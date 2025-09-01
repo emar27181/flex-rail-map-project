@@ -22,5 +22,19 @@ export const keioLine: Station[] = [
   { name: '武蔵野台', lat: 35.6425, lng: 139.4958, timeToNext: 2 },
   { name: '多磨霊園', lat: 35.6350, lng: 139.4881, timeToNext: 2 },
   { name: '東府中', lat: 35.6292, lng: 139.4761, timeToNext: 1 },
-  { name: '府中', lat: 35.6689, lng: 139.4775 }
+  { name: '府中', lat: 35.6689, lng: 139.4775, timeToNext: 2 },
+  { name: '分倍河原', lat: 35.6681, lng: 139.4658, timeToNext: 2 },
+  { name: '中河原', lat: 35.6625, lng: 139.4464, timeToNext: 2 },
+  { name: '聖蹟桜ヶ丘', lat: 35.6550, lng: 139.4461, timeToNext: 2 },
+  { name: '百草園', lat: 35.6422, lng: 139.4311, timeToNext: 2 },
+  { name: '高幡不動', lat: 35.6353, lng: 139.4089, timeToNext: 2 },
+  { name: '南平', lat: 35.6244, lng: 139.3978, timeToNext: 2 },
+  { name: '平山城址公園', lat: 35.6189, lng: 139.3811, timeToNext: 2 },
+  { name: '長沼', lat: 35.6081, lng: 139.3719, timeToNext: 2 },
+  { name: '北野', lat: 35.6331, lng: 139.3139, timeToNext: 3 },
+  { name: '京王八王子', lat: 35.6578, lng: 139.3347, timeToNext: 2 },
+  { name: '山田', lat: 35.6625, lng: 139.3122, timeToNext: 2 },
+  { name: '片倉', lat: 35.6669, lng: 139.2931, timeToNext: 2 },
+  { name: '京王片倉', lat: 35.6556, lng: 139.2833, timeToNext: 2 },
+  { name: '高尾山口', lat: 35.6294, lng: 139.2456 }
 ];

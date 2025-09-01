@@ -18,11 +18,16 @@ import { toeiOedoLine } from './toei-oedo-line';
 import { jrSobuLine } from './jr-sobu-line';
 import { jrJobanLine } from './jr-joban-line';
 import { jrSaikyoLine } from './jr-saikyo-line';
+import { jrTakasakiLine } from './jr-takasaki-line';
+import { jrTokaidoMainLine } from './jr-tokaido-main-line';
 import { odakyuLine } from './odakyu-line';
+import { odakyuEnoshimaLine } from './odakyu-enoshima-line';
 import { keioLine } from './keio-line';
 import { tokyuToyokoLine } from './tokyu-toyoko-line';
 import { tokyuDenEnToshiLine } from './tokyu-den-en-toshi-line';
 import { seibuIkebukuroLine } from './seibu-ikebukuro-line';
+import { seibuShinjukuLine } from './seibu-shinjuku-line';
+import { tobuTojoLine } from './tobu-tojo-line';
 import { keikyuLine } from './keikyu-line';
 
 export const routes = {
@@ -46,11 +51,16 @@ export const routes = {
   jrSobuLine,
   jrJobanLine,
   jrSaikyoLine,
+  jrTakasakiLine,
+  jrTokaidoMainLine,
   odakyuLine,
+  odakyuEnoshimaLine,
   keioLine,
   tokyuToyokoLine,
   tokyuDenEnToshiLine,
   seibuIkebukuroLine,
+  seibuShinjukuLine,
+  tobuTojoLine,
   keikyuLine,
 };
 
@@ -74,14 +84,19 @@ export const routeColors = {
   toeiMitaLine: '#0079C2', // Toei Mita Line blue
   toeiShinjukuLine: '#6CBB5A', // Toei Shinjuku Line leaf green
   toeiOedoLine: '#B6007A', // Toei Oedo Line magenta
-  jrSobuLine: '#F15A22', // JR Sobu Line yellow
+  jrSobuLine: '#FED100', // JR Sobu Line yellow
   jrJobanLine: '#417036', // JR Joban Line green
   jrSaikyoLine: '#00B5AD', // JR Saikyo Line teal
+  jrTakasakiLine: '#F68B1E', // JR Takasaki Line orange
+  jrTokaidoMainLine: '#F68B1E', // JR Tokaido Main Line orange
   odakyuLine: '#0066CC', // Odakyu Line blue
+  odakyuEnoshimaLine: '#0066CC', // Odakyu Enoshima Line blue
   keioLine: '#DD0077', // Keio Line magenta
   tokyuToyokoLine: '#DA020E', // Tokyu Toyoko Line red
   tokyuDenEnToshiLine: '#009639', // Tokyu Den-en-toshi Line green
   seibuIkebukuroLine: '#004098', // Seibu Ikebukuro Line navy blue
+  seibuShinjukuLine: '#F39700', // Seibu Shinjuku Line orange
+  tobuTojoLine: '#004098', // Tobu Tojo Line navy blue
   keikyuLine: '#C8102E', // Keikyu Line red
 };
 
@@ -106,10 +121,15 @@ export const routeNames = {
   jrSobuLine: '総武線',
   jrJobanLine: '常磐線',
   jrSaikyoLine: '埼京線',
-  odakyuLine: '小田急線',
+  jrTakasakiLine: '高崎線',
+  jrTokaidoMainLine: '東海道本線',
+  odakyuLine: '小田急小田原線',
+  odakyuEnoshimaLine: '小田急江ノ島線',
   keioLine: '京王線',
   tokyuToyokoLine: '東急東横線',
   tokyuDenEnToshiLine: '東急田園都市線',
   seibuIkebukuroLine: '西武池袋線',
+  seibuShinjukuLine: '西武新宿線',
+  tobuTojoLine: '東武東上線',
   keikyuLine: '京急本線',
 };
