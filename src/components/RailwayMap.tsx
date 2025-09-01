@@ -54,6 +54,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     return Math.round(baseRadius * scaleFactor);
   };
 
+  const selectAllRoutes = () => {
+    setVisibleRoutes(new Set(Object.keys(routes) as RouteKey[]));
+  };
+
+  const deselectAllRoutes = () => {
+    setVisibleRoutes(new Set());
+  };
+
+  const handleRouteClick = (routeKey: RouteKey) => {
+    toggleRoute(routeKey);
+  };
+
 
   if (!isClient || isLoading || !MapComponents) {
     return (
@@ -125,21 +137,103 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
 
   return (
     <div className={className}>
-      <div style={{ marginBottom: '10px' }}>
+      <div style={{ marginBottom: '15px' }}>
         <h3>路線表示切替</h3>
-        {Object.entries(routes).map(([routeKey, _]) => (
-          <label key={routeKey} style={{ display: 'block', marginBottom: '5px' }}>
-            <input
-              type="checkbox"
-              checked={visibleRoutes.has(routeKey as RouteKey)}
-              onChange={() => toggleRoute(routeKey as RouteKey)}
-              style={{ marginRight: '8px' }}
-            />
-            <span style={{ color: routeColors[routeKey as RouteKey] }}>
+        <div style={{ marginBottom: '10px' }}>
+          <button 
+            onClick={selectAllRoutes}
+            style={{ 
+              marginRight: '10px',
+              padding: '5px 10px',
+              backgroundColor: '#4CAF50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            すべて表示
+          </button>
+          <button 
+            onClick={deselectAllRoutes}
+            style={{ 
+              padding: '5px 10px',
+              backgroundColor: '#f44336',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            すべて非表示
+          </button>
+        </div>
+        <div 
+          style={{
+            width: '100%',
+            height: '200px',
+            padding: '5px',
+            border: '1px solid #ccc',
+            borderRadius: '4px',
+            backgroundColor: 'white',
+            overflowY: 'auto'
+          }}
+        >
+          {Object.entries(routes).map(([routeKey, _]) => (
+            <div
+              key={routeKey}
+              onClick={() => handleRouteClick(routeKey as RouteKey)}
+              style={{
+                padding: '6px 8px',
+                cursor: 'pointer',
+                backgroundColor: visibleRoutes.has(routeKey as RouteKey) ? '#e8f5e8' : 'transparent',
+                color: routeColors[routeKey as RouteKey],
+                fontWeight: visibleRoutes.has(routeKey as RouteKey) ? 'bold' : 'normal',
+                borderRadius: '3px',
+                margin: '1px 0',
+                display: 'flex',
+                alignItems: 'center',
+                transition: 'background-color 0.2s ease',
+                border: visibleRoutes.has(routeKey as RouteKey) 
+                  ? `2px solid ${routeColors[routeKey as RouteKey]}` 
+                  : '2px solid transparent'
+              }}
+              onMouseEnter={(e) => {
+                if (!visibleRoutes.has(routeKey as RouteKey)) {
+                  e.currentTarget.style.backgroundColor = '#f5f5f5';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!visibleRoutes.has(routeKey as RouteKey)) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
+            >
+              <span 
+                style={{
+                  display: 'inline-block',
+                  width: '12px',
+                  height: '12px',
+                  backgroundColor: routeColors[routeKey as RouteKey],
+                  borderRadius: '50%',
+                  marginRight: '8px',
+                  opacity: visibleRoutes.has(routeKey as RouteKey) ? 1 : 0.3
+                }}
+              />
               {routeNames[routeKey as RouteKey]}
-            </span>
-          </label>
-        ))}
+              <span style={{ marginLeft: 'auto', fontSize: '12px', opacity: 0.7 }}>
+                {visibleRoutes.has(routeKey as RouteKey) ? '●' : '○'}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div style={{ 
+          fontSize: '12px', 
+          color: '#666', 
+          marginTop: '5px' 
+        }}>
+          クリックで表示・非表示を切替
+        </div>
       </div>
       
       <div style={{ height: '600px', width: '100%', border: '1px solid #ccc' }}>
