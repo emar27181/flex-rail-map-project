@@ -171,61 +171,71 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         <div 
           style={{
             width: '100%',
-            height: '200px',
+            maxHeight: '200px',
             padding: '5px',
             border: '1px solid #ccc',
             borderRadius: '4px',
             backgroundColor: 'white',
-            overflowY: 'auto'
+            overflowY: 'auto',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '4px',
+            alignContent: 'flex-start'
           }}
         >
-          {Object.entries(routes).map(([routeKey, _]) => (
-            <div
-              key={routeKey}
-              onClick={() => handleRouteClick(routeKey as RouteKey)}
-              style={{
-                padding: '6px 8px',
-                cursor: 'pointer',
-                backgroundColor: visibleRoutes.has(routeKey as RouteKey) ? '#e8f5e8' : 'transparent',
-                color: routeColors[routeKey as RouteKey],
-                fontWeight: visibleRoutes.has(routeKey as RouteKey) ? 'bold' : 'normal',
-                borderRadius: '3px',
-                margin: '1px 0',
-                display: 'flex',
-                alignItems: 'center',
-                transition: 'background-color 0.2s ease',
-                border: visibleRoutes.has(routeKey as RouteKey) 
-                  ? `2px solid ${routeColors[routeKey as RouteKey]}` 
-                  : '2px solid transparent'
-              }}
-              onMouseEnter={(e) => {
-                if (!visibleRoutes.has(routeKey as RouteKey)) {
-                  e.currentTarget.style.backgroundColor = '#f5f5f5';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!visibleRoutes.has(routeKey as RouteKey)) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }
-              }}
-            >
-              <span 
+          {Object.entries(routes).map(([routeKey, _]) => {
+            const routeName = routeNames[routeKey as RouteKey];
+            const minWidth = Math.max(80, routeName.length * 12 + 40);
+            
+            return (
+              <div
+                key={routeKey}
+                onClick={() => handleRouteClick(routeKey as RouteKey)}
                 style={{
-                  display: 'inline-block',
-                  width: '12px',
-                  height: '12px',
-                  backgroundColor: routeColors[routeKey as RouteKey],
-                  borderRadius: '50%',
-                  marginRight: '8px',
-                  opacity: visibleRoutes.has(routeKey as RouteKey) ? 1 : 0.3
+                  padding: '6px 8px',
+                  cursor: 'pointer',
+                  backgroundColor: visibleRoutes.has(routeKey as RouteKey) ? '#e8f5e8' : 'transparent',
+                  color: routeColors[routeKey as RouteKey],
+                  fontWeight: visibleRoutes.has(routeKey as RouteKey) ? 'bold' : 'normal',
+                  borderRadius: '3px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  transition: 'background-color 0.2s ease',
+                  border: visibleRoutes.has(routeKey as RouteKey) 
+                    ? `2px solid ${routeColors[routeKey as RouteKey]}` 
+                    : '2px solid transparent',
+                  minWidth: `${minWidth}px`,
+                  whiteSpace: 'nowrap'
                 }}
-              />
-              {routeNames[routeKey as RouteKey]}
-              <span style={{ marginLeft: 'auto', fontSize: '12px', opacity: 0.7 }}>
-                {visibleRoutes.has(routeKey as RouteKey) ? '●' : '○'}
-              </span>
-            </div>
-          ))}
+                onMouseEnter={(e) => {
+                  if (!visibleRoutes.has(routeKey as RouteKey)) {
+                    e.currentTarget.style.backgroundColor = '#f5f5f5';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!visibleRoutes.has(routeKey as RouteKey)) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                <span 
+                  style={{
+                    display: 'inline-block',
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: routeColors[routeKey as RouteKey],
+                    borderRadius: '50%',
+                    marginRight: '8px',
+                    opacity: visibleRoutes.has(routeKey as RouteKey) ? 1 : 0.3,
+                    flexShrink: 0
+                  }}
+                />
+                <span style={{ fontSize: '13px' }}>
+                  {routeName}
+                </span>
+              </div>
+            );
+          })}
         </div>
         <div style={{ 
           fontSize: '12px', 
