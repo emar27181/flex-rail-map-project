@@ -31,6 +31,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   const [routeRecommendations, setRouteRecommendations] = useState<RouteResult[]>([]);
   const [selectedRoute, setSelectedRoute] = useState<RouteResult | null>(null);
   
+  // 折りたたみ状態の管理
+  const [isStationSelectorExpanded, setIsStationSelectorExpanded] = useState(true);
+  const [isRouteToggleExpanded, setIsRouteToggleExpanded] = useState(false);
+  
   const routeFinder = useMemo(() => new RouteFinder(), []);
 
   // 主要駅リストを一箇所でメモ化
@@ -520,6 +524,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         arrival={arrival}
         onDepartureChange={setDeparture}
         onArrivalChange={setArrival}
+        isExpanded={isStationSelectorExpanded}
+        onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
       />
 
       {/* ルート推薦表示 */}
@@ -530,8 +536,30 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         />
       )}
 
-      <div style={{ marginBottom: '15px' }}>
-        <h3>路線表示切替</h3>
+      <div style={{ marginBottom: '15px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
+        <div 
+          onClick={() => setIsRouteToggleExpanded(!isRouteToggleExpanded)}
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            cursor: 'pointer',
+            marginBottom: isRouteToggleExpanded ? '15px' : '0'
+          }}
+        >
+          <h3 style={{ margin: '0', color: '#333' }}>路線表示切替</h3>
+          <span style={{
+            fontSize: '18px',
+            color: '#666',
+            transform: isRouteToggleExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.3s ease'
+          }}>
+            ▼
+          </span>
+        </div>
+        
+        {isRouteToggleExpanded && (
+        <div>
         <div style={{ marginBottom: '10px' }}>
           <button 
             onClick={selectAllRoutes}
@@ -639,6 +667,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         }}>
           クリックで表示・非表示を切替
         </div>
+        </div>
+        )}
       </div>
       
       <div style={{ height: '600px', width: '100%', border: '1px solid #ccc' }}>
