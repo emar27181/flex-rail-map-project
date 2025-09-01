@@ -181,6 +181,56 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     return [(lat1 + lat2) / 2, (lng1 + lng2) / 2];
   };
 
+  // 路線に沿った中点を計算（複数駅を跨ぐ区間用）
+  const getRouteBasedMidpoint = (stations: Station[], startIndex: number, endIndex: number) => {
+    if (startIndex >= endIndex || startIndex < 0 || endIndex >= stations.length) {
+      return getMidpoint(stations[startIndex].lat, stations[startIndex].lng, stations[endIndex].lat, stations[endIndex].lng);
+    }
+
+    // 区間内の全ての座標を取得
+    const sectionStations = stations.slice(startIndex, endIndex + 1);
+    
+    // 路線の総距離を計算
+    let totalDistance = 0;
+    const distances: number[] = [];
+    
+    for (let i = 0; i < sectionStations.length - 1; i++) {
+      const dist = Math.sqrt(
+        Math.pow(sectionStations[i + 1].lat - sectionStations[i].lat, 2) +
+        Math.pow(sectionStations[i + 1].lng - sectionStations[i].lng, 2)
+      );
+      distances.push(dist);
+      totalDistance += dist;
+    }
+    
+    // 中点となる距離を計算
+    const midDistance = totalDistance / 2;
+    let accumulatedDistance = 0;
+    
+    // 中点が含まれる区間を特定
+    for (let i = 0; i < distances.length; i++) {
+      if (accumulatedDistance + distances[i] >= midDistance) {
+        // この区間内に中点がある
+        const remainingDistance = midDistance - accumulatedDistance;
+        const ratio = remainingDistance / distances[i];
+        
+        const lat = sectionStations[i].lat + (sectionStations[i + 1].lat - sectionStations[i].lat) * ratio;
+        const lng = sectionStations[i].lng + (sectionStations[i + 1].lng - sectionStations[i].lng) * ratio;
+        
+        return [lat, lng];
+      }
+      accumulatedDistance += distances[i];
+    }
+    
+    // フォールバック: 単純な中点
+    return getMidpoint(
+      sectionStations[0].lat, 
+      sectionStations[0].lng, 
+      sectionStations[sectionStations.length - 1].lat, 
+      sectionStations[sectionStations.length - 1].lng
+    );
+  };
+
   const selectAllRoutes = () => {
     setVisibleRoutes(new Set(Object.keys(routes) as RouteKey[]));
   };
@@ -366,8 +416,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               
               if (endIndex === index) return null;
               
-              const endStation = displayStations[endIndex];
-              const midpoint = getMidpoint(station.lat, station.lng, endStation.lat, endStation.lng);
+              // 路線に沿った正確な中点を計算
+              const midpoint = getRouteBasedMidpoint(displayStations, index, endIndex);
               const timeIcon = createTimeIcon(totalTime, color, zoomLevel, true);
               if (!timeIcon) return null;
 
