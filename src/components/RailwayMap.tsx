@@ -333,6 +333,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
           color={color}
           weight={4}
           opacity={0.8}
+          eventHandlers={{
+            click: () => {
+              toggleRoute(routeKey);
+            }
+          }}
+          style={{ cursor: 'pointer' }}
         />
         {displayStations.map((station, index) => {
           const isDeparture = departure && station.name === departure.name;
@@ -355,8 +361,37 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                     <strong>{station.name}</strong>
                     {isDeparture && <div style={{ color: '#4CAF50', fontWeight: 'bold' }}>出発駅</div>}
                     {isArrival && <div style={{ color: '#F44336', fontWeight: 'bold' }}>到着駅</div>}
-                    <br />
-                    {station.timeToNext && `次駅まで: ${station.timeToNext}分`}
+                    <div style={{ marginTop: '10px' }}>
+                      <button 
+                        onClick={() => setDeparture(station)}
+                        style={{
+                          backgroundColor: '#4CAF50',
+                          color: 'white',
+                          border: 'none',
+                          padding: '5px 10px',
+                          borderRadius: '3px',
+                          cursor: 'pointer',
+                          marginRight: '5px',
+                          fontSize: '12px'
+                        }}
+                      >
+                        出発駅に設定
+                      </button>
+                      <button 
+                        onClick={() => setArrival(station)}
+                        style={{
+                          backgroundColor: '#F44336',
+                          color: 'white',
+                          border: 'none',
+                          padding: '5px 10px',
+                          borderRadius: '3px',
+                          cursor: 'pointer',
+                          fontSize: '12px'
+                        }}
+                      >
+                        到着駅に設定
+                      </button>
+                    </div>
                   </div>
                 </Popup>
               </Marker>
@@ -384,8 +419,37 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 <Popup>
                   <div>
                     <strong>{station.name}</strong>
-                    <br />
-                    {station.timeToNext && `次駅まで: ${station.timeToNext}分`}
+                    <div style={{ marginTop: '10px' }}>
+                      <button 
+                        onClick={() => setDeparture(station)}
+                        style={{
+                          backgroundColor: '#4CAF50',
+                          color: 'white',
+                          border: 'none',
+                          padding: '5px 10px',
+                          borderRadius: '3px',
+                          cursor: 'pointer',
+                          marginRight: '5px',
+                          fontSize: '12px'
+                        }}
+                      >
+                        出発駅に設定
+                      </button>
+                      <button 
+                        onClick={() => setArrival(station)}
+                        style={{
+                          backgroundColor: '#F44336',
+                          color: 'white',
+                          border: 'none',
+                          padding: '5px 10px',
+                          borderRadius: '3px',
+                          cursor: 'pointer',
+                          fontSize: '12px'
+                        }}
+                      >
+                        到着駅に設定
+                      </button>
+                    </div>
                   </div>
                 </Popup>
               </Marker>
