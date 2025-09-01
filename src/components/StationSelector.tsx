@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
 
@@ -19,6 +19,26 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const [arrivalSearch, setArrivalSearch] = useState('');
   const [showDepartureResults, setShowDepartureResults] = useState(false);
   const [showArrivalResults, setShowArrivalResults] = useState(false);
+  
+  const departureRef = useRef<HTMLDivElement>(null);
+  const arrivalRef = useRef<HTMLDivElement>(null);
+
+  // 外側クリックで閉じる機能
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (departureRef.current && !departureRef.current.contains(event.target as Node)) {
+        setShowDepartureResults(false);
+      }
+      if (arrivalRef.current && !arrivalRef.current.contains(event.target as Node)) {
+        setShowArrivalResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const allStations = useMemo(() => {
     const stationMap = new Map<string, Station>();
@@ -99,7 +119,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
       
       <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
         {/* 出発駅選択 */}
-        <div style={{ flex: '1', minWidth: '200px', maxWidth: '300px', position: 'relative' }}>
+        <div ref={departureRef} style={{ flex: '1', minWidth: '200px', maxWidth: '300px', position: 'relative' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#555' }}>
             出発駅
           </label>
@@ -202,7 +222,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         </div>
 
         {/* 到着駅選択 */}
-        <div style={{ flex: '1', minWidth: '200px', maxWidth: '300px', position: 'relative' }}>
+        <div ref={arrivalRef} style={{ flex: '1', minWidth: '200px', maxWidth: '300px', position: 'relative' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#555' }}>
             到着駅
           </label>
