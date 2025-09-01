@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
@@ -32,6 +32,84 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   const [selectedRoute, setSelectedRoute] = useState<RouteResult | null>(null);
   
   const routeFinder = useMemo(() => new RouteFinder(), []);
+
+  // 主要駅リストを一箇所でメモ化
+  const majorStations = useMemo(() => [
+    '東京', '新宿', '渋谷', '池袋', '上野', '品川', '横浜', '大宮', '立川',
+    '吉祥寺', '町田', '川崎', '蒲田', '新橋', '有楽町', '秋葉原', '神田',
+    '浜松町', '田町', '高田馬場', '新大久保', '四ツ谷', '市ヶ谷', '飯田橋',
+    '御茶ノ水', '水道橋', '後楽園', '春日', '本郷三丁目', '上野広小路',
+    '仲御徒町', '御徒町', '鶯谷', '日暮里', '西日暮里', '田端', '駒込',
+    '巣鴨', '大塚', '目白', '新宿三丁目', '新宿御苑前', '四谷三丁目'
+  ], []);
+
+  // アイコン作成関数をメモ化
+  const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean) => {
+    if (!MapComponents?.DivIcon) return null;
+    
+    const { DivIcon } = MapComponents;
+    
+    if (isDetailed) {
+      return new DivIcon({
+        html: `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:bold;white-space:nowrap;border:1px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3);text-align:center">${station.name}</div>`,
+        className: 'station-name-marker',
+        iconSize: [station.name.length * 11 + 12, 18],
+        iconAnchor: [(station.name.length * 11 + 12) / 2, 9]
+      });
+    } else {
+      const stationSize = Math.max(8, Math.min(16, zoomLevel - 8));
+      return new DivIcon({
+        html: `<div style="background:${color};width:${stationSize}px;height:${stationSize}px;border:1px solid white;box-shadow:0 1px 2px rgba(0,0,0,0.2)"></div>`,
+        className: 'station-marker',
+        iconSize: [stationSize, stationSize],
+        iconAnchor: [stationSize / 2, stationSize / 2]
+      });
+    }
+  }, [MapComponents]);
+
+  const getTimeMarkerSize = (zoom: number) => {
+    const baseSize = 20;
+    const scaleFactor = Math.max(0.4, Math.min(1.2, (zoom - 8) / 8));
+    return Math.round(baseSize * scaleFactor);
+  };
+
+  const createSpecialStationIcon = useCallback((isDeparture: boolean, zoomLevel: number) => {
+    if (!MapComponents?.DivIcon) return null;
+    
+    const { DivIcon } = MapComponents;
+    const markerSize = getTimeMarkerSize(zoomLevel) * 1.8;
+    const fontSize = Math.max(14, Math.round(markerSize * 0.55));
+    const markerColor = isDeparture ? '#4CAF50' : '#F44336';
+    const markerText = isDeparture ? 'S' : 'G';
+    
+    return new DivIcon({
+      html: `<div style="background:white;border:3px solid ${markerColor};border-radius:50%;width:${markerSize}px;height:${markerSize}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};box-shadow:0 3px 6px rgba(0,0,0,0.3);position:relative;z-index:1000">${markerText}</div>`,
+      className: 'special-station-marker',
+      iconSize: [markerSize, markerSize],
+      iconAnchor: [markerSize / 2, markerSize / 2]
+    });
+  }, [MapComponents]);
+
+  const createTimeIcon = useCallback((time: number, color: string, zoomLevel: number, isSection = false) => {
+    if (!MapComponents?.DivIcon) return null;
+    
+    const { DivIcon } = MapComponents;
+    const markerSize = isSection ? getTimeMarkerSize(zoomLevel) * 1.2 : getTimeMarkerSize(zoomLevel);
+    const fontSize = Math.max(isSection ? 10 : 8, Math.round(markerSize * (isSection ? 0.4 : 0.45)));
+    
+    return new DivIcon({
+      html: `<div style="background:white;border:2px solid ${color};border-radius:50%;width:${markerSize}px;height:${markerSize}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${color};box-shadow:0 2px 4px rgba(0,0,0,${isSection ? 0.3 : 0.2})">${time}</div>`,
+      className: isSection ? 'time-marker-section' : 'time-marker',
+      iconSize: [markerSize, markerSize],
+      iconAnchor: [markerSize / 2, markerSize / 2]
+    });
+  }, [MapComponents]);
+
+  // レンダリング最適化：表示する路線のみレンダリング
+  const visibleRoutesData = useMemo(() => {
+    return Object.entries(routes).filter(([routeKey]) => visibleRoutes.has(routeKey as RouteKey));
+  }, [visibleRoutes]);
+
 
   useEffect(() => {
     setIsClient(true);
@@ -98,12 +176,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     return Math.round(baseRadius * scaleFactor);
   };
 
-  const getTimeMarkerSize = (zoom: number) => {
-    // ズームレベルに応じて時刻マーカーサイズを調整
-    const baseSize = 20;
-    const scaleFactor = Math.max(0.4, Math.min(1.2, (zoom - 8) / 8));
-    return Math.round(baseSize * scaleFactor);
-  };
 
   const getMidpoint = (lat1: number, lng1: number, lat2: number, lng2: number) => {
     return [(lat1 + lat2) / 2, (lng1 + lng2) / 2];
@@ -218,33 +290,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
           const isSpecialStation = isDeparture || isArrival;
           
           if (isSpecialStation) {
-            // 出発駅・到着駅は特別なマーカーで表示
-            const markerSize = getTimeMarkerSize(zoomLevel) * 1.8; // より大きく
-            const fontSize = Math.max(14, Math.round(markerSize * 0.55));
-            const markerColor = isDeparture ? '#4CAF50' : '#F44336';
-            const markerText = isDeparture ? 'S' : 'G';
-            
-            const specialIcon = new DivIcon({
-              html: `<div style="
-                background: white;
-                border: 3px solid ${markerColor};
-                border-radius: 50%;
-                width: ${markerSize}px;
-                height: ${markerSize}px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: ${fontSize}px;
-                font-weight: bold;
-                color: ${markerColor};
-                box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-                position: relative;
-                z-index: 1000;
-              ">${markerText}</div>`,
-              className: 'special-station-marker',
-              iconSize: [markerSize, markerSize],
-              iconAnchor: [markerSize / 2, markerSize / 2]
-            });
+            const specialIcon = createSpecialStationIcon(isDeparture, zoomLevel);
+            if (!specialIcon) return null;
 
             return (
               <Marker
@@ -265,131 +312,85 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               </Marker>
             );
           } else {
-            // 通常の駅は四角いマーカーで表示
-            const shouldShowStation = zoomLevel >= 13; // ズームレベル13以上で駅を表示
-            const shouldShowStationName = zoomLevel >= 14; // ズームレベル14以上で駅名を表示
-            
-            // 主要駅リスト（広域表示時でも表示する駅）
-            const majorStations = [
-              '東京', '新宿', '渋谷', '池袋', '上野', '品川', '横浜', '大宮', '立川',
-              '吉祥寺', '町田', '川崎', '蒲田', '新橋', '有楽町', '秋葉原', '神田',
-              '浜松町', '田町', '高田馬場', '新大久保', '四ツ谷', '市ヶ谷', '飯田橋',
-              '御茶ノ水', '水道橋', '後楽園', '春日', '本郷三丁目', '上野広小路',
-              '仲御徒町', '御徒町', '鶯谷', '日暮里', '西日暮里', '田端', '駒込',
-              '巣鴨', '大塚', '目白', '新宿三丁目', '新宿御苑前', '四谷三丁目'
-            ];
-            
+            const shouldShowStation = zoomLevel >= 13;
+            const shouldShowStationName = zoomLevel >= 14;
             const isMajorStation = majorStations.includes(station.name);
-            const shouldShowInWideView = zoomLevel >= 11 && isMajorStation; // ズーム11以上で主要駅を表示
+            const shouldShowInWideView = zoomLevel >= 11 && isMajorStation;
             
             if (!shouldShowStation && !shouldShowInWideView) {
-              return null; // 通常駅かつ広域表示対象外の場合は非表示
+              return null;
             }
 
-            const stationSize = Math.max(8, Math.min(16, zoomLevel - 8));
-            
-            if (shouldShowStationName || shouldShowInWideView) {
-              // 詳細表示時：駅名付きの四角いマーカー
-              const stationIcon = new DivIcon({
-                html: `<div style="
-                  background: ${color};
-                  color: white;
-                  padding: 2px 6px;
-                  border-radius: 3px;
-                  font-size: 11px;
-                  font-weight: bold;
-                  white-space: nowrap;
-                  border: 1px solid white;
-                  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-                  text-align: center;
-                ">${station.name}</div>`,
-                className: 'station-name-marker',
-                iconSize: [station.name.length * 11 + 12, 18],
-                iconAnchor: [(station.name.length * 11 + 12) / 2, 9]
-              });
+            const isDetailed = shouldShowStationName || shouldShowInWideView;
+            const stationIcon = createStationIcon(station, color, zoomLevel, isDetailed);
+            if (!stationIcon) return null;
 
-              return (
-                <Marker
-                  key={`${routeKey}-station-${index}`}
-                  position={[station.lat, station.lng]}
-                  icon={stationIcon}
-                >
-                  <Popup>
-                    <div>
-                      <strong>{station.name}</strong>
-                      <br />
-                      {station.timeToNext && `次駅まで: ${station.timeToNext}分`}
-                    </div>
-                  </Popup>
-                </Marker>
-              );
-            } else {
-              // 中間表示時：小さな四角いマーカーのみ
-              const smallStationIcon = new DivIcon({
-                html: `<div style="
-                  background: ${color};
-                  width: ${stationSize}px;
-                  height: ${stationSize}px;
-                  border: 1px solid white;
-                  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-                "></div>`,
-                className: 'station-marker',
-                iconSize: [stationSize, stationSize],
-                iconAnchor: [stationSize / 2, stationSize / 2]
-              });
-
-              return (
-                <Marker
-                  key={`${routeKey}-station-${index}`}
-                  position={[station.lat, station.lng]}
-                  icon={smallStationIcon}
-                >
-                  <Popup>
-                    <div>
-                      <strong>{station.name}</strong>
-                      <br />
-                      {station.timeToNext && `次駅まで: ${station.timeToNext}分`}
-                    </div>
-                  </Popup>
-                </Marker>
-              );
-            }
+            return (
+              <Marker
+                key={`${routeKey}-station-${index}`}
+                position={[station.lat, station.lng]}
+                icon={stationIcon}
+              >
+                <Popup>
+                  <div>
+                    <strong>{station.name}</strong>
+                    <br />
+                    {station.timeToNext && `次駅まで: ${station.timeToNext}分`}
+                  </div>
+                </Popup>
+              </Marker>
+            );
           }
         })}
         {displayStations.map((station, index) => {
           if (index < displayStations.length - 1 && station.timeToNext) {
             const nextStation = displayStations[index + 1];
-            const midpoint = getMidpoint(station.lat, station.lng, nextStation.lat, nextStation.lng);
-            const markerSize = getTimeMarkerSize(zoomLevel);
-            const fontSize = Math.max(8, Math.round(markerSize * 0.45));
             
-            const timeIcon = new DivIcon({
-              html: `<div style="
-                background: white;
-                border: 2px solid ${color};
-                border-radius: 50%;
-                width: ${markerSize}px;
-                height: ${markerSize}px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: ${fontSize}px;
-                font-weight: bold;
-                color: ${color};
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-              ">${station.timeToNext}</div>`,
-              className: 'time-marker',
-              iconSize: [markerSize, markerSize],
-              iconAnchor: [markerSize / 2, markerSize / 2]
-            });
+            if (zoomLevel < 13) {
+              const isCurrentMajor = majorStations.includes(station.name);
+              if (!isCurrentMajor) return null;
+              
+              let totalTime = 0;
+              let endIndex = index;
+              
+              for (let i = index; i < displayStations.length - 1; i++) {
+                const currentSt = displayStations[i];
+                const nextSt = displayStations[i + 1];
+                totalTime += currentSt.timeToNext || 3;
+                endIndex = i + 1;
+                
+                if (majorStations.includes(nextSt.name)) {
+                  break;
+                }
+              }
+              
+              if (endIndex === index) return null;
+              
+              const endStation = displayStations[endIndex];
+              const midpoint = getMidpoint(station.lat, station.lng, endStation.lat, endStation.lng);
+              const timeIcon = createTimeIcon(totalTime, color, zoomLevel, true);
+              if (!timeIcon) return null;
 
-            return (
-              <Marker
-                key={`${routeKey}-time-${index}`}
-                position={midpoint}
-                icon={timeIcon}
-              />
-            );
+              return (
+                <Marker
+                  key={`${routeKey}-time-section-${index}`}
+                  position={midpoint}
+                  icon={timeIcon}
+                />
+              );
+            } else {
+              const midpoint = getMidpoint(station.lat, station.lng, nextStation.lat, nextStation.lng);
+              const timeIcon = createTimeIcon(station.timeToNext, color, zoomLevel, false);
+              if (!timeIcon) return null;
+
+              return (
+                <Marker
+                  key={`${routeKey}-time-${index}`}
+                  position={midpoint}
+                  icon={timeIcon}
+                />
+              );
+            }
           }
           return null;
         })}
@@ -540,7 +541,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
           />
           
-          {Object.entries(routes).map(([routeKey, stations]) =>
+          {visibleRoutesData.map(([routeKey, stations]) =>
             renderRoute(routeKey as RouteKey, stations)
           )}
         </MapContainer>
