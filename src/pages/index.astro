@@ -1,7 +1,5 @@
 ---
 import RailwayMap from '../components/RailwayMap.tsx';
-import SimpleMap from '../components/SimpleMap.tsx';
-import DataTest from '../components/DataTest.tsx';
 ---
 
 <html lang="en">
@@ -31,11 +29,6 @@ import DataTest from '../components/DataTest.tsx';
 	</head>
 	<body>
 		<h1>東京路線図</h1>
-		<p>1. React コンポーネントのテスト:</p>
-		<SimpleMap client:only="react" />
-		<p>2. データの読み込みテスト:</p>
-		<DataTest client:only="react" />
-		<p>3. 路線図マップ:</p>
 		<RailwayMap client:only="react" />
 	</body>
 </html>
