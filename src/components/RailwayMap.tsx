@@ -186,7 +186,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
           {Object.entries(routes).map(([routeKey, _]) => {
             const routeName = routeNames[routeKey as RouteKey];
             // 幅をより正確に計算: アイコン12px + マージン8px + テキスト + パディング16px
-            const textWidth = routeName.length * 9; // より正確な文字幅
+            const textWidth = routeName.length * 11; // 長い路線名に対応するため余裕を持たせる
             const totalWidth = 12 + 8 + textWidth + 16;
             
             return (
