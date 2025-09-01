@@ -401,10 +401,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               </Marker>
             );
           } else {
-            const shouldShowStation = zoomLevel >= 13;
-            const shouldShowStationName = zoomLevel >= 14;
+            const shouldShowStation = zoomLevel >= 12; // より広域で駅を表示
+            const shouldShowStationName = zoomLevel >= 12; // より広域で駅名を表示
             const isMajorStation = majorStations.includes(station.name);
-            const shouldShowInWideView = zoomLevel >= 11 && isMajorStation;
+            const shouldShowInWideView = zoomLevel >= 10 && isMajorStation; // 主要駅をより広域で表示
             
             if (!shouldShowStation && !shouldShowInWideView) {
               return null;
@@ -464,20 +464,24 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
           if (index < displayStations.length - 1 && station.timeToNext) {
             const nextStation = displayStations[index + 1];
             
-            if (zoomLevel < 13) {
+            if (zoomLevel < 14) { // より高いズームレベルでのみ詳細表示
               const isCurrentMajor = majorStations.includes(station.name);
               if (!isCurrentMajor) return null;
               
               let totalTime = 0;
               let endIndex = index;
+              let stationCount = 0;
               
+              // より多くの駅をまとめて表示
               for (let i = index; i < displayStations.length - 1; i++) {
                 const currentSt = displayStations[i];
                 const nextSt = displayStations[i + 1];
                 totalTime += currentSt.timeToNext || 3;
                 endIndex = i + 1;
+                stationCount++;
                 
-                if (majorStations.includes(nextSt.name)) {
+                // 主要駅に到達するか、一定数の駅をまとめたら停止
+                if (majorStations.includes(nextSt.name) || stationCount >= 5) {
                   break;
                 }
               }
