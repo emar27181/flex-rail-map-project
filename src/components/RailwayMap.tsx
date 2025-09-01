@@ -217,36 +217,78 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
           const isArrival = arrival && station.name === arrival.name;
           const isSpecialStation = isDeparture || isArrival;
           
-          return (
-            <CircleMarker 
-              key={`${routeKey}-${index}`} 
-              center={[station.lat, station.lng]}
-              radius={isSpecialStation ? getMarkerRadius(zoomLevel) * 1.5 : getMarkerRadius(zoomLevel)}
-              pathOptions={{
-                fillColor: isSpecialStation 
-                  ? (isDeparture ? '#4CAF50' : '#F44336')
-                  : color,
-                color: isSpecialStation 
-                  ? (isDeparture ? '#2E7D32' : '#C62828')
-                  : color,
-                weight: isSpecialStation 
-                  ? Math.max(2, Math.round(getMarkerRadius(zoomLevel) / 2))
-                  : Math.max(1, Math.round(getMarkerRadius(zoomLevel) / 3)),
-                opacity: 1,
-                fillOpacity: isSpecialStation ? 1 : 0.8
-              }}
-            >
-              <Popup>
-                <div>
-                  <strong>{station.name}</strong>
-                  {isDeparture && <div style={{ color: '#4CAF50', fontWeight: 'bold' }}>出発駅</div>}
-                  {isArrival && <div style={{ color: '#F44336', fontWeight: 'bold' }}>到着駅</div>}
-                  <br />
-                  {station.timeToNext && `次駅まで: ${station.timeToNext}分`}
-                </div>
-              </Popup>
-            </CircleMarker>
-          );
+          if (isSpecialStation) {
+            // 出発駅・到着駅は特別なマーカーで表示
+            const markerSize = getTimeMarkerSize(zoomLevel) * 1.8; // より大きく
+            const fontSize = Math.max(14, Math.round(markerSize * 0.55));
+            const markerColor = isDeparture ? '#4CAF50' : '#F44336';
+            const markerText = isDeparture ? 'S' : 'G';
+            
+            const specialIcon = new DivIcon({
+              html: `<div style="
+                background: white;
+                border: 3px solid ${markerColor};
+                border-radius: 50%;
+                width: ${markerSize}px;
+                height: ${markerSize}px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: ${fontSize}px;
+                font-weight: bold;
+                color: ${markerColor};
+                box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+                position: relative;
+                z-index: 1000;
+              ">${markerText}</div>`,
+              className: 'special-station-marker',
+              iconSize: [markerSize, markerSize],
+              iconAnchor: [markerSize / 2, markerSize / 2]
+            });
+
+            return (
+              <Marker
+                key={`${routeKey}-special-${index}`}
+                position={[station.lat, station.lng]}
+                icon={specialIcon}
+                zIndexOffset={1000}
+              >
+                <Popup>
+                  <div>
+                    <strong>{station.name}</strong>
+                    {isDeparture && <div style={{ color: '#4CAF50', fontWeight: 'bold' }}>出発駅</div>}
+                    {isArrival && <div style={{ color: '#F44336', fontWeight: 'bold' }}>到着駅</div>}
+                    <br />
+                    {station.timeToNext && `次駅まで: ${station.timeToNext}分`}
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          } else {
+            // 通常の駅は従来通りのCircleMarkerで表示
+            return (
+              <CircleMarker 
+                key={`${routeKey}-${index}`} 
+                center={[station.lat, station.lng]}
+                radius={getMarkerRadius(zoomLevel)}
+                pathOptions={{
+                  fillColor: color,
+                  color: color,
+                  weight: Math.max(1, Math.round(getMarkerRadius(zoomLevel) / 3)),
+                  opacity: 1,
+                  fillOpacity: 0.8
+                }}
+              >
+                <Popup>
+                  <div>
+                    <strong>{station.name}</strong>
+                    <br />
+                    {station.timeToNext && `次駅まで: ${station.timeToNext}分`}
+                  </div>
+                </Popup>
+              </CircleMarker>
+            );
+          }
         })}
         {displayStations.map((station, index) => {
           if (index < displayStations.length - 1 && station.timeToNext) {
