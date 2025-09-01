@@ -1,6 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import type { Station } from '../data/yamanote';
+import StationSelector from './StationSelector';
+import RouteRecommendations from './RouteRecommendations';
+import { RouteFinder, type RouteResult } from '../utils/routeFinder';
 
 interface RailwayMapProps {
   className?: string;
@@ -13,6 +16,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   const [MapComponents, setMapComponents] = useState<any>(null);
   const [zoomLevel, setZoomLevel] = useState(12);
   const mapRef = useRef<any>(null);
+  
+  // 新しい機能のstate
+  const [departure, setDeparture] = useState<Station | null>(null);
+  const [arrival, setArrival] = useState<Station | null>(null);
+  const [routeRecommendations, setRouteRecommendations] = useState<RouteResult[]>([]);
+  const [selectedRoute, setSelectedRoute] = useState<RouteResult | null>(null);
+  
+  const routeFinder = useMemo(() => new RouteFinder(), []);
 
   useEffect(() => {
     setIsClient(true);
@@ -37,6 +48,29 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
 
     loadLeaflet();
   }, []);
+
+  // 出発駅と到着駅が設定された時にルート検索を実行
+  useEffect(() => {
+    if (departure && arrival) {
+      const routes = routeFinder.findRoutes(departure, arrival, 5);
+      setRouteRecommendations(routes);
+      setSelectedRoute(null);
+      
+      // 推薦路線で使用される全ての路線を表示
+      const allRouteKeys = new Set<RouteKey>();
+      routes.forEach(route => {
+        route.segments.forEach(segment => {
+          allRouteKeys.add(segment.routeKey);
+        });
+      });
+      setVisibleRoutes(allRouteKeys);
+    } else {
+      setRouteRecommendations([]);
+      setSelectedRoute(null);
+      // 出発駅・到着駅がない場合は全路線を表示
+      setVisibleRoutes(new Set(Object.keys(routes) as RouteKey[]));
+    }
+  }, [departure, arrival, routeFinder]);
 
   const toggleRoute = (routeKey: RouteKey) => {
     const newVisibleRoutes = new Set(visibleRoutes);
@@ -77,6 +111,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
 
   const handleRouteClick = (routeKey: RouteKey) => {
     toggleRoute(routeKey);
+  };
+
+  const handleRouteSelect = (route: RouteResult) => {
+    setSelectedRoute(route);
+    // 選択されたルートの路線を表示
+    const routeKeys = new Set<RouteKey>();
+    route.segments.forEach(segment => {
+      routeKeys.add(segment.routeKey);
+    });
+    setVisibleRoutes(routeKeys);
   };
 
 
@@ -187,6 +231,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
 
   return (
     <div className={className}>
+      {/* 駅選択UI */}
+      <StationSelector
+        departure={departure}
+        arrival={arrival}
+        onDepartureChange={setDeparture}
+        onArrivalChange={setArrival}
+      />
+
+      {/* ルート推薦表示 */}
+      {routeRecommendations.length > 0 && (
+        <RouteRecommendations
+          routes={routeRecommendations}
+          onRouteSelect={handleRouteSelect}
+        />
+      )}
+
       <div style={{ marginBottom: '15px' }}>
         <h3>路線表示切替</h3>
         <div style={{ marginBottom: '10px' }}>
