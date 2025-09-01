@@ -185,7 +185,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         >
           {Object.entries(routes).map(([routeKey, _]) => {
             const routeName = routeNames[routeKey as RouteKey];
-            const minWidth = Math.max(80, routeName.length * 12 + 40);
+            // 幅をより正確に計算: アイコン12px + マージン8px + テキスト + パディング16px
+            const textWidth = routeName.length * 9; // より正確な文字幅
+            const totalWidth = 12 + 8 + textWidth + 16;
             
             return (
               <div
@@ -204,7 +206,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   border: visibleRoutes.has(routeKey as RouteKey) 
                     ? `2px solid ${routeColors[routeKey as RouteKey]}` 
                     : '2px solid transparent',
-                  minWidth: `${minWidth}px`,
+                  width: `${totalWidth}px`,
                   whiteSpace: 'nowrap'
                 }}
                 onMouseEnter={(e) => {
