@@ -7,7 +7,7 @@ interface RailwayMapProps {
 }
 
 const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
-  const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(new Set(['yamanote']));
+  const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
   const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [MapComponents, setMapComponents] = useState<any>(null);
