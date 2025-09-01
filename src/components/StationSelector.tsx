@@ -91,7 +91,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
       
       <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
         {/* 出発駅選択 */}
-        <div style={{ flex: '1', minWidth: '200px', position: 'relative' }}>
+        <div style={{ flex: '1', minWidth: '200px', maxWidth: '300px', position: 'relative' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#555' }}>
             出発駅
           </label>
@@ -110,7 +110,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 padding: '8px 30px 8px 8px',
                 border: '1px solid #ccc',
                 borderRadius: '4px',
-                fontSize: '14px'
+                fontSize: '14px',
+                boxSizing: 'border-box'
               }}
             />
             {departure && (
@@ -193,7 +194,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         </div>
 
         {/* 到着駅選択 */}
-        <div style={{ flex: '1', minWidth: '200px', position: 'relative' }}>
+        <div style={{ flex: '1', minWidth: '200px', maxWidth: '300px', position: 'relative' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#555' }}>
             到着駅
           </label>
@@ -212,7 +213,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 padding: '8px 30px 8px 8px',
                 border: '1px solid #ccc',
                 borderRadius: '4px',
-                fontSize: '14px'
+                fontSize: '14px',
+                boxSizing: 'border-box'
               }}
             />
             {arrival && (

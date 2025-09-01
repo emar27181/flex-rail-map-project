@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { routeColors } from '../data/routes';
 import type { RouteResult } from '../utils/routeFinder';
 
@@ -11,6 +11,8 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
   routes,
   onRouteSelect
 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   if (routes.length === 0) {
     return null;
   }
@@ -43,11 +45,31 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
       borderRadius: '8px',
       backgroundColor: '#f9f9f9'
     }}>
-      <h3 style={{ margin: '0 0 15px 0', color: '#333' }}>
-        推薦ルート ({routes.length}件)
-      </h3>
+      <div 
+        onClick={() => setIsExpanded(!isExpanded)}
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          cursor: 'pointer',
+          marginBottom: isExpanded ? '15px' : '0'
+        }}
+      >
+        <h3 style={{ margin: '0', color: '#333' }}>
+          推薦ルート ({routes.length}件)
+        </h3>
+        <span style={{
+          fontSize: '18px',
+          color: '#666',
+          transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+          transition: 'transform 0.3s ease'
+        }}>
+          ▼
+        </span>
+      </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {isExpanded && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {routes.map((route, index) => (
           <div
             key={index}
@@ -212,9 +234,10 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
-      {routes.length === 0 && (
+      {isExpanded && routes.length === 0 && (
         <div style={{
           padding: '20px',
           textAlign: 'center',
