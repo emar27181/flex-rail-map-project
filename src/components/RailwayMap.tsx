@@ -105,7 +105,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     const markerText = isDeparture ? 'S' : 'G';
     
     return new DivIcon({
-      html: `<div style="background:white;border:3px solid ${markerColor};border-radius:50%;width:${markerSize}px;height:${markerSize}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};box-shadow:0 3px 6px rgba(0,0,0,0.3);position:relative;z-index:1000">${markerText}</div>`,
+      html: `<div style="background:white;border:3px solid ${markerColor};border-radius:4px;width:${markerSize}px;height:${markerSize}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};box-shadow:0 3px 6px rgba(0,0,0,0.3);position:relative;z-index:1000">${markerText}</div>`,
       className: 'special-station-marker',
       iconSize: [markerSize, markerSize],
       iconAnchor: [markerSize / 2, markerSize / 2]
@@ -814,7 +814,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                           height: '16px',
                           backgroundColor: 'white',
                           border: '2px solid #4CAF50',
-                          borderRadius: '50%',
+                          borderRadius: '2px',
                           marginRight: '8px',
                           display: 'flex',
                           alignItems: 'center',
@@ -841,7 +841,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                           height: '16px',
                           backgroundColor: 'white',
                           border: '2px solid #F44336',
-                          borderRadius: '50%',
+                          borderRadius: '2px',
                           marginRight: '8px',
                           display: 'flex',
                           alignItems: 'center',
