@@ -19,12 +19,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     const loadLeaflet = async () => {
       try {
         const [
-          { MapContainer, TileLayer, Marker, Popup, Polyline },
+          { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker },
         ] = await Promise.all([
           import('react-leaflet'),
         ]);
         
-        setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline });
+        setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker });
         setIsLoading(false);
       } catch (error) {
         console.error('Failed to load Leaflet:', error);
@@ -61,7 +61,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     );
   }
 
-  const { MapContainer, TileLayer, Marker, Popup, Polyline } = MapComponents;
+  const { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker } = MapComponents;
   const tokyoStation = [35.6812, 139.7671];
 
   const renderRoute = (routeKey: RouteKey, stations: Station[]) => {
@@ -79,7 +79,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
           opacity={0.8}
         />
         {stations.map((station, index) => (
-          <Marker key={`${routeKey}-${index}`} position={[station.lat, station.lng]}>
+          <CircleMarker 
+            key={`${routeKey}-${index}`} 
+            center={[station.lat, station.lng]}
+            radius={6}
+            pathOptions={{
+              fillColor: color,
+              color: color,
+              weight: 2,
+              opacity: 1,
+              fillOpacity: 0.8
+            }}
+          >
             <Popup>
               <div>
                 <strong>{station.name}</strong>
@@ -87,7 +98,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 {station.timeToNext && `次駅まで: ${station.timeToNext}分`}
               </div>
             </Popup>
-          </Marker>
+          </CircleMarker>
         ))}
       </React.Fragment>
     );
