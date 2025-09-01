@@ -17,9 +17,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   const [zoomLevel, setZoomLevel] = useState(12);
   const mapRef = useRef<any>(null);
   
-  // 新しい機能のstate
-  const [departure, setDeparture] = useState<Station | null>(null);
-  const [arrival, setArrival] = useState<Station | null>(null);
+  // 新しい機能のstate - デフォルトで横浜→新宿を設定
+  const [departure, setDeparture] = useState<Station | null>({ 
+    name: "横浜", 
+    lat: 35.4657, 
+    lng: 139.6201 
+  });
+  const [arrival, setArrival] = useState<Station | null>({ 
+    name: "新宿", 
+    lat: 35.6896, 
+    lng: 139.7006 
+  });
   const [routeRecommendations, setRouteRecommendations] = useState<RouteResult[]>([]);
   const [selectedRoute, setSelectedRoute] = useState<RouteResult | null>(null);
   
@@ -166,28 +174,42 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
           weight={4}
           opacity={0.8}
         />
-        {stations.map((station, index) => (
-          <CircleMarker 
-            key={`${routeKey}-${index}`} 
-            center={[station.lat, station.lng]}
-            radius={getMarkerRadius(zoomLevel)}
-            pathOptions={{
-              fillColor: color,
-              color: color,
-              weight: Math.max(1, Math.round(getMarkerRadius(zoomLevel) / 3)),
-              opacity: 1,
-              fillOpacity: 0.8
-            }}
-          >
-            <Popup>
-              <div>
-                <strong>{station.name}</strong>
-                <br />
-                {station.timeToNext && `次駅まで: ${station.timeToNext}分`}
-              </div>
-            </Popup>
-          </CircleMarker>
-        ))}
+        {stations.map((station, index) => {
+          const isDeparture = departure && station.name === departure.name;
+          const isArrival = arrival && station.name === arrival.name;
+          const isSpecialStation = isDeparture || isArrival;
+          
+          return (
+            <CircleMarker 
+              key={`${routeKey}-${index}`} 
+              center={[station.lat, station.lng]}
+              radius={isSpecialStation ? getMarkerRadius(zoomLevel) * 1.5 : getMarkerRadius(zoomLevel)}
+              pathOptions={{
+                fillColor: isSpecialStation 
+                  ? (isDeparture ? '#4CAF50' : '#F44336')
+                  : color,
+                color: isSpecialStation 
+                  ? (isDeparture ? '#2E7D32' : '#C62828')
+                  : color,
+                weight: isSpecialStation 
+                  ? Math.max(2, Math.round(getMarkerRadius(zoomLevel) / 2))
+                  : Math.max(1, Math.round(getMarkerRadius(zoomLevel) / 3)),
+                opacity: 1,
+                fillOpacity: isSpecialStation ? 1 : 0.8
+              }}
+            >
+              <Popup>
+                <div>
+                  <strong>{station.name}</strong>
+                  {isDeparture && <div style={{ color: '#4CAF50', fontWeight: 'bold' }}>出発駅</div>}
+                  {isArrival && <div style={{ color: '#F44336', fontWeight: 'bold' }}>到着駅</div>}
+                  <br />
+                  {station.timeToNext && `次駅まで: ${station.timeToNext}分`}
+                </div>
+              </Popup>
+            </CircleMarker>
+          );
+        })}
         {stations.map((station, index) => {
           if (index < stations.length - 1 && station.timeToNext) {
             const nextStation = stations[index + 1];
