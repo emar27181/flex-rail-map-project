@@ -6,9 +6,24 @@ import { ginzaLine } from './ginza-line';
 import { marunouchiLine } from './marunouchi-line';
 import { hibiyaLine } from './hibiya-line';
 import { tozaiLine } from './tozai-line';
+import { chiyodaLine } from './chiyoda-line';
+import { yurakuchoLine } from './yurakucho-line';
+import { hanzomonLine } from './hanzomon-line';
+import { nambokuLine } from './namboku-line';
+import { fukutoshinLine } from './fukutoshin-line';
+import { toeiAsakusaLine } from './toei-asakusa-line';
+import { toeiMitaLine } from './toei-mita-line';
+import { toeiShinjukuLine } from './toei-shinjuku-line';
+import { toeiOedoLine } from './toei-oedo-line';
+import { jrSobuLine } from './jr-sobu-line';
+import { jrJobanLine } from './jr-joban-line';
+import { jrSaikyoLine } from './jr-saikyo-line';
 import { odakyuLine } from './odakyu-line';
 import { keioLine } from './keio-line';
 import { tokyuToyokoLine } from './tokyu-toyoko-line';
+import { tokyuDenEnToshiLine } from './tokyu-den-en-toshi-line';
+import { seibuIkebukuroLine } from './seibu-ikebukuro-line';
+import { keikyuLine } from './keikyu-line';
 
 export const routes = {
   yamanote,
@@ -19,9 +34,24 @@ export const routes = {
   marunouchiLine,
   hibiyaLine,
   tozaiLine,
+  chiyodaLine,
+  yurakuchoLine,
+  hanzomonLine,
+  nambokuLine,
+  fukutoshinLine,
+  toeiAsakusaLine,
+  toeiMitaLine,
+  toeiShinjukuLine,
+  toeiOedoLine,
+  jrSobuLine,
+  jrJobanLine,
+  jrSaikyoLine,
   odakyuLine,
   keioLine,
   tokyuToyokoLine,
+  tokyuDenEnToshiLine,
+  seibuIkebukuroLine,
+  keikyuLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -35,9 +65,24 @@ export const routeColors = {
   marunouchiLine: '#F62E36', // Tokyo Metro Marunouchi Line red
   hibiyaLine: '#B5B5AC', // Tokyo Metro Hibiya Line silver
   tozaiLine: '#009BBF', // Tokyo Metro Tozai Line light blue
+  chiyodaLine: '#00BB85', // Tokyo Metro Chiyoda Line green
+  yurakuchoLine: '#C1A470', // Tokyo Metro Yurakucho Line gold
+  hanzomonLine: '#8F76D6', // Tokyo Metro Hanzomon Line purple
+  nambokuLine: '#00ADA9', // Tokyo Metro Namboku Line emerald
+  fukutoshinLine: '#9C5F2C', // Tokyo Metro Fukutoshin Line brown
+  toeiAsakusaLine: '#E85298', // Toei Asakusa Line pink
+  toeiMitaLine: '#0079C2', // Toei Mita Line blue
+  toeiShinjukuLine: '#6CBB5A', // Toei Shinjuku Line leaf green
+  toeiOedoLine: '#B6007A', // Toei Oedo Line magenta
+  jrSobuLine: '#F15A22', // JR Sobu Line yellow
+  jrJobanLine: '#417036', // JR Joban Line green
+  jrSaikyoLine: '#00B5AD', // JR Saikyo Line teal
   odakyuLine: '#0066CC', // Odakyu Line blue
   keioLine: '#DD0077', // Keio Line magenta
   tokyuToyokoLine: '#DA020E', // Tokyu Toyoko Line red
+  tokyuDenEnToshiLine: '#009639', // Tokyu Den-en-toshi Line green
+  seibuIkebukuroLine: '#004098', // Seibu Ikebukuro Line navy blue
+  keikyuLine: '#C8102E', // Keikyu Line red
 };
 
 export const routeNames = {
@@ -49,7 +94,22 @@ export const routeNames = {
   marunouchiLine: '丸ノ内線',
   hibiyaLine: '日比谷線',
   tozaiLine: '東西線',
+  chiyodaLine: '千代田線',
+  yurakuchoLine: '有楽町線',
+  hanzomonLine: '半蔵門線',
+  nambokuLine: '南北線',
+  fukutoshinLine: '副都心線',
+  toeiAsakusaLine: '都営浅草線',
+  toeiMitaLine: '都営三田線',
+  toeiShinjukuLine: '都営新宿線',
+  toeiOedoLine: '都営大江戸線',
+  jrSobuLine: '総武線',
+  jrJobanLine: '常磐線',
+  jrSaikyoLine: '埼京線',
   odakyuLine: '小田急線',
   keioLine: '京王線',
   tokyuToyokoLine: '東急東横線',
+  tokyuDenEnToshiLine: '東急田園都市線',
+  seibuIkebukuroLine: '西武池袋線',
+  keikyuLine: '京急本線',
 };
