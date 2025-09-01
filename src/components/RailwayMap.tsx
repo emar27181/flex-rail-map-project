@@ -38,6 +38,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   
   const routeFinder = useMemo(() => new RouteFinder(), []);
 
+  // 路線色から薄い背景色を生成
+  const getLightBackgroundColor = useCallback((color: string): string => {
+    // 16進数カラーをRGBに変換
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    
+    // 薄い背景色を作成（元の色に白を混ぜる）
+    const mixRatio = 0.15; // 元の色の15%の濃度
+    const newR = Math.round(r * mixRatio + 255 * (1 - mixRatio));
+    const newG = Math.round(g * mixRatio + 255 * (1 - mixRatio));
+    const newB = Math.round(b * mixRatio + 255 * (1 - mixRatio));
+    
+    return `rgb(${newR}, ${newG}, ${newB})`;
+  }, []);
+
   // 主要駅リストを一箇所でメモ化
   const majorStations = useMemo(() => [
     '東京', '新宿', '渋谷', '池袋', '上野', '品川', '横浜', '大宮', '立川',
@@ -611,6 +628,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         >
           {Object.entries(routes).map(([routeKey, _]) => {
             const routeName = routeNames[routeKey as RouteKey];
+            const routeColor = routeColors[routeKey as RouteKey];
+            const isSelected = visibleRoutes.has(routeKey as RouteKey);
             // 幅をより正確に計算: アイコン12px + マージン8px + テキスト + パディング16px
             const textWidth = routeName.length * 11; // 長い路線名に対応するため余裕を持たせる
             const totalWidth = 12 + 8 + textWidth + 16;
@@ -622,26 +641,26 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 style={{
                   padding: '6px 8px',
                   cursor: 'pointer',
-                  backgroundColor: visibleRoutes.has(routeKey as RouteKey) ? '#e8f5e8' : 'transparent',
-                  color: routeColors[routeKey as RouteKey],
-                  fontWeight: visibleRoutes.has(routeKey as RouteKey) ? 'bold' : 'normal',
+                  backgroundColor: isSelected ? getLightBackgroundColor(routeColor) : 'transparent',
+                  color: routeColor,
+                  fontWeight: isSelected ? 'bold' : 'normal',
                   borderRadius: '3px',
                   display: 'inline-flex',
                   alignItems: 'center',
                   transition: 'background-color 0.2s ease',
-                  border: visibleRoutes.has(routeKey as RouteKey) 
-                    ? `2px solid ${routeColors[routeKey as RouteKey]}` 
+                  border: isSelected 
+                    ? `2px solid ${routeColor}` 
                     : '2px solid transparent',
                   width: `${totalWidth}px`,
                   whiteSpace: 'nowrap'
                 }}
                 onMouseEnter={(e) => {
-                  if (!visibleRoutes.has(routeKey as RouteKey)) {
+                  if (!isSelected) {
                     e.currentTarget.style.backgroundColor = '#f5f5f5';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (!visibleRoutes.has(routeKey as RouteKey)) {
+                  if (!isSelected) {
                     e.currentTarget.style.backgroundColor = 'transparent';
                   }
                 }}
@@ -651,10 +670,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                     display: 'inline-block',
                     width: '12px',
                     height: '12px',
-                    backgroundColor: routeColors[routeKey as RouteKey],
+                    backgroundColor: routeColor,
                     borderRadius: '50%',
                     marginRight: '8px',
-                    opacity: visibleRoutes.has(routeKey as RouteKey) ? 1 : 0.3,
+                    opacity: isSelected ? 1 : 0.3,
                     flexShrink: 0
                   }}
                 />
