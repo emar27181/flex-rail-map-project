@@ -116,14 +116,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     if (!MapComponents?.DivIcon) return null;
     
     const { DivIcon } = MapComponents;
-    const markerSize = isSection ? getTimeMarkerSize(zoomLevel) * 1.2 : getTimeMarkerSize(zoomLevel);
-    const fontSize = Math.max(isSection ? 10 : 8, Math.round(markerSize * (isSection ? 0.4 : 0.45)));
+    const fontSize = Math.max(10, Math.round(zoomLevel * 0.8));
+    const padding = Math.max(2, Math.round(zoomLevel * 0.3));
     
     return new DivIcon({
-      html: `<div style="background:white;border:2px solid ${color};border-radius:50%;width:${markerSize}px;height:${markerSize}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${color};box-shadow:0 2px 4px rgba(0,0,0,${isSection ? 0.3 : 0.2})">${time}</div>`,
-      className: isSection ? 'time-marker-section' : 'time-marker',
-      iconSize: [markerSize, markerSize],
-      iconAnchor: [markerSize / 2, markerSize / 2]
+      html: `<div style="background:rgba(255,255,255,0.9);border:1px solid ${color};border-radius:3px;padding:${padding}px ${padding + 2}px;font-size:${fontSize}px;font-weight:bold;color:${color};box-shadow:0 1px 3px rgba(0,0,0,0.3);white-space:nowrap;text-align:center">${time}分</div>`,
+      className: isSection ? 'time-text-section' : 'time-text',
+      iconSize: [time.toString().length * fontSize + padding * 4, fontSize + padding * 2],
+      iconAnchor: [(time.toString().length * fontSize + padding * 4) / 2, (fontSize + padding * 2) / 2]
     });
   }, [MapComponents]);
 
@@ -437,6 +437,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 key={`${routeKey}-station-${index}`}
                 position={[station.lat, station.lng]}
                 icon={stationIcon}
+                zIndexOffset={2000}
               >
                 <Popup>
                   <div>
@@ -516,6 +517,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   key={`${routeKey}-time-section-${index}`}
                   position={midpoint}
                   icon={timeIcon}
+                  zIndexOffset={500}
                 />
               );
             } else {
@@ -528,6 +530,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   key={`${routeKey}-time-${index}`}
                   position={midpoint}
                   icon={timeIcon}
+                  zIndexOffset={500}
                 />
               );
             }
