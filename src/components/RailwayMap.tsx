@@ -11,6 +11,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [MapComponents, setMapComponents] = useState<any>(null);
+  const [zoomLevel, setZoomLevel] = useState(12);
   const mapRef = useRef<any>(null);
 
   useEffect(() => {
@@ -19,12 +20,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     const loadLeaflet = async () => {
       try {
         const [
-          { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker },
+          { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents },
         ] = await Promise.all([
           import('react-leaflet'),
         ]);
         
-        setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker });
+        setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents });
         setIsLoading(false);
       } catch (error) {
         console.error('Failed to load Leaflet:', error);
@@ -45,6 +46,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     setVisibleRoutes(newVisibleRoutes);
   };
 
+  const getMarkerRadius = (zoom: number) => {
+    // ズームレベルに応じてマーカーサイズを調整
+    // ズームレベルが低い（広域）ほど小さく、高い（詳細）ほど大きく
+    const baseRadius = 3;
+    const scaleFactor = Math.max(0.3, Math.min(1.5, (zoom - 8) / 8));
+    return Math.round(baseRadius * scaleFactor);
+  };
+
+
   if (!isClient || isLoading || !MapComponents) {
     return (
       <div style={{ 
@@ -61,8 +71,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     );
   }
 
-  const { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker } = MapComponents;
+  const { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents } = MapComponents;
   const tokyoStation = [35.6812, 139.7671];
+
+  const MapEvents = () => {
+    useMapEvents({
+      zoomend: (e) => {
+        setZoomLevel(e.target.getZoom());
+      },
+    });
+    return null;
+  };
 
   const renderRoute = (routeKey: RouteKey, stations: Station[]) => {
     if (!visibleRoutes.has(routeKey)) return null;
@@ -82,11 +101,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
           <CircleMarker 
             key={`${routeKey}-${index}`} 
             center={[station.lat, station.lng]}
-            radius={6}
+            radius={getMarkerRadius(zoomLevel)}
             pathOptions={{
               fillColor: color,
               color: color,
-              weight: 2,
+              weight: Math.max(1, Math.round(getMarkerRadius(zoomLevel) / 3)),
               opacity: 1,
               fillOpacity: 0.8
             }}
@@ -131,6 +150,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
           scrollWheelZoom={true}
           ref={mapRef}
         >
+          <MapEvents />
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
