@@ -671,7 +671,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         )}
       </div>
       
-      <div style={{ height: '600px', width: '100%', border: '1px solid #ccc' }}>
+      <div style={{ height: '600px', width: '100%', border: '1px solid #ccc', position: 'relative' }}>
         <MapContainer
           center={tokyoStation}
           zoom={12}
@@ -689,6 +689,129 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             renderRoute(routeKey as RouteKey, stations)
           )}
         </MapContainer>
+        
+        {/* 路線凡例（Legend） */}
+        {visibleRoutesData.length > 0 && (
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            border: '1px solid #ccc',
+            borderRadius: '6px',
+            padding: '10px',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+            maxHeight: '300px',
+            overflowY: 'auto',
+            minWidth: '150px',
+            zIndex: 1000
+          }}>
+            <div style={{ 
+              fontSize: '14px', 
+              fontWeight: 'bold', 
+              marginBottom: '8px',
+              color: '#333',
+              borderBottom: '1px solid #eee',
+              paddingBottom: '5px'
+            }}>
+              表示中の路線
+            </div>
+            {visibleRoutesData.map(([routeKey]) => (
+              <div key={routeKey} style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '6px',
+                fontSize: '12px'
+              }}>
+                <div style={{
+                  width: '20px',
+                  height: '3px',
+                  backgroundColor: routeColors[routeKey as RouteKey],
+                  marginRight: '8px',
+                  borderRadius: '1px',
+                  flexShrink: 0
+                }} />
+                <span style={{ 
+                  color: '#333',
+                  lineHeight: '1.2'
+                }}>
+                  {routeNames[routeKey as RouteKey]}
+                </span>
+              </div>
+            ))}
+            
+            {/* 特別なマーカーの説明 */}
+            {(departure || arrival) && (
+              <>
+                <div style={{ 
+                  fontSize: '14px', 
+                  fontWeight: 'bold', 
+                  marginTop: '12px',
+                  marginBottom: '8px',
+                  color: '#333',
+                  borderBottom: '1px solid #eee',
+                  paddingBottom: '5px'
+                }}>
+                  マーカー
+                </div>
+                {departure && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginBottom: '6px',
+                    fontSize: '12px'
+                  }}>
+                    <div style={{
+                      width: '16px',
+                      height: '16px',
+                      backgroundColor: 'white',
+                      border: '2px solid #4CAF50',
+                      borderRadius: '50%',
+                      marginRight: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '10px',
+                      fontWeight: 'bold',
+                      color: '#4CAF50',
+                      flexShrink: 0
+                    }}>
+                      S
+                    </div>
+                    <span style={{ color: '#333' }}>出発駅</span>
+                  </div>
+                )}
+                {arrival && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginBottom: '6px',
+                    fontSize: '12px'
+                  }}>
+                    <div style={{
+                      width: '16px',
+                      height: '16px',
+                      backgroundColor: 'white',
+                      border: '2px solid #F44336',
+                      borderRadius: '50%',
+                      marginRight: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '10px',
+                      fontWeight: 'bold',
+                      color: '#F44336',
+                      flexShrink: 0
+                    }}>
+                      G
+                    </div>
+                    <span style={{ color: '#333' }}>到着駅</span>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
