@@ -32,25 +32,33 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     return Array.from(stationMap.values()).sort((a, b) => a.name.localeCompare(b.name));
   }, []);
 
+  // 主要駅5選
+  const majorStations = useMemo(() => {
+    const majorStationNames = ['東京', '新宿', '渋谷', '池袋', '横浜'];
+    return majorStationNames
+      .map(name => allStations.find(station => station.name === name))
+      .filter(station => station !== undefined) as Station[];
+  }, [allStations]);
+
   const filteredDepartureStations = useMemo(() => {
-    if (!departureSearch) return allStations.slice(0, 10);
+    if (!departureSearch) return majorStations;
     return allStations
       .filter(station => 
         station.name.includes(departureSearch) ||
         station.name.toLowerCase().includes(departureSearch.toLowerCase())
       )
       .slice(0, 10);
-  }, [allStations, departureSearch]);
+  }, [allStations, departureSearch, majorStations]);
 
   const filteredArrivalStations = useMemo(() => {
-    if (!arrivalSearch) return allStations.slice(0, 10);
+    if (!arrivalSearch) return majorStations;
     return allStations
       .filter(station => 
         station.name.includes(arrivalSearch) ||
         station.name.toLowerCase().includes(arrivalSearch.toLowerCase())
       )
       .slice(0, 10);
-  }, [allStations, arrivalSearch]);
+  }, [allStations, arrivalSearch, majorStations]);
 
   const handleDepartureSelect = (station: Station) => {
     onDepartureChange(station);
@@ -104,7 +112,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 setShowDepartureResults(true);
               }}
               onFocus={() => setShowDepartureResults(true)}
-              placeholder="駅名を入力してください"
+              placeholder="駅名を入力"
               style={{
                 width: '100%',
                 padding: '8px 30px 8px 8px',
@@ -166,7 +174,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               ))}
               {filteredDepartureStations.length === 0 && (
                 <div style={{ padding: '8px 12px', color: '#666', fontSize: '14px' }}>
-                  該当する駅が見つかりません
+                  {departureSearch ? '該当する駅が見つかりません' : '主要駅: 東京、新宿、渋谷、池袋、横浜'}
                 </div>
               )}
             </div>
@@ -207,7 +215,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 setShowArrivalResults(true);
               }}
               onFocus={() => setShowArrivalResults(true)}
-              placeholder="駅名を入力してください"
+              placeholder="駅名を入力"
               style={{
                 width: '100%',
                 padding: '8px 30px 8px 8px',
@@ -269,7 +277,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               ))}
               {filteredArrivalStations.length === 0 && (
                 <div style={{ padding: '8px 12px', color: '#666', fontSize: '14px' }}>
-                  該当する駅が見つかりません
+                  {arrivalSearch ? '該当する駅が見つかりません' : '主要駅: 東京、新宿、渋谷、池袋、横浜'}
                 </div>
               )}
             </div>
