@@ -21,7 +21,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   const [departure, setDeparture] = useState<Station | null>({ 
     name: "横浜", 
     lat: 35.4657, 
-    lng: 139.6201 
+    lng: 139.6227 
   });
   const [arrival, setArrival] = useState<Station | null>({ 
     name: "新宿", 
@@ -160,10 +160,48 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     return null;
   };
 
+  const getRouteSegmentForStations = (routeKey: RouteKey, stations: Station[], depStation: Station, arrStation: Station) => {
+    const depIndex = stations.findIndex(s => s.name === depStation.name);
+    const arrIndex = stations.findIndex(s => s.name === arrStation.name);
+    
+    if (depIndex === -1 || arrIndex === -1) return null;
+    
+    const startIndex = Math.min(depIndex, arrIndex);
+    const endIndex = Math.max(depIndex, arrIndex);
+    
+    return {
+      stations: stations.slice(startIndex, endIndex + 1),
+      startIndex,
+      endIndex
+    };
+  };
+
   const renderRoute = (routeKey: RouteKey, stations: Station[]) => {
     if (!visibleRoutes.has(routeKey)) return null;
 
-    const positions = stations.map(station => [station.lat, station.lng]);
+    let displayStations = stations;
+    let displayStartIndex = 0;
+    
+    // 推薦ルートが存在し、特定のルートが選択されている場合
+    if (selectedRoute && departure && arrival) {
+      const routeSegment = selectedRoute.segments.find(seg => seg.routeKey === routeKey);
+      if (routeSegment) {
+        displayStations = routeSegment.stations;
+      } else {
+        return null;
+      }
+    } else if (departure && arrival && routeRecommendations.length > 0) {
+      // 推薦ルートが存在するが特定ルートが選択されていない場合、全推薦ルートで使用される区間を表示
+      const allSegments = routeRecommendations.flatMap(route => route.segments);
+      const routeSegment = allSegments.find(seg => seg.routeKey === routeKey);
+      if (routeSegment) {
+        displayStations = routeSegment.stations;
+      } else {
+        return null;
+      }
+    }
+
+    const positions = displayStations.map(station => [station.lat, station.lng]);
     const color = routeColors[routeKey];
 
     return (
@@ -174,7 +212,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
           weight={4}
           opacity={0.8}
         />
-        {stations.map((station, index) => {
+        {displayStations.map((station, index) => {
           const isDeparture = departure && station.name === departure.name;
           const isArrival = arrival && station.name === arrival.name;
           const isSpecialStation = isDeparture || isArrival;
@@ -210,9 +248,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             </CircleMarker>
           );
         })}
-        {stations.map((station, index) => {
-          if (index < stations.length - 1 && station.timeToNext) {
-            const nextStation = stations[index + 1];
+        {displayStations.map((station, index) => {
+          if (index < displayStations.length - 1 && station.timeToNext) {
+            const nextStation = displayStations[index + 1];
             const midpoint = getMidpoint(station.lat, station.lng, nextStation.lat, nextStation.lng);
             const markerSize = getTimeMarkerSize(zoomLevel);
             const fontSize = Math.max(8, Math.round(markerSize * 0.45));
