@@ -21,11 +21,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
       try {
         const [
           { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents },
+          { DivIcon }
         ] = await Promise.all([
           import('react-leaflet'),
+          import('leaflet'),
         ]);
         
-        setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents });
+        setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, DivIcon });
         setIsLoading(false);
       } catch (error) {
         console.error('Failed to load Leaflet:', error);
@@ -52,6 +54,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     const baseRadius = 3;
     const scaleFactor = Math.max(0.3, Math.min(1.5, (zoom - 8) / 8));
     return Math.round(baseRadius * scaleFactor);
+  };
+
+  const getTimeMarkerSize = (zoom: number) => {
+    // ズームレベルに応じて時刻マーカーサイズを調整
+    const baseSize = 20;
+    const scaleFactor = Math.max(0.4, Math.min(1.2, (zoom - 8) / 8));
+    return Math.round(baseSize * scaleFactor);
+  };
+
+  const getMidpoint = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+    return [(lat1 + lat2) / 2, (lng1 + lng2) / 2];
   };
 
   const selectAllRoutes = () => {
@@ -83,7 +96,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     );
   }
 
-  const { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents } = MapComponents;
+  const { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, DivIcon } = MapComponents;
   const tokyoStation = [35.6812, 139.7671];
 
   const MapEvents = () => {
@@ -131,6 +144,43 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             </Popup>
           </CircleMarker>
         ))}
+        {stations.map((station, index) => {
+          if (index < stations.length - 1 && station.timeToNext) {
+            const nextStation = stations[index + 1];
+            const midpoint = getMidpoint(station.lat, station.lng, nextStation.lat, nextStation.lng);
+            const markerSize = getTimeMarkerSize(zoomLevel);
+            const fontSize = Math.max(8, Math.round(markerSize * 0.45));
+            
+            const timeIcon = new DivIcon({
+              html: `<div style="
+                background: white;
+                border: 2px solid ${color};
+                border-radius: 50%;
+                width: ${markerSize}px;
+                height: ${markerSize}px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: ${fontSize}px;
+                font-weight: bold;
+                color: ${color};
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+              ">${station.timeToNext}</div>`,
+              className: 'time-marker',
+              iconSize: [markerSize, markerSize],
+              iconAnchor: [markerSize / 2, markerSize / 2]
+            });
+
+            return (
+              <Marker
+                key={`${routeKey}-time-${index}`}
+                position={midpoint}
+                icon={timeIcon}
+              />
+            );
+          }
+          return null;
+        })}
       </React.Fragment>
     );
   };
