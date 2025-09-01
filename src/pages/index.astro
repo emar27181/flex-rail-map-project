@@ -1,0 +1,41 @@
+---
+import RailwayMap from '../components/RailwayMap.tsx';
+import SimpleMap from '../components/SimpleMap.tsx';
+import DataTest from '../components/DataTest.tsx';
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>路線図アプリ</title>
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+		  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+		  crossorigin=""/>
+		<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+		  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+		  crossorigin=""></script>
+		<style>
+			body {
+				margin: 0;
+				padding: 20px;
+				font-family: Arial, sans-serif;
+			}
+			.leaflet-container {
+				height: 600px !important;
+				width: 100% !important;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>東京路線図</h1>
+		<p>1. React コンポーネントのテスト:</p>
+		<SimpleMap client:only="react" />
+		<p>2. データの読み込みテスト:</p>
+		<DataTest client:only="react" />
+		<p>3. 路線図マップ:</p>
+		<RailwayMap client:only="react" />
+	</body>
+</html>
