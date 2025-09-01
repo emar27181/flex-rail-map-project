@@ -265,29 +265,95 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               </Marker>
             );
           } else {
-            // 通常の駅は従来通りのCircleMarkerで表示
-            return (
-              <CircleMarker 
-                key={`${routeKey}-${index}`} 
-                center={[station.lat, station.lng]}
-                radius={getMarkerRadius(zoomLevel)}
-                pathOptions={{
-                  fillColor: color,
-                  color: color,
-                  weight: Math.max(1, Math.round(getMarkerRadius(zoomLevel) / 3)),
-                  opacity: 1,
-                  fillOpacity: 0.8
-                }}
-              >
-                <Popup>
-                  <div>
-                    <strong>{station.name}</strong>
-                    <br />
-                    {station.timeToNext && `次駅まで: ${station.timeToNext}分`}
-                  </div>
-                </Popup>
-              </CircleMarker>
-            );
+            // 通常の駅は四角いマーカーで表示
+            const shouldShowStation = zoomLevel >= 13; // ズームレベル13以上で駅を表示
+            const shouldShowStationName = zoomLevel >= 14; // ズームレベル14以上で駅名を表示
+            
+            // 主要駅リスト（広域表示時でも表示する駅）
+            const majorStations = [
+              '東京', '新宿', '渋谷', '池袋', '上野', '品川', '横浜', '大宮', '立川',
+              '吉祥寺', '町田', '川崎', '蒲田', '新橋', '有楽町', '秋葉原', '神田',
+              '浜松町', '田町', '高田馬場', '新大久保', '四ツ谷', '市ヶ谷', '飯田橋',
+              '御茶ノ水', '水道橋', '後楽園', '春日', '本郷三丁目', '上野広小路',
+              '仲御徒町', '御徒町', '鶯谷', '日暮里', '西日暮里', '田端', '駒込',
+              '巣鴨', '大塚', '目白', '新宿三丁目', '新宿御苑前', '四谷三丁目'
+            ];
+            
+            const isMajorStation = majorStations.includes(station.name);
+            const shouldShowInWideView = zoomLevel >= 11 && isMajorStation; // ズーム11以上で主要駅を表示
+            
+            if (!shouldShowStation && !shouldShowInWideView) {
+              return null; // 通常駅かつ広域表示対象外の場合は非表示
+            }
+
+            const stationSize = Math.max(8, Math.min(16, zoomLevel - 8));
+            
+            if (shouldShowStationName || shouldShowInWideView) {
+              // 詳細表示時：駅名付きの四角いマーカー
+              const stationIcon = new DivIcon({
+                html: `<div style="
+                  background: ${color};
+                  color: white;
+                  padding: 2px 6px;
+                  border-radius: 3px;
+                  font-size: 11px;
+                  font-weight: bold;
+                  white-space: nowrap;
+                  border: 1px solid white;
+                  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+                  text-align: center;
+                ">${station.name}</div>`,
+                className: 'station-name-marker',
+                iconSize: [station.name.length * 11 + 12, 18],
+                iconAnchor: [(station.name.length * 11 + 12) / 2, 9]
+              });
+
+              return (
+                <Marker
+                  key={`${routeKey}-station-${index}`}
+                  position={[station.lat, station.lng]}
+                  icon={stationIcon}
+                >
+                  <Popup>
+                    <div>
+                      <strong>{station.name}</strong>
+                      <br />
+                      {station.timeToNext && `次駅まで: ${station.timeToNext}分`}
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            } else {
+              // 中間表示時：小さな四角いマーカーのみ
+              const smallStationIcon = new DivIcon({
+                html: `<div style="
+                  background: ${color};
+                  width: ${stationSize}px;
+                  height: ${stationSize}px;
+                  border: 1px solid white;
+                  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+                "></div>`,
+                className: 'station-marker',
+                iconSize: [stationSize, stationSize],
+                iconAnchor: [stationSize / 2, stationSize / 2]
+              });
+
+              return (
+                <Marker
+                  key={`${routeKey}-station-${index}`}
+                  position={[station.lat, station.lng]}
+                  icon={smallStationIcon}
+                >
+                  <Popup>
+                    <div>
+                      <strong>{station.name}</strong>
+                      <br />
+                      {station.timeToNext && `次駅まで: ${station.timeToNext}分`}
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            }
           }
         })}
         {displayStations.map((station, index) => {
