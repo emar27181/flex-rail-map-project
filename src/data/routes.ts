@@ -29,6 +29,9 @@ import { seibuIkebukuroLine } from './seibu-ikebukuro-line';
 import { seibuShinjukuLine } from './seibu-shinjuku-line';
 import { tobuTojoLine } from './tobu-tojo-line';
 import { keikyuLine } from './keikyu-line';
+import { jrMusashinoLine } from './jr-musashino-line';
+import { tokyoMonorail } from './tokyo-monorail';
+import { keiseiMainLine } from './keisei-main-line';
 
 export const routes = {
   yamanote,
@@ -62,6 +65,9 @@ export const routes = {
   seibuShinjukuLine,
   tobuTojoLine,
   keikyuLine,
+  jrMusashinoLine,
+  tokyoMonorail,
+  keiseiMainLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -98,6 +104,9 @@ export const routeColors = {
   seibuShinjukuLine: '#F39700', // Seibu Shinjuku Line orange
   tobuTojoLine: '#004098', // Tobu Tojo Line navy blue
   keikyuLine: '#C8102E', // Keikyu Line red
+  jrMusashinoLine: '#F15A22', // JR Musashino Line orange  
+  tokyoMonorail: '#0066CC', // Tokyo Monorail blue
+  keiseiMainLine: '#3165B1', // Keisei Main Line blue
 };
 
 export const routeNames = {
@@ -132,4 +141,7 @@ export const routeNames = {
   seibuShinjukuLine: '西武新宿線',
   tobuTojoLine: '東武東上線',
   keikyuLine: '京急本線',
+  jrMusashinoLine: 'JR武蔵野線',
+  tokyoMonorail: '東京モノレール',
+  keiseiMainLine: '京成本線',
 };
