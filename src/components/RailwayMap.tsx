@@ -101,14 +101,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   }, []);
 
   // アイコン作成関数をメモ化
-  const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean) => {
+  const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean, opacity: number = 1) => {
     if (!MapComponents?.DivIcon) return null;
     
     const { DivIcon } = MapComponents;
     
     if (isDetailed) {
       return new DivIcon({
-        html: `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:bold;white-space:nowrap;border:1px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3);text-align:center">${station.name}</div>`,
+        html: `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:bold;white-space:nowrap;border:1px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3);text-align:center;opacity:${opacity}">${station.name}</div>`,
         className: 'station-name-marker',
         iconSize: [station.name.length * 11 + 12, 18],
         iconAnchor: [(station.name.length * 11 + 12) / 2, 9]
@@ -116,7 +116,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     } else {
       const stationSize = Math.max(8, Math.min(16, zoomLevel - 8));
       return new DivIcon({
-        html: `<div style="background:${color};width:${stationSize}px;height:${stationSize}px;border:1px solid white;box-shadow:0 1px 2px rgba(0,0,0,0.2)"></div>`,
+        html: `<div style="background:${color};width:${stationSize}px;height:${stationSize}px;border:1px solid white;box-shadow:0 1px 2px rgba(0,0,0,0.2);opacity:${opacity}"></div>`,
         className: 'station-marker',
         iconSize: [stationSize, stationSize],
         iconAnchor: [stationSize / 2, stationSize / 2]
@@ -162,10 +162,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     });
   }, [MapComponents]);
 
-  // レンダリング最適化：表示する路線のみレンダリング
+  // レンダリング最適化：表示する路線のデータを準備
   const visibleRoutesData = useMemo(() => {
-    return Object.entries(routes).filter(([routeKey]) => visibleRoutes.has(routeKey as RouteKey));
-  }, [visibleRoutes]);
+    // 経路推薦がある場合は、推薦で使用される路線のみを表示対象とする
+    if (routeRecommendations.length > 0) {
+      const usedRouteKeys = new Set<RouteKey>();
+      routeRecommendations.forEach(route => {
+        route.segments.forEach(segment => {
+          usedRouteKeys.add(segment.routeKey);
+        });
+      });
+      return Object.entries(routes).filter(([routeKey]) => usedRouteKeys.has(routeKey as RouteKey));
+    }
+    
+    // 経路推薦がない場合は、全路線を表示対象とする
+    return Object.entries(routes);
+  }, [routeRecommendations]);
 
 
   useEffect(() => {
@@ -416,7 +428,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
           positions={positions} 
           color={color}
           weight={4}
-          opacity={0.8}
+          opacity={visibleRoutes.has(routeKey) ? 0.8 : 0.2}
           eventHandlers={{
             click: () => {
               toggleRoute(routeKey);
@@ -504,7 +516,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             }
 
             const isDetailed = shouldShowStationName || shouldShowInWideView || shouldShowAllStations;
-            const stationIcon = createStationIcon(station, color, zoomLevel, isDetailed);
+            const stationOpacity = visibleRoutes.has(routeKey) ? 1 : 0.3;
+            const stationIcon = createStationIcon(station, color, zoomLevel, isDetailed, stationOpacity);
             if (!stationIcon) return null;
 
             return (
@@ -664,66 +677,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         
         {isRouteToggleExpanded && (
         <div>
-        <div style={{ marginBottom: '15px' }}>
-          <div style={{ marginBottom: '10px' }}>
-            <button 
-              onClick={selectAllRoutes}
-              style={{ 
-                marginRight: '10px',
-                padding: '5px 10px',
-                backgroundColor: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              すべて表示
-            </button>
-            <button 
-              onClick={deselectAllRoutes}
-              style={{ 
-                padding: '5px 10px',
-                backgroundColor: '#f44336',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              すべて非表示
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '10px' }}>
-            <label style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              fontSize: '14px',
-              color: '#333',
-              cursor: 'pointer'
-            }}>
-              <input
-                type="checkbox"
-                checked={showTransferStationsOnly}
-                onChange={(e) => setShowTransferStationsOnly(e.target.checked)}
-                style={{ 
-                  marginRight: '8px',
-                  cursor: 'pointer'
-                }}
-              />
-              乗換駅のみ表示
-            </label>
-            <div style={{ 
-              fontSize: '11px', 
-              color: '#666', 
-              marginTop: '4px',
-              marginLeft: '20px'
-            }}>
-              ※十分拡大すると全駅表示
-            </div>
-          </div>
-          
           <div style={{ marginBottom: '10px' }}>
             <label style={{ 
               display: 'flex', 
@@ -749,8 +702,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 <option value={20}>20件</option>
               </select>
             </label>
+            <div style={{ 
+              fontSize: '11px', 
+              color: '#666', 
+              marginTop: '4px'
+            }}>
+              ※路線表示・乗換駅切り替えは右上の凡例から
+            </div>
           </div>
-        </div>
         <div 
           style={{
             width: '100%',
@@ -898,26 +857,115 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             {isLegendExpanded && (
               <div style={{
                 padding: '10px',
-                maxHeight: '300px',
+                maxHeight: '350px',
                 overflowY: 'auto'
               }}>
+                {/* 表示オプション */}
+                <div style={{ 
+                  marginBottom: '15px',
+                  padding: '10px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '4px',
+                  border: '1px solid #e9ecef'
+                }}>
+                  <div style={{ marginBottom: '10px' }}>
+                    <label style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      fontSize: '12px',
+                      color: '#333',
+                      cursor: 'pointer'
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={showTransferStationsOnly}
+                        onChange={(e) => setShowTransferStationsOnly(e.target.checked)}
+                        style={{ 
+                          marginRight: '6px',
+                          cursor: 'pointer'
+                        }}
+                      />
+                      乗換駅のみ表示
+                    </label>
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                      onClick={selectAllRoutes}
+                      style={{ 
+                        flex: 1,
+                        padding: '4px 8px',
+                        fontSize: '10px',
+                        backgroundColor: '#28a745',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '3px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      全表示
+                    </button>
+                    <button 
+                      onClick={deselectAllRoutes}
+                      style={{ 
+                        flex: 1,
+                        padding: '4px 8px',
+                        fontSize: '10px',
+                        backgroundColor: '#dc3545',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '3px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      全非表示
+                    </button>
+                  </div>
+                </div>
+                
+                {/* 路線一覧 */}
                 {visibleRoutesData.map(([routeKey]) => (
-                  <div key={routeKey} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    marginBottom: '6px',
-                    fontSize: '12px'
-                  }}>
+                  <div 
+                    key={routeKey} 
+                    onClick={() => toggleRoute(routeKey as RouteKey)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginBottom: '6px',
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      borderRadius: '3px',
+                      backgroundColor: visibleRoutes.has(routeKey as RouteKey) 
+                        ? 'rgba(0, 123, 255, 0.1)' 
+                        : 'rgba(108, 117, 125, 0.1)',
+                      border: `1px solid ${visibleRoutes.has(routeKey as RouteKey) 
+                        ? '#007bff' 
+                        : '#6c757d'}`,
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={visibleRoutes.has(routeKey as RouteKey)}
+                      onChange={() => {}} // ハンドルはdivのonClickで
+                      style={{
+                        marginRight: '8px',
+                        cursor: 'pointer'
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
                     <div style={{
                       width: '20px',
                       height: '3px',
                       backgroundColor: routeColors[routeKey as RouteKey],
                       marginRight: '8px',
                       borderRadius: '1px',
-                      flexShrink: 0
+                      flexShrink: 0,
+                      opacity: visibleRoutes.has(routeKey as RouteKey) ? 1 : 0.3
                     }} />
                     <span style={{ 
-                      color: '#333',
+                      color: visibleRoutes.has(routeKey as RouteKey) ? '#333' : '#6c757d',
                       lineHeight: '1.2'
                     }}>
                       {routeNames[routeKey as RouteKey]}
