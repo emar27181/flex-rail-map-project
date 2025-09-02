@@ -36,6 +36,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   const [isRouteToggleExpanded, setIsRouteToggleExpanded] = useState(false);
   const [isLegendExpanded, setIsLegendExpanded] = useState(true);
   
+  // 表示モードの管理
+  const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
+  
   const routeFinder = useMemo(() => new RouteFinder(), []);
 
   // 路線色から薄い背景色を生成
@@ -64,6 +67,30 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     '仲御徒町', '御徒町', '鶯谷', '日暮里', '西日暮里', '田端', '駒込',
     '巣鴨', '大塚', '目白', '新宿三丁目', '新宿御苑前', '四谷三丁目'
   ], []);
+
+  // 乗換駅を特定する（複数路線で同じ駅名を持つ駅）
+  const transferStations = useMemo(() => {
+    const stationCounts = new Map<string, Set<RouteKey>>();
+    
+    Object.entries(routes).forEach(([routeKey, stationList]) => {
+      stationList.forEach(station => {
+        if (!stationCounts.has(station.name)) {
+          stationCounts.set(station.name, new Set());
+        }
+        stationCounts.get(station.name)!.add(routeKey as RouteKey);
+      });
+    });
+    
+    // 2路線以上で使用される駅名を乗換駅とする
+    const transferStationNames = new Set<string>();
+    stationCounts.forEach((routeSet, stationName) => {
+      if (routeSet.size >= 2) {
+        transferStationNames.add(stationName);
+      }
+    });
+    
+    return transferStationNames;
+  }, []);
 
   // アイコン作成関数をメモ化
   const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean) => {
@@ -422,7 +449,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             const shouldShowStation = zoomLevel >= 12; // より広域で駅を表示
             const shouldShowStationName = zoomLevel >= 12; // より広域で駅名を表示
             const isMajorStation = majorStations.includes(station.name);
+            const isTransferStation = transferStations.has(station.name);
             const shouldShowInWideView = zoomLevel >= 10 && isMajorStation; // 主要駅をより広域で表示
+            
+            // 乗換駅のみ表示モードの場合、乗換駅でない駅は表示しない
+            if (showTransferStationsOnly && !isTransferStation) {
+              return null;
+            }
             
             if (!shouldShowStation && !shouldShowInWideView) {
               return null;
@@ -585,34 +618,57 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         
         {isRouteToggleExpanded && (
         <div>
-        <div style={{ marginBottom: '10px' }}>
-          <button 
-            onClick={selectAllRoutes}
-            style={{ 
-              marginRight: '10px',
-              padding: '5px 10px',
-              backgroundColor: '#4CAF50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
+        <div style={{ marginBottom: '15px' }}>
+          <div style={{ marginBottom: '10px' }}>
+            <button 
+              onClick={selectAllRoutes}
+              style={{ 
+                marginRight: '10px',
+                padding: '5px 10px',
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              すべて表示
+            </button>
+            <button 
+              onClick={deselectAllRoutes}
+              style={{ 
+                padding: '5px 10px',
+                backgroundColor: '#f44336',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              すべて非表示
+            </button>
+          </div>
+          
+          <div style={{ marginBottom: '10px' }}>
+            <label style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              fontSize: '14px',
+              color: '#333',
               cursor: 'pointer'
-            }}
-          >
-            すべて表示
-          </button>
-          <button 
-            onClick={deselectAllRoutes}
-            style={{ 
-              padding: '5px 10px',
-              backgroundColor: '#f44336',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            すべて非表示
-          </button>
+            }}>
+              <input
+                type="checkbox"
+                checked={showTransferStationsOnly}
+                onChange={(e) => setShowTransferStationsOnly(e.target.checked)}
+                style={{ 
+                  marginRight: '8px',
+                  cursor: 'pointer'
+                }}
+              />
+              乗換駅のみ表示
+            </label>
+          </div>
         </div>
         <div 
           style={{
