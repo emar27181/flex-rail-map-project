@@ -206,18 +206,27 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   // 出発駅と到着駅が設定された時にルート検索を実行
   useEffect(() => {
     if (departure && arrival) {
-      const routes = routeFinder.findRoutes(departure, arrival, maxRouteRecommendations);
-      setRouteRecommendations(routes);
+      const routeResults = routeFinder.findRoutes(departure, arrival, maxRouteRecommendations);
+      setRouteRecommendations(routeResults);
       setSelectedRoute(null);
       
       // 推薦路線で使用される全ての路線を表示
-      const allRouteKeys = new Set<RouteKey>();
-      routes.forEach(route => {
+      const usedRouteKeys = new Set<RouteKey>();
+      routeResults.forEach(route => {
         route.segments.forEach(segment => {
-          allRouteKeys.add(segment.routeKey);
+          usedRouteKeys.add(segment.routeKey);
         });
       });
-      setVisibleRoutes(allRouteKeys);
+      
+      // デバッグ：推薦された経路の詳細をログ出力
+      console.log(`Route recommendations for ${departure.name} → ${arrival.name}:`);
+      routeResults.forEach((route, index) => {
+        const routeDescription = route.segments.map(seg => seg.routeName).join(' → ');
+        console.log(`${index + 1}: ${routeDescription} (${route.totalTime}分, ${route.transfers}回乗換)`);
+      });
+      console.log(`Used routes: ${Array.from(usedRouteKeys).join(', ')}`);
+      
+      setVisibleRoutes(usedRouteKeys);
     } else {
       setRouteRecommendations([]);
       setSelectedRoute(null);
