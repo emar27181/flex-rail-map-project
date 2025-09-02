@@ -248,6 +248,13 @@ export class RouteFinder {
   }
 
   private diversifyRoutes(results: RouteResult[], maxResults: number): RouteResult[] {
+    // Filter out obviously inefficient routes (more than 3x the best time)
+    if (results.length > 0) {
+      const bestTime = Math.min(...results.map(r => r.totalTime));
+      const maxReasonableTime = bestTime * 3;
+      results = results.filter(r => r.totalTime <= maxReasonableTime);
+    }
+
     // Sort by quality (transfers first, then time)
     results.sort((a, b) => {
       if (a.transfers !== b.transfers) {
@@ -269,10 +276,8 @@ export class RouteFinder {
       }
     });
 
-    // If we still need more results, add remaining routes
-    results.forEach(result => {
-      if (diverseResults.length >= maxResults) return;
-      
+    // If we still need more results, add remaining routes (but prioritize fewer transfers)
+    const sortedRemaining = results.filter(result => {
       const alreadyIncluded = diverseResults.some(existing => 
         existing.segments.length === result.segments.length &&
         existing.segments.every((seg, i) => 
@@ -281,12 +286,21 @@ export class RouteFinder {
           seg.endIndex === result.segments[i].endIndex
         )
       );
-
-      if (!alreadyIncluded) {
-        diverseResults.push(result);
+      return !alreadyIncluded;
+    }).sort((a, b) => {
+      // Prioritize routes with fewer transfers
+      if (a.transfers !== b.transfers) {
+        return a.transfers - b.transfers;
       }
+      return a.totalTime - b.totalTime;
     });
 
+    sortedRemaining.forEach(result => {
+      if (diverseResults.length >= maxResults) return;
+      diverseResults.push(result);
+    });
+
+    console.log(`Filtered routes: ${results.length} → ${diverseResults.length}`);
     return diverseResults;
   }
 }
