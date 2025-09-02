@@ -105,6 +105,85 @@ export const yamanote: Station[] = [
   {
     name: "新宿",
     lat: 35.6896,
-    lng: 139.7006
+    lng: 139.7006,
+    timeToNext: 2
+  },
+  {
+    name: "代々木",
+    lat: 35.6837,
+    lng: 139.7020,
+    timeToNext: 2
+  },
+  {
+    name: "原宿",
+    lat: 35.6702,
+    lng: 139.7025,
+    timeToNext: 3
+  },
+  {
+    name: "渋谷",
+    lat: 35.6580,
+    lng: 139.7016,
+    timeToNext: 3
+  },
+  {
+    name: "恵比寿",
+    lat: 35.6465,
+    lng: 139.7100,
+    timeToNext: 2
+  },
+  {
+    name: "目黒",
+    lat: 35.6333,
+    lng: 139.7156,
+    timeToNext: 3
+  },
+  {
+    name: "五反田",
+    lat: 35.6259,
+    lng: 139.7238,
+    timeToNext: 2
+  },
+  {
+    name: "大崎",
+    lat: 35.6197,
+    lng: 139.7286,
+    timeToNext: 3
+  },
+  {
+    name: "品川",
+    lat: 35.6284,
+    lng: 139.7387,
+    timeToNext: 2
+  },
+  {
+    name: "高輪ゲートウェイ",
+    lat: 35.6356,
+    lng: 139.7407,
+    timeToNext: 2
+  },
+  {
+    name: "田町",
+    lat: 35.6454,
+    lng: 139.7475,
+    timeToNext: 3
+  },
+  {
+    name: "浜松町",
+    lat: 35.6553,
+    lng: 139.7570,
+    timeToNext: 2
+  },
+  {
+    name: "新橋",
+    lat: 35.6663,
+    lng: 139.7583,
+    timeToNext: 2
+  },
+  {
+    name: "有楽町",
+    lat: 35.6751,
+    lng: 139.7634,
+    timeToNext: 2
   }
 ];
