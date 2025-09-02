@@ -481,18 +481,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               </Marker>
             );
           } else {
-            const shouldShowStation = zoomLevel >= 12; // より広域で駅を表示
-            const shouldShowStationName = zoomLevel >= 12; // より広域で駅名を表示
+            const shouldShowStation = zoomLevel >= 11; // より広域で駅を表示
+            const shouldShowStationName = zoomLevel >= 10; // より広域で駅名を表示
+            const shouldShowAllStations = zoomLevel >= 13; // 十分拡大したらすべての駅を表示
             const isMajorStation = majorStations.includes(station.name);
             const isTransferStation = transferStations.has(station.name);
             const shouldShowInWideView = zoomLevel >= 10 && isMajorStation; // 主要駅をより広域で表示
             
-            // 乗換駅のみ表示モードの場合、乗換駅でない駅は表示しない
-            if (showTransferStationsOnly) {
+            // 十分拡大している場合はすべての駅を表示（乗換駅フィルターを無視）
+            if (shouldShowAllStations) {
+              // 全駅表示モード - フィルターなし
+            } else if (showTransferStationsOnly) {
+              // 乗換駅のみ表示モードの場合、乗換駅でない駅は表示しない
               if (!isTransferStation) {
                 return null;
               }
-              // 乗換駅の場合は表示
             } else {
               // 通常表示モードの場合
               if (!shouldShowStation && !shouldShowInWideView) {
@@ -500,7 +503,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               }
             }
 
-            const isDetailed = shouldShowStationName || shouldShowInWideView;
+            const isDetailed = shouldShowStationName || shouldShowInWideView || shouldShowAllStations;
             const stationIcon = createStationIcon(station, color, zoomLevel, isDetailed);
             if (!stationIcon) return null;
 
@@ -711,6 +714,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               />
               乗換駅のみ表示
             </label>
+            <div style={{ 
+              fontSize: '11px', 
+              color: '#666', 
+              marginTop: '4px',
+              marginLeft: '20px'
+            }}>
+              ※十分拡大すると全駅表示
+            </div>
           </div>
           
           <div style={{ marginBottom: '10px' }}>
