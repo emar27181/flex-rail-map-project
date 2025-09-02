@@ -3,6 +3,8 @@ import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
 import RouteRecommendations from './RouteRecommendations';
+import CoverageAnalysis from './CoverageAnalysis';
+import ErrorBoundary from './ErrorBoundary';
 import { RouteFinder, type RouteResult } from '../utils/routeFinder';
 
 interface RailwayMapProps {
@@ -161,10 +163,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
 
 
   useEffect(() => {
-    setIsClient(true);
+    let mounted = true;
     
     const loadLeaflet = async () => {
       try {
+        if (typeof window === 'undefined') return;
+        
         const [
           { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents },
           { DivIcon }
@@ -173,15 +177,24 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
           import('leaflet'),
         ]);
         
-        setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, DivIcon });
-        setIsLoading(false);
+        if (mounted) {
+          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, DivIcon });
+          setIsClient(true);
+          setIsLoading(false);
+        }
       } catch (error) {
         console.error('Failed to load Leaflet:', error);
-        setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     loadLeaflet();
+    
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // 出発駅と到着駅が設定された時にルート検索を実行
@@ -314,7 +327,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         justifyContent: 'center',
         backgroundColor: '#f9f9f9'
       }}>
-        <div>マップを読み込み中...</div>
+        <div>
+          <div>マップを読み込み中...</div>
+          <div style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
+            Client: {isClient ? 'OK' : 'Loading'}, 
+            Loading: {isLoading ? 'Yes' : 'No'}, 
+            Components: {MapComponents ? 'OK' : 'Loading'}
+          </div>
+        </div>
       </div>
     );
   }
@@ -575,6 +595,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   };
 
   return (
+    <ErrorBoundary>
     <div className={className}>
       {/* 駅選択UI */}
       <StationSelector
@@ -585,6 +606,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         isExpanded={isStationSelectorExpanded}
         onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
       />
+
+      {/* カバレッジ分析 */}
+      <CoverageAnalysis />
 
       {/* ルート推薦表示 */}
       {routeRecommendations.length > 0 && (
@@ -920,6 +944,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         )}
       </div>
     </div>
+    </ErrorBoundary>
   );
 };
 
