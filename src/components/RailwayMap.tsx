@@ -39,7 +39,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   const [isLegendExpanded, setIsLegendExpanded] = useState(true);
   
   // 表示モードの管理
-  const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
+  const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(true);
+  
+  // 経路推薦設定
+  const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(10);
   
   const routeFinder = useMemo(() => new RouteFinder(), []);
 
@@ -90,6 +93,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         transferStationNames.add(stationName);
       }
     });
+    
+    // デバッグ：乗換駅数をログ出力
+    console.log(`Transfer stations detected: ${transferStationNames.size}`);
     
     return transferStationNames;
   }, []);
@@ -200,7 +206,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   // 出発駅と到着駅が設定された時にルート検索を実行
   useEffect(() => {
     if (departure && arrival) {
-      const routes = routeFinder.findRoutes(departure, arrival, 5);
+      const routes = routeFinder.findRoutes(departure, arrival, maxRouteRecommendations);
       setRouteRecommendations(routes);
       setSelectedRoute(null);
       
@@ -218,7 +224,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
       // 出発駅・到着駅がない場合は全路線を表示
       setVisibleRoutes(new Set(Object.keys(routes) as RouteKey[]));
     }
-  }, [departure, arrival, routeFinder]);
+  }, [departure, arrival, routeFinder, maxRouteRecommendations]);
 
   const toggleRoute = (routeKey: RouteKey) => {
     const newVisibleRoutes = new Set(visibleRoutes);
@@ -473,12 +479,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             const shouldShowInWideView = zoomLevel >= 10 && isMajorStation; // 主要駅をより広域で表示
             
             // 乗換駅のみ表示モードの場合、乗換駅でない駅は表示しない
-            if (showTransferStationsOnly && !isTransferStation) {
-              return null;
-            }
-            
-            if (!shouldShowStation && !shouldShowInWideView) {
-              return null;
+            if (showTransferStationsOnly) {
+              if (!isTransferStation) {
+                return null;
+              }
+              // 乗換駅の場合は表示
+            } else {
+              // 通常表示モードの場合
+              if (!shouldShowStation && !shouldShowInWideView) {
+                return null;
+              }
             }
 
             const isDetailed = shouldShowStationName || shouldShowInWideView;
@@ -691,6 +701,33 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 }}
               />
               乗換駅のみ表示
+            </label>
+          </div>
+          
+          <div style={{ marginBottom: '10px' }}>
+            <label style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              fontSize: '14px',
+              color: '#333'
+            }}>
+              <span style={{ marginRight: '8px' }}>経路推薦数:</span>
+              <select
+                value={maxRouteRecommendations}
+                onChange={(e) => setMaxRouteRecommendations(Number(e.target.value))}
+                style={{
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  border: '1px solid #ccc',
+                  fontSize: '14px'
+                }}
+              >
+                <option value={3}>3件</option>
+                <option value={5}>5件</option>
+                <option value={10}>10件</option>
+                <option value={15}>15件</option>
+                <option value={20}>20件</option>
+              </select>
             </label>
           </div>
         </div>
