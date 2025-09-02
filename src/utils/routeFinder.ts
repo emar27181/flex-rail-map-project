@@ -90,7 +90,7 @@ export class RouteFinder {
     };
   }
 
-  findRoutes(departure: Station, arrival: Station, maxResults: number = 5): RouteResult[] {
+  findRoutes(departure: Station, arrival: Station, maxResults: number = 10): RouteResult[] {
     if (departure.name === arrival.name) {
       return [];
     }
@@ -102,8 +102,9 @@ export class RouteFinder {
       return [];
     }
 
-    const results: RouteResult[] = [];
+    const allResults: RouteResult[] = [];
 
+    // Find direct routes (same line) - highest priority
     departureNodes.forEach(depNode => {
       arrivalNodes.forEach(arrNode => {
         if (depNode.routeKey === arrNode.routeKey) {
@@ -113,7 +114,7 @@ export class RouteFinder {
             depNode.index,
             arrNode.index
           );
-          results.push({
+          allResults.push({
             segments: [segment],
             totalTime: segment.time,
             transfers: 0
@@ -122,6 +123,29 @@ export class RouteFinder {
       });
     });
 
+    // Find one-transfer routes
+    this.findTransferRoutes(departureNodes, arrival, allResults, 1);
+
+    // Find two-transfer routes if needed
+    if (allResults.length < maxResults) {
+      this.findTransferRoutes(departureNodes, arrival, allResults, 2);
+    }
+
+    // Remove exact duplicates
+    const uniqueResults = this.removeDuplicateRoutes(allResults);
+
+    // Diversify results to ensure different route combinations
+    const diverseResults = this.diversifyRoutes(uniqueResults, maxResults);
+
+    return diverseResults;
+  }
+
+  private findTransferRoutes(
+    departureNodes: StationNode[], 
+    arrival: Station, 
+    results: RouteResult[], 
+    maxTransfers: number
+  ) {
     departureNodes.forEach(depNode => {
       const visited = new Set<string>();
       const queue: PathNode[] = [{
@@ -136,21 +160,24 @@ export class RouteFinder {
       while (queue.length > 0) {
         const current = queue.shift()!;
 
-        if (current.transfers >= 2) continue;
+        if (current.transfers > maxTransfers) continue;
 
         const route = routes[current.node.routeKey];
         
+        // Explore both directions on the current line
         for (let direction of [-1, 1]) {
           let currentIndex = current.node.index;
           let segmentTime = 0;
+          let stationsVisited = 0;
 
-          while (true) {
+          while (stationsVisited < 50) { // Prevent infinite loops
             const nextIndex = currentIndex + direction;
             if (nextIndex < 0 || nextIndex >= route.length) break;
 
             const currentStation = route[currentIndex];
             segmentTime += currentStation.timeToNext || 3;
             currentIndex = nextIndex;
+            stationsVisited++;
 
             const nextStation = route[currentIndex];
             const visitKey = `${nextStation.name}-${current.node.routeKey}`;
@@ -167,6 +194,7 @@ export class RouteFinder {
             const newPath = [...current.path, newSegment];
             const newTotalTime = current.totalTime + segmentTime;
 
+            // Check if we've reached the destination
             if (nextStation.name === arrival.name) {
               results.push({
                 segments: newPath,
@@ -176,7 +204,8 @@ export class RouteFinder {
               continue;
             }
 
-            if (current.transfers < 2) {
+            // Look for transfer opportunities
+            if (current.transfers < maxTransfers) {
               const transferNodes = this.stationToRoutes.get(nextStation.name) || [];
               transferNodes.forEach(transferNode => {
                 if (transferNode.routeKey !== current.node.routeKey) {
@@ -185,7 +214,7 @@ export class RouteFinder {
                     queue.push({
                       node: transferNode,
                       path: newPath,
-                      totalTime: newTotalTime + 3,
+                      totalTime: newTotalTime + 5, // Transfer penalty
                       transfers: current.transfers + 1
                     });
                     visited.add(transferKey);
@@ -197,24 +226,67 @@ export class RouteFinder {
         }
       }
     });
+  }
 
-    return results
-      .filter((result, index, self) => {
-        return index === self.findIndex(r => 
-          r.segments.length === result.segments.length &&
-          r.segments.every((seg, i) => 
-            seg.routeKey === result.segments[i].routeKey &&
-            seg.startIndex === result.segments[i].startIndex &&
-            seg.endIndex === result.segments[i].endIndex
-          )
-        );
-      })
-      .sort((a, b) => {
-        if (a.transfers !== b.transfers) {
-          return a.transfers - b.transfers;
-        }
-        return a.totalTime - b.totalTime;
-      })
-      .slice(0, maxResults);
+  private removeDuplicateRoutes(results: RouteResult[]): RouteResult[] {
+    const uniqueResults: RouteResult[] = [];
+    const seen = new Set<string>();
+
+    results.forEach(result => {
+      // Create a unique identifier for the route
+      const routeId = result.segments
+        .map(seg => `${seg.routeKey}:${seg.startIndex}-${seg.endIndex}`)
+        .join('|');
+      
+      if (!seen.has(routeId)) {
+        seen.add(routeId);
+        uniqueResults.push(result);
+      }
+    });
+
+    return uniqueResults;
+  }
+
+  private diversifyRoutes(results: RouteResult[], maxResults: number): RouteResult[] {
+    // Sort by quality (transfers first, then time)
+    results.sort((a, b) => {
+      if (a.transfers !== b.transfers) {
+        return a.transfers - b.transfers;
+      }
+      return a.totalTime - b.totalTime;
+    });
+
+    const diverseResults: RouteResult[] = [];
+    const usedRouteKeys = new Set<string>();
+
+    // First, add the best route from each unique route combination
+    results.forEach(result => {
+      const routeKeyCombo = result.segments.map(seg => seg.routeKey).sort().join('-');
+      
+      if (!usedRouteKeys.has(routeKeyCombo) && diverseResults.length < maxResults) {
+        diverseResults.push(result);
+        usedRouteKeys.add(routeKeyCombo);
+      }
+    });
+
+    // If we still need more results, add remaining routes
+    results.forEach(result => {
+      if (diverseResults.length >= maxResults) return;
+      
+      const alreadyIncluded = diverseResults.some(existing => 
+        existing.segments.length === result.segments.length &&
+        existing.segments.every((seg, i) => 
+          seg.routeKey === result.segments[i].routeKey &&
+          seg.startIndex === result.segments[i].startIndex &&
+          seg.endIndex === result.segments[i].endIndex
+        )
+      );
+
+      if (!alreadyIncluded) {
+        diverseResults.push(result);
+      }
+    });
+
+    return diverseResults;
   }
 }
