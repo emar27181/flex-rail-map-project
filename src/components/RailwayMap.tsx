@@ -940,6 +940,80 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 maxHeight: '350px',
                 overflowY: 'auto'
               }}>
+                {/* マーカー表示（一番上に配置） */}
+                {(departure || arrival) && (
+                  <div style={{ 
+                    marginBottom: '15px',
+                    padding: '10px',
+                    backgroundColor: '#f8f9fa',
+                    borderRadius: '4px',
+                    border: '1px solid #e9ecef'
+                  }}>
+                    <div style={{ 
+                      fontSize: '14px', 
+                      fontWeight: 'bold', 
+                      marginBottom: '8px',
+                      color: '#333'
+                    }}>
+                      現在の駅設定
+                    </div>
+                    {departure && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        marginBottom: '6px',
+                        fontSize: '12px'
+                      }}>
+                        <div style={{
+                          width: '20px',
+                          height: '20px',
+                          backgroundColor: 'white',
+                          border: '3px solid #4CAF50',
+                          borderRadius: '4px',
+                          marginRight: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                          color: '#4CAF50',
+                          flexShrink: 0
+                        }}>
+                          S
+                        </div>
+                        <span style={{ color: '#333', fontWeight: 'bold' }}>出発駅: {departure.name}</span>
+                      </div>
+                    )}
+                    {arrival && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        marginBottom: '6px',
+                        fontSize: '12px'
+                      }}>
+                        <div style={{
+                          width: '20px',
+                          height: '20px',
+                          backgroundColor: 'white',
+                          border: '3px solid #F44336',
+                          borderRadius: '4px',
+                          marginRight: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                          color: '#F44336',
+                          flexShrink: 0
+                        }}>
+                          G
+                        </div>
+                        <span style={{ color: '#333', fontWeight: 'bold' }}>到着駅: {arrival.name}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
                 {/* 表示オプション */}
                 <div style={{ 
                   marginBottom: '15px',
@@ -1053,76 +1127,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   </div>
                 ))}
                 
-                {/* 特別なマーカーの説明 */}
-                {(departure || arrival) && (
-                  <>
-                    <div style={{ 
-                      fontSize: '14px', 
-                      fontWeight: 'bold', 
-                      marginTop: '12px',
-                      marginBottom: '8px',
-                      color: '#333',
-                      borderBottom: '1px solid #eee',
-                      paddingBottom: '5px'
-                    }}>
-                      マーカー
-                    </div>
-                    {departure && (
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        marginBottom: '6px',
-                        fontSize: '12px'
-                      }}>
-                        <div style={{
-                          width: '16px',
-                          height: '16px',
-                          backgroundColor: 'white',
-                          border: '2px solid #4CAF50',
-                          borderRadius: '2px',
-                          marginRight: '8px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '10px',
-                          fontWeight: 'bold',
-                          color: '#4CAF50',
-                          flexShrink: 0
-                        }}>
-                          S
-                        </div>
-                        <span style={{ color: '#333' }}>出発駅</span>
-                      </div>
-                    )}
-                    {arrival && (
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        marginBottom: '6px',
-                        fontSize: '12px'
-                      }}>
-                        <div style={{
-                          width: '16px',
-                          height: '16px',
-                          backgroundColor: 'white',
-                          border: '2px solid #F44336',
-                          borderRadius: '2px',
-                          marginRight: '8px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '10px',
-                          fontWeight: 'bold',
-                          color: '#F44336',
-                          flexShrink: 0
-                        }}>
-                          G
-                        </div>
-                        <span style={{ color: '#333' }}>到着駅</span>
-                      </div>
-                    )}
-                  </>
-                )}
               </div>
             )}
           </div>
