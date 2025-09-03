@@ -5,6 +5,7 @@ import StationSelector from './StationSelector';
 import RouteRecommendations from './RouteRecommendations';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
+import SchematicMap from './SchematicMap';
 import { RouteFinder, type RouteResult } from '../utils/routeFinder';
 
 interface RailwayMapProps {
@@ -40,6 +41,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   
   // 表示モードの管理
   const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(true);
+  const [mapViewMode, setMapViewMode] = useState<'realistic' | 'schematic'>('realistic');
   
   // 経路推薦設定
   const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(10);
@@ -383,6 +385,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
       routeKeys.add(segment.routeKey);
     });
     setVisibleRoutes(routeKeys);
+  };
+
+  const handleSchematicStationClick = (station: Station, action: 'departure' | 'arrival') => {
+    if (action === 'departure') {
+      setDeparture(station);
+    } else {
+      setArrival(station);
+    }
   };
 
 
@@ -907,23 +917,35 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
       </div>
       
       <div style={{ height: '600px', width: '100%', border: '1px solid #ccc', position: 'relative' }}>
-        <MapContainer
-          center={tokyoStation}
-          zoom={12}
-          style={{ height: '100%', width: '100%' }}
-          scrollWheelZoom={true}
-          ref={mapRef}
-        >
-          <MapEvents />
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        {mapViewMode === 'realistic' ? (
+          <MapContainer
+            center={tokyoStation}
+            zoom={12}
+            style={{ height: '100%', width: '100%' }}
+            scrollWheelZoom={true}
+            ref={mapRef}
+          >
+            <MapEvents />
+            <TileLayer
+              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            />
+            
+            {visibleRoutesData.map(([routeKey, stations]) =>
+              renderRoute(routeKey as RouteKey, stations)
+            )}
+          </MapContainer>
+        ) : (
+          <SchematicMap
+            visibleRoutes={visibleRoutes}
+            routeRecommendations={routeRecommendations}
+            departure={departure}
+            arrival={arrival}
+            transferStations={transferStations}
+            showTransferStationsOnly={showTransferStationsOnly}
+            onStationClick={handleSchematicStationClick}
           />
-          
-          {visibleRoutesData.map(([routeKey, stations]) =>
-            renderRoute(routeKey as RouteKey, stations)
-          )}
-        </MapContainer>
+        )}
         
         {/* 路線凡例（Legend） */}
         {visibleRoutesData.length > 0 && (
@@ -1055,6 +1077,56 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   border: '1px solid #e9ecef'
                 }}>
                   <div style={{ marginBottom: '10px' }}>
+                    <label style={{ 
+                      display: 'block',
+                      marginBottom: '8px',
+                      fontSize: '12px',
+                      fontWeight: 'bold',
+                      color: '#333'
+                    }}>
+                      地図表示モード:
+                    </label>
+                    <div style={{ marginBottom: '12px' }}>
+                      <label style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        fontSize: '11px',
+                        color: '#333',
+                        cursor: 'pointer',
+                        marginBottom: '4px'
+                      }}>
+                        <input
+                          type="radio"
+                          name="mapViewMode"
+                          checked={mapViewMode === 'realistic'}
+                          onChange={() => setMapViewMode('realistic')}
+                          style={{ 
+                            marginRight: '6px',
+                            cursor: 'pointer'
+                          }}
+                        />
+                        実地図ベース
+                      </label>
+                      <label style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        fontSize: '11px',
+                        color: '#333',
+                        cursor: 'pointer'
+                      }}>
+                        <input
+                          type="radio"
+                          name="mapViewMode"
+                          checked={mapViewMode === 'schematic'}
+                          onChange={() => setMapViewMode('schematic')}
+                          style={{ 
+                            marginRight: '6px',
+                            cursor: 'pointer'
+                          }}
+                        />
+                        図式化路線図
+                      </label>
+                    </div>
                     <label style={{ 
                       display: 'flex', 
                       alignItems: 'center', 
