@@ -9,7 +9,10 @@
       "Bash(npm run dev:*)",
       "Bash(git add:*)",
       "Bash(q)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "WebSearch",
+      "Bash(curl:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [
       "Bash(git checkout:*)",
