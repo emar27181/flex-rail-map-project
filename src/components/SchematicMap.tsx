@@ -2,6 +2,7 @@ import React, { useMemo, useCallback } from 'react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import type { RouteResult } from '../utils/routeFinder';
+import { createSchematicLayout, getRouteLayout, type SchematicStationLayout } from '../data/schematicLayout';
 
 interface SchematicMapProps {
   visibleRoutes: Set<RouteKey>;
@@ -41,48 +42,26 @@ const SchematicMap: React.FC<SchematicMapProps> = ({
 }) => {
   // 図式化された駅座標を生成
   const schematicData = useMemo(() => {
-    // 主要駅を中心とした簡単な配置
-    const stationPositions = new Map<string, { x: number, y: number }>();
+    // オープンデータベースのレイアウトを使用
+    const stationPositions = createSchematicLayout();
     
-    // 東京を中心とした基本配置
+    // レイアウトにない駅は動的に配置
     const centerX = 400;
     const centerY = 300;
-    
-    // 主要駅の配置（円形に配置）
-    const majorStations = [
-      { name: '東京', angle: 0 },
-      { name: '新宿', angle: Math.PI / 4 },
-      { name: '池袋', angle: Math.PI / 2 },
-      { name: '上野', angle: 3 * Math.PI / 4 },
-      { name: '品川', angle: Math.PI },
-      { name: '渋谷', angle: 5 * Math.PI / 4 },
-      { name: '新橋', angle: 3 * Math.PI / 2 },
-      { name: '有楽町', angle: 7 * Math.PI / 4 }
-    ];
-    
-    const radius = 150;
-    majorStations.forEach(({ name, angle }) => {
-      stationPositions.set(name, {
-        x: centerX + Math.cos(angle) * radius,
-        y: centerY + Math.sin(angle) * radius
-      });
-    });
-    
-    // その他の駅を適当に配置
-    let placedStations = new Set(majorStations.map(s => s.name));
+    const placedStations = new Set(Object.keys(stationPositions));
     let currentAngle = 0;
-    let currentRadius = 200;
+    let currentRadius = 280; // より外側に配置
     
     Object.values(routes).flat().forEach(station => {
       if (!placedStations.has(station.name)) {
-        stationPositions.set(station.name, {
+        stationPositions[station.name] = {
           x: centerX + Math.cos(currentAngle) * currentRadius,
           y: centerY + Math.sin(currentAngle) * currentRadius
-        });
-        currentAngle += 0.3;
+        };
+        currentAngle += 0.4;
         if (currentAngle > 2 * Math.PI) {
           currentAngle = 0;
-          currentRadius += 30;
+          currentRadius += 40;
         }
         placedStations.add(station.name);
       }
@@ -95,7 +74,7 @@ const SchematicMap: React.FC<SchematicMapProps> = ({
       if (!visibleRoutes.has(routeKey as RouteKey)) return;
       
       const schematicStations: SchematicStation[] = stations.map(station => {
-        const pos = stationPositions.get(station.name) || { x: centerX, y: centerY };
+        const pos = stationPositions[station.name] || { x: centerX, y: centerY };
         return {
           name: station.name,
           x: pos.x,
@@ -107,15 +86,39 @@ const SchematicMap: React.FC<SchematicMapProps> = ({
         };
       });
       
-      // 駅間をつなぐパスを生成
+      // 路線のタイプに応じてパスを生成
+      const layoutType = getRouteLayout(routeKey as RouteKey);
       let pathCommands: string[] = [];
-      schematicStations.forEach((station, index) => {
-        if (index === 0) {
-          pathCommands.push(`M ${station.x} ${station.y}`);
-        } else {
-          pathCommands.push(`L ${station.x} ${station.y}`);
-        }
-      });
+      
+      if (layoutType === 'circular' && routeKey === 'yamanote') {
+        // 山手線は円形パスで描画
+        const centerX = 400;
+        const centerY = 300;
+        const radius = 150;
+        pathCommands = [
+          `M ${centerX + radius} ${centerY}`,
+          `A ${radius} ${radius} 0 1 1 ${centerX + radius - 0.1} ${centerY}`
+        ];
+      } else {
+        // その他の路線は直線で接続
+        schematicStations.forEach((station, index) => {
+          if (index === 0) {
+            pathCommands.push(`M ${station.x} ${station.y}`);
+          } else {
+            const prevStation = schematicStations[index - 1];
+            
+            // 直線的な路線は直線で、そうでなければ曲線で接続
+            if (layoutType === 'linear') {
+              pathCommands.push(`L ${station.x} ${station.y}`);
+            } else {
+              // 曲線で接続（より自然な見た目）
+              const midX = (prevStation.x + station.x) / 2;
+              const midY = (prevStation.y + station.y) / 2;
+              pathCommands.push(`Q ${midX} ${midY} ${station.x} ${station.y}`);
+            }
+          }
+        });
+      }
       
       schematicRoutes.push({
         routeKey: routeKey as RouteKey,
