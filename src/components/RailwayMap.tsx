@@ -169,20 +169,24 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     return Math.round(baseSize * scaleFactor);
   };
 
-  const createSpecialStationIcon = useCallback((isDeparture: boolean, zoomLevel: number) => {
+  const createSpecialStationIcon = useCallback((isDeparture: boolean, zoomLevel: number, stationName: string) => {
     if (!MapComponents?.DivIcon) return null;
     
     const { DivIcon } = MapComponents;
-    const markerSize = getTimeMarkerSize(zoomLevel) * 1.8;
-    const fontSize = Math.max(14, Math.round(markerSize * 0.55));
+    const baseMarkerSize = getTimeMarkerSize(zoomLevel) * 1.8;
     const markerColor = isDeparture ? '#4CAF50' : '#F44336';
-    const markerText = isDeparture ? 'S' : 'G';
+    
+    // 駅名のみを表示（S: G: プレフィックスなし）
+    const fontSize = Math.max(12, Math.round(baseMarkerSize * 0.4));
+    const textWidth = stationName.length * fontSize * 0.6 + 16;
+    const markerWidth = Math.max(baseMarkerSize, textWidth);
+    const markerHeight = baseMarkerSize;
     
     return new DivIcon({
-      html: `<div style="background:white;border:3px solid ${markerColor};border-radius:4px;width:${markerSize}px;height:${markerSize}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};box-shadow:0 3px 6px rgba(0,0,0,0.3);position:relative;z-index:1000">${markerText}</div>`,
-      className: 'special-station-marker',
-      iconSize: [markerSize, markerSize],
-      iconAnchor: [markerSize / 2, markerSize / 2]
+      html: `<div style="background:white;border:3px solid ${markerColor};border-radius:4px;width:${markerWidth}px;height:${markerHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};box-shadow:0 3px 6px rgba(0,0,0,0.3);position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px">${stationName}</div>`,
+      className: 'special-station-marker-inline',
+      iconSize: [markerWidth, markerHeight],
+      iconAnchor: [markerWidth / 2, markerHeight / 2]
     });
   }, [MapComponents]);
 
@@ -487,7 +491,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               return null;
             }
             
-            const specialIcon = createSpecialStationIcon(isDeparture, zoomLevel);
+            const specialIcon = createSpecialStationIcon(isDeparture, zoomLevel, station.name);
             if (!specialIcon) return null;
 
             return (
@@ -621,8 +625,66 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         {displayStations.map((station, index) => {
           if (index < displayStations.length - 1 && station.timeToNext) {
             const nextStation = displayStations[index + 1];
+            const isCurrentTransfer = transferStations.has(station.name);
             
-            if (zoomLevel < 14) { // より高いズームレベルでのみ詳細表示
+            // 乗換駅間で時間をまとめる共通ロジック
+            const aggregateTimeToNextTransfer = () => {
+              let totalTime = 0;
+              let endStationIndex = index;
+              
+              for (let i = index; i < displayStations.length - 1; i++) {
+                const currentSt = displayStations[i];
+                const nextSt = displayStations[i + 1];
+                totalTime += currentSt.timeToNext || 3;
+                endStationIndex = i + 1;
+                
+                // 次の駅が乗換駅なら停止
+                if (transferStations.has(nextSt.name)) {
+                  break;
+                }
+              }
+              
+              return { totalTime, endStationIndex };
+            };
+            
+            // 乗換駅のみ表示時、または通常時でも乗換駅から次の乗換駅までをまとめる
+            if (showTransferStationsOnly || isCurrentTransfer) {
+              // 現在の駅が乗換駅でない場合はスキップ（乗換駅のみ表示時）
+              if (showTransferStationsOnly && !isCurrentTransfer) return null;
+              
+              const { totalTime, endStationIndex } = aggregateTimeToNextTransfer();
+              
+              // 隣接する駅も乗換駅の場合は通常表示
+              if (endStationIndex === index + 1) {
+                const midpoint = getMidpoint(station.lat, station.lng, nextStation.lat, nextStation.lng);
+                const timeIcon = createTimeIcon(station.timeToNext, color, zoomLevel, false);
+                if (!timeIcon) return null;
+
+                return (
+                  <Marker
+                    key={`${routeKey}-time-${index}`}
+                    position={midpoint}
+                    icon={timeIcon}
+                    zIndexOffset={500}
+                  />
+                );
+              } else {
+                // 乗換駅間の集計時間を表示
+                const midpoint = getRouteBasedMidpoint(displayStations, index, endStationIndex);
+                const timeIcon = createTimeIcon(totalTime, color, zoomLevel, true);
+                if (!timeIcon) return null;
+
+                return (
+                  <Marker
+                    key={`${routeKey}-time-transfer-${index}`}
+                    position={midpoint}
+                    icon={timeIcon}
+                    zIndexOffset={500}
+                  />
+                );
+              }
+            } else if (zoomLevel < 14) {
+              // 高いズームレベル以下では主要駅間をまとめて表示
               const isCurrentMajor = majorStations.includes(station.name);
               if (!isCurrentMajor) return null;
               
@@ -630,7 +692,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               let endIndex = index;
               let stationCount = 0;
               
-              // より多くの駅をまとめて表示
               for (let i = index; i < displayStations.length - 1; i++) {
                 const currentSt = displayStations[i];
                 const nextSt = displayStations[i + 1];
@@ -638,15 +699,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 endIndex = i + 1;
                 stationCount++;
                 
-                // 主要駅に到達するか、一定数の駅をまとめたら停止
-                if (majorStations.includes(nextSt.name) || stationCount >= 5) {
+                // 主要駅または乗換駅に到達するか、一定数の駅をまとめたら停止
+                if (majorStations.includes(nextSt.name) || transferStations.has(nextSt.name) || stationCount >= 5) {
                   break;
                 }
               }
               
               if (endIndex === index) return null;
               
-              // 路線に沿った正確な中点を計算
               const midpoint = getRouteBasedMidpoint(displayStations, index, endIndex);
               const timeIcon = createTimeIcon(totalTime, color, zoomLevel, true);
               if (!timeIcon) return null;
@@ -660,75 +720,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 />
               );
             } else {
-              // 乗換駅のみ表示時は、隠れた駅間の時間を集計する
-              if (showTransferStationsOnly) {
-                const isCurrentTransfer = transferStations.has(station.name);
-                const isNextTransfer = transferStations.has(nextStation.name);
-                
-                // 現在の駅が乗換駅でない場合はスキップ
-                if (!isCurrentTransfer) return null;
-                
-                // 次の乗換駅までの時間を集計
-                let totalTime = 0;
-                let endStationIndex = index;
-                
-                for (let i = index; i < displayStations.length - 1; i++) {
-                  const currentSt = displayStations[i];
-                  const nextSt = displayStations[i + 1];
-                  totalTime += currentSt.timeToNext || 3;
-                  endStationIndex = i + 1;
-                  
-                  // 次の駅が乗換駅なら停止
-                  if (transferStations.has(nextSt.name)) {
-                    break;
-                  }
-                }
-                
-                // 集計した時間が元の時間と同じ場合（つまり隣接駅も乗換駅）は通常表示
-                if (endStationIndex === index + 1) {
-                  const midpoint = getMidpoint(station.lat, station.lng, nextStation.lat, nextStation.lng);
-                  const timeIcon = createTimeIcon(station.timeToNext, color, zoomLevel, false);
-                  if (!timeIcon) return null;
+              // 通常の詳細表示（全ての駅間時間を表示）
+              const midpoint = getMidpoint(station.lat, station.lng, nextStation.lat, nextStation.lng);
+              const timeIcon = createTimeIcon(station.timeToNext, color, zoomLevel, false);
+              if (!timeIcon) return null;
 
-                  return (
-                    <Marker
-                      key={`${routeKey}-time-${index}`}
-                      position={midpoint}
-                      icon={timeIcon}
-                      zIndexOffset={500}
-                    />
-                  );
-                } else {
-                  // 集計した時間を表示
-                  const endStation = displayStations[endStationIndex];
-                  const midpoint = getRouteBasedMidpoint(displayStations, index, endStationIndex);
-                  const timeIcon = createTimeIcon(totalTime, color, zoomLevel, true);
-                  if (!timeIcon) return null;
-
-                  return (
-                    <Marker
-                      key={`${routeKey}-time-aggregated-${index}`}
-                      position={midpoint}
-                      icon={timeIcon}
-                      zIndexOffset={500}
-                    />
-                  );
-                }
-              } else {
-                // 通常の時間表示
-                const midpoint = getMidpoint(station.lat, station.lng, nextStation.lat, nextStation.lng);
-                const timeIcon = createTimeIcon(station.timeToNext, color, zoomLevel, false);
-                if (!timeIcon) return null;
-
-                return (
-                  <Marker
-                    key={`${routeKey}-time-${index}`}
-                    position={midpoint}
-                    icon={timeIcon}
-                    zIndexOffset={500}
-                  />
-                );
-              }
+              return (
+                <Marker
+                  key={`${routeKey}-time-${index}`}
+                  position={midpoint}
+                  icon={timeIcon}
+                  zIndexOffset={500}
+                />
+              );
             }
           }
           return null;
