@@ -73,9 +73,39 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     '巣鴨', '大塚', '目白', '新宿三丁目', '新宿御苑前', '四谷三丁目'
   ], []);
 
-  // 乗換駅を特定する（複数路線で同じ駅名を持つ駅）
-  const transferStations = useMemo(() => {
-    // 乗換駅判定は全路線を対象にする（表示中の路線のみではなく）
+  // 推薦ルートベースの乗換駅を特定
+  const recommendationTransferStations = useMemo(() => {
+    if (routeRecommendations.length === 0) return new Set<string>();
+    
+    const transferStationNames = new Set<string>();
+    
+    // 推薦ルートの乗換駅を特定
+    routeRecommendations.forEach(route => {
+      route.segments.forEach((segment, segmentIndex) => {
+        // セグメントの最初の駅（前のセグメントからの乗換駅）
+        if (segmentIndex > 0) {
+          transferStationNames.add(segment.stations[0].name);
+        }
+        
+        // セグメントの最後の駅（次のセグメントへの乗換駅）
+        if (segmentIndex < route.segments.length - 1) {
+          transferStationNames.add(segment.stations[segment.stations.length - 1].name);
+        }
+      });
+    });
+    
+    // 出発駅と到着駅も必ず表示
+    if (departure) transferStationNames.add(departure.name);
+    if (arrival) transferStationNames.add(arrival.name);
+    
+    console.log(`Recommendation-based transfer stations: ${transferStationNames.size}`);
+    console.log('Transfer stations:', Array.from(transferStationNames));
+    
+    return transferStationNames;
+  }, [routeRecommendations, departure, arrival]);
+
+  // 全路線ベースの乗換駅を特定（推薦ルートがない場合の参考用）
+  const allTransferStations = useMemo(() => {
     const stationCounts = new Map<string, Set<RouteKey>>();
     
     Object.entries(routes).forEach(([routeKey, stationList]) => {
@@ -87,7 +117,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
       });
     });
     
-    // 2路線以上で使用される駅名を乗換駅とする
     const transferStationNames = new Set<string>();
     stationCounts.forEach((routeSet, stationName) => {
       if (routeSet.size >= 2) {
@@ -95,21 +124,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
       }
     });
     
-    // デバッグ：乗換駅数をログ出力
-    console.log(`Transfer stations detected: ${transferStationNames.size} (from all ${Object.keys(routes).length} routes)`);
-    console.log('First 15 transfer stations:', Array.from(transferStationNames).slice(0, 15));
-    
-    // 全駅数もログ出力
-    const allStations = new Set<string>();
-    Object.values(routes).forEach(stationList => {
-      stationList.forEach(station => {
-        allStations.add(station.name);
-      });
-    });
-    console.log(`Total unique stations in all routes: ${allStations.size}`);
-    
     return transferStationNames;
-  }, []); // routeRecommendationsに依存しない
+  }, []);
+
+  // 使用する乗換駅セットを決定
+  const transferStations = useMemo(() => {
+    // 推薦ルートがある場合は推薦ベースの乗換駅、ない場合は全乗換駅
+    const activeTransferStations = routeRecommendations.length > 0 
+      ? recommendationTransferStations 
+      : allTransferStations;
+    
+    console.log(`Using transfer stations: ${routeRecommendations.length > 0 ? 'recommendation-based' : 'all-routes-based'} (${activeTransferStations.size} stations)`);
+    
+    return activeTransferStations;
+  }, [routeRecommendations.length, recommendationTransferStations, allTransferStations]);
 
   // アイコン作成関数をメモ化
   const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean, opacity: number = 1) => {
