@@ -32,6 +32,8 @@ import { keikyuLine } from './keikyu-line';
 import { jrMusashinoLine } from './jr-musashino-line';
 import { tokyoMonorail } from './tokyo-monorail';
 import { keiseiMainLine } from './keisei-main-line';
+import { jrYokohamaLine } from './jr-yokohama-line';
+import { yokohamaBlueLine } from './yokohama-blue-line';
 
 export const routes = {
   yamanote,
@@ -68,6 +70,8 @@ export const routes = {
   jrMusashinoLine,
   tokyoMonorail,
   keiseiMainLine,
+  jrYokohamaLine,
+  yokohamaBlueLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -107,6 +111,8 @@ export const routeColors = {
   jrMusashinoLine: '#F15A22', // JR Musashino Line orange  
   tokyoMonorail: '#0066CC', // Tokyo Monorail blue
   keiseiMainLine: '#3165B1', // Keisei Main Line blue
+  jrYokohamaLine: '#41A541', // JR Yokohama Line green
+  yokohamaBlueLine: '#0066FF', // Yokohama Blue Line blue
 };
 
 export const routeNames = {
@@ -144,4 +150,6 @@ export const routeNames = {
   jrMusashinoLine: 'JR武蔵野線',
   tokyoMonorail: '東京モノレール',
   keiseiMainLine: '京成本線',
+  jrYokohamaLine: 'JR横浜線',
+  yokohamaBlueLine: '横浜市営地下鉄ブルーライン',
 };
