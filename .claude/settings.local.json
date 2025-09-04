@@ -12,7 +12,8 @@
       "Bash(npm run build:*)",
       "WebSearch",
       "Bash(curl:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(node:*)"
     ],
     "deny": [
       "Bash(git checkout:*)",
