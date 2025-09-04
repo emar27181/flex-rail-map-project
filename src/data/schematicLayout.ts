@@ -189,6 +189,39 @@ export const createSchematicLayout = (): SchematicStationLayout => {
     }
   });
 
+  // JR横浜線（東西方向、やや南寄り）
+  const jrYokohamaLine = [
+    '東神奈川', '大口', '菊名', '新横浜', '小机', '鴨居', '中山', 
+    '十日市場', '長津田', '成瀬', '町田', '古淵', '淵野辺', '矢部', 
+    '相模原', '橋本', '相原', '八王子みなみ野', '片倉', '八王子'
+  ];
+  jrYokohamaLine.forEach((station, index) => {
+    if (!layout[station]) {
+      layout[station] = {
+        x: centerX - 200 + index * 35,
+        y: centerY + 180
+      };
+    }
+  });
+
+  // 横浜市営地下鉄ブルーライン（南北方向）
+  const yokohamaBlueLine = [
+    '湘南台', '下飯田', '立場', '中田', '踊場', '戸塚', '舞岡', 
+    '港南中央', '上永谷', '上大岡', '弘明寺', '蒔田', '吉野町', 
+    '阪東橋', '黄金町', '日ノ出町', '桜木町', '関内', '伊勢佐木長者町', 
+    '横浜', '三ツ沢下町', '三ツ沢上町', '片倉町', '岸根公園', 
+    '新横浜', '北新横浜', '新羽', '仲町台', 'センター南', 'センター北', 
+    '中川', 'あざみ野'
+  ];
+  yokohamaBlueLine.forEach((station, index) => {
+    if (!layout[station]) {
+      layout[station] = {
+        x: centerX + 300,
+        y: 50 + index * 17
+      };
+    }
+  });
+
   return layout;
 };
 
