@@ -56,9 +56,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     return Array.from(stationMap.values()).sort((a, b) => a.name.localeCompare(b.name));
   }, []);
 
-  // 主要駅5選
+  // 主要駅6選
   const majorStations = useMemo(() => {
-    const majorStationNames = ['東京', '新宿', '渋谷', '池袋', '横浜'];
+    const majorStationNames = ['東京', '新宿', '渋谷', '池袋', '横浜', '新横浜'];
     return majorStationNames
       .map(name => allStations.find(station => station.name === name))
       .filter(station => station !== undefined) as Station[];
@@ -221,7 +221,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   ))}
                   {filteredDepartureStations.length === 0 && (
                     <div style={{ padding: '8px 12px', color: '#666', fontSize: '14px' }}>
-                      {departureSearch ? '該当する駅が見つかりません' : '主要駅: 東京、新宿、渋谷、池袋、横浜'}
+                      {departureSearch ? '該当する駅が見つかりません' : '主要駅: 東京、新宿、渋谷、池袋、横浜、新横浜'}
                     </div>
                   )}
                 </div>
@@ -324,7 +324,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   ))}
                   {filteredArrivalStations.length === 0 && (
                     <div style={{ padding: '8px 12px', color: '#666', fontSize: '14px' }}>
-                      {arrivalSearch ? '該当する駅が見つかりません' : '主要駅: 東京、新宿、渋谷、池袋、横浜'}
+                      {arrivalSearch ? '該当する駅が見つかりません' : '主要駅: 東京、新宿、渋谷、池袋、横浜、新横浜'}
                     </div>
                   )}
                 </div>
