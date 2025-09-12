@@ -6,7 +6,7 @@ import RouteRecommendations from './RouteRecommendations';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
-import { RouteFinder, type RouteResult } from '../utils/routeFinder';
+import { RouteFinder, TimeFilter, type RouteResult, type StationWithTime } from '../utils/routeFinder';
 
 interface RailwayMapProps {
   className?: string;
@@ -46,7 +46,46 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   // 経路推薦設定
   const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(10);
   
+  // 時間フィルター機能
+  const [timeFilterEnabled, setTimeFilterEnabled] = useState(false);
+  const [timeFilterMaxMinutes, setTimeFilterMaxMinutes] = useState(15);
+  const [stationsWithinTime, setStationsWithinTime] = useState<StationWithTime[]>([]);
+  const [actuallyDisplayedStations, setActuallyDisplayedStations] = useState<Set<string>>(new Set());
+  
   const routeFinder = useMemo(() => new RouteFinder(), []);
+  const timeFilter = useMemo(() => new TimeFilter(routeFinder), [routeFinder]);
+
+  // 時間フィルター結果と実際表示の一致性をチェックする関数
+  const checkTimeFilterConsistency = useCallback(() => {
+    if (!timeFilterEnabled || stationsWithinTime.length === 0) return;
+    
+    const expectedStations = new Set(stationsWithinTime.map(s => s.station.name));
+    const displayedStations = actuallyDisplayedStations;
+    
+    console.log('=== Time Filter Consistency Check ===');
+    console.log(`Expected stations (${expectedStations.size}):`, Array.from(expectedStations).sort());
+    console.log(`Actually displayed stations (${displayedStations.size}):`, Array.from(displayedStations).sort());
+    
+    // 期待されているが表示されていない駅
+    const missingStations = Array.from(expectedStations).filter(station => !displayedStations.has(station));
+    if (missingStations.length > 0) {
+      console.log(`❌ Missing stations (expected but not displayed):`, missingStations);
+    }
+    
+    // 表示されているが期待されていない駅
+    const unexpectedStations = Array.from(displayedStations).filter(station => !expectedStations.has(station));
+    if (unexpectedStations.length > 0) {
+      console.log(`❌ Unexpected stations (displayed but not expected):`, unexpectedStations);
+    }
+    
+    if (missingStations.length === 0 && unexpectedStations.length === 0) {
+      console.log('✅ Perfect match! All stations are correctly filtered.');
+    } else {
+      console.log(`⚠️  Mismatch detected: ${missingStations.length} missing, ${unexpectedStations.length} unexpected`);
+    }
+    
+    console.log('=======================================');
+  }, [timeFilterEnabled, stationsWithinTime, actuallyDisplayedStations]);
 
   // 路線色から薄い背景色を生成
   const getLightBackgroundColor = useCallback((color: string): string => {
@@ -292,6 +331,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     }
   }, [departure, arrival, routeFinder, maxRouteRecommendations]);
 
+  // 時間フィルターが有効な時の駅フィルタリング（出発駅ベース）
+  useEffect(() => {
+    if (timeFilterEnabled && departure) {
+      const stationsInRange = timeFilter.findStationsWithinTime(
+        departure, 
+        timeFilterMaxMinutes,
+        visibleRoutes
+      );
+      setStationsWithinTime(stationsInRange);
+      console.log(`Time filter: Found ${stationsInRange.length} stations within ${timeFilterMaxMinutes} minutes from ${departure.name}`);
+      console.log('Stations within time range:', stationsInRange.map(s => `${s.station.name}(${s.totalTime}min)`).slice(0, 10));
+    } else {
+      setStationsWithinTime([]);
+    }
+  }, [timeFilterEnabled, departure, timeFilterMaxMinutes, visibleRoutes, timeFilter]);
+
   const toggleRoute = (routeKey: RouteKey) => {
     const newVisibleRoutes = new Set(visibleRoutes);
     if (newVisibleRoutes.has(routeKey)) {
@@ -450,6 +505,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   const renderRoute = (routeKey: RouteKey, stations: Station[]) => {
     if (!visibleRoutes.has(routeKey)) return null;
 
+    // 時間フィルター有効時に実際に表示される駅を記録するためのセット
+    const currentlyDisplayedStations = new Set<string>();
+
     let displayStations = stations;
     let displayStartIndex = 0;
     
@@ -499,6 +557,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             if (showTransferStationsOnly && !transferStations.has(station.name)) {
               console.log(`Filtering out special non-transfer station: ${station.name}`);
               return null;
+            }
+
+            // 時間フィルターが有効な場合は、範囲内の駅のみ表示
+            if (timeFilterEnabled && stationsWithinTime.length > 0) {
+              const stationWithTime = stationsWithinTime.find(sWithTime => sWithTime.station.name === station.name);
+              if (!stationWithTime) {
+                console.log(`TimeFilter: Filtering out special station ${station.name} - not in time range`);
+                return null;
+              } else {
+                console.log(`TimeFilter: Showing special station ${station.name} - ${stationWithTime.totalTime} minutes`);
+                currentlyDisplayedStations.add(station.name);
+              }
+            } else if (!timeFilterEnabled) {
+              // 時間フィルターが無効な場合は通常表示
+              currentlyDisplayedStations.add(station.name);
             }
             
             const specialIcon = createSpecialStationIcon(isDeparture, zoomLevel, station.name);
@@ -559,7 +632,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             const isTransferStation = transferStations.has(station.name);
             const shouldShowInWideView = zoomLevel >= 10 && isMajorStation; // 主要駅をより広域で表示
             
-            // デバッグ：特定の駅の情報を確認と、乗換駅でない駅の表示を記録
+            // 時間フィルターが有効な場合は、範囲内の駅のみ表示（最優先でチェック）
+            if (timeFilterEnabled && stationsWithinTime.length > 0) {
+              const stationWithTime = stationsWithinTime.find(sWithTime => sWithTime.station.name === station.name);
+              if (!stationWithTime) {
+                console.log(`TimeFilter: Filtering out station ${station.name} - not in time range`);
+                return null;
+              } else {
+                console.log(`TimeFilter: Showing station ${station.name} - ${stationWithTime.totalTime} minutes`);
+                currentlyDisplayedStations.add(station.name);
+              }
+            } else if (!timeFilterEnabled) {
+              // 時間フィルターが無効な場合は通常表示
+              currentlyDisplayedStations.add(station.name);
+            }
+
+            // 乗換駅のみ表示モード（時間フィルター後にチェック）
             if (showTransferStationsOnly && !isTransferStation) {
               console.log(`Filtering out non-transfer station: ${station.name} on ${routeKey}`);
               return null;
@@ -749,7 +837,33 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         })}
       </React.Fragment>
     );
+    
+    // 時間フィルター有効時に表示された駅のセットを更新
+    if (timeFilterEnabled && currentlyDisplayedStations.size > 0) {
+      setTimeout(() => {
+        setActuallyDisplayedStations(currentDisplayedSet => {
+          const newSet = new Set([...currentDisplayedSet, ...currentlyDisplayedStations]);
+          return newSet;
+        });
+      }, 0);
+    }
   };
+
+  // 表示された駅情報を更新するuseEffect
+  useEffect(() => {
+    if (timeFilterEnabled) {
+      // 時間フィルター設定変更時に表示駅セットをリセット
+      setActuallyDisplayedStations(new Set());
+      
+      const timer = setTimeout(() => {
+        checkTimeFilterConsistency();
+      }, 1500); // レンダリング完了後にチェック実行
+      
+      return () => clearTimeout(timer);
+    } else {
+      setActuallyDisplayedStations(new Set());
+    }
+  }, [timeFilterEnabled, departure, timeFilterMaxMinutes, visibleRoutes, checkTimeFilterConsistency]);
 
   return (
     <ErrorBoundary>
@@ -862,6 +976,105 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             }}>
               ※路線表示・乗換駅切り替えは右上の凡例から
             </div>
+          </div>
+
+          {/* 時間フィルター設定 */}
+          <div style={{ 
+            marginBottom: '10px',
+            padding: '10px',
+            border: '1px solid #e0e0e0',
+            borderRadius: '6px',
+            backgroundColor: '#f8f9fa'
+          }}>
+            <div style={{ marginBottom: '8px' }}>
+              <label style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                fontSize: '14px',
+                color: '#333',
+                cursor: 'pointer'
+              }}>
+                <input
+                  type="checkbox"
+                  checked={timeFilterEnabled}
+                  onChange={(e) => setTimeFilterEnabled(e.target.checked)}
+                  style={{ marginRight: '8px' }}
+                />
+                所要時間フィルター
+              </label>
+            </div>
+
+            {timeFilterEnabled && (
+              <div style={{ marginTop: '10px', paddingLeft: '20px' }}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '10px',
+                  marginBottom: '8px',
+                  fontSize: '13px'
+                }}>
+                  <span style={{ color: '#555' }}>基準駅:</span>
+                  <span style={{ 
+                    padding: '4px 8px',
+                    backgroundColor: departure ? '#e8f5e8' : '#f0f0f0',
+                    border: departure ? '1px solid #4CAF50' : '1px solid #ccc',
+                    borderRadius: '4px',
+                    color: departure ? '#2e7d32' : '#666',
+                    fontSize: '13px',
+                    fontWeight: 'bold'
+                  }}>
+                    {departure ? departure.name : '出発駅を設定してください'}
+                  </span>
+                </div>
+
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '10px',
+                  fontSize: '13px'
+                }}>
+                  <span style={{ color: '#555' }}>最大時間:</span>
+                  <select
+                    value={timeFilterMaxMinutes}
+                    onChange={(e) => setTimeFilterMaxMinutes(Number(e.target.value))}
+                    style={{
+                      padding: '3px 6px',
+                      borderRadius: '4px',
+                      border: '1px solid #ccc',
+                      fontSize: '13px'
+                    }}
+                    disabled={!departure}
+                  >
+                    <option value={5}>5分</option>
+                    <option value={10}>10分</option>
+                    <option value={15}>15分</option>
+                    <option value={20}>20分</option>
+                    <option value={30}>30分</option>
+                    <option value={45}>45分</option>
+                    <option value={60}>60分</option>
+                  </select>
+                  {timeFilterEnabled && departure && stationsWithinTime.length > 0 && (
+                    <span style={{ color: '#666', fontSize: '11px' }}>
+                      ({stationsWithinTime.length}駅)
+                    </span>
+                  )}
+                </div>
+                
+                {timeFilterEnabled && !departure && (
+                  <div style={{ 
+                    marginTop: '8px',
+                    padding: '6px',
+                    backgroundColor: '#fff3cd',
+                    border: '1px solid #ffeaa7',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    color: '#856404'
+                  }}>
+                    出発駅を設定すると、その駅から指定時間内にアクセス可能な駅のみが表示されます
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         <div 
           style={{

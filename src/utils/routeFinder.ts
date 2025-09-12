@@ -29,6 +29,65 @@ interface PathNode {
   transfers: number;
 }
 
+export interface StationWithTime {
+  station: Station;
+  totalTime: number;
+  routePath: RouteSegment[];
+}
+
+export class TimeFilter {
+  private routeFinder: RouteFinder;
+
+  constructor(routeFinder: RouteFinder) {
+    this.routeFinder = routeFinder;
+  }
+
+  findStationsWithinTime(baseStation: Station, maxTime: number, visibleRoutes?: Set<RouteKey>): StationWithTime[] {
+    const result: StationWithTime[] = [];
+    const visited = new Set<string>();
+
+    // 全ての駅を探索
+    Object.entries(routes).forEach(([routeKey, stations]) => {
+      // 表示路線でフィルター（指定されている場合）
+      if (visibleRoutes && !visibleRoutes.has(routeKey as RouteKey)) {
+        return;
+      }
+
+      stations.forEach(station => {
+        if (station.name === baseStation.name || visited.has(station.name)) {
+          return;
+        }
+
+        // 基準駅からこの駅への経路を探索
+        const routeResults = this.routeFinder.findRoutes(baseStation, station, 1);
+        if (routeResults.length > 0) {
+          const bestRoute = routeResults[0];
+          if (bestRoute.totalTime <= maxTime) {
+            result.push({
+              station,
+              totalTime: bestRoute.totalTime,
+              routePath: bestRoute.segments
+            });
+            visited.add(station.name);
+            console.log(`TimeFilter: ${station.name} included (${bestRoute.totalTime} min <= ${maxTime} min)`);
+          } else {
+            console.log(`TimeFilter: ${station.name} filtered out (${bestRoute.totalTime} min > ${maxTime} min)`);
+          }
+        }
+      });
+    });
+
+    // 基準駅自身も追加（0分）
+    result.push({
+      station: baseStation,
+      totalTime: 0,
+      routePath: []
+    });
+
+    return result.sort((a, b) => a.totalTime - b.totalTime);
+  }
+}
+
 export class RouteFinder {
   private stationToRoutes: Map<string, StationNode[]> = new Map();
 
