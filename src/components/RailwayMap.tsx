@@ -13,6 +13,8 @@ interface RailwayMapProps {
 }
 
 const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
+  console.log('RailwayMap component initialized');
+  
   const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
   const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -306,46 +308,71 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
       setRouteRecommendations(routeResults);
       setSelectedRoute(null);
       
-      // 推薦路線で使用される全ての路線を表示
-      const usedRouteKeys = new Set<RouteKey>();
-      routeResults.forEach(route => {
-        route.segments.forEach(segment => {
-          usedRouteKeys.add(segment.routeKey);
-        });
-      });
-      
       // デバッグ：推薦された経路の詳細をログ出力
       console.log(`Route recommendations for ${departure.name} → ${arrival.name}:`);
       routeResults.forEach((route, index) => {
         const routeDescription = route.segments.map(seg => seg.routeName).join(' → ');
         console.log(`${index + 1}: ${routeDescription} (${route.totalTime}分, ${route.transfers}回乗換)`);
       });
-      console.log(`Used routes: ${Array.from(usedRouteKeys).join(', ')}`);
       
-      setVisibleRoutes(usedRouteKeys);
+      // visibleRoutesの制御は時間フィルターのuseEffectで行う
     } else {
       setRouteRecommendations([]);
       setSelectedRoute(null);
-      // 出発駅・到着駅がない場合は全路線を表示
-      setVisibleRoutes(new Set(Object.keys(routes) as RouteKey[]));
     }
   }, [departure, arrival, routeFinder, maxRouteRecommendations]);
 
   // 時間フィルターが有効な時の駅フィルタリング（出発駅ベース）
   useEffect(() => {
     if (timeFilterEnabled && departure) {
+      // 時間フィルター有効時は全路線を対象とする
+      const allRoutes = new Set(Object.keys(routes) as RouteKey[]);
       const stationsInRange = timeFilter.findStationsWithinTime(
         departure, 
         timeFilterMaxMinutes,
-        visibleRoutes
+        allRoutes
       );
       setStationsWithinTime(stationsInRange);
       console.log(`Time filter: Found ${stationsInRange.length} stations within ${timeFilterMaxMinutes} minutes from ${departure.name}`);
       console.log('Stations within time range:', stationsInRange.map(s => `${s.station.name}(${s.totalTime}min)`).slice(0, 10));
+      
+      // 時間フィルター有効時は全路線を表示対象とする
+      setVisibleRoutes(allRoutes);
     } else {
       setStationsWithinTime([]);
+      // 時間フィルター無効時は元のロジックに戻る
+      if (departure && arrival) {
+        // 推薦経路がある場合はそれに基づく
+        const routeResults = routeFinder.findRoutes(departure, arrival, maxRouteRecommendations);
+        const usedRouteKeys = new Set<RouteKey>();
+        routeResults.forEach(route => {
+          route.segments.forEach(segment => {
+            usedRouteKeys.add(segment.routeKey);
+          });
+        });
+        setVisibleRoutes(usedRouteKeys);
+      } else {
+        // 出発駅・到着駅がない場合は全路線を表示
+        setVisibleRoutes(new Set(Object.keys(routes) as RouteKey[]));
+      }
     }
-  }, [timeFilterEnabled, departure, timeFilterMaxMinutes, visibleRoutes, timeFilter]);
+  }, [timeFilterEnabled, departure, timeFilterMaxMinutes, routeFinder, maxRouteRecommendations, arrival, timeFilter]);
+
+  // 表示された駅情報を更新するuseEffect
+  useEffect(() => {
+    if (timeFilterEnabled) {
+      // 時間フィルター設定変更時に表示駅セットをリセット
+      setActuallyDisplayedStations(new Set());
+      
+      const timer = setTimeout(() => {
+        checkTimeFilterConsistency();
+      }, 1500); // レンダリング完了後にチェック実行
+      
+      return () => clearTimeout(timer);
+    } else {
+      setActuallyDisplayedStations(new Set());
+    }
+  }, [timeFilterEnabled, departure, timeFilterMaxMinutes, visibleRoutes, checkTimeFilterConsistency]);
 
   const toggleRoute = (routeKey: RouteKey) => {
     const newVisibleRoutes = new Set(visibleRoutes);
@@ -452,6 +479,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
 
 
   if (!isClient || isLoading || !MapComponents) {
+    console.log('RailwayMap loading state:', { isClient, isLoading, MapComponents: !!MapComponents });
     return (
       <div style={{ 
         height: '600px', 
@@ -469,10 +497,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             Loading: {isLoading ? 'Yes' : 'No'}, 
             Components: {MapComponents ? 'OK' : 'Loading'}
           </div>
+          <div style={{ fontSize: '12px', color: '#999', marginTop: '10px' }}>
+            Window: {typeof window !== 'undefined' ? 'Available' : 'Not Available'}
+          </div>
         </div>
       </div>
     );
   }
+
+  console.log('RailwayMap rendering main component');
 
   const { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, DivIcon } = MapComponents;
   const tokyoStation = [35.6812, 139.7671];
@@ -563,14 +596,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             if (timeFilterEnabled && stationsWithinTime.length > 0) {
               const stationWithTime = stationsWithinTime.find(sWithTime => sWithTime.station.name === station.name);
               if (!stationWithTime) {
-                console.log(`TimeFilter: Filtering out special station ${station.name} - not in time range`);
                 return null;
-              } else {
-                console.log(`TimeFilter: Showing special station ${station.name} - ${stationWithTime.totalTime} minutes`);
-                currentlyDisplayedStations.add(station.name);
               }
-            } else if (!timeFilterEnabled) {
-              // 時間フィルターが無効な場合は通常表示
+              currentlyDisplayedStations.add(station.name);
+            }
+
+            // 時間フィルターが無効な場合は通常表示
+            if (!timeFilterEnabled) {
               currentlyDisplayedStations.add(station.name);
             }
             
@@ -632,25 +664,26 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             const isTransferStation = transferStations.has(station.name);
             const shouldShowInWideView = zoomLevel >= 10 && isMajorStation; // 主要駅をより広域で表示
             
-            // 時間フィルターが有効な場合は、範囲内の駅のみ表示（最優先でチェック）
+            // 時間フィルターが有効な場合は最優先でチェック
             if (timeFilterEnabled && stationsWithinTime.length > 0) {
               const stationWithTime = stationsWithinTime.find(sWithTime => sWithTime.station.name === station.name);
               if (!stationWithTime) {
-                console.log(`TimeFilter: Filtering out station ${station.name} - not in time range`);
+                // 時間範囲外の駅は表示しない
                 return null;
-              } else {
-                console.log(`TimeFilter: Showing station ${station.name} - ${stationWithTime.totalTime} minutes`);
-                currentlyDisplayedStations.add(station.name);
               }
-            } else if (!timeFilterEnabled) {
-              // 時間フィルターが無効な場合は通常表示
+              // 時間範囲内の駅は記録
               currentlyDisplayedStations.add(station.name);
+              console.log(`TimeFilter: Showing station ${station.name} - ${stationWithTime.totalTime} minutes`);
             }
 
-            // 乗換駅のみ表示モード（時間フィルター後にチェック）
+            // 乗換駅のみ表示モード（時間フィルター有効時でも適用）
             if (showTransferStationsOnly && !isTransferStation) {
-              console.log(`Filtering out non-transfer station: ${station.name} on ${routeKey}`);
               return null;
+            }
+
+            // 時間フィルターが無効な場合は通常表示
+            if (!timeFilterEnabled) {
+              currentlyDisplayedStations.add(station.name);
             }
             
             // 乗換駅のみ表示時に表示される駅をログ
@@ -849,21 +882,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     }
   };
 
-  // 表示された駅情報を更新するuseEffect
-  useEffect(() => {
-    if (timeFilterEnabled) {
-      // 時間フィルター設定変更時に表示駅セットをリセット
-      setActuallyDisplayedStations(new Set());
-      
-      const timer = setTimeout(() => {
-        checkTimeFilterConsistency();
-      }, 1500); // レンダリング完了後にチェック実行
-      
-      return () => clearTimeout(timer);
-    } else {
-      setActuallyDisplayedStations(new Set());
-    }
-  }, [timeFilterEnabled, departure, timeFilterMaxMinutes, visibleRoutes, checkTimeFilterConsistency]);
 
   return (
     <ErrorBoundary>
