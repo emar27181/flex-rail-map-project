@@ -800,9 +800,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         {isRouteToggleExpanded && (
         <div>
           <div style={{ marginBottom: '10px' }}>
-            <label style={{ 
+            <div style={{ 
               display: 'flex', 
               alignItems: 'center', 
+              gap: '10px',
               fontSize: '14px',
               color: '#333'
             }}>
@@ -823,7 +824,37 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 <option value={15}>15件</option>
                 <option value={20}>20件</option>
               </select>
-            </label>
+              <button 
+                onClick={selectAllRoutes}
+                style={{ 
+                  padding: '6px 12px',
+                  fontSize: '12px',
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                全表示
+              </button>
+              <button 
+                onClick={deselectAllRoutes}
+                style={{ 
+                  padding: '6px 12px',
+                  fontSize: '12px',
+                  backgroundColor: '#dc3545',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                全非表示
+              </button>
+            </div>
             <div style={{ 
               fontSize: '11px', 
               color: '#666', 
@@ -905,6 +936,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             );
           })}
         </div>
+        
         <div style={{ 
           fontSize: '12px', 
           color: '#666', 
