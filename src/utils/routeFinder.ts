@@ -406,55 +406,105 @@ export class RouteFinder {
     }
 
     const diverseResults: RouteResult[] = [];
-    const seenRoutePatterns = new Set<string>();
+    const seenRouteSignatures = new Set<string>();
 
-    // ユニークな路線パターンを識別するための関数
-    const getRoutePattern = (result: RouteResult): string => {
-      return result.segments
-        .filter(seg => seg.routeKey !== 'walking') // 歩行乗換は無視
-        .map(seg => seg.routeKey)
-        .join('-');
+    // より詳細なルート識別のための関数（乗り換え駅も含む）
+    const getRouteSignature = (result: RouteResult): string => {
+      // 歩行乗換以外のセグメントで、路線 + 経由駅のパターンを作成
+      const segments = result.segments.filter(seg => seg.routeKey !== 'walking');
+
+      const signature = segments.map((seg, index) => {
+        const startStation = seg.stations[0]?.name || '';
+        const endStation = seg.stations[seg.stations.length - 1]?.name || '';
+
+        // 最初のセグメント以外は乗り換え駅から始まる
+        if (index > 0) {
+          return `${seg.routeKey}:${startStation}→${endStation}`;
+        } else {
+          return `${seg.routeKey}:${startStation}→${endStation}`;
+        }
+      }).join('|');
+
+      return signature;
     };
 
-    // 段階的にルートを追加
-    // 1. 各ユニークな路線パターンから最良のものを選択
-    results.forEach(result => {
-      const pattern = getRoutePattern(result);
+    // デバッグ: 全ルートのシグネチャを出力
+    console.log(`\n=== Route Signatures Analysis ===`);
+    results.forEach((result, index) => {
+      const signature = getRouteSignature(result);
+      const routeDescription = result.segments
+        .filter(seg => seg.routeKey !== 'walking')
+        .map(seg => `${seg.routeName || seg.routeKey}(${seg.stations[0]?.name}→${seg.stations[seg.stations.length - 1]?.name})`)
+        .join(' → ');
+      console.log(`Route ${index + 1}: ${signature}`);
+      console.log(`  Description: ${routeDescription}`);
+      console.log(`  Time: ${result.totalTime}min, Transfers: ${result.transfers}`);
+    });
 
-      if (!seenRoutePatterns.has(pattern) && diverseResults.length < maxResults) {
+    // 段階的にルートを追加
+    // 1. 各ユニークなルートシグネチャから最良のものを選択
+    results.forEach((result, index) => {
+      const signature = getRouteSignature(result);
+
+      if (!seenRouteSignatures.has(signature) && diverseResults.length < maxResults) {
         diverseResults.push(result);
-        seenRoutePatterns.add(pattern);
-        console.log(`Added unique pattern: ${pattern} (${result.totalTime}min, ${result.transfers} transfers)`);
+        seenRouteSignatures.add(signature);
+
+        const routeDescription = result.segments
+          .filter(seg => seg.routeKey !== 'walking')
+          .map(seg => `${seg.routeName || seg.routeKey}(${seg.stations[0]?.name}→${seg.stations[seg.stations.length - 1]?.name})`)
+          .join(' → ');
+        console.log(`✅ Added unique route ${diverseResults.length}: ${routeDescription} (${result.totalTime}min, ${result.transfers} transfers)`);
+      } else {
+        if (seenRouteSignatures.has(signature)) {
+          console.log(`❌ Skipped duplicate route ${index + 1}: signature already seen`);
+        }
       }
     });
 
-    // 2. まだ上限に達していない場合、実質的に異なるルートを追加
+    // 2. 非常に厳しい条件でのみ、実質的に異なるルートを追加
     if (diverseResults.length < maxResults) {
       const remainingRoutes = results.filter(result => {
-        // 既に追加されたルートと実質的に同じかチェック
-        return !diverseResults.some(existing =>
-          this.areRoutesEssentiallySame(existing, result)
-        );
+        const signature = getRouteSignature(result);
+        return !seenRouteSignatures.has(signature);
       });
 
       remainingRoutes.forEach(result => {
         if (diverseResults.length >= maxResults) return;
 
-        // 追加する価値があるかチェック（時間差が5分以上、または乗換回数が異なる）
-        const hasValue = diverseResults.every(existing => {
+        // 既存のルートと大幅に異なる場合のみ追加（10分以上の差、または明らかに異なる経路）
+        const hasSignificantValue = diverseResults.every(existing => {
           const timeDiff = Math.abs(existing.totalTime - result.totalTime);
           const transferDiff = Math.abs(existing.transfers - result.transfers);
-          return timeDiff >= 5 || transferDiff > 0;
+          const isDifferentPath = !this.areRoutesEssentiallySame(existing, result);
+
+          return (timeDiff >= 10 || transferDiff > 0) && isDifferentPath;
         });
 
-        if (hasValue) {
+        if (hasSignificantValue) {
+          const signature = getRouteSignature(result);
+          seenRouteSignatures.add(signature);
           diverseResults.push(result);
-          console.log(`Added diverse route: ${getRoutePattern(result)} (${result.totalTime}min, ${result.transfers} transfers)`);
+
+          const routeDescription = result.segments
+            .filter(seg => seg.routeKey !== 'walking')
+            .map(seg => `${seg.routeName || seg.routeKey}(${seg.stations[0]?.name}→${seg.stations[seg.stations.length - 1]?.name})`)
+            .join(' → ');
+          console.log(`✅ Added significantly different route: ${routeDescription} (${result.totalTime}min, ${result.transfers} transfers)`);
         }
       });
     }
 
-    console.log(`Route diversification: ${results.length} → ${diverseResults.length} unique patterns`);
+    console.log(`\n=== Final Results ===`);
+    console.log(`Route diversification: ${results.length} → ${diverseResults.length} unique routes`);
+    diverseResults.forEach((result, index) => {
+      const routeDescription = result.segments
+        .filter(seg => seg.routeKey !== 'walking')
+        .map(seg => `${seg.routeName || seg.routeKey}(${seg.stations[0]?.name}→${seg.stations[seg.stations.length - 1]?.name})`)
+        .join(' → ');
+      console.log(`Final ${index + 1}: ${routeDescription} (${result.totalTime}min, ${result.transfers} transfers)`);
+    });
+
     return diverseResults;
   }
 

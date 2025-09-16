@@ -53,7 +53,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   const [mapViewMode, setMapViewMode] = useState<'realistic' | 'schematic'>('realistic');
 
   // 経路推薦設定
-  const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(10);
+  const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(5);
 
   // 時間フィルター機能
   const [timeFilterEnabled, setTimeFilterEnabled] = useState(false);
@@ -1191,11 +1191,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                       fontSize: '14px'
                     }}
                   >
+                    <option value={1}>1件</option>
+                    <option value={2}>2件</option>
                     <option value={3}>3件</option>
                     <option value={5}>5件</option>
-                    <option value={10}>10件</option>
-                    <option value={15}>15件</option>
-                    <option value={20}>20件</option>
                   </select>
                   <button
                     onClick={selectAllRoutes}
