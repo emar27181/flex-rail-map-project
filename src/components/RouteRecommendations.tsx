@@ -150,12 +150,12 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                     }}>
                       <div style={{
                         padding: '3px 8px',
-                        backgroundColor: '#ff9800',
+                        backgroundColor: segment.isWalkingTransfer ? '#4CAF50' : '#ff9800',
                         color: 'white',
                         borderRadius: '10px',
                         fontSize: '11px'
                       }}>
-                        乗換
+                        {segment.isWalkingTransfer ? '徒歩乗換' : '乗換'}
                       </div>
                     </div>
                   )}
@@ -177,14 +177,21 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                       <div style={{
                         width: '16px',
                         height: '16px',
-                        backgroundColor: routeColors[segment.routeKey],
+                        backgroundColor: segment.isWalkingTransfer ? '#4CAF50' : routeColors[segment.routeKey],
                         borderRadius: '50%',
-                        flexShrink: 0
-                      }} />
+                        flexShrink: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '10px',
+                        color: 'white'
+                      }}>
+                        {segment.isWalkingTransfer ? '🚶' : ''}
+                      </div>
                       <span style={{
                         fontSize: '14px',
                         fontWeight: '500',
-                        color: routeColors[segment.routeKey]
+                        color: segment.isWalkingTransfer ? '#4CAF50' : routeColors[segment.routeKey]
                       }}>
                         {segment.routeName}
                       </span>

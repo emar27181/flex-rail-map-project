@@ -1,5 +1,6 @@
 import { routes, type RouteKey, routeNames } from '../data/routes';
 import type { Station } from '../data/yamanote';
+import { getWalkingTransferStations, getWalkingTime } from '../data/walkingTransfers';
 
 export interface RouteSegment {
   routeKey: RouteKey;
@@ -8,6 +9,8 @@ export interface RouteSegment {
   startIndex: number;
   endIndex: number;
   time: number;
+  isWalkingTransfer?: boolean;
+  walkingTime?: number;
 }
 
 export interface RouteResult {
@@ -182,6 +185,9 @@ export class RouteFinder {
       });
     });
 
+    // Find direct walking transfer routes
+    this.findDirectWalkingRoutes(departure, arrival, allResults);
+
     // Find one-transfer routes
     this.findTransferRoutes(departureNodes, arrival, allResults, 1);
 
@@ -197,6 +203,52 @@ export class RouteFinder {
     const diverseResults = this.diversifyRoutes(uniqueResults, maxResults);
 
     return diverseResults;
+  }
+
+  private findDirectWalkingRoutes(departure: Station, arrival: Station, results: RouteResult[]) {
+    // 出発駅から歩行乗換可能な駅への直接歩行ルートを探索
+    const walkingTransfers = getWalkingTransferStations(departure.name);
+    
+    walkingTransfers.forEach(walkTransfer => {
+      const walkTargetStation = walkTransfer.station1 === departure.name 
+        ? walkTransfer.station2 
+        : walkTransfer.station1;
+      
+      // 歩行先の駅から到着駅への直接ルートがあるかチェック
+      const walkTargetNodes = this.stationToRoutes.get(walkTargetStation) || [];
+      const arrivalNodes = this.stationToRoutes.get(arrival.name) || [];
+      
+      walkTargetNodes.forEach(walkNode => {
+        arrivalNodes.forEach(arrivalNode => {
+          if (walkNode.routeKey === arrivalNode.routeKey) {
+            // 歩行 + 1路線での直接ルート
+            const trainSegment = this.createRouteSegment(
+              walkNode.routeKey,
+              routes[walkNode.routeKey],
+              walkNode.index,
+              arrivalNode.index
+            );
+            
+            const walkingSegment: RouteSegment = {
+              routeKey: 'walking' as RouteKey,
+              routeName: `徒歩 (${walkTransfer.description || ''})`,
+              stations: [departure, { name: walkTargetStation, lat: 0, lng: 0 }],
+              startIndex: 0,
+              endIndex: 1,
+              time: walkTransfer.walkingTime,
+              isWalkingTransfer: true,
+              walkingTime: walkTransfer.walkingTime
+            };
+            
+            results.push({
+              segments: [walkingSegment, trainSegment],
+              totalTime: walkTransfer.walkingTime + trainSegment.time,
+              transfers: 1
+            });
+          }
+        });
+      });
+    });
   }
 
   private findTransferRoutes(
@@ -265,6 +317,7 @@ export class RouteFinder {
 
             // Look for transfer opportunities
             if (current.transfers < maxTransfers) {
+              // 通常の乗換
               const transferNodes = this.stationToRoutes.get(nextStation.name) || [];
               transferNodes.forEach(transferNode => {
                 if (transferNode.routeKey !== current.node.routeKey) {
@@ -279,6 +332,30 @@ export class RouteFinder {
                     visited.add(transferKey);
                   }
                 }
+              });
+
+              // 歩行乗換の検索
+              const walkingTransfers = getWalkingTransferStations(nextStation.name);
+              walkingTransfers.forEach(walkTransfer => {
+                const walkTargetStation = walkTransfer.station1 === nextStation.name 
+                  ? walkTransfer.station2 
+                  : walkTransfer.station1;
+                
+                const walkTargetNodes = this.stationToRoutes.get(walkTargetStation) || [];
+                walkTargetNodes.forEach(walkTargetNode => {
+                  if (walkTargetNode.routeKey !== current.node.routeKey) {
+                    const walkTransferKey = `${walkTargetNode.station.name}-${walkTargetNode.routeKey}`;
+                    if (!visited.has(walkTransferKey)) {
+                      queue.push({
+                        node: walkTargetNode,
+                        path: newPath,
+                        totalTime: newTotalTime + walkTransfer.walkingTime + 2, // 歩行時間 + 少しの余裕
+                        transfers: current.transfers + 1
+                      });
+                      visited.add(walkTransferKey);
+                    }
+                  }
+                });
               });
             }
           }
