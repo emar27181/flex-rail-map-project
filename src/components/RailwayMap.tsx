@@ -14,7 +14,7 @@ interface RailwayMapProps {
 }
 
 const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
-  console.log('RailwayMap component initialized');
+  // console.log('RailwayMap component initialized');
   
   const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
   const [isClient, setIsClient] = useState(false);
@@ -60,6 +60,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   const [clickedRoute, setClickedRoute] = useState<string | null>(null);
   const [routePopupPosition, setRoutePopupPosition] = useState<{x: number, y: number} | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{x: number, y: number} | null>(null);
+
+  // デバッグ用
+  useEffect(() => {
+    console.log('🟢🟢🟢 clickedRoute changed:', clickedRoute);
+  }, [clickedRoute]);
+
+  useEffect(() => {
+    console.log('🟢🟢🟢 routePopupPosition changed:', routePopupPosition);
+  }, [routePopupPosition]);
   
   const routeFinder = useMemo(() => new RouteFinder(), []);
   const timeFilter = useMemo(() => new TimeFilter(routeFinder), [routeFinder]);
@@ -94,7 +103,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     }
     
     console.log('=======================================');
-  }, [timeFilterEnabled, stationsWithinTime, actuallyDisplayedStations]);
+  }, [timeFilterEnabled, stationsWithinTime]);
 
   // 路線色から薄い背景色を生成
   const getLightBackgroundColor = useCallback((color: string): string => {
@@ -379,7 +388,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     } else {
       setActuallyDisplayedStations(new Set());
     }
-  }, [timeFilterEnabled, departure, timeFilterMaxMinutes, visibleRoutes, checkTimeFilterConsistency]);
+  }, [timeFilterEnabled, departure, timeFilterMaxMinutes, visibleRoutes]);
 
   const toggleRoute = (routeKey: RouteKey) => {
     const newVisibleRoutes = new Set(visibleRoutes);
@@ -525,7 +534,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     );
   }
 
-  console.log('RailwayMap rendering main component');
+  // console.log('RailwayMap rendering main component');
 
   const { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, DivIcon } = MapComponents;
   const tokyoStation = [35.6812, 139.7671];
@@ -612,19 +621,33 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
           opacity={visibleRoutes.has(routeKey) ? 0.8 : 0.2}
           eventHandlers={{
             click: (e) => {
+              console.log('🔴🔴🔴 ROUTE CLICKED:', routeKey);
               const { latlng } = e;
+              console.log('🔴 Click position:', latlng);
               const point = mapRef.current?.latLngToContainerPoint(latlng);
+              console.log('🔴 Map ref exists:', !!mapRef.current);
+              console.log('🔴 Container point:', point);
               if (point) {
                 setClickedRoute(routeKey);
                 setRoutePopupPosition({ x: point.x, y: point.y });
+                console.log('🔴 Popup position set:', { x: point.x, y: point.y });
+              } else {
+                // Fallbackとして画面中央に表示
+                setClickedRoute(routeKey);
+                setRoutePopupPosition({ x: 400, y: 300 });
+                console.log('🔴 Using fallback position');
               }
             },
             mouseover: (e) => {
+              console.log('Route hovered:', routeKey);
               setHoveredRoute(routeKey);
               const { latlng } = e;
               const point = mapRef.current?.latLngToContainerPoint(latlng);
               if (point) {
                 setHoverTooltipPosition({ x: point.x, y: point.y });
+                console.log('Hover tooltip position set:', { x: point.x, y: point.y });
+              } else {
+                console.log('No container point for hover');
               }
             },
             mouseout: () => {
@@ -740,10 +763,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               currentlyDisplayedStations.add(station.name);
             }
             
-            // 乗換駅のみ表示時に表示される駅をログ
-            if (showTransferStationsOnly && isTransferStation) {
-              console.log(`Showing transfer station: ${station.name} on ${routeKey}`);
-            }
+            // 乗換駅のみ表示時に表示される駅をログ（コメントアウト - ノイズを削減）
+            // if (showTransferStationsOnly && isTransferStation) {
+            //   console.log(`Showing transfer station: ${station.name} on ${routeKey}`);
+            // }
             
             // 十分拡大している場合はすべての駅を表示（但し乗換駅フィルターは維持）
             if (shouldShowAllStations) {
@@ -1149,6 +1172,48 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 )}
               </div>
             )}
+            
+            {/* デバッグ用テストボタン */}
+            <div style={{ marginTop: '15px', padding: '10px', backgroundColor: '#f8f9fa', border: '1px solid #dee2e6', borderRadius: '5px' }}>
+              <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>デバッグテスト</div>
+              <button
+                onClick={() => {
+                  setClickedRoute('yamanote');
+                  setRoutePopupPosition({ x: 300, y: 150 });
+                  console.log('🟠🟠🟠 TEST BUTTON CLICKED - Setting popup for yamanote at x:300, y:150');
+                }}
+                style={{
+                  padding: '8px 12px',
+                  backgroundColor: '#007bff',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  marginRight: '10px'
+                }}
+              >
+                テスト山手線ポップアップ
+              </button>
+              <button
+                onClick={() => {
+                  setClickedRoute('chuo-rapid');
+                  setRoutePopupPosition({ x: 200, y: 100 });
+                  console.log('🟠🟠🟠 TEST BUTTON 2 CLICKED - Setting popup for chuo-rapid at x:200, y:100');
+                }}
+                style={{
+                  padding: '8px 12px',
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px'
+                }}
+              >
+                テスト中央線ポップアップ
+              </button>
+            </div>
           </div>
         <div 
           style={{
@@ -1696,20 +1761,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         {hoveredRoute && hoverTooltipPosition && (
           <div
             style={{
-              position: 'absolute',
+              position: 'fixed',
               left: `${hoverTooltipPosition.x}px`,
               top: `${hoverTooltipPosition.y}px`,
               backgroundColor: 'rgba(0, 0, 0, 0.9)',
               color: 'white',
-              padding: '8px 12px',
-              borderRadius: '6px',
+              padding: '10px 15px',
+              borderRadius: '8px',
               fontSize: '14px',
-              zIndex: 1001,
+              zIndex: 9998,
               transform: 'translate(-50%, -100%)',
               marginTop: '-10px',
               whiteSpace: 'nowrap',
               pointerEvents: 'none',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
               border: '1px solid rgba(255,255,255,0.2)'
             }}
           >
@@ -1725,30 +1790,117 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>
                   {getRouteDestination(hoveredRoute)?.description || routeNames[hoveredRoute as RouteKey] || hoveredRoute}
                 </div>
-                <div style={{ fontSize: '12px', opacity: 0.9 }}>
-                  {getRouteDestination(hoveredRoute)?.destinations.join(' ⇔ ') || 'クリックで詳細'}
-                </div>
+                
+                {/* 推薦経路でのこの路線の区間情報を表示 */}
+                {departure && arrival && routeRecommendations.length > 0 && (() => {
+                  // 推薦経路からホバー中の路線のセグメントを探す
+                  for (const recommendation of routeRecommendations) {
+                    for (const segment of recommendation.segments) {
+                      if (segment.routeKey === hoveredRoute) {
+                        const fromStation = segment.fromStation;
+                        const toStation = segment.toStation;
+                        const direction = getDirectionText(hoveredRoute, fromStation, toStation);
+                        
+                        // 行き先表示の決定
+                        let destinationText = '';
+                        if (direction && direction !== '') {
+                          destinationText = direction;
+                        } else if (toStation && toStation !== '') {
+                          destinationText = `${toStation}行き`;
+                        } else {
+                          // 路線の終点駅情報から取得
+                          const routeDestination = getRouteDestination(hoveredRoute);
+                          destinationText = routeDestination?.destinations.join(' ⇔ ') || '方面';
+                        }
+                        
+                        return (
+                          <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                            <div>区間: {fromStation} → {toStation}</div>
+                            <div style={{ color: '#90EE90' }}>
+                              {destinationText}
+                            </div>
+                          </div>
+                        );
+                      }
+                    }
+                  }
+                  
+                  // 推薦経路に含まれていない場合は全体の出発駅・到着駅を表示
+                  const direction = getDirectionText(hoveredRoute, departure.name, arrival.name);
+                  return direction ? (
+                    <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                      <div>{departure.name} から</div>
+                      <div style={{ color: '#90EE90' }}>{direction}</div>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                      {departure && arrival ? 
+                        `出発駅: ${departure.name}, ${arrival.name}行き` : 
+                        getRouteDestination(hoveredRoute)?.destinations.join(' ⇔ ') || ''
+                      }
+                    </div>
+                  );
+                })()}
+                
+                {/* 出発駅・到着駅が未設定の場合 */}
+                {(!departure || !arrival) && (() => {
+                  const routeDestination = getRouteDestination(hoveredRoute);
+                  if (routeDestination) {
+                    // 出発駅のみ設定されている場合
+                    if (departure && !arrival) {
+                      const direction = getDirectionText(hoveredRoute, departure.name, '');
+                      return (
+                        <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                          出発駅: {departure.name}, {direction || `${routeDestination.destinations.join(' または ')}`}
+                        </div>
+                      );
+                    }
+                    // 到着駅のみ設定されている場合
+                    else if (arrival && !departure) {
+                      return (
+                        <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                          {arrival.name}行き
+                        </div>
+                      );
+                    }
+                    // どちらも未設定の場合は両端駅を表示
+                    else {
+                      return (
+                        <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                          {routeDestination.destinations.join(' ⇔ ')}
+                        </div>
+                      );
+                    }
+                  }
+                  return null;
+                })()}
               </div>
             </div>
           </div>
         )}
 
         {/* 路線情報ポップアップ */}
-        {clickedRoute && routePopupPosition && (
+        {clickedRoute && routePopupPosition && (() => {
+          console.log('🔵🔵🔵 RENDERING POPUP:', clickedRoute, 'position:', routePopupPosition);
+          console.log('🔵 Popup should be visible at:', `left: ${routePopupPosition.x}px, top: ${routePopupPosition.y}px`);
+          return (
           <div
+            id="route-popup-debug"
             style={{
-              position: 'absolute',
+              position: 'fixed',
               left: `${routePopupPosition.x}px`,
               top: `${routePopupPosition.y}px`,
-              backgroundColor: 'white',
-              border: '2px solid #333',
-              borderRadius: '6px',
-              padding: '10px',
-              boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
-              zIndex: 1000,
-              minWidth: '200px',
+              backgroundColor: 'yellow',
+              border: '5px solid #ff0000',
+              borderRadius: '8px',
+              padding: '20px',
+              boxShadow: '0 8px 16px rgba(0,0,0,0.8)',
+              zIndex: 99999,
+              minWidth: '300px',
               transform: 'translate(-50%, -100%)',
-              marginTop: '-10px'
+              marginTop: '-20px',
+              fontSize: '16px',
+              fontWeight: 'bold'
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -1796,36 +1948,45 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 </div>
               </div>
               
-              <div style={{
-                fontSize: '14px',
-                color: '#666',
-                marginBottom: '8px'
-              }}>
-                <strong>行先:</strong> {getRouteDestination(clickedRoute)?.destinations.join(' ⇔ ') || '情報なし'}
-              </div>
+              {/* 出発駅と行先のみ表示 */}
+              {departure && arrival && (() => {
+                const direction = getDirectionText(clickedRoute, departure.name, arrival.name);
+                return (
+                  <div style={{
+                    fontSize: '14px',
+                    color: '#333',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ marginBottom: '4px' }}>
+                      <strong>{departure.name}</strong> から
+                    </div>
+                    {direction && (
+                      <div style={{ 
+                        fontSize: '16px', 
+                        color: '#4CAF50',
+                        fontWeight: 'bold' 
+                      }}>
+                        {direction}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
               
-              <button
-                onClick={() => {
-                  toggleRoute(clickedRoute as RouteKey);
-                  handleRoutePopupClose();
-                }}
-                style={{
-                  width: '100%',
-                  padding: '6px 12px',
-                  backgroundColor: visibleRoutes.has(clickedRoute as RouteKey) ? '#ff4444' : '#4CAF50',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  marginTop: '8px'
-                }}
-              >
-                {visibleRoutes.has(clickedRoute as RouteKey) ? '路線を非表示' : '路線を表示'}
-              </button>
+              {/* 出発駅や到着駅が設定されていない場合 */}
+              {(!departure || !arrival) && (
+                <div style={{
+                  fontSize: '14px',
+                  color: '#666',
+                  textAlign: 'center'
+                }}>
+                  <strong>行先:</strong> {getRouteDestination(clickedRoute)?.destinations.join(' ⇔ ') || '情報なし'}
+                </div>
+              )}
             </div>
           </div>
-        )}
+          );
+        })()}
       </div>
     </div>
     </ErrorBoundary>
