@@ -159,7 +159,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setShowDepartureResults(true);
                   }}
                   onFocus={() => setShowDepartureResults(true)}
-                  placeholder="駅名を入力"
+                  placeholder={departure ? departure.name : "駅名を入力"}
                   style={{
                     width: '100%',
                     padding: '8px 30px 8px 8px',
@@ -262,7 +262,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setShowArrivalResults(true);
                   }}
                   onFocus={() => setShowArrivalResults(true)}
-                  placeholder="駅名を入力"
+                  placeholder={arrival ? arrival.name : "駅名を入力"}
                   style={{
                     width: '100%',
                     padding: '8px 30px 8px 8px',
