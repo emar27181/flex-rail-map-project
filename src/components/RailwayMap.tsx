@@ -1787,20 +1787,26 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               border: '1px solid rgba(255,255,255,0.2)'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               <div style={{
-                width: '14px',
-                height: '14px',
+                width: '16px',
+                height: '16px',
                 backgroundColor: routeColors[hoveredRoute] || '#666',
                 borderRadius: '50%',
-                border: '1px solid rgba(255,255,255,0.3)'
+                border: '1px solid rgba(255,255,255,0.3)',
+                flexShrink: 0
               }} />
-              <div>
-                <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>
-                  {getRouteDestination(hoveredRoute)?.description || routeNames[hoveredRoute as RouteKey] || hoveredRoute}
-                </div>
-                
-                {/* 推薦経路でのこの路線が使われているルート番号を表示 */}
+              <div style={{ 
+                fontWeight: 'bold', 
+                fontSize: '14px',
+                lineHeight: '1',
+                whiteSpace: 'nowrap'
+              }}>
+                {getRouteDestination(hoveredRoute)?.description || routeNames[hoveredRoute as RouteKey] || hoveredRoute}
+              </div>
+            </div>
+            
+            {/* 推薦経路でのこの路線が使われているルート番号を表示 */}
                 {departure && arrival && routeRecommendations.length > 0 && (() => {
                   // ホバー中の路線が使われている推薦ルートの番号を収集
                   const routeNumbers = [];
@@ -1863,8 +1869,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   }
                   return null;
                 })()}
-              </div>
-            </div>
           </div>
         )}
 
