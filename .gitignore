@@ -7,6 +7,9 @@ node_modules/
 # Build outputs
 dist/
 .astro/
+.astro/data-store.json
+.astro/settings.json
+.astro/types.d.ts
 
 # Environment variables
 .env
