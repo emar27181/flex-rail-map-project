@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
-import RouteRecommendations from './RouteRecommendations';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
@@ -1147,15 +1146,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         {/* カバレッジ分析 */}
         <CoverageAnalysis />
 
-        {/* ルート推薦表示 */}
-        {routeRecommendations.length > 0 && (
-          <RouteRecommendations
-            routes={routeRecommendations}
-            onRouteSelect={handleRouteSelect}
-            selectedRoute={selectedRoute}
-            onShowAllRoutes={handleShowAllRoutes}
-          />
-        )}
+        {/* ルート推薦表示は凡例内に統合 */}
 
         <div style={{ marginBottom: '15px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
           <div
@@ -1623,116 +1614,94 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                     </div>
                   )}
 
+
                   {/* 推薦ルート選択 */}
                   {routeRecommendations.length > 0 && (
                     <div style={{
                       marginBottom: '15px',
                       padding: '10px',
-                      backgroundColor: selectedRoute ? '#e3f2fd' : '#f8f9fa',
+                      backgroundColor: '#f8f9fa',
                       borderRadius: '4px',
-                      border: selectedRoute ? '1px solid #2196F3' : '1px solid #e9ecef'
+                      border: '1px solid #e9ecef'
                     }}>
                       <div style={{
                         fontSize: '14px',
                         fontWeight: 'bold',
                         marginBottom: '8px',
-                        color: selectedRoute ? '#2196F3' : '#333'
+                        color: '#333'
                       }}>
                         推薦ルート選択
                       </div>
 
-                      <div style={{ marginBottom: '8px' }}>
-                        <select
-                          value={selectedRoute ? routeRecommendations.findIndex(route =>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <label style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          fontSize: '12px',
+                          color: '#333',
+                          cursor: 'pointer',
+                          padding: '4px',
+                          borderRadius: '3px',
+                          backgroundColor: !selectedRoute ? 'rgba(0, 123, 255, 0.1)' : 'transparent',
+                          border: !selectedRoute ? '1px solid #007bff' : '1px solid transparent'
+                        }}>
+                          <input
+                            type="radio"
+                            name="routeSelection"
+                            checked={!selectedRoute}
+                            onChange={() => handleShowAllRoutes()}
+                            style={{
+                              marginRight: '8px',
+                              cursor: 'pointer'
+                            }}
+                          />
+                          全ルート表示
+                        </label>
+                        
+                        {routeRecommendations.map((route, index) => {
+                          const isSelected = selectedRoute && 
                             route.segments.length === selectedRoute.segments.length &&
-                            route.segments.every((segment, index) => {
-                              const selectedSegment = selectedRoute.segments[index];
+                            route.segments.every((segment, segIndex) => {
+                              const selectedSegment = selectedRoute.segments[segIndex];
                               return (
                                 segment.routeKey === selectedSegment.routeKey &&
                                 segment.startIndex === selectedSegment.startIndex &&
                                 segment.endIndex === selectedSegment.endIndex
                               );
-                            })
-                          ) : -1}
-                          onChange={(e) => {
-                            const index = parseInt(e.target.value);
-                            if (index === -1) {
-                              handleShowAllRoutes();
-                            } else {
-                              handleRouteSelect(routeRecommendations[index]);
-                            }
-                          }}
-                          style={{
-                            width: '100%',
-                            padding: '4px',
-                            fontSize: '12px',
-                            borderRadius: '3px',
-                            border: '1px solid #ccc'
-                          }}
-                        >
-                          <option value={-1}>全ルート表示</option>
-                          {routeRecommendations.map((route, index) => (
-                            <option key={index} value={index}>
-                              ルート {index + 1} ({Math.round(route.totalTime)}分, 乗換{route.transfers}回)
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                            });
 
-                      {selectedRoute && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          {selectedRoute.segments.map((segment, index) => (
-                            <div key={index} style={{
+                          return (
+                            <label key={index} style={{
                               display: 'flex',
                               alignItems: 'center',
-                              gap: '6px',
-                              fontSize: '11px'
+                              fontSize: '12px',
+                              color: '#333',
+                              cursor: 'pointer',
+                              padding: '4px',
+                              borderRadius: '3px',
+                              backgroundColor: isSelected ? 'rgba(33, 150, 243, 0.25)' : 'transparent',
+                              border: isSelected ? '2px solid #2196F3' : '1px solid transparent'
                             }}>
-                              <div style={{
-                                width: '12px',
-                                height: '12px',
-                                backgroundColor: segment.isWalkingTransfer ? '#4CAF50' : routeColors[segment.routeKey] || '#666',
-                                borderRadius: '50%',
-                                flexShrink: 0,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'white',
-                                fontSize: '8px'
-                              }}>
-                                {segment.isWalkingTransfer ? '🚶' : ''}
-                              </div>
+                              <input
+                                type="radio"
+                                name="routeSelection"
+                                checked={isSelected}
+                                onChange={() => handleRouteSelect(route)}
+                                style={{
+                                  marginRight: '8px',
+                                  cursor: 'pointer'
+                                }}
+                              />
                               <span style={{
-                                color: segment.isWalkingTransfer ? '#4CAF50' : routeColors[segment.routeKey] || '#666',
-                                fontWeight: '500'
+                                fontWeight: isSelected ? 'bold' : 'normal',
+                                color: isSelected ? '#2196F3' : '#333'
                               }}>
-                                {segment.isWalkingTransfer ?
-                                  `徒歩 (${segment.walkingTime}分)` :
-                                  (() => {
-                                    const routeDestination = getRouteDestination(segment.routeKey);
-                                    const routeName = routeDestination?.description || segment.routeName;
-                                    const fromStation = segment.stations[0].name;
-                                    const toStation = segment.stations[segment.stations.length - 1].name;
-
-                                    // 行先情報を取得
-                                    let direction = '';
-                                    if (routeDestination) {
-                                      const destinations = routeDestination.destinations;
-                                      if (destinations.includes(toStation)) {
-                                        direction = `${toStation}行き`;
-                                      } else {
-                                        direction = `${destinations[destinations.length - 1]}方面`;
-                                      }
-                                    }
-
-                                    return `${routeName}${direction ? ` ${direction}` : ''} (${Math.round(segment.time)}分)`;
-                                  })()
-                                }
+                                ルート {index + 1} ({Math.round(route.totalTime)}分, 乗換{route.transfers}回)
                               </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                            </label>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
 
