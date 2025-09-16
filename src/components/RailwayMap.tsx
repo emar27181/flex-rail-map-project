@@ -1557,7 +1557,73 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                       }}>
                         現在の駅設定
                       </div>
-                      {departure && (
+                      {departure && arrival && (
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          marginBottom: '8px',
+                          fontSize: '12px',
+                          padding: '8px',
+                          backgroundColor: '#f0f8ff',
+                          borderRadius: '4px',
+                          border: '1px solid #e0e8f0'
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}>
+                            <div style={{
+                              width: '16px',
+                              height: '16px',
+                              backgroundColor: 'white',
+                              border: '2px solid #4CAF50',
+                              borderRadius: '3px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '10px',
+                              fontWeight: 'bold',
+                              color: '#4CAF50',
+                              flexShrink: 0
+                            }}>
+                              S
+                            </div>
+                            <span style={{ color: '#333', fontWeight: 'bold' }}>{departure.name}</span>
+                          </div>
+                          <span style={{
+                            color: '#4CAF50',
+                            fontSize: '14px',
+                            fontWeight: 'bold'
+                          }}>→</span>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}>
+                            <div style={{
+                              width: '16px',
+                              height: '16px',
+                              backgroundColor: 'white',
+                              border: '2px solid #F44336',
+                              borderRadius: '3px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '10px',
+                              fontWeight: 'bold',
+                              color: '#F44336',
+                              flexShrink: 0
+                            }}>
+                              G
+                            </div>
+                            <span style={{ color: '#333', fontWeight: 'bold' }}>{arrival.name}</span>
+                          </div>
+                        </div>
+                      )}
+                      {departure && !arrival && (
                         <div style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -1584,7 +1650,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                           <span style={{ color: '#333', fontWeight: 'bold' }}>出発駅: {departure.name}</span>
                         </div>
                       )}
-                      {arrival && (
+                      {!departure && arrival && (
                         <div style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -1692,12 +1758,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                                   cursor: 'pointer'
                                 }}
                               />
-                              <span style={{
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
                                 fontWeight: isSelected ? 'bold' : 'normal',
                                 color: isSelected ? '#2196F3' : '#333'
                               }}>
-                                ルート {index + 1} ({Math.round(route.totalTime)}分, 乗換{route.transfers}回)
-                              </span>
+                                <span>ルート {index + 1}</span>
+                                <span style={{
+                                  color: '#4CAF50',
+                                  fontSize: '10px',
+                                  fontWeight: 'bold'
+                                }}>→</span>
+                                <span>({Math.round(route.totalTime)}分, 乗換{route.transfers}回)</span>
+                              </div>
                             </label>
                           );
                         })}
@@ -1957,7 +2032,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                         // このルートで使用される区間を特定
                         const startStation = segment.stations[0].name;
                         const endStation = segment.stations[segment.stations.length - 1].name;
-                        
+
                         routeInfo.push({
                           routeNumber: index + 1,
                           startStation,
@@ -1975,8 +2050,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                         <div style={{ color: '#333', marginBottom: '2px' }}>
                           推薦ルート: {routeInfo.map(info => info.routeNumber).join(', ')}
                         </div>
-                        <div style={{ color: '#333', fontSize: '10px' }}>
-                          {routeInfo[0].startStation} → {routeInfo[0].endStation}
+                        <div style={{
+                          color: '#333',
+                          fontSize: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '4px'
+                        }}>
+                          <span>{routeInfo[0].startStation}</span>
+                          <span style={{
+                            color: '#4CAF50',
+                            fontSize: '12px',
+                            fontWeight: 'bold'
+                          }}>→</span>
+                          <span>{routeInfo[0].endStation}</span>
                         </div>
                       </div>
                     );
@@ -1999,7 +2087,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                       const direction = getDirectionText(hoveredRoute, departure.name, '');
                       return (
                         <div style={{ fontSize: '11px', opacity: 0.9 }}>
-                          出発駅: {departure.name}, {direction || `${routeDestination.destinations.join(' または ')}`}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '4px'
+                          }}>
+                            <span>出発駅: {departure.name}</span>
+                            <span style={{
+                              color: '#4CAF50',
+                              fontSize: '12px',
+                              fontWeight: 'bold'
+                            }}>→</span>
+                            <span>{direction || `${routeDestination.destinations.join(' または ')}`}</span>
+                          </div>
                         </div>
                       );
                     }
@@ -2007,7 +2108,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                     else if (arrival && !departure) {
                       return (
                         <div style={{ fontSize: '11px', opacity: 0.9 }}>
-                          {arrival.name}行き
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '4px'
+                          }}>
+                            <span>どこから</span>
+                            <span style={{
+                              color: '#4CAF50',
+                              fontSize: '12px',
+                              fontWeight: 'bold'
+                            }}>→</span>
+                            <span>{arrival.name}行き</span>
+                          </div>
                         </div>
                       );
                     }
@@ -2015,7 +2129,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                     else {
                       return (
                         <div style={{ fontSize: '11px', opacity: 0.9 }}>
-                          {routeDestination.destinations.join(' ⇔ ')}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '4px'
+                          }}>
+                            <span>{routeDestination.destinations[0]}</span>
+                            <span style={{
+                              color: '#666',
+                              fontSize: '12px',
+                              fontWeight: 'bold'
+                            }}>⇔</span>
+                            <span>{routeDestination.destinations[1] || routeDestination.destinations[0]}</span>
+                          </div>
                         </div>
                       );
                     }
@@ -2104,14 +2231,26 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                         color: '#333',
                         textAlign: 'center'
                       }}>
-                        <div style={{ marginBottom: '4px' }}>
-                          <strong>{departure.name}</strong> から
-                        </div>
-                        {direction && (
-                          <div style={{
-                            fontSize: '16px',
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          marginBottom: '8px'
+                        }}>
+                          <strong>{departure.name}</strong>
+                          <span style={{
                             color: '#4CAF50',
+                            fontSize: '18px',
                             fontWeight: 'bold'
+                          }}>→</span>
+                          <span>{direction || arrival.name}</span>
+                        </div>
+                        {direction && direction !== arrival.name && (
+                          <div style={{
+                            fontSize: '12px',
+                            color: '#666',
+                            marginTop: '4px'
                           }}>
                             {direction}
                           </div>
@@ -2127,7 +2266,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                       color: '#666',
                       textAlign: 'center'
                     }}>
-                      <strong>行先:</strong> {getRouteDestination(clickedRoute)?.destinations.join(' ⇔ ') || '情報なし'}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px'
+                      }}>
+                        <span>{getRouteDestination(clickedRoute)?.destinations[0] || '始発'}</span>
+                        <span style={{
+                          color: '#666',
+                          fontSize: '16px',
+                          fontWeight: 'bold'
+                        }}>⇔</span>
+                        <span>{getRouteDestination(clickedRoute)?.destinations[1] || '終点'}</span>
+                      </div>
                     </div>
                   )}
                 </div>
