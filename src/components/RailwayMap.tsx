@@ -614,11 +614,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
 
     return (
       <React.Fragment key={routeKey}>
+        {/* 透明な太い線でマウス判定を緩くする */}
         <Polyline 
           positions={positions} 
-          color={color}
-          weight={hoveredRoute === routeKey ? 6 : 4}
-          opacity={visibleRoutes.has(routeKey) ? 0.8 : 0.2}
+          color="transparent"
+          weight={12}
+          opacity={0}
           eventHandlers={{
             click: (e) => {
               console.log('🔴🔴🔴 ROUTE CLICKED:', routeKey);
@@ -656,6 +657,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             }
           }}
           style={{ cursor: 'pointer' }}
+        />
+        {/* 実際に見える路線 */}
+        <Polyline 
+          positions={positions} 
+          color={color}
+          weight={hoveredRoute === routeKey ? 6 : 4}
+          opacity={visibleRoutes.has(routeKey) ? 0.8 : 0.2}
+          interactive={false}
         />
         {displayStations.map((station, index) => {
           const isDeparture = departure && station.name === departure.name;
@@ -1791,53 +1800,33 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   {getRouteDestination(hoveredRoute)?.description || routeNames[hoveredRoute as RouteKey] || hoveredRoute}
                 </div>
                 
-                {/* 推薦経路でのこの路線の区間情報を表示 */}
+                {/* 推薦経路でのこの路線が使われているルート番号を表示 */}
                 {departure && arrival && routeRecommendations.length > 0 && (() => {
-                  // 推薦経路からホバー中の路線のセグメントを探す
-                  for (const recommendation of routeRecommendations) {
+                  // ホバー中の路線が使われている推薦ルートの番号を収集
+                  const routeNumbers = [];
+                  routeRecommendations.forEach((recommendation, index) => {
                     for (const segment of recommendation.segments) {
                       if (segment.routeKey === hoveredRoute) {
-                        const fromStation = segment.fromStation;
-                        const toStation = segment.toStation;
-                        const direction = getDirectionText(hoveredRoute, fromStation, toStation);
-                        
-                        // 行き先表示の決定
-                        let destinationText = '';
-                        if (direction && direction !== '') {
-                          destinationText = direction;
-                        } else if (toStation && toStation !== '') {
-                          destinationText = `${toStation}行き`;
-                        } else {
-                          // 路線の終点駅情報から取得
-                          const routeDestination = getRouteDestination(hoveredRoute);
-                          destinationText = routeDestination?.destinations.join(' ⇔ ') || '方面';
-                        }
-                        
-                        return (
-                          <div style={{ fontSize: '12px', opacity: 0.9 }}>
-                            <div>区間: {fromStation} → {toStation}</div>
-                            <div style={{ color: '#90EE90' }}>
-                              {destinationText}
-                            </div>
-                          </div>
-                        );
+                        routeNumbers.push(index + 1); // 1-based indexing
+                        break; // 同じルートで複数回使われていても1回だけカウント
                       }
                     }
+                  });
+                  
+                  if (routeNumbers.length > 0) {
+                    return (
+                      <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                        <div style={{ color: '#90EE90' }}>
+                          推薦ルート: {routeNumbers.join(', ')}
+                        </div>
+                      </div>
+                    );
                   }
                   
-                  // 推薦経路に含まれていない場合は全体の出発駅・到着駅を表示
-                  const direction = getDirectionText(hoveredRoute, departure.name, arrival.name);
-                  return direction ? (
+                  // 推薦経路に含まれていない場合は通常の行先表示
+                  return (
                     <div style={{ fontSize: '12px', opacity: 0.9 }}>
-                      <div>{departure.name} から</div>
-                      <div style={{ color: '#90EE90' }}>{direction}</div>
-                    </div>
-                  ) : (
-                    <div style={{ fontSize: '12px', opacity: 0.9 }}>
-                      {departure && arrival ? 
-                        `出発駅: ${departure.name}, ${arrival.name}行き` : 
-                        getRouteDestination(hoveredRoute)?.destinations.join(' ⇔ ') || ''
-                      }
+                      {getRouteDestination(hoveredRoute)?.destinations.join(' ⇔ ') || ''}
                     </div>
                   );
                 })()}
