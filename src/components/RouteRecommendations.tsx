@@ -135,12 +135,12 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'center',
+              alignItems: 'flex-start',
               marginBottom: '10px',
               flexWrap: 'wrap',
               gap: '10px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
                 <span style={{
                   fontSize: '18px',
                   fontWeight: 'bold',
