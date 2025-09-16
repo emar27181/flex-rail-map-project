@@ -37,6 +37,8 @@ import { yokohamaBlueLine } from './yokohama-blue-line';
 import { rinkaiLine } from './rinkai-line';
 import { yurikamomeLine } from './yurikamome-line';
 import { tsukubaExpress } from './tsukuba-express';
+import { jrNanbuLine } from './jr-nanbu-line';
+import { jrNegishiLine } from './jr-negishi-line';
 
 export const routes = {
   yamanote,
@@ -78,6 +80,8 @@ export const routes = {
   rinkaiLine,
   yurikamomeLine,
   tsukubaExpress,
+  jrNanbuLine,
+  jrNegishiLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -122,6 +126,8 @@ export const routeColors = {
   rinkaiLine: '#00B5E2', // Rinkai Line light blue
   yurikamomeLine: '#00BFFF', // Yurikamome Line sky blue
   tsukubaExpress: '#8B4513', // Tsukuba Express brown
+  jrNanbuLine: '#FFCC00', // JR Nanbu Line yellow
+  jrNegishiLine: '#00B5AD', // JR Negishi Line teal
 };
 
 export const routeNames = {
@@ -164,4 +170,6 @@ export const routeNames = {
   rinkaiLine: 'りんかい線',
   yurikamomeLine: 'ゆりかもめ',
   tsukubaExpress: 'つくばエクスプレス',
+  jrNanbuLine: 'JR南武線',
+  jrNegishiLine: 'JR根岸線',
 };
