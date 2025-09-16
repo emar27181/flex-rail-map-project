@@ -369,29 +369,27 @@ export class RouteFinder {
     const seen = new Set<string>();
 
     results.forEach(result => {
-      // Create a unique identifier for the route
+      // より詳細な識別子を作成（路線、駅名、方向を含む）
       const routeId = result.segments
-        .map(seg => `${seg.routeKey}:${seg.startIndex}-${seg.endIndex}`)
+        .map(seg => {
+          const startStation = seg.stations[0]?.name || '';
+          const endStation = seg.stations[seg.stations.length - 1]?.name || '';
+          return `${seg.routeKey}:${startStation}-${endStation}`;
+        })
         .join('|');
-      
+
       if (!seen.has(routeId)) {
         seen.add(routeId);
         uniqueResults.push(result);
       }
     });
 
+    console.log(`Exact duplicate removal: ${results.length} → ${uniqueResults.length}`);
     return uniqueResults;
   }
 
   private diversifyRoutes(results: RouteResult[], maxResults: number): RouteResult[] {
-    // Filter out obviously inefficient routes (more than 3x the best time)
-    if (results.length > 0) {
-      const bestTime = Math.min(...results.map(r => r.totalTime));
-      const maxReasonableTime = bestTime * 3;
-      results = results.filter(r => r.totalTime <= maxReasonableTime);
-    }
-
-    // Sort by quality (transfers first, then time)
+    // まず品質でソート（乗換回数優先、次に時間）
     results.sort((a, b) => {
       if (a.transfers !== b.transfers) {
         return a.transfers - b.transfers;
@@ -399,44 +397,87 @@ export class RouteFinder {
       return a.totalTime - b.totalTime;
     });
 
+    // 明らかに非効率なルートを除外（最良時間の2.5倍以上）
+    if (results.length > 0) {
+      const bestTime = Math.min(...results.map(r => r.totalTime));
+      const maxReasonableTime = bestTime * 2.5;
+      results = results.filter(r => r.totalTime <= maxReasonableTime);
+      console.log(`Time filter applied: removed routes > ${Math.round(maxReasonableTime)} minutes`);
+    }
+
     const diverseResults: RouteResult[] = [];
-    const usedRouteKeys = new Set<string>();
+    const seenRoutePatterns = new Set<string>();
 
-    // First, add the best route from each unique route combination
+    // ユニークな路線パターンを識別するための関数
+    const getRoutePattern = (result: RouteResult): string => {
+      return result.segments
+        .filter(seg => seg.routeKey !== 'walking') // 歩行乗換は無視
+        .map(seg => seg.routeKey)
+        .join('-');
+    };
+
+    // 段階的にルートを追加
+    // 1. 各ユニークな路線パターンから最良のものを選択
     results.forEach(result => {
-      const routeKeyCombo = result.segments.map(seg => seg.routeKey).sort().join('-');
-      
-      if (!usedRouteKeys.has(routeKeyCombo) && diverseResults.length < maxResults) {
+      const pattern = getRoutePattern(result);
+
+      if (!seenRoutePatterns.has(pattern) && diverseResults.length < maxResults) {
         diverseResults.push(result);
-        usedRouteKeys.add(routeKeyCombo);
+        seenRoutePatterns.add(pattern);
+        console.log(`Added unique pattern: ${pattern} (${result.totalTime}min, ${result.transfers} transfers)`);
       }
     });
 
-    // If we still need more results, add remaining routes (but prioritize fewer transfers)
-    const sortedRemaining = results.filter(result => {
-      const alreadyIncluded = diverseResults.some(existing => 
-        existing.segments.length === result.segments.length &&
-        existing.segments.every((seg, i) => 
-          seg.routeKey === result.segments[i].routeKey &&
-          seg.startIndex === result.segments[i].startIndex &&
-          seg.endIndex === result.segments[i].endIndex
-        )
-      );
-      return !alreadyIncluded;
-    }).sort((a, b) => {
-      // Prioritize routes with fewer transfers
-      if (a.transfers !== b.transfers) {
-        return a.transfers - b.transfers;
-      }
-      return a.totalTime - b.totalTime;
-    });
+    // 2. まだ上限に達していない場合、実質的に異なるルートを追加
+    if (diverseResults.length < maxResults) {
+      const remainingRoutes = results.filter(result => {
+        // 既に追加されたルートと実質的に同じかチェック
+        return !diverseResults.some(existing =>
+          this.areRoutesEssentiallySame(existing, result)
+        );
+      });
 
-    sortedRemaining.forEach(result => {
-      if (diverseResults.length >= maxResults) return;
-      diverseResults.push(result);
-    });
+      remainingRoutes.forEach(result => {
+        if (diverseResults.length >= maxResults) return;
 
-    console.log(`Filtered routes: ${results.length} → ${diverseResults.length}`);
+        // 追加する価値があるかチェック（時間差が5分以上、または乗換回数が異なる）
+        const hasValue = diverseResults.every(existing => {
+          const timeDiff = Math.abs(existing.totalTime - result.totalTime);
+          const transferDiff = Math.abs(existing.transfers - result.transfers);
+          return timeDiff >= 5 || transferDiff > 0;
+        });
+
+        if (hasValue) {
+          diverseResults.push(result);
+          console.log(`Added diverse route: ${getRoutePattern(result)} (${result.totalTime}min, ${result.transfers} transfers)`);
+        }
+      });
+    }
+
+    console.log(`Route diversification: ${results.length} → ${diverseResults.length} unique patterns`);
     return diverseResults;
+  }
+
+  // 2つのルートが実質的に同じかどうかを判定
+  private areRoutesEssentiallySame(route1: RouteResult, route2: RouteResult): boolean {
+    // セグメント数が異なる場合は異なるルート
+    if (route1.segments.length !== route2.segments.length) {
+      return false;
+    }
+
+    // 各セグメントを比較（歩行乗換以外）
+    const segments1 = route1.segments.filter(seg => seg.routeKey !== 'walking');
+    const segments2 = route2.segments.filter(seg => seg.routeKey !== 'walking');
+
+    if (segments1.length !== segments2.length) {
+      return false;
+    }
+
+    return segments1.every((seg1, index) => {
+      const seg2 = segments2[index];
+      return seg1.routeKey === seg2.routeKey &&
+             seg1.stations[0]?.name === seg2.stations[0]?.name &&
+             seg1.stations[seg1.stations.length - 1]?.name === seg2.stations[seg2.stations.length - 1]?.name;
+    });
   }
 }
