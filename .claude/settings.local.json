@@ -13,7 +13,9 @@
       "WebSearch",
       "Bash(curl:*)",
       "Bash(npx tsc:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(netlify deploy:*)",
+      "Bash(git check-ignore:*)"
     ],
     "deny": [
       "Bash(git checkout:*)",
