@@ -9,6 +9,13 @@ import SchematicMap from './SchematicMap';
 import { RouteFinder, TimeFilter, type RouteResult, type StationWithTime } from '../utils/routeFinder';
 import { getRouteDestination, getRouteDisplayText, getDirectionText, commonDirections } from '../data/routeDestinations';
 
+// デバッグ用のwindow拡張
+declare global {
+  interface Window {
+    lastMouseLog?: number;
+  }
+}
+
 interface RailwayMapProps {
   className?: string;
 }
@@ -548,7 +555,33 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         // 地図クリック時にルートポップアップを閉じる
         handleRoutePopupClose();
       },
-      mousemove: () => {
+      mousemove: (e) => {
+        // デバッグ用：マウス位置をログ出力（頻度制限）
+        if (hoveredRoute && hoverTooltipPosition) {
+          // 100ms間隔でログを制限
+          const now = Date.now();
+          if (!window.lastMouseLog || now - window.lastMouseLog > 100) {
+            window.lastMouseLog = now;
+            
+            const containerPoint = e.containerPoint;
+            console.log('🔵🔵🔵 === MOUSE MOVE DEBUG ===');
+            console.log('🔵 Mouse container point:', containerPoint);
+            console.log('🔵 Tooltip position:', hoverTooltipPosition);
+            
+            // 調整前の座標との差異
+            const originalDeltaX = containerPoint.x - hoverTooltipPosition.x;
+            const originalDeltaY = containerPoint.y - hoverTooltipPosition.y;
+            console.log('🔵 Delta from tooltip (raw): x=' + originalDeltaX + ', y=' + originalDeltaY);
+            
+            // 調整分を考慮した実際の距離
+            const adjustedDeltaY = containerPoint.y - (hoverTooltipPosition.y + 10); // +10は調整で引いた分
+            console.log('🔵 Delta considering -10 adjustment: x=' + originalDeltaX + ', y=' + adjustedDeltaY);
+            
+            // transform(-50%, -100%)を考慮すると...
+            console.log('🔵 Note: tooltip is also shifted by transform(-50%, -100%) + marginTop(-5px)');
+          }
+        }
+        
         // 地図上でのマウス移動時にホバーを無効化（路線上でない場合）
         if (hoveredRoute && !hoverTooltipPosition) {
           setHoveredRoute(null);
@@ -640,15 +673,64 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               }
             },
             mouseover: (e) => {
-              console.log('Route hovered:', routeKey);
+              console.log('🟡🟡🟡 === ROUTE HOVER DEBUG START ===');
+              console.log('🟡 Route:', routeKey);
+              
+              // すべての利用可能な座標情報を取得
+              const { latlng, containerPoint, layerPoint, originalEvent } = e;
+              console.log('🟡 Event latlng:', latlng);
+              console.log('🟡 Event containerPoint:', containerPoint);
+              console.log('🟡 Event layerPoint:', layerPoint);
+              console.log('🟡 Original event clientX/Y:', originalEvent?.clientX, originalEvent?.clientY);
+              console.log('🟡 Original event pageX/Y:', originalEvent?.pageX, originalEvent?.pageY);
+              
+              // 地図の境界とコンテナ情報
+              const mapContainer = mapRef.current?.getContainer();
+              if (mapContainer) {
+                const mapBounds = mapContainer.getBoundingClientRect();
+                console.log('🟡 Map container bounds:', mapBounds);
+              }
+              
+              // 複数の方法で座標を計算
+              const calculatedPoint = mapRef.current?.latLngToContainerPoint(latlng);
+              console.log('🟡 Calculated container point:', calculatedPoint);
+              
               setHoveredRoute(routeKey);
-              const { latlng } = e;
-              const point = mapRef.current?.latLngToContainerPoint(latlng);
-              if (point) {
-                setHoverTooltipPosition({ x: point.x, y: point.y });
-                console.log('Hover tooltip position set:', { x: point.x, y: point.y });
+              
+              if (originalEvent && originalEvent.clientX && originalEvent.clientY) {
+                // ブラウザの画面座標を直接使用（最も正確）
+                const tooltipPosition = { 
+                  x: originalEvent.clientX, 
+                  y: originalEvent.clientY - 50  // ツールチップの高さ分上に配置
+                };
+                setHoverTooltipPosition(tooltipPosition);
+                
+                console.log('🟡 Using clientX/Y:', originalEvent.clientX, originalEvent.clientY);
+                console.log('🟡 Final tooltip position:', tooltipPosition);
+                console.log('🟡 Adjustment: y -= 50 (tooltip height)');
+                console.log('🟡 === ROUTE HOVER DEBUG END ===');
+              } else if (containerPoint || calculatedPoint) {
+                // フォールバック：コンテナポイント使用
+                const usePoint = containerPoint || calculatedPoint;
+                const mapContainer = mapRef.current?.getContainer();
+                const mapBounds = mapContainer?.getBoundingClientRect();
+                
+                if (mapBounds) {
+                  // コンテナポイントを画面座標に変換
+                  const screenX = mapBounds.left + usePoint.x;
+                  const screenY = mapBounds.top + usePoint.y - 50;
+                  const tooltipPosition = { x: screenX, y: screenY };
+                  setHoverTooltipPosition(tooltipPosition);
+                  
+                  console.log('🟡 Using container point with bounds conversion');
+                  console.log('🟡 Map bounds:', mapBounds);
+                  console.log('🟡 Container point:', usePoint);
+                  console.log('🟡 Screen position:', tooltipPosition);
+                } else {
+                  console.log('🟡 ERROR: No map bounds available!');
+                }
               } else {
-                console.log('No container point for hover');
+                console.log('🟡 ERROR: No valid coordinates found!');
               }
             },
             mouseout: () => {
@@ -1767,11 +1849,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         )}
         
         {/* ホバーツールチップ */}
-        {hoveredRoute && hoverTooltipPosition && (
+        {hoveredRoute && hoverTooltipPosition && (() => {
+          console.log('🟢🟢🟢 === TOOLTIP RENDER DEBUG START ===');
+          console.log('🟢 Raw tooltip position:', hoverTooltipPosition);
+          console.log('🟢 CSS left:', (hoverTooltipPosition.x - 100) + 'px (centered by subtracting 100px)');
+          console.log('🟢 CSS top:', hoverTooltipPosition.y + 'px (direct positioning)');
+          console.log('🟢 No transform used - direct positioning');
+          console.log('🟢 === TOOLTIP RENDER DEBUG END ===');
+          return (
           <div
             style={{
               position: 'fixed',
-              left: `${hoverTooltipPosition.x}px`,
+              left: `${hoverTooltipPosition.x - 100}px`, // 中央揃えのため半分の幅（約200px）を引く
               top: `${hoverTooltipPosition.y}px`,
               backgroundColor: 'rgba(0, 0, 0, 0.9)',
               color: 'white',
@@ -1779,12 +1868,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               borderRadius: '8px',
               fontSize: '14px',
               zIndex: 9998,
-              transform: 'translate(-50%, -100%)',
-              marginTop: '-10px',
               whiteSpace: 'nowrap',
               pointerEvents: 'none',
               boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-              border: '1px solid rgba(255,255,255,0.2)'
+              border: '1px solid rgba(255,255,255,0.2)',
+              minWidth: '200px',
+              textAlign: 'center'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
@@ -1870,7 +1959,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   return null;
                 })()}
           </div>
-        )}
+          );
+        })()}
 
         {/* 路線情報ポップアップ */}
         {clickedRoute && routePopupPosition && (() => {
