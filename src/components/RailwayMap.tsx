@@ -1341,91 +1341,98 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   </div>
                 )}
 
-                {/* 選択されたルート表示 */}
-                {selectedRoute && (
+                {/* 推薦ルート選択 */}
+                {routeRecommendations.length > 0 && (
                   <div style={{ 
                     marginBottom: '15px',
                     padding: '10px',
-                    backgroundColor: '#e3f2fd',
+                    backgroundColor: selectedRoute ? '#e3f2fd' : '#f8f9fa',
                     borderRadius: '4px',
-                    border: '1px solid #2196F3'
+                    border: selectedRoute ? '1px solid #2196F3' : '1px solid #e9ecef'
                   }}>
                     <div style={{ 
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '8px'
+                      fontSize: '14px', 
+                      fontWeight: 'bold', 
+                      marginBottom: '8px',
+                      color: selectedRoute ? '#2196F3' : '#333'
                     }}>
-                      <div style={{ 
-                        fontSize: '14px', 
-                        fontWeight: 'bold', 
-                        color: '#2196F3'
-                      }}>
-                        選択中のルート
-                      </div>
-                      <button
-                        onClick={handleShowAllRoutes}
+                      推薦ルート選択
+                    </div>
+                    
+                    <div style={{ marginBottom: '8px' }}>
+                      <select
+                        value={selectedRoute ? routeRecommendations.findIndex(route => 
+                          route.segments.length === selectedRoute.segments.length &&
+                          route.segments.every((segment, index) => {
+                            const selectedSegment = selectedRoute.segments[index];
+                            return (
+                              segment.routeKey === selectedSegment.routeKey &&
+                              segment.startIndex === selectedSegment.startIndex &&
+                              segment.endIndex === selectedSegment.endIndex
+                            );
+                          })
+                        ) : -1}
+                        onChange={(e) => {
+                          const index = parseInt(e.target.value);
+                          if (index === -1) {
+                            handleShowAllRoutes();
+                          } else {
+                            handleRouteSelect(routeRecommendations[index]);
+                          }
+                        }}
                         style={{
-                          padding: '2px 6px',
-                          backgroundColor: 'transparent',
-                          border: '1px solid #2196F3',
+                          width: '100%',
+                          padding: '4px',
+                          fontSize: '12px',
                           borderRadius: '3px',
-                          fontSize: '10px',
-                          cursor: 'pointer',
-                          color: '#2196F3'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#2196F3';
-                          e.currentTarget.style.color = 'white';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.color = '#2196F3';
+                          border: '1px solid #ccc'
                         }}
                       >
-                        解除
-                      </button>
+                        <option value={-1}>全ルート表示</option>
+                        {routeRecommendations.map((route, index) => (
+                          <option key={index} value={index}>
+                            ルート {index + 1} ({Math.round(route.totalTime)}分, 乗換{route.transfers}回)
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     
-                    <div style={{ fontSize: '12px', marginBottom: '8px', color: '#333' }}>
-                      総時間: <strong>{Math.round(selectedRoute.totalTime)}分</strong>　
-                      乗換: <strong>{selectedRoute.transfers}回</strong>
-                    </div>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      {selectedRoute.segments.map((segment, index) => (
-                        <div key={index} style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          fontSize: '11px'
-                        }}>
-                          <div style={{
-                            width: '12px',
-                            height: '12px',
-                            backgroundColor: segment.isWalkingTransfer ? '#4CAF50' : routeColors[segment.routeKey] || '#666',
-                            borderRadius: '50%',
-                            flexShrink: 0,
+                    {selectedRoute && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        {selectedRoute.segments.map((segment, index) => (
+                          <div key={index} style={{
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
-                            fontSize: '8px'
+                            gap: '6px',
+                            fontSize: '11px'
                           }}>
-                            {segment.isWalkingTransfer ? '🚶' : ''}
+                            <div style={{
+                              width: '12px',
+                              height: '12px',
+                              backgroundColor: segment.isWalkingTransfer ? '#4CAF50' : routeColors[segment.routeKey] || '#666',
+                              borderRadius: '50%',
+                              flexShrink: 0,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'white',
+                              fontSize: '8px'
+                            }}>
+                              {segment.isWalkingTransfer ? '🚶' : ''}
+                            </div>
+                            <span style={{ 
+                              color: segment.isWalkingTransfer ? '#4CAF50' : routeColors[segment.routeKey] || '#666',
+                              fontWeight: '500'
+                            }}>
+                              {segment.isWalkingTransfer ? 
+                                `徒歩 (${segment.walkingTime}分)` : 
+                                `${segment.routeName} (${Math.round(segment.time)}分)`
+                              }
+                            </span>
                           </div>
-                          <span style={{ 
-                            color: segment.isWalkingTransfer ? '#4CAF50' : routeColors[segment.routeKey] || '#666',
-                            fontWeight: '500'
-                          }}>
-                            {segment.isWalkingTransfer ? 
-                              `徒歩 (${segment.walkingTime}分)` : 
-                              `${segment.routeName} (${Math.round(segment.time)}分)`
-                            }
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
                 
