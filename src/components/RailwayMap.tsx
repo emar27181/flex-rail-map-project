@@ -1978,33 +1978,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   </div>
                 </div>
 
-                {/* 推薦経路でのこの路線が使われているルート番号を表示 */}
+                {/* 推薦経路でのこの路線が使われているルート番号と区間を表示 */}
                 {departure && arrival && routeRecommendations.length > 0 && (() => {
-                  // ホバー中の路線が使われている推薦ルートの番号と乗換駅を収集
+                  // ホバー中の路線が使われている推薦ルートの番号と利用区間を収集
                   const routeInfo = [];
                   routeRecommendations.forEach((recommendation, index) => {
                     for (const segment of recommendation.segments) {
                       if (segment.routeKey === hoveredRoute) {
-                        // このルートで使用される区間と乗換駅を特定
+                        // このルートで使用される区間を特定
                         const startStation = segment.stations[0].name;
                         const endStation = segment.stations[segment.stations.length - 1].name;
-                        const transferStations = [];
-                        
-                        // セグメントの開始駅（前のセグメントからの乗換）
-                        const segmentIndex = recommendation.segments.indexOf(segment);
-                        if (segmentIndex > 0) {
-                          transferStations.push(startStation);
-                        }
-                        
-                        // セグメントの終了駅（次のセグメントへの乗換）
-                        if (segmentIndex < recommendation.segments.length - 1) {
-                          transferStations.push(endStation);
-                        }
                         
                         routeInfo.push({
                           routeNumber: index + 1,
-                          segment,
-                          transferStations: [...new Set(transferStations)] // 重複除去
+                          startStation,
+                          endStation,
+                          segment
                         });
                         break;
                       }
@@ -2017,11 +2006,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                         <div style={{ color: '#333', marginBottom: '2px' }}>
                           推薦ルート: {routeInfo.map(info => info.routeNumber).join(', ')}
                         </div>
-                        {routeInfo.length > 0 && routeInfo[0].transferStations.length > 0 && (
-                          <div style={{ color: '#333', fontSize: '10px' }}>
-                            乗換駅: {routeInfo[0].transferStations.join(', ')}
-                          </div>
-                        )}
+                        <div style={{ color: '#333', fontSize: '10px' }}>
+                          {routeInfo[0].startStation} → {routeInfo[0].endStation}
+                        </div>
                       </div>
                     );
                   }
