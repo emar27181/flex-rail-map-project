@@ -1499,7 +1499,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               position: 'absolute',
               top: '10px',
               right: '10px',
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              backgroundColor: 'rgba(255, 255, 255, 1.0)',
               border: '1px solid #ccc',
               borderRadius: '6px',
               boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
