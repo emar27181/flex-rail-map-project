@@ -1945,7 +1945,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   position: 'fixed',
                   left: `${hoverTooltipPosition.x - 75}px`, // 中央揃えのため半分の幅（約150px）を引く
                   top: `${hoverTooltipPosition.y}px`,
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  backgroundColor: 'white',
                   color: 'black',
                   padding: '6px 10px',
                   borderRadius: '6px',
