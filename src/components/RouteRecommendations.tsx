@@ -61,10 +61,11 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
   return (
     <div style={{
       marginBottom: '20px',
-      padding: '15px',
-      border: '1px solid #ddd',
-      borderRadius: '8px',
-      backgroundColor: '#f9f9f9'
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      border: '1px solid #ccc',
+      borderRadius: '6px',
+      boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+      minWidth: '200px'
     }}>
       <div 
         onClick={() => setIsExpanded(!isExpanded)}
@@ -73,13 +74,19 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
           justifyContent: 'space-between',
           alignItems: 'center',
           cursor: 'pointer',
-          marginBottom: isExpanded ? '15px' : '0'
+          padding: '10px',
+          borderBottom: isExpanded ? '1px solid #eee' : 'none'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <h3 style={{ margin: '0', color: '#333' }}>
+          <span style={{
+            fontSize: '14px',
+            fontWeight: 'bold',
+            color: '#333',
+            margin: '0'
+          }}>
             推薦ルート ({routes.length}件)
-          </h3>
+          </span>
           {selectedRoute && onShowAllRoutes && (
             <button
               onClick={onShowAllRoutes}
@@ -106,7 +113,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
           )}
         </div>
         <span style={{
-          fontSize: '18px',
+          fontSize: '12px',
           color: '#666',
           transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
           transition: 'transform 0.3s ease'
@@ -116,7 +123,14 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
       </div>
 
       {isExpanded && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '12px',
+          padding: '10px',
+          maxHeight: '400px',
+          overflowY: 'auto'
+        }}>
         {routes.map((route, index) => {
           const isSelected = isRouteSelected(route);
           return (
