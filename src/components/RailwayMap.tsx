@@ -7,6 +7,7 @@ import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
 import { RouteFinder, TimeFilter, type RouteResult, type StationWithTime } from '../utils/routeFinder';
+import { getRouteDestination, getRouteDisplayText, getDirectionText, commonDirections } from '../data/routeDestinations';
 
 interface RailwayMapProps {
   className?: string;
@@ -53,6 +54,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   const [timeFilterMaxMinutes, setTimeFilterMaxMinutes] = useState(15);
   const [stationsWithinTime, setStationsWithinTime] = useState<StationWithTime[]>([]);
   const [actuallyDisplayedStations, setActuallyDisplayedStations] = useState<Set<string>>(new Set());
+  
+  // 路線ホバー・ポップアップ状態
+  const [hoveredRoute, setHoveredRoute] = useState<string | null>(null);
+  const [clickedRoute, setClickedRoute] = useState<string | null>(null);
+  const [routePopupPosition, setRoutePopupPosition] = useState<{x: number, y: number} | null>(null);
+  const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{x: number, y: number} | null>(null);
   
   const routeFinder = useMemo(() => new RouteFinder(), []);
   const timeFilter = useMemo(() => new TimeFilter(routeFinder), [routeFinder]);
@@ -477,6 +484,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     setVisibleRoutes(new Set(Object.keys(routes) as RouteKey[]));
   };
 
+  const handleRoutePopupClose = () => {
+    setClickedRoute(null);
+    setRoutePopupPosition(null);
+  };
+
   const handleSchematicStationClick = (station: Station, action: 'departure' | 'arrival') => {
     if (action === 'departure') {
       setDeparture(station);
@@ -519,11 +531,28 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   const tokyoStation = [35.6812, 139.7671];
 
   const MapEvents = () => {
-    useMapEvents({
+    const map = useMapEvents({
       zoomend: (e) => {
         setZoomLevel(e.target.getZoom());
       },
+      click: () => {
+        // 地図クリック時にルートポップアップを閉じる
+        handleRoutePopupClose();
+      },
+      mousemove: () => {
+        // 地図上でのマウス移動時にホバーを無効化（路線上でない場合）
+        if (hoveredRoute && !hoverTooltipPosition) {
+          setHoveredRoute(null);
+          setHoverTooltipPosition(null);
+        }
+      }
     });
+    
+    // mapRefに地図インスタンスを保存
+    if (map && !mapRef.current) {
+      mapRef.current = map;
+    }
+    
     return null;
   };
 
@@ -579,11 +608,28 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         <Polyline 
           positions={positions} 
           color={color}
-          weight={4}
+          weight={hoveredRoute === routeKey ? 6 : 4}
           opacity={visibleRoutes.has(routeKey) ? 0.8 : 0.2}
           eventHandlers={{
-            click: () => {
-              toggleRoute(routeKey);
+            click: (e) => {
+              const { latlng } = e;
+              const point = mapRef.current?.latLngToContainerPoint(latlng);
+              if (point) {
+                setClickedRoute(routeKey);
+                setRoutePopupPosition({ x: point.x, y: point.y });
+              }
+            },
+            mouseover: (e) => {
+              setHoveredRoute(routeKey);
+              const { latlng } = e;
+              const point = mapRef.current?.latLngToContainerPoint(latlng);
+              if (point) {
+                setHoverTooltipPosition({ x: point.x, y: point.y });
+              }
+            },
+            mouseout: () => {
+              setHoveredRoute(null);
+              setHoverTooltipPosition(null);
             }
           }}
           style={{ cursor: 'pointer' }}
@@ -1426,7 +1472,25 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                             }}>
                               {segment.isWalkingTransfer ? 
                                 `徒歩 (${segment.walkingTime}分)` : 
-                                `${segment.routeName} (${Math.round(segment.time)}分)`
+                                (() => {
+                                  const routeDestination = getRouteDestination(segment.routeKey);
+                                  const routeName = routeDestination?.description || segment.routeName;
+                                  const fromStation = segment.stations[0].name;
+                                  const toStation = segment.stations[segment.stations.length - 1].name;
+                                  
+                                  // 行先情報を取得
+                                  let direction = '';
+                                  if (routeDestination) {
+                                    const destinations = routeDestination.destinations;
+                                    if (destinations.includes(toStation)) {
+                                      direction = `${toStation}行き`;
+                                    } else {
+                                      direction = `${destinations[destinations.length - 1]}方面`;
+                                    }
+                                  }
+                                  
+                                  return `${routeName}${direction ? ` ${direction}` : ''} (${Math.round(segment.time)}分)`;
+                                })()
                               }
                             </span>
                           </div>
@@ -1625,6 +1689,141 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 
               </div>
             )}
+          </div>
+        )}
+        
+        {/* ホバーツールチップ */}
+        {hoveredRoute && hoverTooltipPosition && (
+          <div
+            style={{
+              position: 'absolute',
+              left: `${hoverTooltipPosition.x}px`,
+              top: `${hoverTooltipPosition.y}px`,
+              backgroundColor: 'rgba(0, 0, 0, 0.9)',
+              color: 'white',
+              padding: '8px 12px',
+              borderRadius: '6px',
+              fontSize: '14px',
+              zIndex: 1001,
+              transform: 'translate(-50%, -100%)',
+              marginTop: '-10px',
+              whiteSpace: 'nowrap',
+              pointerEvents: 'none',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+              border: '1px solid rgba(255,255,255,0.2)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '14px',
+                height: '14px',
+                backgroundColor: routeColors[hoveredRoute] || '#666',
+                borderRadius: '50%',
+                border: '1px solid rgba(255,255,255,0.3)'
+              }} />
+              <div>
+                <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>
+                  {getRouteDestination(hoveredRoute)?.description || routeNames[hoveredRoute as RouteKey] || hoveredRoute}
+                </div>
+                <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                  {getRouteDestination(hoveredRoute)?.destinations.join(' ⇔ ') || 'クリックで詳細'}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 路線情報ポップアップ */}
+        {clickedRoute && routePopupPosition && (
+          <div
+            style={{
+              position: 'absolute',
+              left: `${routePopupPosition.x}px`,
+              top: `${routePopupPosition.y}px`,
+              backgroundColor: 'white',
+              border: '2px solid #333',
+              borderRadius: '6px',
+              padding: '10px',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+              zIndex: 1000,
+              minWidth: '200px',
+              transform: 'translate(-50%, -100%)',
+              marginTop: '-10px'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={handleRoutePopupClose}
+                style={{
+                  position: 'absolute',
+                  top: '-5px',
+                  right: '-5px',
+                  background: '#ff4444',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '20px',
+                  height: '20px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                ×
+              </button>
+              
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '8px'
+              }}>
+                <div style={{
+                  width: '20px',
+                  height: '20px',
+                  backgroundColor: routeColors[clickedRoute] || '#666',
+                  borderRadius: '50%'
+                }} />
+                <div style={{
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  color: '#333'
+                }}>
+                  {getRouteDestination(clickedRoute)?.description || routeNames[clickedRoute as RouteKey] || clickedRoute}
+                </div>
+              </div>
+              
+              <div style={{
+                fontSize: '14px',
+                color: '#666',
+                marginBottom: '8px'
+              }}>
+                <strong>行先:</strong> {getRouteDestination(clickedRoute)?.destinations.join(' ⇔ ') || '情報なし'}
+              </div>
+              
+              <button
+                onClick={() => {
+                  toggleRoute(clickedRoute as RouteKey);
+                  handleRoutePopupClose();
+                }}
+                style={{
+                  width: '100%',
+                  padding: '6px 12px',
+                  backgroundColor: visibleRoutes.has(clickedRoute as RouteKey) ? '#ff4444' : '#4CAF50',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  marginTop: '8px'
+                }}
+              >
+                {visibleRoutes.has(clickedRoute as RouteKey) ? '路線を非表示' : '路線を表示'}
+              </button>
+            </div>
           </div>
         )}
       </div>

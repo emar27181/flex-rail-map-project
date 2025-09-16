@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { routeColors } from '../data/routes';
 import type { RouteResult } from '../utils/routeFinder';
+import { getRouteDestination, getDirectionText, commonDirections } from '../data/routeDestinations';
 
 interface RouteRecommendationsProps {
   routes: RouteResult[];
@@ -254,7 +255,32 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                         fontWeight: '500',
                         color: segment.isWalkingTransfer ? '#4CAF50' : routeColors[segment.routeKey]
                       }}>
-                        {segment.routeName}
+                        {segment.isWalkingTransfer ? 
+                          segment.routeName :
+                          (() => {
+                            const routeDestination = getRouteDestination(segment.routeKey);
+                            const routeName = routeDestination?.description || segment.routeName;
+                            const fromStation = segment.stations[0].name;
+                            const toStation = segment.stations[segment.stations.length - 1].name;
+                            
+                            // 行先情報を取得
+                            let direction = '';
+                            if (commonDirections[segment.routeKey] && commonDirections[segment.routeKey][fromStation]) {
+                              direction = commonDirections[segment.routeKey][fromStation];
+                            } else if (routeDestination) {
+                              // 終点駅に向かっているかチェック
+                              const destinations = routeDestination.destinations;
+                              if (destinations.includes(toStation)) {
+                                direction = `${toStation}行き`;
+                              } else {
+                                // より適切な終点を推定
+                                direction = `${destinations[destinations.length - 1]}方面`;
+                              }
+                            }
+                            
+                            return `${routeName}${direction ? ` ${direction}` : ''}`;
+                          })()
+                        }
                       </span>
                     </div>
 
