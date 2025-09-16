@@ -1340,6 +1340,94 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                     )}
                   </div>
                 )}
+
+                {/* 選択されたルート表示 */}
+                {selectedRoute && (
+                  <div style={{ 
+                    marginBottom: '15px',
+                    padding: '10px',
+                    backgroundColor: '#e3f2fd',
+                    borderRadius: '4px',
+                    border: '1px solid #2196F3'
+                  }}>
+                    <div style={{ 
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '8px'
+                    }}>
+                      <div style={{ 
+                        fontSize: '14px', 
+                        fontWeight: 'bold', 
+                        color: '#2196F3'
+                      }}>
+                        選択中のルート
+                      </div>
+                      <button
+                        onClick={handleShowAllRoutes}
+                        style={{
+                          padding: '2px 6px',
+                          backgroundColor: 'transparent',
+                          border: '1px solid #2196F3',
+                          borderRadius: '3px',
+                          fontSize: '10px',
+                          cursor: 'pointer',
+                          color: '#2196F3'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#2196F3';
+                          e.currentTarget.style.color = 'white';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = '#2196F3';
+                        }}
+                      >
+                        解除
+                      </button>
+                    </div>
+                    
+                    <div style={{ fontSize: '12px', marginBottom: '8px', color: '#333' }}>
+                      総時間: <strong>{Math.round(selectedRoute.totalTime)}分</strong>　
+                      乗換: <strong>{selectedRoute.transfers}回</strong>
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      {selectedRoute.segments.map((segment, index) => (
+                        <div key={index} style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '11px'
+                        }}>
+                          <div style={{
+                            width: '12px',
+                            height: '12px',
+                            backgroundColor: segment.isWalkingTransfer ? '#4CAF50' : routeColors[segment.routeKey] || '#666',
+                            borderRadius: '50%',
+                            flexShrink: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontSize: '8px'
+                          }}>
+                            {segment.isWalkingTransfer ? '🚶' : ''}
+                          </div>
+                          <span style={{ 
+                            color: segment.isWalkingTransfer ? '#4CAF50' : routeColors[segment.routeKey] || '#666',
+                            fontWeight: '500'
+                          }}>
+                            {segment.isWalkingTransfer ? 
+                              `徒歩 (${segment.walkingTime}分)` : 
+                              `${segment.routeName} (${Math.round(segment.time)}分)`
+                            }
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 
                 {/* 表示オプション */}
                 <div style={{ 
@@ -1455,27 +1543,35 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 </div>
                 
                 {/* 路線一覧 */}
-                {visibleRoutesData.map(([routeKey]) => (
-                  <div 
-                    key={routeKey} 
-                    onClick={() => toggleRoute(routeKey as RouteKey)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      marginBottom: '6px',
-                      fontSize: '12px',
-                      cursor: 'pointer',
-                      padding: '4px',
-                      borderRadius: '3px',
-                      backgroundColor: visibleRoutes.has(routeKey as RouteKey) 
-                        ? 'rgba(0, 123, 255, 0.1)' 
-                        : 'rgba(108, 117, 125, 0.1)',
-                      border: `1px solid ${visibleRoutes.has(routeKey as RouteKey) 
-                        ? '#007bff' 
-                        : '#6c757d'}`,
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
+                {visibleRoutesData.map(([routeKey]) => {
+                  const isVisible = visibleRoutes.has(routeKey as RouteKey);
+                  const isInSelectedRoute = selectedRoute && selectedRoute.segments.some(
+                    segment => segment.routeKey === routeKey && segment.routeKey !== 'walking'
+                  );
+                  
+                  return (
+                    <div 
+                      key={routeKey} 
+                      onClick={() => toggleRoute(routeKey as RouteKey)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        marginBottom: '6px',
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                        padding: '4px',
+                        borderRadius: '3px',
+                        backgroundColor: isInSelectedRoute 
+                          ? 'rgba(33, 150, 243, 0.25)' 
+                          : isVisible 
+                            ? 'rgba(0, 123, 255, 0.1)' 
+                            : 'rgba(108, 117, 125, 0.1)',
+                        border: isInSelectedRoute 
+                          ? '2px solid #2196F3' 
+                          : `1px solid ${isVisible ? '#007bff' : '#6c757d'}`,
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
                     <input
                       type="checkbox"
                       checked={visibleRoutes.has(routeKey as RouteKey)}
@@ -1496,13 +1592,29 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                       opacity: visibleRoutes.has(routeKey as RouteKey) ? 1 : 0.3
                     }} />
                     <span style={{ 
-                      color: visibleRoutes.has(routeKey as RouteKey) ? '#333' : '#6c757d',
-                      lineHeight: '1.2'
+                      color: isInSelectedRoute 
+                        ? '#2196F3' 
+                        : isVisible 
+                          ? '#333' 
+                          : '#6c757d',
+                      lineHeight: '1.2',
+                      fontWeight: isInSelectedRoute ? 'bold' : 'normal'
                     }}>
                       {routeNames[routeKey as RouteKey]}
+                      {isInSelectedRoute && (
+                        <span style={{ 
+                          fontSize: '10px', 
+                          marginLeft: '4px',
+                          color: '#2196F3',
+                          fontWeight: 'normal'
+                        }}>
+                          (選択中のルート)
+                        </span>
+                      )}
                     </span>
-                  </div>
-                ))}
+                    </div>
+                  );
+                })}
                 
               </div>
             )}
