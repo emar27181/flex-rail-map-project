@@ -464,9 +464,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     // 選択されたルートの路線を表示
     const routeKeys = new Set<RouteKey>();
     route.segments.forEach(segment => {
-      routeKeys.add(segment.routeKey);
+      // 歩行乗換は路線表示に含めない
+      if (segment.routeKey !== 'walking') {
+        routeKeys.add(segment.routeKey);
+      }
     });
     setVisibleRoutes(routeKeys);
+  };
+
+  const handleShowAllRoutes = () => {
+    setSelectedRoute(null);
+    setVisibleRoutes(new Set(Object.keys(routes) as RouteKey[]));
   };
 
   const handleSchematicStationClick = (station: Station, action: 'departure' | 'arrival') => {
@@ -904,6 +912,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
         <RouteRecommendations
           routes={routeRecommendations}
           onRouteSelect={handleRouteSelect}
+          selectedRoute={selectedRoute}
+          onShowAllRoutes={handleShowAllRoutes}
         />
       )}
 

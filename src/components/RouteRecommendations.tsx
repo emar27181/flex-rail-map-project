@@ -5,11 +5,15 @@ import type { RouteResult } from '../utils/routeFinder';
 interface RouteRecommendationsProps {
   routes: RouteResult[];
   onRouteSelect?: (route: RouteResult) => void;
+  selectedRoute?: RouteResult | null;
+  onShowAllRoutes?: () => void;
 }
 
 const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
   routes,
-  onRouteSelect
+  onRouteSelect,
+  selectedRoute,
+  onShowAllRoutes
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -37,6 +41,22 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
     }
   };
 
+  const isRouteSelected = (route: RouteResult): boolean => {
+    if (!selectedRoute) return false;
+    
+    // ルートが同じかどうかを判定（セグメント数、路線、駅で比較）
+    if (route.segments.length !== selectedRoute.segments.length) return false;
+    
+    return route.segments.every((segment, index) => {
+      const selectedSegment = selectedRoute.segments[index];
+      return (
+        segment.routeKey === selectedSegment.routeKey &&
+        segment.startIndex === selectedSegment.startIndex &&
+        segment.endIndex === selectedSegment.endIndex
+      );
+    });
+  };
+
   return (
     <div style={{
       marginBottom: '20px',
@@ -55,9 +75,33 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
           marginBottom: isExpanded ? '15px' : '0'
         }}
       >
-        <h3 style={{ margin: '0', color: '#333' }}>
-          推薦ルート ({routes.length}件)
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <h3 style={{ margin: '0', color: '#333' }}>
+            推薦ルート ({routes.length}件)
+          </h3>
+          {selectedRoute && onShowAllRoutes && (
+            <button
+              onClick={onShowAllRoutes}
+              style={{
+                padding: '4px 8px',
+                backgroundColor: '#f5f5f5',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '12px',
+                cursor: 'pointer',
+                color: '#666'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#e0e0e0';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#f5f5f5';
+              }}
+            >
+              全ルート表示
+            </button>
+          )}
+        </div>
         <span style={{
           fontSize: '18px',
           color: '#666',
@@ -70,32 +114,20 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
 
       {isExpanded && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {routes.map((route, index) => (
-          <div
-            key={index}
-            onClick={() => onRouteSelect?.(route)}
-            style={{
-              padding: '15px',
-              backgroundColor: 'white',
-              borderRadius: '6px',
-              border: '1px solid #e0e0e0',
-              cursor: onRouteSelect ? 'pointer' : 'default',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}
-            onMouseEnter={(e) => {
-              if (onRouteSelect) {
-                e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (onRouteSelect) {
-                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }
-            }}
-          >
+        {routes.map((route, index) => {
+          const isSelected = isRouteSelected(route);
+          return (
+            <div
+              key={index}
+              style={{
+                padding: '15px',
+                backgroundColor: isSelected ? '#e3f2fd' : 'white',
+                borderRadius: '6px',
+                border: isSelected ? '2px solid #2196F3' : '1px solid #e0e0e0',
+                transition: 'all 0.2s ease',
+                boxShadow: isSelected ? '0 2px 8px rgba(33,150,243,0.3)' : '0 1px 3px rgba(0,0,0,0.1)'
+              }}
+            >
             {/* ルートヘッダー */}
             <div style={{
               display: 'flex',
@@ -109,9 +141,9 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                 <span style={{
                   fontSize: '18px',
                   fontWeight: 'bold',
-                  color: '#333'
+                  color: isSelected ? '#2196F3' : '#333'
                 }}>
-                  ルート {index + 1}
+                  ルート {index + 1} {isSelected && '(選択中)'}
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{
@@ -132,6 +164,35 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                   </span>
                 </div>
               </div>
+              
+              {/* 地図で表示ボタン */}
+              <button
+                onClick={() => onRouteSelect?.(route)}
+                disabled={isSelected}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: isSelected ? '#ccc' : '#2196F3',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: isSelected ? 'default' : 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.backgroundColor = '#1976D2';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.backgroundColor = '#2196F3';
+                  }
+                }}
+              >
+                {isSelected ? '地図に表示中' : '地図で表示'}
+              </button>
             </div>
 
             {/* 路線詳細 */}
@@ -239,8 +300,9 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                 </div>
               ))}
             </div>
-          </div>
-        ))}
+            </div>
+          );
+        })}
         </div>
       )}
 
