@@ -701,13 +701,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 // ブラウザの画面座標を直接使用（最も正確）
                 const tooltipPosition = { 
                   x: originalEvent.clientX, 
-                  y: originalEvent.clientY - 50  // ツールチップの高さ分上に配置
+                  y: originalEvent.clientY - 80  // ツールチップとマウスの間にスペースを確保
                 };
                 setHoverTooltipPosition(tooltipPosition);
                 
                 console.log('🟡 Using clientX/Y:', originalEvent.clientX, originalEvent.clientY);
                 console.log('🟡 Final tooltip position:', tooltipPosition);
-                console.log('🟡 Adjustment: y -= 50 (tooltip height)');
+                console.log('🟡 Adjustment: y -= 80 (tooltip height + spacing)');
                 console.log('🟡 === ROUTE HOVER DEBUG END ===');
               } else if (containerPoint || calculatedPoint) {
                 // フォールバック：コンテナポイント使用
@@ -718,7 +718,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 if (mapBounds) {
                   // コンテナポイントを画面座標に変換
                   const screenX = mapBounds.left + usePoint.x;
-                  const screenY = mapBounds.top + usePoint.y - 50;
+                  const screenY = mapBounds.top + usePoint.y - 80;
                   const tooltipPosition = { x: screenX, y: screenY };
                   setHoverTooltipPosition(tooltipPosition);
                   
@@ -1860,34 +1860,34 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
           <div
             style={{
               position: 'fixed',
-              left: `${hoverTooltipPosition.x - 100}px`, // 中央揃えのため半分の幅（約200px）を引く
+              left: `${hoverTooltipPosition.x - 75}px`, // 中央揃えのため半分の幅（約150px）を引く
               top: `${hoverTooltipPosition.y}px`,
-              backgroundColor: 'rgba(0, 0, 0, 0.9)',
-              color: 'white',
-              padding: '10px 15px',
-              borderRadius: '8px',
-              fontSize: '14px',
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              color: 'black',
+              padding: '6px 10px',
+              borderRadius: '6px',
+              fontSize: '13px',
               zIndex: 9998,
               whiteSpace: 'nowrap',
               pointerEvents: 'none',
               boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              minWidth: '200px',
+              border: '1px solid rgba(0,0,0,0.2)',
+              minWidth: '150px',
               textAlign: 'center'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
               <div style={{
-                width: '16px',
-                height: '16px',
+                width: '12px',
+                height: '12px',
                 backgroundColor: routeColors[hoveredRoute] || '#666',
                 borderRadius: '50%',
-                border: '1px solid rgba(255,255,255,0.3)',
+                border: '1px solid rgba(0,0,0,0.3)',
                 flexShrink: 0
               }} />
               <div style={{ 
                 fontWeight: 'bold', 
-                fontSize: '14px',
+                fontSize: '12px',
                 lineHeight: '1',
                 whiteSpace: 'nowrap'
               }}>
@@ -1910,8 +1910,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   
                   if (routeNumbers.length > 0) {
                     return (
-                      <div style={{ fontSize: '12px', opacity: 0.9 }}>
-                        <div style={{ color: '#90EE90' }}>
+                      <div style={{ fontSize: '11px', opacity: 0.9 }}>
+                        <div style={{ color: '#4CAF50' }}>
                           推薦ルート: {routeNumbers.join(', ')}
                         </div>
                       </div>
@@ -1920,7 +1920,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   
                   // 推薦経路に含まれていない場合は通常の行先表示
                   return (
-                    <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                    <div style={{ fontSize: '11px', opacity: 0.9 }}>
                       {getRouteDestination(hoveredRoute)?.destinations.join(' ⇔ ') || ''}
                     </div>
                   );
@@ -1934,7 +1934,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                     if (departure && !arrival) {
                       const direction = getDirectionText(hoveredRoute, departure.name, '');
                       return (
-                        <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                        <div style={{ fontSize: '11px', opacity: 0.9 }}>
                           出発駅: {departure.name}, {direction || `${routeDestination.destinations.join(' または ')}`}
                         </div>
                       );
@@ -1942,7 +1942,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                     // 到着駅のみ設定されている場合
                     else if (arrival && !departure) {
                       return (
-                        <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                        <div style={{ fontSize: '11px', opacity: 0.9 }}>
                           {arrival.name}行き
                         </div>
                       );
@@ -1950,7 +1950,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                     // どちらも未設定の場合は両端駅を表示
                     else {
                       return (
-                        <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                        <div style={{ fontSize: '11px', opacity: 0.9 }}>
                           {routeDestination.destinations.join(' ⇔ ')}
                         </div>
                       );
