@@ -80,6 +80,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   const routeFinder = useMemo(() => new RouteFinder(), []);
   const timeFilter = useMemo(() => new TimeFilter(routeFinder), [routeFinder]);
 
+  // 駅が通っている路線を見つける関数
+  const getRoutesForStation = useCallback((stationName: string): RouteKey[] => {
+    const stationRoutes: RouteKey[] = [];
+    Object.entries(routes).forEach(([routeKey, stationList]) => {
+      if (stationList.some(station => station.name === stationName)) {
+        stationRoutes.push(routeKey as RouteKey);
+      }
+    });
+    return stationRoutes;
+  }, []);
+
   // 時間フィルター結果と実際表示の一致性をチェックする関数
   const checkTimeFilterConsistency = useCallback(() => {
     if (!timeFilterEnabled || stationsWithinTime.length === 0) return;
@@ -794,6 +805,38 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                     <strong>{station.name}</strong>
                     {isDeparture && <div style={{ color: '#4CAF50', fontWeight: 'bold' }}>出発駅</div>}
                     {isArrival && <div style={{ color: '#F44336', fontWeight: 'bold' }}>到着駅</div>}
+                    
+                    {/* 通っている路線を表示 */}
+                    <div style={{ marginTop: '8px', marginBottom: '10px' }}>
+                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>通っている路線:</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        {getRoutesForStation(station.name).map((stationRouteKey) => (
+                          <div
+                            key={stationRouteKey}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              fontSize: '11px'
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: '10px',
+                                height: '10px',
+                                backgroundColor: routeColors[stationRouteKey],
+                                borderRadius: '50%',
+                                flexShrink: 0
+                              }}
+                            />
+                            <span style={{ color: routeColors[stationRouteKey], fontWeight: '500' }}>
+                              {getRouteDestination(stationRouteKey)?.description || routeNames[stationRouteKey] || stationRouteKey}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
                     <div style={{ marginTop: '10px' }}>
                       <button
                         onClick={() => setDeparture(station)}
@@ -889,6 +932,38 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 <Popup>
                   <div>
                     <strong>{station.name}</strong>
+                    
+                    {/* 通っている路線を表示 */}
+                    <div style={{ marginTop: '8px', marginBottom: '10px' }}>
+                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>通っている路線:</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        {getRoutesForStation(station.name).map((stationRouteKey) => (
+                          <div
+                            key={stationRouteKey}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              fontSize: '11px'
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: '10px',
+                                height: '10px',
+                                backgroundColor: routeColors[stationRouteKey],
+                                borderRadius: '50%',
+                                flexShrink: 0
+                              }}
+                            />
+                            <span style={{ color: routeColors[stationRouteKey], fontWeight: '500' }}>
+                              {getRouteDestination(stationRouteKey)?.description || routeNames[stationRouteKey] || stationRouteKey}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
                     <div style={{ marginTop: '10px' }}>
                       <button
                         onClick={() => setDeparture(station)}
