@@ -90,7 +90,9 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                 borderRadius: '4px',
                 fontSize: '12px',
                 cursor: 'pointer',
-                color: '#666'
+                color: '#666',
+                width: 'fit-content',
+                whiteSpace: 'nowrap'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = '#e0e0e0';

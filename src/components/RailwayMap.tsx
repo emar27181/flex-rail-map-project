@@ -398,12 +398,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   }, [timeFilterEnabled, departure, timeFilterMaxMinutes, visibleRoutes]);
 
   const toggleRoute = (routeKey: RouteKey) => {
+    console.log('🔄 toggleRoute called for:', routeKey);
+    console.log('🔄 Current visibleRoutes:', visibleRoutes);
     const newVisibleRoutes = new Set(visibleRoutes);
     if (newVisibleRoutes.has(routeKey)) {
+      console.log('🔄 Removing route from visible routes');
       newVisibleRoutes.delete(routeKey);
     } else {
+      console.log('🔄 Adding route to visible routes');
       newVisibleRoutes.add(routeKey);
     }
+    console.log('🔄 New visibleRoutes:', newVisibleRoutes);
     setVisibleRoutes(newVisibleRoutes);
   };
 
@@ -1802,12 +1807,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                     <input
                       type="checkbox"
                       checked={visibleRoutes.has(routeKey as RouteKey)}
-                      onChange={() => {}} // ハンドルはdivのonClickで
+                      onChange={(e) => {
+                        console.log('Checkbox clicked for route:', routeKey, 'checked:', e.target.checked);
+                        e.stopPropagation(); // 親のクリックイベントを防ぐ
+                        toggleRoute(routeKey as RouteKey);
+                      }}
                       style={{
                         marginRight: '8px',
                         cursor: 'pointer'
                       }}
-                      onClick={(e) => e.stopPropagation()}
                     />
                     <div style={{
                       width: '20px',
