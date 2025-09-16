@@ -191,16 +191,19 @@ export class RouteFinder {
     // Find one-transfer routes
     this.findTransferRoutes(departureNodes, arrival, allResults, 1);
 
-    // Find two-transfer routes if needed
-    if (allResults.length < maxResults) {
+    // Find two-transfer routes only if we have very few results and they're significantly different
+    if (allResults.length < 3) {
       this.findTransferRoutes(departureNodes, arrival, allResults, 2);
     }
 
     // Remove exact duplicates
     const uniqueResults = this.removeDuplicateRoutes(allResults);
 
+    // Apply RAPTOR-inspired optimization: prioritize by transfers then time
+    const optimizedResults = this.applyRAPTOROptimization(uniqueResults);
+
     // Diversify results to ensure different route combinations
-    const diverseResults = this.diversifyRoutes(uniqueResults, maxResults);
+    const diverseResults = this.diversifyRoutes(optimizedResults, maxResults);
 
     return diverseResults;
   }
@@ -326,7 +329,7 @@ export class RouteFinder {
                     queue.push({
                       node: transferNode,
                       path: newPath,
-                      totalTime: newTotalTime + 5, // Transfer penalty
+                      totalTime: newTotalTime + this.getTransferPenalty(nextStation.name), // Dynamic transfer penalty
                       transfers: current.transfers + 1
                     });
                     visited.add(transferKey);
@@ -506,6 +509,95 @@ export class RouteFinder {
     });
 
     return diverseResults;
+  }
+
+  // RAPTOR-inspired optimization: bicriteria approach (transfers first, then time)
+  private applyRAPTOROptimization(results: RouteResult[]): RouteResult[] {
+    if (results.length === 0) return results;
+
+    // Group by number of transfers
+    const byTransfers = new Map<number, RouteResult[]>();
+    results.forEach(result => {
+      if (!byTransfers.has(result.transfers)) {
+        byTransfers.set(result.transfers, []);
+      }
+      byTransfers.get(result.transfers)!.push(result);
+    });
+
+    const optimizedResults: RouteResult[] = [];
+
+    // Process in order of transfers (0, 1, 2, ...)
+    Array.from(byTransfers.keys()).sort((a, b) => a - b).forEach(transferCount => {
+      const routesWithThisTransferCount = byTransfers.get(transferCount)!;
+
+      // Sort by time within each transfer group
+      routesWithThisTransferCount.sort((a, b) => a.totalTime - b.totalTime);
+
+      // Apply more aggressive time filtering based on transfer count
+      const bestTime = routesWithThisTransferCount[0].totalTime;
+
+      // For direct routes (0 transfers): allow up to 1.5x the best time
+      // For 1 transfer: allow up to 1.3x the best time
+      // For 2+ transfers: allow up to 1.2x the best time
+      let timeMultiplier = 1.5;
+      if (transferCount === 1) timeMultiplier = 1.3;
+      else if (transferCount >= 2) timeMultiplier = 1.2;
+
+      const maxAllowedTime = bestTime * timeMultiplier;
+
+      const filtered = routesWithThisTransferCount.filter(route =>
+        route.totalTime <= maxAllowedTime
+      );
+
+      console.log(`Transfer ${transferCount}: ${routesWithThisTransferCount.length} → ${filtered.length} routes (time filter: ${Math.round(maxAllowedTime)}min max)`);
+
+      optimizedResults.push(...filtered);
+    });
+
+    // Further filter: for each transfer level, keep only truly diverse routes
+    const finalResults: RouteResult[] = [];
+    byTransfers.forEach((routes, transferCount) => {
+      const sortedRoutes = routes
+        .filter(r => optimizedResults.includes(r))
+        .sort((a, b) => a.totalTime - b.totalTime);
+
+      if (sortedRoutes.length > 0) {
+        // Always include the best route for this transfer count
+        finalResults.push(sortedRoutes[0]);
+
+        // Add additional routes only if they're significantly different
+        for (let i = 1; i < sortedRoutes.length; i++) {
+          const current = sortedRoutes[i];
+          const timeDiffFromBest = current.totalTime - sortedRoutes[0].totalTime;
+
+          // Only add if time difference is significant AND route is meaningfully different
+          if (timeDiffFromBest >= 5 && !this.areRoutesEssentiallySame(sortedRoutes[0], current)) {
+            const isDifferentFromExisting = finalResults.every(existing =>
+              !this.areRoutesEssentiallySame(existing, current)
+            );
+
+            if (isDifferentFromExisting) {
+              finalResults.push(current);
+            }
+          }
+        }
+      }
+    });
+
+    console.log(`RAPTOR optimization: ${results.length} → ${finalResults.length} routes`);
+    return finalResults;
+  }
+
+  // Improved transfer penalty calculation based on station type
+  private getTransferPenalty(stationName: string): number {
+    // Major hub stations have lower transfer penalty (better facilities)
+    const majorHubs = ['新宿', '東京', '渋谷', '池袋', '品川', '上野', '横浜', '大手町', '表参道'];
+    if (majorHubs.includes(stationName)) {
+      return 3; // 3 minutes for major hubs
+    }
+
+    // Regular transfer stations
+    return 5; // 5 minutes standard penalty
   }
 
   // 2つのルートが実質的に同じかどうかを判定

@@ -1143,8 +1143,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
           onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
         />
 
-        {/* カバレッジ分析 */}
-        <CoverageAnalysis />
+        {/* カバレッジ分析 - オフ */}
+        {/* <CoverageAnalysis /> */}
 
         {/* ルート推薦表示は凡例内に統合 */}
 
