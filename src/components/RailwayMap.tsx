@@ -5,7 +5,7 @@ import StationSelector from './StationSelector';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
-import ThemeToggle from './ThemeToggle';
+import NavigationBar from './NavigationBar';
 import { RouteFinder, TimeFilter, type RouteResult, type StationWithTime } from '../utils/routeFinder';
 import { getRouteDestination, getRouteDisplayText, getDirectionText, commonDirections } from '../data/routeDestinations';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
@@ -1182,11 +1182,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
 
   return (
     <ErrorBoundary>
-      <div className={className}>
-        {/* テーマ切り替えボタン */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-          <ThemeToggle />
-        </div>
+      <div className={className} style={{ padding: '0 20px' }}>
+        {/* ナビゲーションバー */}
+        <NavigationBar />
 
         {/* 駅選択UI */}
         <StationSelector
