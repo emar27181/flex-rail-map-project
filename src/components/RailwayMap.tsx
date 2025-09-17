@@ -1850,9 +1850,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   <div style={{
                     marginBottom: '15px',
                     padding: '10px',
-                    backgroundColor: '#f8f9fa',
+                    backgroundColor: colors.surface,
                     borderRadius: '4px',
-                    border: '1px solid #e9ecef'
+                    border: `1px solid ${colors.borderLight}`
                   }}>
                     <div style={{ marginBottom: '10px' }}>
                       <label style={{
