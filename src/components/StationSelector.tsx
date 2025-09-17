@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import { translateStation, translateUI } from '../utils/translation';
 
 interface StationSelectorProps {
   onDepartureChange: (station: Station | null) => void;
@@ -10,6 +11,7 @@ interface StationSelectorProps {
   arrival: Station | null;
   isExpanded?: boolean;
   onToggleExpanded?: () => void;
+  language?: 'japanese' | 'english';
 }
 
 const StationSelector: React.FC<StationSelectorProps> = ({
@@ -18,7 +20,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   departure,
   arrival,
   isExpanded = true,
-  onToggleExpanded
+  onToggleExpanded,
+  language = 'japanese'
 }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -132,7 +135,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           marginBottom: isExpanded ? '15px' : '0'
         }}
       >
-        <h3 style={{ margin: '0', color: colors.text }}>出発駅・到着駅を選択</h3>
+        <h3 style={{ margin: '0', color: colors.text }}>{translateUI('stationSelection', language)}</h3>
         {onToggleExpanded && (
           <span style={{
             fontSize: '18px',
@@ -151,7 +154,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             {/* 出発駅選択 */}
             <div ref={departureRef} style={{ flex: '1', minWidth: '200px', maxWidth: '300px', position: 'relative' }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: colors.textSecondary }}>
-                出発駅
+                {translateUI('departureStation', language)}
               </label>
               <div style={{ position: 'relative' }}>
                 <input
@@ -162,7 +165,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setShowDepartureResults(true);
                   }}
                   onFocus={() => setShowDepartureResults(true)}
-                  placeholder={departure ? departure.name : "駅名を入力"}
+                  placeholder={departure ? translateStation(departure.name, language) : translateUI('stationPlaceholder', language)}
                   style={{
                     width: '100%',
                     padding: '8px 30px 8px 8px',
@@ -221,12 +224,12 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surface}
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
                     >
-                      {station.name}
+                      {translateStation(station.name, language)}
                     </div>
                   ))}
                   {filteredDepartureStations.length === 0 && (
                     <div style={{ padding: '8px 12px', color: colors.textSecondary, fontSize: '14px' }}>
-                      {departureSearch ? '該当する駅が見つかりません' : '主要駅: 東京、新宿、渋谷、池袋、横浜、新横浜'}
+                      {departureSearch ? translateUI('noStationFound', language) : translateUI('majorStationsHint', language)}
                     </div>
                   )}
                 </div>
@@ -249,14 +252,14 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 }}
                 disabled={!departure || !arrival}
               >
-                ⇄ 入替
+{translateUI('swapStations', language)}
               </button>
             </div>
 
             {/* 到着駅選択 */}
             <div ref={arrivalRef} style={{ flex: '1', minWidth: '200px', maxWidth: '300px', position: 'relative' }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: colors.textSecondary }}>
-                到着駅
+                {translateUI('arrivalStation', language)}
               </label>
               <div style={{ position: 'relative' }}>
                 <input
@@ -267,7 +270,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setShowArrivalResults(true);
                   }}
                   onFocus={() => setShowArrivalResults(true)}
-                  placeholder={arrival ? arrival.name : "駅名を入力"}
+                  placeholder={arrival ? translateStation(arrival.name, language) : translateUI('stationPlaceholder', language)}
                   style={{
                     width: '100%',
                     padding: '8px 30px 8px 8px',
@@ -326,12 +329,12 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surface}
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
                     >
-                      {station.name}
+                      {translateStation(station.name, language)}
                     </div>
                   ))}
                   {filteredArrivalStations.length === 0 && (
                     <div style={{ padding: '8px 12px', color: colors.textSecondary, fontSize: '14px' }}>
-                      {arrivalSearch ? '該当する駅が見つかりません' : '主要駅: 東京、新宿、渋谷、池袋、横浜、新横浜'}
+                      {arrivalSearch ? translateUI('noStationFound', language) : translateUI('majorStationsHint', language)}
                     </div>
                   )}
                 </div>
@@ -343,9 +346,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           {(departure || arrival) && (
             <div style={{ marginTop: '15px', padding: '10px', backgroundColor: theme === 'dark' ? '#2d4a2d' : '#e8f5e8', borderRadius: '4px' }}>
               <div style={{ fontSize: '14px', color: colors.text }}>
-                {departure && <span><strong>出発:</strong> {departure.name}</span>}
+                {departure && <span><strong>{translateUI('departure', language)}:</strong> {translateStation(departure.name, language)}</span>}
                 {departure && arrival && <span style={{ margin: '0 10px' }}>→</span>}
-                {arrival && <span><strong>到着:</strong> {arrival.name}</span>}
+                {arrival && <span><strong>{translateUI('arrival', language)}:</strong> {translateStation(arrival.name, language)}</span>}
               </div>
             </div>
           )}
