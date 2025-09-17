@@ -19,9 +19,10 @@ declare global {
 
 interface RailwayMapProps {
   className?: string;
+  language?: 'japanese' | 'english';
 }
 
-const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
+const RailwayMap: React.FC<RailwayMapProps> = ({ className, language = 'japanese' }) => {
   // console.log('RailwayMap component initialized');
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -46,6 +47,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   });
   const [routeRecommendations, setRouteRecommendations] = useState<RouteResult[]>([]);
   const [selectedRoute, setSelectedRoute] = useState<RouteResult | null>(null);
+
+  // Language state management - use prop if provided, otherwise default to japanese
+  const [internalLanguage, setInternalLanguage] = useState<'japanese' | 'english'>('japanese');
+  const currentLanguage = language || internalLanguage;
+
+  // Debug language changes
+  console.log('Current language state:', { language, internalLanguage, currentLanguage });
 
   // 折りたたみ状態の管理
   const [isStationSelectorExpanded, setIsStationSelectorExpanded] = useState(true);
@@ -1192,7 +1200,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     <ErrorBoundary>
       <div className={className} style={{ padding: '0 20px' }}>
         {/* ナビゲーションバー */}
-        <NavigationBar />
+        <NavigationBar
+          language={currentLanguage}
+          onLanguageChange={setInternalLanguage}
+        />
 
         {/* 駅選択UI */}
         <StationSelector
