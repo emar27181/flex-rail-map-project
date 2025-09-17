@@ -411,24 +411,35 @@ export class RouteFinder {
     const diverseResults: RouteResult[] = [];
     const seenRouteSignatures = new Set<string>();
 
-    // より詳細なルート識別のための関数（乗り換え駅も含む）
+    // より詳細なルート識別のための関数（乗り換え駅と使用路線の組み合わせを完全に考慮）
     const getRouteSignature = (result: RouteResult): string => {
       // 歩行乗換以外のセグメントで、路線 + 経由駅のパターンを作成
       const segments = result.segments.filter(seg => seg.routeKey !== 'walking');
 
-      const signature = segments.map((seg, index) => {
-        const startStation = seg.stations[0]?.name || '';
-        const endStation = seg.stations[seg.stations.length - 1]?.name || '';
+      // 乗り換え駅のリストを抽出
+      const transferStations: string[] = [];
+      for (let i = 0; i < segments.length - 1; i++) {
+        const currentSegmentEnd = segments[i].stations[segments[i].stations.length - 1]?.name;
+        const nextSegmentStart = segments[i + 1].stations[0]?.name;
 
-        // 最初のセグメント以外は乗り換え駅から始まる
-        if (index > 0) {
-          return `${seg.routeKey}:${startStation}→${endStation}`;
-        } else {
-          return `${seg.routeKey}:${startStation}→${endStation}`;
+        // 通常は同じ駅だが、念のため両方チェック
+        if (currentSegmentEnd && nextSegmentStart) {
+          transferStations.push(currentSegmentEnd === nextSegmentStart ? currentSegmentEnd : `${currentSegmentEnd}-${nextSegmentStart}`);
         }
-      }).join('|');
+      }
 
-      return signature;
+      // 使用路線のリスト
+      const routeKeys = segments.map(seg => seg.routeKey).join('-');
+
+      // 乗り換え駅の組み合わせ
+      const transferPattern = transferStations.join(',');
+
+      // 出発駅と到着駅
+      const startStation = segments[0]?.stations[0]?.name || '';
+      const endStation = segments[segments.length - 1]?.stations[segments[segments.length - 1].stations.length - 1]?.name || '';
+
+      // 完全なシグネチャ: 出発駅 + 路線組み合わせ + 乗り換え駅 + 到着駅
+      return `${startStation}|${routeKeys}|${transferPattern}|${endStation}`;
     };
 
     // デバッグ: 全ルートのシグネチャを出力
@@ -460,7 +471,12 @@ export class RouteFinder {
         console.log(`✅ Added unique route ${diverseResults.length}: ${routeDescription} (${result.totalTime}min, ${result.transfers} transfers)`);
       } else {
         if (seenRouteSignatures.has(signature)) {
-          console.log(`❌ Skipped duplicate route ${index + 1}: signature already seen`);
+          const routeDescription = result.segments
+            .filter(seg => seg.routeKey !== 'walking')
+            .map(seg => `${seg.routeName || seg.routeKey}(${seg.stations[0]?.name}→${seg.stations[seg.stations.length - 1]?.name})`)
+            .join(' → ');
+          console.log(`❌ Skipped duplicate route ${index + 1}: ${routeDescription}`);
+          console.log(`   Signature: ${signature}`);
         }
       }
     });
@@ -600,7 +616,7 @@ export class RouteFinder {
     return 5; // 5 minutes standard penalty
   }
 
-  // 2つのルートが実質的に同じかどうかを判定
+  // 2つのルートが実質的に同じかどうかを判定（より厳密）
   private areRoutesEssentiallySame(route1: RouteResult, route2: RouteResult): boolean {
     // セグメント数が異なる場合は異なるルート
     if (route1.segments.length !== route2.segments.length) {
@@ -615,11 +631,33 @@ export class RouteFinder {
       return false;
     }
 
-    return segments1.every((seg1, index) => {
+    // 各セグメントが完全に一致するかチェック
+    const segmentsMatch = segments1.every((seg1, index) => {
       const seg2 = segments2[index];
       return seg1.routeKey === seg2.routeKey &&
              seg1.stations[0]?.name === seg2.stations[0]?.name &&
              seg1.stations[seg1.stations.length - 1]?.name === seg2.stations[seg2.stations.length - 1]?.name;
     });
+
+    if (!segmentsMatch) {
+      return false;
+    }
+
+    // 乗り換え駅のパターンが同じかチェック
+    const getTransferStations = (segments: any[]) => {
+      const transfers: string[] = [];
+      for (let i = 0; i < segments.length - 1; i++) {
+        const transferStation = segments[i].stations[segments[i].stations.length - 1]?.name;
+        if (transferStation) {
+          transfers.push(transferStation);
+        }
+      }
+      return transfers.join(',');
+    };
+
+    const transfers1 = getTransferStations(segments1);
+    const transfers2 = getTransferStations(segments2);
+
+    return transfers1 === transfers2;
   }
 }

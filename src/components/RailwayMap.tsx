@@ -334,18 +334,64 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     };
   }, []);
 
+  // 最終的な重複除去関数（表示レベル）
+  const removeFinalDuplicates = useCallback((routes: RouteResult[]): RouteResult[] => {
+    const uniqueRoutes: RouteResult[] = [];
+    const seenSignatures = new Set<string>();
+
+    routes.forEach((route, index) => {
+      // 乗り換え駅 + 所要時間 + 乗り換え回数の組み合わせで判定
+      const transferStations = [];
+      for (let i = 0; i < route.segments.length - 1; i++) {
+        const currentEnd = route.segments[i].stations[route.segments[i].stations.length - 1]?.name;
+        if (currentEnd) {
+          transferStations.push(currentEnd);
+        }
+      }
+
+      const signature = `${route.transfers}transfers-${Math.round(route.totalTime)}min-${transferStations.join(',')}`;
+
+      if (!seenSignatures.has(signature)) {
+        seenSignatures.add(signature);
+        uniqueRoutes.push(route);
+        console.log(`✅ Display route ${uniqueRoutes.length}: ${signature}`);
+      } else {
+        console.log(`❌ Skipped display duplicate ${index + 1}: ${signature}`);
+      }
+    });
+
+    return uniqueRoutes;
+  }, []);
+
   // 出発駅と到着駅が設定された時にルート検索を実行
   useEffect(() => {
     if (departure && arrival) {
-      const routeResults = routeFinder.findRoutes(departure, arrival, maxRouteRecommendations);
-      setRouteRecommendations(routeResults);
+      const routeResults = routeFinder.findRoutes(departure, arrival, maxRouteRecommendations * 2); // 多めに取得
+
+      // 表示レベルでの最終重複除去
+      const finalUniqueRoutes = removeFinalDuplicates(routeResults).slice(0, maxRouteRecommendations);
+
+      setRouteRecommendations(finalUniqueRoutes);
       setSelectedRoute(null);
 
       // デバッグ：推薦された経路の詳細をログ出力
-      console.log(`Route recommendations for ${departure.name} → ${arrival.name}:`);
-      routeResults.forEach((route, index) => {
-        const routeDescription = route.segments.map(seg => seg.routeName).join(' → ');
+      console.log(`\n=== Final Route Recommendations for ${departure.name} → ${arrival.name} ===`);
+      finalUniqueRoutes.forEach((route, index) => {
+        const routeDescription = route.segments
+          .filter(seg => seg.routeKey !== 'walking')
+          .map(seg => seg.routeName || seg.routeKey)
+          .join(' → ');
+
+        const transferStations = [];
+        for (let i = 0; i < route.segments.length - 1; i++) {
+          const currentEnd = route.segments[i].stations[route.segments[i].stations.length - 1]?.name;
+          if (currentEnd) {
+            transferStations.push(currentEnd);
+          }
+        }
+
         console.log(`${index + 1}: ${routeDescription} (${route.totalTime}分, ${route.transfers}回乗換)`);
+        console.log(`   乗り換え駅: ${transferStations.join(', ') || 'なし'}`);
       });
 
       // visibleRoutesの制御は時間フィルターのuseEffectで行う
@@ -353,7 +399,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
       setRouteRecommendations([]);
       setSelectedRoute(null);
     }
-  }, [departure, arrival, routeFinder, maxRouteRecommendations]);
+  }, [departure, arrival, routeFinder, maxRouteRecommendations, removeFinalDuplicates]);
 
   // 時間フィルターが有効な時の駅フィルタリング（出発駅ベース）
   useEffect(() => {
