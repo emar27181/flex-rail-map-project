@@ -917,7 +917,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                           fontSize: '12px'
                         }}
                       >
-                        出発駅に設定
+{translateUI('setDepartureStation', currentLanguage)}
                       </button>
                       <button
                         onClick={() => setArrival(station)}
@@ -931,7 +931,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                           fontSize: '12px'
                         }}
                       >
-                        到着駅に設定
+{translateUI('setArrivalStation', currentLanguage)}
                       </button>
                     </div>
                   </div>
@@ -1044,7 +1044,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                           fontSize: '12px'
                         }}
                       >
-                        出発駅に設定
+{translateUI('setDepartureStation', currentLanguage)}
                       </button>
                       <button
                         onClick={() => setArrival(station)}
@@ -1058,7 +1058,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                           fontSize: '12px'
                         }}
                       >
-                        到着駅に設定
+{translateUI('setArrivalStation', currentLanguage)}
                       </button>
                     </div>
                   </div>
@@ -1254,7 +1254,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                   fontSize: '14px',
                   color: colors.text
                 }}>
-                  <span style={{ marginRight: '8px' }}>経路推薦数:</span>
+                  <span style={{ marginRight: '8px' }}>{translateUI('routeRecommendationCount', currentLanguage)}</span>
                   <select
                     value={maxRouteRecommendations}
                     onChange={(e) => setMaxRouteRecommendations(Number(e.target.value))}
@@ -1267,11 +1267,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                       color: colors.text
                     }}
                   >
-                    <option value={1}>1件</option>
-                    <option value={2}>2件</option>
-                    <option value={3}>3件</option>
-                    <option value={5}>5件</option>
-                    <option value={10}>10件</option>
+                    <option value={1}>{translateUI('routeCount', currentLanguage, { count: '1' })}</option>
+                    <option value={2}>{translateUI('routeCount', currentLanguage, { count: '2' })}</option>
+                    <option value={3}>{translateUI('routeCount', currentLanguage, { count: '3' })}</option>
+                    <option value={5}>{translateUI('routeCount', currentLanguage, { count: '5' })}</option>
+                    <option value={10}>{translateUI('routeCount', currentLanguage, { count: '10' })}</option>
                   </select>
                   <button
                     onClick={selectAllRoutes}
@@ -1309,7 +1309,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                   color: colors.textSecondary,
                   marginTop: '4px'
                 }}>
-                  ※路線表示・乗換駅切り替えは右上の凡例から
+{translateUI('routeSwitchNote', currentLanguage)}
                 </div>
               </div>
 
@@ -1348,7 +1348,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                       marginBottom: '8px',
                       fontSize: '13px'
                     }}>
-                      <span style={{ color: colors.textSecondary }}>基準駅:</span>
+                      <span style={{ color: colors.textSecondary }}>{translateUI('baseStation', currentLanguage)}</span>
                       <span style={{
                         padding: '4px 8px',
                         backgroundColor: departure ? colors.successLight : colors.surface,
@@ -1358,7 +1358,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                         fontSize: '13px',
                         fontWeight: 'bold'
                       }}>
-                        {departure ? departure.name : '出発駅を設定してください'}
+                        {departure ? translateStation(departure.name, currentLanguage) : translateUI('pleaseSetDeparture', currentLanguage)}
                       </span>
                     </div>
 
@@ -1380,17 +1380,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                         }}
                         disabled={!departure}
                       >
-                        <option value={5}>5分</option>
-                        <option value={10}>10分</option>
-                        <option value={15}>15分</option>
-                        <option value={20}>20分</option>
-                        <option value={30}>30分</option>
-                        <option value={45}>45分</option>
-                        <option value={60}>60分</option>
+                        <option value={5}>{translateUI('minutesShort', currentLanguage, { time: '5' })}</option>
+                        <option value={10}>{translateUI('minutesShort', currentLanguage, { time: '10' })}</option>
+                        <option value={15}>{translateUI('minutesShort', currentLanguage, { time: '15' })}</option>
+                        <option value={20}>{translateUI('minutesShort', currentLanguage, { time: '20' })}</option>
+                        <option value={30}>{translateUI('minutesShort', currentLanguage, { time: '30' })}</option>
+                        <option value={45}>{translateUI('minutesShort', currentLanguage, { time: '45' })}</option>
+                        <option value={60}>{translateUI('minutesShort', currentLanguage, { time: '60' })}</option>
                       </select>
                       {timeFilterEnabled && departure && stationsWithinTime.length > 0 && (
                         <span style={{ color: colors.textSecondary, fontSize: '11px' }}>
-                          ({stationsWithinTime.length}駅)
+{translateUI('stationsCount', currentLanguage, { count: stationsWithinTime.length.toString() })}
                         </span>
                       )}
                     </div>
@@ -1634,7 +1634,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                         marginBottom: '8px',
                         color: colors.text
                       }}>
-                        現在の駅設定
+{translateUI('currentStationSettings', currentLanguage)}
                       </div>
                       {departure && arrival && (
                         <div style={{
@@ -1726,7 +1726,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                           }}>
                             S
                           </div>
-                          <span style={{ color: colors.text, fontWeight: 'bold' }}>出発駅: {departure.name}</span>
+                          <span style={{ color: colors.text, fontWeight: 'bold' }}>{translateUI('departureStationLabel', currentLanguage)} {translateStation(departure.name, currentLanguage)}</span>
                         </div>
                       )}
                       {!departure && arrival && (
@@ -1753,7 +1753,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                           }}>
                             G
                           </div>
-                          <span style={{ color: colors.text, fontWeight: 'bold' }}>到着駅: {arrival.name}</span>
+                          <span style={{ color: colors.text, fontWeight: 'bold' }}>{translateUI('arrivalStationLabel', currentLanguage)} {translateStation(arrival.name, currentLanguage)}</span>
                         </div>
                       )}
                     </div>
@@ -1850,7 +1850,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                                   fontSize: '10px',
                                   fontWeight: 'bold'
                                 }}>→</span>
-                                <span>({Math.round(route.totalTime)}分, 乗換{route.transfers}回)</span>
+                                <span>({translateUI('minutesShort', currentLanguage, { time: Math.round(route.totalTime).toString() })}, {translateUI('transfersCount', currentLanguage, { count: route.transfers.toString() })})</span>
                               </div>
                             </label>
                           );
@@ -2172,7 +2172,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                             justifyContent: 'center',
                             gap: '4px'
                           }}>
-                            <span>出発駅: {departure.name}</span>
+                            <span>{translateUI('departureStationLabel', currentLanguage)} {translateStation(departure.name, currentLanguage)}</span>
                             <span style={{
                               color: '#4CAF50',
                               fontSize: '12px',
