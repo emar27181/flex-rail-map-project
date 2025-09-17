@@ -73,8 +73,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             e.currentTarget.style.backgroundColor = 'transparent';
             e.currentTarget.style.transform = 'scale(1)';
           }}
-          title={language === 'japanese' ? 'Switch to English' : '日本語に切り替え'}
-          aria-label={language === 'japanese' ? 'Switch to English' : '日本語に切り替え'}
+          title={language === 'japanese' ? 'Switch to English' : 'Switch to Japanese'}
+          aria-label={language === 'japanese' ? 'Switch to English' : 'Switch to Japanese'}
         >
           <Languages size={20} />
         </button>
@@ -103,8 +103,14 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             e.currentTarget.style.backgroundColor = 'transparent';
             e.currentTarget.style.transform = 'scale(1)';
           }}
-          title={`${theme === 'light' ? 'ダーク' : 'ライト'}モードに切り替え`}
-          aria-label={`${theme === 'light' ? 'ダーク' : 'ライト'}モードに切り替え`}
+          title={language === 'japanese'
+            ? `${theme === 'light' ? 'ダーク' : 'ライト'}モードに切り替え`
+            : `Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`
+          }
+          aria-label={language === 'japanese'
+            ? `${theme === 'light' ? 'ダーク' : 'ライト'}モードに切り替え`
+            : `Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`
+          }
         >
           {theme === 'light' ? (
             <Moon size={20} />
