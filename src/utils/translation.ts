@@ -262,6 +262,114 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Show stations within {minutes} min from departure"
   },
 
+  // RouteRecommendations
+  routeNumber: {
+    japanese: "ルート {number}",
+    english: "Route {number}"
+  },
+  selectedStatus: {
+    japanese: "(選択中)",
+    english: "(Selected)"
+  },
+  displayOnMapActive: {
+    japanese: "地図に表示中",
+    english: "Displaying on Map"
+  },
+  displayOnMapButton: {
+    japanese: "地図で表示",
+    english: "Show on Map"
+  },
+  routeDetails: {
+    japanese: "路線詳細",
+    english: "Route Details"
+  },
+  transferInfo: {
+    japanese: "乗換案内",
+    english: "Transfer Information"
+  },
+  walkingTransferShort: {
+    japanese: "徒歩乗換",
+    english: "Walking"
+  },
+  transferShort: {
+    japanese: "乗換",
+    english: "Transfer"
+  },
+  direction: {
+    japanese: "{destination}行き",
+    english: "to {destination}"
+  },
+  directionArea: {
+    japanese: "{destination}方面",
+    english: "towards {destination}"
+  },
+  viaStations: {
+    japanese: "経由",
+    english: "via"
+  },
+  otherStations: {
+    japanese: "他{count}駅",
+    english: "{count} more stations"
+  },
+  noRoutesFound: {
+    japanese: "ルートが見つかりませんでした",
+    english: "No routes found"
+  },
+  routeCount: {
+    japanese: "{count}件",
+    english: "{count} routes"
+  },
+
+  // RailwayMap additional UI
+  setDepartureStation: {
+    japanese: "出発駅に設定",
+    english: "Set as Departure"
+  },
+  setArrivalStation: {
+    japanese: "到着駅に設定",
+    english: "Set as Arrival"
+  },
+  routeRecommendationCount: {
+    japanese: "経路推薦数:",
+    english: "Route Count:"
+  },
+  routeSwitchNote: {
+    japanese: "※路線表示・乗換駅切り替えは右上の凡例から",
+    english: "※Use legend in top-right to toggle routes and transfer stations"
+  },
+  baseStation: {
+    japanese: "基準駅:",
+    english: "Base Station:"
+  },
+  pleaseSetDeparture: {
+    japanese: "出発駅を設定してください",
+    english: "Please set departure station"
+  },
+  stationsCount: {
+    japanese: "({count}駅)",
+    english: "({count} stations)"
+  },
+  currentStationSettings: {
+    japanese: "現在の駅設定",
+    english: "Current Station Settings"
+  },
+  departureStationLabel: {
+    japanese: "出発駅:",
+    english: "Departure:"
+  },
+  arrivalStationLabel: {
+    japanese: "到着駅:",
+    english: "Arrival:"
+  },
+  minutesShort: {
+    japanese: "{time}分",
+    english: "{time}min"
+  },
+  transfersCount: {
+    japanese: "乗換{count}回",
+    english: "{count} transfers"
+  },
+
   // その他
   departure: {
     japanese: "出発",
