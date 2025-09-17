@@ -593,7 +593,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
       <div style={{
         height: '600px',
         width: '100%',
-        border: '1px solid #ccc',
+        border: `1px solid ${colors.border}`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -1339,7 +1339,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                       <span style={{
                         padding: '4px 8px',
                         backgroundColor: departure ? '#e8f5e8' : '#f0f0f0',
-                        border: departure ? '1px solid #4CAF50' : '1px solid #ccc',
+                        border: departure ? '1px solid #4CAF50' : `1px solid ${colors.border}`,
                         borderRadius: '4px',
                         color: departure ? '#2e7d32' : '#666',
                         fontSize: '13px',
@@ -1362,7 +1362,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                         style={{
                           padding: '3px 6px',
                           borderRadius: '4px',
-                          border: '1px solid #ccc',
+                          border: `1px solid ${colors.border}`,
                           fontSize: '13px'
                         }}
                         disabled={!departure}
@@ -1445,9 +1445,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   width: '100%',
                   maxHeight: '200px',
                   padding: '5px',
-                  border: '1px solid #ccc',
+                  border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
-                  backgroundColor: 'white',
+                  backgroundColor: colors.surfaceElevated,
                   overflowY: 'auto',
                   display: 'flex',
                   flexWrap: 'wrap',
@@ -1485,7 +1485,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                       }}
                       onMouseEnter={(e) => {
                         if (!isSelected) {
-                          e.currentTarget.style.backgroundColor = '#f5f5f5';
+                          e.currentTarget.style.backgroundColor = colors.surfaceHover;
                         }
                       }}
                       onMouseLeave={(e) => {
@@ -1525,7 +1525,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
           )}
         </div>
 
-        <div style={{ height: '600px', width: '100%', border: '1px solid #ccc', position: 'relative' }}>
+        <div style={{ height: '600px', width: '100%', border: `1px solid ${colors.border}`, position: 'relative' }}>
           {mapViewMode === 'realistic' ? (
             <MapContainer
               center={tokyoStation}
@@ -1632,9 +1632,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                           marginBottom: '8px',
                           fontSize: '12px',
                           padding: '8px',
-                          backgroundColor: '#f0f8ff',
+                          backgroundColor: colors.infoLight,
                           borderRadius: '4px',
-                          border: '1px solid #e0e8f0'
+                          border: `1px solid ${colors.border}`
                         }}>
                           <div style={{
                             display: 'flex',
@@ -1644,7 +1644,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                             <div style={{
                               width: '16px',
                               height: '16px',
-                              backgroundColor: 'white',
+                              backgroundColor: colors.surfaceElevated,
                               border: '2px solid #4CAF50',
                               borderRadius: '3px',
                               display: 'flex',
@@ -1657,7 +1657,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                             }}>
                               S
                             </div>
-                            <span style={{ color: '#333', fontWeight: 'bold' }}>{departure.name}</span>
+                            <span style={{ color: colors.text, fontWeight: 'bold' }}>{departure.name}</span>
                           </div>
                           <span style={{
                             color: '#4CAF50',
@@ -1672,7 +1672,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                             <div style={{
                               width: '16px',
                               height: '16px',
-                              backgroundColor: 'white',
+                              backgroundColor: colors.surfaceElevated,
                               border: '2px solid #F44336',
                               borderRadius: '3px',
                               display: 'flex',
@@ -1685,7 +1685,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                             }}>
                               G
                             </div>
-                            <span style={{ color: '#333', fontWeight: 'bold' }}>{arrival.name}</span>
+                            <span style={{ color: colors.text, fontWeight: 'bold' }}>{arrival.name}</span>
                           </div>
                         </div>
                       )}
@@ -1699,7 +1699,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                           <div style={{
                             width: '20px',
                             height: '20px',
-                            backgroundColor: 'white',
+                            backgroundColor: colors.surfaceElevated,
                             border: '3px solid #4CAF50',
                             borderRadius: '4px',
                             marginRight: '8px',
@@ -1713,7 +1713,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                           }}>
                             S
                           </div>
-                          <span style={{ color: '#333', fontWeight: 'bold' }}>出発駅: {departure.name}</span>
+                          <span style={{ color: colors.text, fontWeight: 'bold' }}>出発駅: {departure.name}</span>
                         </div>
                       )}
                       {!departure && arrival && (
@@ -1726,7 +1726,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                           <div style={{
                             width: '20px',
                             height: '20px',
-                            backgroundColor: 'white',
+                            backgroundColor: colors.surfaceElevated,
                             border: '3px solid #F44336',
                             borderRadius: '4px',
                             marginRight: '8px',
@@ -1740,7 +1740,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                           }}>
                             G
                           </div>
-                          <span style={{ color: '#333', fontWeight: 'bold' }}>到着駅: {arrival.name}</span>
+                          <span style={{ color: colors.text, fontWeight: 'bold' }}>到着駅: {arrival.name}</span>
                         </div>
                       )}
                     </div>
@@ -1760,7 +1760,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                         fontSize: '14px',
                         fontWeight: 'bold',
                         marginBottom: '8px',
-                        color: '#333'
+                        color: colors.text
                       }}>
                         推薦ルート選択
                       </div>
@@ -1770,7 +1770,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                           display: 'flex',
                           alignItems: 'center',
                           fontSize: '12px',
-                          color: '#333',
+                          color: colors.text,
                           cursor: 'pointer',
                           padding: '4px',
                           borderRadius: '3px',
@@ -1807,7 +1807,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                               display: 'flex',
                               alignItems: 'center',
                               fontSize: '12px',
-                              color: '#333',
+                              color: colors.text,
                               cursor: 'pointer',
                               padding: '4px',
                               borderRadius: '3px',
@@ -1829,7 +1829,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                                 alignItems: 'center',
                                 gap: '4px',
                                 fontWeight: isSelected ? 'bold' : 'normal',
-                                color: isSelected ? '#2196F3' : '#333'
+                                color: isSelected ? colors.primary : colors.text
                               }}>
                                 <span>ルート {index + 1}</span>
                                 <span style={{
@@ -1860,7 +1860,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                         marginBottom: '8px',
                         fontSize: '12px',
                         fontWeight: 'bold',
-                        color: '#333'
+                        color: colors.text
                       }}>
                         地図表示モード:
                       </label>
@@ -1869,7 +1869,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                           display: 'flex',
                           alignItems: 'center',
                           fontSize: '11px',
-                          color: '#333',
+                          color: colors.text,
                           cursor: 'pointer',
                           marginBottom: '4px'
                         }}>
@@ -1889,7 +1889,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                           display: 'flex',
                           alignItems: 'center',
                           fontSize: '11px',
-                          color: '#333',
+                          color: colors.text,
                           cursor: 'pointer'
                         }}>
                           <input
@@ -1909,7 +1909,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                         display: 'flex',
                         alignItems: 'center',
                         fontSize: '12px',
-                        color: '#333',
+                        color: colors.text,
                         cursor: 'pointer'
                       }}>
                         <input
@@ -2015,8 +2015,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                           color: isInSelectedRoute
                             ? '#2196F3'
                             : isVisible
-                              ? '#333'
-                              : '#6c757d',
+                              ? colors.text
+                              : colors.textMuted,
                           lineHeight: '1.2',
                           fontWeight: isInSelectedRoute ? 'bold' : 'normal'
                         }}>
@@ -2055,8 +2055,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   position: 'fixed',
                   left: `${hoverTooltipPosition.x - 75}px`, // 中央揃えのため半分の幅（約150px）を引く
                   top: `${hoverTooltipPosition.y}px`,
-                  backgroundColor: 'white',
-                  color: 'black',
+                  backgroundColor: colors.surfaceElevated,
+                  color: colors.text,
                   padding: '6px 10px',
                   borderRadius: '6px',
                   fontSize: '13px',
@@ -2113,11 +2113,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   if (routeInfo.length > 0) {
                     return (
                       <div style={{ fontSize: '11px', opacity: 0.9 }}>
-                        <div style={{ color: '#333', marginBottom: '2px' }}>
+                        <div style={{ color: colors.text, marginBottom: '2px' }}>
                           推薦ルート: {routeInfo.map(info => info.routeNumber).join(', ')}
                         </div>
                         <div style={{
-                          color: '#333',
+                          color: colors.text,
                           fontSize: '10px',
                           display: 'flex',
                           alignItems: 'center',
@@ -2282,7 +2282,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                     <div style={{
                       fontSize: '16px',
                       fontWeight: 'bold',
-                      color: '#333'
+                      color: colors.text
                     }}>
                       {getRouteDestination(clickedRoute)?.description || routeNames[clickedRoute as RouteKey] || clickedRoute}
                     </div>
@@ -2294,7 +2294,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                     return (
                       <div style={{
                         fontSize: '14px',
-                        color: '#333',
+                        color: colors.text,
                         textAlign: 'center'
                       }}>
                         <div style={{
