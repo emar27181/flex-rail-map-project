@@ -1201,7 +1201,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
 
         {/* ルート推薦表示は凡例内に統合 */}
 
-        <div style={{ marginBottom: '15px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
+        <div style={{ marginBottom: '15px', padding: '15px', border: `1px solid ${colors.border}`, borderRadius: '8px', backgroundColor: colors.surface }}>
           <div
             onClick={() => setIsRouteToggleExpanded(!isRouteToggleExpanded)}
             style={{
@@ -1212,10 +1212,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               marginBottom: isRouteToggleExpanded ? '15px' : '0'
             }}
           >
-            <h3 style={{ margin: '0', color: '#333' }}>路線表示切替</h3>
+            <h3 style={{ margin: '0', color: colors.text }}>路線表示切替</h3>
             <span style={{
               fontSize: '18px',
-              color: '#666',
+              color: colors.textSecondary,
               transform: isRouteToggleExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
               transition: 'transform 0.3s ease'
             }}>
@@ -1231,7 +1231,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   alignItems: 'center',
                   gap: '10px',
                   fontSize: '14px',
-                  color: '#333'
+                  color: colors.text
                 }}>
                   <span style={{ marginRight: '8px' }}>経路推薦数:</span>
                   <select
@@ -1240,8 +1240,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                     style={{
                       padding: '4px 8px',
                       borderRadius: '4px',
-                      border: '1px solid #ccc',
-                      fontSize: '14px'
+                      border: `1px solid ${colors.border}`,
+                      fontSize: '14px',
+                      backgroundColor: colors.surfaceElevated,
+                      color: colors.text
                     }}
                   >
                     <option value={1}>1件</option>
@@ -1255,7 +1257,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                     style={{
                       padding: '6px 12px',
                       fontSize: '12px',
-                      backgroundColor: '#28a745',
+                      backgroundColor: colors.success,
                       color: 'white',
                       border: 'none',
                       borderRadius: '4px',
@@ -1283,7 +1285,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                 </div>
                 <div style={{
                   fontSize: '11px',
-                  color: '#666',
+                  color: colors.textSecondary,
                   marginTop: '4px'
                 }}>
                   ※路線表示・乗換駅切り替えは右上の凡例から
@@ -1294,16 +1296,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               <div style={{
                 marginBottom: '10px',
                 padding: '10px',
-                border: '1px solid #e0e0e0',
+                border: `1px solid ${colors.borderLight}`,
                 borderRadius: '6px',
-                backgroundColor: '#f8f9fa'
+                backgroundColor: colors.surfaceElevated
               }}>
                 <div style={{ marginBottom: '8px' }}>
                   <label style={{
                     display: 'flex',
                     alignItems: 'center',
                     fontSize: '14px',
-                    color: '#333',
+                    color: colors.text,
                     cursor: 'pointer'
                   }}>
                     <input
@@ -1325,7 +1327,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                       marginBottom: '8px',
                       fontSize: '13px'
                     }}>
-                      <span style={{ color: '#555' }}>基準駅:</span>
+                      <span style={{ color: colors.textSecondary }}>基準駅:</span>
                       <span style={{
                         padding: '4px 8px',
                         backgroundColor: departure ? '#e8f5e8' : '#f0f0f0',
@@ -1526,7 +1528,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
             >
               <MapEvents />
               <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                url={theme === 'dark'
+                  ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                }
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
               />
 
@@ -1552,10 +1557,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               position: 'absolute',
               top: '10px',
               right: '10px',
-              backgroundColor: 'rgba(255, 255, 255, 1.0)',
-              border: '1px solid #ccc',
+              backgroundColor: colors.surfaceElevated,
+              border: `1px solid ${colors.border}`,
               borderRadius: '6px',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+              boxShadow: `0 2px 6px ${colors.shadow}`,
               minWidth: '150px',
               zIndex: 1000
             }}>
@@ -1567,19 +1572,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                   alignItems: 'center',
                   cursor: 'pointer',
                   padding: '10px',
-                  borderBottom: isLegendExpanded ? '1px solid #eee' : 'none'
+                  borderBottom: isLegendExpanded ? `1px solid ${colors.borderLight}` : 'none'
                 }}
               >
                 <span style={{
                   fontSize: '14px',
                   fontWeight: 'bold',
-                  color: '#333'
+                  color: colors.text
                 }}>
                   表示中の路線
                 </span>
                 <span style={{
                   fontSize: '12px',
-                  color: '#666',
+                  color: colors.textSecondary,
                   transform: isLegendExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                   transition: 'transform 0.3s ease'
                 }}>
@@ -1598,15 +1603,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                     <div style={{
                       marginBottom: '15px',
                       padding: '10px',
-                      backgroundColor: '#f8f9fa',
+                      backgroundColor: colors.surface,
                       borderRadius: '4px',
-                      border: '1px solid #e9ecef'
+                      border: `1px solid ${colors.borderLight}`
                     }}>
                       <div style={{
                         fontSize: '14px',
                         fontWeight: 'bold',
                         marginBottom: '8px',
-                        color: '#333'
+                        color: colors.text
                       }}>
                         現在の駅設定
                       </div>
