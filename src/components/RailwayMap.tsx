@@ -8,7 +8,7 @@ import SchematicMap from './SchematicMap';
 import NavigationBar from './NavigationBar';
 import { RouteFinder, TimeFilter, type RouteResult, type StationWithTime } from '../utils/routeFinder';
 import { getRouteDestination, getRouteDisplayText, getDirectionText, commonDirections } from '../data/routeDestinations';
-import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import { useTheme, getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -226,16 +226,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     const { DivIcon } = MapComponents;
 
     if (isDetailed) {
+      const borderColor = theme === 'dark' ? 'rgba(255,255,255,0.8)' : 'white';
+      const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
       return new DivIcon({
-        html: `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:bold;white-space:nowrap;border:1px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3);text-align:center;opacity:${opacity}">${station.name}</div>`,
+        html: `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:bold;white-space:nowrap;border:1px solid ${borderColor};box-shadow:0 1px 3px ${shadowColor};text-align:center;opacity:${opacity}">${station.name}</div>`,
         className: 'station-name-marker',
         iconSize: [station.name.length * 11 + 12, 18],
         iconAnchor: [(station.name.length * 11 + 12) / 2, 9]
       });
     } else {
       const stationSize = Math.max(8, Math.min(16, zoomLevel - 8));
+      const borderColor = theme === 'dark' ? 'rgba(255,255,255,0.8)' : 'white';
+      const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)';
       return new DivIcon({
-        html: `<div style="background:${color};width:${stationSize}px;height:${stationSize}px;border:1px solid white;box-shadow:0 1px 2px rgba(0,0,0,0.2);opacity:${opacity}"></div>`,
+        html: `<div style="background:${color};width:${stationSize}px;height:${stationSize}px;border:1px solid ${borderColor};box-shadow:0 1px 2px ${shadowColor};opacity:${opacity}"></div>`,
         className: 'station-marker',
         iconSize: [stationSize, stationSize],
         iconAnchor: [stationSize / 2, stationSize / 2]
@@ -262,8 +266,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     const markerWidth = Math.max(baseMarkerSize, textWidth);
     const markerHeight = baseMarkerSize;
 
+    const bgColor = theme === 'dark' ? colors.surfaceElevated : 'white';
+    const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
     return new DivIcon({
-      html: `<div style="background:white;border:3px solid ${markerColor};border-radius:4px;width:${markerWidth}px;height:${markerHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};box-shadow:0 3px 6px rgba(0,0,0,0.3);position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px">${stationName}</div>`,
+      html: `<div style="background:${bgColor};border:3px solid ${markerColor};border-radius:4px;width:${markerWidth}px;height:${markerHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};box-shadow:0 3px 6px ${shadowColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px">${stationName}</div>`,
       className: 'special-station-marker-inline',
       iconSize: [markerWidth, markerHeight],
       iconAnchor: [markerWidth / 2, markerHeight / 2]
@@ -277,8 +283,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     const fontSize = Math.max(10, Math.round(zoomLevel * 0.8));
     const padding = Math.max(2, Math.round(zoomLevel * 0.3));
 
+    const bgColor = theme === 'dark' ? 'rgba(40,40,40,0.9)' : 'rgba(255,255,255,0.9)';
+    const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
     return new DivIcon({
-      html: `<div style="background:rgba(255,255,255,0.9);border:1px solid ${color};border-radius:3px;padding:${padding}px ${padding + 2}px;font-size:${fontSize}px;font-weight:bold;color:${color};box-shadow:0 1px 3px rgba(0,0,0,0.3);white-space:nowrap;text-align:center">${time}分</div>`,
+      html: `<div style="background:${bgColor};border:1px solid ${color};border-radius:3px;padding:${padding}px ${padding + 2}px;font-size:${fontSize}px;font-weight:bold;color:${color};box-shadow:0 1px 3px ${shadowColor};white-space:nowrap;text-align:center">${time}分</div>`,
       className: isSection ? 'time-text-section' : 'time-text',
       iconSize: [time.toString().length * fontSize + padding * 4, fontSize + padding * 2],
       iconAnchor: [(time.toString().length * fontSize + padding * 4) / 2, (fontSize + padding * 2) / 2]
@@ -708,7 +716,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
     }
 
     const positions = displayStations.map(station => [station.lat, station.lng]);
-    const color = routeColors[routeKey];
+    const color = adjustRouteColorForTheme(routeColors[routeKey], theme);
 
     return (
       <React.Fragment key={routeKey}>
@@ -878,7 +886,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                                 flexShrink: 0
                               }}
                             />
-                            <span style={{ color: routeColors[stationRouteKey], fontWeight: '500' }}>
+                            <span style={{ color: adjustRouteColorForTheme(routeColors[stationRouteKey], theme), fontWeight: '500' }}>
                               {getRouteDestination(stationRouteKey)?.description || routeNames[stationRouteKey] || stationRouteKey}
                             </span>
                           </div>
@@ -1005,7 +1013,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                                 flexShrink: 0
                               }}
                             />
-                            <span style={{ color: routeColors[stationRouteKey], fontWeight: '500' }}>
+                            <span style={{ color: adjustRouteColorForTheme(routeColors[stationRouteKey], theme), fontWeight: '500' }}>
                               {getRouteDestination(stationRouteKey)?.description || routeNames[stationRouteKey] || stationRouteKey}
                             </span>
                           </div>
@@ -1449,7 +1457,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
               >
                 {Object.entries(routes).map(([routeKey, _]) => {
                   const routeName = routeNames[routeKey as RouteKey];
-                  const routeColor = routeColors[routeKey as RouteKey];
+                  const routeColor = adjustRouteColorForTheme(routeColors[routeKey as RouteKey], theme);
                   const isSelected = visibleRoutes.has(routeKey as RouteKey);
                   // 幅をより正確に計算: アイコン12px + マージン8px + テキスト + パディング16px
                   const textWidth = routeName.length * 11; // 長い路線名に対応するため余裕を持たせる
@@ -1997,7 +2005,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
                         <div style={{
                           width: '20px',
                           height: '3px',
-                          backgroundColor: routeColors[routeKey as RouteKey],
+                          backgroundColor: adjustRouteColorForTheme(routeColors[routeKey as RouteKey], theme),
                           marginRight: '8px',
                           borderRadius: '1px',
                           flexShrink: 0,
