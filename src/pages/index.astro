@@ -30,5 +30,15 @@ import RailwayMap from '../components/RailwayMap.tsx';
 	<body>
 		<h1>東京路線図</h1>
 		<RailwayMap client:only="react" />
+
+		<footer style="margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-top: 1px solid #e9ecef; font-size: 14px; color: #6c757d;">
+			<div style="max-width: 800px; margin: 0 auto;">
+				<p style="margin: 0 0 10px 0; font-weight: bold;">© 2025 Flex Rail Map Project</p>
+				<p style="margin: 0 0 5px 0;">駅データは独自作成またはオープンデータを利用しています。</p>
+				<p style="margin: 0 0 5px 0;">本サービスは非公式であり、各鉄道事業者とは関係ありません。</p>
+				<p style="margin: 0 0 10px 0;">提供する情報は目安です。正確な運行情報は公式サイトをご確認ください。</p>
+				<p style="margin: 0; font-size: 12px;">Made with <a href="https://claude.ai/code" target="_blank" style="color: #007bff; text-decoration: none;">Claude Code</a></p>
+			</div>
+		</footer>
 	</body>
 </html>
