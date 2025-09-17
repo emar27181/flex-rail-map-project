@@ -22,7 +22,7 @@ interface RailwayMapProps {
   language?: 'japanese' | 'english';
 }
 
-const RailwayMap: React.FC<RailwayMapProps> = ({ className, language = 'japanese' }) => {
+const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   // console.log('RailwayMap component initialized');
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -48,9 +48,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language = 'japanese
   const [routeRecommendations, setRouteRecommendations] = useState<RouteResult[]>([]);
   const [selectedRoute, setSelectedRoute] = useState<RouteResult | null>(null);
 
-  // Language state management - use prop if provided, otherwise default to japanese
+  // Language state management - if prop is provided, use it, otherwise use internal state
   const [internalLanguage, setInternalLanguage] = useState<'japanese' | 'english'>('japanese');
-  const currentLanguage = language || internalLanguage;
+  const currentLanguage = language !== undefined ? language : internalLanguage;
 
   // Debug language changes
   console.log('Current language state:', { language, internalLanguage, currentLanguage });
@@ -1213,6 +1213,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language = 'japanese
           onArrivalChange={setArrival}
           isExpanded={isStationSelectorExpanded}
           onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
+          language={currentLanguage}
         />
 
         {/* カバレッジ分析 - オフ */}
