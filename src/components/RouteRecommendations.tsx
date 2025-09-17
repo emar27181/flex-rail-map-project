@@ -3,19 +3,22 @@ import { routeColors } from '../data/routes';
 import type { RouteResult } from '../utils/routeFinder';
 import { getRouteDestination, getDirectionText, commonDirections } from '../data/routeDestinations';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import { translateStation, translateRoute, translateUI } from '../utils/translation';
 
 interface RouteRecommendationsProps {
   routes: RouteResult[];
   onRouteSelect?: (route: RouteResult) => void;
   selectedRoute?: RouteResult | null;
   onShowAllRoutes?: () => void;
+  language?: 'japanese' | 'english';
 }
 
 const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
   routes,
   onRouteSelect,
   selectedRoute,
-  onShowAllRoutes
+  onShowAllRoutes,
+  language = 'japanese'
 }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -27,21 +30,23 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
 
   const formatTime = (minutes: number): string => {
     if (minutes < 60) {
-      return `${Math.round(minutes)}分`;
+      return translateUI('minutes', language, { minutes: Math.round(minutes).toString() });
     } else {
       const hours = Math.floor(minutes / 60);
       const remainingMinutes = Math.round(minutes % 60);
-      return remainingMinutes > 0 ? `${hours}時間${remainingMinutes}分` : `${hours}時間`;
+      return remainingMinutes > 0
+        ? translateUI('hours', language, { hours: hours.toString(), minutes: remainingMinutes.toString() })
+        : translateUI('hoursOnly', language, { hours: hours.toString() });
     }
   };
 
   const getTransferText = (transfers: number): string => {
     if (transfers === 0) {
-      return '乗換なし';
+      return translateUI('noTransfer', language);
     } else if (transfers === 1) {
-      return '乗換1回';
+      return translateUI('oneTransfer', language);
     } else {
-      return `乗換${transfers}回`;
+      return translateUI('transfers', language, { count: transfers.toString() });
     }
   };
 
