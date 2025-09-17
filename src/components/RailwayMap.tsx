@@ -5,8 +5,10 @@ import StationSelector from './StationSelector';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
+import ThemeToggle from './ThemeToggle';
 import { RouteFinder, TimeFilter, type RouteResult, type StationWithTime } from '../utils/routeFinder';
 import { getRouteDestination, getRouteDisplayText, getDirectionText, commonDirections } from '../data/routeDestinations';
+import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -21,6 +23,8 @@ interface RailwayMapProps {
 
 const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   // console.log('RailwayMap component initialized');
+  const { theme } = useTheme();
+  const colors = getThemeColors(theme);
 
   const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
   const [isClient, setIsClient] = useState(false);
@@ -1179,6 +1183,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className }) => {
   return (
     <ErrorBoundary>
       <div className={className}>
+        {/* テーマ切り替えボタン */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+          <ThemeToggle />
+        </div>
+
         {/* 駅選択UI */}
         <StationSelector
           departure={departure}

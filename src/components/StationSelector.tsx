@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
+import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 
 interface StationSelectorProps {
   onDepartureChange: (station: Station | null) => void;
@@ -19,6 +20,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   isExpanded = true,
   onToggleExpanded
 }) => {
+  const { theme } = useTheme();
+  const colors = getThemeColors(theme);
   const [departureSearch, setDepartureSearch] = useState('');
   const [arrivalSearch, setArrivalSearch] = useState('');
   const [showDepartureResults, setShowDepartureResults] = useState(false);
@@ -118,7 +121,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   };
 
   return (
-    <div style={{ marginBottom: '20px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
+    <div style={{ marginBottom: '20px', padding: '15px', border: `1px solid ${colors.border}`, borderRadius: '8px', backgroundColor: colors.surface }}>
       <div 
         onClick={onToggleExpanded}
         style={{
@@ -129,11 +132,11 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           marginBottom: isExpanded ? '15px' : '0'
         }}
       >
-        <h3 style={{ margin: '0', color: '#333' }}>出発駅・到着駅を選択</h3>
+        <h3 style={{ margin: '0', color: colors.text }}>出発駅・到着駅を選択</h3>
         {onToggleExpanded && (
           <span style={{
             fontSize: '18px',
-            color: '#666',
+            color: colors.textSecondary,
             transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 0.3s ease'
           }}>
@@ -147,7 +150,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
             {/* 出発駅選択 */}
             <div ref={departureRef} style={{ flex: '1', minWidth: '200px', maxWidth: '300px', position: 'relative' }}>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#555' }}>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: colors.textSecondary }}>
                 出発駅
               </label>
               <div style={{ position: 'relative' }}>
@@ -163,10 +166,12 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   style={{
                     width: '100%',
                     padding: '8px 30px 8px 8px',
-                    border: '1px solid #ccc',
+                    border: `1px solid ${colors.border}`,
                     borderRadius: '4px',
                     fontSize: '14px',
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    backgroundColor: colors.surfaceElevated,
+                    color: colors.text
                   }}
                 />
                 {departure && (
@@ -181,7 +186,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       border: 'none',
                       cursor: 'pointer',
                       fontSize: '16px',
-                      color: '#666'
+                      color: colors.textSecondary
                     }}
                   >
                     ×
@@ -195,10 +200,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   top: '100%',
                   left: 0,
                   right: 0,
-                  backgroundColor: 'white',
-                  border: '1px solid #ccc',
+                  backgroundColor: colors.surfaceElevated,
+                  border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  boxShadow: `0 2px 4px ${colors.shadow}`,
                   maxHeight: '200px',
                   overflowY: 'auto',
                   zIndex: 1000
@@ -210,17 +215,17 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       style={{
                         padding: '8px 12px',
                         cursor: 'pointer',
-                        borderBottom: index < filteredDepartureStations.length - 1 ? '1px solid #eee' : 'none',
+                        borderBottom: index < filteredDepartureStations.length - 1 ? `1px solid ${colors.borderLight}` : 'none',
                         fontSize: '14px'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surface}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
                     >
                       {station.name}
                     </div>
                   ))}
                   {filteredDepartureStations.length === 0 && (
-                    <div style={{ padding: '8px 12px', color: '#666', fontSize: '14px' }}>
+                    <div style={{ padding: '8px 12px', color: colors.textSecondary, fontSize: '14px' }}>
                       {departureSearch ? '該当する駅が見つかりません' : '主要駅: 東京、新宿、渋谷、池袋、横浜、新横浜'}
                     </div>
                   )}
@@ -234,7 +239,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 onClick={swapStations}
                 style={{
                   padding: '8px 12px',
-                  backgroundColor: '#4CAF50',
+                  backgroundColor: colors.success,
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
@@ -250,7 +255,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
             {/* 到着駅選択 */}
             <div ref={arrivalRef} style={{ flex: '1', minWidth: '200px', maxWidth: '300px', position: 'relative' }}>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#555' }}>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: colors.textSecondary }}>
                 到着駅
               </label>
               <div style={{ position: 'relative' }}>
@@ -266,10 +271,12 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   style={{
                     width: '100%',
                     padding: '8px 30px 8px 8px',
-                    border: '1px solid #ccc',
+                    border: `1px solid ${colors.border}`,
                     borderRadius: '4px',
                     fontSize: '14px',
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    backgroundColor: colors.surfaceElevated,
+                    color: colors.text
                   }}
                 />
                 {arrival && (
@@ -284,7 +291,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       border: 'none',
                       cursor: 'pointer',
                       fontSize: '16px',
-                      color: '#666'
+                      color: colors.textSecondary
                     }}
                   >
                     ×
@@ -298,10 +305,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   top: '100%',
                   left: 0,
                   right: 0,
-                  backgroundColor: 'white',
-                  border: '1px solid #ccc',
+                  backgroundColor: colors.surfaceElevated,
+                  border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  boxShadow: `0 2px 4px ${colors.shadow}`,
                   maxHeight: '200px',
                   overflowY: 'auto',
                   zIndex: 1000
@@ -316,14 +323,14 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                         borderBottom: index < filteredArrivalStations.length - 1 ? '1px solid #eee' : 'none',
                         fontSize: '14px'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surface}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
                     >
                       {station.name}
                     </div>
                   ))}
                   {filteredArrivalStations.length === 0 && (
-                    <div style={{ padding: '8px 12px', color: '#666', fontSize: '14px' }}>
+                    <div style={{ padding: '8px 12px', color: colors.textSecondary, fontSize: '14px' }}>
                       {arrivalSearch ? '該当する駅が見つかりません' : '主要駅: 東京、新宿、渋谷、池袋、横浜、新横浜'}
                     </div>
                   )}
@@ -334,8 +341,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
           {/* 選択された駅の表示 */}
           {(departure || arrival) && (
-            <div style={{ marginTop: '15px', padding: '10px', backgroundColor: '#e8f5e8', borderRadius: '4px' }}>
-              <div style={{ fontSize: '14px', color: '#333' }}>
+            <div style={{ marginTop: '15px', padding: '10px', backgroundColor: theme === 'dark' ? '#2d4a2d' : '#e8f5e8', borderRadius: '4px' }}>
+              <div style={{ fontSize: '14px', color: colors.text }}>
                 {departure && <span><strong>出発:</strong> {departure.name}</span>}
                 {departure && arrival && <span style={{ margin: '0 10px' }}>→</span>}
                 {arrival && <span><strong>到着:</strong> {arrival.name}</span>}

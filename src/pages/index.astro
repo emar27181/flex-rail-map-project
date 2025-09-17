@@ -1,5 +1,5 @@
 ---
-import RailwayMap from '../components/RailwayMap.tsx';
+import ThemeWrapper from '../components/ThemeWrapper.tsx';
 ---
 
 <html lang="en">
@@ -20,6 +20,23 @@ import RailwayMap from '../components/RailwayMap.tsx';
 				margin: 0;
 				padding: 20px;
 				font-family: Arial, sans-serif;
+				transition: background-color 0.3s ease, color 0.3s ease;
+			}
+			body.light {
+				background-color: #ffffff;
+				color: #333333;
+			}
+			body.dark {
+				background-color: #1a1a1a;
+				color: #ffffff;
+			}
+			body.dark h1 {
+				color: #ffffff;
+			}
+			body.dark footer {
+				background-color: #2d2d2d !important;
+				border-top-color: #404040 !important;
+				color: #b3b3b3 !important;
 			}
 			.leaflet-container {
 				height: 600px !important;
@@ -29,7 +46,7 @@ import RailwayMap from '../components/RailwayMap.tsx';
 	</head>
 	<body>
 		<h1>東京路線図</h1>
-		<RailwayMap client:only="react" />
+		<ThemeWrapper client:only="react" />
 
 		<footer style="margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-top: 1px solid #e9ecef; font-size: 14px; color: #6c757d;">
 			<div style="max-width: 800px; margin: 0 auto;">

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { routeColors } from '../data/routes';
 import type { RouteResult } from '../utils/routeFinder';
 import { getRouteDestination, getDirectionText, commonDirections } from '../data/routeDestinations';
+import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 
 interface RouteRecommendationsProps {
   routes: RouteResult[];
@@ -16,6 +17,8 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
   selectedRoute,
   onShowAllRoutes
 }) => {
+  const { theme } = useTheme();
+  const colors = getThemeColors(theme);
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (routes.length === 0) {
@@ -61,10 +64,10 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
   return (
     <div style={{
       marginBottom: '20px',
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      border: '1px solid #ccc',
+      backgroundColor: colors.surfaceElevated,
+      border: `1px solid ${colors.border}`,
       borderRadius: '6px',
-      boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+      boxShadow: `0 2px 6px ${colors.shadow}`,
       minWidth: '200px'
     }}>
       <div 
@@ -75,14 +78,14 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
           alignItems: 'center',
           cursor: 'pointer',
           padding: '10px',
-          borderBottom: isExpanded ? '1px solid #eee' : 'none'
+          borderBottom: isExpanded ? `1px solid ${colors.borderLight}` : 'none'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{
             fontSize: '14px',
             fontWeight: 'bold',
-            color: '#333',
+            color: colors.text,
             margin: '0'
           }}>
             推薦ルート ({routes.length}件)
@@ -92,12 +95,12 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
               onClick={onShowAllRoutes}
               style={{
                 padding: '4px 8px',
-                backgroundColor: '#f5f5f5',
-                border: '1px solid #ddd',
+                backgroundColor: colors.surface,
+                border: `1px solid ${colors.border}`,
                 borderRadius: '4px',
                 fontSize: '12px',
                 cursor: 'pointer',
-                color: '#666',
+                color: colors.textSecondary,
                 width: 'fit-content',
                 whiteSpace: 'nowrap'
               }}
