@@ -9,6 +9,7 @@ import NavigationBar from './NavigationBar';
 import { RouteFinder, TimeFilter, type RouteResult, type StationWithTime } from '../utils/routeFinder';
 import { getRouteDestination, getRouteDisplayText, getDirectionText, commonDirections } from '../data/routeDestinations';
 import { useTheme, getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
+import { translateStation, translateRoute, translateUI } from '../utils/translation';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -237,7 +238,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       const borderColor = theme === 'dark' ? 'rgba(255,255,255,0.8)' : 'white';
       const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
       return new DivIcon({
-        html: `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:bold;white-space:nowrap;border:1px solid ${borderColor};box-shadow:0 1px 3px ${shadowColor};text-align:center;opacity:${opacity}">${station.name}</div>`,
+        html: `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:bold;white-space:nowrap;border:1px solid ${borderColor};box-shadow:0 1px 3px ${shadowColor};text-align:center;opacity:${opacity}">${translateStation(station.name, currentLanguage)}</div>`,
         className: 'station-name-marker',
         iconSize: [station.name.length * 11 + 12, 18],
         iconAnchor: [(station.name.length * 11 + 12) / 2, 9]
@@ -867,13 +868,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               >
                 <Popup>
                   <div>
-                    <strong>{station.name}</strong>
-                    {isDeparture && <div style={{ color: '#4CAF50', fontWeight: 'bold' }}>出発駅</div>}
-                    {isArrival && <div style={{ color: '#F44336', fontWeight: 'bold' }}>到着駅</div>}
+                    <strong>{translateStation(station.name, currentLanguage)}</strong>
+                    {isDeparture && <div style={{ color: '#4CAF50', fontWeight: 'bold' }}>{translateUI('departure', currentLanguage)}</div>}
+                    {isArrival && <div style={{ color: '#F44336', fontWeight: 'bold' }}>{translateUI('arrival', currentLanguage)}</div>}
                     
                     {/* 通っている路線を表示 */}
                     <div style={{ marginTop: '8px', marginBottom: '10px' }}>
-                      <div style={{ fontSize: '12px', color: colors.textSecondary, marginBottom: '4px' }}>通っている路線:</div>
+                      <div style={{ fontSize: '12px', color: colors.textSecondary, marginBottom: '4px' }}>{currentLanguage === 'japanese' ? '通っている路線:' : 'Routes:'}:</div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                         {getRoutesForStation(station.name).map((stationRouteKey) => (
                           <div
@@ -895,7 +896,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                               }}
                             />
                             <span style={{ color: adjustRouteColorForTheme(routeColors[stationRouteKey], theme), fontWeight: '500' }}>
-                              {getRouteDestination(stationRouteKey)?.description || routeNames[stationRouteKey] || stationRouteKey}
+                              {translateRoute(getRouteDestination(stationRouteKey)?.description || routeNames[stationRouteKey] || stationRouteKey, currentLanguage)}
                             </span>
                           </div>
                         ))}
@@ -996,11 +997,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               >
                 <Popup>
                   <div>
-                    <strong>{station.name}</strong>
+                    <strong>{translateStation(station.name, currentLanguage)}</strong>
                     
                     {/* 通っている路線を表示 */}
                     <div style={{ marginTop: '8px', marginBottom: '10px' }}>
-                      <div style={{ fontSize: '12px', color: colors.textSecondary, marginBottom: '4px' }}>通っている路線:</div>
+                      <div style={{ fontSize: '12px', color: colors.textSecondary, marginBottom: '4px' }}>{currentLanguage === 'japanese' ? '通っている路線:' : 'Routes:'}:</div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                         {getRoutesForStation(station.name).map((stationRouteKey) => (
                           <div
@@ -1022,7 +1023,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                               }}
                             />
                             <span style={{ color: adjustRouteColorForTheme(routeColors[stationRouteKey], theme), fontWeight: '500' }}>
-                              {getRouteDestination(stationRouteKey)?.description || routeNames[stationRouteKey] || stationRouteKey}
+                              {translateRoute(getRouteDestination(stationRouteKey)?.description || routeNames[stationRouteKey] || stationRouteKey, currentLanguage)}
                             </span>
                           </div>
                         ))}
@@ -1232,7 +1233,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               marginBottom: isRouteToggleExpanded ? '15px' : '0'
             }}
           >
-            <h3 style={{ margin: '0', color: colors.text }}>路線表示切替</h3>
+            <h3 style={{ margin: '0', color: colors.text }}>{translateUI('routeToggle', currentLanguage)}</h3>
             <span style={{
               fontSize: '18px',
               color: colors.textSecondary,
@@ -1334,7 +1335,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                       onChange={(e) => setTimeFilterEnabled(e.target.checked)}
                       style={{ marginRight: '8px' }}
                     />
-                    所要時間フィルター(準備中)
+{translateUI('timeFilter', currentLanguage)}
                   </label>
                 </div>
 
@@ -1404,7 +1405,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                         fontSize: '11px',
                         color: colors.warning
                       }}>
-                        出発駅を設定すると、その駅から指定時間内にアクセス可能な駅のみが表示されます
+{translateUI('accessibleStations', currentLanguage, { minutes: timeFilterMaxMinutes.toString() })}
                       </div>
                     )}
                   </div>
@@ -1874,7 +1875,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                         fontWeight: 'bold',
                         color: colors.text
                       }}>
-                        地図表示モード:
+{translateUI('mapDisplayMode', currentLanguage)}:
                       </label>
                       <div style={{ marginBottom: '12px' }}>
                         <label style={{
@@ -1895,7 +1896,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                               cursor: 'pointer'
                             }}
                           />
-                          実地図ベース
+                          {translateUI('realisticView', currentLanguage)}
                         </label>
                         <label style={{
                           display: 'flex',
@@ -1914,7 +1915,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                               cursor: 'pointer'
                             }}
                           />
-                          図式化路線図(準備中)
+{translateUI('schematicView', currentLanguage)}
                         </label>
                       </div>
                       <label style={{
@@ -1933,7 +1934,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                             cursor: 'pointer'
                           }}
                         />
-                        乗換駅のみ表示
+{translateUI('showOnlyTransferStations', currentLanguage)}
                       </label>
                     </div>
 
@@ -2032,7 +2033,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                           lineHeight: '1.2',
                           fontWeight: isInSelectedRoute ? 'bold' : 'normal'
                         }}>
-                          {routeNames[routeKey as RouteKey]}
+                          {translateRoute(routeNames[routeKey as RouteKey], currentLanguage)}
                           {isInSelectedRoute && (
                             <span style={{
                               fontSize: '10px',
@@ -2096,7 +2097,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     lineHeight: '1',
                     whiteSpace: 'nowrap'
                   }}>
-                    {getRouteDestination(hoveredRoute)?.description || routeNames[hoveredRoute as RouteKey] || hoveredRoute}
+                    {translateRoute(getRouteDestination(hoveredRoute)?.description || routeNames[hoveredRoute as RouteKey] || hoveredRoute, currentLanguage)}
                   </div>
                 </div>
 
@@ -2296,7 +2297,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                       fontWeight: 'bold',
                       color: colors.text
                     }}>
-                      {getRouteDestination(clickedRoute)?.description || routeNames[clickedRoute as RouteKey] || clickedRoute}
+                      {translateRoute(getRouteDestination(clickedRoute)?.description || routeNames[clickedRoute as RouteKey] || clickedRoute, currentLanguage)}
                     </div>
                   </div>
 
