@@ -1,8 +1,13 @@
 import React from 'react';
-import { Sun, Moon, Map } from 'lucide-react';
+import { Sun, Moon, Map, Languages } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 
-const NavigationBar: React.FC = () => {
+interface NavigationBarProps {
+  language: 'japanese' | 'english';
+  onLanguageChange: (language: 'japanese' | 'english') => void;
+}
+
+const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChange }) => {
   const { theme, toggleTheme } = useTheme();
   const colors = getThemeColors(theme);
 
@@ -34,7 +39,7 @@ const NavigationBar: React.FC = () => {
           fontWeight: 'bold',
           color: colors.text
         }}>
-          東京路線図
+          {language === 'japanese' ? '東京路線図' : 'Tokyo Railway Map'}
         </h1>
       </div>
 
@@ -44,6 +49,36 @@ const NavigationBar: React.FC = () => {
         alignItems: 'center',
         gap: '16px'
       }}>
+        {/* 言語切り替えボタン */}
+        <button
+          onClick={() => onLanguageChange(language === 'japanese' ? 'english' : 'japanese')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '40px',
+            height: '40px',
+            backgroundColor: 'transparent',
+            border: `1px solid ${colors.border}`,
+            borderRadius: '8px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            color: colors.text
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = colors.surfaceElevated;
+            e.currentTarget.style.transform = 'scale(1.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+          title={language === 'japanese' ? 'Switch to English' : '日本語に切り替え'}
+          aria-label={language === 'japanese' ? 'Switch to English' : '日本語に切り替え'}
+        >
+          <Languages size={20} />
+        </button>
+
         {/* テーマ切り替えボタン */}
         <button
           onClick={toggleTheme}
