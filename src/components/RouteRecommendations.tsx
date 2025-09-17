@@ -93,7 +93,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
             color: colors.text,
             margin: '0'
           }}>
-            推薦ルート ({routes.length}件)
+{translateUI('recommendedRoutes', language)} ({translateUI('routeCount', language, { count: routes.length.toString() })})
           </span>
           {selectedRoute && onShowAllRoutes && (
             <button
@@ -116,7 +116,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                 e.currentTarget.style.backgroundColor = '#f5f5f5';
               }}
             >
-              全ルート表示
+{translateUI('showAllRoutes', language)}
             </button>
           )}
         </div>
@@ -168,7 +168,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                   fontWeight: 'bold',
                   color: isSelected ? '#2196F3' : '#333'
                 }}>
-                  ルート {index + 1} {isSelected && '(選択中)'}
+{translateUI('routeNumber', language, { number: (index + 1).toString() })} {isSelected && translateUI('selectedStatus', language)}
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{
@@ -216,7 +216,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                   }
                 }}
               >
-                {isSelected ? '地図に表示中' : '地図で表示'}
+{isSelected ? translateUI('displayOnMapActive', language) : translateUI('displayOnMapButton', language)}
               </button>
             </div>
 
@@ -241,7 +241,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                         borderRadius: '10px',
                         fontSize: '11px'
                       }}>
-                        {segment.isWalkingTransfer ? '徒歩乗換' : '乗換'}
+{segment.isWalkingTransfer ? translateUI('walkingTransferShort', language) : translateUI('transferShort', language)}
                       </div>
                     </div>
                   )}
@@ -295,10 +295,10 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                               // 終点駅に向かっているかチェック
                               const destinations = routeDestination.destinations;
                               if (destinations.includes(toStation)) {
-                                direction = `${toStation}行き`;
+                                direction = translateUI('direction', language, { destination: translateStation(toStation, language) });
                               } else {
                                 // より適切な終点を推定
-                                direction = `${destinations[destinations.length - 1]}方面`;
+                                direction = translateUI('directionArea', language, { destination: translateStation(destinations[destinations.length - 1], language) });
                               }
                             }
                             
@@ -317,11 +317,11 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                       fontSize: '14px'
                     }}>
                       <span style={{ fontWeight: '500' }}>
-                        {segment.stations[0].name}
+                        {translateStation(segment.stations[0].name, language)}
                       </span>
                       <span style={{ color: '#999' }}>→</span>
                       <span style={{ fontWeight: '500' }}>
-                        {segment.stations[segment.stations.length - 1].name}
+                        {translateStation(segment.stations[segment.stations.length - 1].name, language)}
                       </span>
                       <span style={{
                         marginLeft: 'auto',
@@ -341,9 +341,9 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                       color: '#888',
                       lineHeight: '1.4'
                     }}>
-                      経由: {segment.stations.slice(1, -1).length > 3
-                        ? `${segment.stations.slice(1, 4).map(s => s.name).join('、')}...他${segment.stations.length - 5}駅`
-                        : segment.stations.slice(1, -1).map(s => s.name).join('、')
+{translateUI('viaStations', language)}: {segment.stations.slice(1, -1).length > 3
+                        ? `${segment.stations.slice(1, 4).map(s => translateStation(s.name, language)).join(language === 'japanese' ? '、' : ', ')}...${translateUI('otherStations', language, { count: (segment.stations.length - 5).toString() })}`
+                        : segment.stations.slice(1, -1).map(s => translateStation(s.name, language)).join(language === 'japanese' ? '、' : ', ')
                       }
                     </div>
                   )}
@@ -363,7 +363,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
           color: '#666',
           fontSize: '14px'
         }}>
-          ルートが見つかりませんでした
+{translateUI('noRoutesFound', language)}
         </div>
       )}
     </div>
