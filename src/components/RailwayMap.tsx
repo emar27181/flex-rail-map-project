@@ -5,7 +5,6 @@ import StationSelector from './StationSelector';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
-import NavigationBar from './NavigationBar';
 import { RouteFinder, TimeFilter, type RouteResult, type StationWithTime } from '../utils/routeFinder';
 import { getRouteDestination, getRouteDisplayText, getDirectionText, commonDirections } from '../data/routeDestinations';
 import { useTheme, getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
@@ -20,7 +19,7 @@ declare global {
 
 interface RailwayMapProps {
   className?: string;
-  language?: 'japanese' | 'english';
+  language: 'japanese' | 'english';
 }
 
 const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
@@ -49,12 +48,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [routeRecommendations, setRouteRecommendations] = useState<RouteResult[]>([]);
   const [selectedRoute, setSelectedRoute] = useState<RouteResult | null>(null);
 
-  // Language state management - if prop is provided, use it, otherwise use internal state
-  const [internalLanguage, setInternalLanguage] = useState<'japanese' | 'english'>('japanese');
-  const currentLanguage = language !== undefined ? language : internalLanguage;
+  // Language state management
+  const currentLanguage = language;
 
   // Debug language changes
-  console.log('Current language state:', { language, internalLanguage, currentLanguage });
+  console.log('Current language state:', { language, currentLanguage });
 
   // 折りたたみ状態の管理
   const [isStationSelectorExpanded, setIsStationSelectorExpanded] = useState(true);
@@ -411,7 +409,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
           }
         }
 
-        console.log(`${index + 1}: ${routeDescription} (${route.totalTime}分, ${route.transfers}回乗換)`);
+        console.log(`${index + 1}: ${routeDescription} (${route.totalTime}min, ${route.transfers} transfers)`);
         console.log(`   乗り換え駅: ${transferStations.join(', ') || 'なし'}`);
       });
 
@@ -1200,12 +1198,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   return (
     <ErrorBoundary>
       <div className={className} style={{ padding: '0 20px' }}>
-        {/* ナビゲーションバー */}
-        <NavigationBar
-          language={currentLanguage}
-          onLanguageChange={setInternalLanguage}
-        />
-
         {/* 駅選択UI */}
         <StationSelector
           departure={departure}
@@ -1800,7 +1792,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                               cursor: 'pointer'
                             }}
                           />
-                          全ルート表示
+                          {translateUI('showAllRoutesLabel', currentLanguage)}
                         </label>
                         
                         {routeRecommendations.map((route, index) => {
