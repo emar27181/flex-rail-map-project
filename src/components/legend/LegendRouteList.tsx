@@ -39,7 +39,22 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   const colors = getThemeColors(theme);
 
   return (
-    <>
+    <div style={{
+      marginBottom: '15px',
+      padding: '10px',
+      backgroundColor: colors.surface,
+      borderRadius: '4px',
+      border: `1px solid ${colors.borderLight}`
+    }}>
+      <div style={{
+        fontSize: '14px',
+        fontWeight: 'bold',
+        marginBottom: '8px',
+        color: colors.text
+      }}>
+        {translateUI('routeDisplayToggle', language)}
+      </div>
+
       <div style={{
         display: 'flex',
         gap: '4px',
@@ -151,7 +166,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           </div>
         );
       })}
-    </>
+    </div>
   );
 };
 

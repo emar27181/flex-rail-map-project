@@ -238,6 +238,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "路線表示切替",
     english: "Route Display Toggle"
   },
+  routeDisplayToggle: {
+    japanese: "表示路線切り替え",
+    english: "Route Display Toggle"
+  },
   showOnlyTransferStations: {
     japanese: "乗換駅のみ表示",
     english: "Show Transfer Stations Only"
