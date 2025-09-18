@@ -1,7 +1,8 @@
 import React from 'react';
 import type { RouteKey } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
-import { translateRoute, translateUI } from '../../utils/translation';
+import { translateUI } from '../../utils/translation';
+import RouteToggleItem from '../ui/RouteToggleItem';
 
 interface RouteInfo {
   segments: Array<{
@@ -99,71 +100,18 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         );
 
         return (
-          <div
+          <RouteToggleItem
             key={routeKey}
-            onClick={() => onToggleRoute(routeKey as RouteKey)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: '6px',
-              fontSize: '12px',
-              cursor: 'pointer',
-              padding: '4px',
-              borderRadius: '3px',
-              backgroundColor: isInSelectedRoute
-                ? 'rgba(33, 150, 243, 0.25)'
-                : isVisible
-                  ? 'rgba(0, 123, 255, 0.1)'
-                  : 'rgba(108, 117, 125, 0.1)',
-              border: isInSelectedRoute
-                ? '2px solid #2196F3'
-                : `1px solid ${isVisible ? '#007bff' : '#6c757d'}`,
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={visibleRoutes.has(routeKey as RouteKey)}
-              onChange={(e) => {
-                e.stopPropagation();
-                onToggleRoute(routeKey as RouteKey);
-              }}
-              style={{
-                marginRight: '8px',
-                cursor: 'pointer'
-              }}
-            />
-            <div style={{
-              width: '20px',
-              height: '3px',
-              backgroundColor: adjustRouteColorForTheme(routeColors[routeKey as RouteKey], theme),
-              marginRight: '8px',
-              borderRadius: '1px',
-              flexShrink: 0,
-              opacity: visibleRoutes.has(routeKey as RouteKey) ? 1 : 0.3
-            }} />
-            <span style={{
-              color: isInSelectedRoute
-                ? '#2196F3'
-                : isVisible
-                  ? colors.text
-                  : colors.textMuted,
-              lineHeight: '1.2',
-              fontWeight: isInSelectedRoute ? 'bold' : 'normal'
-            }}>
-              {translateRoute(routeNames[routeKey as RouteKey], language)}
-              {isInSelectedRoute && (
-                <span style={{
-                  fontSize: '10px',
-                  marginLeft: '4px',
-                  color: '#2196F3',
-                  fontWeight: 'normal'
-                }}>
-                  ({translateUI('selected', language)})
-                </span>
-              )}
-            </span>
-          </div>
+            routeKey={routeKey}
+            routeName={routeNames[routeKey as RouteKey]}
+            routeColor={routeColors[routeKey as RouteKey]}
+            isVisible={isVisible}
+            isInSelectedRoute={isInSelectedRoute}
+            theme={theme}
+            language={language}
+            onToggle={onToggleRoute}
+            adjustRouteColorForTheme={adjustRouteColorForTheme}
+          />
         );
       })}
     </div>
