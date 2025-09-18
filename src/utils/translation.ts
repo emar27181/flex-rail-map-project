@@ -395,6 +395,32 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "推薦ルート選択",
     english: "Route Selection"
   },
+  showAllRoutesLabel: {
+    japanese: "全ルート表示",
+    english: "Show All Routes"
+  },
+
+  // Footer text
+  copyrightText: {
+    japanese: "© 2025 Flex Rail Map Project",
+    english: "© 2025 Flex Rail Map Project"
+  },
+  dataSourceText: {
+    japanese: "駅データは独自作成またはオープンデータを利用しています。",
+    english: "Station data is original or uses open data sources."
+  },
+  disclaimerText: {
+    japanese: "本サービスは非公式であり、各鉄道事業者とは関係ありません。",
+    english: "This service is unofficial and not affiliated with any railway companies."
+  },
+  accuracyText: {
+    japanese: "提供する情報は目安です。正確な運行情報は公式サイトをご確認ください。",
+    english: "Information provided is for reference only. Please check official websites for accurate service information."
+  },
+  madeWithText: {
+    japanese: "Made with Claude Code",
+    english: "Made with Claude Code"
+  },
 
   // その他
   departure: {
