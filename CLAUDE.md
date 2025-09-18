@@ -51,6 +51,12 @@ src/
    - 乗換駅のみ表示フィルター
    - 折りたたみ可能な操作パネル
    - レスポンシブデザイン（限定的）
+   - **路線表示切替機能**: デフォルト非表示、プログラムで制御可能
+     - 状態変数: `showRouteToggleSection` (boolean)
+     - 個別路線の表示/非表示切り替え
+     - 経路推薦数の設定（1-10件）
+     - 全路線表示/非表示の一括切り替え
+     - 時間フィルター設定
 
 4. **所要時間フィルター機能（現在実装中）**
    - 出発駅から指定時間内にアクセス可能な駅のみを表示
@@ -165,6 +171,36 @@ netlify deploy --prod
 - ユーザーにとって意味のあるバリエーションのみを残す厳密なフィルタリング
 
 **ファイル:** `src/utils/routeFinder.ts` の `diversifyRoutes()` メソッド
+
+## 開発者向け制御機能
+
+### 路線表示切替セクションの表示制御
+
+**概要:**
+路線表示切替セクション（Route Display Toggle）は、デフォルトで非表示に設定されており、プログラムから動的に表示/非表示を制御できます。
+
+**制御方法:**
+```typescript
+// RailwayMap.tsx 内で以下の状態変数を操作
+const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
+
+// 表示する場合
+setShowRouteToggleSection(true);
+
+// 非表示にする場合
+setShowRouteToggleSection(false);
+```
+
+**含まれる機能:**
+- 個別路線の表示/非表示切り替え
+- 経路推薦数の設定（1, 2, 3, 5, 10件）
+- 全路線表示/非表示の一括操作
+- 時間フィルター設定（5分〜60分）
+- デバッグ用テストボタン（山手線・中央線ポップアップ）
+
+**実装場所:** `src/components/RailwayMap.tsx:64, 1222-1538`
+
+**現在の状態:** デフォルトで非表示（showRouteToggleSection = false）
 
 ## モバイル・レスポンシブデザインの現状
 

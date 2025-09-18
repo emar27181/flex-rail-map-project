@@ -61,6 +61,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
   // 表示モードの管理
   const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(true);
+  const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   const [mapViewMode, setMapViewMode] = useState<'realistic' | 'schematic'>('realistic');
 
   // 経路推薦設定
@@ -1218,7 +1219,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
         {/* ルート推薦表示は凡例内に統合 */}
 
-        <div style={{ marginBottom: '15px', padding: '15px', border: `1px solid ${colors.border}`, borderRadius: '8px', backgroundColor: colors.surface }}>
+        {showRouteToggleSection && (
+          <div style={{ marginBottom: '15px', padding: '15px', border: `1px solid ${colors.border}`, borderRadius: '8px', backgroundColor: colors.surface }}>
           <div
             onClick={() => setIsRouteToggleExpanded(!isRouteToggleExpanded)}
             style={{
@@ -1532,7 +1534,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               </div>
             </div>
           )}
-        </div>
+          </div>
+        )}
 
         <div style={{ height: '600px', width: '100%', border: `1px solid ${colors.border}`, position: 'relative' }}>
           {mapViewMode === 'realistic' ? (
