@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sun, Moon, Map, Languages } from 'lucide-react';
+import { Sun, Moon, Map } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 
 interface NavigationBarProps {
@@ -76,7 +76,14 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           title={language === 'japanese' ? 'Switch to English' : 'Switch to Japanese'}
           aria-label={language === 'japanese' ? 'Switch to English' : 'Switch to Japanese'}
         >
-          <Languages size={20} />
+          <span style={{
+            fontSize: '13px',
+            fontWeight: 'bold',
+            color: colors.text,
+            fontFamily: 'monospace'
+          }}>
+            {language === 'japanese' ? 'En' : '日'}
+          </span>
         </button>
 
         {/* テーマ切り替えボタン */}
