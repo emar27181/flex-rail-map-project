@@ -29,7 +29,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const [arrivalSearch, setArrivalSearch] = useState('');
   const [showDepartureResults, setShowDepartureResults] = useState(false);
   const [showArrivalResults, setShowArrivalResults] = useState(false);
-  
+  const [isMobile, setIsMobile] = useState(false);
+
   const departureRef = useRef<HTMLDivElement>(null);
   const arrivalRef = useRef<HTMLDivElement>(null);
 
@@ -48,6 +49,19 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
+  }, []);
+
+  // レスポンシブ対応
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    // 初期設定
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const allStations = useMemo(() => {
@@ -112,16 +126,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     setArrivalSearch('');
   };
 
-  const swapStations = () => {
-    const tempDeparture = departure;
-    const tempSearch = departureSearch;
-    
-    onDepartureChange(arrival);
-    setDepartureSearch(arrivalSearch);
-    
-    onArrivalChange(tempDeparture);
-    setArrivalSearch(tempSearch);
-  };
 
   return (
     <div style={{ marginBottom: '20px', padding: '15px', border: `1px solid ${colors.border}`, borderRadius: '8px', backgroundColor: colors.surface }}>
@@ -150,9 +154,20 @@ const StationSelector: React.FC<StationSelectorProps> = ({
       
       {isExpanded && (
         <>
-          <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          <div style={{
+            display: 'flex',
+            gap: '15px',
+            alignItems: isMobile ? 'stretch' : 'flex-start',
+            flexDirection: isMobile ? 'column' : 'row',
+            flexWrap: isMobile ? 'nowrap' : 'wrap'
+          }}>
             {/* 出発駅選択 */}
-            <div ref={departureRef} style={{ flex: '1', minWidth: '200px', maxWidth: '300px', position: 'relative' }}>
+            <div ref={departureRef} style={{
+              flex: '1',
+              minWidth: isMobile ? '100%' : '200px',
+              maxWidth: isMobile ? '100%' : '300px',
+              position: 'relative'
+            }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: colors.textSecondary }}>
                 {translateUI('departureStation', language)}
               </label>
@@ -236,28 +251,14 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               )}
             </div>
 
-            {/* 入れ替えボタン */}
-            <div style={{ display: 'flex', alignItems: 'center', marginTop: '25px' }}>
-              <button
-                onClick={swapStations}
-                style={{
-                  padding: '8px 12px',
-                  backgroundColor: colors.success,
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  whiteSpace: 'nowrap'
-                }}
-                disabled={!departure || !arrival}
-              >
-{translateUI('swapStations', language)}
-              </button>
-            </div>
 
             {/* 到着駅選択 */}
-            <div ref={arrivalRef} style={{ flex: '1', minWidth: '200px', maxWidth: '300px', position: 'relative' }}>
+            <div ref={arrivalRef} style={{
+              flex: '1',
+              minWidth: isMobile ? '100%' : '200px',
+              maxWidth: isMobile ? '100%' : '300px',
+              position: 'relative'
+            }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: colors.textSecondary }}>
                 {translateUI('arrivalStation', language)}
               </label>
