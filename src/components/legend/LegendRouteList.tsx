@@ -13,6 +13,7 @@ interface RouteInfo {
 interface LegendRouteListProps {
   visibleRoutesData: Array<[string, any]>;
   visibleRoutes: Set<RouteKey>;
+  availableRoutes: Set<RouteKey>;
   selectedRoute: RouteInfo | null;
   routeColors: Record<RouteKey, string>;
   routeNames: Record<RouteKey, string>;
@@ -33,6 +34,7 @@ interface LegendRouteListProps {
 const LegendRouteList: React.FC<LegendRouteListProps> = ({
   visibleRoutesData,
   visibleRoutes,
+  availableRoutes,
   selectedRoute,
   routeColors,
   routeNames,

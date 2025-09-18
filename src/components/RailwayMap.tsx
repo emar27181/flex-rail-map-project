@@ -32,6 +32,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const colors = getThemeColors(theme);
 
   const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
+  const [availableRoutes, setAvailableRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
   const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [MapComponents, setMapComponents] = useState<any>(null);
@@ -316,20 +317,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
   // レンダリング最適化：表示する路線のデータを準備
   const visibleRoutesData = useMemo(() => {
-    // 経路推薦がある場合は、推薦で使用される路線のみを表示対象とする
-    if (routeRecommendations.length > 0) {
-      const usedRouteKeys = new Set<RouteKey>();
-      routeRecommendations.forEach(route => {
-        route.segments.forEach(segment => {
-          usedRouteKeys.add(segment.routeKey);
-        });
-      });
-      return Object.entries(routes).filter(([routeKey]) => usedRouteKeys.has(routeKey as RouteKey));
-    }
-
-    // 経路推薦がない場合は、全路線を表示対象とする
-    return Object.entries(routes);
-  }, [routeRecommendations]);
+    // availableRoutes状態に基づいて凡例に表示する路線を決定
+    const filteredRoutes = Object.entries(routes).filter(([routeKey]) => availableRoutes.has(routeKey as RouteKey));
+    console.log('🗺️ Available routes for legend:', filteredRoutes.map(([routeKey]) => routeKey).join(', '));
+    return filteredRoutes;
+  }, [availableRoutes]);
 
 
   useEffect(() => {
@@ -486,35 +478,80 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     }
   }, [timeFilterEnabled, departure, timeFilterMaxMinutes, visibleRoutes]);
 
+  // 両駅をつなぐ路線を特定する関数
+  const getConnectingRoutes = (departureStation: string, arrivalStation: string): RouteKey[] => {
+    const departureRoutes = getRoutesForStation(departureStation);
+    const arrivalRoutes = getRoutesForStation(arrivalStation);
+
+    // 両方の駅を通る路線（直接接続）
+    const directRoutes = departureRoutes.filter(route => arrivalRoutes.includes(route));
+
+    // 直接接続がある場合はそれを優先
+    if (directRoutes.length > 0) {
+      console.log(`🚉 Direct connection found: ${directRoutes.join(', ')}`);
+      return directRoutes;
+    }
+
+    // 乗り換えが必要な場合は、経路推薦で使用される路線を含める
+    if (routeRecommendations.length > 0) {
+      const usedRoutes = new Set<RouteKey>();
+      routeRecommendations.forEach(route => {
+        route.segments.forEach(segment => {
+          usedRoutes.add(segment.routeKey as RouteKey);
+        });
+      });
+      console.log(`🚉 Transfer connection found via route recommendations: ${Array.from(usedRoutes).join(', ')}`);
+      return Array.from(usedRoutes);
+    }
+
+    // 経路推薦がない場合は、出発駅と到着駅の路線を両方表示
+    const combinedRoutes = [...new Set([...departureRoutes, ...arrivalRoutes])];
+    console.log(`🚉 No direct connection, showing all routes from both stations: ${combinedRoutes.join(', ')}`);
+    return combinedRoutes;
+  };
+
   // 駅選択に応じた路線表示制御
   useEffect(() => {
     console.log('🚉 Station selection changed:', { departure: departure?.name, arrival: arrival?.name });
 
-    // 両方の駅が選択されている場合は、全路線表示（既存の動作）
+    // 両方の駅が選択されている場合は、それらをつなぐ路線のみを利用可能にする
     if (departure && arrival) {
-      console.log('🚉 Both stations selected, showing all routes');
-      return;
+      const connectingRoutes = getConnectingRoutes(departure.name, arrival.name);
+      console.log('🚉 Both stations selected, available routes:', connectingRoutes);
+      setAvailableRoutes(new Set(connectingRoutes));
+      // 表示されている路線のうち、利用可能な路線のみに絞る
+      setVisibleRoutes(prev => new Set([...prev].filter(route => connectingRoutes.includes(route))));
     }
-
-    // 片方の駅のみ選択されている場合は、その駅の通過路線のみ表示
-    if (departure && !arrival) {
+    // 片方の駅のみ選択されている場合は、その駅の通過路線のみを利用可能にする
+    else if (departure && !arrival) {
       const departureRoutes = getRoutesForStation(departure.name);
-      console.log('🚉 Showing routes for departure station:', departure.name, 'Routes:', departureRoutes);
-      setVisibleRoutes(new Set(departureRoutes));
+      console.log('🚉 Available routes for departure station:', departure.name, 'Routes:', departureRoutes);
+      setAvailableRoutes(new Set(departureRoutes));
+      setVisibleRoutes(prev => new Set([...prev].filter(route => departureRoutes.includes(route))));
     } else if (arrival && !departure) {
       const arrivalRoutes = getRoutesForStation(arrival.name);
-      console.log('🚉 Showing routes for arrival station:', arrival.name, 'Routes:', arrivalRoutes);
-      setVisibleRoutes(new Set(arrivalRoutes));
+      console.log('🚉 Available routes for arrival station:', arrival.name, 'Routes:', arrivalRoutes);
+      setAvailableRoutes(new Set(arrivalRoutes));
+      setVisibleRoutes(prev => new Set([...prev].filter(route => arrivalRoutes.includes(route))));
     } else {
-      // 何も選択されていない場合は全路線表示
-      console.log('🚉 No stations selected, showing all routes');
-      setVisibleRoutes(new Set(Object.keys(routes) as RouteKey[]));
+      // 何も選択されていない場合は全路線を利用可能にする
+      console.log('🚉 No stations selected, all routes available');
+      const allRoutes = Object.keys(routes) as RouteKey[];
+      setAvailableRoutes(new Set(allRoutes));
+      setVisibleRoutes(new Set(allRoutes));
     }
-  }, [departure, arrival]);
+  }, [departure, arrival, routeRecommendations]);
 
   const toggleRoute = (routeKey: RouteKey) => {
     console.log('🔄 toggleRoute called for:', routeKey);
     console.log('🔄 Current visibleRoutes:', visibleRoutes);
+
+    // 利用可能な路線のみ操作を許可
+    if (!availableRoutes.has(routeKey)) {
+      console.log('🔄 Route not available, ignoring toggle');
+      return;
+    }
+
     const newVisibleRoutes = new Set(visibleRoutes);
     if (newVisibleRoutes.has(routeKey)) {
       console.log('🔄 Removing route from visible routes');
@@ -1679,6 +1716,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                   <LegendRouteList
                     visibleRoutesData={visibleRoutesData}
                     visibleRoutes={visibleRoutes}
+                    availableRoutes={availableRoutes}
                     selectedRoute={selectedRoute}
                     routeColors={routeColors}
                     routeNames={routeNames}
