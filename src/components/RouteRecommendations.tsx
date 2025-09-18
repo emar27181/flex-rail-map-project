@@ -258,7 +258,8 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                       display: 'flex',
                       alignItems: 'center',
                       gap: '8px',
-                      minWidth: '120px'
+                      minWidth: language === 'english' ? '100px' : '120px',
+                      maxWidth: language === 'english' ? '180px' : '200px'
                     }}>
                       <div style={{
                         width: '16px',

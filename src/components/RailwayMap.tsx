@@ -276,14 +276,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
     // 駅名のみを表示（S: G: プレフィックスなし）
     const fontSize = Math.max(12, Math.round(baseMarkerSize * 0.4));
-    const textWidth = stationName.length * fontSize * 0.6 + 16;
-    const markerWidth = Math.max(baseMarkerSize, textWidth);
+    // 英語駅名の場合は文字幅係数を調整（英語は日本語より文字幅が狭い）
+    const charWidthMultiplier = language === 'english' ? 0.4 : 0.6;
+    const padding = language === 'english' ? 8 : 16; // 英語時はパディング削減
+    const textWidth = stationName.length * fontSize * charWidthMultiplier + padding;
+    const markerWidth = Math.max(baseMarkerSize, Math.min(textWidth, language === 'english' ? 150 : 200)); // 英語時は最大幅をさらに制限
     const markerHeight = baseMarkerSize;
 
     const bgColor = theme === 'dark' ? colors.surfaceElevated : 'white';
     const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
     return new DivIcon({
-      html: `<div style="background:${bgColor};border:3px solid ${markerColor};border-radius:4px;width:${markerWidth}px;height:${markerHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};box-shadow:0 3px 6px ${shadowColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px">${stationName}</div>`,
+      html: `<div style="background:${bgColor};border:3px solid ${markerColor};border-radius:4px;width:${markerWidth}px;height:${markerHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};box-shadow:0 3px 6px ${shadowColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 ${language === 'english' ? '2px' : '4px'}">${stationName}</div>`,
       className: 'special-station-marker-inline',
       iconSize: [markerWidth, markerHeight],
       iconAnchor: [markerWidth / 2, markerHeight / 2]

@@ -180,8 +180,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             {/* 出発駅選択 */}
             <div ref={departureRef} style={{
               flex: '1',
-              minWidth: '160px',
-              maxWidth: '300px',
+              minWidth: language === 'english' ? '140px' : '160px',
+              maxWidth: language === 'english' ? '200px' : '300px',
               position: 'relative'
             }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: colors.textSecondary }}>
@@ -199,10 +199,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   placeholder={departure ? translateStation(departure.name, language) : translateUI('stationPlaceholder', language)}
                   style={{
                     width: '100%',
-                    padding: '8px 30px 8px 8px',
+                    padding: language === 'english' ? '6px 28px 6px 6px' : '8px 30px 8px 8px',
                     border: `1px solid ${colors.border}`,
                     borderRadius: '4px',
-                    fontSize: '14px',
+                    fontSize: language === 'english' ? '13px' : '14px',
                     boxSizing: 'border-box',
                     backgroundColor: colors.surfaceElevated,
                     color: colors.text
@@ -250,7 +250,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                         padding: '8px 12px',
                         cursor: 'pointer',
                         borderBottom: index < filteredDepartureStations.length - 1 ? `1px solid ${colors.borderLight}` : 'none',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        wordBreak: language === 'english' ? 'break-word' : 'normal',
+                        lineHeight: '1.3'
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surface}
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
@@ -271,8 +273,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             {/* 到着駅選択 */}
             <div ref={arrivalRef} style={{
               flex: '1',
-              minWidth: '160px',
-              maxWidth: '300px',
+              minWidth: language === 'english' ? '140px' : '160px',
+              maxWidth: language === 'english' ? '200px' : '300px',
               position: 'relative'
             }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: colors.textSecondary }}>
@@ -290,10 +292,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   placeholder={arrival ? translateStation(arrival.name, language) : translateUI('stationPlaceholder', language)}
                   style={{
                     width: '100%',
-                    padding: '8px 30px 8px 8px',
+                    padding: language === 'english' ? '6px 28px 6px 6px' : '8px 30px 8px 8px',
                     border: `1px solid ${colors.border}`,
                     borderRadius: '4px',
-                    fontSize: '14px',
+                    fontSize: language === 'english' ? '13px' : '14px',
                     boxSizing: 'border-box',
                     backgroundColor: colors.surfaceElevated,
                     color: colors.text
@@ -340,8 +342,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       style={{
                         padding: '8px 12px',
                         cursor: 'pointer',
-                        borderBottom: index < filteredArrivalStations.length - 1 ? '1px solid #eee' : 'none',
-                        fontSize: '14px'
+                        borderBottom: index < filteredArrivalStations.length - 1 ? `1px solid ${colors.borderLight}` : 'none',
+                        fontSize: '14px',
+                        wordBreak: language === 'english' ? 'break-word' : 'normal',
+                        lineHeight: '1.3'
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surface}
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
