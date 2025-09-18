@@ -157,15 +157,15 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           <div style={{
             display: 'flex',
             gap: '15px',
-            alignItems: isMobile ? 'stretch' : 'flex-start',
-            flexDirection: isMobile ? 'column' : 'row',
-            flexWrap: isMobile ? 'nowrap' : 'wrap'
+            alignItems: 'flex-start',
+            flexDirection: 'row',
+            flexWrap: 'wrap'
           }}>
             {/* 出発駅選択 */}
             <div ref={departureRef} style={{
               flex: '1',
-              minWidth: isMobile ? '100%' : '200px',
-              maxWidth: isMobile ? '100%' : '300px',
+              minWidth: '160px',
+              maxWidth: '300px',
               position: 'relative'
             }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: colors.textSecondary }}>
@@ -255,8 +255,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             {/* 到着駅選択 */}
             <div ref={arrivalRef} style={{
               flex: '1',
-              minWidth: isMobile ? '100%' : '200px',
-              maxWidth: isMobile ? '100%' : '300px',
+              minWidth: '160px',
+              maxWidth: '300px',
               position: 'relative'
             }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: colors.textSecondary }}>
