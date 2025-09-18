@@ -168,7 +168,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                   fontWeight: 'bold',
                   color: isSelected ? '#2196F3' : '#333'
                 }}>
-{translateUI('routeNumber', language, { number: (index + 1).toString() })} {isSelected && translateUI('selectedStatus', language)}
+{translateUI('routeNumber', language, { number: (index + 1).toString() })}
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{

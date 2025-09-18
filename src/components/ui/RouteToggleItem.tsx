@@ -37,7 +37,7 @@ const RouteToggleItem: React.FC<RouteToggleItemProps> = ({
         color: routeColor,
         opacity: 1
       }}
-      badge={isInSelectedRoute ? translateUI('selected', language) : undefined}
+      badge={undefined}
       onToggle={(id) => onToggle(id as RouteKey)}
       adjustColorForTheme={adjustRouteColorForTheme}
     />

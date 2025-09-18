@@ -46,7 +46,7 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
         color: '#4CAF50',
         opacity: 1
       }}
-      badge={isSelected ? translateUI('selected', language) : undefined}
+      badge={undefined}
       onToggle={() => onSelect(route)}
     />
   );
