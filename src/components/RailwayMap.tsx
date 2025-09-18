@@ -295,7 +295,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     const bgColor = theme === 'dark' ? 'rgba(40,40,40,0.9)' : 'rgba(255,255,255,0.9)';
     const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
     return new DivIcon({
-      html: `<div style="background:${bgColor};border:1px solid ${color};border-radius:3px;padding:${padding}px ${padding + 2}px;font-size:${fontSize}px;font-weight:bold;color:${color};box-shadow:0 1px 3px ${shadowColor};white-space:nowrap;text-align:center">${time}分</div>`,
+      html: `<div style="background:${bgColor};border:1px solid ${color};border-radius:3px;padding:${padding}px ${padding + 2}px;font-size:${fontSize}px;font-weight:bold;color:${color};box-shadow:0 1px 3px ${shadowColor};white-space:nowrap;text-align:center">${translateUI('minutesShort', currentLanguage, { time: time.toString() })}</div>`,
       className: isSection ? 'time-text-section' : 'time-text',
       iconSize: [time.toString().length * fontSize + padding * 4, fontSize + padding * 2],
       iconAnchor: [(time.toString().length * fontSize + padding * 4) / 2, (fontSize + padding * 2) / 2]
@@ -856,7 +856,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               currentlyDisplayedStations.add(station.name);
             }
 
-            const specialIcon = createSpecialStationIcon(isDeparture, zoomLevel, station.name);
+            const specialIcon = createSpecialStationIcon(isDeparture, zoomLevel, translateStation(station.name, currentLanguage));
             if (!specialIcon) return null;
 
             return (
@@ -1286,7 +1286,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                       fontWeight: 'bold'
                     }}
                   >
-                    全表示
+{translateUI('allShow', currentLanguage)}
                   </button>
                   <button
                     onClick={deselectAllRoutes}
@@ -1301,7 +1301,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                       fontWeight: 'bold'
                     }}
                   >
-                    全非表示
+{translateUI('allHide', currentLanguage)}
                   </button>
                 </div>
                 <div style={{
@@ -1601,7 +1601,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                   fontWeight: 'bold',
                   color: colors.text
                 }}>
-                  表示中の路線
+{translateUI('displayedRoutes', currentLanguage)}
                 </span>
                 <span style={{
                   fontSize: '12px',
@@ -1775,7 +1775,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                         marginBottom: '8px',
                         color: colors.text
                       }}>
-                        推薦ルート選択
+                        {translateUI('routeSelection', currentLanguage)}
                       </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -1952,7 +1952,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                           cursor: 'pointer'
                         }}
                       >
-                        全表示
+    {translateUI('allShow', currentLanguage)}
                       </button>
                       <button
                         onClick={deselectAllRoutes}
@@ -1967,7 +1967,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                           cursor: 'pointer'
                         }}
                       >
-                        全非表示
+    {translateUI('allHide', currentLanguage)}
                       </button>
                     </div>
                   </div>
@@ -2317,13 +2317,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                           gap: '8px',
                           marginBottom: '8px'
                         }}>
-                          <strong>{departure.name}</strong>
+                          <strong>{translateStation(departure.name, currentLanguage)}</strong>
                           <span style={{
                             color: '#4CAF50',
                             fontSize: '18px',
                             fontWeight: 'bold'
                           }}>→</span>
-                          <span>{direction || arrival.name}</span>
+                          <span>{direction || translateStation(arrival.name, currentLanguage)}</span>
                         </div>
                         {direction && direction !== arrival.name && (
                           <div style={{
