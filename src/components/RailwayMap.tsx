@@ -1637,11 +1637,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     selectedRoute={selectedRoute}
                     routeColors={routeColors}
                     routeNames={routeNames}
+                    showTransferStationsOnly={showTransferStationsOnly}
                     theme={theme}
                     language={currentLanguage}
                     onToggleRoute={toggleRoute}
                     onSelectAllRoutes={selectAllRoutes}
                     onDeselectAllRoutes={deselectAllRoutes}
+                    onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
                   />
 
@@ -1658,11 +1660,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                   {/* 4. 表示オプション (Display Options) */}
                   <LegendDisplayOptions
                     mapViewMode={mapViewMode}
-                    showTransferStationsOnly={showTransferStationsOnly}
                     theme={theme}
                     language={currentLanguage}
                     onMapViewModeChange={setMapViewMode}
-                    onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
                   />
 
                 </div>

@@ -16,11 +16,13 @@ interface LegendRouteListProps {
   selectedRoute: RouteInfo | null;
   routeColors: Record<RouteKey, string>;
   routeNames: Record<RouteKey, string>;
+  showTransferStationsOnly: boolean;
   theme: 'light' | 'dark';
   language: 'japanese' | 'english';
   onToggleRoute: (routeKey: RouteKey) => void;
   onSelectAllRoutes: () => void;
   onDeselectAllRoutes: () => void;
+  onShowTransferStationsOnlyChange: (value: boolean) => void;
   adjustRouteColorForTheme: (color: string, theme: 'light' | 'dark') => string;
 }
 
@@ -30,11 +32,13 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   selectedRoute,
   routeColors,
   routeNames,
+  showTransferStationsOnly,
   theme,
   language,
   onToggleRoute,
   onSelectAllRoutes,
   onDeselectAllRoutes,
+  onShowTransferStationsOnlyChange,
   adjustRouteColorForTheme
 }) => {
   const colors = getThemeColors(theme);
@@ -91,6 +95,28 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         >
           {translateUI('allHide', language)}
         </button>
+      </div>
+
+      {/* 乗換駅のみ表示オプション */}
+      <div style={{ marginBottom: '8px' }}>
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '12px',
+          color: colors.text,
+          cursor: 'pointer'
+        }}>
+          <input
+            type="checkbox"
+            checked={showTransferStationsOnly}
+            onChange={(e) => onShowTransferStationsOnlyChange(e.target.checked)}
+            style={{
+              marginRight: '6px',
+              cursor: 'pointer'
+            }}
+          />
+          {translateUI('showOnlyTransferStations', language)}
+        </label>
       </div>
 
       {visibleRoutesData.map(([routeKey]) => {

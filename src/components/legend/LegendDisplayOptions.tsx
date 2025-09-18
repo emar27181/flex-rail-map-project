@@ -4,20 +4,16 @@ import { translateUI } from '../../utils/translation';
 
 interface LegendDisplayOptionsProps {
   mapViewMode: 'realistic' | 'schematic';
-  showTransferStationsOnly: boolean;
   theme: 'light' | 'dark';
   language: 'japanese' | 'english';
   onMapViewModeChange: (mode: 'realistic' | 'schematic') => void;
-  onShowTransferStationsOnlyChange: (value: boolean) => void;
 }
 
 const LegendDisplayOptions: React.FC<LegendDisplayOptionsProps> = ({
   mapViewMode,
-  showTransferStationsOnly,
   theme,
   language,
-  onMapViewModeChange,
-  onShowTransferStationsOnlyChange
+  onMapViewModeChange
 }) => {
   const colors = getThemeColors(theme);
 
@@ -80,24 +76,6 @@ const LegendDisplayOptions: React.FC<LegendDisplayOptionsProps> = ({
             {translateUI('schematicView', language)}
           </label>
         </div>
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          fontSize: '12px',
-          color: colors.text,
-          cursor: 'pointer'
-        }}>
-          <input
-            type="checkbox"
-            checked={showTransferStationsOnly}
-            onChange={(e) => onShowTransferStationsOnlyChange(e.target.checked)}
-            style={{
-              marginRight: '6px',
-              cursor: 'pointer'
-            }}
-          />
-          {translateUI('showOnlyTransferStations', language)}
-        </label>
       </div>
     </div>
   );
