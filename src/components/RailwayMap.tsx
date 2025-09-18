@@ -484,6 +484,32 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     }
   }, [timeFilterEnabled, departure, timeFilterMaxMinutes, visibleRoutes]);
 
+  // 駅選択に応じた路線表示制御
+  useEffect(() => {
+    console.log('🚉 Station selection changed:', { departure: departure?.name, arrival: arrival?.name });
+
+    // 両方の駅が選択されている場合は、全路線表示（既存の動作）
+    if (departure && arrival) {
+      console.log('🚉 Both stations selected, showing all routes');
+      return;
+    }
+
+    // 片方の駅のみ選択されている場合は、その駅の通過路線のみ表示
+    if (departure && !arrival) {
+      const departureRoutes = getRoutesForStation(departure.name);
+      console.log('🚉 Showing routes for departure station:', departure.name, 'Routes:', departureRoutes);
+      setVisibleRoutes(new Set(departureRoutes));
+    } else if (arrival && !departure) {
+      const arrivalRoutes = getRoutesForStation(arrival.name);
+      console.log('🚉 Showing routes for arrival station:', arrival.name, 'Routes:', arrivalRoutes);
+      setVisibleRoutes(new Set(arrivalRoutes));
+    } else {
+      // 何も選択されていない場合は全路線表示
+      console.log('🚉 No stations selected, showing all routes');
+      setVisibleRoutes(new Set(Object.keys(routes) as RouteKey[]));
+    }
+  }, [departure, arrival]);
+
   const toggleRoute = (routeKey: RouteKey) => {
     console.log('🔄 toggleRoute called for:', routeKey);
     console.log('🔄 Current visibleRoutes:', visibleRoutes);
