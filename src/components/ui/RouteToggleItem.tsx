@@ -35,7 +35,7 @@ const RouteToggleItem: React.FC<RouteToggleItemProps> = ({
       theme={theme}
       colorIndicator={{
         color: routeColor,
-        opacity: 1
+        opacity: isVisible ? 1 : 0.3
       }}
       badge={undefined}
       onToggle={(id) => onToggle(id as RouteKey)}

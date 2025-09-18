@@ -90,7 +90,8 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
             ? colors.text
             : colors.textMuted,
         lineHeight: '1.2',
-        fontWeight: isHighlighted ? 'bold' : 'normal'
+        fontWeight: isHighlighted ? 'bold' : 'normal',
+        opacity: isActive ? 1 : 0.6
       }}>
         {label}
         {badge && (
