@@ -235,11 +235,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     if (isDetailed) {
       const borderColor = theme === 'dark' ? 'rgba(255,255,255,0.8)' : 'white';
       const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
+      const translatedStationName = translateStation(station.name, currentLanguage);
+      const stationNameWidth = translatedStationName.length * 11 + 12;
       return new DivIcon({
-        html: `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:bold;white-space:nowrap;border:1px solid ${borderColor};box-shadow:0 1px 3px ${shadowColor};text-align:center;opacity:${opacity}">${translateStation(station.name, currentLanguage)}</div>`,
+        html: `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:bold;white-space:nowrap;border:1px solid ${borderColor};box-shadow:0 1px 3px ${shadowColor};text-align:center;opacity:${opacity}">${translatedStationName}</div>`,
         className: 'station-name-marker',
-        iconSize: [station.name.length * 11 + 12, 18],
-        iconAnchor: [(station.name.length * 11 + 12) / 2, 9]
+        iconSize: [stationNameWidth, 18],
+        iconAnchor: [stationNameWidth / 2, 9]
       });
     } else {
       const stationSize = Math.max(8, Math.min(16, zoomLevel - 8));
@@ -252,7 +254,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
         iconAnchor: [stationSize / 2, stationSize / 2]
       });
     }
-  }, [MapComponents]);
+  }, [MapComponents, currentLanguage, theme]);
 
   const getTimeMarkerSize = (zoom: number) => {
     const baseSize = 20;
@@ -281,7 +283,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       iconSize: [markerWidth, markerHeight],
       iconAnchor: [markerWidth / 2, markerHeight / 2]
     });
-  }, [MapComponents]);
+  }, [MapComponents, theme, colors]);
 
   const createTimeIcon = useCallback((time: number, color: string, zoomLevel: number, isSection = false) => {
     if (!MapComponents?.DivIcon) return null;
@@ -292,13 +294,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
     const bgColor = theme === 'dark' ? 'rgba(40,40,40,0.9)' : 'rgba(255,255,255,0.9)';
     const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
+    const translatedTimeText = translateUI('minutesShort', currentLanguage, { time: time.toString() });
+    const timeTextWidth = translatedTimeText.length * fontSize * 0.6 + padding * 4;
     return new DivIcon({
-      html: `<div style="background:${bgColor};border:1px solid ${color};border-radius:3px;padding:${padding}px ${padding + 2}px;font-size:${fontSize}px;font-weight:bold;color:${color};box-shadow:0 1px 3px ${shadowColor};white-space:nowrap;text-align:center">${translateUI('minutesShort', currentLanguage, { time: time.toString() })}</div>`,
+      html: `<div style="background:${bgColor};border:1px solid ${color};border-radius:3px;padding:${padding}px ${padding + 2}px;font-size:${fontSize}px;font-weight:bold;color:${color};box-shadow:0 1px 3px ${shadowColor};white-space:nowrap;text-align:center">${translatedTimeText}</div>`,
       className: isSection ? 'time-text-section' : 'time-text',
-      iconSize: [time.toString().length * fontSize + padding * 4, fontSize + padding * 2],
-      iconAnchor: [(time.toString().length * fontSize + padding * 4) / 2, (fontSize + padding * 2) / 2]
+      iconSize: [timeTextWidth, fontSize + padding * 2],
+      iconAnchor: [timeTextWidth / 2, (fontSize + padding * 2) / 2]
     });
-  }, [MapComponents]);
+  }, [MapComponents, currentLanguage, theme]);
 
   // レンダリング最適化：表示する路線のデータを準備
   const visibleRoutesData = useMemo(() => {
