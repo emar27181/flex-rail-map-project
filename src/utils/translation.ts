@@ -370,6 +370,32 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "{count} transfers"
   },
 
+  // Legend and route display
+  displayedRoutes: {
+    japanese: "表示中の路線",
+    english: "Displayed Routes"
+  },
+  allShow: {
+    japanese: "全表示",
+    english: "Show All"
+  },
+  allHide: {
+    japanese: "全非表示",
+    english: "Hide All"
+  },
+  legendDeparture: {
+    japanese: "S{station}",
+    english: "S{station}"
+  },
+  legendArrival: {
+    japanese: "G{station}",
+    english: "G{station}"
+  },
+  routeSelection: {
+    japanese: "推薦ルート選択",
+    english: "Route Selection"
+  },
+
   // その他
   departure: {
     japanese: "出発",
