@@ -97,28 +97,6 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         </button>
       </div>
 
-      {/* 乗換駅のみ表示オプション */}
-      <div style={{ marginBottom: '8px' }}>
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          fontSize: '12px',
-          color: colors.text,
-          cursor: 'pointer'
-        }}>
-          <input
-            type="checkbox"
-            checked={showTransferStationsOnly}
-            onChange={(e) => onShowTransferStationsOnlyChange(e.target.checked)}
-            style={{
-              marginRight: '6px',
-              cursor: 'pointer'
-            }}
-          />
-          {translateUI('showOnlyTransferStations', language)}
-        </label>
-      </div>
-
       {visibleRoutesData.map(([routeKey]) => {
         const isVisible = visibleRoutes.has(routeKey as RouteKey);
         const isInSelectedRoute = selectedRoute && selectedRoute.segments.some(
@@ -140,6 +118,28 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           />
         );
       })}
+
+      {/* 乗換駅のみ表示オプション */}
+      <div style={{ marginTop: '8px' }}>
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '12px',
+          color: colors.text,
+          cursor: 'pointer'
+        }}>
+          <input
+            type="checkbox"
+            checked={showTransferStationsOnly}
+            onChange={(e) => onShowTransferStationsOnlyChange(e.target.checked)}
+            style={{
+              marginRight: '6px',
+              cursor: 'pointer'
+            }}
+          />
+          {translateUI('showOnlyTransferStations', language)}
+        </label>
+      </div>
     </div>
   );
 };
