@@ -1836,7 +1836,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                                 fontWeight: isSelected ? 'bold' : 'normal',
                                 color: isSelected ? colors.primary : colors.text
                               }}>
-                                <span>ルート {index + 1}</span>
+                                <span>{translateUI('routeNumber', currentLanguage, { number: (index + 1).toString() })}</span>
                                 <span style={{
                                   color: '#4CAF50',
                                   fontSize: '10px',
