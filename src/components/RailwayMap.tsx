@@ -66,6 +66,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   // 表示モードの管理
   const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(true);
   const [showTravelTimes, setShowTravelTimes] = useState(true);
+  const [showStationNames, setShowStationNames] = useState(true);
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   const [mapViewMode, setMapViewMode] = useState<'realistic' | 'schematic'>('realistic');
 
@@ -873,6 +874,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
           const isSpecialStation = isDeparture || isArrival;
 
           if (isSpecialStation) {
+            // 駅名表示がオフの場合は特別駅も非表示
+            if (!showStationNames) {
+              return null;
+            }
+
             // 乗換駅のみ表示モード時は、特別駅も乗換駅チェックを適用
             if (showTransferStationsOnly && !transferStations.has(station.name)) {
               console.log(`Filtering out special non-transfer station: ${station.name}`);
@@ -903,6 +909,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 icon={specialIcon}
                 zIndexOffset={1000}
               >
+                {showStationNames && (
                 <Popup>
                   <div>
                     <strong>{translateStation(station.name, currentLanguage)}</strong>
@@ -973,11 +980,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     </div>
                   </div>
                 </Popup>
+                )}
               </Marker>
             );
           } else {
+            // 駅名表示がオフの場合は通常駅も非表示
+            if (!showStationNames) {
+              return null;
+            }
+
             const shouldShowStation = zoomLevel >= 11; // より広域で駅を表示
-            const shouldShowStationName = zoomLevel >= 10; // より広域で駅名を表示
+            const shouldShowStationName = showStationNames && zoomLevel >= 10; // 駅名表示切替 + ズームレベル
             const shouldShowAllStations = zoomLevel >= 13; // 十分拡大したらすべての駅を表示
             const isMajorStation = majorStations.includes(station.name);
             const isTransferStation = transferStations.has(station.name);
@@ -1032,6 +1045,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 icon={stationIcon}
                 zIndexOffset={2000}
               >
+                {showStationNames && (
                 <Popup>
                   <div>
                     <strong>{translateStation(station.name, currentLanguage)}</strong>
@@ -1100,6 +1114,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     </div>
                   </div>
                 </Popup>
+                )}
               </Marker>
             );
           }
@@ -1669,6 +1684,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     routeNames={routeNames}
                     showTransferStationsOnly={showTransferStationsOnly}
                     showTravelTimes={showTravelTimes}
+                    showStationNames={showStationNames}
                     theme={theme}
                     language={currentLanguage}
                     onToggleRoute={toggleRoute}
@@ -1676,6 +1692,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     onDeselectAllRoutes={deselectAllRoutes}
                     onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
                     onShowTravelTimesChange={setShowTravelTimes}
+                    onShowStationNamesChange={setShowStationNames}
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
                   />
 

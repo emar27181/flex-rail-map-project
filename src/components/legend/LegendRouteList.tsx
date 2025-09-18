@@ -18,6 +18,7 @@ interface LegendRouteListProps {
   routeNames: Record<RouteKey, string>;
   showTransferStationsOnly: boolean;
   showTravelTimes: boolean;
+  showStationNames: boolean;
   theme: 'light' | 'dark';
   language: 'japanese' | 'english';
   onToggleRoute: (routeKey: RouteKey) => void;
@@ -25,6 +26,7 @@ interface LegendRouteListProps {
   onDeselectAllRoutes: () => void;
   onShowTransferStationsOnlyChange: (value: boolean) => void;
   onShowTravelTimesChange: (value: boolean) => void;
+  onShowStationNamesChange: (value: boolean) => void;
   adjustRouteColorForTheme: (color: string, theme: 'light' | 'dark') => string;
 }
 
@@ -36,6 +38,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   routeNames,
   showTransferStationsOnly,
   showTravelTimes,
+  showStationNames,
   theme,
   language,
   onToggleRoute,
@@ -43,6 +46,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onDeselectAllRoutes,
   onShowTransferStationsOnlyChange,
   onShowTravelTimesChange,
+  onShowStationNamesChange,
   adjustRouteColorForTheme
 }) => {
   const colors = getThemeColors(theme);
@@ -152,7 +156,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           alignItems: 'center',
           fontSize: '12px',
           color: colors.text,
-          cursor: 'pointer'
+          cursor: 'pointer',
+          marginBottom: '4px'
         }}>
           <input
             type="checkbox"
@@ -164,6 +169,26 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             }}
           />
           {translateUI('showTravelTimes', language)}
+        </label>
+
+        {/* 駅名表示オプション */}
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '12px',
+          color: colors.text,
+          cursor: 'pointer'
+        }}>
+          <input
+            type="checkbox"
+            checked={showStationNames}
+            onChange={(e) => onShowStationNamesChange(e.target.checked)}
+            style={{
+              marginRight: '6px',
+              cursor: 'pointer'
+            }}
+          />
+          {translateUI('showStationNames', language)}
         </label>
       </div>
     </div>

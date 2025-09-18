@@ -617,6 +617,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "所要時間を表示",
     english: "Show Travel Times"
   },
+  showStationNames: {
+    japanese: "駅名を表示",
+    english: "Show Station Names"
+  },
   mapDisplayMode: {
     japanese: "地図表示モード",
     english: "Map Display Mode"
