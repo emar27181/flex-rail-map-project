@@ -65,6 +65,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
   // 表示モードの管理
   const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(true);
+  const [showTravelTimes, setShowTravelTimes] = useState(true);
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   const [mapViewMode, setMapViewMode] = useState<'realistic' | 'schematic'>('realistic');
 
@@ -291,10 +292,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       iconSize: [markerWidth, markerHeight],
       iconAnchor: [markerWidth / 2, markerHeight / 2]
     });
-  }, [MapComponents, theme, colors]);
+  }, [MapComponents, theme, colors, language]);
 
   const createTimeIcon = useCallback((time: number, color: string, zoomLevel: number, isSection = false) => {
-    if (!MapComponents?.DivIcon) return null;
+    if (!MapComponents?.DivIcon || !showTravelTimes) return null;
 
     const { DivIcon } = MapComponents;
     const fontSize = Math.max(10, Math.round(zoomLevel * 0.8));
@@ -310,7 +311,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       iconSize: [timeTextWidth, fontSize + padding * 2],
       iconAnchor: [timeTextWidth / 2, (fontSize + padding * 2) / 2]
     });
-  }, [MapComponents, currentLanguage, theme]);
+  }, [MapComponents, currentLanguage, theme, showTravelTimes]);
 
   // レンダリング最適化：表示する路線のデータを準備
   const visibleRoutesData = useMemo(() => {
@@ -1667,12 +1668,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     routeColors={routeColors}
                     routeNames={routeNames}
                     showTransferStationsOnly={showTransferStationsOnly}
+                    showTravelTimes={showTravelTimes}
                     theme={theme}
                     language={currentLanguage}
                     onToggleRoute={toggleRoute}
                     onSelectAllRoutes={selectAllRoutes}
                     onDeselectAllRoutes={deselectAllRoutes}
                     onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
+                    onShowTravelTimesChange={setShowTravelTimes}
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
                   />
 

@@ -17,12 +17,14 @@ interface LegendRouteListProps {
   routeColors: Record<RouteKey, string>;
   routeNames: Record<RouteKey, string>;
   showTransferStationsOnly: boolean;
+  showTravelTimes: boolean;
   theme: 'light' | 'dark';
   language: 'japanese' | 'english';
   onToggleRoute: (routeKey: RouteKey) => void;
   onSelectAllRoutes: () => void;
   onDeselectAllRoutes: () => void;
   onShowTransferStationsOnlyChange: (value: boolean) => void;
+  onShowTravelTimesChange: (value: boolean) => void;
   adjustRouteColorForTheme: (color: string, theme: 'light' | 'dark') => string;
 }
 
@@ -33,12 +35,14 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   routeColors,
   routeNames,
   showTransferStationsOnly,
+  showTravelTimes,
   theme,
   language,
   onToggleRoute,
   onSelectAllRoutes,
   onDeselectAllRoutes,
   onShowTransferStationsOnlyChange,
+  onShowTravelTimesChange,
   adjustRouteColorForTheme
 }) => {
   const colors = getThemeColors(theme);
@@ -119,14 +123,16 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         );
       })}
 
-      {/* 乗換駅のみ表示オプション */}
+      {/* 表示オプション */}
       <div style={{ marginTop: '8px' }}>
+        {/* 乗換駅のみ表示オプション */}
         <label style={{
           display: 'flex',
           alignItems: 'center',
           fontSize: '12px',
           color: colors.text,
-          cursor: 'pointer'
+          cursor: 'pointer',
+          marginBottom: '4px'
         }}>
           <input
             type="checkbox"
@@ -138,6 +144,26 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             }}
           />
           {translateUI('showOnlyTransferStations', language)}
+        </label>
+
+        {/* 所要時間表示オプション */}
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '12px',
+          color: colors.text,
+          cursor: 'pointer'
+        }}>
+          <input
+            type="checkbox"
+            checked={showTravelTimes}
+            onChange={(e) => onShowTravelTimesChange(e.target.checked)}
+            style={{
+              marginRight: '6px',
+              cursor: 'pointer'
+            }}
+          />
+          {translateUI('showTravelTimes', language)}
         </label>
       </div>
     </div>

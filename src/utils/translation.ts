@@ -613,6 +613,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "乗換駅のみ表示",
     english: "Show Transfer Stations Only"
   },
+  showTravelTimes: {
+    japanese: "所要時間を表示",
+    english: "Show Travel Times"
+  },
   mapDisplayMode: {
     japanese: "地図表示モード",
     english: "Map Display Mode"
