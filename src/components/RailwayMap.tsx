@@ -1530,7 +1530,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 color: colors.textSecondary,
                 marginTop: '5px'
               }}>
-                クリックで表示・非表示を切替
+{translateUI('clickToToggleVisibility', currentLanguage)}
               </div>
             </div>
           )}
@@ -2126,7 +2126,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     return (
                       <div style={{ fontSize: '11px', opacity: 0.9 }}>
                         <div style={{ color: colors.text, marginBottom: '2px' }}>
-                          推薦ルート: {routeInfo.map(info => info.routeNumber).join(', ')}
+{translateUI('recommendedRoute', currentLanguage)}: {routeInfo.map(info => info.routeNumber).join(', ')}
                         </div>
                         <div style={{
                           color: colors.text,
@@ -2136,13 +2136,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                           justifyContent: 'center',
                           gap: '4px'
                         }}>
-                          <span>{routeInfo[0].startStation}</span>
+                          <span>{translateStation(routeInfo[0].startStation, currentLanguage)}</span>
                           <span style={{
                             color: '#4CAF50',
                             fontSize: '12px',
                             fontWeight: 'bold'
                           }}>→</span>
-                          <span>{routeInfo[0].endStation}</span>
+                          <span>{translateStation(routeInfo[0].endStation, currentLanguage)}</span>
                         </div>
                       </div>
                     );

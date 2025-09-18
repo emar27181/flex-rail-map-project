@@ -122,10 +122,13 @@ export const routeTranslations: { [key: string]: string } = {
   "浅草線": "Asakusa Line",
   "三田線": "Mita Line",
   "新宿線": "Shinjuku Line",
+  "都営新宿線": "Toei Shinjuku Line",
   "大江戸線": "Oedo Line",
+  "都営大江戸線": "Toei Oedo Line",
 
   // 私鉄
   "小田急線": "Odakyu Line",
+  "小田急小田原線": "Odakyu Odawara Line",
   "小田急江ノ島線": "Odakyu Enoshima Line",
   "京王線": "Keio Line",
   "東急東横線": "Tokyu Toyoko Line",
@@ -438,6 +441,14 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   selected: {
     japanese: "選択中",
     english: "Selected"
+  },
+  clickToToggleVisibility: {
+    japanese: "クリックで表示・非表示を切替",
+    english: "Click to toggle visibility"
+  },
+  recommendedRoute: {
+    japanese: "推薦ルート",
+    english: "Recommended Route"
   }
 };
 
