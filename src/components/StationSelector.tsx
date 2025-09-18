@@ -64,6 +64,16 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // 言語変更時に選択済み駅名の表示を更新
+  useEffect(() => {
+    if (departure) {
+      setDepartureSearch(translateStation(departure.name, language));
+    }
+    if (arrival) {
+      setArrivalSearch(translateStation(arrival.name, language));
+    }
+  }, [language, departure, arrival]);
+
   const allStations = useMemo(() => {
     const stationMap = new Map<string, Station>();
     Object.values(routes).forEach(routeStations => {
@@ -86,33 +96,39 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
   const filteredDepartureStations = useMemo(() => {
     if (!departureSearch) return majorStations;
+    const searchTerm = departureSearch.toLowerCase();
     return allStations
-      .filter(station => 
-        station.name.includes(departureSearch) ||
-        station.name.toLowerCase().includes(departureSearch.toLowerCase())
-      )
+      .filter(station => {
+        const japaneseName = station.name.toLowerCase();
+        const englishName = translateStation(station.name, 'english').toLowerCase();
+        return japaneseName.includes(searchTerm) ||
+               englishName.includes(searchTerm);
+      })
       .slice(0, 10);
   }, [allStations, departureSearch, majorStations]);
 
   const filteredArrivalStations = useMemo(() => {
     if (!arrivalSearch) return majorStations;
+    const searchTerm = arrivalSearch.toLowerCase();
     return allStations
-      .filter(station => 
-        station.name.includes(arrivalSearch) ||
-        station.name.toLowerCase().includes(arrivalSearch.toLowerCase())
-      )
+      .filter(station => {
+        const japaneseName = station.name.toLowerCase();
+        const englishName = translateStation(station.name, 'english').toLowerCase();
+        return japaneseName.includes(searchTerm) ||
+               englishName.includes(searchTerm);
+      })
       .slice(0, 10);
   }, [allStations, arrivalSearch, majorStations]);
 
   const handleDepartureSelect = (station: Station) => {
     onDepartureChange(station);
-    setDepartureSearch(station.name);
+    setDepartureSearch(translateStation(station.name, language));
     setShowDepartureResults(false);
   };
 
   const handleArrivalSelect = (station: Station) => {
     onArrivalChange(station);
-    setArrivalSearch(station.name);
+    setArrivalSearch(translateStation(station.name, language));
     setShowArrivalResults(false);
   };
 
