@@ -12,6 +12,8 @@ interface ToggleableItemProps {
     opacity?: number;
   };
   badge?: string;
+  inputType?: 'checkbox' | 'radio';
+  inputName?: string;
   onToggle: (id: string) => void;
   adjustColorForTheme?: (color: string, theme: 'light' | 'dark') => string;
 }
@@ -24,6 +26,8 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
   theme,
   colorIndicator,
   badge,
+  inputType = 'checkbox',
+  inputName,
   onToggle,
   adjustColorForTheme
 }) => {
@@ -52,7 +56,8 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
       }}
     >
       <input
-        type="checkbox"
+        type={inputType}
+        name={inputName}
         checked={isActive}
         onChange={(e) => {
           e.stopPropagation();

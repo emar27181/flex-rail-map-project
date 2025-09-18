@@ -1,6 +1,8 @@
 import React from 'react';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation';
+import ToggleableItem from '../ui/ToggleableItem';
+import RouteRecommendationItem from '../ui/RouteRecommendationItem';
 
 interface RouteSegment {
   routeKey: string;
@@ -55,29 +57,16 @@ const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          fontSize: '12px',
-          color: colors.text,
-          cursor: 'pointer',
-          padding: '4px',
-          borderRadius: '3px',
-          backgroundColor: !selectedRoute ? 'rgba(0, 123, 255, 0.1)' : 'transparent',
-          border: !selectedRoute ? '1px solid #007bff' : '1px solid transparent'
-        }}>
-          <input
-            type="radio"
-            name="routeSelection"
-            checked={!selectedRoute}
-            onChange={() => onShowAllRoutes()}
-            style={{
-              marginRight: '8px',
-              cursor: 'pointer'
-            }}
-          />
-          {translateUI('showAllRoutesLabel', language)}
-        </label>
+        <ToggleableItem
+          id="show-all-routes"
+          label={translateUI('showAllRoutesLabel', language)}
+          isActive={!selectedRoute}
+          isHighlighted={!selectedRoute}
+          theme={theme}
+          inputType="radio"
+          inputName="routeSelection"
+          onToggle={() => onShowAllRoutes()}
+        />
 
         {routeRecommendations.map((route, index) => {
           const isSelected = selectedRoute &&
@@ -92,43 +81,15 @@ const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
             });
 
           return (
-            <label key={index} style={{
-              display: 'flex',
-              alignItems: 'center',
-              fontSize: '12px',
-              color: colors.text,
-              cursor: 'pointer',
-              padding: '4px',
-              borderRadius: '3px',
-              backgroundColor: isSelected ? 'rgba(33, 150, 243, 0.25)' : 'transparent',
-              border: isSelected ? '2px solid #2196F3' : '1px solid transparent'
-            }}>
-              <input
-                type="radio"
-                name="routeSelection"
-                checked={isSelected}
-                onChange={() => onRouteSelect(route)}
-                style={{
-                  marginRight: '8px',
-                  cursor: 'pointer'
-                }}
-              />
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                fontWeight: isSelected ? 'bold' : 'normal',
-                color: isSelected ? colors.primary : colors.text
-              }}>
-                <span>{translateUI('routeNumber', language, { number: (index + 1).toString() })}</span>
-                <span style={{
-                  color: '#4CAF50',
-                  fontSize: '10px',
-                  fontWeight: 'bold'
-                }}>→</span>
-                <span>({translateUI('minutesShort', language, { time: Math.round(route.totalTime).toString() })}, {translateUI('transfersCount', language, { count: route.transfers.toString() })})</span>
-              </div>
-            </label>
+            <RouteRecommendationItem
+              key={index}
+              route={route}
+              index={index}
+              isSelected={isSelected}
+              theme={theme}
+              language={language}
+              onSelect={onRouteSelect}
+            />
           );
         })}
       </div>
