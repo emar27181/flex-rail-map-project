@@ -248,8 +248,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Realistic View"
   },
   schematicView: {
-    japanese: "路線図風表示",
-    english: "Schematic View"
+    japanese: "路線図風表示(準備中)",
+    english: "Schematic View (Preparing)"
   },
 
   // 時間フィルター

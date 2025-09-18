@@ -1666,7 +1666,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                             }}>
                               S
                             </div>
-                            <span style={{ color: colors.text, fontWeight: 'bold' }}>{departure.name}</span>
+                            <span style={{ color: colors.text, fontWeight: 'bold' }}>{translateStation(departure.name, currentLanguage)}</span>
                           </div>
                           <span style={{
                             color: '#4CAF50',
@@ -1694,7 +1694,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                             }}>
                               G
                             </div>
-                            <span style={{ color: colors.text, fontWeight: 'bold' }}>{arrival.name}</span>
+                            <span style={{ color: colors.text, fontWeight: 'bold' }}>{translateStation(arrival.name, currentLanguage)}</span>
                           </div>
                         </div>
                       )}
