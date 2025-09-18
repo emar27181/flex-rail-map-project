@@ -39,7 +39,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           fontWeight: 'bold',
           color: colors.text
         }}>
-          {language === 'japanese' ? '東京路線図' : 'Tokyo Railway Map'}
+          {language === 'japanese' ? 'Tokyo Flex Railway Map' : 'Tokyo Flex Railway Map'}
         </h1>
       </div>
 
