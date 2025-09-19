@@ -14,6 +14,7 @@ import LegendRouteList from './legend/LegendRouteList';
 import LegendRouteRecommendations from './legend/LegendRouteRecommendations';
 import LegendDisplayOptions from './legend/LegendDisplayOptions';
 import { getStoppingTrainTypes, generateStationDescription } from '../data/stationTrainTypeAnalysis';
+import { getStationBorderStyleByPattern, getBorderStyleExplanation } from '../data/stationBorderStyles';
 import { attachDebugFunctions } from '../utils/stationAnalysisUtils';
 
 // デバッグ用のwindow拡張
@@ -73,8 +74,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   const [mapViewMode, setMapViewMode] = useState<'realistic' | 'schematic'>('realistic');
 
-  // 列車種別表示モード
-  const [trainTypeViewEnabled, setTrainTypeViewEnabled] = useState(false);
+  // 列車種別表示モード（デフォルトで有効）
+  const [trainTypeViewEnabled, setTrainTypeViewEnabled] = useState(true);
   const [selectedTrainRoute, setSelectedTrainRoute] = useState<RouteKey | null>(null);
   const [selectedTrainType, setSelectedTrainType] = useState<string | null>(null);
 
@@ -289,47 +290,30 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     return stoppingTypes.includes(trainType);
   }, []);
 
-  // 駅の停車パターンから枠線スタイルを決定する関数
+  // 駅の停車パターンから枠線スタイルを決定する関数（新システム）
   const getStationBorderStyle = useCallback((routeKey: RouteKey, stationName: string) => {
     if (!selectedTrainType) {
-      return {
-        borderWidth: 1,
-        borderStyle: 'solid' as const,
-        borderColor: '#CCCCCC',
-        description: 'データなし'
-      };
+      // 列車種別未選択時は全停車パターンを考慮した枠線を表示
+      return getStationBorderStyleByPattern(routeKey, stationName);
     }
 
-    // その列車種別が停車するかチェック
+    // 特定の列車種別が選択されている場合の表示
     const stops = getSimplifiedStationStops(routeKey, selectedTrainType, stationName);
+    const baseStyle = getStationBorderStyleByPattern(routeKey, stationName);
 
     if (!stops) {
       return {
         borderWidth: 1,
         borderStyle: 'dashed' as const,
         borderColor: '#CCCCCC',
-        description: '通過のみ'
+        description: `${selectedTrainType}通過`
       };
     }
 
-    // 列車種別に応じた枠線スタイル
-    const trainTypeStyles: Record<string, any> = {
-      romance_car: { borderWidth: 4, borderStyle: 'double', borderColor: '#8B0000', description: '特急停車' },
-      limitedExpress: { borderWidth: 4, borderStyle: 'double', borderColor: '#CC0000', description: '特急停車' },
-      special_rapid: { borderWidth: 3, borderStyle: 'solid', borderColor: '#FF3300', description: '特別快速停車' },
-      multi_express: { borderWidth: 3, borderStyle: 'solid', borderColor: '#006600', description: '多摩急行停車' },
-      express: { borderWidth: 3, borderStyle: 'solid', borderColor: '#FF0000', description: '急行停車' },
-      rapid_acty: { borderWidth: 2, borderStyle: 'solid', borderColor: '#FF6600', description: 'ラピッド停車' },
-      rapid: { borderWidth: 2, borderStyle: 'solid', borderColor: '#FF6600', description: '快速停車' },
-      semi_express: { borderWidth: 2, borderStyle: 'solid', borderColor: '#FF9900', description: '準急停車' },
-      local: { borderWidth: 1, borderStyle: 'solid', borderColor: '#666666', description: '各駅停車' }
-    };
-
-    return trainTypeStyles[selectedTrainType] || {
-      borderWidth: 1,
-      borderStyle: 'solid' as const,
-      borderColor: '#666666',
-      description: '各駅停車'
+    // 停車する場合は基本スタイルに選択された列車種別の情報を付加
+    return {
+      ...baseStyle,
+      description: `${selectedTrainType}停車 (${baseStyle.description})`
     };
   }, [selectedTrainType, getSimplifiedStationStops]);
 
@@ -365,17 +349,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
   // 列車種別表示用の駅アイコン作成関数
   const createTrainTypeStationIcon = useCallback((station: Station, routeKey: RouteKey, zoomLevel: number, isDetailed: boolean, opacity: number = 1) => {
-    if (!MapComponents?.DivIcon || !trainTypeViewEnabled || !selectedTrainRoute || !selectedTrainType) {
+    if (!MapComponents?.DivIcon || !trainTypeViewEnabled) {
       return createStationIcon(station, routeColors[routeKey], zoomLevel, isDetailed, opacity);
     }
 
-    // 選択された路線以外は通常表示
-    if (routeKey !== selectedTrainRoute) {
-      return createStationIcon(station, routeColors[routeKey], zoomLevel, isDetailed, opacity * 0.3);
-    }
-
     const { DivIcon } = MapComponents;
-    const borderStyle = getStationBorderStyle(selectedTrainRoute, station.name);
+    const borderStyle = getStationBorderStyle(routeKey, station.name);
+
+    // 特定の路線が選択されている場合、他の路線を薄く表示
+    if (selectedTrainRoute && routeKey !== selectedTrainRoute) {
+      opacity *= 0.4;
+    }
 
     if (isDetailed) {
       const translatedStationName = translateStation(station.name, currentLanguage);
@@ -2213,14 +2197,31 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                           </div>
                         )}
 
-                        {selectedTrainRoute && selectedTrainType && (
+                        {selectedTrainRoute && (
                           <div style={{ marginTop: '12px', textAlign: 'left', fontSize: '10px', color: colors.textSecondary }}>
-                            <div style={{ marginBottom: '6px', fontWeight: 'bold' }}>枠線の見方:</div>
-                            <div style={{ marginBottom: '2px' }}>• 太い二重線: 複数種別停車</div>
-                            <div style={{ marginBottom: '2px' }}>• 太い一重線: 急行系統停車</div>
-                            <div style={{ marginBottom: '2px' }}>• 中太線: 快速系統停車</div>
-                            <div style={{ marginBottom: '2px' }}>• 細線: 各停のみ停車</div>
-                            <div>• 破線: 通過</div>
+                            <div style={{ marginBottom: '6px', fontWeight: 'bold' }}>駅枠線の見方:</div>
+                            {getBorderStyleExplanation().map((item, index) => (
+                              <div key={index} style={{ marginBottom: '2px', display: 'flex', alignItems: 'center' }}>
+                                <div style={{
+                                  width: '20px',
+                                  height: '12px',
+                                  border: item.level === 'basic' ? '1px solid #666666' :
+                                          item.level === 'enhanced' ? '2px solid #FF6600' :
+                                          item.level === 'premium' ? '3px solid #FF0000' :
+                                          '3px double #8B0000',
+                                  marginRight: '6px',
+                                  borderRadius: '2px'
+                                }} />
+                                <span style={{ fontSize: '9px' }}>
+                                  {item.style}: {item.description}
+                                </span>
+                              </div>
+                            ))}
+                            {selectedTrainType && (
+                              <div style={{ marginTop: '6px', fontSize: '9px', fontStyle: 'italic' }}>
+                                選択中: {selectedTrainType} の停車駅を強調表示
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
