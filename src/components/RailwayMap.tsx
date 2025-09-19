@@ -566,10 +566,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
             (content as HTMLElement).style.setProperty('background', '#2d2d2d', 'important');
             (content as HTMLElement).style.setProperty('color', '#ffffff', 'important');
 
-            // 全ての子要素
+            // 全ての子要素（路線色表示を除く）
             const allElements = content.querySelectorAll('*:not(button)');
             allElements.forEach(el => {
-              if (!el.classList.contains('leaflet-popup-close-button')) {
+              if (!el.classList.contains('leaflet-popup-close-button') &&
+                  !el.classList.contains('route-color-line')) {
                 (el as HTMLElement).style.setProperty('background', '#2d2d2d', 'important');
                 (el as HTMLElement).style.setProperty('color', '#ffffff', 'important');
               }
@@ -605,10 +606,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
             (content as HTMLElement).style.removeProperty('background');
             (content as HTMLElement).style.removeProperty('color');
 
-            // 全ての子要素のスタイルもリセット
+            // 全ての子要素のスタイルもリセット（路線色表示を除く）
             const allElements = content.querySelectorAll('*:not(button)');
             allElements.forEach(el => {
-              if (!el.classList.contains('leaflet-popup-close-button')) {
+              if (!el.classList.contains('leaflet-popup-close-button') &&
+                  !el.classList.contains('route-color-line')) {
                 (el as HTMLElement).style.removeProperty('background');
                 (el as HTMLElement).style.removeProperty('color');
               }
@@ -1100,7 +1102,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                               marginBottom: '2px'
                             }}
                           >
-                            <span style={{ color: adjustRouteColorForTheme(routeColors[stationRouteKey], theme), fontWeight: 'bold' }}>ー</span>
+                            <div
+                              className="route-color-line"
+                              style={{
+                                width: '20px',
+                                height: '3px',
+                                backgroundColor: routeColors[stationRouteKey],
+                                borderRadius: '1px',
+                                flexShrink: 0
+                              }}
+                            />
                             <span style={{
                               color: adjustRouteColorForTheme(routeColors[stationRouteKey], theme),
                               fontWeight: '500'
@@ -1230,7 +1241,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                               marginBottom: '2px'
                             }}
                           >
-                            <span style={{ color: adjustRouteColorForTheme(routeColors[stationRouteKey], theme), fontWeight: 'bold' }}>ー</span>
+                            <div
+                              className="route-color-line"
+                              style={{
+                                width: '20px',
+                                height: '3px',
+                                backgroundColor: routeColors[stationRouteKey],
+                                borderRadius: '1px',
+                                flexShrink: 0
+                              }}
+                            />
                             <span style={{
                               color: adjustRouteColorForTheme(routeColors[stationRouteKey], theme),
                               fontWeight: '500'
