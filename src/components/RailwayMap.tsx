@@ -95,7 +95,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     console.log('🟢🟢🟢 routePopupPosition changed:', routePopupPosition);
   }, [routePopupPosition]);
 
-  const routeFinder = useMemo(() => new RouteFinder(), []);
+  const routeFinder = useMemo(() => {
+    const finder = new RouteFinder();
+    // 初期化時にデバッグ情報を出力
+    finder.debugStationRegistration();
+    return finder;
+  }, []);
   const timeFilter = useMemo(() => new TimeFilter(routeFinder), [routeFinder]);
 
   // 駅が通っている路線を見つける関数
