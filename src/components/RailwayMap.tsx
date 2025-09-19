@@ -91,6 +91,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [routePopupPosition, setRoutePopupPosition] = useState<{ x: number, y: number } | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
 
+  // 列車種別表示: 路線変更時に列車種別をリセット
+  useEffect(() => {
+    if (selectedTrainRoute) {
+      setSelectedTrainType(null);
+    }
+  }, [selectedTrainRoute]);
+
   // デバッグ用
   useEffect(() => {
     console.log('🟢🟢🟢 clickedRoute changed:', clickedRoute);
@@ -273,6 +280,175 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       });
     }
   }, [MapComponents, currentLanguage, theme]);
+
+  // 簡略化された列車種別停車パターンデータ
+  const getSimplifiedStationStops = useCallback((routeKey: RouteKey, trainType: string, stationName: string): boolean => {
+    // 主要な路線と列車種別の停車パターンを定義
+    const stoppingPatterns: Record<string, Record<string, string[]>> = {
+      yamanote: {
+        local: ['all'] // 山手線は全駅停車
+      },
+      chuo: {
+        local: ['all'],
+        rapid_acty: ['東京', '神田', '御茶ノ水', '四ツ谷', '新宿', '中野', '荻窪', '吉祥寺', '三鷹', '立川', '八王子', '高尾'],
+        special_rapid: ['東京', '新宿', '中野', '吉祥寺', '三鷹', '立川', '八王子', '高尾']
+      },
+      odakyuLine: {
+        local: ['all'],
+        semi_express: ['新宿', '代々木上原', '下北沢', '成城学園前', '登戸', '新百合ヶ丘', '町田', '相模大野', '本厚木', '伊勢原', '秦野', '新松田', '小田原'],
+        express: ['新宿', '代々木上原', '下北沢', '成城学園前', '登戸', '新百合ヶ丘', '町田', '相模大野', '本厚木', '伊勢原', '秦野', '新松田', '小田原'],
+        multi_express: ['新宿', '代々木上原', '下北沢', '登戸', '向ヶ丘遊園', '新百合ヶ丘'],
+        romance_car: ['新宿', '町田', '相模大野', '本厚木', '小田原']
+      },
+      keihinTohoku: {
+        local: ['all'],
+        rapid: ['大宮', '浦和', '赤羽', '上野', '東京', '新橋', '品川', '蒲田', '川崎', '鶴見', '横浜']
+      },
+      ginzaLine: {
+        local: ['all']
+      }
+    };
+
+    const routePattern = stoppingPatterns[routeKey];
+    if (!routePattern || !routePattern[trainType]) {
+      return false;
+    }
+
+    const stops = routePattern[trainType];
+    return stops.includes('all') || stops.includes(stationName);
+  }, []);
+
+  // 駅の停車パターンから枠線スタイルを決定する関数
+  const getStationBorderStyle = useCallback((routeKey: RouteKey, stationName: string) => {
+    if (!selectedTrainType) {
+      return {
+        borderWidth: 1,
+        borderStyle: 'solid' as const,
+        borderColor: '#CCCCCC',
+        description: 'データなし'
+      };
+    }
+
+    // その列車種別が停車するかチェック
+    const stops = getSimplifiedStationStops(routeKey, selectedTrainType, stationName);
+
+    if (!stops) {
+      return {
+        borderWidth: 1,
+        borderStyle: 'dashed' as const,
+        borderColor: '#CCCCCC',
+        description: '通過のみ'
+      };
+    }
+
+    // 列車種別に応じた枠線スタイル
+    const trainTypeStyles: Record<string, any> = {
+      romance_car: { borderWidth: 4, borderStyle: 'double', borderColor: '#8B0000', description: '特急停車' },
+      limitedExpress: { borderWidth: 4, borderStyle: 'double', borderColor: '#CC0000', description: '特急停車' },
+      special_rapid: { borderWidth: 3, borderStyle: 'solid', borderColor: '#FF3300', description: '特別快速停車' },
+      multi_express: { borderWidth: 3, borderStyle: 'solid', borderColor: '#006600', description: '多摩急行停車' },
+      express: { borderWidth: 3, borderStyle: 'solid', borderColor: '#FF0000', description: '急行停車' },
+      rapid_acty: { borderWidth: 2, borderStyle: 'solid', borderColor: '#FF6600', description: 'ラピッド停車' },
+      rapid: { borderWidth: 2, borderStyle: 'solid', borderColor: '#FF6600', description: '快速停車' },
+      semi_express: { borderWidth: 2, borderStyle: 'solid', borderColor: '#FF9900', description: '準急停車' },
+      local: { borderWidth: 1, borderStyle: 'solid', borderColor: '#666666', description: '各駅停車' }
+    };
+
+    return trainTypeStyles[selectedTrainType] || {
+      borderWidth: 1,
+      borderStyle: 'solid' as const,
+      borderColor: '#666666',
+      description: '各駅停車'
+    };
+  }, [selectedTrainType, getSimplifiedStationStops]);
+
+  // 路線別の利用可能な列車種別を取得する関数
+  const getAvailableTrainTypes = useCallback((routeKey: RouteKey) => {
+    const trainTypeOptions: Record<string, Array<{id: string, name: string}>> = {
+      yamanote: [
+        { id: 'local', name: '各駅停車' }
+      ],
+      chuo: [
+        { id: 'local', name: '各駅停車' },
+        { id: 'rapid_acty', name: 'ラピッドアクティー' },
+        { id: 'special_rapid', name: '特別快速' }
+      ],
+      odakyuLine: [
+        { id: 'local', name: '各駅停車' },
+        { id: 'semi_express', name: '準急' },
+        { id: 'express', name: '急行' },
+        { id: 'multi_express', name: '多摩急行' },
+        { id: 'romance_car', name: 'ロマンスカー' }
+      ],
+      keihinTohoku: [
+        { id: 'local', name: '各駅停車' },
+        { id: 'rapid', name: '快速' }
+      ],
+      ginzaLine: [
+        { id: 'local', name: '各駅停車' }
+      ]
+    };
+
+    return trainTypeOptions[routeKey] || [];
+  }, []);
+
+  // 列車種別表示用の駅アイコン作成関数
+  const createTrainTypeStationIcon = useCallback((station: Station, routeKey: RouteKey, zoomLevel: number, isDetailed: boolean, opacity: number = 1) => {
+    if (!MapComponents?.DivIcon || !trainTypeViewEnabled || !selectedTrainRoute || !selectedTrainType) {
+      return createStationIcon(station, routeColors[routeKey], zoomLevel, isDetailed, opacity);
+    }
+
+    // 選択された路線以外は通常表示
+    if (routeKey !== selectedTrainRoute) {
+      return createStationIcon(station, routeColors[routeKey], zoomLevel, isDetailed, opacity * 0.3);
+    }
+
+    const { DivIcon } = MapComponents;
+    const borderStyle = getStationBorderStyle(selectedTrainRoute, station.name);
+
+    if (isDetailed) {
+      const translatedStationName = translateStation(station.name, currentLanguage);
+      const stationNameWidth = translatedStationName.length * 11 + 12;
+      const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
+
+      return new DivIcon({
+        html: `<div style="
+          background:${routeColors[routeKey]};
+          color:white;
+          padding:2px 6px;
+          border-radius:3px;
+          font-size:11px;
+          font-weight:bold;
+          white-space:nowrap;
+          border:${borderStyle.borderWidth}px ${borderStyle.borderStyle} ${borderStyle.borderColor};
+          box-shadow:0 1px 3px ${shadowColor};
+          text-align:center;
+          opacity:${opacity}
+        ">${translatedStationName}</div>`,
+        className: 'station-name-marker train-type-marker',
+        iconSize: [stationNameWidth, 18],
+        iconAnchor: [stationNameWidth / 2, 9]
+      });
+    } else {
+      const stationSize = Math.max(8, Math.min(16, zoomLevel - 8));
+      const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)';
+
+      return new DivIcon({
+        html: `<div style="
+          background:${routeColors[routeKey]};
+          width:${stationSize}px;
+          height:${stationSize}px;
+          border:${borderStyle.borderWidth}px ${borderStyle.borderStyle} ${borderStyle.borderColor};
+          box-shadow:0 1px 2px ${shadowColor};
+          opacity:${opacity};
+          border-radius:50%
+        "></div>`,
+        className: 'station-marker train-type-marker',
+        iconSize: [stationSize, stationSize],
+        iconAnchor: [stationSize / 2, stationSize / 2]
+      });
+    }
+  }, [MapComponents, currentLanguage, theme, trainTypeViewEnabled, selectedTrainRoute, selectedTrainType, createStationIcon, getStationBorderStyle]);
 
   const getTimeMarkerSize = (zoom: number) => {
     const baseSize = 20;
@@ -1308,7 +1484,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
             const isDetailed = shouldShowStationName || shouldShowInWideView || shouldShowAllStations;
             const stationOpacity = visibleRoutes.has(routeKey) ? 1 : 0.3;
-            const stationIcon = createStationIcon(station, color, zoomLevel, isDetailed, stationOpacity);
+            const stationIcon = trainTypeViewEnabled
+              ? createTrainTypeStationIcon(station, routeKey, zoomLevel, isDetailed, stationOpacity)
+              : createStationIcon(station, color, zoomLevel, isDetailed, stationOpacity);
             if (!stationIcon) return null;
 
             return (
@@ -2053,11 +2231,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                               }}
                             >
                               <option value="">列車種別を選択してください</option>
-                              <option value="local">各駅停車</option>
-                              <option value="rapid">快速</option>
-                              <option value="express">急行</option>
-                              <option value="limitedExpress">特急</option>
+                              {getAvailableTrainTypes(selectedTrainRoute).map(trainType => (
+                                <option key={trainType.id} value={trainType.id}>
+                                  {trainType.name}
+                                </option>
+                              ))}
                             </select>
+                          </div>
+                        )}
+
+                        {selectedTrainRoute && selectedTrainType && (
+                          <div style={{ marginTop: '12px', textAlign: 'left', fontSize: '10px', color: colors.textSecondary }}>
+                            <div style={{ marginBottom: '6px', fontWeight: 'bold' }}>枠線の見方:</div>
+                            <div style={{ marginBottom: '2px' }}>• 太い二重線: 複数種別停車</div>
+                            <div style={{ marginBottom: '2px' }}>• 太い一重線: 急行系統停車</div>
+                            <div style={{ marginBottom: '2px' }}>• 中太線: 快速系統停車</div>
+                            <div style={{ marginBottom: '2px' }}>• 細線: 各停のみ停車</div>
+                            <div>• 破線: 通過</div>
                           </div>
                         )}
                       </div>
