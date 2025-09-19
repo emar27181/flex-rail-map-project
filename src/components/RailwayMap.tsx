@@ -948,11 +948,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               >
                 {showStationNames && (
                 <Popup>
-                  <div>
-                    <strong>{translateStation(station.name, currentLanguage)}</strong>
+                  <div style={{ backgroundColor: colors.surface, color: colors.text, padding: '8px', borderRadius: '4px' }}>
+                    <strong style={{ color: colors.text }}>{translateStation(station.name, currentLanguage)}</strong>
                     {isDeparture && <div style={{ color: '#4CAF50', fontWeight: 'bold' }}>{translateUI('departure', currentLanguage)}</div>}
                     {isArrival && <div style={{ color: '#F44336', fontWeight: 'bold' }}>{translateUI('arrival', currentLanguage)}</div>}
-                    
+
                     {/* 通っている路線を表示 */}
                     <div style={{ marginTop: '8px', marginBottom: '10px' }}>
                       <div style={{ fontSize: '12px', color: colors.textSecondary, marginBottom: '4px' }}>{currentLanguage === 'japanese' ? '通っている路線:' : 'Routes:'}:</div>
@@ -1084,9 +1084,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               >
                 {showStationNames && (
                 <Popup>
-                  <div>
-                    <strong>{translateStation(station.name, currentLanguage)}</strong>
-                    
+                  <div style={{ backgroundColor: colors.surface, color: colors.text, padding: '8px', borderRadius: '4px' }}>
+                    <strong style={{ color: colors.text }}>{translateStation(station.name, currentLanguage)}</strong>
+
                     {/* 通っている路線を表示 */}
                     <div style={{ marginTop: '8px', marginBottom: '10px' }}>
                       <div style={{ fontSize: '12px', color: colors.textSecondary, marginBottom: '4px' }}>{currentLanguage === 'japanese' ? '通っている路線:' : 'Routes:'}:</div>
