@@ -1096,19 +1096,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                               display: 'flex',
                               alignItems: 'center',
                               gap: '6px',
-                              fontSize: '11px'
+                              fontSize: '12px',
+                              marginBottom: '2px'
                             }}
                           >
-                            <div
-                              style={{
-                                width: '10px',
-                                height: '10px',
-                                backgroundColor: routeColors[stationRouteKey],
-                                borderRadius: '50%',
-                                flexShrink: 0
-                              }}
-                            />
-                            <span style={{ color: adjustRouteColorForTheme(routeColors[stationRouteKey], theme), fontWeight: '500' }}>
+                            <span style={{ color: adjustRouteColorForTheme(routeColors[stationRouteKey], theme), fontWeight: 'bold' }}>ー</span>
+                            <span style={{
+                              color: adjustRouteColorForTheme(routeColors[stationRouteKey], theme),
+                              fontWeight: '500'
+                            }}>
                               {translateRoute(getRouteDestination(stationRouteKey)?.description || routeNames[stationRouteKey] || stationRouteKey, currentLanguage)}
                             </span>
                           </div>
@@ -1230,19 +1226,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                               display: 'flex',
                               alignItems: 'center',
                               gap: '6px',
-                              fontSize: '11px'
+                              fontSize: '12px',
+                              marginBottom: '2px'
                             }}
                           >
-                            <div
-                              style={{
-                                width: '10px',
-                                height: '10px',
-                                backgroundColor: routeColors[stationRouteKey],
-                                borderRadius: '50%',
-                                flexShrink: 0
-                              }}
-                            />
-                            <span style={{ color: adjustRouteColorForTheme(routeColors[stationRouteKey], theme), fontWeight: '500' }}>
+                            <span style={{ color: adjustRouteColorForTheme(routeColors[stationRouteKey], theme), fontWeight: 'bold' }}>ー</span>
+                            <span style={{
+                              color: adjustRouteColorForTheme(routeColors[stationRouteKey], theme),
+                              fontWeight: '500'
+                            }}>
                               {translateRoute(getRouteDestination(stationRouteKey)?.description || routeNames[stationRouteKey] || stationRouteKey, currentLanguage)}
                             </span>
                           </div>
