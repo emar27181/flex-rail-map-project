@@ -42,6 +42,63 @@ import ThemeWrapper from '../components/ThemeWrapper.tsx';
 				height: 600px !important;
 				width: 100% !important;
 			}
+
+			/* Dark mode support for Leaflet popups - Complete coverage */
+			body.dark .leaflet-popup {
+				background-color: #2d2d2d !important;
+			}
+
+			body.dark .leaflet-popup-content-wrapper {
+				background-color: #2d2d2d !important;
+				color: #ffffff !important;
+				box-shadow: 0 3px 14px rgba(0,0,0,0.8) !important;
+				border: 1px solid #404040 !important;
+			}
+
+			body.dark .leaflet-popup-content {
+				background-color: #2d2d2d !important;
+				color: #ffffff !important;
+				margin: 0 !important;
+			}
+
+			body.dark .leaflet-popup-tip {
+				background-color: #2d2d2d !important;
+				border: 1px solid #404040 !important;
+				box-shadow: none !important;
+			}
+
+			body.dark .leaflet-popup-tip-container {
+				background-color: #2d2d2d !important;
+			}
+
+			body.dark .leaflet-popup-close-button {
+				color: #ffffff !important;
+				background-color: transparent !important;
+			}
+
+			body.dark .leaflet-popup-close-button:hover {
+				color: #cccccc !important;
+				background-color: rgba(255,255,255,0.1) !important;
+			}
+
+			/* Force all nested elements to inherit dark mode styling */
+			body.dark .leaflet-popup *,
+			body.dark .leaflet-popup div,
+			body.dark .leaflet-popup span,
+			body.dark .leaflet-popup strong,
+			body.dark .leaflet-popup p {
+				color: #ffffff !important;
+				background-color: transparent !important;
+			}
+
+			/* Override any inline styles that might be preventing dark mode */
+			body.dark .leaflet-popup [style*="background"] {
+				background-color: #2d2d2d !important;
+			}
+
+			body.dark .leaflet-popup [style*="color"] {
+				color: #ffffff !important;
+			}
 		</style>
 	</head>
 	<body>
