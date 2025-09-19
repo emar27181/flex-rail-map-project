@@ -28,7 +28,9 @@ export interface RouteStationAnalysis {
 // 路線別の列車種別と停車駅パターン
 const trainServicePatterns: Record<RouteKey, Record<string, string[]>> = {
   yamanote: {
-    local: ['all'] // 山手線は全駅停車
+    local: ['all'], // 山手線は全駅停車
+    rapid: ['東京', '新橋', '品川', '渋谷', '新宿', '池袋', '上野'], // 主要ターミナル駅
+    express: ['東京', '新宿', '渋谷', '池袋', '上野'] // 超主要駅
   },
   chuo: {
     local: ['all'],
@@ -44,10 +46,13 @@ const trainServicePatterns: Record<RouteKey, Record<string, string[]>> = {
   },
   keihinTohoku: {
     local: ['all'],
-    rapid: ['大宮', '浦和', '赤羽', '上野', '東京', '新橋', '品川', '蒲田', '川崎', '鶴見', '横浜']
+    rapid: ['大宮', '浦和', '赤羽', '上野', '東京', '新橋', '品川', '蒲田', '川崎', '鶴見', '横浜'],
+    express: ['東京', '上野', '新橋', '品川', '横浜'] // 主要駅には急行相当も追加
   },
   ginzaLine: {
-    local: ['all']
+    local: ['all'],
+    rapid: ['銀座', '表参道', '赤坂見附', '新橋', '上野'], // 主要駅
+    express: ['銀座', '表参道', '上野'] // 超主要駅
   }
 };
 

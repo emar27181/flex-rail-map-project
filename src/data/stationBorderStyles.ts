@@ -49,11 +49,11 @@ const trainTypeNames: Record<string, string> = {
  * 駅に停車する列車種別から枠線スタイルを決定
  *
  * ルール:
- * - 各駅停車のみ: 細い普通線（1px solid）
- * - 快速系統まで: 中太線（2px solid）
- * - 急行系統まで: 太線（3px solid）
- * - 特急系統まで: 太い二重線（3px double）
- * - 停車なし: 破線（1px dashed）
+ * - 各駅停車のみ: 細い実線（1px solid）
+ * - 快速系統まで: 中太実線（3px solid）
+ * - 急行系統まで: 太い実線（5px solid）
+ * - 特急系統まで: 太い二重線（5px double）
+ * - 停車なし: 細い実線（1px solid、薄いグレー）
  */
 export function getStationBorderStyleByPattern(routeKey: RouteKey, stationName: string): StationBorderStyle {
   const stoppingTypes = getStoppingTrainTypes(routeKey, stationName);
@@ -61,7 +61,7 @@ export function getStationBorderStyleByPattern(routeKey: RouteKey, stationName: 
   if (stoppingTypes.length === 0) {
     return {
       borderWidth: 1,
-      borderStyle: 'dashed',
+      borderStyle: 'solid',
       borderColor: '#CCCCCC',
       description: '通過のみ',
       visualLevel: 'basic'
@@ -104,7 +104,7 @@ export function getStationBorderStyleByPattern(routeKey: RouteKey, stationName: 
 
     case 2: // 快速系統まで停車
       return {
-        borderWidth: 2,
+        borderWidth: 3,
         borderStyle: 'solid',
         borderColor: baseColor,
         description,
@@ -113,7 +113,7 @@ export function getStationBorderStyleByPattern(routeKey: RouteKey, stationName: 
 
     case 3: // 急行系統まで停車
       return {
-        borderWidth: 3,
+        borderWidth: 5,
         borderStyle: 'solid',
         borderColor: baseColor,
         description,
@@ -122,7 +122,7 @@ export function getStationBorderStyleByPattern(routeKey: RouteKey, stationName: 
 
     case 4: // 特急系統まで停車
       return {
-        borderWidth: 3,
+        borderWidth: 5,
         borderStyle: 'double',
         borderColor: baseColor,
         description,
@@ -152,25 +152,25 @@ export function getBorderStyleExplanation(): {
   return [
     {
       level: 'basic',
-      style: '細い普通線（1px）',
+      style: '細い実線（1px）',
       description: '各駅停車のみ停車',
       example: '地域密着型の駅'
     },
     {
       level: 'enhanced',
-      style: '中太線（2px）',
+      style: '中太実線（3px）',
       description: '快速系統まで停車',
       example: '準急・快速が停車する駅'
     },
     {
       level: 'premium',
-      style: '太線（3px）',
+      style: '太い実線（5px）',
       description: '急行系統まで停車',
       example: '急行・特別快速が停車する主要駅'
     },
     {
       level: 'special',
-      style: '太い二重線（3px double）',
+      style: '太い二重線（5px double）',
       description: '特急系統まで停車',
       example: 'ロマンスカー・特急が停車する特別駅'
     }

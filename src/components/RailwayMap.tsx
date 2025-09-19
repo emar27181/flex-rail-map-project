@@ -363,7 +363,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
     if (isDetailed) {
       const translatedStationName = translateStation(station.name, currentLanguage);
-      const stationNameWidth = translatedStationName.length * 11 + 12;
+      const baseWidth = translatedStationName.length * 11 + 12;
+      // 枠線の太さを考慮して幅を調整
+      const borderAdjustment = borderStyle.borderWidth * 2; // 左右の枠線分
+      const stationNameWidth = baseWidth + borderAdjustment;
+      const stationNameHeight = 18 + borderAdjustment; // 上下の枠線分も調整
       const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
 
       return new DivIcon({
@@ -378,25 +382,36 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
           border:${borderStyle.borderWidth}px ${borderStyle.borderStyle} ${borderStyle.borderColor};
           box-shadow:0 1px 3px ${shadowColor};
           text-align:center;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          box-sizing:border-box;
           opacity:${opacity}
         ">${translatedStationName}</div>`,
         className: 'station-name-marker train-type-marker',
-        iconSize: [stationNameWidth, 18],
-        iconAnchor: [stationNameWidth / 2, 9]
+        iconSize: [stationNameWidth, stationNameHeight],
+        iconAnchor: [stationNameWidth / 2, stationNameHeight / 2]
       });
     } else {
-      const stationSize = Math.max(8, Math.min(16, zoomLevel - 8));
+      const baseStationSize = Math.max(8, Math.min(16, zoomLevel - 8));
+      // 枠線の太さを考慮してサイズを調整
+      const borderAdjustment = borderStyle.borderWidth * 2; // 左右・上下の枠線分
+      const stationSize = baseStationSize + borderAdjustment;
       const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)';
 
       return new DivIcon({
         html: `<div style="
           background:${routeColors[routeKey]};
-          width:${stationSize}px;
-          height:${stationSize}px;
+          width:${baseStationSize}px;
+          height:${baseStationSize}px;
           border:${borderStyle.borderWidth}px ${borderStyle.borderStyle} ${borderStyle.borderColor};
           box-shadow:0 1px 2px ${shadowColor};
           opacity:${opacity};
-          border-radius:50%
+          border-radius:50%;
+          box-sizing:border-box;
+          display:flex;
+          align-items:center;
+          justify-content:center
         "></div>`,
         className: 'station-marker train-type-marker',
         iconSize: [stationSize, stationSize],
