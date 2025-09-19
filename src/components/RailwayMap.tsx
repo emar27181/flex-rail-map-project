@@ -71,6 +71,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   const [mapViewMode, setMapViewMode] = useState<'realistic' | 'schematic'>('realistic');
 
+  // 列車種別表示モード
+  const [trainTypeViewEnabled, setTrainTypeViewEnabled] = useState(false);
+  const [selectedTrainRoute, setSelectedTrainRoute] = useState<RouteKey | null>(null);
+  const [selectedTrainType, setSelectedTrainType] = useState<string | null>(null);
+
   // 経路推薦設定
   const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(10);
 
@@ -1985,8 +1990,79 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     mapViewMode={mapViewMode}
                     theme={theme}
                     language={currentLanguage}
+                    trainTypeViewEnabled={trainTypeViewEnabled}
                     onMapViewModeChange={setMapViewMode}
+                    onTrainTypeViewChange={setTrainTypeViewEnabled}
                   />
+
+                  {/* 5. 列車種別ビューア */}
+                  {trainTypeViewEnabled && (
+                    <div style={{
+                      marginBottom: '15px',
+                      padding: '10px',
+                      backgroundColor: colors.surface,
+                      borderRadius: '4px',
+                      border: `1px solid ${colors.borderLight}`,
+                      textAlign: 'center'
+                    }}>
+                      <div style={{ fontSize: '12px', color: colors.text }}>
+                        <div style={{ marginBottom: '12px', fontWeight: 'bold' }}>🚆 列車種別表示</div>
+
+                        <div style={{ marginBottom: '8px', textAlign: 'left' }}>
+                          <label style={{ fontSize: '11px', color: colors.textSecondary, display: 'block', marginBottom: '4px' }}>
+                            路線選択:
+                          </label>
+                          <select
+                            value={selectedTrainRoute || ''}
+                            onChange={(e) => setSelectedTrainRoute(e.target.value as RouteKey || null)}
+                            style={{
+                              width: '100%',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              border: `1px solid ${colors.border}`,
+                              fontSize: '11px',
+                              backgroundColor: colors.surface,
+                              color: colors.text
+                            }}
+                          >
+                            <option value="">路線を選択してください</option>
+                            <option value="yamanote">山手線</option>
+                            <option value="chuo">中央線</option>
+                            <option value="odakyuLine">小田急小田原線</option>
+                            <option value="keihinTohoku">京浜東北線</option>
+                            <option value="ginzaLine">銀座線</option>
+                          </select>
+                        </div>
+
+                        {selectedTrainRoute && (
+                          <div style={{ marginTop: '8px', textAlign: 'left' }}>
+                            <label style={{ fontSize: '11px', color: colors.textSecondary, display: 'block', marginBottom: '4px' }}>
+                              列車種別:
+                            </label>
+                            <select
+                              value={selectedTrainType || ''}
+                              onChange={(e) => setSelectedTrainType(e.target.value || null)}
+                              style={{
+                                width: '100%',
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                border: `1px solid ${colors.border}`,
+                                fontSize: '11px',
+                                backgroundColor: colors.surface,
+                                color: colors.text
+                              }}
+                            >
+                              <option value="">列車種別を選択してください</option>
+                              <option value="local">各駅停車</option>
+                              <option value="rapid">快速</option>
+                              <option value="express">急行</option>
+                              <option value="limitedExpress">特急</option>
+                            </select>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                 </div>
               )}

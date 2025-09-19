@@ -6,14 +6,18 @@ interface LegendDisplayOptionsProps {
   mapViewMode: 'realistic' | 'schematic';
   theme: 'light' | 'dark';
   language: 'japanese' | 'english';
+  trainTypeViewEnabled?: boolean;
   onMapViewModeChange: (mode: 'realistic' | 'schematic') => void;
+  onTrainTypeViewChange?: (enabled: boolean) => void;
 }
 
 const LegendDisplayOptions: React.FC<LegendDisplayOptionsProps> = ({
   mapViewMode,
   theme,
   language,
-  onMapViewModeChange
+  trainTypeViewEnabled = false,
+  onMapViewModeChange,
+  onTrainTypeViewChange
 }) => {
   const colors = getThemeColors(theme);
 
@@ -77,6 +81,30 @@ const LegendDisplayOptions: React.FC<LegendDisplayOptionsProps> = ({
           </label>
         </div>
       </div>
+
+      {/* 列車種別表示モード */}
+      {onTrainTypeViewChange && (
+        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: `1px solid ${colors.borderLight}` }}>
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: '11px',
+            color: colors.text,
+            cursor: 'pointer'
+          }}>
+            <input
+              type="checkbox"
+              checked={trainTypeViewEnabled}
+              onChange={(e) => onTrainTypeViewChange(e.target.checked)}
+              style={{
+                marginRight: '6px',
+                cursor: 'pointer'
+              }}
+            />
+            🚆 列車種別表示モード
+          </label>
+        </div>
+      )}
     </div>
   );
 };
