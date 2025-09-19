@@ -562,7 +562,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     }
   }, [departure, arrival, routeRecommendations]);
 
-  // Leafletポップアップのテーマ対応（動的スタイル適用）
+  // Leafletポップアップとコントロールのテーマ対応（動的スタイル適用）
   useEffect(() => {
     const applyThemeToPopups = () => {
       const popups = document.querySelectorAll('.leaflet-popup');
@@ -652,8 +652,64 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       });
     };
 
-    // テーマが変更されたときにポップアップを更新
+    // ズームコントロールのテーマ適用
+    const applyThemeToZoomControls = () => {
+      const zoomControls = document.querySelectorAll('.leaflet-control-zoom');
+
+      zoomControls.forEach(control => {
+        if (theme === 'dark') {
+          // ダークモード適用
+          (control as HTMLElement).style.setProperty('background', '#2d2d2d', 'important');
+          (control as HTMLElement).style.setProperty('border', '1px solid #404040', 'important');
+          (control as HTMLElement).style.setProperty('border-radius', '4px', 'important');
+          (control as HTMLElement).style.setProperty('box-shadow', '0 2px 5px rgba(0,0,0,0.3)', 'important');
+
+          // ズームボタン（+ と -）
+          const zoomButtons = control.querySelectorAll('a');
+          zoomButtons.forEach(button => {
+            (button as HTMLElement).style.setProperty('background', '#2d2d2d', 'important');
+            (button as HTMLElement).style.setProperty('background-color', '#2d2d2d', 'important');
+            (button as HTMLElement).style.setProperty('color', '#ffffff', 'important');
+            (button as HTMLElement).style.setProperty('border', '1px solid #404040', 'important');
+            (button as HTMLElement).style.setProperty('text-decoration', 'none', 'important');
+
+            // ホバーイベント
+            button.addEventListener('mouseenter', () => {
+              if (theme === 'dark') {
+                (button as HTMLElement).style.setProperty('background', '#404040', 'important');
+                (button as HTMLElement).style.setProperty('background-color', '#404040', 'important');
+              }
+            });
+
+            button.addEventListener('mouseleave', () => {
+              if (theme === 'dark') {
+                (button as HTMLElement).style.setProperty('background', '#2d2d2d', 'important');
+                (button as HTMLElement).style.setProperty('background-color', '#2d2d2d', 'important');
+              }
+            });
+          });
+        } else {
+          // ライトモード（デフォルトに戻す）
+          (control as HTMLElement).style.removeProperty('background');
+          (control as HTMLElement).style.removeProperty('border');
+          (control as HTMLElement).style.removeProperty('border-radius');
+          (control as HTMLElement).style.removeProperty('box-shadow');
+
+          const zoomButtons = control.querySelectorAll('a');
+          zoomButtons.forEach(button => {
+            (button as HTMLElement).style.removeProperty('background');
+            (button as HTMLElement).style.removeProperty('background-color');
+            (button as HTMLElement).style.removeProperty('color');
+            (button as HTMLElement).style.removeProperty('border');
+            (button as HTMLElement).style.removeProperty('text-decoration');
+          });
+        }
+      });
+    };
+
+    // テーマが変更されたときにポップアップとコントロールを更新
     applyThemeToPopups();
+    applyThemeToZoomControls();
 
     // Mutationオブザーバーで動的に追加されるポップアップを監視
     const observer = new MutationObserver((mutations) => {
@@ -672,6 +728,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 setTimeout(applyThemeToPopups, 1);
                 setTimeout(applyThemeToPopups, 10);
                 setTimeout(applyThemeToPopups, 50);
+              }
+
+              // ズームコントロール検出
+              if (element.classList?.contains('leaflet-control-zoom') ||
+                  element.querySelector?.('.leaflet-control-zoom') ||
+                  element.classList?.contains('leaflet-control')) {
+                // 即座に適用 + 少し遅延しても適用（確実性のため）
+                applyThemeToZoomControls();
+                setTimeout(applyThemeToZoomControls, 1);
+                setTimeout(applyThemeToZoomControls, 10);
+                setTimeout(applyThemeToZoomControls, 50);
               }
             }
           });

@@ -1,29 +1,54 @@
 ---
-import ThemeWrapper from '../components/ThemeWrapper.tsx';
+import ThemeWrapper from "../components/ThemeWrapper.tsx";
 ---
 
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<link rel="icon" type="image/png" sizes="32x32" href="/icon_flex_rail_way_map.png" />
-		<link rel="icon" type="image/png" sizes="16x16" href="/icon_flex_rail_way_map.png" />
-		<link rel="apple-touch-icon" sizes="180x180" href="/icon_flex_rail_way_map.png" />
+		<meta
+			name="google-site-verification"
+			content="uyjBT9z6vOnpxn6lM6YnxbI6R4jLSDIAboC8zo1slhM"
+		/>
+		<meta name="google-adsense-account" content="ca-pub-2444529114040977" />
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="/icon_flex_rail_way_map.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="16x16"
+			href="/icon_flex_rail_way_map.png"
+		/>
+		<link
+			rel="apple-touch-icon"
+			sizes="180x180"
+			href="/icon_flex_rail_way_map.png"
+		/>
 		<link rel="shortcut icon" href="/icon_flex_rail_way_map.png" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
 		<title>東京フレックス路線図 - Tokyo Flex Railway Map</title>
-		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-		  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-		  crossorigin=""/>
-		<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-		  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-		  crossorigin=""></script>
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+			integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+			crossorigin=""
+		/>
+		<script
+			src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+			integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+			crossorigin=""></script>
 		<style>
 			body {
 				margin: 0;
 				padding: 0;
 				font-family: Arial, sans-serif;
-				transition: background-color 0.3s ease, color 0.3s ease;
+				transition:
+					background-color 0.3s ease,
+					color 0.3s ease;
 			}
 			body.light {
 				background-color: #ffffff;
@@ -60,7 +85,7 @@ import ThemeWrapper from '../components/ThemeWrapper.tsx';
 			body.dark .leaflet-popup-content-wrapper * {
 				background: #2d2d2d !important;
 				color: #ffffff !important;
-				box-shadow: 0 3px 14px rgba(0,0,0,0.8) !important;
+				box-shadow: 0 3px 14px rgba(0, 0, 0, 0.8) !important;
 				border: 1px solid #404040 !important;
 				border-radius: 4px !important;
 			}
@@ -98,13 +123,15 @@ import ThemeWrapper from '../components/ThemeWrapper.tsx';
 			body.dark .leaflet-popup-close-button:focus,
 			body.dark .leaflet-popup-close-button:active {
 				color: #ff6b6b !important;
-				background: rgba(255,255,255,0.15) !important;
+				background: rgba(255, 255, 255, 0.15) !important;
 				text-decoration: none !important;
 				outline: none !important;
 			}
 
 			/* === FORCE ALL NESTED ELEMENTS === */
-			body.dark .leaflet-popup *:not(.leaflet-popup-close-button):not(button) {
+			body.dark
+				.leaflet-popup
+				*:not(.leaflet-popup-close-button):not(button) {
 				color: #ffffff !important;
 				background: transparent !important;
 			}
@@ -124,19 +151,25 @@ import ThemeWrapper from '../components/ThemeWrapper.tsx';
 
 			/* === PRESERVE BUTTON STYLING (except close button) === */
 			body.dark .leaflet-popup button:not(.leaflet-popup-close-button) {
-				background: var(--button-bg, #4CAF50) !important;
+				background: var(--button-bg, #4caf50) !important;
 				color: white !important;
 				border: none !important;
 			}
 
 			/* === OVERRIDE INLINE STYLES === */
 			body.dark .leaflet-popup [style*="background"],
-			body.dark .leaflet-popup [style*="background-color"]:not(button):not(.leaflet-popup-close-button) {
+			body.dark
+				.leaflet-popup
+				[style*="background-color"]:not(button):not(
+					.leaflet-popup-close-button
+				) {
 				background: #2d2d2d !important;
 				background-color: #2d2d2d !important;
 			}
 
-			body.dark .leaflet-popup [style*="color"]:not(button):not(.leaflet-popup-close-button) {
+			body.dark
+				.leaflet-popup
+				[style*="color"]:not(button):not(.leaflet-popup-close-button) {
 				color: #ffffff !important;
 			}
 
@@ -147,6 +180,42 @@ import ThemeWrapper from '../components/ThemeWrapper.tsx';
 
 			body.dark .leaflet-control-container {
 				background: transparent !important;
+			}
+
+			/* === ZOOM CONTROL BUTTONS DARK MODE === */
+			body.dark .leaflet-control-zoom,
+			body.dark .leaflet-control-zoom * {
+				background: #2d2d2d !important;
+				background-color: #2d2d2d !important;
+				border: 1px solid #404040 !important;
+				border-radius: 4px !important;
+				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important;
+			}
+
+			body.dark .leaflet-control-zoom a,
+			body.dark .leaflet-control-zoom-in,
+			body.dark .leaflet-control-zoom-out {
+				background: #2d2d2d !important;
+				background-color: #2d2d2d !important;
+				color: #ffffff !important;
+				border: 1px solid #404040 !important;
+				text-decoration: none !important;
+			}
+
+			body.dark .leaflet-control-zoom a:hover,
+			body.dark .leaflet-control-zoom-in:hover,
+			body.dark .leaflet-control-zoom-out:hover {
+				background: #404040 !important;
+				background-color: #404040 !important;
+				color: #ffffff !important;
+			}
+
+			/* Force override for all zoom control elements */
+			body.dark .leaflet-control-zoom > *,
+			body.dark .leaflet-control-zoom > * > * {
+				background: #2d2d2d !important;
+				background-color: #2d2d2d !important;
+				color: #ffffff !important;
 			}
 
 			/* === FORCE POPUP VISIBILITY AND PROPER LAYERING === */
