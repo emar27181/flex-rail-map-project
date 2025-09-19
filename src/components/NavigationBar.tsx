@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sun, Moon, Map } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 
 interface NavigationBarProps {
@@ -28,10 +28,15 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
         alignItems: 'center',
         gap: '12px'
       }}>
-        <Map
-          size={24}
-          color={colors.primary}
-          style={{ flexShrink: 0 }}
+        <img
+          src="/icon_flex_rail_way_map.png"
+          alt="Tokyo Flex Railway Map Logo"
+          style={{
+            width: '32px',
+            height: '32px',
+            flexShrink: 0,
+            borderRadius: '4px'
+          }}
         />
         <h1 style={{
           margin: 0,
