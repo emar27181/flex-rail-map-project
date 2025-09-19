@@ -542,14 +542,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     }
   }, [departure, arrival, routeRecommendations]);
 
-  // Leafletポップアップのダークモード対応（動的スタイル適用）
+  // Leafletポップアップのテーマ対応（動的スタイル適用）
   useEffect(() => {
-    const applyDarkModeToPopups = () => {
+    const applyThemeToPopups = () => {
       const popups = document.querySelectorAll('.leaflet-popup');
 
       popups.forEach(popup => {
         if (theme === 'dark') {
-          // ポップアップ全体
+          // ダークモード適用
           (popup as HTMLElement).style.setProperty('background', '#2d2d2d', 'important');
 
           // ポップアップコンテンツラッパー
@@ -589,12 +589,49 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
             (closeButton as HTMLElement).style.setProperty('color', '#ffffff', 'important');
             (closeButton as HTMLElement).style.setProperty('background', 'transparent', 'important');
           }
+        } else {
+          // ライトモード - 強制適用したダークモードスタイルを削除
+          (popup as HTMLElement).style.removeProperty('background');
+
+          const wrapper = popup.querySelector('.leaflet-popup-content-wrapper');
+          if (wrapper) {
+            (wrapper as HTMLElement).style.removeProperty('background');
+            (wrapper as HTMLElement).style.removeProperty('color');
+            (wrapper as HTMLElement).style.removeProperty('border');
+          }
+
+          const content = popup.querySelector('.leaflet-popup-content');
+          if (content) {
+            (content as HTMLElement).style.removeProperty('background');
+            (content as HTMLElement).style.removeProperty('color');
+
+            // 全ての子要素のスタイルもリセット
+            const allElements = content.querySelectorAll('*:not(button)');
+            allElements.forEach(el => {
+              if (!el.classList.contains('leaflet-popup-close-button')) {
+                (el as HTMLElement).style.removeProperty('background');
+                (el as HTMLElement).style.removeProperty('color');
+              }
+            });
+          }
+
+          const tip = popup.querySelector('.leaflet-popup-tip');
+          if (tip) {
+            (tip as HTMLElement).style.removeProperty('background');
+            (tip as HTMLElement).style.removeProperty('border');
+          }
+
+          const closeButton = popup.querySelector('.leaflet-popup-close-button');
+          if (closeButton) {
+            (closeButton as HTMLElement).style.removeProperty('color');
+            (closeButton as HTMLElement).style.removeProperty('background');
+          }
         }
       });
     };
 
     // テーマが変更されたときにポップアップを更新
-    applyDarkModeToPopups();
+    applyThemeToPopups();
 
     // Mutationオブザーバーで動的に追加されるポップアップを監視
     const observer = new MutationObserver((mutations) => {
@@ -609,10 +646,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                   element.classList?.contains('leaflet-popup-content-wrapper') ||
                   element.classList?.contains('leaflet-popup-content')) {
                 // 即座に適用 + 少し遅延しても適用（確実性のため）
-                applyDarkModeToPopups();
-                setTimeout(applyDarkModeToPopups, 1);
-                setTimeout(applyDarkModeToPopups, 10);
-                setTimeout(applyDarkModeToPopups, 50);
+                applyThemeToPopups();
+                setTimeout(applyThemeToPopups, 1);
+                setTimeout(applyThemeToPopups, 10);
+                setTimeout(applyThemeToPopups, 50);
               }
             }
           });
@@ -629,7 +666,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     });
 
     // 定期的なチェック（初回表示問題の保険）
-    const intervalCheck = setInterval(applyDarkModeToPopups, 100);
+    const intervalCheck = setInterval(applyThemeToPopups, 100);
 
     return () => {
       observer.disconnect();
