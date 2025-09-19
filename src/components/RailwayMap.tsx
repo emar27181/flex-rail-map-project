@@ -13,6 +13,8 @@ import LegendStationMarkers from './legend/LegendStationMarkers';
 import LegendRouteList from './legend/LegendRouteList';
 import LegendRouteRecommendations from './legend/LegendRouteRecommendations';
 import LegendDisplayOptions from './legend/LegendDisplayOptions';
+import { getStoppingTrainTypes, generateStationDescription } from '../data/stationTrainTypeAnalysis';
+import { attachDebugFunctions } from '../utils/stationAnalysisUtils';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -281,41 +283,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     }
   }, [MapComponents, currentLanguage, theme]);
 
-  // 簡略化された列車種別停車パターンデータ
+  // 列車種別停車パターンの取得（外部データソースを使用）
   const getSimplifiedStationStops = useCallback((routeKey: RouteKey, trainType: string, stationName: string): boolean => {
-    // 主要な路線と列車種別の停車パターンを定義
-    const stoppingPatterns: Record<string, Record<string, string[]>> = {
-      yamanote: {
-        local: ['all'] // 山手線は全駅停車
-      },
-      chuo: {
-        local: ['all'],
-        rapid_acty: ['東京', '神田', '御茶ノ水', '四ツ谷', '新宿', '中野', '荻窪', '吉祥寺', '三鷹', '立川', '八王子', '高尾'],
-        special_rapid: ['東京', '新宿', '中野', '吉祥寺', '三鷹', '立川', '八王子', '高尾']
-      },
-      odakyuLine: {
-        local: ['all'],
-        semi_express: ['新宿', '代々木上原', '下北沢', '成城学園前', '登戸', '新百合ヶ丘', '町田', '相模大野', '本厚木', '伊勢原', '秦野', '新松田', '小田原'],
-        express: ['新宿', '代々木上原', '下北沢', '成城学園前', '登戸', '新百合ヶ丘', '町田', '相模大野', '本厚木', '伊勢原', '秦野', '新松田', '小田原'],
-        multi_express: ['新宿', '代々木上原', '下北沢', '登戸', '向ヶ丘遊園', '新百合ヶ丘'],
-        romance_car: ['新宿', '町田', '相模大野', '本厚木', '小田原']
-      },
-      keihinTohoku: {
-        local: ['all'],
-        rapid: ['大宮', '浦和', '赤羽', '上野', '東京', '新橋', '品川', '蒲田', '川崎', '鶴見', '横浜']
-      },
-      ginzaLine: {
-        local: ['all']
-      }
-    };
-
-    const routePattern = stoppingPatterns[routeKey];
-    if (!routePattern || !routePattern[trainType]) {
-      return false;
-    }
-
-    const stops = routePattern[trainType];
-    return stops.includes('all') || stops.includes(stationName);
+    const stoppingTypes = getStoppingTrainTypes(routeKey, stationName);
+    return stoppingTypes.includes(trainType);
   }, []);
 
   // 駅の停車パターンから枠線スタイルを決定する関数
@@ -529,6 +500,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
           setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, DivIcon });
           setIsClient(true);
           setIsLoading(false);
+          // デバッグ関数をブラウザコンソールで利用可能にする
+          attachDebugFunctions();
         }
       } catch (error) {
         console.error('Failed to load Leaflet:', error);
