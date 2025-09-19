@@ -419,6 +419,27 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
         console.log(`   乗り換え駅: ${transferStations.join(', ') || 'なし'}`);
       });
 
+      // 推薦されたルートで使用される路線を自動的に表示状態にする
+      const routesUsedInRecommendations = new Set<RouteKey>();
+      finalUniqueRoutes.forEach(route => {
+        route.segments.forEach(segment => {
+          if (segment.routeKey !== 'walking' && segment.routeKey) {
+            routesUsedInRecommendations.add(segment.routeKey as RouteKey);
+          }
+        });
+      });
+
+      if (routesUsedInRecommendations.size > 0) {
+        console.log('🚇 Auto-showing routes used in recommendations:', Array.from(routesUsedInRecommendations));
+        setVisibleRoutes(prev => {
+          const newVisible = new Set(prev);
+          routesUsedInRecommendations.forEach(routeKey => {
+            newVisible.add(routeKey);
+          });
+          return newVisible;
+        });
+      }
+
       // visibleRoutesの制御は時間フィルターのuseEffectで行う
     } else {
       setRouteRecommendations([]);
@@ -519,20 +540,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       const connectingRoutes = getConnectingRoutes(departure.name, arrival.name);
       console.log('🚉 Both stations selected, available routes:', connectingRoutes);
       setAvailableRoutes(new Set(connectingRoutes));
-      // 表示されている路線のうち、利用可能な路線のみに絞る
-      setVisibleRoutes(prev => new Set([...prev].filter(route => connectingRoutes.includes(route))));
+      // visibleRoutesの制御は経路推薦useEffectで行う（自動表示機能と競合しないように）
     }
     // 片方の駅のみ選択されている場合は、その駅の通過路線のみを利用可能にする
     else if (departure && !arrival) {
       const departureRoutes = getRoutesForStation(departure.name);
       console.log('🚉 Available routes for departure station:', departure.name, 'Routes:', departureRoutes);
       setAvailableRoutes(new Set(departureRoutes));
-      setVisibleRoutes(prev => new Set([...prev].filter(route => departureRoutes.includes(route))));
+      setVisibleRoutes(new Set(departureRoutes)); // 単一駅の場合は即座に表示制御
     } else if (arrival && !departure) {
       const arrivalRoutes = getRoutesForStation(arrival.name);
       console.log('🚉 Available routes for arrival station:', arrival.name, 'Routes:', arrivalRoutes);
       setAvailableRoutes(new Set(arrivalRoutes));
-      setVisibleRoutes(prev => new Set([...prev].filter(route => arrivalRoutes.includes(route))));
+      setVisibleRoutes(new Set(arrivalRoutes)); // 単一駅の場合は即座に表示制御
     } else {
       // 何も選択されていない場合は全路線を利用可能にする
       console.log('🚉 No stations selected, all routes available');
