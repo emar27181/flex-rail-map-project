@@ -200,7 +200,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   style={{
                     width: '100%',
                     padding: language === 'english' ? '6px 28px 6px 6px' : '8px 30px 8px 8px',
-                    border: `1px solid ${colors.border}`,
+                    border: `2px solid #4CAF50`,
                     borderRadius: '4px',
                     fontSize: language === 'english' ? '13px' : '14px',
                     boxSizing: 'border-box',
@@ -293,7 +293,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   style={{
                     width: '100%',
                     padding: language === 'english' ? '6px 28px 6px 6px' : '8px 30px 8px 8px',
-                    border: `1px solid ${colors.border}`,
+                    border: `2px solid #f44336`,
                     borderRadius: '4px',
                     fontSize: language === 'english' ? '13px' : '14px',
                     boxSizing: 'border-box',
@@ -363,16 +363,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             </div>
           </div>
 
-          {/* 選択された駅の表示 */}
-          {(departure || arrival) && (
-            <div style={{ marginTop: '15px', padding: '10px', backgroundColor: theme === 'dark' ? '#2d4a2d' : '#e8f5e8', borderRadius: '4px' }}>
-              <div style={{ fontSize: '14px', color: colors.text }}>
-                {departure && <span><strong>{translateUI('departure', language)}:</strong> {translateStation(departure.name, language)}</span>}
-                {departure && arrival && <span style={{ margin: '0 10px' }}>→</span>}
-                {arrival && <span><strong>{translateUI('arrival', language)}:</strong> {translateStation(arrival.name, language)}</span>}
-              </div>
-            </div>
-          )}
         </>
       )}
     </div>
