@@ -542,6 +542,101 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     }
   }, [departure, arrival, routeRecommendations]);
 
+  // Leafletポップアップのダークモード対応（動的スタイル適用）
+  useEffect(() => {
+    const applyDarkModeToPopups = () => {
+      const popups = document.querySelectorAll('.leaflet-popup');
+
+      popups.forEach(popup => {
+        if (theme === 'dark') {
+          // ポップアップ全体
+          (popup as HTMLElement).style.setProperty('background', '#2d2d2d', 'important');
+
+          // ポップアップコンテンツラッパー
+          const wrapper = popup.querySelector('.leaflet-popup-content-wrapper');
+          if (wrapper) {
+            (wrapper as HTMLElement).style.setProperty('background', '#2d2d2d', 'important');
+            (wrapper as HTMLElement).style.setProperty('color', '#ffffff', 'important');
+            (wrapper as HTMLElement).style.setProperty('border', '1px solid #404040', 'important');
+          }
+
+          // ポップアップコンテンツ
+          const content = popup.querySelector('.leaflet-popup-content');
+          if (content) {
+            (content as HTMLElement).style.setProperty('background', '#2d2d2d', 'important');
+            (content as HTMLElement).style.setProperty('color', '#ffffff', 'important');
+
+            // 全ての子要素
+            const allElements = content.querySelectorAll('*:not(button)');
+            allElements.forEach(el => {
+              if (!el.classList.contains('leaflet-popup-close-button')) {
+                (el as HTMLElement).style.setProperty('background', '#2d2d2d', 'important');
+                (el as HTMLElement).style.setProperty('color', '#ffffff', 'important');
+              }
+            });
+          }
+
+          // ポップアップTip（矢印）
+          const tip = popup.querySelector('.leaflet-popup-tip');
+          if (tip) {
+            (tip as HTMLElement).style.setProperty('background', '#2d2d2d', 'important');
+            (tip as HTMLElement).style.setProperty('border', '1px solid #404040', 'important');
+          }
+
+          // 閉じるボタン
+          const closeButton = popup.querySelector('.leaflet-popup-close-button');
+          if (closeButton) {
+            (closeButton as HTMLElement).style.setProperty('color', '#ffffff', 'important');
+            (closeButton as HTMLElement).style.setProperty('background', 'transparent', 'important');
+          }
+        }
+      });
+    };
+
+    // テーマが変更されたときにポップアップを更新
+    applyDarkModeToPopups();
+
+    // Mutationオブザーバーで動的に追加されるポップアップを監視
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              const element = node as Element;
+              // より包括的なポップアップ検出
+              if (element.classList?.contains('leaflet-popup') ||
+                  element.querySelector?.('.leaflet-popup') ||
+                  element.classList?.contains('leaflet-popup-content-wrapper') ||
+                  element.classList?.contains('leaflet-popup-content')) {
+                // 即座に適用 + 少し遅延しても適用（確実性のため）
+                applyDarkModeToPopups();
+                setTimeout(applyDarkModeToPopups, 1);
+                setTimeout(applyDarkModeToPopups, 10);
+                setTimeout(applyDarkModeToPopups, 50);
+              }
+            }
+          });
+        }
+      });
+    });
+
+    // body要素を監視（より詳細な設定）
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'style']
+    });
+
+    // 定期的なチェック（初回表示問題の保険）
+    const intervalCheck = setInterval(applyDarkModeToPopups, 100);
+
+    return () => {
+      observer.disconnect();
+      clearInterval(intervalCheck);
+    };
+  }, [theme]);
+
   const toggleRoute = (routeKey: RouteKey) => {
     console.log('🔄 toggleRoute called for:', routeKey);
     console.log('🔄 Current visibleRoutes:', visibleRoutes);
@@ -947,8 +1042,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 zIndexOffset={1000}
               >
                 {showStationNames && (
-                <Popup>
-                  <div style={{ backgroundColor: colors.surface, color: colors.text, padding: '8px', borderRadius: '4px' }}>
+                <Popup className={`popup-${theme}`}>
+                  <div style={{ backgroundColor: colors.surface, color: colors.text, padding: '8px', borderRadius: '4px' }} className="popup-content-main">
                     <strong style={{ color: colors.text }}>{translateStation(station.name, currentLanguage)}</strong>
                     {isDeparture && <div style={{ color: '#4CAF50', fontWeight: 'bold' }}>{translateUI('departure', currentLanguage)}</div>}
                     {isArrival && <div style={{ color: '#F44336', fontWeight: 'bold' }}>{translateUI('arrival', currentLanguage)}</div>}
@@ -1083,8 +1178,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 zIndexOffset={2000}
               >
                 {showStationNames && (
-                <Popup>
-                  <div style={{ backgroundColor: colors.surface, color: colors.text, padding: '8px', borderRadius: '4px' }}>
+                <Popup className={`popup-${theme}`}>
+                  <div style={{ backgroundColor: colors.surface, color: colors.text, padding: '8px', borderRadius: '4px' }} className="popup-content-main">
                     <strong style={{ color: colors.text }}>{translateStation(station.name, currentLanguage)}</strong>
 
                     {/* 通っている路線を表示 */}

@@ -43,60 +43,148 @@ import ThemeWrapper from '../components/ThemeWrapper.tsx';
 				width: 100% !important;
 			}
 
-			/* Dark mode support for Leaflet popups - Complete coverage */
-			body.dark .leaflet-popup {
-				background-color: #2d2d2d !important;
+			/* COMPREHENSIVE Dark mode support for ALL Leaflet popups */
+
+			/* === ROOT POPUP CONTAINER === */
+			body.dark .leaflet-popup,
+			body.dark .leaflet-popup-pane,
+			body.dark .leaflet-popup-pane .leaflet-popup {
+				background: #2d2d2d !important;
 			}
 
-			body.dark .leaflet-popup-content-wrapper {
-				background-color: #2d2d2d !important;
+			/* === POPUP WRAPPER (main box) === */
+			body.dark .leaflet-popup-content-wrapper,
+			body.dark .leaflet-popup-content-wrapper * {
+				background: #2d2d2d !important;
 				color: #ffffff !important;
 				box-shadow: 0 3px 14px rgba(0,0,0,0.8) !important;
 				border: 1px solid #404040 !important;
+				border-radius: 4px !important;
 			}
 
-			body.dark .leaflet-popup-content {
-				background-color: #2d2d2d !important;
+			/* === POPUP CONTENT AREA === */
+			body.dark .leaflet-popup-content,
+			body.dark .leaflet-popup-content * {
+				background: #2d2d2d !important;
 				color: #ffffff !important;
 				margin: 0 !important;
 			}
 
-			body.dark .leaflet-popup-tip {
-				background-color: #2d2d2d !important;
+			/* === POPUP TIP (arrow pointing to marker) === */
+			body.dark .leaflet-popup-tip,
+			body.dark .leaflet-popup-tip-container {
+				background: #2d2d2d !important;
 				border: 1px solid #404040 !important;
 				box-shadow: none !important;
 			}
 
-			body.dark .leaflet-popup-tip-container {
-				background-color: #2d2d2d !important;
-			}
-
+			/* === CLOSE BUTTON === */
 			body.dark .leaflet-popup-close-button {
 				color: #ffffff !important;
-				background-color: transparent !important;
+				background: transparent !important;
+				font-size: 18px !important;
+				font-weight: bold !important;
+				padding: 4px 8px !important;
+				border-radius: 3px !important;
+				transition: all 0.2s ease !important;
+				line-height: 1 !important;
+				text-decoration: none !important;
 			}
 
-			body.dark .leaflet-popup-close-button:hover {
-				color: #cccccc !important;
-				background-color: rgba(255,255,255,0.1) !important;
+			body.dark .leaflet-popup-close-button:hover,
+			body.dark .leaflet-popup-close-button:focus,
+			body.dark .leaflet-popup-close-button:active {
+				color: #ff6b6b !important;
+				background: rgba(255,255,255,0.15) !important;
+				text-decoration: none !important;
+				outline: none !important;
 			}
 
-			/* Force all nested elements to inherit dark mode styling */
-			body.dark .leaflet-popup *,
-			body.dark .leaflet-popup div,
+			/* === FORCE ALL NESTED ELEMENTS === */
+			body.dark .leaflet-popup *:not(.leaflet-popup-close-button):not(button) {
+				color: #ffffff !important;
+				background: transparent !important;
+			}
+
+			body.dark .leaflet-popup div:not(.leaflet-popup-close-button),
 			body.dark .leaflet-popup span,
 			body.dark .leaflet-popup strong,
-			body.dark .leaflet-popup p {
+			body.dark .leaflet-popup p,
+			body.dark .leaflet-popup h1,
+			body.dark .leaflet-popup h2,
+			body.dark .leaflet-popup h3,
+			body.dark .leaflet-popup label,
+			body.dark .leaflet-popup text {
 				color: #ffffff !important;
-				background-color: transparent !important;
+				background: transparent !important;
 			}
 
-			/* Override any inline styles that might be preventing dark mode */
-			body.dark .leaflet-popup [style*="background"] {
+			/* === PRESERVE BUTTON STYLING (except close button) === */
+			body.dark .leaflet-popup button:not(.leaflet-popup-close-button) {
+				background: var(--button-bg, #4CAF50) !important;
+				color: white !important;
+				border: none !important;
+			}
+
+			/* === OVERRIDE INLINE STYLES === */
+			body.dark .leaflet-popup [style*="background"],
+			body.dark .leaflet-popup [style*="background-color"]:not(button):not(.leaflet-popup-close-button) {
+				background: #2d2d2d !important;
 				background-color: #2d2d2d !important;
 			}
 
-			body.dark .leaflet-popup [style*="color"] {
+			body.dark .leaflet-popup [style*="color"]:not(button):not(.leaflet-popup-close-button) {
+				color: #ffffff !important;
+			}
+
+			/* === LEAFLET CONTAINER DARK MODE === */
+			body.dark .leaflet-container {
+				background: #1a1a1a !important;
+			}
+
+			body.dark .leaflet-control-container {
+				background: transparent !important;
+			}
+
+			/* === FORCE POPUP VISIBILITY AND PROPER LAYERING === */
+			body.dark .leaflet-popup {
+				z-index: 1000 !important;
+			}
+
+			/* === SPECIFIC OVERRIDES FOR DEEP NESTING === */
+			body.dark .leaflet-popup-content > div,
+			body.dark .leaflet-popup-content > div > *,
+			body.dark .leaflet-popup-content > div > div,
+			body.dark .leaflet-popup-content > div > div > * {
+				background: #2d2d2d !important;
+				color: #ffffff !important;
+			}
+
+			/* === SHADOW AND BORDER CONSISTENCY === */
+			body.dark .leaflet-popup-content-wrapper::before,
+			body.dark .leaflet-popup-content-wrapper::after {
+				border-color: #404040 !important;
+				background: #2d2d2d !important;
+			}
+
+			/* === CLASS-BASED TARGETING FOR REACT COMPONENTS === */
+			body.dark .popup-dark,
+			body.dark .popup-dark * {
+				background: #2d2d2d !important;
+				color: #ffffff !important;
+			}
+
+			body.dark .popup-content-main,
+			body.dark .popup-content-main * {
+				background: #2d2d2d !important;
+				color: #ffffff !important;
+			}
+
+			/* === FORCE OVERRIDE FOR STUBBORN INLINE STYLES === */
+			body.dark .leaflet-popup-content div[style],
+			body.dark .leaflet-popup-content span[style],
+			body.dark .leaflet-popup-content strong[style] {
+				background: #2d2d2d !important;
 				color: #ffffff !important;
 			}
 		</style>
