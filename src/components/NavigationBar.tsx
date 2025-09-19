@@ -16,7 +16,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '12px 0',
+      padding: '12px 20px',
       backgroundColor: colors.surface,
       borderBottom: `1px solid ${colors.border}`,
       boxShadow: `0 2px 4px ${colors.shadow}`,
