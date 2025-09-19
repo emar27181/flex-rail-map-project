@@ -104,6 +104,17 @@ export class RouteFinder {
     console.log('📍 全登録路線数:', Object.keys(routes).length);
     console.log('📍 小田急関連路線:', Object.keys(routes).filter(key => key.includes('odakyu')));
 
+    // 小田急線データの実際の内容を確認
+    console.log('📊 小田急小田原線データ:', routes.odakyuLine ? `${routes.odakyuLine.length}駅` : '未定義');
+    console.log('📊 小田急江ノ島線データ:', routes.odakyuEnoshimaLine ? `${routes.odakyuEnoshimaLine.length}駅` : '未定義');
+
+    if (routes.odakyuLine) {
+      console.log('🚉 小田急小田原線の主要駅:', routes.odakyuLine.filter(s => ['新宿', '相模大野'].includes(s.name)).map(s => s.name));
+    }
+    if (routes.odakyuEnoshimaLine) {
+      console.log('🚉 小田急江ノ島線の主要駅:', routes.odakyuEnoshimaLine.filter(s => ['藤沢', '相模大野'].includes(s.name)).map(s => s.name));
+    }
+
     // デバッグ: 藤沢駅と相模大野駅の登録状況を確認
     const fujiSawaRoutes = this.stationToRoutes.get('藤沢');
     if (fujiSawaRoutes) {
@@ -131,6 +142,14 @@ export class RouteFinder {
       // 他に相模大野が含まれる駅名があるかチェック
       const sagamiOnoLike = Array.from(this.stationToRoutes.keys()).filter(name => name.includes('相模'));
       console.log('🔍 相模を含む駅名:', sagamiOnoLike);
+    }
+
+    const shinjukuRoutes = this.stationToRoutes.get('新宿');
+    if (shinjukuRoutes) {
+      console.log('🚉 新宿駅の登録路線:', shinjukuRoutes.map(n => ({
+        route: n.routeKey,
+        index: n.index
+      })));
     }
 
     // 小田急江ノ島線のサンプル駅をチェック
@@ -205,6 +224,14 @@ export class RouteFinder {
     console.log(`\n=== 経路検索: ${departure.name} → ${arrival.name} ===`);
     console.log(`出発駅の路線:`, departureNodes.map(n => n.routeKey));
     console.log(`到着駅の路線:`, arrivalNodes.map(n => n.routeKey));
+
+    // 小田急線関連の特別なデバッグ
+    if (departure.name === '藤沢' || arrival.name === '新宿') {
+      console.log('🔍 小田急線経路検索デバッグ開始');
+      console.log('藤沢駅の登録路線:', this.stationToRoutes.get('藤沢')?.map(n => `${n.routeKey}[${n.index}]`));
+      console.log('相模大野駅の登録路線:', this.stationToRoutes.get('相模大野')?.map(n => `${n.routeKey}[${n.index}]`));
+      console.log('新宿駅の登録路線:', this.stationToRoutes.get('新宿')?.map(n => `${n.routeKey}[${n.index}]`));
+    }
 
     if (departureNodes.length === 0 || arrivalNodes.length === 0) {
       return [];
@@ -307,12 +334,22 @@ export class RouteFinder {
   }
 
   private findTransferRoutes(
-    departureNodes: StationNode[], 
-    arrival: Station, 
-    results: RouteResult[], 
+    departureNodes: StationNode[],
+    arrival: Station,
+    results: RouteResult[],
     maxTransfers: number
   ) {
+    console.log(`\n🔍 乗り換え探索開始 (最大${maxTransfers}回まで)`);
+
     departureNodes.forEach(depNode => {
+      console.log(`出発路線: ${depNode.routeKey} 駅: ${depNode.station.name}[${depNode.index}]`);
+
+      // 小田急江ノ島線からの探索を特別にログ
+      if (depNode.routeKey === 'odakyuEnoshimaLine') {
+        console.log(`🔥 小田急江ノ島線からの探索開始！ 駅: ${depNode.station.name}, インデックス: ${depNode.index}`);
+        console.log(`🔥 路線データ長: ${routes.odakyuEnoshimaLine?.length}, 逆方向探索で相模大野(インデックス0)を目指します`);
+      }
+
       const visited = new Set<string>();
       const queue: PathNode[] = [{
         node: depNode,
@@ -336,12 +373,20 @@ export class RouteFinder {
           let segmentTime = 0;
           let stationsVisited = 0;
 
+          // 小田急線での探索開始をデバッグ
+          if (current.node.routeKey.includes('odakyu')) {
+            console.log(`🚂 小田急線探索開始: ${current.node.routeKey}, 駅: ${current.node.station.name}[${current.node.index}], 方向: ${direction === 1 ? '正方向' : '逆方向'}`);
+          }
+
           while (stationsVisited < 50) { // Prevent infinite loops
             const nextIndex = currentIndex + direction;
             if (nextIndex < 0 || nextIndex >= route.length) break;
 
-            const currentStation = route[currentIndex];
-            segmentTime += currentStation.timeToNext || 3;
+            // 時間計算: 正方向では currentStation.timeToNext、逆方向では前の駅の timeToNext
+            const timeForThisSegment = direction === 1
+              ? (route[currentIndex].timeToNext || 3)
+              : (route[nextIndex].timeToNext || 3);
+            segmentTime += timeForThisSegment;
             currentIndex = nextIndex;
             stationsVisited++;
 
@@ -362,6 +407,10 @@ export class RouteFinder {
 
             // Check if we've reached the destination
             if (nextStation.name === arrival.name) {
+              console.log(`🎯 到着駅に到達: ${arrival.name}, 路線: ${current.node.routeKey}, 時間: ${newTotalTime}分, 乗り換え: ${current.transfers}回`);
+              const routeDescription = newPath.map(seg => `${seg.routeName || seg.routeKey}(${seg.stations[0]?.name}→${seg.stations[seg.stations.length-1]?.name})`).join(' → ');
+              console.log(`📍 経路詳細: ${routeDescription}`);
+
               results.push({
                 segments: newPath,
                 totalTime: newTotalTime,
@@ -375,13 +424,14 @@ export class RouteFinder {
               // 通常の乗換
               const transferNodes = this.stationToRoutes.get(nextStation.name) || [];
 
-              // 相模大野での乗り換えをデバッグ
-              if (nextStation.name === '相模大野') {
-                console.log(`🔄 相模大野での乗り換え検索:`, {
+              // 小田急線関連駅での乗り換えをデバッグ
+              if (nextStation.name === '相模大野' || nextStation.name === '藤沢' || nextStation.name === '新宿') {
+                console.log(`🔄 ${nextStation.name}での乗り換え検索:`, {
                   currentRoute: current.node.routeKey,
                   availableRoutes: transferNodes.map(n => n.routeKey),
                   totalTime: newTotalTime,
-                  transfers: current.transfers
+                  transfers: current.transfers,
+                  segmentTime: segmentTime
                 });
               }
 
