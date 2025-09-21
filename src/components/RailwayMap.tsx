@@ -473,8 +473,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     if (!MapComponents?.DivIcon || !showTravelTimes) return null;
 
     const { DivIcon } = MapComponents;
-    const fontSize = Math.max(10, Math.round(zoomLevel * 0.8));
-    const circleSize = Math.max(24, Math.round(zoomLevel * 2.2));
+    const fontSize = 12;
+    const circleSize = Math.max(20, Math.round(zoomLevel * 1.8));
 
     const bgColor = theme === 'dark' ? 'rgba(40,40,40,0.9)' : 'rgba(255,255,255,0.9)';
     const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';

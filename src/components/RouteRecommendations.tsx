@@ -172,17 +172,17 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{
-                    width: '48px',
-                    height: '48px',
+                    width: '40px',
+                    height: '40px',
                     borderRadius: '50%',
-                    border: '3px solid #2196F3',
+                    border: '2px solid #2196F3',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     backgroundColor: '#f8f9fa'
                   }}>
                     <span style={{
-                      fontSize: '16px',
+                      fontSize: '14px',
                       fontWeight: 'bold',
                       color: '#2196F3',
                       lineHeight: '1'
@@ -338,8 +338,8 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                       </span>
                       <div style={{
                         marginLeft: 'auto',
-                        width: '32px',
-                        height: '32px',
+                        width: '28px',
+                        height: '28px',
                         borderRadius: '50%',
                         border: '2px solid #666',
                         display: 'flex',
@@ -348,7 +348,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                         backgroundColor: '#f8f9fa'
                       }}>
                         <span style={{
-                          fontSize: '12px',
+                          fontSize: '11px',
                           fontWeight: 'bold',
                           color: '#666',
                           lineHeight: '1'
