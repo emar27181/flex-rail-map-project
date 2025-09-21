@@ -303,20 +303,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       };
     }
 
+    // 路線色を取得
+    const stationColor = routeColors[routeKey];
+
     if (!selectedTrainType) {
       // 列車種別未選択時は全停車パターンを考慮した枠線を表示
-      return getStationBorderStyleByPattern(routeKey, stationName);
+      return getStationBorderStyleByPattern(routeKey, stationName, stationColor);
     }
 
     // 特定の列車種別が選択されている場合の表示
     const stops = getSimplifiedStationStops(routeKey, selectedTrainType, stationName);
-    const baseStyle = getStationBorderStyleByPattern(routeKey, stationName);
+    const baseStyle = getStationBorderStyleByPattern(routeKey, stationName, stationColor);
 
     if (!stops) {
       return {
         borderWidth: 1,
         borderStyle: 'dashed' as const,
-        borderColor: '#CCCCCC',
+        borderColor: stationColor,
         description: `${selectedTrainType}通過`
       };
     }

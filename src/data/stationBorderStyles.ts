@@ -57,11 +57,11 @@ const trainTypeNames: Record<string, string> = {
  * - 停車なし: 枠線なし（薄いグレー）
  * - 枠線色: ライトモード（グレー）、ダークモード（白）で固定
  */
-export function getStationBorderStyleByPattern(routeKey: RouteKey, stationName: string): StationBorderStyle {
+export function getStationBorderStyleByPattern(routeKey: RouteKey, stationName: string, stationColor?: string): StationBorderStyle {
   const stoppingTypes = getStoppingTrainTypes(routeKey, stationName);
 
-  // ライト/ダークモード対応の枠線色（CSS変数またはメディアクエリで制御可能）
-  const borderColor = 'var(--station-border-color, #000000)';
+  // 駅の路線色を枠線色として使用（指定されていない場合はデフォルト色）
+  const borderColor = stationColor || 'var(--station-border-color, #000000)';
   const passingStationColor = 'var(--station-border-color-light, #CCCCCC)';
 
   if (stoppingTypes.length === 0) {
