@@ -39,6 +39,9 @@ import { yurikamomeLine } from './yurikamome-line';
 import { tsukubaExpress } from './tsukuba-express';
 import { jrNanbuLine } from './jr-nanbu-line';
 import { jrNegishiLine } from './jr-negishi-line';
+import { sotetsuMainLine, sotetsuIzumino } from './sotetsu-line';
+import { jrSobuChiba, jrKeiyo } from './jr-sobu-chiba';
+import { jrKeihinTohokuSaitama, jrTokaidoUtsunomiya } from './jr-keihin-tohoku-saitama';
 
 export const routes = {
   yamanote,
@@ -82,6 +85,12 @@ export const routes = {
   tsukubaExpress,
   jrNanbuLine,
   jrNegishiLine,
+  sotetsuMainLine,
+  sotetsuIzumino,
+  jrSobuChiba,
+  jrKeiyo,
+  jrKeihinTohokuSaitama,
+  jrTokaidoUtsunomiya,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -128,6 +137,12 @@ export const routeColors = {
   tsukubaExpress: '#8B4513', // Tsukuba Express brown
   jrNanbuLine: '#FFCC00', // JR Nanbu Line yellow
   jrNegishiLine: '#00B5AD', // JR Negishi Line teal
+  sotetsuMainLine: '#2E8B57', // Sotetsu Main Line sea green
+  sotetsuIzumino: '#32CD32', // Sotetsu Izumino Line lime green
+  jrSobuChiba: '#FFD700', // JR Sobu Chiba Line gold
+  jrKeiyo: '#FF6347', // JR Keiyo Line tomato
+  jrKeihinTohokuSaitama: '#00CED1', // JR Keihin-Tohoku Saitama dark turquoise
+  jrTokaidoUtsunomiya: '#FF8C00', // JR Tokaido Utsunomiya Line dark orange
 };
 
 export const routeNames = {
@@ -172,4 +187,10 @@ export const routeNames = {
   tsukubaExpress: 'つくばエクスプレス',
   jrNanbuLine: 'JR南武線',
   jrNegishiLine: 'JR根岸線',
+  sotetsuMainLine: '相鉄本線',
+  sotetsuIzumino: '相鉄いずみ野線',
+  jrSobuChiba: 'JR総武線（千葉方面）',
+  jrKeiyo: 'JR京葉線',
+  jrKeihinTohokuSaitama: 'JR京浜東北線（埼玉方面）',
+  jrTokaidoUtsunomiya: 'JR東海道線・宇都宮線',
 };
