@@ -95,7 +95,7 @@ export function getStationBorderStyleByPattern(routeKey: RouteKey, stationName: 
   switch (maxLevel) {
     case 1: // 各駅停車のみ
       return {
-        borderWidth: 1,
+        borderWidth: 0,
         borderStyle: 'solid',
         borderColor: baseColor,
         description,
@@ -131,7 +131,7 @@ export function getStationBorderStyleByPattern(routeKey: RouteKey, stationName: 
 
     default:
       return {
-        borderWidth: 1,
+        borderWidth: 0,
         borderStyle: 'solid',
         borderColor: baseColor,
         description,
