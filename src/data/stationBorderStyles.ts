@@ -6,8 +6,9 @@ import { type RouteKey } from './routes';
 
 export interface StationBorderStyle {
   borderWidth: number;
-  borderStyle: 'solid' | 'double' | 'dashed';
+  borderStyle: 'solid' | 'double' | 'dashed' | 'none';
   borderColor: string;
+  boxShadow?: string; // 三重枠線用
   description: string;
   visualLevel: 'basic' | 'enhanced' | 'premium' | 'special';
 }
@@ -49,20 +50,25 @@ const trainTypeNames: Record<string, string> = {
  * 駅に停車する列車種別から枠線スタイルを決定
  *
  * ルール:
- * - 各駅停車のみ: 細い実線（1px solid）
- * - 快速系統まで: 中太実線（3px solid）
- * - 急行系統まで: 太い実線（5px solid）
- * - 特急系統まで: 太い二重線（5px double）
- * - 停車なし: 細い実線（1px solid、薄いグレー）
+ * - 各駅停車のみ: 枠線なし
+ * - 快速系統まで: 単一枠線（2px solid）
+ * - 急行系統まで: 二重枠線（2px double）
+ * - 特急系統まで: 三重枠線（2px solid + box-shadow）
+ * - 停車なし: 枠線なし（薄いグレー）
+ * - 枠線色: ライトモード（グレー）、ダークモード（白）で固定
  */
 export function getStationBorderStyleByPattern(routeKey: RouteKey, stationName: string): StationBorderStyle {
   const stoppingTypes = getStoppingTrainTypes(routeKey, stationName);
 
+  // ライト/ダークモード対応の枠線色（CSS変数またはメディアクエリで制御可能）
+  const borderColor = 'var(--station-border-color, #000000)';
+  const passingStationColor = 'var(--station-border-color-light, #CCCCCC)';
+
   if (stoppingTypes.length === 0) {
     return {
-      borderWidth: 1,
-      borderStyle: 'solid',
-      borderColor: '#CCCCCC',
+      borderWidth: 0,
+      borderStyle: 'none',
+      borderColor: 'transparent',
       description: '通過のみ',
       visualLevel: 'basic'
     };
@@ -80,51 +86,41 @@ export function getStationBorderStyleByPattern(routeKey: RouteKey, stationName: 
     ? `${sortedTypes[0]}停車`
     : `${sortedTypes.join('・')}停車`;
 
-  // 路線色を基本色として使用
-  const routeColors: Record<RouteKey, string> = {
-    yamanote: '#9ACD32',
-    chuo: '#FF6600',
-    odakyuLine: '#0066CC',
-    keihinTohoku: '#00BFFF',
-    ginzaLine: '#FF9500'
-  };
-
-  const baseColor = routeColors[routeKey] || '#666666';
-
   // 最高階層レベルに応じて枠線スタイルを決定
   switch (maxLevel) {
     case 1: // 各駅停車のみ
       return {
         borderWidth: 0,
-        borderStyle: 'solid',
-        borderColor: baseColor,
+        borderStyle: 'none',
+        borderColor: 'transparent',
         description,
         visualLevel: 'basic'
       };
 
     case 2: // 快速系統まで停車
       return {
-        borderWidth: 3,
+        borderWidth: 2,
         borderStyle: 'solid',
-        borderColor: baseColor,
+        borderColor,
         description,
         visualLevel: 'enhanced'
       };
 
     case 3: // 急行系統まで停車
       return {
-        borderWidth: 5,
-        borderStyle: 'solid',
-        borderColor: baseColor,
+        borderWidth: 2,
+        borderStyle: 'double',
+        borderColor,
         description,
         visualLevel: 'premium'
       };
 
     case 4: // 特急系統まで停車
       return {
-        borderWidth: 5,
-        borderStyle: 'double',
-        borderColor: baseColor,
+        borderWidth: 2,
+        borderStyle: 'solid',
+        borderColor,
+        boxShadow: `0 0 0 2px ${borderColor}, 0 0 0 4px ${borderColor}`,
         description,
         visualLevel: 'special'
       };
@@ -132,8 +128,8 @@ export function getStationBorderStyleByPattern(routeKey: RouteKey, stationName: 
     default:
       return {
         borderWidth: 0,
-        borderStyle: 'solid',
-        borderColor: baseColor,
+        borderStyle: 'none',
+        borderColor: 'transparent',
         description,
         visualLevel: 'basic'
       };
