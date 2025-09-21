@@ -32,6 +32,60 @@ const Footer: React.FC<FooterProps> = ({ language }) => {
         <p style={{ margin: '0 0 10px 0' }}>
           {translateUI('accuracyText', language)}
         </p>
+
+        <div style={{
+          display: 'flex',
+          gap: '20px',
+          margin: '0 0 15px 0',
+          fontSize: '12px',
+          flexWrap: 'wrap'
+        }}>
+          <a
+            href={`/about?lang=${language === 'japanese' ? 'ja' : 'en'}`}
+            style={{
+              color: colors.primary,
+              textDecoration: 'none'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+            onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+          >
+            {language === 'japanese' ? 'このサイトについて' : 'About'}
+          </a>
+          <a
+            href={`/faq?lang=${language === 'japanese' ? 'ja' : 'en'}`}
+            style={{
+              color: colors.primary,
+              textDecoration: 'none'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+            onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+          >
+            {language === 'japanese' ? 'よくある質問' : 'FAQ'}
+          </a>
+          <a
+            href={`/privacy?lang=${language === 'japanese' ? 'ja' : 'en'}`}
+            style={{
+              color: colors.primary,
+              textDecoration: 'none'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+            onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+          >
+            {language === 'japanese' ? 'プライバシーポリシー' : 'Privacy Policy'}
+          </a>
+          <a
+            href={`/terms?lang=${language === 'japanese' ? 'ja' : 'en'}`}
+            style={{
+              color: colors.primary,
+              textDecoration: 'none'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+            onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+          >
+            {language === 'japanese' ? '利用規約' : 'Terms of Service'}
+          </a>
+        </div>
+
         <p style={{ margin: '0 0 8px 0', fontSize: '12px' }}>
           Developed by{' '}
           <a
