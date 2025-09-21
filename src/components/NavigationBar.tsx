@@ -228,7 +228,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             onClick={() => {
-              console.log('About clicked');
+              window.location.href = `/about?lang=${language === 'japanese' ? 'ja' : 'en'}`;
               setIsMenuOpen(false);
             }}
           >
@@ -245,11 +245,45 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             onClick={() => {
-              console.log('Help clicked');
+              window.location.href = `/faq?lang=${language === 'japanese' ? 'ja' : 'en'}`;
               setIsMenuOpen(false);
             }}
           >
-            {language === 'japanese' ? 'ヘルプ' : 'Help'}
+            {language === 'japanese' ? 'よくある質問' : 'FAQ'}
+          </div>
+          <div
+            style={{
+              padding: '12px 16px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              color: colors.text,
+              borderBottom: `1px solid ${colors.borderLight}`
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            onClick={() => {
+              window.location.href = `/privacy?lang=${language === 'japanese' ? 'ja' : 'en'}`;
+              setIsMenuOpen(false);
+            }}
+          >
+            {language === 'japanese' ? 'プライバシーポリシー' : 'Privacy Policy'}
+          </div>
+          <div
+            style={{
+              padding: '12px 16px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              color: colors.text,
+              borderBottom: `1px solid ${colors.borderLight}`
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            onClick={() => {
+              window.location.href = `/terms?lang=${language === 'japanese' ? 'ja' : 'en'}`;
+              setIsMenuOpen(false);
+            }}
+          >
+            {language === 'japanese' ? '利用規約' : 'Terms of Service'}
           </div>
           <div
             style={{
