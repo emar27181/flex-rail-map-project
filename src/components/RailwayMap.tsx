@@ -16,6 +16,7 @@ import LegendDisplayOptions from './legend/LegendDisplayOptions';
 import { getStoppingTrainTypes, generateStationDescription } from '../data/stationTrainTypeAnalysis';
 import { getStationBorderStyleByPattern, getBorderStyleExplanation } from '../data/stationBorderStyles';
 import { attachDebugFunctions } from '../utils/stationAnalysisUtils';
+import CookieBanner from './CookieBanner';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -2597,6 +2598,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
           })()}
         </div>
       </div>
+      <CookieBanner language={currentLanguage} />
     </ErrorBoundary>
   );
 };
