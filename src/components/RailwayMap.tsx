@@ -74,8 +74,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   const [mapViewMode, setMapViewMode] = useState<'realistic' | 'schematic'>('realistic');
 
-  // 列車種別表示モード（デフォルトで有効）
-  const [trainTypeViewEnabled, setTrainTypeViewEnabled] = useState(true);
+  // 列車種別表示モード（常にオン）
+  const trainTypeViewEnabled = true;
   const [selectedTrainRoute, setSelectedTrainRoute] = useState<RouteKey | null>(null);
   const [selectedTrainType, setSelectedTrainType] = useState<string | null>(null);
 
@@ -2176,11 +2176,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     language={currentLanguage}
                     trainTypeViewEnabled={trainTypeViewEnabled}
                     onMapViewModeChange={setMapViewMode}
-                    onTrainTypeViewChange={setTrainTypeViewEnabled}
                   />
 
-                  {/* 5. 列車種別ビューア */}
-                  {trainTypeViewEnabled && (
+                  {/* 5. 列車種別ビューア - 非表示 */}
+                  {false && (
                     <div style={{
                       marginBottom: '15px',
                       padding: '10px',
