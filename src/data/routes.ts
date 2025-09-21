@@ -42,6 +42,11 @@ import { jrNegishiLine } from './jr-negishi-line';
 import { sotetsuMainLine, sotetsuIzumino } from './sotetsu-line';
 import { jrSobuChiba, jrKeiyo } from './jr-sobu-chiba';
 import { jrKeihinTohokuSaitama, jrTokaidoUtsunomiya } from './jr-keihin-tohoku-saitama';
+import { jrTokaidoKanagawa, jrTsurumi } from './jr-tokaido-kanagawa';
+import { tokyuMeguro, tokyuTamagawa, tokyuIkegami } from './tokyu-additional';
+import { yokohamaGreenLine, enoshimaElectricRailway } from './yokohama-green-line';
+import { jrUchiboLine, jrSotoboLine, jrNaritaLine } from './jr-chiba-comprehensive';
+import { shinkeisei, toyoRapid, keiseiExtended } from './chiba-private-railways';
 
 export const routes = {
   yamanote,
@@ -91,6 +96,19 @@ export const routes = {
   jrKeiyo,
   jrKeihinTohokuSaitama,
   jrTokaidoUtsunomiya,
+  jrTokaidoKanagawa,
+  jrTsurumi,
+  tokyuMeguro,
+  tokyuTamagawa,
+  tokyuIkegami,
+  yokohamaGreenLine,
+  enoshimaElectricRailway,
+  jrUchiboLine,
+  jrSotoboLine,
+  jrNaritaLine,
+  shinkeisei,
+  toyoRapid,
+  keiseiExtended,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -143,6 +161,19 @@ export const routeColors = {
   jrKeiyo: '#FF6347', // JR Keiyo Line tomato
   jrKeihinTohokuSaitama: '#00CED1', // JR Keihin-Tohoku Saitama dark turquoise
   jrTokaidoUtsunomiya: '#FF8C00', // JR Tokaido Utsunomiya Line dark orange
+  jrTokaidoKanagawa: '#FF4500', // JR Tokaido Kanagawa orange red
+  jrTsurumi: '#4682B4', // JR Tsurumi Line steel blue
+  tokyuMeguro: '#008B8B', // Tokyu Meguro Line dark cyan
+  tokyuTamagawa: '#FF1493', // Tokyu Tamagawa Line deep pink
+  tokyuIkegami: '#9370DB', // Tokyu Ikegami Line medium purple
+  yokohamaGreenLine: '#32CD32', // Yokohama Green Line lime green
+  enoshimaElectricRailway: '#228B22', // Enoshima Electric Railway forest green
+  jrUchiboLine: '#B22222', // JR Uchibo Line fire brick
+  jrSotoboLine: '#DC143C', // JR Sotobo Line crimson
+  jrNaritaLine: '#800080', // JR Narita Line purple
+  shinkeisei: '#FF6347', // Shin-Keisei tomato
+  toyoRapid: '#4169E1', // Toyo Rapid royal blue
+  keiseiExtended: '#1E90FF', // Keisei Extended dodger blue
 };
 
 export const routeNames = {
@@ -193,4 +224,17 @@ export const routeNames = {
   jrKeiyo: 'JR京葉線',
   jrKeihinTohokuSaitama: 'JR京浜東北線（埼玉方面）',
   jrTokaidoUtsunomiya: 'JR東海道線・宇都宮線',
+  jrTokaidoKanagawa: 'JR東海道線（神奈川方面）',
+  jrTsurumi: 'JR鶴見線',
+  tokyuMeguro: '東急目黒線',
+  tokyuTamagawa: '東急多摩川線',
+  tokyuIkegami: '東急池上線',
+  yokohamaGreenLine: '横浜市営地下鉄グリーンライン',
+  enoshimaElectricRailway: '江ノ島電鉄',
+  jrUchiboLine: 'JR内房線',
+  jrSotoboLine: 'JR外房線',
+  jrNaritaLine: 'JR成田線',
+  shinkeisei: '新京成電鉄',
+  toyoRapid: '東葉高速鉄道',
+  keiseiExtended: '京成電鉄（拡張）',
 };
