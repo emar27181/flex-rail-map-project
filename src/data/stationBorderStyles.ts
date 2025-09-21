@@ -99,29 +99,30 @@ export function getStationBorderStyleByPattern(routeKey: RouteKey, stationName: 
 
     case 2: // 快速系統まで停車
       return {
-        borderWidth: 2,
-        borderStyle: 'solid',
-        borderColor,
+        borderWidth: 0,
+        borderStyle: 'none',
+        borderColor: 'transparent',
+        boxShadow: `0 0 0 2px white, 0 0 0 4px ${borderColor}`,
         description,
         visualLevel: 'enhanced'
       };
 
     case 3: // 急行系統まで停車
       return {
-        borderWidth: 2,
-        borderStyle: 'solid',
-        borderColor,
-        boxShadow: `0 0 0 2px white, 0 0 0 4px ${borderColor}`,
+        borderWidth: 0,
+        borderStyle: 'none',
+        borderColor: 'transparent',
+        boxShadow: `0 0 0 2px white, 0 0 0 4px ${borderColor}, 0 0 0 6px white, 0 0 0 8px ${borderColor}`,
         description,
         visualLevel: 'premium'
       };
 
     case 4: // 特急系統まで停車
       return {
-        borderWidth: 2,
-        borderStyle: 'solid',
-        borderColor,
-        boxShadow: `0 0 0 2px white, 0 0 0 4px ${borderColor}, 0 0 0 6px white, 0 0 0 8px ${borderColor}`,
+        borderWidth: 0,
+        borderStyle: 'none',
+        borderColor: 'transparent',
+        boxShadow: `0 0 0 2px white, 0 0 0 4px ${borderColor}, 0 0 0 6px white, 0 0 0 8px ${borderColor}, 0 0 0 10px white, 0 0 0 12px ${borderColor}`,
         description,
         visualLevel: 'special'
       };
