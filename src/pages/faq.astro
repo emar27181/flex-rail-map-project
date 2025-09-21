@@ -1,0 +1,230 @@
+---
+import ThemeWrapper from "../components/ThemeWrapper.tsx";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="google-site-verification"
+			content="uyjBT9z6vOnpxn6lM6YnxbI6R4jLSDIAboC8zo1slhM"
+		/>
+		<meta name="google-adsense-account" content="ca-pub-2444529114040977" />
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="/icon_flex_rail_way_map.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="16x16"
+			href="/icon_flex_rail_way_map.png"
+		/>
+		<link
+			rel="apple-touch-icon"
+			sizes="180x180"
+			href="/icon_flex_rail_way_map.png"
+		/>
+		<link rel="shortcut icon" href="/icon_flex_rail_way_map.png" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>FAQ - 東京フレックス路線図 / Tokyo Flex Railway Map</title>
+
+		<!-- SEO Meta Description -->
+		<meta name="description" content="よくある質問 - 東京フレックス路線図の使い方や機能について。FAQ - Learn about Tokyo Flex Railway Map features and usage." />
+
+		<!-- hreflang for multilingual SEO -->
+		<link rel="alternate" hreflang="ja" href="https://flex-rail-map.netlify.app/faq?lang=ja" />
+		<link rel="alternate" hreflang="en" href="https://flex-rail-map.netlify.app/faq?lang=en" />
+		<link rel="alternate" hreflang="x-default" href="https://flex-rail-map.netlify.app/faq" />
+
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+				font-family: Arial, sans-serif;
+				transition:
+					background-color 0.3s ease,
+					color 0.3s ease;
+			}
+			body.light {
+				background-color: #ffffff;
+				color: #333333;
+			}
+			body.dark {
+				background-color: #1a1a1a;
+				color: #ffffff;
+			}
+			body.dark h1, body.dark h2, body.dark h3 {
+				color: #ffffff;
+			}
+			body.dark footer {
+				background-color: #2d2d2d !important;
+				border-top-color: #404040 !important;
+				color: #b3b3b3 !important;
+			}
+			.container {
+				max-width: 800px;
+				margin: 0 auto;
+				padding: 20px;
+				line-height: 1.6;
+			}
+			h2 {
+				border-bottom: 2px solid #2196F3;
+				padding-bottom: 8px;
+				margin-bottom: 24px;
+			}
+			h3 {
+				color: #2196F3;
+				margin-top: 32px;
+				margin-bottom: 12px;
+			}
+			ul {
+				margin-left: 20px;
+			}
+			li {
+				margin-bottom: 8px;
+			}
+			a {
+				color: #2196F3;
+				text-decoration: none;
+			}
+			a:hover {
+				text-decoration: underline;
+			}
+			.back-link {
+				display: inline-block;
+				margin-bottom: 20px;
+				padding: 8px 16px;
+				background-color: #2196F3;
+				color: white;
+				border-radius: 4px;
+				text-decoration: none;
+			}
+			.back-link:hover {
+				background-color: #1976D2;
+				text-decoration: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<a href="/" class="back-link">← 路線図に戻る / Back to Map</a>
+
+			<!-- Japanese FAQ -->
+			<div id="faq-ja">
+				<h2>FAQ</h2>
+
+				<h3>Q. このサイトは何のために作られたのですか？</h3>
+				<p>
+				Tokyo Flex Railway Map は、情報が多すぎて見づらい既存の路線図を「必要な路線だけ選んで表示できる」ようにするために開発されました。
+				遅延や運休などで乗り換えアプリの案内が役に立たないとき、必要な路線図をすぐに確認できるのが特徴です。
+				</p>
+
+				<h3>Q. どんなときに便利ですか？</h3>
+				<ul>
+				<li>進行方向が合っているか不安なとき、通過駅で確認できる</li>
+				<li>乗り換えアプリで推薦された電車に乗っているが、乗り換え時刻を忘れてしまったとき</li>
+				<li>遅延や運休で乗り換えアプリが誤ったルートを案内したとき</li>
+				</ul>
+
+				<h3>Q. 今後どんな機能が追加されますか？</h3>
+				<p>
+				TODO として、以下の機能を検討中です：
+				</p>
+				<ul>
+				<li>現在位置情報の反映</li>
+				<li>各駅停車／急行／快速急行の停車駅の可視化</li>
+				<li>東京以外の路線図拡張</li>
+				<li>運休・遅延情報の取得と可視化</li>
+				</ul>
+
+				<h3>Q. どのように開発されていますか？</h3>
+				<p>
+				このサイトは React, TypeScript, Astro, Lucide を用いて構築し、Netlify 上にデプロイしています。
+				ClaudeCode を活用しながら、段階的に機能を追加しています。
+				</p>
+
+				<h3>Q. 開発者情報は？</h3>
+				<p>
+				Developed by ema | <a href="https://github.com/emar27181">GitHub: emar27181</a>
+				</p>
+			</div>
+
+			<!-- English FAQ -->
+			<div id="faq-en" style="display: none;">
+				<h2>FAQ</h2>
+
+				<h3>Q. What is the purpose of this site?</h3>
+				<p>
+				Tokyo Flex Railway Map was developed to make Tokyo's railway maps easier to read by allowing users to "select only the routes they need."
+				It is especially useful when route planner apps fail due to delays or suspensions, letting you quickly check the routes that actually matter.
+				</p>
+
+				<h3>Q. When is this site useful?</h3>
+				<ul>
+				<li>When you are unsure if your train is heading in the right direction, you can check using the passing stations.</li>
+				<li>When you boarded a train suggested by a route planner app but forgot the transfer time.</li>
+				<li>When delays or suspensions cause route planner apps to recommend an invalid route.</li>
+				</ul>
+
+				<h3>Q. What features are planned in the future?</h3>
+				<p>
+				The following features are on the TODO list:
+				</p>
+				<ul>
+				<li>Integration of current location information</li>
+				<li>Visualization of local/express/rapid express stop patterns</li>
+				<li>Expansion to railway maps outside Tokyo</li>
+				<li>Integration of delay and suspension information with visualization</li>
+				</ul>
+
+				<h3>Q. How is this site developed?</h3>
+				<p>
+				This site is built with React, TypeScript, Astro, and Lucide, and deployed on Netlify.
+				Development is supported by ClaudeCode to incrementally add new features.
+				</p>
+
+				<h3>Q. Who is the developer?</h3>
+				<p>
+				Developed by ema | <a href="https://github.com/emar27181">GitHub: emar27181</a>
+				</p>
+			</div>
+		</div>
+
+		<script>
+			// Language detection and switching
+			function switchLanguage() {
+				const urlParams = new URLSearchParams(window.location.search);
+				const lang = urlParams.get('lang') || 'ja'; // Default to Japanese
+
+				const jaContent = document.getElementById('faq-ja');
+				const enContent = document.getElementById('faq-en');
+
+				if (lang === 'en') {
+					jaContent.style.display = 'none';
+					enContent.style.display = 'block';
+				} else {
+					jaContent.style.display = 'block';
+					enContent.style.display = 'none';
+				}
+			}
+
+			// Apply theme
+			function applyTheme() {
+				const savedTheme = localStorage.getItem('theme') || 'light';
+				document.body.className = savedTheme;
+			}
+
+			// Initialize on page load
+			document.addEventListener('DOMContentLoaded', () => {
+				switchLanguage();
+				applyTheme();
+			});
+		</script>
+
+		<ThemeWrapper client:only="react" />
+	</body>
+</html>
