@@ -55,7 +55,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '16px'
+        gap: '8px'
       }}>
         {/* Infoボタン */}
         <button
@@ -64,14 +64,15 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '40px',
-            height: '40px',
+            width: '36px',
+            height: '36px',
             backgroundColor: 'transparent',
-            border: `1px solid ${colors.border}`,
-            borderRadius: '8px',
+            border: 'none',
+            borderRadius: '6px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
-            color: colors.text
+            color: colors.text,
+            padding: '6px'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = colors.surfaceElevated;
@@ -94,14 +95,15 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '40px',
-            height: '40px',
+            width: '36px',
+            height: '36px',
             backgroundColor: 'transparent',
-            border: `1px solid ${colors.border}`,
-            borderRadius: '8px',
+            border: 'none',
+            borderRadius: '6px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
-            color: colors.text
+            color: colors.text,
+            padding: '6px'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = colors.surfaceElevated;
@@ -131,14 +133,15 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '40px',
-            height: '40px',
+            width: '36px',
+            height: '36px',
             backgroundColor: 'transparent',
-            border: `1px solid ${colors.border}`,
-            borderRadius: '8px',
+            border: 'none',
+            borderRadius: '6px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
-            color: colors.text
+            color: colors.text,
+            padding: '6px'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = colors.surfaceElevated;
@@ -171,14 +174,15 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '40px',
-            height: '40px',
+            width: '36px',
+            height: '36px',
             backgroundColor: 'transparent',
-            border: `1px solid ${colors.border}`,
-            borderRadius: '8px',
+            border: 'none',
+            borderRadius: '6px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
-            color: colors.text
+            color: colors.text,
+            padding: '6px'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = colors.surfaceElevated;
