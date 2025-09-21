@@ -109,8 +109,9 @@ export function getStationBorderStyleByPattern(routeKey: RouteKey, stationName: 
     case 3: // 急行系統まで停車
       return {
         borderWidth: 2,
-        borderStyle: 'double',
+        borderStyle: 'solid',
         borderColor,
+        boxShadow: `0 0 0 4px ${borderColor}`,
         description,
         visualLevel: 'premium'
       };

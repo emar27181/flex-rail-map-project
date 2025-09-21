@@ -292,6 +292,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
   // 駅の停車パターンから枠線スタイルを決定する関数（新システム）
   const getStationBorderStyle = useCallback((routeKey: RouteKey, stationName: string) => {
+    // 出発駅・到着駅は枠線なしで表示
+    if ((departure && departure.name === stationName) || (arrival && arrival.name === stationName)) {
+      return {
+        borderWidth: 0,
+        borderStyle: 'none' as const,
+        borderColor: 'transparent',
+        description: departure?.name === stationName ? '出発駅' : '到着駅',
+        visualLevel: 'basic' as const
+      };
+    }
+
     if (!selectedTrainType) {
       // 列車種別未選択時は全停車パターンを考慮した枠線を表示
       return getStationBorderStyleByPattern(routeKey, stationName);
@@ -315,7 +326,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       ...baseStyle,
       description: `${selectedTrainType}停車 (${baseStyle.description})`
     };
-  }, [selectedTrainType, getSimplifiedStationStops]);
+  }, [selectedTrainType, getSimplifiedStationStops, departure, arrival]);
 
   // 路線別の利用可能な列車種別を取得する関数
   const getAvailableTrainTypes = useCallback((routeKey: RouteKey) => {
@@ -368,7 +379,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       const borderAdjustment = borderStyle.borderWidth * 2; // 左右の枠線分
       const stationNameWidth = baseWidth + borderAdjustment;
       const stationNameHeight = 18 + borderAdjustment; // 上下の枠線分も調整
-      const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
+      // 出発駅・到着駅は影なし、その他は通常の影
+      const isSelectedStation = (departure && departure.name === station.name) || (arrival && arrival.name === station.name);
+      const shadowColor = isSelectedStation ? 'transparent' : (theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)');
 
       return new DivIcon({
         html: `<div style="
@@ -381,6 +394,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
           white-space:nowrap;
           border:${borderStyle.borderWidth}px ${borderStyle.borderStyle} ${borderStyle.borderColor};
           ${borderStyle.boxShadow ? `box-shadow:${borderStyle.boxShadow};` : ''}
+          ${isSelectedStation ? 'box-shadow: none !important;' : ''}
           text-align:center;
           display:flex;
           align-items:center;
@@ -397,7 +411,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       // 枠線の太さを考慮してサイズを調整
       const borderAdjustment = borderStyle.borderWidth * 2; // 左右・上下の枠線分
       const stationSize = baseStationSize + borderAdjustment;
-      const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)';
+      // 出発駅・到着駅は影なし、その他は通常の影
+      const isSelectedStation = (departure && departure.name === station.name) || (arrival && arrival.name === station.name);
+      const shadowColor = isSelectedStation ? 'transparent' : (theme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)');
 
       return new DivIcon({
         html: `<div style="
@@ -406,6 +422,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
           height:${baseStationSize}px;
           border:${borderStyle.borderWidth}px ${borderStyle.borderStyle} ${borderStyle.borderColor};
           ${borderStyle.boxShadow ? `box-shadow:${borderStyle.boxShadow};` : ''}
+          ${isSelectedStation ? 'box-shadow: none !important;' : ''}
           opacity:${opacity};
           border-radius:50%;
           box-sizing:border-box;
