@@ -375,12 +375,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
           background:${routeColors[routeKey]};
           color:white;
           padding:2px 6px;
-          border-radius:3px;
+          border-radius:2px;
           font-size:11px;
           font-weight:bold;
           white-space:nowrap;
           border:${borderStyle.borderWidth}px ${borderStyle.borderStyle} ${borderStyle.borderColor};
-          box-shadow:0 1px 3px ${shadowColor};
           text-align:center;
           display:flex;
           align-items:center;
@@ -405,7 +404,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
           width:${baseStationSize}px;
           height:${baseStationSize}px;
           border:${borderStyle.borderWidth}px ${borderStyle.borderStyle} ${borderStyle.borderColor};
-          box-shadow:0 1px 2px ${shadowColor};
           opacity:${opacity};
           border-radius:50%;
           box-sizing:border-box;
