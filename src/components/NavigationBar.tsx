@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sun, Moon, Menu, X } from 'lucide-react';
+import { Sun, Moon, Menu, X, Info } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 
 interface NavigationBarProps {
@@ -11,6 +11,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
   const { theme, toggleTheme } = useTheme();
   const colors = getThemeColors(theme);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
   return (
     <nav style={{
@@ -56,6 +57,36 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
         alignItems: 'center',
         gap: '16px'
       }}>
+        {/* Infoボタン */}
+        <button
+          onClick={() => setIsInfoModalOpen(true)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '40px',
+            height: '40px',
+            backgroundColor: 'transparent',
+            border: `1px solid ${colors.border}`,
+            borderRadius: '8px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            color: colors.text
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = colors.surfaceElevated;
+            e.currentTarget.style.transform = 'scale(1.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+          title={language === 'japanese' ? 'このサイトについて' : 'About this site'}
+          aria-label={language === 'japanese' ? 'このサイトについて' : 'About this site'}
+        >
+          <Info size={20} />
+        </button>
+
         {/* 言語切り替えボタン */}
         <button
           onClick={() => onLanguageChange(language === 'japanese' ? 'english' : 'japanese')}
@@ -231,6 +262,111 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             }}
           >
             {language === 'japanese' ? 'Claude Code で作成' : 'Made with Claude Code'}
+          </div>
+        </div>
+      )}
+
+      {/* Infoモーダル */}
+      {isInfoModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000,
+            padding: '20px'
+          }}
+          onClick={() => setIsInfoModalOpen(false)}
+        >
+          <div
+            style={{
+              backgroundColor: colors.surface,
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '600px',
+              width: '100%',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+              boxShadow: `0 8px 32px ${colors.shadow}`,
+              border: `1px solid ${colors.border}`,
+              position: 'relative'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 閉じるボタン */}
+            <button
+              onClick={() => setIsInfoModalOpen(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                color: colors.textSecondary,
+                padding: '4px'
+              }}
+              aria-label={language === 'japanese' ? '閉じる' : 'Close'}
+            >
+              <X size={24} />
+            </button>
+
+            {/* コンテンツ */}
+            <div style={{ paddingRight: '40px' }}>
+              <h2 style={{
+                margin: '0 0 16px 0',
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: colors.text,
+                lineHeight: '1.3'
+              }}>
+                {language === 'japanese'
+                  ? '必要な路線を選んでシンプルに。フレックスに使える新しい路線図。'
+                  : 'Choose only the routes you need. A flexible new railway map.'
+                }
+              </h2>
+
+              <p style={{
+                margin: '0 0 24px 0',
+                fontSize: '16px',
+                lineHeight: '1.6',
+                color: colors.text
+              }}>
+                {language === 'japanese'
+                  ? 'Tokyo Flex Railway Map は、東京の複雑な鉄道路線図をもっとシンプルに見やすくするためのサービスです。通常の乗り換えアプリは便利ですが、遅延や運休があると実際には乗れない電車を案内してしまうことがあります。そんなときに路線図を参考にしたくても、ネットで見つかるものは情報が多すぎて読みづらいのが現状です。このサービスでは、必要な路線だけを切り替えて表示できるので、自分にとってわかりやすい路線図をすぐに作れます。「今の電車が正しい方向に進んでいるか」「あと何分で乗り換えか」を直感的に確認でき、東京に不慣れな人でも安心して移動できます。必要な情報だけを抽出した見やすい路線図を参照できるのが特徴です。'
+                  : 'Tokyo Flex Railway Map is a service that makes Tokyo\'s complex railway map simple and easy to read. Regular route planner apps are useful, but they sometimes suggest trains that are delayed or not running. Existing online railway maps contain too much information and are difficult to read. With this service, you can switch on and off only the routes you need, creating a custom simplified map that fits your situation. You can quickly check if your train is heading in the right direction or estimate how many minutes remain until your transfer. Even if you\'re not familiar with Tokyo, this tool helps you travel with confidence.'
+                }
+              </p>
+
+              {/* 作者情報 */}
+              <div style={{
+                borderTop: `1px solid ${colors.borderLight}`,
+                paddingTop: '16px',
+                fontSize: '14px',
+                color: colors.textSecondary
+              }}>
+                Developed by{' '}
+                <a
+                  href="https://github.com/emar27181"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: colors.primary,
+                    textDecoration: 'none'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                  onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                >
+                  ema | GitHub: emar27181
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       )}
