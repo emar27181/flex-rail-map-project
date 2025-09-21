@@ -474,17 +474,31 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
     const { DivIcon } = MapComponents;
     const fontSize = Math.max(10, Math.round(zoomLevel * 0.8));
-    const padding = Math.max(2, Math.round(zoomLevel * 0.3));
+    const circleSize = Math.max(24, Math.round(zoomLevel * 2.2));
 
     const bgColor = theme === 'dark' ? 'rgba(40,40,40,0.9)' : 'rgba(255,255,255,0.9)';
     const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
-    const translatedTimeText = translateUI('minutesShort', currentLanguage, { time: time.toString() });
-    const timeTextWidth = translatedTimeText.length * fontSize * 0.6 + padding * 4;
+    const timeNumber = Math.round(time);
+
     return new DivIcon({
-      html: `<div style="background:${bgColor};border:1px solid ${color};border-radius:3px;padding:${padding}px ${padding + 2}px;font-size:${fontSize}px;font-weight:bold;color:${color};box-shadow:0 1px 3px ${shadowColor};white-space:nowrap;text-align:center">${translatedTimeText}</div>`,
+      html: `<div style="
+        width:${circleSize}px;
+        height:${circleSize}px;
+        border-radius:50%;
+        border:2px solid ${color};
+        background:${bgColor};
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        box-shadow:0 1px 3px ${shadowColor};
+        font-weight:bold;
+        line-height:1;
+      ">
+        <span style="font-size:${fontSize}px;color:${color};">${timeNumber}</span>
+      </div>`,
       className: isSection ? 'time-text-section' : 'time-text',
-      iconSize: [timeTextWidth, fontSize + padding * 2],
-      iconAnchor: [timeTextWidth / 2, (fontSize + padding * 2) / 2]
+      iconSize: [circleSize, circleSize],
+      iconAnchor: [circleSize / 2, circleSize / 2]
     });
   }, [MapComponents, currentLanguage, theme, showTravelTimes]);
 

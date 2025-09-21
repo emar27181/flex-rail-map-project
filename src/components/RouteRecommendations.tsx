@@ -171,13 +171,25 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
 {translateUI('routeNumber', language, { number: (index + 1).toString() })}
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    color: '#2196F3'
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '50%',
+                    border: '3px solid #2196F3',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#f8f9fa'
                   }}>
-                    {formatTime(route.totalTime)}
-                  </span>
+                    <span style={{
+                      fontSize: '16px',
+                      fontWeight: 'bold',
+                      color: '#2196F3',
+                      lineHeight: '1'
+                    }}>
+                      {Math.round(route.totalTime)}
+                    </span>
+                  </div>
                   <span style={{
                     fontSize: '14px',
                     color: '#666',
@@ -324,13 +336,26 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                       <span style={{ fontWeight: '500' }}>
                         {translateStation(segment.stations[segment.stations.length - 1].name, language)}
                       </span>
-                      <span style={{
+                      <div style={{
                         marginLeft: 'auto',
-                        color: '#666',
-                        fontSize: '13px'
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        border: '2px solid #666',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: '#f8f9fa'
                       }}>
-                        {formatTime(segment.time)}
-                      </span>
+                        <span style={{
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                          color: '#666',
+                          lineHeight: '1'
+                        }}>
+                          {Math.round(segment.time)}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
