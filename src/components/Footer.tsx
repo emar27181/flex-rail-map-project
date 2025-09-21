@@ -32,6 +32,22 @@ const Footer: React.FC<FooterProps> = ({ language }) => {
         <p style={{ margin: '0 0 10px 0' }}>
           {translateUI('accuracyText', language)}
         </p>
+        <p style={{ margin: '0 0 8px 0', fontSize: '12px' }}>
+          Developed by{' '}
+          <a
+            href="https://github.com/emar27181"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: colors.primary,
+              textDecoration: 'none'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+            onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+          >
+            ema | GitHub: emar27181
+          </a>
+        </p>
         <p style={{ margin: '0', fontSize: '12px' }}>
           <a href="https://claude.ai/code" target="_blank" style={{ color: colors.primary, textDecoration: 'none' }}>
             {translateUI('madeWithText', language)}
