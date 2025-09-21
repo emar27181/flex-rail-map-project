@@ -111,7 +111,7 @@ export function getStationBorderStyleByPattern(routeKey: RouteKey, stationName: 
         borderWidth: 2,
         borderStyle: 'solid',
         borderColor,
-        boxShadow: `0 0 0 4px ${borderColor}`,
+        boxShadow: `0 0 0 2px white, 0 0 0 4px ${borderColor}`,
         description,
         visualLevel: 'premium'
       };
@@ -121,7 +121,7 @@ export function getStationBorderStyleByPattern(routeKey: RouteKey, stationName: 
         borderWidth: 2,
         borderStyle: 'solid',
         borderColor,
-        boxShadow: `0 0 0 2px ${borderColor}, 0 0 0 4px ${borderColor}`,
+        boxShadow: `0 0 0 2px white, 0 0 0 4px ${borderColor}, 0 0 0 6px white, 0 0 0 8px ${borderColor}`,
         description,
         visualLevel: 'special'
       };
