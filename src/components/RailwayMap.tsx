@@ -69,8 +69,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [isLegendExpanded, setIsLegendExpanded] = useState(true);
 
   // 表示モードの管理
-  const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(true);
-  const [showTravelTimes, setShowTravelTimes] = useState(true);
+  const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
+  const [showTravelTimes, setShowTravelTimes] = useState(false);
   const [showStationNames, setShowStationNames] = useState(true);
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   // 地図表示モード（現実の路線図に固定）
