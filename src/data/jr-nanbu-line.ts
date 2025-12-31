@@ -37,6 +37,12 @@ export const jrNanbuLine: Station[] = [
     timeToNext: 2
   },
   {
+    name: "西府",
+    lat: 35.668417,
+    lng: 139.470597,
+    timeToNext: 2
+  },
+  {
     name: "分倍河原",
     lat: 35.6656,
     lng: 139.4767,

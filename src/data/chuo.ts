@@ -19,5 +19,18 @@ export const chuo: Station[] = [
   { name: '阿佐ケ谷', lat: 35.7058, lng: 139.6343, timeToNext: 2 },
   { name: '荻窪', lat: 35.7047, lng: 139.6201, timeToNext: 3 },
   { name: '西荻窪', lat: 35.7021, lng: 139.6012, timeToNext: 2 },
-  { name: '吉祥寺', lat: 35.7032, lng: 139.5803 }
+  { name: '吉祥寺', lat: 35.703119, lng: 139.579765, timeToNext: 2 },
+  { name: '三鷹', lat: 35.705349, lng: 139.559707, timeToNext: 2 },
+  { name: '武蔵境', lat: 35.707133, lng: 139.541389, timeToNext: 2 },
+  { name: '東小金井', lat: 35.699742, lng: 139.525161, timeToNext: 2 },
+  { name: '武蔵小金井', lat: 35.699964, lng: 139.505981, timeToNext: 2 },
+  { name: '国分寺', lat: 35.710425, lng: 139.480383, timeToNext: 2 },
+  { name: '西国分寺', lat: 35.710131, lng: 139.463139, timeToNext: 2 },
+  { name: '国立', lat: 35.696794, lng: 139.440817, timeToNext: 2 },
+  { name: '立川', lat: 35.698202, lng: 139.413704, timeToNext: 3 },
+  { name: '日野', lat: 35.676564, lng: 139.394556, timeToNext: 2 },
+  { name: '豊田', lat: 35.659778, lng: 139.381528, timeToNext: 2 },
+  { name: '八王子', lat: 35.655846, lng: 139.338974, timeToNext: 2 },
+  { name: '西八王子', lat: 35.656111, lng: 139.312778, timeToNext: 2 },
+  { name: '高尾', lat: 35.642347, lng: 139.282003 }
 ];

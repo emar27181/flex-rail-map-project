@@ -3,6 +3,7 @@ import type { Station } from './yamanote';
 export const jrTakasakiLine: Station[] = [
   { name: '東京', lat: 35.6812, lng: 139.7671, timeToNext: 3 },
   { name: '上野', lat: 35.7130, lng: 139.7772, timeToNext: 3 },
+  { name: '尾久', lat: 35.74683, lng: 139.753846, timeToNext: 2 },
   { name: '赤羽', lat: 35.7773, lng: 139.7217, timeToNext: 4 },
   { name: '浦和', lat: 35.8581, lng: 139.6566, timeToNext: 4 },
   { name: 'さいたま新都心', lat: 35.8943, lng: 139.6306, timeToNext: 2 },
