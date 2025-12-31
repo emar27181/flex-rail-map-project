@@ -47,6 +47,19 @@ import { tokyuMeguro, tokyuTamagawa, tokyuIkegami } from './tokyu-additional';
 import { yokohamaGreenLine, enoshimaElectricRailway } from './yokohama-green-line';
 import { jrUchiboLine, jrSotoboLine, jrNaritaLine } from './jr-chiba-comprehensive';
 import { shinkeisei, toyoRapid, keiseiExtended } from './chiba-private-railways';
+import { tamaMonorail } from './tama-monorail';
+import { todenArakawaLine } from './toden-arakawa-line';
+import { nipporiToneriLiner } from './nippori-toneri-liner';
+import { jrOmeLine } from './jr-ome-line';
+import { keioInokashiraLine } from './keio-inokashira-line';
+import { tokyuSetagayaLine } from './tokyu-setagaya-line';
+import { tokyuOimachiLine } from './tokyu-oimachi-line';
+import { tobuIsesakiLine } from './tobu-isesaki-line';
+import { keiseiMainLineTokyo } from './keisei-main-line-tokyo';
+import { jrHachikoLine } from './jr-hachiko-line';
+import { jrItsukaichiLine } from './jr-itsukaichi-line';
+import { tobuDaishiLine } from './tobu-daishi-line';
+import { tobuKameidoLine } from './tobu-kameido-line';
 
 export const routes = {
   yamanote,
@@ -109,6 +122,19 @@ export const routes = {
   shinkeisei,
   toyoRapid,
   keiseiExtended,
+  tamaMonorail,
+  todenArakawaLine,
+  nipporiToneriLiner,
+  jrOmeLine,
+  keioInokashiraLine,
+  tokyuSetagayaLine,
+  tokyuOimachiLine,
+  tobuIsesakiLine,
+  keiseiMainLineTokyo,
+  jrHachikoLine,
+  jrItsukaichiLine,
+  tobuDaishiLine,
+  tobuKameidoLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -174,6 +200,19 @@ export const routeColors = {
   shinkeisei: '#FF6347', // Shin-Keisei tomato
   toyoRapid: '#4169E1', // Toyo Rapid royal blue
   keiseiExtended: '#1E90FF', // Keisei Extended dodger blue
+  tamaMonorail: '#20B2AA', // Tama Monorail light sea green
+  todenArakawaLine: '#EE82EE', // Toden Arakawa Line violet
+  nipporiToneriLiner: '#FF1493', // Nippori-Toneri Liner deep pink
+  jrOmeLine: '#FF8C00', // JR Ome Line dark orange
+  keioInokashiraLine: '#48D1CC', // Keio Inokashira Line medium turquoise
+  tokyuSetagayaLine: '#2E8B57', // Tokyu Setagaya Line sea green
+  tokyuOimachiLine: '#FF4500', // Tokyu Oimachi Line orange red
+  tobuIsesakiLine: '#1E88E5', // Tobu Isesaki Line (Sky Tree Line) blue
+  keiseiMainLineTokyo: '#3165B1', // Keisei Main Line Tokyo blue
+  jrHachikoLine: '#F5A623', // JR Hachiko Line orange
+  jrItsukaichiLine: '#FFB300', // JR Itsukaichi Line amber
+  tobuDaishiLine: '#AB47BC', // Tobu Daishi Line purple
+  tobuKameidoLine: '#66BB6A', // Tobu Kameido Line green
 };
 
 export const routeNames = {
@@ -237,4 +276,17 @@ export const routeNames = {
   shinkeisei: '新京成電鉄',
   toyoRapid: '東葉高速鉄道',
   keiseiExtended: '京成電鉄（拡張）',
+  tamaMonorail: '多摩モノレール',
+  todenArakawaLine: '都電荒川線',
+  nipporiToneriLiner: '日暮里・舎人ライナー',
+  jrOmeLine: 'JR青梅線',
+  keioInokashiraLine: '京王井の頭線',
+  tokyuSetagayaLine: '東急世田谷線',
+  tokyuOimachiLine: '東急大井町線',
+  tobuIsesakiLine: '東武伊勢崎線（スカイツリーライン）',
+  keiseiMainLineTokyo: '京成本線（東京都内）',
+  jrHachikoLine: 'JR八高線',
+  jrItsukaichiLine: 'JR五日市線',
+  tobuDaishiLine: '東武大師線',
+  tobuKameidoLine: '東武亀戸線',
 };
