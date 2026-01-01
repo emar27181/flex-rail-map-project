@@ -70,6 +70,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
   // 表示モードの管理
   const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
+  const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
   const [showTravelTimes, setShowTravelTimes] = useState(false);
   const [showStationNames, setShowStationNames] = useState(true);
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
@@ -1337,6 +1338,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               return null;
             }
 
+            // 急行駅のみ表示モード時は、特別駅も急行駅チェックを適用
+            if (showExpressStationsOnly && !station.isExpress) {
+              console.log(`Filtering out special non-express station: ${station.name}`);
+              return null;
+            }
+
             // 時間フィルターが有効な場合は、範囲内の駅のみ表示
             if (timeFilterEnabled && stationsWithinTime.length > 0) {
               const stationWithTime = stationsWithinTime.find(sWithTime => sWithTime.station.name === station.name);
@@ -1467,6 +1474,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
             // 乗換駅のみ表示モード（時間フィルター有効時でも適用）
             if (showTransferStationsOnly && !isTransferStation) {
+              return null;
+            }
+
+            // 急行駅のみ表示モード（時間フィルター有効時でも適用）
+            if (showExpressStationsOnly && !station.isExpress) {
               return null;
             }
 
@@ -2148,6 +2160,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     routeColors={routeColors}
                     routeNames={routeNames}
                     showTransferStationsOnly={showTransferStationsOnly}
+                    showExpressStationsOnly={showExpressStationsOnly}
                     showTravelTimes={showTravelTimes}
                     showStationNames={showStationNames}
                     theme={theme}
@@ -2156,6 +2169,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     onSelectAllRoutes={selectAllRoutes}
                     onDeselectAllRoutes={deselectAllRoutes}
                     onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
+                    onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
                     onShowTravelTimesChange={setShowTravelTimes}
                     onShowStationNamesChange={setShowStationNames}
                     adjustRouteColorForTheme={adjustRouteColorForTheme}

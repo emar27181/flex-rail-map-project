@@ -18,6 +18,7 @@ interface LegendRouteListProps {
   routeColors: Record<RouteKey, string>;
   routeNames: Record<RouteKey, string>;
   showTransferStationsOnly: boolean;
+  showExpressStationsOnly: boolean;
   showTravelTimes: boolean;
   showStationNames: boolean;
   theme: 'light' | 'dark';
@@ -26,6 +27,7 @@ interface LegendRouteListProps {
   onSelectAllRoutes: () => void;
   onDeselectAllRoutes: () => void;
   onShowTransferStationsOnlyChange: (value: boolean) => void;
+  onShowExpressStationsOnlyChange: (value: boolean) => void;
   onShowTravelTimesChange: (value: boolean) => void;
   onShowStationNamesChange: (value: boolean) => void;
   adjustRouteColorForTheme: (color: string, theme: 'light' | 'dark') => string;
@@ -39,6 +41,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   routeColors,
   routeNames,
   showTransferStationsOnly,
+  showExpressStationsOnly,
   showTravelTimes,
   showStationNames,
   theme,
@@ -47,6 +50,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onSelectAllRoutes,
   onDeselectAllRoutes,
   onShowTransferStationsOnlyChange,
+  onShowExpressStationsOnlyChange,
   onShowTravelTimesChange,
   onShowStationNamesChange,
   adjustRouteColorForTheme
@@ -150,6 +154,27 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             }}
           />
           {translateUI('showOnlyTransferStations', language)}
+        </label>
+
+        {/* 急行駅のみ表示オプション */}
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '12px',
+          color: colors.text,
+          cursor: 'pointer',
+          marginBottom: '4px'
+        }}>
+          <input
+            type="checkbox"
+            checked={showExpressStationsOnly}
+            onChange={(e) => onShowExpressStationsOnlyChange(e.target.checked)}
+            style={{
+              marginRight: '6px',
+              cursor: 'pointer'
+            }}
+          />
+          {translateUI('showOnlyExpressStations', language)}
         </label>
 
         {/* 所要時間表示オプション */}

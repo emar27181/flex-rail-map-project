@@ -3,6 +3,7 @@ export type Station = {
   lat: number;
   lng: number;
   timeToNext?: number;
+  isExpress?: boolean; // 急行停車駅フラグ（true: 急行が停車, false/undefined: 各駅停車のみ）
 };
 
 export const yamanote: Station[] = [

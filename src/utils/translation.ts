@@ -613,6 +613,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "乗換駅のみ表示",
     english: "Show Transfer Stations Only"
   },
+  showOnlyExpressStations: {
+    japanese: "急行駅のみ表示",
+    english: "Show Express Stations Only"
+  },
   showTravelTimes: {
     japanese: "所要時間を表示",
     english: "Show Travel Times"
