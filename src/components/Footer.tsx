@@ -84,6 +84,17 @@ const Footer: React.FC<FooterProps> = ({ language }) => {
           >
             {language === 'japanese' ? '利用規約' : 'Terms of Service'}
           </a>
+          <a
+            href={`/contact?lang=${language === 'japanese' ? 'ja' : 'en'}`}
+            style={{
+              color: colors.primary,
+              textDecoration: 'none'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+            onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+          >
+            {language === 'japanese' ? 'お問い合わせ' : 'Contact'}
+          </a>
         </div>
 
         <p style={{ margin: '0 0 8px 0', fontSize: '12px' }}>
