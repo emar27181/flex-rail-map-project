@@ -21,3 +21,15 @@ dist/
 Thumbs.db
 # Local Netlify folder
 .netlify
+
+# Analysis and development scripts (temporary)
+analyze-missing-stations.js
+check-tokyo-remaining.js
+compare-stations.js
+count-stations.js
+extract-line-stations.js
+fetch-kanto-stations.js
+kanto-all-stations.json
+missing-stations-report.json
+project-stations-new.txt
+project-stations.txt
