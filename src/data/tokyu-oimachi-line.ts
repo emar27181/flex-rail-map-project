@@ -15,7 +15,7 @@ export const tokyuOimachiLine: Station[] = [
   { name: "北千束", lat: 35.606311, lng: 139.693303, timeToNext: 2 },
   { name: "大岡山", lat: 35.607456, lng: 139.685909, timeToNext: 2 },
   { name: "緑が丘", lat: 35.60638, lng: 139.679482, timeToNext: 2 },
-  { name: "自由が丘", lat: 35.607224, lng: 139.668664, timeToNext: 2 },
+  { name: "自由が丘", lat: 35.6078, lng: 139.6681, timeToNext: 2 },
   { name: "九品仏", lat: 35.60538, lng: 139.660992, timeToNext: 2 },
   { name: "尾山台", lat: 35.606971, lng: 139.653862, timeToNext: 2 },
   { name: "等々力", lat: 35.608369, lng: 139.647938, timeToNext: 2 },

@@ -13,7 +13,7 @@ export const keioInokashiraLine: Station[] = [
   { name: "下北沢", lat: 35.661539, lng: 139.66691, timeToNext: 2 },
   { name: "新代田", lat: 35.662593, lng: 139.660524, timeToNext: 2 },
   { name: "東松原", lat: 35.662634, lng: 139.655535, timeToNext: 2 },
-  { name: "明大前", lat: 35.668758, lng: 139.650352, timeToNext: 2 },
+  { name: "明大前", lat: 35.6703, lng: 139.6367, timeToNext: 2 },
   { name: "永福町", lat: 35.67629, lng: 139.642733, timeToNext: 2 },
   { name: "西永福", lat: 35.678918, lng: 139.634936, timeToNext: 2 },
   { name: "浜田山", lat: 35.681603, lng: 139.627528, timeToNext: 2 },
