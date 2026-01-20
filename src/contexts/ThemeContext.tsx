@@ -61,6 +61,7 @@ export const getThemeColors = (theme: Theme) => {
     background: theme === 'dark' ? '#1a1a1a' : '#ffffff',
     surface: theme === 'dark' ? '#2d2d2d' : '#f9f9f9',
     surfaceElevated: theme === 'dark' ? '#3a3a3a' : '#ffffff',
+    surfaceHover: theme === 'dark' ? '#404040' : '#f0f0f0',
     border: theme === 'dark' ? '#404040' : '#ddd',
     borderLight: theme === 'dark' ? '#505050' : '#eee',
     text: theme === 'dark' ? '#ffffff' : '#333',
@@ -68,8 +69,14 @@ export const getThemeColors = (theme: Theme) => {
     textMuted: theme === 'dark' ? '#888888' : '#888',
     primary: theme === 'dark' ? '#4a9eff' : '#2196F3',
     primaryHover: theme === 'dark' ? '#3d8ce6' : '#1976D2',
+    onPrimary: '#ffffff',
+    onSurface: theme === 'dark' ? '#ffffff' : '#333',
     success: theme === 'dark' ? '#5cb85c' : '#4CAF50',
+    successLight: theme === 'dark' ? '#2d4a2d' : '#e8f5e9',
     warning: theme === 'dark' ? '#f0ad4e' : '#ff9800',
+    warningLight: theme === 'dark' ? '#4a3d2d' : '#fff3e0',
+    info: theme === 'dark' ? '#5bc0de' : '#2196F3',
+    infoLight: theme === 'dark' ? '#2d3d4a' : '#e3f2fd',
     shadow: theme === 'dark' ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.15)',
     shadowHeavy: theme === 'dark' ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.3)',
   };
@@ -92,7 +99,7 @@ export const adjustRouteColorForTheme = (originalColor: string, theme: Theme): s
     '#C1272D': '#ee4444', // 丸ノ内線: より明るい赤
     '#A682CC': '#bb99dd', // 半蔵門線: より明るい紫
     '#8F76D6': '#aa88ee', // 副都心線: より明るい紫
-    '#E60012': '#ff4444', // 日比谷線: より明るい赤
+    '#9CAEB7': '#bbccdd', // 日比谷線: より明るいグレー
     '#00A251': '#44cc66', // 有楽町線: より明るい緑
     '#00ADA9': '#44ddcc', // 南北線: より明るいティール
     '#E85298': '#ff77bb', // 都営新宿線: より明るいピンク
