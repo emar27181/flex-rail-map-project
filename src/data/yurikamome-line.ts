@@ -49,12 +49,6 @@ export const yurikamomeLine: Station[] = [
     timeToNext: 2
   },
   {
-    name: "船の科学館",
-    lat: 35.6236,
-    lng: 139.7811,
-    timeToNext: 2
-  },
-  {
     name: "テレコムセンター",
     lat: 35.6228,
     lng: 139.7875,
