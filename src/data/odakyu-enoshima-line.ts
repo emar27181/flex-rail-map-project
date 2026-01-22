@@ -14,5 +14,8 @@ export const odakyuEnoshimaLine: Station[] = [
   { name: '六会日大前', lat: 35.3883, lng: 139.4622, timeToNext: 2 },
   { name: '善行', lat: 35.3794, lng: 139.4567, timeToNext: 2 },
   { name: '藤沢本町', lat: 35.3719, lng: 139.4542, timeToNext: 2 },
-  { name: '藤沢', lat: 35.3419, lng: 139.4893, timeToNext: 0 }
+  { name: '藤沢', lat: 35.3416, lng: 139.4878, timeToNext: 2 },
+  { name: '本鵠沼', lat: 35.3333, lng: 139.4819, timeToNext: 2 },
+  { name: '鵠沼海岸', lat: 35.3228, lng: 139.4811, timeToNext: 2 },
+  { name: '片瀬江ノ島', lat: 35.3111, lng: 139.4808, timeToNext: 0 }
 ];
