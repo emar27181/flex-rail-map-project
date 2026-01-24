@@ -50,14 +50,14 @@ export const jrNegishiLine: Station[] = [
   },
   {
     name: "関内",
-    lat: 35.4431,
-    lng: 139.6350,
+    lat: 35.4432,
+    lng: 139.6377,
     timeToNext: 2
   },
   {
     name: "桜木町",
-    lat: 35.4503,
-    lng: 139.6306,
+    lat: 35.4507,
+    lng: 139.6315,
     timeToNext: 2
   },
   {

@@ -2,20 +2,20 @@ import type { Station } from './yamanote';
 
 // JR東海道線（横浜〜小田原）
 export const jrTokaidoKanagawa: Station[] = [
-  { name: "横浜", lat: 35.4657, lng: 139.6227 },
-  { name: "保土ケ谷", lat: 35.4536, lng: 139.6014 },
-  { name: "東戸塚", lat: 35.4397, lng: 139.5469 },
-  { name: "戸塚", lat: 35.4000, lng: 139.5333 },
-  { name: "大船", lat: 35.3529, lng: 139.5326 },
-  { name: "藤沢", lat: 35.3418, lng: 139.4887 },
-  { name: "辻堂", lat: 35.3330, lng: 139.4579 },
-  { name: "茅ケ崎", lat: 35.3349, lng: 139.4034 },
-  { name: "平塚", lat: 35.3281, lng: 139.3470 },
-  { name: "大磯", lat: 35.3085, lng: 139.3148 },
-  { name: "二宮", lat: 35.2972, lng: 139.2615 },
-  { name: "国府津", lat: 35.2797, lng: 139.2066 },
-  { name: "鴨宮", lat: 35.2742, lng: 139.1881 },
-  { name: "小田原", lat: 35.2560, lng: 139.1567 }
+  { name: "横浜", lat: 35.4657, lng: 139.6227, timeToNext: 4 },
+  { name: "保土ケ谷", lat: 35.4378, lng: 139.6025, timeToNext: 5 },
+  { name: "東戸塚", lat: 35.4053, lng: 139.5458, timeToNext: 4 },
+  { name: "戸塚", lat: 35.3998, lng: 139.5333, timeToNext: 6 },
+  { name: "大船", lat: 35.3531, lng: 139.5328, timeToNext: 5 },
+  { name: "藤沢", lat: 35.3389, lng: 139.4903, timeToNext: 4 },
+  { name: "辻堂", lat: 35.3374, lng: 139.4571, timeToNext: 3 },
+  { name: "茅ケ崎", lat: 35.3297, lng: 139.4067, timeToNext: 4 },
+  { name: "平塚", lat: 35.3276, lng: 139.3477, timeToNext: 4 },
+  { name: "大磯", lat: 35.3083, lng: 139.3119, timeToNext: 3 },
+  { name: "二宮", lat: 35.2975, lng: 139.2531, timeToNext: 4 },
+  { name: "国府津", lat: 35.2969, lng: 139.1681, timeToNext: 3 },
+  { name: "鴨宮", lat: 35.3092, lng: 139.1639, timeToNext: 3 },
+  { name: "小田原", lat: 35.2564, lng: 139.1547, timeToNext: 0 }
 ];
 
 // JR鶴見線
