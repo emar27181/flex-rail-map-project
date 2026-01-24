@@ -33,6 +33,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
   const departureRef = useRef<HTMLDivElement>(null);
   const arrivalRef = useRef<HTMLDivElement>(null);
+  const departureClickedRef = useRef(false);
+  const arrivalClickedRef = useRef(false);
 
   // 外側クリックで閉じる機能
   useEffect(() => {
@@ -121,15 +123,44 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   }, [allStations, arrivalSearch, majorStations]);
 
   const handleDepartureSelect = (station: Station) => {
+    departureClickedRef.current = true;
     onDepartureChange(station);
     setDepartureSearch(translateStation(station.name, language));
     setShowDepartureResults(false);
   };
 
   const handleArrivalSelect = (station: Station) => {
+    arrivalClickedRef.current = true;
     onArrivalChange(station);
     setArrivalSearch(translateStation(station.name, language));
     setShowArrivalResults(false);
+  };
+
+  // 完全一致する駅を検索
+  const findExactMatchStation = (searchTerm: string): Station | null => {
+    if (!searchTerm) return null;
+    const normalizedSearch = searchTerm.toLowerCase().trim();
+    return allStations.find(station => {
+      const japaneseName = station.name.toLowerCase();
+      const englishName = translateStation(station.name, 'english').toLowerCase();
+      return japaneseName === normalizedSearch || englishName === normalizedSearch;
+    }) || null;
+  };
+
+  // 出発駅の検索確定処理
+  const handleDepartureConfirm = () => {
+    const exactMatch = findExactMatchStation(departureSearch);
+    if (exactMatch) {
+      handleDepartureSelect(exactMatch);
+    }
+  };
+
+  // 到着駅の検索確定処理
+  const handleArrivalConfirm = () => {
+    const exactMatch = findExactMatchStation(arrivalSearch);
+    if (exactMatch) {
+      handleArrivalSelect(exactMatch);
+    }
   };
 
   const clearDeparture = () => {
@@ -196,6 +227,21 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setShowDepartureResults(true);
                   }}
                   onFocus={() => setShowDepartureResults(true)}
+                  onBlur={() => {
+                    setTimeout(() => {
+                      if (!departureClickedRef.current) {
+                        handleDepartureConfirm();
+                      }
+                      departureClickedRef.current = false;
+                      setShowDepartureResults(false);
+                    }, 150);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleDepartureConfirm();
+                      setShowDepartureResults(false);
+                    }
+                  }}
                   placeholder={departure ? translateStation(departure.name, language) : translateUI('stationPlaceholder', language)}
                   style={{
                     width: '100%',
@@ -289,6 +335,21 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setShowArrivalResults(true);
                   }}
                   onFocus={() => setShowArrivalResults(true)}
+                  onBlur={() => {
+                    setTimeout(() => {
+                      if (!arrivalClickedRef.current) {
+                        handleArrivalConfirm();
+                      }
+                      arrivalClickedRef.current = false;
+                      setShowArrivalResults(false);
+                    }, 150);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleArrivalConfirm();
+                      setShowArrivalResults(false);
+                    }
+                  }}
                   placeholder={arrival ? translateStation(arrival.name, language) : translateUI('stationPlaceholder', language)}
                   style={{
                     width: '100%',
