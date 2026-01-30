@@ -7,7 +7,7 @@ export const jrTokaidoKanagawa: Station[] = [
   { name: "東戸塚", lat: 35.4053, lng: 139.5458, timeToNext: 4 },
   { name: "戸塚", lat: 35.3998, lng: 139.5333, timeToNext: 6 },
   { name: "大船", lat: 35.3531, lng: 139.5328, timeToNext: 5 },
-  { name: "藤沢", lat: 35.3389, lng: 139.4903, timeToNext: 4 },
+  { name: "藤沢", lat: 35.3386, lng: 139.4874, timeToNext: 4 },
   { name: "辻堂", lat: 35.3374, lng: 139.4571, timeToNext: 3 },
   { name: "茅ケ崎", lat: 35.3297, lng: 139.4067, timeToNext: 4 },
   { name: "平塚", lat: 35.3276, lng: 139.3477, timeToNext: 4 },

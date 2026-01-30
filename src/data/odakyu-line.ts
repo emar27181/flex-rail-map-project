@@ -32,7 +32,7 @@ export const odakyuLine: Station[] = [
   { name: '小田急相模原', lat: 35.5169, lng: 139.4433, timeToNext: 2 },
   { name: '相武台前', lat: 35.5047, lng: 139.4419, timeToNext: 2 },
   { name: '座間', lat: 35.4889, lng: 139.4078, timeToNext: 3 },
-  { name: '海老名', lat: 35.4478, lng: 139.3910, timeToNext: 3 },
+  { name: '海老名', lat: 35.4528, lng: 139.3913, timeToNext: 3 },
   { name: '厚木', lat: 35.4267, lng: 139.3642, timeToNext: 3 },
   { name: '本厚木', lat: 35.4392, lng: 139.3689, timeToNext: 2 },
   { name: '愛甲石田', lat: 35.4519, lng: 139.3428, timeToNext: 3 },
