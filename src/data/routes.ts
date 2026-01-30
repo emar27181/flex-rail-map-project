@@ -60,6 +60,10 @@ import { jrHachikoLine } from './jr-hachiko-line';
 import { jrItsukaichiLine } from './jr-itsukaichi-line';
 import { tobuDaishiLine } from './tobu-daishi-line';
 import { tobuKameidoLine } from './tobu-kameido-line';
+import { osakaLoopLine } from './osaka-loop-line';
+import { midosujiLine } from './osaka-midosuji-line';
+import { jrKyotoLine } from './jr-kyoto-line';
+import { jrKobeLine } from './jr-kobe-line';
 
 export const routes = {
   yamanote,
@@ -133,6 +137,10 @@ export const routes = {
   jrItsukaichiLine,
   tobuDaishiLine,
   tobuKameidoLine,
+  osakaLoopLine,
+  midosujiLine,
+  jrKyotoLine,
+  jrKobeLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -209,6 +217,10 @@ export const routeColors = {
   jrItsukaichiLine: '#FFB300', // JR Itsukaichi Line amber
   tobuDaishiLine: '#AB47BC', // Tobu Daishi Line purple
   tobuKameidoLine: '#66BB6A', // Tobu Kameido Line green
+  osakaLoopLine: '#FF0000', // JR Osaka Loop Line red
+  midosujiLine: '#D90000', // Osaka Metro Midosuji Line red
+  jrKyotoLine: '#0072BC', // JR Kyoto Line blue
+  jrKobeLine: '#0072BC', // JR Kobe Line blue
 };
 
 export const routeNames = {
@@ -283,4 +295,8 @@ export const routeNames = {
   jrItsukaichiLine: 'JR五日市線',
   tobuDaishiLine: '東武大師線',
   tobuKameidoLine: '東武亀戸線',
+  osakaLoopLine: '大阪環状線',
+  midosujiLine: '御堂筋線',
+  jrKyotoLine: 'JR京都線',
+  jrKobeLine: 'JR神戸線',
 };
