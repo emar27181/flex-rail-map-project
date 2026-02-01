@@ -35,6 +35,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
 
+  const [region, setRegion] = useState<'tokyo' | 'osaka'>('tokyo');
+  const [mapCenter, setMapCenter] = useState<[number, number]>([35.6812, 139.7671]); // Default to Tokyo
+
   const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
   const [availableRoutes, setAvailableRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
   const [isClient, setIsClient] = useState(false);
@@ -96,6 +99,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [clickedRoute, setClickedRoute] = useState<string | null>(null);
   const [routePopupPosition, setRoutePopupPosition] = useState<{ x: number, y: number } | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
+
+  useEffect(() => {
+    if (region === 'tokyo') {
+      setMapCenter([35.6812, 139.7671]); // Tokyo Station
+    } else if (region === 'osaka') {
+      setMapCenter([34.7022887, 135.4953509]); // Osaka Station
+    }
+  }, [region]);
 
   // 列車種別表示: 路線変更時に列車種別をリセット
   useEffect(() => {
@@ -1117,7 +1128,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   // console.log('RailwayMap rendering main component');
 
   const { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, DivIcon } = MapComponents;
-  const tokyoStation = [35.6812, 139.7671];
 
   const MapEvents = () => {
     const map = useMapEvents({
@@ -1728,6 +1738,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   return (
     <ErrorBoundary>
       <div className={className} style={{ padding: '0 20px' }}>
+        {/* Region Selector */}
+        <div style={{ marginBottom: '10px' }}>
+          <button onClick={() => setRegion('tokyo')} disabled={region === 'tokyo'}>Tokyo</button>
+          <button onClick={() => setRegion('osaka')} disabled={region === 'osaka'}>Osaka</button>
+        </div>
+
         {/* 駅選択UI */}
         <StationSelector
           departure={departure}
@@ -2065,7 +2081,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
         <div style={{ height: '600px', width: '100%', border: `1px solid ${colors.border}`, position: 'relative' }}>
           {mapViewMode === 'realistic' ? (
             <MapContainer
-              center={tokyoStation}
+              center={mapCenter}
               zoom={12}
               style={{ height: '100%', width: '100%' }}
               scrollWheelZoom={true}

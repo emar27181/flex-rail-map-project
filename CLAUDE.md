@@ -351,4 +351,17 @@ Made with Claude Code
 ### 開発作者情報
 - **開発者**: ema
 - **GitHub**: [emar27181](https://github.com/emar27181)
-- **連絡先**: GitHubプロフィール参照
+- **連絡先**: GitHubプロフィール参照### ✅ 解決済みの問題
+
+#### 問題: 画面が真っ白になり地図が表示されない (2026/02/01解決)
+
+**現象:**
+- ローカル開発環境でページを開いても、何も表示されず画面が真っ白になる。
+- ブラウザのコンソールに `Uncaught ReferenceError: tokyoStation is not defined` というエラーが表示される。
+
+**原因:**
+- `src/components/RailwayMap.tsx` の `MapContainer` コンポーネントにて、地図の中心座標を渡す `center` プロパティに、未定義の変数 `tokyoStation` が指定されていた。
+
+**解決策:**
+- `RailwayMap.tsx` コンポーネント内にすでに定義されていた、地図の中心座標を管理するstate変数 `mapCenter` を `center` プロパティに設定するように修正。
+- これにより、アプリケーションは正しく初期化され、地図が表示されるようになった。
