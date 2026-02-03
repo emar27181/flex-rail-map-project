@@ -64,6 +64,7 @@ import { osakaLoopLine } from './osaka-loop-line';
 import { midosujiLine } from './osaka-midosuji-line';
 import { jrKyotoLine } from './jr-kyoto-line';
 import { jrKobeLine } from './jr-kobe-line';
+import { tokaidoShinkansen } from './tokaido-shinkansen';
 
 export const routes = {
   yamanote,
@@ -141,6 +142,7 @@ export const routes = {
   midosujiLine,
   jrKyotoLine,
   jrKobeLine,
+  tokaidoShinkansen,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -221,6 +223,7 @@ export const routeColors = {
   midosujiLine: '#D90000', // Osaka Metro Midosuji Line red
   jrKyotoLine: '#0072BC', // JR Kyoto Line blue
   jrKobeLine: '#0072BC', // JR Kobe Line blue
+  tokaidoShinkansen: '#0072BC', // Tokaido Shinkansen blue
 };
 
 export const routeNames = {
@@ -299,4 +302,5 @@ export const routeNames = {
   midosujiLine: '御堂筋線',
   jrKyotoLine: 'JR京都線',
   jrKobeLine: 'JR神戸線',
+  tokaidoShinkansen: '東海道新幹線',
 };
