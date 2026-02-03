@@ -35,15 +35,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
 
-  const [region, setRegion] = useState<'tokyo' | 'osaka'>('tokyo');
-  const [mapCenter, setMapCenter] = useState<[number, number]>([35.6812, 139.7671]); // Default to Tokyo
-
+  const [mapCenter, setMapCenter] = useState<[number, number]>([35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
   const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
   const [availableRoutes, setAvailableRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
   const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [MapComponents, setMapComponents] = useState<any>(null);
-  const [zoomLevel, setZoomLevel] = useState(12);
+  const [zoomLevel, setZoomLevel] = useState(20); // Adjusted for better initial view
   const mapRef = useRef<any>(null);
 
   // 新しい機能のstate - デフォルトで横浜→新宿を設定
@@ -100,13 +98,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [routePopupPosition, setRoutePopupPosition] = useState<{ x: number, y: number } | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
 
-  useEffect(() => {
-    if (region === 'tokyo') {
-      setMapCenter([35.6812, 139.7671]); // Tokyo Station
-    } else if (region === 'osaka') {
-      setMapCenter([34.7022887, 135.4953509]); // Osaka Station
-    }
-  }, [region]);
+
 
   // 列車種別表示: 路線変更時に列車種別をリセット
   useEffect(() => {
@@ -1738,11 +1730,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   return (
     <ErrorBoundary>
       <div className={className} style={{ padding: '0 20px' }}>
-        {/* Region Selector */}
-        <div style={{ marginBottom: '10px' }}>
-          <button onClick={() => setRegion('tokyo')} disabled={region === 'tokyo'}>Tokyo</button>
-          <button onClick={() => setRegion('osaka')} disabled={region === 'osaka'}>Osaka</button>
-        </div>
+
 
         {/* 駅選択UI */}
         <StationSelector
