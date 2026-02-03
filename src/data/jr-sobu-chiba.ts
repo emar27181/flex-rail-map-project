@@ -19,21 +19,21 @@ export const jrSobuChiba: Station[] = [
 ];
 
 export const jrKeiyo: Station[] = [
-  { name: "東京", lat: 35.6814, lng: 139.7671 },
-  { name: "八丁堀", lat: 35.6736, lng: 139.7783 },
-  { name: "越中島", lat: 35.6692, lng: 139.7906 },
-  { name: "潮見", lat: 35.6594, lng: 139.8101 },
-  { name: "新木場", lat: 35.6461, lng: 139.8267 },
-  { name: "葛西臨海公園", lat: 35.6482, lng: 139.8574 },
-  { name: "舞浜", lat: 35.6342, lng: 139.8834 },
-  { name: "新浦安", lat: 35.6217, lng: 139.9135 },
-  { name: "市川塩浜", lat: 35.6149, lng: 139.9347 },
-  { name: "二俣新町", lat: 35.6089, lng: 139.9523 },
-  { name: "南船橋", lat: 35.6007, lng: 139.9748 },
-  { name: "新習志野", lat: 35.5929, lng: 140.0011 },
-  { name: "海浜幕張", lat: 35.5782, lng: 140.0345 },
-  { name: "検見川浜", lat: 35.5703, lng: 140.0512 },
-  { name: "稲毛海岸", lat: 35.5641, lng: 140.0665 },
-  { name: "千葉みなと", lat: 35.5568, lng: 140.0798 },
-  { name: "蘇我", lat: 35.5493, lng: 140.0974 }
+  { name: "東京", lat: 35.6814, lng: 139.7671, timeToNext: 2 },
+  { name: "八丁堀", lat: 35.6745833, lng: 139.7777778, timeToNext: 2 },
+  { name: "越中島", lat: 35.667944, lng: 139.792694, timeToNext: 2 },
+  { name: "潮見", lat: 35.658722, lng: 139.817333, timeToNext: 2 },
+  { name: "新木場", lat: 35.645871, lng: 139.826584, timeToNext: 3 },
+  { name: "葛西臨海公園", lat: 35.644389, lng: 139.861583, timeToNext: 2 },
+  { name: "舞浜", lat: 35.636306, lng: 139.88333, timeToNext: 3 },
+  { name: "新浦安", lat: 35.649881, lng: 139.912918, timeToNext: 3 },
+  { name: "市川塩浜", lat: 35.6667194, lng: 139.9235694, timeToNext: 4 },
+  { name: "二俣新町", lat: 35.691472, lng: 139.959611, timeToNext: 3 },
+  { name: "南船橋", lat: 35.681569, lng: 139.9966222, timeToNext: 3 },
+  { name: "新習志野", lat: 35.667428, lng: 140.0130139, timeToNext: 3 },
+  { name: "海浜幕張", lat: 35.648556, lng: 140.041662, timeToNext: 2 },
+  { name: "検見川浜", lat: 35.637184, lng: 140.059106, timeToNext: 2 },
+  { name: "稲毛海岸", lat: 35.6244, lng: 140.0710, timeToNext: 3 },
+  { name: "千葉みなと", lat: 35.6061833, lng: 140.1033917, timeToNext: 3 },
+  { name: "蘇我", lat: 35.5814806, lng: 140.1311389 }
 ];
