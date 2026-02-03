@@ -1,7 +1,7 @@
 import { yamanote } from './yamanote';
 import { chuo } from './chuo';
 import { keihinTohoku } from './keihin-tohoku';
-import { tokaido } from './tokaido';
+
 import { ginzaLine } from './ginza-line';
 import { marunouchiLine } from './marunouchi-line';
 import { hibiyaLine } from './hibiya-line';
@@ -38,11 +38,11 @@ import { rinkaiLine } from './rinkai-line';
 import { yurikamomeLine } from './yurikamome-line';
 import { tsukubaExpress } from './tsukuba-express';
 import { jrNanbuLine } from './jr-nanbu-line';
-import { jrNegishiLine } from './jr-negishi-line';
+
 import { sotetsuMainLine, sotetsuIzumino } from './sotetsu-line';
 import { jrSobuChiba, jrKeiyo } from './jr-sobu-chiba';
-import { jrKeihinTohokuSaitama, jrTokaidoUtsunomiya } from './jr-keihin-tohoku-saitama';
-import { jrTokaidoKanagawa, jrTsurumi } from './jr-tokaido-kanagawa';
+
+
 import { tokyuMeguro, tokyuTamagawa, tokyuIkegami } from './tokyu-additional';
 import { yokohamaGreenLine } from './yokohama-green-line';
 import { enoshimaElectricRailway } from './enoshima-electric-railway';
@@ -65,12 +65,15 @@ import { midosujiLine } from './osaka-midosuji-line';
 import { jrKyotoLine } from './jr-kyoto-line';
 import { jrKobeLine } from './jr-kobe-line';
 import { tokaidoShinkansen } from './tokaido-shinkansen';
+import { yokosukaLine } from './yokosuka-line';
+import { odakyuTamaLine } from './odakyu-tama-line';
+import { keioSagamiharaLine } from './keio-sagamihara-line';
 
 export const routes = {
   yamanote,
   chuo,
   keihinTohoku,
-  tokaido,
+
   ginzaLine,
   marunouchiLine,
   hibiyaLine,
@@ -107,15 +110,13 @@ export const routes = {
   yurikamomeLine,
   tsukubaExpress,
   jrNanbuLine,
-  jrNegishiLine,
+
   sotetsuMainLine,
   sotetsuIzumino,
   jrSobuChiba,
   jrKeiyo,
-  jrKeihinTohokuSaitama,
-  jrTokaidoUtsunomiya,
-  jrTokaidoKanagawa,
-  jrTsurumi,
+
+
   tokyuMeguro,
   tokyuTamagawa,
   tokyuIkegami,
@@ -143,6 +144,9 @@ export const routes = {
   jrKyotoLine,
   jrKobeLine,
   tokaidoShinkansen,
+  yokosukaLine,
+  odakyuTamaLine,
+  keioSagamiharaLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -151,7 +155,7 @@ export const routeColors = {
   yamanote: '#58B848', // JR Yamanote Line green
   chuo: '#F15A22', // JR Chuo Line orange
   keihinTohoku: '#00B5E2', // JR Keihin-Tohoku Line blue
-  tokaido: '#F68B1E', // JR Tokaido Line orange
+
   ginzaLine: '#FF9500', // Tokyo Metro Ginza Line orange
   marunouchiLine: '#F62E36', // Tokyo Metro Marunouchi Line red
   hibiyaLine: '#B5B5AC', // Tokyo Metro Hibiya Line silver
@@ -188,15 +192,13 @@ export const routeColors = {
   yurikamomeLine: '#00BFFF', // Yurikamome Line sky blue
   tsukubaExpress: '#8B4513', // Tsukuba Express brown
   jrNanbuLine: '#FFCC00', // JR Nanbu Line yellow
-  jrNegishiLine: '#00B5AD', // JR Negishi Line teal
+
   sotetsuMainLine: '#2E8B57', // Sotetsu Main Line sea green
   sotetsuIzumino: '#32CD32', // Sotetsu Izumino Line lime green
   jrSobuChiba: '#FFD700', // JR Sobu Chiba Line gold
   jrKeiyo: '#FF6347', // JR Keiyo Line tomato
-  jrKeihinTohokuSaitama: '#00CED1', // JR Keihin-Tohoku Saitama dark turquoise
-  jrTokaidoUtsunomiya: '#FF8C00', // JR Tokaido Utsunomiya Line dark orange
-  jrTokaidoKanagawa: '#FF4500', // JR Tokaido Kanagawa orange red
-  jrTsurumi: '#4682B4', // JR Tsurumi Line steel blue
+
+
   tokyuMeguro: '#008B8B', // Tokyu Meguro Line dark cyan
   tokyuTamagawa: '#FF1493', // Tokyu Tamagawa Line deep pink
   tokyuIkegami: '#9370DB', // Tokyu Ikegami Line medium purple
@@ -224,13 +226,16 @@ export const routeColors = {
   jrKyotoLine: '#0072BC', // JR Kyoto Line blue
   jrKobeLine: '#0072BC', // JR Kobe Line blue
   tokaidoShinkansen: '#0072BC', // Tokaido Shinkansen blue
+  yokosukaLine: '#0072BC', // Yokosuka Line blue
+  odakyuTamaLine: '#0066CC', // Odakyu Tama Line blue
+  keioSagamiharaLine: '#DD0077', // Keio Sagamihara Line magenta
 };
 
 export const routeNames = {
   yamanote: '山手線',
   chuo: '中央線',
   keihinTohoku: '京浜東北線',
-  tokaido: '東海道線',
+
   ginzaLine: '銀座線',
   marunouchiLine: '丸ノ内線',
   hibiyaLine: '日比谷線',
@@ -267,15 +272,13 @@ export const routeNames = {
   yurikamomeLine: 'ゆりかもめ',
   tsukubaExpress: 'つくばエクスプレス',
   jrNanbuLine: 'JR南武線',
-  jrNegishiLine: 'JR根岸線',
+
   sotetsuMainLine: '相鉄本線',
   sotetsuIzumino: '相鉄いずみ野線',
   jrSobuChiba: 'JR総武線（千葉方面）',
   jrKeiyo: 'JR京葉線',
-  jrKeihinTohokuSaitama: 'JR京浜東北線（埼玉方面）',
-  jrTokaidoUtsunomiya: 'JR東海道線・宇都宮線',
-  jrTokaidoKanagawa: 'JR東海道線（神奈川方面）',
-  jrTsurumi: 'JR鶴見線',
+
+
   tokyuMeguro: '東急目黒線',
   tokyuTamagawa: '東急多摩川線',
   tokyuIkegami: '東急池上線',
@@ -303,4 +306,7 @@ export const routeNames = {
   jrKyotoLine: 'JR京都線',
   jrKobeLine: 'JR神戸線',
   tokaidoShinkansen: '東海道新幹線',
+  yokosukaLine: '横須賀線',
+  odakyuTamaLine: '小田急多摩線',
+  keioSagamiharaLine: '京王相模原線',
 };
