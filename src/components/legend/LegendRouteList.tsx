@@ -57,6 +57,13 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 }) => {
   const colors = getThemeColors(theme);
 
+  // Sort visibleRoutesData alphabetically by route name
+  const sortedVisibleRoutesData = [...visibleRoutesData].sort(([keyA], [keyB]) => {
+    const nameA = routeNames[keyA as RouteKey] || '';
+    const nameB = routeNames[keyB as RouteKey] || '';
+    return nameA.localeCompare(nameB, language === 'japanese' ? 'ja' : 'en');
+  });
+
   return (
     <div style={{
       marginBottom: '15px',
@@ -74,67 +81,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         {translateUI('routeDisplayToggle', language)}
       </div>
 
-      <div style={{
-        display: 'flex',
-        gap: '4px',
-        marginBottom: '8px'
-      }}>
-        <button
-          onClick={onSelectAllRoutes}
-          style={{
-            flex: 1,
-            padding: '4px 8px',
-            fontSize: '10px',
-            backgroundColor: '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer'
-          }}
-        >
-          {translateUI('allShow', language)}
-        </button>
-        <button
-          onClick={onDeselectAllRoutes}
-          style={{
-            flex: 1,
-            padding: '4px 8px',
-            fontSize: '10px',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer'
-          }}
-        >
-          {translateUI('allHide', language)}
-        </button>
-      </div>
-
-      {visibleRoutesData.map(([routeKey]) => {
-        const isVisible = visibleRoutes.has(routeKey as RouteKey);
-        const isInSelectedRoute = selectedRoute && selectedRoute.segments.some(
-          segment => segment.routeKey === routeKey && segment.routeKey !== 'walking'
-        );
-
-        return (
-          <RouteToggleItem
-            key={routeKey}
-            routeKey={routeKey}
-            routeName={routeNames[routeKey as RouteKey]}
-            routeColor={routeColors[routeKey as RouteKey]}
-            isVisible={isVisible}
-            isInSelectedRoute={isInSelectedRoute}
-            theme={theme}
-            language={language}
-            onToggle={onToggleRoute}
-            adjustRouteColorForTheme={adjustRouteColorForTheme}
-          />
-        );
-      })}
-
       {/* 表示オプション */}
-      <div style={{ marginTop: '8px' }}>
+      <div style={{ marginBottom: '8px' }}> {/* Removed marginTop to prevent double spacing */}
         {/* 乗換駅のみ表示オプション */}
         <label style={{
           display: 'flex',
@@ -218,6 +166,65 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           {translateUI('showStationNames', language)}
         </label>
       </div>
+
+      <div style={{
+        display: 'flex',
+        gap: '4px',
+        marginBottom: '8px'
+      }}>
+        <button
+          onClick={onSelectAllRoutes}
+          style={{
+            flex: 1,
+            padding: '4px 8px',
+            fontSize: '10px',
+            backgroundColor: '#28a745',
+            color: 'white',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer'
+          }}
+        >
+          {translateUI('allShow', language)}
+        </button>
+        <button
+          onClick={onDeselectAllRoutes}
+          style={{
+            flex: 1,
+            padding: '4px 8px',
+            fontSize: '10px',
+            backgroundColor: '#dc3545',
+            color: 'white',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer'
+          }}
+        >
+          {translateUI('allHide', language)}
+        </button>
+      </div>
+
+      {sortedVisibleRoutesData.map(([routeKey]) => {
+        const isVisible = visibleRoutes.has(routeKey as RouteKey);
+        const isInSelectedRoute = selectedRoute && selectedRoute.segments.some(
+          segment => segment.routeKey === routeKey && segment.routeKey !== 'walking'
+        );
+
+        return (
+          <RouteToggleItem
+            key={routeKey}
+            routeKey={routeKey}
+            routeName={routeNames[routeKey as RouteKey]}
+            routeColor={routeColors[routeKey as RouteKey]}
+            isVisible={isVisible}
+            isInSelectedRoute={isInSelectedRoute}
+            theme={theme}
+            language={language}
+            onToggle={onToggleRoute}
+            adjustRouteColorForTheme={adjustRouteColorForTheme}
+          />
+        );
+      })}
     </div>
   );
 };
