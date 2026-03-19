@@ -1,6 +1,7 @@
 import type { Station } from './yamanote';
 
 export const keikyuLine: Station[] = [
+  { name: '泉岳寺', lat: 35.6408, lng: 139.7406, timeToNext: 2 },
   { name: '品川', lat: 35.6285, lng: 139.7388, timeToNext: 2 },
   { name: '北品川', lat: 35.6233, lng: 139.7410, timeToNext: 2 },
   { name: '新馬場', lat: 35.6156, lng: 139.7391, timeToNext: 2 },

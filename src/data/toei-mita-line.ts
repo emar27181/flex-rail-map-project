@@ -26,5 +26,6 @@ export const toeiMitaLine: Station[] = [
   { name: '蓮根', lat: 35.7781, lng: 139.6764, timeToNext: 2 },
   { name: '西台', lat: 35.7828, lng: 139.6708, timeToNext: 2 },
   { name: '高島平', lat: 35.7936, lng: 139.6650, timeToNext: 2 },
-  { name: '新高島平', lat: 35.8033, lng: 139.6556 }
+  { name: '新高島平', lat: 35.8033, lng: 139.6556, timeToNext: 2 },
+  { name: '西高島平', lat: 35.8117, lng: 139.6494 }
 ];

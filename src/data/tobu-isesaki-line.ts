@@ -8,6 +8,7 @@ export type Station = {
 export const tobuIsesakiLine: Station[] = [
   { name: "浅草", lat: 35.712056, lng: 139.798333, timeToNext: 3 },
   { name: "とうきょうスカイツリー", lat: 35.71043, lng: 139.809332, timeToNext: 2 },
+  { name: "押上", lat: 35.7100, lng: 139.8131, timeToNext: 1 },
   { name: "曳舟", lat: 35.717147, lng: 139.817456, timeToNext: 2 },
   { name: "東向島", lat: 35.722844, lng: 139.821089, timeToNext: 2 },
   { name: "鐘ヶ淵", lat: 35.729358, lng: 139.821458, timeToNext: 2 },
