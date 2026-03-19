@@ -1,7 +1,9 @@
 import type { Station } from './yamanote';
 
 export const jrJobanLine: Station[] = [
-  { name: '品川', lat: 35.6284, lng: 139.7387, timeToNext: 4 },
+  { name: '品川', lat: 35.6284, lng: 139.7387, timeToNext: 2 },
+  { name: '田町', lat: 35.6454, lng: 139.7476, timeToNext: 2 },
+  { name: '浜松町', lat: 35.6553, lng: 139.7572, timeToNext: 2 },
   { name: '新橋', lat: 35.6658, lng: 139.7588, timeToNext: 3 },
   { name: '東京', lat: 35.6812, lng: 139.7671, timeToNext: 3 },
   { name: '上野', lat: 35.7130, lng: 139.7772, timeToNext: 3 },
