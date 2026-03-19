@@ -10,25 +10,19 @@ export const rinkaiLine: Station[] = [
     name: "大崎",
     lat: 35.6197,
     lng: 139.7286,
-    timeToNext: 4
-  },
-  {
-    name: "品川シーサイド",
-    lat: 35.6089,
-    lng: 139.7367,
     timeToNext: 3
   },
   {
     name: "大井町",
     lat: 35.6058,
     lng: 139.7342,
-    timeToNext: 7
+    timeToNext: 4
   },
   {
-    name: "品川埠頭",
-    lat: 35.5944,
-    lng: 139.7528,
-    timeToNext: 5
+    name: "品川シーサイド",
+    lat: 35.6089,
+    lng: 139.7367,
+    timeToNext: 4
   },
   {
     name: "天王洲アイル",
