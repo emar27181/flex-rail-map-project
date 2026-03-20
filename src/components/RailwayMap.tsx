@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
@@ -91,6 +92,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [timeFilterMaxMinutes, setTimeFilterMaxMinutes] = useState(15);
   const [stationsWithinTime, setStationsWithinTime] = useState<StationWithTime[]>([]);
   const [actuallyDisplayedStations, setActuallyDisplayedStations] = useState<Set<string>>(new Set());
+
+  // フルスクリーン状態
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // 路線ホバー・ポップアップ状態
   const [hoveredRoute, setHoveredRoute] = useState<string | null>(null);
@@ -1729,19 +1733,46 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
   return (
     <ErrorBoundary>
-      <div className={className} style={{ padding: '0 20px' }}>
-
-
+      <div
+        className={className}
+        style={isFullscreen
+          ? { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, overflow: 'hidden', backgroundColor: colors.background }
+          : { padding: '0 20px' }
+        }
+      >
         {/* 駅選択UI */}
-        <StationSelector
-          departure={departure}
-          arrival={arrival}
-          onDepartureChange={setDeparture}
-          onArrivalChange={setArrival}
-          isExpanded={isStationSelectorExpanded}
-          onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
-          language={currentLanguage}
-        />
+        {isFullscreen ? (
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            left: '10px',
+            zIndex: 1001,
+            width: '320px',
+            maxHeight: 'calc(100% - 20px)',
+            overflowY: 'auto',
+            borderRadius: '8px',
+          }}>
+            <StationSelector
+              departure={departure}
+              arrival={arrival}
+              onDepartureChange={setDeparture}
+              onArrivalChange={setArrival}
+              isExpanded={isStationSelectorExpanded}
+              onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
+              language={currentLanguage}
+            />
+          </div>
+        ) : (
+          <StationSelector
+            departure={departure}
+            arrival={arrival}
+            onDepartureChange={setDeparture}
+            onArrivalChange={setArrival}
+            isExpanded={isStationSelectorExpanded}
+            onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
+            language={currentLanguage}
+          />
+        )}
 
         {/* カバレッジ分析 - オフ */}
         {/* <CoverageAnalysis /> */}
@@ -2066,7 +2097,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
           </div>
         )}
 
-        <div style={{ height: '600px', width: '100%', border: `1px solid ${colors.border}`, position: 'relative' }}>
+        <div style={isFullscreen
+          ? { position: 'absolute', inset: 0, border: 'none' }
+          : { height: '600px', width: '100%', border: `1px solid ${colors.border}`, position: 'relative' }
+        }>
           {mapViewMode === 'realistic' ? (
             <MapContainer
               center={mapCenter}
@@ -2302,6 +2336,35 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               )}
             </div>
           )}
+
+          {/* フルスクリーン切り替えボタン */}
+          <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            style={{
+              position: 'absolute',
+              bottom: '10px',
+              right: '10px',
+              zIndex: 1002,
+              backgroundColor: colors.surface,
+              color: colors.text,
+              border: `1px solid ${colors.border}`,
+              borderRadius: '8px',
+              padding: '8px',
+              cursor: 'pointer',
+              boxShadow: `0 2px 8px ${colors.shadow}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(4px)',
+            }}
+            title={isFullscreen
+              ? (currentLanguage === 'japanese' ? '縮小表示' : 'Exit Fullscreen')
+              : (currentLanguage === 'japanese' ? '拡大表示' : 'Fullscreen')
+            }
+            aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+          >
+            {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+          </button>
 
           {/* ホバーツールチップ */}
           {hoveredRoute && hoverTooltipPosition && (() => {
