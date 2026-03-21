@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { routeColors } from '../data/routes';
+import { createPortal } from 'react-dom';
+import { routeColors, routeNames } from '../data/routes';
 import type { RouteResult } from '../utils/routeFinder';
 import { getRouteDestination, getDirectionText, commonDirections } from '../data/routeDestinations';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
@@ -23,6 +24,16 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [tooltip, setTooltip] = useState<{ content: string; x: number; y: number } | null>(null);
+
+  const buildTooltip = (route: RouteResult): string => {
+    return route.segments.map((seg, i) => {
+      const name = routeNames[seg.routeKey] || seg.routeName;
+      if (i === 0) return name;
+      const transferStation = seg.stations[0]?.name ?? '';
+      return `${transferStation} → ${name}`;
+    }).join(' → ');
+  };
 
   if (routes.length === 0) {
     return null;
@@ -67,6 +78,26 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
   };
 
   return (
+    <>
+    {tooltip && createPortal(
+      <div style={{
+        position: 'fixed',
+        left: tooltip.x + 12,
+        top: tooltip.y - 36,
+        backgroundColor: 'rgba(30,30,30,0.92)',
+        color: '#fff',
+        padding: '5px 10px',
+        borderRadius: '5px',
+        fontSize: '12px',
+        pointerEvents: 'none',
+        zIndex: 9999,
+        maxWidth: '420px',
+        overflowWrap: 'break-word'
+      }}>
+        {tooltip.content}
+      </div>,
+      document.body
+    )}
     <div style={{
       marginBottom: '20px',
       backgroundColor: colors.surfaceElevated,
@@ -144,6 +175,9 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
           return (
             <div
               key={index}
+              onMouseEnter={(e) => setTooltip({ content: buildTooltip(route), x: e.clientX, y: e.clientY })}
+              onMouseMove={(e) => setTooltip(t => t ? { ...t, x: e.clientX, y: e.clientY } : null)}
+              onMouseLeave={() => setTooltip(null)}
               style={{
                 padding: '15px',
                 backgroundColor: isSelected ? '#e3f2fd' : 'white',
@@ -393,6 +427,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
         </div>
       )}
     </div>
+    </>
   );
 };
 
