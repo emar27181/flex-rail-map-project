@@ -316,6 +316,45 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             </div>
 
 
+            {/* 入れ替えボタン */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-end'
+            }}>
+              {/* ラベルと同じ高さのスペーサー */}
+              <div style={{ marginBottom: '5px', height: '25px' }} />
+              <button
+                onClick={() => {
+                  const prevDep = departure;
+                  const prevArr = arrival;
+                  onDepartureChange(prevArr);
+                  onArrivalChange(prevDep);
+                  setDepartureSearch(prevArr ? translateStation(prevArr.name, language) : '');
+                  setArrivalSearch(prevDep ? translateStation(prevDep.name, language) : '');
+                }}
+                title="出発駅と到着駅を入れ替え"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  color: colors.textSecondary,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = colors.surface; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+              >
+                ⇆
+              </button>
+            </div>
+
             {/* 到着駅選択 */}
             <div ref={arrivalRef} style={{
               flex: '1',
