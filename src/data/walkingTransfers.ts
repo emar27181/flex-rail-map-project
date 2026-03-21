@@ -9,6 +9,14 @@ export interface WalkingTransfer {
 }
 
 export const walkingTransfers: WalkingTransfer[] = [
+  // 浜松町 ⇔ モノレール浜松町（JR↔東京モノレール直接接続）
+  {
+    station1: '浜松町',
+    station2: 'モノレール浜松町',
+    walkingTime: 3,
+    description: 'JR浜松町駅からモノレール乗換'
+  },
+
   // 大門 ⇔ 浜松町（JR/モノレール）
   {
     station1: '大門',

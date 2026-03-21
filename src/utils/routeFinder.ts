@@ -241,11 +241,29 @@ export class RouteFinder {
 
       visited.add(`${depNode.station.name}-${depNode.routeKey}`);
 
+      // 出発駅からの徒歩乗換を初期化（depNodeの駅に隣接する徒歩乗換先を最初から追加）
+      const walkFromDep = getWalkingTransferStations(depNode.station.name);
+      walkFromDep.forEach(walkTransfer => {
+        const walkTarget = walkTransfer.station1 === depNode.station.name
+          ? walkTransfer.station2
+          : walkTransfer.station1;
+        const walkTargetNodes = this.stationToRoutes.get(walkTarget) || [];
+        walkTargetNodes.forEach(walkNode => {
+          const wk = `${walkNode.station.name}-${walkNode.routeKey}`;
+          if (!visited.has(wk)) {
+            queue.push({
+              node: walkNode,
+              path: [],
+              totalTime: walkTransfer.walkingTime + 2,
+              transfers: 1
+            });
+            visited.add(wk);
+          }
+        });
+      });
+
       while (queue.length > 0) {
         const current = queue.shift()!;
-
-        // Limit to 2 transfers maximum
-        if (current.transfers >= 2) continue;
 
         const route = routes[current.node.routeKey];
 
@@ -386,10 +404,11 @@ export class RouteFinder {
       );
     });
 
-    // Filter out routes that are more than 1.5x the best time
+    // Filter out routes that are significantly slower than the best time
+    // 2.5x を使用: 各駅停車換算でも急行・特急と比べると遅くなるため余裕を持たせる
     if (uniqueResults.length > 0) {
       const bestTime = Math.min(...uniqueResults.map(r => r.totalTime));
-      const maxReasonableTime = bestTime * 1.5;
+      const maxReasonableTime = bestTime * 2.5;
       const filteredResults = uniqueResults.filter(r => r.totalTime <= maxReasonableTime);
 
       // Sort by transfers first, then by time
