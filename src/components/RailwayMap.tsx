@@ -96,6 +96,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   // フルスクリーン状態
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // モバイル検出
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobilePanelTab, setMobilePanelTab] = useState<'station' | 'legend'>('station');
+  const [isMobilePanelExpanded, setIsMobilePanelExpanded] = useState(true);
+
   // 路線ホバー・ポップアップ状態
   const [hoveredRoute, setHoveredRoute] = useState<string | null>(null);
   const [clickedRoute, setClickedRoute] = useState<string | null>(null);
@@ -103,6 +108,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
 
 
+
+  // モバイル幅の監視
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // 列車種別表示: 路線変更時に列車種別をリセット
   useEffect(() => {
@@ -1742,26 +1755,29 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       >
         {/* 駅選択UI */}
         {isFullscreen ? (
-          <div style={{
-            position: 'absolute',
-            top: '10px',
-            left: '10px',
-            zIndex: 1001,
-            width: '320px',
-            maxHeight: 'calc(100% - 20px)',
-            overflowY: 'auto',
-            borderRadius: '8px',
-          }}>
-            <StationSelector
-              departure={departure}
-              arrival={arrival}
-              onDepartureChange={setDeparture}
-              onArrivalChange={setArrival}
-              isExpanded={isStationSelectorExpanded}
-              onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
-              language={currentLanguage}
-            />
-          </div>
+          /* モバイルフルスクリーン時は下部統合パネルで表示するためスキップ */
+          !isMobile && (
+            <div style={{
+              position: 'absolute',
+              top: '10px',
+              left: '10px',
+              zIndex: 1001,
+              width: '320px',
+              maxHeight: 'calc(100% - 20px)',
+              overflowY: 'auto',
+              borderRadius: '8px',
+            }}>
+              <StationSelector
+                departure={departure}
+                arrival={arrival}
+                onDepartureChange={setDeparture}
+                onArrivalChange={setArrival}
+                isExpanded={isStationSelectorExpanded}
+                onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
+                language={currentLanguage}
+              />
+            </div>
+          )
         ) : (
           <StationSelector
             departure={departure}
@@ -2134,8 +2150,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
             />
           )}
 
-          {/* 路線凡例（Legend） */}
-          {visibleRoutesData.length > 0 && (
+          {/* 路線凡例（Legend） - モバイルフルスクリーン時は下部統合パネルで表示 */}
+          {visibleRoutesData.length > 0 && !(isFullscreen && isMobile) && (
             <div style={{
               position: 'absolute',
               top: '10px',
@@ -2332,6 +2348,139 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     </div>
                   )}
 
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* モバイルフルスクリーン時の統合パネル */}
+          {isFullscreen && isMobile && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 1001,
+              backgroundColor: colors.surfaceElevated,
+              borderBottom: `2px solid ${colors.border}`,
+              borderRadius: '0 0 12px 12px',
+              maxHeight: isMobilePanelExpanded ? '60vh' : '44px',
+              transition: 'max-height 0.3s ease',
+              overflow: 'hidden',
+              boxShadow: `0 2px 10px ${colors.shadow}`,
+            }}>
+              {/* タブバー */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                height: '44px',
+                borderBottom: isMobilePanelExpanded ? `1px solid ${colors.borderLight}` : 'none',
+                padding: '0 4px',
+              }}>
+                <button
+                  onClick={() => { setMobilePanelTab('station'); setIsMobilePanelExpanded(true); }}
+                  style={{
+                    flex: 1,
+                    height: '36px',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    backgroundColor: mobilePanelTab === 'station' && isMobilePanelExpanded ? colors.primary : 'transparent',
+                    color: mobilePanelTab === 'station' && isMobilePanelExpanded ? '#fff' : colors.textSecondary,
+                    transition: 'background-color 0.2s',
+                  }}
+                >
+                  🚉 {translateUI('departure', currentLanguage) + '/' + translateUI('arrival', currentLanguage)}
+                </button>
+                <button
+                  onClick={() => { setMobilePanelTab('legend'); setIsMobilePanelExpanded(true); }}
+                  style={{
+                    flex: 1,
+                    height: '36px',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    backgroundColor: mobilePanelTab === 'legend' && isMobilePanelExpanded ? colors.primary : 'transparent',
+                    color: mobilePanelTab === 'legend' && isMobilePanelExpanded ? '#fff' : colors.textSecondary,
+                    transition: 'background-color 0.2s',
+                  }}
+                >
+                  🗺 {translateUI('displayedRoutes', currentLanguage)}
+                </button>
+                <button
+                  onClick={() => setIsMobilePanelExpanded(!isMobilePanelExpanded)}
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    backgroundColor: 'transparent',
+                    color: colors.textSecondary,
+                  }}
+                >
+                  {isMobilePanelExpanded ? '▼' : '▲'}
+                </button>
+              </div>
+
+              {/* コンテンツ */}
+              {isMobilePanelExpanded && (
+                <div style={{ overflowY: 'auto', maxHeight: 'calc(60vh - 44px)' }}>
+                  {mobilePanelTab === 'station' && (
+                    <StationSelector
+                      departure={departure}
+                      arrival={arrival}
+                      onDepartureChange={setDeparture}
+                      onArrivalChange={setArrival}
+                      isExpanded={true}
+                      language={currentLanguage}
+                    />
+                  )}
+                  {mobilePanelTab === 'legend' && (
+                    <div style={{ padding: '10px' }}>
+                      <LegendStationMarkers
+                        departure={departure}
+                        arrival={arrival}
+                        theme={theme}
+                        language={currentLanguage}
+                      />
+                      <LegendRouteList
+                        visibleRoutesData={visibleRoutesData}
+                        visibleRoutes={visibleRoutes}
+                        availableRoutes={availableRoutes}
+                        selectedRoute={selectedRoute}
+                        routeColors={routeColors}
+                        routeNames={routeNames}
+                        showTransferStationsOnly={showTransferStationsOnly}
+                        showExpressStationsOnly={showExpressStationsOnly}
+                        showTravelTimes={showTravelTimes}
+                        showStationNames={showStationNames}
+                        theme={theme}
+                        language={currentLanguage}
+                        onToggleRoute={toggleRoute}
+                        onSelectAllRoutes={selectAllRoutes}
+                        onDeselectAllRoutes={deselectAllRoutes}
+                        onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
+                        onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
+                        onShowTravelTimesChange={setShowTravelTimes}
+                        onShowStationNamesChange={setShowStationNames}
+                        adjustRouteColorForTheme={adjustRouteColorForTheme}
+                      />
+                      <LegendRouteRecommendations
+                        routeRecommendations={routeRecommendations}
+                        selectedRoute={selectedRoute}
+                        theme={theme}
+                        language={currentLanguage}
+                        onRouteSelect={handleRouteSelect}
+                        onShowAllRoutes={handleShowAllRoutes}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
