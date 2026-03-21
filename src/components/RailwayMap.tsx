@@ -473,22 +473,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     if (!MapComponents?.DivIcon) return null;
 
     const { DivIcon } = MapComponents;
-    const baseMarkerSize = getTimeMarkerSize(zoomLevel) * 1.8;
+    const baseMarkerSize = getTimeMarkerSize(zoomLevel) * 2.2;
     const markerColor = isDeparture ? '#4CAF50' : '#F44336';
 
     // 駅名のみを表示（S: G: プレフィックスなし）
-    const fontSize = Math.max(12, Math.round(baseMarkerSize * 0.4));
+    const fontSize = Math.max(14, Math.round(baseMarkerSize * 0.45));
     // 英語駅名の場合は文字幅係数を調整（英語は日本語より文字幅が狭い）
     const charWidthMultiplier = language === 'english' ? 0.4 : 0.6;
-    const padding = language === 'english' ? 8 : 16; // 英語時はパディング削減
+    const padding = language === 'english' ? 10 : 20;
     const textWidth = stationName.length * fontSize * charWidthMultiplier + padding;
-    const markerWidth = Math.max(baseMarkerSize, Math.min(textWidth, language === 'english' ? 150 : 200)); // 英語時は最大幅をさらに制限
+    const markerWidth = Math.max(baseMarkerSize, Math.min(textWidth, language === 'english' ? 160 : 210));
     const markerHeight = baseMarkerSize;
 
     const bgColor = theme === 'dark' ? colors.surfaceElevated : 'white';
     const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
     return new DivIcon({
-      html: `<div style="background:${bgColor};border:3px solid ${markerColor};border-radius:4px;width:${markerWidth}px;height:${markerHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};box-shadow:0 3px 6px ${shadowColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 ${language === 'english' ? '2px' : '4px'}">${stationName}</div>`,
+      html: `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${markerHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};box-shadow:0 3px 8px ${shadowColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 ${language === 'english' ? '3px' : '5px'}">${stationName}</div>`,
       className: 'special-station-marker-inline',
       iconSize: [markerWidth, markerHeight],
       iconAnchor: [markerWidth / 2, markerHeight / 2]
@@ -1192,35 +1192,60 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     const currentlyDisplayedStations = new Set<string>();
 
     let displayStations = stations;
-    let displayStartIndex = 0;
+    // 複数セグメントを個別描画するための配列（連続しないセグメントを誤接続しない）
+    let displaySegments: Station[][] = [];
+
+    // 出発・到着が設定されているが推薦ルートがまだない場合は何も表示しない（遷移中の全駅表示を防ぐ）
+    if (departure && arrival && routeRecommendations.length === 0) {
+      return null;
+    }
 
     // 推薦ルートが存在し、特定のルートが選択されている場合
     if (selectedRoute && departure && arrival) {
       const routeSegment = selectedRoute.segments.find(seg => seg.routeKey === routeKey);
       if (routeSegment) {
         displayStations = routeSegment.stations;
+        displaySegments = [routeSegment.stations];
       } else {
         return null;
       }
     } else if (departure && arrival && routeRecommendations.length > 0) {
-      // 推薦ルートが存在するが特定ルートが選択されていない場合、全推薦ルートで使用される区間を表示
-      const allSegments = routeRecommendations.flatMap(route => route.segments);
-      const routeSegment = allSegments.find(seg => seg.routeKey === routeKey);
-      if (routeSegment) {
-        displayStations = routeSegment.stations;
-      } else {
-        return null;
-      }
+      // 全推薦ルートのこの路線に関するセグメントを収集（重複除去）
+      const seen = new Set<string>();
+      const uniqueSegments: Station[][] = [];
+      routeRecommendations.forEach(route => {
+        route.segments
+          .filter(seg => seg.routeKey === routeKey)
+          .forEach(seg => {
+            const key = `${seg.stations[0]?.name}-${seg.stations[seg.stations.length - 1]?.name}`;
+            if (!seen.has(key)) {
+              seen.add(key);
+              uniqueSegments.push(seg.stations);
+            }
+          });
+      });
+      if (uniqueSegments.length === 0) return null;
+      displaySegments = uniqueSegments;
+      // マーカー用：全セグメントの駅の和集合（元路線の順序を保持）
+      const allNames = new Set<string>();
+      uniqueSegments.forEach(seg => seg.forEach(s => allNames.add(s.name)));
+      displayStations = stations.filter(s => allNames.has(s.name));
+    } else {
+      displaySegments = [stations];
     }
 
-    const positions = displayStations.map(station => [station.lat, station.lng]);
     const color = adjustRouteColorForTheme(routeColors[routeKey], theme);
 
     return (
       <React.Fragment key={routeKey}>
+        {/* 各セグメントを個別描画（非連続区間を誤接続しない） */}
+        {displaySegments.map((segStations, segIdx) => {
+          const segPositions = segStations.map(s => [s.lat, s.lng]);
+          return (
+            <React.Fragment key={`${routeKey}-seg-${segIdx}`}>
         {/* 透明な太い線でマウス判定を緩くする */}
         <Polyline
-          positions={positions}
+          positions={segPositions}
           color="transparent"
           weight={12}
           opacity={0}
@@ -1313,12 +1338,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
         />
         {/* 実際に見える路線 */}
         <Polyline
-          positions={positions}
+          positions={segPositions}
           color={color}
           weight={hoveredRoute === routeKey ? 6 : 4}
           opacity={visibleRoutes.has(routeKey) ? 0.8 : 0.2}
           interactive={false}
         />
+            </React.Fragment>
+          );
+        })}
+        {/* 駅マーカー（全セグメントの和集合） */}
         {displayStations.map((station, index) => {
           const isDeparture = departure && station.name === departure.name;
           const isArrival = arrival && station.name === arrival.name;
