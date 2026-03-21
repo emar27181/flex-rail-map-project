@@ -2,6 +2,35 @@ import { routes, type RouteKey, routeNames } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { getWalkingTransferStations, getWalkingTime } from '../data/walkingTransfers';
 
+// ---- 距離計算 ----
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// ---- 路線カテゴリ ----
+// 長距離専用（新幹線）は短距離では非現実的
+const SHINKANSEN_ROUTES: Set<RouteKey> = new Set([
+  'tokaidoShinkansen',
+  'jrKobeLine',
+  'jrKyotoLine',
+] as RouteKey[]);
+
+// 新幹線を使う最低限の直線距離（km）
+const MIN_KM_FOR_SHINKANSEN = 80;
+// 新幹線乗車オーバーヘッド：チケット購入・改札・ホーム移動 (分)
+const SHINKANSEN_OVERHEAD_MIN = 30;
+// 乗換ペナルティ（東京の実測ベース：約12分）
+const TRANSFER_PENALTY_MIN = 12;
+const TRANSFER_PENALTY_HUB_MIN = 8; // 主要ターミナルは少し短い
+// 迂回率の上限（直線距離に対する経路の比率）
+const MAX_DETOUR_RATIO = 2.2;
+
 export interface RouteSegment {
   routeKey: RouteKey;
   routeName: string;
@@ -165,10 +194,19 @@ export class RouteFinder {
       return [];
     }
 
+    // 出発〜到着の直線距離（迂回チェック・新幹線判定に使用）
+    const directDistanceKm = haversineKm(
+      departure.lat, departure.lng, arrival.lat, arrival.lng
+    );
+    const useShinkansenAllowed = directDistanceKm >= MIN_KM_FOR_SHINKANSEN;
+
     const results: RouteResult[] = [];
 
     // Find direct routes (same line)
     departureNodes.forEach(depNode => {
+      // 新幹線で短距離は非現実的なのでスキップ
+      if (SHINKANSEN_ROUTES.has(depNode.routeKey) && !useShinkansenAllowed) return;
+
       arrivalNodes.forEach(arrNode => {
         if (depNode.routeKey === arrNode.routeKey) {
           const segment = this.createRouteSegment(
@@ -177,9 +215,11 @@ export class RouteFinder {
             depNode.index,
             arrNode.index
           );
+          // 新幹線乗車オーバーヘッドを追加
+          const overhead = SHINKANSEN_ROUTES.has(depNode.routeKey) ? SHINKANSEN_OVERHEAD_MIN : 0;
           results.push({
             segments: [segment],
-            totalTime: segment.time,
+            totalTime: segment.time + overhead,
             transfers: 0
           });
         }
@@ -188,11 +228,14 @@ export class RouteFinder {
 
     // Find routes with transfers
     departureNodes.forEach(depNode => {
+      // 新幹線スタートで短距離はスキップ
+      if (SHINKANSEN_ROUTES.has(depNode.routeKey) && !useShinkansenAllowed) return;
+
       const visited = new Set<string>();
       const queue: PathNode[] = [{
         node: depNode,
         path: [],
-        totalTime: 0,
+        totalTime: SHINKANSEN_ROUTES.has(depNode.routeKey) ? SHINKANSEN_OVERHEAD_MIN : 0,
         transfers: 0
       }];
 
@@ -229,6 +272,21 @@ export class RouteFinder {
 
             if (visited.has(visitKey)) continue;
 
+            // 迂回率チェック: 現在地が出発地から大きく外れているものを枝刈り
+            const distFromDeparture = haversineKm(
+              departure.lat, departure.lng, nextStation.lat, nextStation.lng
+            );
+            const distFromArrival = haversineKm(
+              nextStation.lat, nextStation.lng, arrival.lat, arrival.lng
+            );
+            if (
+              directDistanceKm > 5 && // 近距離では迂回チェックを緩める
+              distFromDeparture + distFromArrival > directDistanceKm * MAX_DETOUR_RATIO
+            ) {
+              visited.add(visitKey);
+              continue;
+            }
+
             const newSegment = this.createRouteSegment(
               current.node.routeKey,
               route,
@@ -255,13 +313,19 @@ export class RouteFinder {
               const transferPenalty = this.getTransferPenalty(nextStation.name);
 
               transferNodes.forEach(transferNode => {
+                // 短距離で新幹線への乗換はスキップ
+                if (SHINKANSEN_ROUTES.has(transferNode.routeKey) && !useShinkansenAllowed) return;
+
                 if (transferNode.routeKey !== current.node.routeKey) {
                   const transferKey = `${transferNode.station.name}-${transferNode.routeKey}`;
                   if (!visited.has(transferKey)) {
+                    // 新幹線への乗換は追加オーバーヘッドを加算
+                    const shinkansenOverhead =
+                      SHINKANSEN_ROUTES.has(transferNode.routeKey) ? SHINKANSEN_OVERHEAD_MIN : 0;
                     queue.push({
                       node: transferNode,
                       path: newPath,
-                      totalTime: newTotalTime + transferPenalty,
+                      totalTime: newTotalTime + transferPenalty + shinkansenOverhead,
                       transfers: current.transfers + 1
                     });
                     visited.add(transferKey);
@@ -278,6 +342,8 @@ export class RouteFinder {
 
                 const walkTargetNodes = this.stationToRoutes.get(walkTargetStation) || [];
                 walkTargetNodes.forEach(walkTargetNode => {
+                  if (SHINKANSEN_ROUTES.has(walkTargetNode.routeKey) && !useShinkansenAllowed) return;
+
                   if (walkTargetNode.routeKey !== current.node.routeKey) {
                     const walkTransferKey = `${walkTargetNode.station.name}-${walkTargetNode.routeKey}`;
                     if (!visited.has(walkTransferKey)) {
@@ -349,15 +415,13 @@ export class RouteFinder {
 
 
   // Transfer penalty calculation based on station type
+  // 東京の実測データベース: 乗換は平均12分のコスト（待ち時間・歩行含む）
   private getTransferPenalty(stationName: string): number {
-    // Major hub stations have lower transfer penalty (better facilities)
-    const majorHubs = ['新宿', '東京', '渋谷', '池袋', '品川', '上野', '横浜', '大手町', '表参道'];
+    const majorHubs = ['新宿', '東京', '渋谷', '池袋', '品川', '上野', '横浜', '大手町', '表参道', '新橋', '有楽町'];
     if (majorHubs.includes(stationName)) {
-      return 3; // 3 minutes for major hubs
+      return TRANSFER_PENALTY_HUB_MIN;
     }
-
-    // Regular transfer stations
-    return 5; // 5 minutes standard penalty
+    return TRANSFER_PENALTY_MIN;
   }
 
   // Debug method to check station registration
