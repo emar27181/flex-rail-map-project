@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { routeNames, routeColors } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
-import { translateUI } from '../../utils/translation';
+import { translateUI, translateRoute, translateStation } from '../../utils/translation';
 import ToggleableItem from './ToggleableItem';
 
 interface RouteSegment {
@@ -70,10 +70,11 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
             const lines: React.ReactNode[] = [];
             route.segments.forEach((seg, i) => {
               const key = seg.routeKey as keyof typeof routeNames;
-              const name = routeNames[key] || seg.routeKey;
+              const japaneseName = routeNames[key] || seg.routeKey;
+              const name = translateRoute(japaneseName, language);
               const color = routeColors[key] || '#888';
-              const boardStation = seg.stations?.[0]?.name ?? '';
-              const endStation = seg.stations?.[seg.stations.length - 1]?.name ?? '';
+              const boardStation = translateStation(seg.stations?.[0]?.name ?? '', language);
+              const endStation = translateStation(seg.stations?.[seg.stations.length - 1]?.name ?? '', language);
               // 最初のセグメントのみ乗車駅を表示
               if (i === 0) {
                 lines.push(
