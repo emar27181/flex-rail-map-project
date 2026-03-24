@@ -200,9 +200,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           }}>
             {/* 出発駅選択 */}
             <div ref={departureRef} style={{
-              flex: '1',
-              minWidth: language === 'english' ? '140px' : '160px',
-              maxWidth: language === 'english' ? '200px' : '300px',
+              flex: '1 1 0',
+              minWidth: '0',
               position: 'relative'
             }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: colors.textSecondary }}>
@@ -235,10 +234,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   placeholder={departure ? translateStation(departure.name, language) : translateUI('stationPlaceholder', language)}
                   style={{
                     width: '100%',
-                    padding: language === 'english' ? '6px 28px 6px 6px' : '8px 30px 8px 8px',
+                    padding: '8px 30px 8px 8px',
                     border: `2px solid #4CAF50`,
                     borderRadius: '4px',
-                    fontSize: language === 'english' ? '13px' : '14px',
+                    fontSize: '14px',
                     boxSizing: 'border-box',
                     backgroundColor: colors.surfaceElevated,
                     color: colors.text
@@ -347,9 +346,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
             {/* 到着駅選択 */}
             <div ref={arrivalRef} style={{
-              flex: '1',
-              minWidth: language === 'english' ? '140px' : '160px',
-              maxWidth: language === 'english' ? '200px' : '300px',
+              flex: '1 1 0',
+              minWidth: '0',
               position: 'relative'
             }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: colors.textSecondary }}>
@@ -382,10 +380,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   placeholder={arrival ? translateStation(arrival.name, language) : translateUI('stationPlaceholder', language)}
                   style={{
                     width: '100%',
-                    padding: language === 'english' ? '6px 28px 6px 6px' : '8px 30px 8px 8px',
+                    padding: '8px 30px 8px 8px',
                     border: `2px solid #f44336`,
                     borderRadius: '4px',
-                    fontSize: language === 'english' ? '13px' : '14px',
+                    fontSize: '14px',
                     boxSizing: 'border-box',
                     backgroundColor: colors.surfaceElevated,
                     color: colors.text
