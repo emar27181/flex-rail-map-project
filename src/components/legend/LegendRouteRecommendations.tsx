@@ -18,20 +18,22 @@ interface RouteRecommendation {
 
 interface LegendRouteRecommendationsProps {
   routeRecommendations: RouteRecommendation[];
-  selectedRoute: RouteRecommendation | null;
+  selectedRouteIndices: Set<number> | null;
   theme: 'light' | 'dark';
   language: 'japanese' | 'english';
-  onRouteSelect: (route: RouteRecommendation) => void;
-  onShowAllRoutes: () => void;
+  onRouteToggle: (index: number) => void;
+  onSelectAll: () => void;
+  onDeselectAll: () => void;
 }
 
 const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
   routeRecommendations,
-  selectedRoute,
+  selectedRouteIndices,
   theme,
   language,
-  onRouteSelect,
-  onShowAllRoutes
+  onRouteToggle,
+  onSelectAll,
+  onDeselectAll
 }) => {
   const colors = getThemeColors(theme);
 
@@ -56,29 +58,46 @@ const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
         {translateUI('routeSelection', language)}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        <ToggleableItem
-          id="show-all-routes"
-          label={translateUI('showAllRoutesLabel', language)}
-          isActive={!selectedRoute}
-          isHighlighted={!selectedRoute}
-          theme={theme}
-          inputType="radio"
-          inputName="routeSelection"
-          onToggle={() => onShowAllRoutes()}
-        />
+      <div style={{
+        display: 'flex',
+        gap: '4px',
+        marginBottom: '8px'
+      }}>
+        <button
+          onClick={onSelectAll}
+          style={{
+            flex: 1,
+            padding: '4px 8px',
+            fontSize: '10px',
+            backgroundColor: '#28a745',
+            color: 'white',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer'
+          }}
+        >
+          {translateUI('allShow', language)}
+        </button>
+        <button
+          onClick={onDeselectAll}
+          style={{
+            flex: 1,
+            padding: '4px 8px',
+            fontSize: '10px',
+            backgroundColor: '#dc3545',
+            color: 'white',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer'
+          }}
+        >
+          {translateUI('allHide', language)}
+        </button>
+      </div>
 
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
         {routeRecommendations.map((route, index) => {
-          const isSelected = selectedRoute &&
-            route.segments.length === selectedRoute.segments.length &&
-            route.segments.every((segment, segIndex) => {
-              const selectedSegment = selectedRoute.segments[segIndex];
-              return (
-                segment.routeKey === selectedSegment.routeKey &&
-                segment.startIndex === selectedSegment.startIndex &&
-                segment.endIndex === selectedSegment.endIndex
-              );
-            });
+          const isSelected = selectedRouteIndices === null || selectedRouteIndices.has(index);
 
           return (
             <RouteRecommendationItem
@@ -88,7 +107,7 @@ const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
               isSelected={isSelected}
               theme={theme}
               language={language}
-              onSelect={onRouteSelect}
+              onToggle={onRouteToggle}
             />
           );
         })}

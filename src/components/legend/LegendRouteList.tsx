@@ -4,17 +4,11 @@ import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation';
 import RouteToggleItem from '../ui/RouteToggleItem';
 
-interface RouteInfo {
-  segments: Array<{
-    routeKey: string;
-  }>;
-}
-
 interface LegendRouteListProps {
   visibleRoutesData: Array<[string, any]>;
   visibleRoutes: Set<RouteKey>;
   availableRoutes: Set<RouteKey>;
-  selectedRoute: RouteInfo | null;
+  highlightedRouteKeys?: Set<RouteKey> | null;
   routeColors: Record<RouteKey, string>;
   routeNames: Record<RouteKey, string>;
   showTransferStationsOnly: boolean;
@@ -37,7 +31,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   visibleRoutesData,
   visibleRoutes,
   availableRoutes,
-  selectedRoute,
+  highlightedRouteKeys,
   routeColors,
   routeNames,
   showTransferStationsOnly,
@@ -206,9 +200,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
       {sortedVisibleRoutesData.map(([routeKey]) => {
         const isVisible = visibleRoutes.has(routeKey as RouteKey);
-        const isInSelectedRoute = selectedRoute && selectedRoute.segments.some(
-          segment => segment.routeKey === routeKey && segment.routeKey !== 'walking'
-        );
+        const isInSelectedRoute = !!(highlightedRouteKeys && highlightedRouteKeys.has(routeKey as RouteKey));
 
         return (
           <RouteToggleItem

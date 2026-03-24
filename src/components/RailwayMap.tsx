@@ -57,7 +57,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     lng: 139.7006
   });
   const [routeRecommendations, setRouteRecommendations] = useState<RouteResult[]>([]);
-  const [selectedRoute, setSelectedRoute] = useState<RouteResult | null>(null);
+  const [selectedRouteIndices, setSelectedRouteIndices] = useState<Set<number> | null>(null);
 
   // Language state management
   const currentLanguage = language;
@@ -528,6 +528,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     });
   }, [MapComponents, currentLanguage, theme, showTravelTimes]);
 
+  // 選択された推薦ルートで使用される路線キーのセット（凡例ハイライト用）
+  const highlightedRouteKeys = useMemo(() => {
+    if (selectedRouteIndices === null) return null;
+    const keys = new Set<RouteKey>();
+    [...selectedRouteIndices].forEach(idx => {
+      routeRecommendations[idx]?.segments.forEach(seg => {
+        if (seg.routeKey !== 'walking') {
+          keys.add(seg.routeKey as RouteKey);
+        }
+      });
+    });
+    return keys;
+  }, [selectedRouteIndices, routeRecommendations]);
+
   // レンダリング最適化：表示する路線のデータを準備
   const visibleRoutesData = useMemo(() => {
     // availableRoutes状態に基づいて凡例に表示する路線を決定
@@ -612,7 +626,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       const finalUniqueRoutes = removeFinalDuplicates(routeResults).slice(0, maxRouteRecommendations);
 
       setRouteRecommendations(finalUniqueRoutes);
-      setSelectedRoute(null);
+      setSelectedRouteIndices(null);
 
       // デバッグ：推薦された経路の詳細をログ出力
       console.log(`\n=== Final Route Recommendations for ${departure.name} → ${arrival.name} ===`);
@@ -655,7 +669,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       // visibleRoutesの制御は時間フィルターのuseEffectで行う
     } else {
       setRouteRecommendations([]);
-      setSelectedRoute(null);
+      setSelectedRouteIndices(null);
     }
   }, [departure, arrival, routeFinder, maxRouteRecommendations, removeFinalDuplicates]);
 
@@ -1054,21 +1068,48 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     toggleRoute(routeKey);
   };
 
-  const handleRouteSelect = (route: RouteResult) => {
-    setSelectedRoute(route);
-    // 選択されたルートの路線を表示
-    const routeKeys = new Set<RouteKey>();
-    route.segments.forEach(segment => {
-      // 歩行乗換は路線表示に含めない
-      if (segment.routeKey !== 'walking') {
-        routeKeys.add(segment.routeKey);
+  const handleRouteToggle = (index: number) => {
+    let newIndices: Set<number>;
+    if (selectedRouteIndices === null) {
+      // 全表示中→1つを外す
+      newIndices = new Set(routeRecommendations.map((_, i) => i));
+      newIndices.delete(index);
+    } else {
+      newIndices = new Set(selectedRouteIndices);
+      if (newIndices.has(index)) {
+        newIndices.delete(index);
+      } else {
+        newIndices.add(index);
       }
-    });
-    setVisibleRoutes(routeKeys);
+    }
+    setSelectedRouteIndices(newIndices);
+    if (newIndices.size === 0) {
+      setVisibleRoutes(new Set<RouteKey>());
+    } else {
+      const keys = new Set<RouteKey>();
+      [...newIndices].forEach(idx => {
+        routeRecommendations[idx]?.segments.forEach(segment => {
+          if (segment.routeKey !== 'walking') {
+            keys.add(segment.routeKey as RouteKey);
+          }
+        });
+      });
+      setVisibleRoutes(keys);
+    }
+  };
+
+  const handleSelectAllRecommendedRoutes = () => {
+    setSelectedRouteIndices(null);
+    setVisibleRoutes(availableRoutes);
+  };
+
+  const handleDeselectAllRecommendedRoutes = () => {
+    setSelectedRouteIndices(new Set<number>());
+    setVisibleRoutes(new Set<RouteKey>());
   };
 
   const handleShowAllRoutes = () => {
-    setSelectedRoute(null);
+    setSelectedRouteIndices(null);
     setVisibleRoutes(new Set(Object.keys(routes) as RouteKey[]));
   };
 
@@ -1200,20 +1241,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       return null;
     }
 
-    // 推薦ルートが存在し、特定のルートが選択されている場合
-    if (selectedRoute && departure && arrival) {
-      const routeSegment = selectedRoute.segments.find(seg => seg.routeKey === routeKey);
-      if (routeSegment) {
-        displayStations = routeSegment.stations;
-        displaySegments = [routeSegment.stations];
-      } else {
-        return null;
-      }
-    } else if (departure && arrival && routeRecommendations.length > 0) {
-      // 全推薦ルートのこの路線に関するセグメントを収集（重複除去）
+    if (departure && arrival && routeRecommendations.length > 0) {
+      // 選択された推薦ルートのこの路線に関するセグメントを収集（重複除去）
+      const routesToShow = selectedRouteIndices === null
+        ? routeRecommendations
+        : routeRecommendations.filter((_, idx) => selectedRouteIndices.has(idx));
+
+      if (routesToShow.length === 0) return null;
+
       const seen = new Set<string>();
       const uniqueSegments: Station[][] = [];
-      routeRecommendations.forEach(route => {
+      routesToShow.forEach(route => {
         route.segments
           .filter(seg => seg.routeKey === routeKey)
           .forEach(seg => {
@@ -2218,7 +2256,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     visibleRoutesData={visibleRoutesData}
                     visibleRoutes={visibleRoutes}
                     availableRoutes={availableRoutes}
-                    selectedRoute={selectedRoute}
+                    highlightedRouteKeys={highlightedRouteKeys}
                     routeColors={routeColors}
                     routeNames={routeNames}
                     showTransferStationsOnly={showTransferStationsOnly}
@@ -2240,11 +2278,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                   {/* 3. 推薦ルート選択 (Route Recommendations) */}
                   <LegendRouteRecommendations
                     routeRecommendations={routeRecommendations}
-                    selectedRoute={selectedRoute}
+                    selectedRouteIndices={selectedRouteIndices}
                     theme={theme}
                     language={currentLanguage}
-                    onRouteSelect={handleRouteSelect}
-                    onShowAllRoutes={handleShowAllRoutes}
+                    onRouteToggle={handleRouteToggle}
+                    onSelectAll={handleSelectAllRecommendedRoutes}
+                    onDeselectAll={handleDeselectAllRecommendedRoutes}
                   />
 
                   {/* 4. 表示オプション (Display Options) */}
@@ -2461,7 +2500,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                         visibleRoutesData={visibleRoutesData}
                         visibleRoutes={visibleRoutes}
                         availableRoutes={availableRoutes}
-                        selectedRoute={selectedRoute}
+                        highlightedRouteKeys={highlightedRouteKeys}
                         routeColors={routeColors}
                         routeNames={routeNames}
                         showTransferStationsOnly={showTransferStationsOnly}
@@ -2481,11 +2520,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                       />
                       <LegendRouteRecommendations
                         routeRecommendations={routeRecommendations}
-                        selectedRoute={selectedRoute}
+                        selectedRouteIndices={selectedRouteIndices}
                         theme={theme}
                         language={currentLanguage}
-                        onRouteSelect={handleRouteSelect}
-                        onShowAllRoutes={handleShowAllRoutes}
+                        onRouteToggle={handleRouteToggle}
+                        onSelectAll={handleSelectAllRecommendedRoutes}
+                        onDeselectAll={handleDeselectAllRecommendedRoutes}
                       />
                     </div>
                   )}

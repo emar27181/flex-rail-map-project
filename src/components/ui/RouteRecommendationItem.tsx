@@ -24,7 +24,7 @@ interface RouteRecommendationItemProps {
   isSelected: boolean;
   theme: 'light' | 'dark';
   language: 'japanese' | 'english';
-  onSelect: (route: RouteRecommendation) => void;
+  onToggle: (index: number) => void;
 }
 
 const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
@@ -33,7 +33,7 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
   isSelected,
   theme,
   language,
-  onSelect
+  onToggle
 }) => {
   const [tooltip, setTooltip] = useState<{ x: number; y: number } | null>(null);
   const colors = getThemeColors(theme);
@@ -104,14 +104,13 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
         isActive={isSelected}
         isHighlighted={isSelected}
         theme={theme}
-        inputType="radio"
-        inputName="routeSelection"
+        inputType="checkbox"
         colorIndicator={{
           color: '#4CAF50',
           opacity: 1
         }}
         badge={undefined}
-        onToggle={() => onSelect(route)}
+        onToggle={() => onToggle(index)}
       />
     </div>
   );
