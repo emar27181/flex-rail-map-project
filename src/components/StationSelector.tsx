@@ -187,16 +187,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         }}
       >
         <h3 style={{ margin: '0', color: colors.text }}>{translateUI('stationSelection', language)}</h3>
-        {onToggleExpanded && (
-          <span style={{
-            fontSize: '18px',
-            color: colors.textSecondary,
-            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.3s ease'
-          }}>
-            ▼
-          </span>
-        )}
       </div>
       
       {isExpanded && (
