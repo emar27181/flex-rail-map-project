@@ -15,6 +15,7 @@ interface LegendRouteListProps {
   showExpressStationsOnly: boolean;
   showTravelTimes: boolean;
   showStationNames: boolean;
+  showFurigana: boolean;
   theme: 'light' | 'dark';
   language: 'japanese' | 'english';
   onToggleRoute: (routeKey: RouteKey) => void;
@@ -24,6 +25,7 @@ interface LegendRouteListProps {
   onShowExpressStationsOnlyChange: (value: boolean) => void;
   onShowTravelTimesChange: (value: boolean) => void;
   onShowStationNamesChange: (value: boolean) => void;
+  onShowFuriganaChange: (value: boolean) => void;
   adjustRouteColorForTheme: (color: string, theme: 'light' | 'dark') => string;
 }
 
@@ -38,6 +40,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   showExpressStationsOnly,
   showTravelTimes,
   showStationNames,
+  showFurigana,
   theme,
   language,
   onToggleRoute,
@@ -47,6 +50,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowExpressStationsOnlyChange,
   onShowTravelTimesChange,
   onShowStationNamesChange,
+  onShowFuriganaChange,
   adjustRouteColorForTheme
 }) => {
   const colors = getThemeColors(theme);
@@ -146,7 +150,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           alignItems: 'center',
           fontSize: '12px',
           color: colors.text,
-          cursor: 'pointer'
+          cursor: 'pointer',
+          marginBottom: '4px'
         }}>
           <input
             type="checkbox"
@@ -159,6 +164,28 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           />
           {translateUI('showStationNames', language)}
         </label>
+
+        {/* ふりがな表示オプション（日本語モードのみ） */}
+        {language === 'japanese' && (
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: '12px',
+            color: colors.text,
+            cursor: 'pointer'
+          }}>
+            <input
+              type="checkbox"
+              checked={showFurigana}
+              onChange={(e) => onShowFuriganaChange(e.target.checked)}
+              style={{
+                marginRight: '6px',
+                cursor: 'pointer'
+              }}
+            />
+            {translateUI('showFurigana', language)}
+          </label>
+        )}
       </div>
 
       <div style={{

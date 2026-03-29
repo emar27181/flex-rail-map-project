@@ -1702,6 +1702,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   recommendedRoute: {
     japanese: "推薦ルート",
     english: "Recommended Route"
+  },
+  showFurigana: {
+    japanese: "ふりがなを表示",
+    english: "Show Furigana"
   }
 };
 
