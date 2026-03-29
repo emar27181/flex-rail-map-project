@@ -107,6 +107,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [routePopupPosition, setRoutePopupPosition] = useState<{ x: number, y: number } | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
 
+  // 現在地表示
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
+
 
 
   // モバイル幅の監視
@@ -1126,6 +1130,53 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     }
   };
 
+  // 現在地取得ハンドラー
+  const handleLocateUser = useCallback(() => {
+    if (!navigator.geolocation) {
+      alert(currentLanguage === 'japanese' ? '位置情報はこのブラウザではサポートされていません。' : 'Geolocation is not supported by this browser.');
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation([latitude, longitude]);
+        setIsLocating(false);
+        if (mapRef.current) {
+          mapRef.current.setView([latitude, longitude], 14);
+        }
+      },
+      (error) => {
+        setIsLocating(false);
+        const messages: Record<string, { ja: string; en: string }> = {
+          '1': { ja: '位置情報の使用が許可されていません。', en: 'Location permission denied.' },
+          '2': { ja: '位置情報を取得できませんでした。', en: 'Position unavailable.' },
+          '3': { ja: '位置情報の取得がタイムアウトしました。', en: 'Location request timed out.' },
+        };
+        const msg = messages[String(error.code)] || { ja: '位置情報の取得に失敗しました。', en: 'Failed to get location.' };
+        alert(currentLanguage === 'japanese' ? msg.ja : msg.en);
+      },
+      { enableHighAccuracy: false, timeout: 30000 }
+    );
+  }, [currentLanguage]);
+
+  // 現在地マーカーアイコン
+  const userLocationIcon = useMemo(() => {
+    if (!MapComponents?.DivIcon || !userLocation) return null;
+    const { DivIcon } = MapComponents;
+    return new DivIcon({
+      html: `<div style="
+        width: 18px; height: 18px;
+        background: #4285F4;
+        border: 3px solid white;
+        border-radius: 50%;
+        box-shadow: 0 0 0 2px #4285F4, 0 2px 6px rgba(0,0,0,0.3);
+      "></div>`,
+      className: 'user-location-marker',
+      iconSize: [18, 18],
+      iconAnchor: [9, 9]
+    });
+  }, [MapComponents, userLocation]);
 
   if (!isClient || isLoading || !MapComponents) {
     console.log('RailwayMap loading state:', { isClient, isLoading, MapComponents: !!MapComponents });
@@ -2183,6 +2234,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               {visibleRoutesData.map(([routeKey, stations]) =>
                 renderRoute(routeKey as RouteKey, stations)
               )}
+
+              {/* 現在地マーカー */}
+              {userLocation && userLocationIcon && (
+                <Marker
+                  position={userLocation}
+                  icon={userLocationIcon}
+                  zIndexOffset={3000}
+                />
+              )}
             </MapContainer>
           ) : (
             <SchematicMap
@@ -2561,6 +2621,40 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
             aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
           >
             {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+          </button>
+
+          {/* 現在地ボタン */}
+          <button
+            onClick={handleLocateUser}
+            disabled={isLocating}
+            style={{
+              position: 'absolute',
+              bottom: '10px',
+              right: '50px',
+              zIndex: 1002,
+              backgroundColor: userLocation ? '#4285F4' : colors.surface,
+              color: userLocation ? '#fff' : colors.text,
+              border: `1px solid ${userLocation ? '#4285F4' : colors.border}`,
+              borderRadius: '8px',
+              padding: '8px',
+              cursor: isLocating ? 'wait' : 'pointer',
+              boxShadow: `0 2px 8px ${colors.shadow}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(4px)',
+              opacity: isLocating ? 0.7 : 1,
+            }}
+            title={currentLanguage === 'japanese' ? '現在地を表示' : 'Show my location'}
+            aria-label="Show my location"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="4" />
+              <line x1="12" y1="2" x2="12" y2="6" />
+              <line x1="12" y1="18" x2="12" y2="22" />
+              <line x1="2" y1="12" x2="6" y2="12" />
+              <line x1="18" y1="12" x2="22" y2="12" />
+            </svg>
           </button>
 
           {/* ホバーツールチップ */}
