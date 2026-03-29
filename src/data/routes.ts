@@ -68,6 +68,14 @@ import { tokaidoShinkansen } from './tokaido-shinkansen';
 import { yokosukaLine } from './yokosuka-line';
 import { odakyuTamaLine } from './odakyu-tama-line';
 import { keioSagamiharaLine } from './keio-sagamihara-line';
+import { jrItoLine, izukyuLine, hakoneTozan, izuHakoneSunzu } from './izu-hakone-lines';
+import { keikyuKurihamaLine, keikyuAirportLine } from './keikyu-branch-lines';
+import { keiseiOshiageLine, hokusouLine } from './keisei-branch-lines';
+import { saitamaRailway, newShuttle } from './saitama-lines';
+import { jrUtsunomiyaLine, jrNegishiLine } from './jr-kanto-additional';
+import { tobuNikkoLine } from './tobu-nikko-line';
+import { shonanMonorail } from './shonan-monorail';
+import { sotetsuJRLine } from './sotetsu-jr-line';
 
 export const routes = {
   yamanote,
@@ -147,6 +155,21 @@ export const routes = {
   yokosukaLine,
   odakyuTamaLine,
   keioSagamiharaLine,
+  jrItoLine,
+  izukyuLine,
+  hakoneTozan,
+  izuHakoneSunzu,
+  keikyuKurihamaLine,
+  keikyuAirportLine,
+  keiseiOshiageLine,
+  hokusouLine,
+  saitamaRailway,
+  newShuttle,
+  jrUtsunomiyaLine,
+  jrNegishiLine,
+  tobuNikkoLine,
+  shonanMonorail,
+  sotetsuJRLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -229,6 +252,21 @@ export const routeColors = {
   yokosukaLine: '#0072BC', // Yokosuka Line blue
   odakyuTamaLine: '#0066CC', // Odakyu Tama Line blue
   keioSagamiharaLine: '#DD0077', // Keio Sagamihara Line magenta
+  jrItoLine: '#F68B1E', // JR Ito Line orange
+  izukyuLine: '#0066CC', // Izukyu Line blue
+  hakoneTozan: '#E85298', // Hakone Tozan Railway pink
+  izuHakoneSunzu: '#008B8B', // Izu Hakone Sunzu Line teal
+  keikyuKurihamaLine: '#C8102E', // Keikyu Kurihama Line red
+  keikyuAirportLine: '#C8102E', // Keikyu Airport Line red
+  keiseiOshiageLine: '#3165B1', // Keisei Oshiage Line blue
+  hokusouLine: '#39A0DC', // Hokuso Line sky blue
+  saitamaRailway: '#2E8B57', // Saitama Railway green
+  newShuttle: '#FF6347', // New Shuttle tomato
+  jrUtsunomiyaLine: '#F68B1E', // JR Utsunomiya Line orange
+  jrNegishiLine: '#00B5E2', // JR Negishi Line blue
+  tobuNikkoLine: '#F68B1E', // Tobu Nikko Line orange
+  shonanMonorail: '#2E8B57', // Shonan Monorail green
+  sotetsuJRLine: '#2E8B57', // Sotetsu-JR Direct Line green
 };
 
 export const routeNames = {
@@ -309,4 +347,19 @@ export const routeNames = {
   yokosukaLine: '横須賀線',
   odakyuTamaLine: '小田急多摩線',
   keioSagamiharaLine: '京王相模原線',
+  jrItoLine: 'JR伊東線',
+  izukyuLine: '伊豆急行線',
+  hakoneTozan: '箱根登山鉄道',
+  izuHakoneSunzu: '伊豆箱根鉄道駿豆線',
+  keikyuKurihamaLine: '京急久里浜線',
+  keikyuAirportLine: '京急空港線',
+  keiseiOshiageLine: '京成押上線',
+  hokusouLine: '北総鉄道',
+  saitamaRailway: '埼玉高速鉄道',
+  newShuttle: 'ニューシャトル',
+  jrUtsunomiyaLine: 'JR宇都宮線',
+  jrNegishiLine: 'JR根岸線',
+  tobuNikkoLine: '東武日光線',
+  shonanMonorail: '湘南モノレール',
+  sotetsuJRLine: '相鉄・JR直通線',
 };

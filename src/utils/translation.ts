@@ -1144,7 +1144,157 @@ export const stationTranslations: { [key: string]: string } = {
   "米原": "Maibara",
   "京都": "Kyoto",
   "新大阪": "Shin-Osaka",
-  "大阪": "Osaka"
+  "大阪": "Osaka",
+
+  // 伊豆・箱根エリア
+  "来宮": "Kinomiya",
+  "伊豆多賀": "Izu-taga",
+  "網代": "Ajiro",
+  "宇佐美": "Usami",
+  "伊東": "Ito",
+  "南伊東": "Minami-ito",
+  "川奈": "Kawana",
+  "富戸": "Futo",
+  "城ヶ崎海岸": "Jogasaki-kaigan",
+  "伊豆高原": "Izu-kogen",
+  "伊豆大川": "Izu-okawa",
+  "伊豆北川": "Izu-hokkawa",
+  "伊豆熱川": "Izu-atagawa",
+  "片瀬白田": "Katase-shirata",
+  "伊豆稲取": "Izu-inatori",
+  "今井浜海岸": "Imaihama-kaigan",
+  "河津": "Kawazu",
+  "稲梓": "Inazusa",
+  "蓮台寺": "Rendaiji",
+  "伊豆急下田": "Izukyu-shimoda",
+  "箱根板橋": "Hakone-itabashi",
+  "風祭": "Kazamatsuri",
+  "入生田": "Iriuda",
+  "箱根湯本": "Hakone-yumoto",
+  "塔ノ沢": "Tonosawa",
+  "大平台": "Ohiradai",
+  "宮ノ下": "Miyanoshita",
+  "小涌谷": "Kowakidani",
+  "彫刻の森": "Chokoku-no-mori",
+  "強羅": "Gora",
+  "三島広小路": "Mishima-hirokoji",
+  "三島田町": "Mishima-tamachi",
+  "三島二日町": "Mishima-futsukamachi",
+  "大場": "Daiba",
+  "伊豆仁田": "Izu-nitta",
+  "原木": "Baraki",
+  "韮山": "Nirayama",
+  "伊豆長岡": "Izu-nagaoka",
+  "田京": "Takyo",
+  "大仁": "Ohito",
+  "牧之郷": "Makinoko",
+  "修善寺": "Shuzenji",
+
+  // 京急支線
+  "堀ノ内": "Horinouchi",
+  "新大津": "Shin-otsu",
+  "北久里浜": "Kita-kurihama",
+  "京急久里浜": "Keikyu-kurihama",
+  "YRP野比": "YRP-nobi",
+  "京急長沢": "Keikyu-nagasawa",
+  "津久井浜": "Tsukuihama",
+  "三浦海岸": "Miura-kaigan",
+  "三崎口": "Misakiguchi",
+
+  // 京成支線
+  "京成曳舟": "Keisei-hikifune",
+  "八広": "Yahiro",
+  "新柴又": "Shin-shibamata",
+  "矢切": "Yakiri",
+  "北国分": "Kita-kokubun",
+  "秋山": "Akiyama",
+  "東松戸": "Higashi-matsudo",
+  "松飛台": "Matsuhidai",
+  "大町": "Omachi",
+  "西白井": "Nishi-shiroi",
+  "白井": "Shiroi",
+  "小室": "Komuro",
+  "千葉ニュータウン中央": "Chiba-newtown-chuo",
+  "印西牧の原": "Inzai-makinohara",
+  "印旛日本医大": "Imba-nihon-idai",
+
+  // 埼玉エリア
+  "川口元郷": "Kawaguchi-motogo",
+  "南鳩ヶ谷": "Minami-hatogaya",
+  "鳩ヶ谷": "Hatogaya",
+  "新井宿": "Araijuku",
+  "戸塚安行": "Totsuka-angyou",
+  "浦和美園": "Urawa-misono",
+  "鉄道博物館": "Railway Museum",
+  "加茂宮": "Kamonomiya",
+  "東宮原": "Higashi-miyahara",
+  "今羽": "Konba",
+  "吉野原": "Yoshinohara",
+  "原市": "Haraichi",
+  "沼南": "Shonan",
+  "丸山": "Maruyama",
+  "志久": "Shiku",
+  "伊奈中央": "Ina-chuo",
+  "羽貫": "Hanuki",
+  "内宿": "Uchijuku",
+
+  // JR宇都宮線
+  "土呂": "Toro",
+  "東大宮": "Higashi-omiya",
+  "蓮田": "Hasuda",
+  "白岡": "Shiraoka",
+  "新白岡": "Shin-shiraoka",
+  "久喜": "Kuki",
+  "東鷲宮": "Higashi-washinomiya",
+  "古河": "Koga",
+  "野木": "Nogi",
+  "間々田": "Mamada",
+  "小山": "Oyama",
+  "小金井": "Koganei",
+  "自治医大": "Jichi-idai",
+  "石橋": "Ishibashi",
+  "雀宮": "Suzumenomiya",
+  "宇都宮": "Utsunomiya",
+
+  // 東武日光線
+  "東武動物公園": "Tobu-dobutsu-koen",
+  "杉戸高野台": "Sugito-takanodai",
+  "幸手": "Satte",
+  "南栗橋": "Minami-kurihashi",
+  "新古河": "Shin-koga",
+  "柳生": "Yanagyu",
+  "板倉東洋大前": "Itakura-toyodai-mae",
+  "藤岡": "Fujioka",
+  "静和": "Shizuwa",
+  "新大平下": "Shin-ohirashimo",
+  "栃木": "Tochigi",
+  "新栃木": "Shin-tochigi",
+  "合戦場": "Kassenba",
+  "家中": "Ienaka",
+  "東武金崎": "Tobu-kanasaki",
+  "楡木": "Niregi",
+  "樅山": "Momiyama",
+  "新鹿沼": "Shin-kanuma",
+  "北鹿沼": "Kita-kanuma",
+  "板荷": "Itaga",
+  "下小代": "Shimo-goshiro",
+  "明神": "Myojin",
+  "下今市": "Shimo-imaichi",
+  "上今市": "Kami-imaichi",
+  "東武日光": "Tobu-nikko",
+
+  // 湘南モノレール
+  "富士見町": "Fujimi-cho",
+  "湘南町屋": "Shonan-machiya",
+  "湘南深沢": "Shonan-fukasawa",
+  "西鎌倉": "Nishi-kamakura",
+  "片瀬山": "Kataseyama",
+  "目白山下": "Mejiroyama-shita",
+  "湘南江の島": "Shonan-enoshima",
+
+  // 相鉄・JR直通線（既存駅は翻訳済み）
+  "南万騎が原": "Minami-makigahara",
+  "緑園都市": "Ryokuen-toshi"
 }
 // 路線名翻訳辞書
 export const routeTranslations: { [key: string]: string } = {
@@ -1199,7 +1349,39 @@ export const routeTranslations: { [key: string]: string } = {
   "東京モノレール": "Tokyo Monorail",
   "りんかい線": "Rinkai Line",
   "ゆりかもめ": "Yurikamome",
-  "つくばエクスプレス": "Tsukuba Express"
+  "つくばエクスプレス": "Tsukuba Express",
+
+  // 伊豆・箱根エリア
+  "JR伊東線": "JR Ito Line",
+  "伊豆急行線": "Izukyu Line",
+  "箱根登山鉄道": "Hakone Tozan Railway",
+  "伊豆箱根鉄道駿豆線": "Izu Hakone Sunzu Line",
+
+  // 京急支線
+  "京急久里浜線": "Keikyu Kurihama Line",
+  "京急空港線": "Keikyu Airport Line",
+  "京急本線": "Keikyu Main Line",
+
+  // 京成支線
+  "京成押上線": "Keisei Oshiage Line",
+  "北総鉄道": "Hokuso Line",
+
+  // 埼玉エリア
+  "埼玉高速鉄道": "Saitama Railway",
+  "ニューシャトル": "New Shuttle",
+
+  // JR追加
+  "JR宇都宮線": "JR Utsunomiya Line",
+  "JR根岸線": "JR Negishi Line",
+
+  // 東武追加
+  "東武日光線": "Tobu Nikko Line",
+
+  // 湘南モノレール
+  "湘南モノレール": "Shonan Monorail",
+
+  // 相鉄・JR直通線
+  "相鉄・JR直通線": "Sotetsu-JR Direct Line"
 };
 
 // UI翻訳辞書
