@@ -33,7 +33,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
       }}>
         <img
           src="/icon_flex_rail_way_map.png"
-          alt="Tokyo Flex Railway Map Logo"
+          alt="Flex Railway Map Logo"
           style={{
             width: '32px',
             height: '32px',
@@ -47,7 +47,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           fontWeight: 'bold',
           color: colors.text
         }}>
-          {language === 'japanese' ? '東京フレックス路線図' : 'Tokyo Flex Railway Map'}
+          {language === 'japanese' ? 'フレックス路線図' : 'Flex Railway Map'}
         </h1>
       </div>
 
@@ -377,8 +377,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
                 color: colors.text
               }}>
                 {language === 'japanese'
-                  ? 'Tokyo Flex Railway Map は、東京の複雑な鉄道路線図をもっとシンプルに見やすくするためのサービスです。通常の乗り換えアプリは便利ですが、遅延や運休があると実際には乗れない電車を案内してしまうことがあります。そんなときに路線図を参考にしたくても、ネットで見つかるものは情報が多すぎて読みづらいのが現状です。このサービスでは、必要な路線だけを切り替えて表示できるので、自分にとってわかりやすい路線図をすぐに作れます。「今の電車が正しい方向に進んでいるか」「あと何分で乗り換えか」を直感的に確認でき、東京に不慣れな人でも安心して移動できます。必要な情報だけを抽出した見やすい路線図を参照できるのが特徴です。'
-                  : 'Tokyo Flex Railway Map is a service that makes Tokyo\'s complex railway map simple and easy to read. Regular route planner apps are useful, but they sometimes suggest trains that are delayed or not running. Existing online railway maps contain too much information and are difficult to read. With this service, you can switch on and off only the routes you need, creating a custom simplified map that fits your situation. You can quickly check if your train is heading in the right direction or estimate how many minutes remain until your transfer. Even if you\'re not familiar with Tokyo, this tool helps you travel with confidence.'
+                  ? 'Flex Railway Map は、複雑な鉄道路線図をもっとシンプルに見やすくするためのサービスです。通常の乗り換えアプリは便利ですが、遅延や運休があると実際には乗れない電車を案内してしまうことがあります。そんなときに路線図を参考にしたくても、ネットで見つかるものは情報が多すぎて読みづらいのが現状です。このサービスでは、必要な路線だけを切り替えて表示できるので、自分にとってわかりやすい路線図をすぐに作れます。「今の電車が正しい方向に進んでいるか」「あと何分で乗り換えか」を直感的に確認でき、不慣れな人でも安心して移動できます。必要な情報だけを抽出した見やすい路線図を参照できるのが特徴です。'
+                  : 'Flex Railway Map is a service that makes complex railway maps simple and easy to read. Regular route planner apps are useful, but they sometimes suggest trains that are delayed or not running. Existing online railway maps contain too much information and are difficult to read. With this service, you can switch on and off only the routes you need, creating a custom simplified map that fits your situation. You can quickly check if your train is heading in the right direction or estimate how many minutes remain until your transfer. Even if you\'re not familiar with the area, this tool helps you travel with confidence.'
                 }
               </p>
 
