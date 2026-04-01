@@ -112,6 +112,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   // 現在地表示
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+  const watchIdRef = useRef<number | null>(null);
+  const isFirstPositionRef = useRef(true);
 
 
 
@@ -1150,24 +1152,50 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     }
   };
 
-  // 現在地取得ハンドラー
+  // 現在地取得ハンドラー（トグル式: ON/OFF）
   const handleLocateUser = useCallback(() => {
     if (!navigator.geolocation) {
       alert(currentLanguage === 'japanese' ? '位置情報はこのブラウザではサポートされていません。' : 'Geolocation is not supported by this browser.');
       return;
     }
+
+    // トラッキング中なら停止
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+      setIsLocating(false);
+      setUserLocation(null);
+      isFirstPositionRef.current = true;
+      return;
+    }
+
+    // トラッキング開始
     setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
+    isFirstPositionRef.current = true;
+
+    const id = navigator.geolocation.watchPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         setUserLocation([latitude, longitude]);
-        setIsLocating(false);
-        if (mapRef.current) {
-          mapRef.current.setView([latitude, longitude], 14);
+
+        // 初回取得時のみ地図を移動
+        if (isFirstPositionRef.current) {
+          isFirstPositionRef.current = false;
+          if (mapRef.current) {
+            mapRef.current.setView([latitude, longitude], 14);
+          }
         }
       },
       (error) => {
+        // エラー時はトラッキング停止
+        if (watchIdRef.current !== null) {
+          navigator.geolocation.clearWatch(watchIdRef.current);
+          watchIdRef.current = null;
+        }
         setIsLocating(false);
+        setUserLocation(null);
+        isFirstPositionRef.current = true;
+
         const messages: Record<string, { ja: string; en: string }> = {
           '1': { ja: '位置情報の使用が許可されていません。', en: 'Location permission denied.' },
           '2': { ja: '位置情報を取得できませんでした。', en: 'Position unavailable.' },
@@ -1176,8 +1204,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
         const msg = messages[String(error.code)] || { ja: '位置情報の取得に失敗しました。', en: 'Failed to get location.' };
         alert(currentLanguage === 'japanese' ? msg.ja : msg.en);
       },
-      { enableHighAccuracy: false, timeout: 30000 }
+      { enableHighAccuracy: true, timeout: 30000, maximumAge: 10000 }
     );
+
+    watchIdRef.current = id;
   }, [currentLanguage]);
 
   // 現在地マーカーアイコン
