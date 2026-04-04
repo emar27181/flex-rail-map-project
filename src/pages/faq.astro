@@ -2,7 +2,7 @@
 import SimpleThemeWrapper from "../components/SimpleThemeWrapper.tsx";
 ---
 
-<html lang="en">
+<html lang="ja">
 	<head>
 		<meta charset="utf-8" />
 		<meta
@@ -31,16 +31,70 @@ import SimpleThemeWrapper from "../components/SimpleThemeWrapper.tsx";
 		<link rel="shortcut icon" href="/icon_flex_rail_way_map.png" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>FAQ - フレックス路線図 | 路線図が見にくい時の解決策</title>
+		<title>路線図が見にくい時の解決策 | FAQ - フレックス路線図</title>
+
+		<!-- Canonical URL -->
+		<link rel="canonical" href="https://flex-railway-map.netlify.app/faq" />
 
 		<!-- SEO Meta Description -->
-		<meta name="description" content="路線図が見にくい・分かりづらい時の解決策。フレックス路線図の使い方やよくある質問をまとめました。遅延・運休時に役立つ見やすいインタラクティブ路線図。" />
-		<meta name="keywords" content="路線図,見にくい,分かりづらい,FAQ,使い方,遅延,運休,乗り換え,見やすい路線図" />
+		<meta name="description" content="路線図が見にくい・複雑すぎる・分かりにくい時の解決策。フレックス路線図の使い方やよくある質問をまとめました。必要な路線だけ絞り込んで表示するシンプルなインタラクティブ路線図。" />
+		<meta name="keywords" content="路線図 見にくい,路線図 複雑,路線図 分かりにくい,見やすい路線図,FAQ,使い方,遅延,運休,乗り換え 分かりやすい,シンプル路線図" />
+		<meta name="robots" content="index, follow" />
+
+		<!-- JSON-LD 構造化データ: FAQ -->
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "FAQPage",
+			"mainEntity": [
+				{
+					"@type": "Question",
+					"name": "このサイトは何のために作られたのですか？",
+					"acceptedAnswer": {
+						"@type": "Answer",
+						"text": "フレックス路線図は、情報が多すぎて見にくい既存の路線図を「必要な路線だけ選んで表示できる」ようにするために開発されました。遅延や運休などで乗り換えアプリの案内が役に立たないとき、必要な路線図をすぐに確認できます。"
+					}
+				},
+				{
+					"@type": "Question",
+					"name": "路線図が見にくい・複雑すぎるのはなぜですか？",
+					"acceptedAnswer": {
+						"@type": "Answer",
+						"text": "一般的な路線図はすべての路線・駅情報を同時に表示するため情報量が多くなります。フレックス路線図では出発駅・到着駅に関連する路線だけを絞り込んで表示できるので、シンプルで見やすくなります。"
+					}
+				},
+				{
+					"@type": "Question",
+					"name": "どんなときに便利ですか？",
+					"acceptedAnswer": {
+						"@type": "Answer",
+						"text": "進行方向が合っているか不安なとき、乗り換えアプリの推薦ルートに乗っているが乗り換え時刻を忘れたとき、遅延・運休で乗り換えアプリが誤ったルートを案内したときなどに便利です。"
+					}
+				},
+				{
+					"@type": "Question",
+					"name": "どの路線が対応していますか？",
+					"acceptedAnswer": {
+						"@type": "Answer",
+						"text": "山手線・中央線・東海道線などJR線13路線、東京メトロ全9路線、都営地下鉄全4路線、小田急・東急・京急・西武・東武など私鉄10路線以上、合計39路線以上に対応しています。"
+					}
+				},
+				{
+					"@type": "Question",
+					"name": "スマートフォンでも使えますか？",
+					"acceptedAnswer": {
+						"@type": "Answer",
+						"text": "はい、スマートフォン・タブレット・PCのいずれのブラウザでも無料でご利用いただけます。アプリのインストールは不要です。"
+					}
+				}
+			]
+		}
+		</script>
 
 		<!-- hreflang for multilingual SEO -->
-		<link rel="alternate" hreflang="ja" href="https://flex-rail-map.netlify.app/faq?lang=ja" />
-		<link rel="alternate" hreflang="en" href="https://flex-rail-map.netlify.app/faq?lang=en" />
-		<link rel="alternate" hreflang="x-default" href="https://flex-rail-map.netlify.app/faq" />
+		<link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/faq?lang=ja" />
+		<link rel="alternate" hreflang="en" href="https://flex-railway-map.netlify.app/faq?lang=en" />
+		<link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/faq" />
 
 		<style>
 			body {
@@ -117,27 +171,41 @@ import SimpleThemeWrapper from "../components/SimpleThemeWrapper.tsx";
 
 			<!-- Japanese FAQ -->
 			<div id="faq-ja">
-				<h2>FAQ</h2>
+				<h1 style="font-size: 1.4rem; border-bottom: 2px solid #2196F3; padding-bottom: 8px;">よくある質問（FAQ）</h1>
+
+				<h2 style="font-size: 1.1rem;">路線図について</h2>
+
+				<h3>Q. 路線図が見にくい・複雑すぎると感じるのはなぜですか？</h3>
+				<p>
+				一般的な路線図は首都圏の全路線・全駅を同時に表示するため、情報量が多く見にくくなります。
+				フレックス路線図では、出発駅・到着駅に関連する路線だけを絞り込んで表示できるため、シンプルで見やすい路線図になります。
+				</p>
 
 				<h3>Q. このサイトは何のために作られたのですか？</h3>
 				<p>
-				Flex Railway Map は、情報が多すぎて見づらい既存の路線図を「必要な路線だけ選んで表示できる」ようにするために開発されました。
+				フレックス路線図は、情報が多すぎて見にくい既存の路線図を「必要な路線だけ選んで表示できる」ようにするために開発されました。
 				遅延や運休などで乗り換えアプリの案内が役に立たないとき、必要な路線図をすぐに確認できるのが特徴です。
 				</p>
 
 				<h3>Q. どんなときに便利ですか？</h3>
 				<ul>
+				<li>路線図が複雑すぎて、乗り換え駅がどこか分からないとき</li>
 				<li>進行方向が合っているか不安なとき、通過駅で確認できる</li>
 				<li>乗り換えアプリで推薦された電車に乗っているが、乗り換え時刻を忘れてしまったとき</li>
 				<li>遅延や運休で乗り換えアプリが誤ったルートを案内したとき</li>
 				</ul>
+
+				<h3>Q. どの路線が対応していますか？</h3>
+				<p>山手線・中央線・東海道線などJR線13路線、東京メトロ全9路線、都営地下鉄全4路線、小田急・東急・京急・西武・東武など私鉄10路線以上、合計39路線以上に対応しています。</p>
+
+				<h3>Q. スマートフォンでも使えますか？</h3>
+				<p>はい、スマートフォン・タブレット・PCのいずれのブラウザでも無料でご利用いただけます。アプリのインストールは不要です。</p>
 
 				<h3>Q. 今後どんな機能が追加されますか？</h3>
 				<p>
 				TODO として、以下の機能を検討中です：
 				</p>
 				<ul>
-				<li>現在位置情報の反映</li>
 				<li>各駅停車／急行／快速急行の停車駅の可視化</li>
 				<li>東京以外の路線図拡張</li>
 				<li>運休・遅延情報の取得と可視化</li>
@@ -146,7 +214,7 @@ import SimpleThemeWrapper from "../components/SimpleThemeWrapper.tsx";
 				<h3>Q. どのように開発されていますか？</h3>
 				<p>
 				このサイトは React, TypeScript, Astro, Lucide を用いて構築し、Netlify 上にデプロイしています。
-				ClaudeCode を活用しながら、段階的に機能を追加しています。
+				Claude Code を活用しながら、段階的に機能を追加しています。
 				</p>
 
 				<h3>Q. 開発者情報は？</h3>

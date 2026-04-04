@@ -31,41 +31,41 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 		<link rel="shortcut icon" href="/icon_flex_rail_way_map.png" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>フレックス路線図 - 路線図が見にくい・分かりづらいを解決 | Flex Railway Map</title>
+		<title>路線図が見にくい・複雑すぎる？フレックス路線図で解決 | シンプルな乗り換え路線図</title>
 
 		<!-- Canonical URL -->
-		<link rel="canonical" href="https://flex-rail-map.netlify.app/" />
+		<link rel="canonical" href="https://flex-railway-map.netlify.app/" />
 
 		<!-- SEO Meta Description -->
-		<meta name="description" content="路線図が見にくい・分かりづらいと感じたことはありませんか？フレックス路線図は、必要な路線だけを選んで表示できるインタラクティブ路線図サービスです。情報が多すぎる路線図をシンプルに絞り込み、遅延・運休時も自分で判断できる見やすい路線図を提供します。" />
-		<meta name="keywords" content="フレックス路線図,路線図,見にくい,分かりづらい,分かりにくい,見やすい路線図,シンプル路線図,乗り換え,経路検索,鉄道路線図,東京路線図,インタラクティブ,Flex Railway Map,railway map,train map,Tokyo" />
+		<meta name="description" content="路線図が見にくい・複雑すぎると感じていませんか？フレックス路線図は、必要な路線だけ選んで表示できるシンプルなインタラクティブ路線図です。情報を絞り込んで見やすくし、遅延・運休時も自分で乗り換えを判断できます。" />
+		<meta name="keywords" content="路線図 見にくい,路線図 複雑,路線図 分かりにくい,見やすい路線図,シンプル路線図,フレックス路線図,乗り換え 分かりやすい,鉄道路線図,東京路線図,路線図 絞り込み,インタラクティブ路線図,乗り換え検索,電車 路線図,Flex Railway Map" />
 		<meta name="robots" content="index, follow" />
 		<meta name="author" content="Flex Rail Map Project" />
 
 		<!-- Open Graph / SNS シェア用 -->
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://flex-rail-map.netlify.app/" />
-		<meta property="og:title" content="フレックス路線図 - 路線図が見にくい・分かりづらいを解決" />
-		<meta property="og:description" content="路線図が見にくい・分かりづらいと感じたことはありませんか？フレックス路線図は、必要な路線だけを選んで表示できるインタラクティブ路線図サービスです。遅延・運休時も自分で判断できる見やすい路線図を提供します。" />
-		<meta property="og:image" content="https://flex-rail-map.netlify.app/icon_flex_rail_way_map.png" />
+		<meta property="og:url" content="https://flex-railway-map.netlify.app/" />
+		<meta property="og:title" content="路線図が見にくい・複雑すぎる？フレックス路線図で解決" />
+		<meta property="og:description" content="必要な路線だけ選んで表示できるシンプルなインタラクティブ路線図。路線図が見にくい・分かりにくいを解決し、遅延・運休時も自分で判断できます。" />
+		<meta property="og:image" content="https://flex-railway-map.netlify.app/icon_flex_rail_way_map.png" />
 		<meta property="og:locale" content="ja_JP" />
 		<meta property="og:site_name" content="フレックス路線図" />
 
 		<!-- Twitter Card -->
 		<meta name="twitter:card" content="summary" />
-		<meta name="twitter:title" content="フレックス路線図 - 路線図が見にくい・分かりづらいを解決" />
-		<meta name="twitter:description" content="必要な路線だけ絞り込める！路線図が見にくい・分かりづらいを解決するインタラクティブ路線図サービス。" />
-		<meta name="twitter:image" content="https://flex-rail-map.netlify.app/icon_flex_rail_way_map.png" />
+		<meta name="twitter:title" content="路線図が見にくい？フレックス路線図で解決" />
+		<meta name="twitter:description" content="必要な路線だけ絞り込める！路線図が見にくい・複雑すぎるを解決するシンプルなインタラクティブ路線図サービス。" />
+		<meta name="twitter:image" content="https://flex-railway-map.netlify.app/icon_flex_rail_way_map.png" />
 
-		<!-- JSON-LD 構造化データ -->
+		<!-- JSON-LD 構造化データ: WebApplication -->
 		<script type="application/ld+json">
 		{
 			"@context": "https://schema.org",
 			"@type": "WebApplication",
 			"name": "フレックス路線図",
 			"alternateName": "Flex Railway Map",
-			"url": "https://flex-rail-map.netlify.app/",
-			"description": "路線図が見にくい・分かりづらいを解決するインタラクティブ路線図サービス。必要な路線だけを選んで表示でき、遅延・運休時も自分で判断できる見やすい路線図を提供します。",
+			"url": "https://flex-railway-map.netlify.app/",
+			"description": "路線図が見にくい・複雑すぎるを解決するシンプルなインタラクティブ路線図サービス。必要な路線だけ選んで表示でき、遅延・運休時も自分で乗り換えを判断できます。",
 			"applicationCategory": "TravelApplication",
 			"operatingSystem": "Any",
 			"inLanguage": ["ja", "en"],
@@ -80,15 +80,57 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 				"駅間経路検索",
 				"39路線対応",
 				"乗換駅フィルター",
-				"現在地表示"
+				"現在地表示（30秒自動更新）"
+			]
+		}
+		</script>
+
+		<!-- JSON-LD 構造化データ: FAQ -->
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "FAQPage",
+			"mainEntity": [
+				{
+					"@type": "Question",
+					"name": "路線図が見にくい・複雑すぎるのはなぜですか？",
+					"acceptedAnswer": {
+						"@type": "Answer",
+						"text": "一般的な路線図はすべての路線・駅情報を一度に表示するため、情報量が多すぎて見にくくなります。フレックス路線図では必要な路線だけを選んで表示できるので、シンプルで見やすくなります。"
+					}
+				},
+				{
+					"@type": "Question",
+					"name": "遅延・運休時に路線図を自分で確認したい",
+					"acceptedAnswer": {
+						"@type": "Answer",
+						"text": "フレックス路線図は、乗り換えアプリの案内が役に立たないイレギュラー時に、出発駅〜到着駅に関係する路線だけを絞り込んで表示できます。乗り換え駅や経路を自分で判断するのに役立ちます。"
+					}
+				},
+				{
+					"@type": "Question",
+					"name": "どの路線が対応していますか？",
+					"acceptedAnswer": {
+						"@type": "Answer",
+						"text": "山手線・中央線・東海道線などJR線、東京メトロ全9路線、都営地下鉄全4路線、小田急・東急・京急・西武など主要私鉄を含む39路線以上に対応しています。"
+					}
+				},
+				{
+					"@type": "Question",
+					"name": "スマートフォンでも使えますか？",
+					"acceptedAnswer": {
+						"@type": "Answer",
+						"text": "はい、スマートフォン・タブレット・PCいずれのブラウザでもご利用いただけます。アプリのインストール不要で、ブラウザから無料でアクセスできます。"
+					}
+				}
 			]
 		}
 		</script>
 
 		<!-- hreflang for multilingual SEO -->
-		<link rel="alternate" hreflang="ja" href="https://flex-rail-map.netlify.app/" />
-		<link rel="alternate" hreflang="en" href="https://flex-rail-map.netlify.app/" />
-		<link rel="alternate" hreflang="x-default" href="https://flex-rail-map.netlify.app/" />
+		<link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/" />
+		<link rel="alternate" hreflang="en" href="https://flex-railway-map.netlify.app/" />
+		<link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/" />
 		<link
 			rel="stylesheet"
 			href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -324,6 +366,14 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 		</style>
 	</head>
 	<body>
+		<!-- SEO用静的コンテンツ（検索エンジンがJS描画前にクロール可能） -->
+		<noscript>
+			<div style="padding: 20px; font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
+				<h1>路線図が見にくい・複雑すぎる？フレックス路線図で解決</h1>
+				<p>フレックス路線図は、必要な路線だけを選んで表示できるシンプルなインタラクティブ路線図サービスです。情報が多すぎて見にくい路線図を絞り込み、遅延・運休時も自分で乗り換えを判断できます。</p>
+				<p>JavaScriptを有効にしてご利用ください。</p>
+			</div>
+		</noscript>
 		<ThemeWrapper client:only="react" />
 	</body>
 </html>
