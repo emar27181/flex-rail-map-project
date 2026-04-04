@@ -114,6 +114,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [isLocating, setIsLocating] = useState(false);
   const watchIdRef = useRef<number | null>(null);
   const isFirstPositionRef = useRef(true);
+  const locationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
 
 
@@ -1152,6 +1153,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     }
   };
 
+  // 現在地を一度だけ取得して更新するヘルパー
+  const fetchCurrentPosition = useCallback(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation([latitude, longitude]);
+      },
+      () => {},
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }, []);
+
   // 現在地取得ハンドラー（トグル式: ON/OFF）
   const handleLocateUser = useCallback(() => {
     if (!navigator.geolocation) {
@@ -1163,6 +1177,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
+      if (locationIntervalRef.current !== null) {
+        clearInterval(locationIntervalRef.current);
+        locationIntervalRef.current = null;
+      }
       setIsLocating(false);
       setUserLocation(null);
       isFirstPositionRef.current = true;
@@ -1192,6 +1210,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
           navigator.geolocation.clearWatch(watchIdRef.current);
           watchIdRef.current = null;
         }
+        if (locationIntervalRef.current !== null) {
+          clearInterval(locationIntervalRef.current);
+          locationIntervalRef.current = null;
+        }
         setIsLocating(false);
         setUserLocation(null);
         isFirstPositionRef.current = true;
@@ -1208,7 +1230,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     );
 
     watchIdRef.current = id;
-  }, [currentLanguage]);
+
+    // 30秒ごとに位置情報を強制更新
+    locationIntervalRef.current = setInterval(() => {
+      fetchCurrentPosition();
+    }, 30000);
+  }, [currentLanguage, fetchCurrentPosition]);
+
+  // 現在地を即時更新するハンドラー
+  const handleRefreshLocation = useCallback(() => {
+    fetchCurrentPosition();
+  }, [fetchCurrentPosition]);
 
   // 現在地マーカーアイコン
   const userLocationIcon = useMemo(() => {
@@ -2677,30 +2709,63 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
             {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
           </button>
 
+          {/* 現在地即時更新ボタン（トラッキングON時のみ表示） */}
+          {isLocating && (
+            <button
+              onClick={handleRefreshLocation}
+              style={{
+                position: 'absolute',
+                bottom: '10px',
+                right: '92px',
+                zIndex: 1002,
+                backgroundColor: '#34A853',
+                color: '#fff',
+                border: '1px solid #34A853',
+                borderRadius: '8px',
+                padding: '8px',
+                cursor: 'pointer',
+                boxShadow: `0 2px 8px ${colors.shadow}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backdropFilter: 'blur(4px)',
+              }}
+              title={currentLanguage === 'japanese' ? '現在地を今すぐ更新' : 'Refresh location now'}
+              aria-label="Refresh location now"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 4 23 10 17 10" />
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+              </svg>
+            </button>
+          )}
+
           {/* 現在地ボタン */}
           <button
             onClick={handleLocateUser}
-            disabled={isLocating}
+            disabled={isLocating && !userLocation}
             style={{
               position: 'absolute',
               bottom: '10px',
               right: '50px',
               zIndex: 1002,
-              backgroundColor: userLocation ? '#4285F4' : colors.surface,
-              color: userLocation ? '#fff' : colors.text,
-              border: `1px solid ${userLocation ? '#4285F4' : colors.border}`,
+              backgroundColor: isLocating ? '#4285F4' : colors.surface,
+              color: isLocating ? '#fff' : colors.text,
+              border: `1px solid ${isLocating ? '#4285F4' : colors.border}`,
               borderRadius: '8px',
               padding: '8px',
-              cursor: isLocating ? 'wait' : 'pointer',
+              cursor: (isLocating && !userLocation) ? 'wait' : 'pointer',
               boxShadow: `0 2px 8px ${colors.shadow}`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               backdropFilter: 'blur(4px)',
-              opacity: isLocating ? 0.7 : 1,
+              opacity: (isLocating && !userLocation) ? 0.7 : 1,
             }}
-            title={currentLanguage === 'japanese' ? '現在地を表示' : 'Show my location'}
-            aria-label="Show my location"
+            title={isLocating
+              ? (currentLanguage === 'japanese' ? '現在地追跡をOFF' : 'Stop tracking')
+              : (currentLanguage === 'japanese' ? '現在地を表示' : 'Show my location')}
+            aria-label="Toggle location tracking"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="4" />
