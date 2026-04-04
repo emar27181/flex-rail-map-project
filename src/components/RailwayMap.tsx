@@ -1196,13 +1196,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
         const { latitude, longitude } = position.coords;
         setUserLocation([latitude, longitude]);
 
-        // 初回取得時のみ地図を移動
-        if (isFirstPositionRef.current) {
-          isFirstPositionRef.current = false;
-          if (mapRef.current) {
-            mapRef.current.setView([latitude, longitude], 14);
-          }
-        }
+        isFirstPositionRef.current = false;
       },
       (error) => {
         // エラー時はトラッキング停止
