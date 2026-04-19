@@ -10,6 +10,15 @@ export interface Departure {
   time: string;        // "HH:MM"
   type: string;        // "各停", "急行", "快特", "普通", etc.
   destination: string;
+  platform?: string;   // 番線 (例: "3番線")
+}
+
+/** "HH:MM" に minutes 分を加算して返す */
+export function addMinutes(timeStr: string, minutes: number): string {
+  const [h, mm] = timeStr.split(':').map(Number);
+  const total = h * 60 + mm + minutes;
+  const norm  = ((total % 1440) + 1440) % 1440;
+  return `${String(Math.floor(norm / 60)).padStart(2, '0')}:${String(norm % 60).padStart(2, '0')}`;
 }
 
 interface StationEntry {
@@ -37,6 +46,47 @@ export interface LineTimetableData {
   updatedAt: string;   // "YYYY-MM-DD"
   dataVersion: string;
   directions: DirectionData[];
+}
+
+// ── 番線データ (lineKey_directionIndex_stationName → 番線) ──────
+const platformMap: Record<string, string> = {
+  // 山手線 内回り (0) / 外回り (1)
+  'yamanote_0_東京': '1番線', 'yamanote_0_品川': '1番線', 'yamanote_0_渋谷': '1番線',
+  'yamanote_0_新宿': '1番線', 'yamanote_0_池袋': '1番線', 'yamanote_0_上野': '1番線',
+  'yamanote_1_東京': '2番線', 'yamanote_1_品川': '2番線', 'yamanote_1_渋谷': '2番線',
+  'yamanote_1_新宿': '2番線', 'yamanote_1_池袋': '2番線', 'yamanote_1_上野': '2番線',
+  // 東海道線 下り (0) 東京→小田原 / 上り (1) 小田原→東京
+  'jrTokaidoMainLine_0_東京': '9番線', 'jrTokaidoMainLine_0_品川': '7番線',
+  'jrTokaidoMainLine_0_横浜': '6番線', 'jrTokaidoMainLine_0_藤沢': '3番線',
+  'jrTokaidoMainLine_1_横浜': '8番線', 'jrTokaidoMainLine_1_品川': '8番線',
+  'jrTokaidoMainLine_1_東京': '8番線', 'jrTokaidoMainLine_1_藤沢': '4番線',
+  // 京浜東北線 南行 (0) / 北行 (1)
+  'keihinTohoku_0_東京': '3番線', 'keihinTohoku_0_品川': '3番線',
+  'keihinTohoku_0_川崎': '3番線', 'keihinTohoku_0_横浜': '3番線',
+  'keihinTohoku_1_横浜': '4番線', 'keihinTohoku_1_川崎': '4番線',
+  'keihinTohoku_1_品川': '4番線', 'keihinTohoku_1_東京': '4番線',
+  // 京急 下り (0) / 上り (1)
+  'keikyuLine_0_品川': '1番線', 'keikyuLine_0_京急川崎': '2番線', 'keikyuLine_0_横浜': '1番線',
+  'keikyuLine_1_横浜': '2番線', 'keikyuLine_1_京急川崎': '1番線', 'keikyuLine_1_品川': '2番線',
+  // 小田急 下り (0) 新宿→小田原 / 上り (1)
+  'odakyuLine_0_新宿': '3番線', 'odakyuLine_0_下北沢': '2番線', 'odakyuLine_0_相模大野': '2番線',
+  'odakyuLine_1_新宿': '3番線', 'odakyuLine_1_下北沢': '1番線', 'odakyuLine_1_相模大野': '1番線',
+  // 東急東横線 下り (0) / 上り (1)
+  'tokyuToyokoLine_0_渋谷': '1番線', 'tokyuToyokoLine_0_武蔵小杉': '2番線', 'tokyuToyokoLine_0_横浜': '3番線',
+  'tokyuToyokoLine_1_横浜': '4番線', 'tokyuToyokoLine_1_武蔵小杉': '1番線', 'tokyuToyokoLine_1_渋谷': '2番線',
+  // 東急田園都市線 下り (0) / 上り (1)
+  'tokyuDenEnToshiLine_0_渋谷': '3番線', 'tokyuDenEnToshiLine_0_二子玉川': '3番線',
+  'tokyuDenEnToshiLine_1_渋谷': '4番線', 'tokyuDenEnToshiLine_1_二子玉川': '4番線',
+  // 銀座線 渋谷方面 (0) / 浅草方面 (1)
+  'ginzaLine_0_浅草': '1番線', 'ginzaLine_0_上野': '1番線', 'ginzaLine_0_銀座': '1番線', 'ginzaLine_0_渋谷': '1番線',
+  'ginzaLine_1_渋谷': '2番線', 'ginzaLine_1_銀座': '2番線', 'ginzaLine_1_上野': '2番線', 'ginzaLine_1_浅草': '2番線',
+  // 丸ノ内線 荻窪方面 (0) / 池袋方面 (1)
+  'marunouchiLine_0_池袋': '1番線', 'marunouchiLine_0_新宿': '1番線', 'marunouchiLine_0_銀座': '1番線',
+  'marunouchiLine_1_銀座': '2番線', 'marunouchiLine_1_新宿': '2番線', 'marunouchiLine_1_池袋': '2番線',
+};
+
+function getPlatform(lineKey: string, dirIdx: number, stationName: string): string | undefined {
+  return platformMap[`${lineKey}_${dirIdx}_${stationName}`];
 }
 
 // ── ヘルパー ─────────────────────────────────────────
@@ -695,8 +745,10 @@ export function getNextDepartures(
   const stationEntry = direction.stations.find(s => s.name === stationName);
   if (!stationEntry) return [];
 
+  const platform = getPlatform(lineKey, directionIndex, stationName);
   const baseDepartures = genBase(direction.patterns);
-  const stationDepartures = shiftDeps(baseDepartures, stationEntry.offset);
+  const stationDepartures = shiftDeps(baseDepartures, stationEntry.offset)
+    .map(d => ({ ...d, platform }));
 
   const [ah, am] = afterTime.split(':').map(Number);
   const afterMin = ah * 60 + am;
@@ -711,6 +763,58 @@ export function getNextDepartures(
   // 終電を過ぎた場合は翌日始発から補完
   const nextDay = stationDepartures.slice(0, count - filtered.length);
   return [...filtered, ...nextDay].slice(0, count);
+}
+
+/**
+ * 指定時刻の前後の列車を取得
+ * @param prevCount  centerTime より前の列車数
+ * @param nextCount  centerTime 以降の列車数
+ */
+export function getDeparturesAround(
+  lineKey: string,
+  stationName: string,
+  directionIndex: number,
+  centerTime: string,
+  prevCount: number,
+  nextCount: number
+): { prev: Departure[], next: Departure[] } {
+  const lineData = getLineTimetable(lineKey);
+  if (!lineData || directionIndex >= lineData.directions.length) return { prev: [], next: [] };
+
+  const direction = lineData.directions[directionIndex];
+  const stationEntry = direction.stations.find(s => s.name === stationName);
+  if (!stationEntry) return { prev: [], next: [] };
+
+  const platform = getPlatform(lineKey, directionIndex, stationName);
+  const baseDepartures = genBase(direction.patterns);
+  // 2日分生成して前後を確実に取れるようにする
+  const dayShift = 1440;
+  const allDeps = [
+    ...shiftDeps(baseDepartures, stationEntry.offset - dayShift),
+    ...shiftDeps(baseDepartures, stationEntry.offset),
+    ...shiftDeps(baseDepartures, stationEntry.offset + dayShift),
+  ].map(d => ({ ...d, platform }));
+
+  const [ch, cm] = centerTime.split(':').map(Number);
+  const centerMin = ch * 60 + cm;
+
+  // centerTime の実際の総分数（日をまたぐ判定のため正規化しない）
+  // 全体を時刻文字列の "HH:MM" で比較するのではなく totalMin で比較
+  // allDeps は shiftDeps で生成されており時刻は 00:00〜47:59 の範囲になる場合がある
+  // そこで元の totalMin ベースで比較できるよう変換
+  const toTotalMin = (time: string): number => {
+    const [h, mm] = time.split(':').map(Number);
+    return h * 60 + mm;
+  };
+
+  const prevDeps = allDeps
+    .filter(d => toTotalMin(d.time) < centerMin)
+    .slice(-prevCount);
+  const nextDeps = allDeps
+    .filter(d => toTotalMin(d.time) >= centerMin)
+    .slice(0, nextCount);
+
+  return { prev: prevDeps, next: nextDeps };
 }
 
 /**
