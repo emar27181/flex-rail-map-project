@@ -95,8 +95,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [stationsWithinTime, setStationsWithinTime] = useState<StationWithTime[]>([]);
   const [actuallyDisplayedStations, setActuallyDisplayedStations] = useState<Set<string>>(new Set());
 
-  // フルスクリーン状態
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  // フルスクリーン状態（モバイルはデフォルトでフルスクリーン）
+  const [isFullscreen, setIsFullscreen] = useState(() =>
+    typeof window !== 'undefined' && window.innerWidth < 768
+  );
 
   // モバイル検出
   const [isMobile, setIsMobile] = useState(false);
@@ -1225,10 +1227,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
     watchIdRef.current = id;
 
-    // 30秒ごとに位置情報を強制更新
+    // 10秒ごとに位置情報を強制更新
     locationIntervalRef.current = setInterval(() => {
       fetchCurrentPosition();
-    }, 30000);
+    }, 10000);
   }, [currentLanguage, fetchCurrentPosition]);
 
   // 現在地を即時更新するハンドラー
@@ -2540,82 +2542,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
           {/* モバイルフルスクリーン時の統合パネル */}
           {isFullscreen && isMobile && (
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              zIndex: 1001,
-              backgroundColor: colors.surfaceElevated,
-              borderBottom: `2px solid ${colors.border}`,
-              borderRadius: '0 0 12px 12px',
-              maxHeight: isMobilePanelExpanded ? '60vh' : '44px',
-              transition: 'max-height 0.3s ease',
-              overflow: 'hidden',
-              boxShadow: `0 2px 10px ${colors.shadow}`,
-            }}>
-              {/* タブバー */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                height: '44px',
-                borderBottom: isMobilePanelExpanded ? `1px solid ${colors.borderLight}` : 'none',
-                padding: '0 4px',
-              }}>
-                <button
-                  onClick={() => { setMobilePanelTab('station'); setIsMobilePanelExpanded(true); }}
-                  style={{
-                    flex: 1,
-                    height: '36px',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    fontWeight: 'bold',
-                    backgroundColor: mobilePanelTab === 'station' && isMobilePanelExpanded ? colors.primary : 'transparent',
-                    color: mobilePanelTab === 'station' && isMobilePanelExpanded ? '#fff' : colors.textSecondary,
-                    transition: 'background-color 0.2s',
-                  }}
-                >
-                  🚉 {translateUI('departure', currentLanguage) + '/' + translateUI('arrival', currentLanguage)}
-                </button>
-                <button
-                  onClick={() => { setMobilePanelTab('legend'); setIsMobilePanelExpanded(true); }}
-                  style={{
-                    flex: 1,
-                    height: '36px',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    fontWeight: 'bold',
-                    backgroundColor: mobilePanelTab === 'legend' && isMobilePanelExpanded ? colors.primary : 'transparent',
-                    color: mobilePanelTab === 'legend' && isMobilePanelExpanded ? '#fff' : colors.textSecondary,
-                    transition: 'background-color 0.2s',
-                  }}
-                >
-                  🗺 {translateUI('displayedRoutes', currentLanguage)}
-                </button>
-                <button
-                  onClick={() => setIsMobilePanelExpanded(!isMobilePanelExpanded)}
-                  style={{
-                    width: '36px',
-                    height: '36px',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    backgroundColor: 'transparent',
-                    color: colors.textSecondary,
-                  }}
-                >
-                  {isMobilePanelExpanded ? '▼' : '▲'}
-                </button>
-              </div>
-
-              {/* コンテンツ */}
+            <>
+              {/* コンテンツエリア（タブバーの上に展開） */}
               {isMobilePanelExpanded && (
-                <div style={{ overflowY: 'auto', maxHeight: 'calc(60vh - 44px)' }}>
+                <div style={{
+                  position: 'absolute',
+                  bottom: '44px',
+                  left: 0,
+                  right: 0,
+                  zIndex: 1001,
+                  backgroundColor: colors.surfaceElevated,
+                  borderTop: `2px solid ${colors.border}`,
+                  borderRadius: '12px 12px 0 0',
+                  maxHeight: 'calc(60vh - 44px)',
+                  overflowY: 'auto',
+                  boxShadow: `0 -2px 10px ${colors.shadow}`,
+                }}>
                   {mobilePanelTab === 'station' && (
                     <StationSelector
                       departure={departure}
@@ -2671,7 +2613,74 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                   )}
                 </div>
               )}
-            </div>
+
+              {/* タブバー（常に下端に固定） */}
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: 1002,
+                backgroundColor: colors.surfaceElevated,
+                borderTop: isMobilePanelExpanded ? 'none' : `2px solid ${colors.border}`,
+                borderRadius: isMobilePanelExpanded ? '0' : '12px 12px 0 0',
+                height: '44px',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0 4px',
+                boxShadow: isMobilePanelExpanded ? 'none' : `0 -2px 10px ${colors.shadow}`,
+              }}>
+                <button
+                  onClick={() => { setMobilePanelTab('station'); setIsMobilePanelExpanded(true); }}
+                  style={{
+                    flex: 1,
+                    height: '36px',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    backgroundColor: mobilePanelTab === 'station' && isMobilePanelExpanded ? colors.primary : 'transparent',
+                    color: mobilePanelTab === 'station' && isMobilePanelExpanded ? '#fff' : colors.textSecondary,
+                    transition: 'background-color 0.2s',
+                  }}
+                >
+                  🚉 {translateUI('departure', currentLanguage) + '/' + translateUI('arrival', currentLanguage)}
+                </button>
+                <button
+                  onClick={() => { setMobilePanelTab('legend'); setIsMobilePanelExpanded(true); }}
+                  style={{
+                    flex: 1,
+                    height: '36px',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    backgroundColor: mobilePanelTab === 'legend' && isMobilePanelExpanded ? colors.primary : 'transparent',
+                    color: mobilePanelTab === 'legend' && isMobilePanelExpanded ? '#fff' : colors.textSecondary,
+                    transition: 'background-color 0.2s',
+                  }}
+                >
+                  🗺 {translateUI('displayedRoutes', currentLanguage)}
+                </button>
+                <button
+                  onClick={() => setIsMobilePanelExpanded(!isMobilePanelExpanded)}
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    backgroundColor: 'transparent',
+                    color: colors.textSecondary,
+                  }}
+                >
+                  {isMobilePanelExpanded ? '▼' : '▲'}
+                </button>
+              </div>
+            </>
           )}
 
           {/* フルスクリーン切り替えボタン */}
@@ -2679,9 +2688,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
             onClick={() => setIsFullscreen(!isFullscreen)}
             style={{
               position: 'absolute',
-              bottom: '10px',
+              bottom: isFullscreen && isMobile ? '54px' : '10px',
               right: '10px',
-              zIndex: 1002,
+              zIndex: 1003,
               backgroundColor: colors.surface,
               color: colors.text,
               border: `1px solid ${colors.border}`,
@@ -2709,7 +2718,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               onClick={handleRefreshLocation}
               style={{
                 position: 'absolute',
-                bottom: '10px',
+                bottom: isFullscreen && isMobile ? '54px' : '10px',
                 right: '92px',
                 zIndex: 1002,
                 backgroundColor: '#34A853',
@@ -2740,7 +2749,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
             disabled={isLocating && !userLocation}
             style={{
               position: 'absolute',
-              bottom: '10px',
+              bottom: isFullscreen && isMobile ? '54px' : '10px',
               right: '50px',
               zIndex: 1002,
               backgroundColor: isLocating ? '#4285F4' : colors.surface,
