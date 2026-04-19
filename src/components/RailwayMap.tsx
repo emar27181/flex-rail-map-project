@@ -117,6 +117,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [mobilePanelTab, setMobilePanelTab] = useState<'station' | 'legend' | 'timetable'>('station');
   const [isMobilePanelExpanded, setIsMobilePanelExpanded] = useState(true);
 
+  // 駅時刻表ツールチップ状態
+  const [stationTooltip, setStationTooltip] = useState<{ stationName: string; x: number; y: number } | null>(null);
+
   // 路線ホバー・ポップアップ状態
   const [hoveredRoute, setHoveredRoute] = useState<string | null>(null);
   const [clickedRoute, setClickedRoute] = useState<string | null>(null);
@@ -335,34 +338,47 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     '快特': '#8e44ad', '特急ロマンスカー': '#e74c3c',
   };
 
-  // 駅ポップアップ内の時刻表セクションをレンダリング
-  const renderStationTimetable = useCallback((stationName: string) => {
-    if (!timetableModeEnabled) return null;
-    const info = stationTimelineMap.get(stationName);
+  // 駅時刻表ツールチップのコンテンツをレンダリング
+  const renderStationTimetableTooltip = () => {
+    if (!stationTooltip) return null;
+    const info = stationTimelineMap.get(stationTooltip.stationName);
     if (!info || !hasTimetableData(info.routeKey)) return null;
 
     const { prev, next } = getDeparturesAround(
-      info.routeKey, stationName, info.directionIndex, info.depTime, 1, 4
+      info.routeKey, stationTooltip.stationName, info.directionIndex, info.depTime, 1, 4
     );
     if (prev.length === 0 && next.length === 0) return null;
 
+    // 画面端を超えないよう位置を調整（ツールチップ幅=200px, 高さ=200px想定）
+    const tooltipW = 220;
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 600;
+    const rawX = stationTooltip.x + 12;
+    const rawY = stationTooltip.y - 10;
+    const x = rawX + tooltipW > vw ? stationTooltip.x - tooltipW - 4 : rawX;
+    const y = rawY + 220 > vh ? stationTooltip.y - 220 : rawY;
+
     const renderRow = (dep: Departure, highlight = false) => (
-      <div key={`${dep.time}-${dep.type}`} style={{
+      <div key={`${dep.time}-${dep.type}-${dep.destination}`} style={{
         display: 'flex', alignItems: 'center', gap: '6px',
         padding: '3px 6px',
-        backgroundColor: highlight ? (theme === 'dark' ? 'rgba(33,150,243,0.18)' : 'rgba(33,150,243,0.10)') : 'transparent',
+        backgroundColor: highlight
+          ? (theme === 'dark' ? 'rgba(33,150,243,0.22)' : 'rgba(33,150,243,0.12)')
+          : 'transparent',
         borderRadius: '3px',
       }}>
         <span style={{ fontWeight: highlight ? 'bold' : 'normal', fontSize: '13px',
-          color: highlight ? colors.primary : colors.text, minWidth: '38px' }}>
+          color: highlight ? colors.primary : colors.text, minWidth: '40px', flexShrink: 0 }}>
           {dep.time}
         </span>
         <span style={{
           fontSize: '10px', color: '#fff', padding: '1px 4px', borderRadius: '3px',
-          backgroundColor: TRAIN_TYPE_COLOR[dep.type] ?? '#555', flexShrink: 0,
+          backgroundColor: TRAIN_TYPE_COLOR[dep.type] ?? '#555', flexShrink: 0, whiteSpace: 'nowrap',
         }}>{dep.type}</span>
-        <span style={{ fontSize: '11px', color: colors.textSecondary, flex: 1, overflow: 'hidden',
-          textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{dep.destination}</span>
+        <span style={{ fontSize: '11px', color: colors.textSecondary, flex: 1,
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {dep.destination}
+        </span>
         {dep.platform && (
           <span style={{ fontSize: '10px', color: colors.textSecondary, flexShrink: 0 }}>
             {dep.platform}
@@ -371,23 +387,44 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       </div>
     );
 
-    const lineData = hasTimetableData(info.routeKey);
     return (
-      <div style={{
-        marginTop: '8px', borderTop: `1px solid ${colors.borderLight}`, paddingTop: '6px',
-      }}>
-        <div style={{ fontSize: '11px', color: colors.textSecondary, marginBottom: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <span>🕐</span>
-          <span>{info.depTime} 頃の時刻表</span>
+      <div
+        style={{
+          position: 'fixed',
+          left: x,
+          top: y,
+          zIndex: 9999,
+          width: `${tooltipW}px`,
+          backgroundColor: colors.surfaceElevated,
+          border: `1px solid ${colors.border}`,
+          borderRadius: '8px',
+          boxShadow: `0 4px 16px ${colors.shadow}`,
+          padding: '8px 0',
+          pointerEvents: 'none',
+        }}
+      >
+        {/* ヘッダー */}
+        <div style={{ padding: '0 10px 6px', borderBottom: `1px solid ${colors.borderLight}` }}>
+          <div style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text }}>
+            {stationTooltip.stationName}
+          </div>
+          <div style={{ fontSize: '11px', color: colors.textSecondary, marginTop: '2px' }}>
+            🕐 {info.depTime} 頃の発車
+          </div>
         </div>
-        {prev.map(d => renderRow(d, false))}
-        {next.map((d, i) => renderRow(d, i === 0))}
-        <div style={{ fontSize: '10px', color: colors.textSecondary, marginTop: '3px', opacity: 0.7 }}>
+        {/* 列車一覧 */}
+        <div style={{ padding: '4px 0' }}>
+          {prev.map(d => renderRow(d, false))}
+          {next.map((d, i) => renderRow(d, i === 0))}
+        </div>
+        {/* フッター */}
+        <div style={{ padding: '4px 10px 0', borderTop: `1px solid ${colors.borderLight}`,
+          fontSize: '10px', color: colors.textSecondary, opacity: 0.7 }}>
           ⚠ 概算値・参考用
         </div>
       </div>
     );
-  }, [timetableModeEnabled, stationTimelineMap, colors, theme, TRAIN_TYPE_COLOR]);
+  };
 
   // アイコン作成関数をメモ化
   const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean, opacity: number = 1) => {
@@ -1662,6 +1699,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 position={[station.lat, station.lng]}
                 icon={specialIcon}
                 zIndexOffset={1000}
+                eventHandlers={{
+                  mouseover: (e) => {
+                    if (!timetableModeEnabled) return;
+                    const oe = e.originalEvent as MouseEvent | undefined;
+                    if (oe) setStationTooltip({ stationName: station.name, x: oe.clientX, y: oe.clientY });
+                  },
+                  mouseout: () => setStationTooltip(null),
+                  click: (e) => {
+                    if (!timetableModeEnabled || !isMobile) return;
+                    const oe = e.originalEvent as MouseEvent | undefined;
+                    if (oe) setStationTooltip(prev =>
+                      prev?.stationName === station.name ? null : { stationName: station.name, x: oe.clientX, y: oe.clientY }
+                    );
+                  },
+                }}
               >
                 {showStationNames && (
                 <Popup className={`popup-${theme}`}>
@@ -1705,8 +1757,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                         ))}
                       </div>
                     </div>
-
-                    {renderStationTimetable(station.name)}
 
                     <div style={{ marginTop: '10px' }}>
                       <button
@@ -1812,6 +1862,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 position={[station.lat, station.lng]}
                 icon={stationIcon}
                 zIndexOffset={2000}
+                eventHandlers={{
+                  mouseover: (e) => {
+                    if (!timetableModeEnabled) return;
+                    const oe = e.originalEvent as MouseEvent | undefined;
+                    if (oe) setStationTooltip({ stationName: station.name, x: oe.clientX, y: oe.clientY });
+                  },
+                  mouseout: () => setStationTooltip(null),
+                  click: (e) => {
+                    if (!timetableModeEnabled || !isMobile) return;
+                    const oe = e.originalEvent as MouseEvent | undefined;
+                    if (oe) setStationTooltip(prev =>
+                      prev?.stationName === station.name ? null : { stationName: station.name, x: oe.clientX, y: oe.clientY }
+                    );
+                  },
+                }}
               >
                 {showStationNames && (
                 <Popup className={`popup-${theme}`}>
@@ -1853,8 +1918,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                         ))}
                       </div>
                     </div>
-
-                    {renderStationTimetable(station.name)}
 
                     <div style={{ marginTop: '10px' }}>
                       <button
@@ -3014,6 +3077,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               <line x1="18" y1="12" x2="22" y2="12" />
             </svg>
           </button>
+
+          {/* 駅時刻表ツールチップ */}
+          {timetableModeEnabled && renderStationTimetableTooltip()}
 
           {/* ホバーツールチップ */}
           {hoveredRoute && hoverTooltipPosition && (() => {
