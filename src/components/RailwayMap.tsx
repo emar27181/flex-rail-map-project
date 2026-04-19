@@ -102,11 +102,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   );
 
   // 時刻表モード
-  const [timetableModeEnabled, setTimetableModeEnabled] = useState(false);
-  const [timetableBaseTime, setTimetableBaseTime] = useState(() => {
-    const now = new Date();
-    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-  });
+  const [timetableModeEnabled, setTimetableModeEnabled] = useState(true);
+  const [timetableBaseTime, setTimetableBaseTime] = useState('13:00');
 
   // モバイル検出
   const [isMobile, setIsMobile] = useState(false);
@@ -1959,7 +1956,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
                 language={currentLanguage}
               />
-              {timetableModeEnabled && routeRecommendations.length > 0 && (
+              {timetableModeEnabled && (
                 <div style={{ marginTop: '8px' }}>
                   <TimetablePanel
                     routeResult={routeRecommendations[selectedRouteIndices ? [...selectedRouteIndices][0] : 0] ?? null}
@@ -1983,7 +1980,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
               language={currentLanguage}
             />
-            {timetableModeEnabled && routeRecommendations.length > 0 && (
+            {timetableModeEnabled && (
               <div style={{ marginTop: '8px' }}>
                 <TimetablePanel
                   routeResult={routeRecommendations[selectedRouteIndices ? [...selectedRouteIndices][0] : 0] ?? null}
