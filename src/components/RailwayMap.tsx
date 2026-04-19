@@ -20,6 +20,13 @@ import { getStationBorderStyleByPattern, getBorderStyleExplanation } from '../da
 import { attachDebugFunctions } from '../utils/stationAnalysisUtils';
 import CookieBanner from './CookieBanner';
 import TimetablePanel from './TimetablePanel';
+import {
+  getDeparturesAround,
+  getDirectionIndex as getTimetableDirectionIndex,
+  hasTimetableData,
+  addMinutes,
+  type Departure,
+} from '../data/timetableData';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -292,6 +299,95 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
     return activeTransferStations;
   }, [routeRecommendations.length, recommendationTransferStations, allTransferStations]);
+
+  // 経路上の各駅の出発時刻マップ（時刻表モード用）
+  const stationTimelineMap = useMemo(() => {
+    const map = new Map<string, { depTime: string; routeKey: string; directionIndex: number }>();
+    if (!timetableModeEnabled) return map;
+    const selectedIdx = selectedRouteIndices ? [...selectedRouteIndices][0] : 0;
+    const route = routeRecommendations[selectedIdx];
+    if (!route) return map;
+
+    let cumTime = 0;
+    for (const seg of route.segments) {
+      if (seg.isWalkingTransfer) {
+        cumTime += (seg as any).walkingTime ?? 5;
+        continue;
+      }
+      const n = seg.stations.length;
+      const fromName = seg.stations[0]?.name ?? '';
+      const toName   = seg.stations[n - 1]?.name ?? '';
+      const dirIdx   = getTimetableDirectionIndex(seg.routeKey, fromName, toName);
+      seg.stations.forEach((st, i) => {
+        if (!map.has(st.name)) {
+          const stTime = addMinutes(timetableBaseTime, cumTime + Math.round(seg.time * i / Math.max(n - 1, 1)));
+          map.set(st.name, { depTime: stTime, routeKey: seg.routeKey, directionIndex: dirIdx });
+        }
+      });
+      cumTime += seg.time;
+    }
+    return map;
+  }, [timetableModeEnabled, routeRecommendations, selectedRouteIndices, timetableBaseTime]);
+
+  const TRAIN_TYPE_COLOR: Record<string, string> = {
+    '各停': '#555', '普通': '#555', '急行': '#d35400', '快速': '#2980b9',
+    '快速アクティー': '#2980b9', '特別快速': '#1a6ea8', '準急': '#c0392b',
+    '快特': '#8e44ad', '特急ロマンスカー': '#e74c3c',
+  };
+
+  // 駅ポップアップ内の時刻表セクションをレンダリング
+  const renderStationTimetable = useCallback((stationName: string) => {
+    if (!timetableModeEnabled) return null;
+    const info = stationTimelineMap.get(stationName);
+    if (!info || !hasTimetableData(info.routeKey)) return null;
+
+    const { prev, next } = getDeparturesAround(
+      info.routeKey, stationName, info.directionIndex, info.depTime, 1, 4
+    );
+    if (prev.length === 0 && next.length === 0) return null;
+
+    const renderRow = (dep: Departure, highlight = false) => (
+      <div key={`${dep.time}-${dep.type}`} style={{
+        display: 'flex', alignItems: 'center', gap: '6px',
+        padding: '3px 6px',
+        backgroundColor: highlight ? (theme === 'dark' ? 'rgba(33,150,243,0.18)' : 'rgba(33,150,243,0.10)') : 'transparent',
+        borderRadius: '3px',
+      }}>
+        <span style={{ fontWeight: highlight ? 'bold' : 'normal', fontSize: '13px',
+          color: highlight ? colors.primary : colors.text, minWidth: '38px' }}>
+          {dep.time}
+        </span>
+        <span style={{
+          fontSize: '10px', color: '#fff', padding: '1px 4px', borderRadius: '3px',
+          backgroundColor: TRAIN_TYPE_COLOR[dep.type] ?? '#555', flexShrink: 0,
+        }}>{dep.type}</span>
+        <span style={{ fontSize: '11px', color: colors.textSecondary, flex: 1, overflow: 'hidden',
+          textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{dep.destination}</span>
+        {dep.platform && (
+          <span style={{ fontSize: '10px', color: colors.textSecondary, flexShrink: 0 }}>
+            {dep.platform}
+          </span>
+        )}
+      </div>
+    );
+
+    const lineData = hasTimetableData(info.routeKey);
+    return (
+      <div style={{
+        marginTop: '8px', borderTop: `1px solid ${colors.borderLight}`, paddingTop: '6px',
+      }}>
+        <div style={{ fontSize: '11px', color: colors.textSecondary, marginBottom: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <span>🕐</span>
+          <span>{info.depTime} 頃の時刻表</span>
+        </div>
+        {prev.map(d => renderRow(d, false))}
+        {next.map((d, i) => renderRow(d, i === 0))}
+        <div style={{ fontSize: '10px', color: colors.textSecondary, marginTop: '3px', opacity: 0.7 }}>
+          ⚠ 概算値・参考用
+        </div>
+      </div>
+    );
+  }, [timetableModeEnabled, stationTimelineMap, colors, theme, TRAIN_TYPE_COLOR]);
 
   // アイコン作成関数をメモ化
   const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean, opacity: number = 1) => {
@@ -1610,6 +1706,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                       </div>
                     </div>
 
+                    {renderStationTimetable(station.name)}
+
                     <div style={{ marginTop: '10px' }}>
                       <button
                         onClick={() => setDeparture(station)}
@@ -1755,6 +1853,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                         ))}
                       </div>
                     </div>
+
+                    {renderStationTimetable(station.name)}
 
                     <div style={{ marginTop: '10px' }}>
                       <button
@@ -2738,29 +2838,85 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
             </>
           )}
 
-          {/* 時刻表モード切り替えボタン（PC用） */}
+          {/* 時刻表モード切り替えボタン＋出発時刻入力（PC用） */}
           {!isMobile && (
-            <button
-              onClick={() => setTimetableModeEnabled(!timetableModeEnabled)}
-              style={{
-                position: 'absolute',
-                bottom: '10px',
-                right: '134px',
-                zIndex: 1002,
-                backgroundColor: timetableModeEnabled ? colors.primary : colors.surface,
-                color: timetableModeEnabled ? '#fff' : colors.text,
-                border: `1px solid ${timetableModeEnabled ? colors.primary : colors.border}`,
-                borderRadius: '8px',
-                padding: '8px 10px',
-                cursor: 'pointer',
-                boxShadow: `0 2px 8px ${colors.shadow}`,
-                fontSize: '13px',
-                backdropFilter: 'blur(4px)',
-              }}
-              title={timetableModeEnabled ? '時刻表モードをOFF' : '時刻表モードをON'}
-            >
-              📅
-            </button>
+            <div style={{
+              position: 'absolute',
+              bottom: '10px',
+              right: '134px',
+              zIndex: 1002,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}>
+              {/* 出発時刻入力（時刻表モードON時のみ） */}
+              {timetableModeEnabled && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  backgroundColor: colors.surface,
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: '8px',
+                  padding: '4px 8px',
+                  boxShadow: `0 2px 8px ${colors.shadow}`,
+                  backdropFilter: 'blur(4px)',
+                }}>
+                  <span style={{ fontSize: '11px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>出発</span>
+                  <input
+                    type="time"
+                    value={timetableBaseTime}
+                    onChange={e => setTimetableBaseTime(e.target.value)}
+                    style={{
+                      border: 'none',
+                      outline: 'none',
+                      fontSize: '13px',
+                      color: colors.text,
+                      backgroundColor: 'transparent',
+                      width: '78px',
+                      cursor: 'pointer',
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      const now = new Date();
+                      setTimetableBaseTime(
+                        `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
+                      );
+                    }}
+                    style={{
+                      border: `1px solid ${colors.borderLight}`,
+                      borderRadius: '4px',
+                      padding: '1px 5px',
+                      fontSize: '10px',
+                      backgroundColor: 'transparent',
+                      color: colors.textSecondary,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    今
+                  </button>
+                </div>
+              )}
+              {/* 時刻表ON/OFFボタン */}
+              <button
+                onClick={() => setTimetableModeEnabled(!timetableModeEnabled)}
+                style={{
+                  backgroundColor: timetableModeEnabled ? colors.primary : colors.surface,
+                  color: timetableModeEnabled ? '#fff' : colors.text,
+                  border: `1px solid ${timetableModeEnabled ? colors.primary : colors.border}`,
+                  borderRadius: '8px',
+                  padding: '8px 10px',
+                  cursor: 'pointer',
+                  boxShadow: `0 2px 8px ${colors.shadow}`,
+                  fontSize: '13px',
+                  backdropFilter: 'blur(4px)',
+                }}
+                title={timetableModeEnabled ? '時刻表モードをOFF' : '時刻表モードをON'}
+              >
+                📅
+              </button>
+            </div>
           )}
 
           {/* フルスクリーン切り替えボタン */}
