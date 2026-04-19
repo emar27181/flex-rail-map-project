@@ -19,6 +19,7 @@ import { getStoppingTrainTypes, generateStationDescription } from '../data/stati
 import { getStationBorderStyleByPattern, getBorderStyleExplanation } from '../data/stationBorderStyles';
 import { attachDebugFunctions } from '../utils/stationAnalysisUtils';
 import CookieBanner from './CookieBanner';
+import TimetablePanel from './TimetablePanel';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -72,9 +73,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [isLegendExpanded, setIsLegendExpanded] = useState(true);
 
   // 表示モードの管理
-  const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
+  const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(true);
   const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
-  const [showTravelTimes, setShowTravelTimes] = useState(false);
+  const [showTravelTimes, setShowTravelTimes] = useState(true);
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
@@ -100,9 +101,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     typeof window !== 'undefined' && window.innerWidth < 768
   );
 
+  // 時刻表モード
+  const [timetableModeEnabled, setTimetableModeEnabled] = useState(false);
+  const [timetableBaseTime, setTimetableBaseTime] = useState(() => {
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  });
+
   // モバイル検出
   const [isMobile, setIsMobile] = useState(false);
-  const [mobilePanelTab, setMobilePanelTab] = useState<'station' | 'legend'>('station');
+  const [mobilePanelTab, setMobilePanelTab] = useState<'station' | 'legend' | 'timetable'>('station');
   const [isMobilePanelExpanded, setIsMobilePanelExpanded] = useState(true);
 
   // 路線ホバー・ポップアップ状態
@@ -499,8 +507,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     const baseMarkerSize = getTimeMarkerSize(zoomLevel) * 2.2;
     const markerColor = isDeparture ? '#4CAF50' : '#F44336';
 
-    // 駅名のみを表示（S: G: プレフィックスなし）
-    const fontSize = Math.max(14, Math.round(baseMarkerSize * 0.45));
+    // 駅名のみを表示（S: G: プレフィックスなし）、最大16pxでサイズを固定
+    const fontSize = Math.max(14, Math.min(16, Math.round(baseMarkerSize * 0.45)));
     // 英語駅名の場合は文字幅係数を調整（英語は日本語より文字幅が狭い）
     const charWidthMultiplier = language === 'english' ? 0.4 : 0.6;
     const padding = language === 'english' ? 10 : 20;
@@ -1951,18 +1959,42 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
                 language={currentLanguage}
               />
+              {timetableModeEnabled && routeRecommendations.length > 0 && (
+                <div style={{ marginTop: '8px' }}>
+                  <TimetablePanel
+                    routeResult={routeRecommendations[selectedRouteIndices ? [...selectedRouteIndices][0] : 0] ?? null}
+                    departureTime={timetableBaseTime}
+                    onDepartureTimeChange={setTimetableBaseTime}
+                    language={currentLanguage}
+                    isMobile={false}
+                  />
+                </div>
+              )}
             </div>
           )
         ) : (
-          <StationSelector
-            departure={departure}
-            arrival={arrival}
-            onDepartureChange={setDeparture}
-            onArrivalChange={setArrival}
-            isExpanded={isStationSelectorExpanded}
-            onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
-            language={currentLanguage}
-          />
+          <>
+            <StationSelector
+              departure={departure}
+              arrival={arrival}
+              onDepartureChange={setDeparture}
+              onArrivalChange={setArrival}
+              isExpanded={isStationSelectorExpanded}
+              onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
+              language={currentLanguage}
+            />
+            {timetableModeEnabled && routeRecommendations.length > 0 && (
+              <div style={{ marginTop: '8px' }}>
+                <TimetablePanel
+                  routeResult={routeRecommendations[selectedRouteIndices ? [...selectedRouteIndices][0] : 0] ?? null}
+                  departureTime={timetableBaseTime}
+                  onDepartureTimeChange={setTimetableBaseTime}
+                  language={currentLanguage}
+                  isMobile={false}
+                />
+              </div>
+            )}
+          </>
         )}
 
         {/* カバレッジ分析 - オフ */}
@@ -2568,6 +2600,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                       language={currentLanguage}
                     />
                   )}
+                  {mobilePanelTab === 'timetable' && (
+                    <TimetablePanel
+                      routeResult={routeRecommendations[selectedRouteIndices ? [...selectedRouteIndices][0] : 0] ?? null}
+                      departureTime={timetableBaseTime}
+                      onDepartureTimeChange={setTimetableBaseTime}
+                      language={currentLanguage}
+                      isMobile={true}
+                    />
+                  )}
                   {mobilePanelTab === 'legend' && (
                     <div style={{ padding: '10px' }}>
                       <LegendStationMarkers
@@ -2655,14 +2696,31 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     border: 'none',
                     borderRadius: '6px',
                     cursor: 'pointer',
-                    fontSize: '13px',
+                    fontSize: '12px',
                     fontWeight: 'bold',
                     backgroundColor: mobilePanelTab === 'legend' && isMobilePanelExpanded ? colors.primary : 'transparent',
                     color: mobilePanelTab === 'legend' && isMobilePanelExpanded ? '#fff' : colors.textSecondary,
                     transition: 'background-color 0.2s',
                   }}
                 >
-                  🗺 {translateUI('displayedRoutes', currentLanguage)}
+                  🗺 路線
+                </button>
+                <button
+                  onClick={() => { setMobilePanelTab('timetable'); setIsMobilePanelExpanded(true); }}
+                  style={{
+                    flex: 1,
+                    height: '36px',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    backgroundColor: mobilePanelTab === 'timetable' && isMobilePanelExpanded ? colors.primary : 'transparent',
+                    color: mobilePanelTab === 'timetable' && isMobilePanelExpanded ? '#fff' : colors.textSecondary,
+                    transition: 'background-color 0.2s',
+                  }}
+                >
+                  📅 時刻表
                 </button>
                 <button
                   onClick={() => setIsMobilePanelExpanded(!isMobilePanelExpanded)}
@@ -2681,6 +2739,31 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 </button>
               </div>
             </>
+          )}
+
+          {/* 時刻表モード切り替えボタン（PC用） */}
+          {!isMobile && (
+            <button
+              onClick={() => setTimetableModeEnabled(!timetableModeEnabled)}
+              style={{
+                position: 'absolute',
+                bottom: '10px',
+                right: '134px',
+                zIndex: 1002,
+                backgroundColor: timetableModeEnabled ? colors.primary : colors.surface,
+                color: timetableModeEnabled ? '#fff' : colors.text,
+                border: `1px solid ${timetableModeEnabled ? colors.primary : colors.border}`,
+                borderRadius: '8px',
+                padding: '8px 10px',
+                cursor: 'pointer',
+                boxShadow: `0 2px 8px ${colors.shadow}`,
+                fontSize: '13px',
+                backdropFilter: 'blur(4px)',
+              }}
+              title={timetableModeEnabled ? '時刻表モードをOFF' : '時刻表モードをON'}
+            >
+              📅
+            </button>
           )}
 
           {/* フルスクリーン切り替えボタン */}
