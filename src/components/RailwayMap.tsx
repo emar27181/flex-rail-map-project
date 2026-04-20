@@ -19,8 +19,8 @@ import { getStoppingTrainTypes, generateStationDescription } from '../data/stati
 import { getStationBorderStyleByPattern, getBorderStyleExplanation } from '../data/stationBorderStyles';
 import { attachDebugFunctions } from '../utils/stationAnalysisUtils';
 import CookieBanner from './CookieBanner';
-import TimetablePanel from './TimetablePanel';
 import {
+  getNextDepartures,
   getDeparturesAround,
   getDirectionIndex as getTimetableDirectionIndex,
   hasTimetableData,
@@ -114,7 +114,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
   // モバイル検出
   const [isMobile, setIsMobile] = useState(false);
-  const [mobilePanelTab, setMobilePanelTab] = useState<'station' | 'legend' | 'timetable'>('station');
+  const [mobilePanelTab, setMobilePanelTab] = useState<'station' | 'legend'>('station');
   const [isMobilePanelExpanded, setIsMobilePanelExpanded] = useState(true);
 
   // 駅時刻表ツールチップ状態
@@ -338,88 +338,159 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     '快特': '#8e44ad', '特急ロマンスカー': '#e74c3c',
   };
 
-  // 駅時刻表ツールチップのコンテンツをレンダリング
+  // クリック時の時刻表ツールチップを浮き上がりで表示
   const renderStationTimetableTooltip = () => {
-    if (!stationTooltip) return null;
+    if (!timetableModeEnabled || !stationTooltip) return null;
+
+    // 選択中の経路上にある場合はその路線・方向・推定時刻を使用
+    // 経路外の駅はその駅を通る路線のうち時刻データを持つものを探す
     const info = stationTimelineMap.get(stationTooltip.stationName);
-    if (!info || !hasTimetableData(info.routeKey)) return null;
 
-    const { prev, next } = getDeparturesAround(
-      info.routeKey, stationTooltip.stationName, info.directionIndex, info.depTime, 1, 4
-    );
-    if (prev.length === 0 && next.length === 0) return null;
+    interface RouteSection {
+      routeKey: string;
+      routeName: string;
+      depTime: string;
+      directionIndex: number;
+    }
 
-    // 画面端を超えないよう位置を調整（ツールチップ幅=200px, 高さ=200px想定）
-    const tooltipW = 220;
+    const sections: RouteSection[] = [];
+
+    if (info && hasTimetableData(info.routeKey)) {
+      sections.push({
+        routeKey: info.routeKey,
+        routeName: routeNames[info.routeKey as RouteKey] ?? info.routeKey,
+        depTime: info.depTime,
+        directionIndex: info.directionIndex,
+      });
+    } else {
+      // 経路未選択 or 経路外駅 → その駅を通る全路線を表示
+      const stationRoutes = getRoutesForStation(stationTooltip.stationName);
+      for (const rk of stationRoutes) {
+        if (hasTimetableData(rk)) {
+          sections.push({
+            routeKey: rk,
+            routeName: routeNames[rk as RouteKey] ?? rk,
+            depTime: timetableBaseTime,
+            directionIndex: 0,
+          });
+        }
+      }
+    }
+
+    if (sections.length === 0) return null;
+
+    // 各路線の次発5本を取得（データがある路線のみ保持）
+    const sectionDeps = sections
+      .map(sec => ({
+        ...sec,
+        deps: getNextDepartures(sec.routeKey, stationTooltip.stationName, sec.directionIndex, sec.depTime, 5),
+      }))
+      .filter(s => s.deps.length > 0);
+
+    if (sectionDeps.length === 0) return null;
+
+    // 画面端からはみ出さないよう位置調整
+    const TW = 250;
     const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
     const vh = typeof window !== 'undefined' ? window.innerHeight : 600;
     const rawX = stationTooltip.x + 12;
-    const rawY = stationTooltip.y - 10;
-    const x = rawX + tooltipW > vw ? stationTooltip.x - tooltipW - 4 : rawX;
-    const y = rawY + 220 > vh ? stationTooltip.y - 220 : rawY;
-
-    const renderRow = (dep: Departure, highlight = false) => (
-      <div key={`${dep.time}-${dep.type}-${dep.destination}`} style={{
-        display: 'flex', alignItems: 'center', gap: '6px',
-        padding: '3px 6px',
-        backgroundColor: highlight
-          ? (theme === 'dark' ? 'rgba(33,150,243,0.22)' : 'rgba(33,150,243,0.12)')
-          : 'transparent',
-        borderRadius: '3px',
-      }}>
-        <span style={{ fontWeight: highlight ? 'bold' : 'normal', fontSize: '13px',
-          color: highlight ? colors.primary : colors.text, minWidth: '40px', flexShrink: 0 }}>
-          {dep.time}
-        </span>
-        <span style={{
-          fontSize: '10px', color: '#fff', padding: '1px 4px', borderRadius: '3px',
-          backgroundColor: TRAIN_TYPE_COLOR[dep.type] ?? '#555', flexShrink: 0, whiteSpace: 'nowrap',
-        }}>{dep.type}</span>
-        <span style={{ fontSize: '11px', color: colors.textSecondary, flex: 1,
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {dep.destination}
-        </span>
-        {dep.platform && (
-          <span style={{ fontSize: '10px', color: colors.textSecondary, flexShrink: 0 }}>
-            {dep.platform}
-          </span>
-        )}
-      </div>
-    );
+    const rawY = stationTooltip.y + 12;
+    const x = rawX + TW > vw ? stationTooltip.x - TW - 4 : rawX;
+    const totalRows = sectionDeps.reduce((sum, s) => sum + s.deps.length, 0);
+    const estH = 80 + sectionDeps.length * 22 + totalRows * 26 + 20;
+    const y = rawY + estH > vh ? stationTooltip.y - estH - 4 : rawY;
 
     return (
       <div
+        onClick={() => setStationTooltip(null)}
         style={{
-          position: 'fixed',
-          left: x,
-          top: y,
-          zIndex: 9999,
-          width: `${tooltipW}px`,
+          position: 'fixed', left: x, top: y, zIndex: 9999,
+          width: `${TW}px`,
           backgroundColor: colors.surfaceElevated,
           border: `1px solid ${colors.border}`,
           borderRadius: '8px',
           boxShadow: `0 4px 16px ${colors.shadow}`,
-          padding: '8px 0',
-          pointerEvents: 'none',
+          padding: '8px 10px',
+          cursor: 'pointer',
         }}
       >
         {/* ヘッダー */}
-        <div style={{ padding: '0 10px 6px', borderBottom: `1px solid ${colors.borderLight}` }}>
-          <div style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+          <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text }}>
             {stationTooltip.stationName}
-          </div>
-          <div style={{ fontSize: '11px', color: colors.textSecondary, marginTop: '2px' }}>
-            🕐 {info.depTime} 頃の発車
-          </div>
+          </span>
+          <span style={{ fontSize: '12px', color: colors.textSecondary }}>✕</span>
         </div>
-        {/* 列車一覧 */}
-        <div style={{ padding: '4px 0' }}>
-          {prev.map(d => renderRow(d, false))}
-          {next.map((d, i) => renderRow(d, i === 0))}
+
+        {/* 出発基準時刻 */}
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}
+        >
+          <span style={{ fontSize: '11px', color: colors.textSecondary }}>基準時刻</span>
+          <input
+            type="time"
+            value={timetableBaseTime}
+            onChange={e => setTimetableBaseTime(e.target.value)}
+            style={{
+              border: `1px solid ${colors.border}`,
+              borderRadius: '3px',
+              padding: '1px 4px',
+              fontSize: '11px',
+              backgroundColor: colors.surface,
+              color: colors.text,
+              cursor: 'pointer',
+            }}
+          />
         </div>
-        {/* フッター */}
-        <div style={{ padding: '4px 10px 0', borderTop: `1px solid ${colors.borderLight}`,
-          fontSize: '10px', color: colors.textSecondary, opacity: 0.7 }}>
+
+        {/* 路線ごとの発車一覧 */}
+        {sectionDeps.map((sec, si) => (
+          <div key={sec.routeKey} style={{ marginBottom: si < sectionDeps.length - 1 ? '8px' : 0 }}>
+            {/* 路線名ヘッダー（複数路線の場合のみ表示） */}
+            {sectionDeps.length > 1 && (
+              <div style={{
+                fontSize: '10px', fontWeight: 'bold', color: colors.textSecondary,
+                borderBottom: `1px solid ${colors.borderLight}`, paddingBottom: '2px', marginBottom: '3px',
+              }}>
+                {sec.routeName}（{sec.depTime} 以降）
+              </div>
+            )}
+            {sectionDeps.length === 1 && (
+              <div style={{ fontSize: '10px', color: colors.textSecondary, marginBottom: '3px' }}>
+                {sec.depTime} 以降
+              </div>
+            )}
+            {sec.deps.map((dep, i) => (
+              <div key={`${dep.time}-${dep.type}-${i}`} style={{
+                display: 'flex', alignItems: 'center', gap: '5px',
+                padding: '3px 0',
+                borderTop: `1px solid ${colors.borderLight}`,
+              }}>
+                <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text, minWidth: '42px', flexShrink: 0 }}>
+                  {dep.time}
+                </span>
+                <span style={{
+                  fontSize: '10px', color: '#fff', padding: '1px 4px', borderRadius: '3px',
+                  backgroundColor: TRAIN_TYPE_COLOR[dep.type] ?? '#555', flexShrink: 0, whiteSpace: 'nowrap',
+                }}>
+                  {dep.type}
+                </span>
+                <span style={{ fontSize: '11px', color: colors.textSecondary, flex: 1,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {dep.destination}
+                </span>
+                {dep.platform && (
+                  <span style={{ fontSize: '10px', color: colors.textSecondary, flexShrink: 0 }}>
+                    {dep.platform}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        ))}
+
+        <div style={{ fontSize: '10px', color: colors.textSecondary, opacity: 0.6, marginTop: '4px' }}>
           ⚠ 概算値・参考用
         </div>
       </div>
@@ -1700,16 +1771,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 icon={specialIcon}
                 zIndexOffset={1000}
                 eventHandlers={{
-                  mouseover: (e) => {
-                    if (!timetableModeEnabled) return;
-                    const oe = e.originalEvent as MouseEvent | undefined;
-                    if (oe) setStationTooltip({ stationName: station.name, x: oe.clientX, y: oe.clientY });
-                  },
-                  mouseout: () => setStationTooltip(null),
                   click: (e) => {
-                    if (!timetableModeEnabled || !isMobile) return;
                     const oe = e.originalEvent as MouseEvent | undefined;
-                    if (oe) setStationTooltip(prev =>
+                    if (!oe) return;
+                    setStationTooltip(prev =>
                       prev?.stationName === station.name ? null : { stationName: station.name, x: oe.clientX, y: oe.clientY }
                     );
                   },
@@ -1863,16 +1928,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 icon={stationIcon}
                 zIndexOffset={2000}
                 eventHandlers={{
-                  mouseover: (e) => {
-                    if (!timetableModeEnabled) return;
-                    const oe = e.originalEvent as MouseEvent | undefined;
-                    if (oe) setStationTooltip({ stationName: station.name, x: oe.clientX, y: oe.clientY });
-                  },
-                  mouseout: () => setStationTooltip(null),
                   click: (e) => {
-                    if (!timetableModeEnabled || !isMobile) return;
                     const oe = e.originalEvent as MouseEvent | undefined;
-                    if (oe) setStationTooltip(prev =>
+                    if (!oe) return;
+                    setStationTooltip(prev =>
                       prev?.stationName === station.name ? null : { stationName: station.name, x: oe.clientX, y: oe.clientY }
                     );
                   },
@@ -2119,17 +2178,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
                 language={currentLanguage}
               />
-              {timetableModeEnabled && (
-                <div style={{ marginTop: '8px' }}>
-                  <TimetablePanel
-                    routeResult={routeRecommendations[selectedRouteIndices ? [...selectedRouteIndices][0] : 0] ?? null}
-                    departureTime={timetableBaseTime}
-                    onDepartureTimeChange={setTimetableBaseTime}
-                    language={currentLanguage}
-                    isMobile={false}
-                  />
-                </div>
-              )}
             </div>
           )
         ) : (
@@ -2143,17 +2191,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
               language={currentLanguage}
             />
-            {timetableModeEnabled && (
-              <div style={{ marginTop: '8px' }}>
-                <TimetablePanel
-                  routeResult={routeRecommendations[selectedRouteIndices ? [...selectedRouteIndices][0] : 0] ?? null}
-                  departureTime={timetableBaseTime}
-                  onDepartureTimeChange={setTimetableBaseTime}
-                  language={currentLanguage}
-                  isMobile={false}
-                />
-              </div>
-            )}
           </>
         )}
 
@@ -2760,15 +2797,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                       language={currentLanguage}
                     />
                   )}
-                  {mobilePanelTab === 'timetable' && (
-                    <TimetablePanel
-                      routeResult={routeRecommendations[selectedRouteIndices ? [...selectedRouteIndices][0] : 0] ?? null}
-                      departureTime={timetableBaseTime}
-                      onDepartureTimeChange={setTimetableBaseTime}
-                      language={currentLanguage}
-                      isMobile={true}
-                    />
-                  )}
                   {mobilePanelTab === 'legend' && (
                     <div style={{ padding: '10px' }}>
                       <LegendStationMarkers
@@ -2864,23 +2892,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                   }}
                 >
                   🗺 路線
-                </button>
-                <button
-                  onClick={() => { setMobilePanelTab('timetable'); setIsMobilePanelExpanded(true); }}
-                  style={{
-                    flex: 1,
-                    height: '36px',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    backgroundColor: mobilePanelTab === 'timetable' && isMobilePanelExpanded ? colors.primary : 'transparent',
-                    color: mobilePanelTab === 'timetable' && isMobilePanelExpanded ? '#fff' : colors.textSecondary,
-                    transition: 'background-color 0.2s',
-                  }}
-                >
-                  📅 時刻表
                 </button>
                 <button
                   onClick={() => setIsMobilePanelExpanded(!isMobilePanelExpanded)}
