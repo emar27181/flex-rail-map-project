@@ -468,6 +468,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
             width: `${LEFT_W}px`,
             flexShrink: 0,
             borderRight: `1px solid ${colors.borderLight}`,
+            overflow: 'hidden',
           }}>
             {allRoutes.map(rk => {
               const isActive = rk === activeRouteKey;
@@ -508,7 +509,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
           </div>
 
           {/* 右カラム: 時刻表 */}
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, overflow: 'hidden' }}>
             {activeRouteKey && hasTimetableData(activeRouteKey) ? (
               <>
                 <div style={{
