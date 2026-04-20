@@ -118,7 +118,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [isMobilePanelExpanded, setIsMobilePanelExpanded] = useState(true);
 
   // 駅時刻表ツールチップ状態
-  const [stationTooltip, setStationTooltip] = useState<{ stationName: string; x: number; y: number } | null>(null);
+  const [stationTooltip, setStationTooltip] = useState<{ stationName: string; station: Station; x: number; y: number } | null>(null);
   // ツールチップ内で選択中の路線
   const [tooltipSelectedRoute, setTooltipSelectedRoute] = useState<string | null>(null);
 
@@ -408,37 +408,56 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       >
         {/* ヘッダー */}
         <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           padding: '7px 10px 6px',
           borderBottom: `1px solid ${colors.borderLight}`,
         }}>
-          <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text }}>
-            {stationTooltip.stationName}
-          </span>
+          {/* 駅名 + 閉じるボタン */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+            <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text }}>
+              {stationTooltip.stationName}
+            </span>
+            <span
+              onClick={() => setStationTooltip(null)}
+              style={{ fontSize: '12px', color: colors.textSecondary, cursor: 'pointer', padding: '0 2px' }}
+            >✕</span>
+          </div>
+          {/* 出発/到着ボタン + 基準時刻 */}
           <div
             onClick={e => e.stopPropagation()}
-            style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}
           >
-            <span style={{ fontSize: '10px', color: colors.textSecondary }}>基準</span>
-            <input
-              type="time"
-              value={timetableBaseTime}
-              onChange={e => setTimetableBaseTime(e.target.value)}
+            <button
+              onClick={() => { setDeparture(stationTooltip.station); setStationTooltip(null); }}
               style={{
-                border: `1px solid ${colors.border}`,
-                borderRadius: '3px',
-                padding: '1px 4px',
-                fontSize: '11px',
-                backgroundColor: colors.surface,
-                color: colors.text,
-                cursor: 'pointer',
+                backgroundColor: '#4CAF50', color: 'white', border: 'none',
+                padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px',
               }}
-            />
+            >{translateUI('setDepartureStation', currentLanguage)}</button>
+            <button
+              onClick={() => { setArrival(stationTooltip.station); setStationTooltip(null); }}
+              style={{
+                backgroundColor: '#F44336', color: 'white', border: 'none',
+                padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px',
+              }}
+            >{translateUI('setArrivalStation', currentLanguage)}</button>
+            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '10px', color: colors.textSecondary }}>基準</span>
+              <input
+                type="time"
+                value={timetableBaseTime}
+                onChange={e => setTimetableBaseTime(e.target.value)}
+                style={{
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: '3px',
+                  padding: '1px 4px',
+                  fontSize: '11px',
+                  backgroundColor: colors.surface,
+                  color: colors.text,
+                  cursor: 'pointer',
+                }}
+              />
+            </div>
           </div>
-          <span
-            onClick={() => setStationTooltip(null)}
-            style={{ fontSize: '12px', color: colors.textSecondary, cursor: 'pointer', padding: '0 2px' }}
-          >✕</span>
         </div>
 
         {/* 2カラム本体 */}
@@ -1833,88 +1852,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     const oe = e.originalEvent as MouseEvent | undefined;
                     if (!oe) return;
                     setStationTooltip(prev =>
-                      prev?.stationName === station.name ? null : { stationName: station.name, x: oe.clientX, y: oe.clientY }
+                      prev?.stationName === station.name ? null : { stationName: station.name, station, x: oe.clientX, y: oe.clientY }
                     );
                   },
                 }}
               >
-                {showStationNames && (
-                <Popup className={`popup-${theme}`}>
-                  <div style={{ backgroundColor: colors.surface, color: colors.text, padding: '8px', borderRadius: '4px' }} className="popup-content-main">
-                    <strong style={{ color: colors.text }}>{translateStation(station.name, currentLanguage)}</strong>
-                    {isDeparture && <div style={{ color: '#4CAF50', fontWeight: 'bold' }}>{translateUI('departure', currentLanguage)}</div>}
-                    {isArrival && <div style={{ color: '#F44336', fontWeight: 'bold' }}>{translateUI('arrival', currentLanguage)}</div>}
-
-                    {/* 通っている路線を表示 */}
-                    <div style={{ marginTop: '8px', marginBottom: '10px' }}>
-                      <div style={{ fontSize: '12px', color: colors.textSecondary, marginBottom: '4px' }}>{currentLanguage === 'japanese' ? '通っている路線:' : 'Routes:'}:</div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                        {getRoutesForStation(station.name).map((stationRouteKey) => (
-                          <div
-                            key={stationRouteKey}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              fontSize: '12px',
-                              marginBottom: '2px'
-                            }}
-                          >
-                            <div
-                              className="route-color-line"
-                              style={{
-                                width: '20px',
-                                height: '3px',
-                                backgroundColor: routeColors[stationRouteKey],
-                                borderRadius: '1px',
-                                flexShrink: 0
-                              }}
-                            />
-                            <span style={{
-                              color: adjustRouteColorForTheme(routeColors[stationRouteKey], theme),
-                              fontWeight: '500'
-                            }}>
-                              {translateRoute(getRouteDestination(stationRouteKey)?.description || routeNames[stationRouteKey] || stationRouteKey, currentLanguage)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div style={{ marginTop: '10px' }}>
-                      <button
-                        onClick={() => setDeparture(station)}
-                        style={{
-                          backgroundColor: '#4CAF50',
-                          color: 'white',
-                          border: 'none',
-                          padding: '5px 10px',
-                          borderRadius: '3px',
-                          cursor: 'pointer',
-                          marginRight: '5px',
-                          fontSize: '12px'
-                        }}
-                      >
-{translateUI('setDepartureStation', currentLanguage)}
-                      </button>
-                      <button
-                        onClick={() => setArrival(station)}
-                        style={{
-                          backgroundColor: '#F44336',
-                          color: 'white',
-                          border: 'none',
-                          padding: '5px 10px',
-                          borderRadius: '3px',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                      >
-{translateUI('setArrivalStation', currentLanguage)}
-                      </button>
-                    </div>
-                  </div>
-                </Popup>
-                )}
               </Marker>
             );
           } else {
@@ -1990,86 +1932,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     const oe = e.originalEvent as MouseEvent | undefined;
                     if (!oe) return;
                     setStationTooltip(prev =>
-                      prev?.stationName === station.name ? null : { stationName: station.name, x: oe.clientX, y: oe.clientY }
+                      prev?.stationName === station.name ? null : { stationName: station.name, station, x: oe.clientX, y: oe.clientY }
                     );
                   },
                 }}
               >
-                {showStationNames && (
-                <Popup className={`popup-${theme}`}>
-                  <div style={{ backgroundColor: colors.surface, color: colors.text, padding: '8px', borderRadius: '4px' }} className="popup-content-main">
-                    <strong style={{ color: colors.text }}>{translateStation(station.name, currentLanguage)}</strong>
-
-                    {/* 通っている路線を表示 */}
-                    <div style={{ marginTop: '8px', marginBottom: '10px' }}>
-                      <div style={{ fontSize: '12px', color: colors.textSecondary, marginBottom: '4px' }}>{currentLanguage === 'japanese' ? '通っている路線:' : 'Routes:'}:</div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                        {getRoutesForStation(station.name).map((stationRouteKey) => (
-                          <div
-                            key={stationRouteKey}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              fontSize: '12px',
-                              marginBottom: '2px'
-                            }}
-                          >
-                            <div
-                              className="route-color-line"
-                              style={{
-                                width: '20px',
-                                height: '3px',
-                                backgroundColor: routeColors[stationRouteKey],
-                                borderRadius: '1px',
-                                flexShrink: 0
-                              }}
-                            />
-                            <span style={{
-                              color: adjustRouteColorForTheme(routeColors[stationRouteKey], theme),
-                              fontWeight: '500'
-                            }}>
-                              {translateRoute(getRouteDestination(stationRouteKey)?.description || routeNames[stationRouteKey] || stationRouteKey, currentLanguage)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div style={{ marginTop: '10px' }}>
-                      <button
-                        onClick={() => setDeparture(station)}
-                        style={{
-                          backgroundColor: '#4CAF50',
-                          color: 'white',
-                          border: 'none',
-                          padding: '5px 10px',
-                          borderRadius: '3px',
-                          cursor: 'pointer',
-                          marginRight: '5px',
-                          fontSize: '12px'
-                        }}
-                      >
-{translateUI('setDepartureStation', currentLanguage)}
-                      </button>
-                      <button
-                        onClick={() => setArrival(station)}
-                        style={{
-                          backgroundColor: '#F44336',
-                          color: 'white',
-                          border: 'none',
-                          padding: '5px 10px',
-                          borderRadius: '3px',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                      >
-{translateUI('setArrivalStation', currentLanguage)}
-                      </button>
-                    </div>
-                  </div>
-                </Popup>
-                )}
               </Marker>
             );
           }
