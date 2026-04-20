@@ -119,6 +119,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
   // 駅時刻表ツールチップ状態
   const [stationTooltip, setStationTooltip] = useState<{ stationName: string; x: number; y: number } | null>(null);
+  // ツールチップ内で選択中の路線
+  const [tooltipSelectedRoute, setTooltipSelectedRoute] = useState<string | null>(null);
 
   // 路線ホバー・ポップアップ状態
   const [hoveredRoute, setHoveredRoute] = useState<string | null>(null);
@@ -142,6 +144,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // 駅が変わったらツールチップの選択路線をリセット
+  useEffect(() => {
+    setTooltipSelectedRoute(null);
+  }, [stationTooltip?.stationName]);
 
   // 列車種別表示: 路線変更時に列車種別をリセット
   useEffect(() => {
@@ -338,71 +345,56 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     '快特': '#8e44ad', '特急ロマンスカー': '#e74c3c',
   };
 
-  // クリック時の時刻表ツールチップを浮き上がりで表示
+  // クリック時の時刻表ツールチップを浮き上がりで表示（左:路線一覧 / 右:時刻表）
   const renderStationTimetableTooltip = () => {
     if (!timetableModeEnabled || !stationTooltip) return null;
 
-    // 選択中の経路上にある場合はその路線・方向・推定時刻を使用
-    // 経路外の駅はその駅を通る路線のうち時刻データを持つものを探す
-    const info = stationTimelineMap.get(stationTooltip.stationName);
+    // この駅を通る全路線
+    const allRoutes = getRoutesForStation(stationTooltip.stationName);
+    if (allRoutes.length === 0) return null;
 
-    interface RouteSection {
-      routeKey: string;
-      routeName: string;
-      depTime: string;
-      directionIndex: number;
-    }
+    // 経路上の駅かどうかチェック（路線・方向・推定時刻を取得）
+    const routeInfo = stationTimelineMap.get(stationTooltip.stationName);
 
-    const sections: RouteSection[] = [];
-
-    if (info && hasTimetableData(info.routeKey)) {
-      sections.push({
-        routeKey: info.routeKey,
-        routeName: routeNames[info.routeKey as RouteKey] ?? info.routeKey,
-        depTime: info.depTime,
-        directionIndex: info.directionIndex,
-      });
-    } else {
-      // 経路未選択 or 経路外駅 → その駅を通る全路線を表示
-      const stationRoutes = getRoutesForStation(stationTooltip.stationName);
-      for (const rk of stationRoutes) {
-        if (hasTimetableData(rk)) {
-          sections.push({
-            routeKey: rk,
-            routeName: routeNames[rk as RouteKey] ?? rk,
-            depTime: timetableBaseTime,
-            directionIndex: 0,
-          });
-        }
+    // 選択路線を決定：tooltipSelectedRoute → 経路上の路線 → データのある最初の路線
+    const activeRouteKey: string | null = (() => {
+      if (tooltipSelectedRoute && allRoutes.includes(tooltipSelectedRoute as RouteKey)) {
+        return tooltipSelectedRoute;
       }
-    }
+      if (routeInfo && hasTimetableData(routeInfo.routeKey)) return routeInfo.routeKey;
+      return allRoutes.find(rk => hasTimetableData(rk)) ?? null;
+    })();
 
-    if (sections.length === 0) return null;
+    // 選択路線の時刻データを取得
+    const activeDeps = (() => {
+      if (!activeRouteKey || !hasTimetableData(activeRouteKey)) return [];
+      let depTime = timetableBaseTime;
+      let dirIdx = 0;
+      if (routeInfo && routeInfo.routeKey === activeRouteKey) {
+        depTime = routeInfo.depTime;
+        dirIdx = routeInfo.directionIndex;
+      }
+      return getNextDepartures(activeRouteKey, stationTooltip.stationName, dirIdx, depTime, 5);
+    })();
 
-    // 各路線の次発5本を取得（データがある路線のみ保持）
-    const sectionDeps = sections
-      .map(sec => ({
-        ...sec,
-        deps: getNextDepartures(sec.routeKey, stationTooltip.stationName, sec.directionIndex, sec.depTime, 5),
-      }))
-      .filter(s => s.deps.length > 0);
-
-    if (sectionDeps.length === 0) return null;
+    const activeDepTime = (() => {
+      if (routeInfo && activeRouteKey && routeInfo.routeKey === activeRouteKey) return routeInfo.depTime;
+      return timetableBaseTime;
+    })();
 
     // 画面端からはみ出さないよう位置調整
-    const TW = 250;
+    const TW = 360;
+    const LEFT_W = 120;
     const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
     const vh = typeof window !== 'undefined' ? window.innerHeight : 600;
-    const rawX = stationTooltip.x + 12;
-    const rawY = stationTooltip.y + 12;
-    const x = rawX + TW > vw ? stationTooltip.x - TW - 4 : rawX;
-    const totalRows = sectionDeps.reduce((sum, s) => sum + s.deps.length, 0);
-    const estH = 80 + sectionDeps.length * 22 + totalRows * 26 + 20;
-    const y = rawY + estH > vh ? stationTooltip.y - estH - 4 : rawY;
+    const rawX = stationTooltip.x + 14;
+    const rawY = stationTooltip.y + 14;
+    const x = rawX + TW > vw ? stationTooltip.x - TW - 6 : rawX;
+    const estH = 52 + Math.max(allRoutes.length * 28, activeDeps.length * 26 + 22) + 20;
+    const y = rawY + estH > vh ? stationTooltip.y - estH - 6 : rawY;
 
     return (
       <div
-        onClick={() => setStationTooltip(null)}
         style={{
           position: 'fixed', left: x, top: y, zIndex: 9999,
           width: `${TW}px`,
@@ -410,88 +402,154 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
           border: `1px solid ${colors.border}`,
           borderRadius: '8px',
           boxShadow: `0 4px 16px ${colors.shadow}`,
-          padding: '8px 10px',
-          cursor: 'pointer',
+          overflow: 'hidden',
+          cursor: 'default',
         }}
       >
         {/* ヘッダー */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          padding: '7px 10px 6px',
+          borderBottom: `1px solid ${colors.borderLight}`,
+        }}>
           <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text }}>
             {stationTooltip.stationName}
           </span>
-          <span style={{ fontSize: '12px', color: colors.textSecondary }}>✕</span>
-        </div>
-
-        {/* 出発基準時刻 */}
-        <div
-          onClick={e => e.stopPropagation()}
-          style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}
-        >
-          <span style={{ fontSize: '11px', color: colors.textSecondary }}>基準時刻</span>
-          <input
-            type="time"
-            value={timetableBaseTime}
-            onChange={e => setTimetableBaseTime(e.target.value)}
-            style={{
-              border: `1px solid ${colors.border}`,
-              borderRadius: '3px',
-              padding: '1px 4px',
-              fontSize: '11px',
-              backgroundColor: colors.surface,
-              color: colors.text,
-              cursor: 'pointer',
-            }}
-          />
-        </div>
-
-        {/* 路線ごとの発車一覧 */}
-        {sectionDeps.map((sec, si) => (
-          <div key={sec.routeKey} style={{ marginBottom: si < sectionDeps.length - 1 ? '8px' : 0 }}>
-            {/* 路線名ヘッダー（複数路線の場合のみ表示） */}
-            {sectionDeps.length > 1 && (
-              <div style={{
-                fontSize: '10px', fontWeight: 'bold', color: colors.textSecondary,
-                borderBottom: `1px solid ${colors.borderLight}`, paddingBottom: '2px', marginBottom: '3px',
-              }}>
-                {sec.routeName}（{sec.depTime} 以降）
-              </div>
-            )}
-            {sectionDeps.length === 1 && (
-              <div style={{ fontSize: '10px', color: colors.textSecondary, marginBottom: '3px' }}>
-                {sec.depTime} 以降
-              </div>
-            )}
-            {sec.deps.map((dep, i) => (
-              <div key={`${dep.time}-${dep.type}-${i}`} style={{
-                display: 'flex', alignItems: 'center', gap: '5px',
-                padding: '3px 0',
-                borderTop: `1px solid ${colors.borderLight}`,
-              }}>
-                <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text, minWidth: '42px', flexShrink: 0 }}>
-                  {dep.time}
-                </span>
-                <span style={{
-                  fontSize: '10px', color: '#fff', padding: '1px 4px', borderRadius: '3px',
-                  backgroundColor: TRAIN_TYPE_COLOR[dep.type] ?? '#555', flexShrink: 0, whiteSpace: 'nowrap',
-                }}>
-                  {dep.type}
-                </span>
-                <span style={{ fontSize: '11px', color: colors.textSecondary, flex: 1,
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {dep.destination}
-                </span>
-                {dep.platform && (
-                  <span style={{ fontSize: '10px', color: colors.textSecondary, flexShrink: 0 }}>
-                    {dep.platform}
-                  </span>
-                )}
-              </div>
-            ))}
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+          >
+            <span style={{ fontSize: '10px', color: colors.textSecondary }}>基準</span>
+            <input
+              type="time"
+              value={timetableBaseTime}
+              onChange={e => setTimetableBaseTime(e.target.value)}
+              style={{
+                border: `1px solid ${colors.border}`,
+                borderRadius: '3px',
+                padding: '1px 4px',
+                fontSize: '11px',
+                backgroundColor: colors.surface,
+                color: colors.text,
+                cursor: 'pointer',
+              }}
+            />
           </div>
-        ))}
+          <span
+            onClick={() => setStationTooltip(null)}
+            style={{ fontSize: '12px', color: colors.textSecondary, cursor: 'pointer', padding: '0 2px' }}
+          >✕</span>
+        </div>
 
-        <div style={{ fontSize: '10px', color: colors.textSecondary, opacity: 0.6, marginTop: '4px' }}>
-          ⚠ 概算値・参考用
+        {/* 2カラム本体 */}
+        <div style={{ display: 'flex', alignItems: 'stretch' }}>
+
+          {/* 左カラム: 通過路線一覧 */}
+          <div style={{
+            width: `${LEFT_W}px`,
+            flexShrink: 0,
+            borderRight: `1px solid ${colors.borderLight}`,
+            overflowY: 'auto',
+            maxHeight: '220px',
+          }}>
+            {allRoutes.map(rk => {
+              const isActive = rk === activeRouteKey;
+              const hasData = hasTimetableData(rk);
+              const routeColor = adjustRouteColorForTheme(routeColors[rk as RouteKey] ?? '#888', theme);
+              return (
+                <div
+                  key={rk}
+                  onClick={e => {
+                    e.stopPropagation();
+                    if (hasData) setTooltipSelectedRoute(rk);
+                  }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '5px 8px',
+                    cursor: hasData ? 'pointer' : 'default',
+                    backgroundColor: isActive ? colors.primary + '20' : 'transparent',
+                    borderLeft: isActive ? `3px solid ${colors.primary}` : '3px solid transparent',
+                  }}
+                >
+                  <div style={{
+                    width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0,
+                    backgroundColor: routeColor,
+                    opacity: hasData ? 1 : 0.35,
+                  }} />
+                  <span style={{
+                    fontSize: '10px',
+                    color: isActive ? colors.text : hasData ? colors.text : colors.textSecondary,
+                    fontWeight: isActive ? 'bold' : 'normal',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    opacity: hasData ? 1 : 0.5,
+                  }}>
+                    {routeNames[rk as RouteKey] ?? rk}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* 右カラム: 時刻表 */}
+          <div style={{ flex: 1, overflowY: 'auto', maxHeight: '220px' }}>
+            {activeRouteKey && hasTimetableData(activeRouteKey) ? (
+              <>
+                <div style={{
+                  padding: '4px 8px',
+                  fontSize: '10px', color: colors.textSecondary,
+                  borderBottom: `1px solid ${colors.borderLight}`,
+                }}>
+                  {activeDepTime} 以降
+                </div>
+                {activeDeps.length === 0 ? (
+                  <div style={{ padding: '8px', fontSize: '11px', color: colors.textSecondary }}>
+                    データなし
+                  </div>
+                ) : (
+                  activeDeps.map((dep, i) => (
+                    <div key={`${dep.time}-${dep.type}-${i}`} style={{
+                      display: 'flex', alignItems: 'center', gap: '4px',
+                      padding: '4px 8px',
+                      borderBottom: `1px solid ${colors.borderLight}`,
+                    }}>
+                      <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text, minWidth: '40px', flexShrink: 0 }}>
+                        {dep.time}
+                      </span>
+                      <span style={{
+                        fontSize: '10px', color: '#fff', padding: '1px 4px', borderRadius: '3px',
+                        backgroundColor: TRAIN_TYPE_COLOR[dep.type] ?? '#555', flexShrink: 0, whiteSpace: 'nowrap',
+                      }}>
+                        {dep.type}
+                      </span>
+                      <span style={{
+                        fontSize: '11px', color: colors.textSecondary, flex: 1,
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        {dep.destination}
+                      </span>
+                      {dep.platform && (
+                        <span style={{ fontSize: '10px', color: colors.textSecondary, flexShrink: 0 }}>
+                          {dep.platform}
+                        </span>
+                      )}
+                    </div>
+                  ))
+                )}
+              </>
+            ) : (
+              <div style={{ padding: '10px 8px', fontSize: '11px', color: colors.textSecondary }}>
+                時刻データなし
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div style={{
+          padding: '3px 10px',
+          borderTop: `1px solid ${colors.borderLight}`,
+          fontSize: '9px', color: colors.textSecondary, opacity: 0.6,
+        }}>
+          ⚠ 概算値・参考用　左の路線名をクリックで切替
         </div>
       </div>
     );
