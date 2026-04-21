@@ -12,6 +12,8 @@ interface StationSelectorProps {
   isExpanded?: boolean;
   onToggleExpanded?: () => void;
   language?: 'japanese' | 'english';
+  departureTime?: string;
+  onDepartureTimeChange?: (time: string) => void;
 }
 
 const StationSelector: React.FC<StationSelectorProps> = ({
@@ -21,7 +23,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   arrival,
   isExpanded = true,
   onToggleExpanded,
-  language = 'japanese'
+  language = 'japanese',
+  departureTime,
+  onDepartureTimeChange,
 }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -450,6 +454,54 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               )}
             </div>
           </div>
+
+          {/* 出発時刻 */}
+          {onDepartureTimeChange && (
+            <div style={{
+              marginTop: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}>
+              <label style={{ fontSize: '13px', fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
+                出発時刻
+              </label>
+              <input
+                type="time"
+                value={departureTime ?? ''}
+                onChange={e => onDepartureTimeChange(e.target.value)}
+                style={{
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: '4px',
+                  padding: '5px 8px',
+                  fontSize: '14px',
+                  backgroundColor: colors.surfaceElevated,
+                  color: colors.text,
+                  cursor: 'pointer',
+                }}
+              />
+              <button
+                onClick={() => {
+                  const now = new Date();
+                  const hh = String(now.getHours()).padStart(2, '0');
+                  const mm = String(now.getMinutes()).padStart(2, '0');
+                  onDepartureTimeChange(`${hh}:${mm}`);
+                }}
+                style={{
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: '4px',
+                  padding: '5px 8px',
+                  fontSize: '12px',
+                  backgroundColor: colors.surface,
+                  color: colors.textSecondary,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                現在時刻
+              </button>
+            </div>
+          )}
 
         </>
       )}

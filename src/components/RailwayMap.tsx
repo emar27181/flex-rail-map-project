@@ -2108,6 +2108,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 isExpanded={isStationSelectorExpanded}
                 onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
                 language={currentLanguage}
+                departureTime={timetableBaseTime}
+                onDepartureTimeChange={setTimetableBaseTime}
               />
             </div>
           )
@@ -2120,6 +2122,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               onArrivalChange={setArrival}
               isExpanded={isStationSelectorExpanded}
               onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
+              departureTime={timetableBaseTime}
+              onDepartureTimeChange={setTimetableBaseTime}
               language={currentLanguage}
             />
           </>
@@ -2726,6 +2730,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                       onArrivalChange={setArrival}
                       isExpanded={true}
                       language={currentLanguage}
+                      departureTime={timetableBaseTime}
+                      onDepartureTimeChange={setTimetableBaseTime}
                     />
                   )}
                   {mobilePanelTab === 'legend' && (
