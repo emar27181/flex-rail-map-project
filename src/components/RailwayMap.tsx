@@ -383,15 +383,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     })();
 
     // 画面端からはみ出さないよう位置調整
-    const TW = 360;
-    const LEFT_W = 120;
+    const MARGIN = 8;
     const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
     const vh = typeof window !== 'undefined' ? window.innerHeight : 600;
+    // 幅はビューポートに収まるよう上限を設定
+    const TW = Math.min(360, vw - MARGIN * 2);
+    const LEFT_W = Math.min(120, Math.floor(TW * 0.35));
     const rawX = stationTooltip.x + 14;
     const rawY = stationTooltip.y + 14;
-    const x = rawX + TW > vw ? stationTooltip.x - TW - 6 : rawX;
+    // 右にはみ出す場合は左側に表示、それでも収まらなければ左端に固定
+    let x = rawX + TW > vw - MARGIN ? stationTooltip.x - TW - 6 : rawX;
+    x = Math.max(MARGIN, Math.min(x, vw - TW - MARGIN));
     const estH = 52 + Math.max(allRoutes.length * 28, activeDeps.length * 26 + 22) + 20;
-    const y = rawY + estH > vh ? stationTooltip.y - estH - 6 : rawY;
+    const y = Math.max(MARGIN, Math.min(
+      rawY + estH > vh - MARGIN ? stationTooltip.y - estH - 6 : rawY,
+      vh - estH - MARGIN
+    ));
 
     return (
       <div
