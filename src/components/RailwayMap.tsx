@@ -311,8 +311,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   }, [routeRecommendations.length, recommendationTransferStations, allTransferStations]);
 
   // 経路上の各駅の出発時刻マップ（時刻表モード用）
+  // 同一駅が複数セグメントに登場する場合も全エントリを保持する
+  type StationJourneyEntry = { depTime: string; routeKey: string; directionIndex: number };
   const stationTimelineMap = useMemo(() => {
-    const map = new Map<string, { depTime: string; routeKey: string; directionIndex: number }>();
+    const map = new Map<string, StationJourneyEntry[]>();
     if (!timetableModeEnabled) return map;
     const selectedIdx = selectedRouteIndices ? [...selectedRouteIndices][0] : 0;
     const route = routeRecommendations[selectedIdx];
@@ -329,9 +331,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       const toName   = seg.stations[n - 1]?.name ?? '';
       const dirIdx   = getTimetableDirectionIndex(seg.routeKey, fromName, toName);
       seg.stations.forEach((st, i) => {
-        if (!map.has(st.name)) {
-          const stTime = addMinutes(timetableBaseTime, cumTime + Math.round(seg.time * i / Math.max(n - 1, 1)));
-          map.set(st.name, { depTime: stTime, routeKey: seg.routeKey, directionIndex: dirIdx });
+        const stTime = addMinutes(timetableBaseTime, cumTime + Math.round(seg.time * i / Math.max(n - 1, 1)));
+        const existing = map.get(st.name) ?? [];
+        // 同じ routeKey が既に登録済みの場合は追加しない
+        if (!existing.some(e => e.routeKey === seg.routeKey)) {
+          existing.push({ depTime: stTime, routeKey: seg.routeKey, directionIndex: dirIdx });
+          map.set(st.name, existing);
         }
       });
       cumTime += seg.time;
@@ -353,34 +358,36 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     const allRoutes = getRoutesForStation(stationTooltip.stationName);
     if (allRoutes.length === 0) return null;
 
-    // 経路上の駅かどうかチェック（路線・方向・推定時刻を取得）
-    const routeInfo = stationTimelineMap.get(stationTooltip.stationName);
+    // 経路上でのこの駅の全セグメント情報（複数路線にまたがる可能性あり）
+    const journeyEntries = stationTimelineMap.get(stationTooltip.stationName) ?? [];
+    const journeyRouteKeys = new Set(journeyEntries.map(e => e.routeKey));
 
-    // 選択路線を決定：tooltipSelectedRoute → 経路上の路線 → データのある最初の路線
+    // 選択路線を決定
+    // 優先順: ユーザー選択 → 経路上でデータあり → 経路上でデータなし → 他のデータあり路線
     const activeRouteKey: string | null = (() => {
       if (tooltipSelectedRoute && allRoutes.includes(tooltipSelectedRoute as RouteKey)) {
         return tooltipSelectedRoute;
       }
-      if (routeInfo && hasTimetableData(routeInfo.routeKey)) return routeInfo.routeKey;
+      const journeyWithData = journeyEntries.find(e => hasTimetableData(e.routeKey));
+      if (journeyWithData) return journeyWithData.routeKey;
+      if (journeyEntries.length > 0) return journeyEntries[0].routeKey;
       return allRoutes.find(rk => hasTimetableData(rk)) ?? null;
     })();
 
-    // 選択路線の時刻データを取得
-    const activeDeps = (() => {
+    // アクティブ路線が経路上の路線かどうか
+    const isJourneyRoute = journeyRouteKeys.has(activeRouteKey ?? '');
+    // アクティブ路線の経路エントリ（方向・時刻）
+    const activeJourneyEntry = journeyEntries.find(e => e.routeKey === activeRouteKey);
+
+    // 選択路線の発車情報を取得（経路の方向・時刻を優先使用）
+    const activeDeps: Departure[] = (() => {
       if (!activeRouteKey || !hasTimetableData(activeRouteKey)) return [];
-      let depTime = timetableBaseTime;
-      let dirIdx = 0;
-      if (routeInfo && routeInfo.routeKey === activeRouteKey) {
-        depTime = routeInfo.depTime;
-        dirIdx = routeInfo.directionIndex;
-      }
+      const depTime = activeJourneyEntry?.depTime ?? timetableBaseTime;
+      const dirIdx  = activeJourneyEntry?.directionIndex ?? 0;
       return getNextDepartures(activeRouteKey, stationTooltip.stationName, dirIdx, depTime, 5);
     })();
 
-    const activeDepTime = (() => {
-      if (routeInfo && activeRouteKey && routeInfo.routeKey === activeRouteKey) return routeInfo.depTime;
-      return timetableBaseTime;
-    })();
+    const activeDepTime = activeJourneyEntry?.depTime ?? timetableBaseTime;
 
     // 画面端からはみ出さないよう位置調整
     const MARGIN = 8;
@@ -480,36 +487,42 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
             {allRoutes.map(rk => {
               const isActive = rk === activeRouteKey;
               const hasData = hasTimetableData(rk);
+              const isJourney = journeyRouteKeys.has(rk);
               const routeColor = adjustRouteColorForTheme(routeColors[rk as RouteKey] ?? '#888', theme);
               return (
                 <div
                   key={rk}
                   onClick={e => {
                     e.stopPropagation();
-                    if (hasData) setTooltipSelectedRoute(rk);
+                    setTooltipSelectedRoute(rk);
                   }}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: '6px',
+                    display: 'flex', alignItems: 'center', gap: '5px',
                     padding: '5px 8px',
-                    cursor: hasData ? 'pointer' : 'default',
-                    backgroundColor: isActive ? colors.primary + '20' : 'transparent',
-                    borderLeft: isActive ? `3px solid ${colors.primary}` : '3px solid transparent',
+                    cursor: 'pointer',
+                    backgroundColor: isActive ? colors.primary + '22' : 'transparent',
+                    borderLeft: isActive
+                      ? `3px solid ${colors.primary}`
+                      : isJourney ? `3px solid ${routeColor}` : '3px solid transparent',
                   }}
                 >
                   <div style={{
                     width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0,
                     backgroundColor: routeColor,
-                    opacity: hasData ? 1 : 0.35,
+                    opacity: hasData ? 1 : 0.4,
                   }} />
                   <span style={{
                     fontSize: '10px',
-                    color: isActive ? colors.text : hasData ? colors.text : colors.textSecondary,
-                    fontWeight: isActive ? 'bold' : 'normal',
+                    color: isActive ? colors.text : isJourney ? colors.text : colors.textSecondary,
+                    fontWeight: isJourney ? 'bold' : 'normal',
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     opacity: hasData ? 1 : 0.5,
                   }}>
                     {routeNames[rk as RouteKey] ?? rk}
                   </span>
+                  {isJourney && (
+                    <span style={{ fontSize: '9px', color: colors.primary, flexShrink: 0, marginLeft: 'auto' }}>乗</span>
+                  )}
                 </div>
               );
             })}
@@ -523,8 +536,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                   padding: '4px 8px',
                   fontSize: '10px', color: colors.textSecondary,
                   borderBottom: `1px solid ${colors.borderLight}`,
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 }}>
-                  {activeDepTime} 以降
+                  <span>{activeDepTime} 以降</span>
+                  {!isJourneyRoute && (
+                    <span style={{ color: colors.textSecondary, opacity: 0.7, fontSize: '9px' }}>ルート外参考</span>
+                  )}
                 </div>
                 {activeDeps.length === 0 ? (
                   <div style={{ padding: '8px', fontSize: '11px', color: colors.textSecondary }}>
@@ -563,7 +580,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               </>
             ) : (
               <div style={{ padding: '10px 8px', fontSize: '11px', color: colors.textSecondary }}>
-                時刻データなし
+                {isJourneyRoute
+                  ? `乗車路線ですが\n時刻データなし`
+                  : '時刻データなし'}
               </div>
             )}
           </div>
