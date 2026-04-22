@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { RouteKey } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation';
 import RouteToggleItem from '../ui/RouteToggleItem';
+
+type SortMode = 'name' | 'color' | 'default';
 
 interface LegendRouteListProps {
   visibleRoutesData: Array<[string, any]>;
@@ -54,12 +56,35 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   adjustRouteColorForTheme
 }) => {
   const colors = getThemeColors(theme);
+  const [sortMode, setSortMode] = useState<SortMode>('name');
 
-  // Sort visibleRoutesData alphabetically by route name
+  // HEX色をHue値(0-360)に変換
+  const hexToHue = (hex: string): number => {
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    if (max === min) return 0;
+    const d = max - min;
+    let h = 0;
+    if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    return h * 60;
+  };
+
   const sortedVisibleRoutesData = [...visibleRoutesData].sort(([keyA], [keyB]) => {
-    const nameA = routeNames[keyA as RouteKey] || '';
-    const nameB = routeNames[keyB as RouteKey] || '';
-    return nameA.localeCompare(nameB, language === 'japanese' ? 'ja' : 'en');
+    if (sortMode === 'name') {
+      const nameA = routeNames[keyA as RouteKey] || '';
+      const nameB = routeNames[keyB as RouteKey] || '';
+      return nameA.localeCompare(nameB, language === 'japanese' ? 'ja' : 'en');
+    }
+    if (sortMode === 'color') {
+      const colorA = routeColors[keyA as RouteKey] ?? '#888';
+      const colorB = routeColors[keyB as RouteKey] ?? '#888';
+      return hexToHue(colorA.padEnd(7, '0')) - hexToHue(colorB.padEnd(7, '0'));
+    }
+    return 0; // default: 登録順のまま
   });
 
   return (
@@ -186,6 +211,29 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {translateUI('showFurigana', language)}
           </label>
         )}
+      </div>
+
+      {/* ソート選択 */}
+      <div style={{ display: 'flex', gap: '4px', marginBottom: '6px', alignItems: 'center' }}>
+        <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>並順:</span>
+        {(['name', 'color', 'default'] as SortMode[]).map(mode => {
+          const label = mode === 'name' ? 'あいうえお' : mode === 'color' ? '色' : '登録順';
+          return (
+            <button
+              key={mode}
+              onClick={() => setSortMode(mode)}
+              style={{
+                padding: '2px 6px',
+                fontSize: '10px',
+                border: `1px solid ${sortMode === mode ? colors.primary : colors.borderLight}`,
+                borderRadius: '3px',
+                backgroundColor: sortMode === mode ? colors.primary : 'transparent',
+                color: sortMode === mode ? '#fff' : colors.textSecondary,
+                cursor: 'pointer',
+              }}
+            >{label}</button>
+          );
+        })}
       </div>
 
       <div style={{
