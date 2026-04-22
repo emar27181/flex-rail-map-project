@@ -2915,7 +2915,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     transition: 'background-color 0.2s',
                   }}
                 >
-                  🗺 路線
+                  ⚙ 設定
                 </button>
               </div>
             </>
