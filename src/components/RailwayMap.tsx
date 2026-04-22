@@ -137,6 +137,32 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
 
 
+  // 位置情報をデフォルトでON（初回マウント時に自動開始）
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    setIsLocating(true);
+    isFirstPositionRef.current = true;
+    const id = navigator.geolocation.watchPosition(
+      (pos) => {
+        setUserLocation([pos.coords.latitude, pos.coords.longitude]);
+        isFirstPositionRef.current = false;
+      },
+      () => {
+        if (watchIdRef.current !== null) {
+          navigator.geolocation.clearWatch(watchIdRef.current);
+          watchIdRef.current = null;
+        }
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 30000, maximumAge: 10000 }
+    );
+    watchIdRef.current = id;
+    return () => {
+      navigator.geolocation.clearWatch(id);
+      watchIdRef.current = null;
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // モバイル幅の監視
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -391,17 +417,28 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
     // 画面端からはみ出さないよう位置調整
     const MARGIN = 8;
-    const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
-    const vh = typeof window !== 'undefined' ? window.innerHeight : 600;
+    const vw = typeof window !== 'undefined'
+      ? (window.visualViewport?.width ?? window.innerWidth)
+      : 800;
+    const vh = typeof window !== 'undefined'
+      ? (window.visualViewport?.height ?? window.innerHeight)
+      : 600;
+    const isMobileView = vw < 500;
     // 幅はビューポートに収まるよう上限を設定
     const TW = Math.min(360, vw - MARGIN * 2);
     const LEFT_W = Math.min(120, Math.floor(TW * 0.35));
-    const rawX = stationTooltip.x + 14;
+    // モバイルでは画面中央寄せ、PCはクリック位置基準
+    let x: number;
+    if (isMobileView) {
+      x = Math.max(MARGIN, (vw - TW) / 2);
+    } else {
+      const rawX = stationTooltip.x + 14;
+      x = rawX + TW > vw - MARGIN ? stationTooltip.x - TW - 6 : rawX;
+      x = Math.max(MARGIN, Math.min(x, vw - TW - MARGIN));
+    }
+    const maxTooltipH = Math.min(vh - MARGIN * 2, 480);
+    const estH = Math.min(52 + Math.max(allRoutes.length * 28, activeDeps.length * 26 + 22) + 20, maxTooltipH);
     const rawY = stationTooltip.y + 14;
-    // 右にはみ出す場合は左側に表示、それでも収まらなければ左端に固定
-    let x = rawX + TW > vw - MARGIN ? stationTooltip.x - TW - 6 : rawX;
-    x = Math.max(MARGIN, Math.min(x, vw - TW - MARGIN));
-    const estH = 52 + Math.max(allRoutes.length * 28, activeDeps.length * 26 + 22) + 20;
     const y = Math.max(MARGIN, Math.min(
       rawY + estH > vh - MARGIN ? stationTooltip.y - estH - 6 : rawY,
       vh - estH - MARGIN
@@ -412,11 +449,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
         style={{
           position: 'fixed', left: x, top: y, zIndex: 9999,
           width: `${TW}px`,
+          maxHeight: `${maxTooltipH}px`,
           backgroundColor: colors.surfaceElevated,
           border: `1px solid ${colors.border}`,
           borderRadius: '8px',
           boxShadow: `0 4px 16px ${colors.shadow}`,
           overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
           cursor: 'default',
         }}
       >
@@ -475,14 +515,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
         </div>
 
         {/* 2カラム本体 */}
-        <div style={{ display: 'flex', alignItems: 'stretch' }}>
+        <div style={{ display: 'flex', alignItems: 'stretch', flex: 1, overflow: 'hidden' }}>
 
           {/* 左カラム: 通過路線一覧 */}
           <div style={{
             width: `${LEFT_W}px`,
             flexShrink: 0,
             borderRight: `1px solid ${colors.borderLight}`,
-            overflow: 'hidden',
+            overflowY: 'auto',
           }}>
             {allRoutes.map(rk => {
               const isActive = rk === activeRouteKey;
@@ -529,7 +569,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
           </div>
 
           {/* 右カラム: 時刻表 */}
-          <div style={{ flex: 1, overflow: 'hidden' }}>
+          <div style={{ flex: 1, overflowY: 'auto' }}>
             {activeRouteKey && hasTimetableData(activeRouteKey) ? (
               <>
                 <div style={{
@@ -563,17 +603,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                       }}>
                         {dep.type}
                       </span>
+                      {dep.platform && (
+                        <span style={{ fontSize: '10px', color: colors.textSecondary, flexShrink: 0, whiteSpace: 'nowrap' }}>
+                          {dep.platform}
+                        </span>
+                      )}
                       <span style={{
                         fontSize: '11px', color: colors.textSecondary, flex: 1,
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }}>
-                        {dep.destination}
+                        {dep.destination}{dep.toward ? `（${dep.toward}方面）` : ''}
                       </span>
-                      {dep.platform && (
-                        <span style={{ fontSize: '10px', color: colors.textSecondary, flexShrink: 0 }}>
-                          {dep.platform}
-                        </span>
-                      )}
                     </div>
                   ))
                 )}
@@ -600,7 +640,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   };
 
   // アイコン作成関数をメモ化
-  const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean, opacity: number = 1) => {
+  const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean, opacity: number = 1, timeLabel?: string) => {
     if (!MapComponents?.DivIcon) return null;
 
     const { DivIcon } = MapComponents;
@@ -611,10 +651,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       const translatedStationName = translateStation(station.name, currentLanguage);
       const furigana = (showFurigana && currentLanguage === 'japanese') ? getFurigana(station.name) : '';
       const hasFurigana = furigana.length > 0;
-      const stationNameWidth = translatedStationName.length * 11 + 12;
-      const iconHeight = hasFurigana ? 30 : 18;
-      const htmlContent = hasFurigana
-        ? `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;white-space:nowrap;border:1px solid ${borderColor};box-shadow:0 1px 3px ${shadowColor};text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:8px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:11px;font-weight:bold;line-height:1">${translatedStationName}</div></div>`
+      const hasTime = !!timeLabel;
+      const labelWidth = Math.max(translatedStationName.length * 11, timeLabel ? timeLabel.length * 9 : 0) + 12;
+      const stationNameWidth = hasTime ? labelWidth : translatedStationName.length * 11 + 12;
+      const iconHeight = hasFurigana ? (hasTime ? 42 : 30) : (hasTime ? 30 : 18);
+      const timeLine = hasTime ? `<div style="font-size:9px;line-height:1;margin-top:1px;font-weight:normal;opacity:0.9">${timeLabel}</div>` : '';
+      const htmlContent = hasFurigana || hasTime
+        ? `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;white-space:nowrap;border:1px solid ${borderColor};box-shadow:0 1px 3px ${shadowColor};text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:8px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:11px;font-weight:bold;line-height:1">${translatedStationName}</div>${timeLine}</div>`
         : `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:bold;white-space:nowrap;border:1px solid ${borderColor};box-shadow:0 1px 3px ${shadowColor};text-align:center;opacity:${opacity}">${translatedStationName}</div>`;
       return new DivIcon({
         html: htmlContent,
@@ -1941,9 +1984,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
 
             const isDetailed = shouldShowStationName || shouldShowInWideView || shouldShowAllStations;
             const stationOpacity = visibleRoutes.has(routeKey) ? 1 : 0.3;
+            // 時刻表モード有効かつ経路上の駅なら出発時刻を2行目に表示
+            const timelineEntry = timetableModeEnabled
+              ? stationTimelineMap.get(station.name)?.find(e => e.routeKey === routeKey)
+              : undefined;
+            const stationTimeLabel = isDetailed && timelineEntry ? timelineEntry.depTime : undefined;
             const stationIcon = trainTypeViewEnabled
               ? createTrainTypeStationIcon(station, routeKey, zoomLevel, isDetailed, stationOpacity)
-              : createStationIcon(station, color, zoomLevel, isDetailed, stationOpacity);
+              : createStationIcon(station, color, zoomLevel, isDetailed, stationOpacity, stationTimeLabel);
             if (!stationIcon) return null;
 
             return (
@@ -2741,6 +2789,26 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                   overflowY: 'auto',
                   boxShadow: `0 -2px 10px ${colors.shadow}`,
                 }}>
+                  {/* 折りたたみボタン（右上） */}
+                  <button
+                    onClick={() => setIsMobilePanelExpanded(false)}
+                    style={{
+                      position: 'sticky',
+                      top: 0,
+                      float: 'right',
+                      zIndex: 10,
+                      width: '32px',
+                      height: '32px',
+                      border: 'none',
+                      background: 'none',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      color: colors.textSecondary,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >▼</button>
                   {mobilePanelTab === 'station' && (
                     <StationSelector
                       departure={departure}
@@ -2848,21 +2916,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                   }}
                 >
                   🗺 路線
-                </button>
-                <button
-                  onClick={() => setIsMobilePanelExpanded(!isMobilePanelExpanded)}
-                  style={{
-                    width: '36px',
-                    height: '36px',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    backgroundColor: 'transparent',
-                    color: colors.textSecondary,
-                  }}
-                >
-                  {isMobilePanelExpanded ? '▼' : '▲'}
                 </button>
               </div>
             </>
