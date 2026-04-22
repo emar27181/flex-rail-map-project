@@ -3,6 +3,7 @@ import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { translateStation, translateUI } from '../utils/translation';
+import { stationReadings, normalizeToHiragana } from '../utils/stationReadings';
 
 interface StationSelectorProps {
   onDepartureChange: (station: Station | null) => void;
@@ -102,12 +103,15 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
   const filteredDepartureStations = useMemo(() => {
     if (!departureSearch) return majorStations;
-    const searchTerm = departureSearch.toLowerCase();
+    const searchTerm = normalizeToHiragana(departureSearch.toLowerCase());
     return allStations
       .filter(station => {
         const japaneseName = station.name.toLowerCase();
+        const reading = stationReadings[station.name] ?? '';
         const englishName = translateStation(station.name, 'english').toLowerCase();
         return japaneseName.includes(searchTerm) ||
+               reading.includes(searchTerm) ||
+               normalizeToHiragana(japaneseName).includes(searchTerm) ||
                englishName.includes(searchTerm);
       })
       .slice(0, 10);
@@ -115,12 +119,15 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
   const filteredArrivalStations = useMemo(() => {
     if (!arrivalSearch) return majorStations;
-    const searchTerm = arrivalSearch.toLowerCase();
+    const searchTerm = normalizeToHiragana(arrivalSearch.toLowerCase());
     return allStations
       .filter(station => {
         const japaneseName = station.name.toLowerCase();
+        const reading = stationReadings[station.name] ?? '';
         const englishName = translateStation(station.name, 'english').toLowerCase();
         return japaneseName.includes(searchTerm) ||
+               reading.includes(searchTerm) ||
+               normalizeToHiragana(japaneseName).includes(searchTerm) ||
                englishName.includes(searchTerm);
       })
       .slice(0, 10);
@@ -168,11 +175,13 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   };
 
   const clearDeparture = () => {
+    departureClickedRef.current = true;
     onDepartureChange(null);
     setDepartureSearch('');
   };
 
   const clearArrival = () => {
+    arrivalClickedRef.current = true;
     onArrivalChange(null);
     setArrivalSearch('');
   };
