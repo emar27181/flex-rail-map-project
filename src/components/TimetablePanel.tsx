@@ -313,8 +313,13 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                         }}>
                           {dep.type}
                         </span>
+                        {dep.platform && (
+                          <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
+                            {dep.platform}
+                          </span>
+                        )}
                         <span style={{ fontSize: '12px', color: colors.textSecondary }}>
-                          {dep.destination}
+                          {dep.destination}{dep.toward ? `（${dep.toward}方面）` : ''}
                         </span>
                       </div>
                     ))
