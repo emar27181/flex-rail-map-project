@@ -2,7 +2,7 @@ import type { Station } from './yamanote';
 
 export const yokohamaBlueLine: Station[] = [
   { name: '湘南台', lat: 35.3963, lng: 139.4666, timeToNext: 5 },
-  { name: '下飯田', lat: 35.3489, lng: 139.4734, timeToNext: 3 },
+  { name: '下飯田', lat: 35.4044, lng: 139.4999, timeToNext: 3 },
   { name: '立場', lat: 35.3656, lng: 139.4845, timeToNext: 4 },
   { name: '中田', lat: 35.3798, lng: 139.4923, timeToNext: 3 },
   { name: '踊場', lat: 35.3912, lng: 139.5012, timeToNext: 3 },

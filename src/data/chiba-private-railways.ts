@@ -17,14 +17,14 @@ export const shinkeisei: Station[] = [
   { name: "鎌ヶ谷大仏", lat: 35.7212, lng: 139.8078 },
   { name: "二和向台", lat: 35.7156, lng: 139.8001 },
   { name: "三咲", lat: 35.7101, lng: 139.7923 },
-  { name: "滝不動", lat: 35.7045, lng: 139.7845 },
-  { name: "高根木戸", lat: 35.6989, lng: 139.7767 },
-  { name: "高根公団", lat: 35.6934, lng: 139.7689 },
-  { name: "北習志野", lat: 35.6878, lng: 139.7612 },
-  { name: "習志野", lat: 35.6823, lng: 139.7534, timeToNext: 2 },
-  { name: "薬園台", lat: 35.6767, lng: 139.7456, timeToNext: 2 },
-  { name: "前原", lat: 35.6712, lng: 139.7378, timeToNext: 2 },
-  { name: "新津田沼", lat: 35.690219, lng: 140.023616, timeToNext: 1 },
+  { name: "滝不動", lat: 35.7045, lng: 139.9756 },
+  { name: "高根木戸", lat: 35.6994, lng: 139.9836 },
+  { name: "高根公団", lat: 35.6942, lng: 139.9901 },
+  { name: "北習志野", lat: 35.6878, lng: 140.0000 },
+  { name: "習志野", lat: 35.6875, lng: 139.9784, timeToNext: 2 },
+  { name: "薬園台", lat: 35.6897, lng: 139.9697, timeToNext: 2 },
+  { name: "前原", lat: 35.6809, lng: 139.9998, timeToNext: 2 },
+  { name: "新津田沼", lat: 35.6887, lng: 139.9889, timeToNext: 1 },
   { name: "京成津田沼", lat: 35.68361, lng: 140.02444 }
 ];
 

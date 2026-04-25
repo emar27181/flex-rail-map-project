@@ -33,8 +33,8 @@ export const jrMusashinoLine: Station[] = [
   },
   {
     name: "東所沢",
-    lat: 35.7889,
-    lng: 139.4375,
+    lat: 35.7868,
+    lng: 139.5109,
     timeToNext: 5
   },
   {

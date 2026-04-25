@@ -17,7 +17,7 @@ export const jrJobanLine: Station[] = [
   { name: '天王台', lat: 35.8703, lng: 140.0486, timeToNext: 2 },
   { name: '取手', lat: 35.9069, lng: 140.0506, timeToNext: 4 },
   { name: '藤代', lat: 35.9306, lng: 140.0694, timeToNext: 3 },
-  { name: '龍ケ崎市', lat: 35.9039, lng: 140.1794, timeToNext: 4 },
+  { name: '龍ケ崎市', lat: 35.9339, lng: 140.1843, timeToNext: 4 },
   { name: '牛久', lat: 36.0006, lng: 140.1486, timeToNext: 3 },
   { name: 'ひたち野うしく', lat: 36.0314, lng: 140.1558, timeToNext: 3 },
   { name: '荒川沖', lat: 36.0481, lng: 140.1625, timeToNext: 2 },

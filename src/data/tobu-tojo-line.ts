@@ -31,6 +31,6 @@ export const tobuTojoLine: Station[] = [
   { name: '東松山', lat: 36.0422, lng: 139.3925, timeToNext: 4 },
   { name: '森林公園', lat: 36.0656, lng: 139.3753, timeToNext: 3 },
   { name: 'つきのわ', lat: 36.0925, lng: 139.3511, timeToNext: 3 },
-  { name: '武蔵嵐山', lat: 36.1147, lng: 139.3317, timeToNext: 3 },
+  { name: '武蔵嵐山', lat: 36.0578, lng: 139.3183, timeToNext: 3 },
   { name: '小川町', lat: 36.0564, lng: 139.2492 }
 ];

@@ -2,8 +2,8 @@ import type { Station } from './yamanote';
 
 export const hanzomonLine: Station[] = [
   { name: '中央林間', lat: 35.5128, lng: 139.4494, timeToNext: 3 },
-  { name: 'つきみ野', lat: 35.5519, lng: 139.4867, timeToNext: 2 },
-  { name: '南町田グランベリーパーク', lat: 35.5406, lng: 139.4797, timeToNext: 2 },
+  { name: 'つきみ野', lat: 35.5241, lng: 139.4731, timeToNext: 2 },
+  { name: '南町田グランベリーパーク', lat: 35.5331, lng: 139.4818, timeToNext: 2 },
   { name: 'つくし野', lat: 35.5561, lng: 139.4961, timeToNext: 2 },
   { name: 'すずかけ台', lat: 35.5581, lng: 139.5169, timeToNext: 2 },
   { name: '長津田', lat: 35.5511, lng: 139.5042, timeToNext: 2 },
