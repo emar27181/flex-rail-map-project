@@ -1,0 +1,27 @@
+{
+  "name": "フレックス路線図",
+  "short_name": "路線図",
+  "description": "必要な路線だけ選んで表示できるシンプルなインタラクティブ路線図",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4CAF50",
+  "orientation": "any",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "/icon_flex_rail_way_map.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon_flex_rail_way_map.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["travel", "navigation"],
+  "screenshots": []
+}

@@ -29,7 +29,13 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 			href="/icon_flex_rail_way_map.png"
 		/>
 		<link rel="shortcut icon" href="/icon_flex_rail_way_map.png" />
-		<meta name="viewport" content="width=device-width" />
+		<link rel="manifest" href="/manifest.json" />
+		<meta name="theme-color" content="#4CAF50" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+		<meta name="apple-mobile-web-app-title" content="路線図" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		<meta name="generator" content={Astro.generator} />
 		<title>フレックス路線図 | 路線図が見にくい・複雑すぎる？を解決するシンプルな乗り換え路線図</title>
 
@@ -142,6 +148,12 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 			integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
 			crossorigin=""></script>
 		<style>
+			:root {
+				--sat: env(safe-area-inset-top, 0px);
+				--sab: env(safe-area-inset-bottom, 0px);
+				--sal: env(safe-area-inset-left, 0px);
+				--sar: env(safe-area-inset-right, 0px);
+			}
 			body {
 				margin: 0 0 100px 0; /* Sticky広告用の下部マージン */
 				padding: 0;
@@ -149,6 +161,9 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 				transition:
 					background-color 0.3s ease,
 					color 0.3s ease;
+				-webkit-tap-highlight-color: transparent;
+				touch-action: manipulation;
+				overscroll-behavior: none;
 			}
 			body.light {
 				background-color: #ffffff;
@@ -375,5 +390,12 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 			</div>
 		</noscript>
 		<ThemeWrapper client:only="react" />
+		<script>
+			if ('serviceWorker' in navigator) {
+				window.addEventListener('load', () => {
+					navigator.serviceWorker.register('/sw.js');
+				});
+			}
+		</script>
 	</body>
 </html>
