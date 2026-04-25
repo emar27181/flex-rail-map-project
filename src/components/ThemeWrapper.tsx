@@ -8,6 +8,7 @@ import StickyBottomAd from './StickyBottomAd';
 
 const ThemeWrapper: React.FC = () => {
   const [language, setLanguage] = useState<'japanese' | 'english'>('japanese');
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handleLanguageChange = (newLanguage: 'japanese' | 'english') => {
     setLanguage(newLanguage);
@@ -16,11 +17,11 @@ const ThemeWrapper: React.FC = () => {
   return (
     <ThemeProvider>
       <NavigationBar language={language} onLanguageChange={handleLanguageChange} />
-      <RailwayMap language={language} />
+      <RailwayMap language={language} onFullscreenChange={setIsFullscreen} />
       <Footer language={language} />
 
-      {/* 追従型広告（画面下固定） */}
-      <StickyBottomAd adSlot="0987654321" />
+      {/* 追従型広告（フルスクリーン時は非表示） */}
+      {!isFullscreen && <StickyBottomAd adSlot="0987654321" />}
     </ThemeProvider>
   );
 };

@@ -38,9 +38,10 @@ declare global {
 interface RailwayMapProps {
   className?: string;
   language: 'japanese' | 'english';
+  onFullscreenChange?: (isFullscreen: boolean) => void;
 }
 
-const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
+const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscreenChange }) => {
   // console.log('RailwayMap component initialized');
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -121,6 +122,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
   const [stationTooltip, setStationTooltip] = useState<{ stationName: string; station: Station; x: number; y: number } | null>(null);
   // ツールチップ内で選択中の路線
   const [tooltipSelectedRoute, setTooltipSelectedRoute] = useState<string | null>(null);
+  const [showAllTooltipDeps, setShowAllTooltipDeps] = useState(false);
 
   // 路線ホバー・ポップアップ状態
   const [hoveredRoute, setHoveredRoute] = useState<string | null>(null);
@@ -171,9 +173,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // 駅が変わったらツールチップの選択路線をリセット
+  // フルスクリーン状態を親に通知
+  useEffect(() => {
+    onFullscreenChange?.(isFullscreen);
+  }, [isFullscreen, onFullscreenChange]);
+
+  // 駅が変わったらツールチップの選択路線・すべて表示をリセット
   useEffect(() => {
     setTooltipSelectedRoute(null);
+    setShowAllTooltipDeps(false);
   }, [stationTooltip?.stationName]);
 
   // 列車種別表示: 路線変更時に列車種別をリセット
@@ -324,6 +332,37 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
     return transferStationNames;
   }, []);
 
+  // 全駅（重複なし）
+  const allUniqueStations = useMemo(() => {
+    const map = new Map<string, Station>();
+    Object.values(routes).forEach(stationList => {
+      stationList.forEach(station => {
+        if (!map.has(station.name)) map.set(station.name, station);
+      });
+    });
+    return Array.from(map.values());
+  }, []);
+
+  // 現在地から最も近い駅を返す
+  const findNearestStation = useCallback((lat: number, lng: number): Station | null => {
+    let nearest: Station | null = null;
+    let minDist = Infinity;
+    allUniqueStations.forEach(station => {
+      const dlat = station.lat - lat;
+      const dlng = station.lng - lng;
+      const dist = dlat * dlat + dlng * dlng;
+      if (dist < minDist) { minDist = dist; nearest = station; }
+    });
+    return nearest;
+  }, [allUniqueStations]);
+
+  // 現在地付近の駅を出発に設定するコールバック
+  const handleSetNearestDeparture = useCallback(() => {
+    if (!userLocation) return;
+    const nearest = findNearestStation(userLocation[0], userLocation[1]);
+    if (nearest) setDeparture(nearest);
+  }, [userLocation, findNearestStation]);
+
   // 使用する乗換駅セットを決定
   const transferStations = useMemo(() => {
     // 推薦ルートがある場合は推薦ベースの乗換駅、ない場合は全乗換駅
@@ -410,7 +449,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
       if (!activeRouteKey || !hasTimetableData(activeRouteKey)) return [];
       const depTime = activeJourneyEntry?.depTime ?? timetableBaseTime;
       const dirIdx  = activeJourneyEntry?.directionIndex ?? 0;
-      return getNextDepartures(activeRouteKey, stationTooltip.stationName, dirIdx, depTime, 5);
+      return getNextDepartures(activeRouteKey, stationTooltip.stationName, dirIdx, depTime, showAllTooltipDeps ? 50 : 5);
     })();
 
     const activeDepTime = activeJourneyEntry?.depTime ?? timetableBaseTime;
@@ -588,34 +627,51 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                     データなし
                   </div>
                 ) : (
-                  activeDeps.map((dep, i) => (
-                    <div key={`${dep.time}-${dep.type}-${i}`} style={{
-                      display: 'flex', alignItems: 'center', gap: '4px',
-                      padding: '4px 8px',
-                      borderBottom: `1px solid ${colors.borderLight}`,
-                    }}>
-                      <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text, minWidth: '40px', flexShrink: 0 }}>
-                        {dep.time}
-                      </span>
-                      <span style={{
-                        fontSize: '10px', color: '#fff', padding: '1px 4px', borderRadius: '3px',
-                        backgroundColor: TRAIN_TYPE_COLOR[dep.type] ?? '#555', flexShrink: 0, whiteSpace: 'nowrap',
+                  <>
+                    {activeDeps.map((dep, i) => (
+                      <div key={`${dep.time}-${dep.type}-${i}`} style={{
+                        display: 'flex', alignItems: 'center', gap: '4px',
+                        padding: '4px 8px',
+                        borderBottom: `1px solid ${colors.borderLight}`,
                       }}>
-                        {dep.type}
-                      </span>
-                      {dep.platform && (
-                        <span style={{ fontSize: '10px', color: colors.textSecondary, flexShrink: 0, whiteSpace: 'nowrap' }}>
-                          {dep.platform}
+                        <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text, minWidth: '40px', flexShrink: 0 }}>
+                          {dep.time}
                         </span>
-                      )}
-                      <span style={{
-                        fontSize: '11px', color: colors.textSecondary, flex: 1,
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}>
-                        {dep.destination}{dep.toward ? `（${dep.toward}方面）` : ''}
-                      </span>
-                    </div>
-                  ))
+                        <span style={{
+                          fontSize: '10px', color: '#fff', padding: '1px 4px', borderRadius: '3px',
+                          backgroundColor: TRAIN_TYPE_COLOR[dep.type] ?? '#555', flexShrink: 0, whiteSpace: 'nowrap',
+                        }}>
+                          {dep.type}
+                        </span>
+                        {dep.platform && (
+                          <span style={{ fontSize: '10px', color: colors.textSecondary, flexShrink: 0, whiteSpace: 'nowrap' }}>
+                            {dep.platform}
+                          </span>
+                        )}
+                        <span style={{
+                          fontSize: '11px', color: colors.textSecondary, flex: 1,
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}>
+                          {dep.destination}{dep.toward ? `（${dep.toward}方面）` : ''}
+                        </span>
+                      </div>
+                    ))}
+                    {!showAllTooltipDeps && (
+                      <div
+                        onClick={() => setShowAllTooltipDeps(true)}
+                        style={{
+                          padding: '5px 8px',
+                          fontSize: '10px',
+                          color: colors.primary,
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          borderTop: `1px solid ${colors.borderLight}`,
+                        }}
+                      >
+                        ▼ 時刻表をすべて表示
+                      </div>
+                    )}
+                  </>
                 )}
               </>
             ) : (
@@ -2177,6 +2233,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 language={currentLanguage}
                 departureTime={timetableBaseTime}
                 onDepartureTimeChange={setTimetableBaseTime}
+                onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
               />
             </div>
           )
@@ -2192,6 +2249,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               departureTime={timetableBaseTime}
               onDepartureTimeChange={setTimetableBaseTime}
               language={currentLanguage}
+              onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
             />
           </>
         )}
@@ -2778,15 +2836,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               {isMobilePanelExpanded && (
                 <div style={{
                   position: 'absolute',
-                  bottom: '44px',
+                  bottom: 'calc(44px + env(safe-area-inset-bottom, 0px))',
                   left: 0,
                   right: 0,
                   zIndex: 1001,
                   backgroundColor: colors.surfaceElevated,
                   borderTop: `2px solid ${colors.border}`,
                   borderRadius: '12px 12px 0 0',
-                  maxHeight: 'calc(60vh - 44px)',
+                  maxHeight: 'calc(60dvh - 44px)',
                   overflowY: 'auto',
+                  overscrollBehavior: 'contain',
+                  WebkitOverflowScrolling: 'touch' as any,
                   boxShadow: `0 -2px 10px ${colors.shadow}`,
                 }}>
                   {/* 折りたたみボタン（右上） */}
@@ -2797,8 +2857,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                       top: 0,
                       float: 'right',
                       zIndex: 10,
-                      width: '32px',
-                      height: '32px',
+                      width: '44px',
+                      height: '44px',
                       border: 'none',
                       background: 'none',
                       cursor: 'pointer',
@@ -2819,6 +2879,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                       language={currentLanguage}
                       departureTime={timetableBaseTime}
                       onDepartureTimeChange={setTimetableBaseTime}
+                      onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
                     />
                   )}
                   {mobilePanelTab === 'legend' && (
@@ -2877,17 +2938,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                 backgroundColor: colors.surfaceElevated,
                 borderTop: isMobilePanelExpanded ? 'none' : `2px solid ${colors.border}`,
                 borderRadius: isMobilePanelExpanded ? '0' : '12px 12px 0 0',
-                height: '44px',
+                height: 'calc(44px + env(safe-area-inset-bottom, 0px))',
+                paddingBottom: 'env(safe-area-inset-bottom, 0px)',
                 display: 'flex',
                 alignItems: 'center',
-                padding: '0 4px',
+                padding: `0 4px env(safe-area-inset-bottom, 0px)`,
                 boxShadow: isMobilePanelExpanded ? 'none' : `0 -2px 10px ${colors.shadow}`,
               }}>
                 <button
                   onClick={() => { setMobilePanelTab('station'); setIsMobilePanelExpanded(true); }}
                   style={{
                     flex: 1,
-                    height: '36px',
+                    height: '44px',
                     border: 'none',
                     borderRadius: '6px',
                     cursor: 'pointer',
@@ -2904,7 +2966,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
                   onClick={() => { setMobilePanelTab('legend'); setIsMobilePanelExpanded(true); }}
                   style={{
                     flex: 1,
-                    height: '36px',
+                    height: '44px',
                     border: 'none',
                     borderRadius: '6px',
                     cursor: 'pointer',
@@ -2932,55 +2994,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               alignItems: 'center',
               gap: '4px',
             }}>
-              {/* 出発時刻入力（時刻表モードON時のみ） */}
-              {timetableModeEnabled && (
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  backgroundColor: colors.surface,
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: '8px',
-                  padding: '4px 8px',
-                  boxShadow: `0 2px 8px ${colors.shadow}`,
-                  backdropFilter: 'blur(4px)',
-                }}>
-                  <span style={{ fontSize: '11px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>出発</span>
-                  <input
-                    type="time"
-                    value={timetableBaseTime}
-                    onChange={e => setTimetableBaseTime(e.target.value)}
-                    style={{
-                      border: 'none',
-                      outline: 'none',
-                      fontSize: '13px',
-                      color: colors.text,
-                      backgroundColor: 'transparent',
-                      width: '78px',
-                      cursor: 'pointer',
-                    }}
-                  />
-                  <button
-                    onClick={() => {
-                      const now = new Date();
-                      setTimetableBaseTime(
-                        `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
-                      );
-                    }}
-                    style={{
-                      border: `1px solid ${colors.borderLight}`,
-                      borderRadius: '4px',
-                      padding: '1px 5px',
-                      fontSize: '10px',
-                      backgroundColor: 'transparent',
-                      color: colors.textSecondary,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    今
-                  </button>
-                </div>
-              )}
               {/* 時刻表ON/OFFボタン */}
               <button
                 onClick={() => setTimetableModeEnabled(!timetableModeEnabled)}
@@ -3007,14 +3020,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
             onClick={() => setIsFullscreen(!isFullscreen)}
             style={{
               position: 'absolute',
-              bottom: isFullscreen && isMobile ? '54px' : '10px',
+              bottom: isFullscreen && isMobile
+                ? 'calc(44px + env(safe-area-inset-bottom, 0px) + 10px)'
+                : '10px',
               right: '10px',
               zIndex: 1003,
               backgroundColor: colors.surface,
               color: colors.text,
               border: `1px solid ${colors.border}`,
               borderRadius: '8px',
-              padding: '8px',
+              width: '36px',
+              height: '36px',
               cursor: 'pointer',
               boxShadow: `0 2px 8px ${colors.shadow}`,
               display: 'flex',
@@ -3037,14 +3053,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
               onClick={handleRefreshLocation}
               style={{
                 position: 'absolute',
-                bottom: isFullscreen && isMobile ? '54px' : '10px',
-                right: '92px',
+                bottom: isFullscreen && isMobile
+                  ? 'calc(44px + env(safe-area-inset-bottom, 0px) + 10px)'
+                  : '10px',
+                right: '94px',
                 zIndex: 1002,
                 backgroundColor: '#34A853',
                 color: '#fff',
                 border: '1px solid #34A853',
                 borderRadius: '8px',
-                padding: '8px',
+                width: '36px',
+                height: '36px',
                 cursor: 'pointer',
                 boxShadow: `0 2px 8px ${colors.shadow}`,
                 display: 'flex',
@@ -3068,14 +3087,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language }) => {
             disabled={isLocating && !userLocation}
             style={{
               position: 'absolute',
-              bottom: isFullscreen && isMobile ? '54px' : '10px',
-              right: '50px',
+              bottom: isFullscreen && isMobile
+                ? 'calc(44px + env(safe-area-inset-bottom, 0px) + 10px)'
+                : '10px',
+              right: '52px',
               zIndex: 1002,
               backgroundColor: isLocating ? '#4285F4' : colors.surface,
               color: isLocating ? '#fff' : colors.text,
               border: `1px solid ${isLocating ? '#4285F4' : colors.border}`,
               borderRadius: '8px',
-              padding: '8px',
+              width: '36px',
+              height: '36px',
               cursor: (isLocating && !userLocation) ? 'wait' : 'pointer',
               boxShadow: `0 2px 8px ${colors.shadow}`,
               display: 'flex',
