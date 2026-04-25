@@ -81,7 +81,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
   const [isLegendExpanded, setIsLegendExpanded] = useState(true);
 
   // 表示モードの管理
-  const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(true);
+  const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
   const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
   const [showTravelTimes, setShowTravelTimes] = useState(true);
   const [showStationNames, setShowStationNames] = useState(true);
@@ -543,7 +543,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                   border: `1px solid ${colors.border}`,
                   borderRadius: '3px',
                   padding: '1px 4px',
-                  fontSize: '11px',
+                  fontSize: '16px',
                   backgroundColor: colors.surface,
                   color: colors.text,
                   cursor: 'pointer',
@@ -2300,7 +2300,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                       padding: '4px 8px',
                       borderRadius: '4px',
                       border: `1px solid ${colors.border}`,
-                      fontSize: '14px',
+                      fontSize: '16px',
                       backgroundColor: colors.surfaceElevated,
                       color: colors.text
                     }}
@@ -2847,6 +2847,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                   overflowY: 'auto',
                   overscrollBehavior: 'contain',
                   WebkitOverflowScrolling: 'touch' as any,
+                  touchAction: 'pan-y',
                   boxShadow: `0 -2px 10px ${colors.shadow}`,
                 }}>
                   {/* 折りたたみボタン（右上） */}
@@ -3022,7 +3023,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               position: 'absolute',
               bottom: isFullscreen && isMobile
                 ? 'calc(44px + env(safe-area-inset-bottom, 0px) + 10px)'
-                : '10px',
+                : !isFullscreen ? '100px' : '10px',
               right: '10px',
               zIndex: 1003,
               backgroundColor: colors.surface,
@@ -3055,7 +3056,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                 position: 'absolute',
                 bottom: isFullscreen && isMobile
                   ? 'calc(44px + env(safe-area-inset-bottom, 0px) + 10px)'
-                  : '10px',
+                  : !isFullscreen ? '100px' : '10px',
                 right: '94px',
                 zIndex: 1002,
                 backgroundColor: '#34A853',
@@ -3089,7 +3090,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               position: 'absolute',
               bottom: isFullscreen && isMobile
                 ? 'calc(44px + env(safe-area-inset-bottom, 0px) + 10px)'
-                : '10px',
+                : !isFullscreen ? '100px' : '10px',
               right: '52px',
               zIndex: 1002,
               backgroundColor: isLocating ? '#4285F4' : colors.surface,
