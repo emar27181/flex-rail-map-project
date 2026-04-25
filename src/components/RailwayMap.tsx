@@ -2978,7 +2978,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                     transition: 'background-color 0.2s',
                   }}
                 >
-                  ⚙ 設定
+                  ⚙ 表示設定
                 </button>
               </div>
             </>
@@ -3026,6 +3026,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                 : !isFullscreen ? '100px' : '10px',
               right: '10px',
               zIndex: 1003,
+              display: isFullscreen && isMobile && isMobilePanelExpanded ? 'none' : 'flex',
               backgroundColor: colors.surface,
               color: colors.text,
               border: `1px solid ${colors.border}`,
@@ -3049,7 +3050,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
           </button>
 
           {/* 現在地即時更新ボタン（トラッキングON時のみ表示） */}
-          {isLocating && (
+          {isLocating && !(isFullscreen && isMobile && isMobilePanelExpanded) && (
             <button
               onClick={handleRefreshLocation}
               style={{
@@ -3093,6 +3094,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                 : !isFullscreen ? '100px' : '10px',
               right: '52px',
               zIndex: 1002,
+              display: isFullscreen && isMobile && isMobilePanelExpanded ? 'none' : 'flex',
               backgroundColor: isLocating ? '#4285F4' : colors.surface,
               color: isLocating ? '#fff' : colors.text,
               border: `1px solid ${isLocating ? '#4285F4' : colors.border}`,
