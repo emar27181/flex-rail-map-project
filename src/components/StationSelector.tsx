@@ -219,28 +219,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               minWidth: '0',
               position: 'relative'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px', gap: '6px' }}>
-                <label style={{ fontWeight: 'bold', color: colors.textSecondary }}>
-                  {translateUI('departureStation', language)}
-                </label>
-                {onSetNearestDeparture && (
-                  <button
-                    onClick={onSetNearestDeparture}
-                    style={{
-                      border: `1px solid #4CAF50`,
-                      borderRadius: '4px',
-                      padding: '2px 7px',
-                      fontSize: '11px',
-                      backgroundColor: 'transparent',
-                      color: '#4CAF50',
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    📍 現在地から
-                  </button>
-                )}
-              </div>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: colors.textSecondary }}>
+                {translateUI('departureStation', language)}
+              </label>
               <div style={{ position: 'relative' }}>
                 <input
                   type="text"
@@ -296,7 +277,25 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   </button>
                 )}
               </div>
-              
+              {onSetNearestDeparture && (
+                <button
+                  onClick={onSetNearestDeparture}
+                  style={{
+                    marginTop: '4px',
+                    border: `1px solid #4CAF50`,
+                    borderRadius: '4px',
+                    padding: '2px 7px',
+                    fontSize: '11px',
+                    backgroundColor: 'transparent',
+                    color: '#4CAF50',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  📍 現在地から
+                </button>
+              )}
+
               {showDepartureResults && (
                 <div style={{
                   position: 'absolute',
