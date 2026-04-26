@@ -252,7 +252,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     padding: '5px 24px 5px 7px',
                     border: `2px solid #4CAF50`,
                     borderRadius: '4px',
-                    fontSize: '14px',
+                    fontSize: '16px',
                     boxSizing: 'border-box',
                     backgroundColor: colors.surfaceElevated,
                     color: colors.text
@@ -416,7 +416,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     padding: '5px 24px 5px 7px',
                     border: `2px solid #f44336`,
                     borderRadius: '4px',
-                    fontSize: '14px',
+                    fontSize: '16px',
                     boxSizing: 'border-box',
                     backgroundColor: colors.surfaceElevated,
                     color: colors.text
