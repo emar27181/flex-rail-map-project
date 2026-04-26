@@ -190,7 +190,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
 
   return (
-    <div style={{ marginBottom: '20px', padding: '15px', border: `1px solid ${colors.border}`, borderRadius: '8px', backgroundColor: colors.surface }}>
+    <div style={{ marginBottom: '12px', padding: '10px', border: `1px solid ${colors.border}`, borderRadius: '8px', backgroundColor: colors.surface }}>
       <div 
         onClick={onToggleExpanded}
         style={{
@@ -198,7 +198,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           justifyContent: 'space-between',
           alignItems: 'center',
           cursor: onToggleExpanded ? 'pointer' : 'default',
-          marginBottom: isExpanded ? '15px' : '0'
+          marginBottom: isExpanded ? '10px' : '0'
         }}
       >
         <h3 style={{ margin: '0', color: colors.text }}>{translateUI('stationSelection', language)}</h3>
@@ -208,7 +208,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         <>
           <div style={{
             display: 'flex',
-            gap: '15px',
+            gap: '8px',
             alignItems: 'flex-start',
             flexDirection: 'row',
             flexWrap: 'wrap'
@@ -219,7 +219,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               minWidth: '0',
               position: 'relative'
             }}>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: colors.textSecondary }}>
+              <label style={{ display: 'block', marginBottom: '3px', fontWeight: 'bold', color: colors.textSecondary, fontSize: '12px' }}>
                 {translateUI('departureStation', language)}
               </label>
               <div style={{ position: 'relative' }}>
@@ -249,10 +249,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   placeholder={departure ? translateStation(departure.name, language) : translateUI('stationPlaceholder', language)}
                   style={{
                     width: '100%',
-                    padding: '8px 30px 8px 8px',
+                    padding: '5px 24px 5px 7px',
                     border: `2px solid #4CAF50`,
                     borderRadius: '4px',
-                    fontSize: '16px',
+                    fontSize: '14px',
                     boxSizing: 'border-box',
                     backgroundColor: colors.surfaceElevated,
                     color: colors.text
@@ -345,7 +345,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               justifyContent: 'flex-end'
             }}>
               {/* ラベルと同じ高さのスペーサー */}
-              <div style={{ marginBottom: '5px', height: '25px' }} />
+              <div style={{ marginBottom: '3px', height: '18px' }} />
               <button
                 onClick={() => {
                   const prevDep = departure;
@@ -383,7 +383,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               minWidth: '0',
               position: 'relative'
             }}>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: colors.textSecondary }}>
+              <label style={{ display: 'block', marginBottom: '3px', fontWeight: 'bold', color: colors.textSecondary, fontSize: '12px' }}>
                 {translateUI('arrivalStation', language)}
               </label>
               <div style={{ position: 'relative' }}>
@@ -413,10 +413,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   placeholder={arrival ? translateStation(arrival.name, language) : translateUI('stationPlaceholder', language)}
                   style={{
                     width: '100%',
-                    padding: '8px 30px 8px 8px',
+                    padding: '5px 24px 5px 7px',
                     border: `2px solid #f44336`,
                     borderRadius: '4px',
-                    fontSize: '16px',
+                    fontSize: '14px',
                     boxSizing: 'border-box',
                     backgroundColor: colors.surfaceElevated,
                     color: colors.text
