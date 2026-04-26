@@ -998,7 +998,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
         if (typeof window === 'undefined') return;
 
         const [
-          { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents },
+          { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl },
           { DivIcon }
         ] = await Promise.all([
           import('react-leaflet'),
@@ -1006,7 +1006,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
         ]);
 
         if (mounted) {
-          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, DivIcon });
+          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, DivIcon });
           setIsClient(true);
           setIsLoading(false);
           // デバッグ関数をブラウザコンソールで利用可能にする
@@ -1695,7 +1695,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
 
   // console.log('RailwayMap rendering main component');
 
-  const { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, DivIcon } = MapComponents;
+  const { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, DivIcon } = MapComponents;
 
   const MapEvents = () => {
     const map = useMapEvents({
@@ -1989,12 +1989,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               return null;
             }
 
-            const shouldShowStation = zoomLevel >= 11; // より広域で駅を表示
-            const shouldShowStationName = showStationNames && zoomLevel >= 10; // 駅名表示切替 + ズームレベル
-            const shouldShowAllStations = zoomLevel >= 13; // 十分拡大したらすべての駅を表示
-            const isMajorStation = majorStations.includes(station.name);
             const isTransferStation = transferStations.has(station.name);
-            const shouldShowInWideView = zoomLevel >= 10 && isMajorStation; // 主要駅をより広域で表示
 
             // 時間フィルターが有効な場合は最優先でチェック
             if (timeFilterEnabled && stationsWithinTime.length > 0) {
@@ -2028,17 +2023,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
             //   console.log(`Showing transfer station: ${station.name} on ${routeKey}`);
             // }
 
-            // 十分拡大している場合はすべての駅を表示（但し乗換駅フィルターは維持）
-            if (shouldShowAllStations) {
-              // 全駅表示モード - 乗換駅フィルターのみ適用済み
-            } else {
-              // 通常表示モードの場合
-              if (!shouldShowStation && !shouldShowInWideView) {
-                return null;
-              }
-            }
-
-            const isDetailed = shouldShowStationName || shouldShowInWideView || shouldShowAllStations;
+            // 表示切替のみで駅の表示を制御（ズームレベルによる省略なし）
+            const isDetailed = showStationNames;
             const stationOpacity = visibleRoutes.has(routeKey) ? 1 : 0.3;
             // 時刻表モード有効かつ経路上の駅なら出発時刻を2行目に表示
             const timelineEntry = timetableModeEnabled
@@ -2075,39 +2061,28 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
             const nextStation = displayStations[index + 1];
             const isCurrentTransfer = transferStations.has(station.name);
 
-            // 乗換駅間で時間をまとめる共通ロジック
-            const aggregateTimeToNextTransfer = () => {
+            if (showTransferStationsOnly) {
+              // 乗換駅のみ表示時：乗換駅起点のみ処理（それ以外はスキップ）
+              if (!isCurrentTransfer) return null;
+
+              // 次の乗換駅まで合算
               let totalTime = 0;
-              let endStationIndex = index;
-
+              let endIndex = index;
               for (let i = index; i < displayStations.length - 1; i++) {
-                const currentSt = displayStations[i];
-                const nextSt = displayStations[i + 1];
-                totalTime += currentSt.timeToNext || 3;
-                endStationIndex = i + 1;
-
-                // 次の駅が乗換駅なら停止
-                if (transferStations.has(nextSt.name)) {
-                  break;
-                }
+                const cSt = displayStations[i];
+                const nSt = displayStations[i + 1];
+                totalTime += cSt.timeToNext || 3;
+                endIndex = i + 1;
+                if (transferStations.has(nSt.name)) break;
               }
 
-              return { totalTime, endStationIndex };
-            };
+              if (endIndex === index) return null;
 
-            // 乗換駅のみ表示時、または通常時でも乗換駅から次の乗換駅までをまとめる
-            if (showTransferStationsOnly || isCurrentTransfer) {
-              // 現在の駅が乗換駅でない場合はスキップ（乗換駅のみ表示時）
-              if (showTransferStationsOnly && !isCurrentTransfer) return null;
-
-              const { totalTime, endStationIndex } = aggregateTimeToNextTransfer();
-
-              // 隣接する駅も乗換駅の場合は通常表示
-              if (endStationIndex === index + 1) {
+              // 隣接する駅も乗換駅なら個別表示、それ以外は合算表示
+              if (endIndex === index + 1) {
                 const midpoint = getMidpoint(station.lat, station.lng, nextStation.lat, nextStation.lng);
                 const timeIcon = createTimeIcon(station.timeToNext, color, zoomLevel, false);
                 if (!timeIcon) return null;
-
                 return (
                   <Marker
                     key={`${routeKey}-time-${index}`}
@@ -2117,11 +2092,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                   />
                 );
               } else {
-                // 乗換駅間の集計時間を表示
-                const midpoint = getRouteBasedMidpoint(displayStations, index, endStationIndex);
+                const midpoint = getRouteBasedMidpoint(displayStations, index, endIndex);
                 const timeIcon = createTimeIcon(totalTime, color, zoomLevel, true);
                 if (!timeIcon) return null;
-
                 return (
                   <Marker
                     key={`${routeKey}-time-transfer-${index}`}
@@ -2131,48 +2104,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                   />
                 );
               }
-            } else if (zoomLevel < 14) {
-              // 高いズームレベル以下では主要駅間をまとめて表示
-              const isCurrentMajor = majorStations.includes(station.name);
-              if (!isCurrentMajor) return null;
-
-              let totalTime = 0;
-              let endIndex = index;
-              let stationCount = 0;
-
-              for (let i = index; i < displayStations.length - 1; i++) {
-                const currentSt = displayStations[i];
-                const nextSt = displayStations[i + 1];
-                totalTime += currentSt.timeToNext || 3;
-                endIndex = i + 1;
-                stationCount++;
-
-                // 主要駅または乗換駅に到達するか、一定数の駅をまとめたら停止
-                if (majorStations.includes(nextSt.name) || transferStations.has(nextSt.name) || stationCount >= 5) {
-                  break;
-                }
-              }
-
-              if (endIndex === index) return null;
-
-              const midpoint = getRouteBasedMidpoint(displayStations, index, endIndex);
-              const timeIcon = createTimeIcon(totalTime, color, zoomLevel, true);
-              if (!timeIcon) return null;
-
-              return (
-                <Marker
-                  key={`${routeKey}-time-section-${index}`}
-                  position={midpoint}
-                  icon={timeIcon}
-                  zIndexOffset={500}
-                />
-              );
             } else {
-              // 通常の詳細表示（全ての駅間時間を表示）
+              // 全駅表示時：各駅間の個別時間を表示
               const midpoint = getMidpoint(station.lat, station.lng, nextStation.lat, nextStation.lng);
               const timeIcon = createTimeIcon(station.timeToNext, color, zoomLevel, false);
               if (!timeIcon) return null;
-
               return (
                 <Marker
                   key={`${routeKey}-time-${index}`}
@@ -2587,8 +2523,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               zoom={12}
               style={{ height: '100%', width: '100%' }}
               scrollWheelZoom={true}
+              zoomControl={false}
               ref={mapRef}
             >
+              <ZoomControl position="bottomright" />
               <MapEvents />
               <TileLayer
                 url={theme === 'dark'
@@ -3021,12 +2959,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
             onClick={() => setIsFullscreen(!isFullscreen)}
             style={{
               position: 'absolute',
-              bottom: isFullscreen && isMobile
-                ? 'calc(44px + env(safe-area-inset-bottom, 0px) + 10px)'
-                : !isFullscreen ? '100px' : '10px',
+              ...(isFullscreen && isMobile
+                ? { top: 'calc(env(safe-area-inset-top, 0px) + 10px)', bottom: 'auto' }
+                : !isFullscreen
+                  ? isMobile
+                    ? { top: '60px', bottom: 'auto' }
+                    : { bottom: '10px', top: 'auto' }
+                  : { bottom: '10px', top: 'auto' }),
               right: '10px',
               zIndex: 1003,
-              display: isFullscreen && isMobile && isMobilePanelExpanded ? 'none' : 'flex',
+              display: 'flex',
               backgroundColor: colors.surface,
               color: colors.text,
               border: `1px solid ${colors.border}`,
@@ -3035,7 +2977,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               height: '36px',
               cursor: 'pointer',
               boxShadow: `0 2px 8px ${colors.shadow}`,
-              display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               backdropFilter: 'blur(4px)',
@@ -3050,14 +2991,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
           </button>
 
           {/* 現在地即時更新ボタン（トラッキングON時のみ表示） */}
-          {isLocating && !(isFullscreen && isMobile && isMobilePanelExpanded) && (
+          {isLocating && (
             <button
               onClick={handleRefreshLocation}
               style={{
                 position: 'absolute',
-                bottom: isFullscreen && isMobile
-                  ? 'calc(44px + env(safe-area-inset-bottom, 0px) + 10px)'
-                  : !isFullscreen ? '100px' : '10px',
+                ...(isFullscreen && isMobile
+                  ? { top: 'calc(env(safe-area-inset-top, 0px) + 10px)', bottom: 'auto' }
+                  : !isFullscreen
+                    ? isMobile
+                      ? { top: '60px', bottom: 'auto' }
+                      : { bottom: '10px', top: 'auto' }
+                    : { bottom: '10px', top: 'auto' }),
                 right: '94px',
                 zIndex: 1002,
                 backgroundColor: '#34A853',
@@ -3089,12 +3034,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
             disabled={isLocating && !userLocation}
             style={{
               position: 'absolute',
-              bottom: isFullscreen && isMobile
-                ? 'calc(44px + env(safe-area-inset-bottom, 0px) + 10px)'
-                : !isFullscreen ? '100px' : '10px',
+              ...(isFullscreen && isMobile
+                ? { top: 'calc(env(safe-area-inset-top, 0px) + 10px)', bottom: 'auto' }
+                : !isFullscreen
+                  ? isMobile
+                    ? { top: '60px', bottom: 'auto' }
+                    : { bottom: '10px', top: 'auto' }
+                  : { bottom: '10px', top: 'auto' }),
               right: '52px',
               zIndex: 1002,
-              display: isFullscreen && isMobile && isMobilePanelExpanded ? 'none' : 'flex',
+              display: 'flex',
               backgroundColor: isLocating ? '#4285F4' : colors.surface,
               color: isLocating ? '#fff' : colors.text,
               border: `1px solid ${isLocating ? '#4285F4' : colors.border}`,
@@ -3103,7 +3052,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               height: '36px',
               cursor: (isLocating && !userLocation) ? 'wait' : 'pointer',
               boxShadow: `0 2px 8px ${colors.shadow}`,
-              display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               backdropFilter: 'blur(4px)',
