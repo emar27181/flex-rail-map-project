@@ -179,236 +179,160 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
               onMouseMove={(e) => setTooltip(t => t ? { ...t, x: e.clientX, y: e.clientY } : null)}
               onMouseLeave={() => setTooltip(null)}
               style={{
-                padding: '15px',
-                backgroundColor: isSelected ? '#e3f2fd' : 'white',
+                padding: '10px 12px',
+                backgroundColor: isSelected ? colors.selectedBackground || colors.surfaceElevated : colors.surface,
                 borderRadius: '6px',
-                border: isSelected ? '2px solid #2196F3' : '1px solid #e0e0e0',
+                border: isSelected ? '2px solid #2196F3' : `1px solid ${colors.borderLight}`,
                 transition: 'all 0.2s ease',
-                boxShadow: isSelected ? '0 2px 8px rgba(33,150,243,0.3)' : '0 1px 3px rgba(0,0,0,0.1)'
+                boxShadow: isSelected ? '0 2px 8px rgba(33,150,243,0.3)' : `0 1px 3px ${colors.shadow}`
               }}
             >
-            {/* ルートヘッダー */}
+            {/* ルートヘッダー: 番号・時間・乗換・ボタン */}
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'flex-start',
+              alignItems: 'center',
               marginBottom: '10px',
-              flexWrap: 'wrap',
-              gap: '10px'
+              gap: '8px'
             }}>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span style={{
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  color: isSelected ? '#2196F3' : '#333'
+                  fontSize: '12px',
+                  color: colors.textSecondary
                 }}>
-{translateUI('routeNumber', language, { number: (index + 1).toString() })}
+                  {translateUI('routeNumber', language, { number: (index + 1).toString() })}
                 </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    border: '2px solid #2196F3',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: '#f8f9fa'
-                  }}>
-                    <span style={{
-                      fontSize: '14px',
-                      fontWeight: 'bold',
-                      color: '#2196F3',
-                      lineHeight: '1'
-                    }}>
-                      {Math.round(route.totalTime)}
-                    </span>
-                  </div>
-                  <span style={{
-                    fontSize: '14px',
-                    color: '#666',
-                    padding: '2px 8px',
-                    backgroundColor: '#f0f0f0',
-                    borderRadius: '12px'
-                  }}>
-                    {getTransferText(route.transfers)}
+                {/* 所要時間 */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: '2px'
+                }}>
+                  <span style={{ fontSize: '20px', fontWeight: 'bold', color: isSelected ? '#2196F3' : colors.text, lineHeight: '1' }}>
+                    {Math.round(route.totalTime)}
                   </span>
+                  <span style={{ fontSize: '11px', color: colors.textSecondary }}>分</span>
                 </div>
+                {/* 乗換数 */}
+                <span style={{
+                  fontSize: '12px',
+                  color: route.transfers === 0 ? '#4CAF50' : '#ff9800',
+                  padding: '2px 7px',
+                  backgroundColor: route.transfers === 0 ? 'rgba(76,175,80,0.12)' : 'rgba(255,152,0,0.12)',
+                  borderRadius: '10px',
+                  fontWeight: '500',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {getTransferText(route.transfers)}
+                </span>
               </div>
-              
+
               {/* 地図で表示ボタン */}
               <button
                 onClick={() => onRouteSelect?.(route)}
                 disabled={isSelected}
                 style={{
-                  padding: '8px 16px',
-                  backgroundColor: isSelected ? '#ccc' : '#2196F3',
+                  padding: '5px 12px',
+                  backgroundColor: isSelected ? colors.textSecondary : '#2196F3',
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
                   cursor: isSelected ? 'default' : 'pointer',
-                  fontSize: '14px',
+                  fontSize: '12px',
                   fontWeight: '500',
+                  flexShrink: 0,
                   transition: 'background-color 0.2s ease'
                 }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.backgroundColor = '#1976D2';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.backgroundColor = '#2196F3';
-                  }
-                }}
+                onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = '#1976D2'; }}
+                onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = '#2196F3'; }}
               >
-{isSelected ? translateUI('displayOnMapActive', language) : translateUI('displayOnMapButton', language)}
+                {isSelected ? translateUI('displayOnMapActive', language) : translateUI('displayOnMapButton', language)}
               </button>
             </div>
 
-            {/* 路線詳細 */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {route.segments.map((segment, segIndex) => (
-                <div key={segIndex}>
-                  {/* 乗換案内 */}
-                  {segIndex > 0 && (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      margin: '5px 0',
-                      fontSize: '12px',
-                      color: '#666'
-                    }}>
-                      <div style={{
-                        padding: '3px 8px',
-                        backgroundColor: segment.isWalkingTransfer ? '#4CAF50' : '#ff9800',
-                        color: 'white',
-                        borderRadius: '10px',
-                        fontSize: '11px'
-                      }}>
-{segment.isWalkingTransfer ? translateUI('walkingTransferShort', language) : translateUI('transferShort', language)}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 路線セグメント */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '8px 0'
-                  }}>
-                    {/* 路線アイコン */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      minWidth: language === 'english' ? '100px' : '120px',
-                      maxWidth: language === 'english' ? '180px' : '200px'
-                    }}>
-                      <div style={{
-                        width: '16px',
-                        height: '16px',
-                        backgroundColor: segment.isWalkingTransfer ? '#4CAF50' : routeColors[segment.routeKey],
-                        borderRadius: '50%',
-                        flexShrink: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '10px',
-                        color: 'white'
-                      }}>
-                        {segment.isWalkingTransfer ? '🚶' : ''}
-                      </div>
+            {/* 路線フロービジュアル */}
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', rowGap: '6px' }}>
+              {route.segments.map((segment, segIndex) => {
+                const segColor = segment.isWalkingTransfer ? '#4CAF50' : (routeColors[segment.routeKey] || '#888');
+                const segName = routeNames[segment.routeKey] || segment.routeName;
+                const startName = translateStation(segment.stations[0].name, language);
+                const endName = translateStation(segment.stations[segment.stations.length - 1].name, language);
+                const isLast = segIndex === route.segments.length - 1;
+                return (
+                  <React.Fragment key={segIndex}>
+                    {/* 出発駅 or 乗換駅 */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                      {segIndex > 0 && (
+                        <span style={{
+                          fontSize: '9px',
+                          color: '#fff',
+                          backgroundColor: segment.isWalkingTransfer ? '#4CAF50' : '#ff9800',
+                          padding: '1px 5px',
+                          borderRadius: '6px',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {segment.isWalkingTransfer
+                            ? translateUI('walkingTransferShort', language)
+                            : translateUI('transferShort', language)}
+                        </span>
+                      )}
                       <span style={{
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        color: segment.isWalkingTransfer ? '#4CAF50' : routeColors[segment.routeKey]
+                        fontSize: '11px',
+                        fontWeight: 'bold',
+                        color: colors.text,
+                        whiteSpace: 'nowrap',
+                        maxWidth: '60px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        textAlign: 'center'
                       }}>
-                        {segment.isWalkingTransfer ? 
-                          segment.routeName :
-                          (() => {
-                            const routeDestination = getRouteDestination(segment.routeKey);
-                            const routeName = routeDestination?.description || segment.routeName;
-                            const fromStation = segment.stations[0].name;
-                            const toStation = segment.stations[segment.stations.length - 1].name;
-                            
-                            // 行先情報を取得
-                            let direction = '';
-                            if (commonDirections[segment.routeKey] && commonDirections[segment.routeKey][fromStation]) {
-                              direction = commonDirections[segment.routeKey][fromStation];
-                            } else if (routeDestination) {
-                              // 終点駅に向かっているかチェック
-                              const destinations = routeDestination.destinations;
-                              if (destinations.includes(toStation)) {
-                                direction = translateUI('direction', language, { destination: translateStation(toStation, language) });
-                              } else {
-                                // より適切な終点を推定
-                                direction = translateUI('directionArea', language, { destination: translateStation(destinations[destinations.length - 1], language) });
-                              }
-                            }
-                            
-                            return `${routeName}${direction ? ` ${direction}` : ''}`;
-                          })()
-                        }
+                        {startName}
                       </span>
                     </div>
 
-                    {/* 駅名と時間 */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      flex: 1,
-                      fontSize: '14px'
-                    }}>
-                      <span style={{ fontWeight: '500' }}>
-                        {translateStation(segment.stations[0].name, language)}
-                      </span>
-                      <span style={{ color: '#999' }}>→</span>
-                      <span style={{ fontWeight: '500' }}>
-                        {translateStation(segment.stations[segment.stations.length - 1].name, language)}
-                      </span>
-                      <div style={{
-                        marginLeft: 'auto',
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: '50%',
-                        border: '2px solid #666',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: '#f8f9fa'
+                    {/* 路線バー */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '1 1 40px', minWidth: '40px' }}>
+                      <span style={{
+                        fontSize: '10px',
+                        color: segColor,
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap',
+                        marginBottom: '2px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '100%'
                       }}>
+                        {segName}
+                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2px' }}>
+                        <div style={{ flex: 1, height: '5px', backgroundColor: segColor, borderRadius: '2px' }} />
+                        <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                          {Math.round(segment.time)}分
+                        </span>
+                        <div style={{ flex: 1, height: '5px', backgroundColor: segColor, borderRadius: '2px' }} />
+                      </div>
+                    </div>
+
+                    {/* 到着駅（最終セグメントのみ） */}
+                    {isLast && (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         <span style={{
                           fontSize: '11px',
                           fontWeight: 'bold',
-                          color: '#666',
-                          lineHeight: '1'
+                          color: colors.text,
+                          whiteSpace: 'nowrap',
+                          maxWidth: '60px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          textAlign: 'center'
                         }}>
-                          {Math.round(segment.time)}
+                          {endName}
                         </span>
                       </div>
-                    </div>
-                  </div>
-
-                  {/* 経由駅（多い場合は省略） */}
-                  {segment.stations.length > 2 && (
-                    <div style={{
-                      marginLeft: '28px',
-                      fontSize: '12px',
-                      color: '#888',
-                      lineHeight: '1.4'
-                    }}>
-{translateUI('viaStations', language)}: {segment.stations.slice(1, -1).length > 3
-                        ? `${segment.stations.slice(1, 4).map(s => translateStation(s.name, language)).join(language === 'japanese' ? '、' : ', ')}...${translateUI('otherStations', language, { count: (segment.stations.length - 5).toString() })}`
-                        : segment.stations.slice(1, -1).map(s => translateStation(s.name, language)).join(language === 'japanese' ? '、' : ', ')
-                      }
-                    </div>
-                  )}
-                </div>
-              ))}
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </div>
             </div>
           );
