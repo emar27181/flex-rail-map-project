@@ -517,24 +517,26 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
           {/* 出発/到着ボタン + 基準時刻 */}
           <div
             onClick={e => e.stopPropagation()}
-            style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}
+            style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
           >
-            <button
-              onClick={() => { setDeparture(stationTooltip.station); setStationTooltip(null); }}
-              style={{
-                backgroundColor: '#4CAF50', color: 'white', border: 'none',
-                padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px',
-              }}
-            >{translateUI('setDepartureStation', currentLanguage)}</button>
-            <button
-              onClick={() => { setArrival(stationTooltip.station); setStationTooltip(null); }}
-              style={{
-                backgroundColor: '#F44336', color: 'white', border: 'none',
-                padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px',
-              }}
-            >{translateUI('setArrivalStation', currentLanguage)}</button>
-            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ fontSize: '10px', color: colors.textSecondary }}>基準</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <button
+                onClick={() => { setDeparture(stationTooltip.station); setStationTooltip(null); }}
+                style={{
+                  backgroundColor: '#4CAF50', color: 'white', border: 'none',
+                  padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px',
+                }}
+              >{translateUI('setDepartureStation', currentLanguage)}</button>
+              <button
+                onClick={() => { setArrival(stationTooltip.station); setStationTooltip(null); }}
+                style={{
+                  backgroundColor: '#F44336', color: 'white', border: 'none',
+                  padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px',
+                }}
+              >{translateUI('setArrivalStation', currentLanguage)}</button>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '10px', color: colors.textSecondary }}>基準時刻</span>
               <input
                 type="time"
                 value={timetableBaseTime}
@@ -547,6 +549,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                   backgroundColor: colors.surface,
                   color: colors.text,
                   cursor: 'pointer',
+                  width: '110px',
                 }}
               />
             </div>
