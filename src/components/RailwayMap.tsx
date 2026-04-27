@@ -557,7 +557,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
         </div>
 
         {/* 2カラム本体 */}
-        <div style={{ display: 'flex', alignItems: 'stretch', flex: 1, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', alignItems: 'stretch', flex: 1, overflowX: 'auto', overflowY: 'hidden' }}>
 
           {/* 左カラム: 通過路線一覧 */}
           <div style={{
@@ -611,7 +611,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
           </div>
 
           {/* 右カラム: 時刻表 */}
-          <div style={{ flex: 1, overflowY: 'auto' }}>
+          <div style={{ flex: 1, minWidth: '180px', overflowY: 'auto' }}>
             {activeRouteKey && hasTimetableData(activeRouteKey) ? (
               <>
                 <div style={{
