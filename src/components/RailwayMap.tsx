@@ -633,30 +633,30 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                   <>
                     {activeDeps.map((dep, i) => (
                       <div key={`${dep.time}-${dep.type}-${i}`} style={{
-                        display: 'flex', alignItems: 'center', gap: '4px',
                         padding: '4px 8px',
                         borderBottom: `1px solid ${colors.borderLight}`,
                       }}>
-                        <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text, minWidth: '40px', flexShrink: 0 }}>
-                          {dep.time}
-                        </span>
-                        <span style={{
-                          fontSize: '10px', color: '#fff', padding: '1px 4px', borderRadius: '3px',
-                          backgroundColor: TRAIN_TYPE_COLOR[dep.type] ?? '#555', flexShrink: 0, whiteSpace: 'nowrap',
-                        }}>
-                          {dep.type}
-                        </span>
-                        {dep.platform && (
-                          <span style={{ fontSize: '10px', color: colors.textSecondary, flexShrink: 0, whiteSpace: 'nowrap' }}>
-                            {dep.platform}
+                        {/* 1行目: 時刻・種別・番線 */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '1px' }}>
+                          <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text, flexShrink: 0 }}>
+                            {dep.time}
                           </span>
-                        )}
-                        <span style={{
-                          fontSize: '11px', color: colors.textSecondary, flex: 1,
-                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                        }}>
+                          <span style={{
+                            fontSize: '10px', color: '#fff', padding: '1px 4px', borderRadius: '3px',
+                            backgroundColor: TRAIN_TYPE_COLOR[dep.type] ?? '#555', flexShrink: 0,
+                          }}>
+                            {dep.type}
+                          </span>
+                          {dep.platform && (
+                            <span style={{ fontSize: '10px', color: colors.textSecondary, flexShrink: 0 }}>
+                              {dep.platform}
+                            </span>
+                          )}
+                        </div>
+                        {/* 2行目: 行き先 */}
+                        <div style={{ fontSize: '11px', color: colors.textSecondary, paddingLeft: '2px' }}>
                           {dep.destination}{dep.toward ? `（${dep.toward}方面）` : ''}
-                        </span>
+                        </div>
                       </div>
                     ))}
                     {!showAllTooltipDeps && (
