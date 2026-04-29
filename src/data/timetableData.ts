@@ -3831,6 +3831,606 @@ const toyoRapidData: LineTimetableData = {
   ],
 };
 
+// JR八高線（八王子〜箱根ヶ崎）
+const jrHachikoLineData: LineTimetableData = {
+  key: 'jrHachikoLine',
+  name: 'JR八高線',
+  updatedAt: '2025-03-15',
+  dataVersion: '2025年版（概算）',
+  directions: [
+    {
+      label: '箱根ヶ崎方面',
+      stations: [
+        { name: '八王子', offset: 0 }, { name: '北八王子', offset: 2 }, { name: '小宮', offset: 4 },
+        { name: '拝島', offset: 6 }, { name: '東福生', offset: 9 }, { name: '箱根ヶ崎', offset: 11 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(9),    intervalMin: 30, type: '普通', destination: '箱根ヶ崎' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 40, type: '普通', destination: '箱根ヶ崎' },
+        { fromMin: m(17),   toMin: m(21),   intervalMin: 30, type: '普通', destination: '箱根ヶ崎' },
+        { fromMin: m(21),   toMin: m(23),   intervalMin: 40, type: '普通', destination: '箱根ヶ崎' },
+      ],
+    },
+    {
+      label: '八王子方面',
+      stations: [
+        { name: '箱根ヶ崎', offset: 0 }, { name: '東福生', offset: 2 }, { name: '拝島', offset: 5 },
+        { name: '小宮', offset: 7 }, { name: '北八王子', offset: 9 }, { name: '八王子', offset: 11 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(9),    intervalMin: 30, type: '普通', destination: '八王子' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 40, type: '普通', destination: '八王子' },
+        { fromMin: m(17),   toMin: m(21),   intervalMin: 30, type: '普通', destination: '八王子' },
+        { fromMin: m(21),   toMin: m(23),   intervalMin: 40, type: '普通', destination: '八王子' },
+      ],
+    },
+  ],
+};
+
+// JR五日市線（拝島〜武蔵五日市）
+const jrItsukaichiLineData: LineTimetableData = {
+  key: 'jrItsukaichiLine',
+  name: 'JR五日市線',
+  updatedAt: '2025-03-15',
+  dataVersion: '2025年版（概算）',
+  directions: [
+    {
+      label: '武蔵五日市方面',
+      stations: [
+        { name: '拝島', offset: 0 }, { name: '熊川', offset: 3 }, { name: '東秋留', offset: 5 },
+        { name: '秋川', offset: 7 }, { name: '武蔵引田', offset: 9 }, { name: '武蔵増戸', offset: 11 },
+        { name: '武蔵五日市', offset: 13 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(9),    intervalMin: 20, type: '普通', destination: '武蔵五日市' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 30, type: '普通', destination: '武蔵五日市' },
+        { fromMin: m(17),   toMin: m(21),   intervalMin: 20, type: '普通', destination: '武蔵五日市' },
+        { fromMin: m(21),   toMin: m(23),   intervalMin: 30, type: '普通', destination: '武蔵五日市' },
+      ],
+    },
+    {
+      label: '拝島方面',
+      stations: [
+        { name: '武蔵五日市', offset: 0 }, { name: '武蔵増戸', offset: 2 }, { name: '武蔵引田', offset: 4 },
+        { name: '秋川', offset: 6 }, { name: '東秋留', offset: 8 }, { name: '熊川', offset: 10 },
+        { name: '拝島', offset: 13 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(9),    intervalMin: 20, type: '普通', destination: '拝島' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 30, type: '普通', destination: '拝島' },
+        { fromMin: m(17),   toMin: m(21),   intervalMin: 20, type: '普通', destination: '拝島' },
+        { fromMin: m(21),   toMin: m(23),   intervalMin: 30, type: '普通', destination: '拝島' },
+      ],
+    },
+  ],
+};
+
+// JR伊東線（熱海〜伊東）
+const jrItoLineData: LineTimetableData = {
+  key: 'jrItoLine',
+  name: 'JR伊東線',
+  updatedAt: '2025-03-15',
+  dataVersion: '2025年版（概算）',
+  directions: [
+    {
+      label: '伊東方面',
+      stations: [
+        { name: '熱海', offset: 0 }, { name: '来宮', offset: 4 }, { name: '伊豆多賀', offset: 7 },
+        { name: '網代', offset: 10 }, { name: '宇佐美', offset: 14 }, { name: '伊東', offset: 19 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(9),    intervalMin: 20, type: '普通', destination: '伊東' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 30, type: '普通', destination: '伊東' },
+        { fromMin: m(17),   toMin: m(21),   intervalMin: 20, type: '普通', destination: '伊東' },
+        { fromMin: m(21),   toMin: m(23),   intervalMin: 30, type: '普通', destination: '伊東' },
+      ],
+    },
+    {
+      label: '熱海方面',
+      stations: [
+        { name: '伊東', offset: 0 }, { name: '宇佐美', offset: 5 }, { name: '網代', offset: 9 },
+        { name: '伊豆多賀', offset: 12 }, { name: '来宮', offset: 15 }, { name: '熱海', offset: 19 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(9),    intervalMin: 20, type: '普通', destination: '熱海' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 30, type: '普通', destination: '熱海' },
+        { fromMin: m(17),   toMin: m(21),   intervalMin: 20, type: '普通', destination: '熱海' },
+        { fromMin: m(21),   toMin: m(23),   intervalMin: 30, type: '普通', destination: '熱海' },
+      ],
+    },
+  ],
+};
+
+// 伊豆急行線（伊東〜伊豆急下田）
+const izukyuLineData: LineTimetableData = {
+  key: 'izukyuLine',
+  name: '伊豆急行線',
+  updatedAt: '2025-03-15',
+  dataVersion: '2025年版（概算）',
+  directions: [
+    {
+      label: '伊豆急下田方面',
+      stations: [
+        { name: '伊東', offset: 0 }, { name: '南伊東', offset: 3 }, { name: '川奈', offset: 6 },
+        { name: '富戸', offset: 10 }, { name: '城ヶ崎海岸', offset: 14 }, { name: '伊豆高原', offset: 17 },
+        { name: '伊豆大川', offset: 21 }, { name: '伊豆北川', offset: 24 }, { name: '伊豆熱川', offset: 27 },
+        { name: '片瀬白田', offset: 30 }, { name: '伊豆稲取', offset: 33 }, { name: '今井浜海岸', offset: 37 },
+        { name: '河津', offset: 40 }, { name: '稲梓', offset: 44 }, { name: '蓮台寺', offset: 48 },
+        { name: '伊豆急下田', offset: 51 },
+      ],
+      patterns: [
+        { fromMin: m(6),    toMin: m(9),    intervalMin: 30, type: '普通', destination: '伊豆急下田' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 60, type: '普通', destination: '伊豆急下田' },
+        { fromMin: m(17),   toMin: m(21),   intervalMin: 30, type: '普通', destination: '伊豆急下田' },
+        { fromMin: m(21),   toMin: m(23),   intervalMin: 60, type: '普通', destination: '伊豆急下田' },
+      ],
+    },
+    {
+      label: '伊東方面',
+      stations: [
+        { name: '伊豆急下田', offset: 0 }, { name: '蓮台寺', offset: 3 }, { name: '稲梓', offset: 6 },
+        { name: '河津', offset: 10 }, { name: '今井浜海岸', offset: 14 }, { name: '伊豆稲取', offset: 17 },
+        { name: '片瀬白田', offset: 21 }, { name: '伊豆熱川', offset: 24 }, { name: '伊豆北川', offset: 27 },
+        { name: '伊豆大川', offset: 30 }, { name: '伊豆高原', offset: 34 }, { name: '城ヶ崎海岸', offset: 37 },
+        { name: '富戸', offset: 41 }, { name: '川奈', offset: 45 }, { name: '南伊東', offset: 48 },
+        { name: '伊東', offset: 51 },
+      ],
+      patterns: [
+        { fromMin: m(6),    toMin: m(9),    intervalMin: 30, type: '普通', destination: '伊東' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 60, type: '普通', destination: '伊東' },
+        { fromMin: m(17),   toMin: m(21),   intervalMin: 30, type: '普通', destination: '伊東' },
+        { fromMin: m(21),   toMin: m(23),   intervalMin: 60, type: '普通', destination: '伊東' },
+      ],
+    },
+  ],
+};
+
+// 箱根登山鉄道（小田原〜強羅）
+const hakoneTozanData: LineTimetableData = {
+  key: 'hakoneTozan',
+  name: '箱根登山鉄道',
+  updatedAt: '2025-03-15',
+  dataVersion: '2025年版（概算）',
+  directions: [
+    {
+      label: '強羅方面',
+      stations: [
+        { name: '小田原', offset: 0 }, { name: '箱根板橋', offset: 5 }, { name: '風祭', offset: 8 },
+        { name: '入生田', offset: 11 }, { name: '箱根湯本', offset: 14 }, { name: '塔ノ沢', offset: 21 },
+        { name: '大平台', offset: 26 }, { name: '宮ノ下', offset: 31 }, { name: '小涌谷', offset: 35 },
+        { name: '彫刻の森', offset: 39 }, { name: '強羅', offset: 42 },
+      ],
+      patterns: [
+        { fromMin: m(7),    toMin: m(9),    intervalMin: 15, type: '普通', destination: '強羅' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 20, type: '普通', destination: '強羅' },
+        { fromMin: m(17),   toMin: m(21),   intervalMin: 20, type: '普通', destination: '強羅' },
+        { fromMin: m(21),   toMin: m(23),   intervalMin: 30, type: '普通', destination: '強羅' },
+      ],
+    },
+    {
+      label: '小田原方面',
+      stations: [
+        { name: '強羅', offset: 0 }, { name: '彫刻の森', offset: 3 }, { name: '小涌谷', offset: 7 },
+        { name: '宮ノ下', offset: 11 }, { name: '大平台', offset: 16 }, { name: '塔ノ沢', offset: 21 },
+        { name: '箱根湯本', offset: 28 }, { name: '入生田', offset: 31 }, { name: '風祭', offset: 34 },
+        { name: '箱根板橋', offset: 37 }, { name: '小田原', offset: 42 },
+      ],
+      patterns: [
+        { fromMin: m(7),    toMin: m(9),    intervalMin: 15, type: '普通', destination: '小田原' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 20, type: '普通', destination: '小田原' },
+        { fromMin: m(17),   toMin: m(21),   intervalMin: 20, type: '普通', destination: '小田原' },
+        { fromMin: m(21),   toMin: m(23),   intervalMin: 30, type: '普通', destination: '小田原' },
+      ],
+    },
+  ],
+};
+
+// 伊豆箱根鉄道駿豆線（三島〜修善寺）
+const izuHakoneSunzuData: LineTimetableData = {
+  key: 'izuHakoneSunzu',
+  name: '伊豆箱根鉄道駿豆線',
+  updatedAt: '2025-03-15',
+  dataVersion: '2025年版（概算）',
+  directions: [
+    {
+      label: '修善寺方面',
+      stations: [
+        { name: '三島', offset: 0 }, { name: '三島広小路', offset: 2 }, { name: '三島田町', offset: 4 },
+        { name: '三島二日町', offset: 7 }, { name: '大場', offset: 10 }, { name: '伊豆仁田', offset: 13 },
+        { name: '原木', offset: 15 }, { name: '韮山', offset: 18 }, { name: '伊豆長岡', offset: 20 },
+        { name: '田京', offset: 23 }, { name: '大仁', offset: 26 }, { name: '牧之郷', offset: 30 },
+        { name: '修善寺', offset: 33 },
+      ],
+      patterns: [
+        { fromMin: m(6),    toMin: m(9),    intervalMin: 20, type: '普通', destination: '修善寺' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 30, type: '普通', destination: '修善寺' },
+        { fromMin: m(17),   toMin: m(21),   intervalMin: 20, type: '普通', destination: '修善寺' },
+        { fromMin: m(21),   toMin: m(23),   intervalMin: 30, type: '普通', destination: '修善寺' },
+      ],
+    },
+    {
+      label: '三島方面',
+      stations: [
+        { name: '修善寺', offset: 0 }, { name: '牧之郷', offset: 3 }, { name: '大仁', offset: 7 },
+        { name: '田京', offset: 10 }, { name: '伊豆長岡', offset: 13 }, { name: '韮山', offset: 15 },
+        { name: '原木', offset: 18 }, { name: '伊豆仁田', offset: 20 }, { name: '大場', offset: 23 },
+        { name: '三島二日町', offset: 26 }, { name: '三島田町', offset: 29 }, { name: '三島広小路', offset: 31 },
+        { name: '三島', offset: 33 },
+      ],
+      patterns: [
+        { fromMin: m(6),    toMin: m(9),    intervalMin: 20, type: '普通', destination: '三島' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 30, type: '普通', destination: '三島' },
+        { fromMin: m(17),   toMin: m(21),   intervalMin: 20, type: '普通', destination: '三島' },
+        { fromMin: m(21),   toMin: m(23),   intervalMin: 30, type: '普通', destination: '三島' },
+      ],
+    },
+  ],
+};
+
+// JR内房線（蘇我〜館山）
+const jrUchiboLineData: LineTimetableData = {
+  key: 'jrUchiboLine',
+  name: 'JR内房線',
+  updatedAt: '2025-03-15',
+  dataVersion: '2025年版（概算）',
+  directions: [
+    {
+      label: '館山方面',
+      stations: [
+        { name: '蘇我', offset: 0 }, { name: '浜野', offset: 5 }, { name: '八幡宿', offset: 9 },
+        { name: '五井', offset: 13 }, { name: '姉ケ崎', offset: 17 }, { name: '長浦', offset: 21 },
+        { name: '袖ケ浦', offset: 25 }, { name: '巌根', offset: 29 }, { name: '木更津', offset: 33 },
+        { name: '君津', offset: 41 }, { name: '青堀', offset: 47 }, { name: '大貫', offset: 51 },
+        { name: '佐貫町', offset: 55 }, { name: '上総湊', offset: 59 }, { name: '竹岡', offset: 64 },
+        { name: '浜金谷', offset: 69 }, { name: '保田', offset: 74 }, { name: '安房勝山', offset: 79 },
+        { name: '岩井', offset: 84 }, { name: '富浦', offset: 89 }, { name: '館山', offset: 94 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(7),    intervalMin: 20, type: '普通', destination: '館山' },
+        { fromMin: m(7),    toMin: m(9),    intervalMin: 30, type: '快速', destination: '館山' },
+        { fromMin: m(9),    toMin: m(16),   intervalMin: 60, type: '普通', destination: '館山' },
+        { fromMin: m(16),   toMin: m(20),   intervalMin: 30, type: '普通', destination: '館山' },
+        { fromMin: m(20),   toMin: m(23),   intervalMin: 60, type: '普通', destination: '館山' },
+      ],
+    },
+    {
+      label: '蘇我・千葉方面',
+      stations: [
+        { name: '館山', offset: 0 }, { name: '富浦', offset: 5 }, { name: '岩井', offset: 10 },
+        { name: '安房勝山', offset: 15 }, { name: '保田', offset: 20 }, { name: '浜金谷', offset: 25 },
+        { name: '竹岡', offset: 30 }, { name: '上総湊', offset: 35 }, { name: '佐貫町', offset: 39 },
+        { name: '大貫', offset: 43 }, { name: '青堀', offset: 47 }, { name: '君津', offset: 53 },
+        { name: '木更津', offset: 61 }, { name: '巌根', offset: 65 }, { name: '袖ケ浦', offset: 69 },
+        { name: '長浦', offset: 73 }, { name: '姉ケ崎', offset: 77 }, { name: '五井', offset: 81 },
+        { name: '八幡宿', offset: 85 }, { name: '浜野', offset: 89 }, { name: '蘇我', offset: 94 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(7),    intervalMin: 20, type: '普通', destination: '蘇我' },
+        { fromMin: m(7),    toMin: m(9),    intervalMin: 30, type: '快速', destination: '千葉' },
+        { fromMin: m(9),    toMin: m(16),   intervalMin: 60, type: '普通', destination: '蘇我' },
+        { fromMin: m(16),   toMin: m(20),   intervalMin: 30, type: '普通', destination: '千葉' },
+        { fromMin: m(20),   toMin: m(23),   intervalMin: 60, type: '普通', destination: '蘇我' },
+      ],
+    },
+  ],
+};
+
+// JR外房線（千葉〜大原）
+const jrSotoboLineData: LineTimetableData = {
+  key: 'jrSotoboLine',
+  name: 'JR外房線',
+  updatedAt: '2025-03-15',
+  dataVersion: '2025年版（概算）',
+  directions: [
+    {
+      label: '大原方面',
+      stations: [
+        { name: '千葉', offset: 0 }, { name: '本千葉', offset: 3 }, { name: '蘇我', offset: 7 },
+        { name: '鎌取', offset: 13 }, { name: '誉田', offset: 18 }, { name: '土気', offset: 23 },
+        { name: '大網', offset: 29 }, { name: '永田', offset: 33 }, { name: '本納', offset: 37 },
+        { name: '新茂原', offset: 41 }, { name: '茂原', offset: 45 }, { name: '八積', offset: 50 },
+        { name: '上総一ノ宮', offset: 55 }, { name: '東浪見', offset: 59 }, { name: '太東', offset: 63 },
+        { name: '長者町', offset: 67 }, { name: '三門', offset: 71 }, { name: '大原', offset: 75 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(7),    intervalMin: 20, type: '普通', destination: '大原' },
+        { fromMin: m(7),    toMin: m(9),    intervalMin: 15, type: '快速', destination: '大原' },
+        { fromMin: m(9),    toMin: m(16),   intervalMin: 30, type: '普通', destination: '大原' },
+        { fromMin: m(16),   toMin: m(20),   intervalMin: 20, type: '普通', destination: '大原' },
+        { fromMin: m(20),   toMin: m(23),   intervalMin: 30, type: '普通', destination: '大原' },
+      ],
+    },
+    {
+      label: '千葉方面',
+      stations: [
+        { name: '大原', offset: 0 }, { name: '三門', offset: 4 }, { name: '長者町', offset: 8 },
+        { name: '太東', offset: 12 }, { name: '東浪見', offset: 16 }, { name: '上総一ノ宮', offset: 20 },
+        { name: '八積', offset: 25 }, { name: '茂原', offset: 30 }, { name: '新茂原', offset: 34 },
+        { name: '本納', offset: 38 }, { name: '永田', offset: 42 }, { name: '大網', offset: 46 },
+        { name: '土気', offset: 52 }, { name: '誉田', offset: 57 }, { name: '鎌取', offset: 62 },
+        { name: '蘇我', offset: 68 }, { name: '本千葉', offset: 72 }, { name: '千葉', offset: 75 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(7),    intervalMin: 20, type: '普通', destination: '千葉' },
+        { fromMin: m(7),    toMin: m(9),    intervalMin: 15, type: '快速', destination: '千葉' },
+        { fromMin: m(9),    toMin: m(16),   intervalMin: 30, type: '普通', destination: '千葉' },
+        { fromMin: m(16),   toMin: m(20),   intervalMin: 20, type: '普通', destination: '千葉' },
+        { fromMin: m(20),   toMin: m(23),   intervalMin: 30, type: '普通', destination: '千葉' },
+      ],
+    },
+  ],
+};
+
+// JR成田線（千葉〜銚子）
+const jrNaritaLineData: LineTimetableData = {
+  key: 'jrNaritaLine',
+  name: 'JR成田線',
+  updatedAt: '2025-03-15',
+  dataVersion: '2025年版（概算）',
+  directions: [
+    {
+      label: '銚子方面',
+      stations: [
+        { name: '千葉', offset: 0 }, { name: '東千葉', offset: 3 }, { name: '都賀', offset: 7 },
+        { name: '四街道', offset: 13 }, { name: '物井', offset: 18 }, { name: '佐倉', offset: 24 },
+        { name: '酒々井', offset: 28 }, { name: '成田', offset: 33 }, { name: '久住', offset: 38 },
+        { name: '滑河', offset: 43 }, { name: '下総神崎', offset: 48 }, { name: '大戸', offset: 53 },
+        { name: '佐原', offset: 58 }, { name: '香取', offset: 63 }, { name: '水郷', offset: 68 },
+        { name: '小見川', offset: 73 }, { name: '笹川', offset: 78 }, { name: '下総橘', offset: 82 },
+        { name: '下総豊里', offset: 86 }, { name: '椎柴', offset: 90 }, { name: '銚子', offset: 94 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(7),    intervalMin: 30, type: '普通', destination: '銚子' },
+        { fromMin: m(7),    toMin: m(9),    intervalMin: 20, type: '普通', destination: '銚子' },
+        { fromMin: m(9),    toMin: m(16),   intervalMin: 60, type: '普通', destination: '銚子' },
+        { fromMin: m(16),   toMin: m(20),   intervalMin: 30, type: '普通', destination: '銚子' },
+        { fromMin: m(20),   toMin: m(23),   intervalMin: 60, type: '普通', destination: '銚子' },
+      ],
+    },
+    {
+      label: '千葉方面',
+      stations: [
+        { name: '銚子', offset: 0 }, { name: '椎柴', offset: 4 }, { name: '下総豊里', offset: 8 },
+        { name: '下総橘', offset: 12 }, { name: '笹川', offset: 16 }, { name: '小見川', offset: 21 },
+        { name: '水郷', offset: 26 }, { name: '香取', offset: 31 }, { name: '佐原', offset: 36 },
+        { name: '大戸', offset: 41 }, { name: '下総神崎', offset: 46 }, { name: '滑河', offset: 51 },
+        { name: '久住', offset: 56 }, { name: '成田', offset: 61 }, { name: '酒々井', offset: 66 },
+        { name: '佐倉', offset: 70 }, { name: '物井', offset: 76 }, { name: '四街道', offset: 81 },
+        { name: '都賀', offset: 87 }, { name: '東千葉', offset: 91 }, { name: '千葉', offset: 94 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(7),    intervalMin: 30, type: '普通', destination: '千葉' },
+        { fromMin: m(7),    toMin: m(9),    intervalMin: 20, type: '普通', destination: '千葉' },
+        { fromMin: m(9),    toMin: m(16),   intervalMin: 60, type: '普通', destination: '千葉' },
+        { fromMin: m(16),   toMin: m(20),   intervalMin: 30, type: '普通', destination: '千葉' },
+        { fromMin: m(20),   toMin: m(23),   intervalMin: 60, type: '普通', destination: '千葉' },
+      ],
+    },
+  ],
+};
+
+// JR神戸線（大阪〜住吉）
+const jrKobeLineData: LineTimetableData = {
+  key: 'jrKobeLine',
+  name: 'JR神戸線',
+  updatedAt: '2025-03-15',
+  dataVersion: '2025年版（概算）',
+  directions: [
+    {
+      label: '神戸・姫路方面',
+      stations: [
+        { name: '大阪', offset: 0 }, { name: '塚本', offset: 2 }, { name: '尼崎', offset: 4 },
+        { name: '立花', offset: 6 }, { name: '甲子園口', offset: 8 }, { name: '西宮', offset: 10 },
+        { name: 'さくら夙川', offset: 12 }, { name: '芦屋', offset: 14 }, { name: '甲南山手', offset: 16 },
+        { name: '摂津本山', offset: 18 }, { name: '住吉', offset: 20 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(7),    intervalMin: 10, type: '普通', destination: '住吉' },
+        { fromMin: m(7),    toMin: m(9),    intervalMin: 5,  type: '新快速', destination: '姫路' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 10, type: '普通', destination: '住吉' },
+        { fromMin: m(17),   toMin: m(20),   intervalMin: 7,  type: '新快速', destination: '姫路' },
+        { fromMin: m(20),   toMin: m(23),   intervalMin: 10, type: '普通', destination: '住吉' },
+      ],
+    },
+    {
+      label: '大阪方面',
+      stations: [
+        { name: '住吉', offset: 0 }, { name: '摂津本山', offset: 2 }, { name: '甲南山手', offset: 4 },
+        { name: '芦屋', offset: 6 }, { name: 'さくら夙川', offset: 8 }, { name: '西宮', offset: 10 },
+        { name: '甲子園口', offset: 12 }, { name: '立花', offset: 14 }, { name: '尼崎', offset: 16 },
+        { name: '塚本', offset: 18 }, { name: '大阪', offset: 20 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(7),    intervalMin: 10, type: '普通', destination: '大阪' },
+        { fromMin: m(7),    toMin: m(9),    intervalMin: 5,  type: '新快速', destination: '大阪' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 10, type: '普通', destination: '大阪' },
+        { fromMin: m(17),   toMin: m(20),   intervalMin: 7,  type: '新快速', destination: '大阪' },
+        { fromMin: m(20),   toMin: m(23),   intervalMin: 10, type: '普通', destination: '大阪' },
+      ],
+    },
+  ],
+};
+
+// JR京都線（京都〜大阪）
+const jrKyotoLineData: LineTimetableData = {
+  key: 'jrKyotoLine',
+  name: 'JR京都線',
+  updatedAt: '2025-03-15',
+  dataVersion: '2025年版（概算）',
+  directions: [
+    {
+      label: '大阪・神戸方面',
+      stations: [
+        { name: '京都', offset: 0 }, { name: '西大路', offset: 2 }, { name: '桂川', offset: 4 },
+        { name: '向日町', offset: 6 }, { name: '長岡京', offset: 8 }, { name: '山崎', offset: 10 },
+        { name: '島本', offset: 12 }, { name: '高槻', offset: 14 }, { name: '摂津富田', offset: 16 },
+        { name: 'JR総持寺', offset: 18 }, { name: '茨木', offset: 20 }, { name: '千里丘', offset: 22 },
+        { name: '岸辺', offset: 24 }, { name: '吹田', offset: 26 }, { name: '東淀川', offset: 28 },
+        { name: '新大阪', offset: 30 }, { name: '大阪', offset: 32 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(7),    intervalMin: 10, type: '普通', destination: '大阪' },
+        { fromMin: m(7),    toMin: m(9),    intervalMin: 5,  type: '新快速', destination: '大阪' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 10, type: '普通', destination: '大阪' },
+        { fromMin: m(17),   toMin: m(20),   intervalMin: 7,  type: '新快速', destination: '大阪' },
+        { fromMin: m(20),   toMin: m(23),   intervalMin: 10, type: '普通', destination: '大阪' },
+      ],
+    },
+    {
+      label: '京都方面',
+      stations: [
+        { name: '大阪', offset: 0 }, { name: '新大阪', offset: 2 }, { name: '東淀川', offset: 4 },
+        { name: '吹田', offset: 6 }, { name: '岸辺', offset: 8 }, { name: '千里丘', offset: 10 },
+        { name: '茨木', offset: 12 }, { name: 'JR総持寺', offset: 14 }, { name: '摂津富田', offset: 16 },
+        { name: '高槻', offset: 18 }, { name: '島本', offset: 20 }, { name: '山崎', offset: 22 },
+        { name: '長岡京', offset: 24 }, { name: '向日町', offset: 26 }, { name: '桂川', offset: 28 },
+        { name: '西大路', offset: 30 }, { name: '京都', offset: 32 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(7),    intervalMin: 10, type: '普通', destination: '京都' },
+        { fromMin: m(7),    toMin: m(9),    intervalMin: 5,  type: '新快速', destination: '京都' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 10, type: '普通', destination: '京都' },
+        { fromMin: m(17),   toMin: m(20),   intervalMin: 7,  type: '新快速', destination: '京都' },
+        { fromMin: m(20),   toMin: m(23),   intervalMin: 10, type: '普通', destination: '京都' },
+      ],
+    },
+  ],
+};
+
+// 大阪環状線（内回り・外回り）
+const osakaLoopLineData: LineTimetableData = {
+  key: 'osakaLoopLine',
+  name: '大阪環状線',
+  updatedAt: '2025-03-15',
+  dataVersion: '2025年版（概算）',
+  directions: [
+    {
+      label: '内回り（天王寺→大阪方面）',
+      stations: [
+        { name: '天王寺', offset: 0 }, { name: '寺田町', offset: 2 }, { name: '桃谷', offset: 4 },
+        { name: '鶴橋', offset: 6 }, { name: '玉造', offset: 8 }, { name: '森ノ宮', offset: 10 },
+        { name: '大阪城公園', offset: 12 }, { name: '京橋', offset: 14 }, { name: '桜ノ宮', offset: 16 },
+        { name: '天満', offset: 18 }, { name: '大阪', offset: 20 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(7),    intervalMin: 6,  type: '普通', destination: '大阪' },
+        { fromMin: m(7),    toMin: m(9),    intervalMin: 4,  type: '普通', destination: '大阪' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 6,  type: '普通', destination: '大阪' },
+        { fromMin: m(17),   toMin: m(20),   intervalMin: 4,  type: '普通', destination: '大阪' },
+        { fromMin: m(20),   toMin: m(23),   intervalMin: 6,  type: '普通', destination: '大阪' },
+      ],
+    },
+    {
+      label: '外回り（大阪→天王寺方面）',
+      stations: [
+        { name: '大阪', offset: 0 }, { name: '福島', offset: 2 }, { name: '野田', offset: 4 },
+        { name: '西九条', offset: 6 }, { name: '弁天町', offset: 8 }, { name: '大正', offset: 10 },
+        { name: '芦原橋', offset: 12 }, { name: '今宮', offset: 14 }, { name: '新今宮', offset: 16 },
+        { name: '天王寺', offset: 18 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(7),    intervalMin: 6,  type: '普通', destination: '天王寺' },
+        { fromMin: m(7),    toMin: m(9),    intervalMin: 4,  type: '普通', destination: '天王寺' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 6,  type: '普通', destination: '天王寺' },
+        { fromMin: m(17),   toMin: m(20),   intervalMin: 4,  type: '普通', destination: '天王寺' },
+        { fromMin: m(20),   toMin: m(23),   intervalMin: 6,  type: '普通', destination: '天王寺' },
+      ],
+    },
+  ],
+};
+
+// 大阪メトロ御堂筋線（江坂〜なかもず）
+const midosujiLineData: LineTimetableData = {
+  key: 'midosujiLine',
+  name: '大阪メトロ御堂筋線',
+  updatedAt: '2025-03-15',
+  dataVersion: '2025年版（概算）',
+  directions: [
+    {
+      label: 'なかもず方面',
+      stations: [
+        { name: '江坂', offset: 0 }, { name: '東三国', offset: 2 }, { name: '新大阪', offset: 4 },
+        { name: '西中島南方', offset: 6 }, { name: '中津', offset: 8 }, { name: '梅田', offset: 10 },
+        { name: '淀屋橋', offset: 12 }, { name: '本町', offset: 14 }, { name: '心斎橋', offset: 16 },
+        { name: 'なんば', offset: 18 }, { name: '大国町', offset: 20 }, { name: '動物園前', offset: 22 },
+        { name: '天王寺', offset: 24 }, { name: '昭和町', offset: 26 }, { name: '西田辺', offset: 28 },
+        { name: '長居', offset: 30 }, { name: 'あびこ', offset: 32 }, { name: '北花田', offset: 34 },
+        { name: '新金岡', offset: 36 }, { name: 'なかもず', offset: 38 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(7),    intervalMin: 5,  type: '普通', destination: 'なかもず' },
+        { fromMin: m(7),    toMin: m(9),    intervalMin: 3,  type: '普通', destination: 'なかもず' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 4,  type: '普通', destination: 'なかもず' },
+        { fromMin: m(17),   toMin: m(20),   intervalMin: 3,  type: '普通', destination: 'なかもず' },
+        { fromMin: m(20),   toMin: m(23),   intervalMin: 5,  type: '普通', destination: 'なかもず' },
+      ],
+    },
+    {
+      label: '江坂方面',
+      stations: [
+        { name: 'なかもず', offset: 0 }, { name: '新金岡', offset: 2 }, { name: '北花田', offset: 4 },
+        { name: 'あびこ', offset: 6 }, { name: '長居', offset: 8 }, { name: '西田辺', offset: 10 },
+        { name: '昭和町', offset: 12 }, { name: '天王寺', offset: 14 }, { name: '動物園前', offset: 16 },
+        { name: '大国町', offset: 18 }, { name: 'なんば', offset: 20 }, { name: '心斎橋', offset: 22 },
+        { name: '本町', offset: 24 }, { name: '淀屋橋', offset: 26 }, { name: '梅田', offset: 28 },
+        { name: '中津', offset: 30 }, { name: '西中島南方', offset: 32 }, { name: '新大阪', offset: 34 },
+        { name: '東三国', offset: 36 }, { name: '江坂', offset: 38 },
+      ],
+      patterns: [
+        { fromMin: m(5,30), toMin: m(7),    intervalMin: 5,  type: '普通', destination: '江坂' },
+        { fromMin: m(7),    toMin: m(9),    intervalMin: 3,  type: '普通', destination: '江坂' },
+        { fromMin: m(9),    toMin: m(17),   intervalMin: 4,  type: '普通', destination: '江坂' },
+        { fromMin: m(17),   toMin: m(20),   intervalMin: 3,  type: '普通', destination: '江坂' },
+        { fromMin: m(20),   toMin: m(23),   intervalMin: 5,  type: '普通', destination: '江坂' },
+      ],
+    },
+  ],
+};
+
+// 東海道新幹線（東京〜新大阪）
+const tokaidoShinkansenData: LineTimetableData = {
+  key: 'tokaidoShinkansen',
+  name: '東海道新幹線',
+  updatedAt: '2025-03-15',
+  dataVersion: '2025年版（概算・こだま）',
+  directions: [
+    {
+      label: '新大阪方面',
+      stations: [
+        { name: '東京', offset: 0 }, { name: '品川', offset: 3 }, { name: '新横浜', offset: 11 },
+        { name: '小田原', offset: 26 }, { name: '熱海', offset: 36 }, { name: '三島', offset: 44 },
+        { name: '新富士', offset: 54 }, { name: '静岡', offset: 66 }, { name: '掛川', offset: 78 },
+        { name: '浜松', offset: 93 }, { name: '豊橋', offset: 103 }, { name: '三河安城', offset: 113 },
+        { name: '名古屋', offset: 123 }, { name: '岐阜羽島', offset: 133 }, { name: '米原', offset: 153 },
+        { name: '京都', offset: 168 }, { name: '新大阪', offset: 183 },
+      ],
+      patterns: [
+        { fromMin: m(6),    toMin: m(9),    intervalMin: 20, type: 'のぞみ', destination: '新大阪', toward: '新大阪方面' },
+        { fromMin: m(9),    toMin: m(18),   intervalMin: 15, type: 'のぞみ', destination: '新大阪', toward: '新大阪方面' },
+        { fromMin: m(18),   toMin: m(21),   intervalMin: 20, type: 'のぞみ', destination: '新大阪', toward: '新大阪方面' },
+        { fromMin: m(21),   toMin: m(23),   intervalMin: 30, type: 'のぞみ', destination: '新大阪', toward: '新大阪方面' },
+      ],
+    },
+    {
+      label: '東京方面',
+      stations: [
+        { name: '新大阪', offset: 0 }, { name: '京都', offset: 15 }, { name: '米原', offset: 30 },
+        { name: '岐阜羽島', offset: 50 }, { name: '名古屋', offset: 60 }, { name: '三河安城', offset: 70 },
+        { name: '豊橋', offset: 80 }, { name: '浜松', offset: 90 }, { name: '掛川', offset: 105 },
+        { name: '静岡', offset: 117 }, { name: '新富士', offset: 129 }, { name: '三島', offset: 139 },
+        { name: '熱海', offset: 147 }, { name: '小田原', offset: 157 }, { name: '新横浜', offset: 172 },
+        { name: '品川', offset: 180 }, { name: '東京', offset: 183 },
+      ],
+      patterns: [
+        { fromMin: m(6),    toMin: m(9),    intervalMin: 20, type: 'のぞみ', destination: '東京', toward: '東京方面' },
+        { fromMin: m(9),    toMin: m(18),   intervalMin: 15, type: 'のぞみ', destination: '東京', toward: '東京方面' },
+        { fromMin: m(18),   toMin: m(21),   intervalMin: 20, type: 'のぞみ', destination: '東京', toward: '東京方面' },
+        { fromMin: m(21),   toMin: m(23),   intervalMin: 30, type: 'のぞみ', destination: '東京', toward: '東京方面' },
+      ],
+    },
+  ],
+};
+
 // ── 全路線データ一覧 ──────────────────────────────────
 export const timetableLines: LineTimetableData[] = [
   yamanoteData,
@@ -3910,6 +4510,22 @@ export const timetableLines: LineTimetableData[] = [
   tobuKameidoData,
   shinkeiseiData,
   toyoRapidData,
+  // 第4弾追加路線（JR支線・伊豆箱根・千葉方面）
+  jrHachikoLineData,
+  jrItsukaichiLineData,
+  jrItoLineData,
+  izukyuLineData,
+  hakoneTozanData,
+  izuHakoneSunzuData,
+  jrUchiboLineData,
+  jrSotoboLineData,
+  jrNaritaLineData,
+  // 第5弾追加路線（関西・新幹線）
+  jrKobeLineData,
+  jrKyotoLineData,
+  osakaLoopLineData,
+  midosujiLineData,
+  tokaidoShinkansenData,
 ];
 
 // ── 公開API ──────────────────────────────────────────
