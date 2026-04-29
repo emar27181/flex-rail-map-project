@@ -1,5 +1,40 @@
 # CHANGE LOG
 
+## [2026-04-29] セッション
+
+### feat: 時刻表対応路線を 28 → 49 路線に拡充（`src/data/timetableData.ts`）
+追加した路線（Batch 1）:
+- 総武快速線・高崎線・小田急江ノ島線・西武新宿線・武蔵野線
+- 東京モノレール・京成本線・JR横浜線・横須賀線・南武線
+
+追加した路線（Batch 2）:
+- JR宇都宮線・根岸線・京王井の頭線・東急大井町線・東武伊勢崎線
+- 相鉄本線・相鉄いずみ野線・JR総武線（千葉方面）・JR京葉線
+- 横浜市営地下鉄ブルーライン・りんかい線・ゆりかもめ
+- JR青梅線・日暮里・舎人ライナー・多摩都市モノレール
+- 東急多摩川線・東急池上線・横浜市営地下鉄グリーンライン
+- 京王相模原線・小田急多摩線
+
+### fix: スマホで駅名入力時にブラウザが自動ズームする問題を解消（`src/pages/index.astro`）
+- グローバルCSSで全 `input` / `select` / `textarea` の `font-size` を 16px に固定
+- `-webkit-text-size-adjust: 100%` と `touch-action: manipulation` を併用
+
+### fix: StationSelector のタッチ操作が Leaflet 地図に伝播してズームされる問題を解消（`src/components/StationSelector.tsx`）
+- ラッパー div に `onTouchStart` / `onTouchMove` / `onTouchEnd` で `e.stopPropagation()` を適用
+
+### improve: 駅名入力中に下部UIを一時非表示にして入力・候補選択を快適化
+- `StationSelector.tsx`: `isSearching` 状態と `onSearchingChange` コールバック prop を追加
+  - フォーカス時に `isSearching = true`、ブラウズ中のフォーカス移動を考慮した 200ms debounce で blur 時に `false`
+  - 検索中は「📍現在地から」ボタンと出発時刻入力を非表示
+- `RailwayMap.tsx`: `handleSearchingChange` を追加
+  - デスクトップ: 右上の凡例パネルを非表示（`&& !isStationSearching`）
+  - モバイルフルスクリーン: タブバー・折りたたみボタンを非表示、パネルを画面下端まで拡張（`bottom: 0`）、最大高さを 80dvh に拡大
+  - 入力開始時にモバイルパネルを自動展開（station タブに切替）
+
+### docs: CLAUDE.md に CHANGE.log 記録ルールを追記
+
+---
+
 ## [2026-04-26 〜 2026-04-28] セッション
 
 ### feat: SVGダイアグラム路線図ページ追加
