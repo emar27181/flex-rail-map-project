@@ -1,5 +1,14 @@
 # CHANGE LOG
 
+## [2026-04-29] セッション（深夜）
+
+### fix: Service Workerがdev serverと干渉して画面真っ白になる問題を修正（`public/sw.js`）
+- `localhost` / `127.0.0.1` へのリクエストをSWのfetchハンドラから除外（Vite dev serverのモジュール取得に干渉していた）
+- `caches.match()` が `undefined` を返す場合に `Response.error()` でフォールバック（`undefined` は `Response` に変換できずTypeErrorが発生していた）
+- `CACHE_NAME` を `v1` → `v2` に更新して既存の古いキャッシュを強制削除
+
+---
+
 ## [2026-04-29] セッション（夜）
 
 ### feat: 時刻表対応路線を 65 → 79 路線に拡充（`src/data/timetableData.ts`）
