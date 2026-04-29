@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flex-rail-map-v1';
+const CACHE_NAME = 'flex-rail-map-v2';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
@@ -27,6 +27,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   // chrome-extensionやdata URIはスキップ
   if (!event.request.url.startsWith('http')) return;
+  // localhost開発環境はSWをスキップ（Viteのdev serverと干渉するため）
+  if (event.request.url.includes('localhost') || event.request.url.includes('127.0.0.1')) return;
   // Leafletタイルは除外（常にネットワーク）
   if (event.request.url.includes('tile')) return;
 
@@ -39,6 +41,9 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() =>
+        // caches.matchがundefinedを返す場合にも対応（undefinedはResponseとして無効）
+        caches.match(event.request).then((cached) => cached ?? Response.error())
+      )
   );
 });
