@@ -181,6 +181,24 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // キーボード高さ検知（iOS SafariのvisualViewport対応）
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onViewportResize = () => {
+      // innerHeight と visualViewport.height の差 = キーボード高さ
+      const diff = window.innerHeight - vv.height - (vv.offsetTop ?? 0);
+      setKeyboardHeight(Math.max(0, diff));
+    };
+    vv.addEventListener('resize', onViewportResize);
+    vv.addEventListener('scroll', onViewportResize);
+    return () => {
+      vv.removeEventListener('resize', onViewportResize);
+      vv.removeEventListener('scroll', onViewportResize);
+    };
+  }, []);
+
   // フルスクリーン状態を親に通知
   useEffect(() => {
     onFullscreenChange?.(isFullscreen);
@@ -2787,14 +2805,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               {isMobilePanelExpanded && (
                 <div style={{
                   position: 'absolute',
-                  bottom: isStationSearching ? 0 : 'calc(44px + env(safe-area-inset-bottom, 0px))',
+                  bottom: isStationSearching ? keyboardHeight : 'calc(44px + env(safe-area-inset-bottom, 0px))',
                   left: 0,
                   right: 0,
                   zIndex: 1001,
                   backgroundColor: colors.surfaceElevated,
                   borderTop: `2px solid ${colors.border}`,
                   borderRadius: '12px 12px 0 0',
-                  maxHeight: isStationSearching ? '80dvh' : 'calc(60dvh - 44px)',
+                  maxHeight: isStationSearching ? `calc(100dvh - ${keyboardHeight}px - 20px)` : 'calc(60dvh - 44px)',
                   overflowY: 'auto',
                   overscrollBehavior: 'contain',
                   WebkitOverflowScrolling: 'touch' as any,

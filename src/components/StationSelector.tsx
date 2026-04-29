@@ -261,11 +261,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   onFocus={() => {
                     setShowDepartureResults(true);
                     handleSearchFocus();
-                    if (isMobile) {
-                      setTimeout(() => {
-                        departureRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
-                      }, 350);
-                    }
                   }}
                   onBlur={() => {
                     setTimeout(() => {
@@ -434,11 +429,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   onFocus={() => {
                     setShowArrivalResults(true);
                     handleSearchFocus();
-                    if (isMobile) {
-                      setTimeout(() => {
-                        arrivalRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
-                      }, 350);
-                    }
                   }}
                   onBlur={() => {
                     setTimeout(() => {
