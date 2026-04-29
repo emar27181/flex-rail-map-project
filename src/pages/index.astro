@@ -165,6 +165,12 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 				touch-action: manipulation;
 				overscroll-behavior: none;
 			}
+			/* iOS Safari 自動ズーム防止: 全inputを16px以上に固定 */
+			input, select, textarea {
+				font-size: 16px !important;
+				-webkit-text-size-adjust: 100%;
+				touch-action: manipulation;
+			}
 			body.light {
 				background-color: #ffffff;
 				color: #333333;
