@@ -117,6 +117,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
   const [isMobile, setIsMobile] = useState(false);
   const [mobilePanelTab, setMobilePanelTab] = useState<'station' | 'legend'>('station');
   const [isMobilePanelExpanded, setIsMobilePanelExpanded] = useState(true);
+  const [isStationSearching, setIsStationSearching] = useState(false);
+  const handleSearchingChange = (searching: boolean) => {
+    setIsStationSearching(searching);
+    if (searching && isFullscreen && isMobile) {
+      setMobilePanelTab('station');
+      setIsMobilePanelExpanded(true);
+    }
+  };
 
   // 駅時刻表ツールチップ状態
   const [stationTooltip, setStationTooltip] = useState<{ stationName: string; station: Station; x: number; y: number } | null>(null);
@@ -2173,6 +2181,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                 departureTime={timetableBaseTime}
                 onDepartureTimeChange={setTimetableBaseTime}
                 onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
+                onSearchingChange={handleSearchingChange}
               />
             </div>
           )
@@ -2189,6 +2198,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               onDepartureTimeChange={setTimetableBaseTime}
               language={currentLanguage}
               onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
+              onSearchingChange={handleSearchingChange}
             />
           </>
         )}
@@ -2565,7 +2575,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
           )}
 
           {/* 路線凡例（Legend） - モバイルフルスクリーン時は下部統合パネルで表示 */}
-          {visibleRoutesData.length > 0 && !(isFullscreen && isMobile) && (
+          {visibleRoutesData.length > 0 && !(isFullscreen && isMobile) && !isStationSearching && (
             <div style={{
               position: 'absolute',
               top: '10px',
@@ -2777,22 +2787,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               {isMobilePanelExpanded && (
                 <div style={{
                   position: 'absolute',
-                  bottom: 'calc(44px + env(safe-area-inset-bottom, 0px))',
+                  bottom: isStationSearching ? 0 : 'calc(44px + env(safe-area-inset-bottom, 0px))',
                   left: 0,
                   right: 0,
                   zIndex: 1001,
                   backgroundColor: colors.surfaceElevated,
                   borderTop: `2px solid ${colors.border}`,
                   borderRadius: '12px 12px 0 0',
-                  maxHeight: 'calc(60dvh - 44px)',
+                  maxHeight: isStationSearching ? '80dvh' : 'calc(60dvh - 44px)',
                   overflowY: 'auto',
                   overscrollBehavior: 'contain',
                   WebkitOverflowScrolling: 'touch' as any,
                   touchAction: 'pan-y',
                   boxShadow: `0 -2px 10px ${colors.shadow}`,
                 }}>
-                  {/* 折りたたみボタン（右上） */}
-                  <button
+                  {/* 折りたたみボタン（右上） - 検索中は非表示 */}
+                  {!isStationSearching && <button
                     onClick={() => setIsMobilePanelExpanded(false)}
                     style={{
                       position: 'sticky',
@@ -2810,7 +2820,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
-                  >▼</button>
+                  >▼</button>}
                   {mobilePanelTab === 'station' && (
                     <StationSelector
                       departure={departure}
@@ -2822,6 +2832,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                       departureTime={timetableBaseTime}
                       onDepartureTimeChange={setTimetableBaseTime}
                       onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
+                      onSearchingChange={handleSearchingChange}
                     />
                   )}
                   {mobilePanelTab === 'legend' && (
@@ -2870,8 +2881,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                 </div>
               )}
 
-              {/* タブバー（常に下端に固定） */}
-              <div style={{
+              {/* タブバー（常に下端に固定） - 検索中は非表示 */}
+              {!isStationSearching && <div style={{
                 position: 'absolute',
                 bottom: 0,
                 left: 0,
@@ -2921,7 +2932,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                 >
                   ⚙ 表示設定
                 </button>
-              </div>
+              </div>}
             </>
           )}
 

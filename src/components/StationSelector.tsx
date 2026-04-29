@@ -16,6 +16,7 @@ interface StationSelectorProps {
   departureTime?: string;
   onDepartureTimeChange?: (time: string) => void;
   onSetNearestDeparture?: () => void;
+  onSearchingChange?: (isSearching: boolean) => void;
 }
 
 const StationSelector: React.FC<StationSelectorProps> = ({
@@ -29,6 +30,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   departureTime,
   onDepartureTimeChange,
   onSetNearestDeparture,
+  onSearchingChange,
 }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -37,6 +39,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const [showDepartureResults, setShowDepartureResults] = useState(false);
   const [showArrivalResults, setShowArrivalResults] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   const departureRef = useRef<HTMLDivElement>(null);
   const arrivalRef = useRef<HTMLDivElement>(null);
@@ -189,8 +192,33 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   };
 
 
+  // 入力フォーカス状態の管理
+  const searchingBlurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSearchFocus = () => {
+    if (searchingBlurTimer.current) clearTimeout(searchingBlurTimer.current);
+    setIsSearching(true);
+    onSearchingChange?.(true);
+  };
+
+  const handleSearchBlur = () => {
+    // blurとfocusの間に少し待機（タブ移動などで即座に非表示にならないように）
+    searchingBlurTimer.current = setTimeout(() => {
+      setIsSearching(false);
+      onSearchingChange?.(false);
+    }, 200);
+  };
+
+  // マップへのタッチイベント伝播を防ぐ（Leafletマップが誤ってズームしないように）
+  const stopTouchPropagation = (e: React.TouchEvent) => e.stopPropagation();
+
   return (
-    <div style={{ marginBottom: '12px', padding: '10px', border: `1px solid ${colors.border}`, borderRadius: '8px', backgroundColor: colors.surface }}>
+    <div
+      onTouchStart={stopTouchPropagation}
+      onTouchMove={stopTouchPropagation}
+      onTouchEnd={stopTouchPropagation}
+      style={{ marginBottom: '12px', padding: '10px', border: `1px solid ${colors.border}`, borderRadius: '8px', backgroundColor: colors.surface }}
+    >
       <div 
         onClick={onToggleExpanded}
         style={{
@@ -230,7 +258,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setDepartureSearch(e.target.value);
                     setShowDepartureResults(true);
                   }}
-                  onFocus={() => setShowDepartureResults(true)}
+                  onFocus={() => { setShowDepartureResults(true); handleSearchFocus(); }}
                   onBlur={() => {
                     setTimeout(() => {
                       if (!departureClickedRef.current) {
@@ -239,6 +267,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       departureClickedRef.current = false;
                       setShowDepartureResults(false);
                     }, 150);
+                    handleSearchBlur();
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -277,7 +306,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   </button>
                 )}
               </div>
-              {onSetNearestDeparture && (
+              {onSetNearestDeparture && !isSearching && (
                 <button
                   onClick={onSetNearestDeparture}
                   style={{
@@ -394,7 +423,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setArrivalSearch(e.target.value);
                     setShowArrivalResults(true);
                   }}
-                  onFocus={() => setShowArrivalResults(true)}
+                  onFocus={() => { setShowArrivalResults(true); handleSearchFocus(); }}
                   onBlur={() => {
                     setTimeout(() => {
                       if (!arrivalClickedRef.current) {
@@ -403,6 +432,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       arrivalClickedRef.current = false;
                       setShowArrivalResults(false);
                     }, 150);
+                    handleSearchBlur();
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -484,8 +514,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             </div>
           </div>
 
-          {/* 出発時刻 */}
-          {onDepartureTimeChange && (
+          {/* 出発時刻（駅名入力中は非表示） */}
+          {onDepartureTimeChange && !isSearching && (
             <div style={{
               marginTop: '10px',
               display: 'flex',
