@@ -1706,6 +1706,130 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   showFurigana: {
     japanese: "ふりがなを表示",
     english: "Show Furigana"
+  },
+
+  // StationSelector
+  currentLocationFrom: {
+    japanese: "現在地から",
+    english: "Near Me"
+  },
+  swapStationsTitle: {
+    japanese: "出発駅と到着駅を入れ替え",
+    english: "Swap departure and arrival"
+  },
+  departureTime: {
+    japanese: "出発時刻",
+    english: "Departure Time"
+  },
+  currentTime: {
+    japanese: "現在時刻",
+    english: "Now"
+  },
+
+  // Timetable tooltip
+  baseTime: {
+    japanese: "基準時刻",
+    english: "Base Time"
+  },
+  onboard: {
+    japanese: "乗",
+    english: "On"
+  },
+  afterSuffix: {
+    japanese: "以降",
+    english: "onwards"
+  },
+  offRouteReference: {
+    japanese: "ルート外参考",
+    english: "Off-route ref"
+  },
+  noData: {
+    japanese: "データなし",
+    english: "No data"
+  },
+  showAllTimetable: {
+    japanese: "▼ 時刻表をすべて表示",
+    english: "▼ Show full timetable"
+  },
+  onboardRouteNoData: {
+    japanese: "乗車路線ですが\n時刻データなし",
+    english: "On-route,\nno timetable"
+  },
+  noTimetableData: {
+    japanese: "時刻データなし",
+    english: "No timetable"
+  },
+  approximateNote: {
+    japanese: "⚠ 概算値・参考用　左の路線名をクリックで切替",
+    english: "⚠ Approximate. Click route name to switch"
+  },
+  towardSuffix: {
+    japanese: "方面",
+    english: "dir."
+  },
+
+  // Map loading
+  loadingMap: {
+    japanese: "マップを読み込み中...",
+    english: "Loading map..."
+  },
+
+  // Time filter
+  maxTime: {
+    japanese: "最大時間:",
+    english: "Max Time:"
+  },
+
+  // Buttons
+  timetableModeOff: {
+    japanese: "時刻表モードをOFF",
+    english: "Timetable Mode OFF"
+  },
+  timetableModeOn: {
+    japanese: "時刻表モードをON",
+    english: "Timetable Mode ON"
+  },
+  exitFullscreen: {
+    japanese: "縮小表示",
+    english: "Exit Fullscreen"
+  },
+  enterFullscreen: {
+    japanese: "拡大表示",
+    english: "Fullscreen"
+  },
+  refreshLocationNow: {
+    japanese: "現在地を今すぐ更新",
+    english: "Refresh location"
+  },
+  stopTracking: {
+    japanese: "現在地追跡をOFF",
+    english: "Stop tracking"
+  },
+  showMyLocation: {
+    japanese: "現在地を表示",
+    english: "Show my location"
+  },
+
+  // Hover tooltip
+  fromWhere: {
+    japanese: "どこから",
+    english: "From where"
+  },
+
+  // Route popup
+  firstTrain: {
+    japanese: "始発",
+    english: "First"
+  },
+  lastStation: {
+    japanese: "終点",
+    english: "Last"
+  },
+
+  // Mobile tab bar
+  displaySettings: {
+    japanese: "表示設定",
+    english: "Settings"
   }
 };
 

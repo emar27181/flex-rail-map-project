@@ -1,6 +1,37 @@
 # CHANGE LOG
 
-## [2026-04-29] セッション
+## [2026-04-29] セッション（後半）
+
+### fix: スマホでキーボード表示時に出発・到着駅ラベルが見切れる問題を解消（`src/components/StationSelector.tsx`）
+- 出発・到着駅の入力フォーカス時にモバイルで 350ms 後（キーボード展開完了を待って）`scrollIntoView({ block: 'start' })` を呼び出し、ラベルを含む親コンテナをスクロール位置の先頭に表示
+
+### feat: 時刻表対応路線を 49 → 65 路線に拡充（`src/data/timetableData.ts`）
+追加した16路線（第3弾）:
+- 江ノ島電鉄・都電荒川線・東急世田谷線
+- 京急久里浜線・京急空港線・京成押上線
+- 北総鉄道・埼玉高速鉄道・ニューシャトル
+- 相鉄・JR直通線・湘南モノレール・東武日光線
+- 東武大師線・東武亀戸線・新京成電鉄・東葉高速鉄道
+
+### improve: 英語モードでの日本語混在を網羅的に修正
+
+**`src/utils/translation.ts`** に不足していた翻訳キーを追加（30件以上）:
+- StationSelector: `currentLocationFrom` / `swapStationsTitle` / `departureTime` / `currentTime`
+- 時刻表ツールチップ: `baseTime` / `onboard` / `afterSuffix` / `offRouteReference` / `noData` / `showAllTimetable` / `onboardRouteNoData` / `noTimetableData` / `approximateNote` / `towardSuffix`
+- ボタン類: `loadingMap` / `maxTime` / `timetableModeOff` / `timetableModeOn` / `exitFullscreen` / `enterFullscreen` / `refreshLocationNow` / `stopTracking` / `showMyLocation`
+- その他: `fromWhere` / `firstTrain` / `lastStation` / `displaySettings`
+
+**`src/components/StationSelector.tsx`**: 「現在地から」「出発駅と到着駅を入れ替え」「出発時刻」「現在時刻」を翻訳化
+
+**`src/components/RailwayMap.tsx`**: 「基準時刻」「乗」「以降」「ルート外参考」「データなし」「時刻表をすべて表示」「時刻データなし」「概算値・参考用」「マップを読み込み中」「最大時間」「時刻表モードON/OFF」「拡大/縮小表示」「現在地追跡」「どこから」「○○行き」「始発」「終点」「表示設定」を翻訳化
+
+**`src/components/legend/LegendRouteList.tsx`**: ソート順ラベル（「並順」「あいうえお」「色」「登録順」）を英語対応
+
+**`src/components/RouteRecommendations.tsx`**: 所要時間の「分」単位を英語モードで「min」に修正
+
+---
+
+## [2026-04-29] セッション（前半）
 
 ### feat: 時刻表対応路線を 28 → 49 路線に拡充（`src/data/timetableData.ts`）
 追加した路線（Batch 1）:

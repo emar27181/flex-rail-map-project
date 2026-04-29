@@ -258,7 +258,15 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setDepartureSearch(e.target.value);
                     setShowDepartureResults(true);
                   }}
-                  onFocus={() => { setShowDepartureResults(true); handleSearchFocus(); }}
+                  onFocus={() => {
+                    setShowDepartureResults(true);
+                    handleSearchFocus();
+                    if (isMobile) {
+                      setTimeout(() => {
+                        departureRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                      }, 350);
+                    }
+                  }}
                   onBlur={() => {
                     setTimeout(() => {
                       if (!departureClickedRef.current) {
@@ -321,7 +329,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  📍 現在地から
+                  📍 {translateUI('currentLocationFrom', language)}
                 </button>
               )}
 
@@ -384,7 +392,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   setDepartureSearch(prevArr ? translateStation(prevArr.name, language) : '');
                   setArrivalSearch(prevDep ? translateStation(prevDep.name, language) : '');
                 }}
-                title="出発駅と到着駅を入れ替え"
+                title={translateUI('swapStationsTitle', language)}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -423,7 +431,15 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setArrivalSearch(e.target.value);
                     setShowArrivalResults(true);
                   }}
-                  onFocus={() => { setShowArrivalResults(true); handleSearchFocus(); }}
+                  onFocus={() => {
+                    setShowArrivalResults(true);
+                    handleSearchFocus();
+                    if (isMobile) {
+                      setTimeout(() => {
+                        arrivalRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                      }, 350);
+                    }
+                  }}
                   onBlur={() => {
                     setTimeout(() => {
                       if (!arrivalClickedRef.current) {
@@ -523,7 +539,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               gap: '8px',
             }}>
               <label style={{ fontSize: '13px', fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
-                出発時刻
+                {translateUI('departureTime', language)}
               </label>
               <input
                 type="time"
@@ -557,7 +573,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   whiteSpace: 'nowrap',
                 }}
               >
-                現在時刻
+                {translateUI('currentTime', language)}
               </button>
             </div>
           )}

@@ -215,9 +215,15 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
       {/* ソート選択 */}
       <div style={{ display: 'flex', gap: '4px', marginBottom: '6px', alignItems: 'center' }}>
-        <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>並順:</span>
+        <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
+          {language === 'english' ? 'Sort:' : '並順:'}
+        </span>
         {(['name', 'color', 'default'] as SortMode[]).map(mode => {
-          const label = mode === 'name' ? 'あいうえお' : mode === 'color' ? '色' : '登録順';
+          const label = mode === 'name'
+            ? (language === 'english' ? 'A-Z' : 'あいうえお')
+            : mode === 'color'
+              ? (language === 'english' ? 'Color' : '色')
+              : (language === 'english' ? 'Default' : '登録順');
           return (
             <button
               key={mode}

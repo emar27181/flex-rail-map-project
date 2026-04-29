@@ -544,7 +544,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               >{translateUI('setArrivalStation', currentLanguage)}</button>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ fontSize: '10px', color: colors.textSecondary }}>基準時刻</span>
+              <span style={{ fontSize: '10px', color: colors.textSecondary }}>{translateUI('baseTime', currentLanguage)}</span>
               <input
                 type="time"
                 value={timetableBaseTime}
@@ -611,7 +611,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                     {routeNames[rk as RouteKey] ?? rk}
                   </span>
                   {isJourney && (
-                    <span style={{ fontSize: '9px', color: colors.primary, flexShrink: 0, marginLeft: 'auto' }}>乗</span>
+                    <span style={{ fontSize: '9px', color: colors.primary, flexShrink: 0, marginLeft: 'auto' }}>{translateUI('onboard', currentLanguage)}</span>
                   )}
                 </div>
               );
@@ -628,14 +628,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                   borderBottom: `1px solid ${colors.borderLight}`,
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 }}>
-                  <span>{activeDepTime} 以降</span>
+                  <span>{activeDepTime} {translateUI('afterSuffix', currentLanguage)}</span>
                   {!isJourneyRoute && (
-                    <span style={{ color: colors.textSecondary, opacity: 0.7, fontSize: '9px' }}>ルート外参考</span>
+                    <span style={{ color: colors.textSecondary, opacity: 0.7, fontSize: '9px' }}>{translateUI('offRouteReference', currentLanguage)}</span>
                   )}
                 </div>
                 {activeDeps.length === 0 ? (
                   <div style={{ padding: '8px', fontSize: '11px', color: colors.textSecondary }}>
-                    データなし
+                    {translateUI('noData', currentLanguage)}
                   </div>
                 ) : (
                   <>
@@ -663,7 +663,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                         </div>
                         {/* 2行目: 行き先 */}
                         <div style={{ fontSize: '11px', color: colors.textSecondary, paddingLeft: '2px' }}>
-                          {dep.destination}{dep.toward ? `（${dep.toward}方面）` : ''}
+                          {dep.destination}{dep.toward ? `（${dep.toward} ${translateUI('towardSuffix', currentLanguage)}）` : ''}
                         </div>
                       </div>
                     ))}
@@ -679,17 +679,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                           borderTop: `1px solid ${colors.borderLight}`,
                         }}
                       >
-                        ▼ 時刻表をすべて表示
+                        {translateUI('showAllTimetable', currentLanguage)}
                       </div>
                     )}
                   </>
                 )}
               </>
             ) : (
-              <div style={{ padding: '10px 8px', fontSize: '11px', color: colors.textSecondary }}>
+              <div style={{ padding: '10px 8px', fontSize: '11px', color: colors.textSecondary, whiteSpace: 'pre-line' }}>
                 {isJourneyRoute
-                  ? `乗車路線ですが\n時刻データなし`
-                  : '時刻データなし'}
+                  ? translateUI('onboardRouteNoData', currentLanguage)
+                  : translateUI('noTimetableData', currentLanguage)}
               </div>
             )}
           </div>
@@ -700,7 +700,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
           borderTop: `1px solid ${colors.borderLight}`,
           fontSize: '9px', color: colors.textSecondary, opacity: 0.6,
         }}>
-          ⚠ 概算値・参考用　左の路線名をクリックで切替
+          {translateUI('approximateNote', currentLanguage)}
         </div>
       </div>
     );
@@ -1690,7 +1690,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
         backgroundColor: colors.surface
       }}>
         <div>
-          <div>マップを読み込み中...</div>
+          <div>{translateUI('loadingMap', currentLanguage)}</div>
           <div style={{ fontSize: '12px', color: colors.textSecondary, marginTop: '10px' }}>
             Client: {isClient ? 'OK' : 'Loading'},
             Loading: {isLoading ? 'Yes' : 'No'},
@@ -2355,7 +2355,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                       gap: '10px',
                       fontSize: '13px'
                     }}>
-                      <span style={{ color: '#555' }}>最大時間:</span>
+                      <span style={{ color: '#555' }}>{translateUI('maxTime', currentLanguage)}</span>
                       <select
                         value={timeFilterMaxMinutes}
                         onChange={(e) => setTimeFilterMaxMinutes(Number(e.target.value))}
@@ -2930,7 +2930,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                     transition: 'background-color 0.2s',
                   }}
                 >
-                  ⚙ 表示設定
+                  ⚙ {translateUI('displaySettings', currentLanguage)}
                 </button>
               </div>}
             </>
@@ -2961,7 +2961,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                   fontSize: '13px',
                   backdropFilter: 'blur(4px)',
                 }}
-                title={timetableModeEnabled ? '時刻表モードをOFF' : '時刻表モードをON'}
+                title={timetableModeEnabled ? translateUI('timetableModeOff', currentLanguage) : translateUI('timetableModeOn', currentLanguage)}
               >
                 📅
               </button>
@@ -2996,8 +2996,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               backdropFilter: 'blur(4px)',
             }}
             title={isFullscreen
-              ? (currentLanguage === 'japanese' ? '縮小表示' : 'Exit Fullscreen')
-              : (currentLanguage === 'japanese' ? '拡大表示' : 'Fullscreen')
+              ? translateUI('exitFullscreen', currentLanguage)
+              : translateUI('enterFullscreen', currentLanguage)
             }
             aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
           >
@@ -3032,7 +3032,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                 justifyContent: 'center',
                 backdropFilter: 'blur(4px)',
               }}
-              title={currentLanguage === 'japanese' ? '現在地を今すぐ更新' : 'Refresh location now'}
+              title={translateUI('refreshLocationNow', currentLanguage)}
               aria-label="Refresh location now"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -3072,8 +3072,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               opacity: (isLocating && !userLocation) ? 0.7 : 1,
             }}
             title={isLocating
-              ? (currentLanguage === 'japanese' ? '現在地追跡をOFF' : 'Stop tracking')
-              : (currentLanguage === 'japanese' ? '現在地を表示' : 'Show my location')}
+              ? translateUI('stopTracking', currentLanguage)
+              : translateUI('showMyLocation', currentLanguage)}
             aria-label="Toggle location tracking"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -3227,13 +3227,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                             justifyContent: 'center',
                             gap: '4px'
                           }}>
-                            <span>どこから</span>
+                            <span>{translateUI('fromWhere', currentLanguage)}</span>
                             <span style={{
                               color: '#4CAF50',
                               fontSize: '12px',
                               fontWeight: 'bold'
                             }}>→</span>
-                            <span>{arrival.name}行き</span>
+                            <span>{translateUI('direction', currentLanguage, { destination: translateStation(arrival.name, currentLanguage) })}</span>
                           </div>
                         </div>
                       );
@@ -3385,13 +3385,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                         justifyContent: 'center',
                         gap: '8px'
                       }}>
-                        <span>{getRouteDestination(clickedRoute)?.destinations[0] || '始発'}</span>
+                        <span>{getRouteDestination(clickedRoute)?.destinations[0] || translateUI('firstTrain', currentLanguage)}</span>
                         <span style={{
                           color: colors.textSecondary,
                           fontSize: '16px',
                           fontWeight: 'bold'
                         }}>⇔</span>
-                        <span>{getRouteDestination(clickedRoute)?.destinations[1] || '終点'}</span>
+                        <span>{getRouteDestination(clickedRoute)?.destinations[1] || translateUI('lastStation', currentLanguage)}</span>
                       </div>
                     </div>
                   )}

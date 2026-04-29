@@ -211,7 +211,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                   <span style={{ fontSize: '20px', fontWeight: 'bold', color: isSelected ? '#2196F3' : colors.text, lineHeight: '1' }}>
                     {Math.round(route.totalTime)}
                   </span>
-                  <span style={{ fontSize: '11px', color: colors.textSecondary }}>分</span>
+                  <span style={{ fontSize: '11px', color: colors.textSecondary }}>{language === 'english' ? 'min' : '分'}</span>
                 </div>
                 {/* 乗換数 */}
                 <span style={{
@@ -307,7 +307,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                       <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2px' }}>
                         <div style={{ flex: 1, height: '5px', backgroundColor: segColor, borderRadius: '2px' }} />
                         <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap', flexShrink: 0 }}>
-                          {Math.round(segment.time)}分
+                          {Math.round(segment.time)}{language === 'english' ? 'min' : '分'}
                         </span>
                         <div style={{ flex: 1, height: '5px', backgroundColor: segColor, borderRadius: '2px' }} />
                       </div>
