@@ -418,9 +418,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
   }, [timetableModeEnabled, routeRecommendations, selectedRouteIndices, timetableBaseTime]);
 
   const TRAIN_TYPE_COLOR: Record<string, string> = {
-    '各停': '#555', '普通': '#555', '急行': '#d35400', '快速': '#2980b9',
-    '快速アクティー': '#2980b9', '特別快速': '#1a6ea8', '準急': '#c0392b',
-    '快特': '#8e44ad', '特急ロマンスカー': '#e74c3c',
+    '各停': '#2980b9', '普通': '#2980b9',
+    '準急': '#e87a2a',
+    '快速': '#f39800', '快速アクティー': '#f39800', '特別快速': '#f39800',
+    '急行': '#e74c3c',
+    '快特': '#8e44ad',
+    '特急': '#c0392b', '特急ロマンスカー': '#c0392b',
+  };
+
+  const getTrainTypeBadgeColor = (trainType: string, _lineKey: string | null): string => {
+    return TRAIN_TYPE_COLOR[trainType] ?? '#555';
   };
 
   // クリック時の時刻表ツールチップを浮き上がりで表示（左:路線一覧 / 右:時刻表）
@@ -651,7 +658,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                           </span>
                           <span style={{
                             fontSize: '10px', color: '#fff', padding: '1px 4px', borderRadius: '3px',
-                            backgroundColor: TRAIN_TYPE_COLOR[dep.type] ?? '#555', flexShrink: 0,
+                            backgroundColor: getTrainTypeBadgeColor(dep.type, activeRouteKey), flexShrink: 0,
                           }}>
                             {dep.type}
                           </span>
