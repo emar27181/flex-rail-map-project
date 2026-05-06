@@ -45,6 +45,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const arrivalRef = useRef<HTMLDivElement>(null);
   const departureClickedRef = useRef(false);
   const arrivalClickedRef = useRef(false);
+  const focusedInputRef = useRef<HTMLInputElement | null>(null);
 
   // 外側クリックで閉じる機能
   useEffect(() => {
@@ -74,6 +75,21 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // visualViewport でキーボード表示を検知して入力欄をスクロール
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const handleViewportResize = () => {
+      if (!focusedInputRef.current) return;
+      // キーボードが出て viewport が縮んだとき入力欄を画面内に収める
+      focusedInputRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    };
+
+    vv.addEventListener('resize', handleViewportResize);
+    return () => vv.removeEventListener('resize', handleViewportResize);
   }, []);
 
   // 言語変更時に選択済み駅名の表示を更新
@@ -206,6 +222,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     searchingBlurTimer.current = setTimeout(() => {
       setIsSearching(false);
       onSearchingChange?.(false);
+      focusedInputRef.current = null;
     }, 200);
   };
 
@@ -258,14 +275,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setDepartureSearch(e.target.value);
                     setShowDepartureResults(true);
                   }}
-                  onFocus={() => {
+                  onFocus={(e) => {
+                    focusedInputRef.current = e.currentTarget;
                     setShowDepartureResults(true);
                     handleSearchFocus();
-                    if (isMobile) {
-                      setTimeout(() => {
-                        departureRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
-                      }, 350);
-                    }
                   }}
                   onBlur={() => {
                     setTimeout(() => {
@@ -431,14 +444,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setArrivalSearch(e.target.value);
                     setShowArrivalResults(true);
                   }}
-                  onFocus={() => {
+                  onFocus={(e) => {
+                    focusedInputRef.current = e.currentTarget;
                     setShowArrivalResults(true);
                     handleSearchFocus();
-                    if (isMobile) {
-                      setTimeout(() => {
-                        arrivalRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
-                      }, 350);
-                    }
                   }}
                   onBlur={() => {
                     setTimeout(() => {
