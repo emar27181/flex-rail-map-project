@@ -929,11 +929,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
 
     // 駅名のみを表示（S: G: プレフィックスなし）、最大16pxでサイズを固定
     const fontSize = Math.max(14, Math.min(16, Math.round(baseMarkerSize * 0.45)));
-    // 英語駅名の場合は文字幅係数を調整（英語は日本語より文字幅が狭い）
+    // 英語は文字幅が狭いが名前が長いため、日本語と同じパディングで上限を抑える
     const charWidthMultiplier = language === 'english' ? 0.4 : 0.6;
-    const padding = language === 'english' ? 10 : 20;
-    const textWidth = stationName.length * fontSize * charWidthMultiplier + padding;
-    const markerWidth = Math.max(baseMarkerSize, Math.min(textWidth, language === 'english' ? 100 : 120));
+    const textWidth = stationName.length * fontSize * charWidthMultiplier + 20;
+    const markerWidth = Math.max(baseMarkerSize, Math.min(textWidth, language === 'english' ? 80 : 120));
 
     const furigana = (showFurigana && language === 'japanese' && originalName) ? getFurigana(originalName) : '';
     const hasFurigana = furigana.length > 0;
@@ -942,8 +941,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
     const bgColor = theme === 'dark' ? colors.surfaceElevated : 'white';
     const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
     const htmlContent = hasFurigana
-      ? `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${markerHeight}px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;color:${markerColor};box-shadow:0 3px 8px ${shadowColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 ${language === 'english' ? '3px' : '5px'}"><div style="font-size:${Math.max(9, Math.round(fontSize * 0.55))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:${fontSize}px;line-height:1">${stationName}</div></div>`
-      : `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${markerHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};box-shadow:0 3px 8px ${shadowColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 ${language === 'english' ? '3px' : '5px'}">${stationName}</div>`;
+      ? `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${markerHeight}px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;color:${markerColor};box-shadow:0 3px 8px ${shadowColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px"><div style="font-size:${Math.max(9, Math.round(fontSize * 0.55))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:${fontSize}px;line-height:1">${stationName}</div></div>`
+      : `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${markerHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};box-shadow:0 3px 8px ${shadowColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px">${stationName}</div>`;
     return new DivIcon({
       html: htmlContent,
       className: 'special-station-marker-inline',
@@ -2155,7 +2154,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
 
 
   return (
-    <ErrorBoundary>
+    <ErrorBoundary language={currentLanguage}>
       <div
         className={className}
         style={isFullscreen
@@ -2578,6 +2577,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               transferStations={transferStations}
               showTransferStationsOnly={showTransferStationsOnly}
               onStationClick={handleSchematicStationClick}
+              language={currentLanguage}
             />
           )}
 

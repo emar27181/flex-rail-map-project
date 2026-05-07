@@ -1,7 +1,12 @@
 import React from 'react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import { translateUI } from '../utils/translation';
 
-const ThemeToggle: React.FC = () => {
+interface ThemeToggleProps {
+  language?: 'japanese' | 'english';
+}
+
+const ThemeToggle: React.FC<ThemeToggleProps> = ({ language = 'japanese' }) => {
   const { theme, toggleTheme } = useTheme();
   const colors = getThemeColors(theme);
 
@@ -32,13 +37,13 @@ const ThemeToggle: React.FC = () => {
         e.currentTarget.style.backgroundColor = colors.surface;
         e.currentTarget.style.transform = 'translateY(0)';
       }}
-      title={`${theme === 'light' ? 'ダーク' : 'ライト'}モードに切り替え`}
+      title={translateUI(theme === 'light' ? 'switchToDarkMode' : 'switchToLightMode', language)}
     >
       <span style={{ fontSize: '16px' }}>
         {theme === 'light' ? '🌙' : '☀️'}
       </span>
       <span>
-        {theme === 'light' ? 'ダークモード' : 'ライトモード'}
+        {translateUI(theme === 'light' ? 'darkMode' : 'lightMode', language)}
       </span>
     </button>
   );

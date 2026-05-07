@@ -3,6 +3,7 @@ import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import type { RouteResult } from '../utils/routeFinder';
 import { createSchematicLayout, getRouteLayout, type SchematicStationLayout } from '../data/schematicLayout';
+import { translateUI } from '../utils/translation';
 
 interface SchematicMapProps {
   visibleRoutes: Set<RouteKey>;
@@ -12,6 +13,7 @@ interface SchematicMapProps {
   transferStations: Set<string>;
   showTransferStationsOnly: boolean;
   onStationClick: (station: Station, action: 'departure' | 'arrival') => void;
+  language?: 'japanese' | 'english';
 }
 
 interface SchematicStation {
@@ -38,7 +40,8 @@ const SchematicMap: React.FC<SchematicMapProps> = ({
   arrival,
   transferStations,
   showTransferStationsOnly,
-  onStationClick
+  onStationClick,
+  language = 'japanese',
 }) => {
   // 図式化された駅座標を生成
   const schematicData = useMemo(() => {
@@ -245,7 +248,7 @@ const SchematicMap: React.FC<SchematicMapProps> = ({
         fontSize: '11px',
         color: '#666'
       }}>
-        クリック: 出発駅設定 | Shift+クリック: 到着駅設定
+        {translateUI('schematicMapHint', language)}
       </div>
     </div>
   );

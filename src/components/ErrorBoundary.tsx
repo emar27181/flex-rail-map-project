@@ -1,4 +1,5 @@
 import React from 'react';
+import { translateUI } from '../utils/translation';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -7,6 +8,7 @@ interface ErrorBoundaryState {
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
+  language?: 'japanese' | 'english';
 }
 
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -25,6 +27,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 
   render() {
     if (this.state.hasError) {
+      const lang = this.props.language ?? 'japanese';
       return (
         <div style={{
           padding: '20px',
@@ -33,15 +36,15 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
           backgroundColor: '#ffebee',
           margin: '20px'
         }}>
-          <h3 style={{ color: '#f44336', margin: '0 0 10px 0' }}>地図の読み込みでエラーが発生しました</h3>
-          <p style={{ margin: '0 0 10px 0' }}>ページを再読み込みしてください。</p>
+          <h3 style={{ color: '#f44336', margin: '0 0 10px 0' }}>{translateUI('mapErrorTitle', lang)}</h3>
+          <p style={{ margin: '0 0 10px 0' }}>{translateUI('mapErrorMessage', lang)}</p>
           {this.state.error && (
             <details style={{ fontSize: '12px', color: '#666' }}>
-              <summary>詳細</summary>
+              <summary>{translateUI('errorDetails', lang)}</summary>
               <pre>{this.state.error.toString()}</pre>
             </details>
           )}
-          <button 
+          <button
             onClick={() => window.location.reload()}
             style={{
               padding: '8px 16px',
@@ -52,7 +55,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
               cursor: 'pointer'
             }}
           >
-            再読み込み
+            {translateUI('reloadButton', lang)}
           </button>
         </div>
       );

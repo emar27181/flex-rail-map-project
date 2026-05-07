@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import { translateUI } from '../utils/translation';
 import {
   getNextDepartures,
   getDirectionIndex,
@@ -129,7 +130,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
         fontSize: '13px',
         textAlign: 'center',
       }}>
-        出発駅・到着駅を選択して経路を検索してください
+        {translateUI('selectStationsPrompt', language)}
       </div>
     );
   }
@@ -153,7 +154,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
         gap: '8px',
         flexWrap: 'wrap',
       }}>
-        <span style={{ fontWeight: 'bold', color: colors.text }}>⏰ 出発時刻</span>
+        <span style={{ fontWeight: 'bold', color: colors.text }}>⏰ {translateUI('departureTime', language)}</span>
         <input
           type="time"
           value={departureTime}
@@ -185,7 +186,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
             cursor: 'pointer',
           }}
         >
-          現在時刻
+          {translateUI('currentTime', language)}
         </button>
       </div>
 
@@ -220,7 +221,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                   color: idx === 0 ? '#4CAF50' : colors.primary,
                   marginLeft: 'auto',
                 }}>
-                  {seg.departTime} 発
+                  {seg.departTime} {translateUI('departsLabel', language)}
                 </span>
               </div>
 
@@ -247,7 +248,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                   fontSize: '11px',
                   color: colors.textSecondary,
                 }}>
-                  約{seg.segTime}分
+                  {translateUI('approxMinutes', language, { time: seg.segTime })}
                 </span>
                 {seg.hasTimetable && (
                   <button
@@ -263,7 +264,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                       cursor: 'pointer',
                     }}
                   >
-                    {isExpanded ? '▲ 閉じる' : '▼ 時刻表'}
+                    {isExpanded ? `▲ ${translateUI('close', language)}` : `▼ ${translateUI('timetableButton', language)}`}
                   </button>
                 )}
               </div>
@@ -284,11 +285,11 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                     borderBottom: `1px solid ${colors.borderLight}`,
                     backgroundColor: colors.surfaceElevated,
                   }}>
-                    {seg.fromStation} {seg.departTime}以降の発車（{seg.routeName}）
+                    {translateUI('departsAfterLabel', language, { station: seg.fromStation, time: seg.departTime, route: seg.routeName })}
                   </div>
                   {nextDeps.length === 0 ? (
                     <div style={{ padding: '8px', color: colors.textSecondary, fontSize: '12px' }}>
-                      時刻データが見つかりません
+                      {translateUI('noTimetableDataFound', language)}
                     </div>
                   ) : (
                     nextDeps.map((dep, di) => (
@@ -319,7 +320,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                           </span>
                         )}
                         <span style={{ fontSize: '12px', color: colors.textSecondary }}>
-                          {dep.destination}{dep.toward ? `（${dep.toward}方面）` : ''}
+                          {dep.destination}{dep.toward ? translateUI('towardDirection', language, { direction: dep.toward }) : ''}
                         </span>
                       </div>
                     ))
@@ -353,7 +354,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                     fontSize: '14px', fontWeight: 'bold',
                     color: '#F44336', marginLeft: 'auto',
                   }}>
-                    {totalArriveTime} 着
+                    {totalArriveTime} {translateUI('arrivesLabel', language)}
                   </span>
                 </div>
               )}
@@ -371,8 +372,8 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
           color: colors.textSecondary,
           lineHeight: '1.5',
         }}>
-          ⚠ {dataVersionLabel.version}（概算値・参考用）<br />
-          更新日: {dataVersionLabel.updatedAt}　正確な時刻は公式をご確認ください
+          ⚠ {dataVersionLabel.version}{language === 'japanese' ? '（概算値・参考用）' : ' (approx.)'}<br />
+          {translateUI('timetableUpdatedAt', language, { date: dataVersionLabel.updatedAt })}　{translateUI('timetableDisclaimerNote', language)}
         </div>
       )}
     </div>
