@@ -933,7 +933,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
     const charWidthMultiplier = language === 'english' ? 0.4 : 0.6;
     const padding = language === 'english' ? 10 : 20;
     const textWidth = stationName.length * fontSize * charWidthMultiplier + padding;
-    const markerWidth = Math.max(baseMarkerSize, Math.min(textWidth, language === 'english' ? 160 : 210));
+    const markerWidth = Math.max(baseMarkerSize, Math.min(textWidth, language === 'english' ? 100 : 120));
 
     const furigana = (showFurigana && language === 'japanese' && originalName) ? getFurigana(originalName) : '';
     const hasFurigana = furigana.length > 0;
@@ -1988,7 +1988,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                 key={`${routeKey}-special-${index}`}
                 position={[station.lat, station.lng]}
                 icon={specialIcon}
-                zIndexOffset={1000}
+                zIndexOffset={5000}
                 eventHandlers={{
                   click: (e) => {
                     const oe = e.originalEvent as MouseEvent | undefined;
