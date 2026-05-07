@@ -1294,7 +1294,143 @@ export const stationTranslations: { [key: string]: string } = {
 
   // 相鉄・JR直通線（既存駅は翻訳済み）
   "南万騎が原": "Minami-makigahara",
-  "緑園都市": "Ryokuen-toshi"
+  "緑園都市": "Ryokuen-toshi",
+
+  // 未翻訳駅の追加（網羅調査分）
+
+  // 東急各線
+  "新丸子": "Shin-Maruko",
+  "上野毛": "Kaminoge",
+  "等々力": "Todoroki",
+  "尾山台": "Oyamadai",
+  "矢口渡": "Yaguchi-no-Watashi",
+  "北千束": "Kita-Senzoku",
+  "大岡山": "Ookayama",
+  "戸越公園": "Togoshi-Koen",
+  "大森町": "Omori-Machi",
+  "六郷土手": "Rokugodote",
+  "東松原": "Higashi-Matsubara",
+  "新代田": "Shin-Daita",
+  "東林間": "Higashi-Rinkan",
+
+  // 京王各線
+  "久我山": "Kugayama",
+  "三鷹台": "Mitakadai",
+  "井の頭公園": "Inokashira-koen",
+  "富士見ヶ丘": "Fujimigaoka",
+  "高井戸": "Takaido",
+  "浜田山": "Hamadayama",
+  "永福町": "Eifukucho",
+  "西永福": "Nishi-Eifuku",
+  "桜ヶ丘": "Sakuragaoka",
+
+  // 横浜市営地下鉄
+  "高島町": "Takashima-cho",
+  "新羽": "Nitta",
+  "小机": "Kozukue",
+  "鴨居": "Kamoi",
+  "十日市場": "Tokaichiba",
+  "中山": "Nakayama",
+  "成瀬": "Naruse",
+  "長後": "Chogo",
+  "永田": "Nagata",
+
+  // 小田急各線
+  "藤沢本町": "Fujisawa-Honmachi",
+
+  // 東京メトロ各線
+  "乃木坂": "Nogizaka",
+  "半蔵門": "Hanzomon",
+  "新大塚": "Shin-Otsuka",
+  "茗荷谷": "Myogadani",
+  "神楽坂": "Kagurazaka",
+  "神谷町": "Kamiyacho",
+  "広尾": "Hiroo",
+  "西ケ原": "Nishigahara",
+  "新江古田": "Shin-Egota",
+  "麹町": "Kojimachi",
+  "銀座一丁目": "Ginza-Itchome",
+
+  // 都営各線
+  "西馬込": "Nishi-Magome",
+  "馬込": "Magome",
+  "泉岳寺": "Sengakuji",
+  "高輪台": "Takanawadai",
+  "西新井大師西": "Nishi-Arai-Daishi-Nishi",
+  "大塚駅前": "Otsuka-Ekimae",
+
+  // 東武各線
+  "鐘ヶ淵": "Kanegafuchi",
+  "東向島": "Higashi-Mukojima",
+  "小菅": "Kosuge",
+  "江戸川": "Edogawa",
+  "千住大橋": "Senju-Ohashi",
+  "東大前": "Todaimae",
+  "鶴ケ島": "Tsurugashima",
+  "柳瀬川": "Yanasegawa",
+  "鶴瀬": "Tsuruse",
+  "栗橋": "Kurihashi",
+
+  // 西武各線
+  "新小平": "Shin-Kodaira",
+  "小宮": "Komiya",
+
+  // JR各線
+  "東十条": "Higashi-Jujo",
+  "尾久": "Oku",
+  "下赤塚": "Shimo-Akatsuka",
+  "北戸田": "Kita-Toda",
+  "宮原": "Miyahara",
+  "大口": "Oguchi",
+  "新松戸": "Shin-Matsudo",
+  "舞浜": "Maihama",
+  "葛西臨海公園": "Kasai-Rinkai-Koen",
+  "新浦安": "Shin-Urayasu",
+  "新日本橋": "Shin-Nihombashi",
+  "平間": "Hirama",
+  "中神": "Nakagami",
+  "東中神": "Higashi-Nakagami",
+  "箱根ヶ崎": "Hakonegasaki",
+  "羽村": "Hamura",
+  "東福生": "Higashi-Fussa",
+  "東秋留": "Higashi-Akiru",
+  "三河安城": "Mikawa-Anjo",
+  "大網": "Oami",
+  "下総豊里": "Shimosa-Toyosato",
+  "下総橘": "Shimosa-Tachibana",
+  "小見川": "Omigawa",
+  "東浪見": "Tounami",
+  "日の出": "Hinode",
+  "山田": "Yamada",
+
+  // 新京成・関東私鉄
+  "菅野": "Sugano",
+  "国府台": "Konodai",
+  "阿佐ケ谷": "Asagaya",
+  "南阿佐ケ谷": "Minami-Asagaya",
+  "霞ケ関": "Kasumigaseki",
+  "飯山満": "Iiyama",
+  "大久保": "Okubo",
+  "長者町": "Chojamachi",
+
+  // 関西エリア
+  "塚本": "Tsukamoto",
+  "新今宮": "Shin-Imamiya",
+  "福島": "Fukushima",
+  "梅田": "Umeda",
+  "野田": "Noda",
+  "昭和町": "Showa-cho",
+  "西田辺": "Nishi-Tanabe",
+  "新金岡": "Shin-Kanaooka",
+  "北花田": "Kita-Hanada",
+  "茨木": "Ibaraki",
+  "千里丘": "Senrigaoka",
+  "岸辺": "Kishibe",
+  "島本": "Shimamoto",
+  "桂川": "Katsuragawa",
+  "立花": "Tachibana",
+  "新町": "Shinmachi",
+  "東淀川": "Higashi-Yodogawa"
 }
 // 路線名翻訳辞書
 export const routeTranslations: { [key: string]: string } = {
@@ -1381,7 +1517,64 @@ export const routeTranslations: { [key: string]: string } = {
   "湘南モノレール": "Shonan Monorail",
 
   // 相鉄・JR直通線
-  "相鉄・JR直通線": "Sotetsu-JR Direct Line"
+  "相鉄・JR直通線": "Sotetsu-JR Direct Line",
+
+  // 都営（正式名称）
+  "都営浅草線": "Toei Asakusa Line",
+  "都営三田線": "Toei Mita Line",
+
+  // JR（JRプレフィックス付き正式名称）
+  "JR武蔵野線": "JR Musashino Line",
+  "JR横浜線": "JR Yokohama Line",
+  "JR南武線": "JR Nambu Line",
+
+  // 相鉄
+  "相鉄本線": "Sotetsu Main Line",
+  "相鉄いずみ野線": "Sotetsu Izumino Line",
+
+  // JR追加路線
+  "JR総武線（千葉方面）": "JR Sobu Line (toward Chiba)",
+  "JR京葉線": "JR Keiyo Line",
+  "JR内房線": "JR Uchibo Line",
+  "JR外房線": "JR Sotobo Line",
+  "JR成田線": "JR Narita Line",
+  "JR青梅線": "JR Ome Line",
+  "JR五日市線": "JR Itsukaichi Line",
+  "JR八高線": "JR Hachiko Line",
+
+  // 東急追加路線
+  "東急目黒線": "Tokyu Meguro Line",
+  "東急多摩川線": "Tokyu Tamagawa Line",
+  "東急池上線": "Tokyu Ikegami Line",
+  "東急世田谷線": "Tokyu Setagaya Line",
+  "東急大井町線": "Tokyu Oimachi Line",
+
+  // 横浜市営地下鉄
+  "横浜市営地下鉄グリーンライン": "Yokohama Municipal Subway Green Line",
+
+  // 私鉄追加
+  "江ノ島電鉄": "Enoshima Electric Railway",
+  "新京成電鉄": "Shinkeisei Railway",
+  "東葉高速鉄道": "Toyo Rapid Railway",
+  "多摩モノレール": "Tama Monorail",
+  "都電荒川線": "Toden Arakawa Line",
+  "日暮里・舎人ライナー": "Nippori-Toneri Liner",
+  "京王井の頭線": "Keio Inokashira Line",
+  "京王相模原線": "Keio Sagamihara Line",
+  "小田急多摩線": "Odakyu Tama Line",
+  "東武伊勢崎線（スカイツリーライン）": "Tobu Isesaki Line (Skytree Line)",
+  "東武大師線": "Tobu Daishi Line",
+  "東武亀戸線": "Tobu Kameido Line",
+
+  // 新幹線・その他
+  "東海道新幹線": "Tokaido Shinkansen",
+  "横須賀線": "Yokosuka Line",
+
+  // 関西エリア（データとして存在する場合）
+  "大阪環状線": "Osaka Loop Line",
+  "御堂筋線": "Midosuji Line",
+  "JR京都線": "JR Kyoto Line",
+  "JR神戸線": "JR Kobe Line"
 };
 
 // UI翻訳辞書
@@ -1830,6 +2023,94 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   displaySettings: {
     japanese: "表示設定",
     english: "Settings"
+  },
+
+  // TimetablePanel
+  selectStationsPrompt: {
+    japanese: "出発駅・到着駅を選択して経路を検索してください",
+    english: "Select departure and arrival stations to search routes"
+  },
+  departsLabel: {
+    japanese: "発",
+    english: "Dep."
+  },
+  arrivesLabel: {
+    japanese: "着",
+    english: "Arr."
+  },
+  approxMinutes: {
+    japanese: "約{time}分",
+    english: "approx. {time}min"
+  },
+  close: {
+    japanese: "閉じる",
+    english: "Close"
+  },
+  timetableButton: {
+    japanese: "時刻表",
+    english: "Timetable"
+  },
+  departsAfterLabel: {
+    japanese: "{station} {time}以降の発車（{route}）",
+    english: "Deps. from {station} after {time} ({route})"
+  },
+  noTimetableDataFound: {
+    japanese: "時刻データが見つかりません",
+    english: "No timetable data found"
+  },
+  timetableUpdatedAt: {
+    japanese: "更新日: {date}",
+    english: "Updated: {date}"
+  },
+  timetableDisclaimerNote: {
+    japanese: "正確な時刻は公式をご確認ください",
+    english: "Please check official timetables for accuracy"
+  },
+  towardDirection: {
+    japanese: "（{direction}方面）",
+    english: " ({direction} dir.)"
+  },
+
+  // ThemeToggle
+  darkMode: {
+    japanese: "ダークモード",
+    english: "Dark Mode"
+  },
+  lightMode: {
+    japanese: "ライトモード",
+    english: "Light Mode"
+  },
+  switchToDarkMode: {
+    japanese: "ダークモードに切り替え",
+    english: "Switch to dark mode"
+  },
+  switchToLightMode: {
+    japanese: "ライトモードに切り替え",
+    english: "Switch to light mode"
+  },
+
+  // ErrorBoundary
+  mapErrorTitle: {
+    japanese: "地図の読み込みでエラーが発生しました",
+    english: "Error loading map"
+  },
+  mapErrorMessage: {
+    japanese: "ページを再読み込みしてください。",
+    english: "Please reload the page."
+  },
+  errorDetails: {
+    japanese: "詳細",
+    english: "Details"
+  },
+  reloadButton: {
+    japanese: "再読み込み",
+    english: "Reload"
+  },
+
+  // SchematicMap
+  schematicMapHint: {
+    japanese: "クリック: 出発駅設定 | Shift+クリック: 到着駅設定",
+    english: "Click: Set Departure | Shift+Click: Set Arrival"
   }
 };
 
