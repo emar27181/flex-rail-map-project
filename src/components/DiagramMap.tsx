@@ -134,9 +134,13 @@ const DiagramMap: React.FC = () => {
   const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(
     new Set(DIAGRAM_ROUTE_KEYS)
   );
-  const [transform, setTransform] = useState({ x: 20, y: 20, scale: 0.48 });
+  const [transform, setTransform] = useState({ x: 20, y: 20, scale: 0.55 });
   const [showPanel, setShowPanel] = useState(true);
   const [showWipNote, setShowWipNote] = useState(false);
+  const [depInput, setDepInput] = useState('横浜');
+  const [arrInput, setArrInput] = useState('新宿');
+  const [depStation, setDepStation] = useState('横浜');
+  const [arrStation, setArrStation] = useState('新宿');
 
   const isPanning = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
@@ -208,14 +212,44 @@ const DiagramMap: React.FC = () => {
     return offsets;
   }, [segmentRouteMap]);
 
+  // ---- 出発/到着駅の関連路線とSVG座標 ----
+  const { depRouteSet, arrRouteSet, depSVGPos, arrSVGPos } = useMemo(() => {
+    const depRouteSet = new Set<RouteKey>(
+      DIAGRAM_ROUTE_KEYS.filter(k => (routes[k] as any[])?.some(s => s.name === depStation))
+    );
+    const arrRouteSet = new Set<RouteKey>(
+      DIAGRAM_ROUTE_KEYS.filter(k => (routes[k] as any[])?.some(s => s.name === arrStation))
+    );
+    let depSVGPos: [number, number] | null = null;
+    let arrSVGPos: [number, number] | null = null;
+    for (const k of DIAGRAM_ROUTE_KEYS) {
+      const depSt = (routes[k] as any[])?.find(s => s.name === depStation);
+      if (depSt && !depSVGPos) { const [gx, gy] = toGrid(depSt.lat, depSt.lng); depSVGPos = gridToXY(gx, gy); }
+      const arrSt = (routes[k] as any[])?.find(s => s.name === arrStation);
+      if (arrSt && !arrSVGPos) { const [gx, gy] = toGrid(arrSt.lat, arrSt.lng); arrSVGPos = gridToXY(gx, gy); }
+      if (depSVGPos && arrSVGPos) break;
+    }
+    return { depRouteSet, arrRouteSet, depSVGPos, arrSVGPos };
+  }, [depStation, arrStation]);
+
   // ---- 路線ライン要素生成（オクチリニア: 0°/45°/90°整列） ----
   const routeLineElements = useMemo(() => {
+    const hasFilter = depRouteSet.size > 0 || arrRouteSet.size > 0;
     const elements: React.ReactElement[] = [];
-    DIAGRAM_ROUTE_KEYS.forEach(routeKey => {
+    // 非ハイライト路線を先に描画（背面）、ハイライト路線を後に描画（前面）
+    const sortedKeys = [...DIAGRAM_ROUTE_KEYS].sort((a, b) => {
+      const aHi = depRouteSet.has(a) || arrRouteSet.has(a);
+      const bHi = depRouteSet.has(b) || arrRouteSet.has(b);
+      return Number(aHi) - Number(bHi);
+    });
+    sortedKeys.forEach(routeKey => {
       if (!visibleRoutes.has(routeKey)) return;
       const data = routeGridData.get(routeKey);
       if (!data) return;
       const color = routeColors[routeKey] ?? '#888';
+      const isHighlighted = depRouteSet.has(routeKey) || arrRouteSet.has(routeKey);
+      const opacity = hasFilter ? (isHighlighted ? 1.0 : 0.13) : 1.0;
+      const sw = isHighlighted ? 4 : 2.5;
       for (let i = 0; i < data.grids.length - 1; i++) {
         const [gx1, gy1] = data.grids[i];
         const [gx2, gy2] = data.grids[i + 1];
@@ -231,7 +265,8 @@ const DiagramMap: React.FC = () => {
             d={d}
             fill="none"
             stroke={color}
-            strokeWidth={3}
+            strokeWidth={sw}
+            strokeOpacity={opacity}
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -239,7 +274,7 @@ const DiagramMap: React.FC = () => {
       }
     });
     return elements;
-  }, [visibleRoutes, routeGridData, routeSegmentOffsets]);
+  }, [visibleRoutes, routeGridData, routeSegmentOffsets, depRouteSet, arrRouteSet]);
 
   // ---- 駅マーカー要素生成（乗換駅のみ） ----
   const stationElements = useMemo(() => {
@@ -311,6 +346,30 @@ const DiagramMap: React.FC = () => {
     return () => area.removeEventListener('wheel', onWheel);
   }, []);
 
+  // ---- 出発/到着駅の中間点にビューをセンタリング ----
+  useEffect(() => {
+    const area = mapAreaRef.current;
+    if (!area) return;
+    const rect = area.getBoundingClientRect();
+    if (rect.width === 0) return;
+
+    let depPos: [number, number] | null = null;
+    let arrPos: [number, number] | null = null;
+    for (const k of DIAGRAM_ROUTE_KEYS) {
+      const d = (routes[k] as any[])?.find(s => s.name === depStation);
+      if (d && !depPos) { const [gx, gy] = toGrid(d.lat, d.lng); depPos = gridToXY(gx, gy); }
+      const a = (routes[k] as any[])?.find(s => s.name === arrStation);
+      if (a && !arrPos) { const [gx, gy] = toGrid(a.lat, a.lng); arrPos = gridToXY(gx, gy); }
+      if (depPos && arrPos) break;
+    }
+    if (!depPos && !arrPos) return;
+
+    const cx = depPos && arrPos ? (depPos[0] + arrPos[0]) / 2 : (depPos ?? arrPos)![0];
+    const cy = depPos && arrPos ? (depPos[1] + arrPos[1]) / 2 : (depPos ?? arrPos)![1];
+    const scale = 0.65;
+    setTransform({ x: rect.width / 2 - cx * scale, y: rect.height / 2 - cy * scale, scale });
+  }, [depStation, arrStation]);
+
   const toggleRoute = useCallback((key: RouteKey) => {
     setVisibleRoutes(prev => {
       const next = new Set(prev);
@@ -329,6 +388,35 @@ const DiagramMap: React.FC = () => {
           overflowY: 'auto', padding: '10px 8px', fontSize: '12px',
           display: 'flex', flexDirection: 'column', gap: '4px',
         }}>
+          {/* 出発/到着駅入力 */}
+          <div style={{ marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px solid #ddd' }}>
+            <div style={{ fontWeight: 'bold', color: '#333', marginBottom: '5px', fontSize: '11px' }}>区間を指定</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginBottom: '4px' }}>
+              <span style={{ color: '#4CAF50', fontWeight: 'bold', fontSize: '10px', minWidth: '24px' }}>出発</span>
+              <input
+                value={depInput}
+                onChange={e => setDepInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { setDepStation(depInput); setArrStation(arrInput); } }}
+                style={{ flex: 1, fontSize: '11px', padding: '3px 4px', border: '1px solid #4CAF50', borderRadius: '3px', outline: 'none' }}
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginBottom: '5px' }}>
+              <span style={{ color: '#F44336', fontWeight: 'bold', fontSize: '10px', minWidth: '24px' }}>到着</span>
+              <input
+                value={arrInput}
+                onChange={e => setArrInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { setDepStation(depInput); setArrStation(arrInput); } }}
+                style={{ flex: 1, fontSize: '11px', padding: '3px 4px', border: '1px solid #F44336', borderRadius: '3px', outline: 'none' }}
+              />
+            </div>
+            <button
+              onClick={() => { setDepStation(depInput); setArrStation(arrInput); }}
+              style={{ width: '100%', fontSize: '10px', padding: '4px', background: '#333', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer' }}
+            >
+              この区間を表示
+            </button>
+          </div>
+
           <div style={{ fontWeight: 'bold', color: '#333', marginBottom: '4px' }}>路線の表示切替</div>
           <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
             <button
@@ -373,7 +461,7 @@ const DiagramMap: React.FC = () => {
             {showPanel ? '◀ パネル' : '▶ パネル'}
           </button>
           <button
-            onClick={() => setTransform({ x: 20, y: 20, scale: 0.48 })}
+            onClick={() => { setDepStation(depInput); setArrStation(arrInput); }}
             style={{ background: 'rgba(255,255,255,0.92)', border: '1px solid #ccc', borderRadius: '4px', padding: '5px 10px', fontSize: '12px', cursor: 'pointer' }}
           >
             リセット
@@ -464,6 +552,40 @@ const DiagramMap: React.FC = () => {
 
             {/* 乗換駅マーカー */}
             {stationElements}
+
+            {/* 出発駅マーカー */}
+            {depSVGPos && (
+              <g style={{ pointerEvents: 'none' }}>
+                <circle cx={depSVGPos[0]} cy={depSVGPos[1]} r={10} fill="#4CAF50" stroke="white" strokeWidth={2.5} />
+                <text x={depSVGPos[0] + 14} y={depSVGPos[1] - 3}
+                  fontSize={10} fontWeight="bold" fill="#4CAF50"
+                  stroke="white" strokeWidth={2.5} paintOrder="stroke"
+                  style={{ userSelect: 'none' }}
+                >{depStation}</text>
+                <text x={depSVGPos[0] + 14} y={depSVGPos[1] + 10}
+                  fontSize={8} fill="#4CAF50"
+                  stroke="white" strokeWidth={2} paintOrder="stroke"
+                  style={{ userSelect: 'none' }}
+                >出発</text>
+              </g>
+            )}
+
+            {/* 到着駅マーカー */}
+            {arrSVGPos && (
+              <g style={{ pointerEvents: 'none' }}>
+                <circle cx={arrSVGPos[0]} cy={arrSVGPos[1]} r={10} fill="#F44336" stroke="white" strokeWidth={2.5} />
+                <text x={arrSVGPos[0] + 14} y={arrSVGPos[1] - 3}
+                  fontSize={10} fontWeight="bold" fill="#F44336"
+                  stroke="white" strokeWidth={2.5} paintOrder="stroke"
+                  style={{ userSelect: 'none' }}
+                >{arrStation}</text>
+                <text x={arrSVGPos[0] + 14} y={arrSVGPos[1] + 10}
+                  fontSize={8} fill="#F44336"
+                  stroke="white" strokeWidth={2} paintOrder="stroke"
+                  style={{ userSelect: 'none' }}
+                >到着</text>
+              </g>
+            )}
           </g>
         </svg>
       </div>
