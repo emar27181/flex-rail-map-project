@@ -315,14 +315,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     return elements;
   }, [visibleRoutes, routeGridData, routeSegmentOffsets, depRouteSet, arrRouteSet, theme]);
 
-  // ---- 駅マーカー要素生成（乗換駅のみ、ラベル衝突検出付き） ----
-
-  // テキスト幅推定: ASCII ≈ 0.55*fs, CJK ≈ 1.0*fs (SVG単位)
-  function estimateTextW(text: string, fs: number): number {
-    let w = 0;
-    for (const ch of text) w += ch.charCodeAt(0) > 127 ? fs : fs * 0.55;
-    return w;
-  }
+  // ---- 駅マーカー要素生成（乗換駅のみ、ラベル全表示・ずらし配置） ----
 
   const stationElements = useMemo(() => {
     const colors = getThemeColors(theme);
@@ -331,15 +324,45 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     const fs = Math.max(4, Math.min(10, 6 / s));
     const sw = 1.8 / s;
     const csw = 0.8 / s;
-    const lx0 = r + 2 / s;  // ラベルx開始オフセット
-    const lh = fs * 1.4;    // ラベル高さ
-    const GAP = 1.5 / s;    // ラベル間マージン
+    const lh = fs * 1.4;
+    const GAP = 1.0 / s;
+    const BASE_OFF = r + 2.5 / s;
 
-    // ── 1. 全乗換駅を収集し、通過路線数順（降順）でソート ──
-    const candidates: Array<{ name: string; sx: number; sy: number }> = [];
+    // テキスト幅推定: CJK=1.0*fs, ASCII=0.55*fs
+    function textW(name: string): number {
+      let w = 0;
+      for (const ch of name) w += ch.charCodeAt(0) > 127 ? fs : fs * 0.55;
+      return w;
+    }
+
+    // 配置済みボックス: [x0,y0,x1,y1]
+    const placed: Array<[number, number, number, number]> = [];
+
+    function hits(lx: number, ly: number, lw: number): boolean {
+      const x1 = lx + lw, y1 = ly + lh;
+      for (const [px, py, px1, py1] of placed) {
+        if (lx < px1 + GAP && x1 + GAP > px && ly < py1 + GAP && y1 + GAP > py) return true;
+      }
+      return false;
+    }
+
+    // 8方向候補 (dx,dy): dx>0=右, dx<0=左, dy<0=上, dy>0=下
+    const DIRS: Array<[number, number]> = [
+      [1, 0], [-1, 0], [0, -1], [0, 1],
+      [1, -1], [-1, -1], [1, 1], [-1, 1],
+    ];
+
+    function labelPos(sx: number, sy: number, lw: number, dx: number, dy: number, step = 0): [number, number] {
+      const off = BASE_OFF + step * (lh + GAP);
+      const lx = dx > 0 ? sx + off : dx < 0 ? sx - off - lw : sx - lw / 2;
+      const ly = dy < 0 ? sy - off - lh : dy > 0 ? sy + off : sy - lh * 0.5;
+      return [lx, ly];
+    }
+
+    // 全乗換駅を収集 → 路線数降順ソート（主要駅優先）
+    const stations: Array<{ name: string; sx: number; sy: number; routes: number }> = [];
     const seen = new Set<string>();
     const routeCount = new Map<string, number>();
-
     DIAGRAM_ROUTE_KEYS.forEach(routeKey => {
       if (!visibleRoutes.has(routeKey)) return;
       const data = routeGridData.get(routeKey);
@@ -350,52 +373,63 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         seen.add(name);
         const [gx, gy] = data.grids[idx];
         const [sx, sy] = gridToXY(gx, gy);
-        candidates.push({ name, sx, sy });
+        stations.push({ name, sx, sy, routes: 0 });
       });
     });
-    candidates.sort((a, b) => (routeCount.get(b.name) ?? 0) - (routeCount.get(a.name) ?? 0));
+    stations.forEach(st => { st.routes = routeCount.get(st.name) ?? 1; });
+    stations.sort((a, b) => b.routes - a.routes);
 
-    // ── 2. グリーディー衝突検出: 既配置ボックスと重ならない場合のみラベル表示 ──
-    // ボックス形式: [lx, ly, lx+lw, ly+lh]
-    const placed: Array<[number, number, number, number]> = [];
-
-    function overlaps(lx: number, ly: number, lw: number): boolean {
-      const rx = lx + lw, ry = ly + lh;
-      for (const [px, py, prx, pry] of placed) {
-        if (lx < prx + GAP && rx + GAP > px && ly < pry + GAP && ry + GAP > py) return true;
+    // 各駅にラベル位置を決定（8方向 × 最大5ステップ探索）
+    const placements = new Map<string, [number, number, boolean]>(); // name → [lx, ly, displaced]
+    stations.forEach(({ name, sx, sy }) => {
+      const lw = textW(name);
+      let found = false;
+      outer: for (let step = 0; step <= 5; step++) {
+        for (const [dx, dy] of DIRS) {
+          const [lx, ly] = labelPos(sx, sy, lw, dx, dy, step);
+          if (!hits(lx, ly, lw)) {
+            placed.push([lx, ly, lx + lw, ly + lh]);
+            placements.set(name, [lx, ly, step > 0 || dx !== 1 || dy !== 0]);
+            found = true;
+            break outer;
+          }
+        }
       }
-      return false;
-    }
-
-    // ── 3. 要素生成 ──
-    const labelVisible = new Map<string, boolean>();
-    candidates.forEach(({ name, sx, sy }) => {
-      const lw = estimateTextW(name, fs);
-      const lx = sx + lx0;
-      const ly = sy - lh * 0.6;
-      if (!overlaps(lx, ly, lw)) {
+      if (!found) {
+        // 最終フォールバック: 右に強制配置
+        const [lx, ly] = labelPos(sx, sy, lw, 1, 0, 6);
         placed.push([lx, ly, lx + lw, ly + lh]);
-        labelVisible.set(name, true);
-      } else {
-        labelVisible.set(name, false);
+        placements.set(name, [lx, ly, true]);
       }
     });
 
-    return candidates.map(({ name, sx, sy }) => (
-      <g key={name}>
-        <circle cx={sx} cy={sy} r={r} fill={colors.surfaceElevated} stroke={colors.textSecondary} strokeWidth={csw} />
-        {labelVisible.get(name) && (
+    return stations.map(({ name, sx, sy }) => {
+      const [lx, ly, displaced] = placements.get(name)!;
+      const lw = textW(name);
+      // ラベルがずれている場合は細いリード線を引く
+      const anchorX = sx + (lx > sx ? r : lx + lw < sx ? -r : 0);
+      const anchorY = sy + (ly + lh < sy ? -r : ly > sy ? r : 0);
+      return (
+        <g key={name}>
+          {displaced && (
+            <line
+              x1={anchorX} y1={anchorY}
+              x2={lx + lw * 0.5} y2={ly + lh * 0.5}
+              stroke={colors.textMuted} strokeWidth={0.6 / s} strokeOpacity={0.5}
+            />
+          )}
+          <circle cx={sx} cy={sy} r={r} fill={colors.surfaceElevated} stroke={colors.textSecondary} strokeWidth={csw} />
           <text
-            x={sx + lx0} y={sy + fs * 0.4}
+            x={lx} y={ly + fs}
             fontSize={fs} fontWeight="bold" fill={colors.text}
             stroke={colors.background} strokeWidth={sw} paintOrder="stroke"
             style={{ pointerEvents: 'none', userSelect: 'none' }}
           >
             {name}
           </text>
-        )}
-      </g>
-    ));
+        </g>
+      );
+    });
   }, [visibleRoutes, routeGridData, transferStations, transform.scale, theme]);
 
   // ---- パン操作 ----
