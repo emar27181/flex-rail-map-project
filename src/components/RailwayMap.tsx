@@ -717,7 +717,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
 
   // テキスト幅を文字種別考慮で推定（ASCII約7px, 日本語約12px, パディング12px）
   const estimateTextWidth = (text: string): number => {
-    let w = 12;
+    let w = 6; // padding 1px 3px → 左右3px×2=6px
     for (const ch of text) w += ch.charCodeAt(0) > 127 ? 12 : 7;
     return w;
   };
@@ -745,8 +745,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
       const iconHeight = hasFurigana ? (hasTime ? 42 : 30) : (hasTime ? 30 : 18);
       const timeLine = hasTime ? `<div style="font-size:9px;line-height:1;margin-top:1px;font-weight:normal;opacity:0.9">${timeLabel}</div>` : '';
       const htmlContent = hasFurigana || hasTime
-        ? `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;white-space:nowrap;border:1px solid ${borderColor};box-shadow:0 1px 3px ${shadowColor};text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:8px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:11px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
-        : `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:bold;white-space:nowrap;border:1px solid ${borderColor};box-shadow:0 1px 3px ${shadowColor};opacity:${opacity}">${displayName}</div>`;
+        ? `<div style="background:${color};color:white;padding:1px 3px;border-radius:3px;white-space:nowrap;border:1px solid ${borderColor};box-shadow:0 1px 3px ${shadowColor};text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:8px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:11px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
+        : `<div style="background:${color};color:white;padding:1px 3px;border-radius:3px;font-size:11px;font-weight:bold;white-space:nowrap;border:1px solid ${borderColor};box-shadow:0 1px 3px ${shadowColor};opacity:${opacity}">${displayName}</div>`;
       return new DivIcon({
         html: htmlContent,
         className: 'station-name-marker',
@@ -882,7 +882,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
         html: `<div style="
           background:${routeColors[routeKey]};
           color:white;
-          padding:2px 6px;
+          padding:1px 3px;
           border-radius:2px;
           ${hasFurigana ? '' : 'font-size:11px;font-weight:bold;'}
           white-space:nowrap;
