@@ -316,6 +316,9 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
   }, [visibleRoutes, routeGridData, routeSegmentOffsets, depRouteSet, arrRouteSet, theme]);
 
   // ---- 駅マーカー要素生成（乗換駅のみ） ----
+  // ラベル表示はズームが十分なときだけ（重なり防止）
+  const LABEL_SCALE_THRESHOLD = 0.9; // これ以上のscaleでラベルを表示
+
   const stationElements = useMemo(() => {
     const colors = getThemeColors(theme);
     const s = transform.scale;
@@ -324,6 +327,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     const sw = 1.8 / s;
     const csw = 0.8 / s;
     const offset = r + 2 / s;
+    const showLabel = s >= LABEL_SCALE_THRESHOLD;
     const elements: React.ReactElement[] = [];
     const rendered = new Set<string>();
     DIAGRAM_ROUTE_KEYS.forEach(routeKey => {
@@ -339,14 +343,16 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         elements.push(
           <g key={name}>
             <circle cx={sx} cy={sy} r={r} fill={colors.surfaceElevated} stroke={colors.textSecondary} strokeWidth={csw} />
-            <text
-              x={sx + offset} y={sy + fs * 0.4}
-              fontSize={fs} fontWeight="bold" fill={colors.text}
-              stroke={colors.background} strokeWidth={sw} paintOrder="stroke"
-              style={{ pointerEvents: 'none', userSelect: 'none' }}
-            >
-              {name}
-            </text>
+            {showLabel && (
+              <text
+                x={sx + offset} y={sy + fs * 0.4}
+                fontSize={fs} fontWeight="bold" fill={colors.text}
+                stroke={colors.background} strokeWidth={sw} paintOrder="stroke"
+                style={{ pointerEvents: 'none', userSelect: 'none' }}
+              >
+                {name}
+              </text>
+            )}
           </g>
         );
       });
@@ -485,17 +491,23 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        {/* 操作説明 */}
+        {/* 操作説明（PC幅のみ表示） */}
         <div style={{
           position: 'absolute', bottom: 8, right: 8, zIndex: 20,
           background: colors.surfaceElevated,
           border: `1px solid ${colors.border}`,
-          borderRadius: '4px', padding: '5px 8px', fontSize: '10px',
+          borderRadius: '4px', padding: '4px 7px', fontSize: '10px',
           color: colors.textSecondary,
           boxShadow: `0 1px 4px ${colors.shadow}`,
-        }}>
+          display: 'none', // JS不要でCSSのみ対応 — PC: inline-block
+        }}
+          className="diagram-hint"
+        >
           スクロール: ズーム | ドラッグ: 移動 | ●: 乗換駅
         </div>
+        <style>{`
+          @media (min-width: 600px) { .diagram-hint { display: block !important; } }
+        `}</style>
 
         {/* 準備中バッジ */}
         <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 20 }}>
@@ -553,16 +565,19 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
             {depSVGPos && (() => {
               const s = transform.scale;
               const r = Math.max(3, 6 / s);
-              const fs = Math.max(5, Math.min(12, 7 / s));
+              const fs = Math.max(5, Math.min(11, 7 / s));
               const depColor = colors.success;
+              const showText = s >= 0.5;
               return (
                 <g style={{ pointerEvents: 'none' }}>
                   <circle cx={depSVGPos[0]} cy={depSVGPos[1]} r={r} fill={depColor} stroke={colors.background} strokeWidth={1.5 / s} />
-                  <text x={depSVGPos[0] + r + 2 / s} y={depSVGPos[1] + fs * 0.35}
-                    fontSize={fs} fontWeight="bold" fill={depColor}
-                    stroke={colors.background} strokeWidth={2 / s} paintOrder="stroke"
-                    style={{ userSelect: 'none' }}
-                  >{depStation} 出発</text>
+                  {showText && (
+                    <text x={depSVGPos[0] + r + 2 / s} y={depSVGPos[1] + fs * 0.35}
+                      fontSize={fs} fontWeight="bold" fill={depColor}
+                      stroke={colors.background} strokeWidth={2 / s} paintOrder="stroke"
+                      style={{ userSelect: 'none' }}
+                    >{depStation}</text>
+                  )}
                 </g>
               );
             })()}
@@ -571,16 +586,19 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
             {arrSVGPos && (() => {
               const s = transform.scale;
               const r = Math.max(3, 6 / s);
-              const fs = Math.max(5, Math.min(12, 7 / s));
+              const fs = Math.max(5, Math.min(11, 7 / s));
               const arrColor = theme === 'dark' ? '#ff5555' : '#F44336';
+              const showText = s >= 0.5;
               return (
                 <g style={{ pointerEvents: 'none' }}>
                   <circle cx={arrSVGPos[0]} cy={arrSVGPos[1]} r={r} fill={arrColor} stroke={colors.background} strokeWidth={1.5 / s} />
-                  <text x={arrSVGPos[0] + r + 2 / s} y={arrSVGPos[1] + fs * 0.35}
-                    fontSize={fs} fontWeight="bold" fill={arrColor}
-                    stroke={colors.background} strokeWidth={2 / s} paintOrder="stroke"
-                    style={{ userSelect: 'none' }}
-                  >{arrStation} 到着</text>
+                  {showText && (
+                    <text x={arrSVGPos[0] + r + 2 / s} y={arrSVGPos[1] + fs * 0.35}
+                      fontSize={fs} fontWeight="bold" fill={arrColor}
+                      stroke={colors.background} strokeWidth={2 / s} paintOrder="stroke"
+                      style={{ userSelect: 'none' }}
+                    >{arrStation}</text>
+                  )}
                 </g>
               );
             })()}
