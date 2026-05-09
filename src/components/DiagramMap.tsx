@@ -350,15 +350,10 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     return stations.map(({ name, sx, sy, isTransfer }) => {
       const placement = placements.get(name);
       if (!placement) return null;
-      const [lx, ly, displaced, anchorX, anchorY] = placement;
+      const [lx, ly, , ,] = placement;
       const r = isTransfer ? rTransfer : rRegular;
       return (
         <g key={name}>
-          {displaced && (
-            <line x1={anchorX} y1={anchorY} x2={lx + REF_FS * 2} y2={ly + REF_LH * 0.5}
-              stroke={colors.textMuted} strokeWidth={0.5 / s} strokeOpacity={0.4}
-            />
-          )}
           <circle cx={sx} cy={sy} r={r}
             fill={isTransfer ? colors.surfaceElevated : colors.textMuted}
             stroke={isTransfer ? colors.textSecondary : 'none'}
