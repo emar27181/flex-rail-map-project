@@ -88,6 +88,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
   const [showStationNumbers, setShowStationNumbers] = useState(true);
+  const [showOsmTiles, setShowOsmTiles] = useState(true);
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   // 地図表示モード（現実の路線図に固定）
   const mapViewMode = 'realistic';
@@ -942,7 +943,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
     if (!MapComponents?.DivIcon) return null;
 
     const { DivIcon } = MapComponents;
-    const baseMarkerSize = getTimeMarkerSize(zoomLevel) * 2.2;
+    const baseMarkerSize = Math.min(getTimeMarkerSize(zoomLevel) * 1.5, 30);
     const markerColor = isDeparture ? '#4CAF50' : '#F44336';
 
     const stationNumber = showStationNumbers
@@ -962,10 +963,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
     const markerHeight = hasFurigana ? baseMarkerSize + 12 : baseMarkerSize;
 
     const bgColor = theme === 'dark' ? colors.surfaceElevated : 'white';
-    const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
     const htmlContent = hasFurigana
-      ? `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${markerHeight}px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;color:${markerColor};box-shadow:0 3px 8px ${shadowColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px"><div style="font-size:${Math.max(9, Math.round(fontSize * 0.55))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:${fontSize}px;line-height:1">${displayStationName}</div></div>`
-      : `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${markerHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};box-shadow:0 3px 8px ${shadowColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px">${displayStationName}</div>`;
+      ? `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${markerHeight}px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;color:${markerColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px"><div style="font-size:${Math.max(9, Math.round(fontSize * 0.55))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:${fontSize}px;line-height:1">${displayStationName}</div></div>`
+      : `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${markerHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px">${displayStationName}</div>`;
     return new DivIcon({
       html: htmlContent,
       className: 'special-station-marker-inline',
@@ -2076,12 +2076,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               : createStationIcon(station, color, zoomLevel, isDetailed, stationOpacity, stationTimeLabel, routeKey);
             if (!stationIcon) return null;
 
+            const stationZIndex = (station.isExpress || isTransferStation) ? 3000 : 1000;
+
             return (
               <Marker
                 key={`${routeKey}-station-${index}`}
                 position={[station.lat, station.lng]}
                 icon={stationIcon}
-                zIndexOffset={2000}
+                zIndexOffset={stationZIndex}
                 eventHandlers={{
                   click: (e) => {
                     const oe = e.originalEvent as MouseEvent | undefined;
@@ -2570,13 +2572,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
             >
               <ZoomControl position="bottomright" />
               <MapEvents />
-              <TileLayer
-                url={theme === 'dark'
-                  ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                  : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                }
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-              />
+              {showOsmTiles && (
+                <TileLayer
+                  url={theme === 'dark'
+                    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                  }
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                />
+              )}
 
               {visibleRoutesData.map(([routeKey, stations]) =>
                 renderRoute(routeKey as RouteKey, stations)
@@ -2673,6 +2677,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                     showStationNames={showStationNames}
                     showStationNumbers={showStationNumbers}
                     showFurigana={showFurigana}
+                    showOsmTiles={showOsmTiles}
                     theme={theme}
                     language={currentLanguage}
                     onToggleRoute={toggleRoute}
@@ -2684,6 +2689,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                     onShowStationNamesChange={setShowStationNames}
                     onShowStationNumbersChange={setShowStationNumbers}
                     onShowFuriganaChange={setShowFurigana}
+                    onShowOsmTilesChange={setShowOsmTiles}
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
                   />
 
@@ -2888,6 +2894,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                         showStationNames={showStationNames}
                         showStationNumbers={showStationNumbers}
                         showFurigana={showFurigana}
+                        showOsmTiles={showOsmTiles}
                         theme={theme}
                         language={currentLanguage}
                         onToggleRoute={toggleRoute}
@@ -2899,6 +2906,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                         onShowStationNamesChange={setShowStationNames}
                         onShowStationNumbersChange={setShowStationNumbers}
                         onShowFuriganaChange={setShowFurigana}
+                        onShowOsmTilesChange={setShowOsmTiles}
                         adjustRouteColorForTheme={adjustRouteColorForTheme}
                       />
                       <LegendRouteRecommendations

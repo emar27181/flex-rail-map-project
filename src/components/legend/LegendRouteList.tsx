@@ -19,6 +19,7 @@ interface LegendRouteListProps {
   showStationNames: boolean;
   showStationNumbers: boolean;
   showFurigana: boolean;
+  showOsmTiles: boolean;
   theme: 'light' | 'dark';
   language: 'japanese' | 'english';
   onToggleRoute: (routeKey: RouteKey) => void;
@@ -30,6 +31,7 @@ interface LegendRouteListProps {
   onShowStationNamesChange: (value: boolean) => void;
   onShowStationNumbersChange: (value: boolean) => void;
   onShowFuriganaChange: (value: boolean) => void;
+  onShowOsmTilesChange: (value: boolean) => void;
   adjustRouteColorForTheme: (color: string, theme: 'light' | 'dark') => string;
 }
 
@@ -46,6 +48,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   showStationNames,
   showStationNumbers,
   showFurigana,
+  showOsmTiles,
   theme,
   language,
   onToggleRoute,
@@ -57,6 +60,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowStationNamesChange,
   onShowStationNumbersChange,
   onShowFuriganaChange,
+  onShowOsmTilesChange,
   adjustRouteColorForTheme
 }) => {
   const colors = getThemeColors(theme);
@@ -222,7 +226,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             alignItems: 'center',
             fontSize: '12px',
             color: colors.text,
-            cursor: 'pointer'
+            cursor: 'pointer',
+            marginBottom: '4px'
           }}>
             <input
               type="checkbox"
@@ -236,6 +241,26 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {translateUI('showFurigana', language)}
           </label>
         )}
+
+        {/* 地図タイル表示オプション */}
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '12px',
+          color: colors.text,
+          cursor: 'pointer'
+        }}>
+          <input
+            type="checkbox"
+            checked={showOsmTiles}
+            onChange={(e) => onShowOsmTilesChange(e.target.checked)}
+            style={{
+              marginRight: '6px',
+              cursor: 'pointer'
+            }}
+          />
+          {language === 'english' ? 'Show map tiles' : '地図タイルを表示'}
+        </label>
       </div>
 
       {/* ソート選択 */}
