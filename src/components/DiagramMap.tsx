@@ -316,29 +316,25 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     return elements;
   }, [visibleRoutes, routeGridData, routeSegmentOffsets, highlightedRouteKeys, theme]);
 
-  // ---- 駅マーカー要素生成（全駅、ラベル全表示・ずらし配置） ----
+  // ---- 駅レイアウト計算（スケール非依存・位置固定） ----
+  // scale変化では再計算しないことで、ズーム時にラベルが動くのを防ぐ
 
-  const stationElements = useMemo(() => {
-    const colors = getThemeColors(theme);
-    const s = transform.scale;
-    const rTransfer = Math.max(1.5, 2.5 / s);
-    const rRegular = Math.max(1.0, 1.5 / s);
-    const fs = Math.max(3.5, Math.min(9, 5.5 / s));
-    const sw = 1.5 / s;
-    const lh = fs * 1.5;
-    const GAP = 0.8 / s;
+  // 基準スケール(1.0)でのレイアウト定数
+  const REF_FS = 5.5;
+  const REF_LH = REF_FS * 1.5;
+  const REF_GAP = 0.8;
+  const REF_R_TRANSFER = 2.5;
+  const REF_R_REGULAR = 1.5;
 
+  const stationLayout = useMemo(() => {
     function textW(name: string): number {
       let w = 0;
-      for (const ch of name) w += ch.charCodeAt(0) > 127 ? fs : fs * 0.55;
+      for (const ch of name) w += ch.charCodeAt(0) > 127 ? REF_FS : REF_FS * 0.55;
       return w;
     }
 
-    // 空間グリッドで衝突検出を高速化 (O(n) → O(1) 平均)
-    const CELL = lh * 3;
+    const CELL = REF_LH * 3;
     const grid = new Map<string, Array<[number, number, number, number]>>();
-
-    function cellKey(x: number, y: number) { return `${Math.floor(x / CELL)},${Math.floor(y / CELL)}`; }
 
     function addBox(box: [number, number, number, number]) {
       const [x0, y0, x1, y1] = box;
@@ -352,11 +348,11 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     }
 
     function hits(lx: number, ly: number, lw: number): boolean {
-      const x1 = lx + lw, y1 = ly + lh;
+      const x1 = lx + lw, y1 = ly + REF_LH;
       for (let gx = Math.floor(lx / CELL); gx <= Math.ceil(x1 / CELL); gx++) {
         for (let gy = Math.floor(ly / CELL); gy <= Math.ceil(y1 / CELL); gy++) {
           for (const [px, py, px1, py1] of grid.get(`${gx},${gy}`) ?? []) {
-            if (lx < px1 + GAP && x1 + GAP > px && ly < py1 + GAP && y1 + GAP > py) return true;
+            if (lx < px1 + REF_GAP && x1 + REF_GAP > px && ly < py1 + REF_GAP && y1 + REF_GAP > py) return true;
           }
         }
       }
@@ -369,9 +365,9 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     ];
 
     function labelPos(sx: number, sy: number, lw: number, r: number, dx: number, dy: number, step: number): [number, number] {
-      const off = r + 2 / s + step * (lh + GAP);
+      const off = r + 2 + step * (REF_LH + REF_GAP);
       const lx = dx > 0 ? sx + off : dx < 0 ? sx - off - lw : sx - lw / 2;
-      const ly = dy < 0 ? sy - off - lh : dy > 0 ? sy + off : sy - lh * 0.5;
+      const ly = dy < 0 ? sy - off - REF_LH : dy > 0 ? sy + off : sy - REF_LH * 0.5;
       return [lx, ly];
     }
 
@@ -395,25 +391,26 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       });
     });
     stations.forEach(st => { st.routes = routeCount.get(st.name) ?? 1; });
-    // 乗換駅を先に、次いで路線数降順
     stations.sort((a, b) => {
       if (a.isTransfer !== b.isTransfer) return a.isTransfer ? -1 : 1;
       return b.routes - a.routes;
     });
 
-    // ラベル配置: 8方向 × 最大8ステップで空き探索
-    const placements = new Map<string, [number, number, boolean]>();
+    // ラベル配置: 8方向 × 最大8ステップで空き探索（固定スケールで計算）
+    const placements = new Map<string, [number, number, boolean, number, number]>();
     stations.forEach(({ name, sx, sy, isTransfer }) => {
       const lw = textW(name);
-      const r = isTransfer ? rTransfer : rRegular;
+      const r = isTransfer ? REF_R_TRANSFER : REF_R_REGULAR;
       let found = false;
       outer: for (let step = 0; step <= 8; step++) {
         for (const [dx, dy] of DIRS) {
           const [lx, ly] = labelPos(sx, sy, lw, r, dx, dy, step);
           if (!hits(lx, ly, lw)) {
-            const box: [number, number, number, number] = [lx, ly, lx + lw, ly + lh];
-            addBox(box);
-            placements.set(name, [lx, ly, step > 0 || dx !== 1 || dy !== 0]);
+            addBox([lx, ly, lx + lw, ly + REF_LH]);
+            const displaced = step > 0 || dx !== 1 || dy !== 0;
+            const anchorX = sx + (lx > sx ? r : lx + lw < sx ? -r : 0);
+            const anchorY = sy + (ly + REF_LH < sy ? -r : ly > sy ? r : 0);
+            placements.set(name, [lx, ly, displaced, anchorX, anchorY]);
             found = true;
             break outer;
           }
@@ -421,14 +418,28 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       }
       if (!found) {
         const [lx, ly] = labelPos(sx, sy, lw, r, 1, 0, 9);
-        const box: [number, number, number, number] = [lx, ly, lx + lw, ly + lh];
-        addBox(box);
-        placements.set(name, [lx, ly, true]);
+        addBox([lx, ly, lx + lw, ly + REF_LH]);
+        const anchorX = sx + r;
+        const anchorY = sy;
+        placements.set(name, [lx, ly, true, anchorX, anchorY]);
       }
     });
 
+    return { stations, placements };
+  }, [visibleRoutes, routeGridData, transferStations, highlightedRouteKeys]);
+
+  // ---- 駅マーカー要素生成（スケール依存のサイズのみ更新、位置は固定） ----
+
+  const stationElements = useMemo(() => {
+    const colors = getThemeColors(theme);
+    const s = transform.scale;
+    const rTransfer = Math.max(1.5, REF_R_TRANSFER / s);
+    const rRegular = Math.max(1.0, REF_R_REGULAR / s);
+    const fs = Math.max(3.5, Math.min(9, REF_FS / s));
+    const sw = 1.5 / s;
+    const { stations, placements } = stationLayout;
+
     if (!showStationNames) {
-      // ラベル非表示: マーカーのみ
       return stations.map(({ name, sx, sy, isTransfer }) => {
         const r = isTransfer ? rTransfer : rRegular;
         return (
@@ -444,15 +455,14 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     }
 
     return stations.map(({ name, sx, sy, isTransfer }) => {
-      const [lx, ly, displaced] = placements.get(name)!;
-      const lw = textW(name);
+      const placement = placements.get(name);
+      if (!placement) return null;
+      const [lx, ly, displaced, anchorX, anchorY] = placement;
       const r = isTransfer ? rTransfer : rRegular;
-      const anchorX = sx + (lx > sx ? r : lx + lw < sx ? -r : 0);
-      const anchorY = sy + (ly + lh < sy ? -r : ly > sy ? r : 0);
       return (
         <g key={name}>
           {displaced && (
-            <line x1={anchorX} y1={anchorY} x2={lx + lw * 0.5} y2={ly + lh * 0.5}
+            <line x1={anchorX} y1={anchorY} x2={lx + REF_FS * 2} y2={ly + REF_LH * 0.5}
               stroke={colors.textMuted} strokeWidth={0.5 / s} strokeOpacity={0.4}
             />
           )}
@@ -474,7 +484,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         </g>
       );
     });
-  }, [visibleRoutes, routeGridData, transferStations, transform.scale, theme, showStationNames, highlightedRouteKeys]);
+  }, [stationLayout, transform.scale, theme, showStationNames]);
 
   // ---- パン操作 ----
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
