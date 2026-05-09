@@ -64,16 +64,16 @@ const MIN_LNG = 139.10;
 const MAX_LNG = 140.12;
 
 // ---- グリッド設定 ----
-const GRID_DEG = 0.003;  // 1グリッド ≈ 300m（細密グリッドで駅間隔を詰める）
-const CELL_PX = 9;       // 1グリッド9px — 実際の路線図に近い密度
-const PAD = 40;
+const GRID_DEG = 0.003;  // 1グリッド ≈ 300m
+const CELL_PX = 6;       // 1グリッド6px — 余白なく詰める
+const PAD = 8;
 
 const GX_MAX = Math.round((MAX_LNG - MIN_LNG) / GRID_DEG);
 const GY_MAX = Math.round((MAX_LAT - MIN_LAT) / GRID_DEG);
 const SVG_W = PAD * 2 + GX_MAX * CELL_PX;
 const SVG_H = PAD * 2 + GY_MAX * CELL_PX;
 
-const BASE_OFFSET_PX = 2.5;
+const BASE_OFFSET_PX = 1.8;
 // 路線数に応じて動的にオフセット量を調整: セル幅の75%以内に全路線を収める
 function dynamicOffset(n: number): number {
   const maxTotalSpread = CELL_PX * 0.75;
@@ -249,7 +249,7 @@ const DiagramMap: React.FC = () => {
       const color = routeColors[routeKey] ?? '#888';
       const isHighlighted = depRouteSet.has(routeKey) || arrRouteSet.has(routeKey);
       const opacity = hasFilter ? (isHighlighted ? 1.0 : 0.12) : 1.0;
-      const sw = hasFilter ? (isHighlighted ? 2.5 : 1.5) : 2.0;
+      const sw = hasFilter ? (isHighlighted ? 2.0 : 1.0) : 1.5;
       for (let i = 0; i < data.grids.length - 1; i++) {
         const [gx1, gy1] = data.grids[i];
         const [gx2, gy2] = data.grids[i + 1];
@@ -292,11 +292,11 @@ const DiagramMap: React.FC = () => {
         const [sx, sy] = gridToXY(gx, gy);
         elements.push(
           <g key={name}>
-            <circle cx={sx} cy={sy} r={3.5} fill="white" stroke="#555" strokeWidth={1} />
+            <circle cx={sx} cy={sy} r={2.5} fill="white" stroke="#555" strokeWidth={0.8} />
             <text
-              x={sx + 5} y={sy + 3}
-              fontSize={7} fontWeight="bold" fill="#222"
-              stroke="white" strokeWidth={2} paintOrder="stroke"
+              x={sx + 4} y={sy + 2.5}
+              fontSize={6} fontWeight="bold" fill="#222"
+              stroke="white" strokeWidth={1.8} paintOrder="stroke"
               style={{ pointerEvents: 'none', userSelect: 'none' }}
             >
               {name}
@@ -533,14 +533,14 @@ const DiagramMap: React.FC = () => {
         >
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.scale})`}>
             {/* 地図背景 */}
-            <rect x={PAD} y={PAD} width={GX_MAX * CELL_PX} height={GY_MAX * CELL_PX} fill="#eef0eb" rx={4} />
+            <rect x={PAD} y={PAD} width={GX_MAX * CELL_PX} height={GY_MAX * CELL_PX} fill="#eef0eb" rx={2} />
 
             {/* 準備中ウォーターマーク */}
             <text
               x={PAD + (GX_MAX * CELL_PX) / 2}
               y={PAD + (GY_MAX * CELL_PX) / 2}
               textAnchor="middle" dominantBaseline="middle"
-              fontSize={140} fill="rgba(180,160,100,0.12)" fontWeight="bold"
+              fontSize={80} fill="rgba(180,160,100,0.10)" fontWeight="bold"
               transform={`rotate(-25, ${PAD + (GX_MAX * CELL_PX) / 2}, ${PAD + (GY_MAX * CELL_PX) / 2})`}
               style={{ userSelect: 'none', pointerEvents: 'none' }}
             >
@@ -556,34 +556,24 @@ const DiagramMap: React.FC = () => {
             {/* 出発駅マーカー */}
             {depSVGPos && (
               <g style={{ pointerEvents: 'none' }}>
-                <circle cx={depSVGPos[0]} cy={depSVGPos[1]} r={10} fill="#4CAF50" stroke="white" strokeWidth={2.5} />
-                <text x={depSVGPos[0] + 14} y={depSVGPos[1] - 3}
-                  fontSize={10} fontWeight="bold" fill="#4CAF50"
-                  stroke="white" strokeWidth={2.5} paintOrder="stroke"
-                  style={{ userSelect: 'none' }}
-                >{depStation}</text>
-                <text x={depSVGPos[0] + 14} y={depSVGPos[1] + 10}
-                  fontSize={8} fill="#4CAF50"
+                <circle cx={depSVGPos[0]} cy={depSVGPos[1]} r={6} fill="#4CAF50" stroke="white" strokeWidth={1.5} />
+                <text x={depSVGPos[0] + 8} y={depSVGPos[1] - 1}
+                  fontSize={7} fontWeight="bold" fill="#4CAF50"
                   stroke="white" strokeWidth={2} paintOrder="stroke"
                   style={{ userSelect: 'none' }}
-                >出発</text>
+                >{depStation} 出発</text>
               </g>
             )}
 
             {/* 到着駅マーカー */}
             {arrSVGPos && (
               <g style={{ pointerEvents: 'none' }}>
-                <circle cx={arrSVGPos[0]} cy={arrSVGPos[1]} r={10} fill="#F44336" stroke="white" strokeWidth={2.5} />
-                <text x={arrSVGPos[0] + 14} y={arrSVGPos[1] - 3}
-                  fontSize={10} fontWeight="bold" fill="#F44336"
-                  stroke="white" strokeWidth={2.5} paintOrder="stroke"
-                  style={{ userSelect: 'none' }}
-                >{arrStation}</text>
-                <text x={arrSVGPos[0] + 14} y={arrSVGPos[1] + 10}
-                  fontSize={8} fill="#F44336"
+                <circle cx={arrSVGPos[0]} cy={arrSVGPos[1]} r={6} fill="#F44336" stroke="white" strokeWidth={1.5} />
+                <text x={arrSVGPos[0] + 8} y={arrSVGPos[1] - 1}
+                  fontSize={7} fontWeight="bold" fill="#F44336"
                   stroke="white" strokeWidth={2} paintOrder="stroke"
                   style={{ userSelect: 'none' }}
-                >到着</text>
+                >{arrStation} 到着</text>
               </g>
             )}
           </g>
