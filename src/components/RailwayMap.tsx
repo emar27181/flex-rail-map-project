@@ -16,7 +16,7 @@ import LegendRouteList from './legend/LegendRouteList';
 import LegendRouteRecommendations from './legend/LegendRouteRecommendations';
 import LegendDisplayOptions from './legend/LegendDisplayOptions';
 import { getStoppingTrainTypes, generateStationDescription } from '../data/stationTrainTypeAnalysis';
-import { getStationNumber } from '../data/stationNumbers';
+import { getStationNumber, getAnyStationNumber } from '../data/stationNumbers';
 import { getStationBorderStyleByPattern, getBorderStyleExplanation } from '../data/stationBorderStyles';
 import { attachDebugFunctions } from '../utils/stationAnalysisUtils';
 import CookieBanner from './CookieBanner';
@@ -715,6 +715,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
     );
   };
 
+  // テキスト幅を文字種別考慮で推定（ASCII約7px, 日本語約12px, パディング12px）
+  const estimateTextWidth = (text: string): number => {
+    let w = 12;
+    for (const ch of text) w += ch.charCodeAt(0) > 127 ? 12 : 7;
+    return w;
+  };
+
   // アイコン作成関数をメモ化
   const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean, opacity: number = 1, timeLabel?: string, routeKey?: RouteKey) => {
     if (!MapComponents?.DivIcon) return null;
@@ -728,10 +735,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
       const furigana = (showFurigana && currentLanguage === 'japanese') ? getFurigana(station.name) : '';
       const hasFurigana = furigana.length > 0;
       const hasTime = !!timeLabel;
-      const stationNumber = (showStationNumbers && routeKey) ? getStationNumber(routeKey, station.name) : undefined;
+      const stationNumber = (showStationNumbers && routeKey)
+        ? (getStationNumber(routeKey, station.name) ?? getAnyStationNumber(station.name))
+        : undefined;
       const displayName = stationNumber ? `${stationNumber} ${translatedStationName}` : translatedStationName;
-      const labelWidth = Math.max(displayName.length * 11, timeLabel ? timeLabel.length * 9 : 0) + 12;
-      const stationNameWidth = hasTime ? labelWidth : displayName.length * 11 + 12;
+      const nameWidth = estimateTextWidth(displayName);
+      const labelWidth = Math.max(nameWidth, timeLabel ? estimateTextWidth(timeLabel) : 0);
+      const stationNameWidth = hasTime ? labelWidth : nameWidth;
       const iconHeight = hasFurigana ? (hasTime ? 42 : 30) : (hasTime ? 30 : 18);
       const timeLine = hasTime ? `<div style="font-size:9px;line-height:1;margin-top:1px;font-weight:normal;opacity:0.9">${timeLabel}</div>` : '';
       const htmlContent = hasFurigana || hasTime
@@ -851,9 +861,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
       const translatedStationName = translateStation(station.name, currentLanguage);
       const furigana = (showFurigana && currentLanguage === 'japanese') ? getFurigana(station.name) : '';
       const hasFurigana = furigana.length > 0;
-      const stationNumber = showStationNumbers ? getStationNumber(routeKey, station.name) : undefined;
+      const stationNumber = showStationNumbers
+        ? (getStationNumber(routeKey, station.name) ?? getAnyStationNumber(station.name))
+        : undefined;
       const displayName = stationNumber ? `${stationNumber} ${translatedStationName}` : translatedStationName;
-      const baseWidth = displayName.length * 11 + 12;
+      const baseWidth = estimateTextWidth(displayName);
       // 枠線の太さを考慮して幅を調整
       const borderAdjustment = borderStyle.borderWidth * 2; // 左右の枠線分
       const stationNameWidth = baseWidth + borderAdjustment;
@@ -933,15 +945,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
     const baseMarkerSize = getTimeMarkerSize(zoomLevel) * 2.2;
     const markerColor = isDeparture ? '#4CAF50' : '#F44336';
 
-    const stationNumber = (showStationNumbers && routeKey && originalName) ? getStationNumber(routeKey, originalName) : undefined;
+    const stationNumber = showStationNumbers
+      ? ((routeKey ? getStationNumber(routeKey, originalName ?? stationName) : undefined) ?? getAnyStationNumber(originalName ?? stationName))
+      : undefined;
     const displayStationName = stationNumber ? `${stationNumber} ${stationName}` : stationName;
 
     // 駅名のみを表示（S: G: プレフィックスなし）、最大16pxでサイズを固定
     const fontSize = Math.max(14, Math.min(16, Math.round(baseMarkerSize * 0.45)));
-    // 英語は文字幅が狭いが名前が長いため、日本語と同じパディングで上限を抑える
-    const charWidthMultiplier = language === 'english' ? 0.4 : 0.6;
-    const textWidth = displayStationName.length * fontSize * charWidthMultiplier + 20;
-    const markerWidth = Math.max(baseMarkerSize, Math.min(textWidth, language === 'english' ? 120 : 150));
+    // 文字種別ごとに幅を推定（ASCII約7px, 日本語約12px at fontSize≒15px）
+    let textWidth = 20;
+    for (const ch of displayStationName) textWidth += ch.charCodeAt(0) > 127 ? fontSize * 1.0 : fontSize * 0.55;
+    const markerWidth = Math.max(baseMarkerSize, Math.min(textWidth, language === 'english' ? 130 : 160));
 
     const furigana = (showFurigana && language === 'japanese' && originalName) ? getFurigana(originalName) : '';
     const hasFurigana = furigana.length > 0;

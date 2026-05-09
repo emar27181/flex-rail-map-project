@@ -486,8 +486,27 @@ export const stationNumbers: Partial<Record<RouteKey, Record<string, string>>> =
     'ゆめが丘': 'SO26', '湘南台': 'SO27',
   },
 
+  // 相鉄・JR直通線（相鉄線内はSOコード、JR線内は各線コード）
+  sotetsuJRLine: {
+    '海老名': 'SO18', 'かしわ台': 'SO17', 'さがみ野': 'SO16',
+    '相模大塚': 'SO15', '大和': 'SO14', '瀬谷': 'SO13',
+    '三ツ境': 'SO12', '希望ヶ丘': 'SO11', '二俣川': 'SO10',
+    '西谷': 'SO08', '羽沢横浜国大': 'SO36',
+    '武蔵小杉': 'JO09', '西大井': 'JO08', '大崎': 'JO07',
+    '恵比寿': 'JS11', '渋谷': 'JS10', '新宿': 'JS20',
+  },
+
 };
 
 export const getStationNumber = (routeKey: RouteKey, stationName: string): string | undefined => {
   return stationNumbers[routeKey]?.[stationName];
+};
+
+// routeKeyに登録がない場合に全路線から検索するfallback
+export const getAnyStationNumber = (stationName: string): string | undefined => {
+  for (const key of Object.keys(stationNumbers) as RouteKey[]) {
+    const code = stationNumbers[key]?.[stationName];
+    if (code) return code;
+  }
+  return undefined;
 };
