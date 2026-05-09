@@ -943,7 +943,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
     if (!MapComponents?.DivIcon) return null;
 
     const { DivIcon } = MapComponents;
-    const baseMarkerSize = Math.min(getTimeMarkerSize(zoomLevel) * 1.5, 30);
+    const fontSize = 14;
+    const markerHeight = 30;
     const markerColor = isDeparture ? '#4CAF50' : '#F44336';
 
     const stationNumber = showStationNumbers
@@ -951,26 +952,24 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
       : undefined;
     const displayStationName = stationNumber ? `${stationNumber} ${stationName}` : stationName;
 
-    // 駅名のみを表示（S: G: プレフィックスなし）、最大16pxでサイズを固定
-    const fontSize = Math.max(14, Math.min(16, Math.round(baseMarkerSize * 0.45)));
-    // 文字種別ごとに幅を推定（ASCII約7px, 日本語約12px at fontSize≒15px）
+    // 文字種別ごとに幅を推定（ASCII約7px, 日本語約12px）
     let textWidth = 20;
     for (const ch of displayStationName) textWidth += ch.charCodeAt(0) > 127 ? fontSize * 1.0 : fontSize * 0.55;
-    const markerWidth = Math.max(baseMarkerSize, Math.min(textWidth, language === 'english' ? 130 : 160));
+    const markerWidth = Math.min(textWidth, language === 'english' ? 130 : 160);
 
     const furigana = (showFurigana && language === 'japanese' && originalName) ? getFurigana(originalName) : '';
     const hasFurigana = furigana.length > 0;
-    const markerHeight = hasFurigana ? baseMarkerSize + 12 : baseMarkerSize;
+    const totalHeight = hasFurigana ? markerHeight + 12 : markerHeight;
 
     const bgColor = theme === 'dark' ? colors.surfaceElevated : 'white';
     const htmlContent = hasFurigana
-      ? `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${markerHeight}px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;color:${markerColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px"><div style="font-size:${Math.max(9, Math.round(fontSize * 0.55))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:${fontSize}px;line-height:1">${displayStationName}</div></div>`
-      : `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${markerHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px">${displayStationName}</div>`;
+      ? `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${totalHeight}px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;color:${markerColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px"><div style="font-size:${Math.max(9, Math.round(fontSize * 0.55))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:${fontSize}px;line-height:1">${displayStationName}</div></div>`
+      : `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${totalHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px">${displayStationName}</div>`;
     return new DivIcon({
       html: htmlContent,
       className: 'special-station-marker-inline',
-      iconSize: [markerWidth, markerHeight],
-      iconAnchor: [markerWidth / 2, markerHeight / 2]
+      iconSize: [markerWidth, totalHeight],
+      iconAnchor: [markerWidth / 2, totalHeight / 2]
     });
   }, [MapComponents, theme, colors, language, showFurigana, showStationNumbers]);
 

@@ -64,8 +64,8 @@ const MIN_LNG = 139.10;
 const MAX_LNG = 140.12;
 
 // ---- グリッド設定 ----
-const GRID_DEG = 0.005;  // 1グリッド ≈ 500m
-const CELL_PX = 14;
+const GRID_DEG = 0.004;  // 1グリッド ≈ 400m（細かくして中心部の重複を分散）
+const CELL_PX = 16;
 const PAD = 60;
 
 const GX_MAX = Math.round((MAX_LNG - MIN_LNG) / GRID_DEG);
@@ -73,7 +73,12 @@ const GY_MAX = Math.round((MAX_LAT - MIN_LAT) / GRID_DEG);
 const SVG_W = PAD * 2 + GX_MAX * CELL_PX;
 const SVG_H = PAD * 2 + GY_MAX * CELL_PX;
 
-const OFFSET_PX = 3.5;
+const BASE_OFFSET_PX = 4;
+// 路線数に応じて動的にオフセット量を調整: 多数路線ほどセル内に収める
+function dynamicOffset(n: number): number {
+  const maxTotalSpread = CELL_PX * 0.72; // セル幅の72%以内に全路線を収める
+  return Math.min(BASE_OFFSET_PX, maxTotalSpread / Math.max(1, n - 1));
+}
 
 // ---- ユーティリティ ----
 function toGrid(lat: number, lng: number): [number, number] {
@@ -177,7 +182,7 @@ const DiagramMap: React.FC = () => {
     return { routeGridData, segmentRouteMap, transferStations };
   }, []);
 
-  // ---- セグメントごとの垂直オフセット計算 ----
+  // ---- セグメントごとの垂直オフセット計算（路線数に応じて動的スケール） ----
   const routeSegmentOffsets = useMemo(() => {
     const offsets = new Map<string, [number, number]>();
     segmentRouteMap.forEach((routeKeys, segKey) => {
@@ -194,8 +199,9 @@ const DiagramMap: React.FC = () => {
       const perpX = -dy / len;
       const perpY = dx / len;
       const n = routeKeys.length;
+      const offsetStep = dynamicOffset(n);
       routeKeys.forEach((routeKey, idx) => {
-        const t = (idx - (n - 1) / 2) * OFFSET_PX;
+        const t = (idx - (n - 1) / 2) * offsetStep;
         offsets.set(`${routeKey}|${segKey}`, [perpX * t, perpY * t]);
       });
     });
@@ -225,7 +231,7 @@ const DiagramMap: React.FC = () => {
             d={d}
             fill="none"
             stroke={color}
-            strokeWidth={4}
+            strokeWidth={3}
             strokeLinecap="round"
             strokeLinejoin="round"
           />
