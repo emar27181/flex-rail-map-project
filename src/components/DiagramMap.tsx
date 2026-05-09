@@ -20,6 +20,7 @@
 
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
+import { getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
 
 // ---- 表示対象路線（東京圏全路線） ----
 const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
@@ -64,9 +65,32 @@ const MIN_LNG = 139.10;
 const MAX_LNG = 140.12;
 
 // ---- グリッド設定 ----
-const GRID_DEG = 0.006;  // 1グリッド ≈ 600m（粗くして地理的拘束を弱める）
-const CELL_PX = 4;       // 1グリッド4px — ぎりぎり触れ合う幅
+const GRID_DEG = 0.005;  // 1グリッド ≈ 500m
 const PAD = 8;
+
+// 隣接駅間のグリッド距離分布から最適セルサイズを自動計算:
+//   20パーセンタイル距離が TARGET_PX になるよう調整（近い駅がぎりぎり離れる）
+function computeOptimalCellPx(): number {
+  const dists: number[] = [];
+  DIAGRAM_ROUTE_KEYS.forEach(routeKey => {
+    const stationList = routes[routeKey] as Array<{ lat: number; lng: number }> | undefined;
+    if (!stationList) return;
+    for (let i = 0; i < stationList.length - 1; i++) {
+      const gx1 = Math.round((stationList[i].lng - MIN_LNG) / GRID_DEG);
+      const gy1 = Math.round((MAX_LAT - stationList[i].lat) / GRID_DEG);
+      const gx2 = Math.round((stationList[i + 1].lng - MIN_LNG) / GRID_DEG);
+      const gy2 = Math.round((MAX_LAT - stationList[i + 1].lat) / GRID_DEG);
+      if (gx1 === gx2 && gy1 === gy2) continue;
+      dists.push(Math.sqrt((gx2 - gx1) ** 2 + (gy2 - gy1) ** 2));
+    }
+  });
+  dists.sort((a, b) => a - b);
+  if (dists.length === 0) return 4;
+  const TARGET_PX = 6; // 20パーセンタイルの駅ペアが TARGET_PX px 離れるようにする
+  const p20 = dists[Math.floor(dists.length * 0.20)] ?? 1;
+  return Math.max(3, Math.min(8, Math.round(TARGET_PX / Math.max(1, p20))));
+}
+const CELL_PX = computeOptimalCellPx();
 
 const GX_MAX = Math.round((MAX_LNG - MIN_LNG) / GRID_DEG);
 const GY_MAX = Math.round((MAX_LAT - MIN_LAT) / GRID_DEG);
@@ -255,7 +279,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       if (!visibleRoutes.has(routeKey)) return;
       const data = routeGridData.get(routeKey);
       if (!data) return;
-      const color = routeColors[routeKey] ?? '#888';
+      const color = adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme);
       const isHighlighted = depRouteSet.has(routeKey) || arrRouteSet.has(routeKey);
       const opacity = hasFilter ? (isHighlighted ? 1.0 : 0.15) : 1.0;
       const sw = hasFilter ? (isHighlighted ? 1.8 : 0.8) : 1.1;
@@ -283,10 +307,11 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       }
     });
     return elements;
-  }, [visibleRoutes, routeGridData, routeSegmentOffsets, depRouteSet, arrRouteSet]);
+  }, [visibleRoutes, routeGridData, routeSegmentOffsets, depRouteSet, arrRouteSet, theme]);
 
   // ---- 駅マーカー要素生成（乗換駅のみ） ----
   const stationElements = useMemo(() => {
+    const colors = getThemeColors(theme);
     const s = transform.scale;
     const r = Math.max(1.5, 2.5 / s);
     const fs = Math.max(4, Math.min(10, 6 / s));
@@ -307,11 +332,11 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         const [sx, sy] = gridToXY(gx, gy);
         elements.push(
           <g key={name}>
-            <circle cx={sx} cy={sy} r={r} fill="white" stroke="#555" strokeWidth={csw} />
+            <circle cx={sx} cy={sy} r={r} fill={colors.surfaceElevated} stroke={colors.textSecondary} strokeWidth={csw} />
             <text
               x={sx + offset} y={sy + fs * 0.4}
-              fontSize={fs} fontWeight="bold" fill="#222"
-              stroke="white" strokeWidth={sw} paintOrder="stroke"
+              fontSize={fs} fontWeight="bold" fill={colors.text}
+              stroke={colors.background} strokeWidth={sw} paintOrder="stroke"
               style={{ pointerEvents: 'none', userSelect: 'none' }}
             >
               {name}
@@ -321,7 +346,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       });
     });
     return elements;
-  }, [visibleRoutes, routeGridData, transferStations, transform.scale]);
+  }, [visibleRoutes, routeGridData, transferStations, transform.scale, theme]);
 
   // ---- パン操作 ----
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -440,36 +465,41 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     setTransform({ x: rect.width / 2 - cx * scale, y: rect.height / 2 - cy * scale, scale });
   }, [depStation, arrStation]);
 
+  const colors = getThemeColors(theme);
+  const mapBg = theme === 'dark' ? '#1e2a1e' : '#eef4ee';
+
   return (
-    <div style={{ display: 'flex', height: '100%', width: '100%', fontFamily: 'sans-serif', background: theme === 'dark' ? '#1a1a1a' : '#fff' }}>
+    <div style={{ display: 'flex', height: '100%', width: '100%', fontFamily: 'sans-serif', background: colors.background }}>
       {/* ---- SVGマップエリア ---- */}
       <div
         ref={mapAreaRef}
-        style={{ flex: 1, position: 'relative', overflow: 'hidden', background: theme === 'dark' ? '#2a2a2a' : '#f5f5f0' }}
+        style={{ flex: 1, position: 'relative', overflow: 'hidden', background: colors.surface }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-
         {/* 操作説明 */}
         <div style={{
           position: 'absolute', bottom: 8, right: 8, zIndex: 20,
-          background: 'rgba(255,255,255,0.88)', border: '1px solid #ddd',
-          borderRadius: '4px', padding: '5px 8px', fontSize: '10px', color: '#666',
+          background: colors.surfaceElevated,
+          border: `1px solid ${colors.border}`,
+          borderRadius: '4px', padding: '5px 8px', fontSize: '10px',
+          color: colors.textSecondary,
+          boxShadow: `0 1px 4px ${colors.shadow}`,
         }}>
-          スクロール: ズーム（カーソル基準） | ドラッグ: 移動 | ●: 乗換駅
+          スクロール: ズーム | ドラッグ: 移動 | ●: 乗換駅
         </div>
 
-        {/* 準備中バッジ + WIPノート */}
-        <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 20, display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
+        {/* 準備中バッジ */}
+        <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 20 }}>
           <button
             onClick={() => setShowWipNote(v => !v)}
             style={{
-              background: '#e67e00', color: '#fff', border: 'none',
+              background: colors.warning, color: '#fff', border: 'none',
               borderRadius: '4px', padding: '5px 10px',
               fontSize: '11px', fontWeight: 'bold', cursor: 'pointer',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+              boxShadow: `0 1px 4px ${colors.shadow}`,
             }}
           >
             🚧 準備中
@@ -480,33 +510,21 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         {showWipNote && (
           <div style={{
             position: 'absolute', top: 40, right: 8, zIndex: 30,
-            background: '#fffbf0', border: '1px solid #e0a800',
+            background: colors.surfaceElevated,
+            border: `1px solid ${colors.border}`,
             borderRadius: '6px', padding: '12px 14px',
-            fontSize: '11px', color: '#444', width: '280px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)', lineHeight: '1.6',
+            fontSize: '11px', color: colors.text, width: '260px',
+            boxShadow: `0 4px 12px ${colors.shadowHeavy}`, lineHeight: '1.6',
           }}>
-            <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#b35900', fontSize: '12px' }}>
+            <div style={{ fontWeight: 'bold', marginBottom: '6px', color: colors.warning, fontSize: '12px' }}>
               🚧 路線図モード — 仮実装
             </div>
-            <div style={{ marginBottom: '8px' }}>
-              現在の実装: 地理座標 → グリッドスナップ + 並走路線オフセット
-            </div>
-            <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>実装予定の機能:</div>
-            <ul style={{ margin: '0 0 8px 16px', padding: 0 }}>
-              <li>オクチリニア配置（45°整列）</li>
-              <li>駅ラベルの重なり回避</li>
-              <li>経路ハイライト連携</li>
-              <li>英語/日本語切替</li>
-            </ul>
-            <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>参考文献:</div>
-            <div style={{ fontSize: '10px', color: '#666', lineHeight: '1.5' }}>
-              <div>• Nöllenburg &amp; Wolff (2011) "Drawing and Labeling High-Quality Metro Maps by Mixed-Integer Programming" <em>IEEE TVCG</em></div>
-              <div style={{ marginTop: '4px' }}>• Stott et al. (2011) "Automatic Metro Map Layout Using Multicriteria Optimization" <em>IEEE TVCG</em></div>
-              <div style={{ marginTop: '4px' }}>• Hurter et al. (2012) "Graph Bundling by Kernel Density Estimation"</div>
+            <div style={{ marginBottom: '6px', color: colors.textSecondary, fontSize: '10px' }}>
+              地理座標 → グリッドスナップ + 並走路線オフセット
             </div>
             <button
               onClick={() => setShowWipNote(false)}
-              style={{ marginTop: '10px', fontSize: '10px', padding: '3px 8px', border: '1px solid #ccc', borderRadius: '3px', cursor: 'pointer', background: '#fff' }}
+              style={{ fontSize: '10px', padding: '3px 8px', border: `1px solid ${colors.border}`, borderRadius: '3px', cursor: 'pointer', background: colors.surface, color: colors.text }}
             >閉じる</button>
           </div>
         )}
@@ -517,19 +535,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         >
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.scale})`}>
             {/* 地図背景 */}
-            <rect x={PAD} y={PAD} width={GX_MAX * CELL_PX} height={GY_MAX * CELL_PX} fill="#eef0eb" rx={2} />
-
-            {/* 準備中ウォーターマーク */}
-            <text
-              x={PAD + (GX_MAX * CELL_PX) / 2}
-              y={PAD + (GY_MAX * CELL_PX) / 2}
-              textAnchor="middle" dominantBaseline="middle"
-              fontSize={80} fill="rgba(180,160,100,0.10)" fontWeight="bold"
-              transform={`rotate(-25, ${PAD + (GX_MAX * CELL_PX) / 2}, ${PAD + (GY_MAX * CELL_PX) / 2})`}
-              style={{ userSelect: 'none', pointerEvents: 'none' }}
-            >
-              準備中
-            </text>
+            <rect x={PAD} y={PAD} width={GX_MAX * CELL_PX} height={GY_MAX * CELL_PX} fill={mapBg} rx={2} />
 
             {/* 路線ライン */}
             {routeLineElements}
@@ -542,12 +548,13 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
               const s = transform.scale;
               const r = Math.max(3, 6 / s);
               const fs = Math.max(5, Math.min(12, 7 / s));
+              const depColor = colors.success;
               return (
                 <g style={{ pointerEvents: 'none' }}>
-                  <circle cx={depSVGPos[0]} cy={depSVGPos[1]} r={r} fill="#4CAF50" stroke="white" strokeWidth={1.5 / s} />
+                  <circle cx={depSVGPos[0]} cy={depSVGPos[1]} r={r} fill={depColor} stroke={colors.background} strokeWidth={1.5 / s} />
                   <text x={depSVGPos[0] + r + 2 / s} y={depSVGPos[1] + fs * 0.35}
-                    fontSize={fs} fontWeight="bold" fill="#4CAF50"
-                    stroke="white" strokeWidth={2 / s} paintOrder="stroke"
+                    fontSize={fs} fontWeight="bold" fill={depColor}
+                    stroke={colors.background} strokeWidth={2 / s} paintOrder="stroke"
                     style={{ userSelect: 'none' }}
                   >{depStation} 出発</text>
                 </g>
@@ -559,12 +566,13 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
               const s = transform.scale;
               const r = Math.max(3, 6 / s);
               const fs = Math.max(5, Math.min(12, 7 / s));
+              const arrColor = theme === 'dark' ? '#ff5555' : '#F44336';
               return (
                 <g style={{ pointerEvents: 'none' }}>
-                  <circle cx={arrSVGPos[0]} cy={arrSVGPos[1]} r={r} fill="#F44336" stroke="white" strokeWidth={1.5 / s} />
+                  <circle cx={arrSVGPos[0]} cy={arrSVGPos[1]} r={r} fill={arrColor} stroke={colors.background} strokeWidth={1.5 / s} />
                   <text x={arrSVGPos[0] + r + 2 / s} y={arrSVGPos[1] + fs * 0.35}
-                    fontSize={fs} fontWeight="bold" fill="#F44336"
-                    stroke="white" strokeWidth={2 / s} paintOrder="stroke"
+                    fontSize={fs} fontWeight="bold" fill={arrColor}
+                    stroke={colors.background} strokeWidth={2 / s} paintOrder="stroke"
                     style={{ userSelect: 'none' }}
                   >{arrStation} 到着</text>
                 </g>
