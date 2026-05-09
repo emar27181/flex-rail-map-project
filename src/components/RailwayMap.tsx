@@ -16,6 +16,7 @@ import LegendRouteList from './legend/LegendRouteList';
 import LegendRouteRecommendations from './legend/LegendRouteRecommendations';
 import LegendDisplayOptions from './legend/LegendDisplayOptions';
 import { getStoppingTrainTypes, generateStationDescription } from '../data/stationTrainTypeAnalysis';
+import { getStationNumber } from '../data/stationNumbers';
 import { getStationBorderStyleByPattern, getBorderStyleExplanation } from '../data/stationBorderStyles';
 import { attachDebugFunctions } from '../utils/stationAnalysisUtils';
 import CookieBanner from './CookieBanner';
@@ -86,6 +87,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
   const [showTravelTimes, setShowTravelTimes] = useState(true);
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
+  const [showStationNumbers, setShowStationNumbers] = useState(true);
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   // 地図表示モード（現実の路線図に固定）
   const mapViewMode = 'realistic';
@@ -714,7 +716,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
   };
 
   // アイコン作成関数をメモ化
-  const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean, opacity: number = 1, timeLabel?: string) => {
+  const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean, opacity: number = 1, timeLabel?: string, routeKey?: RouteKey) => {
     if (!MapComponents?.DivIcon) return null;
 
     const { DivIcon } = MapComponents;
@@ -726,13 +728,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
       const furigana = (showFurigana && currentLanguage === 'japanese') ? getFurigana(station.name) : '';
       const hasFurigana = furigana.length > 0;
       const hasTime = !!timeLabel;
-      const labelWidth = Math.max(translatedStationName.length * 11, timeLabel ? timeLabel.length * 9 : 0) + 12;
-      const stationNameWidth = hasTime ? labelWidth : translatedStationName.length * 11 + 12;
+      const stationNumber = (showStationNumbers && routeKey) ? getStationNumber(routeKey, station.name) : undefined;
+      const displayName = stationNumber ? `${stationNumber} ${translatedStationName}` : translatedStationName;
+      const labelWidth = Math.max(displayName.length * 11, timeLabel ? timeLabel.length * 9 : 0) + 12;
+      const stationNameWidth = hasTime ? labelWidth : displayName.length * 11 + 12;
       const iconHeight = hasFurigana ? (hasTime ? 42 : 30) : (hasTime ? 30 : 18);
       const timeLine = hasTime ? `<div style="font-size:9px;line-height:1;margin-top:1px;font-weight:normal;opacity:0.9">${timeLabel}</div>` : '';
       const htmlContent = hasFurigana || hasTime
-        ? `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;white-space:nowrap;border:1px solid ${borderColor};box-shadow:0 1px 3px ${shadowColor};text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:8px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:11px;font-weight:bold;line-height:1">${translatedStationName}</div>${timeLine}</div>`
-        : `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:bold;white-space:nowrap;border:1px solid ${borderColor};box-shadow:0 1px 3px ${shadowColor};text-align:center;opacity:${opacity}">${translatedStationName}</div>`;
+        ? `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;white-space:nowrap;border:1px solid ${borderColor};box-shadow:0 1px 3px ${shadowColor};text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:8px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:11px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
+        : `<div style="background:${color};color:white;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:bold;white-space:nowrap;border:1px solid ${borderColor};box-shadow:0 1px 3px ${shadowColor};opacity:${opacity}">${displayName}</div>`;
       return new DivIcon({
         html: htmlContent,
         className: 'station-name-marker',
@@ -750,7 +754,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
         iconAnchor: [stationSize / 2, stationSize / 2]
       });
     }
-  }, [MapComponents, currentLanguage, theme, showFurigana]);
+  }, [MapComponents, currentLanguage, theme, showFurigana, showStationNumbers]);
 
   // 列車種別停車パターンの取得（外部データソースを使用）
   const getSimplifiedStationStops = useCallback((routeKey: RouteKey, trainType: string, stationName: string): boolean => {
@@ -832,7 +836,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
   // 列車種別表示用の駅アイコン作成関数
   const createTrainTypeStationIcon = useCallback((station: Station, routeKey: RouteKey, zoomLevel: number, isDetailed: boolean, opacity: number = 1) => {
     if (!MapComponents?.DivIcon || !trainTypeViewEnabled) {
-      return createStationIcon(station, routeColors[routeKey], zoomLevel, isDetailed, opacity);
+      return createStationIcon(station, routeColors[routeKey], zoomLevel, isDetailed, opacity, undefined, routeKey);
     }
 
     const { DivIcon } = MapComponents;
@@ -847,7 +851,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
       const translatedStationName = translateStation(station.name, currentLanguage);
       const furigana = (showFurigana && currentLanguage === 'japanese') ? getFurigana(station.name) : '';
       const hasFurigana = furigana.length > 0;
-      const baseWidth = translatedStationName.length * 11 + 12;
+      const stationNumber = showStationNumbers ? getStationNumber(routeKey, station.name) : undefined;
+      const displayName = stationNumber ? `${stationNumber} ${translatedStationName}` : translatedStationName;
+      const baseWidth = displayName.length * 11 + 12;
       // 枠線の太さを考慮して幅を調整
       const borderAdjustment = borderStyle.borderWidth * 2; // 左右の枠線分
       const stationNameWidth = baseWidth + borderAdjustment;
@@ -857,8 +863,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
       const shadowColor = isSelectedStation ? 'transparent' : (theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)');
 
       const innerHtml = hasFurigana
-        ? `<div style="font-size:8px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:11px;font-weight:bold;line-height:1">${translatedStationName}</div>`
-        : translatedStationName;
+        ? `<div style="font-size:8px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:11px;font-weight:bold;line-height:1">${displayName}</div>`
+        : displayName;
 
       return new DivIcon({
         html: `<div style="
@@ -912,7 +918,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
         iconAnchor: [stationSize / 2, stationSize / 2]
       });
     }
-  }, [MapComponents, currentLanguage, theme, trainTypeViewEnabled, selectedTrainRoute, selectedTrainType, createStationIcon, getStationBorderStyle, showFurigana]);
+  }, [MapComponents, currentLanguage, theme, trainTypeViewEnabled, selectedTrainRoute, selectedTrainType, createStationIcon, getStationBorderStyle, showFurigana, showStationNumbers]);
 
   const getTimeMarkerSize = (zoom: number) => {
     const baseSize = 20;
@@ -920,19 +926,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
     return Math.round(baseSize * scaleFactor);
   };
 
-  const createSpecialStationIcon = useCallback((isDeparture: boolean, zoomLevel: number, stationName: string, originalName?: string) => {
+  const createSpecialStationIcon = useCallback((isDeparture: boolean, zoomLevel: number, stationName: string, originalName?: string, routeKey?: RouteKey) => {
     if (!MapComponents?.DivIcon) return null;
 
     const { DivIcon } = MapComponents;
     const baseMarkerSize = getTimeMarkerSize(zoomLevel) * 2.2;
     const markerColor = isDeparture ? '#4CAF50' : '#F44336';
 
+    const stationNumber = (showStationNumbers && routeKey && originalName) ? getStationNumber(routeKey, originalName) : undefined;
+    const displayStationName = stationNumber ? `${stationNumber} ${stationName}` : stationName;
+
     // 駅名のみを表示（S: G: プレフィックスなし）、最大16pxでサイズを固定
     const fontSize = Math.max(14, Math.min(16, Math.round(baseMarkerSize * 0.45)));
     // 英語は文字幅が狭いが名前が長いため、日本語と同じパディングで上限を抑える
     const charWidthMultiplier = language === 'english' ? 0.4 : 0.6;
-    const textWidth = stationName.length * fontSize * charWidthMultiplier + 20;
-    const markerWidth = Math.max(baseMarkerSize, Math.min(textWidth, language === 'english' ? 80 : 120));
+    const textWidth = displayStationName.length * fontSize * charWidthMultiplier + 20;
+    const markerWidth = Math.max(baseMarkerSize, Math.min(textWidth, language === 'english' ? 120 : 150));
 
     const furigana = (showFurigana && language === 'japanese' && originalName) ? getFurigana(originalName) : '';
     const hasFurigana = furigana.length > 0;
@@ -941,15 +950,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
     const bgColor = theme === 'dark' ? colors.surfaceElevated : 'white';
     const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
     const htmlContent = hasFurigana
-      ? `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${markerHeight}px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;color:${markerColor};box-shadow:0 3px 8px ${shadowColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px"><div style="font-size:${Math.max(9, Math.round(fontSize * 0.55))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:${fontSize}px;line-height:1">${stationName}</div></div>`
-      : `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${markerHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};box-shadow:0 3px 8px ${shadowColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px">${stationName}</div>`;
+      ? `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${markerHeight}px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;color:${markerColor};box-shadow:0 3px 8px ${shadowColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px"><div style="font-size:${Math.max(9, Math.round(fontSize * 0.55))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:${fontSize}px;line-height:1">${displayStationName}</div></div>`
+      : `<div style="background:${bgColor};border:4px solid ${markerColor};border-radius:5px;width:${markerWidth}px;height:${markerHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${markerColor};box-shadow:0 3px 8px ${shadowColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px">${displayStationName}</div>`;
     return new DivIcon({
       html: htmlContent,
       className: 'special-station-marker-inline',
       iconSize: [markerWidth, markerHeight],
       iconAnchor: [markerWidth / 2, markerHeight / 2]
     });
-  }, [MapComponents, theme, colors, language, showFurigana]);
+  }, [MapComponents, theme, colors, language, showFurigana, showStationNumbers]);
 
   const createTimeIcon = useCallback((time: number, color: string, zoomLevel: number, isSection = false) => {
     if (!MapComponents?.DivIcon || !showTravelTimes) return null;
@@ -1979,7 +1988,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               currentlyDisplayedStations.add(station.name);
             }
 
-            const specialIcon = createSpecialStationIcon(isDeparture, zoomLevel, translateStation(station.name, currentLanguage), station.name);
+            const specialIcon = createSpecialStationIcon(isDeparture, zoomLevel, translateStation(station.name, currentLanguage), station.name, routeKey);
             if (!specialIcon) return null;
 
             return (
@@ -2050,7 +2059,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
             const stationTimeLabel = isDetailed && timelineEntry ? timelineEntry.depTime : undefined;
             const stationIcon = trainTypeViewEnabled
               ? createTrainTypeStationIcon(station, routeKey, zoomLevel, isDetailed, stationOpacity)
-              : createStationIcon(station, color, zoomLevel, isDetailed, stationOpacity, stationTimeLabel);
+              : createStationIcon(station, color, zoomLevel, isDetailed, stationOpacity, stationTimeLabel, routeKey);
             if (!stationIcon) return null;
 
             return (
@@ -2648,6 +2657,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                     showExpressStationsOnly={showExpressStationsOnly}
                     showTravelTimes={showTravelTimes}
                     showStationNames={showStationNames}
+                    showStationNumbers={showStationNumbers}
                     showFurigana={showFurigana}
                     theme={theme}
                     language={currentLanguage}
@@ -2658,6 +2668,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                     onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
                     onShowTravelTimesChange={setShowTravelTimes}
                     onShowStationNamesChange={setShowStationNames}
+                    onShowStationNumbersChange={setShowStationNumbers}
                     onShowFuriganaChange={setShowFurigana}
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
                   />
@@ -2861,6 +2872,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                         showExpressStationsOnly={showExpressStationsOnly}
                         showTravelTimes={showTravelTimes}
                         showStationNames={showStationNames}
+                        showStationNumbers={showStationNumbers}
                         showFurigana={showFurigana}
                         theme={theme}
                         language={currentLanguage}
@@ -2871,6 +2883,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                         onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
                         onShowTravelTimesChange={setShowTravelTimes}
                         onShowStationNamesChange={setShowStationNames}
+                        onShowStationNumbersChange={setShowStationNumbers}
                         onShowFuriganaChange={setShowFurigana}
                         adjustRouteColorForTheme={adjustRouteColorForTheme}
                       />

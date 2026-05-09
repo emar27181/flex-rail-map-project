@@ -1,5 +1,24 @@
 # CHANGE LOG
 
+## [2026-05-08] セッション
+
+### feat: 駅番号（路線記号＋番号）をマップ上の駅名ラベルに表示（`src/data/stationNumbers.ts`, `src/components/RailwayMap.tsx`）
+- 50路線以上の駅番号データ（JY01, G01等）を網羅した `stationNumbers.ts` を新規作成
+- `createStationIcon` / `createSpecialStationIcon` に `routeKey` パラメータを追加
+- 駅名ラベルの左側に路線色の小バッジとして駅番号を表示
+- 出発駅・到着駅の特別マーカーにも駅番号バッジを追加
+
+### feat: 英語翻訳カバレッジの網羅的修正（`src/utils/translation.ts`, 各コンポーネント）
+- 路線名39件・駅名112件の英語翻訳を追加
+- TimetablePanel, ThemeToggle, ErrorBoundary, SchematicMap の英語未対応を修正
+- 翻訳カバレッジレポート `TRANSLATION_STATUS.md` を自動生成スクリプトで作成
+
+### fix: 出発駅・到着駅マーカーの最大幅を120px(日本語) / 80px(英語)に制限（`src/components/RailwayMap.tsx`）
+- `createSpecialStationIcon` の `markerWidth` に上限を設定し大きくなりすぎないよう修正
+- 英語・日本語ともに左右パディングを5pxに統一
+
+---
+
 ## [2026-04-29] セッション（深夜）
 
 ### fix: Service Workerがdev serverと干渉して画面真っ白になる問題を修正（`public/sw.js`）

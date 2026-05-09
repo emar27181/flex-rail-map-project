@@ -17,6 +17,7 @@ interface LegendRouteListProps {
   showExpressStationsOnly: boolean;
   showTravelTimes: boolean;
   showStationNames: boolean;
+  showStationNumbers: boolean;
   showFurigana: boolean;
   theme: 'light' | 'dark';
   language: 'japanese' | 'english';
@@ -27,6 +28,7 @@ interface LegendRouteListProps {
   onShowExpressStationsOnlyChange: (value: boolean) => void;
   onShowTravelTimesChange: (value: boolean) => void;
   onShowStationNamesChange: (value: boolean) => void;
+  onShowStationNumbersChange: (value: boolean) => void;
   onShowFuriganaChange: (value: boolean) => void;
   adjustRouteColorForTheme: (color: string, theme: 'light' | 'dark') => string;
 }
@@ -42,6 +44,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   showExpressStationsOnly,
   showTravelTimes,
   showStationNames,
+  showStationNumbers,
   showFurigana,
   theme,
   language,
@@ -52,6 +55,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowExpressStationsOnlyChange,
   onShowTravelTimesChange,
   onShowStationNamesChange,
+  onShowStationNumbersChange,
   onShowFuriganaChange,
   adjustRouteColorForTheme
 }) => {
@@ -188,6 +192,27 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             }}
           />
           {translateUI('showStationNames', language)}
+        </label>
+
+        {/* 駅番号表示オプション */}
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '12px',
+          color: colors.text,
+          cursor: 'pointer',
+          marginBottom: '4px'
+        }}>
+          <input
+            type="checkbox"
+            checked={showStationNumbers}
+            onChange={(e) => onShowStationNumbersChange(e.target.checked)}
+            style={{
+              marginRight: '6px',
+              cursor: 'pointer'
+            }}
+          />
+          {language === 'english' ? 'Show station numbers' : '駅番号を表示'}
         </label>
 
         {/* ふりがな表示オプション（日本語モードのみ） */}
