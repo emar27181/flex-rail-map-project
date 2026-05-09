@@ -64,19 +64,19 @@ const MIN_LNG = 139.10;
 const MAX_LNG = 140.12;
 
 // ---- グリッド設定 ----
-const GRID_DEG = 0.004;  // 1グリッド ≈ 400m（細かくして中心部の重複を分散）
-const CELL_PX = 16;
-const PAD = 60;
+const GRID_DEG = 0.003;  // 1グリッド ≈ 300m（細密グリッドで駅間隔を詰める）
+const CELL_PX = 9;       // 1グリッド9px — 実際の路線図に近い密度
+const PAD = 40;
 
 const GX_MAX = Math.round((MAX_LNG - MIN_LNG) / GRID_DEG);
 const GY_MAX = Math.round((MAX_LAT - MIN_LAT) / GRID_DEG);
 const SVG_W = PAD * 2 + GX_MAX * CELL_PX;
 const SVG_H = PAD * 2 + GY_MAX * CELL_PX;
 
-const BASE_OFFSET_PX = 4;
-// 路線数に応じて動的にオフセット量を調整: 多数路線ほどセル内に収める
+const BASE_OFFSET_PX = 2.5;
+// 路線数に応じて動的にオフセット量を調整: セル幅の75%以内に全路線を収める
 function dynamicOffset(n: number): number {
-  const maxTotalSpread = CELL_PX * 0.72; // セル幅の72%以内に全路線を収める
+  const maxTotalSpread = CELL_PX * 0.75;
   return Math.min(BASE_OFFSET_PX, maxTotalSpread / Math.max(1, n - 1));
 }
 
@@ -248,8 +248,8 @@ const DiagramMap: React.FC = () => {
       if (!data) return;
       const color = routeColors[routeKey] ?? '#888';
       const isHighlighted = depRouteSet.has(routeKey) || arrRouteSet.has(routeKey);
-      const opacity = hasFilter ? (isHighlighted ? 1.0 : 0.13) : 1.0;
-      const sw = isHighlighted ? 4 : 2.5;
+      const opacity = hasFilter ? (isHighlighted ? 1.0 : 0.12) : 1.0;
+      const sw = hasFilter ? (isHighlighted ? 2.5 : 1.5) : 2.0;
       for (let i = 0; i < data.grids.length - 1; i++) {
         const [gx1, gy1] = data.grids[i];
         const [gx2, gy2] = data.grids[i + 1];
@@ -292,11 +292,11 @@ const DiagramMap: React.FC = () => {
         const [sx, sy] = gridToXY(gx, gy);
         elements.push(
           <g key={name}>
-            <circle cx={sx} cy={sy} r={5.5} fill="white" stroke="#444" strokeWidth={1.5} />
+            <circle cx={sx} cy={sy} r={3.5} fill="white" stroke="#555" strokeWidth={1} />
             <text
-              x={sx + 7} y={sy + 4}
-              fontSize={9} fontWeight="bold" fill="#222"
-              stroke="white" strokeWidth={2.5} paintOrder="stroke"
+              x={sx + 5} y={sy + 3}
+              fontSize={7} fontWeight="bold" fill="#222"
+              stroke="white" strokeWidth={2} paintOrder="stroke"
               style={{ pointerEvents: 'none', userSelect: 'none' }}
             >
               {name}
