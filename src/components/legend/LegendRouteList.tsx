@@ -212,7 +212,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
               cursor: 'pointer'
             }}
           />
-          {language === 'english' ? 'Show station numbers' : '駅番号を表示'}
+          {language === 'english' ? 'Show station codes' : '駅コードを表示'}
         </label>
 
         {/* ふりがな表示オプション（日本語モードのみ） */}

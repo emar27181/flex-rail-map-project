@@ -1821,8 +1821,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
 
   // Legend and route display
   displayedRoutes: {
-    japanese: "表示中の路線",
-    english: "Displayed Routes"
+    japanese: "表示路線の切替",
+    english: "Route Display Toggle"
   },
   allShow: {
     japanese: "全表示",
