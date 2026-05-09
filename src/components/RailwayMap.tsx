@@ -15,6 +15,7 @@ import LegendStationMarkers from './legend/LegendStationMarkers';
 import LegendRouteList from './legend/LegendRouteList';
 import LegendRouteRecommendations from './legend/LegendRouteRecommendations';
 import LegendDisplayOptions from './legend/LegendDisplayOptions';
+import DiagramMap from './DiagramMap';
 import { getStoppingTrainTypes, generateStationDescription } from '../data/stationTrainTypeAnalysis';
 import { getStationNumber, getAnyStationNumber } from '../data/stationNumbers';
 import { getStationBorderStyleByPattern, getBorderStyleExplanation } from '../data/stationBorderStyles';
@@ -90,8 +91,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
   const [showStationNumbers, setShowStationNumbers] = useState(true);
   const [showOsmTiles, setShowOsmTiles] = useState(true);
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
-  // 地図表示モード（現実の路線図に固定）
-  const mapViewMode = 'realistic';
+  // 地図表示モード
+  const [mapViewMode, setMapViewMode] = useState<'realistic' | 'schematic'>('realistic');
 
   // 列車種別表示モード（常にオン）
   const trainTypeViewEnabled = true;
@@ -2595,14 +2596,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               )}
             </MapContainer>
           ) : (
-            <SchematicMap
+            <DiagramMap
               visibleRoutes={visibleRoutes}
-              routeRecommendations={routeRecommendations}
-              departure={departure}
-              arrival={arrival}
-              transferStations={transferStations}
-              showTransferStationsOnly={showTransferStationsOnly}
-              onStationClick={handleSchematicStationClick}
+              departure={departure?.name ?? ''}
+              arrival={arrival?.name ?? ''}
+              theme={theme}
               language={currentLanguage}
             />
           )}
@@ -2704,15 +2702,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                   />
 
                   {/* 4. 表示オプション (Display Options) */}
-                  {/* 表示オプション - 現在は非表示 */}
-                  {false && (
-                    <LegendDisplayOptions
-                      mapViewMode={mapViewMode}
-                      theme={theme}
-                      language={currentLanguage}
-                      trainTypeViewEnabled={trainTypeViewEnabled}
-                    />
-                  )}
+                  <LegendDisplayOptions
+                    mapViewMode={mapViewMode}
+                    theme={theme}
+                    language={currentLanguage}
+                    trainTypeViewEnabled={trainTypeViewEnabled}
+                    onMapViewModeChange={setMapViewMode}
+                  />
 
                   {/* 5. 列車種別ビューア - 非表示 */}
                   {false && (

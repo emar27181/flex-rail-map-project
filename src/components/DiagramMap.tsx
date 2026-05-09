@@ -64,8 +64,8 @@ const MIN_LNG = 139.10;
 const MAX_LNG = 140.12;
 
 // ---- グリッド設定 ----
-const GRID_DEG = 0.003;  // 1グリッド ≈ 300m
-const CELL_PX = 6;       // 1グリッド6px — 余白なく詰める
+const GRID_DEG = 0.006;  // 1グリッド ≈ 600m（粗くして地理的拘束を弱める）
+const CELL_PX = 4;       // 1グリッド4px — ぎりぎり触れ合う幅
 const PAD = 8;
 
 const GX_MAX = Math.round((MAX_LNG - MIN_LNG) / GRID_DEG);
@@ -73,10 +73,10 @@ const GY_MAX = Math.round((MAX_LAT - MIN_LAT) / GRID_DEG);
 const SVG_W = PAD * 2 + GX_MAX * CELL_PX;
 const SVG_H = PAD * 2 + GY_MAX * CELL_PX;
 
-const BASE_OFFSET_PX = 1.8;
-// 路線数に応じて動的にオフセット量を調整: セル幅の75%以内に全路線を収める
+const BASE_OFFSET_PX = 1.1;
+// 路線数に応じて動的にオフセット量を調整: stroke幅(1.0px)とほぼ等しい間隔で並べる
 function dynamicOffset(n: number): number {
-  const maxTotalSpread = CELL_PX * 0.75;
+  const maxTotalSpread = CELL_PX * 0.85;
   return Math.min(BASE_OFFSET_PX, maxTotalSpread / Math.max(1, n - 1));
 }
 
@@ -130,17 +130,26 @@ function makeOctilinearPath(
 }
 
 // ---- メインコンポーネント ----
-const DiagramMap: React.FC = () => {
-  const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(
-    new Set(DIAGRAM_ROUTE_KEYS)
-  );
+interface DiagramMapProps {
+  visibleRoutes?: Set<RouteKey>;
+  departure?: string;
+  arrival?: string;
+  theme?: 'light' | 'dark';
+  language?: 'japanese' | 'english';
+}
+
+const DiagramMap: React.FC<DiagramMapProps> = ({
+  visibleRoutes: externalVisibleRoutes,
+  departure = '横浜',
+  arrival = '新宿',
+  theme = 'light',
+  language = 'japanese',
+}) => {
+  const visibleRoutes = externalVisibleRoutes ?? new Set(DIAGRAM_ROUTE_KEYS);
+  const depStation = departure;
+  const arrStation = arrival;
   const [transform, setTransform] = useState({ x: 20, y: 20, scale: 0.55 });
-  const [showPanel, setShowPanel] = useState(true);
   const [showWipNote, setShowWipNote] = useState(false);
-  const [depInput, setDepInput] = useState('横浜');
-  const [arrInput, setArrInput] = useState('新宿');
-  const [depStation, setDepStation] = useState('横浜');
-  const [arrStation, setArrStation] = useState('新宿');
 
   const isPanning = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
@@ -248,8 +257,8 @@ const DiagramMap: React.FC = () => {
       if (!data) return;
       const color = routeColors[routeKey] ?? '#888';
       const isHighlighted = depRouteSet.has(routeKey) || arrRouteSet.has(routeKey);
-      const opacity = hasFilter ? (isHighlighted ? 1.0 : 0.12) : 1.0;
-      const sw = hasFilter ? (isHighlighted ? 2.0 : 1.0) : 1.5;
+      const opacity = hasFilter ? (isHighlighted ? 1.0 : 0.15) : 1.0;
+      const sw = hasFilter ? (isHighlighted ? 1.8 : 0.8) : 1.1;
       for (let i = 0; i < data.grids.length - 1; i++) {
         const [gx1, gy1] = data.grids[i];
         const [gx2, gy2] = data.grids[i + 1];
@@ -278,6 +287,12 @@ const DiagramMap: React.FC = () => {
 
   // ---- 駅マーカー要素生成（乗換駅のみ） ----
   const stationElements = useMemo(() => {
+    const s = transform.scale;
+    const r = Math.max(1.5, 2.5 / s);
+    const fs = Math.max(4, Math.min(10, 6 / s));
+    const sw = 1.8 / s;
+    const csw = 0.8 / s;
+    const offset = r + 2 / s;
     const elements: React.ReactElement[] = [];
     const rendered = new Set<string>();
     DIAGRAM_ROUTE_KEYS.forEach(routeKey => {
@@ -292,11 +307,11 @@ const DiagramMap: React.FC = () => {
         const [sx, sy] = gridToXY(gx, gy);
         elements.push(
           <g key={name}>
-            <circle cx={sx} cy={sy} r={2.5} fill="white" stroke="#555" strokeWidth={0.8} />
+            <circle cx={sx} cy={sy} r={r} fill="white" stroke="#555" strokeWidth={csw} />
             <text
-              x={sx + 4} y={sy + 2.5}
-              fontSize={6} fontWeight="bold" fill="#222"
-              stroke="white" strokeWidth={1.8} paintOrder="stroke"
+              x={sx + offset} y={sy + fs * 0.4}
+              fontSize={fs} fontWeight="bold" fill="#222"
+              stroke="white" strokeWidth={sw} paintOrder="stroke"
               style={{ pointerEvents: 'none', userSelect: 'none' }}
             >
               {name}
@@ -306,7 +321,7 @@ const DiagramMap: React.FC = () => {
       });
     });
     return elements;
-  }, [visibleRoutes, routeGridData, transferStations]);
+  }, [visibleRoutes, routeGridData, transferStations, transform.scale]);
 
   // ---- パン操作 ----
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -346,6 +361,61 @@ const DiagramMap: React.FC = () => {
     return () => area.removeEventListener('wheel', onWheel);
   }, []);
 
+  // ---- タッチ操作（スマホ対応: 1本指パン + 2本指ピンチズーム） ----
+  useEffect(() => {
+    const area = mapAreaRef.current;
+    if (!area) return;
+    let lastTouches: TouchList | null = null;
+
+    const onTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      lastTouches = e.touches;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      if (!lastTouches) return;
+      const rect = area.getBoundingClientRect();
+
+      if (e.touches.length === 1 && lastTouches.length === 1) {
+        const dx = e.touches[0].clientX - lastTouches[0].clientX;
+        const dy = e.touches[0].clientY - lastTouches[0].clientY;
+        setTransform(t => ({ ...t, x: t.x + dx, y: t.y + dy }));
+      } else if (e.touches.length === 2 && lastTouches.length >= 2) {
+        const prevDist = Math.hypot(
+          lastTouches[0].clientX - lastTouches[1].clientX,
+          lastTouches[0].clientY - lastTouches[1].clientY,
+        );
+        const newDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY,
+        );
+        if (prevDist < 1) { lastTouches = e.touches; return; }
+        const factor = newDist / prevDist;
+        const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+        const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+        setTransform(t => {
+          const newScale = Math.max(0.12, Math.min(8, t.scale * factor));
+          const svgX = (cx - t.x) / t.scale;
+          const svgY = (cy - t.y) / t.scale;
+          return { x: cx - svgX * newScale, y: cy - svgY * newScale, scale: newScale };
+        });
+      }
+      lastTouches = e.touches;
+    };
+
+    const onTouchEnd = () => { lastTouches = null; };
+
+    area.addEventListener('touchstart', onTouchStart, { passive: false });
+    area.addEventListener('touchmove', onTouchMove, { passive: false });
+    area.addEventListener('touchend', onTouchEnd);
+    return () => {
+      area.removeEventListener('touchstart', onTouchStart);
+      area.removeEventListener('touchmove', onTouchMove);
+      area.removeEventListener('touchend', onTouchEnd);
+    };
+  }, []);
+
   // ---- 出発/到着駅の中間点にビューをセンタリング ----
   useEffect(() => {
     const area = mapAreaRef.current;
@@ -370,103 +440,17 @@ const DiagramMap: React.FC = () => {
     setTransform({ x: rect.width / 2 - cx * scale, y: rect.height / 2 - cy * scale, scale });
   }, [depStation, arrStation]);
 
-  const toggleRoute = useCallback((key: RouteKey) => {
-    setVisibleRoutes(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key); else next.add(key);
-      return next;
-    });
-  }, []);
-
   return (
-    <div style={{ display: 'flex', height: '100%', width: '100%', fontFamily: 'sans-serif', background: '#fff' }}>
-      {/* ---- サイドパネル ---- */}
-      {showPanel && (
-        <div style={{
-          width: '190px', minWidth: '190px',
-          background: '#f8f8f8', borderRight: '1px solid #ddd',
-          overflowY: 'auto', padding: '10px 8px', fontSize: '12px',
-          display: 'flex', flexDirection: 'column', gap: '4px',
-        }}>
-          {/* 出発/到着駅入力 */}
-          <div style={{ marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px solid #ddd' }}>
-            <div style={{ fontWeight: 'bold', color: '#333', marginBottom: '5px', fontSize: '11px' }}>区間を指定</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginBottom: '4px' }}>
-              <span style={{ color: '#4CAF50', fontWeight: 'bold', fontSize: '10px', minWidth: '24px' }}>出発</span>
-              <input
-                value={depInput}
-                onChange={e => setDepInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { setDepStation(depInput); setArrStation(arrInput); } }}
-                style={{ flex: 1, fontSize: '11px', padding: '3px 4px', border: '1px solid #4CAF50', borderRadius: '3px', outline: 'none' }}
-              />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginBottom: '5px' }}>
-              <span style={{ color: '#F44336', fontWeight: 'bold', fontSize: '10px', minWidth: '24px' }}>到着</span>
-              <input
-                value={arrInput}
-                onChange={e => setArrInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { setDepStation(depInput); setArrStation(arrInput); } }}
-                style={{ flex: 1, fontSize: '11px', padding: '3px 4px', border: '1px solid #F44336', borderRadius: '3px', outline: 'none' }}
-              />
-            </div>
-            <button
-              onClick={() => { setDepStation(depInput); setArrStation(arrInput); }}
-              style={{ width: '100%', fontSize: '10px', padding: '4px', background: '#333', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer' }}
-            >
-              この区間を表示
-            </button>
-          </div>
-
-          <div style={{ fontWeight: 'bold', color: '#333', marginBottom: '4px' }}>路線の表示切替</div>
-          <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
-            <button
-              onClick={() => setVisibleRoutes(new Set(DIAGRAM_ROUTE_KEYS))}
-              style={{ flex: 1, fontSize: '10px', padding: '4px 2px', border: '1px solid #ccc', borderRadius: '3px', cursor: 'pointer', background: '#fff' }}
-            >全表示</button>
-            <button
-              onClick={() => setVisibleRoutes(new Set())}
-              style={{ flex: 1, fontSize: '10px', padding: '4px 2px', border: '1px solid #ccc', borderRadius: '3px', cursor: 'pointer', background: '#fff' }}
-            >全非表示</button>
-          </div>
-          {DIAGRAM_ROUTE_KEYS.map(key => (
-            <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', padding: '2px 0', lineHeight: '1.4' }}>
-              <input
-                type="checkbox"
-                checked={visibleRoutes.has(key)}
-                onChange={() => toggleRoute(key)}
-                style={{ width: '12px', height: '12px', cursor: 'pointer', flexShrink: 0 }}
-              />
-              <span style={{ display: 'inline-block', width: '10px', height: '10px', background: routeColors[key] ?? '#888', borderRadius: '50%', flexShrink: 0 }} />
-              <span style={{ color: '#333', fontSize: '11px' }}>{routeNames[key] ?? key}</span>
-            </label>
-          ))}
-        </div>
-      )}
-
+    <div style={{ display: 'flex', height: '100%', width: '100%', fontFamily: 'sans-serif', background: theme === 'dark' ? '#1a1a1a' : '#fff' }}>
       {/* ---- SVGマップエリア ---- */}
       <div
         ref={mapAreaRef}
-        style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#f5f5f0' }}
+        style={{ flex: 1, position: 'relative', overflow: 'hidden', background: theme === 'dark' ? '#2a2a2a' : '#f5f5f0' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        {/* コントロールバー */}
-        <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 20, display: 'flex', gap: '6px' }}>
-          <button
-            onClick={() => setShowPanel(p => !p)}
-            style={{ background: 'rgba(255,255,255,0.92)', border: '1px solid #ccc', borderRadius: '4px', padding: '5px 10px', fontSize: '12px', cursor: 'pointer' }}
-          >
-            {showPanel ? '◀ パネル' : '▶ パネル'}
-          </button>
-          <button
-            onClick={() => { setDepStation(depInput); setArrStation(arrInput); }}
-            style={{ background: 'rgba(255,255,255,0.92)', border: '1px solid #ccc', borderRadius: '4px', padding: '5px 10px', fontSize: '12px', cursor: 'pointer' }}
-          >
-            リセット
-          </button>
-        </div>
 
         {/* 操作説明 */}
         <div style={{
@@ -554,28 +538,38 @@ const DiagramMap: React.FC = () => {
             {stationElements}
 
             {/* 出発駅マーカー */}
-            {depSVGPos && (
-              <g style={{ pointerEvents: 'none' }}>
-                <circle cx={depSVGPos[0]} cy={depSVGPos[1]} r={6} fill="#4CAF50" stroke="white" strokeWidth={1.5} />
-                <text x={depSVGPos[0] + 8} y={depSVGPos[1] - 1}
-                  fontSize={7} fontWeight="bold" fill="#4CAF50"
-                  stroke="white" strokeWidth={2} paintOrder="stroke"
-                  style={{ userSelect: 'none' }}
-                >{depStation} 出発</text>
-              </g>
-            )}
+            {depSVGPos && (() => {
+              const s = transform.scale;
+              const r = Math.max(3, 6 / s);
+              const fs = Math.max(5, Math.min(12, 7 / s));
+              return (
+                <g style={{ pointerEvents: 'none' }}>
+                  <circle cx={depSVGPos[0]} cy={depSVGPos[1]} r={r} fill="#4CAF50" stroke="white" strokeWidth={1.5 / s} />
+                  <text x={depSVGPos[0] + r + 2 / s} y={depSVGPos[1] + fs * 0.35}
+                    fontSize={fs} fontWeight="bold" fill="#4CAF50"
+                    stroke="white" strokeWidth={2 / s} paintOrder="stroke"
+                    style={{ userSelect: 'none' }}
+                  >{depStation} 出発</text>
+                </g>
+              );
+            })()}
 
             {/* 到着駅マーカー */}
-            {arrSVGPos && (
-              <g style={{ pointerEvents: 'none' }}>
-                <circle cx={arrSVGPos[0]} cy={arrSVGPos[1]} r={6} fill="#F44336" stroke="white" strokeWidth={1.5} />
-                <text x={arrSVGPos[0] + 8} y={arrSVGPos[1] - 1}
-                  fontSize={7} fontWeight="bold" fill="#F44336"
-                  stroke="white" strokeWidth={2} paintOrder="stroke"
-                  style={{ userSelect: 'none' }}
-                >{arrStation} 到着</text>
-              </g>
-            )}
+            {arrSVGPos && (() => {
+              const s = transform.scale;
+              const r = Math.max(3, 6 / s);
+              const fs = Math.max(5, Math.min(12, 7 / s));
+              return (
+                <g style={{ pointerEvents: 'none' }}>
+                  <circle cx={arrSVGPos[0]} cy={arrSVGPos[1]} r={r} fill="#F44336" stroke="white" strokeWidth={1.5 / s} />
+                  <text x={arrSVGPos[0] + r + 2 / s} y={arrSVGPos[1] + fs * 0.35}
+                    fontSize={fs} fontWeight="bold" fill="#F44336"
+                    stroke="white" strokeWidth={2 / s} paintOrder="stroke"
+                    style={{ userSelect: 'none' }}
+                  >{arrStation} 到着</text>
+                </g>
+              );
+            })()}
           </g>
         </svg>
       </div>
