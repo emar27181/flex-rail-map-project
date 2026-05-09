@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "Bash(xargs -I {} basename {} .ts)",
-      "Bash(npx astro:*)"
+      "Bash(npx astro:*)",
+      "Bash(grep -oP '^\\\\s*\"\\\\K[^\"]+\\(?=\": \"\\)' src/utils/translation.ts | sort -u > /tmp/translated_stations.txt && wc -l /tmp/translated_stations.txt)",
+      "Read(//tmp/**)",
+      "Bash(grep -h \"name: '\" /home/emar27181/works/flex-rail-map-project/src/data/*.ts | grep -oP \"name: '\\\\K[^']+\" | sort -u > /tmp/actual_stations.txt && wc -l /tmp/actual_stations.txt)",
+      "Bash(bash /tmp/check_translations.sh)",
+      "Bash(npm --version)"
+    ],
+    "additionalDirectories": [
+      "/tmp"
     ]
   }
 }
