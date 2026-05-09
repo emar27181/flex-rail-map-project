@@ -2217,7 +2217,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               {/* 表示形式切替 */}
               <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
                 {(['realistic', 'schematic'] as const).map(mode => {
-                  const label = mode === 'realistic' ? '地図' : '路線図（試験）';
+                  const label = mode === 'realistic' ? '地図' : '路線図（実装中）';
                   const isActive = mapViewMode === mode;
                   return (
                     <button
@@ -2258,7 +2258,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
             {/* 表示形式切替 */}
             <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
               {(['realistic', 'schematic'] as const).map(mode => {
-                const label = mode === 'realistic' ? '地図' : '路線図（試験）';
+                const label = mode === 'realistic' ? '地図' : '路線図（実装中）';
                 const isActive = mapViewMode === mode;
                 return (
                   <button
