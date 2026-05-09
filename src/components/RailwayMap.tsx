@@ -1021,6 +1021,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
     return keys;
   }, [selectedRouteIndices, routeRecommendations]);
 
+  // 路線図モード用: dep/arr設定時は全推薦ルートの路線を表示（未選択時）
+  const diagramHighlightedRouteKeys = useMemo(() => {
+    if (!departure || !arrival) return null;
+    if (highlightedRouteKeys !== null) return highlightedRouteKeys;
+    if (routeRecommendations.length === 0) return null;
+    const keys = new Set<RouteKey>();
+    routeRecommendations.forEach(rec => {
+      rec.segments.forEach((seg: any) => {
+        if (seg.routeKey !== 'walking') keys.add(seg.routeKey as RouteKey);
+      });
+    });
+    return keys.size > 0 ? keys : null;
+  }, [departure, arrival, highlightedRouteKeys, routeRecommendations]);
+
   // レンダリング最適化：表示する路線のデータを準備
   const visibleRoutesData = useMemo(() => {
     // availableRoutes状態に基づいて凡例に表示する路線を決定
@@ -2646,7 +2660,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
           ) : (
             <DiagramMap
               visibleRoutes={visibleRoutes}
-              highlightedRouteKeys={highlightedRouteKeys}
+              highlightedRouteKeys={diagramHighlightedRouteKeys}
               departure={departure?.name ?? ''}
               arrival={arrival?.name ?? ''}
               theme={theme}

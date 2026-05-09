@@ -1,160 +1,58 @@
 'use client';
 
-/**
- * DiagramMap - SVG路線図コンポーネント（仮実装）
- *
- * アルゴリズム:
- *   地理座標 → グリッド座標 (GRID_DEG ≈ 500m/格子) にスナップし、
- *   同一セグメントを共有する並走路線を法線方向へオフセット表示する。
- *
- * 今後の実装予定（参考文献）:
- *   - Octilinear schematization: 線を 45° の倍数に整列
- *     Nöllenburg & Wolff (2011) "Drawing and Labeling High-Quality Metro Maps
- *     by Mixed-Integer Programming" (IEEE TVCG)
- *   - 多目的最適化レイアウト:
- *     Stott et al. (2011) "Automatic Metro Map Layout Using Multicriteria
- *     Optimization" (IEEE TVCG)
- *   - 駅ラベル重なり回避（greedy / MIP）
- *   - 路線バンドル可視化 (Hurter et al. 2012)
- */
-
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
-import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
+import { routes, routeColors, type RouteKey } from '../data/routes';
 import { getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
-import layoutData from '../data/diagramLayouts/latest.json';
 
-// ---- 表示対象路線（東京圏全路線） ----
+// ---- 表示対象路線 ----
 const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
-  // JR東日本
   'yamanote', 'chuo', 'keihinTohoku', 'jrSobuLine', 'jrJobanLine',
   'jrSaikyoLine', 'jrTakasakiLine', 'jrTokaidoMainLine', 'jrMusashinoLine',
   'jrYokohamaLine', 'jrNanbuLine', 'jrSobuChiba', 'jrKeiyo',
   'jrOmeLine', 'jrHachikoLine', 'jrItsukaichiLine', 'jrUtsunomiyaLine', 'jrNegishiLine',
   'yokosukaLine',
-  // 東京メトロ
   'ginzaLine', 'marunouchiLine', 'hibiyaLine', 'tozaiLine', 'chiyodaLine',
   'yurakuchoLine', 'hanzomonLine', 'nambokuLine', 'fukutoshinLine',
-  // 都営地下鉄
   'toeiAsakusaLine', 'toeiMitaLine', 'toeiShinjukuLine', 'toeiOedoLine',
-  // 小田急・京王
   'odakyuLine', 'odakyuEnoshimaLine', 'odakyuTamaLine',
   'keioLine', 'keioInokashiraLine', 'keioSagamiharaLine',
-  // 東急
   'tokyuToyokoLine', 'tokyuDenEnToshiLine', 'tokyuMeguro',
   'tokyuOimachiLine', 'tokyuTamagawa', 'tokyuIkegami', 'tokyuSetagayaLine',
-  // 西武・東武
   'seibuIkebukuroLine', 'seibuShinjukuLine',
   'tobuTojoLine', 'tobuIsesakiLine', 'tobuNikkoLine', 'tobuDaishiLine', 'tobuKameidoLine',
-  // 京急・京成
   'keikyuLine', 'keikyuKurihamaLine', 'keikyuAirportLine',
   'keiseiMainLine', 'keiseiOshiageLine', 'hokusouLine',
-  // 相鉄
   'sotetsuMainLine', 'sotetsuIzumino', 'sotetsuJRLine',
-  // 新交通・モノレール
   'tokyoMonorail', 'rinkaiLine', 'yurikamomeLine', 'tsukubaExpress',
   'tamaMonorail', 'todenArakawaLine', 'nipporiToneriLiner',
-  // 横浜・神奈川
   'yokohamaBlueLine', 'yokohamaGreenLine', 'shonanMonorail', 'enoshimaElectricRailway',
-  // 埼玉・千葉
   'saitamaRailway', 'newShuttle', 'shinkeisei', 'toyoRapid',
 ];
 
-// ---- 地理的範囲（東京圏全体） ----
-const MIN_LAT = 35.22;
-const MAX_LAT = 35.92;
-const MIN_LNG = 139.10;
-const MAX_LNG = 140.12;
+// ---- SVGキャンバス & 地理範囲 ----
+const SVG_W = 1400;
+const SVG_H = 900;
+const LAYOUT_PAD = 80;
+const GEO_MIN_LNG = 139.10, GEO_MAX_LNG = 140.12;
+const GEO_MIN_LAT = 35.22, GEO_MAX_LAT = 35.92;
 
-// ---- グリッド設定 ----
-const GRID_DEG = 0.005;  // 1グリッド ≈ 500m
-const PAD = 8;
-
-// 隣接駅間のグリッド距離分布から最適セルサイズを自動計算:
-//   20パーセンタイル距離が TARGET_PX になるよう調整（近い駅がぎりぎり離れる）
-function computeOptimalCellPx(): number {
-  const dists: number[] = [];
-  DIAGRAM_ROUTE_KEYS.forEach(routeKey => {
-    const stationList = routes[routeKey] as Array<{ lat: number; lng: number }> | undefined;
-    if (!stationList) return;
-    for (let i = 0; i < stationList.length - 1; i++) {
-      const gx1 = Math.round((stationList[i].lng - MIN_LNG) / GRID_DEG);
-      const gy1 = Math.round((MAX_LAT - stationList[i].lat) / GRID_DEG);
-      const gx2 = Math.round((stationList[i + 1].lng - MIN_LNG) / GRID_DEG);
-      const gy2 = Math.round((MAX_LAT - stationList[i + 1].lat) / GRID_DEG);
-      if (gx1 === gx2 && gy1 === gy2) continue;
-      dists.push(Math.sqrt((gx2 - gx1) ** 2 + (gy2 - gy1) ** 2));
-    }
-  });
-  dists.sort((a, b) => a - b);
-  if (dists.length === 0) return 4;
-  const TARGET_PX = 6; // 20パーセンタイルの駅ペアが TARGET_PX px 離れるようにする
-  const p20 = dists[Math.floor(dists.length * 0.20)] ?? 1;
-  return Math.max(3, Math.min(8, Math.round(TARGET_PX / Math.max(1, p20))));
+function geoX(lng: number): number {
+  return LAYOUT_PAD + (lng - GEO_MIN_LNG) / (GEO_MAX_LNG - GEO_MIN_LNG) * (SVG_W - 2 * LAYOUT_PAD);
 }
-const CELL_PX = computeOptimalCellPx();
-
-const GX_MAX = Math.round((MAX_LNG - MIN_LNG) / GRID_DEG);
-const GY_MAX = Math.round((MAX_LAT - MIN_LAT) / GRID_DEG);
-const SVG_W = PAD * 2 + GX_MAX * CELL_PX;
-const SVG_H = PAD * 2 + GY_MAX * CELL_PX;
-
-const BASE_OFFSET_PX = 1.1;
-// 路線数に応じて動的にオフセット量を調整: stroke幅(1.0px)とほぼ等しい間隔で並べる
-function dynamicOffset(n: number): number {
-  const maxTotalSpread = CELL_PX * 0.85;
-  return Math.min(BASE_OFFSET_PX, maxTotalSpread / Math.max(1, n - 1));
+function geoY(lat: number): number {
+  return LAYOUT_PAD + (GEO_MAX_LAT - lat) / (GEO_MAX_LAT - GEO_MIN_LAT) * (SVG_H - 2 * LAYOUT_PAD);
 }
 
-// ---- ユーティリティ ----
-function toGrid(lat: number, lng: number): [number, number] {
-  return [
-    Math.round((lng - MIN_LNG) / GRID_DEG),
-    Math.round((MAX_LAT - lat) / GRID_DEG),
-  ];
+// 路線の主方向: 経度幅 >= 緯度幅*1.1 → 横(H)、それ以外 → 縦(V)
+function classifyRoute(k: RouteKey): 'H' | 'V' {
+  const stns = routes[k] as Array<{ lat: number; lng: number }> | undefined;
+  if (!stns?.length) return 'H';
+  const latR = Math.max(...stns.map(s => s.lat)) - Math.min(...stns.map(s => s.lat));
+  const lngR = Math.max(...stns.map(s => s.lng)) - Math.min(...stns.map(s => s.lng));
+  return lngR >= latR * 1.1 ? 'H' : 'V';
 }
 
-function gridToXY(gx: number, gy: number): [number, number] {
-  return [PAD + gx * CELL_PX, PAD + gy * CELL_PX];
-}
-
-function normSegKey(gx1: number, gy1: number, gx2: number, gy2: number): string {
-  if (gx1 > gx2 || (gx1 === gx2 && gy1 > gy2)) {
-    return `${gx2},${gy2}|${gx1},${gy1}`;
-  }
-  return `${gx1},${gy1}|${gx2},${gy2}`;
-}
-
-// ---- オクチリニアパス生成 ----
-// 実際の路線図の考え方: 2本の線分（斜め+直線 または 直線+斜め）で接続
-// 線は必ず 0°/45°/90°/135° のいずれかになる
-function makeOctilinearPath(
-  x1: number, y1: number,
-  x2: number, y2: number
-): string {
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  const adx = Math.abs(dx);
-  const ady = Math.abs(dy);
-
-  // 既に水平・垂直・45°の場合はそのまま
-  if (adx === 0 || ady === 0 || adx === ady) {
-    return `M${x1},${y1} L${x2},${y2}`;
-  }
-
-  const sx = Math.sign(dx);
-  const sy = Math.sign(dy);
-
-  // 折れ曲がり点: 対角線部分を先に消化し、残りを直線
-  // adx > ady → 斜め ady ステップ後に水平
-  // adx < ady → 斜め adx ステップ後に垂直
-  const diagSteps = Math.min(adx, ady);
-  const mx = x1 + sx * diagSteps;
-  const my = y1 + sy * diagSteps;
-
-  return `M${x1},${y1} L${mx},${my} L${x2},${y2}`;
-}
-
-// ---- メインコンポーネント ----
+// ---- Props ----
 interface DiagramMapProps {
   visibleRoutes?: Set<RouteKey>;
   highlightedRouteKeys?: Set<RouteKey> | null;
@@ -175,158 +73,152 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
   showStationNames = true,
 }) => {
   const visibleRoutes = externalVisibleRoutes ?? new Set(DIAGRAM_ROUTE_KEYS);
-  const depStation = departure;
-  const arrStation = arrival;
-  const [transform, setTransform] = useState({ x: 20, y: 20, scale: 0.55 });
-
+  const [transform, setTransform] = useState({ x: 10, y: 10, scale: 0.5 });
   const isPanning = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
   const mapAreaRef = useRef<HTMLDivElement>(null);
 
-  // ---- 路線データをグリッド座標に変換（最適化済みレイアウトがあればそちらを優先） ----
-  const prePos = (layoutData as { version: number; positions: Record<string, [number, number]> }).positions;
-  const hasLayout = Object.keys(prePos).length > 0;
+  // ---- スケマティックレイアウト計算 ----
+  // H路線: y固定の水平ライン、V路線: x固定の垂直ライン
+  // H-V乗換駅は両トラックの交点に配置
+  const schematicData = useMemo(() => {
+    const activeRoutes = DIAGRAM_ROUTE_KEYS.filter(k => visibleRoutes.has(k));
 
-  const { routeGridData, segmentRouteMap, transferStations } = useMemo(() => {
-    const segmentRouteMap = new Map<string, RouteKey[]>();
-    const routeGridData = new Map<RouteKey, { grids: [number, number][]; names: string[] }>();
-    const stationRouteCount = new Map<string, number>();
+    const hRoutes: RouteKey[] = [];
+    const vRoutes: RouteKey[] = [];
+    activeRoutes.forEach(k => {
+      if (classifyRoute(k) === 'H') hRoutes.push(k);
+      else vRoutes.push(k);
+    });
 
-    DIAGRAM_ROUTE_KEYS.forEach(routeKey => {
-      const stationList = routes[routeKey];
-      if (!stationList) return;
+    // H路線: 平均緯度降順（北=上=小y）、V路線: 平均経度昇順（西=左=小x）
+    const avgLat = (k: RouteKey) => {
+      const s = routes[k] as any[];
+      return s.reduce((sum: number, st: any) => sum + st.lat, 0) / s.length;
+    };
+    const avgLng = (k: RouteKey) => {
+      const s = routes[k] as any[];
+      return s.reduce((sum: number, st: any) => sum + st.lng, 0) / s.length;
+    };
+    hRoutes.sort((a, b) => avgLat(b) - avgLat(a));
+    vRoutes.sort((a, b) => avgLng(a) - avgLng(b));
 
-      const grids: [number, number][] = [];
-      const names: string[] = [];
+    const nH = hRoutes.length;
+    const nV = vRoutes.length;
+    const hStep = nH > 1 ? (SVG_H - 2 * LAYOUT_PAD) / (nH - 1) : 0;
+    const vStep = nV > 1 ? (SVG_W - 2 * LAYOUT_PAD) / (nV - 1) : 0;
 
-      stationList.forEach((station: { lat: number; lng: number; name: string }) => {
-        // 最適化済み位置があればそちらを使用、なければ地理座標から計算
-        const optimized = hasLayout ? prePos[station.name] : null;
-        grids.push(optimized ?? toGrid(station.lat, station.lng));
-        names.push(station.name);
-        stationRouteCount.set(station.name, (stationRouteCount.get(station.name) ?? 0) + 1);
+    const hTrack = new Map<RouteKey, number>(); // route → y座標
+    const vTrack = new Map<RouteKey, number>(); // route → x座標
+    hRoutes.forEach((k, i) => hTrack.set(k, nH <= 1 ? SVG_H / 2 : LAYOUT_PAD + i * hStep));
+    vRoutes.forEach((k, i) => vTrack.set(k, nV <= 1 ? SVG_W / 2 : LAYOUT_PAD + i * vStep));
+
+    // 駅ごとのH/V路線と地理座標を収集
+    const stationGeo = new Map<string, { lat: number; lng: number }>();
+    const stationHRoute = new Map<string, RouteKey>(); // primary H route
+    const stationVRoute = new Map<string, RouteKey>(); // primary V route
+
+    activeRoutes.forEach(k => {
+      const stns = routes[k] as any[];
+      const isH = hTrack.has(k);
+      stns?.forEach((st: any) => {
+        if (!stationGeo.has(st.name)) stationGeo.set(st.name, { lat: st.lat, lng: st.lng });
+        if (isH && !stationHRoute.has(st.name)) stationHRoute.set(st.name, k);
+        if (!isH && !stationVRoute.has(st.name)) stationVRoute.set(st.name, k);
       });
+    });
 
-      routeGridData.set(routeKey, { grids, names });
+    // 駅の正規位置: H-V交点 / H路線上 / V路線上
+    const stationPos = new Map<string, [number, number]>();
+    const allNames = new Set([...stationHRoute.keys(), ...stationVRoute.keys()]);
 
-      for (let i = 0; i < grids.length - 1; i++) {
-        const [gx1, gy1] = grids[i];
-        const [gx2, gy2] = grids[i + 1];
-        if (gx1 === gx2 && gy1 === gy2) continue;
-        const key = normSegKey(gx1, gy1, gx2, gy2);
-        if (!segmentRouteMap.has(key)) segmentRouteMap.set(key, []);
-        const existing = segmentRouteMap.get(key)!;
-        if (!existing.includes(routeKey)) existing.push(routeKey);
+    allNames.forEach(name => {
+      const hR = stationHRoute.get(name);
+      const vR = stationVRoute.get(name);
+      const geo = stationGeo.get(name)!;
+      if (hR && vR) {
+        stationPos.set(name, [vTrack.get(vR)!, hTrack.get(hR)!]);
+      } else if (hR) {
+        stationPos.set(name, [geoX(geo.lng), hTrack.get(hR)!]);
+      } else if (vR) {
+        stationPos.set(name, [vTrack.get(vR)!, geoY(geo.lat)]);
       }
     });
 
+    // 乗換駅: 2路線以上に所属する駅
     const transferStations = new Set<string>();
-    stationRouteCount.forEach((count, name) => {
-      if (count >= 2) transferStations.add(name);
+    allNames.forEach(name => {
+      const total = (stationHRoute.has(name) ? 1 : 0) + (stationVRoute.has(name) ? 1 : 0);
+      if (total >= 2) transferStations.add(name);
     });
 
-    return { routeGridData, segmentRouteMap, transferStations };
-  }, []);
+    return { stationPos, hTrack, vTrack, hRoutes, vRoutes, transferStations, stationVRoute, stationHRoute };
+  }, [visibleRoutes]);
 
-  // ---- セグメントごとの垂直オフセット計算（路線数に応じて動的スケール） ----
-  const routeSegmentOffsets = useMemo(() => {
-    const offsets = new Map<string, [number, number]>();
-    segmentRouteMap.forEach((routeKeys, segKey) => {
-      if (routeKeys.length <= 1) return;
-      const [fromPart, toPart] = segKey.split('|');
-      const [gx1, gy1] = fromPart.split(',').map(Number);
-      const [gx2, gy2] = toPart.split(',').map(Number);
-      const [sx1, sy1] = gridToXY(gx1, gy1);
-      const [sx2, sy2] = gridToXY(gx2, gy2);
-      const dx = sx2 - sx1;
-      const dy = sy2 - sy1;
-      const len = Math.sqrt(dx * dx + dy * dy);
-      if (len < 0.001) return;
-      const perpX = -dy / len;
-      const perpY = dx / len;
-      const n = routeKeys.length;
-      const offsetStep = dynamicOffset(n);
-      routeKeys.forEach((routeKey, idx) => {
-        const t = (idx - (n - 1) / 2) * offsetStep;
-        offsets.set(`${routeKey}|${segKey}`, [perpX * t, perpY * t]);
-      });
-    });
-    return offsets;
-  }, [segmentRouteMap]);
-
-  // ---- 出発/到着駅の関連路線とSVG座標 ----
-  const { depRouteSet, arrRouteSet, depSVGPos, arrSVGPos } = useMemo(() => {
-    const depRouteSet = new Set<RouteKey>(
-      DIAGRAM_ROUTE_KEYS.filter(k => (routes[k] as any[])?.some(s => s.name === depStation))
-    );
-    const arrRouteSet = new Set<RouteKey>(
-      DIAGRAM_ROUTE_KEYS.filter(k => (routes[k] as any[])?.some(s => s.name === arrStation))
-    );
-    let depSVGPos: [number, number] | null = null;
-    let arrSVGPos: [number, number] | null = null;
-    for (const k of DIAGRAM_ROUTE_KEYS) {
-      const depSt = (routes[k] as any[])?.find(s => s.name === depStation);
-      if (depSt && !depSVGPos) { const [gx, gy] = toGrid(depSt.lat, depSt.lng); depSVGPos = gridToXY(gx, gy); }
-      const arrSt = (routes[k] as any[])?.find(s => s.name === arrStation);
-      if (arrSt && !arrSVGPos) { const [gx, gy] = toGrid(arrSt.lat, arrSt.lng); arrSVGPos = gridToXY(gx, gy); }
-      if (depSVGPos && arrSVGPos) break;
-    }
-    return { depRouteSet, arrRouteSet, depSVGPos, arrSVGPos };
-  }, [depStation, arrStation]);
-
-  // ---- 路線ライン要素生成（オクチリニア: 0°/45°/90°整列） ----
+  // ---- 路線ライン要素（H路線: 水平線、V路線: 垂直線） ----
   const routeLineElements = useMemo(() => {
     const hasFilter = highlightedRouteKeys !== null;
     const elements: React.ReactElement[] = [];
-    const sortedKeys = [...DIAGRAM_ROUTE_KEYS].sort((a, b) => {
-      const aHi = highlightedRouteKeys?.has(a) ?? false;
-      const bHi = highlightedRouteKeys?.has(b) ?? false;
-      return Number(aHi) - Number(bHi);
-    });
+    const { stationPos, hTrack, vTrack, stationVRoute, stationHRoute } = schematicData;
+
+    // ハイライト路線を前面に（後に描画）
+    const sortedKeys = [...DIAGRAM_ROUTE_KEYS].sort((a, b) =>
+      Number(highlightedRouteKeys?.has(a) ?? false) - Number(highlightedRouteKeys?.has(b) ?? false)
+    );
+
     sortedKeys.forEach(routeKey => {
       if (!visibleRoutes.has(routeKey)) return;
       if (hasFilter && !highlightedRouteKeys!.has(routeKey)) return;
-      const data = routeGridData.get(routeKey);
-      if (!data) return;
+
+      const stns = routes[routeKey] as any[];
+      if (!stns?.length) return;
+
       const color = adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme);
-      const sw = hasFilter ? 1.8 : 1.1;
-      for (let i = 0; i < data.grids.length - 1; i++) {
-        const [gx1, gy1] = data.grids[i];
-        const [gx2, gy2] = data.grids[i + 1];
-        if (gx1 === gx2 && gy1 === gy2) continue;
-        const segKey = normSegKey(gx1, gy1, gx2, gy2);
-        const [ox, oy] = routeSegmentOffsets.get(`${routeKey}|${segKey}`) ?? [0, 0];
-        const [sx1, sy1] = gridToXY(gx1, gy1);
-        const [sx2, sy2] = gridToXY(gx2, gy2);
-        const d = makeOctilinearPath(sx1 + ox, sy1 + oy, sx2 + ox, sy2 + oy);
+      const sw = hasFilter ? 3 : 2;
+      const isH = hTrack.has(routeKey);
+      const trackVal = isH ? hTrack.get(routeKey)! : vTrack.get(routeKey)!;
+
+      for (let i = 0; i < stns.length - 1; i++) {
+        const s1 = stns[i], s2 = stns[i + 1];
+        const pos1 = stationPos.get(s1.name);
+        const pos2 = stationPos.get(s2.name);
+        if (!pos1 || !pos2) continue;
+
+        let x1: number, y1: number, x2: number, y2: number;
+        if (isH) {
+          // H路線: y=trackVal の水平線。xは各駅のcanonical x
+          x1 = pos1[0]; y1 = trackVal;
+          x2 = pos2[0]; y2 = trackVal;
+        } else {
+          // V路線: x=trackVal の垂直線。yは各駅のcanonical y
+          x1 = trackVal; y1 = pos1[1];
+          x2 = trackVal; y2 = pos2[1];
+        }
+        if (Math.abs(x1 - x2) < 0.5 && Math.abs(y1 - y2) < 0.5) continue;
+
         elements.push(
-          <path
-            key={`${routeKey}-${i}`}
-            d={d}
-            fill="none"
-            stroke={color}
-            strokeWidth={sw}
-            strokeOpacity={1.0}
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <line key={`${routeKey}-${i}`}
+            x1={x1} y1={y1} x2={x2} y2={y2}
+            stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round"
           />
         );
       }
     });
     return elements;
-  }, [visibleRoutes, routeGridData, routeSegmentOffsets, highlightedRouteKeys, theme]);
+  }, [schematicData, visibleRoutes, highlightedRouteKeys, theme]);
 
-  // ---- 駅レイアウト計算（スケール非依存・位置固定） ----
-  // scale変化では再計算しないことで、ズーム時にラベルが動くのを防ぐ
-
-  // 基準スケール(1.0)でのレイアウト定数
+  // ---- ラベル配置定数（スケール非依存・固定基準） ----
   const REF_FS = 5.5;
   const REF_LH = REF_FS * 1.5;
   const REF_GAP = 0.8;
   const REF_R_TRANSFER = 2.5;
   const REF_R_REGULAR = 1.5;
 
+  // ---- 駅レイアウト計算（スケール非依存・位置固定） ----
   const stationLayout = useMemo(() => {
+    const { stationPos, transferStations } = schematicData;
+    const hasFilter = highlightedRouteKeys !== null;
+
     function textW(name: string): number {
       let w = 0;
       for (const ch of name) w += ch.charCodeAt(0) > 127 ? REF_FS : REF_FS * 0.55;
@@ -371,32 +263,28 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       return [lx, ly];
     }
 
-    // 全駅を収集（重複排除） → 乗換駅優先、路線数降順でソート
-    const hasFilter = highlightedRouteKeys !== null;
-    const stations: Array<{ name: string; sx: number; sy: number; isTransfer: boolean; routes: number }> = [];
+    // 表示対象駅を収集（重複排除・乗換駅優先ソート）
+    const stations: Array<{ name: string; sx: number; sy: number; isTransfer: boolean }> = [];
     const seen = new Set<string>();
-    const routeCount = new Map<string, number>();
+
     DIAGRAM_ROUTE_KEYS.forEach(routeKey => {
       if (!visibleRoutes.has(routeKey)) return;
       if (hasFilter && !highlightedRouteKeys!.has(routeKey)) return;
-      const data = routeGridData.get(routeKey);
-      if (!data) return;
-      data.names.forEach((name, idx) => {
-        routeCount.set(name, (routeCount.get(name) ?? 0) + 1);
-        if (seen.has(name)) return;
-        seen.add(name);
-        const [gx, gy] = data.grids[idx];
-        const [sx, sy] = gridToXY(gx, gy);
-        stations.push({ name, sx, sy, isTransfer: transferStations.has(name), routes: 0 });
+      const stns = routes[routeKey] as any[];
+      stns?.forEach((st: any) => {
+        if (seen.has(st.name)) return;
+        seen.add(st.name);
+        const pos = stationPos.get(st.name);
+        if (!pos) return;
+        stations.push({ name: st.name, sx: pos[0], sy: pos[1], isTransfer: transferStations.has(st.name) });
       });
     });
-    stations.forEach(st => { st.routes = routeCount.get(st.name) ?? 1; });
     stations.sort((a, b) => {
       if (a.isTransfer !== b.isTransfer) return a.isTransfer ? -1 : 1;
-      return b.routes - a.routes;
+      return 0;
     });
 
-    // ラベル配置: 8方向 × 最大8ステップで空き探索（固定スケールで計算）
+    // ラベル配置: 8方向 × 最大8ステップ
     const placements = new Map<string, [number, number, boolean, number, number]>();
     stations.forEach(({ name, sx, sy, isTransfer }) => {
       const lw = textW(name);
@@ -407,10 +295,9 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
           const [lx, ly] = labelPos(sx, sy, lw, r, dx, dy, step);
           if (!hits(lx, ly, lw)) {
             addBox([lx, ly, lx + lw, ly + REF_LH]);
-            const displaced = step > 0 || dx !== 1 || dy !== 0;
             const anchorX = sx + (lx > sx ? r : lx + lw < sx ? -r : 0);
             const anchorY = sy + (ly + REF_LH < sy ? -r : ly > sy ? r : 0);
-            placements.set(name, [lx, ly, displaced, anchorX, anchorY]);
+            placements.set(name, [lx, ly, step > 0 || dx !== 1 || dy !== 0, anchorX, anchorY]);
             found = true;
             break outer;
           }
@@ -419,17 +306,14 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       if (!found) {
         const [lx, ly] = labelPos(sx, sy, lw, r, 1, 0, 9);
         addBox([lx, ly, lx + lw, ly + REF_LH]);
-        const anchorX = sx + r;
-        const anchorY = sy;
-        placements.set(name, [lx, ly, true, anchorX, anchorY]);
+        placements.set(name, [lx, ly, true, sx + r, sy]);
       }
     });
 
     return { stations, placements };
-  }, [visibleRoutes, routeGridData, transferStations, highlightedRouteKeys]);
+  }, [schematicData, visibleRoutes, highlightedRouteKeys]);
 
-  // ---- 駅マーカー要素生成（スケール依存のサイズのみ更新、位置は固定） ----
-
+  // ---- 駅SVG要素（スケール依存のサイズのみ更新・位置固定） ----
   const stationElements = useMemo(() => {
     const colors = getThemeColors(theme);
     const s = transform.scale;
@@ -503,7 +387,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
 
   const handleMouseUp = useCallback(() => { isPanning.current = false; }, []);
 
-  // ---- マウスカーソル位置基準ズーム（non-passive wheel event） ----
+  // ---- ホイールズーム（カーソル基準） ----
   useEffect(() => {
     const area = mapAreaRef.current;
     if (!area) return;
@@ -524,22 +408,17 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     return () => area.removeEventListener('wheel', onWheel);
   }, []);
 
-  // ---- タッチ操作（スマホ対応: 1本指パン + 2本指ピンチズーム） ----
+  // ---- タッチ操作（1本指パン・2本指ピンチ） ----
   useEffect(() => {
     const area = mapAreaRef.current;
     if (!area) return;
     let lastTouches: TouchList | null = null;
 
-    const onTouchStart = (e: TouchEvent) => {
-      e.preventDefault();
-      lastTouches = e.touches;
-    };
-
+    const onTouchStart = (e: TouchEvent) => { e.preventDefault(); lastTouches = e.touches; };
     const onTouchMove = (e: TouchEvent) => {
       e.preventDefault();
       if (!lastTouches) return;
       const rect = area.getBoundingClientRect();
-
       if (e.touches.length === 1 && lastTouches.length === 1) {
         const dx = e.touches[0].clientX - lastTouches[0].clientX;
         const dy = e.touches[0].clientY - lastTouches[0].clientY;
@@ -566,7 +445,6 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       }
       lastTouches = e.touches;
     };
-
     const onTouchEnd = () => { lastTouches = null; };
 
     area.addEventListener('touchstart', onTouchStart, { passive: false });
@@ -579,36 +457,28 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     };
   }, []);
 
-  // ---- 出発/到着駅の中間点にビューをセンタリング ----
+  // ---- 出発/到着駅の中間にビューをセンタリング ----
   useEffect(() => {
     const area = mapAreaRef.current;
     if (!area) return;
     const rect = area.getBoundingClientRect();
     if (rect.width === 0) return;
-
-    let depPos: [number, number] | null = null;
-    let arrPos: [number, number] | null = null;
-    for (const k of DIAGRAM_ROUTE_KEYS) {
-      const d = (routes[k] as any[])?.find(s => s.name === depStation);
-      if (d && !depPos) { const [gx, gy] = toGrid(d.lat, d.lng); depPos = gridToXY(gx, gy); }
-      const a = (routes[k] as any[])?.find(s => s.name === arrStation);
-      if (a && !arrPos) { const [gx, gy] = toGrid(a.lat, a.lng); arrPos = gridToXY(gx, gy); }
-      if (depPos && arrPos) break;
-    }
+    const depPos = schematicData.stationPos.get(departure) ?? null;
+    const arrPos = schematicData.stationPos.get(arrival) ?? null;
     if (!depPos && !arrPos) return;
-
     const cx = depPos && arrPos ? (depPos[0] + arrPos[0]) / 2 : (depPos ?? arrPos)![0];
     const cy = depPos && arrPos ? (depPos[1] + arrPos[1]) / 2 : (depPos ?? arrPos)![1];
-    const scale = 0.65;
+    const scale = 0.6;
     setTransform({ x: rect.width / 2 - cx * scale, y: rect.height / 2 - cy * scale, scale });
-  }, [depStation, arrStation]);
+  }, [departure, arrival, schematicData]);
 
   const colors = getThemeColors(theme);
-  const mapBg = theme === 'dark' ? '#1e2a1e' : '#eef4ee';
+  const mapBg = theme === 'dark' ? '#1a1f1a' : '#f0f4f0';
+  const depSVGPos = schematicData.stationPos.get(departure) ?? null;
+  const arrSVGPos = schematicData.stationPos.get(arrival) ?? null;
 
   return (
     <div style={{ display: 'flex', height: '100%', width: '100%', fontFamily: 'sans-serif', background: colors.background }}>
-      {/* ---- SVGマップエリア ---- */}
       <div
         ref={mapAreaRef}
         style={{ flex: 1, position: 'relative', overflow: 'hidden', background: colors.surface }}
@@ -617,56 +487,43 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        {/* 操作説明（PC幅のみ表示） */}
+        {/* 操作ヒント（PC幅のみ） */}
         <div style={{
           position: 'absolute', bottom: 8, right: 8, zIndex: 20,
-          background: colors.surfaceElevated,
-          border: `1px solid ${colors.border}`,
+          background: colors.surfaceElevated, border: `1px solid ${colors.border}`,
           borderRadius: '4px', padding: '4px 7px', fontSize: '10px',
-          color: colors.textSecondary,
-          boxShadow: `0 1px 4px ${colors.shadow}`,
-          display: 'none', // JS不要でCSSのみ対応 — PC: inline-block
-        }}
-          className="diagram-hint"
-        >
-          スクロール: ズーム | ドラッグ: 移動 | ●: 乗換駅
+          color: colors.textSecondary, boxShadow: `0 1px 4px ${colors.shadow}`,
+          display: 'none',
+        }} className="diagram-hint">
+          スクロール: ズーム ｜ ドラッグ: 移動
         </div>
-        <style>{`
-          @media (min-width: 600px) { .diagram-hint { display: block !important; } }
-        `}</style>
+        <style>{`@media (min-width: 600px) { .diagram-hint { display: block !important; } }`}</style>
 
-
-        {/* SVG */}
-        <svg
-          style={{ width: '100%', height: '100%', cursor: isPanning.current ? 'grabbing' : 'grab', display: 'block' }}
-        >
+        <svg style={{ width: '100%', height: '100%', cursor: isPanning.current ? 'grabbing' : 'grab', display: 'block' }}>
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.scale})`}>
-            {/* 地図背景 */}
-            <rect x={PAD} y={PAD} width={GX_MAX * CELL_PX} height={GY_MAX * CELL_PX} fill={mapBg} rx={2} />
+            {/* 背景 */}
+            <rect x={0} y={0} width={SVG_W} height={SVG_H} fill={mapBg} rx={4} />
 
             {/* 路線ライン */}
             {routeLineElements}
 
-            {/* 乗換駅マーカー */}
+            {/* 駅マーカー・ラベル */}
             {stationElements}
 
             {/* 出発駅マーカー */}
             {depSVGPos && (() => {
               const s = transform.scale;
               const r = Math.max(3, 6 / s);
-              const fs = Math.max(5, Math.min(11, 7 / s));
-              const depColor = colors.success;
-              const showText = s >= 0.5;
+              const fs = Math.max(5, Math.min(12, 8 / s));
+              const c = colors.success;
               return (
                 <g style={{ pointerEvents: 'none' }}>
-                  <circle cx={depSVGPos[0]} cy={depSVGPos[1]} r={r} fill={depColor} stroke={colors.background} strokeWidth={1.5 / s} />
-                  {showText && (
-                    <text x={depSVGPos[0] + r + 2 / s} y={depSVGPos[1] + fs * 0.35}
-                      fontSize={fs} fontWeight="bold" fill={depColor}
-                      stroke={colors.background} strokeWidth={2 / s} paintOrder="stroke"
-                      style={{ userSelect: 'none' }}
-                    >{depStation}</text>
-                  )}
+                  <circle cx={depSVGPos[0]} cy={depSVGPos[1]} r={r} fill={c} stroke={colors.background} strokeWidth={1.5 / s} />
+                  <text x={depSVGPos[0] + r + 2 / s} y={depSVGPos[1] + fs * 0.35}
+                    fontSize={fs} fontWeight="bold" fill={c}
+                    stroke={colors.background} strokeWidth={2 / s} paintOrder="stroke"
+                    style={{ userSelect: 'none' }}
+                  >{departure}</text>
                 </g>
               );
             })()}
@@ -675,19 +532,16 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
             {arrSVGPos && (() => {
               const s = transform.scale;
               const r = Math.max(3, 6 / s);
-              const fs = Math.max(5, Math.min(11, 7 / s));
-              const arrColor = theme === 'dark' ? '#ff5555' : '#F44336';
-              const showText = s >= 0.5;
+              const fs = Math.max(5, Math.min(12, 8 / s));
+              const c = theme === 'dark' ? '#ff5555' : '#F44336';
               return (
                 <g style={{ pointerEvents: 'none' }}>
-                  <circle cx={arrSVGPos[0]} cy={arrSVGPos[1]} r={r} fill={arrColor} stroke={colors.background} strokeWidth={1.5 / s} />
-                  {showText && (
-                    <text x={arrSVGPos[0] + r + 2 / s} y={arrSVGPos[1] + fs * 0.35}
-                      fontSize={fs} fontWeight="bold" fill={arrColor}
-                      stroke={colors.background} strokeWidth={2 / s} paintOrder="stroke"
-                      style={{ userSelect: 'none' }}
-                    >{arrStation}</text>
-                  )}
+                  <circle cx={arrSVGPos[0]} cy={arrSVGPos[1]} r={r} fill={c} stroke={colors.background} strokeWidth={1.5 / s} />
+                  <text x={arrSVGPos[0] + r + 2 / s} y={arrSVGPos[1] + fs * 0.35}
+                    fontSize={fs} fontWeight="bold" fill={c}
+                    stroke={colors.background} strokeWidth={2 / s} paintOrder="stroke"
+                    style={{ userSelect: 'none' }}
+                  >{arrival}</text>
                 </g>
               );
             })()}
