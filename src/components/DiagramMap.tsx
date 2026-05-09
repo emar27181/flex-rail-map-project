@@ -315,9 +315,14 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     return elements;
   }, [visibleRoutes, routeGridData, routeSegmentOffsets, depRouteSet, arrRouteSet, theme]);
 
-  // ---- 駅マーカー要素生成（乗換駅のみ） ----
-  // ラベル表示はズームが十分なときだけ（重なり防止）
-  const LABEL_SCALE_THRESHOLD = 0.9; // これ以上のscaleでラベルを表示
+  // ---- 駅マーカー要素生成（乗換駅のみ、ラベル衝突検出付き） ----
+
+  // テキスト幅推定: ASCII ≈ 0.55*fs, CJK ≈ 1.0*fs (SVG単位)
+  function estimateTextW(text: string, fs: number): number {
+    let w = 0;
+    for (const ch of text) w += ch.charCodeAt(0) > 127 ? fs : fs * 0.55;
+    return w;
+  }
 
   const stationElements = useMemo(() => {
     const colors = getThemeColors(theme);
@@ -326,38 +331,71 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     const fs = Math.max(4, Math.min(10, 6 / s));
     const sw = 1.8 / s;
     const csw = 0.8 / s;
-    const offset = r + 2 / s;
-    const showLabel = s >= LABEL_SCALE_THRESHOLD;
-    const elements: React.ReactElement[] = [];
-    const rendered = new Set<string>();
+    const lx0 = r + 2 / s;  // ラベルx開始オフセット
+    const lh = fs * 1.4;    // ラベル高さ
+    const GAP = 1.5 / s;    // ラベル間マージン
+
+    // ── 1. 全乗換駅を収集し、通過路線数順（降順）でソート ──
+    const candidates: Array<{ name: string; sx: number; sy: number }> = [];
+    const seen = new Set<string>();
+    const routeCount = new Map<string, number>();
+
     DIAGRAM_ROUTE_KEYS.forEach(routeKey => {
       if (!visibleRoutes.has(routeKey)) return;
       const data = routeGridData.get(routeKey);
       if (!data) return;
       data.names.forEach((name, idx) => {
-        if (rendered.has(name)) return;
-        if (!transferStations.has(name)) return;
-        rendered.add(name);
+        routeCount.set(name, (routeCount.get(name) ?? 0) + 1);
+        if (seen.has(name) || !transferStations.has(name)) return;
+        seen.add(name);
         const [gx, gy] = data.grids[idx];
         const [sx, sy] = gridToXY(gx, gy);
-        elements.push(
-          <g key={name}>
-            <circle cx={sx} cy={sy} r={r} fill={colors.surfaceElevated} stroke={colors.textSecondary} strokeWidth={csw} />
-            {showLabel && (
-              <text
-                x={sx + offset} y={sy + fs * 0.4}
-                fontSize={fs} fontWeight="bold" fill={colors.text}
-                stroke={colors.background} strokeWidth={sw} paintOrder="stroke"
-                style={{ pointerEvents: 'none', userSelect: 'none' }}
-              >
-                {name}
-              </text>
-            )}
-          </g>
-        );
+        candidates.push({ name, sx, sy });
       });
     });
-    return elements;
+    candidates.sort((a, b) => (routeCount.get(b.name) ?? 0) - (routeCount.get(a.name) ?? 0));
+
+    // ── 2. グリーディー衝突検出: 既配置ボックスと重ならない場合のみラベル表示 ──
+    // ボックス形式: [lx, ly, lx+lw, ly+lh]
+    const placed: Array<[number, number, number, number]> = [];
+
+    function overlaps(lx: number, ly: number, lw: number): boolean {
+      const rx = lx + lw, ry = ly + lh;
+      for (const [px, py, prx, pry] of placed) {
+        if (lx < prx + GAP && rx + GAP > px && ly < pry + GAP && ry + GAP > py) return true;
+      }
+      return false;
+    }
+
+    // ── 3. 要素生成 ──
+    const labelVisible = new Map<string, boolean>();
+    candidates.forEach(({ name, sx, sy }) => {
+      const lw = estimateTextW(name, fs);
+      const lx = sx + lx0;
+      const ly = sy - lh * 0.6;
+      if (!overlaps(lx, ly, lw)) {
+        placed.push([lx, ly, lx + lw, ly + lh]);
+        labelVisible.set(name, true);
+      } else {
+        labelVisible.set(name, false);
+      }
+    });
+
+    return candidates.map(({ name, sx, sy }) => (
+      <g key={name}>
+        <circle cx={sx} cy={sy} r={r} fill={colors.surfaceElevated} stroke={colors.textSecondary} strokeWidth={csw} />
+        {labelVisible.get(name) && (
+          <text
+            x={sx + lx0} y={sy + fs * 0.4}
+            fontSize={fs} fontWeight="bold" fill={colors.text}
+            stroke={colors.background} strokeWidth={sw} paintOrder="stroke"
+            style={{ pointerEvents: 'none', userSelect: 'none' }}
+          >
+            {name}
+          </text>
+        )}
+      </g>
+    ));
   }, [visibleRoutes, routeGridData, transferStations, transform.scale, theme]);
 
   // ---- パン操作 ----
