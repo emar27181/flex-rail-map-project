@@ -43,6 +43,22 @@ function geoY(lat: number): number {
   return LAYOUT_PAD + (GEO_MAX_LAT - lat) / (GEO_MAX_LAT - GEO_MIN_LAT) * (SVG_H - 2 * LAYOUT_PAD);
 }
 
+// 地理座標とトラック座標のブレンド率 (0=純スケマティック, 1=純地理)
+const BLEND = 0.35;
+
+// セグメントを 0°/45°/90° に丸めたoctilinear path を生成
+function makeOctilinearPath(x1: number, y1: number, x2: number, y2: number): string {
+  const dx = x2 - x1, dy = y2 - y1;
+  const adx = Math.abs(dx), ady = Math.abs(dy);
+  if (adx < 0.5 || ady < 0.5 || Math.abs(adx - ady) < 0.5) {
+    return `M${x1},${y1} L${x2},${y2}`;
+  }
+  const sx = Math.sign(dx), sy = Math.sign(dy);
+  const diagSteps = Math.min(adx, ady);
+  const mx = x1 + sx * diagSteps, my = y1 + sy * diagSteps;
+  return `M${x1},${y1} L${mx},${my} L${x2},${y2}`;
+}
+
 // 路線の主方向: 経度幅 >= 緯度幅*1.1 → 横(H)、それ以外 → 縦(V)
 function classifyRoute(k: RouteKey): 'H' | 'V' {
   const stns = routes[k] as Array<{ lat: number; lng: number }> | undefined;
@@ -128,7 +144,8 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       });
     });
 
-    // 駅の正規位置: H-V交点 / H路線上 / V路線上
+    // 駅の位置: スケマティックトラックと地理座標をBLENDで混合
+    // H-V乗換駅は交点付近、H専用は水平トラック付近、V専用は垂直トラック付近
     const stationPos = new Map<string, [number, number]>();
     const allNames = new Set([...stationHRoute.keys(), ...stationVRoute.keys()]);
 
@@ -136,12 +153,17 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       const hR = stationHRoute.get(name);
       const vR = stationVRoute.get(name);
       const geo = stationGeo.get(name)!;
+      const gx = geoX(geo.lng), gy = geoY(geo.lat);
       if (hR && vR) {
-        stationPos.set(name, [vTrack.get(vR)!, hTrack.get(hR)!]);
+        // H-V乗換: トラック交点 × (1-BLEND) + 地理 × BLEND
+        const tx = vTrack.get(vR)!, ty = hTrack.get(hR)!;
+        stationPos.set(name, [tx * (1 - BLEND) + gx * BLEND, ty * (1 - BLEND) + gy * BLEND]);
       } else if (hR) {
-        stationPos.set(name, [geoX(geo.lng), hTrack.get(hR)!]);
+        // H専用: x=地理経度、y=トラック×(1-BLEND)+地理×BLEND
+        stationPos.set(name, [gx, hTrack.get(hR)! * (1 - BLEND) + gy * BLEND]);
       } else if (vR) {
-        stationPos.set(name, [vTrack.get(vR)!, geoY(geo.lat)]);
+        // V専用: x=トラック×(1-BLEND)+地理×BLEND、y=地理緯度
+        stationPos.set(name, [vTrack.get(vR)! * (1 - BLEND) + gx * BLEND, gy]);
       }
     });
 
@@ -155,13 +177,12 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     return { stationPos, hTrack, vTrack, hRoutes, vRoutes, transferStations, stationVRoute, stationHRoute };
   }, [visibleRoutes]);
 
-  // ---- 路線ライン要素（H路線: 水平線、V路線: 垂直線） ----
+  // ---- 路線ライン要素（octilinear: 0°/45°/90°で接続） ----
   const routeLineElements = useMemo(() => {
     const hasFilter = highlightedRouteKeys !== null;
     const elements: React.ReactElement[] = [];
-    const { stationPos, hTrack, vTrack, stationVRoute, stationHRoute } = schematicData;
+    const { stationPos } = schematicData;
 
-    // ハイライト路線を前面に（後に描画）
     const sortedKeys = [...DIAGRAM_ROUTE_KEYS].sort((a, b) =>
       Number(highlightedRouteKeys?.has(a) ?? false) - Number(highlightedRouteKeys?.has(b) ?? false)
     );
@@ -175,31 +196,19 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
 
       const color = adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme);
       const sw = hasFilter ? 3 : 2;
-      const isH = hTrack.has(routeKey);
-      const trackVal = isH ? hTrack.get(routeKey)! : vTrack.get(routeKey)!;
 
       for (let i = 0; i < stns.length - 1; i++) {
-        const s1 = stns[i], s2 = stns[i + 1];
-        const pos1 = stationPos.get(s1.name);
-        const pos2 = stationPos.get(s2.name);
+        const pos1 = stationPos.get(stns[i].name);
+        const pos2 = stationPos.get(stns[i + 1].name);
         if (!pos1 || !pos2) continue;
-
-        let x1: number, y1: number, x2: number, y2: number;
-        if (isH) {
-          // H路線: y=trackVal の水平線。xは各駅のcanonical x
-          x1 = pos1[0]; y1 = trackVal;
-          x2 = pos2[0]; y2 = trackVal;
-        } else {
-          // V路線: x=trackVal の垂直線。yは各駅のcanonical y
-          x1 = trackVal; y1 = pos1[1];
-          x2 = trackVal; y2 = pos2[1];
-        }
+        const [x1, y1] = pos1, [x2, y2] = pos2;
         if (Math.abs(x1 - x2) < 0.5 && Math.abs(y1 - y2) < 0.5) continue;
 
         elements.push(
-          <line key={`${routeKey}-${i}`}
-            x1={x1} y1={y1} x2={x2} y2={y2}
-            stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round"
+          <path key={`${routeKey}-${i}`}
+            d={makeOctilinearPath(x1, y1, x2, y2)}
+            fill="none" stroke={color} strokeWidth={sw}
+            strokeLinecap="round" strokeLinejoin="round"
           />
         );
       }
