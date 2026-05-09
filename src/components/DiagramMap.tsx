@@ -157,24 +157,27 @@ function makeOctilinearPath(
 // ---- メインコンポーネント ----
 interface DiagramMapProps {
   visibleRoutes?: Set<RouteKey>;
+  highlightedRouteKeys?: Set<RouteKey> | null;
   departure?: string;
   arrival?: string;
   theme?: 'light' | 'dark';
   language?: 'japanese' | 'english';
+  showStationNames?: boolean;
 }
 
 const DiagramMap: React.FC<DiagramMapProps> = ({
   visibleRoutes: externalVisibleRoutes,
-  departure = '横浜',
-  arrival = '新宿',
+  highlightedRouteKeys = null,
+  departure = '',
+  arrival = '',
   theme = 'light',
   language = 'japanese',
+  showStationNames = true,
 }) => {
   const visibleRoutes = externalVisibleRoutes ?? new Set(DIAGRAM_ROUTE_KEYS);
   const depStation = departure;
   const arrStation = arrival;
   const [transform, setTransform] = useState({ x: 20, y: 20, scale: 0.55 });
-  const [showWipNote, setShowWipNote] = useState(false);
 
   const isPanning = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
@@ -273,22 +276,20 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
 
   // ---- 路線ライン要素生成（オクチリニア: 0°/45°/90°整列） ----
   const routeLineElements = useMemo(() => {
-    const hasFilter = depRouteSet.size > 0 || arrRouteSet.size > 0;
+    const hasFilter = highlightedRouteKeys !== null;
     const elements: React.ReactElement[] = [];
-    // 非ハイライト路線を先に描画（背面）、ハイライト路線を後に描画（前面）
     const sortedKeys = [...DIAGRAM_ROUTE_KEYS].sort((a, b) => {
-      const aHi = depRouteSet.has(a) || arrRouteSet.has(a);
-      const bHi = depRouteSet.has(b) || arrRouteSet.has(b);
+      const aHi = highlightedRouteKeys?.has(a) ?? false;
+      const bHi = highlightedRouteKeys?.has(b) ?? false;
       return Number(aHi) - Number(bHi);
     });
     sortedKeys.forEach(routeKey => {
       if (!visibleRoutes.has(routeKey)) return;
+      if (hasFilter && !highlightedRouteKeys!.has(routeKey)) return;
       const data = routeGridData.get(routeKey);
       if (!data) return;
       const color = adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme);
-      const isHighlighted = depRouteSet.has(routeKey) || arrRouteSet.has(routeKey);
-      const opacity = hasFilter ? (isHighlighted ? 1.0 : 0.15) : 1.0;
-      const sw = hasFilter ? (isHighlighted ? 1.8 : 0.8) : 1.1;
+      const sw = hasFilter ? 1.8 : 1.1;
       for (let i = 0; i < data.grids.length - 1; i++) {
         const [gx1, gy1] = data.grids[i];
         const [gx2, gy2] = data.grids[i + 1];
@@ -305,7 +306,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
             fill="none"
             stroke={color}
             strokeWidth={sw}
-            strokeOpacity={opacity}
+            strokeOpacity={1.0}
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -313,82 +314,105 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       }
     });
     return elements;
-  }, [visibleRoutes, routeGridData, routeSegmentOffsets, depRouteSet, arrRouteSet, theme]);
+  }, [visibleRoutes, routeGridData, routeSegmentOffsets, highlightedRouteKeys, theme]);
 
-  // ---- 駅マーカー要素生成（乗換駅のみ、ラベル全表示・ずらし配置） ----
+  // ---- 駅マーカー要素生成（全駅、ラベル全表示・ずらし配置） ----
 
   const stationElements = useMemo(() => {
     const colors = getThemeColors(theme);
     const s = transform.scale;
-    const r = Math.max(1.5, 2.5 / s);
-    const fs = Math.max(4, Math.min(10, 6 / s));
-    const sw = 1.8 / s;
-    const csw = 0.8 / s;
-    const lh = fs * 1.4;
-    const GAP = 1.0 / s;
-    const BASE_OFF = r + 2.5 / s;
+    const rTransfer = Math.max(1.5, 2.5 / s);
+    const rRegular = Math.max(1.0, 1.5 / s);
+    const fs = Math.max(3.5, Math.min(9, 5.5 / s));
+    const sw = 1.5 / s;
+    const lh = fs * 1.5;
+    const GAP = 0.8 / s;
 
-    // テキスト幅推定: CJK=1.0*fs, ASCII=0.55*fs
     function textW(name: string): number {
       let w = 0;
       for (const ch of name) w += ch.charCodeAt(0) > 127 ? fs : fs * 0.55;
       return w;
     }
 
-    // 配置済みボックス: [x0,y0,x1,y1]
-    const placed: Array<[number, number, number, number]> = [];
+    // 空間グリッドで衝突検出を高速化 (O(n) → O(1) 平均)
+    const CELL = lh * 3;
+    const grid = new Map<string, Array<[number, number, number, number]>>();
+
+    function cellKey(x: number, y: number) { return `${Math.floor(x / CELL)},${Math.floor(y / CELL)}`; }
+
+    function addBox(box: [number, number, number, number]) {
+      const [x0, y0, x1, y1] = box;
+      for (let gx = Math.floor(x0 / CELL); gx <= Math.ceil(x1 / CELL); gx++) {
+        for (let gy = Math.floor(y0 / CELL); gy <= Math.ceil(y1 / CELL); gy++) {
+          const k = `${gx},${gy}`;
+          if (!grid.has(k)) grid.set(k, []);
+          grid.get(k)!.push(box);
+        }
+      }
+    }
 
     function hits(lx: number, ly: number, lw: number): boolean {
       const x1 = lx + lw, y1 = ly + lh;
-      for (const [px, py, px1, py1] of placed) {
-        if (lx < px1 + GAP && x1 + GAP > px && ly < py1 + GAP && y1 + GAP > py) return true;
+      for (let gx = Math.floor(lx / CELL); gx <= Math.ceil(x1 / CELL); gx++) {
+        for (let gy = Math.floor(ly / CELL); gy <= Math.ceil(y1 / CELL); gy++) {
+          for (const [px, py, px1, py1] of grid.get(`${gx},${gy}`) ?? []) {
+            if (lx < px1 + GAP && x1 + GAP > px && ly < py1 + GAP && y1 + GAP > py) return true;
+          }
+        }
       }
       return false;
     }
 
-    // 8方向候補 (dx,dy): dx>0=右, dx<0=左, dy<0=上, dy>0=下
     const DIRS: Array<[number, number]> = [
       [1, 0], [-1, 0], [0, -1], [0, 1],
       [1, -1], [-1, -1], [1, 1], [-1, 1],
     ];
 
-    function labelPos(sx: number, sy: number, lw: number, dx: number, dy: number, step = 0): [number, number] {
-      const off = BASE_OFF + step * (lh + GAP);
+    function labelPos(sx: number, sy: number, lw: number, r: number, dx: number, dy: number, step: number): [number, number] {
+      const off = r + 2 / s + step * (lh + GAP);
       const lx = dx > 0 ? sx + off : dx < 0 ? sx - off - lw : sx - lw / 2;
       const ly = dy < 0 ? sy - off - lh : dy > 0 ? sy + off : sy - lh * 0.5;
       return [lx, ly];
     }
 
-    // 全乗換駅を収集 → 路線数降順ソート（主要駅優先）
-    const stations: Array<{ name: string; sx: number; sy: number; routes: number }> = [];
+    // 全駅を収集（重複排除） → 乗換駅優先、路線数降順でソート
+    const hasFilter = highlightedRouteKeys !== null;
+    const stations: Array<{ name: string; sx: number; sy: number; isTransfer: boolean; routes: number }> = [];
     const seen = new Set<string>();
     const routeCount = new Map<string, number>();
     DIAGRAM_ROUTE_KEYS.forEach(routeKey => {
       if (!visibleRoutes.has(routeKey)) return;
+      if (hasFilter && !highlightedRouteKeys!.has(routeKey)) return;
       const data = routeGridData.get(routeKey);
       if (!data) return;
       data.names.forEach((name, idx) => {
         routeCount.set(name, (routeCount.get(name) ?? 0) + 1);
-        if (seen.has(name) || !transferStations.has(name)) return;
+        if (seen.has(name)) return;
         seen.add(name);
         const [gx, gy] = data.grids[idx];
         const [sx, sy] = gridToXY(gx, gy);
-        stations.push({ name, sx, sy, routes: 0 });
+        stations.push({ name, sx, sy, isTransfer: transferStations.has(name), routes: 0 });
       });
     });
     stations.forEach(st => { st.routes = routeCount.get(st.name) ?? 1; });
-    stations.sort((a, b) => b.routes - a.routes);
+    // 乗換駅を先に、次いで路線数降順
+    stations.sort((a, b) => {
+      if (a.isTransfer !== b.isTransfer) return a.isTransfer ? -1 : 1;
+      return b.routes - a.routes;
+    });
 
-    // 各駅にラベル位置を決定（8方向 × 最大5ステップ探索）
-    const placements = new Map<string, [number, number, boolean]>(); // name → [lx, ly, displaced]
-    stations.forEach(({ name, sx, sy }) => {
+    // ラベル配置: 8方向 × 最大8ステップで空き探索
+    const placements = new Map<string, [number, number, boolean]>();
+    stations.forEach(({ name, sx, sy, isTransfer }) => {
       const lw = textW(name);
+      const r = isTransfer ? rTransfer : rRegular;
       let found = false;
-      outer: for (let step = 0; step <= 5; step++) {
+      outer: for (let step = 0; step <= 8; step++) {
         for (const [dx, dy] of DIRS) {
-          const [lx, ly] = labelPos(sx, sy, lw, dx, dy, step);
+          const [lx, ly] = labelPos(sx, sy, lw, r, dx, dy, step);
           if (!hits(lx, ly, lw)) {
-            placed.push([lx, ly, lx + lw, ly + lh]);
+            const box: [number, number, number, number] = [lx, ly, lx + lw, ly + lh];
+            addBox(box);
             placements.set(name, [lx, ly, step > 0 || dx !== 1 || dy !== 0]);
             found = true;
             break outer;
@@ -396,32 +420,52 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         }
       }
       if (!found) {
-        // 最終フォールバック: 右に強制配置
-        const [lx, ly] = labelPos(sx, sy, lw, 1, 0, 6);
-        placed.push([lx, ly, lx + lw, ly + lh]);
+        const [lx, ly] = labelPos(sx, sy, lw, r, 1, 0, 9);
+        const box: [number, number, number, number] = [lx, ly, lx + lw, ly + lh];
+        addBox(box);
         placements.set(name, [lx, ly, true]);
       }
     });
 
-    return stations.map(({ name, sx, sy }) => {
+    if (!showStationNames) {
+      // ラベル非表示: マーカーのみ
+      return stations.map(({ name, sx, sy, isTransfer }) => {
+        const r = isTransfer ? rTransfer : rRegular;
+        return (
+          <g key={name}>
+            <circle cx={sx} cy={sy} r={r}
+              fill={isTransfer ? colors.surfaceElevated : colors.textMuted}
+              stroke={isTransfer ? colors.textSecondary : 'none'}
+              strokeWidth={isTransfer ? 0.8 / s : 0}
+            />
+          </g>
+        );
+      });
+    }
+
+    return stations.map(({ name, sx, sy, isTransfer }) => {
       const [lx, ly, displaced] = placements.get(name)!;
       const lw = textW(name);
-      // ラベルがずれている場合は細いリード線を引く
+      const r = isTransfer ? rTransfer : rRegular;
       const anchorX = sx + (lx > sx ? r : lx + lw < sx ? -r : 0);
       const anchorY = sy + (ly + lh < sy ? -r : ly > sy ? r : 0);
       return (
         <g key={name}>
           {displaced && (
-            <line
-              x1={anchorX} y1={anchorY}
-              x2={lx + lw * 0.5} y2={ly + lh * 0.5}
-              stroke={colors.textMuted} strokeWidth={0.6 / s} strokeOpacity={0.5}
+            <line x1={anchorX} y1={anchorY} x2={lx + lw * 0.5} y2={ly + lh * 0.5}
+              stroke={colors.textMuted} strokeWidth={0.5 / s} strokeOpacity={0.4}
             />
           )}
-          <circle cx={sx} cy={sy} r={r} fill={colors.surfaceElevated} stroke={colors.textSecondary} strokeWidth={csw} />
+          <circle cx={sx} cy={sy} r={r}
+            fill={isTransfer ? colors.surfaceElevated : colors.textMuted}
+            stroke={isTransfer ? colors.textSecondary : 'none'}
+            strokeWidth={isTransfer ? 0.8 / s : 0}
+          />
           <text
             x={lx} y={ly + fs}
-            fontSize={fs} fontWeight="bold" fill={colors.text}
+            fontSize={fs}
+            fontWeight={isTransfer ? 'bold' : 'normal'}
+            fill={isTransfer ? colors.text : colors.textSecondary}
             stroke={colors.background} strokeWidth={sw} paintOrder="stroke"
             style={{ pointerEvents: 'none', userSelect: 'none' }}
           >
@@ -430,7 +474,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         </g>
       );
     });
-  }, [visibleRoutes, routeGridData, transferStations, transform.scale, theme]);
+  }, [visibleRoutes, routeGridData, transferStations, transform.scale, theme, showStationNames, highlightedRouteKeys]);
 
   // ---- パン操作 ----
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -581,43 +625,6 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
           @media (min-width: 600px) { .diagram-hint { display: block !important; } }
         `}</style>
 
-        {/* 準備中バッジ */}
-        <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 20 }}>
-          <button
-            onClick={() => setShowWipNote(v => !v)}
-            style={{
-              background: colors.warning, color: '#fff', border: 'none',
-              borderRadius: '4px', padding: '5px 10px',
-              fontSize: '11px', fontWeight: 'bold', cursor: 'pointer',
-              boxShadow: `0 1px 4px ${colors.shadow}`,
-            }}
-          >
-            🚧 準備中
-          </button>
-        </div>
-
-        {/* WIPノートパネル */}
-        {showWipNote && (
-          <div style={{
-            position: 'absolute', top: 40, right: 8, zIndex: 30,
-            background: colors.surfaceElevated,
-            border: `1px solid ${colors.border}`,
-            borderRadius: '6px', padding: '12px 14px',
-            fontSize: '11px', color: colors.text, width: '260px',
-            boxShadow: `0 4px 12px ${colors.shadowHeavy}`, lineHeight: '1.6',
-          }}>
-            <div style={{ fontWeight: 'bold', marginBottom: '6px', color: colors.warning, fontSize: '12px' }}>
-              🚧 路線図モード — 仮実装
-            </div>
-            <div style={{ marginBottom: '6px', color: colors.textSecondary, fontSize: '10px' }}>
-              地理座標 → グリッドスナップ + 並走路線オフセット
-            </div>
-            <button
-              onClick={() => setShowWipNote(false)}
-              style={{ fontSize: '10px', padding: '3px 8px', border: `1px solid ${colors.border}`, borderRadius: '3px', cursor: 'pointer', background: colors.surface, color: colors.text }}
-            >閉じる</button>
-          </div>
-        )}
 
         {/* SVG */}
         <svg

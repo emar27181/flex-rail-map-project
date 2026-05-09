@@ -2598,10 +2598,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
           ) : (
             <DiagramMap
               visibleRoutes={visibleRoutes}
+              highlightedRouteKeys={highlightedRouteKeys}
               departure={departure?.name ?? ''}
               arrival={arrival?.name ?? ''}
               theme={theme}
               language={currentLanguage}
+              showStationNames={showStationNames}
             />
           )}
 
