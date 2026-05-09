@@ -21,6 +21,7 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
+import layoutData from '../data/diagramLayouts/latest.json';
 
 // ---- 表示対象路線（東京圏全路線） ----
 const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
@@ -179,7 +180,10 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
   const lastPos = useRef({ x: 0, y: 0 });
   const mapAreaRef = useRef<HTMLDivElement>(null);
 
-  // ---- 路線データをグリッド座標に変換 ----
+  // ---- 路線データをグリッド座標に変換（最適化済みレイアウトがあればそちらを優先） ----
+  const prePos = (layoutData as { version: number; positions: Record<string, [number, number]> }).positions;
+  const hasLayout = Object.keys(prePos).length > 0;
+
   const { routeGridData, segmentRouteMap, transferStations } = useMemo(() => {
     const segmentRouteMap = new Map<string, RouteKey[]>();
     const routeGridData = new Map<RouteKey, { grids: [number, number][]; names: string[] }>();
@@ -193,7 +197,9 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       const names: string[] = [];
 
       stationList.forEach((station: { lat: number; lng: number; name: string }) => {
-        grids.push(toGrid(station.lat, station.lng));
+        // 最適化済み位置があればそちらを使用、なければ地理座標から計算
+        const optimized = hasLayout ? prePos[station.name] : null;
+        grids.push(optimized ?? toGrid(station.lat, station.lng));
         names.push(station.name);
         stationRouteCount.set(station.name, (stationRouteCount.get(station.name) ?? 0) + 1);
       });
