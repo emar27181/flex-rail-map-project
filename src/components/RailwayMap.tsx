@@ -2214,6 +2214,30 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                 onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
                 onSearchingChange={handleSearchingChange}
               />
+              {/* 表示形式切替 */}
+              <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                {(['realistic', 'schematic'] as const).map(mode => {
+                  const label = mode === 'realistic' ? '地図' : '路線図（試験）';
+                  const isActive = mapViewMode === mode;
+                  return (
+                    <button
+                      key={mode}
+                      onClick={() => setMapViewMode(mode)}
+                      style={{
+                        padding: '5px 14px',
+                        fontSize: '13px',
+                        border: `1px solid ${isActive ? colors.primary : colors.border}`,
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        backgroundColor: isActive ? colors.primary : colors.surface,
+                        color: isActive ? colors.onPrimary : colors.text,
+                        fontWeight: isActive ? 'bold' : 'normal',
+                        transition: 'all 0.15s',
+                      }}
+                    >{label}</button>
+                  );
+                })}
+              </div>
             </div>
           )
         ) : (
@@ -2231,6 +2255,30 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
               onSearchingChange={handleSearchingChange}
             />
+            {/* 表示形式切替 */}
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+              {(['realistic', 'schematic'] as const).map(mode => {
+                const label = mode === 'realistic' ? '地図' : '路線図（試験）';
+                const isActive = mapViewMode === mode;
+                return (
+                  <button
+                    key={mode}
+                    onClick={() => setMapViewMode(mode)}
+                    style={{
+                      padding: '5px 14px',
+                      fontSize: '13px',
+                      border: `1px solid ${isActive ? colors.primary : colors.border}`,
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      backgroundColor: isActive ? colors.primary : colors.surface,
+                      color: isActive ? colors.onPrimary : colors.text,
+                      fontWeight: isActive ? 'bold' : 'normal',
+                      transition: 'all 0.15s',
+                    }}
+                  >{label}</button>
+                );
+              })}
+            </div>
           </>
         )}
 
