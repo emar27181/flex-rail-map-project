@@ -2299,7 +2299,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     checked={showDimmedMapRoutes}
                     onChange={(e) => setShowDimmedMapRoutes(e.target.checked)}
                   />
-                  {currentLanguage === 'english' ? 'Show non-route lines semi-transparently' : '区間外の路線を半透明で表示'}
+                  {currentLanguage === 'english' ? 'Show outside-segment routes' : '区間外の路線を表示'}
                 </label>
               </div>
               <div style={{ marginBottom: '10px' }}>

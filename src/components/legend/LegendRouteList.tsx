@@ -133,7 +133,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             onChange={(e) => onShowDimmedRoutesChange(e.target.checked)}
             style={{ marginRight: '6px', cursor: 'pointer' }}
           />
-          {language === 'english' ? 'Show outside-segment routes dimly' : '区間外の路線を半透明で表示'}
+          {language === 'english' ? 'Show outside-segment routes' : '区間外の路線を表示'}
         </label>
 
         {/* 乗換駅のみ表示オプション */}
