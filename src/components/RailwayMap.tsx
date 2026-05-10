@@ -149,6 +149,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [isLocating, setIsLocating] = useState(false);
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
+  const autoSetDepartureRef = useRef(false);
   const isFirstPositionRef = useRef(true);
   const locationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -374,6 +375,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 現在地付近の駅を出発に設定するコールバック
   const handleSetNearestDeparture = useCallback(() => {
     if (!userLocation) return;
+    const nearest = findNearestStation(userLocation[0], userLocation[1]);
+    if (nearest) setDeparture(nearest);
+  }, [userLocation, findNearestStation]);
+
+  // 初回位置情報取得時に最寄り駅を出発駅に自動設定
+  useEffect(() => {
+    if (!userLocation || autoSetDepartureRef.current) return;
+    autoSetDepartureRef.current = true;
     const nearest = findNearestStation(userLocation[0], userLocation[1]);
     if (nearest) setDeparture(nearest);
   }, [userLocation, findNearestStation]);

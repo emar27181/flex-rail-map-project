@@ -1,5 +1,14 @@
 # CHANGE LOG
 
+## [2026-05-10] セッション（続き3）
+
+### feat: 位置情報が許可されている場合に出発駅を最寄り駅に自動設定（`src/components/RailwayMap.tsx`）
+- `autoSetDepartureRef` で初回のみ自動設定するよう制御
+- `userLocation` が取得できた時点で `findNearestStation` を呼び出し `setDeparture` を実行
+- 位置情報が拒否・未対応の場合は横浜駅をデフォルト出発駅として維持
+
+---
+
 ## [2026-05-10] セッション（続き2）
 
 ### fix: DiagramMapの非表示路線パス生成でposが未定義になるバグを修正（`src/components/DiagramMap.tsx`）
@@ -229,3 +238,79 @@
 - 乗換駅のみ表示フィルター
 - ダークモード・多言語（日英）対応
 - 39路線のデータ整備（JR・東京メトロ・都営・私鉄・新交通）
+
+---
+
+## 2026-05-10 セッション3
+
+### fix: DiagramMap 半透明路線クリック修正
+- `src/components/DiagramMap.tsx`
+- 非表示路線パスに `strokeWidth=12, vectorEffect="non-scaling-stroke"` の不可視クリックターゲットを追加し、低ズーム時でもクリックを確実に受け取るよう修正
+
+### feat: DiagramMap/RailwayMap 表示/非表示ボタンをツールチップに追加
+- `src/components/DiagramMap.tsx`, `src/components/RailwayMap.tsx`
+- 表示中の路線クリック → 「この路線を非表示にする」（赤）ボタン表示
+- 非表示（半透明）路線クリック → 「この路線を表示する」（緑）ボタン表示
+- `onHideRoute` prop を DiagramMap に追加
+
+### fix: RailwayMap Leaflet 半透明路線クリック修正
+- `src/components/RailwayMap.tsx`
+- transparent 二重 Polyline から単一着色 Polyline (opacity=0.2) に変更
+- `stopPropagation` でMap全体クリックによるツールチップ即時消去を防止
+
+### feat: RailwayMap 路線切替セクションヘッダーをsticky化
+- `src/components/RailwayMap.tsx`
+- コンテナに `max-height: calc(100vh - 200px)`, `overflow-y: auto` を追加
+- ヘッダー div に `position: sticky; top: 0` を適用しスクロール時も常時表示
+
+---
+
+## 2026-05-10 セッション4
+
+### fix: 半透明路線の太さを表示路線に統一
+- `src/components/DiagramMap.tsx`: dimmedパスのstrokeWidthを4→2に
+- `src/components/RailwayMap.tsx`: dimmed PolylineのweightをW6→4に
+
+### fix: DiagramMap半透明路線クリックターゲット改善
+- `src/components/DiagramMap.tsx`
+- vectorEffect="non-scaling-stroke"を廃止し、strokeWidth=12/transform.scaleで常に12pxのクリック幅を確保
+- transform.scaleをdimmedPathElements依存配列に追加
+
+### fix: RailwayMap Leaflet半透明路線クリックでツールチップが消える問題
+- `src/components/RailwayMap.tsx`
+- justClickedLayerRefを追加し、MapEventsのclickハンドラがPolylineクリック直後に誤ってtooltipをnullにしないよう修正
+
+### fix: 路線切替セクションstickyヘッダー
+- `src/components/RailwayMap.tsx`
+- overflowY:autoをコンテンツdivに移動し、ヘッダーがページスクロール基準でstickyになるよう修正
+
+### feat: DiagramMap showDimmedRoutes prop追加
+- `src/components/DiagramMap.tsx`
+- 外部からshowDimmedRoutesを制御可能なpropを追加
+
+### feat: 路線切替セクションに「区間外の路線を半透明で表示」チェックボックス追加
+- `src/components/RailwayMap.tsx`
+- showDimmedMapRoutesをDiagramMapにも渡し両モードで統一制御
+
+---
+
+## 2026-05-10 セッション5
+
+### fix: 非表示路線の「表示」ボタンで路線が反映されない問題
+- `src/components/RailwayMap.tsx`
+- visibleRoutesDataはavailableRoutesでフィルタされているため、visibleRoutesだけ更新しても
+  renderRouteが呼ばれず路線が完全不可視になっていた
+- setAvailableRoutes と setVisibleRoutes を同時に更新するよう修正
+- DiagramMapのonToggleRouteも同様に修正
+
+### fix+feat: 路線クリックポップアップのデバッグ色修正・非表示ボタン追加
+- `src/components/RailwayMap.tsx`
+- デバッグ用yellow背景・赤枠線をthemeカラーに変更
+- ポップアップに「この路線を非表示にする」ボタンを追加
+- visible route clickでのdimmedMapTooltip二重表示を削除しポップアップに統一
+
+### 設計確認: 半透明/非表示フラグロジック
+- showDimmedMapRoutes=true + visibleRoutes外 → 半透明
+- showDimmedMapRoutes=true + visibleRoutes内 → 実線
+- showDimmedMapRoutes=false + visibleRoutes外 → 非表示
+- showDimmedMapRoutes=false + visibleRoutes内 → 実線
