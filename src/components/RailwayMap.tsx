@@ -1481,6 +1481,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     };
   }, [theme]);
 
+  // タイル非表示時はLeafletコンテナの背景色をテーマに合わせる
+  useEffect(() => {
+    const container = mapRef.current?.getContainer?.() as HTMLElement | undefined;
+    if (!container) return;
+    container.style.backgroundColor = showOsmTiles ? '' : colors.background;
+  }, [showOsmTiles, theme]);
+
   const toggleRoute = (routeKey: RouteKey) => {
     console.log('🔄 toggleRoute called for:', routeKey);
     console.log('🔄 Current visibleRoutes:', visibleRoutes);
@@ -1817,6 +1824,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (map && !mapRef.current) {
       mapRef.current = map;
     }
+
+    // タイル非表示時の背景色をマウント直後に適用
+    React.useEffect(() => {
+      const container = map.getContainer() as HTMLElement;
+      container.style.backgroundColor = showOsmTiles ? '' : colors.background;
+    }, [showOsmTiles, theme, map]);
 
     return null;
   };
@@ -2617,7 +2630,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             <MapContainer
               center={mapCenter}
               zoom={12}
-              style={{ height: '100%', width: '100%', backgroundColor: showOsmTiles ? undefined : colors.background }}
+              style={{ height: '100%', width: '100%' }}
               scrollWheelZoom={true}
               zoomControl={false}
               ref={mapRef}
