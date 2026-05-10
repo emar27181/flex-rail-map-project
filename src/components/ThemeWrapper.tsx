@@ -16,7 +16,7 @@ const ThemeWrapper: React.FC = () => {
 
   return (
     <ThemeProvider>
-      <NavigationBar language={language} onLanguageChange={handleLanguageChange} />
+      <NavigationBar language={language} onLanguageChange={handleLanguageChange} isFullscreen={isFullscreen} />
       <RailwayMap language={language} onFullscreenChange={setIsFullscreen} />
       <Footer language={language} />
 

@@ -1,17 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sun, Moon, Menu, X, Info } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 
 interface NavigationBarProps {
   language: 'japanese' | 'english';
   onLanguageChange: (language: 'japanese' | 'english') => void;
+  isFullscreen?: boolean;
 }
 
-const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChange }) => {
+const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChange, isFullscreen = false }) => {
   const { theme, toggleTheme } = useTheme();
   const colors = getThemeColors(theme);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+  const [navVisible, setNavVisible] = useState(false);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // PCフルスクリーン時: マウスが上端60px以内で表示、離れたら500ms後に隠す
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const isMobile = window.matchMedia('(pointer: coarse)').matches;
+    if (isMobile) return;
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (e.clientY < 60) {
+        if (hideTimer.current) clearTimeout(hideTimer.current);
+        setNavVisible(true);
+      } else {
+        if (hideTimer.current) clearTimeout(hideTimer.current);
+        hideTimer.current = setTimeout(() => setNavVisible(false), 500);
+      }
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+    };
+  }, [isFullscreen]);
+
+  const isAutoHide = isFullscreen && (typeof window === 'undefined' || !window.matchMedia('(pointer: coarse)').matches);
 
   return (
     <nav style={{
@@ -22,8 +49,14 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
       backgroundColor: colors.surface,
       borderBottom: `1px solid ${colors.border}`,
       boxShadow: `0 2px 4px ${colors.shadow}`,
-      marginBottom: '20px',
-      position: 'relative'
+      marginBottom: isAutoHide ? '0' : '20px',
+      position: isAutoHide ? 'fixed' : 'relative',
+      top: isAutoHide ? 0 : 'auto',
+      left: isAutoHide ? 0 : 'auto',
+      right: isAutoHide ? 0 : 'auto',
+      zIndex: isAutoHide ? 10000 : 'auto',
+      transform: isAutoHide ? `translateY(${navVisible ? '0%' : '-100%'})` : 'none',
+      transition: isAutoHide ? 'transform 0.25s ease' : 'none',
     }}>
       {/* ロゴ・タイトル部分 */}
       <div style={{
