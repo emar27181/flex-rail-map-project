@@ -1859,12 +1859,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             }
           });
       });
-      if (uniqueSegments.length === 0) return null;
-      displaySegments = uniqueSegments;
-      // マーカー用：全セグメントの駅の和集合（元路線の順序を保持）
-      const allNames = new Set<string>();
-      uniqueSegments.forEach(seg => seg.forEach(s => allNames.add(s.name)));
-      displayStations = stations.filter(s => allNames.has(s.name));
+      if (uniqueSegments.length === 0) {
+        // 推薦ルートに含まれないが visibleRoutes に明示的に追加された路線は全区間を表示
+        displaySegments = [stations];
+      } else {
+        displaySegments = uniqueSegments;
+        // マーカー用：全セグメントの駅の和集合（元路線の順序を保持）
+        const allNames = new Set<string>();
+        uniqueSegments.forEach(seg => seg.forEach(s => allNames.add(s.name)));
+        displayStations = stations.filter(s => allNames.has(s.name));
+      }
     } else {
       displaySegments = [stations];
     }
