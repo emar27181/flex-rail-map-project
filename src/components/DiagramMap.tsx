@@ -30,21 +30,31 @@ const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
 ];
 
 // ---- SVGキャンバス & 地理範囲 ----
-const SVG_W = 1400;
-const SVG_H = 900;
-const LAYOUT_PAD = 80;
 const GEO_MIN_LNG = 139.10, GEO_MAX_LNG = 140.12;
 const GEO_MIN_LAT = 35.22, GEO_MAX_LAT = 35.92;
+const LAYOUT_PAD = 60;
+
+// 東京緯度でのcos補正: 1°経度 ≈ cos(35.57°) × 1°緯度
+const LAT_CENTER = (GEO_MIN_LAT + GEO_MAX_LAT) / 2;
+const LNG_COS = Math.cos(LAT_CENTER * Math.PI / 180); // ~0.813
+
+const LAT_RANGE = GEO_MAX_LAT - GEO_MIN_LAT; // 0.70°
+const LNG_RANGE = GEO_MAX_LNG - GEO_MIN_LNG; // 1.02°
+
+// 実距離比 = (lng幅 * cos) / lat幅
+const SVG_H = 900;
+const SVG_W = Math.round((SVG_H - 2 * LAYOUT_PAD) * (LNG_RANGE * LNG_COS / LAT_RANGE) + 2 * LAYOUT_PAD);
+// ≈ 780 * (1.02*0.813/0.70) + 120 ≈ 780 * 1.185 + 120 ≈ 1044
 
 function geoX(lng: number): number {
-  return LAYOUT_PAD + (lng - GEO_MIN_LNG) / (GEO_MAX_LNG - GEO_MIN_LNG) * (SVG_W - 2 * LAYOUT_PAD);
+  return LAYOUT_PAD + (lng - GEO_MIN_LNG) / LNG_RANGE * (SVG_W - 2 * LAYOUT_PAD);
 }
 function geoY(lat: number): number {
-  return LAYOUT_PAD + (GEO_MAX_LAT - lat) / (GEO_MAX_LAT - GEO_MIN_LAT) * (SVG_H - 2 * LAYOUT_PAD);
+  return LAYOUT_PAD + (GEO_MAX_LAT - lat) / LAT_RANGE * (SVG_H - 2 * LAYOUT_PAD);
 }
 
 // 地理座標とトラック座標のブレンド率 (0=純スケマティック, 1=純地理)
-const BLEND = 0.35;
+const BLEND = 0.82;
 
 // セグメントを 0°/45°/90° に丸めたoctilinear path を生成
 function makeOctilinearPath(x1: number, y1: number, x2: number, y2: number): string {
