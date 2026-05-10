@@ -112,7 +112,12 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         }
       });
     });
-    return Array.from(stationMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+    // 読み（ひらがな）でソート。読みがない駅は末尾
+    return Array.from(stationMap.values()).sort((a, b) => {
+      const ra = stationReadings[a.name] ?? '￿' + a.name;
+      const rb = stationReadings[b.name] ?? '￿' + b.name;
+      return ra.localeCompare(rb, 'ja');
+    });
   }, []);
 
   // 主要駅6選
@@ -123,37 +128,39 @@ const StationSelector: React.FC<StationSelectorProps> = ({
       .filter(station => station !== undefined) as Station[];
   }, [allStations]);
 
-  const filteredDepartureStations = useMemo(() => {
-    if (!departureSearch) return majorStations;
-    const searchTerm = normalizeToHiragana(departureSearch.toLowerCase());
+  // 検索文字列でフィルタし、前方一致優先・読み順でソートして上位10件を返す
+  function filterStations(search: string): Station[] {
+    if (!search) return majorStations;
+    const term = normalizeToHiragana(search.toLowerCase());
     return allStations
       .filter(station => {
-        const japaneseName = station.name.toLowerCase();
         const reading = stationReadings[station.name] ?? '';
-        const englishName = translateStation(station.name, 'english').toLowerCase();
-        return japaneseName.includes(searchTerm) ||
-               reading.includes(searchTerm) ||
-               normalizeToHiragana(japaneseName).includes(searchTerm) ||
-               englishName.includes(searchTerm);
+        const name = normalizeToHiragana(station.name.toLowerCase());
+        const en = translateStation(station.name, 'english').toLowerCase();
+        return reading.startsWith(term) || reading.includes(term) ||
+               name.includes(term) || en.includes(term);
+      })
+      .sort((a, b) => {
+        // 前方一致を優先
+        const ra = stationReadings[a.name] ?? a.name;
+        const rb = stationReadings[b.name] ?? b.name;
+        const aStarts = ra.startsWith(term) ? 0 : 1;
+        const bStarts = rb.startsWith(term) ? 0 : 1;
+        if (aStarts !== bStarts) return aStarts - bStarts;
+        return ra.localeCompare(rb, 'ja');
       })
       .slice(0, 10);
-  }, [allStations, departureSearch, majorStations]);
+  }
 
-  const filteredArrivalStations = useMemo(() => {
-    if (!arrivalSearch) return majorStations;
-    const searchTerm = normalizeToHiragana(arrivalSearch.toLowerCase());
-    return allStations
-      .filter(station => {
-        const japaneseName = station.name.toLowerCase();
-        const reading = stationReadings[station.name] ?? '';
-        const englishName = translateStation(station.name, 'english').toLowerCase();
-        return japaneseName.includes(searchTerm) ||
-               reading.includes(searchTerm) ||
-               normalizeToHiragana(japaneseName).includes(searchTerm) ||
-               englishName.includes(searchTerm);
-      })
-      .slice(0, 10);
-  }, [allStations, arrivalSearch, majorStations]);
+  const filteredDepartureStations = useMemo(
+    () => filterStations(departureSearch),
+    [allStations, departureSearch, majorStations]
+  );
+
+  const filteredArrivalStations = useMemo(
+    () => filterStations(arrivalSearch),
+    [allStations, arrivalSearch, majorStations]
+  );
 
   const handleDepartureSelect = (station: Station) => {
     departureClickedRef.current = true;
