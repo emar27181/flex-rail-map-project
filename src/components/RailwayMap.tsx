@@ -141,6 +141,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [clickedRoute, setClickedRoute] = useState<string | null>(null);
   const [routePopupPosition, setRoutePopupPosition] = useState<{ x: number, y: number } | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
+  const [showDimmedMapRoutes, setShowDimmedMapRoutes] = useState(true);
+  const [dimmedMapTooltip, setDimmedMapTooltip] = useState<{ routeKey: RouteKey; x: number; y: number } | null>(null);
 
   // 現在地表示
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
@@ -1757,8 +1759,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         setZoomLevel(e.target.getZoom());
       },
       click: () => {
-        // 地図クリック時にルートポップアップを閉じる
         handleRoutePopupClose();
+        setDimmedMapTooltip(null);
       },
       mousemove: (e) => {
         // デバッグ用：マウス位置をログ出力（頻度制限）
@@ -2594,6 +2596,27 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 />
               )}
 
+              {/* 非表示路線（半透明・クリック可能） */}
+              {showDimmedMapRoutes && Object.entries(routes)
+                .filter(([rk]) => !visibleRoutes.has(rk as RouteKey))
+                .map(([rk, stationList]) => {
+                  const rKey = rk as RouteKey;
+                  const color = adjustRouteColorForTheme(routeColors[rKey] ?? '#888', theme);
+                  const positions = (stationList as any[]).map((s: any) => [s.lat, s.lng] as [number, number]);
+                  return (
+                    <React.Fragment key={`dimmed-${rKey}`}>
+                      <Polyline positions={positions} color="transparent" weight={12} opacity={0}
+                        eventHandlers={{ click: (e) => {
+                          const oe = e.originalEvent as MouseEvent;
+                          setDimmedMapTooltip({ routeKey: rKey, x: oe.clientX, y: oe.clientY });
+                        }}}
+                      />
+                      <Polyline positions={positions} color={color} weight={3} opacity={0.2} interactive={false} />
+                    </React.Fragment>
+                  );
+                })
+              }
+
               {visibleRoutesData.map(([routeKey, stations]) =>
                 renderRoute(routeKey as RouteKey, stations)
               )}
@@ -2619,6 +2642,87 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               onToggleRoute={(routeKey) => setVisibleRoutes(prev => new Set([...prev, routeKey]))}
             />
           )}
+
+          {/* 非表示路線の半透明表示トグル（リアル地図モードのみ） */}
+          {mapViewMode === 'realistic' && (
+            <button
+              onClick={() => setShowDimmedMapRoutes(v => !v)}
+              style={{
+                position: 'absolute', bottom: 36, left: 8, zIndex: 1000,
+                backgroundColor: colors.surfaceElevated,
+                border: `1px solid ${showDimmedMapRoutes ? colors.border : colors.borderLight}`,
+                borderRadius: '4px', padding: '4px 8px', fontSize: '11px',
+                color: showDimmedMapRoutes ? colors.text : colors.textSecondary,
+                cursor: 'pointer', boxShadow: `0 1px 4px ${colors.shadow}`,
+                opacity: showDimmedMapRoutes ? 1 : 0.6,
+              }}
+            >
+              {currentLanguage === 'english'
+                ? (showDimmedMapRoutes ? 'All routes: ON' : 'All routes: OFF')
+                : (showDimmedMapRoutes ? '全路線: 表示' : '全路線: 非表示')}
+            </button>
+          )}
+
+          {/* 非表示路線ツールチップ（リアル地図モード） */}
+          {mapViewMode === 'realistic' && dimmedMapTooltip && (() => {
+            const TW = 180;
+            const displayName = translateRoute(
+              (routeNames as Record<string, string>)[dimmedMapTooltip.routeKey] ?? dimmedMapTooltip.routeKey,
+              currentLanguage
+            );
+            const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
+            const vh = typeof window !== 'undefined' ? window.innerHeight : 600;
+            const rawX = dimmedMapTooltip.x + 12;
+            const rawY = dimmedMapTooltip.y + 12;
+            const tx = rawX + TW > vw - 8 ? dimmedMapTooltip.x - TW - 4 : rawX;
+            const ty = rawY + 80 > vh - 8 ? dimmedMapTooltip.y - 84 : rawY;
+            return (
+              <div
+                onClick={e => e.stopPropagation()}
+                style={{
+                  position: 'fixed', left: tx, top: ty, zIndex: 9999,
+                  width: TW, backgroundColor: colors.surfaceElevated,
+                  border: `1px solid ${colors.border}`, borderRadius: '8px',
+                  boxShadow: `0 4px 16px ${colors.shadow}`, overflow: 'hidden',
+                }}
+              >
+                <div style={{
+                  padding: '7px 10px 6px',
+                  borderBottom: `1px solid ${colors.borderLight}`,
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{
+                      width: '10px', height: '10px', borderRadius: '50%', flexShrink: 0,
+                      backgroundColor: adjustRouteColorForTheme(routeColors[dimmedMapTooltip.routeKey] ?? '#888', theme),
+                    }} />
+                    <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text }}>
+                      {displayName}
+                    </span>
+                  </div>
+                  <span
+                    onClick={() => setDimmedMapTooltip(null)}
+                    style={{ fontSize: '12px', color: colors.textSecondary, cursor: 'pointer', padding: '0 2px' }}
+                  >✕</span>
+                </div>
+                <div style={{ padding: '8px 10px' }}>
+                  <button
+                    onClick={() => {
+                      setVisibleRoutes(prev => new Set([...prev, dimmedMapTooltip.routeKey]));
+                      setDimmedMapTooltip(null);
+                    }}
+                    style={{
+                      backgroundColor: '#4CAF50', color: 'white', border: 'none',
+                      padding: '3px 8px', borderRadius: '3px', cursor: 'pointer',
+                      fontSize: '11px', width: '100%',
+                    }}
+                  >
+                    {currentLanguage === 'english' ? 'Show this route' : 'この路線を表示する'}
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* 路線凡例（Legend） - モバイルフルスクリーン時は下部統合パネルで表示 */}
           {visibleRoutesData.length > 0 && !(isFullscreen && isMobile) && !isStationSearching && (

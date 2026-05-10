@@ -139,10 +139,10 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
           d += `M${x.toFixed(1)},${y.toFixed(1)}`;
         } else {
           const [px, py] = prevPos;
-          if (Math.abs(x - px) < 0.5 && Math.abs(y - py) < 0.5) { prevPos = pos; continue; }
+          if (Math.abs(x - px) < 0.5 && Math.abs(y - py) < 0.5) { prevPos = [x, y]; continue; }
           d += `L${x.toFixed(1)},${y.toFixed(1)}`;
         }
-        prevPos = pos;
+        prevPos = [x, y];
       }
 
       if (!d || d.length < 3) return [];

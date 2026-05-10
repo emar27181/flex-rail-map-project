@@ -1,5 +1,19 @@
 # CHANGE LOG
 
+## [2026-05-10] セッション（続き2）
+
+### fix: DiagramMapの非表示路線パス生成でposが未定義になるバグを修正（`src/components/DiagramMap.tsx`）
+- `prevPos = pos` / `{ prevPos = pos; continue; }` を `prevPos = [x, y]` に修正
+
+### feat: リアル地図モードでも非表示路線を半透明表示・クリックで表示ボタン（`src/components/RailwayMap.tsx`）
+- `showDimmedMapRoutes` / `dimmedMapTooltip` 状態を追加
+- MapContainer内に非表示路線を半透明Polyline（opacity 0.2）として描画
+- クリックで路線名＋色ドット＋「この路線を表示する」ボタン付きツールチップを表示（position: fixed）
+- 左下に「全路線: 表示/非表示」トグルボタンを追加（zIndex: 1000）
+- 地図クリック時にツールチップを閉じる（MapEventsのclickハンドラに追加）
+
+---
+
 ## [2026-05-10] セッション（続き）
 
 ### feat: 路線図で非表示路線を半透明表示・クリックで表示ボタン（`src/components/DiagramMap.tsx`, `src/components/RailwayMap.tsx`）
