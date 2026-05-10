@@ -2663,8 +2663,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               {isLegendExpanded && (
                 <div style={{
                   padding: '10px',
-                  maxHeight: '350px',
-                  overflowY: 'auto'
+                  maxHeight: isFullscreen ? 'none' : '350px',
+                  overflowY: isFullscreen ? 'visible' : 'auto',
                 }}>
                   {/* 1. マーカー表示 (Current Station Settings) */}
                   <LegendStationMarkers
