@@ -2623,12 +2623,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               position: 'absolute',
               top: '10px',
               right: '10px',
+              bottom: isFullscreen ? '56px' : 'auto',
               backgroundColor: colors.surfaceElevated,
               border: `1px solid ${colors.border}`,
               borderRadius: '6px',
               boxShadow: `0 2px 6px ${colors.shadow}`,
               minWidth: '150px',
-              zIndex: 1000
+              zIndex: 1000,
+              overflowY: isFullscreen ? 'auto' : 'visible',
             }}>
               <div
                 onClick={() => setIsLegendExpanded(!isLegendExpanded)}
@@ -2992,38 +2994,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
             </>
           )}
 
-          {/* 時刻表モード切り替えボタン＋出発時刻入力（PC用） */}
-          {!isMobile && (
-            <div style={{
-              position: 'absolute',
-              bottom: '10px',
-              right: '134px',
-              zIndex: 1002,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}>
-              {/* 時刻表ON/OFFボタン */}
-              <button
-                onClick={() => setTimetableModeEnabled(!timetableModeEnabled)}
-                style={{
-                  backgroundColor: timetableModeEnabled ? colors.primary : colors.surface,
-                  color: timetableModeEnabled ? '#fff' : colors.text,
-                  border: `1px solid ${timetableModeEnabled ? colors.primary : colors.border}`,
-                  borderRadius: '8px',
-                  padding: '8px 10px',
-                  cursor: 'pointer',
-                  boxShadow: `0 2px 8px ${colors.shadow}`,
-                  fontSize: '13px',
-                  backdropFilter: 'blur(4px)',
-                }}
-                title={timetableModeEnabled ? translateUI('timetableModeOff', currentLanguage) : translateUI('timetableModeOn', currentLanguage)}
-              >
-                📅
-              </button>
-            </div>
-          )}
-
           {/* フルスクリーン切り替えボタン */}
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
@@ -3036,7 +3006,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                     ? { top: '60px', bottom: 'auto' }
                     : { bottom: '10px', top: 'auto' }
                   : { bottom: '10px', top: 'auto' }),
-              right: '10px',
+              left: '10px',
               zIndex: 1003,
               display: 'flex',
               backgroundColor: colors.surface,
@@ -3060,86 +3030,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
             {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
           </button>
 
-          {/* 現在地即時更新ボタン（トラッキングON時のみ表示） */}
-          {isLocating && (
-            <button
-              onClick={handleRefreshLocation}
-              style={{
-                position: 'absolute',
-                ...(isFullscreen && isMobile
-                  ? { top: 'calc(env(safe-area-inset-top, 0px) + 10px)', bottom: 'auto' }
-                  : !isFullscreen
-                    ? isMobile
-                      ? { top: '60px', bottom: 'auto' }
-                      : { bottom: '10px', top: 'auto' }
-                    : { bottom: '10px', top: 'auto' }),
-                right: '94px',
-                zIndex: 1002,
-                backgroundColor: '#34A853',
-                color: '#fff',
-                border: '1px solid #34A853',
-                borderRadius: '8px',
-                width: '36px',
-                height: '36px',
-                cursor: 'pointer',
-                boxShadow: `0 2px 8px ${colors.shadow}`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backdropFilter: 'blur(4px)',
-              }}
-              title={translateUI('refreshLocationNow', currentLanguage)}
-              aria-label="Refresh location now"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 4 23 10 17 10" />
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-              </svg>
-            </button>
-          )}
-
-          {/* 現在地ボタン */}
-          <button
-            onClick={handleLocateUser}
-            disabled={isLocating && !userLocation}
-            style={{
-              position: 'absolute',
-              ...(isFullscreen && isMobile
-                ? { top: 'calc(env(safe-area-inset-top, 0px) + 10px)', bottom: 'auto' }
-                : !isFullscreen
-                  ? isMobile
-                    ? { top: '60px', bottom: 'auto' }
-                    : { bottom: '10px', top: 'auto' }
-                  : { bottom: '10px', top: 'auto' }),
-              right: '52px',
-              zIndex: 1002,
-              display: 'flex',
-              backgroundColor: isLocating ? '#4285F4' : colors.surface,
-              color: isLocating ? '#fff' : colors.text,
-              border: `1px solid ${isLocating ? '#4285F4' : colors.border}`,
-              borderRadius: '8px',
-              width: '36px',
-              height: '36px',
-              cursor: (isLocating && !userLocation) ? 'wait' : 'pointer',
-              boxShadow: `0 2px 8px ${colors.shadow}`,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(4px)',
-              opacity: (isLocating && !userLocation) ? 0.7 : 1,
-            }}
-            title={isLocating
-              ? translateUI('stopTracking', currentLanguage)
-              : translateUI('showMyLocation', currentLanguage)}
-            aria-label="Toggle location tracking"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="4" />
-              <line x1="12" y1="2" x2="12" y2="6" />
-              <line x1="12" y1="18" x2="12" y2="22" />
-              <line x1="2" y1="12" x2="6" y2="12" />
-              <line x1="18" y1="12" x2="22" y2="12" />
-            </svg>
-          </button>
 
           {/* 駅時刻表ツールチップ */}
           {timetableModeEnabled && renderStationTimetableTooltip()}
