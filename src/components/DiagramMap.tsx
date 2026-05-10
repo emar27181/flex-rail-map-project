@@ -29,53 +29,19 @@ const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
   'saitamaRailway', 'newShuttle', 'shinkeisei', 'toyoRapid',
 ];
 
-// ---- SVGキャンバス & 地理範囲 ----
-const GEO_MIN_LNG = 139.10, GEO_MAX_LNG = 140.12;
-const GEO_MIN_LAT = 35.22, GEO_MAX_LAT = 35.92;
-const LAYOUT_PAD = 60;
-
-// 東京緯度でのcos補正: 1°経度 ≈ cos(35.57°) × 1°緯度
-const LAT_CENTER = (GEO_MIN_LAT + GEO_MAX_LAT) / 2;
-const LNG_COS = Math.cos(LAT_CENTER * Math.PI / 180); // ~0.813
-
-const LAT_RANGE = GEO_MAX_LAT - GEO_MIN_LAT; // 0.70°
-const LNG_RANGE = GEO_MAX_LNG - GEO_MIN_LNG; // 1.02°
-
-// 実距離比 = (lng幅 * cos) / lat幅
-const SVG_H = 900;
-const SVG_W = Math.round((SVG_H - 2 * LAYOUT_PAD) * (LNG_RANGE * LNG_COS / LAT_RANGE) + 2 * LAYOUT_PAD);
-// ≈ 780 * (1.02*0.813/0.70) + 120 ≈ 780 * 1.185 + 120 ≈ 1044
+// ---- 地理座標系 (新宿アンカー・無限拡張キャンバス) ----
+const SCALE_PX = 12000;                              // px / 緯度1°
+const LNG_COS = Math.cos(35.57 * Math.PI / 180);    // ~0.813 (東京緯度での経度補正)
+const ANCHOR_LNG = 139.7006;                         // 新宿
+const ANCHOR_LAT = 35.6896;
+const CANVAS_CX = 5000;
+const CANVAS_CY = 5000;
 
 function geoX(lng: number): number {
-  return LAYOUT_PAD + (lng - GEO_MIN_LNG) / LNG_RANGE * (SVG_W - 2 * LAYOUT_PAD);
+  return CANVAS_CX + (lng - ANCHOR_LNG) * LNG_COS * SCALE_PX;
 }
 function geoY(lat: number): number {
-  return LAYOUT_PAD + (GEO_MAX_LAT - lat) / LAT_RANGE * (SVG_H - 2 * LAYOUT_PAD);
-}
-
-// 地理座標とトラック座標のブレンド率 (0=純スケマティック, 1=純地理)
-const BLEND = 0.82;
-
-// セグメントを 0°/45°/90° に丸めたoctilinear path を生成
-function makeOctilinearPath(x1: number, y1: number, x2: number, y2: number): string {
-  const dx = x2 - x1, dy = y2 - y1;
-  const adx = Math.abs(dx), ady = Math.abs(dy);
-  if (adx < 0.5 || ady < 0.5 || Math.abs(adx - ady) < 0.5) {
-    return `M${x1},${y1} L${x2},${y2}`;
-  }
-  const sx = Math.sign(dx), sy = Math.sign(dy);
-  const diagSteps = Math.min(adx, ady);
-  const mx = x1 + sx * diagSteps, my = y1 + sy * diagSteps;
-  return `M${x1},${y1} L${mx},${my} L${x2},${y2}`;
-}
-
-// 路線の主方向: 経度幅 >= 緯度幅*1.1 → 横(H)、それ以外 → 縦(V)
-function classifyRoute(k: RouteKey): 'H' | 'V' {
-  const stns = routes[k] as Array<{ lat: number; lng: number }> | undefined;
-  if (!stns?.length) return 'H';
-  const latR = Math.max(...stns.map(s => s.lat)) - Math.min(...stns.map(s => s.lat));
-  const lngR = Math.max(...stns.map(s => s.lng)) - Math.min(...stns.map(s => s.lng));
-  return lngR >= latR * 1.1 ? 'H' : 'V';
+  return CANVAS_CY - (lat - ANCHOR_LAT) * SCALE_PX;
 }
 
 // ---- Props ----
@@ -99,95 +65,35 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
   showStationNames = true,
 }) => {
   const visibleRoutes = externalVisibleRoutes ?? new Set(DIAGRAM_ROUTE_KEYS);
-  const [transform, setTransform] = useState({ x: 10, y: 10, scale: 0.5 });
+  const [transform, setTransform] = useState({ x: 0, y: 0, scale: 0.08 });
   const isPanning = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
   const mapAreaRef = useRef<HTMLDivElement>(null);
 
-  // ---- スケマティックレイアウト計算 ----
-  // H路線: y固定の水平ライン、V路線: x固定の垂直ライン
-  // H-V乗換駅は両トラックの交点に配置
+  // ---- 地理座標ベースの駅レイアウト計算 ----
   const schematicData = useMemo(() => {
-    const activeRoutes = DIAGRAM_ROUTE_KEYS.filter(k => visibleRoutes.has(k));
-
-    const hRoutes: RouteKey[] = [];
-    const vRoutes: RouteKey[] = [];
-    activeRoutes.forEach(k => {
-      if (classifyRoute(k) === 'H') hRoutes.push(k);
-      else vRoutes.push(k);
-    });
-
-    // H路線: 平均緯度降順（北=上=小y）、V路線: 平均経度昇順（西=左=小x）
-    const avgLat = (k: RouteKey) => {
-      const s = routes[k] as any[];
-      return s.reduce((sum: number, st: any) => sum + st.lat, 0) / s.length;
-    };
-    const avgLng = (k: RouteKey) => {
-      const s = routes[k] as any[];
-      return s.reduce((sum: number, st: any) => sum + st.lng, 0) / s.length;
-    };
-    hRoutes.sort((a, b) => avgLat(b) - avgLat(a));
-    vRoutes.sort((a, b) => avgLng(a) - avgLng(b));
-
-    const nH = hRoutes.length;
-    const nV = vRoutes.length;
-    const hStep = nH > 1 ? (SVG_H - 2 * LAYOUT_PAD) / (nH - 1) : 0;
-    const vStep = nV > 1 ? (SVG_W - 2 * LAYOUT_PAD) / (nV - 1) : 0;
-
-    const hTrack = new Map<RouteKey, number>(); // route → y座標
-    const vTrack = new Map<RouteKey, number>(); // route → x座標
-    hRoutes.forEach((k, i) => hTrack.set(k, nH <= 1 ? SVG_H / 2 : LAYOUT_PAD + i * hStep));
-    vRoutes.forEach((k, i) => vTrack.set(k, nV <= 1 ? SVG_W / 2 : LAYOUT_PAD + i * vStep));
-
-    // 駅ごとのH/V路線と地理座標を収集
     const stationGeo = new Map<string, { lat: number; lng: number }>();
-    const stationHRoute = new Map<string, RouteKey>(); // primary H route
-    const stationVRoute = new Map<string, RouteKey>(); // primary V route
+    const stationRouteCount = new Map<string, number>();
 
-    activeRoutes.forEach(k => {
+    DIAGRAM_ROUTE_KEYS.filter(k => visibleRoutes.has(k)).forEach(k => {
       const stns = routes[k] as any[];
-      const isH = hTrack.has(k);
       stns?.forEach((st: any) => {
         if (!stationGeo.has(st.name)) stationGeo.set(st.name, { lat: st.lat, lng: st.lng });
-        if (isH && !stationHRoute.has(st.name)) stationHRoute.set(st.name, k);
-        if (!isH && !stationVRoute.has(st.name)) stationVRoute.set(st.name, k);
+        stationRouteCount.set(st.name, (stationRouteCount.get(st.name) ?? 0) + 1);
       });
     });
 
-    // 駅の位置: スケマティックトラックと地理座標をBLENDで混合
-    // H-V乗換駅は交点付近、H専用は水平トラック付近、V専用は垂直トラック付近
     const stationPos = new Map<string, [number, number]>();
-    const allNames = new Set([...stationHRoute.keys(), ...stationVRoute.keys()]);
-
-    allNames.forEach(name => {
-      const hR = stationHRoute.get(name);
-      const vR = stationVRoute.get(name);
-      const geo = stationGeo.get(name)!;
-      const gx = geoX(geo.lng), gy = geoY(geo.lat);
-      if (hR && vR) {
-        // H-V乗換: トラック交点 × (1-BLEND) + 地理 × BLEND
-        const tx = vTrack.get(vR)!, ty = hTrack.get(hR)!;
-        stationPos.set(name, [tx * (1 - BLEND) + gx * BLEND, ty * (1 - BLEND) + gy * BLEND]);
-      } else if (hR) {
-        // H専用: x=地理経度、y=トラック×(1-BLEND)+地理×BLEND
-        stationPos.set(name, [gx, hTrack.get(hR)! * (1 - BLEND) + gy * BLEND]);
-      } else if (vR) {
-        // V専用: x=トラック×(1-BLEND)+地理×BLEND、y=地理緯度
-        stationPos.set(name, [vTrack.get(vR)! * (1 - BLEND) + gx * BLEND, gy]);
-      }
-    });
-
-    // 乗換駅: 2路線以上に所属する駅
     const transferStations = new Set<string>();
-    allNames.forEach(name => {
-      const total = (stationHRoute.has(name) ? 1 : 0) + (stationVRoute.has(name) ? 1 : 0);
-      if (total >= 2) transferStations.add(name);
+    stationGeo.forEach((geo, name) => {
+      stationPos.set(name, [geoX(geo.lng), geoY(geo.lat)]);
+      if ((stationRouteCount.get(name) ?? 0) >= 2) transferStations.add(name);
     });
 
-    return { stationPos, hTrack, vTrack, hRoutes, vRoutes, transferStations, stationVRoute, stationHRoute };
+    return { stationPos, transferStations };
   }, [visibleRoutes]);
 
-  // ---- 路線ライン要素（octilinear: 0°/45°/90°で接続） ----
+  // ---- 路線ライン要素 ----
   const routeLineElements = useMemo(() => {
     const hasFilter = highlightedRouteKeys !== null;
     const elements: React.ReactElement[] = [];
@@ -215,10 +121,10 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         if (Math.abs(x1 - x2) < 0.5 && Math.abs(y1 - y2) < 0.5) continue;
 
         elements.push(
-          <path key={`${routeKey}-${i}`}
-            d={makeOctilinearPath(x1, y1, x2, y2)}
-            fill="none" stroke={color} strokeWidth={sw}
-            strokeLinecap="round" strokeLinejoin="round"
+          <line key={`${routeKey}-${i}`}
+            x1={x1} y1={y1} x2={x2} y2={y2}
+            stroke={color} strokeWidth={sw}
+            strokeLinecap="round"
           />
         );
       }
@@ -384,6 +290,20 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     });
   }, [stationLayout, transform.scale, theme, showStationNames]);
 
+  // ---- 初期表示: 新宿を中央に ----
+  useEffect(() => {
+    const area = mapAreaRef.current;
+    if (!area) return;
+    const rect = area.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const initialScale = 0.08;
+    setTransform({
+      x: rect.width / 2 - CANVAS_CX * initialScale,
+      y: rect.height / 2 - CANVAS_CY * initialScale,
+      scale: initialScale,
+    });
+  }, []);
+
   // ---- パン操作 ----
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
@@ -482,7 +402,11 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     if (!depPos && !arrPos) return;
     const cx = depPos && arrPos ? (depPos[0] + arrPos[0]) / 2 : (depPos ?? arrPos)![0];
     const cy = depPos && arrPos ? (depPos[1] + arrPos[1]) / 2 : (depPos ?? arrPos)![1];
-    const scale = 0.6;
+    let scale = 0.35;
+    if (depPos && arrPos) {
+      const span = Math.max(Math.abs(depPos[0] - arrPos[0]), Math.abs(depPos[1] - arrPos[1]), 400);
+      scale = Math.min(0.6, Math.max(0.1, Math.min(rect.width, rect.height) * 0.5 / span));
+    }
     setTransform({ x: rect.width / 2 - cx * scale, y: rect.height / 2 - cy * scale, scale });
   }, [departure, arrival, schematicData]);
 
@@ -515,8 +439,8 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
 
         <svg style={{ width: '100%', height: '100%', cursor: isPanning.current ? 'grabbing' : 'grab', display: 'block' }}>
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.scale})`}>
-            {/* 背景 */}
-            <rect x={0} y={0} width={SVG_W} height={SVG_H} fill={mapBg} rx={4} />
+            {/* 背景 (全駅をカバーする大領域) */}
+            <rect x={-3000} y={1000} width={16000} height={12000} fill={mapBg} />
 
             {/* 路線ライン */}
             {routeLineElements}
