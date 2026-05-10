@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
-import { routes, routeColors, type RouteKey } from '../data/routes';
+import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
+import { translateRoute } from '../utils/translation';
 
 // ---- 表示対象路線 ----
 const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
@@ -62,6 +63,7 @@ interface DiagramMapProps {
   theme?: 'light' | 'dark';
   language?: 'japanese' | 'english';
   showStationNames?: boolean;
+  onToggleRoute?: (routeKey: RouteKey) => void;
 }
 
 const DiagramMap: React.FC<DiagramMapProps> = ({
@@ -72,10 +74,13 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
   theme = 'light',
   language = 'japanese',
   showStationNames = true,
+  onToggleRoute,
 }) => {
   const visibleRoutes = externalVisibleRoutes ?? new Set(DIAGRAM_ROUTE_KEYS);
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 0.08 });
   const [containerSize, setContainerSize] = useState({ w: 800, h: 600 });
+  const [showDimmedRoutes, setShowDimmedRoutes] = useState(true);
+  const [dimmedTooltip, setDimmedTooltip] = useState<{ routeKey: RouteKey; x: number; y: number } | null>(null);
   const isPanning = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
   const mapAreaRef = useRef<HTMLDivElement>(null);
@@ -102,6 +107,53 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
 
     return { stationPos, transferStations };
   }, [visibleRoutes]);
+
+  // ---- 非表示路線クリックハンドラ ----
+  const handleDimmedRouteClick = useCallback((e: React.MouseEvent<SVGPathElement>, routeKey: RouteKey) => {
+    e.stopPropagation();
+    const rect = mapAreaRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setDimmedTooltip({ routeKey, x: e.clientX - rect.left, y: e.clientY - rect.top });
+  }, []);
+
+  // ---- 非表示路線（半透明・transform非依存） ----
+  const dimmedPathElements = useMemo(() => {
+    if (!showDimmedRoutes) return [];
+
+    return DIAGRAM_ROUTE_KEYS.flatMap(routeKey => {
+      if (visibleRoutes.has(routeKey)) return [];
+
+      const stns = routes[routeKey] as any[];
+      if (!stns?.length) return [];
+
+      const color = adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme);
+
+      let d = '';
+      let prevPos: [number, number] | null = null;
+      for (let i = 0; i < stns.length; i++) {
+        const st = stns[i] as any;
+        if (!st?.lat || !st?.lng) { prevPos = null; continue; }
+        const x = geoX(st.lng);
+        const y = geoY(st.lat);
+        if (prevPos === null) {
+          d += `M${x.toFixed(1)},${y.toFixed(1)}`;
+        } else {
+          const [px, py] = prevPos;
+          if (Math.abs(x - px) < 0.5 && Math.abs(y - py) < 0.5) { prevPos = pos; continue; }
+          d += `L${x.toFixed(1)},${y.toFixed(1)}`;
+        }
+        prevPos = pos;
+      }
+
+      if (!d || d.length < 3) return [];
+
+      return [<path key={`dimmed-${routeKey}`} d={d} fill="none" stroke={color}
+        strokeWidth={5} strokeLinecap="round" strokeLinejoin="round"
+        opacity={0.22} style={{ cursor: 'pointer' }}
+        onClick={(e) => handleDimmedRouteClick(e, routeKey)}
+      />];
+    });
+  }, [schematicData, visibleRoutes, showDimmedRoutes, theme, handleDimmedRouteClick]);
 
   // ---- 路線パス要素（1 path per route · transform非依存） ----
   const routePathElements = useMemo(() => {
@@ -449,6 +501,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onClick={() => setDimmedTooltip(null)}
       >
         <div style={{
           position: 'absolute', bottom: 8, right: 8, zIndex: 20,
@@ -465,6 +518,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
           {/* スケール変換グループ: 路線・ドットのみ（transform非依存メモで安定） */}
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.scale})`}>
             <rect x={-3000} y={1000} width={16000} height={12000} fill={mapBg} />
+            {dimmedPathElements}
             {routePathElements}
             {stationDotElements}
           </g>
@@ -498,6 +552,76 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
             </g>
           )}
         </svg>
+
+        {/* 非表示路線の半透明表示トグルボタン */}
+        <button
+          onClick={e => { e.stopPropagation(); setShowDimmedRoutes(v => !v); }}
+          style={{
+            position: 'absolute', bottom: 8, left: 8, zIndex: 20,
+            background: colors.surfaceElevated,
+            border: `1px solid ${showDimmedRoutes ? colors.border : colors.borderLight}`,
+            borderRadius: '4px', padding: '4px 8px', fontSize: '11px',
+            color: showDimmedRoutes ? colors.text : colors.textSecondary,
+            cursor: 'pointer', boxShadow: `0 1px 4px ${colors.shadow}`,
+            opacity: showDimmedRoutes ? 1 : 0.6,
+          }}
+        >
+          {language === 'english'
+            ? (showDimmedRoutes ? 'All routes: ON' : 'All routes: OFF')
+            : (showDimmedRoutes ? '全路線: 表示' : '全路線: 非表示')}
+        </button>
+
+        {/* 非表示路線ツールチップ */}
+        {dimmedTooltip && (() => {
+          const TW = 180;
+          const TH = 78;
+          const rawX = dimmedTooltip.x + 12;
+          const rawY = dimmedTooltip.y + 12;
+          const tx = rawX + TW > containerSize.w - 8 ? dimmedTooltip.x - TW - 4 : rawX;
+          const ty = rawY + TH > containerSize.h - 8 ? dimmedTooltip.y - TH - 4 : rawY;
+          const displayName = translateRoute(
+            (routeNames as Record<string, string>)[dimmedTooltip.routeKey] ?? dimmedTooltip.routeKey,
+            language
+          );
+          return (
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                position: 'absolute', left: tx, top: ty, zIndex: 50,
+                width: TW, backgroundColor: colors.surfaceElevated,
+                border: `1px solid ${colors.border}`, borderRadius: '8px',
+                boxShadow: `0 4px 16px ${colors.shadow}`,
+                overflow: 'hidden',
+              }}
+            >
+              <div style={{
+                padding: '7px 10px 6px',
+                borderBottom: `1px solid ${colors.borderLight}`,
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}>
+                <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text }}>
+                  {displayName}
+                </span>
+                <span
+                  onClick={() => setDimmedTooltip(null)}
+                  style={{ fontSize: '12px', color: colors.textSecondary, cursor: 'pointer', padding: '0 2px' }}
+                >✕</span>
+              </div>
+              <div style={{ padding: '8px 10px' }}>
+                <button
+                  onClick={() => { onToggleRoute?.(dimmedTooltip.routeKey); setDimmedTooltip(null); }}
+                  style={{
+                    backgroundColor: '#4CAF50', color: 'white', border: 'none',
+                    padding: '3px 8px', borderRadius: '3px', cursor: 'pointer',
+                    fontSize: '11px', width: '100%',
+                  }}
+                >
+                  {language === 'english' ? 'Show this route' : 'この路線を表示する'}
+                </button>
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

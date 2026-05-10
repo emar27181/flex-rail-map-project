@@ -1,5 +1,16 @@
 # CHANGE LOG
 
+## [2026-05-10] セッション（続き）
+
+### feat: 路線図で非表示路線を半透明表示・クリックで表示ボタン（`src/components/DiagramMap.tsx`, `src/components/RailwayMap.tsx`）
+- `showDimmedRoutes` トグルボタン（デフォルトON）を路線図左下に追加
+- 非表示路線を半透明（opacity 0.22）のパスとして描画（駅名・ドットなし）
+- 半透明路線クリックで路線名＋「この路線を表示する」ボタン付きツールチップを表示
+- ツールチップのデザインは既存の駅ツールチップと統一（fontSize 13px/11px, borderRadius 8px）
+- `onToggleRoute` コールバックをDiagramMap Propsに追加し、RailwayMapから `setVisibleRoutes` に接続
+
+---
+
 ## [2026-05-10] セッション
 
 ### improve: DiagramMap大幅軽量化・ラベル固定12px化（`src/components/DiagramMap.tsx`）

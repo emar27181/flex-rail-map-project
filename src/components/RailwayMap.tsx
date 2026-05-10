@@ -2616,6 +2616,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               theme={theme}
               language={currentLanguage}
               showStationNames={showStationNames}
+              onToggleRoute={(routeKey) => setVisibleRoutes(prev => new Set([...prev, routeKey]))}
             />
           )}
 
