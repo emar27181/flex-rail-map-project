@@ -89,7 +89,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
   const [showTravelTimes, setShowTravelTimes] = useState(true);
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
-  const [showStationNumbers, setShowStationNumbers] = useState(true);
+  const [showStationNumbers, setShowStationNumbers] = useState(false);
   const [showOsmTiles, setShowOsmTiles] = useState(true);
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   // 地図表示モード
