@@ -979,7 +979,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     const { DivIcon } = MapComponents;
     const fontSize = 12;
-    const circleSize = Math.max(20, Math.round(zoomLevel * 1.8));
+    const circleSize = 20;
 
     const bgColor = theme === 'dark' ? 'rgba(40,40,40,0.9)' : 'rgba(255,255,255,0.9)';
     const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
