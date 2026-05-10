@@ -109,9 +109,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
   const [actuallyDisplayedStations, setActuallyDisplayedStations] = useState<Set<string>>(new Set());
 
   // フルスクリーン状態（モバイルはデフォルトでフルスクリーン）
-  const [isFullscreen, setIsFullscreen] = useState(() =>
-    typeof window !== 'undefined' && window.innerWidth < 768
-  );
+  const [isFullscreen, setIsFullscreen] = useState(true);
 
   // 時刻表モード
   const [timetableModeEnabled, setTimetableModeEnabled] = useState(true);
