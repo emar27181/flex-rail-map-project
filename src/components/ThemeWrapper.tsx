@@ -17,7 +17,7 @@ const ThemeWrapper: React.FC = () => {
   return (
     <ThemeProvider>
       <NavigationBar language={language} onLanguageChange={handleLanguageChange} isFullscreen={isFullscreen} />
-      <RailwayMap language={language} onFullscreenChange={setIsFullscreen} />
+      <RailwayMap language={language} onLanguageChange={handleLanguageChange} onFullscreenChange={setIsFullscreen} />
       <Footer language={language} />
 
       {/* 追従型広告（フルスクリーン時は非表示） */}

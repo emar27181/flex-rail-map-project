@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Maximize2, Minimize2 } from 'lucide-react';
+import { Maximize2, Minimize2, Sun, Moon } from 'lucide-react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
@@ -41,12 +41,13 @@ declare global {
 interface RailwayMapProps {
   className?: string;
   language: 'japanese' | 'english';
+  onLanguageChange?: (language: 'japanese' | 'english') => void;
   onFullscreenChange?: (isFullscreen: boolean) => void;
 }
 
-const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscreenChange }) => {
+const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguageChange, onFullscreenChange }) => {
   // console.log('RailwayMap component initialized');
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const colors = getThemeColors(theme);
 
   const [mapCenter, setMapCenter] = useState<[number, number]>([35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
@@ -2995,41 +2996,101 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
             </>
           )}
 
-          {/* フルスクリーン切り替えボタン */}
-          <button
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            style={{
-              position: 'absolute',
-              ...(isFullscreen && isMobile
-                ? { top: 'calc(env(safe-area-inset-top, 0px) + 10px)', bottom: 'auto' }
-                : !isFullscreen
-                  ? isMobile
-                    ? { top: '60px', bottom: 'auto' }
-                    : { bottom: '10px', top: 'auto' }
-                  : { bottom: '10px', top: 'auto' }),
-              left: '10px',
-              zIndex: 1003,
-              display: 'flex',
-              backgroundColor: colors.surface,
-              color: colors.text,
-              border: `1px solid ${colors.border}`,
-              borderRadius: '8px',
-              width: '36px',
-              height: '36px',
-              cursor: 'pointer',
-              boxShadow: `0 2px 8px ${colors.shadow}`,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(4px)',
-            }}
-            title={isFullscreen
-              ? translateUI('exitFullscreen', currentLanguage)
-              : translateUI('enterFullscreen', currentLanguage)
-            }
-            aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-          >
-            {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
-          </button>
+          {/* 左下ボタングループ: フルスクリーン切り替え / 言語 / テーマ */}
+          <div style={{
+            position: 'absolute',
+            ...(isFullscreen && isMobile
+              ? { top: 'calc(env(safe-area-inset-top, 0px) + 10px)', bottom: 'auto' }
+              : !isFullscreen
+                ? isMobile
+                  ? { top: '60px', bottom: 'auto' }
+                  : { bottom: '10px', top: 'auto' }
+                : { bottom: '10px', top: 'auto' }),
+            left: '10px',
+            zIndex: 1003,
+            display: 'flex',
+            gap: '4px',
+          }}>
+            {/* フルスクリーン切り替え */}
+            <button
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              style={{
+                display: 'flex',
+                backgroundColor: colors.surface,
+                color: colors.text,
+                border: `1px solid ${colors.border}`,
+                borderRadius: '8px',
+                width: '36px',
+                height: '36px',
+                cursor: 'pointer',
+                boxShadow: `0 2px 8px ${colors.shadow}`,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backdropFilter: 'blur(4px)',
+              }}
+              title={isFullscreen
+                ? translateUI('exitFullscreen', currentLanguage)
+                : translateUI('enterFullscreen', currentLanguage)
+              }
+              aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            >
+              {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+            </button>
+
+            {/* 言語切り替え */}
+            {onLanguageChange && (
+              <button
+                onClick={() => onLanguageChange(language === 'japanese' ? 'english' : 'japanese')}
+                style={{
+                  display: 'flex',
+                  backgroundColor: colors.surface,
+                  color: colors.text,
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: '8px',
+                  width: '36px',
+                  height: '36px',
+                  cursor: 'pointer',
+                  boxShadow: `0 2px 8px ${colors.shadow}`,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backdropFilter: 'blur(4px)',
+                  fontSize: FS.label,
+                  fontWeight: 'bold',
+                  fontFamily: 'monospace',
+                }}
+                title={language === 'japanese' ? 'Switch to English' : 'Switch to Japanese'}
+                aria-label={language === 'japanese' ? 'Switch to English' : 'Switch to Japanese'}
+              >
+                {language === 'japanese' ? 'En' : '日'}
+              </button>
+            )}
+
+            {/* テーマ切り替え */}
+            <button
+              onClick={toggleTheme}
+              style={{
+                display: 'flex',
+                backgroundColor: colors.surface,
+                color: colors.text,
+                border: `1px solid ${colors.border}`,
+                borderRadius: '8px',
+                width: '36px',
+                height: '36px',
+                cursor: 'pointer',
+                boxShadow: `0 2px 8px ${colors.shadow}`,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backdropFilter: 'blur(4px)',
+              }}
+              title={language === 'japanese'
+                ? `${theme === 'light' ? 'ダーク' : 'ライト'}モードに切り替え`
+                : `Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`
+              }
+              aria-label="Toggle theme"
+            >
+              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+            </button>
+          </div>
 
 
           {/* 駅時刻表ツールチップ */}
