@@ -2662,7 +2662,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               language={currentLanguage}
               showStationNames={showStationNames}
               showDimmedRoutes={showDimmedMapRoutes}
-              onToggleRoute={(routeKey) => setVisibleRoutes(prev => new Set([...prev, routeKey]))}
+              onToggleRoute={(routeKey) => { setAvailableRoutes(prev => new Set([...prev, routeKey])); setVisibleRoutes(prev => new Set([...prev, routeKey])); }}
               onHideRoute={(routeKey) => setVisibleRoutes(prev => { const s = new Set(prev); s.delete(routeKey); return s; })}
             />
           )}
@@ -2747,6 +2747,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   ) : (
                     <button
                       onClick={() => {
+                        setAvailableRoutes(prev => new Set([...prev, dimmedMapTooltip.routeKey]));
                         setVisibleRoutes(prev => new Set([...prev, dimmedMapTooltip.routeKey]));
                         setDimmedMapTooltip(null);
                       }}
