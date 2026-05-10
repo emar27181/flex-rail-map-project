@@ -25,6 +25,8 @@ interface LegendRouteListProps {
   onToggleRoute: (routeKey: RouteKey) => void;
   onSelectAllRoutes: () => void;
   onDeselectAllRoutes: () => void;
+  showDimmedRoutes: boolean;
+  onShowDimmedRoutesChange: (value: boolean) => void;
   onShowTransferStationsOnlyChange: (value: boolean) => void;
   onShowExpressStationsOnlyChange: (value: boolean) => void;
   onShowTravelTimesChange: (value: boolean) => void;
@@ -54,6 +56,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onToggleRoute,
   onSelectAllRoutes,
   onDeselectAllRoutes,
+  showDimmedRoutes,
+  onShowDimmedRoutesChange,
   onShowTransferStationsOnlyChange,
   onShowExpressStationsOnlyChange,
   onShowTravelTimesChange,
@@ -114,6 +118,24 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
       {/* 表示オプション */}
       <div style={{ marginBottom: '8px' }}> {/* Removed marginTop to prevent double spacing */}
+        {/* 区間外の路線を半透明で表示 */}
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '12px',
+          color: colors.text,
+          cursor: 'pointer',
+          marginBottom: '4px'
+        }}>
+          <input
+            type="checkbox"
+            checked={showDimmedRoutes}
+            onChange={(e) => onShowDimmedRoutesChange(e.target.checked)}
+            style={{ marginRight: '6px', cursor: 'pointer' }}
+          />
+          {language === 'english' ? 'Show outside-segment routes dimly' : '区間外の路線を半透明で表示'}
+        </label>
+
         {/* 乗換駅のみ表示オプション */}
         <label style={{
           display: 'flex',
