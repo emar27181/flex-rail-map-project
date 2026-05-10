@@ -181,6 +181,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // 英語モードではデフォルトで駅コードを表示
+  useEffect(() => {
+    setShowStationNumbers(language === 'english');
+  }, [language]);
+
   // モバイル幅の監視
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -2612,7 +2617,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             <MapContainer
               center={mapCenter}
               zoom={12}
-              style={{ height: '100%', width: '100%' }}
+              style={{ height: '100%', width: '100%', backgroundColor: showOsmTiles ? undefined : colors.background }}
               scrollWheelZoom={true}
               zoomControl={false}
               ref={mapRef}
