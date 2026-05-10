@@ -1903,8 +1903,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 console.log('🔴 Using fallback position');
               }
               justClickedLayerRef.current = true;
-              const oe = (e as any).originalEvent as MouseEvent;
-              setDimmedMapTooltip({ routeKey, x: oe?.clientX ?? 400, y: oe?.clientY ?? 300, isVisible: true });
             },
             mouseover: (e) => {
               console.log('🟡🟡🟡 === ROUTE HOVER DEBUG START ===');
@@ -3422,51 +3420,37 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
           {/* 路線情報ポップアップ */}
           {clickedRoute && routePopupPosition && (() => {
-            console.log('🔵🔵🔵 RENDERING POPUP:', clickedRoute, 'position:', routePopupPosition);
-            console.log('🔵 Popup should be visible at:', `left: ${routePopupPosition.x}px, top: ${routePopupPosition.y}px`);
             return (
               <div
-                id="route-popup-debug"
                 style={{
                   position: 'fixed',
                   left: `${routePopupPosition.x}px`,
                   top: `${routePopupPosition.y}px`,
-                  backgroundColor: 'yellow',
-                  border: '5px solid #ff0000',
+                  backgroundColor: colors.surfaceElevated,
+                  border: `1px solid ${colors.border}`,
                   borderRadius: '8px',
-                  padding: '20px',
-                  boxShadow: '0 8px 16px rgba(0,0,0,0.8)',
-                  zIndex: 99999,
-                  minWidth: '300px',
+                  padding: '12px 14px',
+                  boxShadow: `0 4px 16px ${colors.shadow}`,
+                  zIndex: 9999,
+                  minWidth: '180px',
                   transform: 'translate(-50%, -100%)',
-                  marginTop: '-20px',
-                  fontSize: '16px',
-                  fontWeight: 'bold'
+                  marginTop: '-12px',
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
                 <div style={{ position: 'relative' }}>
-                  <button
+                  <span
                     onClick={handleRoutePopupClose}
                     style={{
                       position: 'absolute',
-                      top: '-5px',
-                      right: '-5px',
-                      background: '#ff4444',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '50%',
-                      width: '20px',
-                      height: '20px',
-                      cursor: 'pointer',
+                      top: '-4px',
+                      right: '-4px',
                       fontSize: '12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
+                      color: colors.textSecondary,
+                      cursor: 'pointer',
+                      padding: '0 2px',
                     }}
-                  >
-                    ×
-                  </button>
+                  >✕</span>
 
                   <div style={{
                     display: 'flex',
@@ -3549,6 +3533,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       </div>
                     </div>
                   )}
+
+                  {/* この路線を非表示にするボタン */}
+                  <button
+                    onClick={() => {
+                      setVisibleRoutes(prev => { const s = new Set(prev); s.delete(clickedRoute as RouteKey); return s; });
+                      handleRoutePopupClose();
+                    }}
+                    style={{
+                      marginTop: '10px',
+                      width: '100%',
+                      backgroundColor: '#F44336', color: 'white', border: 'none',
+                      padding: '4px 8px', borderRadius: '4px', cursor: 'pointer',
+                      fontSize: '11px',
+                    }}
+                  >
+                    {currentLanguage === 'english' ? 'Hide this route' : 'この路線を非表示にする'}
+                  </button>
                 </div>
               </div>
             );
