@@ -1,5 +1,21 @@
 # CHANGE LOG
 
+## [2026-05-10] セッション
+
+### improve: DiagramMap大幅軽量化・ラベル固定12px化（`src/components/DiagramMap.tsx`）
+- 路線ライン: 2000超の `<line>` 要素を76本の `<path>` 要素（1路線1パス）に置換 → React要素数を大幅削減
+- 駅ドット: `stationDotElements` を transform非依存のメモに分離 → ズーム中もドットが再レンダリングされない
+- 駅ラベル: `<g transform>` の外（スクリーン空間）でSVG `<text>` を描画 → スケール依存の `fontSize/scale` 計算を廃止
+- ラベルフォントサイズを常時固定12pxに統一（拡大縮小に関係なく同じ大きさで表示）
+- 出発/到着マーカーもスクリーン空間で描画（常時8px円・12pxテキスト）
+- LODしきい値: scale<0.05→ラベル非表示, scale<0.09→乗換駅のみ表示
+
+### feat: DiagramMapにフォントサイズ定数・マーカー定数を追加（`src/components/DiagramMap.tsx`）
+- `SCREEN_FS = 12` (固定スクリーンフォントサイズ)
+- `MARKER_R = 8` (出発/到着マーカー半径)
+
+---
+
 ## [2026-05-08] セッション
 
 ### feat: 駅番号（路線記号＋番号）をマップ上の駅名ラベルに表示（`src/data/stationNumbers.ts`, `src/components/RailwayMap.tsx`）

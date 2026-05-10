@@ -30,9 +30,9 @@ const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
 ];
 
 // ---- 地理座標系 (新宿アンカー・無限拡張キャンバス) ----
-const SCALE_PX = 12000;                              // px / 緯度1°
-const LNG_COS = Math.cos(35.57 * Math.PI / 180);    // ~0.813 (東京緯度での経度補正)
-const ANCHOR_LNG = 139.7006;                         // 新宿
+const SCALE_PX = 12000;
+const LNG_COS = Math.cos(35.57 * Math.PI / 180);
+const ANCHOR_LNG = 139.7006;
 const ANCHOR_LAT = 35.6896;
 const CANVAS_CX = 5000;
 const CANVAS_CY = 5000;
@@ -43,6 +43,15 @@ function geoX(lng: number): number {
 function geoY(lat: number): number {
   return CANVAS_CY - (lat - ANCHOR_LAT) * SCALE_PX;
 }
+
+// ---- ラベル配置定数 ----
+const REF_FS = 5.5;
+const REF_LH = REF_FS * 1.5;
+const REF_GAP = 0.8;
+const REF_R_TRANSFER = 2.5;
+const REF_R_REGULAR = 1.5;
+const SCREEN_FS = 12; // 固定スクリーン空間フォントサイズ
+const MARKER_R = 8;   // 出発/到着マーカー半径（スクリーンpx）
 
 // ---- Props ----
 interface DiagramMapProps {
@@ -66,11 +75,12 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
 }) => {
   const visibleRoutes = externalVisibleRoutes ?? new Set(DIAGRAM_ROUTE_KEYS);
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 0.08 });
+  const [containerSize, setContainerSize] = useState({ w: 800, h: 600 });
   const isPanning = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
   const mapAreaRef = useRef<HTMLDivElement>(null);
 
-  // ---- 地理座標ベースの駅レイアウト計算 ----
+  // ---- 地理座標ベースの駅位置計算 ----
   const schematicData = useMemo(() => {
     const stationGeo = new Map<string, { lat: number; lng: number }>();
     const stationRouteCount = new Map<string, number>();
@@ -93,53 +103,49 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     return { stationPos, transferStations };
   }, [visibleRoutes]);
 
-  // ---- 路線ライン要素 ----
-  const routeLineElements = useMemo(() => {
+  // ---- 路線パス要素（1 path per route · transform非依存） ----
+  const routePathElements = useMemo(() => {
     const hasFilter = highlightedRouteKeys !== null;
-    const elements: React.ReactElement[] = [];
     const { stationPos } = schematicData;
 
     const sortedKeys = [...DIAGRAM_ROUTE_KEYS].sort((a, b) =>
       Number(highlightedRouteKeys?.has(a) ?? false) - Number(highlightedRouteKeys?.has(b) ?? false)
     );
 
-    sortedKeys.forEach(routeKey => {
-      if (!visibleRoutes.has(routeKey)) return;
-      if (hasFilter && !highlightedRouteKeys!.has(routeKey)) return;
+    return sortedKeys.flatMap(routeKey => {
+      if (!visibleRoutes.has(routeKey)) return [];
+      if (hasFilter && !highlightedRouteKeys!.has(routeKey)) return [];
 
       const stns = routes[routeKey] as any[];
-      if (!stns?.length) return;
+      if (!stns?.length) return [];
 
       const color = adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme);
       const sw = hasFilter ? 3 : 2;
 
-      for (let i = 0; i < stns.length - 1; i++) {
-        const pos1 = stationPos.get(stns[i].name);
-        const pos2 = stationPos.get(stns[i + 1].name);
-        if (!pos1 || !pos2) continue;
-        const [x1, y1] = pos1, [x2, y2] = pos2;
-        if (Math.abs(x1 - x2) < 0.5 && Math.abs(y1 - y2) < 0.5) continue;
-
-        elements.push(
-          <line key={`${routeKey}-${i}`}
-            x1={x1} y1={y1} x2={x2} y2={y2}
-            stroke={color} strokeWidth={sw}
-            strokeLinecap="round"
-          />
-        );
+      let d = '';
+      let prevPos: [number, number] | null = null;
+      for (let i = 0; i < stns.length; i++) {
+        const pos = stationPos.get(stns[i].name);
+        if (!pos) { prevPos = null; continue; }
+        const [x, y] = pos;
+        if (prevPos === null) {
+          d += `M${x.toFixed(1)},${y.toFixed(1)}`;
+        } else {
+          const [px, py] = prevPos;
+          if (Math.abs(x - px) < 0.5 && Math.abs(y - py) < 0.5) { prevPos = pos; continue; }
+          d += `L${x.toFixed(1)},${y.toFixed(1)}`;
+        }
+        prevPos = pos;
       }
+
+      if (!d || d.length < 3) return [];
+
+      return [<path key={routeKey} d={d} fill="none" stroke={color} strokeWidth={sw}
+        strokeLinecap="round" strokeLinejoin="round" />];
     });
-    return elements;
   }, [schematicData, visibleRoutes, highlightedRouteKeys, theme]);
 
-  // ---- ラベル配置定数（スケール非依存・固定基準） ----
-  const REF_FS = 5.5;
-  const REF_LH = REF_FS * 1.5;
-  const REF_GAP = 0.8;
-  const REF_R_TRANSFER = 2.5;
-  const REF_R_REGULAR = 1.5;
-
-  // ---- 駅レイアウト計算（スケール非依存・位置固定） ----
+  // ---- 駅レイアウト計算（スケール非依存） ----
   const stationLayout = useMemo(() => {
     const { stationPos, transferStations } = schematicData;
     const hasFilter = highlightedRouteKeys !== null;
@@ -188,7 +194,6 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       return [lx, ly];
     }
 
-    // 表示対象駅を収集（重複排除・乗換駅優先ソート）
     const stations: Array<{ name: string; sx: number; sy: number; isTransfer: boolean }> = [];
     const seen = new Set<string>();
 
@@ -209,7 +214,6 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       return 0;
     });
 
-    // ラベル配置: 8方向 × 最大8ステップ
     const placements = new Map<string, [number, number, boolean, number, number]>();
     stations.forEach(({ name, sx, sy, isTransfer }) => {
       const lw = textW(name);
@@ -238,57 +242,71 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     return { stations, placements };
   }, [schematicData, visibleRoutes, highlightedRouteKeys]);
 
-  // ---- 駅SVG要素（スケール依存のサイズのみ更新・位置固定） ----
-  const stationElements = useMemo(() => {
+  // ---- 駅ドット（スケール非依存・ズーム中も安定） ----
+  const stationDotElements = useMemo(() => {
     const colors = getThemeColors(theme);
-    const s = transform.scale;
-    const rTransfer = Math.max(1.5, REF_R_TRANSFER / s);
-    const rRegular = Math.max(1.0, REF_R_REGULAR / s);
-    const fs = Math.max(3.5, Math.min(9, REF_FS / s));
-    const sw = 1.5 / s;
-    const { stations, placements } = stationLayout;
-
-    if (!showStationNames) {
-      return stations.map(({ name, sx, sy, isTransfer }) => {
-        const r = isTransfer ? rTransfer : rRegular;
-        return (
-          <g key={name}>
-            <circle cx={sx} cy={sy} r={r}
-              fill={isTransfer ? colors.surfaceElevated : colors.textMuted}
-              stroke={isTransfer ? colors.textSecondary : 'none'}
-              strokeWidth={isTransfer ? 0.8 / s : 0}
-            />
-          </g>
-        );
-      });
-    }
+    const { stations } = stationLayout;
 
     return stations.map(({ name, sx, sy, isTransfer }) => {
-      const placement = placements.get(name);
-      if (!placement) return null;
-      const [lx, ly, , ,] = placement;
-      const r = isTransfer ? rTransfer : rRegular;
+      const r = isTransfer ? REF_R_TRANSFER : REF_R_REGULAR;
       return (
-        <g key={name}>
-          <circle cx={sx} cy={sy} r={r}
-            fill={isTransfer ? colors.surfaceElevated : colors.textMuted}
-            stroke={isTransfer ? colors.textSecondary : 'none'}
-            strokeWidth={isTransfer ? 0.8 / s : 0}
-          />
-          <text
-            x={lx} y={ly + fs}
-            fontSize={fs}
-            fontWeight={isTransfer ? 'bold' : 'normal'}
-            fill={isTransfer ? colors.text : colors.textSecondary}
-            stroke={colors.background} strokeWidth={sw} paintOrder="stroke"
-            style={{ pointerEvents: 'none', userSelect: 'none' }}
-          >
-            {name}
-          </text>
-        </g>
+        <circle key={name} cx={sx} cy={sy} r={r}
+          fill={isTransfer ? colors.surfaceElevated : colors.textMuted}
+          stroke={isTransfer ? colors.textSecondary : 'none'}
+          strokeWidth={isTransfer ? 0.8 : 0}
+        />
       );
     });
-  }, [stationLayout, transform.scale, theme, showStationNames]);
+  }, [stationLayout, theme]);
+
+  // ---- 駅ラベル（スクリーン空間・常時固定12px） ----
+  const labelElements = useMemo(() => {
+    if (!showStationNames) return null;
+    const colors = getThemeColors(theme);
+    const { stations, placements } = stationLayout;
+    const { x: tx, y: ty, scale: s } = transform;
+
+    if (s < 0.05) return null;
+
+    const texts: React.ReactElement[] = [];
+    for (const { name, sx, sy, isTransfer } of stations) {
+      if (s < 0.09 && !isTransfer) continue;
+
+      const screenSx = sx * s + tx;
+      const screenSy = sy * s + ty;
+      if (screenSx < -60 || screenSx > containerSize.w + 60) continue;
+      if (screenSy < -60 || screenSy > containerSize.h + 60) continue;
+
+      const placement = placements.get(name);
+      if (!placement) continue;
+      const [lx, ly] = placement;
+
+      texts.push(
+        <text key={name}
+          x={lx * s + tx} y={ly * s + ty + SCREEN_FS}
+          fontSize={SCREEN_FS}
+          fontWeight={isTransfer ? 'bold' : 'normal'}
+          fill={isTransfer ? colors.text : colors.textSecondary}
+          stroke={colors.background} strokeWidth={1.5} paintOrder="stroke"
+          style={{ pointerEvents: 'none', userSelect: 'none' }}
+        >
+          {name}
+        </text>
+      );
+    }
+    return texts;
+  }, [stationLayout, transform, containerSize, theme, showStationNames]);
+
+  // ---- コンテナサイズ追跡 ----
+  useEffect(() => {
+    const area = mapAreaRef.current;
+    if (!area) return;
+    const ro = new ResizeObserver(([e]) => {
+      setContainerSize({ w: e.contentRect.width, h: e.contentRect.height });
+    });
+    ro.observe(area);
+    return () => ro.disconnect();
+  }, []);
 
   // ---- 初期表示: 新宿を中央に ----
   useEffect(() => {
@@ -332,7 +350,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       const mouseY = e.clientY - rect.top;
       const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
       setTransform(t => {
-        const newScale = Math.max(0.12, Math.min(8, t.scale * factor));
+        const newScale = Math.max(0.03, Math.min(8, t.scale * factor));
         const svgX = (mouseX - t.x) / t.scale;
         const svgY = (mouseY - t.y) / t.scale;
         return { x: mouseX - svgX * newScale, y: mouseY - svgY * newScale, scale: newScale };
@@ -371,7 +389,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
         const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
         setTransform(t => {
-          const newScale = Math.max(0.12, Math.min(8, t.scale * factor));
+          const newScale = Math.max(0.03, Math.min(8, t.scale * factor));
           const svgX = (cx - t.x) / t.scale;
           const svgY = (cy - t.y) / t.scale;
           return { x: cx - svgX * newScale, y: cy - svgY * newScale, scale: newScale };
@@ -415,6 +433,13 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
   const depSVGPos = schematicData.stationPos.get(departure) ?? null;
   const arrSVGPos = schematicData.stationPos.get(arrival) ?? null;
 
+  const depScreenX = depSVGPos ? depSVGPos[0] * transform.scale + transform.x : null;
+  const depScreenY = depSVGPos ? depSVGPos[1] * transform.scale + transform.y : null;
+  const arrScreenX = arrSVGPos ? arrSVGPos[0] * transform.scale + transform.x : null;
+  const arrScreenY = arrSVGPos ? arrSVGPos[1] * transform.scale + transform.y : null;
+  const depColor = colors.success;
+  const arrColor = theme === 'dark' ? '#ff5555' : '#F44336';
+
   return (
     <div style={{ display: 'flex', height: '100%', width: '100%', fontFamily: 'sans-serif', background: colors.background }}>
       <div
@@ -425,7 +450,6 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        {/* 操作ヒント（PC幅のみ） */}
         <div style={{
           position: 'absolute', bottom: 8, right: 8, zIndex: 20,
           background: colors.surfaceElevated, border: `1px solid ${colors.border}`,
@@ -438,52 +462,41 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         <style>{`@media (min-width: 600px) { .diagram-hint { display: block !important; } }`}</style>
 
         <svg style={{ width: '100%', height: '100%', cursor: isPanning.current ? 'grabbing' : 'grab', display: 'block' }}>
+          {/* スケール変換グループ: 路線・ドットのみ（transform非依存メモで安定） */}
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.scale})`}>
-            {/* 背景 (全駅をカバーする大領域) */}
             <rect x={-3000} y={1000} width={16000} height={12000} fill={mapBg} />
-
-            {/* 路線ライン */}
-            {routeLineElements}
-
-            {/* 駅マーカー・ラベル */}
-            {stationElements}
-
-            {/* 出発駅マーカー */}
-            {depSVGPos && (() => {
-              const s = transform.scale;
-              const r = Math.max(3, 6 / s);
-              const fs = Math.max(5, Math.min(12, 8 / s));
-              const c = colors.success;
-              return (
-                <g style={{ pointerEvents: 'none' }}>
-                  <circle cx={depSVGPos[0]} cy={depSVGPos[1]} r={r} fill={c} stroke={colors.background} strokeWidth={1.5 / s} />
-                  <text x={depSVGPos[0] + r + 2 / s} y={depSVGPos[1] + fs * 0.35}
-                    fontSize={fs} fontWeight="bold" fill={c}
-                    stroke={colors.background} strokeWidth={2 / s} paintOrder="stroke"
-                    style={{ userSelect: 'none' }}
-                  >{departure}</text>
-                </g>
-              );
-            })()}
-
-            {/* 到着駅マーカー */}
-            {arrSVGPos && (() => {
-              const s = transform.scale;
-              const r = Math.max(3, 6 / s);
-              const fs = Math.max(5, Math.min(12, 8 / s));
-              const c = theme === 'dark' ? '#ff5555' : '#F44336';
-              return (
-                <g style={{ pointerEvents: 'none' }}>
-                  <circle cx={arrSVGPos[0]} cy={arrSVGPos[1]} r={r} fill={c} stroke={colors.background} strokeWidth={1.5 / s} />
-                  <text x={arrSVGPos[0] + r + 2 / s} y={arrSVGPos[1] + fs * 0.35}
-                    fontSize={fs} fontWeight="bold" fill={c}
-                    stroke={colors.background} strokeWidth={2 / s} paintOrder="stroke"
-                    style={{ userSelect: 'none' }}
-                  >{arrival}</text>
-                </g>
-              );
-            })()}
+            {routePathElements}
+            {stationDotElements}
           </g>
+
+          {/* ラベル（スクリーン空間・常時12px） */}
+          {labelElements}
+
+          {/* 出発駅マーカー（スクリーン空間） */}
+          {depScreenX !== null && depScreenY !== null && (
+            <g style={{ pointerEvents: 'none' }}>
+              <circle cx={depScreenX} cy={depScreenY} r={MARKER_R}
+                fill={depColor} stroke={colors.background} strokeWidth={1.5} />
+              <text x={depScreenX + MARKER_R + 3} y={depScreenY + 4}
+                fontSize={SCREEN_FS} fontWeight="bold" fill={depColor}
+                stroke={colors.background} strokeWidth={2} paintOrder="stroke"
+                style={{ userSelect: 'none' }}
+              >{departure}</text>
+            </g>
+          )}
+
+          {/* 到着駅マーカー（スクリーン空間） */}
+          {arrScreenX !== null && arrScreenY !== null && (
+            <g style={{ pointerEvents: 'none' }}>
+              <circle cx={arrScreenX} cy={arrScreenY} r={MARKER_R}
+                fill={arrColor} stroke={colors.background} strokeWidth={1.5} />
+              <text x={arrScreenX + MARKER_R + 3} y={arrScreenY + 4}
+                fontSize={SCREEN_FS} fontWeight="bold" fill={arrColor}
+                stroke={colors.background} strokeWidth={2} paintOrder="stroke"
+                style={{ userSelect: 'none' }}
+              >{arrival}</text>
+            </g>
+          )}
         </svg>
       </div>
     </div>
