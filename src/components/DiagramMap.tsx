@@ -65,6 +65,7 @@ interface DiagramMapProps {
   showStationNames?: boolean;
   onToggleRoute?: (routeKey: RouteKey) => void;
   onHideRoute?: (routeKey: RouteKey) => void;
+  showDimmedRoutes?: boolean;
 }
 
 const DiagramMap: React.FC<DiagramMapProps> = ({
@@ -77,11 +78,13 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
   showStationNames = true,
   onToggleRoute,
   onHideRoute,
+  showDimmedRoutes: externalShowDimmed,
 }) => {
   const visibleRoutes = externalVisibleRoutes ?? new Set(DIAGRAM_ROUTE_KEYS);
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 0.08 });
   const [containerSize, setContainerSize] = useState({ w: 800, h: 600 });
-  const [showDimmedRoutes, setShowDimmedRoutes] = useState(true);
+  const [internalShowDimmed, setInternalShowDimmed] = useState(true);
+  const showDimmedRoutes = externalShowDimmed !== undefined ? externalShowDimmed : internalShowDimmed;
   const [dimmedTooltip, setDimmedTooltip] = useState<{ routeKey: RouteKey; x: number; y: number; isVisible: boolean } | null>(null);
   const isPanning = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
@@ -156,20 +159,21 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
 
       if (!d || d.length < 3) return [];
 
+      const clickSW = 12 / transform.scale;
       return [
         <path key={`click-${routeKey}`} d={d} fill="none" stroke={color}
-          strokeWidth={12} vectorEffect="non-scaling-stroke"
+          strokeWidth={clickSW}
           style={{ cursor: 'pointer', pointerEvents: 'all' }} opacity={0}
           onClick={(e) => handleDimmedRouteClick(e, routeKey)}
         />,
         <path key={`dimmed-${routeKey}`} d={d} fill="none" stroke={color}
-          strokeWidth={4} strokeLinecap="round" strokeLinejoin="round"
-          opacity={0.22} vectorEffect="non-scaling-stroke"
+          strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+          opacity={0.22}
           style={{ pointerEvents: 'none' }}
         />,
       ];
     });
-  }, [schematicData, visibleRoutes, showDimmedRoutes, theme, handleDimmedRouteClick]);
+  }, [schematicData, visibleRoutes, showDimmedRoutes, theme, handleDimmedRouteClick, transform.scale]);
 
   // ---- 路線パス要素（1 path per route · transform非依存） ----
   const routePathElements = useMemo(() => {
@@ -574,7 +578,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
 
         {/* 非表示路線の半透明表示トグルボタン */}
         <button
-          onClick={e => { e.stopPropagation(); setShowDimmedRoutes(v => !v); }}
+          onClick={e => { e.stopPropagation(); setInternalShowDimmed(v => !v); }}
           style={{
             position: 'absolute', bottom: 8, left: 8, zIndex: 20,
             background: colors.surfaceElevated,

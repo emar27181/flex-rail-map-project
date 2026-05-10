@@ -148,6 +148,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const watchIdRef = useRef<number | null>(null);
+  const justClickedLayerRef = useRef(false);
   const isFirstPositionRef = useRef(true);
   const locationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -1759,6 +1760,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         setZoomLevel(e.target.getZoom());
       },
       click: () => {
+        if (justClickedLayerRef.current) { justClickedLayerRef.current = false; return; }
         handleRoutePopupClose();
         setDimmedMapTooltip(null);
       },
@@ -1900,8 +1902,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 setRoutePopupPosition({ x: 400, y: 300 });
                 console.log('🔴 Using fallback position');
               }
+              justClickedLayerRef.current = true;
               const oe = (e as any).originalEvent as MouseEvent;
-              oe?.stopPropagation();
               setDimmedMapTooltip({ routeKey, x: oe?.clientX ?? 400, y: oe?.clientY ?? 300, isVisible: true });
             },
             mouseover: (e) => {
@@ -2257,19 +2259,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         {/* ルート推薦表示は凡例内に統合 */}
 
         {showRouteToggleSection && (
-          <div style={{ marginBottom: '15px', border: `1px solid ${colors.border}`, borderRadius: '8px', backgroundColor: colors.surface, maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+          <div style={{ marginBottom: '15px', border: `1px solid ${colors.border}`, borderRadius: '8px', backgroundColor: colors.surface }}>
           <div
             onClick={() => setIsRouteToggleExpanded(!isRouteToggleExpanded)}
             style={{
               position: 'sticky',
               top: 0,
               backgroundColor: colors.surface,
-              zIndex: 1,
+              zIndex: 10,
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               cursor: 'pointer',
               padding: '15px',
+              borderRadius: '8px 8px 0 0',
               borderBottom: isRouteToggleExpanded ? `1px solid ${colors.borderLight}` : 'none'
             }}
           >
@@ -2285,7 +2288,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           </div>
 
           {isRouteToggleExpanded && (
-            <div style={{ padding: '15px' }}>
+            <div style={{ padding: '15px', maxHeight: 'calc(100vh - 160px)', overflowY: 'auto' }}>
+              {/* 区間外路線を半透明で表示 */}
+              <div style={{ marginBottom: '10px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: FS.base, color: colors.text, cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={showDimmedMapRoutes}
+                    onChange={(e) => setShowDimmedMapRoutes(e.target.checked)}
+                  />
+                  {currentLanguage === 'english' ? 'Show non-route lines semi-transparently' : '区間外の路線を半透明で表示'}
+                </label>
+              </div>
               <div style={{ marginBottom: '10px' }}>
                 <div style={{
                   display: 'flex',
@@ -2613,11 +2627,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   const positions = (stationList as any[]).map((s: any) => [s.lat, s.lng] as [number, number]);
                   return (
                     <Polyline key={`dimmed-${rKey}`}
-                      positions={positions} color={color} weight={6} opacity={0.2}
+                      positions={positions} color={color} weight={4} opacity={0.2}
                       pathOptions={{ cursor: 'pointer' }}
                       eventHandlers={{ click: (e) => {
+                        justClickedLayerRef.current = true;
                         const oe = (e as any).originalEvent as MouseEvent;
-                        oe?.stopPropagation();
                         setDimmedMapTooltip({ routeKey: rKey, x: oe?.clientX ?? 400, y: oe?.clientY ?? 300, isVisible: false });
                       }}}
                     />
@@ -2647,6 +2661,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               theme={theme}
               language={currentLanguage}
               showStationNames={showStationNames}
+              showDimmedRoutes={showDimmedMapRoutes}
               onToggleRoute={(routeKey) => setVisibleRoutes(prev => new Set([...prev, routeKey]))}
               onHideRoute={(routeKey) => setVisibleRoutes(prev => { const s = new Set(prev); s.delete(routeKey); return s; })}
             />
