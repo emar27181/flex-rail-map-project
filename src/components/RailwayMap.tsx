@@ -29,6 +29,7 @@ import {
   addMinutes,
   type Departure,
 } from '../data/timetableData';
+import { FS } from '../constants/ui';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -2261,9 +2262,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               marginBottom: isRouteToggleExpanded ? '15px' : '0'
             }}
           >
-            <h3 style={{ margin: '0', color: colors.text }}>{translateUI('routeToggle', currentLanguage)}</h3>
+            <h3 style={{ margin: '0', color: colors.text, fontSize: FS.sectionTitle, fontWeight: 'bold' }}>{translateUI('routeToggle', currentLanguage)}</h3>
             <span style={{
-              fontSize: '18px',
+              fontSize: FS.label,
               color: colors.textSecondary,
               transform: isRouteToggleExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
               transition: 'transform 0.3s ease'
@@ -2279,7 +2280,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                   display: 'flex',
                   alignItems: 'center',
                   gap: '10px',
-                  fontSize: '14px',
+                  fontSize: FS.base,
                   color: colors.text
                 }}>
                   <span style={{ marginRight: '8px' }}>{translateUI('routeRecommendationCount', currentLanguage)}</span>
@@ -2290,7 +2291,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                       padding: '4px 8px',
                       borderRadius: '4px',
                       border: `1px solid ${colors.border}`,
-                      fontSize: '16px',
+                      fontSize: FS.base,
                       backgroundColor: colors.surfaceElevated,
                       color: colors.text
                     }}
