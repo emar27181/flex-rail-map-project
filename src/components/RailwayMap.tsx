@@ -2659,7 +2659,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 <Marker
                   position={userLocation}
                   icon={userLocationIcon}
-                  zIndexOffset={3000}
+                  zIndexOffset={10000}
                 />
               )}
             </MapContainer>
