@@ -28,7 +28,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
         setNavVisible(true);
       } else {
         if (hideTimer.current) clearTimeout(hideTimer.current);
-        hideTimer.current = setTimeout(() => setNavVisible(false), 500);
+        hideTimer.current = setTimeout(() => setNavVisible(false), 150);
       }
     };
     window.addEventListener('mousemove', onMouseMove);
