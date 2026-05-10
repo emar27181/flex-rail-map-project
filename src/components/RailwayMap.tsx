@@ -2228,72 +2228,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                 onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
                 onSearchingChange={handleSearchingChange}
               />
-              {/* 表示形式切替 */}
-              <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
-                {(['realistic', 'schematic'] as const).map(mode => {
-                  const label = mode === 'realistic' ? '地図' : '路線図（開発中）';
-                  const isActive = mapViewMode === mode;
-                  return (
-                    <button
-                      key={mode}
-                      onClick={() => setMapViewMode(mode)}
-                      style={{
-                        padding: '5px 14px',
-                        fontSize: '13px',
-                        border: `1px solid ${isActive ? colors.primary : colors.border}`,
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        backgroundColor: isActive ? colors.primary : colors.surface,
-                        color: isActive ? colors.onPrimary : colors.text,
-                        fontWeight: isActive ? 'bold' : 'normal',
-                        transition: 'all 0.15s',
-                      }}
-                    >{label}</button>
-                  );
-                })}
-              </div>
             </div>
           )
         ) : (
-          <>
-            <StationSelector
-              departure={departure}
-              arrival={arrival}
-              onDepartureChange={setDeparture}
-              onArrivalChange={setArrival}
-              isExpanded={isStationSelectorExpanded}
-              onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
-              departureTime={timetableBaseTime}
-              onDepartureTimeChange={setTimetableBaseTime}
-              language={currentLanguage}
-              onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
-              onSearchingChange={handleSearchingChange}
-            />
-            {/* 表示形式切替 */}
-            <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
-              {(['realistic', 'schematic'] as const).map(mode => {
-                const label = mode === 'realistic' ? '地図' : '路線図（開発中）';
-                const isActive = mapViewMode === mode;
-                return (
-                  <button
-                    key={mode}
-                    onClick={() => setMapViewMode(mode)}
-                    style={{
-                      padding: '5px 14px',
-                      fontSize: '13px',
-                      border: `1px solid ${isActive ? colors.primary : colors.border}`,
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      backgroundColor: isActive ? colors.primary : colors.surface,
-                      color: isActive ? colors.onPrimary : colors.text,
-                      fontWeight: isActive ? 'bold' : 'normal',
-                      transition: 'all 0.15s',
-                    }}
-                  >{label}</button>
-                );
-              })}
-            </div>
-          </>
+          <StationSelector
+            departure={departure}
+            arrival={arrival}
+            onDepartureChange={setDeparture}
+            onArrivalChange={setArrival}
+            isExpanded={isStationSelectorExpanded}
+            onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
+            departureTime={timetableBaseTime}
+            onDepartureTimeChange={setTimetableBaseTime}
+            language={currentLanguage}
+            onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
+            onSearchingChange={handleSearchingChange}
+          />
         )}
 
         {/* カバレッジ分析 - オフ */}
@@ -2754,7 +2704,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
                   />
 
-                  {/* 3. 推薦ルート選択 (Route Recommendations) */}
+                  {/* 3. 表示オプション (Display Options) */}
+                  <LegendDisplayOptions
+                    mapViewMode={mapViewMode}
+                    theme={theme}
+                    language={currentLanguage}
+                    trainTypeViewEnabled={trainTypeViewEnabled}
+                    onMapViewModeChange={setMapViewMode}
+                  />
+
+                  {/* 4. 推薦ルート選択 (Route Recommendations) */}
                   <LegendRouteRecommendations
                     routeRecommendations={routeRecommendations}
                     selectedRouteIndices={selectedRouteIndices}
@@ -2763,15 +2722,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                     onRouteToggle={handleRouteToggle}
                     onSelectAll={handleSelectAllRecommendedRoutes}
                     onDeselectAll={handleDeselectAllRecommendedRoutes}
-                  />
-
-                  {/* 4. 表示オプション (Display Options) */}
-                  <LegendDisplayOptions
-                    mapViewMode={mapViewMode}
-                    theme={theme}
-                    language={currentLanguage}
-                    trainTypeViewEnabled={trainTypeViewEnabled}
-                    onMapViewModeChange={setMapViewMode}
                   />
 
                   {/* 5. 列車種別ビューア - 非表示 */}
@@ -2967,6 +2917,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
                         onShowFuriganaChange={setShowFurigana}
                         onShowOsmTilesChange={setShowOsmTiles}
                         adjustRouteColorForTheme={adjustRouteColorForTheme}
+                      />
+                      <LegendDisplayOptions
+                        mapViewMode={mapViewMode}
+                        theme={theme}
+                        language={currentLanguage}
+                        trainTypeViewEnabled={trainTypeViewEnabled}
+                        onMapViewModeChange={setMapViewMode}
                       />
                       <LegendRouteRecommendations
                         routeRecommendations={routeRecommendations}
