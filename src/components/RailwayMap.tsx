@@ -2623,7 +2623,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onFullscre
               position: 'absolute',
               top: '10px',
               right: '10px',
-              bottom: isFullscreen ? '56px' : 'auto',
+              maxHeight: isFullscreen ? 'calc(100% - 66px)' : 'none',
               backgroundColor: colors.surfaceElevated,
               border: `1px solid ${colors.border}`,
               borderRadius: '6px',
