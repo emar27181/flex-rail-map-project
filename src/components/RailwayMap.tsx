@@ -384,13 +384,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (nearest) setDeparture(nearest);
   }, [userLocation, findNearestStation]);
 
-  // 初回位置情報取得時に最寄り駅を出発駅に自動設定
-  useEffect(() => {
-    if (!userLocation || autoSetDepartureRef.current) return;
-    autoSetDepartureRef.current = true;
-    const nearest = findNearestStation(userLocation[0], userLocation[1]);
-    if (nearest) setDeparture(nearest);
-  }, [userLocation, findNearestStation]);
 
   // 使用する乗換駅セットを決定
   const transferStations = useMemo(() => {
