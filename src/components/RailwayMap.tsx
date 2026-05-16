@@ -2139,8 +2139,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             //   console.log(`Showing transfer station: ${station.name} on ${routeKey}`);
             // }
 
-            // 表示切替のみで駅の表示を制御（ズームレベルによる省略なし）
-            const isDetailed = showStationNames;
+            // 表示切替のみで駅の表示を制御（列車デモ中は駅名を非表示にして列車ドットを見やすくする）
+            const isDetailed = showTrainDemo ? false : showStationNames;
             const stationOpacity = visibleRoutes.has(routeKey) ? 1 : 0.3;
             // 時刻表モード有効かつ経路上の駅なら出発時刻を2行目に表示
             const timelineEntry = timetableModeEnabled
