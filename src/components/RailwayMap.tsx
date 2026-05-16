@@ -1018,7 +1018,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   }, [MapComponents, theme, colors, language, showFurigana, showStationNumbers]);
 
   const createTimeIcon = useCallback((time: number, color: string, zoomLevel: number, isSection = false) => {
-    if (!MapComponents?.DivIcon || !showTravelTimes) return null;
+    if (!MapComponents?.DivIcon || !showTravelTimes || showTrainDemo) return null;
 
     const { DivIcon } = MapComponents;
     const fontSize = 12;
