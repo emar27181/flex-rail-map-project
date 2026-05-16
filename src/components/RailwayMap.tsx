@@ -2742,7 +2742,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             <button
               onClick={() => { setShowTrainDemo(v => !v); if (!showTrainDemo) setTrainDemoMinutes(12 * 60); }}
               style={{
-                position: 'absolute', bottom: 36, left: 8, zIndex: 1000,
+                position: 'absolute', bottom: 56, left: 8, zIndex: 1000,
                 backgroundColor: showTrainDemo ? '#9ACD32' : colors.surfaceElevated,
                 border: `1px solid ${showTrainDemo ? '#7ab020' : colors.borderLight}`,
                 borderRadius: '4px', padding: '4px 8px', fontSize: '11px',
