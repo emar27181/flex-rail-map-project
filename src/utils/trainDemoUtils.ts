@@ -25,6 +25,13 @@ import { toeiOedoLine } from '../data/toei-oedo-line';
 import { seibuIkebukuroLine } from '../data/seibu-ikebukuro-line';
 import { tobuTojoLine } from '../data/tobu-tojo-line';
 import { jrSaikyoLine } from '../data/jr-saikyo-line';
+import { yurakuchoLine } from '../data/yurakucho-line';
+import { jrSobuLine } from '../data/jr-sobu-line';
+import { jrJobanLine } from '../data/jr-joban-line';
+import { tsukubaExpress } from '../data/tsukuba-express';
+import { rinkaiLine } from '../data/rinkai-line';
+import { yurikamomeLine } from '../data/yurikamome-line';
+import { keioLine } from '../data/keio-line';
 
 // ── 型定義 ──────────────────────────────────────────────
 
@@ -875,6 +882,198 @@ const saikyoPatterns: PatternSimple[] = [
   { fromMin: m(20,30),toMin: m(24),   intervalMin: 8 },
 ];
 
+// 有楽町線（和光市→新木場: 0 / 新木場→和光市: 1）
+const yurakuchoMap = buildCoordMap(yurakuchoLine);
+const yurakuchoDir0 = withCoords([
+  { name: '和光市', offset: 0 }, { name: '地下鉄成増', offset: 5 }, { name: '地下鉄赤塚', offset: 7 },
+  { name: '平和台', offset: 9 }, { name: '氷川台', offset: 11 }, { name: '小竹向原', offset: 12 },
+  { name: '千川', offset: 14 }, { name: '要町', offset: 15 }, { name: '池袋', offset: 16 },
+  { name: '東池袋', offset: 18 }, { name: '護国寺', offset: 19 }, { name: '江戸川橋', offset: 21 },
+  { name: '飯田橋', offset: 22 }, { name: '市ケ谷', offset: 24 }, { name: '麹町', offset: 25 },
+  { name: '永田町', offset: 26 }, { name: '桜田門', offset: 28 }, { name: '有楽町', offset: 29 },
+  { name: '銀座一丁目', offset: 30 }, { name: '新富町', offset: 31 }, { name: '月島', offset: 33 },
+  { name: '豊洲', offset: 34 }, { name: '辰巳', offset: 36 }, { name: '新木場', offset: 38 },
+], yurakuchoMap);
+const yurakuchoDir1 = withCoords([
+  { name: '新木場', offset: 0 }, { name: '辰巳', offset: 2 }, { name: '豊洲', offset: 4 },
+  { name: '月島', offset: 6 }, { name: '新富町', offset: 7 }, { name: '銀座一丁目', offset: 8 },
+  { name: '有楽町', offset: 9 }, { name: '桜田門', offset: 10 }, { name: '永田町', offset: 12 },
+  { name: '麹町', offset: 13 }, { name: '市ケ谷', offset: 14 }, { name: '飯田橋', offset: 16 },
+  { name: '江戸川橋', offset: 17 }, { name: '護国寺', offset: 19 }, { name: '東池袋', offset: 20 },
+  { name: '池袋', offset: 22 }, { name: '要町', offset: 23 }, { name: '千川', offset: 24 },
+  { name: '小竹向原', offset: 26 }, { name: '氷川台', offset: 27 }, { name: '平和台', offset: 29 },
+  { name: '地下鉄赤塚', offset: 31 }, { name: '地下鉄成増', offset: 33 }, { name: '和光市', offset: 38 },
+], yurakuchoMap);
+const yurakuchoPatterns: PatternSimple[] = [
+  { fromMin: m(5),    toMin: m(7,30), intervalMin: 8 },
+  { fromMin: m(7,30), toMin: m(9,30), intervalMin: 5 },
+  { fromMin: m(9,30), toMin: m(17),   intervalMin: 7 },
+  { fromMin: m(17),   toMin: m(20),   intervalMin: 5 },
+  { fromMin: m(20),   toMin: m(24),   intervalMin: 9 },
+];
+
+// JR総武線快速（東京→千葉: 0 / 千葉→東京: 1）
+const sobuMap = buildCoordMap(jrSobuLine);
+const sobuDir0 = withCoords([
+  { name: '東京', offset: 0 }, { name: '新日本橋', offset: 3 }, { name: '馬喰町', offset: 5 },
+  { name: '錦糸町', offset: 7 }, { name: '亀戸', offset: 10 }, { name: '平井', offset: 12 },
+  { name: '新小岩', offset: 14 }, { name: '小岩', offset: 17 }, { name: '市川', offset: 20 },
+  { name: '本八幡', offset: 23 }, { name: '下総中山', offset: 25 }, { name: '西船橋', offset: 27 },
+  { name: '船橋', offset: 30 }, { name: '東船橋', offset: 33 }, { name: '津田沼', offset: 35 },
+  { name: '幕張本郷', offset: 38 }, { name: '幕張', offset: 40 }, { name: '新検見川', offset: 42 },
+  { name: '稲毛', offset: 44 }, { name: '西千葉', offset: 47 }, { name: '千葉', offset: 49 },
+], sobuMap);
+const sobuDir1 = withCoords([
+  { name: '千葉', offset: 0 }, { name: '西千葉', offset: 2 }, { name: '稲毛', offset: 5 },
+  { name: '新検見川', offset: 7 }, { name: '幕張', offset: 9 }, { name: '幕張本郷', offset: 11 },
+  { name: '津田沼', offset: 14 }, { name: '東船橋', offset: 16 }, { name: '船橋', offset: 19 },
+  { name: '西船橋', offset: 22 }, { name: '下総中山', offset: 24 }, { name: '本八幡', offset: 26 },
+  { name: '市川', offset: 29 }, { name: '小岩', offset: 32 }, { name: '新小岩', offset: 35 },
+  { name: '平井', offset: 37 }, { name: '亀戸', offset: 39 }, { name: '錦糸町', offset: 42 },
+  { name: '馬喰町', offset: 44 }, { name: '新日本橋', offset: 46 }, { name: '東京', offset: 49 },
+], sobuMap);
+const sobuPatterns: PatternSimple[] = [
+  { fromMin: m(5),    toMin: m(7),    intervalMin: 15 },
+  { fromMin: m(7),    toMin: m(9),    intervalMin: 10 },
+  { fromMin: m(9),    toMin: m(17),   intervalMin: 15 },
+  { fromMin: m(17),   toMin: m(20),   intervalMin: 10 },
+  { fromMin: m(20),   toMin: m(24),   intervalMin: 20 },
+];
+
+// JR常磐線（品川→土浦: 0 / 土浦→品川: 1）
+const jobanMap = buildCoordMap(jrJobanLine);
+const jobanDir0 = withCoords([
+  { name: '品川', offset: 0 }, { name: '田町', offset: 2 }, { name: '浜松町', offset: 4 },
+  { name: '新橋', offset: 6 }, { name: '東京', offset: 9 }, { name: '上野', offset: 12 },
+  { name: '日暮里', offset: 15 }, { name: '三河島', offset: 17 }, { name: '南千住', offset: 19 },
+  { name: '北千住', offset: 21 }, { name: '松戸', offset: 24 }, { name: '柏', offset: 30 },
+  { name: '我孫子', offset: 37 }, { name: '天王台', offset: 41 }, { name: '取手', offset: 43 },
+  { name: '藤代', offset: 47 }, { name: '龍ケ崎市', offset: 50 }, { name: '牛久', offset: 54 },
+  { name: 'ひたち野うしく', offset: 57 }, { name: '荒川沖', offset: 60 }, { name: '土浦', offset: 62 },
+], jobanMap);
+const jobanDir1 = withCoords([
+  { name: '土浦', offset: 0 }, { name: '荒川沖', offset: 2 }, { name: 'ひたち野うしく', offset: 5 },
+  { name: '牛久', offset: 8 }, { name: '龍ケ崎市', offset: 12 }, { name: '藤代', offset: 15 },
+  { name: '取手', offset: 19 }, { name: '天王台', offset: 21 }, { name: '我孫子', offset: 25 },
+  { name: '柏', offset: 32 }, { name: '松戸', offset: 38 }, { name: '北千住', offset: 41 },
+  { name: '南千住', offset: 43 }, { name: '三河島', offset: 45 }, { name: '日暮里', offset: 47 },
+  { name: '上野', offset: 50 }, { name: '東京', offset: 53 }, { name: '新橋', offset: 56 },
+  { name: '浜松町', offset: 58 }, { name: '田町', offset: 60 }, { name: '品川', offset: 62 },
+], jobanMap);
+const jobanPatterns: PatternSimple[] = [
+  { fromMin: m(5),    toMin: m(7),    intervalMin: 20 },
+  { fromMin: m(7),    toMin: m(9),    intervalMin: 10 },
+  { fromMin: m(9),    toMin: m(17),   intervalMin: 20 },
+  { fromMin: m(17),   toMin: m(20),   intervalMin: 10 },
+  { fromMin: m(20),   toMin: m(24),   intervalMin: 25 },
+];
+
+// つくばエクスプレス（秋葉原→つくば: 0 / つくば→秋葉原: 1）
+const txMap = buildCoordMap(tsukubaExpress);
+const txDir0 = withCoords([
+  { name: '秋葉原', offset: 0 }, { name: '新御徒町', offset: 8 }, { name: '浅草', offset: 13 },
+  { name: '南千住', offset: 20 }, { name: '北千住', offset: 26 }, { name: '青井', offset: 34 },
+  { name: '六町', offset: 39 }, { name: '八潮', offset: 43 }, { name: '三郷中央', offset: 48 },
+  { name: '南流山', offset: 54 }, { name: '流山セントラルパーク', offset: 58 }, { name: '流山おおたかの森', offset: 61 },
+  { name: '柏の葉キャンパス', offset: 66 }, { name: '柏たなか', offset: 70 }, { name: '守谷', offset: 74 },
+  { name: 'みらい平', offset: 82 }, { name: 'みどりの', offset: 88 }, { name: '万博記念公園', offset: 93 },
+  { name: '研究学園', offset: 97 }, { name: 'つくば', offset: 100 },
+], txMap);
+const txDir1 = withCoords([
+  { name: 'つくば', offset: 0 }, { name: '研究学園', offset: 3 }, { name: '万博記念公園', offset: 7 },
+  { name: 'みどりの', offset: 12 }, { name: 'みらい平', offset: 18 }, { name: '守谷', offset: 26 },
+  { name: '柏たなか', offset: 30 }, { name: '柏の葉キャンパス', offset: 34 }, { name: '流山おおたかの森', offset: 39 },
+  { name: '流山セントラルパーク', offset: 42 }, { name: '南流山', offset: 46 }, { name: '三郷中央', offset: 52 },
+  { name: '八潮', offset: 57 }, { name: '六町', offset: 61 }, { name: '青井', offset: 66 },
+  { name: '北千住', offset: 74 }, { name: '南千住', offset: 80 }, { name: '浅草', offset: 87 },
+  { name: '新御徒町', offset: 92 }, { name: '秋葉原', offset: 100 },
+], txMap);
+const txPatterns: PatternSimple[] = [
+  { fromMin: m(5,20), toMin: m(7),    intervalMin: 20 },
+  { fromMin: m(7),    toMin: m(9),    intervalMin: 10 },
+  { fromMin: m(9),    toMin: m(17),   intervalMin: 15 },
+  { fromMin: m(17),   toMin: m(20),   intervalMin: 10 },
+  { fromMin: m(20),   toMin: m(24),   intervalMin: 20 },
+];
+
+// りんかい線（大崎→新木場: 0 / 新木場→大崎: 1）
+const rinkaiMap = buildCoordMap(rinkaiLine);
+const rinkaiDir0 = withCoords([
+  { name: '大崎', offset: 0 }, { name: '大井町', offset: 3 }, { name: '品川シーサイド', offset: 7 },
+  { name: '天王洲アイル', offset: 11 }, { name: '東京テレポート', offset: 14 },
+  { name: '国際展示場', offset: 17 }, { name: '東雲', offset: 21 }, { name: '新木場', offset: 23 },
+], rinkaiMap);
+const rinkaiDir1 = withCoords([
+  { name: '新木場', offset: 0 }, { name: '東雲', offset: 2 }, { name: '国際展示場', offset: 6 },
+  { name: '東京テレポート', offset: 9 }, { name: '天王洲アイル', offset: 12 },
+  { name: '品川シーサイド', offset: 16 }, { name: '大井町', offset: 20 }, { name: '大崎', offset: 23 },
+], rinkaiMap);
+const rinkaiPatterns: PatternSimple[] = [
+  { fromMin: m(5),    toMin: m(7),    intervalMin: 12 },
+  { fromMin: m(7),    toMin: m(9,30), intervalMin: 8 },
+  { fromMin: m(9,30), toMin: m(17),   intervalMin: 12 },
+  { fromMin: m(17),   toMin: m(20),   intervalMin: 8 },
+  { fromMin: m(20),   toMin: m(24),   intervalMin: 15 },
+];
+
+// ゆりかもめ（新橋→豊洲: 0 / 豊洲→新橋: 1）
+const yurikamomeMap = buildCoordMap(yurikamomeLine);
+const yurikamomeDir0 = withCoords([
+  { name: '新橋', offset: 0 }, { name: '汐留', offset: 2 }, { name: '竹芝', offset: 4 },
+  { name: '日の出', offset: 6 }, { name: '芝浦ふ頭', offset: 8 }, { name: 'お台場海浜公園', offset: 10 },
+  { name: '台場', offset: 12 }, { name: 'テレコムセンター', offset: 14 }, { name: '青海', offset: 16 },
+  { name: '東京国際クルーズターミナル', offset: 19 }, { name: '中央広場前', offset: 21 },
+  { name: '有明', offset: 23 }, { name: '有明テニスの森', offset: 25 }, { name: '市場前', offset: 27 },
+  { name: '新豊洲', offset: 29 }, { name: '豊洲', offset: 31 },
+], yurikamomeMap);
+const yurikamomeDir1 = withCoords([
+  { name: '豊洲', offset: 0 }, { name: '新豊洲', offset: 2 }, { name: '市場前', offset: 4 },
+  { name: '有明テニスの森', offset: 6 }, { name: '有明', offset: 8 }, { name: '中央広場前', offset: 10 },
+  { name: '東京国際クルーズターミナル', offset: 12 }, { name: '青海', offset: 15 },
+  { name: 'テレコムセンター', offset: 17 }, { name: '台場', offset: 19 },
+  { name: 'お台場海浜公園', offset: 21 }, { name: '芝浦ふ頭', offset: 23 },
+  { name: '日の出', offset: 25 }, { name: '竹芝', offset: 27 }, { name: '汐留', offset: 29 }, { name: '新橋', offset: 31 },
+], yurikamomeMap);
+const yurikamomePatterns: PatternSimple[] = [
+  { fromMin: m(5,30), toMin: m(7),    intervalMin: 10 },
+  { fromMin: m(7),    toMin: m(9,30), intervalMin: 7 },
+  { fromMin: m(9,30), toMin: m(17),   intervalMin: 8 },
+  { fromMin: m(17),   toMin: m(20),   intervalMin: 7 },
+  { fromMin: m(20),   toMin: m(24),   intervalMin: 10 },
+];
+
+// 京王線（新宿→高幡不動: 0 / 高幡不動→新宿: 1）
+const keioMap = buildCoordMap(keioLine);
+const keioDir0 = withCoords([
+  { name: '新宿', offset: 0 }, { name: '笹塚', offset: 3 }, { name: '代田橋', offset: 5 },
+  { name: '明大前', offset: 7 }, { name: '下高井戸', offset: 8 }, { name: '桜上水', offset: 10 },
+  { name: '上北沢', offset: 11 }, { name: '八幡山', offset: 12 }, { name: '芦花公園', offset: 13 },
+  { name: '千歳烏山', offset: 14 }, { name: '仙川', offset: 16 }, { name: 'つつじヶ丘', offset: 18 },
+  { name: '柴崎', offset: 20 }, { name: '国領', offset: 21 }, { name: '布田', offset: 22 },
+  { name: '調布', offset: 23 }, { name: '西調布', offset: 25 }, { name: '飛田給', offset: 26 },
+  { name: '武蔵野台', offset: 28 }, { name: '多磨霊園', offset: 30 }, { name: '東府中', offset: 32 },
+  { name: '府中', offset: 33 }, { name: '分倍河原', offset: 35 }, { name: '中河原', offset: 37 },
+  { name: '聖蹟桜ヶ丘', offset: 39 }, { name: '百草園', offset: 41 }, { name: '高幡不動', offset: 43 },
+], keioMap);
+const keioDir1 = withCoords([
+  { name: '高幡不動', offset: 0 }, { name: '百草園', offset: 2 }, { name: '聖蹟桜ヶ丘', offset: 4 },
+  { name: '中河原', offset: 6 }, { name: '分倍河原', offset: 8 }, { name: '府中', offset: 10 },
+  { name: '東府中', offset: 11 }, { name: '多磨霊園', offset: 13 }, { name: '武蔵野台', offset: 15 },
+  { name: '飛田給', offset: 17 }, { name: '西調布', offset: 18 }, { name: '調布', offset: 20 },
+  { name: '布田', offset: 21 }, { name: '国領', offset: 22 }, { name: '柴崎', offset: 23 },
+  { name: 'つつじヶ丘', offset: 25 }, { name: '仙川', offset: 27 }, { name: '千歳烏山', offset: 29 },
+  { name: '芦花公園', offset: 30 }, { name: '八幡山', offset: 31 }, { name: '上北沢', offset: 32 },
+  { name: '桜上水', offset: 33 }, { name: '下高井戸', offset: 35 }, { name: '明大前', offset: 36 },
+  { name: '代田橋', offset: 38 }, { name: '笹塚', offset: 40 }, { name: '新宿', offset: 43 },
+], keioMap);
+const keioPatterns: PatternSimple[] = [
+  { fromMin: m(5),    toMin: m(7),    intervalMin: 10 },
+  { fromMin: m(7),    toMin: m(9,30), intervalMin: 6 },
+  { fromMin: m(9,30), toMin: m(17),   intervalMin: 8 },
+  { fromMin: m(17),   toMin: m(20,30),intervalMin: 6 },
+  { fromMin: m(20,30),toMin: m(24),   intervalMin: 12 },
+];
+
 // ── 全路線の設定 ────────────────────────────────────────
 
 const DEMO_LINES: LineDemo[] = [
@@ -1060,6 +1259,62 @@ const DEMO_LINES: LineDemo[] = [
     directions: [
       { stations: saikyoDir0, travelMin: 43, isCircular: false, patterns: saikyoPatterns },
       { stations: saikyoDir1, travelMin: 43, isCircular: false, patterns: saikyoPatterns },
+    ],
+  },
+  {
+    key: 'yurakuchoLine',
+    color: '#C1A470',
+    directions: [
+      { stations: yurakuchoDir0, travelMin: 38, isCircular: false, patterns: yurakuchoPatterns },
+      { stations: yurakuchoDir1, travelMin: 38, isCircular: false, patterns: yurakuchoPatterns },
+    ],
+  },
+  {
+    key: 'jrSobuLine',
+    color: '#FED100',
+    directions: [
+      { stations: sobuDir0, travelMin: 49, isCircular: false, patterns: sobuPatterns },
+      { stations: sobuDir1, travelMin: 49, isCircular: false, patterns: sobuPatterns },
+    ],
+  },
+  {
+    key: 'jrJobanLine',
+    color: '#417036',
+    directions: [
+      { stations: jobanDir0, travelMin: 62, isCircular: false, patterns: jobanPatterns },
+      { stations: jobanDir1, travelMin: 62, isCircular: false, patterns: jobanPatterns },
+    ],
+  },
+  {
+    key: 'tsukubaExpress',
+    color: '#8B4513',
+    directions: [
+      { stations: txDir0, travelMin: 100, isCircular: false, patterns: txPatterns },
+      { stations: txDir1, travelMin: 100, isCircular: false, patterns: txPatterns },
+    ],
+  },
+  {
+    key: 'rinkaiLine',
+    color: '#00B5E2',
+    directions: [
+      { stations: rinkaiDir0, travelMin: 23, isCircular: false, patterns: rinkaiPatterns },
+      { stations: rinkaiDir1, travelMin: 23, isCircular: false, patterns: rinkaiPatterns },
+    ],
+  },
+  {
+    key: 'yurikamomeLine',
+    color: '#00BFFF',
+    directions: [
+      { stations: yurikamomeDir0, travelMin: 31, isCircular: false, patterns: yurikamomePatterns },
+      { stations: yurikamomeDir1, travelMin: 31, isCircular: false, patterns: yurikamomePatterns },
+    ],
+  },
+  {
+    key: 'keioLine',
+    color: '#DD0077',
+    directions: [
+      { stations: keioDir0, travelMin: 43, isCircular: false, patterns: keioPatterns },
+      { stations: keioDir1, travelMin: 43, isCircular: false, patterns: keioPatterns },
     ],
   },
 ];
