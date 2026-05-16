@@ -122,7 +122,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showTrainDemo, setShowTrainDemo] = useState(false);
   const [trainDemoMinutes, setTrainDemoMinutes] = useState(12 * 60); // 12:00（全日: 5:00〜25:00）
   const [trainDemoPlaying, setTrainDemoPlaying] = useState(false);
-  const [trainDemoSpeed, setTrainDemoSpeed] = useState(5); // 5倍速をデフォルト
+  const [trainDemoSpeed, setTrainDemoSpeed] = useState(1); // 1倍速をデフォルト
+  const trainPositions = useMemo(
+    () => showTrainDemo ? getAllTrainPositions(trainDemoMinutes) : [],
+    [showTrainDemo, trainDemoMinutes]
+  );
 
   // モバイル検出
   const [isMobile, setIsMobile] = useState(false);
@@ -201,9 +205,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // 列車位置デモ アニメーション（requestAnimationFrameで60fps滑らか再生）
+  // 列車位置デモ アニメーション（RafでRefに時刻を蓄積し、15fps でのみReact stateを更新）
   const trainDemoRafRef = useRef<number | null>(null);
   const trainDemoLastTimestampRef = useRef<number | null>(null);
+  const trainDemoMinutesRef = useRef<number>(12 * 60); // 実時刻をRefに保持（60fps精度）
+  const trainDemoLastRenderRef = useRef<number>(0);    // 最後にReact stateを更新したtimestamp
   useEffect(() => {
     if (!trainDemoPlaying || !showTrainDemo) {
       trainDemoLastTimestampRef.current = null;
@@ -212,10 +218,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const tick = (timestamp: number) => {
       if (trainDemoLastTimestampRef.current !== null) {
         const dtSec = (timestamp - trainDemoLastTimestampRef.current) / 1000;
-        setTrainDemoMinutes(prev => {
-          const next = prev + dtSec * trainDemoSpeed; // speed倍速で分を進める
-          return next >= 25 * 60 ? 5 * 60 : next; // 25:00で5:00にループ
-        });
+        trainDemoMinutesRef.current += dtSec * trainDemoSpeed;
+        if (trainDemoMinutesRef.current >= 25 * 60) trainDemoMinutesRef.current = 5 * 60;
+        // React re-render は ~15fps に絞る（66ms ≒ 15fps）
+        if (timestamp - trainDemoLastRenderRef.current >= 66) {
+          setTrainDemoMinutes(trainDemoMinutesRef.current);
+          trainDemoLastRenderRef.current = timestamp;
+        }
       }
       trainDemoLastTimestampRef.current = timestamp;
       trainDemoRafRef.current = requestAnimationFrame(tick);
@@ -1048,7 +1057,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       iconSize: [circleSize, circleSize],
       iconAnchor: [circleSize / 2, circleSize / 2]
     });
-  }, [MapComponents, currentLanguage, theme, showTravelTimes]);
+  }, [MapComponents, currentLanguage, theme, showTravelTimes, showTrainDemo]);
 
   // 選択された推薦ルートで使用される路線キーのセット（凡例ハイライト用）
   const highlightedRouteKeys = useMemo(() => {
@@ -2708,16 +2717,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               )}
 
               {/* 列車位置デモ: 複数路線の各列車をドットで表示 */}
-              {showTrainDemo && getAllTrainPositions(trainDemoMinutes).map(t => (
+              {showTrainDemo && trainPositions.map(t => (
                 <CircleMarker
                   key={t.id}
                   center={t.pos}
-                  radius={6}
+                  radius={4}
                   pathOptions={{
                     fillColor: t.color,
-                    fillOpacity: 0.92,
+                    fillOpacity: 0.9,
                     color: '#fff',
-                    weight: 1.5,
+                    weight: 1,
                   }}
                 />
               ))}
@@ -2740,7 +2749,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           {/* 列車位置デモ トグルボタン（リアル地図モードのみ） */}
           {mapViewMode === 'realistic' && (
             <button
-              onClick={() => { setShowTrainDemo(v => !v); if (!showTrainDemo) setTrainDemoMinutes(12 * 60); }}
+              onClick={() => { setShowTrainDemo(v => !v); if (!showTrainDemo) { setTrainDemoMinutes(12 * 60); setTrainDemoPlaying(true); } }}
               style={{
                 position: 'absolute', bottom: 56, left: 8, zIndex: 1000,
                 backgroundColor: showTrainDemo ? '#9ACD32' : colors.surfaceElevated,
@@ -2800,7 +2809,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 <option value={300}>×300</option>
               </select>
               <button
-                onClick={() => { setTrainDemoMinutes(5 * 60); setTrainDemoPlaying(false); }}
+                onClick={() => { trainDemoMinutesRef.current = 5 * 60; setTrainDemoMinutes(5 * 60); setTrainDemoPlaying(false); }}
                 title="5:00にリセット"
                 style={{
                   background: 'none', border: `1px solid ${colors.border}`, borderRadius: '4px',
