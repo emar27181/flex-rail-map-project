@@ -1104,7 +1104,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         if (typeof window === 'undefined') return;
 
         const [
-          { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl },
+          { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, Pane },
           { DivIcon }
         ] = await Promise.all([
           import('react-leaflet'),
@@ -1112,7 +1112,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         ]);
 
         if (mounted) {
-          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, DivIcon });
+          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, DivIcon, Pane });
           setIsClient(true);
           setIsLoading(false);
           // デバッグ関数をブラウザコンソールで利用可能にする
@@ -1808,7 +1808,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // console.log('RailwayMap rendering main component');
 
-  const { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, DivIcon } = MapComponents;
+  const { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, DivIcon, Pane } = MapComponents;
 
   const MapEvents = () => {
     const map = useMapEvents({
@@ -2716,20 +2716,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 />
               )}
 
-              {/* 列車位置デモ: 複数路線の各列車をドットで表示 */}
-              {showTrainDemo && trainPositions.map(t => (
-                <CircleMarker
-                  key={t.id}
-                  center={t.pos}
-                  radius={4}
-                  pathOptions={{
-                    fillColor: t.color,
-                    fillOpacity: 0.9,
-                    color: '#fff',
-                    weight: 1,
-                  }}
-                />
-              ))}
+              {/* 列車位置デモ: 駅・路線より前面のカスタムペインに表示 */}
+              <Pane name="trainDemoPane" style={{ zIndex: 650 }}>
+                {showTrainDemo && trainPositions.map(t => (
+                  <CircleMarker
+                    key={t.id}
+                    center={t.pos}
+                    radius={5}
+                    pathOptions={{
+                      fillColor: t.color,
+                      fillOpacity: 1,
+                      color: '#fff',
+                      weight: 1.5,
+                    }}
+                  />
+                ))}
+              </Pane>
             </MapContainer>
           ) : (
             <DiagramMap
