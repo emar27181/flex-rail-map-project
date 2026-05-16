@@ -21,7 +21,7 @@ import { getStationNumber, getAnyStationNumber } from '../data/stationNumbers';
 import { getStationBorderStyleByPattern, getBorderStyleExplanation } from '../data/stationBorderStyles';
 import { attachDebugFunctions } from '../utils/stationAnalysisUtils';
 import CookieBanner from './CookieBanner';
-import { getYamanoteTrainPositions, formatDemoTime } from '../utils/trainDemoUtils';
+import { getAllTrainPositions, formatDemoTime } from '../utils/trainDemoUtils';
 import {
   getNextDepartures,
   getDeparturesAround,
@@ -120,7 +120,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // 列車位置デモ
   const [showTrainDemo, setShowTrainDemo] = useState(false);
-  const [trainDemoMinutes, setTrainDemoMinutes] = useState(12 * 60); // 12:00
+  const [trainDemoMinutes, setTrainDemoMinutes] = useState(12 * 60); // 12:00（全日: 5:00〜25:00）
   const [trainDemoPlaying, setTrainDemoPlaying] = useState(false);
   const [trainDemoSpeed, setTrainDemoSpeed] = useState(5); // 5倍速をデフォルト
 
@@ -214,7 +214,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         const dtSec = (timestamp - trainDemoLastTimestampRef.current) / 1000;
         setTrainDemoMinutes(prev => {
           const next = prev + dtSec * trainDemoSpeed; // speed倍速で分を進める
-          return next >= 13 * 60 ? 12 * 60 : next;
+          return next >= 25 * 60 ? 5 * 60 : next; // 25:00で5:00にループ
         });
       }
       trainDemoLastTimestampRef.current = timestamp;
@@ -2707,17 +2707,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 />
               )}
 
-              {/* 列車位置デモ: 山手線の各列車をドットで表示 */}
-              {showTrainDemo && getYamanoteTrainPositions(trainDemoMinutes).map(t => (
+              {/* 列車位置デモ: 複数路線の各列車をドットで表示 */}
+              {showTrainDemo && getAllTrainPositions(trainDemoMinutes).map(t => (
                 <CircleMarker
                   key={t.id}
                   center={t.pos}
-                  radius={7}
+                  radius={6}
                   pathOptions={{
-                    fillColor: '#9ACD32',
-                    fillOpacity: 0.95,
-                    color: t.direction === 0 ? '#4a7a10' : '#2d6080',
-                    weight: 2,
+                    fillColor: t.color,
+                    fillOpacity: 0.92,
+                    color: '#fff',
+                    weight: 1.5,
                   }}
                 />
               ))}
@@ -2742,7 +2742,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             <button
               onClick={() => { setShowTrainDemo(v => !v); if (!showTrainDemo) setTrainDemoMinutes(12 * 60); }}
               style={{
-                position: 'absolute', bottom: 64, left: 8, zIndex: 1000,
+                position: 'absolute', bottom: 36, left: 8, zIndex: 1000,
                 backgroundColor: showTrainDemo ? '#9ACD32' : colors.surfaceElevated,
                 border: `1px solid ${showTrainDemo ? '#7ab020' : colors.borderLight}`,
                 borderRadius: '4px', padding: '4px 8px', fontSize: '11px',
@@ -2751,26 +2751,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               }}
             >
               🚃 列車デモ
-            </button>
-          )}
-
-          {/* 非表示路線の半透明表示トグル（リアル地図モードのみ） */}
-          {mapViewMode === 'realistic' && (
-            <button
-              onClick={() => setShowDimmedMapRoutes(v => !v)}
-              style={{
-                position: 'absolute', bottom: 36, left: 8, zIndex: 1000,
-                backgroundColor: colors.surfaceElevated,
-                border: `1px solid ${showDimmedMapRoutes ? colors.border : colors.borderLight}`,
-                borderRadius: '4px', padding: '4px 8px', fontSize: '11px',
-                color: showDimmedMapRoutes ? colors.text : colors.textSecondary,
-                cursor: 'pointer', boxShadow: `0 1px 4px ${colors.shadow}`,
-                opacity: showDimmedMapRoutes ? 1 : 0.6,
-              }}
-            >
-              {currentLanguage === 'english'
-                ? (showDimmedMapRoutes ? 'All routes: ON' : 'All routes: OFF')
-                : (showDimmedMapRoutes ? '全路線: 表示' : '全路線: 非表示')}
             </button>
           )}
 
@@ -2820,8 +2800,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 <option value={300}>×300</option>
               </select>
               <button
-                onClick={() => { setTrainDemoMinutes(12 * 60); setTrainDemoPlaying(false); }}
-                title="12:00にリセット"
+                onClick={() => { setTrainDemoMinutes(5 * 60); setTrainDemoPlaying(false); }}
+                title="5:00にリセット"
                 style={{
                   background: 'none', border: `1px solid ${colors.border}`, borderRadius: '4px',
                   color: colors.textSecondary, padding: '2px 6px', cursor: 'pointer', fontSize: '12px',
