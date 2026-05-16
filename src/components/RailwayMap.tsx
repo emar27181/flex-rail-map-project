@@ -21,7 +21,7 @@ import { getStationNumber, getAnyStationNumber } from '../data/stationNumbers';
 import { getStationBorderStyleByPattern, getBorderStyleExplanation } from '../data/stationBorderStyles';
 import { attachDebugFunctions } from '../utils/stationAnalysisUtils';
 import CookieBanner from './CookieBanner';
-import { getAllTrainPositions, formatDemoTime } from '../utils/trainDemoUtils';
+import { getAllTrainPositions, formatDemoTime, DEMO_LINE_COLORS } from '../utils/trainDemoUtils';
 import {
   getNextDepartures,
   getDeparturesAround,
@@ -124,8 +124,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [trainDemoPlaying, setTrainDemoPlaying] = useState(false);
   const [trainDemoSpeed, setTrainDemoSpeed] = useState(1); // 1倍速をデフォルト
   const trainPositions = useMemo(
-    () => showTrainDemo ? getAllTrainPositions(trainDemoMinutes) : [],
-    [showTrainDemo, trainDemoMinutes]
+    () => showTrainDemo ? getAllTrainPositions(trainDemoMinutes, visibleRoutes) : [],
+    [showTrainDemo, trainDemoMinutes, visibleRoutes]
   );
 
   // モバイル検出
@@ -2777,7 +2777,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               boxShadow: `0 2px 8px ${colors.shadow}`,
               whiteSpace: 'nowrap',
             }}>
-              <span style={{ fontWeight: 'bold', color: '#9ACD32' }}>🚃 山手線</span>
+              <span style={{ fontWeight: 'bold', color: '#9ACD32' }}>
+                🚃 {Object.keys(DEMO_LINE_COLORS).filter(k => visibleRoutes.has(k as any)).length}/{Object.keys(DEMO_LINE_COLORS).length}路線
+              </span>
               <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 'bold', minWidth: '42px', textAlign: 'center' }}>
                 {formatDemoTime(trainDemoMinutes)}
               </span>

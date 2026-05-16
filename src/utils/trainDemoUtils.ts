@@ -1066,10 +1066,11 @@ const DEMO_LINES: LineDemo[] = [
 
 // ── メインAPI ────────────────────────────────────────────
 
-export function getAllTrainPositions(currentMinutes: number): TrainPosition[] {
+export function getAllTrainPositions(currentMinutes: number, allowedKeys?: Set<string>): TrainPosition[] {
   const result: TrainPosition[] = [];
 
   for (const line of DEMO_LINES) {
+    if (allowedKeys && !allowedKeys.has(line.key)) continue;
     for (let di = 0; di < line.directions.length; di++) {
       const dir = line.directions[di];
       const windowStart = currentMinutes - dir.travelMin;
