@@ -21,6 +21,7 @@ import { getStationNumber, getAnyStationNumber } from '../data/stationNumbers';
 import { getStationBorderStyleByPattern, getBorderStyleExplanation } from '../data/stationBorderStyles';
 import { attachDebugFunctions } from '../utils/stationAnalysisUtils';
 import CookieBanner from './CookieBanner';
+import { getYamanoteTrainPositions, formatDemoTime } from '../utils/trainDemoUtils';
 import {
   getNextDepartures,
   getDeparturesAround,
@@ -117,6 +118,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [timetableModeEnabled, setTimetableModeEnabled] = useState(true);
   const [timetableBaseTime, setTimetableBaseTime] = useState('13:00');
 
+  // 列車位置デモ
+  const [showTrainDemo, setShowTrainDemo] = useState(false);
+  const [trainDemoMinutes, setTrainDemoMinutes] = useState(12 * 60); // 12:00
+  const [trainDemoPlaying, setTrainDemoPlaying] = useState(false);
+  const [trainDemoSpeed, setTrainDemoSpeed] = useState(5); // 5倍速をデフォルト
+
   // モバイル検出
   const [isMobile, setIsMobile] = useState(false);
   const [mobilePanelTab, setMobilePanelTab] = useState<'station' | 'legend'>('station');
@@ -193,6 +200,32 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // 列車位置デモ アニメーション（requestAnimationFrameで60fps滑らか再生）
+  const trainDemoRafRef = useRef<number | null>(null);
+  const trainDemoLastTimestampRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!trainDemoPlaying || !showTrainDemo) {
+      trainDemoLastTimestampRef.current = null;
+      return;
+    }
+    const tick = (timestamp: number) => {
+      if (trainDemoLastTimestampRef.current !== null) {
+        const dtSec = (timestamp - trainDemoLastTimestampRef.current) / 1000;
+        setTrainDemoMinutes(prev => {
+          const next = prev + dtSec * trainDemoSpeed; // speed倍速で分を進める
+          return next >= 13 * 60 ? 12 * 60 : next;
+        });
+      }
+      trainDemoLastTimestampRef.current = timestamp;
+      trainDemoRafRef.current = requestAnimationFrame(tick);
+    };
+    trainDemoRafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (trainDemoRafRef.current !== null) cancelAnimationFrame(trainDemoRafRef.current);
+      trainDemoLastTimestampRef.current = null;
+    };
+  }, [trainDemoPlaying, showTrainDemo, trainDemoSpeed]);
 
   // フルスクリーン状態を親に通知
   useEffect(() => {
@@ -2673,6 +2706,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   zIndexOffset={10000}
                 />
               )}
+
+              {/* 列車位置デモ: 山手線の各列車をドットで表示 */}
+              {showTrainDemo && getYamanoteTrainPositions(trainDemoMinutes).map(t => (
+                <CircleMarker
+                  key={t.id}
+                  center={t.pos}
+                  radius={7}
+                  pathOptions={{
+                    fillColor: '#9ACD32',
+                    fillOpacity: 0.95,
+                    color: t.direction === 0 ? '#4a7a10' : '#2d6080',
+                    weight: 2,
+                  }}
+                />
+              ))}
             </MapContainer>
           ) : (
             <DiagramMap
@@ -2687,6 +2735,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               onToggleRoute={(routeKey) => { setAvailableRoutes(prev => new Set([...prev, routeKey])); setVisibleRoutes(prev => new Set([...prev, routeKey])); }}
               onHideRoute={(routeKey) => setVisibleRoutes(prev => { const s = new Set(prev); s.delete(routeKey); return s; })}
             />
+          )}
+
+          {/* 列車位置デモ トグルボタン（リアル地図モードのみ） */}
+          {mapViewMode === 'realistic' && (
+            <button
+              onClick={() => { setShowTrainDemo(v => !v); if (!showTrainDemo) setTrainDemoMinutes(12 * 60); }}
+              style={{
+                position: 'absolute', bottom: 64, left: 8, zIndex: 1000,
+                backgroundColor: showTrainDemo ? '#9ACD32' : colors.surfaceElevated,
+                border: `1px solid ${showTrainDemo ? '#7ab020' : colors.borderLight}`,
+                borderRadius: '4px', padding: '4px 8px', fontSize: '11px',
+                color: showTrainDemo ? '#fff' : colors.textSecondary,
+                cursor: 'pointer', boxShadow: `0 1px 4px ${colors.shadow}`,
+              }}
+            >
+              🚃 列車デモ
+            </button>
           )}
 
           {/* 非表示路線の半透明表示トグル（リアル地図モードのみ） */}
@@ -2707,6 +2772,74 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 ? (showDimmedMapRoutes ? 'All routes: ON' : 'All routes: OFF')
                 : (showDimmedMapRoutes ? '全路線: 表示' : '全路線: 非表示')}
             </button>
+          )}
+
+          {/* 列車位置デモ コントロールパネル */}
+          {showTrainDemo && mapViewMode === 'realistic' && (
+            <div style={{
+              position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
+              zIndex: 1001,
+              backgroundColor: colors.surface,
+              border: `1px solid ${colors.border}`,
+              borderRadius: '8px',
+              padding: '6px 12px',
+              display: 'flex', alignItems: 'center', gap: '8px',
+              fontSize: '13px', color: colors.text,
+              boxShadow: `0 2px 8px ${colors.shadow}`,
+              whiteSpace: 'nowrap',
+            }}>
+              <span style={{ fontWeight: 'bold', color: '#9ACD32' }}>🚃 山手線</span>
+              <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 'bold', minWidth: '42px', textAlign: 'center' }}>
+                {formatDemoTime(trainDemoMinutes)}
+              </span>
+              <button
+                onClick={() => setTrainDemoPlaying(p => !p)}
+                style={{
+                  background: trainDemoPlaying ? '#e74c3c' : '#9ACD32',
+                  border: 'none', borderRadius: '4px', color: '#fff',
+                  padding: '3px 10px', cursor: 'pointer', fontSize: '14px',
+                }}
+              >
+                {trainDemoPlaying ? '⏸' : '▶'}
+              </button>
+              <select
+                value={trainDemoSpeed}
+                onChange={e => setTrainDemoSpeed(Number(e.target.value))}
+                style={{
+                  background: colors.surfaceElevated, border: `1px solid ${colors.border}`,
+                  borderRadius: '4px', color: colors.text, fontSize: '11px', padding: '2px 4px',
+                }}
+              >
+                <option value={1}>×1</option>
+                <option value={2}>×2</option>
+                <option value={5}>×5</option>
+                <option value={10}>×10</option>
+                <option value={30}>×30</option>
+                <option value={60}>×60</option>
+                <option value={120}>×120</option>
+                <option value={300}>×300</option>
+              </select>
+              <button
+                onClick={() => { setTrainDemoMinutes(12 * 60); setTrainDemoPlaying(false); }}
+                title="12:00にリセット"
+                style={{
+                  background: 'none', border: `1px solid ${colors.border}`, borderRadius: '4px',
+                  color: colors.textSecondary, padding: '2px 6px', cursor: 'pointer', fontSize: '12px',
+                }}
+              >
+                ↺
+              </button>
+              <button
+                onClick={() => { setShowTrainDemo(false); setTrainDemoPlaying(false); }}
+                title="デモを閉じる"
+                style={{
+                  background: 'none', border: 'none',
+                  color: colors.textSecondary, cursor: 'pointer', fontSize: '14px', padding: '0 2px',
+                }}
+              >
+                ✕
+              </button>
+            </div>
           )}
 
           {/* 非表示路線ツールチップ（リアル地図モード） */}
