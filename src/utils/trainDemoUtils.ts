@@ -54,27 +54,50 @@ function withCoords(
   return raw.map(s => ({ ...s, ...(coordMap.get(s.name) ?? { lat: 0, lng: 0 }) }));
 }
 
+// 各駅での停車時間（分）。offset は発車時刻を表すので、到着→発車までをここで表現する
+const DWELL_MIN = 0.5;
+
 function interpolate(stations: StationWithCoord[], elapsed: number, circular: boolean): [number, number] | null {
-  const travelMin = stations[stations.length - 1].offset;
-  const e = circular ? ((elapsed % travelMin) + travelMin) % travelMin : elapsed;
+  const totalMin = stations[stations.length - 1].offset;
+  const e = circular ? ((elapsed % totalMin) + totalMin) % totalMin : elapsed;
 
   for (let i = 0; i < stations.length - 1; i++) {
     const a = stations[i], b = stations[i + 1];
-    if (e >= a.offset && e < b.offset) {
-      const r = (e - a.offset) / (b.offset - a.offset);
+    if (e < a.offset || e >= b.offset) continue;
+
+    const segDur = b.offset - a.offset;
+    // セグメント時間の最大40%・上限DWELL_MINを停車時間とする
+    const dwell = Math.min(DWELL_MIN, segDur * 0.4);
+    const moveDur = segDur - dwell;
+
+    if (e < a.offset + moveDur) {
+      // 走行中: a → b
+      const r = moveDur > 0 ? (e - a.offset) / moveDur : 1;
       return [a.lat + r * (b.lat - a.lat), a.lng + r * (b.lng - a.lng)];
+    } else {
+      // 停車中: 駅bに停まっている
+      return [b.lat, b.lng];
     }
   }
 
   if (circular) {
-    // 最終駅→始発駅 の折り返し補間
+    // 折り返し区間: 最終駅→始発駅（東京）
     const last = stations[stations.length - 1];
     const first = stations[0];
-    const r = (e - last.offset) / (travelMin - last.offset);
-    return [last.lat + r * (first.lat - last.lat), last.lng + r * (first.lng - last.lng)];
+    const segDur = totalMin - last.offset;
+    const dwell = Math.min(DWELL_MIN, segDur * 0.4);
+    const moveDur = segDur - dwell;
+
+    if (e >= last.offset) {
+      if (moveDur > 0 && e < last.offset + moveDur) {
+        const r = (e - last.offset) / moveDur;
+        return [last.lat + r * (first.lat - last.lat), last.lng + r * (first.lng - last.lng)];
+      }
+      return [first.lat, first.lng]; // 始発駅で停車
+    }
   }
 
-  // 線形路線: 終端駅に着いた列車
+  // 線形路線の終端
   const last = stations[stations.length - 1];
   return [last.lat, last.lng];
 }
