@@ -1,5 +1,26 @@
 # CHANGE LOG
 
+## [2026-05-17] セッション
+
+### feat: 列車デモを30路線に拡張（`src/utils/trainDemoUtils.ts`）
+- 新規追加7路線: 有楽町線・JR総武線快速・JR常磐線・つくばエクスプレス・りんかい線・ゆりかもめ・京王線
+- 各路線のオフセットはデータファイルの `timeToNext` 累積値から計算
+- trainDemoUtils.ts: 68K→84K、JSバンドル: 448K→460K
+
+### fix: 列車デモアイコンを駅表示より前面に描画（`src/components/RailwayMap.tsx`）
+- Leafletカスタムペイン `trainDemoPane`（z-index 650）を作成
+- CircleMarker を markerPane（z-index 600）より前面に配置し、駅ラベルに隠れず列車ドットが見えるよう修正
+
+### feat: 列車デモを表示中路線と連動（`src/utils/trainDemoUtils.ts`, `src/components/RailwayMap.tsx`）
+- `getAllTrainPositions` に `allowedKeys` 引数を追加し `visibleRoutes` でフィルタリング
+- コントロールパネルに「N/30路線」表示を追加
+
+### improve: 列車デモのパフォーマンス改善・UX調整（`src/components/RailwayMap.tsx`）
+- 15fps throttling + useMemo でレンダリング負荷を軽減
+- デフォルト速度 x5→x1、デモ開始時に自動再生
+
+---
+
 ## [2026-05-16] セッション
 
 ### feat: 列車デモ対応路線を7路線から23路線に拡張（`src/utils/trainDemoUtils.ts`）
