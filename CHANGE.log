@@ -27,6 +27,13 @@
 - 各路線のオフセットはデータファイルの `timeToNext` 累積値から計算
 - trainDemoUtils.ts: 68K→84K、JSバンドル: 448K→460K
 
+### feat: 列車デモをさらに11路線追加（計41路線）（`src/utils/trainDemoUtils.ts`）
+- 新規追加11路線: JR南武線・JR根岸線・JR横浜線・東急目黒線・西武新宿線・東武伊勢崎線・相鉄本線・東京モノレール・多摩モノレール・小田急江ノ島線・京成本線
+- 各路線のオフセット・パターン変数（Dir0/Dir1/Patterns）と DEMO_LINES エントリを追加
+
+### improve: 非経路路線の透明度を 0.2 → 0.35 に変更（`src/components/RailwayMap.tsx`）
+- 0.2だと東海道線など暗い路線色が実質不可視だったため視認性を改善
+
 ### fix: 列車デモアイコンを駅表示より前面に描画（`src/components/RailwayMap.tsx`）
 - Leafletカスタムペイン `trainDemoPane`（z-index 650）を作成
 - CircleMarker を markerPane（z-index 600）より前面に配置し、駅ラベルに隠れず列車ドットが見えるよう修正

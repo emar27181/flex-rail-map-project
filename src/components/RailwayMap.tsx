@@ -2704,7 +2704,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   const positions = (stationList as any[]).map((s: any) => [s.lat, s.lng] as [number, number]);
                   return (
                     <Polyline key={`dimmed-${rKey}`}
-                      positions={positions} color={color} weight={4} opacity={0.2}
+                      positions={positions} color={color} weight={4} opacity={0.35}
                       pathOptions={{ cursor: 'pointer' }}
                       eventHandlers={{ click: (e) => {
                         justClickedLayerRef.current = true;
