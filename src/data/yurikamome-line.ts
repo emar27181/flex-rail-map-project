@@ -63,13 +63,7 @@ export const yurikamomeLine: Station[] = [
   {
     name: "東京国際クルーズターミナル",
     lat: 35.621357,
-    lng: 139.773103,
-    timeToNext: 2
-  },
-  {
-    name: "中央広場前",
-    lat: 35.6181,
-    lng: 139.8031,
+    lng: 139.784200,
     timeToNext: 2
   },
   {

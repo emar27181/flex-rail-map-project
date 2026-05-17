@@ -160,25 +160,6 @@ export const jrMusashinoLine: Station[] = [
   {
     name: "新木場",
     lat: 35.6458,
-    lng: 139.8267,
-    timeToNext: 6
-  },
-  {
-    name: "葛西臨海公園",
-    lat: 35.644170,
-    lng: 139.861485,
-    timeToNext: 3
-  },
-  {
-    name: "舞浜",
-    lat: 35.636160,
-    lng: 139.883720,
-    timeToNext: 4
-  },
-  {
-    name: "新浦安",
-    lat: 35.649520,
-    lng: 139.912530,
-    timeToNext: 3
+    lng: 139.8267
   }
 ];
