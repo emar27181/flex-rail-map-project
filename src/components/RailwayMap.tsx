@@ -1819,6 +1819,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   const { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, DivIcon, Pane } = MapComponents;
 
+  // 列車デモ用：路線色ごとに四角形DivIconをキャッシュ
+  const trainSquareIcons = useMemo(() => {
+    if (!DivIcon) return {} as Record<string, InstanceType<typeof DivIcon>>;
+    const cache: Record<string, InstanceType<typeof DivIcon>> = {};
+    for (const color of Object.values(DEMO_LINE_COLORS)) {
+      if (!cache[color]) {
+        cache[color] = new DivIcon({
+          html: `<div style="width:8px;height:8px;background:${color};border:1.5px solid #fff;border-radius:1px;box-sizing:border-box;"></div>`,
+          className: '',
+          iconSize: [8, 8],
+          iconAnchor: [4, 4],
+        });
+      }
+    }
+    return cache;
+  }, [DivIcon]);
+
   const MapEvents = () => {
     const map = useMapEvents({
       zoomend: (e) => {
@@ -2725,21 +2742,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 />
               )}
 
-              {/* 列車位置デモ: 駅・路線より前面のカスタムペインに表示 */}
+              {/* 列車位置デモ: 駅・路線より前面のカスタムペインに表示（四角形アイコン） */}
               <Pane name="trainDemoPane" style={{ zIndex: 650 }}>
-                {showTrainDemo && trainPositions.map(t => (
-                  <CircleMarker
-                    key={t.id}
-                    center={t.pos}
-                    radius={5}
-                    pathOptions={{
-                      fillColor: t.color,
-                      fillOpacity: 1,
-                      color: '#fff',
-                      weight: 1.5,
-                    }}
-                  />
-                ))}
+                {showTrainDemo && trainPositions.map(t => {
+                  const icon = trainSquareIcons[t.color];
+                  if (!icon) return null;
+                  return (
+                    <Marker
+                      key={t.id}
+                      position={t.pos}
+                      icon={icon}
+                      interactive={false}
+                      pane="trainDemoPane"
+                    />
+                  );
+                })}
               </Pane>
             </MapContainer>
           ) : (

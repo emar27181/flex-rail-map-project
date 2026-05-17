@@ -2,6 +2,11 @@
 
 ## [2026-05-17] セッション
 
+### improve: 列車デモのアイコンを円から四角形に変更（`src/components/RailwayMap.tsx`）
+- `CircleMarker` → `Marker` + `DivIcon`（8×8px の角丸四角形）に変更し、駅（丸）と列車（四角）を視覚的に区別
+- 路線色ごとに `DivIcon` を `useMemo` でキャッシュし再生成コストを削減
+- `interactive={false}` でクリックイベントを無効化
+
 ### feat: 列車デモに現在時刻の常時追跡モードを追加（`src/components/RailwayMap.tsx`）
 - 🕐ボタンをトグル式に変更：押すと「現在時刻追跡モード」に入り、ボタンが緑色でハイライト
 - 追跡モード中はアニメーションtickで毎フレーム `new Date()` から実時刻を取得し連続表示
