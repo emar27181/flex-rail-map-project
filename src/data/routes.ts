@@ -76,6 +76,11 @@ import { jrUtsunomiyaLine, jrNegishiLine } from './jr-kanto-additional';
 import { tobuNikkoLine } from './tobu-nikko-line';
 import { shonanMonorail } from './shonan-monorail';
 import { sotetsuJRLine } from './sotetsu-jr-line';
+import { tobuNodaLine } from './tobu-noda-line';
+import { jrSagamiLine } from './jr-sagami-line';
+import { jrTsurumiLine, jrTsurumiUmiShiba } from './jr-tsurumi-line';
+import { seibuTamagawaLine } from './seibu-tamagawa-line';
+import { jrNambuBranchLine } from './jr-nambu-branch';
 
 export const routes = {
   yamanote,
@@ -170,6 +175,12 @@ export const routes = {
   tobuNikkoLine,
   shonanMonorail,
   sotetsuJRLine,
+  tobuNodaLine,
+  jrSagamiLine,
+  jrTsurumiLine,
+  jrTsurumiUmiShiba,
+  seibuTamagawaLine,
+  jrNambuBranchLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -267,6 +278,12 @@ export const routeColors = {
   tobuNikkoLine: '#F68B1E', // Tobu Nikko Line orange
   shonanMonorail: '#2E8B57', // Shonan Monorail green
   sotetsuJRLine: '#2E8B57', // Sotetsu-JR Direct Line green
+  tobuNodaLine: '#004098', // Tobu Noda Line (Urban Park Line) navy blue
+  jrSagamiLine: '#8FCF57', // JR Sagami Line light green
+  jrTsurumiLine: '#F68B1E', // JR Tsurumi Line orange
+  jrTsurumiUmiShiba: '#F68B1E', // JR Tsurumi Line (Umishibaura branch) orange
+  seibuTamagawaLine: '#F39700', // Seibu Tamagawa Line orange
+  jrNambuBranchLine: '#FFCC00', // JR Nambu Branch Line yellow
 };
 
 export const routeNames = {
@@ -362,4 +379,10 @@ export const routeNames = {
   tobuNikkoLine: '東武日光線',
   shonanMonorail: '湘南モノレール',
   sotetsuJRLine: '相鉄・JR直通線',
+  tobuNodaLine: '東武アーバンパークライン',
+  jrSagamiLine: 'JR相模線',
+  jrTsurumiLine: 'JR鶴見線',
+  jrTsurumiUmiShiba: 'JR鶴見線（海芝浦支線）',
+  seibuTamagawaLine: '西武多摩川線',
+  jrNambuBranchLine: 'JR南武支線',
 };
