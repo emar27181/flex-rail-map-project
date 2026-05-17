@@ -2957,7 +2957,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               border: `1px solid ${colors.border}`,
               borderRadius: '6px',
               boxShadow: `0 2px 6px ${colors.shadow}`,
-              minWidth: '150px',
+              width: '180px',
               zIndex: 1000,
               overflowY: 'hidden',
               display: isFullscreen ? 'flex' : 'block',
