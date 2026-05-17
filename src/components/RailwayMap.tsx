@@ -123,6 +123,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [trainDemoMinutes, setTrainDemoMinutes] = useState(12 * 60); // 12:00（全日: 5:00〜25:00）
   const [trainDemoPlaying, setTrainDemoPlaying] = useState(false);
   const [trainDemoSpeed, setTrainDemoSpeed] = useState(1); // 1倍速をデフォルト
+  const [trainDemoRealTime, setTrainDemoRealTime] = useState(false);
   const trainPositions = useMemo(
     () => showTrainDemo ? getAllTrainPositions(trainDemoMinutes, visibleRoutes) : [],
     [showTrainDemo, trainDemoMinutes, visibleRoutes]
@@ -210,16 +211,24 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const trainDemoLastTimestampRef = useRef<number | null>(null);
   const trainDemoMinutesRef = useRef<number>(12 * 60); // 実時刻をRefに保持（60fps精度）
   const trainDemoLastRenderRef = useRef<number>(0);    // 最後にReact stateを更新したtimestamp
+  const trainDemoRealTimeRef = useRef<boolean>(false);
   useEffect(() => {
     if (!trainDemoPlaying || !showTrainDemo) {
       trainDemoLastTimestampRef.current = null;
       return;
     }
+    trainDemoRealTimeRef.current = trainDemoRealTime;
     const tick = (timestamp: number) => {
       if (trainDemoLastTimestampRef.current !== null) {
-        const dtSec = (timestamp - trainDemoLastTimestampRef.current) / 1000;
-        trainDemoMinutesRef.current += dtSec * trainDemoSpeed;
-        if (trainDemoMinutesRef.current >= 25 * 60) trainDemoMinutesRef.current = 5 * 60;
+        if (trainDemoRealTimeRef.current) {
+          const now = new Date();
+          const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+          trainDemoMinutesRef.current = nowMin < 5 * 60 ? nowMin + 24 * 60 : nowMin;
+        } else {
+          const dtSec = (timestamp - trainDemoLastTimestampRef.current) / 1000;
+          trainDemoMinutesRef.current += dtSec * trainDemoSpeed;
+          if (trainDemoMinutesRef.current >= 25 * 60) trainDemoMinutesRef.current = 5 * 60;
+        }
         // React re-render は ~15fps に絞る（66ms ≒ 15fps）
         if (timestamp - trainDemoLastRenderRef.current >= 66) {
           setTrainDemoMinutes(trainDemoMinutesRef.current);
@@ -234,7 +243,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       if (trainDemoRafRef.current !== null) cancelAnimationFrame(trainDemoRafRef.current);
       trainDemoLastTimestampRef.current = null;
     };
-  }, [trainDemoPlaying, showTrainDemo, trainDemoSpeed]);
+  }, [trainDemoPlaying, showTrainDemo, trainDemoSpeed, trainDemoRealTime]);
 
   // フルスクリーン状態を親に通知
   useEffect(() => {
@@ -2814,16 +2823,25 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               </select>
               <button
                 onClick={() => {
-                  const now = new Date();
-                  const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
-                  const adjusted = nowMin < 5 * 60 ? nowMin + 24 * 60 : nowMin;
-                  trainDemoMinutesRef.current = adjusted;
-                  setTrainDemoMinutes(adjusted);
+                  const next = !trainDemoRealTime;
+                  if (next) {
+                    const now = new Date();
+                    const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+                    const adjusted = nowMin < 5 * 60 ? nowMin + 24 * 60 : nowMin;
+                    trainDemoMinutesRef.current = adjusted;
+                    setTrainDemoMinutes(adjusted);
+                    setTrainDemoPlaying(true);
+                  }
+                  trainDemoRealTimeRef.current = next;
+                  setTrainDemoRealTime(next);
                 }}
-                title="現在時刻にジャンプ"
+                title={trainDemoRealTime ? "現在時刻追跡中（クリックで解除）" : "現在時刻を常時追跡"}
                 style={{
-                  background: 'none', border: `1px solid ${colors.border}`, borderRadius: '4px',
-                  color: colors.textSecondary, padding: '2px 6px', cursor: 'pointer', fontSize: '11px',
+                  background: trainDemoRealTime ? '#9ACD32' : 'none',
+                  border: `1px solid ${trainDemoRealTime ? '#9ACD32' : colors.border}`,
+                  borderRadius: '4px',
+                  color: trainDemoRealTime ? '#fff' : colors.textSecondary,
+                  padding: '2px 6px', cursor: 'pointer', fontSize: '11px',
                 }}
               >
                 🕐
