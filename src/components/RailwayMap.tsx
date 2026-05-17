@@ -2813,6 +2813,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 <option value={300}>×300</option>
               </select>
               <button
+                onClick={() => {
+                  const now = new Date();
+                  const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+                  const adjusted = nowMin < 5 * 60 ? nowMin + 24 * 60 : nowMin;
+                  trainDemoMinutesRef.current = adjusted;
+                  setTrainDemoMinutes(adjusted);
+                }}
+                title="現在時刻にジャンプ"
+                style={{
+                  background: 'none', border: `1px solid ${colors.border}`, borderRadius: '4px',
+                  color: colors.textSecondary, padding: '2px 6px', cursor: 'pointer', fontSize: '11px',
+                }}
+              >
+                🕐
+              </button>
+              <button
                 onClick={() => { trainDemoMinutesRef.current = 5 * 60; setTrainDemoMinutes(5 * 60); setTrainDemoPlaying(false); }}
                 title="5:00にリセット"
                 style={{
