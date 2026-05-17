@@ -2959,8 +2959,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               boxShadow: `0 2px 6px ${colors.shadow}`,
               minWidth: '150px',
               zIndex: 1000,
-              overflowY: isFullscreen ? 'auto' : 'visible',
+              overflowY: 'hidden',
+              display: isFullscreen ? 'flex' : 'block',
+              flexDirection: 'column',
             }}>
+              {/* ヘッダー：スクロールコンテナの外に置き常に表示 */}
               <div
                 onClick={() => setIsLegendExpanded(!isLegendExpanded)}
                 style={{
@@ -2969,6 +2972,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   alignItems: 'center',
                   cursor: 'pointer',
                   padding: '10px',
+                  flexShrink: 0,
                   borderBottom: isLegendExpanded ? `1px solid ${colors.borderLight}` : 'none'
                 }}
               >
@@ -2989,11 +2993,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 </span>
               </div>
 
+              {/* コンテンツ：独立したスクロールコンテナ */}
               {isLegendExpanded && (
                 <div style={{
                   padding: '10px',
-                  maxHeight: isFullscreen ? 'none' : '350px',
-                  overflowY: isFullscreen ? 'visible' : 'auto',
+                  flex: isFullscreen ? 1 : 'none',
+                  minHeight: 0,
+                  maxHeight: isFullscreen ? undefined : '350px',
+                  overflowY: 'auto',
                 }}>
                   {/* 1. マーカー表示 (Current Station Settings) */}
                   <LegendStationMarkers
