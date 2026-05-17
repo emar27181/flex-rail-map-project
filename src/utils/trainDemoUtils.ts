@@ -32,6 +32,17 @@ import { tsukubaExpress } from '../data/tsukuba-express';
 import { rinkaiLine } from '../data/rinkai-line';
 import { yurikamomeLine } from '../data/yurikamome-line';
 import { keioLine } from '../data/keio-line';
+import { jrNanbuLine } from '../data/jr-nanbu-line';
+import { jrNegishiLine } from '../data/jr-kanto-additional';
+import { jrYokohamaLine } from '../data/jr-yokohama-line';
+import { tokyuMeguro } from '../data/tokyu-additional';
+import { seibuShinjukuLine } from '../data/seibu-shinjuku-line';
+import { tobuIsesakiLine } from '../data/tobu-isesaki-line';
+import { sotetsuMainLine } from '../data/sotetsu-line';
+import { tokyoMonorail } from '../data/tokyo-monorail';
+import { tamaMonorail } from '../data/tama-monorail';
+import { odakyuEnoshimaLine } from '../data/odakyu-enoshima-line';
+import { keiseiMainLine } from '../data/keisei-main-line';
 
 // ── 型定義 ──────────────────────────────────────────────
 
@@ -1074,6 +1085,300 @@ const keioPatterns: PatternSimple[] = [
   { fromMin: m(20,30),toMin: m(24),   intervalMin: 12 },
 ];
 
+// ── 追加路線データ ──────────────────────────────────────
+
+// 南武線（立川→川崎: 0 / 川崎→立川: 1）
+const nanbuMap = buildCoordMap(jrNanbuLine);
+const nanbuDir0 = withCoords([
+  { name: '立川', offset: 0 }, { name: '西国立', offset: 5 }, { name: '矢川', offset: 7 },
+  { name: '谷保', offset: 10 }, { name: '西府', offset: 12 }, { name: '分倍河原', offset: 14 },
+  { name: '府中本町', offset: 17 }, { name: '南多摩', offset: 20 }, { name: '矢野口', offset: 22 },
+  { name: '稲城長沼', offset: 24 }, { name: '稲田堤', offset: 27 }, { name: '中野島', offset: 30 },
+  { name: '登戸', offset: 32 }, { name: '宿河原', offset: 36 }, { name: '久地', offset: 38 },
+  { name: '津田山', offset: 40 }, { name: '武蔵溝ノ口', offset: 42 }, { name: '武蔵小杉', offset: 45 },
+  { name: '向河原', offset: 47 }, { name: '平間', offset: 49 },
+], nanbuMap);
+const nanbuDir1 = withCoords([
+  { name: '平間', offset: 0 }, { name: '向河原', offset: 2 }, { name: '武蔵小杉', offset: 4 },
+  { name: '武蔵溝ノ口', offset: 7 }, { name: '津田山', offset: 9 }, { name: '久地', offset: 11 },
+  { name: '宿河原', offset: 13 }, { name: '登戸', offset: 17 }, { name: '中野島', offset: 19 },
+  { name: '稲田堤', offset: 22 }, { name: '稲城長沼', offset: 25 }, { name: '矢野口', offset: 27 },
+  { name: '南多摩', offset: 29 }, { name: '府中本町', offset: 32 }, { name: '分倍河原', offset: 35 },
+  { name: '西府', offset: 37 }, { name: '谷保', offset: 39 }, { name: '矢川', offset: 42 },
+  { name: '西国立', offset: 44 }, { name: '立川', offset: 49 },
+], nanbuMap);
+const nanbuPatterns: PatternSimple[] = [
+  { fromMin: m(5),    toMin: m(7,30), intervalMin: 8 },
+  { fromMin: m(7,30), toMin: m(10),   intervalMin: 5 },
+  { fromMin: m(10),   toMin: m(17),   intervalMin: 8 },
+  { fromMin: m(17),   toMin: m(20),   intervalMin: 5 },
+  { fromMin: m(20),   toMin: m(24),   intervalMin: 10 },
+];
+
+// 根岸線（横浜→大船方面: 0 / 逆: 1）
+const negishiMap = buildCoordMap(jrNegishiLine);
+const negishiDir0 = withCoords([
+  { name: '横浜', offset: 0 }, { name: '桜木町', offset: 3 }, { name: '関内', offset: 5 },
+  { name: '石川町', offset: 7 }, { name: '山手', offset: 9 }, { name: '根岸', offset: 12 },
+  { name: '磯子', offset: 15 }, { name: '新杉田', offset: 18 }, { name: '洋光台', offset: 21 },
+  { name: '港南台', offset: 24 }, { name: '本郷台', offset: 27 },
+], negishiMap);
+const negishiDir1 = withCoords([
+  { name: '本郷台', offset: 0 }, { name: '港南台', offset: 3 }, { name: '洋光台', offset: 6 },
+  { name: '新杉田', offset: 9 }, { name: '磯子', offset: 12 }, { name: '根岸', offset: 15 },
+  { name: '山手', offset: 18 }, { name: '石川町', offset: 20 }, { name: '関内', offset: 22 },
+  { name: '桜木町', offset: 24 }, { name: '横浜', offset: 27 },
+], negishiMap);
+const negishiPatterns: PatternSimple[] = [
+  { fromMin: m(5),    toMin: m(7,30), intervalMin: 7 },
+  { fromMin: m(7,30), toMin: m(10),   intervalMin: 4 },
+  { fromMin: m(10),   toMin: m(17),   intervalMin: 7 },
+  { fromMin: m(17),   toMin: m(20),   intervalMin: 4 },
+  { fromMin: m(20),   toMin: m(24),   intervalMin: 10 },
+];
+
+// 横浜線（東神奈川→八王子: 0 / 逆: 1）
+const yokohamaLineMap = buildCoordMap(jrYokohamaLine);
+const yokohamaLineDir0 = withCoords([
+  { name: '東神奈川', offset: 0 }, { name: '大口', offset: 3 }, { name: '菊名', offset: 6 },
+  { name: '新横浜', offset: 10 }, { name: '小机', offset: 15 }, { name: '鴨居', offset: 18 },
+  { name: '中山', offset: 22 }, { name: '十日市場', offset: 25 }, { name: '長津田', offset: 29 },
+  { name: '成瀬', offset: 33 }, { name: '町田', offset: 36 }, { name: '古淵', offset: 41 },
+  { name: '淵野辺', offset: 45 }, { name: '矢部', offset: 48 }, { name: '相模原', offset: 51 },
+  { name: '橋本', offset: 54 }, { name: '相原', offset: 58 }, { name: '八王子みなみ野', offset: 62 },
+  { name: '片倉', offset: 66 }, { name: '八王子', offset: 69 },
+], yokohamaLineMap);
+const yokohamaLineDir1 = withCoords([
+  { name: '八王子', offset: 0 }, { name: '片倉', offset: 3 }, { name: '八王子みなみ野', offset: 7 },
+  { name: '相原', offset: 11 }, { name: '橋本', offset: 15 }, { name: '相模原', offset: 18 },
+  { name: '矢部', offset: 21 }, { name: '淵野辺', offset: 24 }, { name: '古淵', offset: 28 },
+  { name: '町田', offset: 33 }, { name: '成瀬', offset: 36 }, { name: '長津田', offset: 40 },
+  { name: '十日市場', offset: 44 }, { name: '中山', offset: 47 }, { name: '鴨居', offset: 51 },
+  { name: '小机', offset: 54 }, { name: '新横浜', offset: 59 }, { name: '菊名', offset: 63 },
+  { name: '大口', offset: 66 }, { name: '東神奈川', offset: 69 },
+], yokohamaLineMap);
+const yokohamaLinePatterns: PatternSimple[] = [
+  { fromMin: m(5),    toMin: m(7,30), intervalMin: 10 },
+  { fromMin: m(7,30), toMin: m(10),   intervalMin: 6 },
+  { fromMin: m(10),   toMin: m(17),   intervalMin: 10 },
+  { fromMin: m(17),   toMin: m(20),   intervalMin: 6 },
+  { fromMin: m(20),   toMin: m(24),   intervalMin: 15 },
+];
+
+// 東急目黒線（目黒→日吉: 0 / 逆: 1）
+const meguroMap = buildCoordMap(tokyuMeguro);
+const meguroDir0 = withCoords([
+  { name: '目黒', offset: 0 }, { name: '不動前', offset: 2 }, { name: '武蔵小山', offset: 4 },
+  { name: '洗足', offset: 8 }, { name: '大岡山', offset: 10 },
+  { name: '奥沢', offset: 12 }, { name: '田園調布', offset: 14 }, { name: '多摩川', offset: 16 },
+  { name: '新丸子', offset: 18 }, { name: '武蔵小杉', offset: 20 },
+  { name: '元住吉', offset: 22 }, { name: '日吉', offset: 25 },
+], meguroMap);
+const meguroDir1 = withCoords([
+  { name: '日吉', offset: 0 }, { name: '元住吉', offset: 3 }, { name: '武蔵小杉', offset: 5 },
+  { name: '新丸子', offset: 7 }, { name: '多摩川', offset: 9 }, { name: '田園調布', offset: 11 },
+  { name: '奥沢', offset: 13 }, { name: '大岡山', offset: 15 },
+  { name: '洗足', offset: 17 }, { name: '武蔵小山', offset: 21 },
+  { name: '不動前', offset: 23 }, { name: '目黒', offset: 25 },
+], meguroMap);
+const meguroPatterns: PatternSimple[] = [
+  { fromMin: m(5),    toMin: m(7,30), intervalMin: 6 },
+  { fromMin: m(7,30), toMin: m(10),   intervalMin: 4 },
+  { fromMin: m(10),   toMin: m(17),   intervalMin: 6 },
+  { fromMin: m(17),   toMin: m(20,30),intervalMin: 4 },
+  { fromMin: m(20,30),toMin: m(24),   intervalMin: 8 },
+];
+
+// 西武新宿線（西武新宿→南大塚: 0 / 逆: 1）
+const seibuShinjukuMap = buildCoordMap(seibuShinjukuLine);
+const seibuShinjukuDir0 = withCoords([
+  { name: '西武新宿', offset: 0 }, { name: '高田馬場', offset: 4 }, { name: '下落合', offset: 6 },
+  { name: '中井', offset: 8 }, { name: '新井薬師前', offset: 10 }, { name: '沼袋', offset: 12 },
+  { name: '野方', offset: 14 }, { name: '都立家政', offset: 16 }, { name: '鷺ノ宮', offset: 18 },
+  { name: '下井草', offset: 20 }, { name: '井荻', offset: 22 }, { name: '上石神井', offset: 26 },
+  { name: '武蔵関', offset: 28 }, { name: '東伏見', offset: 30 }, { name: '西武柳沢', offset: 32 },
+  { name: '田無', offset: 34 }, { name: '花小金井', offset: 36 }, { name: '小平', offset: 39 },
+  { name: '東村山', offset: 44 }, { name: '所沢', offset: 46 }, { name: '新所沢', offset: 52 },
+  { name: '狭山市', offset: 57 }, { name: '南大塚', offset: 62 },
+], seibuShinjukuMap);
+const seibuShinjukuDir1 = withCoords([
+  { name: '南大塚', offset: 0 }, { name: '狭山市', offset: 5 }, { name: '新所沢', offset: 10 },
+  { name: '所沢', offset: 16 }, { name: '東村山', offset: 18 }, { name: '小平', offset: 23 },
+  { name: '花小金井', offset: 26 }, { name: '田無', offset: 28 }, { name: '西武柳沢', offset: 30 },
+  { name: '東伏見', offset: 32 }, { name: '武蔵関', offset: 34 }, { name: '上石神井', offset: 36 },
+  { name: '井荻', offset: 40 }, { name: '下井草', offset: 42 }, { name: '鷺ノ宮', offset: 44 },
+  { name: '都立家政', offset: 46 }, { name: '野方', offset: 48 }, { name: '沼袋', offset: 50 },
+  { name: '新井薬師前', offset: 52 }, { name: '中井', offset: 54 }, { name: '下落合', offset: 56 },
+  { name: '高田馬場', offset: 58 }, { name: '西武新宿', offset: 62 },
+], seibuShinjukuMap);
+const seibuShinjukuPatterns: PatternSimple[] = [
+  { fromMin: m(5),    toMin: m(7,30), intervalMin: 10 },
+  { fromMin: m(7,30), toMin: m(10),   intervalMin: 6 },
+  { fromMin: m(10),   toMin: m(17),   intervalMin: 10 },
+  { fromMin: m(17),   toMin: m(20),   intervalMin: 6 },
+  { fromMin: m(20),   toMin: m(24),   intervalMin: 12 },
+];
+
+// 東武伊勢崎線（浅草→竹ノ塚: 0 / 逆: 1）
+const tobuIsesakiMap = buildCoordMap(tobuIsesakiLine);
+const tobuIsesakiDir0 = withCoords([
+  { name: '浅草', offset: 0 }, { name: 'とうきょうスカイツリー', offset: 3 },
+  { name: '押上', offset: 5 }, { name: '曳舟', offset: 6 }, { name: '東向島', offset: 8 },
+  { name: '鐘ヶ淵', offset: 10 }, { name: '堀切', offset: 12 }, { name: '牛田', offset: 14 },
+  { name: '北千住', offset: 16 }, { name: '小菅', offset: 18 }, { name: '五反野', offset: 20 },
+  { name: '梅島', offset: 22 }, { name: '西新井', offset: 24 }, { name: '竹ノ塚', offset: 26 },
+], tobuIsesakiMap);
+const tobuIsesakiDir1 = withCoords([
+  { name: '竹ノ塚', offset: 0 }, { name: '西新井', offset: 2 }, { name: '梅島', offset: 4 },
+  { name: '五反野', offset: 6 }, { name: '小菅', offset: 8 }, { name: '北千住', offset: 10 },
+  { name: '牛田', offset: 12 }, { name: '堀切', offset: 14 }, { name: '鐘ヶ淵', offset: 16 },
+  { name: '東向島', offset: 18 }, { name: '曳舟', offset: 20 }, { name: '押上', offset: 21 },
+  { name: 'とうきょうスカイツリー', offset: 23 }, { name: '浅草', offset: 26 },
+], tobuIsesakiMap);
+const tobuIsesakiPatterns: PatternSimple[] = [
+  { fromMin: m(5),    toMin: m(7,30), intervalMin: 6 },
+  { fromMin: m(7,30), toMin: m(10),   intervalMin: 4 },
+  { fromMin: m(10),   toMin: m(17),   intervalMin: 6 },
+  { fromMin: m(17),   toMin: m(20,30),intervalMin: 4 },
+  { fromMin: m(20,30),toMin: m(24),   intervalMin: 8 },
+];
+
+// 相鉄本線（横浜→海老名: 0 / 逆: 1）
+const sotetsuMap = buildCoordMap(sotetsuMainLine);
+const sotetsuDir0 = withCoords([
+  { name: '横浜', offset: 0 }, { name: '平沼橋', offset: 2 }, { name: '西横浜', offset: 4 },
+  { name: '天王町', offset: 6 }, { name: '星川', offset: 8 }, { name: '和田町', offset: 10 },
+  { name: '上星川', offset: 12 }, { name: '西谷', offset: 14 }, { name: '鶴ヶ峰', offset: 17 },
+  { name: '二俣川', offset: 20 }, { name: '希望ヶ丘', offset: 23 }, { name: '三ツ境', offset: 25 },
+  { name: '瀬谷', offset: 28 }, { name: '大和', offset: 31 }, { name: 'かしわ台', offset: 38 },
+  { name: '海老名', offset: 41 },
+], sotetsuMap);
+const sotetsuDir1 = withCoords([
+  { name: '海老名', offset: 0 }, { name: 'かしわ台', offset: 3 }, { name: '大和', offset: 10 },
+  { name: '瀬谷', offset: 13 }, { name: '三ツ境', offset: 16 }, { name: '希望ヶ丘', offset: 18 },
+  { name: '二俣川', offset: 21 }, { name: '鶴ヶ峰', offset: 24 }, { name: '西谷', offset: 27 },
+  { name: '上星川', offset: 29 }, { name: '和田町', offset: 31 }, { name: '星川', offset: 33 },
+  { name: '天王町', offset: 35 }, { name: '西横浜', offset: 37 }, { name: '平沼橋', offset: 39 },
+  { name: '横浜', offset: 41 },
+], sotetsuMap);
+const sotetsuPatterns: PatternSimple[] = [
+  { fromMin: m(5),    toMin: m(7,30), intervalMin: 8 },
+  { fromMin: m(7,30), toMin: m(10),   intervalMin: 5 },
+  { fromMin: m(10),   toMin: m(17),   intervalMin: 8 },
+  { fromMin: m(17),   toMin: m(20),   intervalMin: 5 },
+  { fromMin: m(20),   toMin: m(24),   intervalMin: 10 },
+];
+
+// 東京モノレール（浜松町→羽田: 0 / 逆: 1）
+const monorailMap = buildCoordMap(tokyoMonorail);
+const monorailDir0 = withCoords([
+  { name: 'モノレール浜松町', offset: 0 }, { name: '天王洲アイル', offset: 3 },
+  { name: '大井競馬場前', offset: 7 }, { name: '流通センター', offset: 9 },
+  { name: '昭和島', offset: 12 }, { name: '整備場', offset: 14 },
+  { name: '天空橋', offset: 16 }, { name: '羽田空港第3ターミナル', offset: 19 },
+  { name: '羽田空港第1・第2ターミナル', offset: 21 },
+], monorailMap);
+const monorailDir1 = withCoords([
+  { name: '羽田空港第1・第2ターミナル', offset: 0 }, { name: '羽田空港第3ターミナル', offset: 2 },
+  { name: '天空橋', offset: 5 }, { name: '整備場', offset: 7 },
+  { name: '昭和島', offset: 9 }, { name: '流通センター', offset: 12 },
+  { name: '大井競馬場前', offset: 14 }, { name: '天王洲アイル', offset: 18 },
+  { name: 'モノレール浜松町', offset: 21 },
+], monorailMap);
+const monorailPatterns: PatternSimple[] = [
+  { fromMin: m(5,20), toMin: m(7,30), intervalMin: 10 },
+  { fromMin: m(7,30), toMin: m(9,30), intervalMin: 4 },
+  { fromMin: m(9,30), toMin: m(17),   intervalMin: 6 },
+  { fromMin: m(17),   toMin: m(20),   intervalMin: 4 },
+  { fromMin: m(20),   toMin: m(24),   intervalMin: 10 },
+];
+
+// 多摩モノレール（上北台→多摩センター: 0 / 逆: 1）
+const tamaMonoMap = buildCoordMap(tamaMonorail);
+const tamaMonoDir0 = withCoords([
+  { name: '上北台', offset: 0 }, { name: '玉川上水', offset: 4 },
+  { name: '泉体育館', offset: 8 }, { name: '立飛', offset: 10 }, { name: '高松', offset: 12 },
+  { name: '立川北', offset: 14 }, { name: '立川南', offset: 16 }, { name: '柴崎体育館', offset: 18 },
+  { name: '甲州街道', offset: 20 }, { name: '万願寺', offset: 22 }, { name: '高幡不動', offset: 24 },
+  { name: '程久保', offset: 26 }, { name: '中央大学・明星大学', offset: 28 },
+  { name: '松が谷', offset: 32 }, { name: '多摩センター', offset: 34 },
+], tamaMonoMap);
+const tamaMonoDir1 = withCoords([
+  { name: '多摩センター', offset: 0 }, { name: '松が谷', offset: 2 },
+  { name: '中央大学・明星大学', offset: 6 }, { name: '程久保', offset: 8 },
+  { name: '高幡不動', offset: 10 }, { name: '万願寺', offset: 12 }, { name: '甲州街道', offset: 14 },
+  { name: '柴崎体育館', offset: 16 }, { name: '立川南', offset: 18 }, { name: '立川北', offset: 20 },
+  { name: '高松', offset: 22 }, { name: '立飛', offset: 24 }, { name: '泉体育館', offset: 26 },
+  { name: '玉川上水', offset: 30 }, { name: '上北台', offset: 34 },
+], tamaMonoMap);
+const tamaMonoPatterns: PatternSimple[] = [
+  { fromMin: m(5,30), toMin: m(7,30), intervalMin: 10 },
+  { fromMin: m(7,30), toMin: m(9,30), intervalMin: 6 },
+  { fromMin: m(9,30), toMin: m(17),   intervalMin: 8 },
+  { fromMin: m(17),   toMin: m(20),   intervalMin: 6 },
+  { fromMin: m(20),   toMin: m(24),   intervalMin: 12 },
+];
+
+// 小田急江ノ島線（相模大野→片瀬江ノ島: 0 / 逆: 1）
+const odakyuEnoMap = buildCoordMap(odakyuEnoshimaLine);
+const odakyuEnoDir0 = withCoords([
+  { name: '相模大野', offset: 0 }, { name: '東林間', offset: 2 }, { name: '中央林間', offset: 4 },
+  { name: '南林間', offset: 6 }, { name: '鶴間', offset: 8 }, { name: '大和', offset: 10 },
+  { name: '桜ヶ丘', offset: 12 }, { name: '高座渋谷', offset: 14 }, { name: '長後', offset: 16 },
+  { name: '湘南台', offset: 19 }, { name: '六会日大前', offset: 21 }, { name: '善行', offset: 23 },
+  { name: '藤沢本町', offset: 25 }, { name: '藤沢', offset: 27 },
+  { name: '本鵠沼', offset: 29 }, { name: '鵠沼海岸', offset: 31 }, { name: '片瀬江ノ島', offset: 33 },
+], odakyuEnoMap);
+const odakyuEnoDir1 = withCoords([
+  { name: '片瀬江ノ島', offset: 0 }, { name: '鵠沼海岸', offset: 2 }, { name: '本鵠沼', offset: 4 },
+  { name: '藤沢', offset: 6 }, { name: '藤沢本町', offset: 8 }, { name: '善行', offset: 10 },
+  { name: '六会日大前', offset: 12 }, { name: '湘南台', offset: 14 }, { name: '長後', offset: 17 },
+  { name: '高座渋谷', offset: 19 }, { name: '桜ヶ丘', offset: 21 }, { name: '大和', offset: 23 },
+  { name: '鶴間', offset: 25 }, { name: '南林間', offset: 27 }, { name: '中央林間', offset: 29 },
+  { name: '東林間', offset: 31 }, { name: '相模大野', offset: 33 },
+], odakyuEnoMap);
+const odakyuEnoPatterns: PatternSimple[] = [
+  { fromMin: m(5,30), toMin: m(7,30), intervalMin: 15 },
+  { fromMin: m(7,30), toMin: m(10),   intervalMin: 10 },
+  { fromMin: m(10),   toMin: m(17),   intervalMin: 15 },
+  { fromMin: m(17),   toMin: m(20),   intervalMin: 10 },
+  { fromMin: m(20),   toMin: m(24),   intervalMin: 20 },
+];
+
+// 京成本線（京成上野→成田空港: 0 / 逆: 1）
+const keiseiMap = buildCoordMap(keiseiMainLine);
+const keiseiDir0 = withCoords([
+  { name: '京成上野', offset: 0 }, { name: '日暮里', offset: 2 }, { name: '新三河島', offset: 5 },
+  { name: '町屋', offset: 7 }, { name: '千住大橋', offset: 9 }, { name: '京成関屋', offset: 11 },
+  { name: '堀切菖蒲園', offset: 13 }, { name: 'お花茶屋', offset: 15 }, { name: '青砥', offset: 17 },
+  { name: '京成高砂', offset: 20 }, { name: '京成小岩', offset: 24 }, { name: '江戸川', offset: 27 },
+  { name: '国府台', offset: 31 }, { name: '市川真間', offset: 34 }, { name: '京成八幡', offset: 38 },
+  { name: '東中山', offset: 45 }, { name: '京成西船', offset: 47 }, { name: '京成船橋', offset: 51 },
+  { name: '谷津', offset: 59 }, { name: '京成津田沼', offset: 61 }, { name: '八千代台', offset: 70 },
+  { name: '勝田台', offset: 77 }, { name: 'ユーカリが丘', offset: 84 },
+  { name: '京成佐倉', offset: 89 }, { name: '宗吾参道', offset: 102 },
+  { name: '京成成田', offset: 110 }, { name: '成田空港', offset: 116 },
+], keiseiMap);
+const keiseiDir1 = withCoords([
+  { name: '成田空港', offset: 0 }, { name: '京成成田', offset: 6 },
+  { name: '宗吾参道', offset: 14 }, { name: '京成佐倉', offset: 27 },
+  { name: 'ユーカリが丘', offset: 32 }, { name: '勝田台', offset: 39 },
+  { name: '八千代台', offset: 46 }, { name: '京成津田沼', offset: 55 }, { name: '谷津', offset: 57 },
+  { name: '京成船橋', offset: 65 }, { name: '京成西船', offset: 69 }, { name: '東中山', offset: 71 },
+  { name: '京成八幡', offset: 78 }, { name: '市川真間', offset: 82 }, { name: '国府台', offset: 85 },
+  { name: '江戸川', offset: 89 }, { name: '京成小岩', offset: 92 }, { name: '京成高砂', offset: 96 },
+  { name: '青砥', offset: 99 }, { name: 'お花茶屋', offset: 101 }, { name: '堀切菖蒲園', offset: 103 },
+  { name: '京成関屋', offset: 105 }, { name: '千住大橋', offset: 107 }, { name: '町屋', offset: 109 },
+  { name: '新三河島', offset: 111 }, { name: '日暮里', offset: 114 }, { name: '京成上野', offset: 116 },
+], keiseiMap);
+const keiseiPatterns: PatternSimple[] = [
+  { fromMin: m(5),    toMin: m(7,30), intervalMin: 20 },
+  { fromMin: m(7,30), toMin: m(10),   intervalMin: 10 },
+  { fromMin: m(10),   toMin: m(17),   intervalMin: 15 },
+  { fromMin: m(17),   toMin: m(20),   intervalMin: 10 },
+  { fromMin: m(20),   toMin: m(24),   intervalMin: 20 },
+];
+
 // ── 全路線の設定 ────────────────────────────────────────
 
 const DEMO_LINES: LineDemo[] = [
@@ -1315,6 +1620,94 @@ const DEMO_LINES: LineDemo[] = [
     directions: [
       { stations: keioDir0, travelMin: 43, isCircular: false, patterns: keioPatterns },
       { stations: keioDir1, travelMin: 43, isCircular: false, patterns: keioPatterns },
+    ],
+  },
+  {
+    key: 'jrNanbuLine',
+    color: '#FFCC00',
+    directions: [
+      { stations: nanbuDir0, travelMin: 49, isCircular: false, patterns: nanbuPatterns },
+      { stations: nanbuDir1, travelMin: 49, isCircular: false, patterns: nanbuPatterns },
+    ],
+  },
+  {
+    key: 'jrNegishiLine',
+    color: '#00B5E2',
+    directions: [
+      { stations: negishiDir0, travelMin: 27, isCircular: false, patterns: negishiPatterns },
+      { stations: negishiDir1, travelMin: 27, isCircular: false, patterns: negishiPatterns },
+    ],
+  },
+  {
+    key: 'jrYokohamaLine',
+    color: '#41A541',
+    directions: [
+      { stations: yokohamaLineDir0, travelMin: 69, isCircular: false, patterns: yokohamaLinePatterns },
+      { stations: yokohamaLineDir1, travelMin: 69, isCircular: false, patterns: yokohamaLinePatterns },
+    ],
+  },
+  {
+    key: 'tokyuMeguro',
+    color: '#008B8B',
+    directions: [
+      { stations: meguroDir0, travelMin: 25, isCircular: false, patterns: meguroPatterns },
+      { stations: meguroDir1, travelMin: 25, isCircular: false, patterns: meguroPatterns },
+    ],
+  },
+  {
+    key: 'seibuShinjukuLine',
+    color: '#F39700',
+    directions: [
+      { stations: seibuShinjukuDir0, travelMin: 62, isCircular: false, patterns: seibuShinjukuPatterns },
+      { stations: seibuShinjukuDir1, travelMin: 62, isCircular: false, patterns: seibuShinjukuPatterns },
+    ],
+  },
+  {
+    key: 'tobuIsesakiLine',
+    color: '#1E88E5',
+    directions: [
+      { stations: tobuIsesakiDir0, travelMin: 26, isCircular: false, patterns: tobuIsesakiPatterns },
+      { stations: tobuIsesakiDir1, travelMin: 26, isCircular: false, patterns: tobuIsesakiPatterns },
+    ],
+  },
+  {
+    key: 'sotetsuMainLine',
+    color: '#2E8B57',
+    directions: [
+      { stations: sotetsuDir0, travelMin: 41, isCircular: false, patterns: sotetsuPatterns },
+      { stations: sotetsuDir1, travelMin: 41, isCircular: false, patterns: sotetsuPatterns },
+    ],
+  },
+  {
+    key: 'tokyoMonorail',
+    color: '#0066CC',
+    directions: [
+      { stations: monorailDir0, travelMin: 21, isCircular: false, patterns: monorailPatterns },
+      { stations: monorailDir1, travelMin: 21, isCircular: false, patterns: monorailPatterns },
+    ],
+  },
+  {
+    key: 'tamaMonorail',
+    color: '#20B2AA',
+    directions: [
+      { stations: tamaMonoDir0, travelMin: 34, isCircular: false, patterns: tamaMonoPatterns },
+      { stations: tamaMonoDir1, travelMin: 34, isCircular: false, patterns: tamaMonoPatterns },
+    ],
+  },
+  {
+    key: 'odakyuEnoshimaLine',
+    color: '#0066CC',
+    directions: [
+      { stations: odakyuEnoDir0, travelMin: 33, isCircular: false, patterns: odakyuEnoPatterns },
+      { stations: odakyuEnoDir1, travelMin: 33, isCircular: false, patterns: odakyuEnoPatterns },
+    ],
+  },
+  {
+    key: 'keiseiMainLine',
+    color: '#3165B1',
+    directions: [
+      { stations: keiseiDir0, travelMin: 116, isCircular: false, patterns: keiseiPatterns },
+      { stations: keiseiDir1, travelMin: 116, isCircular: false, patterns: keiseiPatterns },
     ],
   },
 ];
