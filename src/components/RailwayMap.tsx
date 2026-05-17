@@ -2331,12 +2331,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         {/* ルート推薦表示は凡例内に統合 */}
 
         {showRouteToggleSection && (
-          <div style={{ marginBottom: '15px', border: `1px solid ${colors.border}`, borderRadius: '8px', backgroundColor: colors.surface }}>
+          <div style={{
+            marginBottom: '15px',
+            border: `1px solid ${colors.border}`,
+            borderRadius: '8px',
+            backgroundColor: colors.surface,
+          }}>
+          {/* ヘッダー：スクロールコンテナの外に置き常に表示 */}
           <div
             onClick={() => setIsRouteToggleExpanded(!isRouteToggleExpanded)}
             style={{
-              position: 'sticky',
-              top: 0,
               backgroundColor: colors.surface,
               zIndex: 10,
               display: 'flex',
@@ -2359,8 +2363,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             </span>
           </div>
 
+          {/* コンテンツ：独立したスクロールコンテナ */}
           {isRouteToggleExpanded && (
-            <div style={{ padding: '15px', maxHeight: 'calc(100vh - 160px)', overflowY: 'auto' }}>
+            <div style={{ padding: '15px', maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
               {/* 区間外路線を半透明で表示 */}
               <div style={{ marginBottom: '10px' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: FS.base, color: colors.text, cursor: 'pointer' }}>
