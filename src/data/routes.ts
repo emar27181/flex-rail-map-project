@@ -130,6 +130,8 @@ import { kotohiraLongLine, kotohiraShidoLine, tosaCuroshioSukumo, jrMugiLineSout
 import { jrKesennumaLine, sendaiAirportRailway, jrOofunatoLine, jrYamadaLine } from './tohoku-more2';
 import { echigotokimekiHisui, echigotokimekiMyoko, ainokaze, irIshikawaRailway, kurobe } from './hokuriku-more';
 import { hankyuItamiLine, hankyuMinooLine, kintetsuTenriLine, kintetsuDoumyojiLine, kintetsuNaganoLine, osakaMidosujiMain } from './kinki-private-more4';
+import { jrEtsugoLine, jrShinetsuNiigata, hokuetsukyu, shinanoBrandNorth, shinanoRailway, jrIiyamaLineExt } from './niigata-nagano-lines';
+import { jrRyomoline, jrMitoLineExt, jrKarasuyamaLine, jrKururiLine, jrSobuMainLine } from './kanto-jr-more';
 
 export const routes = {
   yamanote,
@@ -534,6 +536,19 @@ export const routes = {
   kintetsuDoumyojiLine,
   kintetsuNaganoLine,
   osakaMidosujiMain,
+  // 新潟・長野エリア
+  jrEtsugoLine,
+  jrShinetsuNiigata,
+  hokuetsukyu,
+  shinanoBrandNorth,
+  shinanoRailway,
+  jrIiyamaLineExt,
+  // 関東JR追加
+  jrRyomoline,
+  jrMitoLineExt,
+  jrKarasuyamaLine,
+  jrKururiLine,
+  jrSobuMainLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -941,6 +956,19 @@ export const routeColors = {
   kintetsuDoumyojiLine: '#F08000',
   kintetsuNaganoLine: '#F08000',
   osakaMidosujiMain: '#D90000',
+  // 新潟・長野エリア
+  jrEtsugoLine: '#009944',
+  jrShinetsuNiigata: '#F68B1E',
+  hokuetsukyu: '#E60026',
+  shinanoBrandNorth: '#009944',
+  shinanoRailway: '#E60026',
+  jrIiyamaLineExt: '#009944',
+  // 関東JR追加
+  jrRyomoline: '#F68B1E',
+  jrMitoLineExt: '#009944',
+  jrKarasuyamaLine: '#009944',
+  jrKururiLine: '#F68B1E',
+  jrSobuMainLine: '#FFD700',
 };
 
 export const routeNames = {
@@ -1346,4 +1374,17 @@ export const routeNames = {
   kintetsuDoumyojiLine: '近鉄道明寺線',
   kintetsuNaganoLine: '近鉄長野線',
   osakaMidosujiMain: '大阪メトロ御堂筋線',
+  // 新潟・長野エリア
+  jrEtsugoLine: 'JR越後線',
+  jrShinetsuNiigata: 'JR信越本線（新潟〜柏崎）',
+  hokuetsukyu: '北越急行ほくほく線',
+  shinanoBrandNorth: 'しなの鉄道北しなの線',
+  shinanoRailway: 'しなの鉄道本線',
+  jrIiyamaLineExt: 'JR飯山線',
+  // 関東JR追加
+  jrRyomoline: 'JR両毛線',
+  jrMitoLineExt: 'JR常磐線（水戸付近）',
+  jrKarasuyamaLine: 'JR烏山線',
+  jrKururiLine: 'JR久留里線',
+  jrSobuMainLine: 'JR総武本線（千葉〜銚子）',
 };
