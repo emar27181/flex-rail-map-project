@@ -107,6 +107,9 @@ import { jrMuroranMainLine, jrNemuroMainLine, jrHidakaMainLine, jrFuranoLine, sa
 import { kotohiraLine, jrMugiLine, tosaCuroshioAsaLine, tosaCuroshioNahariLine, jrYodoLine } from './shikoku-more-lines';
 import { jrHanwaLine, jrNaraLine, jrKansaiMainLine, wakayamaDenwKishiLine, nankaAirportLine } from './jr-kinki-more';
 import { toyamaTramLoop, manyoLine, toyohashiTramLine, meitetsuTokonameLine, meitetsuInuyamaLine, kintetsuNagoyaLine } from './chubu-private-lines';
+import { aoimoriRailway, igrIwateGinga, jrKamaishiLine2, sanrikuRiasLine, konantetsudoKonanLine } from './tohoku-private-lines';
+import { hakoneTozan2, shinkeisei2, ryutetsuLine, choshiDenki, minatomirai } from './kanto-private-more';
+import { sembokuKosokuLine, nosedenMyokenLine, keihanIshiyamasakamoto, osakaMono, hanshinNamba, hankyuKobeLine2 } from './kinki-private-more';
 
 export const routes = {
   yamanote,
@@ -370,6 +373,25 @@ export const routes = {
   meitetsuTokonameLine,
   meitetsuInuyamaLine,
   kintetsuNagoyaLine,
+  // 東北私鉄・三セク追加
+  aoimoriRailway,
+  igrIwateGinga,
+  jrKamaishiLine2,
+  sanrikuRiasLine,
+  konantetsudoKonanLine,
+  // 関東私鉄追加
+  hakoneTozan2,
+  shinkeisei2,
+  ryutetsuLine,
+  choshiDenki,
+  minatomirai,
+  // 近畿私鉄さらに追加
+  sembokuKosokuLine,
+  nosedenMyokenLine,
+  keihanIshiyamasakamoto,
+  osakaMono,
+  hanshinNamba,
+  hankyuKobeLine2,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -636,6 +658,25 @@ export const routeColors = {
   meitetsuTokonameLine: '#E60026',
   meitetsuInuyamaLine: '#E60026',
   kintetsuNagoyaLine: '#009944',
+  // 東北私鉄・三セク追加
+  aoimoriRailway: '#009944',
+  igrIwateGinga: '#E60026',
+  jrKamaishiLine2: '#009944',
+  sanrikuRiasLine: '#E60026',
+  konantetsudoKonanLine: '#F68B1E',
+  // 関東私鉄追加
+  hakoneTozan2: '#E60026',
+  shinkeisei2: '#E60026',
+  ryutetsuLine: '#F68B1E',
+  choshiDenki: '#E60026',
+  minatomirai: '#E60026',
+  // 近畿私鉄さらに追加
+  sembokuKosokuLine: '#E60026',
+  nosedenMyokenLine: '#009944',
+  keihanIshiyamasakamoto: '#009944',
+  osakaMono: '#E60026',
+  hanshinNamba: '#E60026',
+  hankyuKobeLine2: '#009944',
 };
 
 export const routeNames = {
@@ -900,4 +941,23 @@ export const routeNames = {
   meitetsuTokonameLine: '名鉄常滑線',
   meitetsuInuyamaLine: '名鉄犬山線',
   kintetsuNagoyaLine: '近鉄名古屋線',
+  // 東北私鉄・三セク追加
+  aoimoriRailway: '青い森鉄道',
+  igrIwateGinga: 'IGRいわて銀河鉄道',
+  jrKamaishiLine2: 'JR釜石線',
+  sanrikuRiasLine: '三陸鉄道リアス線',
+  konantetsudoKonanLine: '弘南鉄道弘南線',
+  // 関東私鉄追加
+  hakoneTozan2: '箱根登山鉄道',
+  shinkeisei2: '新京成電鉄',
+  ryutetsuLine: '流鉄流山線',
+  choshiDenki: '銚子電気鉄道',
+  minatomirai: 'みなとみらい線',
+  // 近畿私鉄さらに追加
+  sembokuKosokuLine: '泉北高速鉄道',
+  nosedenMyokenLine: '能勢電鉄妙見線',
+  keihanIshiyamasakamoto: '京阪石山坂本線',
+  osakaMono: '大阪モノレール',
+  hanshinNamba: '阪神なんば線',
+  hankyuKobeLine2: '阪急神戸線',
 };
