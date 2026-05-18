@@ -102,6 +102,11 @@ import { osakaChangbori, osakaImazatosuji, hankyuTakarazukaLine, kobeSeishinYama
 import { jrChikuhiLine, jrOmuraLine, shimabaraRailway, okinawaMonorail, jrNichinanLine, jrNippoMainLineSouth } from './kyushu-okinawa-lines';
 import { jrYamagataShinkansen, jrAkitaShinkansen, jrOuMainLineAkita, jrJobanLineNorth, jrBanetsusaiLine, jrShinetsuLine } from './tohoku-more-lines';
 import { jrMitoLine, jrJobanLineMain, jrNikkoLine, kantetsJososen, chichibuRailway } from './kanto-more-lines';
+import { toyamaChihoMainLine, echizentetsudoKatsuyamaLine, fukuiRailwayFukubuLine, hokurikuTetsudoIshikawaLine, jrHokurikuKanazawaToToyama, toyamaLightRail } from './hokuriku-lines';
+import { jrMuroranMainLine, jrNemuroMainLine, jrHidakaMainLine, jrFuranoLine, sapporoShiden } from './hokkaido-more-lines';
+import { kotohiraLine, jrMugiLine, tosaCuroshioAsaLine, tosaCuroshioNahariLine, jrYodoLine } from './shikoku-more-lines';
+import { jrHanwaLine, jrNaraLine, jrKansaiMainLine, wakayamaDenwKishiLine, nankaAirportLine } from './jr-kinki-more';
+import { toyamaTramLoop, manyoLine, toyohashiTramLine, meitetsuTokonameLine, meitetsuInuyamaLine, kintetsuNagoyaLine } from './chubu-private-lines';
 
 export const routes = {
   yamanote,
@@ -333,6 +338,38 @@ export const routes = {
   okinawaMonorail,
   jrNichinanLine,
   jrNippoMainLineSouth,
+  // 北陸エリア
+  toyamaChihoMainLine,
+  echizentetsudoKatsuyamaLine,
+  fukuiRailwayFukubuLine,
+  hokurikuTetsudoIshikawaLine,
+  jrHokurikuKanazawaToToyama,
+  toyamaLightRail,
+  // 北海道追加
+  jrMuroranMainLine,
+  jrNemuroMainLine,
+  jrHidakaMainLine,
+  jrFuranoLine,
+  sapporoShiden,
+  // 四国追加
+  kotohiraLine,
+  jrMugiLine,
+  tosaCuroshioAsaLine,
+  tosaCuroshioNahariLine,
+  jrYodoLine,
+  // 近畿さらに追加
+  jrHanwaLine,
+  jrNaraLine,
+  jrKansaiMainLine,
+  wakayamaDenwKishiLine,
+  nankaAirportLine,
+  // 中部私鉄追加
+  toyamaTramLoop,
+  manyoLine,
+  toyohashiTramLine,
+  meitetsuTokonameLine,
+  meitetsuInuyamaLine,
+  kintetsuNagoyaLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -567,6 +604,38 @@ export const routeColors = {
   okinawaMonorail: '#00B5E2',
   jrNichinanLine: '#009944',
   jrNippoMainLineSouth: '#F68B1E',
+  // 北陸エリア
+  toyamaChihoMainLine: '#E60026',
+  echizentetsudoKatsuyamaLine: '#009944',
+  fukuiRailwayFukubuLine: '#F68B1E',
+  hokurikuTetsudoIshikawaLine: '#E60026',
+  jrHokurikuKanazawaToToyama: '#009944',
+  toyamaLightRail: '#00B5E2',
+  // 北海道追加
+  jrMuroranMainLine: '#009944',
+  jrNemuroMainLine: '#F68B1E',
+  jrHidakaMainLine: '#009944',
+  jrFuranoLine: '#E60026',
+  sapporoShiden: '#009944',
+  // 四国追加
+  kotohiraLine: '#F68B1E',
+  jrMugiLine: '#009944',
+  tosaCuroshioAsaLine: '#E60026',
+  tosaCuroshioNahariLine: '#009944',
+  jrYodoLine: '#F68B1E',
+  // 近畿さらに追加
+  jrHanwaLine: '#009944',
+  jrNaraLine: '#F68B1E',
+  jrKansaiMainLine: '#009944',
+  wakayamaDenwKishiLine: '#E60026',
+  nankaAirportLine: '#E60026',
+  // 中部私鉄追加
+  toyamaTramLoop: '#009944',
+  manyoLine: '#00B5E2',
+  toyohashiTramLine: '#E60026',
+  meitetsuTokonameLine: '#E60026',
+  meitetsuInuyamaLine: '#E60026',
+  kintetsuNagoyaLine: '#009944',
 };
 
 export const routeNames = {
@@ -799,4 +868,36 @@ export const routeNames = {
   okinawaMonorail: '沖縄都市モノレール（ゆいレール）',
   jrNichinanLine: 'JR日南線',
   jrNippoMainLineSouth: 'JR日豊本線（大分〜鹿児島）',
+  // 北陸エリア
+  toyamaChihoMainLine: '富山地方鉄道本線',
+  echizentetsudoKatsuyamaLine: 'えちぜん鉄道勝山永平寺線',
+  fukuiRailwayFukubuLine: '福井鉄道福武線',
+  hokurikuTetsudoIshikawaLine: '北陸鉄道石川線',
+  jrHokurikuKanazawaToToyama: 'JR北陸本線（金沢〜富山）',
+  toyamaLightRail: '富山ライトレール',
+  // 北海道追加
+  jrMuroranMainLine: 'JR室蘭本線',
+  jrNemuroMainLine: 'JR根室本線',
+  jrHidakaMainLine: 'JR日高本線',
+  jrFuranoLine: 'JR富良野線',
+  sapporoShiden: '札幌市電',
+  // 四国追加
+  kotohiraLine: '高松琴平電気鉄道琴平線',
+  jrMugiLine: 'JR牟岐線',
+  tosaCuroshioAsaLine: '土佐くろしお鉄道阿佐線',
+  tosaCuroshioNahariLine: '土佐くろしお鉄道ごめん・なはり線',
+  jrYodoLine: 'JR予土線',
+  // 近畿さらに追加
+  jrHanwaLine: 'JR阪和線',
+  jrNaraLine: 'JR奈良線',
+  jrKansaiMainLine: 'JR関西本線（加茂〜亀山）',
+  wakayamaDenwKishiLine: '和歌山電鐵貴志川線',
+  nankaAirportLine: '南海空港線',
+  // 中部私鉄追加
+  toyamaTramLoop: '富山市内電車環状線',
+  manyoLine: '万葉線',
+  toyohashiTramLine: '豊橋鉄道東田本線',
+  meitetsuTokonameLine: '名鉄常滑線',
+  meitetsuInuyamaLine: '名鉄犬山線',
+  kintetsuNagoyaLine: '近鉄名古屋線',
 };
