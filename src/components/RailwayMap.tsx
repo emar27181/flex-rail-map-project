@@ -2587,15 +2587,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               <div
                 style={{
                   width: '100%',
-                  maxHeight: '200px',
-                  padding: '5px',
+                  maxHeight: '350px',
+                  padding: '6px',
                   border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
                   backgroundColor: colors.surfaceElevated,
                   overflowY: 'auto',
                   display: 'flex',
                   flexWrap: 'wrap',
-                  gap: '4px',
+                  gap: '3px',
                   alignContent: 'flex-start'
                 }}
               >
@@ -2604,7 +2604,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   const routeColor = adjustRouteColorForTheme(routeColors[routeKey as RouteKey], theme);
                   const isSelected = visibleRoutes.has(routeKey as RouteKey);
                   // 幅をより正確に計算: アイコン12px + マージン8px + テキスト + パディング16px
-                  const textWidth = routeName.length * 11; // 長い路線名に対応するため余裕を持たせる
+                  const textWidth = routeName.length * 14; // 日本語13px基準で余裕を持たせる
                   const totalWidth = 12 + 8 + textWidth + 16;
 
                   return (
