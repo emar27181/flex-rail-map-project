@@ -132,6 +132,7 @@ import { echigotokimekiHisui, echigotokimekiMyoko, ainokaze, irIshikawaRailway, 
 import { hankyuItamiLine, hankyuMinooLine, kintetsuTenriLine, kintetsuDoumyojiLine, kintetsuNaganoLine, osakaMidosujiMain } from './kinki-private-more4';
 import { jrEtsugoLine, jrShinetsuNiigata, hokuetsukyu, shinanoBrandNorth, shinanoRailway, jrIiyamaLineExt } from './niigata-nagano-lines';
 import { jrRyomoline, jrMitoLineExt, jrKarasuyamaLine, jrKururiLine, jrSobuMainLine } from './kanto-jr-more';
+import { jrTokaidoNagoyaToyohashi, toyohashiAtsumiLine, nagoyaMeikoLine, meitetsuToyotaLine } from './chubu-jr-more3';
 
 export const routes = {
   yamanote,
@@ -549,6 +550,11 @@ export const routes = {
   jrKarasuyamaLine,
   jrKururiLine,
   jrSobuMainLine,
+  // 中部追加3
+  jrTokaidoNagoyaToyohashi,
+  toyohashiAtsumiLine,
+  nagoyaMeikoLine,
+  meitetsuToyotaLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -969,6 +975,11 @@ export const routeColors = {
   jrKarasuyamaLine: '#009944',
   jrKururiLine: '#F68B1E',
   jrSobuMainLine: '#FFD700',
+  // 中部追加3
+  jrTokaidoNagoyaToyohashi: '#F68B1E',
+  toyohashiAtsumiLine: '#E60026',
+  nagoyaMeikoLine: '#9B1889',
+  meitetsuToyotaLine: '#E50012',
 };
 
 export const routeNames = {
@@ -1387,4 +1398,9 @@ export const routeNames = {
   jrKarasuyamaLine: 'JR烏山線',
   jrKururiLine: 'JR久留里線',
   jrSobuMainLine: 'JR総武本線（千葉〜銚子）',
+  // 中部追加3
+  jrTokaidoNagoyaToyohashi: 'JR東海道本線（名古屋〜豊橋）',
+  toyohashiAtsumiLine: '豊橋鉄道渥美線',
+  nagoyaMeikoLine: '名古屋市営地下鉄名港線',
+  meitetsuToyotaLine: '名鉄豊田線',
 };
