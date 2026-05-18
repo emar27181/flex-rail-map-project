@@ -114,6 +114,9 @@ import { matsuuraRailway, hisatsuOrange, jrKudaiMainLine, jrHohibMainLine2 } fro
 import { jrTakayamaMainLine, jrIiyamaLine, jrOitoLine } from './jr-chubu-more';
 import { hakodateShiden, jrHakodateMainLineSouth, jrHakodateMainLineNorth, dosanIsaribi } from './hokkaido-private-lines';
 import { jrOuMainLineSouth, jrRikuuWestLine, jrBanetsuEastLine, jrSensekiLine2 } from './jr-tohoku-more';
+import { abukumaKyuko, yamagataRailway, jrHanawLine, jrOminateLine, akitaNairikuLine } from './tohoku-private-more';
+import { jrSekishoLine, jrNemuroMainLineWest, jrSoyaMainLineNorth, jrSenmouMainLine } from './jr-hokkaido-more';
+import { jrWakayamaLine, jrKiseiMainLineNorth, jrKiseiMainLineSouth, kintetsuOsakaLine2 } from './kinki-jr-more';
 
 export const routes = {
   yamanote,
@@ -415,6 +418,22 @@ export const routes = {
   jrRikuuWestLine,
   jrBanetsuEastLine,
   jrSensekiLine2,
+  // 東北私鉄・三セクさらに追加
+  abukumaKyuko,
+  yamagataRailway,
+  jrHanawLine,
+  jrOminateLine,
+  akitaNairikuLine,
+  // 北海道JR追加
+  jrSekishoLine,
+  jrNemuroMainLineWest,
+  jrSoyaMainLineNorth,
+  jrSenmouMainLine,
+  // 近畿JR追加
+  jrWakayamaLine,
+  jrKiseiMainLineNorth,
+  jrKiseiMainLineSouth,
+  kintetsuOsakaLine2,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -719,6 +738,22 @@ export const routeColors = {
   jrRikuuWestLine: '#F68B1E',
   jrBanetsuEastLine: '#009944',
   jrSensekiLine2: '#009944',
+  // 東北私鉄・三セクさらに追加
+  abukumaKyuko: '#F68B1E',
+  yamagataRailway: '#E60026',
+  jrHanawLine: '#009944',
+  jrOminateLine: '#009944',
+  akitaNairikuLine: '#F68B1E',
+  // 北海道JR追加
+  jrSekishoLine: '#009944',
+  jrNemuroMainLineWest: '#009944',
+  jrSoyaMainLineNorth: '#009944',
+  jrSenmouMainLine: '#009944',
+  // 近畿JR追加
+  jrWakayamaLine: '#009944',
+  jrKiseiMainLineNorth: '#009944',
+  jrKiseiMainLineSouth: '#009944',
+  kintetsuOsakaLine2: '#009944',
 };
 
 export const routeNames = {
@@ -1021,4 +1056,20 @@ export const routeNames = {
   jrRikuuWestLine: 'JR陸羽西線',
   jrBanetsuEastLine: 'JR磐越東線',
   jrSensekiLine2: 'JR仙石線',
+  // 東北私鉄・三セクさらに追加
+  abukumaKyuko: '阿武隈急行',
+  yamagataRailway: '山形鉄道フラワー長井線',
+  jrHanawLine: 'JR花輪線',
+  jrOminateLine: 'JR大湊線',
+  akitaNairikuLine: '秋田内陸縦貫鉄道',
+  // 北海道JR追加
+  jrSekishoLine: 'JR石勝線',
+  jrNemuroMainLineWest: 'JR根室本線（滝川〜新得）',
+  jrSoyaMainLineNorth: 'JR宗谷本線（旭川〜名寄）',
+  jrSenmouMainLine: 'JR釧網本線',
+  // 近畿JR追加
+  jrWakayamaLine: 'JR和歌山線',
+  jrKiseiMainLineNorth: 'JR紀勢本線（亀山〜新宮）',
+  jrKiseiMainLineSouth: 'JR紀勢本線（新宮〜和歌山）',
+  kintetsuOsakaLine2: '近鉄大阪線',
 };
