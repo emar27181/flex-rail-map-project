@@ -89,6 +89,11 @@ import { sapporoNambokuLine, sapporoTozaiLine, sapporoTohoLine, jrHakodateMainLi
 import { jrTohokuMainLine, sendaiNambokuLine, sendaiTozaiLine, jrSensekiLine } from './tohoku-lines';
 import { kintetsuOsakaLine, kintetsuNaraLine, keihanMainLine } from './kinki-lines';
 import { jrSanyoMainLine, jrShizuokaLine, jrChuoNagoyaLine, jrSaninMainLine } from './jr-regional-lines';
+import { jrNagasakiMainLine, nagasakiTram, jrHohibMainLine, jrNippoMainLineNorth, kumamotoTram } from './kyushu-lines';
+import { shizuokaRailway, enshuRailway, jrIidaLine, nagoyaTsurumai, nagoyaSakuradori, jrHamamatsuToyohashi, aichiLoopRailway } from './chubu-lines';
+import { jrHakodateLineHakodate, jrSoyaMainLine, jrSekihokuMainLine, jrHanasakiLine } from './hokkaido-lines';
+import { jrYosanLine, jrDosanLine, iyotetsuTram, jrKotokuLine, jrTokushimaLine } from './sanin-shikoku-lines';
+import { jrYamatoji, jrGakkenLine, kintetsuKyotoLine, nankaMainLine, nankaKoyaLine } from './kansai-more-lines';
 
 export const routes = {
   yamanote,
@@ -233,6 +238,37 @@ export const routes = {
   jrShizuokaLine,
   jrChuoNagoyaLine,
   jrSaninMainLine,
+  // 九州エリア
+  jrNagasakiMainLine,
+  nagasakiTram,
+  jrHohibMainLine,
+  jrNippoMainLineNorth,
+  kumamotoTram,
+  // 中部エリア追加
+  shizuokaRailway,
+  enshuRailway,
+  jrIidaLine,
+  nagoyaTsurumai,
+  nagoyaSakuradori,
+  jrHamamatsuToyohashi,
+  aichiLoopRailway,
+  // 北海道エリア追加
+  jrHakodateLineHakodate,
+  jrSoyaMainLine,
+  jrSekihokuMainLine,
+  jrHanasakiLine,
+  // 四国エリア
+  jrYosanLine,
+  jrDosanLine,
+  iyotetsuTram,
+  jrKotokuLine,
+  jrTokushimaLine,
+  // 関西エリア追加
+  jrYamatoji,
+  jrGakkenLine,
+  kintetsuKyotoLine,
+  nankaMainLine,
+  nankaKoyaLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -380,6 +416,37 @@ export const routeColors = {
   jrShizuokaLine: '#F68B1E', // JR Shizuoka (Tokaido) orange
   jrChuoNagoyaLine: '#E60026', // JR Chuo Nagoya Line red
   jrSaninMainLine: '#009944', // JR Sanin Main Line green
+  // 九州エリア
+  jrNagasakiMainLine: '#009944',
+  nagasakiTram: '#E60026',
+  jrHohibMainLine: '#F68B1E',
+  jrNippoMainLineNorth: '#009944',
+  kumamotoTram: '#E60026',
+  // 中部エリア追加
+  shizuokaRailway: '#FF6347',
+  enshuRailway: '#F68B1E',
+  jrIidaLine: '#009944',
+  nagoyaTsurumai: '#0072BC',
+  nagoyaSakuradori: '#E60026',
+  jrHamamatsuToyohashi: '#F68B1E',
+  aichiLoopRailway: '#009944',
+  // 北海道エリア追加
+  jrHakodateLineHakodate: '#4D8B2E',
+  jrSoyaMainLine: '#009944',
+  jrSekihokuMainLine: '#F68B1E',
+  jrHanasakiLine: '#009944',
+  // 四国エリア
+  jrYosanLine: '#0072BC',
+  jrDosanLine: '#009944',
+  iyotetsuTram: '#E60026',
+  jrKotokuLine: '#F68B1E',
+  jrTokushimaLine: '#009944',
+  // 関西エリア追加
+  jrYamatoji: '#009944',
+  jrGakkenLine: '#0072BC',
+  kintetsuKyotoLine: '#F08000',
+  nankaMainLine: '#0072BC',
+  nankaKoyaLine: '#009944',
 };
 
 export const routeNames = {
@@ -525,4 +592,35 @@ export const routeNames = {
   jrShizuokaLine: 'JR東海道本線（静岡〜浜松）',
   jrChuoNagoyaLine: 'JR中央本線（名古屋〜塩尻）',
   jrSaninMainLine: 'JR山陰本線',
+  // 九州エリア
+  jrNagasakiMainLine: 'JR長崎本線',
+  nagasakiTram: '長崎市電',
+  jrHohibMainLine: 'JR豊肥本線',
+  jrNippoMainLineNorth: 'JR日豊本線（小倉〜大分）',
+  kumamotoTram: '熊本市電',
+  // 中部エリア追加
+  shizuokaRailway: '静岡鉄道',
+  enshuRailway: '遠州鉄道',
+  jrIidaLine: 'JR飯田線',
+  nagoyaTsurumai: '名古屋市営地下鉄鶴舞線',
+  nagoyaSakuradori: '名古屋市営地下鉄桜通線',
+  jrHamamatsuToyohashi: 'JR東海道本線（浜松〜豊橋）',
+  aichiLoopRailway: '愛知環状鉄道',
+  // 北海道エリア追加
+  jrHakodateLineHakodate: 'JR函館本線（函館〜小樽）',
+  jrSoyaMainLine: 'JR宗谷本線',
+  jrSekihokuMainLine: 'JR石北本線',
+  jrHanasakiLine: 'JR花咲線',
+  // 四国エリア
+  jrYosanLine: 'JR予讃線',
+  jrDosanLine: 'JR土讃線',
+  iyotetsuTram: '伊予鉄道市内電車',
+  jrKotokuLine: 'JR高徳線',
+  jrTokushimaLine: 'JR徳島線',
+  // 関西エリア追加
+  jrYamatoji: 'JR大和路線',
+  jrGakkenLine: 'JR学研都市線',
+  kintetsuKyotoLine: '近鉄京都線',
+  nankaMainLine: '南海本線',
+  nankaKoyaLine: '南海高野線',
 };

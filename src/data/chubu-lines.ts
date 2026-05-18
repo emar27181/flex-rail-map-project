@@ -1,0 +1,152 @@
+import type { Station } from './yamanote';
+
+// 静岡鉄道 静岡清水線: 新静岡〜新清水
+export const shizuokaRailway: Station[] = [
+  { name: "新静岡",   lat: 34.976940, lng: 138.381830, timeToNext: 2 },
+  { name: "日吉町",   lat: 34.981170, lng: 138.388850, timeToNext: 2 },
+  { name: "音羽町",   lat: 34.985280, lng: 138.400730, timeToNext: 2 },
+  { name: "春日町",   lat: 34.992290, lng: 138.412730, timeToNext: 2 },
+  { name: "柚木",     lat: 34.998280, lng: 138.430830, timeToNext: 2 },
+  { name: "狐ヶ崎",   lat: 35.002540, lng: 138.444460, timeToNext: 2 },
+  { name: "県総合運動場", lat: 35.010490, lng: 138.454450, timeToNext: 2 },
+  { name: "桜橋",     lat: 35.017670, lng: 138.465390, timeToNext: 2 },
+  { name: "入江岡",   lat: 35.028050, lng: 138.471070, timeToNext: 2 },
+  { name: "新清水",   lat: 35.018550, lng: 138.488870, timeToNext: 0 },
+];
+
+// 遠州鉄道（遠鉄）: 新浜松〜西鹿島
+export const enshuRailway: Station[] = [
+  { name: "新浜松",   lat: 34.704720, lng: 137.726100, timeToNext: 3 },
+  { name: "第一通り",  lat: 34.702030, lng: 137.728620, timeToNext: 2 },
+  { name: "遠州病院",  lat: 34.697360, lng: 137.733410, timeToNext: 2 },
+  { name: "八幡",     lat: 34.695540, lng: 137.744700, timeToNext: 3 },
+  { name: "助信",     lat: 34.704310, lng: 137.757860, timeToNext: 2 },
+  { name: "曳馬",     lat: 34.721030, lng: 137.756760, timeToNext: 3 },
+  { name: "上島",     lat: 34.731710, lng: 137.762190, timeToNext: 2 },
+  { name: "自動車学校前", lat: 34.745920, lng: 137.762480, timeToNext: 2 },
+  { name: "さぎの宮",  lat: 34.756310, lng: 137.768980, timeToNext: 3 },
+  { name: "積志",     lat: 34.769840, lng: 137.783650, timeToNext: 3 },
+  { name: "遠州西ヶ崎", lat: 34.781070, lng: 137.795370, timeToNext: 3 },
+  { name: "遠州小松",  lat: 34.787120, lng: 137.820230, timeToNext: 3 },
+  { name: "浜北",     lat: 34.797520, lng: 137.841780, timeToNext: 3 },
+  { name: "美薗中央公園", lat: 34.810870, lng: 137.851720, timeToNext: 3 },
+  { name: "遠州小林",  lat: 34.823640, lng: 137.851980, timeToNext: 3 },
+  { name: "遠州芝本",  lat: 34.836440, lng: 137.854260, timeToNext: 3 },
+  { name: "遠州二俣",  lat: 34.844040, lng: 137.840720, timeToNext: 3 },
+  { name: "西鹿島",   lat: 34.843540, lng: 137.820270, timeToNext: 0 },
+];
+
+// JR飯田線: 豊橋〜辰野
+export const jrIidaLine: Station[] = [
+  { name: "豊橋",     lat: 34.769870, lng: 137.391030, timeToNext: 10 },
+  { name: "新豊橋",   lat: 34.766010, lng: 137.388890, timeToNext: 8 },
+  { name: "小坂井",   lat: 34.786420, lng: 137.418190, timeToNext: 5 },
+  { name: "牛久保",   lat: 34.797530, lng: 137.431210, timeToNext: 5 },
+  { name: "豊川",     lat: 34.829300, lng: 137.376980, timeToNext: 8 },
+  { name: "三河一宮",  lat: 34.889060, lng: 137.407040, timeToNext: 5 },
+  { name: "長山",     lat: 34.924680, lng: 137.454700, timeToNext: 6 },
+  { name: "江島",     lat: 34.966600, lng: 137.500640, timeToNext: 5 },
+  { name: "新城",     lat: 34.984030, lng: 137.518030, timeToNext: 5 },
+  { name: "東新町",   lat: 34.998700, lng: 137.516600, timeToNext: 4 },
+  { name: "茶臼山",   lat: 35.013250, lng: 137.539650, timeToNext: 5 },
+  { name: "三河東郷",  lat: 35.047950, lng: 137.572660, timeToNext: 7 },
+  { name: "本長篠",   lat: 35.060690, lng: 137.637360, timeToNext: 5 },
+  { name: "湯谷温泉",  lat: 35.054680, lng: 137.654900, timeToNext: 8 },
+  { name: "三河槇原",  lat: 35.036600, lng: 137.683470, timeToNext: 7 },
+  { name: "柿平",     lat: 35.014320, lng: 137.712540, timeToNext: 6 },
+  { name: "三河大野",  lat: 35.025880, lng: 137.739060, timeToNext: 5 },
+  { name: "豊橋市 豊根口", lat: 35.025000, lng: 137.752500, timeToNext: 5 },
+  { name: "早瀬",     lat: 35.050780, lng: 137.781200, timeToNext: 5 },
+  { name: "池場",     lat: 35.073450, lng: 137.808150, timeToNext: 5 },
+  { name: "東栄",     lat: 35.061490, lng: 137.826340, timeToNext: 8 },
+  { name: "浦川",     lat: 35.043650, lng: 137.853840, timeToNext: 6 },
+  { name: "中部天竜",  lat: 35.040000, lng: 137.885940, timeToNext: 8 },
+  { name: "水窪",     lat: 35.058880, lng: 137.899470, timeToNext: 10 },
+  { name: "向市場",   lat: 35.123210, lng: 137.870630, timeToNext: 8 },
+  { name: "城西",     lat: 35.144680, lng: 137.841700, timeToNext: 6 },
+  { name: "飯田",     lat: 35.513210, lng: 137.831700, timeToNext: 30 },
+  { name: "辰野",     lat: 36.014640, lng: 137.978570, timeToNext: 0 },
+];
+
+// 名古屋市営地下鉄 鶴舞線: 上小田井〜赤池
+export const nagoyaTsurumai: Station[] = [
+  { name: "上小田井",  lat: 35.219250, lng: 136.872380, timeToNext: 2 },
+  { name: "庄内通",   lat: 35.205030, lng: 136.867730, timeToNext: 2 },
+  { name: "浄心",     lat: 35.195870, lng: 136.868700, timeToNext: 2 },
+  { name: "浅間町",   lat: 35.186580, lng: 136.871290, timeToNext: 2 },
+  { name: "丸の内",   lat: 35.176580, lng: 136.897920, timeToNext: 2 },
+  { name: "伏見",     lat: 35.165990, lng: 136.905960, timeToNext: 2 },
+  { name: "大須観音",  lat: 35.155360, lng: 136.905960, timeToNext: 2 },
+  { name: "上前津",   lat: 35.155690, lng: 136.910680, timeToNext: 2 },
+  { name: "鶴舞",     lat: 35.147520, lng: 136.907210, timeToNext: 2 },
+  { name: "荒畑",     lat: 35.137560, lng: 136.905200, timeToNext: 2 },
+  { name: "御器所",   lat: 35.128950, lng: 136.905760, timeToNext: 2 },
+  { name: "川名",     lat: 35.123780, lng: 136.918680, timeToNext: 2 },
+  { name: "いりなか",  lat: 35.124550, lng: 136.932920, timeToNext: 2 },
+  { name: "八事",     lat: 35.131760, lng: 136.958480, timeToNext: 2 },
+  { name: "塩釜口",   lat: 35.120010, lng: 136.979540, timeToNext: 2 },
+  { name: "植田",     lat: 35.109310, lng: 136.988940, timeToNext: 2 },
+  { name: "原",       lat: 35.097430, lng: 136.993440, timeToNext: 2 },
+  { name: "平針",     lat: 35.085100, lng: 137.015090, timeToNext: 2 },
+  { name: "赤池",     lat: 35.076600, lng: 137.036950, timeToNext: 0 },
+];
+
+// 名古屋市営地下鉄 桜通線: 中村区役所〜徳重
+export const nagoyaSakuradori: Station[] = [
+  { name: "中村区役所", lat: 35.172620, lng: 136.855080, timeToNext: 2 },
+  { name: "名古屋",   lat: 35.170694, lng: 136.881637, timeToNext: 2 },
+  { name: "国際センター", lat: 35.169490, lng: 136.892770, timeToNext: 2 },
+  { name: "丸の内",   lat: 35.176580, lng: 136.897920, timeToNext: 2 },
+  { name: "久屋大通",  lat: 35.173640, lng: 136.908560, timeToNext: 2 },
+  { name: "高岳",     lat: 35.172380, lng: 136.915560, timeToNext: 2 },
+  { name: "車道",     lat: 35.168720, lng: 136.923920, timeToNext: 2 },
+  { name: "今池",     lat: 35.163970, lng: 136.939730, timeToNext: 2 },
+  { name: "吹上",     lat: 35.161050, lng: 136.947940, timeToNext: 2 },
+  { name: "御器所",   lat: 35.128950, lng: 136.905760, timeToNext: 2 },
+  { name: "桜山",     lat: 35.136920, lng: 136.925060, timeToNext: 2 },
+  { name: "瑞穂区役所", lat: 35.131480, lng: 136.935120, timeToNext: 2 },
+  { name: "瑞穂運動場東", lat: 35.124470, lng: 136.942030, timeToNext: 2 },
+  { name: "新瑞橋",   lat: 35.121060, lng: 136.940320, timeToNext: 2 },
+  { name: "桜本町",   lat: 35.111330, lng: 136.957490, timeToNext: 2 },
+  { name: "鶴里",     lat: 35.097410, lng: 136.966880, timeToNext: 2 },
+  { name: "野並",     lat: 35.085050, lng: 136.975300, timeToNext: 2 },
+  { name: "鳴子北",   lat: 35.072540, lng: 136.984900, timeToNext: 2 },
+  { name: "相生山",   lat: 35.059510, lng: 136.994870, timeToNext: 2 },
+  { name: "神沢",     lat: 35.046590, lng: 137.002780, timeToNext: 2 },
+  { name: "徳重",     lat: 35.038190, lng: 137.008390, timeToNext: 0 },
+];
+
+// JR東海道本線（浜松〜豊橋）
+export const jrHamamatsuToyohashi: Station[] = [
+  { name: "浜松",     lat: 34.703710, lng: 137.731010, timeToNext: 6 },
+  { name: "高塚",     lat: 34.700270, lng: 137.762490, timeToNext: 5 },
+  { name: "舞阪",     lat: 34.686720, lng: 137.794650, timeToNext: 5 },
+  { name: "弁天島",   lat: 34.683770, lng: 137.813130, timeToNext: 5 },
+  { name: "新居町",   lat: 34.697180, lng: 137.852680, timeToNext: 5 },
+  { name: "鷲津",     lat: 34.718770, lng: 137.855040, timeToNext: 5 },
+  { name: "新所原",   lat: 34.736590, lng: 137.869830, timeToNext: 6 },
+  { name: "二川",     lat: 34.761590, lng: 137.387240, timeToNext: 7 },
+  { name: "豊橋",     lat: 34.769870, lng: 137.391030, timeToNext: 0 },
+];
+
+// 愛知環状鉄道: 岡崎〜高蔵寺
+export const aichiLoopRailway: Station[] = [
+  { name: "岡崎",     lat: 34.948280, lng: 137.175270, timeToNext: 3 },
+  { name: "北岡崎",   lat: 34.968580, lng: 137.177590, timeToNext: 3 },
+  { name: "大門",     lat: 34.979180, lng: 137.170280, timeToNext: 3 },
+  { name: "北野桝塚",  lat: 35.007870, lng: 137.109840, timeToNext: 4 },
+  { name: "三河上郷",  lat: 35.048740, lng: 137.093270, timeToNext: 4 },
+  { name: "永覚",     lat: 35.073270, lng: 137.081800, timeToNext: 3 },
+  { name: "末野原",   lat: 35.085020, lng: 137.064150, timeToNext: 3 },
+  { name: "豊田市",   lat: 35.087340, lng: 137.155930, timeToNext: 4 },
+  { name: "新上挙母",  lat: 35.102350, lng: 137.129120, timeToNext: 3 },
+  { name: "新豊田",   lat: 35.113250, lng: 137.120830, timeToNext: 3 },
+  { name: "愛環梅坪",  lat: 35.131050, lng: 137.108270, timeToNext: 4 },
+  { name: "四郷",     lat: 35.155080, lng: 137.093150, timeToNext: 4 },
+  { name: "貝津",     lat: 35.179360, lng: 137.073530, timeToNext: 3 },
+  { name: "保田ケ池",  lat: 35.197780, lng: 137.063220, timeToNext: 3 },
+  { name: "篠原",     lat: 35.214680, lng: 137.056590, timeToNext: 4 },
+  { name: "八草",     lat: 35.231340, lng: 137.047030, timeToNext: 4 },
+  { name: "山口",     lat: 35.241180, lng: 137.042810, timeToNext: 3 },
+  { name: "高蔵寺",   lat: 35.236890, lng: 137.041490, timeToNext: 0 },
+];

@@ -1,0 +1,112 @@
+import type { Station } from './yamanote';
+
+// 四国: JR予讃線: 高松〜松山〜宇和島
+export const jrYosanLine: Station[] = [
+  { name: "高松",     lat: 34.348580, lng: 134.047460, timeToNext: 5 },
+  { name: "昭和町",   lat: 34.353850, lng: 134.038900, timeToNext: 4 },
+  { name: "香西",     lat: 34.373640, lng: 133.995790, timeToNext: 5 },
+  { name: "鬼無",     lat: 34.378470, lng: 133.975780, timeToNext: 5 },
+  { name: "端岡",     lat: 34.367110, lng: 133.942460, timeToNext: 5 },
+  { name: "国分",     lat: 34.346270, lng: 133.895810, timeToNext: 5 },
+  { name: "讃岐府中",  lat: 34.346270, lng: 133.867520, timeToNext: 5 },
+  { name: "丸亀",     lat: 34.289760, lng: 133.800220, timeToNext: 5 },
+  { name: "宇多津",   lat: 34.261720, lng: 133.818040, timeToNext: 5 },
+  { name: "坂出",     lat: 34.316180, lng: 133.870000, timeToNext: 8 },
+  { name: "多度津",   lat: 34.276340, lng: 133.752650, timeToNext: 10 },
+  { name: "詫間",     lat: 34.249960, lng: 133.668300, timeToNext: 8 },
+  { name: "海岸寺",   lat: 34.246640, lng: 133.657450, timeToNext: 8 },
+  { name: "観音寺",   lat: 34.118710, lng: 133.662610, timeToNext: 15 },
+  { name: "川之江",   lat: 33.996570, lng: 133.566670, timeToNext: 12 },
+  { name: "伊予三島",  lat: 33.992570, lng: 133.536570, timeToNext: 8 },
+  { name: "新居浜",   lat: 33.953400, lng: 133.285450, timeToNext: 15 },
+  { name: "壬生川",   lat: 33.919830, lng: 133.254620, timeToNext: 8 },
+  { name: "伊予西条",  lat: 33.917250, lng: 133.195960, timeToNext: 12 },
+  { name: "伊予氷見",  lat: 33.912870, lng: 132.981230, timeToNext: 15 },
+  { name: "伊予小松",  lat: 33.878390, lng: 132.967360, timeToNext: 8 },
+  { name: "石鎚山",   lat: 33.850680, lng: 132.878350, timeToNext: 10 },
+  { name: "伊予西条",  lat: 33.917250, lng: 133.195960, timeToNext: 25 },
+  { name: "松山",     lat: 33.839750, lng: 132.765660, timeToNext: 15 },
+  { name: "伊予市",   lat: 33.757460, lng: 132.706760, timeToNext: 15 },
+  { name: "八幡浜",   lat: 33.463400, lng: 132.408570, timeToNext: 25 },
+  { name: "卯之町",   lat: 33.386020, lng: 132.541020, timeToNext: 15 },
+  { name: "宇和島",   lat: 33.223360, lng: 132.555760, timeToNext: 0 },
+];
+
+// JR土讃線: 高知〜多度津
+export const jrDosanLine: Station[] = [
+  { name: "高知",     lat: 33.561210, lng: 133.531470, timeToNext: 5 },
+  { name: "旭",       lat: 33.570070, lng: 133.510170, timeToNext: 5 },
+  { name: "枝川",     lat: 33.592210, lng: 133.481680, timeToNext: 5 },
+  { name: "伊野",     lat: 33.553220, lng: 133.447220, timeToNext: 15 },
+  { name: "佐川",     lat: 33.500860, lng: 133.291020, timeToNext: 15 },
+  { name: "須崎",     lat: 33.398990, lng: 133.283940, timeToNext: 25 },
+  { name: "土佐久礼",  lat: 33.260820, lng: 133.244210, timeToNext: 20 },
+  { name: "窪川",     lat: 33.219960, lng: 133.101870, timeToNext: 30 },
+  { name: "土佐大正",  lat: 33.212590, lng: 132.952500, timeToNext: 20 },
+  { name: "土佐昭和",  lat: 33.213700, lng: 132.834380, timeToNext: 15 },
+  { name: "江川崎",   lat: 33.214480, lng: 132.795820, timeToNext: 20 },
+  { name: "半家",     lat: 33.231780, lng: 132.744450, timeToNext: 10 },
+  { name: "十川",     lat: 33.247960, lng: 132.817990, timeToNext: 10 },
+  { name: "大歩危",   lat: 33.808770, lng: 133.820270, timeToNext: 15 },
+  { name: "小歩危",   lat: 33.854060, lng: 133.837850, timeToNext: 10 },
+  { name: "土佐山田",  lat: 33.648570, lng: 133.683060, timeToNext: 15 },
+  { name: "大田口",   lat: 33.737610, lng: 133.636370, timeToNext: 10 },
+  { name: "繁藤",     lat: 33.782340, lng: 133.709720, timeToNext: 10 },
+  { name: "新改",     lat: 33.791300, lng: 133.723120, timeToNext: 10 },
+  { name: "阿波池田",  lat: 33.918050, lng: 133.789820, timeToNext: 15 },
+  { name: "讃岐財田",  lat: 34.061890, lng: 133.813360, timeToNext: 15 },
+  { name: "多度津",   lat: 34.276340, lng: 133.752650, timeToNext: 0 },
+];
+
+// 伊予鉄道 市内電車（松山市内）
+export const iyotetsuTram: Station[] = [
+  { name: "松山市駅",  lat: 33.838830, lng: 132.764150, timeToNext: 2 },
+  { name: "西堀端",   lat: 33.840810, lng: 132.762310, timeToNext: 2 },
+  { name: "東堀端",   lat: 33.844080, lng: 132.767780, timeToNext: 2 },
+  { name: "県庁前",   lat: 33.843040, lng: 132.773980, timeToNext: 2 },
+  { name: "大街道",   lat: 33.844120, lng: 132.770180, timeToNext: 2 },
+  { name: "勝山町",   lat: 33.849390, lng: 132.766390, timeToNext: 2 },
+  { name: "警察署前",  lat: 33.855650, lng: 132.760490, timeToNext: 2 },
+  { name: "道後公園",  lat: 33.847090, lng: 132.802180, timeToNext: 2 },
+  { name: "道後温泉",  lat: 33.851420, lng: 132.782400, timeToNext: 0 },
+];
+
+// JR高徳線: 高松〜徳島
+export const jrKotokuLine: Station[] = [
+  { name: "高松",     lat: 34.348580, lng: 134.047460, timeToNext: 5 },
+  { name: "栗林公園北口", lat: 34.342040, lng: 134.063360, timeToNext: 4 },
+  { name: "栗林",     lat: 34.333890, lng: 134.083460, timeToNext: 5 },
+  { name: "木太町",   lat: 34.319330, lng: 134.092940, timeToNext: 4 },
+  { name: "屋島",     lat: 34.330300, lng: 134.118050, timeToNext: 5 },
+  { name: "讃岐牟礼",  lat: 34.311620, lng: 134.163650, timeToNext: 5 },
+  { name: "志度",     lat: 34.312740, lng: 134.198560, timeToNext: 5 },
+  { name: "神前",     lat: 34.304560, lng: 134.215540, timeToNext: 5 },
+  { name: "オレンジタウン", lat: 34.302800, lng: 134.228220, timeToNext: 5 },
+  { name: "造田",     lat: 34.283240, lng: 134.231700, timeToNext: 5 },
+  { name: "鶴羽",     lat: 34.249170, lng: 134.231930, timeToNext: 5 },
+  { name: "三本松",   lat: 34.193260, lng: 134.212590, timeToNext: 8 },
+  { name: "讃岐白鳥",  lat: 34.132480, lng: 134.220670, timeToNext: 8 },
+  { name: "引田",     lat: 34.109290, lng: 134.333980, timeToNext: 10 },
+  { name: "阿波大宮",  lat: 34.055250, lng: 134.415640, timeToNext: 8 },
+  { name: "板野",     lat: 34.101300, lng: 134.453240, timeToNext: 8 },
+  { name: "阿波川端",  lat: 34.078710, lng: 134.491950, timeToNext: 8 },
+  { name: "板東",     lat: 34.076630, lng: 134.518080, timeToNext: 8 },
+  { name: "池谷",     lat: 34.095430, lng: 134.557010, timeToNext: 5 },
+  { name: "勝瑞",     lat: 34.085880, lng: 134.570410, timeToNext: 5 },
+  { name: "吉成",     lat: 34.082550, lng: 134.577790, timeToNext: 5 },
+  { name: "佐古",     lat: 34.073440, lng: 134.548750, timeToNext: 5 },
+  { name: "徳島",     lat: 34.074590, lng: 134.552630, timeToNext: 0 },
+];
+
+// 徳島線: 佐古〜佃
+export const jrTokushimaLine: Station[] = [
+  { name: "佐古",     lat: 34.073440, lng: 134.548750, timeToNext: 5 },
+  { name: "蔵本",     lat: 34.067730, lng: 134.540490, timeToNext: 5 },
+  { name: "鮎喰",     lat: 34.072180, lng: 134.509720, timeToNext: 7 },
+  { name: "石井",     lat: 34.071760, lng: 134.460320, timeToNext: 7 },
+  { name: "府中",     lat: 34.055790, lng: 134.408640, timeToNext: 10 },
+  { name: "阿波山川",  lat: 34.002870, lng: 134.253260, timeToNext: 15 },
+  { name: "穴吹",     lat: 34.012350, lng: 134.102690, timeToNext: 10 },
+  { name: "阿波川島",  lat: 34.039460, lng: 133.991060, timeToNext: 10 },
+  { name: "阿波池田",  lat: 33.918050, lng: 133.789820, timeToNext: 0 },
+];
