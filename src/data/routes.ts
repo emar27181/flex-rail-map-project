@@ -113,6 +113,7 @@ import { sembokuKosokuLine, nosedenMyokenLine, keihanIshiyamasakamoto, osakaMono
 import { matsuuraRailway, hisatsuOrange, jrKudaiMainLine, jrHohibMainLine2 } from './kyushu-private-more';
 import { jrTakayamaMainLine, jrIiyamaLine, jrOitoLine } from './jr-chubu-more';
 import { hakodateShiden, jrHakodateMainLineSouth, jrHakodateMainLineNorth, dosanIsaribi } from './hokkaido-private-lines';
+import { jrOuMainLineSouth, jrRikuuWestLine, jrBanetsuEastLine, jrSensekiLine2 } from './jr-tohoku-more';
 
 export const routes = {
   yamanote,
@@ -409,6 +410,11 @@ export const routes = {
   jrHakodateMainLineSouth,
   jrHakodateMainLineNorth,
   dosanIsaribi,
+  // 東北JR追加
+  jrOuMainLineSouth,
+  jrRikuuWestLine,
+  jrBanetsuEastLine,
+  jrSensekiLine2,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -708,6 +714,11 @@ export const routeColors = {
   jrHakodateMainLineSouth: '#009944',
   jrHakodateMainLineNorth: '#009944',
   dosanIsaribi: '#F68B1E',
+  // 東北JR追加
+  jrOuMainLineSouth: '#009944',
+  jrRikuuWestLine: '#F68B1E',
+  jrBanetsuEastLine: '#009944',
+  jrSensekiLine2: '#009944',
 };
 
 export const routeNames = {
@@ -1005,4 +1016,9 @@ export const routeNames = {
   jrHakodateMainLineSouth: 'JR函館本線（小樽〜長万部）',
   jrHakodateMainLineNorth: 'JR函館本線（旭川〜岩見沢）',
   dosanIsaribi: '道南いさりび鉄道',
+  // 東北JR追加
+  jrOuMainLineSouth: 'JR奥羽本線（福島〜新庄）',
+  jrRikuuWestLine: 'JR陸羽西線',
+  jrBanetsuEastLine: 'JR磐越東線',
+  jrSensekiLine2: 'JR仙石線',
 };

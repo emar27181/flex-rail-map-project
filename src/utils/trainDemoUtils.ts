@@ -60,7 +60,7 @@ import { tokyuTamagawa, tokyuIkegami } from '../data/tokyu-additional';
 import { jrMusashinoLine } from '../data/jr-musashino-line';
 import { yokohamaBlueLine } from '../data/yokohama-blue-line';
 import { jrTakasakiLine } from '../data/jr-takasaki-line';
-import { jrKeiyo } from '../data/jr-sobu-chiba';
+import { jrKeiyo, jrSobuChiba } from '../data/jr-sobu-chiba';
 import { yokohamaGreenLine } from '../data/yokohama-green-line';
 import { enoshimaElectricRailway } from '../data/enoshima-electric-railway';
 import { todenArakawaLine } from '../data/toden-arakawa-line';
