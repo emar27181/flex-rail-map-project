@@ -12,7 +12,7 @@ export const jrHanwaLine: Station[] = [
   { name: "浅香",      lat: 34.553130, lng: 135.498580, timeToNext: 4 },
   { name: "堺市",      lat: 34.540700, lng: 135.491380, timeToNext: 4 },
   { name: "三国ヶ丘",   lat: 34.531220, lng: 135.482660, timeToNext: 4 },
-  { name: "百舌鳥",    lat: 34.566590, lng: 135.475090, timeToNext: 4 },
+  { name: "百舌鳥",    lat: 34.547000, lng: 135.475090, timeToNext: 4 },
   { name: "上野芝",    lat: 34.540690, lng: 135.472130, timeToNext: 4 },
   { name: "津久野",    lat: 34.527980, lng: 135.462070, timeToNext: 4 },
   { name: "鳳",        lat: 34.508450, lng: 135.463650, timeToNext: 5 },
@@ -77,9 +77,8 @@ export const jrKansaiMainLine: Station[] = [
   { name: "新堂",      lat: 34.791290, lng: 136.181080, timeToNext: 5 },
   { name: "河田",      lat: 34.793190, lng: 136.233320, timeToNext: 5 },
   { name: "柘植",      lat: 34.813200, lng: 136.006050, timeToNext: 8 },
-  { name: "油日",      lat: 34.882350, lng: 136.136950, timeToNext: 8 },
-  { name: "甲賀",      lat: 34.869430, lng: 136.126820, timeToNext: 8 },
-  { name: "三雲",      lat: 34.942100, lng: 136.048360, timeToNext: 8 },
+  { name: "加太",      lat: 34.849000, lng: 136.133000, timeToNext: 8 },
+  { name: "関",        lat: 34.877900, lng: 136.247800, timeToNext: 8 },
   { name: "亀山",      lat: 34.861340, lng: 136.446160, timeToNext: 0 },
 ];
 

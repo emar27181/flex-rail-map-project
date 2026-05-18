@@ -81,7 +81,6 @@ export const jrTsugaRuLine: Station[] = [
   { name: "瀬辺地",   lat: 41.117870, lng: 140.485990, timeToNext: 6 },
   { name: "蓬田",     lat: 41.151010, lng: 140.489000, timeToNext: 5 },
   { name: "郷沢",     lat: 41.165030, lng: 140.480000, timeToNext: 5 },
-  { name: "瀬辺地",   lat: 41.117870, lng: 140.485990, timeToNext: 6 },
   { name: "三厩",     lat: 41.210820, lng: 140.454190, timeToNext: 0 },
 ];
 

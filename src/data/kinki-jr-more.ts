@@ -76,7 +76,7 @@ export const jrKiseiMainLineSouth: Station[] = [
   { name: "紀伊有田",   lat: 33.473250, lng: 135.726550, timeToNext: 10 },
   { name: "周参見",    lat: 33.626890, lng: 135.482050, timeToNext: 10 },
   { name: "白浜",      lat: 33.713100, lng: 135.356830, timeToNext: 8 },
-  { name: "紀伊田辺",   lat: 33.688500, lng: 135.370580, timeToNext: 8 },
+  { name: "紀伊田辺",   lat: 33.729000, lng: 135.373000, timeToNext: 8 },
   { name: "芳養",      lat: 33.740680, lng: 135.346020, timeToNext: 8 },
   { name: "南部",      lat: 33.742730, lng: 135.361190, timeToNext: 8 },
   { name: "御坊",      lat: 33.890220, lng: 135.163470, timeToNext: 8 },
