@@ -94,6 +94,9 @@ import { shizuokaRailway, enshuRailway, jrIidaLine, nagoyaTsurumai, nagoyaSakura
 import { jrHakodateLineHakodate, jrSoyaMainLine, jrSekihokuMainLine, jrHanasakiLine } from './hokkaido-lines';
 import { jrYosanLine, jrDosanLine, iyotetsuTram, jrKotokuLine, jrTokushimaLine } from './sanin-shikoku-lines';
 import { jrYamatoji, jrGakkenLine, kintetsuKyotoLine, nankaMainLine, nankaKoyaLine } from './kansai-more-lines';
+import { jrKagoshimaMainLineSouth, kagoshimaTram, jrIbusukinMakurazakiLine, jrSaseboLine, nishitetsuKaizukaLine, kumamotoElecRailway } from './kyushu-more-lines';
+import { jrYamagataShinkansen, jrAkitaShinkansen, jrOuMainLineAkita, jrJobanLineNorth, jrBanetsusaiLine, jrShinetsuLine } from './tohoku-more-lines';
+import { jrMitoLine, jrJobanLineMain, jrNikkoLine, kantetsJososen, chichibuRailway } from './kanto-more-lines';
 
 export const routes = {
   yamanote,
@@ -269,6 +272,26 @@ export const routes = {
   kintetsuKyotoLine,
   nankaMainLine,
   nankaKoyaLine,
+  // 九州エリアさらに追加
+  jrKagoshimaMainLineSouth,
+  kagoshimaTram,
+  jrIbusukinMakurazakiLine,
+  jrSaseboLine,
+  nishitetsuKaizukaLine,
+  kumamotoElecRailway,
+  // 東北エリアさらに追加
+  jrYamagataShinkansen,
+  jrAkitaShinkansen,
+  jrOuMainLineAkita,
+  jrJobanLineNorth,
+  jrBanetsusaiLine,
+  jrShinetsuLine,
+  // 関東エリアさらに追加
+  jrMitoLine,
+  jrJobanLineMain,
+  jrNikkoLine,
+  kantetsJososen,
+  chichibuRailway,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -447,6 +470,26 @@ export const routeColors = {
   kintetsuKyotoLine: '#F08000',
   nankaMainLine: '#0072BC',
   nankaKoyaLine: '#009944',
+  // 九州エリアさらに追加
+  jrKagoshimaMainLineSouth: '#F68B1E',
+  kagoshimaTram: '#E60026',
+  jrIbusukinMakurazakiLine: '#009944',
+  jrSaseboLine: '#0072BC',
+  nishitetsuKaizukaLine: '#E60026',
+  kumamotoElecRailway: '#009944',
+  // 東北エリアさらに追加
+  jrYamagataShinkansen: '#B5008E',
+  jrAkitaShinkansen: '#008F1D',
+  jrOuMainLineAkita: '#F68B1E',
+  jrJobanLineNorth: '#417036',
+  jrBanetsusaiLine: '#009944',
+  jrShinetsuLine: '#0072BC',
+  // 関東エリアさらに追加
+  jrMitoLine: '#009944',
+  jrJobanLineMain: '#417036',
+  jrNikkoLine: '#F68B1E',
+  kantetsJososen: '#009944',
+  chichibuRailway: '#E60026',
 };
 
 export const routeNames = {
@@ -623,4 +666,24 @@ export const routeNames = {
   kintetsuKyotoLine: '近鉄京都線',
   nankaMainLine: '南海本線',
   nankaKoyaLine: '南海高野線',
+  // 九州エリアさらに追加
+  jrKagoshimaMainLineSouth: 'JR鹿児島本線（熊本〜鹿児島中央）',
+  kagoshimaTram: '鹿児島市電',
+  jrIbusukinMakurazakiLine: 'JR指宿枕崎線',
+  jrSaseboLine: 'JR佐世保線',
+  nishitetsuKaizukaLine: '西鉄貝塚線',
+  kumamotoElecRailway: '熊本電気鉄道',
+  // 東北エリアさらに追加
+  jrYamagataShinkansen: 'JR山形新幹線',
+  jrAkitaShinkansen: 'JR秋田新幹線',
+  jrOuMainLineAkita: 'JR奥羽本線（秋田〜青森）',
+  jrJobanLineNorth: 'JR常磐線（いわき〜仙台）',
+  jrBanetsusaiLine: 'JR磐越西線',
+  jrShinetsuLine: 'JR信越本線',
+  // 関東エリアさらに追加
+  jrMitoLine: 'JR水戸線',
+  jrJobanLineMain: 'JR常磐線（上野〜いわき）',
+  jrNikkoLine: 'JR日光線',
+  kantetsJososen: '関東鉄道常総線',
+  chichibuRailway: '秩父鉄道',
 };
