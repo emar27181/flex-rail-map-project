@@ -111,6 +111,8 @@ import { aoimoriRailway, igrIwateGinga, jrKamaishiLine2, sanrikuRiasLine, konant
 import { hakoneTozan2, shinkeisei2, ryutetsuLine, choshiDenki, minatomirai } from './kanto-private-more';
 import { sembokuKosokuLine, nosedenMyokenLine, keihanIshiyamasakamoto, osakaMono, hanshinNamba, hankyuKobeLine2 } from './kinki-private-more';
 import { matsuuraRailway, hisatsuOrange, jrKudaiMainLine, jrHohibMainLine2 } from './kyushu-private-more';
+import { jrTakayamaMainLine, jrIiyamaLine, jrOitoLine } from './jr-chubu-more';
+import { hakodateShiden, jrHakodateMainLineSouth, jrHakodateMainLineNorth, dosanIsaribi } from './hokkaido-private-lines';
 
 export const routes = {
   yamanote,
@@ -398,6 +400,15 @@ export const routes = {
   hisatsuOrange,
   jrKudaiMainLine,
   jrHohibMainLine2,
+  // 中部JR追加
+  jrTakayamaMainLine,
+  jrIiyamaLine,
+  jrOitoLine,
+  // 北海道追加（路面電車・幹線）
+  hakodateShiden,
+  jrHakodateMainLineSouth,
+  jrHakodateMainLineNorth,
+  dosanIsaribi,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -688,6 +699,15 @@ export const routeColors = {
   hisatsuOrange: '#F68B1E',
   jrKudaiMainLine: '#009944',
   jrHohibMainLine2: '#009944',
+  // 中部JR追加
+  jrTakayamaMainLine: '#009944',
+  jrIiyamaLine: '#F68B1E',
+  jrOitoLine: '#009944',
+  // 北海道追加
+  hakodateShiden: '#009944',
+  jrHakodateMainLineSouth: '#009944',
+  jrHakodateMainLineNorth: '#009944',
+  dosanIsaribi: '#F68B1E',
 };
 
 export const routeNames = {
@@ -976,4 +996,13 @@ export const routeNames = {
   hisatsuOrange: '肥薩おれんじ鉄道',
   jrKudaiMainLine: 'JR久大本線',
   jrHohibMainLine2: 'JR豊肥本線',
+  // 中部JR追加
+  jrTakayamaMainLine: 'JR高山本線',
+  jrIiyamaLine: 'JR飯山線',
+  jrOitoLine: 'JR大糸線',
+  // 北海道追加
+  hakodateShiden: '函館市電',
+  jrHakodateMainLineSouth: 'JR函館本線（小樽〜長万部）',
+  jrHakodateMainLineNorth: 'JR函館本線（旭川〜岩見沢）',
+  dosanIsaribi: '道南いさりび鉄道',
 };
