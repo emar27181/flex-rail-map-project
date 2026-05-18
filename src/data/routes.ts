@@ -95,6 +95,8 @@ import { jrHakodateLineHakodate, jrSoyaMainLine, jrSekihokuMainLine, jrHanasakiL
 import { jrYosanLine, jrDosanLine, iyotetsuTram, jrKotokuLine, jrTokushimaLine } from './sanin-shikoku-lines';
 import { jrYamatoji, jrGakkenLine, kintetsuKyotoLine, nankaMainLine, nankaKoyaLine } from './kansai-more-lines';
 import { jrKagoshimaMainLineSouth, kagoshimaTram, jrIbusukinMakurazakiLine, jrSaseboLine, nishitetsuKaizukaLine, kumamotoElecRailway } from './kyushu-more-lines';
+import { jrSeikanTunnel, jrUetsuMainLine, jrKitakamiLine, jrKamaishiLine, jrTsugaRuLine, jrGonoLine, jrRikuuEastLine } from './jr-more-regional';
+import { jrSaninMainLineWest, jrYamaguchiLine, hiroshimaTram, jrKabeLine, jrUnoline, jrKureLine, okayamaTram, jrMurotozakiLine } from './chugoku-kyushu-lines';
 import { jrYamagataShinkansen, jrAkitaShinkansen, jrOuMainLineAkita, jrJobanLineNorth, jrBanetsusaiLine, jrShinetsuLine } from './tohoku-more-lines';
 import { jrMitoLine, jrJobanLineMain, jrNikkoLine, kantetsJososen, chichibuRailway } from './kanto-more-lines';
 
@@ -292,6 +294,23 @@ export const routes = {
   jrNikkoLine,
   kantetsJososen,
   chichibuRailway,
+  // 広域JRさらに追加
+  jrSeikanTunnel,
+  jrUetsuMainLine,
+  jrKitakamiLine,
+  jrKamaishiLine,
+  jrTsugaRuLine,
+  jrGonoLine,
+  jrRikuuEastLine,
+  // 中国・四国エリア
+  jrSaninMainLineWest,
+  jrYamaguchiLine,
+  hiroshimaTram,
+  jrKabeLine,
+  jrUnoline,
+  jrKureLine,
+  okayamaTram,
+  jrMurotozakiLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -490,6 +509,23 @@ export const routeColors = {
   jrNikkoLine: '#F68B1E',
   kantetsJososen: '#009944',
   chichibuRailway: '#E60026',
+  // 広域JRさらに追加
+  jrSeikanTunnel: '#0072BC',
+  jrUetsuMainLine: '#F68B1E',
+  jrKitakamiLine: '#009944',
+  jrKamaishiLine: '#F68B1E',
+  jrTsugaRuLine: '#009944',
+  jrGonoLine: '#0072BC',
+  jrRikuuEastLine: '#009944',
+  // 中国・四国エリア
+  jrSaninMainLineWest: '#009944',
+  jrYamaguchiLine: '#F68B1E',
+  hiroshimaTram: '#E60026',
+  jrKabeLine: '#009944',
+  jrUnoline: '#F68B1E',
+  jrKureLine: '#0072BC',
+  okayamaTram: '#E60026',
+  jrMurotozakiLine: '#009944',
 };
 
 export const routeNames = {
@@ -686,4 +722,21 @@ export const routeNames = {
   jrNikkoLine: 'JR日光線',
   kantetsJososen: '関東鉄道常総線',
   chichibuRailway: '秩父鉄道',
+  // 広域JRさらに追加
+  jrSeikanTunnel: 'JR海峡線（青函トンネル）',
+  jrUetsuMainLine: 'JR羽越本線',
+  jrKitakamiLine: 'JR北上線',
+  jrKamaishiLine: 'JR釜石線',
+  jrTsugaRuLine: 'JR津軽線',
+  jrGonoLine: 'JR五能線',
+  jrRikuuEastLine: 'JR陸羽東線',
+  // 中国・四国エリア
+  jrSaninMainLineWest: 'JR山陰本線（西部）',
+  jrYamaguchiLine: 'JR山口線',
+  hiroshimaTram: '広島電鉄',
+  jrKabeLine: 'JR可部線',
+  jrUnoline: 'JR宇野線（瀬戸大橋線）',
+  jrKureLine: 'JR呉線',
+  okayamaTram: '岡山電気軌道',
+  jrMurotozakiLine: 'JR土讃線（高知付近）',
 };
