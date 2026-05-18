@@ -138,6 +138,8 @@ import { ichibataKitamatsue, ichibataOyashiro, mizushimaLine, ibaraRailway } fro
 import { heiseiChikuhoIdaLine, heiseiChikuhoTagawaLine, minamiAsoRailway } from './kyushu-more3';
 import { kashimaRinkaiRailway, joshinDentetsu, kantoRailwayJoso } from './kanto-private-more3';
 import { yuriHighlandRailway, tsugaruRailway, konanLineHirosaki, konanLineOwani } from './tohoku-more3';
+import { hitachinakaSeaRailway, jrSuigunLineMain, kominatoRailway } from './kanto-more2';
+import { jrRumoiMainLine } from './hokkaido-more2';
 
 export const routes = {
   yamanote,
@@ -583,6 +585,12 @@ export const routes = {
   tsugaruRailway,
   konanLineHirosaki,
   konanLineOwani,
+  // 関東追加2
+  hitachinakaSeaRailway,
+  jrSuigunLineMain,
+  kominatoRailway,
+  // 北海道追加2
+  jrRumoiMainLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -1031,6 +1039,12 @@ export const routeColors = {
   tsugaruRailway: '#E60027',
   konanLineHirosaki: '#E60027',
   konanLineOwani: '#E60027',
+  // 関東追加2
+  hitachinakaSeaRailway: '#E60026',
+  jrSuigunLineMain: '#009944',
+  kominatoRailway: '#E73820',
+  // 北海道追加2
+  jrRumoiMainLine: '#009944',
 };
 
 export const routeNames = {
@@ -1477,4 +1491,10 @@ export const routeNames = {
   tsugaruRailway: '津軽鉄道',
   konanLineHirosaki: '弘南鉄道弘南線',
   konanLineOwani: '弘南鉄道大鰐線',
+  // 関東追加2
+  hitachinakaSeaRailway: 'ひたちなか海浜鉄道',
+  jrSuigunLineMain: 'JR水郡線（水戸〜常陸大宮）',
+  kominatoRailway: '小湊鉄道',
+  // 北海道追加2
+  jrRumoiMainLine: 'JR留萌本線',
 };
