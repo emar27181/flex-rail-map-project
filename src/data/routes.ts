@@ -110,6 +110,7 @@ import { toyamaTramLoop, manyoLine, toyohashiTramLine, meitetsuTokonameLine, mei
 import { aoimoriRailway, igrIwateGinga, jrKamaishiLine2, sanrikuRiasLine, konantetsudoKonanLine } from './tohoku-private-lines';
 import { hakoneTozan2, shinkeisei2, ryutetsuLine, choshiDenki, minatomirai } from './kanto-private-more';
 import { sembokuKosokuLine, nosedenMyokenLine, keihanIshiyamasakamoto, osakaMono, hanshinNamba, hankyuKobeLine2 } from './kinki-private-more';
+import { matsuuraRailway, hisatsuOrange, jrKudaiMainLine, jrHohibMainLine2 } from './kyushu-private-more';
 
 export const routes = {
   yamanote,
@@ -392,6 +393,11 @@ export const routes = {
   osakaMono,
   hanshinNamba,
   hankyuKobeLine2,
+  // 九州私鉄追加
+  matsuuraRailway,
+  hisatsuOrange,
+  jrKudaiMainLine,
+  jrHohibMainLine2,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -677,6 +683,11 @@ export const routeColors = {
   osakaMono: '#E60026',
   hanshinNamba: '#E60026',
   hankyuKobeLine2: '#009944',
+  // 九州私鉄追加
+  matsuuraRailway: '#F68B1E',
+  hisatsuOrange: '#F68B1E',
+  jrKudaiMainLine: '#009944',
+  jrHohibMainLine2: '#009944',
 };
 
 export const routeNames = {
@@ -960,4 +971,9 @@ export const routeNames = {
   osakaMono: '大阪モノレール',
   hanshinNamba: '阪神なんば線',
   hankyuKobeLine2: '阪急神戸線',
+  // 九州私鉄追加
+  matsuuraRailway: '松浦鉄道西九州線',
+  hisatsuOrange: '肥薩おれんじ鉄道',
+  jrKudaiMainLine: 'JR久大本線',
+  jrHohibMainLine2: 'JR豊肥本線',
 };
