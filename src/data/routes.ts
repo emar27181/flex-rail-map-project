@@ -81,6 +81,14 @@ import { jrSagamiLine } from './jr-sagami-line';
 import { jrTsurumiLine, jrTsurumiUmiShiba } from './jr-tsurumi-line';
 import { seibuTamagawaLine } from './seibu-tamagawa-line';
 import { jrNambuBranchLine } from './jr-nambu-branch';
+import { tohokuShinkansen, sanyoShinkansen, kyushuShinkansen, hokurikuShinkansen, joetsuShinkansen } from './shinkansen-lines';
+import { nagoyaHigashiyamaLine, nagoyaMeijoline, meitetsuNagoyaMainLine, jrNagoyaLine } from './nagoya-lines';
+import { osakaTanimachi, osakaYotsubashi, osakaChuoLine, hankyuKyotoLine, hankyuKobeLine, hanshinMainLine, osakaSakaisuji } from './osaka-lines';
+import { fukuokaAirportLine, fukuokaHakozakiLine, fukuokaShichikumaLine, nishitetsuTenjinOmutaLine, jrKagoshimaMainLineFukuoka } from './fukuoka-lines';
+import { sapporoNambokuLine, sapporoTozaiLine, sapporoTohoLine, jrHakodateMainLine, jrChitoseLine } from './sapporo-lines';
+import { jrTohokuMainLine, sendaiNambokuLine, sendaiTozaiLine, jrSensekiLine } from './tohoku-lines';
+import { kintetsuOsakaLine, kintetsuNaraLine, keihanMainLine } from './kinki-lines';
+import { jrSanyoMainLine, jrShizuokaLine, jrChuoNagoyaLine, jrSaninMainLine } from './jr-regional-lines';
 
 export const routes = {
   yamanote,
@@ -181,6 +189,50 @@ export const routes = {
   jrTsurumiUmiShiba,
   seibuTamagawaLine,
   jrNambuBranchLine,
+  // 新幹線
+  tohokuShinkansen,
+  sanyoShinkansen,
+  kyushuShinkansen,
+  hokurikuShinkansen,
+  joetsuShinkansen,
+  // 名古屋エリア
+  nagoyaHigashiyamaLine,
+  nagoyaMeijoline,
+  meitetsuNagoyaMainLine,
+  jrNagoyaLine,
+  // 大阪・関西エリア
+  osakaTanimachi,
+  osakaYotsubashi,
+  osakaChuoLine,
+  hankyuKyotoLine,
+  hankyuKobeLine,
+  hanshinMainLine,
+  osakaSakaisuji,
+  kintetsuOsakaLine,
+  kintetsuNaraLine,
+  keihanMainLine,
+  // 福岡・九州エリア
+  fukuokaAirportLine,
+  fukuokaHakozakiLine,
+  fukuokaShichikumaLine,
+  nishitetsuTenjinOmutaLine,
+  jrKagoshimaMainLineFukuoka,
+  // 札幌・北海道エリア
+  sapporoNambokuLine,
+  sapporoTozaiLine,
+  sapporoTohoLine,
+  jrHakodateMainLine,
+  jrChitoseLine,
+  // 東北エリア
+  jrTohokuMainLine,
+  sendaiNambokuLine,
+  sendaiTozaiLine,
+  jrSensekiLine,
+  // 広域JR
+  jrSanyoMainLine,
+  jrShizuokaLine,
+  jrChuoNagoyaLine,
+  jrSaninMainLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -284,6 +336,50 @@ export const routeColors = {
   jrTsurumiUmiShiba: '#F68B1E', // JR Tsurumi Line (Umishibaura branch) orange
   seibuTamagawaLine: '#F39700', // Seibu Tamagawa Line orange
   jrNambuBranchLine: '#FFCC00', // JR Nambu Branch Line yellow
+  // 新幹線
+  tohokuShinkansen: '#35A0D5', // Tohoku Shinkansen ice blue
+  sanyoShinkansen: '#0072BC', // Sanyo Shinkansen blue
+  kyushuShinkansen: '#D60026', // Kyushu Shinkansen red
+  hokurikuShinkansen: '#00A0A0', // Hokuriku Shinkansen teal
+  joetsuShinkansen: '#009B6C', // Joetsu Shinkansen green
+  // 名古屋エリア
+  nagoyaHigashiyamaLine: '#FFCC00', // Nagoya Higashiyama Line yellow
+  nagoyaMeijoline: '#9B1889', // Nagoya Meijo Line purple
+  meitetsuNagoyaMainLine: '#E50012', // Meitetsu red
+  jrNagoyaLine: '#F68B1E', // JR Tokaido Nagoya orange
+  // 大阪・関西エリア
+  osakaTanimachi: '#8B3FAB', // Osaka Tanimachi Line purple
+  osakaYotsubashi: '#0066CC', // Osaka Yotsubashi Line blue
+  osakaChuoLine: '#00A0A0', // Osaka Chuo Line teal
+  hankyuKyotoLine: '#8B5A2B', // Hankyu Kyoto Line brown
+  hankyuKobeLine: '#8B5A2B', // Hankyu Kobe Line brown
+  hanshinMainLine: '#0070C0', // Hanshin Main Line blue
+  osakaSakaisuji: '#D0A030', // Osaka Sakaisuji Line gold
+  kintetsuOsakaLine: '#F08000', // Kintetsu Osaka Line orange
+  kintetsuNaraLine: '#F08000', // Kintetsu Nara Line orange
+  keihanMainLine: '#008E42', // Keihan Main Line green
+  // 福岡・九州エリア
+  fukuokaAirportLine: '#E4000F', // Fukuoka Airport Line red
+  fukuokaHakozakiLine: '#FF8C00', // Fukuoka Hakozaki Line orange
+  fukuokaShichikumaLine: '#007DB7', // Fukuoka Shichikuma Line blue
+  nishitetsuTenjinOmutaLine: '#E60026', // Nishitetsu red
+  jrKagoshimaMainLineFukuoka: '#F68B1E', // JR Kagoshima Main Line orange
+  // 札幌・北海道エリア
+  sapporoNambokuLine: '#007243', // Sapporo Namboku Line green
+  sapporoTozaiLine: '#E4007F', // Sapporo Tozai Line pink
+  sapporoTohoLine: '#E4942A', // Sapporo Toho Line orange
+  jrHakodateMainLine: '#4D8B2E', // JR Hakodate Main Line green
+  jrChitoseLine: '#00B5E2', // JR Chitose Line blue
+  // 東北エリア
+  jrTohokuMainLine: '#009944', // JR Tohoku Main Line green
+  sendaiNambokuLine: '#009944', // Sendai Namboku Line green
+  sendaiTozaiLine: '#0099D0', // Sendai Tozai Line blue
+  jrSensekiLine: '#009944', // JR Senseki Line green
+  // 広域JR
+  jrSanyoMainLine: '#0072BC', // JR Sanyo Main Line blue
+  jrShizuokaLine: '#F68B1E', // JR Shizuoka (Tokaido) orange
+  jrChuoNagoyaLine: '#E60026', // JR Chuo Nagoya Line red
+  jrSaninMainLine: '#009944', // JR Sanin Main Line green
 };
 
 export const routeNames = {
@@ -385,4 +481,48 @@ export const routeNames = {
   jrTsurumiUmiShiba: 'JR鶴見線（海芝浦支線）',
   seibuTamagawaLine: '西武多摩川線',
   jrNambuBranchLine: 'JR南武支線',
+  // 新幹線
+  tohokuShinkansen: '東北新幹線',
+  sanyoShinkansen: '山陽新幹線',
+  kyushuShinkansen: '九州新幹線',
+  hokurikuShinkansen: '北陸新幹線',
+  joetsuShinkansen: '上越新幹線',
+  // 名古屋エリア
+  nagoyaHigashiyamaLine: '名古屋市営地下鉄東山線',
+  nagoyaMeijoline: '名古屋市営地下鉄名城線',
+  meitetsuNagoyaMainLine: '名鉄名古屋本線',
+  jrNagoyaLine: 'JR東海道本線（名古屋〜米原）',
+  // 大阪・関西エリア
+  osakaTanimachi: '大阪メトロ谷町線',
+  osakaYotsubashi: '大阪メトロ四つ橋線',
+  osakaChuoLine: '大阪メトロ中央線',
+  hankyuKyotoLine: '阪急京都線',
+  hankyuKobeLine: '阪急神戸線',
+  hanshinMainLine: '阪神本線',
+  osakaSakaisuji: '大阪メトロ堺筋線',
+  kintetsuOsakaLine: '近鉄大阪線',
+  kintetsuNaraLine: '近鉄奈良線',
+  keihanMainLine: '京阪本線',
+  // 福岡・九州エリア
+  fukuokaAirportLine: '福岡市地下鉄空港線',
+  fukuokaHakozakiLine: '福岡市地下鉄箱崎線',
+  fukuokaShichikumaLine: '福岡市地下鉄七隈線',
+  nishitetsuTenjinOmutaLine: '西鉄天神大牟田線',
+  jrKagoshimaMainLineFukuoka: 'JR鹿児島本線（福岡〜熊本）',
+  // 札幌・北海道エリア
+  sapporoNambokuLine: '札幌市営地下鉄南北線',
+  sapporoTozaiLine: '札幌市営地下鉄東西線',
+  sapporoTohoLine: '札幌市営地下鉄東豊線',
+  jrHakodateMainLine: 'JR函館本線（札幌〜旭川）',
+  jrChitoseLine: 'JR千歳線',
+  // 東北エリア
+  jrTohokuMainLine: 'JR東北本線',
+  sendaiNambokuLine: '仙台市地下鉄南北線',
+  sendaiTozaiLine: '仙台市地下鉄東西線',
+  jrSensekiLine: 'JR仙石線',
+  // 広域JR
+  jrSanyoMainLine: 'JR山陽本線',
+  jrShizuokaLine: 'JR東海道本線（静岡〜浜松）',
+  jrChuoNagoyaLine: 'JR中央本線（名古屋〜塩尻）',
+  jrSaninMainLine: 'JR山陰本線',
 };
