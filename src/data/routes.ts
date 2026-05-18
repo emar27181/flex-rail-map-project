@@ -99,6 +99,7 @@ import { jrSeikanTunnel, jrUetsuMainLine, jrKitakamiLine, jrKamaishiLine, jrTsug
 import { jrSaninMainLineWest, jrYamaguchiLine, hiroshimaTram, jrKabeLine, jrUnoline, jrKureLine, okayamaTram, jrMurotozakiLine } from './chugoku-kyushu-lines';
 import { jrBiwako, jrOsakaLoop, kintetsuMinamiOsakaLine, jrKosaiLine, jrKusatsuLine } from './kinki-more-lines';
 import { osakaChangbori, osakaImazatosuji, hankyuTakarazukaLine, kobeSeishinYamate, kobeKaigan, kintetsuKasharaLine } from './osaka-metro-more';
+import { jrChikuhiLine, jrOmuraLine, shimabaraRailway, okinawaMonorail, jrNichinanLine, jrNippoMainLineSouth } from './kyushu-okinawa-lines';
 import { jrYamagataShinkansen, jrAkitaShinkansen, jrOuMainLineAkita, jrJobanLineNorth, jrBanetsusaiLine, jrShinetsuLine } from './tohoku-more-lines';
 import { jrMitoLine, jrJobanLineMain, jrNikkoLine, kantetsJososen, chichibuRailway } from './kanto-more-lines';
 
@@ -325,6 +326,13 @@ export const routes = {
   kobeSeishinYamate,
   kobeKaigan,
   kintetsuKasharaLine,
+  // 九州・沖縄追加
+  jrChikuhiLine,
+  jrOmuraLine,
+  shimabaraRailway,
+  okinawaMonorail,
+  jrNichinanLine,
+  jrNippoMainLineSouth,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -552,6 +560,13 @@ export const routeColors = {
   kobeSeishinYamate: '#E60026',
   kobeKaigan: '#0072BC',
   kintetsuKasharaLine: '#F08000',
+  // 九州・沖縄追加
+  jrChikuhiLine: '#F68B1E',
+  jrOmuraLine: '#009944',
+  shimabaraRailway: '#E60026',
+  okinawaMonorail: '#00B5E2',
+  jrNichinanLine: '#009944',
+  jrNippoMainLineSouth: '#F68B1E',
 };
 
 export const routeNames = {
@@ -777,4 +792,11 @@ export const routeNames = {
   kobeSeishinYamate: '神戸市営地下鉄西神・山手線',
   kobeKaigan: '神戸市営地下鉄海岸線',
   kintetsuKasharaLine: '近鉄橿原線',
+  // 九州・沖縄追加
+  jrChikuhiLine: 'JR筑肥線',
+  jrOmuraLine: 'JR大村線',
+  shimabaraRailway: '島原鉄道',
+  okinawaMonorail: '沖縄都市モノレール（ゆいレール）',
+  jrNichinanLine: 'JR日南線',
+  jrNippoMainLineSouth: 'JR日豊本線（大分〜鹿児島）',
 };
