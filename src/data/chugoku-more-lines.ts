@@ -1,0 +1,113 @@
+import type { Station } from './yamanote';
+
+// JR福塩線: 福山〜塩町
+export const jrFukuenLine: Station[] = [
+  { name: "福山",      lat: 34.485300, lng: 133.362060, timeToNext: 5 },
+  { name: "備後本庄",   lat: 34.488930, lng: 133.344130, timeToNext: 5 },
+  { name: "光武",      lat: 34.507890, lng: 133.330260, timeToNext: 5 },
+  { name: "神辺",      lat: 34.536480, lng: 133.327600, timeToNext: 5 },
+  { name: "湯田村",    lat: 34.555800, lng: 133.323050, timeToNext: 5 },
+  { name: "道上",      lat: 34.574300, lng: 133.318940, timeToNext: 5 },
+  { name: "万能倉",    lat: 34.590600, lng: 133.323100, timeToNext: 5 },
+  { name: "駅家",      lat: 34.614770, lng: 133.323820, timeToNext: 8 },
+  { name: "近田",      lat: 34.644640, lng: 133.326730, timeToNext: 5 },
+  { name: "川北",      lat: 34.660800, lng: 133.344130, timeToNext: 5 },
+  { name: "吉舎",      lat: 34.748180, lng: 133.136130, timeToNext: 15 },
+  { name: "三良坂",    lat: 34.763450, lng: 133.077430, timeToNext: 10 },
+  { name: "塩町",      lat: 34.790300, lng: 133.037680, timeToNext: 0 },
+];
+
+// JR芸備線: 広島〜三次〜備中神代
+export const jrGeibiLine: Station[] = [
+  { name: "広島",      lat: 34.397060, lng: 132.475790, timeToNext: 3 },
+  { name: "矢賀",      lat: 34.412890, lng: 132.501440, timeToNext: 5 },
+  { name: "戸坂",      lat: 34.421100, lng: 132.526860, timeToNext: 5 },
+  { name: "安芸矢口",   lat: 34.421280, lng: 132.551950, timeToNext: 5 },
+  { name: "中深川",    lat: 34.421680, lng: 132.577990, timeToNext: 5 },
+  { name: "下深川",    lat: 34.424750, lng: 132.601940, timeToNext: 5 },
+  { name: "玖村",      lat: 34.437170, lng: 132.626830, timeToNext: 8 },
+  { name: "志和口",    lat: 34.507600, lng: 132.714890, timeToNext: 15 },
+  { name: "上三田",    lat: 34.574520, lng: 132.731040, timeToNext: 10 },
+  { name: "三次",      lat: 34.806630, lng: 132.857900, timeToNext: 5 },
+  { name: "西三次",    lat: 34.818710, lng: 132.841350, timeToNext: 8 },
+  { name: "甲立",      lat: 34.851190, lng: 132.782540, timeToNext: 8 },
+  { name: "吉田口",    lat: 34.811040, lng: 132.739960, timeToNext: 10 },
+  { name: "向原",      lat: 34.786520, lng: 132.704910, timeToNext: 10 },
+  { name: "備後落合",   lat: 34.974890, lng: 133.194110, timeToNext: 15 },
+  { name: "備中神代",   lat: 35.015520, lng: 133.299780, timeToNext: 0 },
+];
+
+// JR木次線: 宍道〜備後落合
+export const jrKisukiLine: Station[] = [
+  { name: "宍道",      lat: 35.382450, lng: 133.068460, timeToNext: 8 },
+  { name: "南宍道",    lat: 35.357530, lng: 133.091420, timeToNext: 8 },
+  { name: "加茂中",    lat: 35.332730, lng: 133.127830, timeToNext: 8 },
+  { name: "幡屋",      lat: 35.296820, lng: 133.158140, timeToNext: 8 },
+  { name: "出雲大東",   lat: 35.265680, lng: 133.186280, timeToNext: 10 },
+  { name: "南大東",    lat: 35.238090, lng: 133.190290, timeToNext: 8 },
+  { name: "木次",      lat: 35.210220, lng: 133.201510, timeToNext: 10 },
+  { name: "日登",      lat: 35.162500, lng: 133.200680, timeToNext: 10 },
+  { name: "下久野",    lat: 35.130430, lng: 133.218290, timeToNext: 10 },
+  { name: "出雲八代",   lat: 35.104790, lng: 133.199450, timeToNext: 10 },
+  { name: "出雲三成",   lat: 35.079310, lng: 133.181360, timeToNext: 12 },
+  { name: "亀嵩",      lat: 35.063320, lng: 133.158780, timeToNext: 12 },
+  { name: "出雲横田",   lat: 35.030100, lng: 133.109550, timeToNext: 15 },
+  { name: "八川",      lat: 35.002100, lng: 133.113400, timeToNext: 12 },
+  { name: "出雲坂根",   lat: 34.977620, lng: 133.144780, timeToNext: 15 },
+  { name: "三井野原",   lat: 34.980090, lng: 133.178640, timeToNext: 10 },
+  { name: "油木",      lat: 34.979680, lng: 133.188970, timeToNext: 8 },
+  { name: "備後落合",   lat: 34.974890, lng: 133.194110, timeToNext: 0 },
+];
+
+// JR姫新線: 姫路〜新見
+export const jrKishinLine: Station[] = [
+  { name: "姫路",      lat: 34.820200, lng: 134.692600, timeToNext: 5 },
+  { name: "播磨高岡",   lat: 34.812690, lng: 134.668040, timeToNext: 5 },
+  { name: "余部",      lat: 34.844630, lng: 134.625820, timeToNext: 8 },
+  { name: "太市",      lat: 34.854530, lng: 134.575490, timeToNext: 5 },
+  { name: "本竜野",    lat: 34.849580, lng: 134.563530, timeToNext: 5 },
+  { name: "東觜崎",    lat: 34.851600, lng: 134.542780, timeToNext: 5 },
+  { name: "播磨新宮",   lat: 34.881080, lng: 134.474420, timeToNext: 8 },
+  { name: "西栗栖",    lat: 34.884510, lng: 134.444810, timeToNext: 8 },
+  { name: "千種",      lat: 35.058200, lng: 134.332950, timeToNext: 15 },
+  { name: "佐用",      lat: 34.990880, lng: 134.358880, timeToNext: 10 },
+  { name: "上月",      lat: 34.985700, lng: 134.279430, timeToNext: 10 },
+  { name: "美作江見",   lat: 34.989640, lng: 134.220830, timeToNext: 10 },
+  { name: "津山",      lat: 35.068790, lng: 134.003880, timeToNext: 5 },
+  { name: "坪井",      lat: 35.067830, lng: 133.984630, timeToNext: 5 },
+  { name: "院庄",      lat: 35.056390, lng: 133.937050, timeToNext: 8 },
+  { name: "美作千代",   lat: 35.050600, lng: 133.889470, timeToNext: 8 },
+  { name: "中国勝山",   lat: 35.072370, lng: 133.693680, timeToNext: 15 },
+  { name: "月田",      lat: 35.083350, lng: 133.619450, timeToNext: 10 },
+  { name: "富原",      lat: 35.082060, lng: 133.556140, timeToNext: 10 },
+  { name: "刑部",      lat: 35.063850, lng: 133.480830, timeToNext: 10 },
+  { name: "丹治部",    lat: 35.046360, lng: 133.434340, timeToNext: 10 },
+  { name: "新見",      lat: 34.993330, lng: 133.478730, timeToNext: 0 },
+];
+
+// JR伯備線: 倉敷〜伯耆大山
+export const jrHakubiLine: Station[] = [
+  { name: "倉敷",      lat: 34.584620, lng: 133.773000, timeToNext: 5 },
+  { name: "清音",      lat: 34.634270, lng: 133.750020, timeToNext: 8 },
+  { name: "総社",      lat: 34.671740, lng: 133.749080, timeToNext: 8 },
+  { name: "豪渓",      lat: 34.717790, lng: 133.741720, timeToNext: 8 },
+  { name: "日羽",      lat: 34.764270, lng: 133.706090, timeToNext: 8 },
+  { name: "美袋",      lat: 34.788920, lng: 133.674260, timeToNext: 10 },
+  { name: "備中広瀬",   lat: 34.826050, lng: 133.615410, timeToNext: 8 },
+  { name: "備中高梁",   lat: 34.818590, lng: 133.626780, timeToNext: 8 },
+  { name: "木野山",    lat: 34.858040, lng: 133.574570, timeToNext: 10 },
+  { name: "備中川面",   lat: 34.885460, lng: 133.540600, timeToNext: 8 },
+  { name: "方谷",      lat: 34.887290, lng: 133.517490, timeToNext: 10 },
+  { name: "新見",      lat: 34.993330, lng: 133.478730, timeToNext: 10 },
+  { name: "井倉",      lat: 35.034690, lng: 133.435740, timeToNext: 10 },
+  { name: "石蟹",      lat: 35.070140, lng: 133.424280, timeToNext: 8 },
+  { name: "足立",      lat: 35.148200, lng: 133.388810, timeToNext: 10 },
+  { name: "生山",      lat: 35.183210, lng: 133.375240, timeToNext: 8 },
+  { name: "上石見",    lat: 35.240690, lng: 133.394410, timeToNext: 10 },
+  { name: "上溝",      lat: 35.299560, lng: 133.396650, timeToNext: 8 },
+  { name: "根雨",      lat: 35.335800, lng: 133.393450, timeToNext: 10 },
+  { name: "黒坂",      lat: 35.372020, lng: 133.378200, timeToNext: 10 },
+  { name: "伯耆溝口",   lat: 35.371840, lng: 133.393110, timeToNext: 10 },
+  { name: "武庫",      lat: 35.406570, lng: 133.387220, timeToNext: 8 },
+  { name: "伯耆大山",   lat: 35.437930, lng: 133.374680, timeToNext: 0 },
+];
