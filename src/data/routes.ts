@@ -122,6 +122,10 @@ import { jrSanguLine, sangiNokuseLine, yoroRailway, naganoDentetsuLine, uedaDent
 import { jrFukuenLine, jrGeibiLine, jrKisukiLine, jrKishinLine, jrHakubiLine } from './chugoku-more-lines';
 import { kintetsuYoshinoLine, kintetsuTobaLine, kintetsuYunoyamaLine, keihanUjiLine, kintetsuSuzukaLine, hankyuImazu, nankaKoyaLine2 } from './kinki-more-private3';
 import { jrGotembLine, jrMinobuLine, jrNagoyaGifuLine, jrKansaiNagoya, fujikyu } from './chubu-jr-more2';
+import { jrSakuraiLine, kintetsuKeihanna, kitaosakaKyuko, hankyuSenriLine, hankyuArashiyamaLine, hankyuKoyoLine, jrKosaiLineNorth } from './kinki-more-jr2';
+import { heitatsuIdaLine, amakiRailway, jrMiyazakiAirportLine, jrHitaHikosan, jrGotojLine, nishitetsuAmakiLine, jrKaratsuLine } from './kyushu-more2';
+import { meitetsuGamagoriLine, meitetsuKowaLine, jrTakehoyLine, meitetsuChitaShinLine, meitetsuMikawaKaisen, meitetsuMikawaYamasen } from './chubu-meitetsu-more';
+import { tobuOgoseLine, seibuChichibuLine, jomotetsudo, watarasekeikoku, mookaRailway } from './kanto-private-more2';
 
 export const routes = {
   yamanote,
@@ -473,6 +477,35 @@ export const routes = {
   jrNagoyaGifuLine,
   jrKansaiNagoya,
   fujikyu,
+  // 近畿JR・私鉄さらに追加
+  jrSakuraiLine,
+  kintetsuKeihanna,
+  kitaosakaKyuko,
+  hankyuSenriLine,
+  hankyuArashiyamaLine,
+  hankyuKoyoLine,
+  jrKosaiLineNorth,
+  // 九州追加2
+  heitatsuIdaLine,
+  amakiRailway,
+  jrMiyazakiAirportLine,
+  jrHitaHikosan,
+  jrGotojLine,
+  nishitetsuAmakiLine,
+  jrKaratsuLine,
+  // 中部名鉄追加
+  meitetsuGamagoriLine,
+  meitetsuKowaLine,
+  jrTakehoyLine,
+  meitetsuChitaShinLine,
+  meitetsuMikawaKaisen,
+  meitetsuMikawaYamasen,
+  // 関東私鉄追加2
+  tobuOgoseLine,
+  seibuChichibuLine,
+  jomotetsudo,
+  watarasekeikoku,
+  mookaRailway,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -827,6 +860,35 @@ export const routeColors = {
   jrNagoyaGifuLine: '#F68B1E',
   jrKansaiNagoya: '#009944',
   fujikyu: '#E60026',
+  // 近畿JR・私鉄さらに追加
+  jrSakuraiLine: '#F68B1E',
+  kintetsuKeihanna: '#F08000',
+  kitaosakaKyuko: '#E60026',
+  hankyuSenriLine: '#8B5A2B',
+  hankyuArashiyamaLine: '#8B5A2B',
+  hankyuKoyoLine: '#8B5A2B',
+  jrKosaiLineNorth: '#0072BC',
+  // 九州追加2
+  heitatsuIdaLine: '#F68B1E',
+  amakiRailway: '#009944',
+  jrMiyazakiAirportLine: '#F68B1E',
+  jrHitaHikosan: '#009944',
+  jrGotojLine: '#009944',
+  nishitetsuAmakiLine: '#E60026',
+  jrKaratsuLine: '#F68B1E',
+  // 中部名鉄追加
+  meitetsuGamagoriLine: '#E50012',
+  meitetsuKowaLine: '#E50012',
+  jrTakehoyLine: '#009944',
+  meitetsuChitaShinLine: '#E50012',
+  meitetsuMikawaKaisen: '#E50012',
+  meitetsuMikawaYamasen: '#E50012',
+  // 関東私鉄追加2
+  tobuOgoseLine: '#004098',
+  seibuChichibuLine: '#004098',
+  jomotetsudo: '#E60026',
+  watarasekeikoku: '#009944',
+  mookaRailway: '#F68B1E',
 };
 
 export const routeNames = {
@@ -1179,4 +1241,33 @@ export const routeNames = {
   jrNagoyaGifuLine: 'JR東海道本線（名古屋〜大垣）',
   jrKansaiNagoya: 'JR関西本線（名古屋〜亀山）',
   fujikyu: '富士急行線',
+  // 近畿JR・私鉄さらに追加
+  jrSakuraiLine: 'JR桜井線（万葉まほろば線）',
+  kintetsuKeihanna: '近鉄けいはんな線',
+  kitaosakaKyuko: '北大阪急行電鉄',
+  hankyuSenriLine: '阪急千里線',
+  hankyuArashiyamaLine: '阪急嵐山線',
+  hankyuKoyoLine: '阪急甲陽線',
+  jrKosaiLineNorth: 'JR湖西線（北部）',
+  // 九州追加2
+  heitatsuIdaLine: '平成筑豊鉄道伊田線',
+  amakiRailway: '甘木鉄道',
+  jrMiyazakiAirportLine: 'JR宮崎空港線',
+  jrHitaHikosan: 'JR日田彦山線',
+  jrGotojLine: 'JR後藤寺線',
+  nishitetsuAmakiLine: '西鉄甘木線',
+  jrKaratsuLine: 'JR唐津線',
+  // 中部名鉄追加
+  meitetsuGamagoriLine: '名鉄蒲郡線',
+  meitetsuKowaLine: '名鉄河和線',
+  jrTakehoyLine: 'JR武豊線',
+  meitetsuChitaShinLine: '名鉄知多新線',
+  meitetsuMikawaKaisen: '名鉄三河線（海線）',
+  meitetsuMikawaYamasen: '名鉄三河線（山線）',
+  // 関東私鉄追加2
+  tobuOgoseLine: '東武越生線',
+  seibuChichibuLine: '西武秩父線',
+  jomotetsudo: '上毛電気鉄道',
+  watarasekeikoku: 'わたらせ渓谷鐵道',
+  mookaRailway: '真岡鐵道',
 };
