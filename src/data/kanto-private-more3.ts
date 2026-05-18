@@ -1,0 +1,70 @@
+import type { Station } from './yamanote';
+
+// 鹿島臨海鉄道: 水戸〜鹿島サッカースタジアム
+export const kashimaRinkaiRailway: Station[] = [
+  { name: "水戸",               lat: 36.371690, lng: 140.473100, timeToNext: 5 },
+  { name: "東水戸",             lat: 36.360200, lng: 140.500100, timeToNext: 5 },
+  { name: "常澄",               lat: 36.344800, lng: 140.527300, timeToNext: 5 },
+  { name: "大洗",               lat: 36.314100, lng: 140.568600, timeToNext: 5 },
+  { name: "涸沼",               lat: 36.295400, lng: 140.579800, timeToNext: 15 },
+  { name: "鹿島旭",             lat: 36.166100, lng: 140.573500, timeToNext: 5 },
+  { name: "徳宿",               lat: 36.142200, lng: 140.582200, timeToNext: 5 },
+  { name: "新鉾田",             lat: 36.120300, lng: 140.590300, timeToNext: 5 },
+  { name: "北浦湖畔",           lat: 36.098700, lng: 140.585100, timeToNext: 5 },
+  { name: "大洋",               lat: 36.080100, lng: 140.581700, timeToNext: 5 },
+  { name: "鹿島灘",             lat: 36.058300, lng: 140.585400, timeToNext: 5 },
+  { name: "鹿島大野",           lat: 36.021800, lng: 140.604300, timeToNext: 5 },
+  { name: "長者ヶ浜潮騒はまなす公園前", lat: 36.000600, lng: 140.612100, timeToNext: 5 },
+  { name: "荒野台",             lat: 35.990200, lng: 140.619400, timeToNext: 5 },
+  { name: "鹿島サッカースタジアム", lat: 35.982400, lng: 140.638200, timeToNext: 0 },
+];
+
+// 上信電鉄: 高崎〜下仁田
+export const joshinDentetsu: Station[] = [
+  { name: "高崎",               lat: 36.322590, lng: 139.003580, timeToNext: 5 },
+  { name: "南高崎",             lat: 36.311100, lng: 139.001400, timeToNext: 3 },
+  { name: "根小屋",             lat: 36.300200, lng: 138.993100, timeToNext: 4 },
+  { name: "高崎商科大学前",     lat: 36.286300, lng: 138.983200, timeToNext: 4 },
+  { name: "佐野のわたし",       lat: 36.272100, lng: 138.972100, timeToNext: 4 },
+  { name: "馬庭",               lat: 36.258400, lng: 138.958600, timeToNext: 4 },
+  { name: "吉井",               lat: 36.243800, lng: 138.940300, timeToNext: 5 },
+  { name: "西吉井",             lat: 36.231200, lng: 138.920400, timeToNext: 4 },
+  { name: "東富岡",             lat: 36.249200, lng: 138.901400, timeToNext: 3 },
+  { name: "上州富岡",           lat: 36.255200, lng: 138.886300, timeToNext: 5 },
+  { name: "上州七日市",         lat: 36.239400, lng: 138.862100, timeToNext: 5 },
+  { name: "上州一ノ宮",         lat: 36.226100, lng: 138.832400, timeToNext: 5 },
+  { name: "神農原",             lat: 36.211900, lng: 138.800200, timeToNext: 5 },
+  { name: "上州新屋",           lat: 36.201200, lng: 138.775100, timeToNext: 4 },
+  { name: "上州福島",           lat: 36.200400, lng: 138.753200, timeToNext: 5 },
+  { name: "千平",               lat: 36.193800, lng: 138.728100, timeToNext: 5 },
+  { name: "下仁田",             lat: 36.202200, lng: 138.690100, timeToNext: 0 },
+];
+
+// 関東鉄道常総線: 取手〜下館
+export const kantoRailwayJoso: Station[] = [
+  { name: "取手",               lat: 35.897780, lng: 140.062300, timeToNext: 5 },
+  { name: "西取手",             lat: 35.894100, lng: 140.047200, timeToNext: 4 },
+  { name: "寺原",               lat: 35.891200, lng: 140.033100, timeToNext: 4 },
+  { name: "新取手",             lat: 35.888100, lng: 140.019300, timeToNext: 4 },
+  { name: "ゆめみ野",           lat: 35.894800, lng: 140.002100, timeToNext: 4 },
+  { name: "稲戸井",             lat: 35.904300, lng: 139.987800, timeToNext: 4 },
+  { name: "戸頭",               lat: 35.917200, lng: 139.972400, timeToNext: 4 },
+  { name: "南守谷",             lat: 35.926300, lng: 139.960100, timeToNext: 4 },
+  { name: "守谷",               lat: 35.935500, lng: 139.976400, timeToNext: 5 },
+  { name: "新守谷",             lat: 35.947200, lng: 139.969800, timeToNext: 4 },
+  { name: "小絹",               lat: 35.961700, lng: 139.979200, timeToNext: 4 },
+  { name: "水海道",             lat: 36.000200, lng: 139.993100, timeToNext: 8 },
+  { name: "北水海道",           lat: 36.012900, lng: 139.994700, timeToNext: 4 },
+  { name: "中妻",               lat: 36.028300, lng: 139.989200, timeToNext: 4 },
+  { name: "三妻",               lat: 36.042100, lng: 139.981800, timeToNext: 4 },
+  { name: "南石下",             lat: 36.052600, lng: 139.973400, timeToNext: 4 },
+  { name: "石下",               lat: 36.065100, lng: 139.964200, timeToNext: 4 },
+  { name: "玉村",               lat: 36.080400, lng: 139.951800, timeToNext: 4 },
+  { name: "宗道",               lat: 36.095100, lng: 139.941200, timeToNext: 5 },
+  { name: "下妻",               lat: 36.183600, lng: 139.960600, timeToNext: 10 },
+  { name: "大宝",               lat: 36.208700, lng: 139.987200, timeToNext: 5 },
+  { name: "騰波ノ江",           lat: 36.234100, lng: 139.998700, timeToNext: 5 },
+  { name: "黒子",               lat: 36.253200, lng: 140.014400, timeToNext: 5 },
+  { name: "大田郷",             lat: 36.272900, lng: 140.020100, timeToNext: 5 },
+  { name: "下館",               lat: 36.295400, lng: 139.982200, timeToNext: 0 },
+];

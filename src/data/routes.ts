@@ -133,6 +133,11 @@ import { hankyuItamiLine, hankyuMinooLine, kintetsuTenriLine, kintetsuDoumyojiLi
 import { jrEtsugoLine, jrShinetsuNiigata, hokuetsukyu, shinanoBrandNorth, shinanoRailway, jrIiyamaLineExt } from './niigata-nagano-lines';
 import { jrRyomoline, jrMitoLineExt, jrKarasuyamaLine, jrKururiLine, jrSobuMainLine } from './kanto-jr-more';
 import { jrTokaidoNagoyaToyohashi, toyohashiAtsumiLine, nagoyaMeikoLine, meitetsuToyotaLine } from './chubu-jr-more3';
+import { meitetsuSetoLine, linimo, nagoyaKamiidaLine, meitetsuBisaiLine } from './chubu-nagoya-more';
+import { ichibataKitamatsue, ichibataOyashiro, mizushimaLine, ibaraRailway } from './chugoku-more2';
+import { heiseiChikuhoIdaLine, heiseiChikuhoTagawaLine, minamiAsoRailway } from './kyushu-more3';
+import { kashimaRinkaiRailway, joshinDentetsu, kantoRailwayJoso } from './kanto-private-more3';
+import { yuriHighlandRailway, tsugaruRailway, konanLineHirosaki, konanLineOwani } from './tohoku-more3';
 
 export const routes = {
   yamanote,
@@ -555,6 +560,29 @@ export const routes = {
   toyohashiAtsumiLine,
   nagoyaMeikoLine,
   meitetsuToyotaLine,
+  // 名古屋エリア追加
+  meitetsuSetoLine,
+  linimo,
+  nagoyaKamiidaLine,
+  meitetsuBisaiLine,
+  // 中国追加
+  ichibataKitamatsue,
+  ichibataOyashiro,
+  mizushimaLine,
+  ibaraRailway,
+  // 九州追加3
+  heiseiChikuhoIdaLine,
+  heiseiChikuhoTagawaLine,
+  minamiAsoRailway,
+  // 関東私鉄追加3
+  kashimaRinkaiRailway,
+  joshinDentetsu,
+  kantoRailwayJoso,
+  // 東北追加3
+  yuriHighlandRailway,
+  tsugaruRailway,
+  konanLineHirosaki,
+  konanLineOwani,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -980,6 +1008,29 @@ export const routeColors = {
   toyohashiAtsumiLine: '#E60026',
   nagoyaMeikoLine: '#9B1889',
   meitetsuToyotaLine: '#E50012',
+  // 名古屋エリア追加
+  meitetsuSetoLine: '#E50012',
+  linimo: '#0077BB',
+  nagoyaKamiidaLine: '#E84A17',
+  meitetsuBisaiLine: '#E50012',
+  // 中国追加
+  ichibataKitamatsue: '#EE7700',
+  ichibataOyashiro: '#EE7700',
+  mizushimaLine: '#558B2F',
+  ibaraRailway: '#E73820',
+  // 九州追加3
+  heiseiChikuhoIdaLine: '#1B5299',
+  heiseiChikuhoTagawaLine: '#1B5299',
+  minamiAsoRailway: '#2B9348',
+  // 関東私鉄追加3
+  kashimaRinkaiRailway: '#E8380D',
+  joshinDentetsu: '#CC0000',
+  kantoRailwayJoso: '#558B2F',
+  // 東北追加3
+  yuriHighlandRailway: '#E60027',
+  tsugaruRailway: '#E60027',
+  konanLineHirosaki: '#E60027',
+  konanLineOwani: '#E60027',
 };
 
 export const routeNames = {
@@ -1403,4 +1454,27 @@ export const routeNames = {
   toyohashiAtsumiLine: '豊橋鉄道渥美線',
   nagoyaMeikoLine: '名古屋市営地下鉄名港線',
   meitetsuToyotaLine: '名鉄豊田線',
+  // 名古屋エリア追加
+  meitetsuSetoLine: '名鉄瀬戸線',
+  linimo: 'リニモ（愛知高速交通東部丘陵線）',
+  nagoyaKamiidaLine: '名古屋市営地下鉄上飯田線',
+  meitetsuBisaiLine: '名鉄尾西線',
+  // 中国追加
+  ichibataKitamatsue: '一畑電車北松江線',
+  ichibataOyashiro: '一畑電車大社線',
+  mizushimaLine: '水島臨海鉄道',
+  ibaraRailway: '井原鉄道',
+  // 九州追加3
+  heiseiChikuhoIdaLine: '平成筑豊鉄道伊田線',
+  heiseiChikuhoTagawaLine: '平成筑豊鉄道田川線',
+  minamiAsoRailway: '南阿蘇鉄道',
+  // 関東私鉄追加3
+  kashimaRinkaiRailway: '鹿島臨海鉄道',
+  joshinDentetsu: '上信電鉄',
+  kantoRailwayJoso: '関東鉄道常総線',
+  // 東北追加3
+  yuriHighlandRailway: '由利高原鉄道',
+  tsugaruRailway: '津軽鉄道',
+  konanLineHirosaki: '弘南鉄道弘南線',
+  konanLineOwani: '弘南鉄道大鰐線',
 };
