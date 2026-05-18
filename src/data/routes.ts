@@ -140,6 +140,8 @@ import { kashimaRinkaiRailway, joshinDentetsu, kantoRailwayJoso } from './kanto-
 import { yuriHighlandRailway, tsugaruRailway, konanLineHirosaki, konanLineOwani } from './tohoku-more3';
 import { hitachinakaSeaRailway, jrSuigunLineMain, kominatoRailway } from './kanto-more2';
 import { jrRumoiMainLine } from './hokkaido-more2';
+import { oigawaRailway, gakunanRailway, izuhakoneOyamazanLine } from './chubu-shizuoka-more';
+import { kyotoSubwayKarasuma, kyotoSubwayTozai, keifukuArashiyama } from './kinki-kyoto-more';
 
 export const routes = {
   yamanote,
@@ -591,6 +593,14 @@ export const routes = {
   kominatoRailway,
   // 北海道追加2
   jrRumoiMainLine,
+  // 中部・静岡追加
+  oigawaRailway,
+  gakunanRailway,
+  izuhakoneOyamazanLine,
+  // 近畿・京都追加
+  kyotoSubwayKarasuma,
+  kyotoSubwayTozai,
+  keifukuArashiyama,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -1045,6 +1055,14 @@ export const routeColors = {
   kominatoRailway: '#E73820',
   // 北海道追加2
   jrRumoiMainLine: '#009944',
+  // 中部・静岡追加
+  oigawaRailway: '#E60026',
+  gakunanRailway: '#E60026',
+  izuhakoneOyamazanLine: '#EE7700',
+  // 近畿・京都追加
+  kyotoSubwayKarasuma: '#009944',
+  kyotoSubwayTozai: '#E60026',
+  keifukuArashiyama: '#9B1889',
 };
 
 export const routeNames = {
@@ -1497,4 +1515,12 @@ export const routeNames = {
   kominatoRailway: '小湊鉄道',
   // 北海道追加2
   jrRumoiMainLine: 'JR留萌本線',
+  // 中部・静岡追加
+  oigawaRailway: '大井川鐡道大井川本線',
+  gakunanRailway: '岳南電車',
+  izuhakoneOyamazanLine: '伊豆箱根鉄道大雄山線',
+  // 近畿・京都追加
+  kyotoSubwayKarasuma: '京都市営地下鉄烏丸線',
+  kyotoSubwayTozai: '京都市営地下鉄東西線',
+  keifukuArashiyama: '嵐電（嵐山本線）',
 };
