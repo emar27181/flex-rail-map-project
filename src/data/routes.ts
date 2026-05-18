@@ -117,6 +117,7 @@ import { jrOuMainLineSouth, jrRikuuWestLine, jrBanetsuEastLine, jrSensekiLine2 }
 import { abukumaKyuko, yamagataRailway, jrHanawLine, jrOminateLine, akitaNairikuLine } from './tohoku-private-more';
 import { jrSekishoLine, jrNemuroMainLineWest, jrSoyaMainLineNorth, jrSenmouMainLine } from './jr-hokkaido-more';
 import { jrWakayamaLine, jrKiseiMainLineNorth, jrKiseiMainLineSouth, kintetsuOsakaLine2 } from './kinki-jr-more';
+import { kintetsuNaraLine2, kintetsuShimaLine, kintetsuYamadaLine, mizumaRailway, kobeElecArimaLine, eizanMainLine } from './kinki-private-more2';
 
 export const routes = {
   yamanote,
@@ -434,6 +435,13 @@ export const routes = {
   jrKiseiMainLineNorth,
   jrKiseiMainLineSouth,
   kintetsuOsakaLine2,
+  // 近畿私鉄さらに追加2
+  kintetsuNaraLine2,
+  kintetsuShimaLine,
+  kintetsuYamadaLine,
+  mizumaRailway,
+  kobeElecArimaLine,
+  eizanMainLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -754,6 +762,13 @@ export const routeColors = {
   jrKiseiMainLineNorth: '#009944',
   jrKiseiMainLineSouth: '#009944',
   kintetsuOsakaLine2: '#009944',
+  // 近畿私鉄さらに追加2
+  kintetsuNaraLine2: '#009944',
+  kintetsuShimaLine: '#009944',
+  kintetsuYamadaLine: '#009944',
+  mizumaRailway: '#E60026',
+  kobeElecArimaLine: '#E60026',
+  eizanMainLine: '#E60026',
 };
 
 export const routeNames = {
@@ -1072,4 +1087,11 @@ export const routeNames = {
   jrKiseiMainLineNorth: 'JR紀勢本線（亀山〜新宮）',
   jrKiseiMainLineSouth: 'JR紀勢本線（新宮〜和歌山）',
   kintetsuOsakaLine2: '近鉄大阪線',
+  // 近畿私鉄さらに追加2
+  kintetsuNaraLine2: '近鉄奈良線',
+  kintetsuShimaLine: '近鉄志摩線',
+  kintetsuYamadaLine: '近鉄山田線',
+  mizumaRailway: '水間鉄道',
+  kobeElecArimaLine: '神戸電鉄有馬線',
+  eizanMainLine: '叡山電鉄叡山本線',
 };
