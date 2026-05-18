@@ -97,6 +97,8 @@ import { jrYamatoji, jrGakkenLine, kintetsuKyotoLine, nankaMainLine, nankaKoyaLi
 import { jrKagoshimaMainLineSouth, kagoshimaTram, jrIbusukinMakurazakiLine, jrSaseboLine, nishitetsuKaizukaLine, kumamotoElecRailway } from './kyushu-more-lines';
 import { jrSeikanTunnel, jrUetsuMainLine, jrKitakamiLine, jrKamaishiLine, jrTsugaRuLine, jrGonoLine, jrRikuuEastLine } from './jr-more-regional';
 import { jrSaninMainLineWest, jrYamaguchiLine, hiroshimaTram, jrKabeLine, jrUnoline, jrKureLine, okayamaTram, jrMurotozakiLine } from './chugoku-kyushu-lines';
+import { jrBiwako, jrOsakaLoop, kintetsuMinamiOsakaLine, jrKosaiLine, jrKusatsuLine } from './kinki-more-lines';
+import { osakaChangbori, osakaImazatosuji, hankyuTakarazukaLine, kobeSeishinYamate, kobeKaigan, kintetsuKasharaLine } from './osaka-metro-more';
 import { jrYamagataShinkansen, jrAkitaShinkansen, jrOuMainLineAkita, jrJobanLineNorth, jrBanetsusaiLine, jrShinetsuLine } from './tohoku-more-lines';
 import { jrMitoLine, jrJobanLineMain, jrNikkoLine, kantetsJososen, chichibuRailway } from './kanto-more-lines';
 
@@ -311,6 +313,18 @@ export const routes = {
   jrKureLine,
   okayamaTram,
   jrMurotozakiLine,
+  // 近畿エリア追加
+  jrBiwako,
+  jrOsakaLoop,
+  kintetsuMinamiOsakaLine,
+  jrKosaiLine,
+  jrKusatsuLine,
+  osakaChangbori,
+  osakaImazatosuji,
+  hankyuTakarazukaLine,
+  kobeSeishinYamate,
+  kobeKaigan,
+  kintetsuKasharaLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -526,6 +540,18 @@ export const routeColors = {
   jrKureLine: '#0072BC',
   okayamaTram: '#E60026',
   jrMurotozakiLine: '#009944',
+  // 近畿エリア追加
+  jrBiwako: '#F68B1E',
+  jrOsakaLoop: '#009944',
+  kintetsuMinamiOsakaLine: '#F08000',
+  jrKosaiLine: '#0072BC',
+  jrKusatsuLine: '#009944',
+  osakaChangbori: '#35A0D5',
+  osakaImazatosuji: '#E60026',
+  hankyuTakarazukaLine: '#8B5A2B',
+  kobeSeishinYamate: '#E60026',
+  kobeKaigan: '#0072BC',
+  kintetsuKasharaLine: '#F08000',
 };
 
 export const routeNames = {
@@ -739,4 +765,16 @@ export const routeNames = {
   jrKureLine: 'JR呉線',
   okayamaTram: '岡山電気軌道',
   jrMurotozakiLine: 'JR土讃線（高知付近）',
+  // 近畿エリア追加
+  jrBiwako: 'JR琵琶湖線',
+  jrOsakaLoop: 'JR大阪環状線',
+  kintetsuMinamiOsakaLine: '近鉄南大阪線',
+  jrKosaiLine: 'JR湖西線',
+  jrKusatsuLine: 'JR草津線',
+  osakaChangbori: '大阪メトロ長堀鶴見緑地線',
+  osakaImazatosuji: '大阪メトロ今里筋線',
+  hankyuTakarazukaLine: '阪急宝塚線',
+  kobeSeishinYamate: '神戸市営地下鉄西神・山手線',
+  kobeKaigan: '神戸市営地下鉄海岸線',
+  kintetsuKasharaLine: '近鉄橿原線',
 };
