@@ -126,6 +126,8 @@ import { jrSakuraiLine, kintetsuKeihanna, kitaosakaKyuko, hankyuSenriLine, hanky
 import { heitatsuIdaLine, amakiRailway, jrMiyazakiAirportLine, jrHitaHikosan, jrGotojLine, nishitetsuAmakiLine, jrKaratsuLine } from './kyushu-more2';
 import { meitetsuGamagoriLine, meitetsuKowaLine, jrTakehoyLine, meitetsuChitaShinLine, meitetsuMikawaKaisen, meitetsuMikawaYamasen } from './chubu-meitetsu-more';
 import { tobuOgoseLine, seibuChichibuLine, jomotetsudo, watarasekeikoku, mookaRailway } from './kanto-private-more2';
+import { kotohiraLongLine, kotohiraShidoLine, tosaCuroshioSukumo, jrMugiLineSouth, jrTokushimaLineWest } from './shikoku-more2';
+import { jrKesennumaLine, sendaiAirportRailway, jrOofunatoLine, jrYamadaLine } from './tohoku-more2';
 
 export const routes = {
   yamanote,
@@ -506,6 +508,17 @@ export const routes = {
   jomotetsudo,
   watarasekeikoku,
   mookaRailway,
+  // 四国追加2
+  kotohiraLongLine,
+  kotohiraShidoLine,
+  tosaCuroshioSukumo,
+  jrMugiLineSouth,
+  jrTokushimaLineWest,
+  // 東北追加2
+  jrKesennumaLine,
+  sendaiAirportRailway,
+  jrOofunatoLine,
+  jrYamadaLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -889,6 +902,17 @@ export const routeColors = {
   jomotetsudo: '#E60026',
   watarasekeikoku: '#009944',
   mookaRailway: '#F68B1E',
+  // 四国追加2
+  kotohiraLongLine: '#F68B1E',
+  kotohiraShidoLine: '#F68B1E',
+  tosaCuroshioSukumo: '#009944',
+  jrMugiLineSouth: '#F68B1E',
+  jrTokushimaLineWest: '#009944',
+  // 東北追加2
+  jrKesennumaLine: '#009944',
+  sendaiAirportRailway: '#0072BC',
+  jrOofunatoLine: '#F68B1E',
+  jrYamadaLine: '#009944',
 };
 
 export const routeNames = {
@@ -1270,4 +1294,15 @@ export const routeNames = {
   jomotetsudo: '上毛電気鉄道',
   watarasekeikoku: 'わたらせ渓谷鐵道',
   mookaRailway: '真岡鐵道',
+  // 四国追加2
+  kotohiraLongLine: '高松琴平電鉄長尾線',
+  kotohiraShidoLine: '高松琴平電鉄志度線',
+  tosaCuroshioSukumo: '土佐くろしお鉄道宿毛線',
+  jrMugiLineSouth: 'JR牟岐線（阿南〜海部）',
+  jrTokushimaLineWest: 'JR徳島線（西部）',
+  // 東北追加2
+  jrKesennumaLine: 'JR気仙沼線',
+  sendaiAirportRailway: '仙台空港鉄道',
+  jrOofunatoLine: 'JR大船渡線',
+  jrYamadaLine: 'JR山田線',
 };
