@@ -118,6 +118,7 @@ import { abukumaKyuko, yamagataRailway, jrHanawLine, jrOminateLine, akitaNairiku
 import { jrSekishoLine, jrNemuroMainLineWest, jrSoyaMainLineNorth, jrSenmouMainLine } from './jr-hokkaido-more';
 import { jrWakayamaLine, jrKiseiMainLineNorth, jrKiseiMainLineSouth, kintetsuOsakaLine2 } from './kinki-jr-more';
 import { kintetsuNaraLine2, kintetsuShimaLine, kintetsuYamadaLine, mizumaRailway, kobeElecArimaLine, eizanMainLine } from './kinki-private-more2';
+import { jrSanguLine, sangiNokuseLine, yoroRailway, naganoDentetsuLine, uedaDentetsuLine, matsumotoDentestu } from './chubu-more-lines';
 
 export const routes = {
   yamanote,
@@ -442,6 +443,13 @@ export const routes = {
   mizumaRailway,
   kobeElecArimaLine,
   eizanMainLine,
+  // 中部追加（伊勢・長野・北陸私鉄）
+  jrSanguLine,
+  sangiNokuseLine,
+  yoroRailway,
+  naganoDentetsuLine,
+  uedaDentetsuLine,
+  matsumotoDentestu,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -769,6 +777,13 @@ export const routeColors = {
   mizumaRailway: '#E60026',
   kobeElecArimaLine: '#E60026',
   eizanMainLine: '#E60026',
+  // 中部追加（伊勢・長野・北陸私鉄）
+  jrSanguLine: '#F68B1E',
+  sangiNokuseLine: '#E60026',
+  yoroRailway: '#009944',
+  naganoDentetsuLine: '#E60026',
+  uedaDentetsuLine: '#009944',
+  matsumotoDentestu: '#F68B1E',
 };
 
 export const routeNames = {
@@ -1094,4 +1109,11 @@ export const routeNames = {
   mizumaRailway: '水間鉄道',
   kobeElecArimaLine: '神戸電鉄有馬線',
   eizanMainLine: '叡山電鉄叡山本線',
+  // 中部追加（伊勢・長野・北陸私鉄）
+  jrSanguLine: 'JR参宮線',
+  sangiNokuseLine: '三岐鉄道北勢線',
+  yoroRailway: '養老鉄道',
+  naganoDentetsuLine: '長野電鉄長野線',
+  uedaDentetsuLine: '上田電鉄別所線',
+  matsumotoDentestu: '松本電気鉄道上高地線',
 };
