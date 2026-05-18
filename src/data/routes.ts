@@ -129,6 +129,7 @@ import { tobuOgoseLine, seibuChichibuLine, jomotetsudo, watarasekeikoku, mookaRa
 import { kotohiraLongLine, kotohiraShidoLine, tosaCuroshioSukumo, jrMugiLineSouth, jrTokushimaLineWest } from './shikoku-more2';
 import { jrKesennumaLine, sendaiAirportRailway, jrOofunatoLine, jrYamadaLine } from './tohoku-more2';
 import { echigotokimekiHisui, echigotokimekiMyoko, ainokaze, irIshikawaRailway, kurobe } from './hokuriku-more';
+import { hankyuItamiLine, hankyuMinooLine, kintetsuTenriLine, kintetsuDoumyojiLine, kintetsuNaganoLine, osakaMidosujiMain } from './kinki-private-more4';
 
 export const routes = {
   yamanote,
@@ -526,6 +527,13 @@ export const routes = {
   ainokaze,
   irIshikawaRailway,
   kurobe,
+  // 近畿私鉄さらに追加4
+  hankyuItamiLine,
+  hankyuMinooLine,
+  kintetsuTenriLine,
+  kintetsuDoumyojiLine,
+  kintetsuNaganoLine,
+  osakaMidosujiMain,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -926,6 +934,13 @@ export const routeColors = {
   ainokaze: '#009944',
   irIshikawaRailway: '#0072BC',
   kurobe: '#8B5A2B',
+  // 近畿私鉄さらに追加4
+  hankyuItamiLine: '#8B5A2B',
+  hankyuMinooLine: '#8B5A2B',
+  kintetsuTenriLine: '#F08000',
+  kintetsuDoumyojiLine: '#F08000',
+  kintetsuNaganoLine: '#F08000',
+  osakaMidosujiMain: '#D90000',
 };
 
 export const routeNames = {
@@ -1324,4 +1339,11 @@ export const routeNames = {
   ainokaze: 'あいの風とやま鉄道',
   irIshikawaRailway: 'IRいしかわ鉄道',
   kurobe: '黒部峡谷鉄道',
+  // 近畿私鉄さらに追加4
+  hankyuItamiLine: '阪急伊丹線',
+  hankyuMinooLine: '阪急箕面線',
+  kintetsuTenriLine: '近鉄天理線',
+  kintetsuDoumyojiLine: '近鉄道明寺線',
+  kintetsuNaganoLine: '近鉄長野線',
+  osakaMidosujiMain: '大阪メトロ御堂筋線',
 };
