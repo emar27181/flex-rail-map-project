@@ -13,7 +13,6 @@ export const jrHakodateLineHakodate: Station[] = [
   { name: "赤井川",   lat: 42.045770, lng: 140.569850, timeToNext: 8 },
   { name: "流山温泉",  lat: 42.065400, lng: 140.454490, timeToNext: 7 },
   { name: "池田園",   lat: 42.076890, lng: 140.425660, timeToNext: 5 },
-  { name: "鹿部",     lat: 42.066760, lng: 140.983040, timeToNext: 15 },
   { name: "森",       lat: 42.099750, lng: 140.572920, timeToNext: 10 },
   { name: "石谷",     lat: 42.106670, lng: 140.543380, timeToNext: 5 },
   { name: "本石倉",   lat: 42.126050, lng: 140.513260, timeToNext: 4 },

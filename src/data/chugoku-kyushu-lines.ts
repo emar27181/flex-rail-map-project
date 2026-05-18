@@ -7,7 +7,6 @@ export const jrSaninMainLineWest: Station[] = [
   { name: "出雲神西",  lat: 35.378230, lng: 132.648330, timeToNext: 8 },
   { name: "江南",     lat: 35.352680, lng: 132.603750, timeToNext: 8 },
   { name: "直江",     lat: 35.375760, lng: 132.548920, timeToNext: 8 },
-  { name: "出雲市",   lat: 35.367980, lng: 132.758590, timeToNext: 15 },
   { name: "大田市",   lat: 35.194980, lng: 132.498600, timeToNext: 25 },
   { name: "石見銀山",  lat: 35.100500, lng: 132.459200, timeToNext: 20 },
   { name: "江津",     lat: 34.980280, lng: 132.221700, timeToNext: 20 },
