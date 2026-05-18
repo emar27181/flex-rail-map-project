@@ -128,6 +128,7 @@ import { meitetsuGamagoriLine, meitetsuKowaLine, jrTakehoyLine, meitetsuChitaShi
 import { tobuOgoseLine, seibuChichibuLine, jomotetsudo, watarasekeikoku, mookaRailway } from './kanto-private-more2';
 import { kotohiraLongLine, kotohiraShidoLine, tosaCuroshioSukumo, jrMugiLineSouth, jrTokushimaLineWest } from './shikoku-more2';
 import { jrKesennumaLine, sendaiAirportRailway, jrOofunatoLine, jrYamadaLine } from './tohoku-more2';
+import { echigotokimekiHisui, echigotokimekiMyoko, ainokaze, irIshikawaRailway, kurobe } from './hokuriku-more';
 
 export const routes = {
   yamanote,
@@ -519,6 +520,12 @@ export const routes = {
   sendaiAirportRailway,
   jrOofunatoLine,
   jrYamadaLine,
+  // 北陸追加
+  echigotokimekiHisui,
+  echigotokimekiMyoko,
+  ainokaze,
+  irIshikawaRailway,
+  kurobe,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -913,6 +920,12 @@ export const routeColors = {
   sendaiAirportRailway: '#0072BC',
   jrOofunatoLine: '#F68B1E',
   jrYamadaLine: '#009944',
+  // 北陸追加
+  echigotokimekiHisui: '#009944',
+  echigotokimekiMyoko: '#F68B1E',
+  ainokaze: '#009944',
+  irIshikawaRailway: '#0072BC',
+  kurobe: '#8B5A2B',
 };
 
 export const routeNames = {
@@ -1305,4 +1318,10 @@ export const routeNames = {
   sendaiAirportRailway: '仙台空港鉄道',
   jrOofunatoLine: 'JR大船渡線',
   jrYamadaLine: 'JR山田線',
+  // 北陸追加
+  echigotokimekiHisui: 'えちごトキめき鉄道日本海ひすいライン',
+  echigotokimekiMyoko: 'えちごトキめき鉄道妙高はねうまライン',
+  ainokaze: 'あいの風とやま鉄道',
+  irIshikawaRailway: 'IRいしかわ鉄道',
+  kurobe: '黒部峡谷鉄道',
 };
