@@ -7,25 +7,25 @@ export const jrEtsugoLine: Station[] = [
   { name: "関屋",       lat: 37.900350, lng: 139.023130, timeToNext: 5 },
   { name: "青山",       lat: 37.897990, lng: 139.006720, timeToNext: 5 },
   { name: "小針",       lat: 37.890710, lng: 138.983080, timeToNext: 5 },
-  { name: "寺尾",       lat: 37.882230, lng: 138.958720, timeToNext: 5 },
+  { name: "寺尾",       lat: 37.879282, lng: 138.973934, timeToNext: 5 },
   { name: "内野",       lat: 37.867360, lng: 138.937200, timeToNext: 8 },
   { name: "越後曽根",   lat: 37.804400, lng: 138.817810, timeToNext: 15 },
   { name: "吉田",       lat: 37.749440, lng: 138.761560, timeToNext: 10 },
-  { name: "燕三条",     lat: 37.681530, lng: 138.798360, timeToNext: 8 },
+  { name: "燕三条",     lat: 37.64837, lng: 138.939089, timeToNext: 8 },
   { name: "柏崎",       lat: 37.372530, lng: 138.559420, timeToNext: 0 },
 ];
 
 // JR信越本線（新潟〜柏崎）
 export const jrShinetsuNiigata: Station[] = [
   { name: "新潟",       lat: 37.913460, lng: 139.059580, timeToNext: 5 },
-  { name: "越後石山",   lat: 37.899310, lng: 139.114260, timeToNext: 5 },
-  { name: "亀田",       lat: 37.892050, lng: 139.138920, timeToNext: 5 },
+  { name: "越後石山",   lat: 37.896568, lng: 139.095285, timeToNext: 5 },
+  { name: "亀田",       lat: 37.877239, lng: 139.108266, timeToNext: 5 },
   { name: "荻川",       lat: 37.872830, lng: 139.190280, timeToNext: 8 },
   { name: "さつき野",   lat: 37.846930, lng: 139.226820, timeToNext: 5 },
   { name: "新津",       lat: 37.822760, lng: 139.220820, timeToNext: 5 },
-  { name: "加茂",       lat: 37.664420, lng: 139.038120, timeToNext: 10 },
-  { name: "三条",       lat: 37.635540, lng: 138.973920, timeToNext: 8 },
-  { name: "東三条",     lat: 37.690010, lng: 138.952010, timeToNext: 5 },
+  { name: "加茂",       lat: 37.658901, lng: 139.049247, timeToNext: 10 },
+  { name: "三条",       lat: 37.62114, lng: 138.960895, timeToNext: 8 },
+  { name: "東三条",     lat: 37.628596, lng: 138.974463, timeToNext: 5 },
   { name: "柏崎",       lat: 37.372530, lng: 138.559420, timeToNext: 0 },
 ];
 
@@ -43,23 +43,23 @@ export const hokuetsukyu: Station[] = [
 // しなの鉄道北しなの線: 長野〜妙高高原
 export const shinanoBrandNorth: Station[] = [
   { name: "長野",       lat: 36.644790, lng: 138.188710, timeToNext: 5 },
-  { name: "北長野",     lat: 36.673130, lng: 138.193090, timeToNext: 5 },
+  { name: "北長野",     lat: 36.665478, lng: 138.223014, timeToNext: 5 },
   { name: "三才",       lat: 36.695550, lng: 138.193250, timeToNext: 5 },
-  { name: "豊野",       lat: 36.743840, lng: 138.218050, timeToNext: 8 },
-  { name: "牟礼",       lat: 36.774100, lng: 138.204360, timeToNext: 8 },
-  { name: "古間",       lat: 36.806010, lng: 138.163800, timeToNext: 8 },
-  { name: "黒姫",       lat: 36.833280, lng: 138.147780, timeToNext: 8 },
-  { name: "妙高高原",   lat: 36.893090, lng: 138.222360, timeToNext: 0 },
+  { name: "豊野",       lat: 36.710912, lng: 138.275039, timeToNext: 8 },
+  { name: "牟礼",       lat: 36.753147, lng: 138.247602, timeToNext: 8 },
+  { name: "古間",       lat: 36.791926, lng: 138.230443, timeToNext: 8 },
+  { name: "黒姫",       lat: 36.807738, lng: 138.196507, timeToNext: 8 },
+  { name: "妙高高原",   lat: 36.872201, lng: 138.212196, timeToNext: 0 },
 ];
 
 // しなの鉄道本線: 軽井沢〜篠ノ井
 export const shinanoRailway: Station[] = [
-  { name: "軽井沢",     lat: 36.348720, lng: 138.592040, timeToNext: 8 },
+  { name: "軽井沢",     lat: 36.342551, lng: 138.635109, timeToNext: 8 },
   { name: "中軽井沢",   lat: 36.341870, lng: 138.566200, timeToNext: 5 },
-  { name: "信濃追分",   lat: 36.363630, lng: 138.507080, timeToNext: 5 },
-  { name: "御代田",     lat: 36.379540, lng: 138.474090, timeToNext: 8 },
+  { name: "信濃追分",   lat: 36.33574, lng: 138.558983, timeToNext: 5 },
+  { name: "御代田",     lat: 36.318979, lng: 138.506442, timeToNext: 8 },
   { name: "小諸",       lat: 36.322100, lng: 138.431800, timeToNext: 5 },
-  { name: "滋野",       lat: 36.315630, lng: 138.415870, timeToNext: 5 },
+  { name: "滋野",       lat: 36.342441, lng: 138.363619, timeToNext: 5 },
   { name: "田中",       lat: 36.330210, lng: 138.388950, timeToNext: 5 },
   { name: "大屋",       lat: 36.323750, lng: 138.372860, timeToNext: 5 },
   { name: "信濃国分寺", lat: 36.318450, lng: 138.360540, timeToNext: 5 },
@@ -67,7 +67,7 @@ export const shinanoRailway: Station[] = [
   { name: "坂城",       lat: 36.453820, lng: 138.175710, timeToNext: 8 },
   { name: "戸倉",       lat: 36.490660, lng: 138.147200, timeToNext: 5 },
   { name: "千曲",       lat: 36.514030, lng: 138.153120, timeToNext: 5 },
-  { name: "篠ノ井",     lat: 36.593650, lng: 138.124880, timeToNext: 0 },
+  { name: "篠ノ井",     lat: 36.577415, lng: 138.138184, timeToNext: 0 },
 ];
 
 // JR飯山線: 豊野〜越後川口
@@ -77,11 +77,11 @@ export const jrIiyamaLineExt: Station[] = [
   { name: "戸狩野沢温泉", lat: 36.827980, lng: 138.357660, timeToNext: 10 },
   { name: "上境",       lat: 36.880680, lng: 138.404020, timeToNext: 8 },
   { name: "替佐",       lat: 36.906730, lng: 138.426260, timeToNext: 8 },
-  { name: "飯山",       lat: 36.853130, lng: 138.370010, timeToNext: 8 },
-  { name: "北飯山",     lat: 36.867030, lng: 138.384810, timeToNext: 5 },
+  { name: "飯山",       lat: 36.846288, lng: 138.358787, timeToNext: 8 },
+  { name: "北飯山",     lat: 36.858813, lng: 138.36378, timeToNext: 5 },
   { name: "信濃白鳥",   lat: 36.931300, lng: 138.443500, timeToNext: 8 },
-  { name: "西大滝",     lat: 36.986720, lng: 138.506830, timeToNext: 8 },
-  { name: "津南",       lat: 37.006560, lng: 138.605620, timeToNext: 10 },
+  { name: "西大滝",     lat: 36.979219, lng: 138.480922, timeToNext: 8 },
+  { name: "津南",       lat: 37.023684, lng: 138.639401, timeToNext: 10 },
   { name: "越後田沢",   lat: 37.019630, lng: 138.637020, timeToNext: 8 },
   { name: "越後鹿渡",   lat: 37.044110, lng: 138.666420, timeToNext: 8 },
   { name: "越後川口",   lat: 37.092030, lng: 138.737620, timeToNext: 0 },
