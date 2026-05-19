@@ -3,8 +3,8 @@ import type { Station } from './yamanote';
 // 大阪メトロ 御堂筋線は osaka-midosuji-line.ts に既存
 // 大阪メトロ 谷町線: 大日〜八尾南
 export const osakaTanimachi: Station[] = [
-  { name: "大日",     lat: 34.773390, lng: 135.538940, timeToNext: 2 },
-  { name: "守口",     lat: 34.760530, lng: 135.554520, timeToNext: 2 },
+  { name: "大日",     lat: 34.749905, lng: 135.578834, timeToNext: 2 },
+  { name: "守口",     lat: 34.738467, lng: 135.564383, timeToNext: 2 },
   { name: "太子橋今市", lat: 34.746440, lng: 135.549240, timeToNext: 2 },
   { name: "千林大宮",  lat: 34.738400, lng: 135.537790, timeToNext: 2 },
   { name: "関目高殿",  lat: 34.720570, lng: 135.533200, timeToNext: 2 },
@@ -24,13 +24,13 @@ export const osakaTanimachi: Station[] = [
   { name: "文の里",   lat: 34.625130, lng: 135.511270, timeToNext: 2 },
   { name: "田辺",     lat: 34.614110, lng: 135.521650, timeToNext: 2 },
   { name: "駒川中野",  lat: 34.606870, lng: 135.534290, timeToNext: 2 },
-  { name: "平野",     lat: 34.597460, lng: 135.548890, timeToNext: 2 },
+  { name: "平野",     lat: 34.621296, lng: 135.548643, timeToNext: 2 },
   { name: "喜連瓜破",  lat: 34.599050, lng: 135.561070, timeToNext: 2 },
   { name: "出戸",     lat: 34.597390, lng: 135.576220, timeToNext: 2 },
   { name: "長原",     lat: 34.590850, lng: 135.581680, timeToNext: 2 },
-  { name: "針中野",   lat: 34.584460, lng: 135.577950, timeToNext: 2 },
-  { name: "矢田",     lat: 34.579100, lng: 135.574270, timeToNext: 2 },
-  { name: "八尾南",   lat: 34.563770, lng: 135.576740, timeToNext: 0 },
+  { name: "針中野",   lat: 34.617130, lng: 135.532978, timeToNext: 2 },
+  { name: "矢田",     lat: 34.605745, lng: 135.532905, timeToNext: 2 },
+  { name: "八尾南",   lat: 34.597329, lng: 135.582515, timeToNext: 0 },
 ];
 
 // 大阪メトロ 四つ橋線: 西梅田〜住之江公園
@@ -44,7 +44,7 @@ export const osakaYotsubashi: Station[] = [
   { name: "花園町",   lat: 34.637760, lng: 135.499450, timeToNext: 2 },
   { name: "岸里玉出",  lat: 34.628820, lng: 135.489670, timeToNext: 2 },
   { name: "北加賀屋",  lat: 34.614520, lng: 135.490030, timeToNext: 2 },
-  { name: "住之江公園", lat: 34.604470, lng: 135.493900, timeToNext: 0 },
+  { name: "住之江公園", lat: 34.608739, lng: 135.473099, timeToNext: 0 },
 ];
 
 // 大阪メトロ 中央線: コスモスクエア〜長田
@@ -62,10 +62,10 @@ export const osakaChuoLine: Station[] = [
   { name: "緑橋",     lat: 34.683560, lng: 135.543320, timeToNext: 2 },
   { name: "深江橋",   lat: 34.682830, lng: 135.558090, timeToNext: 2 },
   { name: "布施",     lat: 34.680860, lng: 135.573190, timeToNext: 2 },
-  { name: "新深江",   lat: 34.669790, lng: 135.578550, timeToNext: 2 },
-  { name: "小路",     lat: 34.663460, lng: 135.586400, timeToNext: 2 },
-  { name: "新加美",   lat: 34.657990, lng: 135.591560, timeToNext: 2 },
-  { name: "長田",     lat: 34.655720, lng: 135.601590, timeToNext: 0 },
+  { name: "新深江",   lat: 34.668185, lng: 135.554297, timeToNext: 2 },
+  { name: "小路",     lat: 34.661431, lng: 135.556281, timeToNext: 2 },
+  { name: "新加美",   lat: 34.626978, lng: 135.568384, timeToNext: 2 },
+  { name: "長田",     lat: 34.678758, lng: 135.591060, timeToNext: 0 },
 ];
 
 // 阪急京都線: 大阪梅田〜京都河原町
@@ -73,9 +73,9 @@ export const hankyuKyotoLine: Station[] = [
   { name: "大阪梅田",  lat: 34.705820, lng: 135.497110, timeToNext: 3 },
   { name: "中津",     lat: 34.710290, lng: 135.499290, timeToNext: 2 },
   { name: "十三",     lat: 34.722650, lng: 135.471360, timeToNext: 5 },
-  { name: "南方",     lat: 34.736890, lng: 135.479450, timeToNext: 3 },
-  { name: "崇禅寺",   lat: 34.742920, lng: 135.487300, timeToNext: 2 },
-  { name: "淡路",     lat: 34.749030, lng: 135.489370, timeToNext: 3 },
+  { name: "南方",     lat: 34.725665, lng: 135.499708, timeToNext: 3 },
+  { name: "崇禅寺",   lat: 34.730980, lng: 135.510160, timeToNext: 2 },
+  { name: "淡路",     lat: 34.739252, lng: 135.516890, timeToNext: 3 },
   { name: "上新庄",   lat: 34.754560, lng: 135.514070, timeToNext: 3 },
   { name: "相川",     lat: 34.759090, lng: 135.521230, timeToNext: 2 },
   { name: "正雀",     lat: 34.769350, lng: 135.546540, timeToNext: 3 },
@@ -91,9 +91,9 @@ export const hankyuKyotoLine: Station[] = [
   { name: "西山天王山", lat: 34.895510, lng: 135.699090, timeToNext: 3 },
   { name: "長岡天神",  lat: 34.913430, lng: 135.697270, timeToNext: 5 },
   { name: "西向日",   lat: 34.935310, lng: 135.719750, timeToNext: 2 },
-  { name: "東向日",   lat: 34.943240, lng: 135.730290, timeToNext: 3 },
+  { name: "東向日",   lat: 34.953234, lng: 135.704628, timeToNext: 3 },
   { name: "洛西口",   lat: 34.952920, lng: 135.720600, timeToNext: 3 },
-  { name: "桂",       lat: 34.963500, lng: 135.725230, timeToNext: 4 },
+  { name: "桂",       lat: 34.979467, lng: 135.703260, timeToNext: 4 },
   { name: "西京極",   lat: 34.986680, lng: 135.734150, timeToNext: 3 },
   { name: "西院",     lat: 34.998710, lng: 135.734350, timeToNext: 2 },
   { name: "大宮",     lat: 35.003960, lng: 135.749400, timeToNext: 2 },
@@ -150,9 +150,9 @@ export const hanshinMainLine: Station[] = [
   { name: "魚崎",     lat: 34.710940, lng: 135.263230, timeToNext: 2 },
   { name: "住吉",     lat: 34.714220, lng: 135.248960, timeToNext: 2 },
   { name: "御影",     lat: 34.711640, lng: 135.236220, timeToNext: 2 },
-  { name: "石屋川",   lat: 34.707090, lng: 135.225600, timeToNext: 2 },
-  { name: "新在家",   lat: 34.702960, lng: 135.212910, timeToNext: 2 },
-  { name: "大石",     lat: 34.700110, lng: 135.207300, timeToNext: 2 },
+  { name: "石屋川",   lat: 34.713488, lng: 135.250052, timeToNext: 2 },
+  { name: "新在家",   lat: 34.710675, lng: 135.240739, timeToNext: 2 },
+  { name: "大石",     lat: 34.707702, lng: 135.231040, timeToNext: 2 },
   { name: "西灘",     lat: 34.694900, lng: 135.204850, timeToNext: 2 },
   { name: "岩屋",     lat: 34.693990, lng: 135.201000, timeToNext: 2 },
   { name: "春日野道",  lat: 34.693200, lng: 135.195850, timeToNext: 2 },

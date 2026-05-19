@@ -13,14 +13,14 @@ export const jrSakuraiLine: Station[] = [
   { name: "三輪",       lat: 34.529350, lng: 135.853650, timeToNext: 5 },
   { name: "玄番",       lat: 34.517580, lng: 135.852580, timeToNext: 5 },
   { name: "桜井",       lat: 34.513770, lng: 135.843500, timeToNext: 5 },
-  { name: "金橋",       lat: 34.505990, lng: 135.822740, timeToNext: 5 },
+  { name: "金橋",       lat: 34.509612, lng: 135.765302, timeToNext: 5 },
   { name: "香久山",     lat: 34.497830, lng: 135.808320, timeToNext: 5 },
   { name: "畝傍",       lat: 34.494600, lng: 135.800120, timeToNext: 5 },
-  { name: "耳成",       lat: 34.499420, lng: 135.786630, timeToNext: 5 },
+  { name: "耳成",       lat: 34.512399, lng: 135.814748, timeToNext: 5 },
   { name: "大和八木",   lat: 34.505890, lng: 135.797020, timeToNext: 5 },
   { name: "金田",       lat: 34.508960, lng: 135.749460, timeToNext: 5 },
-  { name: "二上",       lat: 34.520850, lng: 135.727480, timeToNext: 5 },
-  { name: "高田",       lat: 34.519050, lng: 135.703630, timeToNext: 0 },
+  { name: "二上",       lat: 34.546528, lng: 135.688197, timeToNext: 5 },
+  { name: "高田",       lat: 34.516288, lng: 135.744823, timeToNext: 0 },
 ];
 
 // 阪急甲陽線: 夙川〜甲陽園
@@ -38,11 +38,11 @@ export const kintetsuKeihanna: Station[] = [
   { name: "新石切",     lat: 34.672920, lng: 135.647130, timeToNext: 5 },
   { name: "石切",       lat: 34.681500, lng: 135.657340, timeToNext: 5 },
   { name: "額田",       lat: 34.688210, lng: 135.667850, timeToNext: 5 },
-  { name: "枚岡",       lat: 34.693610, lng: 135.680490, timeToNext: 5 },
-  { name: "瓢箪山",     lat: 34.694380, lng: 135.697800, timeToNext: 5 },
-  { name: "河内花園",   lat: 34.697830, lng: 135.713280, timeToNext: 5 },
-  { name: "東花園",     lat: 34.706210, lng: 135.730810, timeToNext: 8 },
-  { name: "学研奈良登美ヶ丘", lat: 34.736350, lng: 135.807060, timeToNext: 0 },
+  { name: "枚岡",       lat: 34.669800, lng: 135.648170, timeToNext: 5 },
+  { name: "瓢箪山",     lat: 34.662061, lng: 135.639022, timeToNext: 5 },
+  { name: "河内花園",   lat: 34.662839, lng: 135.617991, timeToNext: 5 },
+  { name: "東花園",     lat: 34.662521, lng: 135.626465, timeToNext: 8 },
+  { name: "学研奈良登美ヶ丘", lat: 34.726559, lng: 135.752194, timeToNext: 0 },
 ];
 
 // 北大阪急行: 江坂〜箕面萱野
@@ -61,9 +61,9 @@ export const hankyuSenriLine: Station[] = [
   { name: "柴島",       lat: 34.723800, lng: 135.513340, timeToNext: 3 },
   { name: "淡路",       lat: 34.729800, lng: 135.514530, timeToNext: 3 },
   { name: "崇禅寺",     lat: 34.740350, lng: 135.510260, timeToNext: 3 },
-  { name: "南方",       lat: 34.748830, lng: 135.507130, timeToNext: 3 },
+  { name: "南方",       lat: 34.725665, lng: 135.499708, timeToNext: 3 },
   { name: "山田",       lat: 34.816800, lng: 135.507630, timeToNext: 8 },
-  { name: "北千里",     lat: 34.827100, lng: 135.482290, timeToNext: 0 },
+  { name: "北千里",     lat: 34.820032, lng: 135.511056, timeToNext: 0 },
 ];
 
 // 阪急嵐山線: 桂〜嵐山
@@ -76,13 +76,13 @@ export const hankyuArashiyamaLine: Station[] = [
 
 // JR湖西線（北部）: 近江塩津〜近江舞子
 export const jrKosaiLineNorth: Station[] = [
-  { name: "近江塩津",   lat: 35.497880, lng: 136.144890, timeToNext: 8 },
-  { name: "永原",       lat: 35.475090, lng: 136.128370, timeToNext: 5 },
-  { name: "マキノ",     lat: 35.476030, lng: 136.106540, timeToNext: 5 },
-  { name: "近江中庄",   lat: 35.461860, lng: 136.065560, timeToNext: 5 },
-  { name: "新旭",       lat: 35.442660, lng: 136.055930, timeToNext: 5 },
-  { name: "安曇川",     lat: 35.419470, lng: 136.032130, timeToNext: 5 },
-  { name: "近江高島",   lat: 35.392920, lng: 136.021720, timeToNext: 5 },
-  { name: "北小松",     lat: 35.341090, lng: 136.000520, timeToNext: 8 },
-  { name: "近江舞子",   lat: 35.300870, lng: 135.969520, timeToNext: 0 },
+  { name: "近江塩津",   lat: 35.539119, lng: 136.151485, timeToNext: 8 },
+  { name: "永原",       lat: 35.499003, lng: 136.122668, timeToNext: 5 },
+  { name: "マキノ",     lat: 35.461374, lng: 136.059801, timeToNext: 5 },
+  { name: "近江中庄",   lat: 35.441369, lng: 136.038547, timeToNext: 5 },
+  { name: "新旭",       lat: 35.355295, lng: 136.035532, timeToNext: 5 },
+  { name: "安曇川",     lat: 35.328438, lng: 136.019975, timeToNext: 5 },
+  { name: "近江高島",   lat: 35.292640, lng: 136.010307, timeToNext: 5 },
+  { name: "北小松",     lat: 35.253738, lng: 135.970582, timeToNext: 8 },
+  { name: "近江舞子",   lat: 35.235822, lng: 135.959030, timeToNext: 0 },
 ];

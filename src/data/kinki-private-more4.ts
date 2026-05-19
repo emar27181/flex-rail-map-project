@@ -2,7 +2,7 @@ import type { Station } from './yamanote';
 
 // 阪急神戸線（支線）阪急甲陽線・阪急伊丹線
 export const hankyuItamiLine: Station[] = [
-  { name: "塚口",       lat: 34.761250, lng: 135.392680, timeToNext: 4 },
+  { name: "塚口",       lat: 34.752934, lng: 135.416267, timeToNext: 4 },
   { name: "稲野",       lat: 34.762720, lng: 135.398090, timeToNext: 4 },
   { name: "新伊丹",     lat: 34.769070, lng: 135.403120, timeToNext: 4 },
   { name: "伊丹",       lat: 34.777310, lng: 135.401050, timeToNext: 0 },
@@ -10,34 +10,34 @@ export const hankyuItamiLine: Station[] = [
 
 // 阪急箕面線: 石橋阪大前〜箕面
 export const hankyuMinooLine: Station[] = [
-  { name: "石橋阪大前", lat: 34.823050, lng: 135.467590, timeToNext: 4 },
+  { name: "石橋阪大前", lat: 34.808003, lng: 135.445762, timeToNext: 4 },
   { name: "桜井",       lat: 34.833590, lng: 135.463220, timeToNext: 4 },
-  { name: "牧落",       lat: 34.844770, lng: 135.461450, timeToNext: 4 },
+  { name: "牧落",       lat: 34.823377, lng: 135.465874, timeToNext: 4 },
   { name: "箕面",       lat: 34.831110, lng: 135.469920, timeToNext: 0 },
 ];
 
 // 近鉄天理線: 平端〜天理
 export const kintetsuTenriLine: Station[] = [
-  { name: "平端",       lat: 34.567160, lng: 135.781740, timeToNext: 4 },
-  { name: "二階堂",     lat: 34.577930, lng: 135.808440, timeToNext: 4 },
-  { name: "前栽",       lat: 34.579310, lng: 135.820570, timeToNext: 4 },
+  { name: "平端",       lat: 34.606662, lng: 135.783012, timeToNext: 4 },
+  { name: "二階堂",     lat: 34.602112, lng: 135.795868, timeToNext: 4 },
+  { name: "前栽",       lat: 34.601108, lng: 135.816454, timeToNext: 4 },
   { name: "天理",       lat: 34.595590, lng: 135.840620, timeToNext: 0 },
 ];
 
 // 近鉄道明寺線: 道明寺〜柏原南口
 export const kintetsuDoumyojiLine: Station[] = [
   { name: "道明寺",     lat: 34.570900, lng: 135.624390, timeToNext: 5 },
-  { name: "柏原南口",   lat: 34.556680, lng: 135.633100, timeToNext: 0 },
+  { name: "柏原南口",   lat: 34.581288, lng: 135.624947, timeToNext: 0 },
 ];
 
 // 近鉄長野線: 古市〜河内長野
 export const kintetsuNaganoLine: Station[] = [
-  { name: "古市",       lat: 34.533470, lng: 135.594860, timeToNext: 4 },
-  { name: "喜志",       lat: 34.509420, lng: 135.584060, timeToNext: 4 },
+  { name: "古市",       lat: 34.554199, lng: 135.609170, timeToNext: 4 },
+  { name: "喜志",       lat: 34.522905, lng: 135.607345, timeToNext: 4 },
   { name: "富田林",     lat: 34.495240, lng: 135.586820, timeToNext: 4 },
   { name: "富田林西口", lat: 34.490580, lng: 135.577530, timeToNext: 4 },
   { name: "川西",       lat: 34.479570, lng: 135.572880, timeToNext: 4 },
-  { name: "滝谷不動",   lat: 34.467960, lng: 135.566080, timeToNext: 4 },
+  { name: "滝谷不動",   lat: 34.480964, lng: 135.586519, timeToNext: 4 },
   { name: "汐ノ宮",     lat: 34.456750, lng: 135.560790, timeToNext: 4 },
   { name: "河内長野",   lat: 34.456550, lng: 135.562460, timeToNext: 0 },
 ];
