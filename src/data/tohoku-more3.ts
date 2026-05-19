@@ -11,7 +11,7 @@ export const yuriHighlandRailway: Station[] = [
   { name: "鶴舞台",             lat: 39.296700, lng: 140.053200, timeToNext: 4 },
   { name: "曲沢",               lat: 39.321049, lng: 140.102125, timeToNext: 4 },
   { name: "前郷",               lat: 39.312631, lng: 140.112781, timeToNext: 4 },
-  { name: "後三年",             lat: 39.255900, lng: 140.075400, timeToNext: 4 },
+  { name: "後三年",             lat: 39.364550, lng: 140.538675, timeToNext: 4 },
   { name: "新水沢",             lat: 39.247100, lng: 140.087200, timeToNext: 4 },
   { name: "矢島",               lat: 39.230376, lng: 140.138755, timeToNext: 0 },
 ];
@@ -53,8 +53,8 @@ export const konanLineOwani: Station[] = [
   { name: "運動公園前",         lat: 40.589475, lng: 140.503357, timeToNext: 4 },
   { name: "石川プール前",       lat: 40.543174, lng: 140.550435, timeToNext: 3 },
   { name: "義塾高校前",         lat: 40.555791, lng: 140.527629, timeToNext: 3 },
-  { name: "津軽大沢",           lat: 40.535900, lng: 140.412700, timeToNext: 4 },
-  { name: "松木平",             lat: 40.526100, lng: 140.411200, timeToNext: 3 },
+  { name: "津軽大沢",           lat: 40.557919, lng: 140.516318, timeToNext: 4 },
+  { name: "松木平",             lat: 40.560568, lng: 140.497278, timeToNext: 3 },
   { name: "宿川原",             lat: 40.525061, lng: 140.557676, timeToNext: 3 },
   { name: "大鰐",               lat: 40.521833, lng: 140.567025, timeToNext: 0 },
 ];
