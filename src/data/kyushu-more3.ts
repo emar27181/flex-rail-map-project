@@ -6,8 +6,8 @@ export const heiseiChikuhoIdaLine: Station[] = [
   { name: "藤棚",               lat: 33.727600, lng: 130.748200, timeToNext: 4 },
   { name: "市場",               lat: 33.718200, lng: 130.754800, timeToNext: 3 },
   { name: "崎山",               lat: 33.705100, lng: 130.762300, timeToNext: 3 },
-  { name: "金田",               lat: 33.694700, lng: 130.769800, timeToNext: 3 },
-  { name: "上金田",             lat: 33.682900, lng: 130.779200, timeToNext: 3 },
+  { name: "金田",               lat: 33.683093, lng: 130.776221, timeToNext: 3 },
+  { name: "上金田",             lat: 33.672367, lng: 130.789728, timeToNext: 3 },
   { name: "漆生",               lat: 33.671200, lng: 130.789100, timeToNext: 3 },
   { name: "下山田",             lat: 33.658800, lng: 130.798700, timeToNext: 3 },
   { name: "田川伊田",           lat: 33.640900, lng: 130.809800, timeToNext: 0 },
@@ -15,7 +15,7 @@ export const heiseiChikuhoIdaLine: Station[] = [
 
 // 平成筑豊鉄道田川線: 行橋〜田川伊田
 export const heiseiChikuhoTagawaLine: Station[] = [
-  { name: "行橋",               lat: 33.717800, lng: 130.993800, timeToNext: 5 },
+  { name: "行橋",               lat: 33.728706, lng: 130.970129, timeToNext: 5 },
   { name: "令和コスタ行橋",     lat: 33.714600, lng: 130.980100, timeToNext: 4 },
   { name: "椎地",               lat: 33.709800, lng: 130.960700, timeToNext: 5 },
   { name: "源じいの森",         lat: 33.702600, lng: 130.935800, timeToNext: 5 },
@@ -23,7 +23,7 @@ export const heiseiChikuhoTagawaLine: Station[] = [
   { name: "赤",                 lat: 33.682500, lng: 130.890900, timeToNext: 5 },
   { name: "呼野",               lat: 33.671200, lng: 130.869700, timeToNext: 5 },
   { name: "採銅所",             lat: 33.659700, lng: 130.850800, timeToNext: 5 },
-  { name: "柿下温泉口",         lat: 33.649800, lng: 130.832400, timeToNext: 4 },
+  { name: "柿下温泉口",         lat: 33.651489, lng: 130.854424, timeToNext: 4 },
   { name: "豊前川崎",           lat: 33.641200, lng: 130.817100, timeToNext: 3 },
   { name: "田川伊田",           lat: 33.640900, lng: 130.809800, timeToNext: 0 },
 ];
