@@ -47,7 +47,7 @@ export const meitetsuBisaiLine: Station[] = [
   { name: "弥富",               lat: 35.114082, lng: 136.725822, timeToNext: 5 },
   { name: "五ノ三",             lat: 35.129801, lng: 136.711451, timeToNext: 5 },
   { name: "佐屋",               lat: 35.147294, lng: 136.716447, timeToNext: 8 },
-  { name: "日比野",             lat: 35.142200, lng: 136.778300, timeToNext: 8 },
+  { name: "日比野",             lat: 35.163758, lng: 136.728629, timeToNext: 8 },
   { name: "津島",               lat: 35.178225, lng: 136.731084, timeToNext: 8 },
   { name: "勝幡",               lat: 35.195135, lng: 136.750015, timeToNext: 5 },
   { name: "藤浪",               lat: 35.188852, lng: 136.738936, timeToNext: 4 },
