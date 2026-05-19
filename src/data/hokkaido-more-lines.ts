@@ -11,7 +11,7 @@ export const jrMuroranMainLine: Station[] = [
   { name: "洞爺",      lat: 42.505260, lng: 140.873400, timeToNext: 8 },
   { name: "有珠",      lat: 42.508760, lng: 140.939390, timeToNext: 5 },
   { name: "長和",      lat: 42.509680, lng: 140.921840, timeToNext: 6 },
-  { name: "伊達紋別",   lat: 42.478520, lng: 140.873380, timeToNext: 8 },
+  { name: "伊達紋別",   lat: 42.470556, lng: 140.866944, timeToNext: 8 },
   { name: "北舟岡",    lat: 42.455040, lng: 140.879980, timeToNext: 5 },
   { name: "稀府",      lat: 42.448560, lng: 140.899090, timeToNext: 5 },
   { name: "黄金",      lat: 42.441390, lng: 140.921860, timeToNext: 5 },
