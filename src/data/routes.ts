@@ -142,6 +142,15 @@ import { hitachinakaSeaRailway, jrSuigunLineMain, kominatoRailway } from './kant
 import { jrRumoiMainLine } from './hokkaido-more2';
 import { oigawaRailway, gakunanRailway, izuhakoneOyamazanLine } from './chubu-shizuoka-more';
 import { kyotoSubwayKarasuma, kyotoSubwayTozai, keifukuArashiyama } from './kinki-kyoto-more';
+import { jrHachinoheLineOuter, jrTadamiLine, jrYonesakaLine } from './tohoku-jr-more2';
+import { aizuRailway, yaganRailway, tobuSanoLine, tobuKiryuLine } from './tohoku-private-more3';
+import { notaRailway, echizentetsudoMikuni, hokutetsuAsanogawa, jrKuzuryuLine, tenryuHamanako } from './hokuriku-more2';
+import { kyototangoMiyafuku, kyototangoMiyatoyo, kyototangoMiyamai, omiRailwayMain, shigarakiRailway } from './kinki-tango-lines';
+import { jrBantanLine, jrKakogawaLine, chizuExpressLine, sangiBonsen, igaRailway } from './kinki-jr-more2';
+import { wakasaRailway, nishikigawaRailway, jrGantokuLine, hiroshimadentetsuMiyajima } from './chugoku-more3';
+import { iyotetsuTakahama, iyotetsuYokogawara, iyotetsuGunchu, tosadentsuAki, tosadentsuIno, asaKaiganRailway } from './shikoku-more3';
+import { jrHisatsuLine, jrKittoLine, matsuuraRailwayDetail, shimabara_detail } from './kyushu-more4';
+import { kobePortLiner, kobeRokkouLiner, hiroshimaAstramLine, osakaMonorailSaito, keihanNakanoshima, noseDentetsuMyoken, kobeDentetsuAwoline } from './new-urban-transit';
 
 export const routes = {
   yamanote,
@@ -601,6 +610,58 @@ export const routes = {
   kyotoSubwayKarasuma,
   kyotoSubwayTozai,
   keifukuArashiyama,
+  // 東北JR追加2
+  jrHachinoheLineOuter,
+  jrTadamiLine,
+  jrYonesakaLine,
+  // 東北・関東私鉄追加3
+  aizuRailway,
+  yaganRailway,
+  tobuSanoLine,
+  tobuKiryuLine,
+  // 中部・北陸追加2
+  notaRailway,
+  echizentetsudoMikuni,
+  hokutetsuAsanogawa,
+  jrKuzuryuLine,
+  tenryuHamanako,
+  // 近畿丹後・近江追加
+  kyototangoMiyafuku,
+  kyototangoMiyatoyo,
+  kyototangoMiyamai,
+  omiRailwayMain,
+  shigarakiRailway,
+  // 近畿JR・私鉄追加2
+  jrBantanLine,
+  jrKakogawaLine,
+  chizuExpressLine,
+  sangiBonsen,
+  igaRailway,
+  // 中国追加3
+  wakasaRailway,
+  nishikigawaRailway,
+  jrGantokuLine,
+  hiroshimadentetsuMiyajima,
+  // 四国追加3
+  iyotetsuTakahama,
+  iyotetsuYokogawara,
+  iyotetsuGunchu,
+  tosadentsuAki,
+  tosadentsuIno,
+  asaKaiganRailway,
+  // 九州追加4
+  jrHisatsuLine,
+  jrKittoLine,
+  matsuuraRailwayDetail,
+  shimabara_detail,
+  // 新交通・都市鉄道追加
+  kobePortLiner,
+  kobeRokkouLiner,
+  hiroshimaAstramLine,
+  osakaMonorailSaito,
+  keihanNakanoshima,
+  noseDentetsuMyoken,
+  kobeDentetsuAwoline,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -1063,6 +1124,58 @@ export const routeColors = {
   kyotoSubwayKarasuma: '#009944',
   kyotoSubwayTozai: '#E60026',
   keifukuArashiyama: '#9B1889',
+  // 東北JR追加2
+  jrHachinoheLineOuter: '#009944',
+  jrTadamiLine: '#009944',
+  jrYonesakaLine: '#009944',
+  // 東北・関東私鉄追加3
+  aizuRailway: '#E60026',
+  yaganRailway: '#009944',
+  tobuSanoLine: '#004098',
+  tobuKiryuLine: '#004098',
+  // 中部・北陸追加2
+  notaRailway: '#0072BC',
+  echizentetsudoMikuni: '#E60026',
+  hokutetsuAsanogawa: '#0072BC',
+  jrKuzuryuLine: '#009944',
+  tenryuHamanako: '#F68B1E',
+  // 近畿丹後・近江追加
+  kyototangoMiyafuku: '#0072BC',
+  kyototangoMiyatoyo: '#0072BC',
+  kyototangoMiyamai: '#0072BC',
+  omiRailwayMain: '#E60026',
+  shigarakiRailway: '#009944',
+  // 近畿JR・私鉄追加2
+  jrBantanLine: '#009944',
+  jrKakogawaLine: '#009944',
+  chizuExpressLine: '#0072BC',
+  sangiBonsen: '#E60026',
+  igaRailway: '#E60026',
+  // 中国追加3
+  wakasaRailway: '#F68B1E',
+  nishikigawaRailway: '#009944',
+  jrGantokuLine: '#009944',
+  hiroshimadentetsuMiyajima: '#E60026',
+  // 四国追加3
+  iyotetsuTakahama: '#E60026',
+  iyotetsuYokogawara: '#E60026',
+  iyotetsuGunchu: '#E60026',
+  tosadentsuAki: '#F68B1E',
+  tosadentsuIno: '#F68B1E',
+  asaKaiganRailway: '#009944',
+  // 九州追加4
+  jrHisatsuLine: '#009944',
+  jrKittoLine: '#009944',
+  matsuuraRailwayDetail: '#F68B1E',
+  shimabara_detail: '#E60026',
+  // 新交通・都市鉄道追加
+  kobePortLiner: '#0072BC',
+  kobeRokkouLiner: '#0072BC',
+  hiroshimaAstramLine: '#9B1889',
+  osakaMonorailSaito: '#F68B1E',
+  keihanNakanoshima: '#008E42',
+  noseDentetsuMyoken: '#E60026',
+  kobeDentetsuAwoline: '#E60026',
 };
 
 export const routeNames = {
@@ -1523,4 +1636,56 @@ export const routeNames = {
   kyotoSubwayKarasuma: '京都市営地下鉄烏丸線',
   kyotoSubwayTozai: '京都市営地下鉄東西線',
   keifukuArashiyama: '嵐電（嵐山本線）',
+  // 東北JR追加2
+  jrHachinoheLineOuter: 'JR八戸線',
+  jrTadamiLine: 'JR只見線',
+  jrYonesakaLine: 'JR米坂線',
+  // 東北・関東私鉄追加3
+  aizuRailway: '会津鉄道会津線',
+  yaganRailway: '野岩鉄道会津鬼怒川線',
+  tobuSanoLine: '東武佐野線',
+  tobuKiryuLine: '東武桐生線',
+  // 中部・北陸追加2
+  notaRailway: 'のと鉄道七尾線',
+  echizentetsudoMikuni: 'えちぜん鉄道三国芦原線',
+  hokutetsuAsanogawa: '北陸鉄道浅野川線',
+  jrKuzuryuLine: 'JR越美北線（九頭竜線）',
+  tenryuHamanako: '天竜浜名湖鉄道',
+  // 近畿丹後・近江追加
+  kyototangoMiyafuku: '京都丹後鉄道宮福線',
+  kyototangoMiyatoyo: '京都丹後鉄道宮豊線',
+  kyototangoMiyamai: '京都丹後鉄道宮舞線',
+  omiRailwayMain: '近江鉄道本線',
+  shigarakiRailway: '信楽高原鐵道',
+  // 近畿JR・私鉄追加2
+  jrBantanLine: 'JR播但線',
+  jrKakogawaLine: 'JR加古川線',
+  chizuExpressLine: '智頭急行智頭線',
+  sangiBonsen: '三岐鉄道本線',
+  igaRailway: '伊賀鉄道伊賀線',
+  // 中国追加3
+  wakasaRailway: '若桜鉄道若桜線',
+  nishikigawaRailway: '錦川鉄道錦川清流線',
+  jrGantokuLine: 'JR岩徳線',
+  hiroshimadentetsuMiyajima: '広島電鉄宮島線',
+  // 四国追加3
+  iyotetsuTakahama: 'いよ鉄道高浜線',
+  iyotetsuYokogawara: 'いよ鉄道横河原線',
+  iyotetsuGunchu: 'いよ鉄道郡中線',
+  tosadentsuAki: 'とさでん交通後免・安芸線',
+  tosadentsuIno: 'とさでん交通伊野線',
+  asaKaiganRailway: '阿佐海岸鉄道阿佐東線',
+  // 九州追加4
+  jrHisatsuLine: 'JR肥薩線',
+  jrKittoLine: 'JR吉都線',
+  matsuuraRailwayDetail: '松浦鉄道西九州線',
+  shimabara_detail: '島原鉄道',
+  // 新交通・都市鉄道追加
+  kobePortLiner: '神戸新交通ポートライナー',
+  kobeRokkouLiner: '神戸新交通六甲ライナー',
+  hiroshimaAstramLine: '広島高速交通アストラムライン',
+  osakaMonorailSaito: '大阪モノレール彩都線',
+  keihanNakanoshima: '京阪中之島線',
+  noseDentetsuMyoken: '能勢電鉄妙見線',
+  kobeDentetsuAwoline: '神戸電鉄粟生線',
 };
