@@ -88,7 +88,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 表示モードの管理
   const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
   const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
-  const [showTravelTimes, setShowTravelTimes] = useState(true);
+  const [showTravelTimes, setShowTravelTimes] = useState(false);
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
   const [showStationNumbers, setShowStationNumbers] = useState(language === 'english');
@@ -2381,11 +2381,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
+                  gap: '8px',
                   fontSize: FS.base,
-                  color: colors.text
+                  color: colors.text,
+                  flexWrap: 'nowrap'
                 }}>
-                  <span style={{ marginRight: '8px' }}>{translateUI('routeRecommendationCount', currentLanguage)}</span>
+                  <span style={{ marginRight: '4px', whiteSpace: 'nowrap' }}>{translateUI('routeRecommendationCount', currentLanguage)}</span>
                   <select
                     value={maxRouteRecommendations}
                     onChange={(e) => setMaxRouteRecommendations(Number(e.target.value))}
@@ -2957,7 +2958,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               border: `1px solid ${colors.border}`,
               borderRadius: '6px',
               boxShadow: `0 2px 6px ${colors.shadow}`,
-              width: '180px',
+              width: '250px',
               zIndex: 1000,
               overflowY: 'hidden',
               display: isFullscreen ? 'flex' : 'block',
