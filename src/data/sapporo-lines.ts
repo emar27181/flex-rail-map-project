@@ -22,7 +22,7 @@ export const sapporoNambokuLine: Station[] = [
 
 // 札幌市営地下鉄 東西線: 宮の沢〜新さっぽろ
 export const sapporoTozaiLine: Station[] = [
-  { name: "宮の沢",   lat: 43.064040, lng: 141.253270, timeToNext: 2 },
+  { name: "宮の沢",   lat: 43.089503, lng: 141.277971, timeToNext: 2 },
   { name: "発寒南",   lat: 43.068620, lng: 141.272550, timeToNext: 2 },
   { name: "琴似",     lat: 43.071980, lng: 141.301470, timeToNext: 2 },
   { name: "二十四軒",  lat: 43.073270, lng: 141.320250, timeToNext: 2 },
@@ -37,7 +37,7 @@ export const sapporoTozaiLine: Station[] = [
   { name: "白石",     lat: 43.058960, lng: 141.397540, timeToNext: 2 },
   { name: "南郷7丁目", lat: 43.055050, lng: 141.411880, timeToNext: 2 },
   { name: "南郷13丁目", lat: 43.053830, lng: 141.425440, timeToNext: 2 },
-  { name: "南郷18丁目", lat: 43.051650, lng: 141.435660, timeToNext: 2 },
+  { name: "南郷18丁目", lat: 43.030362, lng: 141.435270, timeToNext: 2 },
   { name: "大谷地",   lat: 43.046910, lng: 141.445560, timeToNext: 2 },
   { name: "ひばりが丘", lat: 43.040960, lng: 141.455300, timeToNext: 2 },
   { name: "新さっぽろ", lat: 43.035010, lng: 141.468830, timeToNext: 0 },
@@ -58,7 +58,7 @@ export const sapporoTohoLine: Station[] = [
   { name: "豊平公園",  lat: 43.038020, lng: 141.365610, timeToNext: 2 },
   { name: "美園",     lat: 43.030040, lng: 141.376660, timeToNext: 2 },
   { name: "月寒中央",  lat: 43.022200, lng: 141.379050, timeToNext: 2 },
-  { name: "福住",     lat: 43.015110, lng: 141.373900, timeToNext: 0 },
+  { name: "福住",     lat: 43.021849, lng: 141.402877, timeToNext: 0 },
 ];
 
 // JR函館本線（札幌〜旭川）
@@ -92,10 +92,10 @@ export const jrChitoseLine: Station[] = [
   { name: "南千歳",   lat: 42.801180, lng: 141.658550, timeToNext: 5 },
   { name: "千歳",     lat: 42.825640, lng: 141.652370, timeToNext: 7 },
   { name: "恵庭",     lat: 42.876000, lng: 141.577070, timeToNext: 6 },
-  { name: "恵み野",   lat: 42.895120, lng: 141.554200, timeToNext: 5 },
-  { name: "島松",     lat: 42.948620, lng: 141.538820, timeToNext: 7 },
+  { name: "恵み野",   lat: 42.902410, lng: 141.574327, timeToNext: 5 },
+  { name: "島松",     lat: 42.922027, lng: 141.573172, timeToNext: 7 },
   { name: "北広島",   lat: 42.986820, lng: 141.562450, timeToNext: 8 },
-  { name: "上野幌",   lat: 43.019190, lng: 141.511210, timeToNext: 5 },
+  { name: "上野幌",   lat: 43.016286, lng: 141.487016, timeToNext: 5 },
   { name: "新札幌",   lat: 43.033130, lng: 141.469760, timeToNext: 6 },
   { name: "平和",     lat: 43.048420, lng: 141.427930, timeToNext: 4 },
   { name: "白石",     lat: 43.060020, lng: 141.401900, timeToNext: 5 },
