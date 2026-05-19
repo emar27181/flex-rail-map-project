@@ -27,17 +27,17 @@ export const joshinDentetsu: Station[] = [
   { name: "高崎商科大学前",     lat: 36.284309, lng: 139.029513, timeToNext: 4 },
   { name: "佐野のわたし",       lat: 36.302587, lng: 139.018284, timeToNext: 4 },
   { name: "馬庭",               lat: 36.261415, lng: 139.009209, timeToNext: 4 },
-  { name: "吉井",               lat: 36.243800, lng: 138.940300, timeToNext: 5 },
+  { name: "吉井",               lat: 36.256054, lng: 138.984292, timeToNext: 5 },
   { name: "西吉井",             lat: 36.255723, lng: 138.96633, timeToNext: 4 },
   { name: "東富岡",             lat: 36.260837, lng: 138.901902, timeToNext: 3 },
   { name: "上州富岡",           lat: 36.255200, lng: 138.886300, timeToNext: 5 },
   { name: "上州七日市",         lat: 36.258802, lng: 138.874883, timeToNext: 5 },
   { name: "上州一ノ宮",         lat: 36.253037, lng: 138.863715, timeToNext: 5 },
   { name: "神農原",             lat: 36.242667, lng: 138.843527, timeToNext: 5 },
-  { name: "上州新屋",           lat: 36.201200, lng: 138.775100, timeToNext: 4 },
-  { name: "上州福島",           lat: 36.200400, lng: 138.753200, timeToNext: 5 },
-  { name: "千平",               lat: 36.193800, lng: 138.728100, timeToNext: 5 },
-  { name: "下仁田",             lat: 36.202200, lng: 138.690100, timeToNext: 0 },
+  { name: "上州新屋",           lat: 36.255955, lng: 138.951622, timeToNext: 4 },
+  { name: "上州福島",           lat: 36.256290, lng: 138.929680, timeToNext: 5 },
+  { name: "千平",               lat: 36.230199, lng: 138.798843, timeToNext: 5 },
+  { name: "下仁田",             lat: 36.210465, lng: 138.786408, timeToNext: 0 },
 ];
 
 // 関東鉄道常総線: 取手〜下館
@@ -64,7 +64,7 @@ export const kantoRailwayJoso: Station[] = [
   { name: "下妻",               lat: 36.183600, lng: 139.960600, timeToNext: 10 },
   { name: "大宝",               lat: 36.208700, lng: 139.987200, timeToNext: 5 },
   { name: "騰波ノ江",           lat: 36.223256, lng: 139.976435, timeToNext: 5 },
-  { name: "黒子",               lat: 36.253200, lng: 140.014400, timeToNext: 5 },
-  { name: "大田郷",             lat: 36.272900, lng: 140.020100, timeToNext: 5 },
+  { name: "黒子",               lat: 36.247311, lng: 139.974993, timeToNext: 5 },
+  { name: "大田郷",             lat: 36.278214, lng: 139.959641, timeToNext: 5 },
   { name: "下館",               lat: 36.295400, lng: 139.982200, timeToNext: 0 },
 ];

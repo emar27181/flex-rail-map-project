@@ -40,8 +40,8 @@ export const shinkeisei2: Station[] = [
   { name: "高根木戸",   lat: 35.698280, lng: 140.008720, timeToNext: 3 },
   { name: "北習志野",   lat: 35.693390, lng: 140.020880, timeToNext: 3 },
   { name: "習志野",    lat: 35.687900, lng: 140.027270, timeToNext: 3 },
-  { name: "薬園台",    lat: 35.677100, lng: 140.025960, timeToNext: 3 },
-  { name: "前原",      lat: 35.663720, lng: 140.025160, timeToNext: 3 },
+  { name: "薬園台",    lat: 35.710159, lng: 140.037704, timeToNext: 3 },
+  { name: "前原",      lat: 35.700952, lng: 140.027839, timeToNext: 3 },
   { name: "京成津田沼",  lat: 35.671780, lng: 140.018720, timeToNext: 0 },
 ];
 
@@ -51,10 +51,10 @@ export const shinkeisei2: Station[] = [
 // 流鉄流山線: 馬橋〜流山
 export const ryutetsuLine: Station[] = [
   { name: "馬橋",      lat: 35.794790, lng: 139.892700, timeToNext: 3 },
-  { name: "幸谷",      lat: 35.800030, lng: 139.884620, timeToNext: 3 },
-  { name: "小金城趾",   lat: 35.806020, lng: 139.876100, timeToNext: 3 },
-  { name: "鰭ヶ崎",    lat: 35.813400, lng: 139.864780, timeToNext: 3 },
-  { name: "平和台",    lat: 35.817310, lng: 139.855860, timeToNext: 3 },
+  { name: "幸谷",      lat: 35.826597, lng: 139.919820, timeToNext: 3 },
+  { name: "小金城趾",   lat: 35.835747, lng: 139.917342, timeToNext: 3 },
+  { name: "鰭ヶ崎",    lat: 35.841010, lng: 139.910894, timeToNext: 3 },
+  { name: "平和台",    lat: 35.850878, lng: 139.901089, timeToNext: 3 },
   { name: "流山",      lat: 35.828380, lng: 139.900100, timeToNext: 0 },
 ];
 
@@ -64,10 +64,10 @@ export const choshiDenki: Station[] = [
   { name: "仲ノ町",    lat: 35.727320, lng: 140.824040, timeToNext: 3 },
   { name: "観音",      lat: 35.722300, lng: 140.827480, timeToNext: 3 },
   { name: "本銚子",    lat: 35.715940, lng: 140.825500, timeToNext: 3 },
-  { name: "笠上黒生",   lat: 35.704960, lng: 140.814990, timeToNext: 3 },
-  { name: "西海鹿島",   lat: 35.693560, lng: 140.805680, timeToNext: 3 },
-  { name: "海鹿島",    lat: 35.682360, lng: 140.794660, timeToNext: 3 },
-  { name: "君ヶ浜",    lat: 35.672690, lng: 140.783520, timeToNext: 3 },
+  { name: "笠上黒生",   lat: 35.728429, lng: 140.857086, timeToNext: 3 },
+  { name: "西海鹿島",   lat: 35.725413, lng: 140.859857, timeToNext: 3 },
+  { name: "海鹿島",    lat: 35.721792, lng: 140.863544, timeToNext: 3 },
+  { name: "君ヶ浜",    lat: 35.713550, lng: 140.860502, timeToNext: 3 },
   { name: "犬吠",      lat: 35.707620, lng: 140.870080, timeToNext: 3 },
   { name: "外川",      lat: 35.699290, lng: 140.878010, timeToNext: 0 },
 ];
