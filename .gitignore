@@ -41,3 +41,9 @@ project-stations.txt
 # Development notes
 TODO.md
 station-coordinate-fix-log.md
+
+# Generated coordinate exports
+scripts/all-coordinates.csv
+scripts/station-analysis-output.json
+scripts/kanto-all-stations.json
+scripts/missing-stations-report.json
