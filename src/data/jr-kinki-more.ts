@@ -84,18 +84,20 @@ export const jrKansaiMainLine: Station[] = [
 
 // 和歌山電鐵貴志川線: 和歌山〜貴志
 export const wakayamaDenwKishiLine: Station[] = [
-  { name: "和歌山",    lat: 34.231270, lng: 135.174500, timeToNext: 3 },
-  { name: "田中口",    lat: 34.236720, lng: 135.178970, timeToNext: 3 },
-  { name: "日前宮",    lat: 34.237040, lng: 135.185270, timeToNext: 3 },
-  { name: "県前",      lat: 34.235830, lng: 135.192190, timeToNext: 3 },
-  { name: "岡崎前",    lat: 34.203461, lng: 135.224996, timeToNext: 3 },
-  { name: "吉礼",      lat: 34.203393, lng: 135.236127, timeToNext: 3 },
-  { name: "伊太祁曽",   lat: 34.214190, lng: 135.260760, timeToNext: 3 },
-  { name: "山東",      lat: 34.205838, lng: 135.262512, timeToNext: 3 },
-  { name: "大池遊園",   lat: 34.200560, lng: 135.304130, timeToNext: 3 },
-  { name: "西山口",    lat: 34.209767, lng: 135.291258, timeToNext: 3 },
-  { name: "甘露寺前",   lat: 34.213343, lng: 135.301459, timeToNext: 3 },
-  { name: "貴志",      lat: 34.209368, lng: 135.312009, timeToNext: 0 },
+  { name: "和歌山",         lat: 34.232608, lng: 135.191217, timeToNext: 3 },
+  { name: "田中口",         lat: 34.227017, lng: 135.193134, timeToNext: 3 },
+  { name: "日前宮",         lat: 34.226448, lng: 135.201818, timeToNext: 3 },
+  { name: "神前",           lat: 34.213151, lng: 135.205128, timeToNext: 3 },
+  { name: "竈山",           lat: 34.207289, lng: 135.207221, timeToNext: 4 },
+  { name: "交通センター前", lat: 34.203824, lng: 135.218173, timeToNext: 3 },
+  { name: "岡崎前",         lat: 34.203461, lng: 135.224996, timeToNext: 4 },
+  { name: "吉礼",           lat: 34.203393, lng: 135.236127, timeToNext: 4 },
+  { name: "伊太祁曽",       lat: 34.204210, lng: 135.251341, timeToNext: 5 },
+  { name: "山東",           lat: 34.205866, lng: 135.262500, timeToNext: 5 },
+  { name: "大池遊園",       lat: 34.204769, lng: 135.285577, timeToNext: 3 },
+  { name: "西山口",         lat: 34.209784, lng: 135.291241, timeToNext: 4 },
+  { name: "甘露寺前",       lat: 34.213321, lng: 135.301458, timeToNext: 4 },
+  { name: "貴志",           lat: 34.209368, lng: 135.311980, timeToNext: 0 },
 ];
 
 // 南海空港線: 泉佐野〜関西空港
