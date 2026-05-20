@@ -151,6 +151,25 @@ import { wakasaRailway, nishikigawaRailway, jrGantokuLine, hiroshimadentetsuMiya
 import { iyotetsuTakahama, iyotetsuYokogawara, iyotetsuGunchu, tosadentsuAki, tosadentsuIno, asaKaiganRailway } from './shikoku-more3';
 import { jrHisatsuLine, jrKittoLine, matsuuraRailwayDetail, shimabara_detail } from './kyushu-more4';
 import { kobePortLiner, kobeRokkouLiner, hiroshimaAstramLine, osakaMonorailSaito, keihanNakanoshima, noseDentetsuMyoken, kobeDentetsuAwoline } from './new-urban-transit';
+import { jrSenzanLine, jrAterazawaLine } from './tohoku-jr-more3';
+import { jrJoetsuLine, jrOuMainLineMid } from './jr-kanto-tohoku-more';
+import { nishitetsuDazaifuLine, tobuKinugawaLine, isumiRailway, kantoRailwayRyugasaki } from './misc-new-lines';
+import { jrOsakaTozaiLine, nagoyaAonamiLine } from './osaka-nagoya-more';
+import { jrOsakaHigashiLine, jrGakuendaiLine } from './hokkaido-osaka-more';
+import { jrShinetsuNaoetsu } from './jr-niigata-more';
+import { fukushimaIizakaLine, jrIshinomakiLine, omiTagaLine, omiYokaichLine } from './various-more-lines';
+import { tobuUtsunomiyaLine, keikyuZushiLine, tokyuKodomoLine } from './kanto-misc-lines';
+import { jrJohanaLine, jrHimiLine, eizanKuramaLine, nankaKadaLine, jrSakaiLine } from './hokuriku-kinki-new';
+import { jrFukuchiyamaLine, kobeDentetsuSandaLine } from './kinki-fukuchiyama';
+import { hapirainFukui } from './hapirainfukui';
+import { jrWakamatsuLine, jrKashiiLine, jrHaradaLine, keifukuKitanoLine } from './kyushu-kinki-new';
+import { jrObamaLine, jrInbiLine } from './jr-obama-inbi';
+import { jrFukuhoLine, jrMaizuruLine } from './jr-kyushu-maizuru';
+import { jrSaninKyotoTottori } from './jr-sanin-kyoto-tottori';
+import { jrHokurikuMaibaraToTsuruga } from './jr-hokuriku-maibara';
+import { tarumiRailway, nagaraRailway, meichiRailway, iseTetsudo } from './chubu-missing-lines';
+import { jrTsuyamaLine, kintetsuIkomaLine, kintetsuTawaramoto, nankaShiomibashiLine, nankaTanagawaLine } from './kinki-chugoku-more';
+import { keihanKatanoLine, keihanKamotoline, hanshinMukogawaLine, jrWadamisakiLine, kintetsuShigiLine, noseDentetsuNisshoLine } from './kinki-branch-lines';
 
 export const routes = {
   yamanote,
@@ -662,6 +681,74 @@ export const routes = {
   keihanNakanoshima,
   noseDentetsuMyoken,
   kobeDentetsuAwoline,
+  // 東北JR追加3
+  jrSenzanLine,
+  jrAterazawaLine,
+  // 関東・東北JR追加
+  jrJoetsuLine,
+  jrOuMainLineMid,
+  // 各地私鉄・三セク追加
+  nishitetsuDazaifuLine,
+  tobuKinugawaLine,
+  isumiRailway,
+  kantoRailwayRyugasaki,
+  // 大阪・名古屋追加
+  jrOsakaTozaiLine,
+  nagoyaAonamiLine,
+  jrOsakaHigashiLine,
+  jrGakuendaiLine,
+  // 新潟追加
+  jrShinetsuNaoetsu,
+  // 東北・近江追加
+  fukushimaIizakaLine,
+  jrIshinomakiLine,
+  omiTagaLine,
+  omiYokaichLine,
+  // 関東・北陸・近畿・中国追加
+  tobuUtsunomiyaLine,
+  keikyuZushiLine,
+  tokyuKodomoLine,
+  jrJohanaLine,
+  jrHimiLine,
+  eizanKuramaLine,
+  nankaKadaLine,
+  jrSakaiLine,
+  // 近畿・北陸追加2
+  jrFukuchiyamaLine,
+  kobeDentetsuSandaLine,
+  hapirainFukui,
+  // 九州・近畿追加
+  jrWakamatsuLine,
+  jrKashiiLine,
+  jrHaradaLine,
+  keifukuKitanoLine,
+  // JR小浜線・因美線・筑豊本線・舞鶴線
+  jrObamaLine,
+  jrInbiLine,
+  jrFukuhoLine,
+  jrMaizuruLine,
+  // JR山陰本線（京都〜鳥取）
+  jrSaninKyotoTottori,
+  // JR北陸本線（米原〜敦賀）
+  jrHokurikuMaibaraToTsuruga,
+  // 中部未収録路線
+  tarumiRailway,
+  nagaraRailway,
+  meichiRailway,
+  iseTetsudo,
+  // 近畿・中国未収録路線
+  jrTsuyamaLine,
+  kintetsuIkomaLine,
+  kintetsuTawaramoto,
+  nankaShiomibashiLine,
+  nankaTanagawaLine,
+  // 近畿支線
+  keihanKatanoLine,
+  keihanKamotoline,
+  hanshinMukogawaLine,
+  jrWadamisakiLine,
+  kintetsuShigiLine,
+  noseDentetsuNisshoLine,
 };
 
 export type RouteKey = keyof typeof routes;
@@ -1176,6 +1263,74 @@ export const routeColors = {
   keihanNakanoshima: '#008E42',
   noseDentetsuMyoken: '#E60026',
   kobeDentetsuAwoline: '#E60026',
+  // 東北JR追加3
+  jrSenzanLine: '#009944',
+  jrAterazawaLine: '#F68B1E',
+  // 関東・東北JR追加
+  jrJoetsuLine: '#009944',
+  jrOuMainLineMid: '#F68B1E',
+  // 各地私鉄・三セク追加
+  nishitetsuDazaifuLine: '#E60026',
+  tobuKinugawaLine: '#004098',
+  isumiRailway: '#F68B1E',
+  kantoRailwayRyugasaki: '#009944',
+  // 大阪・名古屋追加
+  jrOsakaTozaiLine: '#009944',
+  nagoyaAonamiLine: '#0072BC',
+  jrOsakaHigashiLine: '#009944',
+  jrGakuendaiLine: '#009944',
+  // 新潟追加
+  jrShinetsuNaoetsu: '#009944',
+  // 東北・近江追加
+  fukushimaIizakaLine: '#E60026',
+  jrIshinomakiLine: '#009944',
+  omiTagaLine: '#E60026',
+  omiYokaichLine: '#E60026',
+  // 関東・北陸・近畿・中国追加
+  tobuUtsunomiyaLine: '#004098',
+  keikyuZushiLine: '#E60026',
+  tokyuKodomoLine: '#FF8800',
+  jrJohanaLine: '#009944',
+  jrHimiLine: '#009944',
+  eizanKuramaLine: '#E60026',
+  nankaKadaLine: '#0080C6',
+  jrSakaiLine: '#009944',
+  // 近畿・北陸追加2
+  jrFukuchiyamaLine: '#009944',
+  kobeDentetsuSandaLine: '#E60026',
+  hapirainFukui: '#0080C6',
+  // 九州・近畿追加
+  jrWakamatsuLine: '#009944',
+  jrKashiiLine: '#009944',
+  jrHaradaLine: '#009944',
+  keifukuKitanoLine: '#9B1889',
+  // JR小浜線・因美線・筑豊本線・舞鶴線
+  jrObamaLine: '#009944',
+  jrInbiLine: '#009944',
+  jrFukuhoLine: '#009944',
+  jrMaizuruLine: '#009944',
+  // JR山陰本線（京都〜鳥取）
+  jrSaninKyotoTottori: '#009944',
+  // JR北陸本線（米原〜敦賀）
+  jrHokurikuMaibaraToTsuruga: '#009944',
+  // 中部未収録路線
+  tarumiRailway: '#0080C6',
+  nagaraRailway: '#E60026',
+  meichiRailway: '#F68B1E',
+  iseTetsudo: '#009944',
+  // 近畿・中国未収録路線
+  jrTsuyamaLine: '#009944',
+  kintetsuIkomaLine: '#F08000',
+  kintetsuTawaramoto: '#F08000',
+  nankaShiomibashiLine: '#0080C6',
+  nankaTanagawaLine: '#0080C6',
+  // 近畿支線
+  keihanKatanoLine: '#E41E20',
+  keihanKamotoline: '#E41E20',
+  hanshinMukogawaLine: '#0070C0',
+  jrWadamisakiLine: '#009944',
+  kintetsuShigiLine: '#F08000',
+  noseDentetsuNisshoLine: '#E60026',
 };
 
 export const routeNames = {
@@ -1688,4 +1843,72 @@ export const routeNames = {
   keihanNakanoshima: '京阪中之島線',
   noseDentetsuMyoken: '能勢電鉄妙見線',
   kobeDentetsuAwoline: '神戸電鉄粟生線',
+  // 東北JR追加3
+  jrSenzanLine: 'JR仙山線',
+  jrAterazawaLine: 'JR左沢線',
+  // 関東・東北JR追加
+  jrJoetsuLine: 'JR上越線',
+  jrOuMainLineMid: 'JR奥羽本線（新庄〜秋田）',
+  // 各地私鉄・三セク追加
+  nishitetsuDazaifuLine: '西鉄太宰府線',
+  tobuKinugawaLine: '東武鬼怒川線',
+  isumiRailway: 'いすみ鉄道',
+  kantoRailwayRyugasaki: '関東鉄道竜ヶ崎線',
+  // 大阪・名古屋追加
+  jrOsakaTozaiLine: 'JR東西線（大阪）',
+  nagoyaAonamiLine: 'あおなみ線',
+  jrOsakaHigashiLine: 'JR大阪東線',
+  jrGakuendaiLine: 'JR学園都市線',
+  // 新潟追加
+  jrShinetsuNaoetsu: 'JR信越本線（長岡〜直江津）',
+  // 東北・近江追加
+  fukushimaIizakaLine: '福島交通飯坂線',
+  jrIshinomakiLine: 'JR石巻線',
+  omiTagaLine: '近江鉄道多賀線',
+  omiYokaichLine: '近江鉄道八日市線',
+  // 関東・北陸・近畿・中国追加
+  tobuUtsunomiyaLine: '東武宇都宮線',
+  keikyuZushiLine: '京急逗子線',
+  tokyuKodomoLine: '東急こどもの国線',
+  jrJohanaLine: 'JR城端線',
+  jrHimiLine: 'JR氷見線',
+  eizanKuramaLine: '叡山電鉄鞍馬線',
+  nankaKadaLine: '南海加太線',
+  jrSakaiLine: 'JR境線',
+  // 近畿・北陸追加2
+  jrFukuchiyamaLine: 'JR福知山線',
+  kobeDentetsuSandaLine: '神戸電鉄三田線',
+  hapirainFukui: 'ハピラインふくい',
+  // 九州・近畿追加
+  jrWakamatsuLine: 'JR若松線',
+  jrKashiiLine: 'JR香椎線',
+  jrHaradaLine: 'JR原田線',
+  keifukuKitanoLine: '嵐電北野線',
+  // JR小浜線・因美線・筑豊本線・舞鶴線
+  jrObamaLine: 'JR小浜線',
+  jrInbiLine: 'JR因美線',
+  jrFukuhoLine: 'JR筑豊本線（福北ゆたか線）',
+  jrMaizuruLine: 'JR舞鶴線',
+  // JR山陰本線（京都〜鳥取）
+  jrSaninKyotoTottori: 'JR山陰本線（京都〜鳥取）',
+  // JR北陸本線（米原〜敦賀）
+  jrHokurikuMaibaraToTsuruga: 'JR北陸本線（米原〜敦賀）',
+  // 中部未収録路線
+  tarumiRailway: '樽見鉄道',
+  nagaraRailway: '長良川鉄道',
+  meichiRailway: '明知鉄道',
+  iseTetsudo: '伊勢鉄道（伊勢線）',
+  // 近畿・中国未収録路線
+  jrTsuyamaLine: 'JR津山線',
+  kintetsuIkomaLine: '近鉄生駒線',
+  kintetsuTawaramoto: '近鉄田原本線',
+  nankaShiomibashiLine: '南海汐見橋線',
+  nankaTanagawaLine: '南海多奈川線',
+  // 近畿支線
+  keihanKatanoLine: '京阪交野線',
+  keihanKamotoline: '京阪鴨東線',
+  hanshinMukogawaLine: '阪神武庫川線',
+  jrWadamisakiLine: 'JR和田岬線',
+  kintetsuShigiLine: '近鉄信貴線',
+  noseDentetsuNisshoLine: '能勢電鉄日生線',
 };
