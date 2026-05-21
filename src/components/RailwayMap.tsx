@@ -1252,6 +1252,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         setAvailableRoutes(routesUsedInRecommendations);
       }
 
+      // 出発・到着駅が両方揃ったら地図をその範囲に合わせる
+      if (mapRef.current) {
+        const lats = [departure.lat, arrival.lat];
+        const lngs = [departure.lng, arrival.lng];
+        const bounds: [[number, number], [number, number]] = [
+          [Math.min(...lats), Math.min(...lngs)],
+          [Math.max(...lats), Math.max(...lngs)],
+        ];
+        mapRef.current.fitBounds(bounds, { padding: [60, 60], maxZoom: 13 });
+      }
+
       // visibleRoutesの制御は時間フィルターのuseEffectで行う
     } else {
       setRouteRecommendations([]);
@@ -1911,6 +1922,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       mapRef.current = map;
       const b = map.getBounds();
       setViewBounds({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
+
+      // 初期表示時に出発・到着駅が両方設定済みならその範囲にフィット
+      if (departure && arrival) {
+        const bounds: [[number, number], [number, number]] = [
+          [Math.min(departure.lat, arrival.lat), Math.min(departure.lng, arrival.lng)],
+          [Math.max(departure.lat, arrival.lat), Math.max(departure.lng, arrival.lng)],
+        ];
+        map.fitBounds(bounds, { padding: [60, 60], maxZoom: 13 });
+      }
     }
 
     // タイル非表示時の背景色をマウント直後に適用
