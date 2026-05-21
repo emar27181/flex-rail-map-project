@@ -96,6 +96,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showStationNumbers, setShowStationNumbers] = useState(language === 'english');
   const [showOsmTiles, setShowOsmTiles] = useState(true);
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
+  const [tapToggleMode, setTapToggleMode] = useState(false);
   // 地図表示モード
   const [mapViewMode, setMapViewMode] = useState<'realistic' | 'schematic'>('realistic');
 
@@ -2025,6 +2026,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           opacity={0}
           eventHandlers={{
             click: (e) => {
+              if (tapToggleMode) {
+                // 表示切替モード: 路線の表示/非表示をトグル
+                const newVisibleRoutes = new Set(visibleRoutes);
+                if (newVisibleRoutes.has(routeKey)) {
+                  newVisibleRoutes.delete(routeKey);
+                } else {
+                  newVisibleRoutes.add(routeKey);
+                }
+                setVisibleRoutes(newVisibleRoutes);
+                justClickedLayerRef.current = true;
+                return;
+              }
               console.log('🔴🔴🔴 ROUTE CLICKED:', routeKey);
               const { latlng } = e;
               console.log('🔴 Click position:', latlng);
@@ -2835,6 +2848,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           )}
 
           {/* 列車位置デモ トグルボタン（リアル地図モードのみ） */}
+          {/* 表示タップ切替モードボタン */}
+          <button
+            onClick={() => setTapToggleMode(v => !v)}
+            style={{
+              position: 'absolute', bottom: 90, left: 8, zIndex: 1000,
+              backgroundColor: tapToggleMode ? '#FF9800' : colors.surfaceElevated,
+              border: `2px solid ${tapToggleMode ? '#e65100' : colors.borderLight}`,
+              borderRadius: '4px', padding: '4px 8px', fontSize: '11px',
+              color: tapToggleMode ? '#fff' : colors.textSecondary,
+              cursor: 'pointer', boxShadow: `0 1px 4px ${colors.shadow}`,
+              whiteSpace: 'nowrap',
+              fontWeight: tapToggleMode ? 'bold' : 'normal',
+            }}
+          >
+            {tapToggleMode ? '✕ 切替モード中' : '👁 表示切替'}
+          </button>
+
           {mapViewMode === 'realistic' && (
             <button
               onClick={() => { setShowTrainDemo(v => !v); if (!showTrainDemo) { setTrainDemoMinutes(12 * 60); setTrainDemoPlaying(true); } }}
