@@ -329,14 +329,21 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     onClick={clearDeparture}
                     style={{
                       position: 'absolute',
-                      right: '5px',
+                      right: '2px',
                       top: '50%',
                       transform: 'translateY(-50%)',
                       background: 'none',
                       border: 'none',
                       cursor: 'pointer',
-                      fontSize: FS.base,
-                      color: colors.textSecondary
+                      fontSize: '18px',
+                      color: colors.textSecondary,
+                      padding: '4px 8px',
+                      lineHeight: '1',
+                      minWidth: '32px',
+                      minHeight: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
                     ×
@@ -498,14 +505,21 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     onClick={clearArrival}
                     style={{
                       position: 'absolute',
-                      right: '5px',
+                      right: '2px',
                       top: '50%',
                       transform: 'translateY(-50%)',
                       background: 'none',
                       border: 'none',
                       cursor: 'pointer',
-                      fontSize: FS.base,
-                      color: colors.textSecondary
+                      fontSize: '18px',
+                      color: colors.textSecondary,
+                      padding: '4px 8px',
+                      lineHeight: '1',
+                      minWidth: '32px',
+                      minHeight: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
                     ×
