@@ -52,6 +52,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const colors = getThemeColors(theme);
 
   const [mapCenter, setMapCenter] = useState<[number, number]>([35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
+  const [viewCenter, setViewCenter] = useState<[number, number]>([35.57765, 139.66165]); // Updates on moveend/zoomend
   const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
   const [availableRoutes, setAvailableRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
   const [isClient, setIsClient] = useState(false);
@@ -1104,6 +1105,27 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return filteredRoutes;
   }, [availableRoutes]);
 
+  // 駅マーカー表示制限: 画面中心から近い駅をMAX_MARKER_STATIONS件だけ表示（フリーズ防止）
+  const MAX_MARKER_STATIONS = 100;
+  const allowedStationNames = useMemo(() => {
+    const allStations: Array<{ name: string; lat: number; lng: number }> = [];
+    visibleRoutesData.forEach(([, stationList]) => {
+      (stationList as Station[]).forEach(s => {
+        allStations.push({ name: s.name, lat: s.lat, lng: s.lng });
+      });
+    });
+    if (allStations.length <= MAX_MARKER_STATIONS) return null; // 少ない場合は制限なし
+    const [cLat, cLng] = viewCenter;
+    allStations.sort((a, b) => {
+      const da = (a.lat - cLat) ** 2 + (a.lng - cLng) ** 2;
+      const db = (b.lat - cLat) ** 2 + (b.lng - cLng) ** 2;
+      return da - db;
+    });
+    const result = new Set<string>();
+    for (let i = 0; i < MAX_MARKER_STATIONS; i++) result.add(allStations[i].name);
+    return result;
+  }, [visibleRoutesData, viewCenter]);
+
 
   useEffect(() => {
     let mounted = true;
@@ -1823,6 +1845,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const map = useMapEvents({
       zoomend: (e) => {
         setZoomLevel(e.target.getZoom());
+        const c = e.target.getCenter();
+        setViewCenter([c.lat, c.lng]);
+      },
+      moveend: (e) => {
+        const c = e.target.getCenter();
+        setViewCenter([c.lat, c.lng]);
       },
       click: () => {
         if (justClickedLayerRef.current) { justClickedLayerRef.current = false; return; }
@@ -1957,7 +1985,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         <Polyline
           positions={segPositions}
           color="transparent"
-          weight={12}
+          weight={20}
           opacity={0}
           eventHandlers={{
             click: (e) => {
@@ -2063,6 +2091,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           const isDeparture = departure && station.name === departure.name;
           const isArrival = arrival && station.name === arrival.name;
           const isSpecialStation = isDeparture || isArrival;
+
+          // 駅マーカー表示上限（特別駅は常に表示）
+          if (!isSpecialStation && allowedStationNames && !allowedStationNames.has(station.name)) {
+            return null;
+          }
 
           if (isSpecialStation) {
             // 駅名表示がオフの場合は特別駅も非表示
@@ -2704,15 +2737,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   const color = adjustRouteColorForTheme(routeColors[rKey] ?? '#888', theme);
                   const positions = (stationList as any[]).map((s: any) => [s.lat, s.lng] as [number, number]);
                   return (
-                    <Polyline key={`dimmed-${rKey}`}
-                      positions={positions} color={color} weight={4} opacity={0.35}
-                      pathOptions={{ cursor: 'pointer' }}
-                      eventHandlers={{ click: (e) => {
-                        justClickedLayerRef.current = true;
-                        const oe = (e as any).originalEvent as MouseEvent;
-                        setDimmedMapTooltip({ routeKey: rKey, x: oe?.clientX ?? 400, y: oe?.clientY ?? 300, isVisible: false });
-                      }}}
-                    />
+                    <React.Fragment key={`dimmed-${rKey}`}>
+                      {/* 視覚的な半透明路線 */}
+                      <Polyline
+                        positions={positions} color={color} weight={3} opacity={0.35}
+                        interactive={false}
+                      />
+                      {/* クリック判定用の透明な太い線 */}
+                      <Polyline
+                        positions={positions} color="transparent" weight={20} opacity={0}
+                        pathOptions={{ cursor: 'pointer' }}
+                        eventHandlers={{ click: (e) => {
+                          justClickedLayerRef.current = true;
+                          const oe = (e as any).originalEvent as MouseEvent;
+                          setDimmedMapTooltip({ routeKey: rKey, x: oe?.clientX ?? 400, y: oe?.clientY ?? 300, isVisible: false });
+                        }}}
+                      />
+                    </React.Fragment>
                   );
                 })
               }
