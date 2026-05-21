@@ -1107,7 +1107,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   }, [availableRoutes]);
 
   // 駅マーカー表示制限: 画面表示範囲内の駅のみ表示（フリーズ防止）
-  const MAX_MARKER_STATIONS = 300;
+  const MAX_MARKER_STATIONS = 400;
   const allowedStationNames = useMemo(() => {
     // boundsが未取得の場合は制限なし（初回表示まで）
     if (!viewBounds) return null;
