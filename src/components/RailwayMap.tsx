@@ -53,6 +53,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   const [mapCenter, setMapCenter] = useState<[number, number]>([35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
   const [viewCenter, setViewCenter] = useState<[number, number]>([35.57765, 139.66165]); // Updates on moveend/zoomend
+  const [viewBounds, setViewBounds] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
   const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
   const [availableRoutes, setAvailableRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
   const [isClient, setIsClient] = useState(false);
@@ -1105,16 +1106,25 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return filteredRoutes;
   }, [availableRoutes]);
 
-  // 駅マーカー表示制限: 画面中心から近い駅をMAX_MARKER_STATIONS件だけ表示（フリーズ防止）
+  // 駅マーカー表示制限: 画面表示範囲内の駅のみ表示（フリーズ防止）
   const MAX_MARKER_STATIONS = 300;
   const allowedStationNames = useMemo(() => {
+    // boundsが未取得の場合は制限なし（初回表示まで）
+    if (!viewBounds) return null;
+    const { north, south, east, west } = viewBounds;
     const allStations: Array<{ name: string; lat: number; lng: number }> = [];
     visibleRoutesData.forEach(([, stationList]) => {
       (stationList as Station[]).forEach(s => {
-        allStations.push({ name: s.name, lat: s.lat, lng: s.lng });
+        if (s.lat <= north && s.lat >= south && s.lng <= east && s.lng >= west) {
+          allStations.push({ name: s.name, lat: s.lat, lng: s.lng });
+        }
       });
     });
-    if (allStations.length <= MAX_MARKER_STATIONS) return null; // 少ない場合は制限なし
+    if (allStations.length <= MAX_MARKER_STATIONS) {
+      // bounds内が上限以下なら全部許可
+      return new Set(allStations.map(s => s.name));
+    }
+    // 上限超過時は中心に近い順で絞る
     const [cLat, cLng] = viewCenter;
     allStations.sort((a, b) => {
       const da = (a.lat - cLat) ** 2 + (a.lng - cLng) ** 2;
@@ -1124,7 +1134,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const result = new Set<string>();
     for (let i = 0; i < MAX_MARKER_STATIONS; i++) result.add(allStations[i].name);
     return result;
-  }, [visibleRoutesData, viewCenter]);
+  }, [visibleRoutesData, viewBounds, viewCenter]);
 
 
   useEffect(() => {
@@ -1847,10 +1857,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         setZoomLevel(e.target.getZoom());
         const c = e.target.getCenter();
         setViewCenter([c.lat, c.lng]);
+        const b = e.target.getBounds();
+        setViewBounds({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
       },
       moveend: (e) => {
         const c = e.target.getCenter();
         setViewCenter([c.lat, c.lng]);
+        const b = e.target.getBounds();
+        setViewBounds({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
       },
       click: () => {
         if (justClickedLayerRef.current) { justClickedLayerRef.current = false; return; }
@@ -1892,9 +1906,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       }
     });
 
-    // mapRefに地図インスタンスを保存
+    // mapRefに地図インスタンスを保存、初回boundsを取得
     if (map && !mapRef.current) {
       mapRef.current = map;
+      const b = map.getBounds();
+      setViewBounds({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
     }
 
     // タイル非表示時の背景色をマウント直後に適用
