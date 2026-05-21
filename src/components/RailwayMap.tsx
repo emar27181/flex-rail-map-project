@@ -542,9 +542,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const vw = typeof window !== 'undefined'
       ? (window.visualViewport?.width ?? window.innerWidth)
       : 800;
-    const vh = typeof window !== 'undefined'
+    const rawVh = typeof window !== 'undefined'
       ? (window.visualViewport?.height ?? window.innerHeight)
       : 600;
+    // モバイルフルスクリーン時はタブバー分(44px)を除いた高さを使用
+    const mobileBottomOffset = (isFullscreen && isMobile) ? 50 : 0;
+    const vh = rawVh - mobileBottomOffset;
     const isMobileView = vw < 500;
     // 幅はビューポートに収まるよう上限を設定
     const TW = Math.min(360, vw - MARGIN * 2);
@@ -635,6 +638,26 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   width: '110px',
                 }}
               />
+              <button
+                onClick={() => {
+                  const now = new Date();
+                  const hh = String(now.getHours()).padStart(2, '0');
+                  const mm = String(now.getMinutes()).padStart(2, '0');
+                  setTimetableBaseTime(`${hh}:${mm}`);
+                }}
+                style={{
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: '3px',
+                  padding: '2px 5px',
+                  fontSize: '10px',
+                  backgroundColor: colors.surface,
+                  color: colors.textSecondary,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                現在
+              </button>
             </div>
           </div>
         </div>
