@@ -2852,7 +2852,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           <button
             onClick={() => setTapToggleMode(v => !v)}
             style={{
-              position: 'absolute', bottom: 90, left: 8, zIndex: 1000,
+              position: 'absolute',
+              ...(isFullscreen && isMobile
+                ? { top: 'calc(env(safe-area-inset-top, 0px) + 10px)', right: 8, bottom: 'auto', left: 'auto' }
+                : { bottom: 90, left: 8 }
+              ),
+              zIndex: 1000,
               backgroundColor: tapToggleMode ? '#FF9800' : colors.surfaceElevated,
               border: `2px solid ${tapToggleMode ? '#e65100' : colors.borderLight}`,
               borderRadius: '4px', padding: '4px 8px', fontSize: '11px',
