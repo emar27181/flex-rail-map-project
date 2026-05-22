@@ -3182,6 +3182,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onShowFuriganaChange={setShowFurigana}
                     onShowOsmTilesChange={setShowOsmTiles}
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
+                    viewCenter={viewCenter}
                   />
 
                   {/* 3. 表示オプション (Display Options) */}

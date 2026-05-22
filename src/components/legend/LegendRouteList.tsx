@@ -4,7 +4,7 @@ import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation';
 import RouteToggleItem from '../ui/RouteToggleItem';
 
-type SortMode = 'name' | 'color' | 'default';
+type SortMode = 'name' | 'color' | 'default' | 'distance';
 
 interface LegendRouteListProps {
   visibleRoutesData: Array<[string, any]>;
@@ -35,6 +35,7 @@ interface LegendRouteListProps {
   onShowFuriganaChange: (value: boolean) => void;
   onShowOsmTilesChange: (value: boolean) => void;
   adjustRouteColorForTheme: (color: string, theme: 'light' | 'dark') => string;
+  viewCenter?: [number, number];
 }
 
 const LegendRouteList: React.FC<LegendRouteListProps> = ({
@@ -65,7 +66,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowStationNumbersChange,
   onShowFuriganaChange,
   onShowOsmTilesChange,
-  adjustRouteColorForTheme
+  adjustRouteColorForTheme,
+  viewCenter,
 }) => {
   const colors = getThemeColors(theme);
   const [sortMode, setSortMode] = useState<SortMode>('name');
@@ -85,7 +87,17 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
     return h * 60;
   };
 
-  const sortedVisibleRoutesData = [...visibleRoutesData].sort(([keyA], [keyB]) => {
+  // 路線の画面中心からの最近接駅距離（度単位の簡易距離）
+  const routeMinDist = (stations: any[]): number => {
+    if (!viewCenter || !stations?.length) return Infinity;
+    const [clat, clng] = viewCenter;
+    return Math.min(...stations.map((s: any) => {
+      const dlat = s.lat - clat, dlng = s.lng - clng;
+      return dlat * dlat + dlng * dlng;
+    }));
+  };
+
+  const sortedVisibleRoutesData = [...visibleRoutesData].sort(([keyA, stationsA], [keyB, stationsB]) => {
     if (sortMode === 'name') {
       const nameA = routeNames[keyA as RouteKey] || '';
       const nameB = routeNames[keyB as RouteKey] || '';
@@ -95,6 +107,9 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
       const colorA = routeColors[keyA as RouteKey] ?? '#888';
       const colorB = routeColors[keyB as RouteKey] ?? '#888';
       return hexToHue(colorA.padEnd(7, '0')) - hexToHue(colorB.padEnd(7, '0'));
+    }
+    if (sortMode === 'distance') {
+      return routeMinDist(stationsA) - routeMinDist(stationsB);
     }
     return 0; // default: 登録順のまま
   });
@@ -290,12 +305,14 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
           {language === 'english' ? 'Sort:' : '並順:'}
         </span>
-        {(['name', 'color', 'default'] as SortMode[]).map(mode => {
+        {(['name', 'color', 'default', 'distance'] as SortMode[]).map(mode => {
           const label = mode === 'name'
             ? (language === 'english' ? 'A-Z' : 'あいうえお')
             : mode === 'color'
               ? (language === 'english' ? 'Color' : '色')
-              : (language === 'english' ? 'Default' : '登録順');
+              : mode === 'distance'
+                ? (language === 'english' ? 'Nearby' : '近い順')
+                : (language === 'english' ? 'Default' : '登録順');
           return (
             <button
               key={mode}
