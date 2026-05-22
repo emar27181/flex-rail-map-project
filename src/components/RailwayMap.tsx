@@ -656,7 +656,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   whiteSpace: 'nowrap',
                 }}
               >
-                現在
+                🕐
               </button>
             </div>
           </div>
@@ -2821,6 +2821,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         pathOptions={{ cursor: 'pointer' }}
                         eventHandlers={{ click: (e) => {
                           justClickedLayerRef.current = true;
+                          if (tapToggleMode) {
+                            // 切替モード：確認なしで即表示
+                            setAvailableRoutes(prev => new Set([...prev, rKey]));
+                            setVisibleRoutes(prev => new Set([...prev, rKey]));
+                            return;
+                          }
                           const oe = (e as any).originalEvent as MouseEvent;
                           setDimmedMapTooltip({ routeKey: rKey, x: oe?.clientX ?? 400, y: oe?.clientY ?? 300, isVisible: false });
                         }}}
@@ -2876,11 +2882,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             onClick={() => setTapToggleMode(v => !v)}
             style={{
               position: 'absolute',
-              ...(isFullscreen && isMobile
+              ...(isFullscreen
                 ? { top: 'calc(env(safe-area-inset-top, 0px) + 10px)', right: 8, bottom: 'auto', left: 'auto' }
                 : { bottom: 90, left: 8 }
               ),
-              zIndex: 1000,
+              zIndex: 1003,
               backgroundColor: tapToggleMode ? '#FF9800' : colors.surfaceElevated,
               border: `2px solid ${tapToggleMode ? '#e65100' : colors.borderLight}`,
               borderRadius: '4px', padding: '4px 8px', fontSize: '11px',
