@@ -2876,13 +2876,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             />
           )}
 
-          {/* 列車位置デモ トグルボタン（リアル地図モードのみ） */}
-          {/* 表示タップ切替モードボタン */}
+          {/* 表示切替モードボタン / 列車デモボタン（モバイル: 右上 / PC: 左下） */}
           <button
             onClick={() => setTapToggleMode(v => !v)}
             style={{
               position: 'absolute',
-              ...(isFullscreen
+              ...(isMobile
                 ? { top: 'calc(env(safe-area-inset-top, 0px) + 10px)', right: 8, bottom: 'auto', left: 'auto' }
                 : { bottom: 90, left: 8 }
               ),
@@ -2903,7 +2902,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             <button
               onClick={() => { setShowTrainDemo(v => !v); if (!showTrainDemo) { setTrainDemoMinutes(12 * 60); setTrainDemoPlaying(true); } }}
               style={{
-                position: 'absolute', bottom: 56, left: 8, zIndex: 1000,
+                position: 'absolute',
+                ...(isMobile
+                  ? { top: 'calc(env(safe-area-inset-top, 0px) + 44px)', right: 8, bottom: 'auto', left: 'auto' }
+                  : { bottom: 56, left: 8 }
+                ),
+                zIndex: 1003,
                 backgroundColor: showTrainDemo ? '#9ACD32' : colors.surfaceElevated,
                 border: `1px solid ${showTrainDemo ? '#7ab020' : colors.borderLight}`,
                 borderRadius: '4px', padding: '4px 8px', fontSize: '11px',
