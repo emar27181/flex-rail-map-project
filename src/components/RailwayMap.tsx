@@ -64,24 +64,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const fg = colors.text;
     const bd = colors.border;
     el.textContent = `
-      .leaflet-tooltip.route-tooltip {
-        background-color: ${bg};
-        color: ${fg};
-        border: 1px solid ${bd};
-        padding: 5px 8px;
-        font-family: inherit;
+      .leaflet-tooltip {
+        background-color: ${bg} !important;
+        color: ${fg} !important;
+        border: 1px solid ${bd} !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.3) !important;
       }
-      .leaflet-tooltip-right.route-tooltip::before {
-        border-right-color: ${bd};
+      .leaflet-tooltip-right::before {
+        border-right-color: ${bd} !important;
       }
-      .leaflet-tooltip-left.route-tooltip::before {
-        border-left-color: ${bd};
+      .leaflet-tooltip-left::before {
+        border-left-color: ${bd} !important;
       }
-      .leaflet-tooltip-top.route-tooltip::before {
-        border-top-color: ${bd};
+      .leaflet-tooltip-top::before {
+        border-top-color: ${bd} !important;
       }
-      .leaflet-tooltip-bottom.route-tooltip::before {
-        border-bottom-color: ${bd};
+      .leaflet-tooltip-bottom::before {
+        border-bottom-color: ${bd} !important;
       }
     `;
   }, [theme]);
@@ -2087,7 +2086,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           }}
           style={{ cursor: 'pointer' }}
         >
-          <Tooltip sticky offset={[10, 0]} direction="right" opacity={0.97} className="route-tooltip">
+          <Tooltip sticky offset={[10, 0]} direction="right" opacity={0.97}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '12px' }}>
               <span style={{
                 display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%',
@@ -2781,7 +2780,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           setDimmedMapTooltip({ routeKey: rKey, x: oe?.clientX ?? 400, y: oe?.clientY ?? 300, isVisible: false });
                         }}}
                       >
-                        <Tooltip sticky offset={[10, 0]} direction="right" opacity={0.97} className="route-tooltip">
+                        <Tooltip sticky offset={[10, 0]} direction="right" opacity={0.97}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '12px' }}>
                             <span style={{
                               display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%',
