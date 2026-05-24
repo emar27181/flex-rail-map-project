@@ -4,7 +4,7 @@
 
 ### improve: 半透明路線にもツールチップ表示・ダークモード対応（`src/components/RailwayMap.tsx`）
 - 区間外（半透明）路線のクリック判定 Polyline にも `<Tooltip sticky>` を追加
-- 全ツールチップの背景・文字色を `colors.surfaceElevated` / `colors.text` で統一し、ダークモードに対応
+- `route-tooltip` classNameと動的CSS注入でLeafletツールチップの背景・文字色・枠線をテーマに合わせて切り替え（ライト: 白背景/灰枠、ダーク: #3a3a3a背景/#404040枠）
 
 ### fix: 路線ホバーツールチップが残り続ける問題を修正（`src/components/RailwayMap.tsx`）
 - 自前の fixed div ホバー表示を廃止し、Leaflet 組み込みの `<Tooltip sticky>` に切り替え

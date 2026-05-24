@@ -51,6 +51,41 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const { theme, toggleTheme } = useTheme();
   const colors = getThemeColors(theme);
 
+  // Leafletツールチップのテーマ対応CSS注入
+  useEffect(() => {
+    const styleId = 'leaflet-route-tooltip-style';
+    let el = document.getElementById(styleId) as HTMLStyleElement | null;
+    if (!el) {
+      el = document.createElement('style');
+      el.id = styleId;
+      document.head.appendChild(el);
+    }
+    const bg = colors.surfaceElevated;
+    const fg = colors.text;
+    const bd = colors.border;
+    el.textContent = `
+      .leaflet-tooltip.route-tooltip {
+        background-color: ${bg};
+        color: ${fg};
+        border: 1px solid ${bd};
+        padding: 5px 8px;
+        font-family: inherit;
+      }
+      .leaflet-tooltip-right.route-tooltip::before {
+        border-right-color: ${bd};
+      }
+      .leaflet-tooltip-left.route-tooltip::before {
+        border-left-color: ${bd};
+      }
+      .leaflet-tooltip-top.route-tooltip::before {
+        border-top-color: ${bd};
+      }
+      .leaflet-tooltip-bottom.route-tooltip::before {
+        border-bottom-color: ${bd};
+      }
+    `;
+  }, [theme]);
+
   const [mapCenter, setMapCenter] = useState<[number, number]>([35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
   const [viewCenter, setViewCenter] = useState<[number, number]>([35.57765, 139.66165]); // Updates on moveend/zoomend
   const [viewBounds, setViewBounds] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
@@ -2052,16 +2087,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           }}
           style={{ cursor: 'pointer' }}
         >
-          <Tooltip sticky offset={[10, 0]} direction="right" opacity={0.97}>
-            <div style={{ margin: '-6px -8px', padding: '5px 8px', backgroundColor: colors.surfaceElevated, color: colors.text, borderRadius: '3px' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '12px' }}>
-                <span style={{
-                  display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%',
-                  backgroundColor: adjustRouteColorForTheme(color, theme), flexShrink: 0,
-                }} />
-                {routeNames[routeKey] || routeKey}
-              </span>
-            </div>
+          <Tooltip sticky offset={[10, 0]} direction="right" opacity={0.97} className="route-tooltip">
+            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '12px' }}>
+              <span style={{
+                display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%',
+                backgroundColor: adjustRouteColorForTheme(color, theme), flexShrink: 0,
+              }} />
+              {routeNames[routeKey] || routeKey}
+            </span>
           </Tooltip>
         </Polyline>
         {/* 実際に見える路線 */}
@@ -2748,16 +2781,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           setDimmedMapTooltip({ routeKey: rKey, x: oe?.clientX ?? 400, y: oe?.clientY ?? 300, isVisible: false });
                         }}}
                       >
-                        <Tooltip sticky offset={[10, 0]} direction="right" opacity={0.97}>
-                          <div style={{ margin: '-6px -8px', padding: '5px 8px', backgroundColor: colors.surfaceElevated, color: colors.text, borderRadius: '3px' }}>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '12px' }}>
-                              <span style={{
-                                display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%',
-                                backgroundColor: color, flexShrink: 0, opacity: 0.7,
-                              }} />
-                              {routeNames[rKey] || rKey}
-                            </span>
-                          </div>
+                        <Tooltip sticky offset={[10, 0]} direction="right" opacity={0.97} className="route-tooltip">
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '12px' }}>
+                            <span style={{
+                              display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%',
+                              backgroundColor: color, flexShrink: 0, opacity: 0.7,
+                            }} />
+                            {routeNames[rKey] || rKey}
+                          </span>
                         </Tooltip>
                       </Polyline>
                     </React.Fragment>
