@@ -61,6 +61,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       document.head.appendChild(el);
     }
     el.textContent = `
+      .leaflet-interactive:focus {
+        outline: none !important;
+      }
       .leaflet-tooltip {
         background-color: rgba(0,0,0,0.65) !important;
         color: #fff !important;
