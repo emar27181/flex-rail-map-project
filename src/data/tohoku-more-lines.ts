@@ -1,0 +1,133 @@
+import type { Station } from './yamanote';
+
+// JR山形新幹線（奥羽本線）: 福島〜新庄
+export const jrYamagataShinkansen: Station[] = [
+  { name: "福島",     lat: 37.751640, lng: 140.467330, timeToNext: 20 },
+  { name: "米沢",     lat: 37.922680, lng: 140.115090, timeToNext: 20 },
+  { name: "高畠",     lat: 37.992415, lng: 140.153131, timeToNext: 10 },
+  { name: "赤湯",     lat: 38.047377, lng: 140.148976, timeToNext: 10 },
+  { name: "かみのやま温泉", lat: 38.152099, lng: 140.278530, timeToNext: 10 },
+  { name: "山形",     lat: 38.256450, lng: 140.340110, timeToNext: 10 },
+  { name: "蔵王",     lat: 38.205957, lng: 140.303623, timeToNext: 10 },
+  { name: "天童",     lat: 38.364350, lng: 140.376630, timeToNext: 10 },
+  { name: "天童南",   lat: 38.343470, lng: 140.376970, timeToNext: 10 },
+  { name: "さくらんぼ東根", lat: 38.428700, lng: 140.388190, timeToNext: 12 },
+  { name: "村山",     lat: 38.488310, lng: 140.384720, timeToNext: 12 },
+  { name: "袖崎",     lat: 38.548874, lng: 140.391589, timeToNext: 10 },
+  { name: "大石田",   lat: 38.593780, lng: 140.376000, timeToNext: 10 },
+  { name: "北大石田",  lat: 38.629988, lng: 140.371140, timeToNext: 10 },
+  { name: "芦沢",     lat: 38.655788, lng: 140.361111, timeToNext: 10 },
+  { name: "新庄",     lat: 38.762020, lng: 140.302770, timeToNext: 0 },
+];
+
+// JR秋田新幹線（田沢湖線・奥羽本線）: 盛岡〜秋田
+export const jrAkitaShinkansen: Station[] = [
+  { name: "盛岡",     lat: 39.701550, lng: 141.134140, timeToNext: 25 },
+  { name: "雫石",     lat: 39.689271, lng: 140.974446, timeToNext: 15 },
+  { name: "田沢湖",   lat: 39.700286, lng: 140.722379, timeToNext: 15 },
+  { name: "角館",     lat: 39.593040, lng: 140.563140, timeToNext: 15 },
+  { name: "大曲",     lat: 39.467160, lng: 140.473840, timeToNext: 25 },
+  { name: "秋田",     lat: 39.716883, lng: 140.129666, timeToNext: 0 },
+];
+
+// JR奥羽本線（秋田〜青森）
+export const jrOuMainLineAkita: Station[] = [
+  { name: "秋田",     lat: 39.716883, lng: 140.129666, timeToNext: 8 },
+  { name: "土崎",     lat: 39.758506, lng: 140.073744, timeToNext: 5 },
+  { name: "上飯島",   lat: 39.777300, lng: 140.084270, timeToNext: 5 },
+  { name: "追分",     lat: 39.809888, lng: 140.057898, timeToNext: 8 },
+  { name: "大久保",   lat: 39.871501, lng: 140.063071, timeToNext: 6 },
+  { name: "羽後飯塚",  lat: 39.899392, lng: 140.073294, timeToNext: 5 },
+  { name: "八郎潟",   lat: 39.947498, lng: 140.078383, timeToNext: 5 },
+  { name: "鯉川",     lat: 39.996229, lng: 140.077478, timeToNext: 5 },
+  { name: "鹿渡",     lat: 40.044375, lng: 140.082637, timeToNext: 6 },
+  { name: "森岳",     lat: 40.103541, lng: 140.071019, timeToNext: 6 },
+  { name: "北金岡",   lat: 40.141467, lng: 140.063640, timeToNext: 5 },
+  { name: "東能代",   lat: 40.191552, lng: 140.065744, timeToNext: 6 },
+  { name: "能代",     lat: 40.206966, lng: 140.033020, timeToNext: 8 },
+  { name: "二ツ井",   lat: 40.212918, lng: 140.236290, timeToNext: 10 },
+  { name: "大館",     lat: 40.272120, lng: 140.554990, timeToNext: 15 },
+  { name: "碇ヶ関",   lat: 40.479377, lng: 140.622318, timeToNext: 12 },
+  { name: "大鰐温泉",  lat: 40.526270, lng: 140.565090, timeToNext: 10 },
+  { name: "弘前",     lat: 40.599551, lng: 140.485209, timeToNext: 15 },
+  { name: "川部",     lat: 40.646998, lng: 140.521533, timeToNext: 10 },
+  { name: "北常盤",   lat: 40.670429, lng: 140.543681, timeToNext: 8 },
+  { name: "浪岡",     lat: 40.705310, lng: 140.582740, timeToNext: 8 },
+  { name: "大釈迦",   lat: 40.756701, lng: 140.587685, timeToNext: 7 },
+  { name: "鶴ヶ坂",   lat: 40.791472, lng: 140.634916, timeToNext: 8 },
+  { name: "津軽新城",  lat: 40.828051, lng: 140.672059, timeToNext: 6 },
+  { name: "新青森",   lat: 40.822330, lng: 140.685290, timeToNext: 5 },
+  { name: "青森",     lat: 40.822340, lng: 140.743630, timeToNext: 0 },
+];
+
+// JR常磐線（いわき〜仙台）
+export const jrJobanLineNorth: Station[] = [
+  { name: "いわき",   lat: 37.047680, lng: 140.888280, timeToNext: 10 },
+  { name: "草野",     lat: 37.073984, lng: 140.947522, timeToNext: 8 },
+  { name: "四ツ倉",   lat: 37.102670, lng: 140.981251, timeToNext: 7 },
+  { name: "久ノ浜",   lat: 37.142363, lng: 140.995772, timeToNext: 10 },
+  { name: "末続",     lat: 37.172446, lng: 140.995418, timeToNext: 7 },
+  { name: "広野",     lat: 37.212075, lng: 140.999258, timeToNext: 8 },
+  { name: "木戸",     lat: 37.257915, lng: 141.002533, timeToNext: 7 },
+  { name: "竜田",     lat: 37.282450, lng: 141.002648, timeToNext: 8 },
+  { name: "富岡",     lat: 37.335186, lng: 141.022623, timeToNext: 8 },
+  { name: "夜ノ森",   lat: 37.365966, lng: 140.992072, timeToNext: 7 },
+  { name: "大野",     lat: 37.409225, lng: 140.984165, timeToNext: 5 },
+  { name: "双葉",     lat: 37.453801, lng: 141.005742, timeToNext: 7 },
+  { name: "浪江",     lat: 37.492036, lng: 140.989970, timeToNext: 10 },
+  { name: "桃内",     lat: 37.528803, lng: 140.984620, timeToNext: 7 },
+  { name: "小高",     lat: 37.562896, lng: 140.996175, timeToNext: 8 },
+  { name: "磐城太田",  lat: 37.604834, lng: 140.991836, timeToNext: 7 },
+  { name: "原ノ町",   lat: 37.636340, lng: 140.972730, timeToNext: 8 },
+  { name: "鹿島",     lat: 37.702502, lng: 140.970206, timeToNext: 8 },
+  { name: "日立木",   lat: 37.756056, lng: 140.934889, timeToNext: 7 },
+  { name: "相馬",     lat: 37.797020, lng: 140.915870, timeToNext: 8 },
+  { name: "駒ヶ嶺",   lat: 37.832600, lng: 140.907180, timeToNext: 7 },
+  { name: "新地",     lat: 37.879445, lng: 140.925563, timeToNext: 8 },
+  { name: "坂元",     lat: 37.919060, lng: 140.903010, timeToNext: 7 },
+  { name: "山下",     lat: 37.952530, lng: 140.878890, timeToNext: 8 },
+  { name: "浜吉田",   lat: 37.990680, lng: 140.873100, timeToNext: 8 },
+  { name: "亘理",     lat: 38.030760, lng: 140.864500, timeToNext: 8 },
+  { name: "逢隈",     lat: 38.060960, lng: 140.873460, timeToNext: 6 },
+  { name: "岩沼",     lat: 38.102790, lng: 140.868870, timeToNext: 10 },
+  { name: "仙台",     lat: 38.260454, lng: 140.882078, timeToNext: 0 },
+];
+
+// JR磐越西線: 郡山〜新津（主要駅）
+export const jrBanetsusaiLine: Station[] = [
+  { name: "郡山",     lat: 37.396650, lng: 140.382030, timeToNext: 8 },
+  { name: "喜久田",   lat: 37.451785, lng: 140.341983, timeToNext: 8 },
+  { name: "磐梯熱海",  lat: 37.480749, lng: 140.270822, timeToNext: 15 },
+  { name: "猪苗代",   lat: 37.545180, lng: 140.114400, timeToNext: 20 },
+  { name: "翁島",     lat: 37.557310, lng: 140.054150, timeToNext: 10 },
+  { name: "磐梯町",   lat: 37.557654, lng: 139.993580, timeToNext: 15 },
+  { name: "会津若松",  lat: 37.494080, lng: 139.925710, timeToNext: 20 },
+  { name: "会津坂下",  lat: 37.556910, lng: 139.821008, timeToNext: 20 },
+  { name: "野沢",     lat: 37.608640, lng: 139.626090, timeToNext: 20 },
+  { name: "津川",     lat: 37.728880, lng: 139.427940, timeToNext: 25 },
+  { name: "五泉",     lat: 37.741230, lng: 139.186150, timeToNext: 15 },
+  { name: "新津",     lat: 37.918850, lng: 139.116660, timeToNext: 0 },
+];
+
+// JR信越本線（新潟〜長岡）
+export const jrShinetsuLine: Station[] = [
+  { name: "新潟",     lat: 37.913270, lng: 139.061840, timeToNext: 5 },
+  { name: "白山",     lat: 37.908290, lng: 139.049350, timeToNext: 4 },
+  { name: "関屋",     lat: 37.914600, lng: 139.035320, timeToNext: 5 },
+  { name: "青山",     lat: 37.901810, lng: 139.009430, timeToNext: 5 },
+  { name: "小針",     lat: 37.890120, lng: 138.992140, timeToNext: 4 },
+  { name: "寺尾",     lat: 37.882760, lng: 138.978310, timeToNext: 4 },
+  { name: "内野",     lat: 37.873210, lng: 138.959670, timeToNext: 5 },
+  { name: "新潟大学前", lat: 37.868490, lng: 138.941150, timeToNext: 4 },
+  { name: "内野西が丘", lat: 37.864640, lng: 138.927120, timeToNext: 5 },
+  { name: "越後曽根",  lat: 37.827870, lng: 138.889360, timeToNext: 8 },
+  { name: "越後赤塚",  lat: 37.801720, lng: 138.878930, timeToNext: 6 },
+  { name: "吉田",     lat: 37.720200, lng: 138.843880, timeToNext: 10 },
+  { name: "分水",     lat: 37.680290, lng: 138.869200, timeToNext: 8 },
+  { name: "寺泊",     lat: 37.642790, lng: 138.792490, timeToNext: 10 },
+  { name: "出雲崎",   lat: 37.564820, lng: 138.771020, timeToNext: 8 },
+  { name: "石地",     lat: 37.484104, lng: 138.688286, timeToNext: 6 },
+  { name: "小木ノ城",  lat: 37.519420, lng: 138.729960, timeToNext: 7 },
+  { name: "出雲崎駅",  lat: 37.564820, lng: 138.771020, timeToNext: 8 },
+  { name: "長岡",     lat: 37.447880, lng: 138.851560, timeToNext: 0 },
+];

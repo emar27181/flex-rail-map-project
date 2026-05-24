@@ -1,0 +1,50 @@
+# Claude Code settings
+.claude/settings.local.json
+.claude/settings.json
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.astro/
+.astro/data-store.json
+.astro/settings.json
+.astro/types.d.ts
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+# Local Netlify folder
+.netlify
+
+# Analysis and development scripts (temporary)
+analyze-missing-stations.js
+check-tokyo-remaining.js
+compare-stations.js
+count-stations.js
+extract-line-stations.js
+fetch-kanto-stations.js
+kanto-all-stations.json
+missing-stations-report.json
+project-stations-new.txt
+project-stations.txt
+
+# Astro auto-generated files
+.astro/
+
+# Development notes
+TODO.md
+station-coordinate-fix-log.md
+
+# Generated coordinate exports
+scripts/all-coordinates.csv
+scripts/all-coordinates-v2.csv
+scripts/station-analysis-output.json
+scripts/kanto-all-stations.json
+scripts/missing-stations-report.json

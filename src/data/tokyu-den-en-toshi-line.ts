@@ -1,0 +1,31 @@
+import type { Station } from './yamanote';
+
+export const tokyuDenEnToshiLine: Station[] = [
+  { name: '渋谷', lat: 35.659450, lng: 139.701035, timeToNext: 3 },
+  { name: '池尻大橋', lat: 35.650710, lng: 139.684710, timeToNext: 2 },
+  { name: '三軒茶屋', lat: 35.644105, lng: 139.669185, timeToNext: 2 },
+  { name: '駒沢大学', lat: 35.633035, lng: 139.660965, timeToNext: 2 },
+  { name: '桜新町', lat: 35.631700, lng: 139.645367, timeToNext: 2 },
+  { name: '用賀', lat: 35.626580, lng: 139.634247, timeToNext: 2 },
+  { name: '二子玉川', lat: 35.611515, lng: 139.626494, timeToNext: 2 },
+  { name: '二子新地', lat: 35.607273, lng: 139.622683, timeToNext: 1 },
+  { name: '高津', lat: 35.603460, lng: 139.617665, timeToNext: 1 },
+  { name: '溝の口', lat: 35.599777, lng: 139.610540, timeToNext: 2 },
+  { name: '梶が谷', lat: 35.593785, lng: 139.605717, timeToNext: 2 },
+  { name: '宮崎台', lat: 35.587090, lng: 139.590850, timeToNext: 1 },
+  { name: '宮前平', lat: 35.584960, lng: 139.582255, timeToNext: 2 },
+  { name: '鷺沼', lat: 35.579613, lng: 139.573025, timeToNext: 2 },
+  { name: 'たまプラーザ', lat: 35.577405, lng: 139.558650, timeToNext: 3 },
+  { name: 'あざみ野', lat: 35.568780, lng: 139.553547, timeToNext: 2 },
+  { name: '江田', lat: 35.558535, lng: 139.551410, timeToNext: 2 },
+  { name: '市が尾', lat: 35.551265, lng: 139.541260, timeToNext: 2 },
+  { name: '藤が丘', lat: 35.543400, lng: 139.527580, timeToNext: 2 },
+  { name: '青葉台', lat: 35.542855, lng: 139.517300, timeToNext: 2 },
+  { name: '田奈', lat: 35.535922, lng: 139.504593, timeToNext: 2 },
+  { name: '長津田', lat: 35.531633, lng: 139.495258, timeToNext: 2 },
+  { name: 'つくし野', lat: 35.527065, lng: 139.484940, timeToNext: 2 },
+  { name: 'すずかけ台', lat: 35.517097, lng: 139.481747, timeToNext: 2 },
+  { name: '南町田グランベリーパーク', lat: 35.511515, lng: 139.470440, timeToNext: 2 },
+  { name: 'つきみ野', lat: 35.510517, lng: 139.458557, timeToNext: 3 },
+  { name: '中央林間', lat: 35.507810, lng: 139.445115 }
+];

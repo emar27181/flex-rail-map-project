@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm install)",
+      "Bash(npx astro add:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)",
+      "Bash(git add:*)",
+      "Bash(q)",
+      "Bash(npm run build:*)",
+      "WebSearch",
+      "Bash(curl:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node:*)",
+      "Bash(netlify deploy:*)",
+      "Bash(git check-ignore:*)"
+    ],
+    "deny": [
+      "Bash(git checkout:*)",
+      "Bash(git rm:*)"
+    ],
+    "ask": [
+      "Bash(git commit:*)"
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+import type { Station } from './yamanote';
+
+// 東武日光線: 東武動物公園→東武日光
+export const tobuNikkoLine: Station[] = [
+  { name: '東武動物公園', lat: 36.024700, lng: 139.726890, timeToNext: 3 },
+  { name: '杉戸高野台', lat: 36.051350, lng: 139.714545, timeToNext: 3 },
+  { name: '幸手', lat: 36.074070, lng: 139.714910, timeToNext: 4 },
+  { name: '南栗橋', lat: 36.113140, lng: 139.712830, timeToNext: 4 },
+  { name: '栗橋', lat: 36.135715, lng: 139.694035, timeToNext: 4 },
+  { name: '新古河', lat: 36.192700, lng: 139.687015, timeToNext: 4 },
+  { name: '柳生', lat: 36.206590, lng: 139.659955, timeToNext: 4 },
+  { name: '板倉東洋大前', lat: 36.222205, lng: 139.648625, timeToNext: 5 },
+  { name: '藤岡', lat: 36.255585, lng: 139.645600, timeToNext: 4 },
+  { name: '静和', lat: 36.316530, lng: 139.684930, timeToNext: 4 },
+  { name: '新大平下', lat: 36.338970, lng: 139.701865, timeToNext: 4 },
+  { name: '栃木', lat: 36.371935, lng: 139.731020, timeToNext: 4 },
+  { name: '新栃木', lat: 36.390060, lng: 139.742350, timeToNext: 4 },
+  { name: '合戦場', lat: 36.407585, lng: 139.741020, timeToNext: 3 },
+  { name: '家中', lat: 36.429790, lng: 139.747450, timeToNext: 4 },
+  { name: '東武金崎', lat: 36.466300, lng: 139.749485, timeToNext: 5 },
+  { name: '楡木', lat: 36.506880, lng: 139.745270, timeToNext: 4 },
+  { name: '樅山', lat: 36.533330, lng: 139.741736, timeToNext: 3 },
+  { name: '新鹿沼', lat: 36.556830, lng: 139.744780, timeToNext: 4 },
+  { name: '北鹿沼', lat: 36.580686, lng: 139.737754, timeToNext: 4 },
+  { name: '板荷', lat: 36.619400, lng: 139.707780, timeToNext: 5 },
+  { name: '下小代', lat: 36.651115, lng: 139.713948, timeToNext: 4 },
+  { name: '明神', lat: 36.676555, lng: 139.712205, timeToNext: 3 },
+  { name: '下今市', lat: 36.725600, lng: 139.692770, timeToNext: 4 },
+  { name: '上今市', lat: 36.728010, lng: 139.680860, timeToNext: 3 },
+  { name: '東武日光', lat: 36.748240, lng: 139.619720 },
+];

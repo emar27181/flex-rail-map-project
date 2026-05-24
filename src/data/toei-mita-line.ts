@@ -1,0 +1,31 @@
+import type { Station } from './yamanote';
+
+export const toeiMitaLine: Station[] = [
+  { name: '目黒', lat: 35.633406, lng: 139.715727, timeToNext: 2 },
+  { name: '白金台', lat: 35.637770, lng: 139.725860, timeToNext: 2 },
+  { name: '白金高輪', lat: 35.643145, lng: 139.734285, timeToNext: 2 },
+  { name: '三田', lat: 35.648220, lng: 139.748900, timeToNext: 2 },
+  { name: '芝公園', lat: 35.653748, lng: 139.749765, timeToNext: 1 },
+  { name: '御成門', lat: 35.660977, lng: 139.751487, timeToNext: 1 },
+  { name: '内幸町', lat: 35.669322, lng: 139.755410, timeToNext: 1 },
+  { name: '日比谷', lat: 35.673955, lng: 139.758765, timeToNext: 1 },
+  { name: '大手町', lat: 35.685250, lng: 139.763285, timeToNext: 2 },
+  { name: '神保町', lat: 35.695975, lng: 139.757665, timeToNext: 1 },
+  { name: '水道橋', lat: 35.702000, lng: 139.753745, timeToNext: 2 },
+  { name: '春日', lat: 35.709998, lng: 139.753228, timeToNext: 1 },
+  { name: '白山', lat: 35.721550, lng: 139.752297, timeToNext: 2 },
+  { name: '千石', lat: 35.727965, lng: 139.744745, timeToNext: 2 },
+  { name: '巣鴨', lat: 35.733780, lng: 139.738035, timeToNext: 2 },
+  { name: '西巣鴨', lat: 35.743415, lng: 139.728725, timeToNext: 1 },
+  { name: '新板橋', lat: 35.748840, lng: 139.719365, timeToNext: 2 },
+  { name: '板橋区役所前', lat: 35.751305, lng: 139.710055, timeToNext: 2 },
+  { name: '板橋本町', lat: 35.761100, lng: 139.705605, timeToNext: 1 },
+  { name: '本蓮沼', lat: 35.768985, lng: 139.702110, timeToNext: 2 },
+  { name: '志村坂上', lat: 35.776340, lng: 139.694730, timeToNext: 2 },
+  { name: '志村三丁目', lat: 35.777465, lng: 139.685860, timeToNext: 1 },
+  { name: '蓮根', lat: 35.784055, lng: 139.679060, timeToNext: 2 },
+  { name: '西台', lat: 35.787080, lng: 139.672680, timeToNext: 2 },
+  { name: '高島平', lat: 35.788935, lng: 139.661295, timeToNext: 2 },
+  { name: '新高島平', lat: 35.790220, lng: 139.654330, timeToNext: 2 },
+  { name: '西高島平', lat: 35.791895, lng: 139.645685 }
+];

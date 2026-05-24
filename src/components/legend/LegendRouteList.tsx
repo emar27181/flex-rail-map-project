@@ -1,0 +1,420 @@
+import React, { useState } from 'react';
+import type { RouteKey } from '../../data/routes';
+import { getThemeColors } from '../../contexts/ThemeContext';
+import { translateUI } from '../../utils/translation';
+import RouteToggleItem from '../ui/RouteToggleItem';
+
+type SortMode = 'name' | 'color' | 'default' | 'distance';
+
+interface LegendRouteListProps {
+  visibleRoutesData: Array<[string, any]>;
+  visibleRoutes: Set<RouteKey>;
+  availableRoutes: Set<RouteKey>;
+  highlightedRouteKeys?: Set<RouteKey> | null;
+  routeColors: Record<RouteKey, string>;
+  routeNames: Record<RouteKey, string>;
+  showTransferStationsOnly: boolean;
+  showExpressStationsOnly: boolean;
+  showTravelTimes: boolean;
+  showStationNames: boolean;
+  showStationNumbers: boolean;
+  showFurigana: boolean;
+  showOsmTiles: boolean;
+  theme: 'light' | 'dark';
+  language: 'japanese' | 'english';
+  onToggleRoute: (routeKey: RouteKey) => void;
+  onSelectAllRoutes: () => void;
+  onDeselectAllRoutes: () => void;
+  showDimmedRoutes: boolean;
+  onShowDimmedRoutesChange: (value: boolean) => void;
+  onShowTransferStationsOnlyChange: (value: boolean) => void;
+  onShowExpressStationsOnlyChange: (value: boolean) => void;
+  onShowTravelTimesChange: (value: boolean) => void;
+  onShowStationNamesChange: (value: boolean) => void;
+  onShowStationNumbersChange: (value: boolean) => void;
+  onShowFuriganaChange: (value: boolean) => void;
+  onShowOsmTilesChange: (value: boolean) => void;
+  adjustRouteColorForTheme: (color: string, theme: 'light' | 'dark') => string;
+  viewCenter?: [number, number];
+  showTrainDemo: boolean;
+  onTrainDemoToggle: () => void;
+  mapViewMode: 'realistic' | 'schematic';
+}
+
+const LegendRouteList: React.FC<LegendRouteListProps> = ({
+  visibleRoutesData,
+  visibleRoutes,
+  availableRoutes,
+  highlightedRouteKeys,
+  routeColors,
+  routeNames,
+  showTransferStationsOnly,
+  showExpressStationsOnly,
+  showTravelTimes,
+  showStationNames,
+  showStationNumbers,
+  showFurigana,
+  showOsmTiles,
+  theme,
+  language,
+  onToggleRoute,
+  onSelectAllRoutes,
+  onDeselectAllRoutes,
+  showDimmedRoutes,
+  onShowDimmedRoutesChange,
+  onShowTransferStationsOnlyChange,
+  onShowExpressStationsOnlyChange,
+  onShowTravelTimesChange,
+  onShowStationNamesChange,
+  onShowStationNumbersChange,
+  onShowFuriganaChange,
+  onShowOsmTilesChange,
+  adjustRouteColorForTheme,
+  viewCenter,
+  showTrainDemo,
+  onTrainDemoToggle,
+  mapViewMode,
+}) => {
+  const colors = getThemeColors(theme);
+  const [sortMode, setSortMode] = useState<SortMode>('name');
+
+  // HEX色をHue値(0-360)に変換
+  const hexToHue = (hex: string): number => {
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    if (max === min) return 0;
+    const d = max - min;
+    let h = 0;
+    if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    return h * 60;
+  };
+
+  // 路線の画面中心からの最近接駅距離（度単位の簡易距離）
+  const routeMinDist = (stations: any[]): number => {
+    if (!viewCenter || !stations?.length) return Infinity;
+    const [clat, clng] = viewCenter;
+    return Math.min(...stations.map((s: any) => {
+      const dlat = s.lat - clat, dlng = s.lng - clng;
+      return dlat * dlat + dlng * dlng;
+    }));
+  };
+
+  const sortedVisibleRoutesData = [...visibleRoutesData].sort(([keyA, stationsA], [keyB, stationsB]) => {
+    if (sortMode === 'name') {
+      const nameA = routeNames[keyA as RouteKey] || '';
+      const nameB = routeNames[keyB as RouteKey] || '';
+      return nameA.localeCompare(nameB, language === 'japanese' ? 'ja' : 'en');
+    }
+    if (sortMode === 'color') {
+      const colorA = routeColors[keyA as RouteKey] ?? '#888';
+      const colorB = routeColors[keyB as RouteKey] ?? '#888';
+      return hexToHue(colorA.padEnd(7, '0')) - hexToHue(colorB.padEnd(7, '0'));
+    }
+    if (sortMode === 'distance') {
+      return routeMinDist(stationsA) - routeMinDist(stationsB);
+    }
+    return 0; // default: 登録順のまま
+  });
+
+  return (
+    <div style={{
+      marginBottom: '15px',
+      padding: '10px',
+      backgroundColor: colors.surface,
+      borderRadius: '4px',
+      border: `1px solid ${colors.borderLight}`
+    }}>
+      <div style={{
+        fontSize: '14px',
+        fontWeight: 'bold',
+        marginBottom: '8px',
+        color: colors.text
+      }}>
+        {translateUI('routeDisplayToggle', language)}
+      </div>
+
+      {/* 表示オプション */}
+      <div style={{ marginBottom: '8px' }}>
+        {/* 区間外の路線を半透明で表示 */}
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '12px',
+          color: colors.text,
+          cursor: 'pointer',
+          marginBottom: '4px'
+        }}>
+          <input
+            type="checkbox"
+            checked={showDimmedRoutes}
+            onChange={(e) => onShowDimmedRoutesChange(e.target.checked)}
+            style={{ marginRight: '6px', cursor: 'pointer' }}
+          />
+          {language === 'english' ? 'Show outside-segment routes' : '区間外の路線を表示'}
+        </label>
+
+        {/* 乗換駅のみ表示オプション */}
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '12px',
+          color: colors.text,
+          cursor: 'pointer',
+          marginBottom: '4px'
+        }}>
+          <input
+            type="checkbox"
+            checked={showTransferStationsOnly}
+            onChange={(e) => onShowTransferStationsOnlyChange(e.target.checked)}
+            style={{
+              marginRight: '6px',
+              cursor: 'pointer'
+            }}
+          />
+          {translateUI('showOnlyTransferStations', language)}
+        </label>
+
+        {/* 急行駅のみ表示オプション */}
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '12px',
+          color: colors.text,
+          cursor: 'pointer',
+          marginBottom: '4px'
+        }}>
+          <input
+            type="checkbox"
+            checked={showExpressStationsOnly}
+            onChange={(e) => onShowExpressStationsOnlyChange(e.target.checked)}
+            style={{
+              marginRight: '6px',
+              cursor: 'pointer'
+            }}
+          />
+          {translateUI('showOnlyExpressStations', language)}
+        </label>
+
+        {/* 所要時間表示オプション */}
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '12px',
+          color: colors.text,
+          cursor: 'pointer',
+          marginBottom: '4px'
+        }}>
+          <input
+            type="checkbox"
+            checked={showTravelTimes}
+            onChange={(e) => onShowTravelTimesChange(e.target.checked)}
+            style={{
+              marginRight: '6px',
+              cursor: 'pointer'
+            }}
+          />
+          {translateUI('showTravelTimes', language)}
+        </label>
+
+        {/* 駅名表示オプション */}
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '12px',
+          color: colors.text,
+          cursor: 'pointer',
+          marginBottom: '4px'
+        }}>
+          <input
+            type="checkbox"
+            checked={showStationNames}
+            onChange={(e) => onShowStationNamesChange(e.target.checked)}
+            style={{
+              marginRight: '6px',
+              cursor: 'pointer'
+            }}
+          />
+          {translateUI('showStationNames', language)}
+        </label>
+
+        {/* 駅番号表示オプション */}
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '12px',
+          color: colors.text,
+          cursor: 'pointer',
+          marginBottom: '4px'
+        }}>
+          <input
+            type="checkbox"
+            checked={showStationNumbers}
+            onChange={(e) => onShowStationNumbersChange(e.target.checked)}
+            style={{
+              marginRight: '6px',
+              cursor: 'pointer'
+            }}
+          />
+          {language === 'english' ? 'Show station codes' : '駅コードを表示'}
+        </label>
+
+        {/* ふりがな表示オプション（日本語モードのみ） */}
+        {language === 'japanese' && (
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: '12px',
+            color: colors.text,
+            cursor: 'pointer',
+            marginBottom: '4px'
+          }}>
+            <input
+              type="checkbox"
+              checked={showFurigana}
+              onChange={(e) => onShowFuriganaChange(e.target.checked)}
+              style={{
+                marginRight: '6px',
+                cursor: 'pointer'
+              }}
+            />
+            {translateUI('showFurigana', language)}
+          </label>
+        )}
+
+        {/* 地図タイル表示オプション */}
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '12px',
+          color: colors.text,
+          cursor: 'pointer'
+        }}>
+          <input
+            type="checkbox"
+            checked={showOsmTiles}
+            onChange={(e) => onShowOsmTilesChange(e.target.checked)}
+            style={{
+              marginRight: '6px',
+              cursor: 'pointer'
+            }}
+          />
+          {language === 'english' ? 'Show map tiles' : '地図タイルを表示'}
+        </label>
+
+        {/* 列車デモ（リアル地図モードのみ） */}
+        {mapViewMode === 'realistic' && (
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: '12px',
+            color: colors.text,
+            cursor: 'pointer',
+            marginTop: '4px',
+          }}>
+            <input
+              type="checkbox"
+              checked={showTrainDemo}
+              onChange={onTrainDemoToggle}
+              style={{ marginRight: '6px', cursor: 'pointer' }}
+            />
+            🚃 {language === 'english' ? 'Train Demo' : '列車デモ'}
+          </label>
+        )}
+      </div>
+
+      {/* ソート選択 */}
+      <div style={{ display: 'flex', gap: '4px', marginBottom: '6px', alignItems: 'center' }}>
+        <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
+          {language === 'english' ? 'Sort:' : '並順:'}
+        </span>
+        {(['name', 'color', 'default', 'distance'] as SortMode[]).map(mode => {
+          const label = mode === 'name'
+            ? (language === 'english' ? 'A-Z' : 'あいうえお')
+            : mode === 'color'
+              ? (language === 'english' ? 'Color' : '色')
+              : mode === 'distance'
+                ? (language === 'english' ? 'Nearby' : '近い順')
+                : (language === 'english' ? 'Default' : '登録順');
+          return (
+            <button
+              key={mode}
+              onClick={() => setSortMode(mode)}
+              style={{
+                padding: '2px 6px',
+                fontSize: '10px',
+                border: `1px solid ${sortMode === mode ? colors.primary : colors.borderLight}`,
+                borderRadius: '3px',
+                backgroundColor: sortMode === mode ? colors.primary : 'transparent',
+                color: sortMode === mode ? '#fff' : colors.textSecondary,
+                cursor: 'pointer',
+              }}
+            >{label}</button>
+          );
+        })}
+      </div>
+
+      <div style={{
+        display: 'flex',
+        gap: '4px',
+        marginBottom: '8px'
+      }}>
+        <button
+          onClick={onSelectAllRoutes}
+          style={{
+            flex: 1,
+            padding: '4px 8px',
+            fontSize: '10px',
+            backgroundColor: '#28a745',
+            color: 'white',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer'
+          }}
+        >
+          {translateUI('allShow', language)}
+        </button>
+        <button
+          onClick={onDeselectAllRoutes}
+          style={{
+            flex: 1,
+            padding: '4px 8px',
+            fontSize: '10px',
+            backgroundColor: '#dc3545',
+            color: 'white',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer'
+          }}
+        >
+          {translateUI('allHide', language)}
+        </button>
+      </div>
+
+      {sortedVisibleRoutesData.map(([routeKey]) => {
+        const isVisible = visibleRoutes.has(routeKey as RouteKey);
+        const isInSelectedRoute = !!(highlightedRouteKeys && highlightedRouteKeys.has(routeKey as RouteKey));
+
+        return (
+          <RouteToggleItem
+            key={routeKey}
+            routeKey={routeKey}
+            routeName={routeNames[routeKey as RouteKey]}
+            routeColor={routeColors[routeKey as RouteKey]}
+            isVisible={isVisible}
+            isInSelectedRoute={isInSelectedRoute}
+            theme={theme}
+            language={language}
+            onToggle={onToggleRoute}
+            adjustRouteColorForTheme={adjustRouteColorForTheme}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
+export default LegendRouteList;

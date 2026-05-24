@@ -1,0 +1,105 @@
+---
+import FullscreenMapWrapper from "../components/FullscreenMapWrapper.tsx";
+---
+
+<html lang="ja">
+	<head>
+		<meta charset="utf-8" />
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="/icon_flex_rail_way_map.png"
+		/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="generator" content={Astro.generator} />
+		<title>フレックス路線図 - フルスクリーンマップ</title>
+		<meta name="description" content="フルスクリーンで東京の路線図を表示。Google マップのように地図を全画面表示し、必要な情報をオーバーレイで確認できます。" />
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+			integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+			crossorigin=""
+		/>
+		<script
+			src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+			integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+			crossorigin=""></script>
+		<style>
+			*, *::before, *::after {
+				box-sizing: border-box;
+			}
+			html, body {
+				margin: 0;
+				padding: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+				font-family: Arial, sans-serif;
+			}
+			body.light {
+				background-color: #ffffff;
+				color: #333333;
+				--station-border-color: #666666;
+				--station-border-color-light: #CCCCCC;
+			}
+			body.dark {
+				background-color: #1a1a1a;
+				color: #ffffff;
+				--station-border-color: #ffffff;
+				--station-border-color-light: #666666;
+			}
+
+			/* フルスクリーン時は leaflet-container が100%を埋める */
+			.leaflet-container {
+				height: 100% !important;
+				width: 100% !important;
+			}
+
+			/* Dark mode popup styles (same as index.astro) */
+			body.dark .leaflet-popup-content-wrapper,
+			body.dark .leaflet-popup-content-wrapper * {
+				background: #2d2d2d !important;
+				color: #ffffff !important;
+				box-shadow: 0 3px 14px rgba(0, 0, 0, 0.8) !important;
+				border: 1px solid #404040 !important;
+			}
+			body.dark .leaflet-popup-content,
+			body.dark .leaflet-popup-content * {
+				background: #2d2d2d !important;
+				color: #ffffff !important;
+				margin: 0 !important;
+			}
+			body.dark .leaflet-popup-tip,
+			body.dark .leaflet-popup-tip-container {
+				background: #2d2d2d !important;
+				border: 1px solid #404040 !important;
+				box-shadow: none !important;
+			}
+			body.dark .leaflet-popup-close-button {
+				color: #ffffff !important;
+				background: transparent !important;
+			}
+			body.dark .leaflet-popup-close-button:hover {
+				color: #ff6b6b !important;
+				background: rgba(255, 255, 255, 0.15) !important;
+			}
+			body.dark .leaflet-container {
+				background: #1a1a1a !important;
+			}
+			body.dark .leaflet-control-zoom a,
+			body.dark .leaflet-control-zoom-in,
+			body.dark .leaflet-control-zoom-out {
+				background: #2d2d2d !important;
+				color: #ffffff !important;
+				border: 1px solid #404040 !important;
+			}
+			body.dark .leaflet-control-zoom a:hover {
+				background: #404040 !important;
+			}
+		</style>
+	</head>
+	<body>
+		<FullscreenMapWrapper client:only="react" />
+	</body>
+</html>

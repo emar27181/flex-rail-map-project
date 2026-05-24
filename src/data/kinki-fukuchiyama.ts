@@ -1,0 +1,51 @@
+import type { Station } from './yamanote';
+
+// JR福知山線: 大阪〜福知山
+export const jrFukuchiyamaLine: Station[] = [
+  { name: "大阪",     lat: 34.702490, lng: 135.495440, timeToNext: 4 },
+  { name: "塚本",     lat: 34.727200, lng: 135.476800, timeToNext: 5 },
+  { name: "尼崎",     lat: 34.718550, lng: 135.415960, timeToNext: 4 },
+  { name: "塚口",     lat: 34.735100, lng: 135.413000, timeToNext: 4 },
+  { name: "猪名寺",   lat: 34.750900, lng: 135.406300, timeToNext: 4 },
+  { name: "伊丹",     lat: 34.778100, lng: 135.418200, timeToNext: 4 },
+  { name: "北伊丹",   lat: 34.803100, lng: 135.396800, timeToNext: 4 },
+  { name: "川西池田", lat: 34.822100, lng: 135.414200, timeToNext: 4 },
+  { name: "中山寺",   lat: 34.829800, lng: 135.392500, timeToNext: 4 },
+  { name: "宝塚",     lat: 34.832800, lng: 135.360300, timeToNext: 5 },
+  { name: "生瀬",     lat: 34.862800, lng: 135.327100, timeToNext: 5 },
+  { name: "西宮名塩", lat: 34.882100, lng: 135.312800, timeToNext: 6 },
+  { name: "武田尾",   lat: 34.920900, lng: 135.304800, timeToNext: 7 },
+  { name: "道場",     lat: 34.935200, lng: 135.262000, timeToNext: 6 },
+  { name: "三田",     lat: 34.889200, lng: 135.227100, timeToNext: 4 },
+  { name: "新三田",   lat: 34.914800, lng: 135.210200, timeToNext: 4 },
+  { name: "広野",     lat: 34.941800, lng: 135.192200, timeToNext: 4 },
+  { name: "相野",     lat: 34.960200, lng: 135.177000, timeToNext: 4 },
+  { name: "藍本",     lat: 34.984600, lng: 135.178100, timeToNext: 4 },
+  { name: "草野",     lat: 35.012100, lng: 135.186100, timeToNext: 4 },
+  { name: "古市",     lat: 35.025700, lng: 135.197000, timeToNext: 3 },
+  { name: "南矢代",   lat: 35.042100, lng: 135.197800, timeToNext: 3 },
+  { name: "篠山口",   lat: 35.046200, lng: 135.209200, timeToNext: 6 },
+  { name: "丹波大山", lat: 35.085100, lng: 135.188800, timeToNext: 5 },
+  { name: "下滝",     lat: 35.113800, lng: 135.175200, timeToNext: 5 },
+  { name: "丹波竹田", lat: 35.138200, lng: 135.168100, timeToNext: 5 },
+  { name: "谷川",     lat: 35.163100, lng: 135.153100, timeToNext: 8 },
+  { name: "柏原",     lat: 35.183100, lng: 135.063200, timeToNext: 6 },
+  { name: "石生",     lat: 35.217800, lng: 135.004200, timeToNext: 4 },
+  { name: "黒井",     lat: 35.236200, lng: 135.000100, timeToNext: 5 },
+  { name: "市島",     lat: 35.260100, lng: 135.039000, timeToNext: 8 },
+  { name: "福知山",   lat: 35.292800, lng: 135.152300, timeToNext: 0 },
+];
+
+// 神戸電鉄三田線: 有馬口〜三田
+export const kobeDentetsuSandaLine: Station[] = [
+  { name: "有馬口",           lat: 34.822600, lng: 135.253600, timeToNext: 4 },
+  { name: "新有馬",           lat: 34.844900, lng: 135.241200, timeToNext: 4 },
+  { name: "道場南口",         lat: 34.873000, lng: 135.240300, timeToNext: 4 },
+  { name: "岡場",             lat: 34.887500, lng: 135.233700, timeToNext: 3 },
+  { name: "横山",             lat: 34.895100, lng: 135.221600, timeToNext: 4 },
+  { name: "フラワータウン",   lat: 34.913500, lng: 135.217800, timeToNext: 3 },
+  { name: "南ウッディタウン", lat: 34.911200, lng: 135.215200, timeToNext: 3 },
+  { name: "ウッディタウン中央", lat: 34.908100, lng: 135.211500, timeToNext: 5 },
+  { name: "三田本町",         lat: 34.893900, lng: 135.228200, timeToNext: 3 },
+  { name: "三田",             lat: 34.889200, lng: 135.226000, timeToNext: 0 },
+];

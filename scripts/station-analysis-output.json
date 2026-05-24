@@ -1,0 +1,232 @@
+{
+  "timestamp": "2025-09-19T16:18:00.000Z",
+  "description": "駅ごとの列車種別停車データ - 分析結果サンプル",
+  "routes": [
+    {
+      "routeKey": "yamanote",
+      "routeName": "山手線",
+      "totalStations": 31,
+      "stations": [
+        {
+          "stationName": "東京",
+          "routeKey": "yamanote",
+          "stoppingTrainTypes": ["local"],
+          "description": "各駅停車のみ",
+          "serviceLevel": "low"
+        },
+        {
+          "stationName": "有楽町",
+          "routeKey": "yamanote",
+          "stoppingTrainTypes": ["local"],
+          "description": "各駅停車のみ",
+          "serviceLevel": "low"
+        },
+        {
+          "stationName": "新橋",
+          "routeKey": "yamanote",
+          "stoppingTrainTypes": ["local"],
+          "description": "各駅停車のみ",
+          "serviceLevel": "low"
+        }
+      ],
+      "trainTypes": [
+        {
+          "id": "local",
+          "name": "各駅停車",
+          "stoppingStations": ["全駅"],
+          "stoppingStationCount": 31,
+          "stoppingPercentage": 100
+        }
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "routeName": "中央線",
+      "totalStations": 21,
+      "stations": [
+        {
+          "stationName": "東京",
+          "routeKey": "chuo",
+          "stoppingTrainTypes": ["special_rapid", "rapid_acty", "local"],
+          "description": "特別快速・ラピッドアクティー・各駅停車停車",
+          "serviceLevel": "high"
+        },
+        {
+          "stationName": "神田",
+          "routeKey": "chuo",
+          "stoppingTrainTypes": ["rapid_acty", "local"],
+          "description": "ラピッドアクティー・各駅停車停車",
+          "serviceLevel": "medium"
+        },
+        {
+          "stationName": "四ツ谷",
+          "routeKey": "chuo",
+          "stoppingTrainTypes": ["rapid_acty", "local"],
+          "description": "ラピッドアクティー・各駅停車停車",
+          "serviceLevel": "medium"
+        },
+        {
+          "stationName": "新宿",
+          "routeKey": "chuo",
+          "stoppingTrainTypes": ["special_rapid", "rapid_acty", "local"],
+          "description": "特別快速・ラピッドアクティー・各駅停車停車",
+          "serviceLevel": "high"
+        },
+        {
+          "stationName": "中野",
+          "routeKey": "chuo",
+          "stoppingTrainTypes": ["special_rapid", "rapid_acty", "local"],
+          "description": "特別快速・ラピッドアクティー・各駅停車停車",
+          "serviceLevel": "high"
+        },
+        {
+          "stationName": "東中野",
+          "routeKey": "chuo",
+          "stoppingTrainTypes": ["local"],
+          "description": "各駅停車のみ",
+          "serviceLevel": "low"
+        },
+        {
+          "stationName": "吉祥寺",
+          "routeKey": "chuo",
+          "stoppingTrainTypes": ["special_rapid", "rapid_acty", "local"],
+          "description": "特別快速・ラピッドアクティー・各駅停車停車",
+          "serviceLevel": "high"
+        }
+      ],
+      "trainTypes": [
+        {
+          "id": "local",
+          "name": "各駅停車",
+          "stoppingStations": ["全駅"],
+          "stoppingStationCount": 21,
+          "stoppingPercentage": 100
+        },
+        {
+          "id": "rapid_acty",
+          "name": "ラピッドアクティー",
+          "stoppingStations": ["東京", "神田", "御茶ノ水", "四ツ谷", "新宿", "中野", "荻窪", "阿佐ヶ谷", "高円寺", "吉祥寺", "三鷹", "武蔵境", "東小金井", "国分寺", "国立", "立川", "日野", "豊田", "八王子", "西八王子", "高尾"],
+          "stoppingStationCount": 21,
+          "stoppingPercentage": 100
+        },
+        {
+          "id": "special_rapid",
+          "name": "特別快速",
+          "stoppingStations": ["東京", "新宿", "中野", "吉祥寺", "三鷹", "立川", "八王子", "高尾"],
+          "stoppingStationCount": 8,
+          "stoppingPercentage": 38
+        }
+      ]
+    },
+    {
+      "routeKey": "odakyuLine",
+      "routeName": "小田急小田原線",
+      "totalStations": 36,
+      "stations": [
+        {
+          "stationName": "新宿",
+          "routeKey": "odakyuLine",
+          "stoppingTrainTypes": ["romance_car", "multi_express", "express", "semi_express", "local"],
+          "description": "ロマンスカー・多摩急行・急行・準急・各駅停車停車",
+          "serviceLevel": "high"
+        },
+        {
+          "stationName": "代々木上原",
+          "routeKey": "odakyuLine",
+          "stoppingTrainTypes": ["multi_express", "express", "semi_express", "local"],
+          "description": "多摩急行・急行・準急・各駅停車停車",
+          "serviceLevel": "high"
+        },
+        {
+          "stationName": "下北沢",
+          "routeKey": "odakyuLine",
+          "stoppingTrainTypes": ["multi_express", "express", "semi_express", "local"],
+          "description": "多摩急行・急行・準急・各駅停車停車",
+          "serviceLevel": "high"
+        },
+        {
+          "stationName": "世田谷代田",
+          "routeKey": "odakyuLine",
+          "stoppingTrainTypes": ["local"],
+          "description": "各駅停車のみ",
+          "serviceLevel": "low"
+        },
+        {
+          "stationName": "町田",
+          "routeKey": "odakyuLine",
+          "stoppingTrainTypes": ["romance_car", "express", "semi_express", "local"],
+          "description": "ロマンスカー・急行・準急・各駅停車停車",
+          "serviceLevel": "high"
+        }
+      ],
+      "trainTypes": [
+        {
+          "id": "local",
+          "name": "各駅停車",
+          "stoppingStations": ["全駅"],
+          "stoppingStationCount": 36,
+          "stoppingPercentage": 100
+        },
+        {
+          "id": "semi_express",
+          "name": "準急",
+          "stoppingStations": ["新宿", "代々木上原", "下北沢", "梅ヶ丘", "豪徳寺", "経堂", "成城学園前", "登戸", "向ヶ丘遊園", "生田", "新百合ヶ丘", "町田", "相模大野", "本厚木", "伊勢原", "秦野", "新松田", "小田原"],
+          "stoppingStationCount": 18,
+          "stoppingPercentage": 50
+        },
+        {
+          "id": "express",
+          "name": "急行",
+          "stoppingStations": ["新宿", "代々木上原", "下北沢", "成城学園前", "登戸", "新百合ヶ丘", "町田", "相模大野", "本厚木", "伊勢原", "秦野", "新松田", "小田原"],
+          "stoppingStationCount": 13,
+          "stoppingPercentage": 36
+        },
+        {
+          "id": "multi_express",
+          "name": "多摩急行",
+          "stoppingStations": ["新宿", "代々木上原", "下北沢", "登戸", "向ヶ丘遊園", "新百合ヶ丘"],
+          "stoppingStationCount": 6,
+          "stoppingPercentage": 17
+        },
+        {
+          "id": "romance_car",
+          "name": "ロマンスカー",
+          "stoppingStations": ["新宿", "町田", "相模大野", "本厚木", "小田原"],
+          "stoppingStationCount": 5,
+          "stoppingPercentage": 14
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "totalRoutes": 5,
+    "totalStations": 140,
+    "serviceDistribution": {
+      "high": 25,
+      "medium": 40,
+      "low": 75
+    },
+    "keyFindings": [
+      "小田急線は最も多様な列車種別（5種類）を運行",
+      "中央線は特別快速の停車駅が限定的（38%の駅のみ）",
+      "山手線は環状線のため全駅各駅停車のみ",
+      "高サービス駅（複数種別停車）は主要ターミナル駅に集中",
+      "各駅停車のみの駅が全体の53%を占める"
+    ]
+  },
+  "analysisDetails": {
+    "dataExtractedAt": "2025-09-19T16:18:00.000Z",
+    "coverageNote": "本データは山手線、中央線、小田急小田原線、京浜東北線、銀座線の5路線をカバー",
+    "limitations": [
+      "時間帯による運行パターンの違いは考慮されていない",
+      "土休日ダイヤは反映されていない",
+      "臨時列車や季節運行は含まれていない"
+    ],
+    "usageExamples": [
+      "新宿駅: 最も多くの列車種別が停車する主要ターミナル",
+      "町田駅: ロマンスカーも停車する小田急の主要駅",
+      "吉祥寺駅: 中央線の特別快速停車駅",
+      "各駅停車のみの駅: 地域密着型の交通拠点"
+    ]
+  }
+}

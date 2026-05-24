@@ -1,0 +1,13 @@
+# https://flex-railway-map.netlify.app/robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://flex-railway-map.netlify.app/sitemap.xml
+
+# Google AdSense and Googlebot
+User-agent: Googlebot
+Allow: /
+
+User-agent: Mediapartners-Google
+Allow: /

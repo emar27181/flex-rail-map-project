@@ -1,0 +1,30 @@
+import type { Station } from './yamanote';
+
+export const keikyuLine: Station[] = [
+  { name: '泉岳寺', lat: 35.638130, lng: 139.739730, timeToNext: 2 },
+  { name: '品川', lat: 35.628495, lng: 139.739040, timeToNext: 2 },
+  { name: '北品川', lat: 35.622426, lng: 139.739310, timeToNext: 2 },
+  { name: '新馬場', lat: 35.616662, lng: 139.741498, timeToNext: 2 },
+  { name: '青物横丁', lat: 35.609190, lng: 139.743135, timeToNext: 2 },
+  { name: '鮫洲', lat: 35.605070, lng: 139.742445, timeToNext: 2 },
+  { name: '立会川', lat: 35.598505, lng: 139.738945, timeToNext: 2 },
+  { name: '大森海岸', lat: 35.587410, lng: 139.735308, timeToNext: 2 },
+  { name: '平和島', lat: 35.578654, lng: 139.734934, timeToNext: 2 },
+  { name: '大森町', lat: 35.572500, lng: 139.732010, timeToNext: 2 },
+  { name: '梅屋敷', lat: 35.566785, lng: 139.728170, timeToNext: 2 },
+  { name: '京急蒲田', lat: 35.561699, lng: 139.724329, timeToNext: 3 },
+  { name: '雑色', lat: 35.549775, lng: 139.715035, timeToNext: 2 },
+  { name: '六郷土手', lat: 35.540530, lng: 139.707565, timeToNext: 2 },
+  { name: '京急川崎', lat: 35.533010, lng: 139.700940, timeToNext: 3 },
+  { name: '港町', lat: 35.535065, lng: 139.712620, timeToNext: 1 },
+  { name: '鶴見市場', lat: 35.517590, lng: 139.686490, timeToNext: 2 },
+  { name: '京急鶴見', lat: 35.506665, lng: 139.677587, timeToNext: 2 },
+  { name: '花月園前', lat: 35.500325, lng: 139.672860, timeToNext: 1 },
+  { name: '生麦', lat: 35.495600, lng: 139.667335, timeToNext: 2 },
+  { name: '京急新子安', lat: 35.487220, lng: 139.655850, timeToNext: 2 },
+  { name: '子安', lat: 35.484575, lng: 139.645040, timeToNext: 1 },
+  { name: '神奈川新町', lat: 35.481515, lng: 139.640170, timeToNext: 1 },
+  { name: '仲木戸', lat: 35.477555, lng: 139.634925, timeToNext: 1 },
+  { name: '神奈川', lat: 35.471250, lng: 139.627415, timeToNext: 2 },
+  { name: '横浜', lat: 35.465407, lng: 139.622253 }
+];

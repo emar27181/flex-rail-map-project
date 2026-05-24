@@ -1,0 +1,551 @@
+# CHANGE LOG
+
+## [2026-05-24] セッション（続き2）
+
+### fix: 路線ツールチップの白い長方形を解消（`src/components/RailwayMap.tsx`）
+- Leafletツールチップを `border: none`・`::before { display: none }` に変更し枠線・矢印を非表示
+- 背景を `rgba(0,0,0,0.65)` の暗い半透明に統一し、ライト/ダーク両モードで白い四角が出ないよう修正
+
+## [2026-05-24] セッション（続き）
+
+### fix: 路線クリック時に白い四角が表示される問題を修正（`src/components/RailwayMap.tsx`）
+- クリック時に `e.target.closeTooltip()` でツールチップを即座に閉じるよう修正
+- 不要なデバッグ console.log を削除
+
+### improve: 路線ホバー時に中間透明度でプレビュー表示（`src/components/RailwayMap.tsx`）
+- 表示中路線をホバーすると opacity 0.8→0.5（非表示化のプレビュー）
+- 半透明路線をホバーすると opacity 0.35→0.6（表示化のプレビュー）
+- 半透明路線の透明 Polyline にも mouseover/mouseout ハンドラを追加
+
+### improve: 凡例パネル幅を 250px → 300px に拡大（`src/components/RailwayMap.tsx`）
+
+## [2026-05-24] セッション
+
+### improve: 半透明路線にもツールチップ表示・ダークモード対応（`src/components/RailwayMap.tsx`）
+- 区間外（半透明）路線のクリック判定 Polyline にも `<Tooltip sticky>` を追加
+- `route-tooltip` classNameと動的CSS注入でLeafletツールチップの背景・文字色・枠線をテーマに合わせて切り替え（ライト: 白背景/灰枠、ダーク: #3a3a3a背景/#404040枠）
+
+### fix: 路線ホバーツールチップが残り続ける問題を修正（`src/components/RailwayMap.tsx`）
+- 自前の fixed div ホバー表示を廃止し、Leaflet 組み込みの `<Tooltip sticky>` に切り替え
+- 透明 Polyline の mouseover/mouseout ハンドラを簡略化
+
+### improve: クリックで路線表示切り替えを常時オンに変更（`src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`）
+- `tapToggleMode` 切り替えチェックボックスを凡例パネルから削除（常時オン）
+- `tapToggleMode`・`onTapToggleModeChange` props を `LegendRouteList` から削除
+
+### fix: 駅名検索中にUIが専用モードに切り替わる問題を修正（`src/components/RailwayMap.tsx`）
+- `isStationSearching` による凡例パネル非表示・パネル拡大・タブバー非表示を廃止
+- 検索中も他UIは変化せず、検索窓のみで駅名入力が完結するよう修正
+
+## [2026-05-21] セッション（続き2）
+
+### feat: 駅コード（stationNumbers.ts）を大幅拡充（関西・中部・北海道・東北・九州の地下鉄・メトロ系）
+- **`src/data/stationNumbers.ts`** に以下を追加:
+  - **大阪メトロ全線**: 御堂筋線（M11-M30）・谷町線（T11-T38）・四つ橋線（Y11-Y20）・中央線（C10-C23）・堺筋線（K11-K20）・長堀鶴見緑地線（N11-N27）・今里筋線（I11-I20）
+  - **JR大阪環状線**: O01-O19（osakaLoopLine・jrOsakaLoop 両キーに対応）
+  - **名古屋市営地下鉄全線**: 東山線（H01-H22）・名城線（M01-M25）・鶴舞線（T01-T19）・桜通線（S01-S21）・上飯田線（K01-K02）
+  - **京都市営地下鉄**: 烏丸線（K01-K15）・東西線（T01-T18）
+  - **神戸市営地下鉄**: 西神・山手線（S01-S16）・海岸線（K01-K09）
+  - **横浜市営地下鉄グリーンライン**: G01-G10
+  - **みなとみらい線**: MM01-MM06
+  - **札幌市営地下鉄**: 南北線（N01-N16）・東西線（T01-T19）・東豊線（H01-H14）
+  - **仙台市地下鉄**: 南北線（N01-N17）・東西線（T01-T12）
+  - **福岡市地下鉄**: 空港線（K01-K13）・箱崎線（H01-H07）・七隈線（N01-N15）
+
+## [2026-05-21] セッション（続き）
+
+### feat: さらに新規路線を追加（中部・近畿・中国ブランチ路線）（`src/data/`）
+- **`jr-hokuriku-maibara.ts`** 新規作成: JR北陸本線（米原〜敦賀, 12駅）
+- **`chubu-missing-lines.ts`** 新規作成: 樽見鉄道・長良川鉄道・明知鉄道・伊勢鉄道（伊勢線）
+- **`kinki-chugoku-more.ts`** 新規作成: JR津山線・近鉄生駒線・近鉄田原本線・南海汐見橋線・南海多奈川線
+- **`kinki-branch-lines.ts`** 新規作成: 京阪交野線・京阪鴨東線・阪神武庫川線・JR和田岬線・近鉄信貴線・能勢電鉄日生線
+- **`src/data/routes.ts`**: 上記全路線をroutes/routeColors/routeNamesに登録
+
+### fix: 和歌山電鐵貴志川線の駅座標・駅名を修正（`src/data/jr-kinki-more.ts`）
+- 「県前」→「神前」「竈山」に分割、「交通センター前」を追加。先頭の和歌山駅座標を修正
+
+## [2026-05-21] セッション
+
+### feat: 新規路線を大規模追加（全国カバレッジ向上）（`src/data/`）
+- **`various-more-lines.ts`** 新規作成: 福島交通飯坂線・JR石巻線・近江鉄道多賀線・近江鉄道八日市線
+- **`kanto-misc-lines.ts`** 新規作成: 東武宇都宮線・京急逗子線・東急こどもの国線
+- **`hokuriku-kinki-new.ts`** 新規作成: JR城端線・JR氷見線・叡山電鉄鞍馬線・南海加太線・JR境線
+- **`kinki-fukuchiyama.ts`** 新規作成: JR福知山線（大阪〜福知山）・神戸電鉄三田線
+- **`hapirainfukui.ts`** 新規作成: ハピラインふくい（敦賀〜大聖寺）
+- **`kyushu-kinki-new.ts`** 新規作成: JR若松線・JR香椎線・JR原田線・嵐電北野線
+- **`jr-obama-inbi.ts`** 新規作成: JR小浜線・JR因美線
+- **`jr-kyushu-maizuru.ts`** 新規作成: JR筑豊本線（福北ゆたか線）・JR舞鶴線
+- **`jr-sanin-kyoto-tottori.ts`** 新規作成: JR山陰本線（京都〜鳥取, 嵯峨野線区間含む）
+- **`src/data/routes.ts`**: 上記全路線をroutes/routeColors/routeNamesに登録
+
+## [2026-05-19] セッション（続き）
+
+### feat: 新規路線を大規模追加（394→444路線）（`src/data/`）
+- 東北JR追加2: JR八戸線・JR只見線・JR米坂線 (`tohoku-jr-more2.ts`)
+- 東北・関東私鉄追加3: 会津鉄道・野岩鉄道・東武佐野線・東武桐生線 (`tohoku-private-more3.ts`)
+- 中部・北陸追加2: のと鉄道・えちぜん鉄道三国芦原線・北陸鉄道浅野川線・JR越美北線・天竜浜名湖鉄道 (`hokuriku-more2.ts`)
+- 近畿丹後・近江追加: 京都丹後鉄道3路線・近江鉄道・信楽高原鐵道 (`kinki-tango-lines.ts`)
+- 近畿JR・私鉄追加2: JR播但線・JR加古川線・智頭急行・三岐鉄道・伊賀鉄道 (`kinki-jr-more2.ts`)
+- 中国追加3: 若桜鉄道・錦川鉄道・JR岩徳線・広島電鉄宮島線 (`chugoku-more3.ts`)
+- 四国追加3: いよ鉄道3路線・とさでん交通2路線・阿佐海岸鉄道 (`shikoku-more3.ts`)
+- 九州追加4: JR肥薩線・JR吉都線・松浦鉄道・島原鉄道 (`kyushu-more4.ts`)
+- 新交通・都市鉄道追加: 神戸新交通2路線・広島アストラムライン・大阪モノレール彩都線・京阪中之島線・能勢電鉄・神戸電鉄粟生線 (`new-urban-transit.ts`)
+- `routes.ts`: 全9ファイルのimport・routes・routeColors・routeNamesを追加
+
+### fix: 新規路線の座標をOSM基準に修正（`src/data/`）
+- JR只見線: 31駅を修正（緯度が約0.35°南にずれていた）
+- JR米坂線: 12駅を修正（経度が約0.26°西にずれていた）
+- JR肥薩線: 一部駅を修正（球泉洞〜渡区間の系統的なずれ）
+- 広島電鉄宮島線: 誤挿入された東高須・高須・古江の3駅を削除し、広電宮島口の座標を修正
+- 会津鉄道: 東長原・七ヶ岳登山口の誤修正を原値に戻す
+
+## [2026-05-19] セッション
+
+### fix: 全国61路線ファイルの駅座標をOSM基準値に網羅的修正（`src/data/`）
+- **調査方法**: Overpass API（overpass.kumi.systems）で9地域のOSMデータを一括取得し、全6629駅の座標を比較
+- **修正規模**: 61ファイル・約700駅を修正（ずれ幅0.020°以上＝約2km以上の誤差を対象）
+- **対象エリア**: 北海道・東北・関東・中部・北陸・近畿・中国・四国・九州・新幹線
+- **主要修正例**: JR御殿場線・身延線（lng 0.06〜0.09°のシフト）、JR函館本線各区間（0.1〜0.4°のずれ）、JR室蘭本線・日高本線（最大31km）
+- **ずれの原因**: データ入力時の写し間違い（旧測地系・メルカトル図法の問題ではなく純粋な人為的ミス）
+
+### fix: 座標ズレを修正（`src/data/`）
+- `hokkaido-more-lines.ts`: JR室蘭本線 伊達紋別駅の座標を修正（lat 42.479→42.471, lng 140.873→140.867）— 内浦湾岸ギリギリに配置されていた問題を解消
+
+### improve: UI改善（`src/components/RailwayMap.tsx`）
+- 左パネル幅を320px→380pxに拡大し、路線表示切替セクションのボタンが一行で収まるよう改善
+- 所要時間表示のデフォルトをオン→オフに変更（`showTravelTimes` 初期値 `true`→`false`）
+
+### feat: READMEを日本語+英語の二言語対応に書き直し（`README.md`）
+- 日本語を主体とし、英語版を折りたたみセクションで提供
+- 路線カバレッジ統計（394路線、約5200駅、全国カバー率約56%）と座標データ最終更新日を追記
+
+### feat: 路線別最終更新日CSVを追加（`scripts/route-update-dates.csv`）
+- 394路線のroute_key・路線名・ソースファイル・最終更新日（gitログベース）を記録
+
+## [2026-05-18] セッション（続き）
+
+### feat: 全国路線を大規模追加（362→391路線）（`src/data/`）
+- 中部（名古屋）: 名鉄瀬戸線・尾西線、リニモ、名古屋市営地下鉄上飯田線 (`chubu-nagoya-more.ts`)
+- 中国: 一畑電車北松江線・大社線、水島臨海鉄道、井原鉄道 (`chugoku-more2.ts`)
+- 九州: 平成筑豊鉄道伊田線・田川線、南阿蘇鉄道 (`kyushu-more3.ts`)
+- 関東: 鹿島臨海鉄道、上信電鉄、関東鉄道常総線 (`kanto-private-more3.ts`)
+- 東北: 由利高原鉄道、津軽鉄道、弘南鉄道弘南線・大鰐線 (`tohoku-more3.ts`)
+- 関東: ひたちなか海浜鉄道、JR水郡線（水戸〜常陸大宮）、小湊鉄道 (`kanto-more2.ts`)
+- 北海道: JR留萌本線 (`hokkaido-more2.ts`)
+- 中部: JR東海道本線（名古屋〜豊橋）、豊橋鉄道渥美線、名古屋市営地下鉄名港線、名鉄豊田線 (`chubu-jr-more3.ts`)
+
+### fix: 座標ズレを修正（`src/data/`）
+- `hokkaido-more-lines.ts`: JR室蘭本線の長和駅のlng（140.975→140.921）を修正しスパイク解消、錦岡→糸井のtimeToNextを5→25に修正
+
+## [2026-05-18] セッション
+
+### feat: 全国路線を大規模追加（289→362路線）（`src/data/`）
+- 中国: JR福塩線・芸備線・木次線・姫新線・伯備線 (`chugoku-more-lines.ts`)
+- 近畿私鉄: 近鉄吉野線・鳥羽線・湯の山線・鈴鹿線・けいはんな線・天理線・道明寺線・長野線、京阪宇治線、阪急今津線・伊丹線・箕面線・千里線・嵐山線・甲陽線、南海高野線、北大阪急行、大阪メトロ御堂筋線 (`kinki-more-private3.ts`, `kinki-more-jr2.ts`, `kinki-private-more4.ts`)
+- 中部: JR御殿場線・身延線・東海道本線（名古屋〜大垣）・関西本線（名古屋〜亀山）、富士急行、名鉄蒲郡線・河和線・知多新線・三河線、JR武豊線 (`chubu-jr-more2.ts`, `chubu-meitetsu-more.ts`)
+- 九州: 平成筑豊鉄道・甘木鉄道・西鉄甘木線・JR日田彦山線・後藤寺線・唐津線・宮崎空港線 (`kyushu-more2.ts`)
+- 四国: 高松琴平電鉄長尾線・志度線、土佐くろしお鉄道宿毛線、JR牟岐線南部・徳島線西部 (`shikoku-more2.ts`)
+- 東北: JR気仙沼線・大船渡線・山田線、仙台空港鉄道 (`tohoku-more2.ts`)
+- 北陸: えちごトキめき鉄道（日本海ひすいライン・妙高はねうまライン）、あいの風とやま鉄道、IRいしかわ鉄道、黒部峡谷鉄道 (`hokuriku-more.ts`)
+- 新潟・長野: JR越後線・信越本線、北越急行ほくほく線、しなの鉄道本線・北しなの線、JR飯山線 (`niigata-nagano-lines.ts`)
+- 関東: JR両毛線・烏山線・久留里線・総武本線（千葉〜銚子）、東武越生線・西武秩父線、上毛電気鉄道、わたらせ渓谷鐵道、真岡鐵道 (`kanto-jr-more.ts`, `kanto-private-more2.ts`)
+- JR桜井線・湖西線北部を追加
+
+### fix: 座標ズレを複数修正（`src/data/`）
+- `hokkaido-lines.ts`: 函館本線の鹿部駅（廃止支線の駅）を除去 → 海上に路線が飛び出す問題を解消
+- `chugoku-kyushu-lines.ts`: 山陰本線西部の出雲市重複を除去
+- `jr-kinki-more.ts`: JR阪和線・JR関西本線の駅座標を修正（油日/甲賀/三雲を加太/関に置換、百舌鳥の緯度修正）
+- `hokkaido-more-lines.ts`: 室蘭本線の誤駅（室蘭支線・存在しない富浦）を除去、日高本線の誤駅（室蘭本線の駅）を除去
+- `kyushu-private-more.ts`: 肥薩おれんじ鉄道4駅の緯度を約0.1度修正
+
+## [2026-05-17] セッション
+
+### fix: 南武線・ゆりかもめ・武蔵野線のジグザグ表示を修正（`src/data/`）
+- **jr-nanbu-line.ts**: `国立`（中央線の駅）を削除、全体的に乱れていた駅順を正しい立川→川崎順に修正
+  - 修正箇所: 稲田堤・中野島・登戸の逆順、宿河原・久地・津田山・武蔵溝ノ口の逆順、武蔵小杉・向河原・平間の逆順
+- **yurikamome-line.ts**: 存在しない駅「中央広場前」（座標が大きくズレ）を削除、東京国際クルーズターミナルの経度を修正
+- **jr-musashino-line.ts**: 新木場以降に誤って追加されていた京葉線駅（葛西臨海公園・舞浜・新浦安）を削除
+
+### revert: 列車デモアイコンを丸に戻しサイズ拡大・駅名を常時表示（`src/components/RailwayMap.tsx`）
+- 四角形 DivIcon → CircleMarker（radius 7）に戻し視認性改善（元は radius 5）
+- デモ中も `showStationNames` の設定に従い駅名を表示するよう修正
+
+### fix: 表示路線切替セクションのヘッダーが常に表示されるよう修正（`src/components/RailwayMap.tsx`）
+- ヘッダーとコンテンツを兄弟要素に分離し、コンテンツのみ独立スクロールコンテナにする
+- `position: sticky` は flex コンテナ内で機能しないため廃止し、構造で解決
+
+### feat: 列車デモに現在時刻の常時追跡モードを追加（`src/components/RailwayMap.tsx`）
+- 🕐ボタンをトグル式に変更：押すと「現在時刻追跡モード」に入り、ボタンが緑色でハイライト
+- 追跡モード中はアニメーションtickで毎フレーム `new Date()` から実時刻を取得し連続表示
+- 追跡モードON時は自動的に再生も開始（`setTrainDemoPlaying(true)`）
+- 再度🕐を押すと通常の模擬時刻モードに戻る
+
+### feat: 列車デモを30路線に拡張（`src/utils/trainDemoUtils.ts`）
+- 新規追加7路線: 有楽町線・JR総武線快速・JR常磐線・つくばエクスプレス・りんかい線・ゆりかもめ・京王線
+- 各路線のオフセットはデータファイルの `timeToNext` 累積値から計算
+- trainDemoUtils.ts: 68K→84K、JSバンドル: 448K→460K
+
+### feat: 列車デモをさらに11路線追加（計41路線）（`src/utils/trainDemoUtils.ts`）
+- 新規追加11路線: JR南武線・JR根岸線・JR横浜線・東急目黒線・西武新宿線・東武伊勢崎線・相鉄本線・東京モノレール・多摩モノレール・小田急江ノ島線・京成本線
+- 各路線のオフセット・パターン変数（Dir0/Dir1/Patterns）と DEMO_LINES エントリを追加
+
+### feat: 列車デモに21路線を追加（計76路線・関東ほぼ完全網羅）（`src/utils/trainDemoUtils.ts`）
+- 新規追加: 宇都宮線・八高線・五日市線・埼玉高速鉄道・ニューシャトル
+- 新規追加: 京成押上線・北総線・京急空港線・京急久里浜線
+- 新規追加: 新京成電鉄・東葉高速鉄道・相鉄いずみ野線・相鉄JR直通線
+- 新規追加: 湘南モノレール・小田急多摩線・東武日光線・東武亀戸線
+- 新規追加: 総武線千葉方面・東急多摩川線・東急池上線
+
+### fix: 凡例パネルの幅を固定（180px）し開閉時に幅が変わらないよう修正（`src/components/RailwayMap.tsx`）
+
+### feat: 列車デモにさらに14路線を追加（計55路線）（`src/utils/trainDemoUtils.ts`）
+- 新規追加: JR武蔵野線・横浜市営地下鉄ブルーライン・高崎線・京葉線・横浜市営地下鉄グリーンライン
+- 新規追加: 江ノ島電鉄・都電荒川線・日暮里舎人ライナー・JR青梅線・京王井の頭線
+- 新規追加: 東急世田谷線・東急大井町線・横須賀線・京王相模原線
+
+### fix: フルスクリーン時の凡例ヘッダーが常に表示されるよう修正（`src/components/RailwayMap.tsx`）
+- フルスクリーンモードで凡例パネル全体が overflowY:auto コンテナに入っていたためヘッダー（▼）がスクロールで消える問題を修正
+- 外側コンテナを flex-column にしヘッダーを flexShrink:0 で固定、コンテンツのみ overflowY:auto でスクロールする構造に変更
+
+### improve: 非経路路線の透明度を 0.2 → 0.35 に変更（`src/components/RailwayMap.tsx`）
+- 0.2だと東海道線など暗い路線色が実質不可視だったため視認性を改善
+
+### fix: 列車デモアイコンを駅表示より前面に描画（`src/components/RailwayMap.tsx`）
+- Leafletカスタムペイン `trainDemoPane`（z-index 650）を作成
+- CircleMarker を markerPane（z-index 600）より前面に配置し、駅ラベルに隠れず列車ドットが見えるよう修正
+
+### feat: 列車デモを表示中路線と連動（`src/utils/trainDemoUtils.ts`, `src/components/RailwayMap.tsx`）
+- `getAllTrainPositions` に `allowedKeys` 引数を追加し `visibleRoutes` でフィルタリング
+- コントロールパネルに「N/30路線」表示を追加
+
+### improve: 列車デモのパフォーマンス改善・UX調整（`src/components/RailwayMap.tsx`）
+- 15fps throttling + useMemo でレンダリング負荷を軽減
+- デフォルト速度 x5→x1、デモ開始時に自動再生
+
+---
+
+## [2026-05-16] セッション
+
+### feat: 列車デモ対応路線を7路線から23路線に拡張（`src/utils/trainDemoUtils.ts`）
+- 新規追加16路線: 東急田園都市線・小田急小田原線・京急線・日比谷線・東西線・千代田線・半蔵門線・南北線・副都心線・都営浅草線・都営三田線・都営新宿線・都営大江戸線・西武池袋線・東武東上線・JR埼京線
+- 各路線の座標データファイルをインポートし、`buildCoordMap` + `withCoords` で駅座標を解決
+- 各方向の駅リスト（オフセット）と運行パターン（PatternSimple）を定義
+- `DEMO_LINES` 配列に全16路線を追加（各路線カラーはroutes.tsの定義に準拠）
+- 東武東上線は西武池袋線と同色衝突を避けるため `#1E3C8C` を使用
+
+---
+
+## [2026-05-10] セッション（続き3）
+
+### feat: 位置情報が許可されている場合に出発駅を最寄り駅に自動設定（`src/components/RailwayMap.tsx`）
+- `autoSetDepartureRef` で初回のみ自動設定するよう制御
+- `userLocation` が取得できた時点で `findNearestStation` を呼び出し `setDeparture` を実行
+- 位置情報が拒否・未対応の場合は横浜駅をデフォルト出発駅として維持
+
+---
+
+## [2026-05-10] セッション（続き2）
+
+### fix: DiagramMapの非表示路線パス生成でposが未定義になるバグを修正（`src/components/DiagramMap.tsx`）
+- `prevPos = pos` / `{ prevPos = pos; continue; }` を `prevPos = [x, y]` に修正
+
+### feat: リアル地図モードでも非表示路線を半透明表示・クリックで表示ボタン（`src/components/RailwayMap.tsx`）
+- `showDimmedMapRoutes` / `dimmedMapTooltip` 状態を追加
+- MapContainer内に非表示路線を半透明Polyline（opacity 0.2）として描画
+- クリックで路線名＋色ドット＋「この路線を表示する」ボタン付きツールチップを表示（position: fixed）
+- 左下に「全路線: 表示/非表示」トグルボタンを追加（zIndex: 1000）
+- 地図クリック時にツールチップを閉じる（MapEventsのclickハンドラに追加）
+
+---
+
+## [2026-05-10] セッション（続き）
+
+### feat: 路線図で非表示路線を半透明表示・クリックで表示ボタン（`src/components/DiagramMap.tsx`, `src/components/RailwayMap.tsx`）
+- `showDimmedRoutes` トグルボタン（デフォルトON）を路線図左下に追加
+- 非表示路線を半透明（opacity 0.22）のパスとして描画（駅名・ドットなし）
+- 半透明路線クリックで路線名＋「この路線を表示する」ボタン付きツールチップを表示
+- ツールチップのデザインは既存の駅ツールチップと統一（fontSize 13px/11px, borderRadius 8px）
+- `onToggleRoute` コールバックをDiagramMap Propsに追加し、RailwayMapから `setVisibleRoutes` に接続
+
+---
+
+## [2026-05-10] セッション
+
+### improve: DiagramMap大幅軽量化・ラベル固定12px化（`src/components/DiagramMap.tsx`）
+- 路線ライン: 2000超の `<line>` 要素を76本の `<path>` 要素（1路線1パス）に置換 → React要素数を大幅削減
+- 駅ドット: `stationDotElements` を transform非依存のメモに分離 → ズーム中もドットが再レンダリングされない
+- 駅ラベル: `<g transform>` の外（スクリーン空間）でSVG `<text>` を描画 → スケール依存の `fontSize/scale` 計算を廃止
+- ラベルフォントサイズを常時固定12pxに統一（拡大縮小に関係なく同じ大きさで表示）
+- 出発/到着マーカーもスクリーン空間で描画（常時8px円・12pxテキスト）
+- LODしきい値: scale<0.05→ラベル非表示, scale<0.09→乗換駅のみ表示
+
+### feat: DiagramMapにフォントサイズ定数・マーカー定数を追加（`src/components/DiagramMap.tsx`）
+- `SCREEN_FS = 12` (固定スクリーンフォントサイズ)
+- `MARKER_R = 8` (出発/到着マーカー半径)
+
+---
+
+## [2026-05-08] セッション
+
+### feat: 駅番号（路線記号＋番号）をマップ上の駅名ラベルに表示（`src/data/stationNumbers.ts`, `src/components/RailwayMap.tsx`）
+- 50路線以上の駅番号データ（JY01, G01等）を網羅した `stationNumbers.ts` を新規作成
+- `createStationIcon` / `createSpecialStationIcon` に `routeKey` パラメータを追加
+- 駅名ラベルの左側に路線色の小バッジとして駅番号を表示
+- 出発駅・到着駅の特別マーカーにも駅番号バッジを追加
+
+### feat: 英語翻訳カバレッジの網羅的修正（`src/utils/translation.ts`, 各コンポーネント）
+- 路線名39件・駅名112件の英語翻訳を追加
+- TimetablePanel, ThemeToggle, ErrorBoundary, SchematicMap の英語未対応を修正
+- 翻訳カバレッジレポート `TRANSLATION_STATUS.md` を自動生成スクリプトで作成
+
+### fix: 出発駅・到着駅マーカーの最大幅を120px(日本語) / 80px(英語)に制限（`src/components/RailwayMap.tsx`）
+- `createSpecialStationIcon` の `markerWidth` に上限を設定し大きくなりすぎないよう修正
+- 英語・日本語ともに左右パディングを5pxに統一
+
+---
+
+## [2026-04-29] セッション（深夜）
+
+### fix: Service Workerがdev serverと干渉して画面真っ白になる問題を修正（`public/sw.js`）
+- `localhost` / `127.0.0.1` へのリクエストをSWのfetchハンドラから除外（Vite dev serverのモジュール取得に干渉していた）
+- `caches.match()` が `undefined` を返す場合に `Response.error()` でフォールバック（`undefined` は `Response` に変換できずTypeErrorが発生していた）
+- `CACHE_NAME` を `v1` → `v2` に更新して既存の古いキャッシュを強制削除
+
+---
+
+## [2026-04-29] セッション（夜）
+
+### feat: 時刻表対応路線を 65 → 79 路線に拡充（`src/data/timetableData.ts`）
+追加した9路線（第4弾）:
+- JR八高線（八王子〜箱根ヶ崎）
+- JR五日市線（拝島〜武蔵五日市）
+- JR伊東線（熱海〜伊東）
+- 伊豆急行線（伊東〜伊豆急下田）
+- 箱根登山鉄道（小田原〜強羅）
+- 伊豆箱根鉄道駿豆線（三島〜修善寺）
+- JR内房線（蘇我〜館山）
+- JR外房線（千葉〜大原）
+- JR成田線（千葉〜銚子）
+
+追加した5路線（第5弾・関西・新幹線）:
+- JR神戸線（大阪〜住吉）
+- JR京都線（京都〜大阪）
+- 大阪環状線（内回り・外回り）
+- 大阪メトロ御堂筋線（江坂〜なかもず）
+- 東海道新幹線（東京〜新大阪）
+
+**全88路線中79路線が時刻表対応完了（残り: なし ※全路線データあり）**
+
+---
+
+## [2026-04-29] セッション（後半）
+
+### fix: スマホでキーボード表示時に出発・到着駅ラベルが見切れる問題を解消（`src/components/StationSelector.tsx`）
+- 出発・到着駅の入力フォーカス時にモバイルで 350ms 後（キーボード展開完了を待って）`scrollIntoView({ block: 'start' })` を呼び出し、ラベルを含む親コンテナをスクロール位置の先頭に表示
+
+### feat: 時刻表対応路線を 49 → 65 路線に拡充（`src/data/timetableData.ts`）
+追加した16路線（第3弾）:
+- 江ノ島電鉄・都電荒川線・東急世田谷線
+- 京急久里浜線・京急空港線・京成押上線
+- 北総鉄道・埼玉高速鉄道・ニューシャトル
+- 相鉄・JR直通線・湘南モノレール・東武日光線
+- 東武大師線・東武亀戸線・新京成電鉄・東葉高速鉄道
+
+### improve: 英語モードでの日本語混在を網羅的に修正
+
+**`src/utils/translation.ts`** に不足していた翻訳キーを追加（30件以上）:
+- StationSelector: `currentLocationFrom` / `swapStationsTitle` / `departureTime` / `currentTime`
+- 時刻表ツールチップ: `baseTime` / `onboard` / `afterSuffix` / `offRouteReference` / `noData` / `showAllTimetable` / `onboardRouteNoData` / `noTimetableData` / `approximateNote` / `towardSuffix`
+- ボタン類: `loadingMap` / `maxTime` / `timetableModeOff` / `timetableModeOn` / `exitFullscreen` / `enterFullscreen` / `refreshLocationNow` / `stopTracking` / `showMyLocation`
+- その他: `fromWhere` / `firstTrain` / `lastStation` / `displaySettings`
+
+**`src/components/StationSelector.tsx`**: 「現在地から」「出発駅と到着駅を入れ替え」「出発時刻」「現在時刻」を翻訳化
+
+**`src/components/RailwayMap.tsx`**: 「基準時刻」「乗」「以降」「ルート外参考」「データなし」「時刻表をすべて表示」「時刻データなし」「概算値・参考用」「マップを読み込み中」「最大時間」「時刻表モードON/OFF」「拡大/縮小表示」「現在地追跡」「どこから」「○○行き」「始発」「終点」「表示設定」を翻訳化
+
+**`src/components/legend/LegendRouteList.tsx`**: ソート順ラベル（「並順」「あいうえお」「色」「登録順」）を英語対応
+
+**`src/components/RouteRecommendations.tsx`**: 所要時間の「分」単位を英語モードで「min」に修正
+
+---
+
+## [2026-04-29] セッション（前半）
+
+### feat: 時刻表対応路線を 28 → 49 路線に拡充（`src/data/timetableData.ts`）
+追加した路線（Batch 1）:
+- 総武快速線・高崎線・小田急江ノ島線・西武新宿線・武蔵野線
+- 東京モノレール・京成本線・JR横浜線・横須賀線・南武線
+
+追加した路線（Batch 2）:
+- JR宇都宮線・根岸線・京王井の頭線・東急大井町線・東武伊勢崎線
+- 相鉄本線・相鉄いずみ野線・JR総武線（千葉方面）・JR京葉線
+- 横浜市営地下鉄ブルーライン・りんかい線・ゆりかもめ
+- JR青梅線・日暮里・舎人ライナー・多摩都市モノレール
+- 東急多摩川線・東急池上線・横浜市営地下鉄グリーンライン
+- 京王相模原線・小田急多摩線
+
+### fix: スマホで駅名入力時にブラウザが自動ズームする問題を解消（`src/pages/index.astro`）
+- グローバルCSSで全 `input` / `select` / `textarea` の `font-size` を 16px に固定
+- `-webkit-text-size-adjust: 100%` と `touch-action: manipulation` を併用
+
+### fix: StationSelector のタッチ操作が Leaflet 地図に伝播してズームされる問題を解消（`src/components/StationSelector.tsx`）
+- ラッパー div に `onTouchStart` / `onTouchMove` / `onTouchEnd` で `e.stopPropagation()` を適用
+
+### improve: 駅名入力中に下部UIを一時非表示にして入力・候補選択を快適化
+- `StationSelector.tsx`: `isSearching` 状態と `onSearchingChange` コールバック prop を追加
+  - フォーカス時に `isSearching = true`、ブラウズ中のフォーカス移動を考慮した 200ms debounce で blur 時に `false`
+  - 検索中は「📍現在地から」ボタンと出発時刻入力を非表示
+- `RailwayMap.tsx`: `handleSearchingChange` を追加
+  - デスクトップ: 右上の凡例パネルを非表示（`&& !isStationSearching`）
+  - モバイルフルスクリーン: タブバー・折りたたみボタンを非表示、パネルを画面下端まで拡張（`bottom: 0`）、最大高さを 80dvh に拡大
+  - 入力開始時にモバイルパネルを自動展開（station タブに切替）
+
+### docs: CLAUDE.md に CHANGE.log 記録ルールを追記
+
+---
+
+## [2026-04-26 〜 2026-04-28] セッション
+
+### feat: SVGダイアグラム路線図ページ追加
+- `/diagram` ページ新設（`src/pages/diagram.astro`, `src/components/DiagramMap.tsx`）
+- SVGベースの路線図。重複区間はオフセット表示、路線トグルパネル付き
+
+### fix: モバイルUI修正（ボタン重なり・駅省略廃止・所要時間連動）
+- 地図上のフローティングボタン（全画面・GPS・更新）がスマホで底部UIと重ならないよう位置調整
+- Leafletのズームコントロールを右下に移動し広告との重なりを解消
+- ズームレベルによる駅省略を廃止。表示切替のみで駅を制御するように変更
+- 「乗換駅のみ表示」時は乗換間の合算時間を表示、全駅表示時は区間ごとの個別時間を表示
+
+### fix: 「現在地から」ボタンの位置修正
+- 出発駅ラベルに食い込んでいた「📍 現在地から」ボタンを入力欄の下に移動
+- 出発駅・到着駅の入力欄が横に揃うよう修正
+
+### feat: 時刻表ホーム番線情報を全10路線・全駅分に拡充（`src/data/timetableData.ts`）
+- 従来の一部駅のみ・不正確な番線データを全面刷新
+- 山手線・東海道線・京浜東北線・中央総武線・銀座線・丸ノ内線・東急東横線・東急田園都市線・小田急線・京急線の全駅を網羅
+- 誤っていた主要駅の番線を修正（品川1/3番線、新宿15/14番線、池袋6/5番線、上野3/2番線 など）
+
+### improve: 出発・到着駅入力欄のサイズ縮小（`src/components/StationSelector.tsx`）
+- 外枠パディング 15px → 10px、フォントサイズ 14px、ラベル 12px に縮小
+- 項目間ギャップ 15px → 8px でコンパクト化
+
+### improve: 推薦ルートの路線フロービジュアルを刷新（`src/components/RouteRecommendations.tsx`）
+- 路線色バー + 路線名 + 乗換駅名を横並びで視覚的に表示
+- 乗換数を緑（直通）/橙（乗換あり）の色分けバッジで強調
+- 各セグメントに所要時間を表示
+
+### fix: スマホでの自動ズーム無効化
+- `input[font-size]` を 16px に戻し iOS Safari の自動ズームを解消
+- viewport に `maximum-scale=1, user-scalable=no` を追加
+
+### fix: 時刻表ツールチップのスマホ対応
+- ヘッダー行（出発設定・到着設定ボタン + 基準時刻 input）を2行構成に変更し横はみ出しを解消
+- 時刻表各行を「時刻・種別・番線」（1行目）と「行き先」（2行目）の2段構成に変更
+- 時刻表本体エリアに横スクロール対応・右カラムに minWidth 設定
+
+### feat: 時刻表対応路線を 10 → 28 路線に拡充（`src/data/timetableData.ts`）
+追加した路線:
+- 東京メトロ: 日比谷線・東西線・千代田線・有楽町線・半蔵門線・南北線・副都心線
+- 都営地下鉄: 浅草線・三田線・新宿線・大江戸線
+- JR: 埼京線・常磐線
+- 私鉄: 京王線・西武池袋線・東武東上線・東急目黒線
+- つくばエクスプレス
+各路線に駅リスト・累計所要時間・時間帯別運行間隔パターン・種別・行き先を定義。
+
+### docs: 時刻表カバレッジ調査（2026-04-28）
+- 全88路線・878ユニーク駅に対する時刻表対応状況を集計
+- 対応路線: 28路線 / 88路線（32%）
+- 対応駅数: 487駅 / 878駅（55.5%）
+- 未対応の主な路線（60路線）:
+  小田急江ノ島線・西武新宿線・京成本線・横浜市営地下鉄・横須賀線・
+  JR武蔵野線・東急大井町線・JR総武線（千葉方面）・JR京葉線・
+  りんかい線・ゆりかもめ・東京モノレール・つくばエクスプレス など
+
+---
+
+## 過去のセッション（抜粋）
+
+- PWA対応（manifest・Service Worker）
+- 複数路線の駅座標ずれ修正
+- 広告（StickyBottomAd）配信判定・表示制御の改善
+- 位置情報による最寄り駅自動取得
+- 駅クリック時刻表ツールチップ（路線一覧 + 発車情報）実装
+- 乗換駅のみ表示フィルター
+- ダークモード・多言語（日英）対応
+- 39路線のデータ整備（JR・東京メトロ・都営・私鉄・新交通）
+
+---
+
+## 2026-05-10 セッション3
+
+### fix: DiagramMap 半透明路線クリック修正
+- `src/components/DiagramMap.tsx`
+- 非表示路線パスに `strokeWidth=12, vectorEffect="non-scaling-stroke"` の不可視クリックターゲットを追加し、低ズーム時でもクリックを確実に受け取るよう修正
+
+### feat: DiagramMap/RailwayMap 表示/非表示ボタンをツールチップに追加
+- `src/components/DiagramMap.tsx`, `src/components/RailwayMap.tsx`
+- 表示中の路線クリック → 「この路線を非表示にする」（赤）ボタン表示
+- 非表示（半透明）路線クリック → 「この路線を表示する」（緑）ボタン表示
+- `onHideRoute` prop を DiagramMap に追加
+
+### fix: RailwayMap Leaflet 半透明路線クリック修正
+- `src/components/RailwayMap.tsx`
+- transparent 二重 Polyline から単一着色 Polyline (opacity=0.2) に変更
+- `stopPropagation` でMap全体クリックによるツールチップ即時消去を防止
+
+### feat: RailwayMap 路線切替セクションヘッダーをsticky化
+- `src/components/RailwayMap.tsx`
+- コンテナに `max-height: calc(100vh - 200px)`, `overflow-y: auto` を追加
+- ヘッダー div に `position: sticky; top: 0` を適用しスクロール時も常時表示
+
+---
+
+## 2026-05-10 セッション4
+
+### fix: 半透明路線の太さを表示路線に統一
+- `src/components/DiagramMap.tsx`: dimmedパスのstrokeWidthを4→2に
+- `src/components/RailwayMap.tsx`: dimmed PolylineのweightをW6→4に
+
+### fix: DiagramMap半透明路線クリックターゲット改善
+- `src/components/DiagramMap.tsx`
+- vectorEffect="non-scaling-stroke"を廃止し、strokeWidth=12/transform.scaleで常に12pxのクリック幅を確保
+- transform.scaleをdimmedPathElements依存配列に追加
+
+### fix: RailwayMap Leaflet半透明路線クリックでツールチップが消える問題
+- `src/components/RailwayMap.tsx`
+- justClickedLayerRefを追加し、MapEventsのclickハンドラがPolylineクリック直後に誤ってtooltipをnullにしないよう修正
+
+### fix: 路線切替セクションstickyヘッダー
+- `src/components/RailwayMap.tsx`
+- overflowY:autoをコンテンツdivに移動し、ヘッダーがページスクロール基準でstickyになるよう修正
+
+### feat: DiagramMap showDimmedRoutes prop追加
+- `src/components/DiagramMap.tsx`
+- 外部からshowDimmedRoutesを制御可能なpropを追加
+
+### feat: 路線切替セクションに「区間外の路線を半透明で表示」チェックボックス追加
+- `src/components/RailwayMap.tsx`
+- showDimmedMapRoutesをDiagramMapにも渡し両モードで統一制御
+
+---
+
+## 2026-05-10 セッション5
+
+### fix: 非表示路線の「表示」ボタンで路線が反映されない問題
+- `src/components/RailwayMap.tsx`
+- visibleRoutesDataはavailableRoutesでフィルタされているため、visibleRoutesだけ更新しても
+  renderRouteが呼ばれず路線が完全不可視になっていた
+- setAvailableRoutes と setVisibleRoutes を同時に更新するよう修正
+- DiagramMapのonToggleRouteも同様に修正
+
+### fix+feat: 路線クリックポップアップのデバッグ色修正・非表示ボタン追加
+- `src/components/RailwayMap.tsx`
+- デバッグ用yellow背景・赤枠線をthemeカラーに変更
+- ポップアップに「この路線を非表示にする」ボタンを追加
+- visible route clickでのdimmedMapTooltip二重表示を削除しポップアップに統一
+
+### 設計確認: 半透明/非表示フラグロジック
+- showDimmedMapRoutes=true + visibleRoutes外 → 半透明
+- showDimmedMapRoutes=true + visibleRoutes内 → 実線
+- showDimmedMapRoutes=false + visibleRoutes外 → 非表示
+- showDimmedMapRoutes=false + visibleRoutes内 → 実線

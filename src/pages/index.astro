@@ -1,0 +1,411 @@
+---
+import ThemeWrapper from "../components/ThemeWrapper.tsx";
+---
+
+<html lang="ja">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="google-site-verification"
+			content="uyjBT9z6vOnpxn6lM6YnxbI6R4jLSDIAboC8zo1slhM"
+		/>
+		<meta name="google-adsense-account" content="ca-pub-2444529114040977" />
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2444529114040977" crossorigin="anonymous"></script>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="/icon_flex_rail_way_map.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="16x16"
+			href="/icon_flex_rail_way_map.png"
+		/>
+		<link
+			rel="apple-touch-icon"
+			sizes="180x180"
+			href="/icon_flex_rail_way_map.png"
+		/>
+		<link rel="shortcut icon" href="/icon_flex_rail_way_map.png" />
+		<link rel="manifest" href="/manifest.json" />
+		<meta name="theme-color" content="#4CAF50" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+		<meta name="apple-mobile-web-app-title" content="路線図" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+		<meta name="generator" content={Astro.generator} />
+		<title>フレックス路線図 | 路線図が見にくい・複雑すぎる？を解決するシンプルな乗り換え路線図</title>
+
+		<!-- Canonical URL -->
+		<link rel="canonical" href="https://flex-railway-map.netlify.app/" />
+
+		<!-- SEO Meta Description -->
+		<meta name="description" content="路線図が見にくい・複雑すぎると感じていませんか？フレックス路線図は、必要な路線だけ選んで表示できるシンプルなインタラクティブ路線図です。情報を絞り込んで見やすくし、遅延・運休時も自分で乗り換えを判断できます。" />
+		<meta name="keywords" content="路線図 見にくい,路線図 複雑,路線図 分かりにくい,見やすい路線図,シンプル路線図,フレックス路線図,乗り換え 分かりやすい,鉄道路線図,東京路線図,路線図 絞り込み,インタラクティブ路線図,乗り換え検索,電車 路線図,Flex Railway Map" />
+		<meta name="robots" content="index, follow" />
+		<meta name="author" content="Flex Rail Map Project" />
+
+		<!-- Open Graph / SNS シェア用 -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://flex-railway-map.netlify.app/" />
+		<meta property="og:title" content="路線図が見にくい・複雑すぎる？フレックス路線図で解決" />
+		<meta property="og:description" content="必要な路線だけ選んで表示できるシンプルなインタラクティブ路線図。路線図が見にくい・分かりにくいを解決し、遅延・運休時も自分で判断できます。" />
+		<meta property="og:image" content="https://flex-railway-map.netlify.app/icon_flex_rail_way_map.png" />
+		<meta property="og:locale" content="ja_JP" />
+		<meta property="og:site_name" content="フレックス路線図" />
+
+		<!-- Twitter Card -->
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:title" content="路線図が見にくい？フレックス路線図で解決" />
+		<meta name="twitter:description" content="必要な路線だけ絞り込める！路線図が見にくい・複雑すぎるを解決するシンプルなインタラクティブ路線図サービス。" />
+		<meta name="twitter:image" content="https://flex-railway-map.netlify.app/icon_flex_rail_way_map.png" />
+
+		<!-- JSON-LD 構造化データ: WebApplication -->
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "WebApplication",
+			"name": "フレックス路線図",
+			"alternateName": "Flex Railway Map",
+			"url": "https://flex-railway-map.netlify.app/",
+			"description": "路線図が見にくい・複雑すぎるを解決するシンプルなインタラクティブ路線図サービス。必要な路線だけ選んで表示でき、遅延・運休時も自分で乗り換えを判断できます。",
+			"applicationCategory": "TravelApplication",
+			"operatingSystem": "Any",
+			"inLanguage": ["ja", "en"],
+			"offers": {
+				"@type": "Offer",
+				"price": "0",
+				"priceCurrency": "JPY"
+			},
+			"featureList": [
+				"インタラクティブ路線図表示",
+				"路線の絞り込み表示",
+				"駅間経路検索",
+				"39路線対応",
+				"乗換駅フィルター",
+				"現在地表示（30秒自動更新）"
+			]
+		}
+		</script>
+
+		<!-- JSON-LD 構造化データ: FAQ -->
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "FAQPage",
+			"mainEntity": [
+				{
+					"@type": "Question",
+					"name": "路線図が見にくい・複雑すぎるのはなぜですか？",
+					"acceptedAnswer": {
+						"@type": "Answer",
+						"text": "一般的な路線図はすべての路線・駅情報を一度に表示するため、情報量が多すぎて見にくくなります。フレックス路線図では必要な路線だけを選んで表示できるので、シンプルで見やすくなります。"
+					}
+				},
+				{
+					"@type": "Question",
+					"name": "遅延・運休時に路線図を自分で確認したい",
+					"acceptedAnswer": {
+						"@type": "Answer",
+						"text": "フレックス路線図は、乗り換えアプリの案内が役に立たないイレギュラー時に、出発駅〜到着駅に関係する路線だけを絞り込んで表示できます。乗り換え駅や経路を自分で判断するのに役立ちます。"
+					}
+				},
+				{
+					"@type": "Question",
+					"name": "どの路線が対応していますか？",
+					"acceptedAnswer": {
+						"@type": "Answer",
+						"text": "山手線・中央線・東海道線などJR線、東京メトロ全9路線、都営地下鉄全4路線、小田急・東急・京急・西武など主要私鉄を含む39路線以上に対応しています。"
+					}
+				},
+				{
+					"@type": "Question",
+					"name": "スマートフォンでも使えますか？",
+					"acceptedAnswer": {
+						"@type": "Answer",
+						"text": "はい、スマートフォン・タブレット・PCいずれのブラウザでもご利用いただけます。アプリのインストール不要で、ブラウザから無料でアクセスできます。"
+					}
+				}
+			]
+		}
+		</script>
+
+		<!-- hreflang for multilingual SEO -->
+		<link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/" />
+		<link rel="alternate" hreflang="en" href="https://flex-railway-map.netlify.app/" />
+		<link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/" />
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+			integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+			crossorigin=""
+		/>
+		<script
+			src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+			integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+			crossorigin=""></script>
+		<style>
+			:root {
+				--sat: env(safe-area-inset-top, 0px);
+				--sab: env(safe-area-inset-bottom, 0px);
+				--sal: env(safe-area-inset-left, 0px);
+				--sar: env(safe-area-inset-right, 0px);
+			}
+			body {
+				margin: 0 0 100px 0; /* Sticky広告用の下部マージン */
+				padding: 0;
+				font-family: Arial, sans-serif;
+				transition:
+					background-color 0.3s ease,
+					color 0.3s ease;
+				-webkit-tap-highlight-color: transparent;
+				touch-action: manipulation;
+				overscroll-behavior: none;
+			}
+			/* iOS Safari 自動ズーム防止: 全inputを16px以上に固定 */
+			input, select, textarea {
+				font-size: 16px !important;
+				-webkit-text-size-adjust: 100%;
+				touch-action: manipulation;
+			}
+			body.light {
+				background-color: #ffffff;
+				color: #333333;
+				--station-border-color: #666666;
+				--station-border-color-light: #CCCCCC;
+			}
+			body.dark {
+				background-color: #1a1a1a;
+				color: #ffffff;
+				--station-border-color: #ffffff;
+				--station-border-color-light: #666666;
+			}
+			body.dark h1 {
+				color: #ffffff;
+			}
+			body.dark footer {
+				background-color: #2d2d2d !important;
+				border-top-color: #404040 !important;
+				color: #b3b3b3 !important;
+			}
+			.leaflet-container {
+				height: 600px !important;
+				width: 100% !important;
+			}
+			/* Sticky広告(90px)の上にLeaflet下部コントロールを表示 */
+			.leaflet-bottom {
+				bottom: 96px !important;
+			}
+
+			/* COMPREHENSIVE Dark mode support for ALL Leaflet popups */
+
+			/* === ROOT POPUP CONTAINER === */
+			body.dark .leaflet-popup,
+			body.dark .leaflet-popup-pane,
+			body.dark .leaflet-popup-pane .leaflet-popup {
+				background: #2d2d2d !important;
+			}
+
+			/* === POPUP WRAPPER (main box) === */
+			body.dark .leaflet-popup-content-wrapper,
+			body.dark .leaflet-popup-content-wrapper * {
+				background: #2d2d2d !important;
+				color: #ffffff !important;
+				box-shadow: 0 3px 14px rgba(0, 0, 0, 0.8) !important;
+				border: 1px solid #404040 !important;
+				border-radius: 4px !important;
+			}
+
+			/* === POPUP CONTENT AREA === */
+			body.dark .leaflet-popup-content,
+			body.dark .leaflet-popup-content * {
+				background: #2d2d2d !important;
+				color: #ffffff !important;
+				margin: 0 !important;
+			}
+
+			/* === POPUP TIP (arrow pointing to marker) === */
+			body.dark .leaflet-popup-tip,
+			body.dark .leaflet-popup-tip-container {
+				background: #2d2d2d !important;
+				border: 1px solid #404040 !important;
+				box-shadow: none !important;
+			}
+
+			/* === CLOSE BUTTON === */
+			body.dark .leaflet-popup-close-button {
+				color: #ffffff !important;
+				background: transparent !important;
+				font-size: 18px !important;
+				font-weight: bold !important;
+				padding: 4px 8px !important;
+				border-radius: 3px !important;
+				transition: all 0.2s ease !important;
+				line-height: 1 !important;
+				text-decoration: none !important;
+			}
+
+			body.dark .leaflet-popup-close-button:hover,
+			body.dark .leaflet-popup-close-button:focus,
+			body.dark .leaflet-popup-close-button:active {
+				color: #ff6b6b !important;
+				background: rgba(255, 255, 255, 0.15) !important;
+				text-decoration: none !important;
+				outline: none !important;
+			}
+
+			/* === FORCE ALL NESTED ELEMENTS === */
+			body.dark
+				.leaflet-popup
+				*:not(.leaflet-popup-close-button):not(button) {
+				color: #ffffff !important;
+				background: transparent !important;
+			}
+
+			body.dark .leaflet-popup div:not(.leaflet-popup-close-button),
+			body.dark .leaflet-popup span,
+			body.dark .leaflet-popup strong,
+			body.dark .leaflet-popup p,
+			body.dark .leaflet-popup h1,
+			body.dark .leaflet-popup h2,
+			body.dark .leaflet-popup h3,
+			body.dark .leaflet-popup label,
+			body.dark .leaflet-popup text {
+				color: #ffffff !important;
+				background: transparent !important;
+			}
+
+			/* === PRESERVE BUTTON STYLING (except close button) === */
+			body.dark .leaflet-popup button:not(.leaflet-popup-close-button) {
+				background: var(--button-bg, #4caf50) !important;
+				color: white !important;
+				border: none !important;
+			}
+
+			/* === OVERRIDE INLINE STYLES === */
+			body.dark .leaflet-popup [style*="background"],
+			body.dark
+				.leaflet-popup
+				[style*="background-color"]:not(button):not(
+					.leaflet-popup-close-button
+				) {
+				background: #2d2d2d !important;
+				background-color: #2d2d2d !important;
+			}
+
+			body.dark
+				.leaflet-popup
+				[style*="color"]:not(button):not(.leaflet-popup-close-button) {
+				color: #ffffff !important;
+			}
+
+			/* === LEAFLET CONTAINER DARK MODE === */
+			body.dark .leaflet-container {
+				background: #1a1a1a !important;
+			}
+
+			body.dark .leaflet-control-container {
+				background: transparent !important;
+			}
+
+			/* === ZOOM CONTROL BUTTONS DARK MODE === */
+			body.dark .leaflet-control-zoom,
+			body.dark .leaflet-control-zoom * {
+				background: #2d2d2d !important;
+				background-color: #2d2d2d !important;
+				border: 1px solid #404040 !important;
+				border-radius: 4px !important;
+				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important;
+			}
+
+			body.dark .leaflet-control-zoom a,
+			body.dark .leaflet-control-zoom-in,
+			body.dark .leaflet-control-zoom-out {
+				background: #2d2d2d !important;
+				background-color: #2d2d2d !important;
+				color: #ffffff !important;
+				border: 1px solid #404040 !important;
+				text-decoration: none !important;
+			}
+
+			body.dark .leaflet-control-zoom a:hover,
+			body.dark .leaflet-control-zoom-in:hover,
+			body.dark .leaflet-control-zoom-out:hover {
+				background: #404040 !important;
+				background-color: #404040 !important;
+				color: #ffffff !important;
+			}
+
+			/* Force override for all zoom control elements */
+			body.dark .leaflet-control-zoom > *,
+			body.dark .leaflet-control-zoom > * > * {
+				background: #2d2d2d !important;
+				background-color: #2d2d2d !important;
+				color: #ffffff !important;
+			}
+
+			/* === FORCE POPUP VISIBILITY AND PROPER LAYERING === */
+			body.dark .leaflet-popup {
+				z-index: 1000 !important;
+			}
+
+			/* === SPECIFIC OVERRIDES FOR DEEP NESTING === */
+			body.dark .leaflet-popup-content > div,
+			body.dark .leaflet-popup-content > div > *,
+			body.dark .leaflet-popup-content > div > div,
+			body.dark .leaflet-popup-content > div > div > * {
+				background: #2d2d2d !important;
+				color: #ffffff !important;
+			}
+
+			/* === SHADOW AND BORDER CONSISTENCY === */
+			body.dark .leaflet-popup-content-wrapper::before,
+			body.dark .leaflet-popup-content-wrapper::after {
+				border-color: #404040 !important;
+				background: #2d2d2d !important;
+			}
+
+			/* === CLASS-BASED TARGETING FOR REACT COMPONENTS === */
+			body.dark .popup-dark,
+			body.dark .popup-dark * {
+				background: #2d2d2d !important;
+				color: #ffffff !important;
+			}
+
+			body.dark .popup-content-main,
+			body.dark .popup-content-main * {
+				background: #2d2d2d !important;
+				color: #ffffff !important;
+			}
+
+			/* === FORCE OVERRIDE FOR STUBBORN INLINE STYLES === */
+			body.dark .leaflet-popup-content div[style],
+			body.dark .leaflet-popup-content span[style],
+			body.dark .leaflet-popup-content strong[style] {
+				background: #2d2d2d !important;
+				color: #ffffff !important;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- SEO用静的コンテンツ（検索エンジンがJS描画前にクロール可能） -->
+		<noscript>
+			<div style="padding: 20px; font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
+				<h1>路線図が見にくい・複雑すぎる？フレックス路線図で解決</h1>
+				<p>フレックス路線図は、必要な路線だけを選んで表示できるシンプルなインタラクティブ路線図サービスです。情報が多すぎて見にくい路線図を絞り込み、遅延・運休時も自分で乗り換えを判断できます。</p>
+				<p>JavaScriptを有効にしてご利用ください。</p>
+			</div>
+		</noscript>
+		<ThemeWrapper client:only="react" />
+		<script>
+			if ('serviceWorker' in navigator) {
+				window.addEventListener('load', () => {
+					navigator.serviceWorker.register('/sw.js');
+				});
+			}
+		</script>
+	</body>
+</html>

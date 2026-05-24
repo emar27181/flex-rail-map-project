@@ -1,0 +1,1914 @@
+import { yamanote } from './yamanote';
+import { chuo } from './chuo';
+import { keihinTohoku } from './keihin-tohoku';
+
+import { ginzaLine } from './ginza-line';
+import { marunouchiLine } from './marunouchi-line';
+import { hibiyaLine } from './hibiya-line';
+import { tozaiLine } from './tozai-line';
+import { chiyodaLine } from './chiyoda-line';
+import { yurakuchoLine } from './yurakucho-line';
+import { hanzomonLine } from './hanzomon-line';
+import { nambokuLine } from './namboku-line';
+import { fukutoshinLine } from './fukutoshin-line';
+import { toeiAsakusaLine } from './toei-asakusa-line';
+import { toeiMitaLine } from './toei-mita-line';
+import { toeiShinjukuLine } from './toei-shinjuku-line';
+import { toeiOedoLine } from './toei-oedo-line';
+import { jrSobuLine } from './jr-sobu-line';
+import { jrJobanLine } from './jr-joban-line';
+import { jrSaikyoLine } from './jr-saikyo-line';
+import { jrTakasakiLine } from './jr-takasaki-line';
+import { jrTokaidoMainLine } from './jr-tokaido-main-line';
+import { odakyuLine } from './odakyu-line';
+import { odakyuEnoshimaLine } from './odakyu-enoshima-line';
+import { keioLine } from './keio-line';
+import { tokyuToyokoLine } from './tokyu-toyoko-line';
+import { tokyuDenEnToshiLine } from './tokyu-den-en-toshi-line';
+import { seibuIkebukuroLine } from './seibu-ikebukuro-line';
+import { seibuShinjukuLine } from './seibu-shinjuku-line';
+import { tobuTojoLine } from './tobu-tojo-line';
+import { keikyuLine } from './keikyu-line';
+import { jrMusashinoLine } from './jr-musashino-line';
+import { tokyoMonorail } from './tokyo-monorail';
+import { keiseiMainLine } from './keisei-main-line';
+import { jrYokohamaLine } from './jr-yokohama-line';
+import { yokohamaBlueLine } from './yokohama-blue-line';
+import { rinkaiLine } from './rinkai-line';
+import { yurikamomeLine } from './yurikamome-line';
+import { tsukubaExpress } from './tsukuba-express';
+import { jrNanbuLine } from './jr-nanbu-line';
+
+import { sotetsuMainLine, sotetsuIzumino } from './sotetsu-line';
+import { jrSobuChiba, jrKeiyo } from './jr-sobu-chiba';
+
+
+import { tokyuMeguro, tokyuTamagawa, tokyuIkegami } from './tokyu-additional';
+import { yokohamaGreenLine } from './yokohama-green-line';
+import { enoshimaElectricRailway } from './enoshima-electric-railway';
+import { jrUchiboLine, jrSotoboLine, jrNaritaLine } from './jr-chiba-comprehensive';
+import { shinkeisei, toyoRapid } from './chiba-private-railways';
+import { tamaMonorail } from './tama-monorail';
+import { todenArakawaLine } from './toden-arakawa-line';
+import { nipporiToneriLiner } from './nippori-toneri-liner';
+import { jrOmeLine } from './jr-ome-line';
+import { keioInokashiraLine } from './keio-inokashira-line';
+import { tokyuSetagayaLine } from './tokyu-setagaya-line';
+import { tokyuOimachiLine } from './tokyu-oimachi-line';
+import { tobuIsesakiLine } from './tobu-isesaki-line';
+import { jrHachikoLine } from './jr-hachiko-line';
+import { jrItsukaichiLine } from './jr-itsukaichi-line';
+import { tobuDaishiLine } from './tobu-daishi-line';
+import { tobuKameidoLine } from './tobu-kameido-line';
+import { osakaLoopLine } from './osaka-loop-line';
+import { midosujiLine } from './osaka-midosuji-line';
+import { jrKyotoLine } from './jr-kyoto-line';
+import { jrKobeLine } from './jr-kobe-line';
+import { tokaidoShinkansen } from './tokaido-shinkansen';
+import { yokosukaLine } from './yokosuka-line';
+import { odakyuTamaLine } from './odakyu-tama-line';
+import { keioSagamiharaLine } from './keio-sagamihara-line';
+import { jrItoLine, izukyuLine, hakoneTozan, izuHakoneSunzu } from './izu-hakone-lines';
+import { keikyuKurihamaLine, keikyuAirportLine } from './keikyu-branch-lines';
+import { keiseiOshiageLine, hokusouLine } from './keisei-branch-lines';
+import { saitamaRailway, newShuttle } from './saitama-lines';
+import { jrUtsunomiyaLine, jrNegishiLine } from './jr-kanto-additional';
+import { tobuNikkoLine } from './tobu-nikko-line';
+import { shonanMonorail } from './shonan-monorail';
+import { sotetsuJRLine } from './sotetsu-jr-line';
+import { tobuNodaLine } from './tobu-noda-line';
+import { jrSagamiLine } from './jr-sagami-line';
+import { jrTsurumiLine, jrTsurumiUmiShiba } from './jr-tsurumi-line';
+import { seibuTamagawaLine } from './seibu-tamagawa-line';
+import { jrNambuBranchLine } from './jr-nambu-branch';
+import { tohokuShinkansen, sanyoShinkansen, kyushuShinkansen, hokurikuShinkansen, joetsuShinkansen } from './shinkansen-lines';
+import { nagoyaHigashiyamaLine, nagoyaMeijoline, meitetsuNagoyaMainLine, jrNagoyaLine } from './nagoya-lines';
+import { osakaTanimachi, osakaYotsubashi, osakaChuoLine, hankyuKyotoLine, hankyuKobeLine, hanshinMainLine, osakaSakaisuji } from './osaka-lines';
+import { fukuokaAirportLine, fukuokaHakozakiLine, fukuokaShichikumaLine, nishitetsuTenjinOmutaLine, jrKagoshimaMainLineFukuoka } from './fukuoka-lines';
+import { sapporoNambokuLine, sapporoTozaiLine, sapporoTohoLine, jrHakodateMainLine, jrChitoseLine } from './sapporo-lines';
+import { jrTohokuMainLine, sendaiNambokuLine, sendaiTozaiLine, jrSensekiLine } from './tohoku-lines';
+import { kintetsuOsakaLine, kintetsuNaraLine, keihanMainLine } from './kinki-lines';
+import { jrSanyoMainLine, jrShizuokaLine, jrChuoNagoyaLine, jrSaninMainLine } from './jr-regional-lines';
+import { jrNagasakiMainLine, nagasakiTram, jrHohibMainLine, jrNippoMainLineNorth, kumamotoTram } from './kyushu-lines';
+import { shizuokaRailway, enshuRailway, jrIidaLine, nagoyaTsurumai, nagoyaSakuradori, jrHamamatsuToyohashi, aichiLoopRailway } from './chubu-lines';
+import { jrHakodateLineHakodate, jrSoyaMainLine, jrSekihokuMainLine, jrHanasakiLine } from './hokkaido-lines';
+import { jrYosanLine, jrDosanLine, iyotetsuTram, jrKotokuLine, jrTokushimaLine } from './sanin-shikoku-lines';
+import { jrYamatoji, jrGakkenLine, kintetsuKyotoLine, nankaMainLine, nankaKoyaLine } from './kansai-more-lines';
+import { jrKagoshimaMainLineSouth, kagoshimaTram, jrIbusukinMakurazakiLine, jrSaseboLine, nishitetsuKaizukaLine, kumamotoElecRailway } from './kyushu-more-lines';
+import { jrSeikanTunnel, jrUetsuMainLine, jrKitakamiLine, jrKamaishiLine, jrTsugaRuLine, jrGonoLine, jrRikuuEastLine } from './jr-more-regional';
+import { jrSaninMainLineWest, jrYamaguchiLine, hiroshimaTram, jrKabeLine, jrUnoline, jrKureLine, okayamaTram, jrMurotozakiLine } from './chugoku-kyushu-lines';
+import { jrBiwako, jrOsakaLoop, kintetsuMinamiOsakaLine, jrKosaiLine, jrKusatsuLine } from './kinki-more-lines';
+import { osakaChangbori, osakaImazatosuji, hankyuTakarazukaLine, kobeSeishinYamate, kobeKaigan, kintetsuKasharaLine } from './osaka-metro-more';
+import { jrChikuhiLine, jrOmuraLine, shimabaraRailway, okinawaMonorail, jrNichinanLine, jrNippoMainLineSouth } from './kyushu-okinawa-lines';
+import { jrYamagataShinkansen, jrAkitaShinkansen, jrOuMainLineAkita, jrJobanLineNorth, jrBanetsusaiLine, jrShinetsuLine } from './tohoku-more-lines';
+import { jrMitoLine, jrJobanLineMain, jrNikkoLine, kantetsJososen, chichibuRailway } from './kanto-more-lines';
+import { toyamaChihoMainLine, echizentetsudoKatsuyamaLine, fukuiRailwayFukubuLine, hokurikuTetsudoIshikawaLine, jrHokurikuKanazawaToToyama, toyamaLightRail } from './hokuriku-lines';
+import { jrMuroranMainLine, jrNemuroMainLine, jrHidakaMainLine, jrFuranoLine, sapporoShiden } from './hokkaido-more-lines';
+import { kotohiraLine, jrMugiLine, tosaCuroshioAsaLine, tosaCuroshioNahariLine, jrYodoLine } from './shikoku-more-lines';
+import { jrHanwaLine, jrNaraLine, jrKansaiMainLine, wakayamaDenwKishiLine, nankaAirportLine } from './jr-kinki-more';
+import { toyamaTramLoop, manyoLine, toyohashiTramLine, meitetsuTokonameLine, meitetsuInuyamaLine, kintetsuNagoyaLine } from './chubu-private-lines';
+import { aoimoriRailway, igrIwateGinga, jrKamaishiLine2, sanrikuRiasLine, konantetsudoKonanLine } from './tohoku-private-lines';
+import { hakoneTozan2, shinkeisei2, ryutetsuLine, choshiDenki, minatomirai } from './kanto-private-more';
+import { sembokuKosokuLine, nosedenMyokenLine, keihanIshiyamasakamoto, osakaMono, hanshinNamba, hankyuKobeLine2 } from './kinki-private-more';
+import { matsuuraRailway, hisatsuOrange, jrKudaiMainLine, jrHohibMainLine2 } from './kyushu-private-more';
+import { jrTakayamaMainLine, jrIiyamaLine, jrOitoLine } from './jr-chubu-more';
+import { hakodateShiden, jrHakodateMainLineSouth, jrHakodateMainLineNorth, dosanIsaribi } from './hokkaido-private-lines';
+import { jrOuMainLineSouth, jrRikuuWestLine, jrBanetsuEastLine, jrSensekiLine2 } from './jr-tohoku-more';
+import { abukumaKyuko, yamagataRailway, jrHanawLine, jrOminateLine, akitaNairikuLine } from './tohoku-private-more';
+import { jrSekishoLine, jrNemuroMainLineWest, jrSoyaMainLineNorth, jrSenmouMainLine } from './jr-hokkaido-more';
+import { jrWakayamaLine, jrKiseiMainLineNorth, jrKiseiMainLineSouth, kintetsuOsakaLine2 } from './kinki-jr-more';
+import { kintetsuNaraLine2, kintetsuShimaLine, kintetsuYamadaLine, mizumaRailway, kobeElecArimaLine, eizanMainLine } from './kinki-private-more2';
+import { jrSanguLine, sangiNokuseLine, yoroRailway, naganoDentetsuLine, uedaDentetsuLine, matsumotoDentestu } from './chubu-more-lines';
+import { jrFukuenLine, jrGeibiLine, jrKisukiLine, jrKishinLine, jrHakubiLine } from './chugoku-more-lines';
+import { kintetsuYoshinoLine, kintetsuTobaLine, kintetsuYunoyamaLine, keihanUjiLine, kintetsuSuzukaLine, hankyuImazu, nankaKoyaLine2 } from './kinki-more-private3';
+import { jrGotembLine, jrMinobuLine, jrNagoyaGifuLine, jrKansaiNagoya, fujikyu } from './chubu-jr-more2';
+import { jrSakuraiLine, kintetsuKeihanna, kitaosakaKyuko, hankyuSenriLine, hankyuArashiyamaLine, hankyuKoyoLine, jrKosaiLineNorth } from './kinki-more-jr2';
+import { heitatsuIdaLine, amakiRailway, jrMiyazakiAirportLine, jrHitaHikosan, jrGotojLine, nishitetsuAmakiLine, jrKaratsuLine } from './kyushu-more2';
+import { meitetsuGamagoriLine, meitetsuKowaLine, jrTakehoyLine, meitetsuChitaShinLine, meitetsuMikawaKaisen, meitetsuMikawaYamasen } from './chubu-meitetsu-more';
+import { tobuOgoseLine, seibuChichibuLine, jomotetsudo, watarasekeikoku, mookaRailway } from './kanto-private-more2';
+import { kotohiraLongLine, kotohiraShidoLine, tosaCuroshioSukumo, jrMugiLineSouth, jrTokushimaLineWest } from './shikoku-more2';
+import { jrKesennumaLine, sendaiAirportRailway, jrOofunatoLine, jrYamadaLine } from './tohoku-more2';
+import { echigotokimekiHisui, echigotokimekiMyoko, ainokaze, irIshikawaRailway, kurobe } from './hokuriku-more';
+import { hankyuItamiLine, hankyuMinooLine, kintetsuTenriLine, kintetsuDoumyojiLine, kintetsuNaganoLine, osakaMidosujiMain } from './kinki-private-more4';
+import { jrEtsugoLine, jrShinetsuNiigata, hokuetsukyu, shinanoBrandNorth, shinanoRailway, jrIiyamaLineExt } from './niigata-nagano-lines';
+import { jrRyomoline, jrMitoLineExt, jrKarasuyamaLine, jrKururiLine, jrSobuMainLine } from './kanto-jr-more';
+import { jrTokaidoNagoyaToyohashi, toyohashiAtsumiLine, nagoyaMeikoLine, meitetsuToyotaLine } from './chubu-jr-more3';
+import { meitetsuSetoLine, linimo, nagoyaKamiidaLine, meitetsuBisaiLine } from './chubu-nagoya-more';
+import { ichibataKitamatsue, ichibataOyashiro, mizushimaLine, ibaraRailway } from './chugoku-more2';
+import { heiseiChikuhoIdaLine, heiseiChikuhoTagawaLine, minamiAsoRailway } from './kyushu-more3';
+import { kashimaRinkaiRailway, joshinDentetsu, kantoRailwayJoso } from './kanto-private-more3';
+import { yuriHighlandRailway, tsugaruRailway, konanLineHirosaki, konanLineOwani } from './tohoku-more3';
+import { hitachinakaSeaRailway, jrSuigunLineMain, kominatoRailway } from './kanto-more2';
+import { jrRumoiMainLine } from './hokkaido-more2';
+import { oigawaRailway, gakunanRailway, izuhakoneOyamazanLine } from './chubu-shizuoka-more';
+import { kyotoSubwayKarasuma, kyotoSubwayTozai, keifukuArashiyama } from './kinki-kyoto-more';
+import { jrHachinoheLineOuter, jrTadamiLine, jrYonesakaLine } from './tohoku-jr-more2';
+import { aizuRailway, yaganRailway, tobuSanoLine, tobuKiryuLine } from './tohoku-private-more3';
+import { notaRailway, echizentetsudoMikuni, hokutetsuAsanogawa, jrKuzuryuLine, tenryuHamanako } from './hokuriku-more2';
+import { kyototangoMiyafuku, kyototangoMiyatoyo, kyototangoMiyamai, omiRailwayMain, shigarakiRailway } from './kinki-tango-lines';
+import { jrBantanLine, jrKakogawaLine, chizuExpressLine, sangiBonsen, igaRailway } from './kinki-jr-more2';
+import { wakasaRailway, nishikigawaRailway, jrGantokuLine, hiroshimadentetsuMiyajima } from './chugoku-more3';
+import { iyotetsuTakahama, iyotetsuYokogawara, iyotetsuGunchu, tosadentsuAki, tosadentsuIno, asaKaiganRailway } from './shikoku-more3';
+import { jrHisatsuLine, jrKittoLine, matsuuraRailwayDetail, shimabara_detail } from './kyushu-more4';
+import { kobePortLiner, kobeRokkouLiner, hiroshimaAstramLine, osakaMonorailSaito, keihanNakanoshima, noseDentetsuMyoken, kobeDentetsuAwoline } from './new-urban-transit';
+import { jrSenzanLine, jrAterazawaLine } from './tohoku-jr-more3';
+import { jrJoetsuLine, jrOuMainLineMid } from './jr-kanto-tohoku-more';
+import { nishitetsuDazaifuLine, tobuKinugawaLine, isumiRailway, kantoRailwayRyugasaki } from './misc-new-lines';
+import { jrOsakaTozaiLine, nagoyaAonamiLine } from './osaka-nagoya-more';
+import { jrOsakaHigashiLine, jrGakuendaiLine } from './hokkaido-osaka-more';
+import { jrShinetsuNaoetsu } from './jr-niigata-more';
+import { fukushimaIizakaLine, jrIshinomakiLine, omiTagaLine, omiYokaichLine } from './various-more-lines';
+import { tobuUtsunomiyaLine, keikyuZushiLine, tokyuKodomoLine } from './kanto-misc-lines';
+import { jrJohanaLine, jrHimiLine, eizanKuramaLine, nankaKadaLine, jrSakaiLine } from './hokuriku-kinki-new';
+import { jrFukuchiyamaLine, kobeDentetsuSandaLine } from './kinki-fukuchiyama';
+import { hapirainFukui } from './hapirainfukui';
+import { jrWakamatsuLine, jrKashiiLine, jrHaradaLine, keifukuKitanoLine } from './kyushu-kinki-new';
+import { jrObamaLine, jrInbiLine } from './jr-obama-inbi';
+import { jrFukuhoLine, jrMaizuruLine } from './jr-kyushu-maizuru';
+import { jrSaninKyotoTottori } from './jr-sanin-kyoto-tottori';
+import { jrHokurikuMaibaraToTsuruga } from './jr-hokuriku-maibara';
+import { tarumiRailway, nagaraRailway, meichiRailway, iseTetsudo } from './chubu-missing-lines';
+import { jrTsuyamaLine, kintetsuIkomaLine, kintetsuTawaramoto, nankaShiomibashiLine, nankaTanagawaLine } from './kinki-chugoku-more';
+import { keihanKatanoLine, keihanKamotoline, hanshinMukogawaLine, jrWadamisakiLine, kintetsuShigiLine, noseDentetsuNisshoLine } from './kinki-branch-lines';
+
+export const routes = {
+  yamanote,
+  chuo,
+  keihinTohoku,
+
+  ginzaLine,
+  marunouchiLine,
+  hibiyaLine,
+  tozaiLine,
+  chiyodaLine,
+  yurakuchoLine,
+  hanzomonLine,
+  nambokuLine,
+  fukutoshinLine,
+  toeiAsakusaLine,
+  toeiMitaLine,
+  toeiShinjukuLine,
+  toeiOedoLine,
+  jrSobuLine,
+  jrJobanLine,
+  jrSaikyoLine,
+  jrTakasakiLine,
+  jrTokaidoMainLine,
+  odakyuLine,
+  odakyuEnoshimaLine,
+  keioLine,
+  tokyuToyokoLine,
+  tokyuDenEnToshiLine,
+  seibuIkebukuroLine,
+  seibuShinjukuLine,
+  tobuTojoLine,
+  keikyuLine,
+  jrMusashinoLine,
+  tokyoMonorail,
+  keiseiMainLine,
+  jrYokohamaLine,
+  yokohamaBlueLine,
+  rinkaiLine,
+  yurikamomeLine,
+  tsukubaExpress,
+  jrNanbuLine,
+
+  sotetsuMainLine,
+  sotetsuIzumino,
+  jrSobuChiba,
+  jrKeiyo,
+
+
+  tokyuMeguro,
+  tokyuTamagawa,
+  tokyuIkegami,
+  yokohamaGreenLine,
+  enoshimaElectricRailway,
+  jrUchiboLine,
+  jrSotoboLine,
+  jrNaritaLine,
+  shinkeisei,
+  toyoRapid,
+  tamaMonorail,
+  todenArakawaLine,
+  nipporiToneriLiner,
+  jrOmeLine,
+  keioInokashiraLine,
+  tokyuSetagayaLine,
+  tokyuOimachiLine,
+  tobuIsesakiLine,
+  jrHachikoLine,
+  jrItsukaichiLine,
+  tobuDaishiLine,
+  tobuKameidoLine,
+  osakaLoopLine,
+  midosujiLine,
+  jrKyotoLine,
+  jrKobeLine,
+  tokaidoShinkansen,
+  yokosukaLine,
+  odakyuTamaLine,
+  keioSagamiharaLine,
+  jrItoLine,
+  izukyuLine,
+  hakoneTozan,
+  izuHakoneSunzu,
+  keikyuKurihamaLine,
+  keikyuAirportLine,
+  keiseiOshiageLine,
+  hokusouLine,
+  saitamaRailway,
+  newShuttle,
+  jrUtsunomiyaLine,
+  jrNegishiLine,
+  tobuNikkoLine,
+  shonanMonorail,
+  sotetsuJRLine,
+  tobuNodaLine,
+  jrSagamiLine,
+  jrTsurumiLine,
+  jrTsurumiUmiShiba,
+  seibuTamagawaLine,
+  jrNambuBranchLine,
+  // 新幹線
+  tohokuShinkansen,
+  sanyoShinkansen,
+  kyushuShinkansen,
+  hokurikuShinkansen,
+  joetsuShinkansen,
+  // 名古屋エリア
+  nagoyaHigashiyamaLine,
+  nagoyaMeijoline,
+  meitetsuNagoyaMainLine,
+  jrNagoyaLine,
+  // 大阪・関西エリア
+  osakaTanimachi,
+  osakaYotsubashi,
+  osakaChuoLine,
+  hankyuKyotoLine,
+  hankyuKobeLine,
+  hanshinMainLine,
+  osakaSakaisuji,
+  kintetsuOsakaLine,
+  kintetsuNaraLine,
+  keihanMainLine,
+  // 福岡・九州エリア
+  fukuokaAirportLine,
+  fukuokaHakozakiLine,
+  fukuokaShichikumaLine,
+  nishitetsuTenjinOmutaLine,
+  jrKagoshimaMainLineFukuoka,
+  // 札幌・北海道エリア
+  sapporoNambokuLine,
+  sapporoTozaiLine,
+  sapporoTohoLine,
+  jrHakodateMainLine,
+  jrChitoseLine,
+  // 東北エリア
+  jrTohokuMainLine,
+  sendaiNambokuLine,
+  sendaiTozaiLine,
+  jrSensekiLine,
+  // 広域JR
+  jrSanyoMainLine,
+  jrShizuokaLine,
+  jrChuoNagoyaLine,
+  jrSaninMainLine,
+  // 九州エリア
+  jrNagasakiMainLine,
+  nagasakiTram,
+  jrHohibMainLine,
+  jrNippoMainLineNorth,
+  kumamotoTram,
+  // 中部エリア追加
+  shizuokaRailway,
+  enshuRailway,
+  jrIidaLine,
+  nagoyaTsurumai,
+  nagoyaSakuradori,
+  jrHamamatsuToyohashi,
+  aichiLoopRailway,
+  // 北海道エリア追加
+  jrHakodateLineHakodate,
+  jrSoyaMainLine,
+  jrSekihokuMainLine,
+  jrHanasakiLine,
+  // 四国エリア
+  jrYosanLine,
+  jrDosanLine,
+  iyotetsuTram,
+  jrKotokuLine,
+  jrTokushimaLine,
+  // 関西エリア追加
+  jrYamatoji,
+  jrGakkenLine,
+  kintetsuKyotoLine,
+  nankaMainLine,
+  nankaKoyaLine,
+  // 九州エリアさらに追加
+  jrKagoshimaMainLineSouth,
+  kagoshimaTram,
+  jrIbusukinMakurazakiLine,
+  jrSaseboLine,
+  nishitetsuKaizukaLine,
+  kumamotoElecRailway,
+  // 東北エリアさらに追加
+  jrYamagataShinkansen,
+  jrAkitaShinkansen,
+  jrOuMainLineAkita,
+  jrJobanLineNorth,
+  jrBanetsusaiLine,
+  jrShinetsuLine,
+  // 関東エリアさらに追加
+  jrMitoLine,
+  jrJobanLineMain,
+  jrNikkoLine,
+  kantetsJososen,
+  chichibuRailway,
+  // 広域JRさらに追加
+  jrSeikanTunnel,
+  jrUetsuMainLine,
+  jrKitakamiLine,
+  jrKamaishiLine,
+  jrTsugaRuLine,
+  jrGonoLine,
+  jrRikuuEastLine,
+  // 中国・四国エリア
+  jrSaninMainLineWest,
+  jrYamaguchiLine,
+  hiroshimaTram,
+  jrKabeLine,
+  jrUnoline,
+  jrKureLine,
+  okayamaTram,
+  jrMurotozakiLine,
+  // 近畿エリア追加
+  jrBiwako,
+  jrOsakaLoop,
+  kintetsuMinamiOsakaLine,
+  jrKosaiLine,
+  jrKusatsuLine,
+  osakaChangbori,
+  osakaImazatosuji,
+  hankyuTakarazukaLine,
+  kobeSeishinYamate,
+  kobeKaigan,
+  kintetsuKasharaLine,
+  // 九州・沖縄追加
+  jrChikuhiLine,
+  jrOmuraLine,
+  shimabaraRailway,
+  okinawaMonorail,
+  jrNichinanLine,
+  jrNippoMainLineSouth,
+  // 北陸エリア
+  toyamaChihoMainLine,
+  echizentetsudoKatsuyamaLine,
+  fukuiRailwayFukubuLine,
+  hokurikuTetsudoIshikawaLine,
+  jrHokurikuKanazawaToToyama,
+  toyamaLightRail,
+  // 北海道追加
+  jrMuroranMainLine,
+  jrNemuroMainLine,
+  jrHidakaMainLine,
+  jrFuranoLine,
+  sapporoShiden,
+  // 四国追加
+  kotohiraLine,
+  jrMugiLine,
+  tosaCuroshioAsaLine,
+  tosaCuroshioNahariLine,
+  jrYodoLine,
+  // 近畿さらに追加
+  jrHanwaLine,
+  jrNaraLine,
+  jrKansaiMainLine,
+  wakayamaDenwKishiLine,
+  nankaAirportLine,
+  // 中部私鉄追加
+  toyamaTramLoop,
+  manyoLine,
+  toyohashiTramLine,
+  meitetsuTokonameLine,
+  meitetsuInuyamaLine,
+  kintetsuNagoyaLine,
+  // 東北私鉄・三セク追加
+  aoimoriRailway,
+  igrIwateGinga,
+  jrKamaishiLine2,
+  sanrikuRiasLine,
+  konantetsudoKonanLine,
+  // 関東私鉄追加
+  hakoneTozan2,
+  shinkeisei2,
+  ryutetsuLine,
+  choshiDenki,
+  minatomirai,
+  // 近畿私鉄さらに追加
+  sembokuKosokuLine,
+  nosedenMyokenLine,
+  keihanIshiyamasakamoto,
+  osakaMono,
+  hanshinNamba,
+  hankyuKobeLine2,
+  // 九州私鉄追加
+  matsuuraRailway,
+  hisatsuOrange,
+  jrKudaiMainLine,
+  jrHohibMainLine2,
+  // 中部JR追加
+  jrTakayamaMainLine,
+  jrIiyamaLine,
+  jrOitoLine,
+  // 北海道追加（路面電車・幹線）
+  hakodateShiden,
+  jrHakodateMainLineSouth,
+  jrHakodateMainLineNorth,
+  dosanIsaribi,
+  // 東北JR追加
+  jrOuMainLineSouth,
+  jrRikuuWestLine,
+  jrBanetsuEastLine,
+  jrSensekiLine2,
+  // 東北私鉄・三セクさらに追加
+  abukumaKyuko,
+  yamagataRailway,
+  jrHanawLine,
+  jrOminateLine,
+  akitaNairikuLine,
+  // 北海道JR追加
+  jrSekishoLine,
+  jrNemuroMainLineWest,
+  jrSoyaMainLineNorth,
+  jrSenmouMainLine,
+  // 近畿JR追加
+  jrWakayamaLine,
+  jrKiseiMainLineNorth,
+  jrKiseiMainLineSouth,
+  kintetsuOsakaLine2,
+  // 近畿私鉄さらに追加2
+  kintetsuNaraLine2,
+  kintetsuShimaLine,
+  kintetsuYamadaLine,
+  mizumaRailway,
+  kobeElecArimaLine,
+  eizanMainLine,
+  // 中部追加（伊勢・長野・北陸私鉄）
+  jrSanguLine,
+  sangiNokuseLine,
+  yoroRailway,
+  naganoDentetsuLine,
+  uedaDentetsuLine,
+  matsumotoDentestu,
+  // 中国エリア追加
+  jrFukuenLine,
+  jrGeibiLine,
+  jrKisukiLine,
+  jrKishinLine,
+  jrHakubiLine,
+  // 近畿私鉄さらに追加3
+  kintetsuYoshinoLine,
+  kintetsuTobaLine,
+  kintetsuYunoyamaLine,
+  keihanUjiLine,
+  kintetsuSuzukaLine,
+  hankyuImazu,
+  nankaKoyaLine2,
+  // 中部JR・私鉄追加2
+  jrGotembLine,
+  jrMinobuLine,
+  jrNagoyaGifuLine,
+  jrKansaiNagoya,
+  fujikyu,
+  // 近畿JR・私鉄さらに追加
+  jrSakuraiLine,
+  kintetsuKeihanna,
+  kitaosakaKyuko,
+  hankyuSenriLine,
+  hankyuArashiyamaLine,
+  hankyuKoyoLine,
+  jrKosaiLineNorth,
+  // 九州追加2
+  heitatsuIdaLine,
+  amakiRailway,
+  jrMiyazakiAirportLine,
+  jrHitaHikosan,
+  jrGotojLine,
+  nishitetsuAmakiLine,
+  jrKaratsuLine,
+  // 中部名鉄追加
+  meitetsuGamagoriLine,
+  meitetsuKowaLine,
+  jrTakehoyLine,
+  meitetsuChitaShinLine,
+  meitetsuMikawaKaisen,
+  meitetsuMikawaYamasen,
+  // 関東私鉄追加2
+  tobuOgoseLine,
+  seibuChichibuLine,
+  jomotetsudo,
+  watarasekeikoku,
+  mookaRailway,
+  // 四国追加2
+  kotohiraLongLine,
+  kotohiraShidoLine,
+  tosaCuroshioSukumo,
+  jrMugiLineSouth,
+  jrTokushimaLineWest,
+  // 東北追加2
+  jrKesennumaLine,
+  sendaiAirportRailway,
+  jrOofunatoLine,
+  jrYamadaLine,
+  // 北陸追加
+  echigotokimekiHisui,
+  echigotokimekiMyoko,
+  ainokaze,
+  irIshikawaRailway,
+  kurobe,
+  // 近畿私鉄さらに追加4
+  hankyuItamiLine,
+  hankyuMinooLine,
+  kintetsuTenriLine,
+  kintetsuDoumyojiLine,
+  kintetsuNaganoLine,
+  osakaMidosujiMain,
+  // 新潟・長野エリア
+  jrEtsugoLine,
+  jrShinetsuNiigata,
+  hokuetsukyu,
+  shinanoBrandNorth,
+  shinanoRailway,
+  jrIiyamaLineExt,
+  // 関東JR追加
+  jrRyomoline,
+  jrMitoLineExt,
+  jrKarasuyamaLine,
+  jrKururiLine,
+  jrSobuMainLine,
+  // 中部追加3
+  jrTokaidoNagoyaToyohashi,
+  toyohashiAtsumiLine,
+  nagoyaMeikoLine,
+  meitetsuToyotaLine,
+  // 名古屋エリア追加
+  meitetsuSetoLine,
+  linimo,
+  nagoyaKamiidaLine,
+  meitetsuBisaiLine,
+  // 中国追加
+  ichibataKitamatsue,
+  ichibataOyashiro,
+  mizushimaLine,
+  ibaraRailway,
+  // 九州追加3
+  heiseiChikuhoIdaLine,
+  heiseiChikuhoTagawaLine,
+  minamiAsoRailway,
+  // 関東私鉄追加3
+  kashimaRinkaiRailway,
+  joshinDentetsu,
+  kantoRailwayJoso,
+  // 東北追加3
+  yuriHighlandRailway,
+  tsugaruRailway,
+  konanLineHirosaki,
+  konanLineOwani,
+  // 関東追加2
+  hitachinakaSeaRailway,
+  jrSuigunLineMain,
+  kominatoRailway,
+  // 北海道追加2
+  jrRumoiMainLine,
+  // 中部・静岡追加
+  oigawaRailway,
+  gakunanRailway,
+  izuhakoneOyamazanLine,
+  // 近畿・京都追加
+  kyotoSubwayKarasuma,
+  kyotoSubwayTozai,
+  keifukuArashiyama,
+  // 東北JR追加2
+  jrHachinoheLineOuter,
+  jrTadamiLine,
+  jrYonesakaLine,
+  // 東北・関東私鉄追加3
+  aizuRailway,
+  yaganRailway,
+  tobuSanoLine,
+  tobuKiryuLine,
+  // 中部・北陸追加2
+  notaRailway,
+  echizentetsudoMikuni,
+  hokutetsuAsanogawa,
+  jrKuzuryuLine,
+  tenryuHamanako,
+  // 近畿丹後・近江追加
+  kyototangoMiyafuku,
+  kyototangoMiyatoyo,
+  kyototangoMiyamai,
+  omiRailwayMain,
+  shigarakiRailway,
+  // 近畿JR・私鉄追加2
+  jrBantanLine,
+  jrKakogawaLine,
+  chizuExpressLine,
+  sangiBonsen,
+  igaRailway,
+  // 中国追加3
+  wakasaRailway,
+  nishikigawaRailway,
+  jrGantokuLine,
+  hiroshimadentetsuMiyajima,
+  // 四国追加3
+  iyotetsuTakahama,
+  iyotetsuYokogawara,
+  iyotetsuGunchu,
+  tosadentsuAki,
+  tosadentsuIno,
+  asaKaiganRailway,
+  // 九州追加4
+  jrHisatsuLine,
+  jrKittoLine,
+  matsuuraRailwayDetail,
+  shimabara_detail,
+  // 新交通・都市鉄道追加
+  kobePortLiner,
+  kobeRokkouLiner,
+  hiroshimaAstramLine,
+  osakaMonorailSaito,
+  keihanNakanoshima,
+  noseDentetsuMyoken,
+  kobeDentetsuAwoline,
+  // 東北JR追加3
+  jrSenzanLine,
+  jrAterazawaLine,
+  // 関東・東北JR追加
+  jrJoetsuLine,
+  jrOuMainLineMid,
+  // 各地私鉄・三セク追加
+  nishitetsuDazaifuLine,
+  tobuKinugawaLine,
+  isumiRailway,
+  kantoRailwayRyugasaki,
+  // 大阪・名古屋追加
+  jrOsakaTozaiLine,
+  nagoyaAonamiLine,
+  jrOsakaHigashiLine,
+  jrGakuendaiLine,
+  // 新潟追加
+  jrShinetsuNaoetsu,
+  // 東北・近江追加
+  fukushimaIizakaLine,
+  jrIshinomakiLine,
+  omiTagaLine,
+  omiYokaichLine,
+  // 関東・北陸・近畿・中国追加
+  tobuUtsunomiyaLine,
+  keikyuZushiLine,
+  tokyuKodomoLine,
+  jrJohanaLine,
+  jrHimiLine,
+  eizanKuramaLine,
+  nankaKadaLine,
+  jrSakaiLine,
+  // 近畿・北陸追加2
+  jrFukuchiyamaLine,
+  kobeDentetsuSandaLine,
+  hapirainFukui,
+  // 九州・近畿追加
+  jrWakamatsuLine,
+  jrKashiiLine,
+  jrHaradaLine,
+  keifukuKitanoLine,
+  // JR小浜線・因美線・筑豊本線・舞鶴線
+  jrObamaLine,
+  jrInbiLine,
+  jrFukuhoLine,
+  jrMaizuruLine,
+  // JR山陰本線（京都〜鳥取）
+  jrSaninKyotoTottori,
+  // JR北陸本線（米原〜敦賀）
+  jrHokurikuMaibaraToTsuruga,
+  // 中部未収録路線
+  tarumiRailway,
+  nagaraRailway,
+  meichiRailway,
+  iseTetsudo,
+  // 近畿・中国未収録路線
+  jrTsuyamaLine,
+  kintetsuIkomaLine,
+  kintetsuTawaramoto,
+  nankaShiomibashiLine,
+  nankaTanagawaLine,
+  // 近畿支線
+  keihanKatanoLine,
+  keihanKamotoline,
+  hanshinMukogawaLine,
+  jrWadamisakiLine,
+  kintetsuShigiLine,
+  noseDentetsuNisshoLine,
+};
+
+export type RouteKey = keyof typeof routes;
+
+export const routeColors = {
+  yamanote: '#58B848', // JR Yamanote Line green
+  chuo: '#F15A22', // JR Chuo Line orange
+  keihinTohoku: '#00B5E2', // JR Keihin-Tohoku Line blue
+
+  ginzaLine: '#FF9500', // Tokyo Metro Ginza Line orange
+  marunouchiLine: '#F62E36', // Tokyo Metro Marunouchi Line red
+  hibiyaLine: '#B5B5AC', // Tokyo Metro Hibiya Line silver
+  tozaiLine: '#009BBF', // Tokyo Metro Tozai Line light blue
+  chiyodaLine: '#00BB85', // Tokyo Metro Chiyoda Line green
+  yurakuchoLine: '#C1A470', // Tokyo Metro Yurakucho Line gold
+  hanzomonLine: '#8F76D6', // Tokyo Metro Hanzomon Line purple
+  nambokuLine: '#00ADA9', // Tokyo Metro Namboku Line emerald
+  fukutoshinLine: '#9C5F2C', // Tokyo Metro Fukutoshin Line brown
+  toeiAsakusaLine: '#E85298', // Toei Asakusa Line pink
+  toeiMitaLine: '#0079C2', // Toei Mita Line blue
+  toeiShinjukuLine: '#6CBB5A', // Toei Shinjuku Line leaf green
+  toeiOedoLine: '#B6007A', // Toei Oedo Line magenta
+  jrSobuLine: '#FED100', // JR Sobu Line yellow
+  jrJobanLine: '#417036', // JR Joban Line green
+  jrSaikyoLine: '#00B5AD', // JR Saikyo Line teal
+  jrTakasakiLine: '#F68B1E', // JR Takasaki Line orange
+  jrTokaidoMainLine: '#F68B1E', // JR Tokaido Main Line orange
+  odakyuLine: '#0066CC', // Odakyu Line blue
+  odakyuEnoshimaLine: '#0066CC', // Odakyu Enoshima Line blue
+  keioLine: '#DD0077', // Keio Line magenta
+  tokyuToyokoLine: '#DA020E', // Tokyu Toyoko Line red
+  tokyuDenEnToshiLine: '#009639', // Tokyu Den-en-toshi Line green
+  seibuIkebukuroLine: '#004098', // Seibu Ikebukuro Line navy blue
+  seibuShinjukuLine: '#F39700', // Seibu Shinjuku Line orange
+  tobuTojoLine: '#004098', // Tobu Tojo Line navy blue
+  keikyuLine: '#C8102E', // Keikyu Line red
+  jrMusashinoLine: '#F15A22', // JR Musashino Line orange  
+  tokyoMonorail: '#0066CC', // Tokyo Monorail blue
+  keiseiMainLine: '#3165B1', // Keisei Main Line blue
+  jrYokohamaLine: '#41A541', // JR Yokohama Line green
+  yokohamaBlueLine: '#0066FF', // Yokohama Blue Line blue
+  rinkaiLine: '#00B5E2', // Rinkai Line light blue
+  yurikamomeLine: '#00BFFF', // Yurikamome Line sky blue
+  tsukubaExpress: '#8B4513', // Tsukuba Express brown
+  jrNanbuLine: '#FFCC00', // JR Nanbu Line yellow
+
+  sotetsuMainLine: '#2E8B57', // Sotetsu Main Line sea green
+  sotetsuIzumino: '#32CD32', // Sotetsu Izumino Line lime green
+  jrSobuChiba: '#FFD700', // JR Sobu Chiba Line gold
+  jrKeiyo: '#FF6347', // JR Keiyo Line tomato
+
+
+  tokyuMeguro: '#008B8B', // Tokyu Meguro Line dark cyan
+  tokyuTamagawa: '#FF1493', // Tokyu Tamagawa Line deep pink
+  tokyuIkegami: '#9370DB', // Tokyu Ikegami Line medium purple
+  yokohamaGreenLine: '#32CD32', // Yokohama Green Line lime green
+  enoshimaElectricRailway: '#228B22', // Enoshima Electric Railway forest green
+  jrUchiboLine: '#B22222', // JR Uchibo Line fire brick
+  jrSotoboLine: '#DC143C', // JR Sotobo Line crimson
+  jrNaritaLine: '#800080', // JR Narita Line purple
+  shinkeisei: '#FF6347', // Shin-Keisei tomato
+  toyoRapid: '#4169E1', // Toyo Rapid royal blue
+  tamaMonorail: '#20B2AA', // Tama Monorail light sea green
+  todenArakawaLine: '#EE82EE', // Toden Arakawa Line violet
+  nipporiToneriLiner: '#FF1493', // Nippori-Toneri Liner deep pink
+  jrOmeLine: '#FF8C00', // JR Ome Line dark orange
+  keioInokashiraLine: '#48D1CC', // Keio Inokashira Line medium turquoise
+  tokyuSetagayaLine: '#2E8B57', // Tokyu Setagaya Line sea green
+  tokyuOimachiLine: '#FF4500', // Tokyu Oimachi Line orange red
+  tobuIsesakiLine: '#1E88E5', // Tobu Isesaki Line (Sky Tree Line) blue
+  jrHachikoLine: '#F5A623', // JR Hachiko Line orange
+  jrItsukaichiLine: '#FFB300', // JR Itsukaichi Line amber
+  tobuDaishiLine: '#AB47BC', // Tobu Daishi Line purple
+  tobuKameidoLine: '#66BB6A', // Tobu Kameido Line green
+  osakaLoopLine: '#FF0000', // JR Osaka Loop Line red
+  midosujiLine: '#D90000', // Osaka Metro Midosuji Line red
+  jrKyotoLine: '#0072BC', // JR Kyoto Line blue
+  jrKobeLine: '#0072BC', // JR Kobe Line blue
+  tokaidoShinkansen: '#0072BC', // Tokaido Shinkansen blue
+  yokosukaLine: '#0072BC', // Yokosuka Line blue
+  odakyuTamaLine: '#0066CC', // Odakyu Tama Line blue
+  keioSagamiharaLine: '#DD0077', // Keio Sagamihara Line magenta
+  jrItoLine: '#F68B1E', // JR Ito Line orange
+  izukyuLine: '#0066CC', // Izukyu Line blue
+  hakoneTozan: '#E85298', // Hakone Tozan Railway pink
+  izuHakoneSunzu: '#008B8B', // Izu Hakone Sunzu Line teal
+  keikyuKurihamaLine: '#C8102E', // Keikyu Kurihama Line red
+  keikyuAirportLine: '#C8102E', // Keikyu Airport Line red
+  keiseiOshiageLine: '#3165B1', // Keisei Oshiage Line blue
+  hokusouLine: '#39A0DC', // Hokuso Line sky blue
+  saitamaRailway: '#2E8B57', // Saitama Railway green
+  newShuttle: '#FF6347', // New Shuttle tomato
+  jrUtsunomiyaLine: '#F68B1E', // JR Utsunomiya Line orange
+  jrNegishiLine: '#00B5E2', // JR Negishi Line blue
+  tobuNikkoLine: '#F68B1E', // Tobu Nikko Line orange
+  shonanMonorail: '#2E8B57', // Shonan Monorail green
+  sotetsuJRLine: '#2E8B57', // Sotetsu-JR Direct Line green
+  tobuNodaLine: '#004098', // Tobu Noda Line (Urban Park Line) navy blue
+  jrSagamiLine: '#8FCF57', // JR Sagami Line light green
+  jrTsurumiLine: '#F68B1E', // JR Tsurumi Line orange
+  jrTsurumiUmiShiba: '#F68B1E', // JR Tsurumi Line (Umishibaura branch) orange
+  seibuTamagawaLine: '#F39700', // Seibu Tamagawa Line orange
+  jrNambuBranchLine: '#FFCC00', // JR Nambu Branch Line yellow
+  // 新幹線
+  tohokuShinkansen: '#35A0D5', // Tohoku Shinkansen ice blue
+  sanyoShinkansen: '#0072BC', // Sanyo Shinkansen blue
+  kyushuShinkansen: '#D60026', // Kyushu Shinkansen red
+  hokurikuShinkansen: '#00A0A0', // Hokuriku Shinkansen teal
+  joetsuShinkansen: '#009B6C', // Joetsu Shinkansen green
+  // 名古屋エリア
+  nagoyaHigashiyamaLine: '#FFCC00', // Nagoya Higashiyama Line yellow
+  nagoyaMeijoline: '#9B1889', // Nagoya Meijo Line purple
+  meitetsuNagoyaMainLine: '#E50012', // Meitetsu red
+  jrNagoyaLine: '#F68B1E', // JR Tokaido Nagoya orange
+  // 大阪・関西エリア
+  osakaTanimachi: '#8B3FAB', // Osaka Tanimachi Line purple
+  osakaYotsubashi: '#0066CC', // Osaka Yotsubashi Line blue
+  osakaChuoLine: '#00A0A0', // Osaka Chuo Line teal
+  hankyuKyotoLine: '#8B5A2B', // Hankyu Kyoto Line brown
+  hankyuKobeLine: '#8B5A2B', // Hankyu Kobe Line brown
+  hanshinMainLine: '#0070C0', // Hanshin Main Line blue
+  osakaSakaisuji: '#D0A030', // Osaka Sakaisuji Line gold
+  kintetsuOsakaLine: '#F08000', // Kintetsu Osaka Line orange
+  kintetsuNaraLine: '#F08000', // Kintetsu Nara Line orange
+  keihanMainLine: '#008E42', // Keihan Main Line green
+  // 福岡・九州エリア
+  fukuokaAirportLine: '#E4000F', // Fukuoka Airport Line red
+  fukuokaHakozakiLine: '#FF8C00', // Fukuoka Hakozaki Line orange
+  fukuokaShichikumaLine: '#007DB7', // Fukuoka Shichikuma Line blue
+  nishitetsuTenjinOmutaLine: '#E60026', // Nishitetsu red
+  jrKagoshimaMainLineFukuoka: '#F68B1E', // JR Kagoshima Main Line orange
+  // 札幌・北海道エリア
+  sapporoNambokuLine: '#007243', // Sapporo Namboku Line green
+  sapporoTozaiLine: '#E4007F', // Sapporo Tozai Line pink
+  sapporoTohoLine: '#E4942A', // Sapporo Toho Line orange
+  jrHakodateMainLine: '#4D8B2E', // JR Hakodate Main Line green
+  jrChitoseLine: '#00B5E2', // JR Chitose Line blue
+  // 東北エリア
+  jrTohokuMainLine: '#009944', // JR Tohoku Main Line green
+  sendaiNambokuLine: '#009944', // Sendai Namboku Line green
+  sendaiTozaiLine: '#0099D0', // Sendai Tozai Line blue
+  jrSensekiLine: '#009944', // JR Senseki Line green
+  // 広域JR
+  jrSanyoMainLine: '#0072BC', // JR Sanyo Main Line blue
+  jrShizuokaLine: '#F68B1E', // JR Shizuoka (Tokaido) orange
+  jrChuoNagoyaLine: '#E60026', // JR Chuo Nagoya Line red
+  jrSaninMainLine: '#009944', // JR Sanin Main Line green
+  // 九州エリア
+  jrNagasakiMainLine: '#009944',
+  nagasakiTram: '#E60026',
+  jrHohibMainLine: '#F68B1E',
+  jrNippoMainLineNorth: '#009944',
+  kumamotoTram: '#E60026',
+  // 中部エリア追加
+  shizuokaRailway: '#FF6347',
+  enshuRailway: '#F68B1E',
+  jrIidaLine: '#009944',
+  nagoyaTsurumai: '#0072BC',
+  nagoyaSakuradori: '#E60026',
+  jrHamamatsuToyohashi: '#F68B1E',
+  aichiLoopRailway: '#009944',
+  // 北海道エリア追加
+  jrHakodateLineHakodate: '#4D8B2E',
+  jrSoyaMainLine: '#009944',
+  jrSekihokuMainLine: '#F68B1E',
+  jrHanasakiLine: '#009944',
+  // 四国エリア
+  jrYosanLine: '#0072BC',
+  jrDosanLine: '#009944',
+  iyotetsuTram: '#E60026',
+  jrKotokuLine: '#F68B1E',
+  jrTokushimaLine: '#009944',
+  // 関西エリア追加
+  jrYamatoji: '#009944',
+  jrGakkenLine: '#0072BC',
+  kintetsuKyotoLine: '#F08000',
+  nankaMainLine: '#0072BC',
+  nankaKoyaLine: '#009944',
+  // 九州エリアさらに追加
+  jrKagoshimaMainLineSouth: '#F68B1E',
+  kagoshimaTram: '#E60026',
+  jrIbusukinMakurazakiLine: '#009944',
+  jrSaseboLine: '#0072BC',
+  nishitetsuKaizukaLine: '#E60026',
+  kumamotoElecRailway: '#009944',
+  // 東北エリアさらに追加
+  jrYamagataShinkansen: '#B5008E',
+  jrAkitaShinkansen: '#008F1D',
+  jrOuMainLineAkita: '#F68B1E',
+  jrJobanLineNorth: '#417036',
+  jrBanetsusaiLine: '#009944',
+  jrShinetsuLine: '#0072BC',
+  // 関東エリアさらに追加
+  jrMitoLine: '#009944',
+  jrJobanLineMain: '#417036',
+  jrNikkoLine: '#F68B1E',
+  kantetsJososen: '#009944',
+  chichibuRailway: '#E60026',
+  // 広域JRさらに追加
+  jrSeikanTunnel: '#0072BC',
+  jrUetsuMainLine: '#F68B1E',
+  jrKitakamiLine: '#009944',
+  jrKamaishiLine: '#F68B1E',
+  jrTsugaRuLine: '#009944',
+  jrGonoLine: '#0072BC',
+  jrRikuuEastLine: '#009944',
+  // 中国・四国エリア
+  jrSaninMainLineWest: '#009944',
+  jrYamaguchiLine: '#F68B1E',
+  hiroshimaTram: '#E60026',
+  jrKabeLine: '#009944',
+  jrUnoline: '#F68B1E',
+  jrKureLine: '#0072BC',
+  okayamaTram: '#E60026',
+  jrMurotozakiLine: '#009944',
+  // 近畿エリア追加
+  jrBiwako: '#F68B1E',
+  jrOsakaLoop: '#009944',
+  kintetsuMinamiOsakaLine: '#F08000',
+  jrKosaiLine: '#0072BC',
+  jrKusatsuLine: '#009944',
+  osakaChangbori: '#35A0D5',
+  osakaImazatosuji: '#E60026',
+  hankyuTakarazukaLine: '#8B5A2B',
+  kobeSeishinYamate: '#E60026',
+  kobeKaigan: '#0072BC',
+  kintetsuKasharaLine: '#F08000',
+  // 九州・沖縄追加
+  jrChikuhiLine: '#F68B1E',
+  jrOmuraLine: '#009944',
+  shimabaraRailway: '#E60026',
+  okinawaMonorail: '#00B5E2',
+  jrNichinanLine: '#009944',
+  jrNippoMainLineSouth: '#F68B1E',
+  // 北陸エリア
+  toyamaChihoMainLine: '#E60026',
+  echizentetsudoKatsuyamaLine: '#009944',
+  fukuiRailwayFukubuLine: '#F68B1E',
+  hokurikuTetsudoIshikawaLine: '#E60026',
+  jrHokurikuKanazawaToToyama: '#009944',
+  toyamaLightRail: '#00B5E2',
+  // 北海道追加
+  jrMuroranMainLine: '#009944',
+  jrNemuroMainLine: '#F68B1E',
+  jrHidakaMainLine: '#009944',
+  jrFuranoLine: '#E60026',
+  sapporoShiden: '#009944',
+  // 四国追加
+  kotohiraLine: '#F68B1E',
+  jrMugiLine: '#009944',
+  tosaCuroshioAsaLine: '#E60026',
+  tosaCuroshioNahariLine: '#009944',
+  jrYodoLine: '#F68B1E',
+  // 近畿さらに追加
+  jrHanwaLine: '#009944',
+  jrNaraLine: '#F68B1E',
+  jrKansaiMainLine: '#009944',
+  wakayamaDenwKishiLine: '#E60026',
+  nankaAirportLine: '#E60026',
+  // 中部私鉄追加
+  toyamaTramLoop: '#009944',
+  manyoLine: '#00B5E2',
+  toyohashiTramLine: '#E60026',
+  meitetsuTokonameLine: '#E60026',
+  meitetsuInuyamaLine: '#E60026',
+  kintetsuNagoyaLine: '#009944',
+  // 東北私鉄・三セク追加
+  aoimoriRailway: '#009944',
+  igrIwateGinga: '#E60026',
+  jrKamaishiLine2: '#009944',
+  sanrikuRiasLine: '#E60026',
+  konantetsudoKonanLine: '#F68B1E',
+  // 関東私鉄追加
+  hakoneTozan2: '#E60026',
+  shinkeisei2: '#E60026',
+  ryutetsuLine: '#F68B1E',
+  choshiDenki: '#E60026',
+  minatomirai: '#E60026',
+  // 近畿私鉄さらに追加
+  sembokuKosokuLine: '#E60026',
+  nosedenMyokenLine: '#009944',
+  keihanIshiyamasakamoto: '#009944',
+  osakaMono: '#E60026',
+  hanshinNamba: '#E60026',
+  hankyuKobeLine2: '#009944',
+  // 九州私鉄追加
+  matsuuraRailway: '#F68B1E',
+  hisatsuOrange: '#F68B1E',
+  jrKudaiMainLine: '#009944',
+  jrHohibMainLine2: '#009944',
+  // 中部JR追加
+  jrTakayamaMainLine: '#009944',
+  jrIiyamaLine: '#F68B1E',
+  jrOitoLine: '#009944',
+  // 北海道追加
+  hakodateShiden: '#009944',
+  jrHakodateMainLineSouth: '#009944',
+  jrHakodateMainLineNorth: '#009944',
+  dosanIsaribi: '#F68B1E',
+  // 東北JR追加
+  jrOuMainLineSouth: '#009944',
+  jrRikuuWestLine: '#F68B1E',
+  jrBanetsuEastLine: '#009944',
+  jrSensekiLine2: '#009944',
+  // 東北私鉄・三セクさらに追加
+  abukumaKyuko: '#F68B1E',
+  yamagataRailway: '#E60026',
+  jrHanawLine: '#009944',
+  jrOminateLine: '#009944',
+  akitaNairikuLine: '#F68B1E',
+  // 北海道JR追加
+  jrSekishoLine: '#009944',
+  jrNemuroMainLineWest: '#009944',
+  jrSoyaMainLineNorth: '#009944',
+  jrSenmouMainLine: '#009944',
+  // 近畿JR追加
+  jrWakayamaLine: '#009944',
+  jrKiseiMainLineNorth: '#009944',
+  jrKiseiMainLineSouth: '#009944',
+  kintetsuOsakaLine2: '#009944',
+  // 近畿私鉄さらに追加2
+  kintetsuNaraLine2: '#009944',
+  kintetsuShimaLine: '#009944',
+  kintetsuYamadaLine: '#009944',
+  mizumaRailway: '#E60026',
+  kobeElecArimaLine: '#E60026',
+  eizanMainLine: '#E60026',
+  // 中部追加（伊勢・長野・北陸私鉄）
+  jrSanguLine: '#F68B1E',
+  sangiNokuseLine: '#E60026',
+  yoroRailway: '#009944',
+  naganoDentetsuLine: '#E60026',
+  uedaDentetsuLine: '#009944',
+  matsumotoDentestu: '#F68B1E',
+  // 中国エリア追加
+  jrFukuenLine: '#009944',
+  jrGeibiLine: '#F68B1E',
+  jrKisukiLine: '#009944',
+  jrKishinLine: '#F68B1E',
+  jrHakubiLine: '#009944',
+  // 近畿私鉄さらに追加3
+  kintetsuYoshinoLine: '#F08000',
+  kintetsuTobaLine: '#F08000',
+  kintetsuYunoyamaLine: '#F08000',
+  keihanUjiLine: '#008E42',
+  kintetsuSuzukaLine: '#F08000',
+  hankyuImazu: '#8B5A2B',
+  nankaKoyaLine2: '#009944',
+  // 中部JR・私鉄追加2
+  jrGotembLine: '#F68B1E',
+  jrMinobuLine: '#009944',
+  jrNagoyaGifuLine: '#F68B1E',
+  jrKansaiNagoya: '#009944',
+  fujikyu: '#E60026',
+  // 近畿JR・私鉄さらに追加
+  jrSakuraiLine: '#F68B1E',
+  kintetsuKeihanna: '#F08000',
+  kitaosakaKyuko: '#E60026',
+  hankyuSenriLine: '#8B5A2B',
+  hankyuArashiyamaLine: '#8B5A2B',
+  hankyuKoyoLine: '#8B5A2B',
+  jrKosaiLineNorth: '#0072BC',
+  // 九州追加2
+  heitatsuIdaLine: '#F68B1E',
+  amakiRailway: '#009944',
+  jrMiyazakiAirportLine: '#F68B1E',
+  jrHitaHikosan: '#009944',
+  jrGotojLine: '#009944',
+  nishitetsuAmakiLine: '#E60026',
+  jrKaratsuLine: '#F68B1E',
+  // 中部名鉄追加
+  meitetsuGamagoriLine: '#E50012',
+  meitetsuKowaLine: '#E50012',
+  jrTakehoyLine: '#009944',
+  meitetsuChitaShinLine: '#E50012',
+  meitetsuMikawaKaisen: '#E50012',
+  meitetsuMikawaYamasen: '#E50012',
+  // 関東私鉄追加2
+  tobuOgoseLine: '#004098',
+  seibuChichibuLine: '#004098',
+  jomotetsudo: '#E60026',
+  watarasekeikoku: '#009944',
+  mookaRailway: '#F68B1E',
+  // 四国追加2
+  kotohiraLongLine: '#F68B1E',
+  kotohiraShidoLine: '#F68B1E',
+  tosaCuroshioSukumo: '#009944',
+  jrMugiLineSouth: '#F68B1E',
+  jrTokushimaLineWest: '#009944',
+  // 東北追加2
+  jrKesennumaLine: '#009944',
+  sendaiAirportRailway: '#0072BC',
+  jrOofunatoLine: '#F68B1E',
+  jrYamadaLine: '#009944',
+  // 北陸追加
+  echigotokimekiHisui: '#009944',
+  echigotokimekiMyoko: '#F68B1E',
+  ainokaze: '#009944',
+  irIshikawaRailway: '#0072BC',
+  kurobe: '#8B5A2B',
+  // 近畿私鉄さらに追加4
+  hankyuItamiLine: '#8B5A2B',
+  hankyuMinooLine: '#8B5A2B',
+  kintetsuTenriLine: '#F08000',
+  kintetsuDoumyojiLine: '#F08000',
+  kintetsuNaganoLine: '#F08000',
+  osakaMidosujiMain: '#D90000',
+  // 新潟・長野エリア
+  jrEtsugoLine: '#009944',
+  jrShinetsuNiigata: '#F68B1E',
+  hokuetsukyu: '#E60026',
+  shinanoBrandNorth: '#009944',
+  shinanoRailway: '#E60026',
+  jrIiyamaLineExt: '#009944',
+  // 関東JR追加
+  jrRyomoline: '#F68B1E',
+  jrMitoLineExt: '#009944',
+  jrKarasuyamaLine: '#009944',
+  jrKururiLine: '#F68B1E',
+  jrSobuMainLine: '#FFD700',
+  // 中部追加3
+  jrTokaidoNagoyaToyohashi: '#F68B1E',
+  toyohashiAtsumiLine: '#E60026',
+  nagoyaMeikoLine: '#9B1889',
+  meitetsuToyotaLine: '#E50012',
+  // 名古屋エリア追加
+  meitetsuSetoLine: '#E50012',
+  linimo: '#0077BB',
+  nagoyaKamiidaLine: '#E84A17',
+  meitetsuBisaiLine: '#E50012',
+  // 中国追加
+  ichibataKitamatsue: '#EE7700',
+  ichibataOyashiro: '#EE7700',
+  mizushimaLine: '#558B2F',
+  ibaraRailway: '#E73820',
+  // 九州追加3
+  heiseiChikuhoIdaLine: '#1B5299',
+  heiseiChikuhoTagawaLine: '#1B5299',
+  minamiAsoRailway: '#2B9348',
+  // 関東私鉄追加3
+  kashimaRinkaiRailway: '#E8380D',
+  joshinDentetsu: '#CC0000',
+  kantoRailwayJoso: '#558B2F',
+  // 東北追加3
+  yuriHighlandRailway: '#E60027',
+  tsugaruRailway: '#E60027',
+  konanLineHirosaki: '#E60027',
+  konanLineOwani: '#E60027',
+  // 関東追加2
+  hitachinakaSeaRailway: '#E60026',
+  jrSuigunLineMain: '#009944',
+  kominatoRailway: '#E73820',
+  // 北海道追加2
+  jrRumoiMainLine: '#009944',
+  // 中部・静岡追加
+  oigawaRailway: '#E60026',
+  gakunanRailway: '#E60026',
+  izuhakoneOyamazanLine: '#EE7700',
+  // 近畿・京都追加
+  kyotoSubwayKarasuma: '#009944',
+  kyotoSubwayTozai: '#E60026',
+  keifukuArashiyama: '#9B1889',
+  // 東北JR追加2
+  jrHachinoheLineOuter: '#009944',
+  jrTadamiLine: '#009944',
+  jrYonesakaLine: '#009944',
+  // 東北・関東私鉄追加3
+  aizuRailway: '#E60026',
+  yaganRailway: '#009944',
+  tobuSanoLine: '#004098',
+  tobuKiryuLine: '#004098',
+  // 中部・北陸追加2
+  notaRailway: '#0072BC',
+  echizentetsudoMikuni: '#E60026',
+  hokutetsuAsanogawa: '#0072BC',
+  jrKuzuryuLine: '#009944',
+  tenryuHamanako: '#F68B1E',
+  // 近畿丹後・近江追加
+  kyototangoMiyafuku: '#0072BC',
+  kyototangoMiyatoyo: '#0072BC',
+  kyototangoMiyamai: '#0072BC',
+  omiRailwayMain: '#E60026',
+  shigarakiRailway: '#009944',
+  // 近畿JR・私鉄追加2
+  jrBantanLine: '#009944',
+  jrKakogawaLine: '#009944',
+  chizuExpressLine: '#0072BC',
+  sangiBonsen: '#E60026',
+  igaRailway: '#E60026',
+  // 中国追加3
+  wakasaRailway: '#F68B1E',
+  nishikigawaRailway: '#009944',
+  jrGantokuLine: '#009944',
+  hiroshimadentetsuMiyajima: '#E60026',
+  // 四国追加3
+  iyotetsuTakahama: '#E60026',
+  iyotetsuYokogawara: '#E60026',
+  iyotetsuGunchu: '#E60026',
+  tosadentsuAki: '#F68B1E',
+  tosadentsuIno: '#F68B1E',
+  asaKaiganRailway: '#009944',
+  // 九州追加4
+  jrHisatsuLine: '#009944',
+  jrKittoLine: '#009944',
+  matsuuraRailwayDetail: '#F68B1E',
+  shimabara_detail: '#E60026',
+  // 新交通・都市鉄道追加
+  kobePortLiner: '#0072BC',
+  kobeRokkouLiner: '#0072BC',
+  hiroshimaAstramLine: '#9B1889',
+  osakaMonorailSaito: '#F68B1E',
+  keihanNakanoshima: '#008E42',
+  noseDentetsuMyoken: '#E60026',
+  kobeDentetsuAwoline: '#E60026',
+  // 東北JR追加3
+  jrSenzanLine: '#009944',
+  jrAterazawaLine: '#F68B1E',
+  // 関東・東北JR追加
+  jrJoetsuLine: '#009944',
+  jrOuMainLineMid: '#F68B1E',
+  // 各地私鉄・三セク追加
+  nishitetsuDazaifuLine: '#E60026',
+  tobuKinugawaLine: '#004098',
+  isumiRailway: '#F68B1E',
+  kantoRailwayRyugasaki: '#009944',
+  // 大阪・名古屋追加
+  jrOsakaTozaiLine: '#009944',
+  nagoyaAonamiLine: '#0072BC',
+  jrOsakaHigashiLine: '#009944',
+  jrGakuendaiLine: '#009944',
+  // 新潟追加
+  jrShinetsuNaoetsu: '#009944',
+  // 東北・近江追加
+  fukushimaIizakaLine: '#E60026',
+  jrIshinomakiLine: '#009944',
+  omiTagaLine: '#E60026',
+  omiYokaichLine: '#E60026',
+  // 関東・北陸・近畿・中国追加
+  tobuUtsunomiyaLine: '#004098',
+  keikyuZushiLine: '#E60026',
+  tokyuKodomoLine: '#FF8800',
+  jrJohanaLine: '#009944',
+  jrHimiLine: '#009944',
+  eizanKuramaLine: '#E60026',
+  nankaKadaLine: '#0080C6',
+  jrSakaiLine: '#009944',
+  // 近畿・北陸追加2
+  jrFukuchiyamaLine: '#009944',
+  kobeDentetsuSandaLine: '#E60026',
+  hapirainFukui: '#0080C6',
+  // 九州・近畿追加
+  jrWakamatsuLine: '#009944',
+  jrKashiiLine: '#009944',
+  jrHaradaLine: '#009944',
+  keifukuKitanoLine: '#9B1889',
+  // JR小浜線・因美線・筑豊本線・舞鶴線
+  jrObamaLine: '#009944',
+  jrInbiLine: '#009944',
+  jrFukuhoLine: '#009944',
+  jrMaizuruLine: '#009944',
+  // JR山陰本線（京都〜鳥取）
+  jrSaninKyotoTottori: '#009944',
+  // JR北陸本線（米原〜敦賀）
+  jrHokurikuMaibaraToTsuruga: '#009944',
+  // 中部未収録路線
+  tarumiRailway: '#0080C6',
+  nagaraRailway: '#E60026',
+  meichiRailway: '#F68B1E',
+  iseTetsudo: '#009944',
+  // 近畿・中国未収録路線
+  jrTsuyamaLine: '#009944',
+  kintetsuIkomaLine: '#F08000',
+  kintetsuTawaramoto: '#F08000',
+  nankaShiomibashiLine: '#0080C6',
+  nankaTanagawaLine: '#0080C6',
+  // 近畿支線
+  keihanKatanoLine: '#E41E20',
+  keihanKamotoline: '#E41E20',
+  hanshinMukogawaLine: '#0070C0',
+  jrWadamisakiLine: '#009944',
+  kintetsuShigiLine: '#F08000',
+  noseDentetsuNisshoLine: '#E60026',
+};
+
+export const routeNames = {
+  yamanote: '山手線',
+  chuo: '中央線',
+  keihinTohoku: '京浜東北線',
+
+  ginzaLine: '銀座線',
+  marunouchiLine: '丸ノ内線',
+  hibiyaLine: '日比谷線',
+  tozaiLine: '東西線',
+  chiyodaLine: '千代田線',
+  yurakuchoLine: '有楽町線',
+  hanzomonLine: '半蔵門線',
+  nambokuLine: '南北線',
+  fukutoshinLine: '副都心線',
+  toeiAsakusaLine: '都営浅草線',
+  toeiMitaLine: '都営三田線',
+  toeiShinjukuLine: '都営新宿線',
+  toeiOedoLine: '都営大江戸線',
+  jrSobuLine: '総武線',
+  jrJobanLine: '常磐線',
+  jrSaikyoLine: '埼京線',
+  jrTakasakiLine: '高崎線',
+  jrTokaidoMainLine: '東海道本線',
+  odakyuLine: '小田急小田原線',
+  odakyuEnoshimaLine: '小田急江ノ島線',
+  keioLine: '京王線',
+  tokyuToyokoLine: '東急東横線',
+  tokyuDenEnToshiLine: '東急田園都市線',
+  seibuIkebukuroLine: '西武池袋線',
+  seibuShinjukuLine: '西武新宿線',
+  tobuTojoLine: '東武東上線',
+  keikyuLine: '京急本線',
+  jrMusashinoLine: 'JR武蔵野線',
+  tokyoMonorail: '東京モノレール',
+  keiseiMainLine: '京成本線',
+  jrYokohamaLine: 'JR横浜線',
+  yokohamaBlueLine: '横浜市営地下鉄ブルーライン',
+  rinkaiLine: 'りんかい線',
+  yurikamomeLine: 'ゆりかもめ',
+  tsukubaExpress: 'つくばエクスプレス',
+  jrNanbuLine: 'JR南武線',
+
+  sotetsuMainLine: '相鉄本線',
+  sotetsuIzumino: '相鉄いずみ野線',
+  jrSobuChiba: 'JR総武線（千葉方面）',
+  jrKeiyo: 'JR京葉線',
+
+
+  tokyuMeguro: '東急目黒線',
+  tokyuTamagawa: '東急多摩川線',
+  tokyuIkegami: '東急池上線',
+  yokohamaGreenLine: '横浜市営地下鉄グリーンライン',
+  enoshimaElectricRailway: '江ノ島電鉄',
+  jrUchiboLine: 'JR内房線',
+  jrSotoboLine: 'JR外房線',
+  jrNaritaLine: 'JR成田線',
+  shinkeisei: '新京成電鉄',
+  toyoRapid: '東葉高速鉄道',
+  tamaMonorail: '多摩モノレール',
+  todenArakawaLine: '都電荒川線',
+  nipporiToneriLiner: '日暮里・舎人ライナー',
+  jrOmeLine: 'JR青梅線',
+  keioInokashiraLine: '京王井の頭線',
+  tokyuSetagayaLine: '東急世田谷線',
+  tokyuOimachiLine: '東急大井町線',
+  tobuIsesakiLine: '東武伊勢崎線（スカイツリーライン）',
+  jrHachikoLine: 'JR八高線',
+  jrItsukaichiLine: 'JR五日市線',
+  tobuDaishiLine: '東武大師線',
+  tobuKameidoLine: '東武亀戸線',
+  osakaLoopLine: '大阪環状線',
+  midosujiLine: '御堂筋線',
+  jrKyotoLine: 'JR京都線',
+  jrKobeLine: 'JR神戸線',
+  tokaidoShinkansen: '東海道新幹線',
+  yokosukaLine: '横須賀線',
+  odakyuTamaLine: '小田急多摩線',
+  keioSagamiharaLine: '京王相模原線',
+  jrItoLine: 'JR伊東線',
+  izukyuLine: '伊豆急行線',
+  hakoneTozan: '箱根登山鉄道',
+  izuHakoneSunzu: '伊豆箱根鉄道駿豆線',
+  keikyuKurihamaLine: '京急久里浜線',
+  keikyuAirportLine: '京急空港線',
+  keiseiOshiageLine: '京成押上線',
+  hokusouLine: '北総鉄道',
+  saitamaRailway: '埼玉高速鉄道',
+  newShuttle: 'ニューシャトル',
+  jrUtsunomiyaLine: 'JR宇都宮線',
+  jrNegishiLine: 'JR根岸線',
+  tobuNikkoLine: '東武日光線',
+  shonanMonorail: '湘南モノレール',
+  sotetsuJRLine: '相鉄・JR直通線',
+  tobuNodaLine: '東武アーバンパークライン',
+  jrSagamiLine: 'JR相模線',
+  jrTsurumiLine: 'JR鶴見線',
+  jrTsurumiUmiShiba: 'JR鶴見線（海芝浦支線）',
+  seibuTamagawaLine: '西武多摩川線',
+  jrNambuBranchLine: 'JR南武支線',
+  // 新幹線
+  tohokuShinkansen: '東北新幹線',
+  sanyoShinkansen: '山陽新幹線',
+  kyushuShinkansen: '九州新幹線',
+  hokurikuShinkansen: '北陸新幹線',
+  joetsuShinkansen: '上越新幹線',
+  // 名古屋エリア
+  nagoyaHigashiyamaLine: '名古屋市営地下鉄東山線',
+  nagoyaMeijoline: '名古屋市営地下鉄名城線',
+  meitetsuNagoyaMainLine: '名鉄名古屋本線',
+  jrNagoyaLine: 'JR東海道本線（名古屋〜米原）',
+  // 大阪・関西エリア
+  osakaTanimachi: '大阪メトロ谷町線',
+  osakaYotsubashi: '大阪メトロ四つ橋線',
+  osakaChuoLine: '大阪メトロ中央線',
+  hankyuKyotoLine: '阪急京都線',
+  hankyuKobeLine: '阪急神戸線',
+  hanshinMainLine: '阪神本線',
+  osakaSakaisuji: '大阪メトロ堺筋線',
+  kintetsuOsakaLine: '近鉄大阪線',
+  kintetsuNaraLine: '近鉄奈良線',
+  keihanMainLine: '京阪本線',
+  // 福岡・九州エリア
+  fukuokaAirportLine: '福岡市地下鉄空港線',
+  fukuokaHakozakiLine: '福岡市地下鉄箱崎線',
+  fukuokaShichikumaLine: '福岡市地下鉄七隈線',
+  nishitetsuTenjinOmutaLine: '西鉄天神大牟田線',
+  jrKagoshimaMainLineFukuoka: 'JR鹿児島本線（福岡〜熊本）',
+  // 札幌・北海道エリア
+  sapporoNambokuLine: '札幌市営地下鉄南北線',
+  sapporoTozaiLine: '札幌市営地下鉄東西線',
+  sapporoTohoLine: '札幌市営地下鉄東豊線',
+  jrHakodateMainLine: 'JR函館本線（札幌〜旭川）',
+  jrChitoseLine: 'JR千歳線',
+  // 東北エリア
+  jrTohokuMainLine: 'JR東北本線',
+  sendaiNambokuLine: '仙台市地下鉄南北線',
+  sendaiTozaiLine: '仙台市地下鉄東西線',
+  jrSensekiLine: 'JR仙石線',
+  // 広域JR
+  jrSanyoMainLine: 'JR山陽本線',
+  jrShizuokaLine: 'JR東海道本線（静岡〜浜松）',
+  jrChuoNagoyaLine: 'JR中央本線（名古屋〜塩尻）',
+  jrSaninMainLine: 'JR山陰本線',
+  // 九州エリア
+  jrNagasakiMainLine: 'JR長崎本線',
+  nagasakiTram: '長崎市電',
+  jrHohibMainLine: 'JR豊肥本線',
+  jrNippoMainLineNorth: 'JR日豊本線（小倉〜大分）',
+  kumamotoTram: '熊本市電',
+  // 中部エリア追加
+  shizuokaRailway: '静岡鉄道',
+  enshuRailway: '遠州鉄道',
+  jrIidaLine: 'JR飯田線',
+  nagoyaTsurumai: '名古屋市営地下鉄鶴舞線',
+  nagoyaSakuradori: '名古屋市営地下鉄桜通線',
+  jrHamamatsuToyohashi: 'JR東海道本線（浜松〜豊橋）',
+  aichiLoopRailway: '愛知環状鉄道',
+  // 北海道エリア追加
+  jrHakodateLineHakodate: 'JR函館本線（函館〜小樽）',
+  jrSoyaMainLine: 'JR宗谷本線',
+  jrSekihokuMainLine: 'JR石北本線',
+  jrHanasakiLine: 'JR花咲線',
+  // 四国エリア
+  jrYosanLine: 'JR予讃線',
+  jrDosanLine: 'JR土讃線',
+  iyotetsuTram: '伊予鉄道市内電車',
+  jrKotokuLine: 'JR高徳線',
+  jrTokushimaLine: 'JR徳島線',
+  // 関西エリア追加
+  jrYamatoji: 'JR大和路線',
+  jrGakkenLine: 'JR学研都市線',
+  kintetsuKyotoLine: '近鉄京都線',
+  nankaMainLine: '南海本線',
+  nankaKoyaLine: '南海高野線',
+  // 九州エリアさらに追加
+  jrKagoshimaMainLineSouth: 'JR鹿児島本線（熊本〜鹿児島中央）',
+  kagoshimaTram: '鹿児島市電',
+  jrIbusukinMakurazakiLine: 'JR指宿枕崎線',
+  jrSaseboLine: 'JR佐世保線',
+  nishitetsuKaizukaLine: '西鉄貝塚線',
+  kumamotoElecRailway: '熊本電気鉄道',
+  // 東北エリアさらに追加
+  jrYamagataShinkansen: 'JR山形新幹線',
+  jrAkitaShinkansen: 'JR秋田新幹線',
+  jrOuMainLineAkita: 'JR奥羽本線（秋田〜青森）',
+  jrJobanLineNorth: 'JR常磐線（いわき〜仙台）',
+  jrBanetsusaiLine: 'JR磐越西線',
+  jrShinetsuLine: 'JR信越本線',
+  // 関東エリアさらに追加
+  jrMitoLine: 'JR水戸線',
+  jrJobanLineMain: 'JR常磐線（上野〜いわき）',
+  jrNikkoLine: 'JR日光線',
+  kantetsJososen: '関東鉄道常総線',
+  chichibuRailway: '秩父鉄道',
+  // 広域JRさらに追加
+  jrSeikanTunnel: 'JR海峡線（青函トンネル）',
+  jrUetsuMainLine: 'JR羽越本線',
+  jrKitakamiLine: 'JR北上線',
+  jrKamaishiLine: 'JR釜石線',
+  jrTsugaRuLine: 'JR津軽線',
+  jrGonoLine: 'JR五能線',
+  jrRikuuEastLine: 'JR陸羽東線',
+  // 中国・四国エリア
+  jrSaninMainLineWest: 'JR山陰本線（西部）',
+  jrYamaguchiLine: 'JR山口線',
+  hiroshimaTram: '広島電鉄',
+  jrKabeLine: 'JR可部線',
+  jrUnoline: 'JR宇野線（瀬戸大橋線）',
+  jrKureLine: 'JR呉線',
+  okayamaTram: '岡山電気軌道',
+  jrMurotozakiLine: 'JR土讃線（高知付近）',
+  // 近畿エリア追加
+  jrBiwako: 'JR琵琶湖線',
+  jrOsakaLoop: 'JR大阪環状線',
+  kintetsuMinamiOsakaLine: '近鉄南大阪線',
+  jrKosaiLine: 'JR湖西線',
+  jrKusatsuLine: 'JR草津線',
+  osakaChangbori: '大阪メトロ長堀鶴見緑地線',
+  osakaImazatosuji: '大阪メトロ今里筋線',
+  hankyuTakarazukaLine: '阪急宝塚線',
+  kobeSeishinYamate: '神戸市営地下鉄西神・山手線',
+  kobeKaigan: '神戸市営地下鉄海岸線',
+  kintetsuKasharaLine: '近鉄橿原線',
+  // 九州・沖縄追加
+  jrChikuhiLine: 'JR筑肥線',
+  jrOmuraLine: 'JR大村線',
+  shimabaraRailway: '島原鉄道',
+  okinawaMonorail: '沖縄都市モノレール（ゆいレール）',
+  jrNichinanLine: 'JR日南線',
+  jrNippoMainLineSouth: 'JR日豊本線（大分〜鹿児島）',
+  // 北陸エリア
+  toyamaChihoMainLine: '富山地方鉄道本線',
+  echizentetsudoKatsuyamaLine: 'えちぜん鉄道勝山永平寺線',
+  fukuiRailwayFukubuLine: '福井鉄道福武線',
+  hokurikuTetsudoIshikawaLine: '北陸鉄道石川線',
+  jrHokurikuKanazawaToToyama: 'JR北陸本線（金沢〜富山）',
+  toyamaLightRail: '富山ライトレール',
+  // 北海道追加
+  jrMuroranMainLine: 'JR室蘭本線',
+  jrNemuroMainLine: 'JR根室本線',
+  jrHidakaMainLine: 'JR日高本線',
+  jrFuranoLine: 'JR富良野線',
+  sapporoShiden: '札幌市電',
+  // 四国追加
+  kotohiraLine: '高松琴平電気鉄道琴平線',
+  jrMugiLine: 'JR牟岐線',
+  tosaCuroshioAsaLine: '土佐くろしお鉄道阿佐線',
+  tosaCuroshioNahariLine: '土佐くろしお鉄道ごめん・なはり線',
+  jrYodoLine: 'JR予土線',
+  // 近畿さらに追加
+  jrHanwaLine: 'JR阪和線',
+  jrNaraLine: 'JR奈良線',
+  jrKansaiMainLine: 'JR関西本線（加茂〜亀山）',
+  wakayamaDenwKishiLine: '和歌山電鐵貴志川線',
+  nankaAirportLine: '南海空港線',
+  // 中部私鉄追加
+  toyamaTramLoop: '富山市内電車環状線',
+  manyoLine: '万葉線',
+  toyohashiTramLine: '豊橋鉄道東田本線',
+  meitetsuTokonameLine: '名鉄常滑線',
+  meitetsuInuyamaLine: '名鉄犬山線',
+  kintetsuNagoyaLine: '近鉄名古屋線',
+  // 東北私鉄・三セク追加
+  aoimoriRailway: '青い森鉄道',
+  igrIwateGinga: 'IGRいわて銀河鉄道',
+  jrKamaishiLine2: 'JR釜石線',
+  sanrikuRiasLine: '三陸鉄道リアス線',
+  konantetsudoKonanLine: '弘南鉄道弘南線',
+  // 関東私鉄追加
+  hakoneTozan2: '箱根登山鉄道',
+  shinkeisei2: '新京成電鉄',
+  ryutetsuLine: '流鉄流山線',
+  choshiDenki: '銚子電気鉄道',
+  minatomirai: 'みなとみらい線',
+  // 近畿私鉄さらに追加
+  sembokuKosokuLine: '泉北高速鉄道',
+  nosedenMyokenLine: '能勢電鉄妙見線',
+  keihanIshiyamasakamoto: '京阪石山坂本線',
+  osakaMono: '大阪モノレール',
+  hanshinNamba: '阪神なんば線',
+  hankyuKobeLine2: '阪急神戸線',
+  // 九州私鉄追加
+  matsuuraRailway: '松浦鉄道西九州線',
+  hisatsuOrange: '肥薩おれんじ鉄道',
+  jrKudaiMainLine: 'JR久大本線',
+  jrHohibMainLine2: 'JR豊肥本線',
+  // 中部JR追加
+  jrTakayamaMainLine: 'JR高山本線',
+  jrIiyamaLine: 'JR飯山線',
+  jrOitoLine: 'JR大糸線',
+  // 北海道追加
+  hakodateShiden: '函館市電',
+  jrHakodateMainLineSouth: 'JR函館本線（小樽〜長万部）',
+  jrHakodateMainLineNorth: 'JR函館本線（旭川〜岩見沢）',
+  dosanIsaribi: '道南いさりび鉄道',
+  // 東北JR追加
+  jrOuMainLineSouth: 'JR奥羽本線（福島〜新庄）',
+  jrRikuuWestLine: 'JR陸羽西線',
+  jrBanetsuEastLine: 'JR磐越東線',
+  jrSensekiLine2: 'JR仙石線',
+  // 東北私鉄・三セクさらに追加
+  abukumaKyuko: '阿武隈急行',
+  yamagataRailway: '山形鉄道フラワー長井線',
+  jrHanawLine: 'JR花輪線',
+  jrOminateLine: 'JR大湊線',
+  akitaNairikuLine: '秋田内陸縦貫鉄道',
+  // 北海道JR追加
+  jrSekishoLine: 'JR石勝線',
+  jrNemuroMainLineWest: 'JR根室本線（滝川〜新得）',
+  jrSoyaMainLineNorth: 'JR宗谷本線（旭川〜名寄）',
+  jrSenmouMainLine: 'JR釧網本線',
+  // 近畿JR追加
+  jrWakayamaLine: 'JR和歌山線',
+  jrKiseiMainLineNorth: 'JR紀勢本線（亀山〜新宮）',
+  jrKiseiMainLineSouth: 'JR紀勢本線（新宮〜和歌山）',
+  kintetsuOsakaLine2: '近鉄大阪線',
+  // 近畿私鉄さらに追加2
+  kintetsuNaraLine2: '近鉄奈良線',
+  kintetsuShimaLine: '近鉄志摩線',
+  kintetsuYamadaLine: '近鉄山田線',
+  mizumaRailway: '水間鉄道',
+  kobeElecArimaLine: '神戸電鉄有馬線',
+  eizanMainLine: '叡山電鉄叡山本線',
+  // 中部追加（伊勢・長野・北陸私鉄）
+  jrSanguLine: 'JR参宮線',
+  sangiNokuseLine: '三岐鉄道北勢線',
+  yoroRailway: '養老鉄道',
+  naganoDentetsuLine: '長野電鉄長野線',
+  uedaDentetsuLine: '上田電鉄別所線',
+  matsumotoDentestu: '松本電気鉄道上高地線',
+  // 中国エリア追加
+  jrFukuenLine: 'JR福塩線',
+  jrGeibiLine: 'JR芸備線',
+  jrKisukiLine: 'JR木次線',
+  jrKishinLine: 'JR姫新線',
+  jrHakubiLine: 'JR伯備線',
+  // 近畿私鉄さらに追加3
+  kintetsuYoshinoLine: '近鉄吉野線',
+  kintetsuTobaLine: '近鉄鳥羽線',
+  kintetsuYunoyamaLine: '近鉄湯の山線',
+  keihanUjiLine: '京阪宇治線',
+  kintetsuSuzukaLine: '近鉄鈴鹿線',
+  hankyuImazu: '阪急今津線',
+  nankaKoyaLine2: '南海高野線',
+  // 中部JR・私鉄追加2
+  jrGotembLine: 'JR御殿場線',
+  jrMinobuLine: 'JR身延線',
+  jrNagoyaGifuLine: 'JR東海道本線（名古屋〜大垣）',
+  jrKansaiNagoya: 'JR関西本線（名古屋〜亀山）',
+  fujikyu: '富士急行線',
+  // 近畿JR・私鉄さらに追加
+  jrSakuraiLine: 'JR桜井線（万葉まほろば線）',
+  kintetsuKeihanna: '近鉄けいはんな線',
+  kitaosakaKyuko: '北大阪急行電鉄',
+  hankyuSenriLine: '阪急千里線',
+  hankyuArashiyamaLine: '阪急嵐山線',
+  hankyuKoyoLine: '阪急甲陽線',
+  jrKosaiLineNorth: 'JR湖西線（北部）',
+  // 九州追加2
+  heitatsuIdaLine: '平成筑豊鉄道伊田線',
+  amakiRailway: '甘木鉄道',
+  jrMiyazakiAirportLine: 'JR宮崎空港線',
+  jrHitaHikosan: 'JR日田彦山線',
+  jrGotojLine: 'JR後藤寺線',
+  nishitetsuAmakiLine: '西鉄甘木線',
+  jrKaratsuLine: 'JR唐津線',
+  // 中部名鉄追加
+  meitetsuGamagoriLine: '名鉄蒲郡線',
+  meitetsuKowaLine: '名鉄河和線',
+  jrTakehoyLine: 'JR武豊線',
+  meitetsuChitaShinLine: '名鉄知多新線',
+  meitetsuMikawaKaisen: '名鉄三河線（海線）',
+  meitetsuMikawaYamasen: '名鉄三河線（山線）',
+  // 関東私鉄追加2
+  tobuOgoseLine: '東武越生線',
+  seibuChichibuLine: '西武秩父線',
+  jomotetsudo: '上毛電気鉄道',
+  watarasekeikoku: 'わたらせ渓谷鐵道',
+  mookaRailway: '真岡鐵道',
+  // 四国追加2
+  kotohiraLongLine: '高松琴平電鉄長尾線',
+  kotohiraShidoLine: '高松琴平電鉄志度線',
+  tosaCuroshioSukumo: '土佐くろしお鉄道宿毛線',
+  jrMugiLineSouth: 'JR牟岐線（阿南〜海部）',
+  jrTokushimaLineWest: 'JR徳島線（西部）',
+  // 東北追加2
+  jrKesennumaLine: 'JR気仙沼線',
+  sendaiAirportRailway: '仙台空港鉄道',
+  jrOofunatoLine: 'JR大船渡線',
+  jrYamadaLine: 'JR山田線',
+  // 北陸追加
+  echigotokimekiHisui: 'えちごトキめき鉄道日本海ひすいライン',
+  echigotokimekiMyoko: 'えちごトキめき鉄道妙高はねうまライン',
+  ainokaze: 'あいの風とやま鉄道',
+  irIshikawaRailway: 'IRいしかわ鉄道',
+  kurobe: '黒部峡谷鉄道',
+  // 近畿私鉄さらに追加4
+  hankyuItamiLine: '阪急伊丹線',
+  hankyuMinooLine: '阪急箕面線',
+  kintetsuTenriLine: '近鉄天理線',
+  kintetsuDoumyojiLine: '近鉄道明寺線',
+  kintetsuNaganoLine: '近鉄長野線',
+  osakaMidosujiMain: '大阪メトロ御堂筋線',
+  // 新潟・長野エリア
+  jrEtsugoLine: 'JR越後線',
+  jrShinetsuNiigata: 'JR信越本線（新潟〜柏崎）',
+  hokuetsukyu: '北越急行ほくほく線',
+  shinanoBrandNorth: 'しなの鉄道北しなの線',
+  shinanoRailway: 'しなの鉄道本線',
+  jrIiyamaLineExt: 'JR飯山線',
+  // 関東JR追加
+  jrRyomoline: 'JR両毛線',
+  jrMitoLineExt: 'JR常磐線（水戸付近）',
+  jrKarasuyamaLine: 'JR烏山線',
+  jrKururiLine: 'JR久留里線',
+  jrSobuMainLine: 'JR総武本線（千葉〜銚子）',
+  // 中部追加3
+  jrTokaidoNagoyaToyohashi: 'JR東海道本線（名古屋〜豊橋）',
+  toyohashiAtsumiLine: '豊橋鉄道渥美線',
+  nagoyaMeikoLine: '名古屋市営地下鉄名港線',
+  meitetsuToyotaLine: '名鉄豊田線',
+  // 名古屋エリア追加
+  meitetsuSetoLine: '名鉄瀬戸線',
+  linimo: 'リニモ（愛知高速交通東部丘陵線）',
+  nagoyaKamiidaLine: '名古屋市営地下鉄上飯田線',
+  meitetsuBisaiLine: '名鉄尾西線',
+  // 中国追加
+  ichibataKitamatsue: '一畑電車北松江線',
+  ichibataOyashiro: '一畑電車大社線',
+  mizushimaLine: '水島臨海鉄道',
+  ibaraRailway: '井原鉄道',
+  // 九州追加3
+  heiseiChikuhoIdaLine: '平成筑豊鉄道伊田線',
+  heiseiChikuhoTagawaLine: '平成筑豊鉄道田川線',
+  minamiAsoRailway: '南阿蘇鉄道',
+  // 関東私鉄追加3
+  kashimaRinkaiRailway: '鹿島臨海鉄道',
+  joshinDentetsu: '上信電鉄',
+  kantoRailwayJoso: '関東鉄道常総線',
+  // 東北追加3
+  yuriHighlandRailway: '由利高原鉄道',
+  tsugaruRailway: '津軽鉄道',
+  konanLineHirosaki: '弘南鉄道弘南線',
+  konanLineOwani: '弘南鉄道大鰐線',
+  // 関東追加2
+  hitachinakaSeaRailway: 'ひたちなか海浜鉄道',
+  jrSuigunLineMain: 'JR水郡線（水戸〜常陸大宮）',
+  kominatoRailway: '小湊鉄道',
+  // 北海道追加2
+  jrRumoiMainLine: 'JR留萌本線',
+  // 中部・静岡追加
+  oigawaRailway: '大井川鐡道大井川本線',
+  gakunanRailway: '岳南電車',
+  izuhakoneOyamazanLine: '伊豆箱根鉄道大雄山線',
+  // 近畿・京都追加
+  kyotoSubwayKarasuma: '京都市営地下鉄烏丸線',
+  kyotoSubwayTozai: '京都市営地下鉄東西線',
+  keifukuArashiyama: '嵐電（嵐山本線）',
+  // 東北JR追加2
+  jrHachinoheLineOuter: 'JR八戸線',
+  jrTadamiLine: 'JR只見線',
+  jrYonesakaLine: 'JR米坂線',
+  // 東北・関東私鉄追加3
+  aizuRailway: '会津鉄道会津線',
+  yaganRailway: '野岩鉄道会津鬼怒川線',
+  tobuSanoLine: '東武佐野線',
+  tobuKiryuLine: '東武桐生線',
+  // 中部・北陸追加2
+  notaRailway: 'のと鉄道七尾線',
+  echizentetsudoMikuni: 'えちぜん鉄道三国芦原線',
+  hokutetsuAsanogawa: '北陸鉄道浅野川線',
+  jrKuzuryuLine: 'JR越美北線（九頭竜線）',
+  tenryuHamanako: '天竜浜名湖鉄道',
+  // 近畿丹後・近江追加
+  kyototangoMiyafuku: '京都丹後鉄道宮福線',
+  kyototangoMiyatoyo: '京都丹後鉄道宮豊線',
+  kyototangoMiyamai: '京都丹後鉄道宮舞線',
+  omiRailwayMain: '近江鉄道本線',
+  shigarakiRailway: '信楽高原鐵道',
+  // 近畿JR・私鉄追加2
+  jrBantanLine: 'JR播但線',
+  jrKakogawaLine: 'JR加古川線',
+  chizuExpressLine: '智頭急行智頭線',
+  sangiBonsen: '三岐鉄道本線',
+  igaRailway: '伊賀鉄道伊賀線',
+  // 中国追加3
+  wakasaRailway: '若桜鉄道若桜線',
+  nishikigawaRailway: '錦川鉄道錦川清流線',
+  jrGantokuLine: 'JR岩徳線',
+  hiroshimadentetsuMiyajima: '広島電鉄宮島線',
+  // 四国追加3
+  iyotetsuTakahama: 'いよ鉄道高浜線',
+  iyotetsuYokogawara: 'いよ鉄道横河原線',
+  iyotetsuGunchu: 'いよ鉄道郡中線',
+  tosadentsuAki: 'とさでん交通後免・安芸線',
+  tosadentsuIno: 'とさでん交通伊野線',
+  asaKaiganRailway: '阿佐海岸鉄道阿佐東線',
+  // 九州追加4
+  jrHisatsuLine: 'JR肥薩線',
+  jrKittoLine: 'JR吉都線',
+  matsuuraRailwayDetail: '松浦鉄道西九州線',
+  shimabara_detail: '島原鉄道',
+  // 新交通・都市鉄道追加
+  kobePortLiner: '神戸新交通ポートライナー',
+  kobeRokkouLiner: '神戸新交通六甲ライナー',
+  hiroshimaAstramLine: '広島高速交通アストラムライン',
+  osakaMonorailSaito: '大阪モノレール彩都線',
+  keihanNakanoshima: '京阪中之島線',
+  noseDentetsuMyoken: '能勢電鉄妙見線',
+  kobeDentetsuAwoline: '神戸電鉄粟生線',
+  // 東北JR追加3
+  jrSenzanLine: 'JR仙山線',
+  jrAterazawaLine: 'JR左沢線',
+  // 関東・東北JR追加
+  jrJoetsuLine: 'JR上越線',
+  jrOuMainLineMid: 'JR奥羽本線（新庄〜秋田）',
+  // 各地私鉄・三セク追加
+  nishitetsuDazaifuLine: '西鉄太宰府線',
+  tobuKinugawaLine: '東武鬼怒川線',
+  isumiRailway: 'いすみ鉄道',
+  kantoRailwayRyugasaki: '関東鉄道竜ヶ崎線',
+  // 大阪・名古屋追加
+  jrOsakaTozaiLine: 'JR東西線（大阪）',
+  nagoyaAonamiLine: 'あおなみ線',
+  jrOsakaHigashiLine: 'JR大阪東線',
+  jrGakuendaiLine: 'JR学園都市線',
+  // 新潟追加
+  jrShinetsuNaoetsu: 'JR信越本線（長岡〜直江津）',
+  // 東北・近江追加
+  fukushimaIizakaLine: '福島交通飯坂線',
+  jrIshinomakiLine: 'JR石巻線',
+  omiTagaLine: '近江鉄道多賀線',
+  omiYokaichLine: '近江鉄道八日市線',
+  // 関東・北陸・近畿・中国追加
+  tobuUtsunomiyaLine: '東武宇都宮線',
+  keikyuZushiLine: '京急逗子線',
+  tokyuKodomoLine: '東急こどもの国線',
+  jrJohanaLine: 'JR城端線',
+  jrHimiLine: 'JR氷見線',
+  eizanKuramaLine: '叡山電鉄鞍馬線',
+  nankaKadaLine: '南海加太線',
+  jrSakaiLine: 'JR境線',
+  // 近畿・北陸追加2
+  jrFukuchiyamaLine: 'JR福知山線',
+  kobeDentetsuSandaLine: '神戸電鉄三田線',
+  hapirainFukui: 'ハピラインふくい',
+  // 九州・近畿追加
+  jrWakamatsuLine: 'JR若松線',
+  jrKashiiLine: 'JR香椎線',
+  jrHaradaLine: 'JR原田線',
+  keifukuKitanoLine: '嵐電北野線',
+  // JR小浜線・因美線・筑豊本線・舞鶴線
+  jrObamaLine: 'JR小浜線',
+  jrInbiLine: 'JR因美線',
+  jrFukuhoLine: 'JR筑豊本線（福北ゆたか線）',
+  jrMaizuruLine: 'JR舞鶴線',
+  // JR山陰本線（京都〜鳥取）
+  jrSaninKyotoTottori: 'JR山陰本線（京都〜鳥取）',
+  // JR北陸本線（米原〜敦賀）
+  jrHokurikuMaibaraToTsuruga: 'JR北陸本線（米原〜敦賀）',
+  // 中部未収録路線
+  tarumiRailway: '樽見鉄道',
+  nagaraRailway: '長良川鉄道',
+  meichiRailway: '明知鉄道',
+  iseTetsudo: '伊勢鉄道（伊勢線）',
+  // 近畿・中国未収録路線
+  jrTsuyamaLine: 'JR津山線',
+  kintetsuIkomaLine: '近鉄生駒線',
+  kintetsuTawaramoto: '近鉄田原本線',
+  nankaShiomibashiLine: '南海汐見橋線',
+  nankaTanagawaLine: '南海多奈川線',
+  // 近畿支線
+  keihanKatanoLine: '京阪交野線',
+  keihanKamotoline: '京阪鴨東線',
+  hanshinMukogawaLine: '阪神武庫川線',
+  jrWadamisakiLine: 'JR和田岬線',
+  kintetsuShigiLine: '近鉄信貴線',
+  noseDentetsuNisshoLine: '能勢電鉄日生線',
+};
