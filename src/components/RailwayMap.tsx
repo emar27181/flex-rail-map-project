@@ -96,7 +96,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showStationNumbers, setShowStationNumbers] = useState(language === 'english');
   const [showOsmTiles, setShowOsmTiles] = useState(true);
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
-  const [tapToggleMode, setTapToggleMode] = useState(false);
+  const [tapToggleMode, setTapToggleMode] = useState(true);
   // 地図表示モード
   const [mapViewMode, setMapViewMode] = useState<'realistic' | 'schematic'>('realistic');
 
@@ -2876,48 +2876,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             />
           )}
 
-          {/* 表示切替モードボタン / 列車デモボタン（モバイル: 右上 / PC: 左下） */}
-          <button
-            onClick={() => setTapToggleMode(v => !v)}
-            style={{
-              position: 'absolute',
-              ...(isMobile
-                ? { top: 'calc(env(safe-area-inset-top, 0px) + 10px)', right: 8, bottom: 'auto', left: 'auto' }
-                : { bottom: 90, left: 8 }
-              ),
-              zIndex: 1003,
-              backgroundColor: tapToggleMode ? '#FF9800' : colors.surfaceElevated,
-              border: `2px solid ${tapToggleMode ? '#e65100' : colors.borderLight}`,
-              borderRadius: '4px', padding: '4px 8px', fontSize: '11px',
-              color: tapToggleMode ? '#fff' : colors.textSecondary,
-              cursor: 'pointer', boxShadow: `0 1px 4px ${colors.shadow}`,
-              whiteSpace: 'nowrap',
-              fontWeight: tapToggleMode ? 'bold' : 'normal',
-            }}
-          >
-            {tapToggleMode ? '✕ 切替モード中' : '👁 表示切替'}
-          </button>
-
-          {mapViewMode === 'realistic' && (
-            <button
-              onClick={() => { setShowTrainDemo(v => !v); if (!showTrainDemo) { setTrainDemoMinutes(12 * 60); setTrainDemoPlaying(true); } }}
-              style={{
-                position: 'absolute',
-                ...(isMobile
-                  ? { top: 'calc(env(safe-area-inset-top, 0px) + 44px)', right: 8, bottom: 'auto', left: 'auto' }
-                  : { bottom: 56, left: 8 }
-                ),
-                zIndex: 1003,
-                backgroundColor: showTrainDemo ? '#9ACD32' : colors.surfaceElevated,
-                border: `1px solid ${showTrainDemo ? '#7ab020' : colors.borderLight}`,
-                borderRadius: '4px', padding: '4px 8px', fontSize: '11px',
-                color: showTrainDemo ? '#fff' : colors.textSecondary,
-                cursor: 'pointer', boxShadow: `0 1px 4px ${colors.shadow}`,
-              }}
-            >
-              🚃 列車デモ
-            </button>
-          )}
 
           {/* 列車位置デモ コントロールパネル */}
           {showTrainDemo && mapViewMode === 'realistic' && (
@@ -3187,6 +3145,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onShowOsmTilesChange={setShowOsmTiles}
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
                     viewCenter={viewCenter}
+                    tapToggleMode={tapToggleMode}
+                    onTapToggleModeChange={setTapToggleMode}
+                    showTrainDemo={showTrainDemo}
+                    onTrainDemoToggle={() => { setShowTrainDemo(v => !v); if (!showTrainDemo) { setTrainDemoMinutes(12 * 60); setTrainDemoPlaying(true); } }}
+                    mapViewMode={mapViewMode}
                   />
 
                   {/* 3. 表示オプション (Display Options) */}
@@ -3404,6 +3367,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onShowFuriganaChange={setShowFurigana}
                         onShowOsmTilesChange={setShowOsmTiles}
                         adjustRouteColorForTheme={adjustRouteColorForTheme}
+                        viewCenter={viewCenter}
+                        tapToggleMode={tapToggleMode}
+                        onTapToggleModeChange={setTapToggleMode}
+                        showTrainDemo={showTrainDemo}
+                        onTrainDemoToggle={() => { setShowTrainDemo(v => !v); if (!showTrainDemo) { setTrainDemoMinutes(12 * 60); setTrainDemoPlaying(true); } }}
+                        mapViewMode={mapViewMode}
                       />
                       <LegendDisplayOptions
                         mapViewMode={mapViewMode}

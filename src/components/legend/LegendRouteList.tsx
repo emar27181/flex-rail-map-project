@@ -36,6 +36,11 @@ interface LegendRouteListProps {
   onShowOsmTilesChange: (value: boolean) => void;
   adjustRouteColorForTheme: (color: string, theme: 'light' | 'dark') => string;
   viewCenter?: [number, number];
+  tapToggleMode: boolean;
+  onTapToggleModeChange: (value: boolean) => void;
+  showTrainDemo: boolean;
+  onTrainDemoToggle: () => void;
+  mapViewMode: 'realistic' | 'schematic';
 }
 
 const LegendRouteList: React.FC<LegendRouteListProps> = ({
@@ -68,6 +73,11 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowOsmTilesChange,
   adjustRouteColorForTheme,
   viewCenter,
+  tapToggleMode,
+  onTapToggleModeChange,
+  showTrainDemo,
+  onTrainDemoToggle,
+  mapViewMode,
 }) => {
   const colors = getThemeColors(theme);
   const [sortMode, setSortMode] = useState<SortMode>('name');
@@ -132,7 +142,30 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
       </div>
 
       {/* 表示オプション */}
-      <div style={{ marginBottom: '8px' }}> {/* Removed marginTop to prevent double spacing */}
+      <div style={{ marginBottom: '8px' }}>
+        {/* クリックで路線表示切替モード */}
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '12px',
+          color: tapToggleMode ? colors.text : colors.textSecondary,
+          cursor: 'pointer',
+          marginBottom: '8px',
+          padding: '4px 6px',
+          borderRadius: '4px',
+          backgroundColor: tapToggleMode ? (colors.surface === '#f5f5f5' ? '#e8f5e9' : '#1b3a1e') : 'transparent',
+          border: `1px solid ${tapToggleMode ? '#4CAF50' : colors.borderLight}`,
+          fontWeight: tapToggleMode ? 'bold' : 'normal',
+        }}>
+          <input
+            type="checkbox"
+            checked={tapToggleMode}
+            onChange={(e) => onTapToggleModeChange(e.target.checked)}
+            style={{ marginRight: '6px', cursor: 'pointer' }}
+          />
+          {language === 'english' ? 'Click route to toggle visibility' : 'クリックで路線表示を切り替え'}
+        </label>
+
         {/* 区間外の路線を半透明で表示 */}
         <label style={{
           display: 'flex',
@@ -298,6 +331,27 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           />
           {language === 'english' ? 'Show map tiles' : '地図タイルを表示'}
         </label>
+
+        {/* 列車デモ（リアル地図モードのみ） */}
+        {mapViewMode === 'realistic' && (
+          <button
+            onClick={onTrainDemoToggle}
+            style={{
+              marginTop: '6px',
+              width: '100%',
+              padding: '4px 8px',
+              fontSize: '12px',
+              backgroundColor: showTrainDemo ? '#9ACD32' : 'transparent',
+              border: `1px solid ${showTrainDemo ? '#7ab020' : colors.borderLight}`,
+              borderRadius: '4px',
+              color: showTrainDemo ? '#fff' : colors.textSecondary,
+              cursor: 'pointer',
+              textAlign: 'left',
+            }}
+          >
+            🚃 {language === 'english' ? 'Train Demo' : '列車デモ'}
+          </button>
+        )}
       </div>
 
       {/* ソート選択 */}
