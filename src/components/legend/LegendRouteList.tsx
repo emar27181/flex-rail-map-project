@@ -148,14 +148,9 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           display: 'flex',
           alignItems: 'center',
           fontSize: '12px',
-          color: tapToggleMode ? colors.text : colors.textSecondary,
+          color: colors.text,
           cursor: 'pointer',
-          marginBottom: '8px',
-          padding: '4px 6px',
-          borderRadius: '4px',
-          backgroundColor: tapToggleMode ? (colors.surface === '#f5f5f5' ? '#e8f5e9' : '#1b3a1e') : 'transparent',
-          border: `1px solid ${tapToggleMode ? '#4CAF50' : colors.borderLight}`,
-          fontWeight: tapToggleMode ? 'bold' : 'normal',
+          marginBottom: '4px',
         }}>
           <input
             type="checkbox"
@@ -334,23 +329,22 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
         {/* 列車デモ（リアル地図モードのみ） */}
         {mapViewMode === 'realistic' && (
-          <button
-            onClick={onTrainDemoToggle}
-            style={{
-              marginTop: '6px',
-              width: '100%',
-              padding: '4px 8px',
-              fontSize: '12px',
-              backgroundColor: showTrainDemo ? '#9ACD32' : 'transparent',
-              border: `1px solid ${showTrainDemo ? '#7ab020' : colors.borderLight}`,
-              borderRadius: '4px',
-              color: showTrainDemo ? '#fff' : colors.textSecondary,
-              cursor: 'pointer',
-              textAlign: 'left',
-            }}
-          >
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: '12px',
+            color: colors.text,
+            cursor: 'pointer',
+            marginTop: '4px',
+          }}>
+            <input
+              type="checkbox"
+              checked={showTrainDemo}
+              onChange={onTrainDemoToggle}
+              style={{ marginRight: '6px', cursor: 'pointer' }}
+            />
             🚃 {language === 'english' ? 'Train Demo' : '列車デモ'}
-          </button>
+          </label>
         )}
       </div>
 

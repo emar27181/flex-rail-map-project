@@ -2080,64 +2080,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               justClickedLayerRef.current = true;
             },
             mouseover: (e) => {
-              console.log('🟡🟡🟡 === ROUTE HOVER DEBUG START ===');
-              console.log('🟡 Route:', routeKey);
-
-              // すべての利用可能な座標情報を取得
-              const { latlng, containerPoint, layerPoint, originalEvent } = e;
-              console.log('🟡 Event latlng:', latlng);
-              console.log('🟡 Event containerPoint:', containerPoint);
-              console.log('🟡 Event layerPoint:', layerPoint);
-              console.log('🟡 Original event clientX/Y:', originalEvent?.clientX, originalEvent?.clientY);
-              console.log('🟡 Original event pageX/Y:', originalEvent?.pageX, originalEvent?.pageY);
-
-              // 地図の境界とコンテナ情報
-              const mapContainer = mapRef.current?.getContainer();
-              if (mapContainer) {
-                const mapBounds = mapContainer.getBoundingClientRect();
-                console.log('🟡 Map container bounds:', mapBounds);
-              }
-
-              // 複数の方法で座標を計算
-              const calculatedPoint = mapRef.current?.latLngToContainerPoint(latlng);
-              console.log('🟡 Calculated container point:', calculatedPoint);
-
+              const oe = e.originalEvent as MouseEvent | undefined;
               setHoveredRoute(routeKey);
-
-              if (originalEvent && originalEvent.clientX && originalEvent.clientY) {
-                // ブラウザの画面座標を直接使用（最も正確）
-                const tooltipPosition = {
-                  x: originalEvent.clientX,
-                  y: originalEvent.clientY - 80  // ツールチップとマウスの間にスペースを確保
-                };
-                setHoverTooltipPosition(tooltipPosition);
-
-                console.log('🟡 Using clientX/Y:', originalEvent.clientX, originalEvent.clientY);
-                console.log('🟡 Final tooltip position:', tooltipPosition);
-                console.log('🟡 Adjustment: y -= 80 (tooltip height + spacing)');
-                console.log('🟡 === ROUTE HOVER DEBUG END ===');
-              } else if (containerPoint || calculatedPoint) {
-                // フォールバック：コンテナポイント使用
-                const usePoint = containerPoint || calculatedPoint;
-                const mapContainer = mapRef.current?.getContainer();
-                const mapBounds = mapContainer?.getBoundingClientRect();
-
-                if (mapBounds) {
-                  // コンテナポイントを画面座標に変換
-                  const screenX = mapBounds.left + usePoint.x;
-                  const screenY = mapBounds.top + usePoint.y - 80;
-                  const tooltipPosition = { x: screenX, y: screenY };
-                  setHoverTooltipPosition(tooltipPosition);
-
-                  console.log('🟡 Using container point with bounds conversion');
-                  console.log('🟡 Map bounds:', mapBounds);
-                  console.log('🟡 Container point:', usePoint);
-                  console.log('🟡 Screen position:', tooltipPosition);
-                } else {
-                  console.log('🟡 ERROR: No map bounds available!');
-                }
-              } else {
-                console.log('🟡 ERROR: No valid coordinates found!');
+              if (oe?.clientX) {
+                setHoverTooltipPosition({ x: oe.clientX, y: oe.clientY - 36 });
               }
             },
             mouseout: () => {
@@ -3551,182 +3497,36 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           {timetableModeEnabled && renderStationTimetableTooltip()}
 
           {/* ホバーツールチップ */}
-          {hoveredRoute && hoverTooltipPosition && (() => {
-            console.log('🟢🟢🟢 === TOOLTIP RENDER DEBUG START ===');
-            console.log('🟢 Raw tooltip position:', hoverTooltipPosition);
-            console.log('🟢 CSS left:', (hoverTooltipPosition.x - 100) + 'px (centered by subtracting 100px)');
-            console.log('🟢 CSS top:', hoverTooltipPosition.y + 'px (direct positioning)');
-            console.log('🟢 No transform used - direct positioning');
-            console.log('🟢 === TOOLTIP RENDER DEBUG END ===');
-            return (
-              <div
-                style={{
-                  position: 'fixed',
-                  left: `${hoverTooltipPosition.x - 75}px`, // 中央揃えのため半分の幅（約150px）を引く
-                  top: `${hoverTooltipPosition.y}px`,
-                  backgroundColor: colors.surfaceElevated,
-                  color: colors.text,
-                  padding: '6px 10px',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  zIndex: 9998,
-                  whiteSpace: 'nowrap',
-                  pointerEvents: 'none',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-                  border: '1px solid rgba(0,0,0,0.2)',
-                  minWidth: '150px',
-                  textAlign: 'center'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-                  <div style={{
-                    width: '12px',
-                    height: '12px',
-                    backgroundColor: routeColors[hoveredRoute] || colors.textSecondary,
-                    borderRadius: '50%',
-                    border: '1px solid rgba(0,0,0,0.3)',
-                    flexShrink: 0
-                  }} />
-                  <div style={{
-                    fontWeight: 'bold',
-                    fontSize: '12px',
-                    lineHeight: '1',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {translateRoute(getRouteDestination(hoveredRoute)?.description || routeNames[hoveredRoute as RouteKey] || hoveredRoute, currentLanguage)}
-                  </div>
-                </div>
-
-                {/* 推薦経路でのこの路線が使われているルート番号と区間を表示 */}
-                {departure && arrival && routeRecommendations.length > 0 && (() => {
-                  // ホバー中の路線が使われている推薦ルートの番号と利用区間を収集
-                  const routeInfo = [];
-                  routeRecommendations.forEach((recommendation, index) => {
-                    for (const segment of recommendation.segments) {
-                      if (segment.routeKey === hoveredRoute) {
-                        // このルートで使用される区間を特定
-                        const startStation = segment.stations[0].name;
-                        const endStation = segment.stations[segment.stations.length - 1].name;
-
-                        routeInfo.push({
-                          routeNumber: index + 1,
-                          startStation,
-                          endStation,
-                          segment
-                        });
-                        break;
-                      }
-                    }
-                  });
-
-                  if (routeInfo.length > 0) {
-                    return (
-                      <div style={{ fontSize: '11px', opacity: 0.9 }}>
-                        <div style={{ color: colors.text, marginBottom: '2px' }}>
-{translateUI('recommendedRoute', currentLanguage)}: {routeInfo.map(info => info.routeNumber).join(', ')}
-                        </div>
-                        <div style={{
-                          color: colors.text,
-                          fontSize: '10px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '4px'
-                        }}>
-                          <span>{translateStation(routeInfo[0].startStation, currentLanguage)}</span>
-                          <span style={{
-                            color: '#4CAF50',
-                            fontSize: '12px',
-                            fontWeight: 'bold'
-                          }}>→</span>
-                          <span>{translateStation(routeInfo[0].endStation, currentLanguage)}</span>
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  // 推薦経路に含まれていない場合は通常の行先表示
-                  return (
-                    <div style={{ fontSize: '11px', opacity: 0.9 }}>
-                      {getRouteDestination(hoveredRoute)?.destinations.join(' ⇔ ') || ''}
-                    </div>
-                  );
-                })()}
-
-                {/* 出発駅・到着駅が未設定の場合 */}
-                {(!departure || !arrival) && (() => {
-                  const routeDestination = getRouteDestination(hoveredRoute);
-                  if (routeDestination) {
-                    // 出発駅のみ設定されている場合
-                    if (departure && !arrival) {
-                      const direction = getDirectionText(hoveredRoute, departure.name, '');
-                      return (
-                        <div style={{ fontSize: '11px', opacity: 0.9 }}>
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '4px'
-                          }}>
-                            <span>{translateUI('departureStationLabel', currentLanguage)} {translateStation(departure.name, currentLanguage)}</span>
-                            <span style={{
-                              color: '#4CAF50',
-                              fontSize: '12px',
-                              fontWeight: 'bold'
-                            }}>→</span>
-                            <span>{direction || `${routeDestination.destinations.join(' または ')}`}</span>
-                          </div>
-                        </div>
-                      );
-                    }
-                    // 到着駅のみ設定されている場合
-                    else if (arrival && !departure) {
-                      return (
-                        <div style={{ fontSize: '11px', opacity: 0.9 }}>
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '4px'
-                          }}>
-                            <span>{translateUI('fromWhere', currentLanguage)}</span>
-                            <span style={{
-                              color: '#4CAF50',
-                              fontSize: '12px',
-                              fontWeight: 'bold'
-                            }}>→</span>
-                            <span>{translateUI('direction', currentLanguage, { destination: translateStation(arrival.name, currentLanguage) })}</span>
-                          </div>
-                        </div>
-                      );
-                    }
-                    // どちらも未設定の場合は両端駅を表示
-                    else {
-                      return (
-                        <div style={{ fontSize: '11px', opacity: 0.9 }}>
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '4px'
-                          }}>
-                            <span>{routeDestination.destinations[0]}</span>
-                            <span style={{
-                              color: colors.textSecondary,
-                              fontSize: '12px',
-                              fontWeight: 'bold'
-                            }}>⇔</span>
-                            <span>{routeDestination.destinations[1] || routeDestination.destinations[0]}</span>
-                          </div>
-                        </div>
-                      );
-                    }
-                  }
-                  return null;
-                })()}
-              </div>
-            );
-          })()}
+          {hoveredRoute && hoverTooltipPosition && (
+            <div
+              style={{
+                position: 'fixed',
+                left: `${hoverTooltipPosition.x + 12}px`,
+                top: `${hoverTooltipPosition.y}px`,
+                backgroundColor: colors.surfaceElevated,
+                color: colors.text,
+                padding: '4px 8px',
+                borderRadius: '4px',
+                fontSize: '12px',
+                zIndex: 9998,
+                whiteSpace: 'nowrap',
+                pointerEvents: 'none',
+                boxShadow: `0 2px 6px ${colors.shadow}`,
+                border: `1px solid ${colors.border}`,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+              }}
+            >
+              <div style={{
+                width: '10px', height: '10px', borderRadius: '50%', flexShrink: 0,
+                backgroundColor: adjustRouteColorForTheme(routeColors[hoveredRoute as RouteKey] ?? '#888', theme),
+              }} />
+              <span style={{ fontWeight: 'bold' }}>
+                {routeNames[hoveredRoute as RouteKey] || hoveredRoute}
+              </span>
+            </div>
+          )}
 
           {/* 路線情報ポップアップ */}
           {clickedRoute && routePopupPosition && (() => {
