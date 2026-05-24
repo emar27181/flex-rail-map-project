@@ -2086,9 +2086,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         {/* 実際に見える路線 */}
         <Polyline
           positions={segPositions}
-          color={color}
-          weight={hoveredRoute === routeKey ? 6 : 4}
-          opacity={hoveredRoute === routeKey ? 0.5 : (visibleRoutes.has(routeKey) ? 0.8 : 0.2)}
+          pathOptions={{
+            color,
+            weight: hoveredRoute === routeKey ? 6 : 4,
+            opacity: hoveredRoute === routeKey ? 0.5 : 0.85,
+          }}
           interactive={false}
         />
             </React.Fragment>
@@ -2748,8 +2750,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     <React.Fragment key={`dimmed-${rKey}`}>
                       {/* 視覚的な半透明路線 */}
                       <Polyline
-                        positions={positions} color={color} weight={3}
-                        opacity={hoveredRoute === rKey ? 0.6 : 0.35}
+                        positions={positions}
+                        pathOptions={{
+                          color,
+                          weight: 3,
+                          opacity: hoveredRoute === rKey ? 0.6 : 0.25,
+                        }}
                         interactive={false}
                       />
                       {/* クリック判定用の透明な太い線 */}
