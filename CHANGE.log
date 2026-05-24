@@ -1,5 +1,10 @@
 # CHANGE LOG
 
+## [2026-05-24] セッション（続き3）
+
+### fix: 駅名入力中に現在地ボタン・出発時刻が消えるUIの崩れを修正（`src/components/StationSelector.tsx`）
+- `!isSearching` 条件を削除し、入力中も「現在地ボタン」「出発時刻」を常時表示
+
 ## [2026-05-24] セッション（続き2）
 
 ### fix: 路線ツールチップの白い長方形を解消（`src/components/RailwayMap.tsx`）

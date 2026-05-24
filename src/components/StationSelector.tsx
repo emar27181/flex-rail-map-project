@@ -350,7 +350,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   </button>
                 )}
               </div>
-              {onSetNearestDeparture && !isSearching && (
+              {onSetNearestDeparture && (
                 <button
                   onClick={onSetNearestDeparture}
                   style={{
@@ -569,8 +569,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             </div>
           </div>
 
-          {/* 出発時刻（駅名入力中は非表示） */}
-          {onDepartureTimeChange && !isSearching && (
+          {/* 出発時刻 */}
+          {onDepartureTimeChange && (
             <div style={{
               marginTop: '10px',
               display: 'flex',
