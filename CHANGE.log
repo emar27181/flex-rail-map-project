@@ -1,5 +1,11 @@
 # CHANGE LOG
 
+## [2026-05-24] セッション（続き2）
+
+### fix: 路線ツールチップの白い長方形を解消（`src/components/RailwayMap.tsx`）
+- Leafletツールチップを `border: none`・`::before { display: none }` に変更し枠線・矢印を非表示
+- 背景を `rgba(0,0,0,0.65)` の暗い半透明に統一し、ライト/ダーク両モードで白い四角が出ないよう修正
+
 ## [2026-05-24] セッション（続き）
 
 ### fix: 路線クリック時に白い四角が表示される問題を修正（`src/components/RailwayMap.tsx`）

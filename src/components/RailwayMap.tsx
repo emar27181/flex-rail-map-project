@@ -60,27 +60,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       el.id = styleId;
       document.head.appendChild(el);
     }
-    const bg = colors.surfaceElevated;
-    const fg = colors.text;
-    const bd = colors.border;
     el.textContent = `
       .leaflet-tooltip {
-        background-color: ${bg} !important;
-        color: ${fg} !important;
-        border: 1px solid ${bd} !important;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.3) !important;
+        background-color: rgba(0,0,0,0.65) !important;
+        color: #fff !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 4px 8px !important;
+        border-radius: 4px !important;
       }
-      .leaflet-tooltip-right::before {
-        border-right-color: ${bd} !important;
-      }
-      .leaflet-tooltip-left::before {
-        border-left-color: ${bd} !important;
-      }
-      .leaflet-tooltip-top::before {
-        border-top-color: ${bd} !important;
-      }
-      .leaflet-tooltip-bottom::before {
-        border-bottom-color: ${bd} !important;
+      .leaflet-tooltip::before {
+        display: none !important;
       }
     `;
   }, [theme]);
