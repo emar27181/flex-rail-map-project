@@ -36,8 +36,6 @@ interface LegendRouteListProps {
   onShowOsmTilesChange: (value: boolean) => void;
   adjustRouteColorForTheme: (color: string, theme: 'light' | 'dark') => string;
   viewCenter?: [number, number];
-  tapToggleMode: boolean;
-  onTapToggleModeChange: (value: boolean) => void;
   showTrainDemo: boolean;
   onTrainDemoToggle: () => void;
   mapViewMode: 'realistic' | 'schematic';
@@ -73,8 +71,6 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowOsmTilesChange,
   adjustRouteColorForTheme,
   viewCenter,
-  tapToggleMode,
-  onTapToggleModeChange,
   showTrainDemo,
   onTrainDemoToggle,
   mapViewMode,
@@ -143,24 +139,6 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
       {/* 表示オプション */}
       <div style={{ marginBottom: '8px' }}>
-        {/* クリックで路線表示切替モード */}
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          fontSize: '12px',
-          color: colors.text,
-          cursor: 'pointer',
-          marginBottom: '4px',
-        }}>
-          <input
-            type="checkbox"
-            checked={tapToggleMode}
-            onChange={(e) => onTapToggleModeChange(e.target.checked)}
-            style={{ marginRight: '6px', cursor: 'pointer' }}
-          />
-          {language === 'english' ? 'Click route to toggle visibility' : 'クリックで路線表示を切り替え'}
-        </label>
-
         {/* 区間外の路線を半透明で表示 */}
         <label style={{
           display: 'flex',

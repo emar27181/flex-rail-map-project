@@ -1169,7 +1169,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         if (typeof window === 'undefined') return;
 
         const [
-          { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, Pane },
+          { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, Pane, Tooltip },
           { DivIcon }
         ] = await Promise.all([
           import('react-leaflet'),
@@ -1177,7 +1177,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         ]);
 
         if (mounted) {
-          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, DivIcon, Pane });
+          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip });
           setIsClient(true);
           setIsLoading(false);
           // デバッグ関数をブラウザコンソールで利用可能にする
@@ -1884,7 +1884,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // console.log('RailwayMap rendering main component');
 
-  const { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, DivIcon, Pane } = MapComponents;
+  const { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip } = MapComponents;
 
   const MapEvents = () => {
     const map = useMapEvents({
@@ -1906,39 +1906,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         handleRoutePopupClose();
         setDimmedMapTooltip(null);
       },
-      mousemove: (e) => {
-        // デバッグ用：マウス位置をログ出力（頻度制限）
-        if (hoveredRoute && hoverTooltipPosition) {
-          // 100ms間隔でログを制限
-          const now = Date.now();
-          if (!window.lastMouseLog || now - window.lastMouseLog > 100) {
-            window.lastMouseLog = now;
-
-            const containerPoint = e.containerPoint;
-            console.log('🔵🔵🔵 === MOUSE MOVE DEBUG ===');
-            console.log('🔵 Mouse container point:', containerPoint);
-            console.log('🔵 Tooltip position:', hoverTooltipPosition);
-
-            // 調整前の座標との差異
-            const originalDeltaX = containerPoint.x - hoverTooltipPosition.x;
-            const originalDeltaY = containerPoint.y - hoverTooltipPosition.y;
-            console.log('🔵 Delta from tooltip (raw): x=' + originalDeltaX + ', y=' + originalDeltaY);
-
-            // 調整分を考慮した実際の距離
-            const adjustedDeltaY = containerPoint.y - (hoverTooltipPosition.y + 10); // +10は調整で引いた分
-            console.log('🔵 Delta considering -10 adjustment: x=' + originalDeltaX + ', y=' + adjustedDeltaY);
-
-            // transform(-50%, -100%)を考慮すると...
-            console.log('🔵 Note: tooltip is also shifted by transform(-50%, -100%) + marginTop(-5px)');
-          }
-        }
-
-        // 地図上でのマウス移動時にホバーを無効化（路線上でない場合）
-        if (hoveredRoute && !hoverTooltipPosition) {
-          setHoveredRoute(null);
-          setHoverTooltipPosition(null);
-        }
-      }
+      mousemove: () => {}
     });
 
     // mapRefに地図インスタンスを保存、初回boundsを取得
@@ -2079,20 +2047,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               }
               justClickedLayerRef.current = true;
             },
-            mouseover: (e) => {
-              const oe = e.originalEvent as MouseEvent | undefined;
-              setHoveredRoute(routeKey);
-              if (oe?.clientX) {
-                setHoverTooltipPosition({ x: oe.clientX, y: oe.clientY - 36 });
-              }
-            },
-            mouseout: () => {
-              setHoveredRoute(null);
-              setHoverTooltipPosition(null);
-            }
+            mouseover: () => setHoveredRoute(routeKey),
+            mouseout: () => setHoveredRoute(null),
           }}
           style={{ cursor: 'pointer' }}
-        />
+        >
+          <Tooltip sticky offset={[10, 0]} direction="right" opacity={0.97}>
+            <div style={{ margin: '-6px -8px', padding: '5px 8px', backgroundColor: colors.surfaceElevated, color: colors.text, borderRadius: '3px' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '12px' }}>
+                <span style={{
+                  display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%',
+                  backgroundColor: adjustRouteColorForTheme(color, theme), flexShrink: 0,
+                }} />
+                {routeNames[routeKey] || routeKey}
+              </span>
+            </div>
+          </Tooltip>
+        </Polyline>
         {/* 実際に見える路線 */}
         <Polyline
           positions={segPositions}
@@ -2776,7 +2747,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           const oe = (e as any).originalEvent as MouseEvent;
                           setDimmedMapTooltip({ routeKey: rKey, x: oe?.clientX ?? 400, y: oe?.clientY ?? 300, isVisible: false });
                         }}}
-                      />
+                      >
+                        <Tooltip sticky offset={[10, 0]} direction="right" opacity={0.97}>
+                          <div style={{ margin: '-6px -8px', padding: '5px 8px', backgroundColor: colors.surfaceElevated, color: colors.text, borderRadius: '3px' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '12px' }}>
+                              <span style={{
+                                display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%',
+                                backgroundColor: color, flexShrink: 0, opacity: 0.7,
+                              }} />
+                              {routeNames[rKey] || rKey}
+                            </span>
+                          </div>
+                        </Tooltip>
+                      </Polyline>
                     </React.Fragment>
                   );
                 })
@@ -2997,7 +2980,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           })()}
 
           {/* 路線凡例（Legend） - モバイルフルスクリーン時は下部統合パネルで表示 */}
-          {visibleRoutesData.length > 0 && !(isFullscreen && isMobile) && !isStationSearching && (
+          {visibleRoutesData.length > 0 && !(isFullscreen && isMobile) && (
             <div style={{
               position: 'absolute',
               top: '10px',
@@ -3091,8 +3074,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onShowOsmTilesChange={setShowOsmTiles}
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
                     viewCenter={viewCenter}
-                    tapToggleMode={tapToggleMode}
-                    onTapToggleModeChange={setTapToggleMode}
                     showTrainDemo={showTrainDemo}
                     onTrainDemoToggle={() => { setShowTrainDemo(v => !v); if (!showTrainDemo) { setTrainDemoMinutes(12 * 60); setTrainDemoPlaying(true); } }}
                     mapViewMode={mapViewMode}
@@ -3228,22 +3209,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               {isMobilePanelExpanded && (
                 <div style={{
                   position: 'absolute',
-                  bottom: isStationSearching ? 0 : 'calc(44px + env(safe-area-inset-bottom, 0px))',
+                  bottom: 'calc(44px + env(safe-area-inset-bottom, 0px))',
                   left: 0,
                   right: 0,
                   zIndex: 1001,
                   backgroundColor: colors.surfaceElevated,
                   borderTop: `2px solid ${colors.border}`,
                   borderRadius: '12px 12px 0 0',
-                  maxHeight: isStationSearching ? '80dvh' : 'calc(60dvh - 44px)',
+                  maxHeight: 'calc(60dvh - 44px)',
                   overflowY: 'auto',
                   overscrollBehavior: 'contain',
                   WebkitOverflowScrolling: 'touch' as any,
                   touchAction: 'pan-y',
                   boxShadow: `0 -2px 10px ${colors.shadow}`,
                 }}>
-                  {/* 折りたたみボタン（右上） - 検索中は非表示 */}
-                  {!isStationSearching && <button
+                  {/* 折りたたみボタン（右上） */}
+                  <button
                     onClick={() => setIsMobilePanelExpanded(false)}
                     style={{
                       position: 'sticky',
@@ -3261,7 +3242,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
-                  >▼</button>}
+                  >▼</button>
                   {mobilePanelTab === 'station' && (
                     <StationSelector
                       departure={departure}
@@ -3314,8 +3295,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onShowOsmTilesChange={setShowOsmTiles}
                         adjustRouteColorForTheme={adjustRouteColorForTheme}
                         viewCenter={viewCenter}
-                        tapToggleMode={tapToggleMode}
-                        onTapToggleModeChange={setTapToggleMode}
                         showTrainDemo={showTrainDemo}
                         onTrainDemoToggle={() => { setShowTrainDemo(v => !v); if (!showTrainDemo) { setTrainDemoMinutes(12 * 60); setTrainDemoPlaying(true); } }}
                         mapViewMode={mapViewMode}
@@ -3341,8 +3320,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 </div>
               )}
 
-              {/* タブバー（常に下端に固定） - 検索中は非表示 */}
-              {!isStationSearching && <div style={{
+              {/* タブバー（常に下端に固定） */}
+              <div style={{
                 position: 'absolute',
                 bottom: 0,
                 left: 0,
@@ -3392,7 +3371,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 >
                   ⚙ {translateUI('displaySettings', currentLanguage)}
                 </button>
-              </div>}
+              </div>
             </>
           )}
 
@@ -3497,36 +3476,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           {timetableModeEnabled && renderStationTimetableTooltip()}
 
           {/* ホバーツールチップ */}
-          {hoveredRoute && hoverTooltipPosition && (
-            <div
-              style={{
-                position: 'fixed',
-                left: `${hoverTooltipPosition.x + 12}px`,
-                top: `${hoverTooltipPosition.y}px`,
-                backgroundColor: colors.surfaceElevated,
-                color: colors.text,
-                padding: '4px 8px',
-                borderRadius: '4px',
-                fontSize: '12px',
-                zIndex: 9998,
-                whiteSpace: 'nowrap',
-                pointerEvents: 'none',
-                boxShadow: `0 2px 6px ${colors.shadow}`,
-                border: `1px solid ${colors.border}`,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-              }}
-            >
-              <div style={{
-                width: '10px', height: '10px', borderRadius: '50%', flexShrink: 0,
-                backgroundColor: adjustRouteColorForTheme(routeColors[hoveredRoute as RouteKey] ?? '#888', theme),
-              }} />
-              <span style={{ fontWeight: 'bold' }}>
-                {routeNames[hoveredRoute as RouteKey] || hoveredRoute}
-              </span>
-            </div>
-          )}
 
           {/* 路線情報ポップアップ */}
           {clickedRoute && routePopupPosition && (() => {

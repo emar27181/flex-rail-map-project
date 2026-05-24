@@ -1,5 +1,23 @@
 # CHANGE LOG
 
+## [2026-05-24] セッション
+
+### improve: 半透明路線にもツールチップ表示・ダークモード対応（`src/components/RailwayMap.tsx`）
+- 区間外（半透明）路線のクリック判定 Polyline にも `<Tooltip sticky>` を追加
+- 全ツールチップの背景・文字色を `colors.surfaceElevated` / `colors.text` で統一し、ダークモードに対応
+
+### fix: 路線ホバーツールチップが残り続ける問題を修正（`src/components/RailwayMap.tsx`）
+- 自前の fixed div ホバー表示を廃止し、Leaflet 組み込みの `<Tooltip sticky>` に切り替え
+- 透明 Polyline の mouseover/mouseout ハンドラを簡略化
+
+### improve: クリックで路線表示切り替えを常時オンに変更（`src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`）
+- `tapToggleMode` 切り替えチェックボックスを凡例パネルから削除（常時オン）
+- `tapToggleMode`・`onTapToggleModeChange` props を `LegendRouteList` から削除
+
+### fix: 駅名検索中にUIが専用モードに切り替わる問題を修正（`src/components/RailwayMap.tsx`）
+- `isStationSearching` による凡例パネル非表示・パネル拡大・タブバー非表示を廃止
+- 検索中も他UIは変化せず、検索窓のみで駅名入力が完結するよう修正
+
 ## [2026-05-21] セッション（続き2）
 
 ### feat: 駅コード（stationNumbers.ts）を大幅拡充（関西・中部・北海道・東北・九州の地下鉄・メトロ系）
