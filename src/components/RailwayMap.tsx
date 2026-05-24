@@ -2051,6 +2051,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           opacity={0}
           eventHandlers={{
             click: (e) => {
+              (e.target as any)?.closeTooltip?.();
               if (tapToggleMode) {
                 // 表示切替モード: 路線の表示/非表示をトグル
                 const newVisibleRoutes = new Set(visibleRoutes);
@@ -2063,21 +2064,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 justClickedLayerRef.current = true;
                 return;
               }
-              console.log('🔴🔴🔴 ROUTE CLICKED:', routeKey);
               const { latlng } = e;
-              console.log('🔴 Click position:', latlng);
               const point = mapRef.current?.latLngToContainerPoint(latlng);
-              console.log('🔴 Map ref exists:', !!mapRef.current);
-              console.log('🔴 Container point:', point);
               if (point) {
                 setClickedRoute(routeKey);
                 setRoutePopupPosition({ x: point.x, y: point.y });
-                console.log('🔴 Popup position set:', { x: point.x, y: point.y });
               } else {
-                // Fallbackとして画面中央に表示
                 setClickedRoute(routeKey);
                 setRoutePopupPosition({ x: 400, y: 300 });
-                console.log('🔴 Using fallback position');
               }
               justClickedLayerRef.current = true;
             },
@@ -2101,7 +2095,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           positions={segPositions}
           color={color}
           weight={hoveredRoute === routeKey ? 6 : 4}
-          opacity={visibleRoutes.has(routeKey) ? 0.8 : 0.2}
+          opacity={hoveredRoute === routeKey ? 0.5 : (visibleRoutes.has(routeKey) ? 0.8 : 0.2)}
           interactive={false}
         />
             </React.Fragment>
@@ -2761,14 +2755,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     <React.Fragment key={`dimmed-${rKey}`}>
                       {/* 視覚的な半透明路線 */}
                       <Polyline
-                        positions={positions} color={color} weight={3} opacity={0.35}
+                        positions={positions} color={color} weight={3}
+                        opacity={hoveredRoute === rKey ? 0.6 : 0.35}
                         interactive={false}
                       />
                       {/* クリック判定用の透明な太い線 */}
                       <Polyline
                         positions={positions} color="transparent" weight={20} opacity={0}
                         pathOptions={{ cursor: 'pointer' }}
-                        eventHandlers={{ click: (e) => {
+                        eventHandlers={{
+                          mouseover: () => setHoveredRoute(rKey),
+                          mouseout: () => setHoveredRoute(null),
+                          click: (e) => {
+                          (e.target as any)?.closeTooltip?.();
                           justClickedLayerRef.current = true;
                           if (tapToggleMode) {
                             // 切替モード：確認なしで即表示
@@ -3020,7 +3019,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               border: `1px solid ${colors.border}`,
               borderRadius: '6px',
               boxShadow: `0 2px 6px ${colors.shadow}`,
-              width: '250px',
+              width: '300px',
               zIndex: 1000,
               overflowY: 'hidden',
               display: isFullscreen ? 'flex' : 'block',

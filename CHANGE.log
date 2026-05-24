@@ -1,5 +1,18 @@
 # CHANGE LOG
 
+## [2026-05-24] セッション（続き）
+
+### fix: 路線クリック時に白い四角が表示される問題を修正（`src/components/RailwayMap.tsx`）
+- クリック時に `e.target.closeTooltip()` でツールチップを即座に閉じるよう修正
+- 不要なデバッグ console.log を削除
+
+### improve: 路線ホバー時に中間透明度でプレビュー表示（`src/components/RailwayMap.tsx`）
+- 表示中路線をホバーすると opacity 0.8→0.5（非表示化のプレビュー）
+- 半透明路線をホバーすると opacity 0.35→0.6（表示化のプレビュー）
+- 半透明路線の透明 Polyline にも mouseover/mouseout ハンドラを追加
+
+### improve: 凡例パネル幅を 250px → 300px に拡大（`src/components/RailwayMap.tsx`）
+
 ## [2026-05-24] セッション
 
 ### improve: 半透明路線にもツールチップ表示・ダークモード対応（`src/components/RailwayMap.tsx`）
