@@ -1,5 +1,20 @@
 # CHANGE LOG
 
+## [2026-05-24] セッション（続き5）
+
+### feat: 緯度・経度グリッドのON/OFF切替機能を追加（`src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`）
+- 凡例パネルに「緯度・経度グリッドを表示」チェックボックスを追加
+- ズームレベルに応じてグリッド間隔を自動調整（0.05°〜2°）
+- 各グリッド線に緯度・経度のラベルを表示
+- ライト/ダークモード対応のグリッド色
+
+## [2026-05-24] セッション（続き4）
+
+### fix: 駅名サジェスト候補がパネル内にクリップされる問題を修正（`src/components/StationSelector.tsx`）
+- 出発・到着の候補ドロップダウンを `position: absolute` から `position: fixed` に変更
+- `onFocus` 時に `getBoundingClientRect()` でビューポート座標を取得し、`overflowY: auto` の親コンテナ外に候補を表示
+- `zIndex` を 1000 → 9999 に引き上げて前面表示を保証
+
 ## [2026-05-24] セッション（続き3）
 
 ### fix: 駅名入力中に現在地ボタン・出発時刻が消えるUIの崩れを修正（`src/components/StationSelector.tsx`）
