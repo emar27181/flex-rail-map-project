@@ -388,6 +388,24 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 				background: #2d2d2d !important;
 				color: #ffffff !important;
 			}
+			/* 凡例・パネルの細いスクロールバー（背景なし、バーのみ） */
+			.thin-scrollbar {
+				scrollbar-width: thin;
+				scrollbar-color: rgba(128,128,128,0.4) transparent;
+			}
+			.thin-scrollbar::-webkit-scrollbar {
+				width: 4px;
+			}
+			.thin-scrollbar::-webkit-scrollbar-track {
+				background: transparent;
+			}
+			.thin-scrollbar::-webkit-scrollbar-thumb {
+				background: rgba(128,128,128,0.4);
+				border-radius: 2px;
+			}
+			.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+				background: rgba(128,128,128,0.7);
+			}
 		</style>
 	</head>
 	<body>
