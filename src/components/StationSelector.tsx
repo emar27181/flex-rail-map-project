@@ -41,6 +41,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const [showArrivalResults, setShowArrivalResults] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [departureDropdownPos, setDepartureDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [arrivalDropdownPos, setArrivalDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
 
   const departureRef = useRef<HTMLDivElement>(null);
   const arrivalRef = useRef<HTMLDivElement>(null);
@@ -293,6 +295,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                   onFocus={(e) => {
                     focusedInputRef.current = e.currentTarget;
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setDepartureDropdownPos({ top: rect.bottom + 2, left: rect.left, width: rect.width });
                     setShowDepartureResults(true);
                     handleSearchFocus();
                   }}
@@ -369,19 +373,19 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 </button>
               )}
 
-              {showDepartureResults && (
+              {showDepartureResults && departureDropdownPos && (
                 <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  right: 0,
+                  position: 'fixed',
+                  top: departureDropdownPos.top,
+                  left: departureDropdownPos.left,
+                  width: departureDropdownPos.width,
                   backgroundColor: colors.surfaceElevated,
                   border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
-                  boxShadow: `0 2px 4px ${colors.shadow}`,
+                  boxShadow: `0 4px 12px ${colors.shadow}`,
                   maxHeight: '200px',
                   overflowY: 'auto',
-                  zIndex: 1000
+                  zIndex: 9999
                 }}>
                   {filteredDepartureStations.map((station, index) => (
                     <div
@@ -469,6 +473,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                   onFocus={(e) => {
                     focusedInputRef.current = e.currentTarget;
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setArrivalDropdownPos({ top: rect.bottom + 2, left: rect.left, width: rect.width });
                     setShowArrivalResults(true);
                     handleSearchFocus();
                   }}
@@ -527,19 +533,19 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 )}
               </div>
               
-              {showArrivalResults && (
+              {showArrivalResults && arrivalDropdownPos && (
                 <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  right: 0,
+                  position: 'fixed',
+                  top: arrivalDropdownPos.top,
+                  left: arrivalDropdownPos.left,
+                  width: arrivalDropdownPos.width,
                   backgroundColor: colors.surfaceElevated,
                   border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
-                  boxShadow: `0 2px 4px ${colors.shadow}`,
+                  boxShadow: `0 4px 12px ${colors.shadow}`,
                   maxHeight: '200px',
                   overflowY: 'auto',
-                  zIndex: 1000
+                  zIndex: 9999
                 }}>
                   {filteredArrivalStations.map((station, index) => (
                     <div
