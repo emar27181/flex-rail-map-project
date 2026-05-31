@@ -15,6 +15,16 @@ import LegendStationMarkers from './legend/LegendStationMarkers';
 import LegendRouteList from './legend/LegendRouteList';
 import LegendRouteRecommendations from './legend/LegendRouteRecommendations';
 import LegendDisplayOptions from './legend/LegendDisplayOptions';
+import type { StationStats } from '../data/stationStats';
+import {
+  getStationHeatColor,
+  HEATMAP_NO_DATA_COLOR,
+  getStationStats as getStationStatsFn,
+  stationStatsData,
+  STAT_PARAMS,
+  getParamRange,
+  heatValueToColor,
+} from '../data/stationStats';
 import DiagramMap from './DiagramMap';
 import { getStoppingTrainTypes, generateStationDescription } from '../data/stationTrainTypeAnalysis';
 import { getStationNumber, getAnyStationNumber } from '../data/stationNumbers';
@@ -189,6 +199,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 現在地表示
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+
+  // ヒートマップ
+  const [heatmapEnabled, setHeatmapEnabled] = useState(false);
+  const [heatmapParam, setHeatmapParam] = useState<keyof StationStats>('safetyScore');
+  const [heatmapOpacity, setHeatmapOpacity] = useState(5);
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
   const autoSetDepartureRef = useRef(false);
@@ -688,6 +703,63 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             </div>
           </div>
         </div>
+
+        {/* 駅統計データパネル（ヒートマップ有効時のみ表示） */}
+        {heatmapEnabled && (() => {
+          const stats = getStationStatsFn(stationTooltip.stationName);
+          const currentMeta = STAT_PARAMS.find(p => p.key === heatmapParam);
+          const val = stats ? (stats[heatmapParam] as number | undefined) : undefined;
+          const { min, max } = getParamRange(heatmapParam);
+          const normalized = (val !== undefined && max > min) ? (val - min) / (max - min) : null;
+          const dotColor = normalized !== null ? heatValueToColor(normalized) : HEATMAP_NO_DATA_COLOR;
+          const filledParams = STAT_PARAMS.filter(p => stats && typeof stats[p.key] === 'number');
+
+          return (
+            <div style={{
+              borderBottom: `1px solid ${colors.borderLight}`,
+              padding: '6px 10px',
+              background: theme === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+            }}>
+              {/* 選択パラメータのハイライト */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: dotColor, flexShrink: 0, border: '1px solid rgba(0,0,0,0.2)' }} />
+                <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.text }}>
+                  {currentMeta?.label ?? String(heatmapParam)}
+                </span>
+                <span style={{ fontSize: '12px', fontWeight: 'bold', color: dotColor, marginLeft: 'auto' }}>
+                  {val !== undefined ? `${val} ${currentMeta?.unit ?? ''}` : 'データなし'}
+                </span>
+              </div>
+              {/* 全パラメータ一覧（2列グリッド） */}
+              {filledParams.length > 0 ? (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px 8px' }}>
+                  {filledParams.map(p => {
+                    const v = stats![p.key] as number;
+                    const isActive = p.key === heatmapParam;
+                    return (
+                      <div key={String(p.key)} style={{
+                        display: 'flex', justifyContent: 'space-between',
+                        fontSize: '10px',
+                        background: isActive ? `${dotColor}22` : 'transparent',
+                        borderRadius: '2px',
+                        padding: '0 2px',
+                      }}>
+                        <span style={{ color: colors.textSecondary }}>{p.label}</span>
+                        <span style={{ color: isActive ? dotColor : colors.text, fontWeight: isActive ? 'bold' : 'normal' }}>
+                          {v}{p.unit ? ` ${p.unit}` : ''}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div style={{ fontSize: '10px', color: colors.textSecondary, fontStyle: 'italic' }}>
+                  この駅のデータは未入力です
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* 2カラム本体 */}
         <div style={{ display: 'flex', alignItems: 'stretch', flex: 1, overflowX: 'auto', overflowY: 'hidden' }}>
@@ -2029,8 +2101,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     const color = adjustRouteColorForTheme(routeColors[routeKey], theme);
 
+    // ヒートマップ切替時に Fragment ごと再マウントして駅アイコン色を確実に更新する
+    const fragmentKey = `${routeKey}-${heatmapEnabled ? String(heatmapParam) : 'off'}`;
+
     return (
-      <React.Fragment key={routeKey}>
+      <React.Fragment key={fragmentKey}>
         {/* 各セグメントを個別描画（非連続区間を誤接続しない） */}
         {displaySegments.map((segStations, segIdx) => {
           const segPositions = segStations.map(s => [s.lat, s.lng]);
@@ -2161,8 +2236,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               </Marker>
             );
           } else {
-            // 駅名表示がオフの場合は通常駅も非表示
-            if (!showStationNames) {
+            // ヒートマップ有効時はデータあり駅を常に表示（showStationNames に関係なく）
+            const hasHeatData = heatmapEnabled && stationStatsData[station.name] !== undefined;
+            if (!showStationNames && !hasHeatData) {
               return null;
             }
 
@@ -2207,16 +2283,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               ? stationTimelineMap.get(station.name)?.find(e => e.routeKey === routeKey)
               : undefined;
             const stationTimeLabel = isDetailed && timelineEntry ? timelineEntry.depTime : undefined;
+            const effectiveColor = (heatmapEnabled && !trainTypeViewEnabled)
+              ? getStationHeatColor(station.name, heatmapParam)
+              : color;
             const stationIcon = trainTypeViewEnabled
               ? createTrainTypeStationIcon(station, routeKey, zoomLevel, isDetailed, stationOpacity)
-              : createStationIcon(station, color, zoomLevel, isDetailed, stationOpacity, stationTimeLabel, routeKey);
+              : createStationIcon(station, effectiveColor, zoomLevel, isDetailed, stationOpacity, stationTimeLabel, routeKey);
             if (!stationIcon) return null;
 
             const stationZIndex = (station.isExpress || isTransferStation) ? 3000 : 1000;
+            // DivIcon は setIcon() での in-place 更新が不確実なため、
+            // 表示色が変わるときに key を変えて強制 remount させる。
+            const markerKey = `${routeKey}-station-${index}-${effectiveColor}`;
 
             return (
               <Marker
-                key={`${routeKey}-station-${index}`}
+                key={markerKey}
                 position={[station.lat, station.lng]}
                 icon={stationIcon}
                 zIndexOffset={stationZIndex}
@@ -3100,6 +3182,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onShowStationNumbersChange={setShowStationNumbers}
                     onShowFuriganaChange={setShowFurigana}
                     onShowOsmTilesChange={setShowOsmTiles}
+                    heatmapEnabled={heatmapEnabled}
+                    heatmapParam={heatmapParam}
+                    onHeatmapEnabledChange={setHeatmapEnabled}
+                    onHeatmapParamChange={setHeatmapParam}
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
                     viewCenter={viewCenter}
                     showTrainDemo={showTrainDemo}
@@ -3322,7 +3408,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onShowStationNumbersChange={setShowStationNumbers}
                         onShowFuriganaChange={setShowFurigana}
                         onShowOsmTilesChange={setShowOsmTiles}
-                        onShowLatLngGridChange={setShowLatLngGrid}
+                        heatmapEnabled={heatmapEnabled}
+                        heatmapParam={heatmapParam}
+                        onHeatmapEnabledChange={setHeatmapEnabled}
+                        onHeatmapParamChange={setHeatmapParam}
                         adjustRouteColorForTheme={adjustRouteColorForTheme}
                         viewCenter={viewCenter}
                         showTrainDemo={showTrainDemo}

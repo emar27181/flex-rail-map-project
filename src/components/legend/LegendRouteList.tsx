@@ -3,6 +3,8 @@ import type { RouteKey } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation';
 import RouteToggleItem from '../ui/RouteToggleItem';
+import { STAT_PARAMS } from '../../data/stationStats';
+import type { StationStats, StatCategory } from '../../data/stationStats';
 
 type SortMode = 'name' | 'color' | 'default' | 'distance';
 
@@ -39,6 +41,10 @@ interface LegendRouteListProps {
   showTrainDemo: boolean;
   onTrainDemoToggle: () => void;
   mapViewMode: 'realistic' | 'schematic';
+  heatmapEnabled: boolean;
+  heatmapParam: keyof StationStats;
+  onHeatmapEnabledChange: (v: boolean) => void;
+  onHeatmapParamChange: (k: keyof StationStats) => void;
 }
 
 const LegendRouteList: React.FC<LegendRouteListProps> = ({
@@ -74,6 +80,10 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   showTrainDemo,
   onTrainDemoToggle,
   mapViewMode,
+  heatmapEnabled,
+  heatmapParam,
+  onHeatmapEnabledChange,
+  onHeatmapParamChange,
 }) => {
   const colors = getThemeColors(theme);
   const [sortMode, setSortMode] = useState<SortMode>('name');
@@ -304,6 +314,53 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           />
           {language === 'english' ? 'Show map tiles' : '地図タイルを表示'}
         </label>
+
+        {/* 駅統計ヒートマップ */}
+        <label style={{ display: 'flex', alignItems: 'center', fontSize: '12px', color: colors.text, cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={heatmapEnabled}
+            onChange={e => onHeatmapEnabledChange(e.target.checked)}
+            style={{ marginRight: '6px', cursor: 'pointer' }}
+          />
+          {language === 'english' ? 'Station heatmap' : '駅統計ヒートマップ'}
+        </label>
+        {heatmapEnabled && (
+          <select
+            value={heatmapParam as string}
+            onChange={e => onHeatmapParamChange(e.target.value as keyof StationStats)}
+            style={{
+              marginLeft: '22px',
+              marginTop: '2px',
+              fontSize: '11px',
+              padding: '2px 4px',
+              borderRadius: '3px',
+              border: `1px solid ${colors.border}`,
+              background: colors.surfaceElevated,
+              color: colors.text,
+              cursor: 'pointer',
+              width: 'calc(100% - 22px)',
+            }}
+          >
+            {(['housing','transport','food','convenience','safety','environment','work'] as StatCategory[]).map(cat => {
+              const catLabel: Record<StatCategory, string> = {
+                housing: '住居', transport: '交通', food: '飲食', convenience: '利便性',
+                safety: '治安', environment: '環境', work: '仕事',
+              };
+              const params = STAT_PARAMS.filter(p => p.category === cat);
+              if (params.length === 0) return null;
+              return (
+                <optgroup key={cat} label={catLabel[cat]}>
+                  {params.map(p => (
+                    <option key={p.key as string} value={p.key as string}>
+                      {p.label}（{p.unit}）
+                    </option>
+                  ))}
+                </optgroup>
+              );
+            })}
+          </select>
+        )}
 
         {/* 列車デモ（リアル地図モードのみ） */}
         {mapViewMode === 'realistic' && (

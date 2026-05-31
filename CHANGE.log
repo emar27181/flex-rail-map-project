@@ -1,5 +1,27 @@
 # CHANGE LOG
 
+## [2026-05-31] セッション（駅統計ヒートマップ機能）
+
+### feat: 駅別統計データの型定義・サンプルデータ・グラデーションユーティリティを追加（`src/data/stationStats.ts`, `src/types/leaflet-heat.d.ts`）
+- `StationStats` 型（24パラメータ・6カテゴリ）・`STAT_PARAMS`・`CustomScoreFormula` を定義
+- 山手線全31駅 + 主要ターミナル駅など計42駅のサンプルデータを入力
+- `DataSource` 型で参照元・参照日・更新日を管理する `PARAM_DATA_SOURCES` を追加
+- `GRADIENT_STOPS` を export し `buildGradientCss()` で CSS グラデーション文字列を動的生成
+- `getStationHeatColor()` / `heatValueToColor()` で値→色変換ユーティリティを実装
+
+### feat: 全駅CSVテンプレート生成スクリプトを追加（`scripts/generate-station-stats.ts`, `data/station-stats.csv`）
+- `routes.ts` の全6002駅を lat/lng/line_count 入り CSVに出力
+- `stationStatsData` 入力済み駅は既存値をCSVに反映
+
+### feat: leaflet.heat パッケージを追加（`package.json`）
+
+### feat: 駅統計ヒートマップ表示機能を実装（`src/components/legend/LegendRouteList.tsx`, `src/components/RailwayMap.tsx`, `src/components/legend/HeatmapControl.tsx`）
+- 凡例パネルの表示オプション行（駅名・コード等と同列）にチェックボックス＋パラメータ選択を追加
+- ヒートマップ有効時、Fragment key にパラメータ名を含めて全駅アイコンを強制再マウント
+- 駅アイコンの背景色をヒートマップカラーで上書き（データなし駅は灰色 `#aaaaaa`）
+- 駅クリック時のツールチップにパラメータ全値一覧（ヒートマップ有効時のみ）を表示
+- `HeatmapControl.tsx`：凡例グラデーションバー・参照元URL・参照日・免責事項を表示
+
 ## [2026-05-24] セッション（続き5）
 
 ### feat: 緯度・経度グリッドのON/OFF切替機能を追加（`src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`）
