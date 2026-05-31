@@ -1,5 +1,14 @@
 # CHANGE LOG
 
+## [2026-06-01] セッション（ヒートマップ凡例UI改善）
+
+### improve: ヒートマップ凡例を25%刻み数値ラベル＋min/max編集UIに改良（`src/components/RailwayMap.tsx`, `src/data/stationStats.ts`）
+- 凡例グラデーションバーの下に0%/25%/50%/75%/100%の実際の数値を表示
+- 凡例下部にmin・maxの入力欄を追加し、範囲をユーザーが直接変更可能に
+- カスタム範囲変更時はヒートマップの色分けにも即時反映（`getStationHeatColor`に`rangeOverride`引数追加）
+- パラメータ切替時はカスタム範囲を自動リセット（↩ボタンでも手動リセット可）
+- フォントサイズを全体的に拡大（タイトル12px、ティック11px）、グラデーションバーを10pxに拡大
+
 ## [2026-05-31] セッション（駅統計ヒートマップ機能）
 
 ### feat: 駅別統計データの型定義・サンプルデータ・グラデーションユーティリティを追加（`src/data/stationStats.ts`, `src/types/leaflet-heat.d.ts`）

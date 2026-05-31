@@ -121,11 +121,25 @@ export default function HeatmapControl({
               borderRadius: '4px',
               borderLeft: `3px solid ${colors.primary ?? '#4a90d9'}`,
             }}>
-              {currentMeta.description}
-              <br />
-              <span style={{ color: colors.textMuted ?? colors.textSecondary }}>
+              <div>{currentMeta.description}</div>
+              {currentMeta.methodology && (
+                <div style={{ marginTop: '2px' }}>
+                  <span style={{ fontWeight: 'bold' }}>集計方法:</span> {currentMeta.methodology}
+                </div>
+              )}
+              {currentMeta.period && (
+                <div>
+                  <span style={{ fontWeight: 'bold' }}>基準時点:</span> {currentMeta.period}
+                </div>
+              )}
+              {currentMeta.radius && (
+                <div>
+                  <span style={{ fontWeight: 'bold' }}>範囲:</span> {currentMeta.radius}
+                </div>
+              )}
+              <div style={{ marginTop: '3px', color: colors.textMuted ?? colors.textSecondary }}>
                 {currentMeta.higherIsBetter ? '高いほど 赤' : '低いほど 赤（値が高いほど課題あり）'}
-              </span>
+              </div>
             </div>
           )}
 
