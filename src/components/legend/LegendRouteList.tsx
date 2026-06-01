@@ -5,6 +5,8 @@ import { translateUI } from '../../utils/translation';
 import RouteToggleItem from '../ui/RouteToggleItem';
 import { STAT_PARAMS } from '../../data/stationStats';
 import type { StationStats, StatCategory } from '../../data/stationStats';
+import MapConfigPanel from './MapConfigPanel';
+import type { MapConfig } from './MapConfigPanel';
 
 type SortMode = 'name' | 'color' | 'default' | 'distance';
 
@@ -45,6 +47,9 @@ interface LegendRouteListProps {
   heatmapParam: keyof StationStats;
   onHeatmapEnabledChange: (v: boolean) => void;
   onHeatmapParamChange: (k: keyof StationStats) => void;
+  showLatLngGrid?: boolean;
+  mapConfig: MapConfig;
+  onImportConfig: (config: MapConfig) => void;
 }
 
 const LegendRouteList: React.FC<LegendRouteListProps> = ({
@@ -84,6 +89,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   heatmapParam,
   onHeatmapEnabledChange,
   onHeatmapParamChange,
+  mapConfig,
+  onImportConfig,
 }) => {
   const colors = getThemeColors(theme);
   const [sortMode, setSortMode] = useState<SortMode>('name');
@@ -470,6 +477,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           />
         );
       })}
+
+      <MapConfigPanel config={mapConfig} theme={theme} onImport={onImportConfig} />
     </div>
   );
 };
