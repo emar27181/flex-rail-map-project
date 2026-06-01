@@ -390,8 +390,10 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         )}
       </div>
 
+      <MapConfigPanel config={mapConfig} theme={theme} onImport={onImportConfig} />
+
       {/* ソート選択 */}
-      <div style={{ display: 'flex', gap: '4px', marginBottom: '6px', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: '4px', marginTop: '10px', marginBottom: '6px', alignItems: 'center' }}>
         <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
           {language === 'english' ? 'Sort:' : '並順:'}
         </span>
@@ -478,7 +480,6 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         );
       })}
 
-      <MapConfigPanel config={mapConfig} theme={theme} onImport={onImportConfig} />
     </div>
   );
 };

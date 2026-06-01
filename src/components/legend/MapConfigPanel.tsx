@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { getThemeColors } from '../../contexts/ThemeContext';
+import { section, text, btn, btnFull, textarea, L } from './legendStyles';
 
 export type MapConfig = {
   version: 1;
@@ -27,10 +28,10 @@ type Props = {
 
 export default function MapConfigPanel({ config, theme, onImport }: Props) {
   const colors = getThemeColors(theme);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen]           = useState(false);
   const [pasteText, setPasteText] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [error, setError]         = useState<string | null>(null);
+  const [copied, setCopied]       = useState(false);
   const [importDone, setImportDone] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -38,9 +39,9 @@ export default function MapConfigPanel({ config, theme, onImport }: Props) {
 
   const handleExportDownload = () => {
     const blob = new Blob([jsonStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
     a.download = `flex-rail-map-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
@@ -77,62 +78,46 @@ export default function MapConfigPanel({ config, theme, onImport }: Props) {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
-      try {
-        applyConfig(JSON.parse(ev.target?.result as string));
-      } catch {
-        setError('ファイルの読み込みに失敗しました');
-      }
+      try { applyConfig(JSON.parse(ev.target?.result as string)); }
+      catch { setError('ファイルの読み込みに失敗しました'); }
     };
     reader.readAsText(file);
     e.target.value = '';
   };
 
-  const btn: React.CSSProperties = {
-    fontSize: '11px', padding: '3px 8px', cursor: 'pointer',
-    borderRadius: '4px', border: `1px solid ${colors.border}`,
-    background: colors.surfaceElevated, color: colors.text,
-  };
-
   return (
-    <div style={{ borderTop: `1px solid ${colors.border}`, paddingTop: '8px', marginTop: '4px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
-        onClick={() => setOpen(v => !v)}>
-        <span style={{ fontSize: '11px', color: colors.textSecondary, userSelect: 'none' }}>
-          {open ? '▼' : '▶'}
-        </span>
-        <span style={{ fontSize: '12px', fontWeight: 'bold', color: colors.text, userSelect: 'none' }}>
-          設定の保存・読込
-        </span>
+    <div style={section.wrap(colors)}>
+      {/* ヘッダー */}
+      <div style={section.header} onClick={() => setOpen(v => !v)}>
+        <span style={section.arrow(colors)}>{open ? '▼' : '▶'}</span>
+        <span style={section.title(colors)}>設定の保存・読込</span>
         {importDone && (
-          <span style={{ fontSize: '10px', color: '#27ae60' }}>✓ 適用済み</span>
+          <span style={{ fontSize: L.fs.xs, color: '#27ae60', marginLeft: L.sp.xs }}>
+            ✓ 適用済み
+          </span>
         )}
       </div>
 
       {open && (
-        <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={section.body}>
 
           {/* エクスポート */}
           <div>
-            <div style={{ fontSize: '11px', color: colors.textSecondary, marginBottom: '4px' }}>
-              エクスポート（現在の表示設定）
-            </div>
-            <div style={{ display: 'flex', gap: '4px' }}>
-              <button onClick={handleExportDownload} style={btn}>⬇ JSON保存</button>
-              <button onClick={handleCopy} style={btn}>
+            <div style={text.desc(colors)}>エクスポート（現在の表示設定）</div>
+            <div style={{ display: 'flex', gap: L.sp.xs }}>
+              <button onClick={handleExportDownload} style={btn(colors)}>⬇ JSON保存</button>
+              <button onClick={handleCopy}           style={btn(colors)}>
                 {copied ? '✓ コピー済み' : '📋 テキストコピー'}
               </button>
             </div>
           </div>
 
           {/* インポート */}
-          <div>
-            <div style={{ fontSize: '11px', color: colors.textSecondary, marginBottom: '4px' }}>
-              インポート（設定を読み込む）
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
+            <div style={text.desc(colors)}>インポート（設定を読み込む）</div>
             <input ref={fileInputRef} type="file" accept=".json"
               onChange={handleFileImport} style={{ display: 'none' }} />
-            <button onClick={() => fileInputRef.current?.click()}
-              style={{ ...btn, width: '100%', marginBottom: '4px', boxSizing: 'border-box' }}>
+            <button onClick={() => fileInputRef.current?.click()} style={btnFull(colors)}>
               📂 JSONファイルを開く
             </button>
             <textarea
@@ -140,20 +125,17 @@ export default function MapConfigPanel({ config, theme, onImport }: Props) {
               onChange={e => { setPasteText(e.target.value); setError(null); }}
               placeholder="JSONテキストをここに貼り付け..."
               rows={3}
-              style={{
-                width: '100%', fontSize: '11px', padding: '4px',
-                border: `1px solid ${colors.border}`, borderRadius: '4px',
-                background: colors.surface, color: colors.text,
-                resize: 'vertical', boxSizing: 'border-box', display: 'block',
-              }}
+              style={textarea(colors)}
             />
-            <button onClick={handleImportText} disabled={!pasteText.trim()}
-              style={{ ...btn, width: '100%', marginTop: '4px', boxSizing: 'border-box',
-                opacity: pasteText.trim() ? 1 : 0.5 }}>
+            <button
+              onClick={handleImportText}
+              disabled={!pasteText.trim()}
+              style={{ ...btnFull(colors), opacity: pasteText.trim() ? 1 : 0.5 }}
+            >
               ✅ テキストから適用
             </button>
             {error && (
-              <div style={{ fontSize: '10px', color: '#e74c3c', marginTop: '3px' }}>{error}</div>
+              <div style={{ fontSize: L.fs.xs, color: '#e74c3c' }}>{error}</div>
             )}
           </div>
 
