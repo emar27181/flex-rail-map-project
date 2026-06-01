@@ -254,6 +254,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // 駅ホバーツールチップ: マーカーとパネル両方から離れたときに閉じる遅延タイマー
+  const stationTooltipCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheduleTooltipClose = () => {
+    stationTooltipCloseTimer.current = setTimeout(() => setStationTooltip(null), 200);
+  };
+  const cancelTooltipClose = () => {
+    if (stationTooltipCloseTimer.current) clearTimeout(stationTooltipCloseTimer.current);
+  };
+
   // 列車位置デモ アニメーション（RafでRefに時刻を蓄積し、15fps でのみReact stateを更新）
   const trainDemoRafRef = useRef<number | null>(null);
   const trainDemoLastTimestampRef = useRef<number | null>(null);
@@ -661,6 +670,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     return (
       <div
+        onMouseEnter={cancelTooltipClose}
+        onMouseLeave={scheduleTooltipClose}
         style={{
           position: 'fixed', left: x, top: y, zIndex: 9999,
           width: `${TW}px`,
@@ -2311,6 +2322,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 icon={specialIcon}
                 zIndexOffset={5000}
                 eventHandlers={{
+                  mouseover: (e) => {
+                    cancelTooltipClose();
+                    const oe = e.originalEvent as MouseEvent | undefined;
+                    if (!oe) return;
+                    setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
+                  },
+                  mouseout: () => scheduleTooltipClose(),
                   click: (e) => {
                     const oe = e.originalEvent as MouseEvent | undefined;
                     if (!oe) return;
@@ -2319,13 +2337,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     );
                   },
                 }}
-              >
-                <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
-                  <span style={{ fontWeight: 'bold', fontSize: '12px' }}>
-                    {translateStation(station.name, currentLanguage)}
-                  </span>
-                </Tooltip>
-              </Marker>
+              />
             );
           } else {
             // ヒートマップ有効時はデータあり駅を常に表示（showStationNames に関係なく）
@@ -2390,8 +2402,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             const stationZIndex = (station.isExpress || isTransferStation) ? 3000 : 1000;
             const markerKey = `${routeKey}-station-${index}-${stationColor}`;
 
-            const passingRoutes = isTransferStation ? getRoutesForStation(station.name) : null;
-
             return (
               <Marker
                 key={markerKey}
@@ -2399,6 +2409,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 icon={stationIcon}
                 zIndexOffset={stationZIndex}
                 eventHandlers={{
+                  mouseover: (e) => {
+                    cancelTooltipClose();
+                    const oe = e.originalEvent as MouseEvent | undefined;
+                    if (!oe) return;
+                    setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
+                  },
+                  mouseout: () => scheduleTooltipClose(),
                   click: (e) => {
                     const oe = e.originalEvent as MouseEvent | undefined;
                     if (!oe) return;
@@ -2407,35 +2424,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     );
                   },
                 }}
-              >
-                <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
-                  <div style={{ whiteSpace: 'nowrap' }}>
-                    <div style={{ fontWeight: 'bold', fontSize: '12px', marginBottom: passingRoutes ? '3px' : 0 }}>
-                      {translateStation(station.name, currentLanguage)}
-                    </div>
-                    {passingRoutes && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', maxWidth: '180px' }}>
-                        {passingRoutes.slice(0, 6).map(rk => (
-                          <span key={rk} style={{
-                            fontSize: '10px',
-                            padding: '1px 4px',
-                            borderRadius: '3px',
-                            background: adjustRouteColorForTheme(routeColors[rk], theme),
-                            color: '#fff',
-                            fontWeight: rk === routeKey ? 'bold' : 'normal',
-                            opacity: rk === routeKey ? 1 : 0.8,
-                          }}>
-                            {routeNames[rk]}
-                          </span>
-                        ))}
-                        {passingRoutes.length > 6 && (
-                          <span style={{ fontSize: '10px', color: '#888' }}>+{passingRoutes.length - 6}</span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </Tooltip>
-              </Marker>
+              />
             );
           }
         })}
