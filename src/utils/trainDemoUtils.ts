@@ -2871,3 +2871,17 @@ export function formatDemoTime(minutes: number): string {
 export const DEMO_LINE_COLORS: Record<string, string> = Object.fromEntries(
   DEMO_LINES.map(l => [l.key, l.color])
 );
+
+/**
+ * 各路線・方向の終端駅名を返す。
+ * ツールチップの「〇〇方面」表示に使用。
+ * direction=0 → stations[0] が出発、最後の駅が終点
+ * direction=1 → 逆方向の終点
+ */
+export const DEMO_DIRECTION_TERMINALS: Record<string, [string, string]> = Object.fromEntries(
+  DEMO_LINES.map(l => {
+    const d0end = l.directions[0]?.stations.at(-1)?.name ?? '';
+    const d1end = l.directions[1]?.stations.at(-1)?.name ?? '';
+    return [l.key, [d0end, d1end] as [string, string]];
+  })
+);
