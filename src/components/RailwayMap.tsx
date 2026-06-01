@@ -15,6 +15,7 @@ import LegendStationMarkers from './legend/LegendStationMarkers';
 import LegendRouteList from './legend/LegendRouteList';
 import LegendRouteRecommendations from './legend/LegendRouteRecommendations';
 import LegendDisplayOptions from './legend/LegendDisplayOptions';
+import type { MapConfig } from './legend/MapConfigPanel';
 import type { StationStats } from '../data/stationStats';
 import {
   getStationHeatColor,
@@ -22,6 +23,7 @@ import {
   getStationStats as getStationStatsFn,
   stationStatsData,
   STAT_PARAMS,
+  PARAM_DATA_SOURCES,
   getParamRange,
   heatValueToColor,
   buildGradientCss,
@@ -322,6 +324,46 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   useEffect(() => {
     setHeatmapCustomRange(undefined);
   }, [heatmapParam]);
+
+  // 現在の表示設定をエクスポート用オブジェクトに変換
+  const mapConfig: MapConfig = useMemo(() => ({
+    version: 1,
+    heatmapEnabled,
+    heatmapParam: heatmapParam as string,
+    heatmapCustomRange,
+    visibleRoutes: Array.from(visibleRoutes),
+    showTransferStationsOnly,
+    showExpressStationsOnly,
+    showTravelTimes,
+    showStationNames,
+    showFurigana,
+    showStationNumbers,
+    showOsmTiles,
+    mapViewMode,
+    timeFilterEnabled,
+    timeFilterMaxMinutes,
+  }), [heatmapEnabled, heatmapParam, heatmapCustomRange, visibleRoutes,
+      showTransferStationsOnly, showExpressStationsOnly, showTravelTimes,
+      showStationNames, showFurigana, showStationNumbers, showOsmTiles,
+      mapViewMode, timeFilterEnabled, timeFilterMaxMinutes]);
+
+  // インポートされた設定を一括適用
+  const handleImportConfig = useCallback((cfg: MapConfig) => {
+    if (cfg.heatmapEnabled !== undefined) setHeatmapEnabled(cfg.heatmapEnabled);
+    if (cfg.heatmapParam) setHeatmapParam(cfg.heatmapParam as keyof StationStats);
+    setHeatmapCustomRange(cfg.heatmapCustomRange);
+    if (cfg.visibleRoutes) setVisibleRoutes(new Set(cfg.visibleRoutes as RouteKey[]));
+    if (cfg.showTransferStationsOnly !== undefined) setShowTransferStationsOnly(cfg.showTransferStationsOnly);
+    if (cfg.showExpressStationsOnly !== undefined) setShowExpressStationsOnly(cfg.showExpressStationsOnly);
+    if (cfg.showTravelTimes !== undefined) setShowTravelTimes(cfg.showTravelTimes);
+    if (cfg.showStationNames !== undefined) setShowStationNames(cfg.showStationNames);
+    if (cfg.showFurigana !== undefined) setShowFurigana(cfg.showFurigana);
+    if (cfg.showStationNumbers !== undefined) setShowStationNumbers(cfg.showStationNumbers);
+    if (cfg.showOsmTiles !== undefined) setShowOsmTiles(cfg.showOsmTiles);
+    if (cfg.mapViewMode) setMapViewMode(cfg.mapViewMode as 'realistic' | 'schematic');
+    if (cfg.timeFilterEnabled !== undefined) setTimeFilterEnabled(cfg.timeFilterEnabled);
+    if (cfg.timeFilterMaxMinutes !== undefined) setTimeFilterMaxMinutes(cfg.timeFilterMaxMinutes);
+  }, []);
 
   const routeFinder = useMemo(() => {
     const finder = new RouteFinder();
@@ -742,6 +784,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   {filledParams.map(p => {
                     const v = stats![p.key] as number;
                     const isActive = p.key === heatmapParam;
+                    const src = PARAM_DATA_SOURCES[p.key];
+                    const url = src?.url;
+                    const labelEl = url ? (
+                      <a href={url} target="_blank" rel="noopener noreferrer"
+                        onClick={e => e.stopPropagation()}
+                        style={{ color: isActive ? dotColor : '#4a90d9', textDecoration: 'underline', cursor: 'pointer' }}>
+                        {p.label}
+                      </a>
+                    ) : (
+                      <span style={{ color: colors.textSecondary }}>{p.label}</span>
+                    );
                     return (
                       <div key={String(p.key)} style={{
                         display: 'flex', justifyContent: 'space-between',
@@ -750,7 +803,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         borderRadius: '2px',
                         padding: '0 2px',
                       }}>
-                        <span style={{ color: colors.textSecondary }}>{p.label}</span>
+                        {labelEl}
                         <span style={{ color: isActive ? dotColor : colors.text, fontWeight: isActive ? 'bold' : 'normal' }}>
                           {v}{p.unit ? ` ${p.unit}` : ''}
                         </span>
@@ -3324,6 +3377,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     showTrainDemo={showTrainDemo}
                     onTrainDemoToggle={() => { setShowTrainDemo(v => !v); if (!showTrainDemo) { setTrainDemoMinutes(12 * 60); setTrainDemoPlaying(true); } }}
                     mapViewMode={mapViewMode}
+                    mapConfig={mapConfig}
+                    onImportConfig={handleImportConfig}
                   />
 
                   {/* 3. 表示オプション (Display Options) */}
@@ -3550,6 +3605,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         showTrainDemo={showTrainDemo}
                         onTrainDemoToggle={() => { setShowTrainDemo(v => !v); if (!showTrainDemo) { setTrainDemoMinutes(12 * 60); setTrainDemoPlaying(true); } }}
                         mapViewMode={mapViewMode}
+                        mapConfig={mapConfig}
+                        onImportConfig={handleImportConfig}
                       />
                       <LegendDisplayOptions
                         mapViewMode={mapViewMode}
