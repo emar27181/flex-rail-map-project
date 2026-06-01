@@ -209,6 +209,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [heatmapCustomRange, setHeatmapCustomRange] = useState<{ min: number; max: number } | undefined>(undefined);
   const [showStationTooltip, setShowStationTooltip] = useState(true);
   const [showFullRouteStations, setShowFullRouteStations] = useState(true);
+  const [showRouteLine, setShowRouteLine] = useState(true);
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
   const autoSetDepartureRef = useRef(false);
@@ -355,6 +356,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     timeFilterMaxMinutes,
     showStationTooltip,
     showFullRouteStations,
+    showRouteLine,
   }), [heatmapEnabled, heatmapParam, heatmapCustomRange, visibleRoutes,
       showTransferStationsOnly, showExpressStationsOnly, showTravelTimes,
       showStationNames, showFurigana, showStationNumbers, showOsmTiles,
@@ -379,6 +381,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (cfg.timeFilterMaxMinutes !== undefined) setTimeFilterMaxMinutes(cfg.timeFilterMaxMinutes);
     if (cfg.showStationTooltip !== undefined) setShowStationTooltip(cfg.showStationTooltip);
     if (cfg.showFullRouteStations !== undefined) setShowFullRouteStations(cfg.showFullRouteStations);
+    if (cfg.showRouteLine !== undefined) setShowRouteLine(cfg.showRouteLine);
   }, []);
 
   const routeFinder = useMemo(() => {
@@ -2385,15 +2388,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           </Tooltip>
         </Polyline>
         {/* 実際に見える路線 */}
-        <Polyline
-          positions={segPositions}
-          pathOptions={{
-            color: routeColor,
-            weight: hoveredRoute === routeKey ? 6 : 4,
-            opacity: hoveredRoute === routeKey ? 0.5 : 0.85,
-          }}
-          interactive={false}
-        />
+        {showRouteLine && (
+          <Polyline
+            positions={segPositions}
+            pathOptions={{
+              color: routeColor,
+              weight: hoveredRoute === routeKey ? 6 : 4,
+              opacity: hoveredRoute === routeKey ? 0.5 : 0.85,
+            }}
+            interactive={false}
+          />
+        )}
             </React.Fragment>
           );
         })}
@@ -3547,6 +3552,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onShowStationTooltipChange={setShowStationTooltip}
                     showFullRouteStations={showFullRouteStations}
                     onShowFullRouteStationsChange={setShowFullRouteStations}
+                    showRouteLine={showRouteLine}
+                    onShowRouteLineChange={setShowRouteLine}
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
                     viewCenter={viewCenter}
                     showTrainDemo={showTrainDemo}
@@ -3794,6 +3801,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onShowStationTooltipChange={setShowStationTooltip}
                     showFullRouteStations={showFullRouteStations}
                     onShowFullRouteStationsChange={setShowFullRouteStations}
+                    showRouteLine={showRouteLine}
+                    onShowRouteLineChange={setShowRouteLine}
                         adjustRouteColorForTheme={adjustRouteColorForTheme}
                         viewCenter={viewCenter}
                         showTrainDemo={showTrainDemo}

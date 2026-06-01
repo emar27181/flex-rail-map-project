@@ -52,6 +52,8 @@ interface LegendRouteListProps {
   onShowStationTooltipChange: (v: boolean) => void;
   showFullRouteStations: boolean;
   onShowFullRouteStationsChange: (v: boolean) => void;
+  showRouteLine: boolean;
+  onShowRouteLineChange: (v: boolean) => void;
   mapConfig: MapConfig;
   onImportConfig: (config: MapConfig) => void;
 }
@@ -97,6 +99,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowStationTooltipChange,
   showFullRouteStations,
   onShowFullRouteStationsChange,
+  showRouteLine,
+  onShowRouteLineChange,
   mapConfig,
   onImportConfig,
 }) => {
@@ -339,6 +343,17 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             style={{ marginRight: '6px', cursor: 'pointer' }}
           />
           {language === 'english' ? 'Show full route stations' : '中間駅以外も表示'}
+        </label>
+
+        {/* 路線の線を表示 */}
+        <label style={{ display: 'flex', alignItems: 'center', fontSize: '12px', color: colors.text, cursor: 'pointer', marginBottom: '4px' }}>
+          <input
+            type="checkbox"
+            checked={showRouteLine}
+            onChange={e => onShowRouteLineChange(e.target.checked)}
+            style={{ marginRight: '6px', cursor: 'pointer' }}
+          />
+          {language === 'english' ? 'Show route lines' : '路線の線を表示'}
         </label>
 
         {/* 駅ツールチップ */}
