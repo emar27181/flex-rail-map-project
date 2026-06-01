@@ -1414,6 +1414,93 @@ export const stationStatsData: Record<string, StationStats> = {
   '稲毛':     { stationName: '稲毛',     lat: 35.657100, lng: 140.046400, lineCount: 2, avgRent1K: 6.0,  avgRent1LDK: 10.2 },
   '四街道':   { stationName: '四街道',   lat: 35.669000, lng: 140.169300, lineCount: 1, avgRent1K: 5.5,  avgRent1LDK: 9.3 },
 
+  // ======== 埼京線（追加分） ========
+  '北赤羽':   { stationName: '北赤羽',   lat: 35.786974, lng: 139.705834, lineCount: 1, avgRent1K: 7.5,  avgRent1LDK: 12.5 },
+  '浮間舟渡': { stationName: '浮間舟渡', lat: 35.791264, lng: 139.691491, lineCount: 1, avgRent1K: 7.3,  avgRent1LDK: 12.3 },
+  '戸田公園': { stationName: '戸田公園', lat: 35.807765, lng: 139.678350, lineCount: 1, avgRent1K: 7.0,  avgRent1LDK: 11.8 },
+  '戸田':     { stationName: '戸田',     lat: 35.817595, lng: 139.669610, lineCount: 1, avgRent1K: 7.0,  avgRent1LDK: 11.8 },
+  '北戸田':   { stationName: '北戸田',   lat: 35.826755, lng: 139.661445, lineCount: 1, avgRent1K: 6.8,  avgRent1LDK: 11.5 },
+  '中浦和':   { stationName: '中浦和',   lat: 35.853915, lng: 139.637303, lineCount: 1, avgRent1K: 6.5,  avgRent1LDK: 11.0 },
+  '南与野':   { stationName: '南与野',   lat: 35.867355, lng: 139.631055, lineCount: 1, avgRent1K: 6.5,  avgRent1LDK: 11.0 },
+  '与野本町': { stationName: '与野本町', lat: 35.880925, lng: 139.626005, lineCount: 1, avgRent1K: 6.5,  avgRent1LDK: 11.0 },
+  '北与野':   { stationName: '北与野',   lat: 35.890765, lng: 139.628547, lineCount: 1, avgRent1K: 6.5,  avgRent1LDK: 11.0 },
+
+  // ======== 南武線（追加分） ========
+  '向河原':   { stationName: '向河原',   lat: 35.572175, lng: 139.667295, lineCount: 1, avgRent1K: 9.0,  avgRent1LDK: 15.5 },
+  '平間':     { stationName: '平間',     lat: 35.560565, lng: 139.671095, lineCount: 1, avgRent1K: 7.8,  avgRent1LDK: 13.0 },
+  '武蔵溝ノ口': { stationName: '武蔵溝ノ口', lat: 35.598815, lng: 139.611375, lineCount: 1, avgRent1K: 7.5, avgRent1LDK: 12.8 },
+  '津田山':   { stationName: '津田山',   lat: 35.603650, lng: 139.600720, lineCount: 1, avgRent1K: 7.5,  avgRent1LDK: 12.5 },
+  '久地':     { stationName: '久地',     lat: 35.610105, lng: 139.593075, lineCount: 1, avgRent1K: 7.5,  avgRent1LDK: 12.5 },
+  '宿河原':   { stationName: '宿河原',   lat: 35.615420, lng: 139.579545, lineCount: 1, avgRent1K: 7.3,  avgRent1LDK: 12.3 },
+  '稲田堤':   { stationName: '稲田堤',   lat: 35.633410, lng: 139.535935, lineCount: 1, avgRent1K: 7.0,  avgRent1LDK: 11.8 },
+  '中野島':   { stationName: '中野島',   lat: 35.630020, lng: 139.551075, lineCount: 1, avgRent1K: 7.0,  avgRent1LDK: 11.8 },
+  '稲城長沼': { stationName: '稲城長沼', lat: 35.644275, lng: 139.502610, lineCount: 2, avgRent1K: 6.8,  avgRent1LDK: 11.5 },
+  '南多摩':   { stationName: '南多摩',   lat: 35.649215, lng: 139.489545, lineCount: 1, avgRent1K: 6.8,  avgRent1LDK: 11.5 },
+  '矢野口':   { stationName: '矢野口',   lat: 35.641735, lng: 139.520435, lineCount: 1, avgRent1K: 6.8,  avgRent1LDK: 11.5 },
+  '西国立':   { stationName: '西国立',   lat: 35.693790, lng: 139.423905, lineCount: 1, avgRent1K: 6.3,  avgRent1LDK: 10.8 },
+  '矢川':     { stationName: '矢川',     lat: 35.685075, lng: 139.431590, lineCount: 1, avgRent1K: 6.3,  avgRent1LDK: 10.8 },
+  '谷保':     { stationName: '谷保',     lat: 35.681380, lng: 139.446780, lineCount: 1, avgRent1K: 6.3,  avgRent1LDK: 10.8 },
+  '西府':     { stationName: '西府',     lat: 35.670935, lng: 139.457390, lineCount: 1, avgRent1K: 6.5,  avgRent1LDK: 11.0 },
+
+  // ======== 横浜線（追加分） ========
+  '大口':         { stationName: '大口',         lat: 35.492295, lng: 139.646335, lineCount: 1, avgRent1K: 7.5,  avgRent1LDK: 12.5 },
+  '小机':         { stationName: '小机',         lat: 35.508635, lng: 139.599620, lineCount: 1, avgRent1K: 7.3,  avgRent1LDK: 12.3 },
+  '鴨居':         { stationName: '鴨居',         lat: 35.510850, lng: 139.566950, lineCount: 1, avgRent1K: 7.3,  avgRent1LDK: 12.3 },
+  '十日市場':     { stationName: '十日市場',     lat: 35.526210, lng: 139.516670, lineCount: 1, avgRent1K: 7.0,  avgRent1LDK: 11.8 },
+  '成瀬':         { stationName: '成瀬',         lat: 35.535380, lng: 139.472967, lineCount: 1, avgRent1K: 6.8,  avgRent1LDK: 11.5 },
+  '古淵':         { stationName: '古淵',         lat: 35.555980, lng: 139.419240, lineCount: 1, avgRent1K: 6.0,  avgRent1LDK: 10.2 },
+  '淵野辺':       { stationName: '淵野辺',       lat: 35.568494, lng: 139.395334, lineCount: 1, avgRent1K: 5.8,  avgRent1LDK: 9.8 },
+  '矢部':         { stationName: '矢部',         lat: 35.573090, lng: 139.386550, lineCount: 1, avgRent1K: 5.8,  avgRent1LDK: 9.8 },
+  '橋本':         { stationName: '橋本',         lat: 35.595210, lng: 139.343540, lineCount: 3, avgRent1K: 5.8,  avgRent1LDK: 9.8 },
+  '相原':         { stationName: '相原',         lat: 35.606930, lng: 139.331680, lineCount: 1, avgRent1K: 5.5,  avgRent1LDK: 9.3 },
+  '八王子みなみ野': { stationName: '八王子みなみ野', lat: 35.631260, lng: 139.330965, lineCount: 1, avgRent1K: 5.5, avgRent1LDK: 9.3 },
+  '片倉':         { stationName: '片倉',         lat: 35.639675, lng: 139.341165, lineCount: 2, avgRent1K: 5.5,  avgRent1LDK: 9.3 },
+
+  // ======== 小田急江ノ島線（追加分） ========
+  '東林間':     { stationName: '東林間',     lat: 35.520193, lng: 139.439025, lineCount: 1, avgRent1K: 6.0,  avgRent1LDK: 10.2 },
+  '南林間':     { stationName: '南林間',     lat: 35.495600, lng: 139.448005, lineCount: 1, avgRent1K: 6.0,  avgRent1LDK: 10.2 },
+  '鶴間':       { stationName: '鶴間',       lat: 35.490570, lng: 139.450640, lineCount: 1, avgRent1K: 6.0,  avgRent1LDK: 10.2 },
+  '桜ヶ丘':     { stationName: '桜ヶ丘',     lat: 35.450530, lng: 139.465740, lineCount: 1, avgRent1K: 6.0,  avgRent1LDK: 10.2 },
+  '高座渋谷':   { stationName: '高座渋谷',   lat: 35.432145, lng: 139.464710, lineCount: 1, avgRent1K: 6.0,  avgRent1LDK: 10.2 },
+  '長後':       { stationName: '長後',       lat: 35.412250, lng: 139.465325, lineCount: 1, avgRent1K: 6.0,  avgRent1LDK: 10.2 },
+  '六会日大前': { stationName: '六会日大前', lat: 35.383760, lng: 139.470720, lineCount: 1, avgRent1K: 5.8,  avgRent1LDK: 9.8 },
+  '善行':       { stationName: '善行',       lat: 35.362590, lng: 139.473265, lineCount: 1, avgRent1K: 6.0,  avgRent1LDK: 10.2 },
+  '藤沢本町':   { stationName: '藤沢本町',   lat: 35.348210, lng: 139.475840, lineCount: 1, avgRent1K: 6.0,  avgRent1LDK: 10.2 },
+  '本鵠沼':     { stationName: '本鵠沼',     lat: 35.331035, lng: 139.475290, lineCount: 1, avgRent1K: 6.0,  avgRent1LDK: 10.2 },
+  '鵠沼海岸':   { stationName: '鵠沼海岸',   lat: 35.320750, lng: 139.471220, lineCount: 1, avgRent1K: 6.5,  avgRent1LDK: 11.0 },
+  '片瀬江ノ島': { stationName: '片瀬江ノ島', lat: 35.309310, lng: 139.482925, lineCount: 1, avgRent1K: 6.5,  avgRent1LDK: 11.0 },
+
+  // ======== 東武東上線（川越以遠追加分） ========
+  // '霞ケ関' は丸ノ内線と同名のため重複を避けてスキップ
+  '鶴ケ島':   { stationName: '鶴ケ島',   lat: 35.936790, lng: 139.423910, lineCount: 1, avgRent1K: 5.5,  avgRent1LDK: 9.3 },
+  '若葉':     { stationName: '若葉',     lat: 35.949073, lng: 139.408487, lineCount: 1, avgRent1K: 5.5,  avgRent1LDK: 9.3 },
+  '坂戸':     { stationName: '坂戸',     lat: 35.957050, lng: 139.394045, lineCount: 2, avgRent1K: 5.5,  avgRent1LDK: 9.3 },
+  '北坂戸':   { stationName: '北坂戸',   lat: 35.971980, lng: 139.396845, lineCount: 1, avgRent1K: 5.3,  avgRent1LDK: 9.0 },
+  '高坂':     { stationName: '高坂',     lat: 36.002928, lng: 139.397692, lineCount: 1, avgRent1K: 5.3,  avgRent1LDK: 9.0 },
+  '東松山':   { stationName: '東松山',   lat: 36.034640, lng: 139.401588, lineCount: 1, avgRent1K: 5.3,  avgRent1LDK: 9.0 },
+  '森林公園': { stationName: '森林公園', lat: 36.045165, lng: 139.375330, lineCount: 1, avgRent1K: 5.0,  avgRent1LDK: 8.5 },
+  'つきのわ': { stationName: 'つきのわ', lat: 36.043515, lng: 139.345565, lineCount: 1, avgRent1K: 5.0,  avgRent1LDK: 8.5 },
+  '武蔵嵐山': { stationName: '武蔵嵐山', lat: 36.044385, lng: 139.327740, lineCount: 1, avgRent1K: 5.0,  avgRent1LDK: 8.5 },
+
+  // ======== 常磐線（土浦方面追加分） ========
+  '藤代':         { stationName: '藤代',         lat: 35.920555, lng: 140.118150, lineCount: 1, avgRent1K: 5.0,  avgRent1LDK: 8.5 },
+  '龍ケ崎市':     { stationName: '龍ケ崎市',     lat: 35.929786, lng: 140.137966, lineCount: 1, avgRent1K: 4.8,  avgRent1LDK: 8.2 },
+  '牛久':         { stationName: '牛久',         lat: 35.975333, lng: 140.141040, lineCount: 1, avgRent1K: 5.0,  avgRent1LDK: 8.5 },
+  'ひたち野うしく': { stationName: 'ひたち野うしく', lat: 36.007261, lng: 140.158247, lineCount: 1, avgRent1K: 5.0, avgRent1LDK: 8.5 },
+  '荒川沖':       { stationName: '荒川沖',       lat: 36.030595, lng: 140.165985, lineCount: 1, avgRent1K: 5.0,  avgRent1LDK: 8.5 },
+  '土浦':         { stationName: '土浦',         lat: 36.078595, lng: 140.206240, lineCount: 1, avgRent1K: 5.0,  avgRent1LDK: 8.5 },
+
+  // ======== 京急久里浜線（追加分） ========
+  '堀ノ内':   { stationName: '堀ノ内',   lat: 35.263150, lng: 139.687035, lineCount: 2, avgRent1K: 5.5,  avgRent1LDK: 9.3 },
+  '新大津':   { stationName: '新大津',   lat: 35.256970, lng: 139.690197, lineCount: 1, avgRent1K: 5.5,  avgRent1LDK: 9.3 },
+  '北久里浜': { stationName: '北久里浜', lat: 35.249162, lng: 139.686390, lineCount: 1, avgRent1K: 5.5,  avgRent1LDK: 9.3 },
+  '京急久里浜': { stationName: '京急久里浜', lat: 35.231470, lng: 139.702215, lineCount: 1, avgRent1K: 5.5, avgRent1LDK: 9.3 },
+  'YRP野比':  { stationName: 'YRP野比',  lat: 35.214200, lng: 139.699700, lineCount: 1, avgRent1K: 5.3,  avgRent1LDK: 9.0 },
+  '京急長沢': { stationName: '京急長沢', lat: 35.205445, lng: 139.674125, lineCount: 1, avgRent1K: 5.3,  avgRent1LDK: 9.0 },
+  '津久井浜': { stationName: '津久井浜', lat: 35.198120, lng: 139.664850, lineCount: 1, avgRent1K: 5.5,  avgRent1LDK: 9.3 },
+  '三浦海岸': { stationName: '三浦海岸', lat: 35.188285, lng: 139.653375, lineCount: 1, avgRent1K: 5.5,  avgRent1LDK: 9.3 },
+  '三崎口':   { stationName: '三崎口',   lat: 35.178218, lng: 139.633358, lineCount: 1, avgRent1K: 5.3,  avgRent1LDK: 9.0 },
+
   // ======== 東武伊勢崎線（追加分） ========
   'とうきょうスカイツリー': { stationName: 'とうきょうスカイツリー', lat: 35.710430, lng: 139.809332, lineCount: 1, avgRent1K: 9.5,  avgRent1LDK: 16.0 },
   '曳舟':   { stationName: '曳舟',   lat: 35.718510, lng: 139.816673, lineCount: 2, avgRent1K: 9.0,  avgRent1LDK: 15.5 },

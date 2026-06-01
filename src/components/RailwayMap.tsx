@@ -3808,7 +3808,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         theme={theme}
                         language={currentLanguage}
                         trainTypeViewEnabled={trainTypeViewEnabled}
-                        onMapViewModeChange={setMapViewMode}
+                        onMapViewModeChange={(mode) => { setMapViewMode(mode); setIsMobilePanelExpanded(false); }}
                       />
                       <LegendRouteRecommendations
                         routeRecommendations={routeRecommendations}

@@ -322,11 +322,12 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     const colors = getThemeColors(theme);
     const { stations } = stationLayout;
 
-    return stations.map(({ name, sx, sy, isTransfer }) => {
+    return stations.map(({ name, sx, sy, isTransfer, routeKey }) => {
       const r = isTransfer ? REF_R_TRANSFER : REF_R_REGULAR;
+      const routeColor = adjustRouteColorForTheme(routeColors[routeKey] ?? colors.textMuted, theme);
       return (
         <circle key={name} cx={sx} cy={sy} r={r}
-          fill={isTransfer ? colors.surfaceElevated : colors.textMuted}
+          fill={isTransfer ? colors.surfaceElevated : routeColor}
           stroke={isTransfer ? colors.textSecondary : 'none'}
           strokeWidth={isTransfer ? 0.8 : 0}
         />
@@ -383,19 +384,24 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     return () => ro.disconnect();
   }, []);
 
-  // ---- 初期表示: 新宿を中央に ----
+  // ---- 初期表示: 新宿を中央に（containerSizeが確定してから設定） ----
+  const initializedRef = useRef(false);
   useEffect(() => {
+    if (initializedRef.current) return;
     const area = mapAreaRef.current;
     if (!area) return;
     const rect = area.getBoundingClientRect();
-    if (rect.width === 0) return;
+    const w = rect.width  || containerSize.w;
+    const h = rect.height || containerSize.h;
+    if (w === 0) return;
+    initializedRef.current = true;
     const initialScale = 0.08;
     setTransform({
-      x: rect.width / 2 - CANVAS_CX * initialScale,
-      y: rect.height / 2 - CANVAS_CY * initialScale,
+      x: w / 2 - CANVAS_CX * initialScale,
+      y: h / 2 - CANVAS_CY * initialScale,
       scale: initialScale,
     });
-  }, []);
+  }, [containerSize]);
 
   // ---- パン操作 ----
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
