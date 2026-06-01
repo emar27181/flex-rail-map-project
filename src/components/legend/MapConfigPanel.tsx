@@ -19,6 +19,7 @@ export type MapConfig = {
   timeFilterEnabled: boolean;
   timeFilterMaxMinutes: number;
   showStationTooltip: boolean;
+  showFullRouteStations: boolean;
 };
 
 type Props = {

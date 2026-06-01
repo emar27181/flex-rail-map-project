@@ -208,6 +208,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [heatmapParam, setHeatmapParam] = useState<keyof StationStats>('avgRent1K');
   const [heatmapCustomRange, setHeatmapCustomRange] = useState<{ min: number; max: number } | undefined>(undefined);
   const [showStationTooltip, setShowStationTooltip] = useState(true);
+  const [showFullRouteStations, setShowFullRouteStations] = useState(true);
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
   const autoSetDepartureRef = useRef(false);
@@ -353,10 +354,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     timeFilterEnabled,
     timeFilterMaxMinutes,
     showStationTooltip,
+    showFullRouteStations,
   }), [heatmapEnabled, heatmapParam, heatmapCustomRange, visibleRoutes,
       showTransferStationsOnly, showExpressStationsOnly, showTravelTimes,
       showStationNames, showFurigana, showStationNumbers, showOsmTiles,
-      mapViewMode, timeFilterEnabled, timeFilterMaxMinutes, showStationTooltip]);
+      mapViewMode, timeFilterEnabled, timeFilterMaxMinutes,
+      showStationTooltip, showFullRouteStations]);
 
   // インポートされた設定を一括適用
   const handleImportConfig = useCallback((cfg: MapConfig) => {
@@ -375,6 +378,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (cfg.timeFilterEnabled !== undefined) setTimeFilterEnabled(cfg.timeFilterEnabled);
     if (cfg.timeFilterMaxMinutes !== undefined) setTimeFilterMaxMinutes(cfg.timeFilterMaxMinutes);
     if (cfg.showStationTooltip !== undefined) setShowStationTooltip(cfg.showStationTooltip);
+    if (cfg.showFullRouteStations !== undefined) setShowFullRouteStations(cfg.showFullRouteStations);
   }, []);
 
   const routeFinder = useMemo(() => {
@@ -2305,10 +2309,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         displaySegments = [stations];
       } else {
         displaySegments = uniqueSegments;
-        // マーカー用：全セグメントの駅の和集合（元路線の順序を保持）
-        const allNames = new Set<string>();
-        uniqueSegments.forEach(seg => seg.forEach(s => allNames.add(s.name)));
-        displayStations = stations.filter(s => allNames.has(s.name));
+        if (showFullRouteStations) {
+          // 路線の全駅を表示（中間駅以外も含む）
+          displayStations = stations;
+        } else {
+          // 出発〜到着の区間駅のみ
+          const allNames = new Set<string>();
+          uniqueSegments.forEach(seg => seg.forEach(s => allNames.add(s.name)));
+          displayStations = stations.filter(s => allNames.has(s.name));
+        }
       }
     } else {
       displaySegments = [stations];
@@ -3535,6 +3544,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onHeatmapParamChange={setHeatmapParam}
                     showStationTooltip={showStationTooltip}
                     onShowStationTooltipChange={setShowStationTooltip}
+                    showFullRouteStations={showFullRouteStations}
+                    onShowFullRouteStationsChange={setShowFullRouteStations}
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
                     viewCenter={viewCenter}
                     showTrainDemo={showTrainDemo}
@@ -3780,6 +3791,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onHeatmapParamChange={setHeatmapParam}
                         showStationTooltip={showStationTooltip}
                         onShowStationTooltipChange={setShowStationTooltip}
+                    showFullRouteStations={showFullRouteStations}
+                    onShowFullRouteStationsChange={setShowFullRouteStations}
                         adjustRouteColorForTheme={adjustRouteColorForTheme}
                         viewCenter={viewCenter}
                         showTrainDemo={showTrainDemo}
