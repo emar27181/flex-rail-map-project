@@ -48,6 +48,8 @@ interface LegendRouteListProps {
   onHeatmapEnabledChange: (v: boolean) => void;
   onHeatmapParamChange: (k: keyof StationStats) => void;
   showLatLngGrid?: boolean;
+  showStationTooltip: boolean;
+  onShowStationTooltipChange: (v: boolean) => void;
   mapConfig: MapConfig;
   onImportConfig: (config: MapConfig) => void;
 }
@@ -89,6 +91,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   heatmapParam,
   onHeatmapEnabledChange,
   onHeatmapParamChange,
+  showStationTooltip,
+  onShowStationTooltipChange,
   mapConfig,
   onImportConfig,
 }) => {
@@ -320,6 +324,17 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             }}
           />
           {language === 'english' ? 'Show map tiles' : '地図タイルを表示'}
+        </label>
+
+        {/* 駅ツールチップ */}
+        <label style={{ display: 'flex', alignItems: 'center', fontSize: '12px', color: colors.text, cursor: 'pointer', marginBottom: '4px' }}>
+          <input
+            type="checkbox"
+            checked={showStationTooltip}
+            onChange={e => onShowStationTooltipChange(e.target.checked)}
+            style={{ marginRight: '6px', cursor: 'pointer' }}
+          />
+          {language === 'english' ? 'Station tooltip' : '駅ツールチップを表示'}
         </label>
 
         {/* 駅統計ヒートマップ */}

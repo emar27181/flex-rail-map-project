@@ -207,6 +207,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
   const [heatmapParam, setHeatmapParam] = useState<keyof StationStats>('avgRent1K');
   const [heatmapCustomRange, setHeatmapCustomRange] = useState<{ min: number; max: number } | undefined>(undefined);
+  const [showStationTooltip, setShowStationTooltip] = useState(true);
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
   const autoSetDepartureRef = useRef(false);
@@ -351,10 +352,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     mapViewMode,
     timeFilterEnabled,
     timeFilterMaxMinutes,
+    showStationTooltip,
   }), [heatmapEnabled, heatmapParam, heatmapCustomRange, visibleRoutes,
       showTransferStationsOnly, showExpressStationsOnly, showTravelTimes,
       showStationNames, showFurigana, showStationNumbers, showOsmTiles,
-      mapViewMode, timeFilterEnabled, timeFilterMaxMinutes]);
+      mapViewMode, timeFilterEnabled, timeFilterMaxMinutes, showStationTooltip]);
 
   // インポートされた設定を一括適用
   const handleImportConfig = useCallback((cfg: MapConfig) => {
@@ -372,6 +374,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (cfg.mapViewMode) setMapViewMode(cfg.mapViewMode as 'realistic' | 'schematic');
     if (cfg.timeFilterEnabled !== undefined) setTimeFilterEnabled(cfg.timeFilterEnabled);
     if (cfg.timeFilterMaxMinutes !== undefined) setTimeFilterMaxMinutes(cfg.timeFilterMaxMinutes);
+    if (cfg.showStationTooltip !== undefined) setShowStationTooltip(cfg.showStationTooltip);
   }, []);
 
   const routeFinder = useMemo(() => {
@@ -2323,6 +2326,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 zIndexOffset={5000}
                 eventHandlers={{
                   mouseover: (e) => {
+                    if (!showStationTooltip) return;
                     cancelTooltipClose();
                     const oe = e.originalEvent as MouseEvent | undefined;
                     if (!oe) return;
@@ -2410,6 +2414,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 zIndexOffset={stationZIndex}
                 eventHandlers={{
                   mouseover: (e) => {
+                    if (!showStationTooltip) return;
                     cancelTooltipClose();
                     const oe = e.originalEvent as MouseEvent | undefined;
                     if (!oe) return;
@@ -3409,6 +3414,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     heatmapParam={heatmapParam}
                     onHeatmapEnabledChange={setHeatmapEnabled}
                     onHeatmapParamChange={setHeatmapParam}
+                    showStationTooltip={showStationTooltip}
+                    onShowStationTooltipChange={setShowStationTooltip}
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
                     viewCenter={viewCenter}
                     showTrainDemo={showTrainDemo}
@@ -3652,6 +3659,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         heatmapParam={heatmapParam}
                         onHeatmapEnabledChange={setHeatmapEnabled}
                         onHeatmapParamChange={setHeatmapParam}
+                        showStationTooltip={showStationTooltip}
+                        onShowStationTooltipChange={setShowStationTooltip}
                         adjustRouteColorForTheme={adjustRouteColorForTheme}
                         viewCenter={viewCenter}
                         showTrainDemo={showTrainDemo}
