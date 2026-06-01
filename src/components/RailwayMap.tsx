@@ -3715,7 +3715,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   backgroundColor: colors.surfaceElevated,
                   borderTop: `2px solid ${colors.border}`,
                   borderRadius: '12px 12px 0 0',
-                  maxHeight: 'calc(60dvh - 44px)',
+                  maxHeight: 'calc(60vh - 44px)',
                   overflowY: 'auto',
                   overscrollBehavior: 'contain',
                   WebkitOverflowScrolling: 'touch' as any,

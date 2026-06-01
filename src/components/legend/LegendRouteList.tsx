@@ -7,6 +7,7 @@ import { STAT_PARAMS } from '../../data/stationStats';
 import type { StationStats, StatCategory } from '../../data/stationStats';
 import MapConfigPanel from './MapConfigPanel';
 import type { MapConfig } from './MapConfigPanel';
+import { checkboxLabel } from './legendStyles';
 
 type SortMode = 'name' | 'color' | 'default' | 'distance';
 
@@ -169,14 +170,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
       {/* 表示オプション */}
       <div style={{ marginBottom: '8px' }}>
         {/* 区間外の路線を半透明で表示 */}
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          fontSize: '12px',
-          color: colors.text,
-          cursor: 'pointer',
-          marginBottom: '4px'
-        }}>
+        <label style={checkboxLabel(colors)}>
           <input
             type="checkbox"
             checked={showDimmedRoutes}
@@ -187,14 +181,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         </label>
 
         {/* 乗換駅のみ表示オプション */}
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          fontSize: '12px',
-          color: colors.text,
-          cursor: 'pointer',
-          marginBottom: '4px'
-        }}>
+        <label style={checkboxLabel(colors)}>
           <input
             type="checkbox"
             checked={showTransferStationsOnly}
@@ -208,14 +195,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         </label>
 
         {/* 急行駅のみ表示オプション */}
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          fontSize: '12px',
-          color: colors.text,
-          cursor: 'pointer',
-          marginBottom: '4px'
-        }}>
+        <label style={checkboxLabel(colors)}>
           <input
             type="checkbox"
             checked={showExpressStationsOnly}
@@ -229,14 +209,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         </label>
 
         {/* 所要時間表示オプション */}
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          fontSize: '12px',
-          color: colors.text,
-          cursor: 'pointer',
-          marginBottom: '4px'
-        }}>
+        <label style={checkboxLabel(colors)}>
           <input
             type="checkbox"
             checked={showTravelTimes}
@@ -250,14 +223,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         </label>
 
         {/* 駅名表示オプション */}
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          fontSize: '12px',
-          color: colors.text,
-          cursor: 'pointer',
-          marginBottom: '4px'
-        }}>
+        <label style={checkboxLabel(colors)}>
           <input
             type="checkbox"
             checked={showStationNames}
@@ -271,14 +237,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         </label>
 
         {/* 駅番号表示オプション */}
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          fontSize: '12px',
-          color: colors.text,
-          cursor: 'pointer',
-          marginBottom: '4px'
-        }}>
+        <label style={checkboxLabel(colors)}>
           <input
             type="checkbox"
             checked={showStationNumbers}
@@ -293,14 +252,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
         {/* ふりがな表示オプション（日本語モードのみ） */}
         {language === 'japanese' && (
-          <label style={{
-            display: 'flex',
-            alignItems: 'center',
-            fontSize: '12px',
-            color: colors.text,
-            cursor: 'pointer',
-            marginBottom: '4px'
-          }}>
+          <label style={checkboxLabel(colors)}>
             <input
               type="checkbox"
               checked={showFurigana}
@@ -315,13 +267,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         )}
 
         {/* 地図タイル表示オプション */}
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          fontSize: '12px',
-          color: colors.text,
-          cursor: 'pointer'
-        }}>
+        <label style={checkboxLabel(colors)}>
           <input
             type="checkbox"
             checked={showOsmTiles}
@@ -335,7 +281,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         </label>
 
         {/* 中間駅以外も表示 */}
-        <label style={{ display: 'flex', alignItems: 'center', fontSize: '12px', color: colors.text, cursor: 'pointer', marginBottom: '4px' }}>
+        <label style={checkboxLabel(colors)}>
           <input
             type="checkbox"
             checked={showFullRouteStations}
@@ -346,7 +292,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         </label>
 
         {/* 路線の線を表示 */}
-        <label style={{ display: 'flex', alignItems: 'center', fontSize: '12px', color: colors.text, cursor: 'pointer', marginBottom: '4px' }}>
+        <label style={checkboxLabel(colors)}>
           <input
             type="checkbox"
             checked={showRouteLine}
@@ -357,7 +303,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         </label>
 
         {/* 駅ツールチップ */}
-        <label style={{ display: 'flex', alignItems: 'center', fontSize: '12px', color: colors.text, cursor: 'pointer', marginBottom: '4px' }}>
+        <label style={checkboxLabel(colors)}>
           <input
             type="checkbox"
             checked={showStationTooltip}
@@ -368,7 +314,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         </label>
 
         {/* 駅統計ヒートマップ */}
-        <label style={{ display: 'flex', alignItems: 'center', fontSize: '12px', color: colors.text, cursor: 'pointer' }}>
+        <label style={checkboxLabel(colors)}>
           <input
             type="checkbox"
             checked={heatmapEnabled}
@@ -416,14 +362,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
         {/* 列車デモ（リアル地図モードのみ） */}
         {mapViewMode === 'realistic' && (
-          <label style={{
-            display: 'flex',
-            alignItems: 'center',
-            fontSize: '12px',
-            color: colors.text,
-            cursor: 'pointer',
-            marginTop: '4px',
-          }}>
+          <label style={checkboxLabel(colors)}>
             <input
               type="checkbox"
               checked={showTrainDemo}

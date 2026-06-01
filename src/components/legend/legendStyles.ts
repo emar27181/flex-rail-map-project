@@ -131,6 +131,19 @@ export function btnFull(colors: Colors): CSSProperties {
   return { ...btn(colors), width: '100%', boxSizing: 'border-box' };
 }
 
+/** Checkbox / radio label row in legend */
+export function checkboxLabel(colors: Colors): CSSProperties {
+  return {
+    display:       'flex',
+    alignItems:    'center',
+    fontSize:      L.fs.md,
+    color:         colors.text,
+    cursor:        'pointer',
+    padding:       `${L.sp.sm} 0`,
+    userSelect:    'none',
+  };
+}
+
 /** Single-line text input / number input */
 export function input(colors: Colors): CSSProperties {
   return {
