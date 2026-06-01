@@ -269,7 +269,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       return [lx, ly];
     }
 
-    const stations: Array<{ name: string; sx: number; sy: number; isTransfer: boolean }> = [];
+    const stations: Array<{ name: string; sx: number; sy: number; isTransfer: boolean; routeKey: RouteKey }> = [];
     const seen = new Set<string>();
 
     DIAGRAM_ROUTE_KEYS.forEach(routeKey => {
@@ -281,7 +281,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         seen.add(st.name);
         const pos = stationPos.get(st.name);
         if (!pos) return;
-        stations.push({ name: st.name, sx: pos[0], sy: pos[1], isTransfer: transferStations.has(st.name) });
+        stations.push({ name: st.name, sx: pos[0], sy: pos[1], isTransfer: transferStations.has(st.name), routeKey });
       });
     });
     stations.sort((a, b) => {

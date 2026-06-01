@@ -34,7 +34,7 @@ import { getStationNumber, getAnyStationNumber } from '../data/stationNumbers';
 import { getStationBorderStyleByPattern, getBorderStyleExplanation } from '../data/stationBorderStyles';
 import { attachDebugFunctions } from '../utils/stationAnalysisUtils';
 import CookieBanner from './CookieBanner';
-import { getAllTrainPositions, formatDemoTime, DEMO_LINE_COLORS } from '../utils/trainDemoUtils';
+import { getAllTrainPositions, formatDemoTime, DEMO_LINE_COLORS, DEMO_DIRECTION_TERMINALS } from '../utils/trainDemoUtils';
 import {
   getNextDepartures,
   getDeparturesAround,
@@ -2320,6 +2320,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   },
                 }}
               >
+                <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
+                  <span style={{ fontWeight: 'bold', fontSize: '12px' }}>
+                    {translateStation(station.name, currentLanguage)}
+                  </span>
+                </Tooltip>
               </Marker>
             );
           } else {
@@ -2385,6 +2390,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             const stationZIndex = (station.isExpress || isTransferStation) ? 3000 : 1000;
             const markerKey = `${routeKey}-station-${index}-${stationColor}`;
 
+            const passingRoutes = isTransferStation ? getRoutesForStation(station.name) : null;
+
             return (
               <Marker
                 key={markerKey}
@@ -2401,6 +2408,33 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   },
                 }}
               >
+                <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
+                  <div style={{ whiteSpace: 'nowrap' }}>
+                    <div style={{ fontWeight: 'bold', fontSize: '12px', marginBottom: passingRoutes ? '3px' : 0 }}>
+                      {translateStation(station.name, currentLanguage)}
+                    </div>
+                    {passingRoutes && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', maxWidth: '180px' }}>
+                        {passingRoutes.slice(0, 6).map(rk => (
+                          <span key={rk} style={{
+                            fontSize: '10px',
+                            padding: '1px 4px',
+                            borderRadius: '3px',
+                            background: adjustRouteColorForTheme(routeColors[rk], theme),
+                            color: '#fff',
+                            fontWeight: rk === routeKey ? 'bold' : 'normal',
+                            opacity: rk === routeKey ? 1 : 0.8,
+                          }}>
+                            {routeNames[rk]}
+                          </span>
+                        ))}
+                        {passingRoutes.length > 6 && (
+                          <span style={{ fontSize: '10px', color: '#888' }}>+{passingRoutes.length - 6}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </Tooltip>
               </Marker>
             );
           }
@@ -2979,14 +3013,28 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
               {/* 列車位置デモ: 駅・路線より前面のカスタムペインに表示 */}
               <Pane name="trainDemoPane" style={{ zIndex: 650 }}>
-                {showTrainDemo && trainPositions.map(t => (
-                  <CircleMarker
-                    key={t.id}
-                    center={t.pos}
-                    radius={7}
-                    pathOptions={{ fillColor: t.color, fillOpacity: 1, color: '#fff', weight: 1.5 }}
-                  />
-                ))}
+                {showTrainDemo && trainPositions.map(t => {
+                  const terminals = DEMO_DIRECTION_TERMINALS[t.lineKey];
+                  const dest = terminals?.[t.direction] ?? '';
+                  const lineName = routeNames[t.lineKey as RouteKey] ?? t.lineKey;
+                  const depTime = formatDemoTime(t.departureMin);
+                  return (
+                    <CircleMarker
+                      key={t.id}
+                      center={t.pos}
+                      radius={7}
+                      pathOptions={{ fillColor: t.color, fillOpacity: 1, color: '#fff', weight: 1.5 }}
+                    >
+                      <Tooltip sticky offset={[8, 0]} direction="right" opacity={0.95}>
+                        <div style={{ fontSize: '12px', lineHeight: 1.5, whiteSpace: 'nowrap' }}>
+                          <div style={{ fontWeight: 'bold', color: t.color }}>{lineName}</div>
+                          {dest && <div>{dest}方面</div>}
+                          <div style={{ color: '#888', fontSize: '11px' }}>発 {depTime}</div>
+                        </div>
+                      </Tooltip>
+                    </CircleMarker>
+                  );
+                })}
               </Pane>
             </MapContainer>
           ) : (
@@ -3375,7 +3423,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
                     viewCenter={viewCenter}
                     showTrainDemo={showTrainDemo}
-                    onTrainDemoToggle={() => { setShowTrainDemo(v => !v); if (!showTrainDemo) { setTrainDemoMinutes(12 * 60); setTrainDemoPlaying(true); } }}
+                    onTrainDemoToggle={() => {
+                      setShowTrainDemo(v => !v);
+                      if (!showTrainDemo) {
+                        const now = new Date();
+                        const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+                        const adjusted = nowMin < 5 * 60 ? nowMin + 24 * 60 : nowMin;
+                        trainDemoMinutesRef.current = adjusted;
+                        setTrainDemoMinutes(adjusted);
+                        setTrainDemoRealTime(true);
+                        trainDemoRealTimeRef.current = true;
+                        setTrainDemoPlaying(true);
+                      } else {
+                        setTrainDemoRealTime(false);
+                        trainDemoRealTimeRef.current = false;
+                      }
+                    }}
                     mapViewMode={mapViewMode}
                     mapConfig={mapConfig}
                     onImportConfig={handleImportConfig}
@@ -3603,7 +3666,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         adjustRouteColorForTheme={adjustRouteColorForTheme}
                         viewCenter={viewCenter}
                         showTrainDemo={showTrainDemo}
-                        onTrainDemoToggle={() => { setShowTrainDemo(v => !v); if (!showTrainDemo) { setTrainDemoMinutes(12 * 60); setTrainDemoPlaying(true); } }}
+                        onTrainDemoToggle={() => {
+                      setShowTrainDemo(v => !v);
+                      if (!showTrainDemo) {
+                        const now = new Date();
+                        const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+                        const adjusted = nowMin < 5 * 60 ? nowMin + 24 * 60 : nowMin;
+                        trainDemoMinutesRef.current = adjusted;
+                        setTrainDemoMinutes(adjusted);
+                        setTrainDemoRealTime(true);
+                        trainDemoRealTimeRef.current = true;
+                        setTrainDemoPlaying(true);
+                      } else {
+                        setTrainDemoRealTime(false);
+                        trainDemoRealTimeRef.current = false;
+                      }
+                    }}
                         mapViewMode={mapViewMode}
                         mapConfig={mapConfig}
                         onImportConfig={handleImportConfig}
