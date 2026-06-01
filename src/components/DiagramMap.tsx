@@ -384,21 +384,18 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     return () => ro.disconnect();
   }, []);
 
-  // ---- 初期表示: 新宿を中央に（containerSizeが確定してから設定） ----
-  const initializedRef = useRef(false);
+  // ---- 初期表示: 新宿を中央に（実コンテナサイズが確定してから設定） ----
+  // ユーザーが手動でパンしたかどうかを記録
+  const userPannedRef = useRef(false);
   useEffect(() => {
-    if (initializedRef.current) return;
-    const area = mapAreaRef.current;
-    if (!area) return;
-    const rect = area.getBoundingClientRect();
-    const w = rect.width  || containerSize.w;
-    const h = rect.height || containerSize.h;
-    if (w === 0) return;
-    initializedRef.current = true;
+    // ユーザーが既に操作していたら自動リセットしない
+    if (userPannedRef.current) return;
+    // 実サイズが確定していない(デフォルト800x600のまま)は待つ
+    if (containerSize.w === 800 && containerSize.h === 600) return;
     const initialScale = 0.08;
     setTransform({
-      x: w / 2 - CANVAS_CX * initialScale,
-      y: h / 2 - CANVAS_CY * initialScale,
+      x: containerSize.w / 2 - CANVAS_CX * initialScale,
+      y: containerSize.h / 2 - CANVAS_CY * initialScale,
       scale: initialScale,
     });
   }, [containerSize]);
@@ -412,6 +409,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isPanning.current) return;
+    userPannedRef.current = true;
     const dx = e.clientX - lastPos.current.x;
     const dy = e.clientY - lastPos.current.y;
     setTransform(t => ({ ...t, x: t.x + dx, y: t.y + dy }));
@@ -451,6 +449,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     const onTouchMove = (e: TouchEvent) => {
       e.preventDefault();
       if (!lastTouches) return;
+      userPannedRef.current = true;
       const rect = area.getBoundingClientRect();
       if (e.touches.length === 1 && lastTouches.length === 1) {
         const dx = e.touches[0].clientX - lastTouches[0].clientX;
