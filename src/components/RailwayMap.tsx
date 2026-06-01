@@ -2308,12 +2308,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         // 推薦ルートに含まれないが visibleRoutes に明示的に追加された路線は全区間を表示
         displaySegments = [stations];
       } else {
-        displaySegments = uniqueSegments;
         if (showFullRouteStations) {
-          // 路線の全駅を表示（中間駅以外も含む）
+          // 路線の全区間（線・駅とも）を表示
+          displaySegments = [stations];
           displayStations = stations;
         } else {
-          // 出発〜到着の区間駅のみ
+          // 出発〜到着の区間のみ
+          displaySegments = uniqueSegments;
           const allNames = new Set<string>();
           uniqueSegments.forEach(seg => seg.forEach(s => allNames.add(s.name)));
           displayStations = stations.filter(s => allNames.has(s.name));
