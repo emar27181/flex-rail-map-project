@@ -600,6 +600,125 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return TRAIN_TYPE_COLOR[trainType] ?? '#555';
   };
 
+  // ヒートマップモード専用ツールチップ（駅統計データに特化）
+  const renderHeatmapTooltip = () => {
+    if (!stationTooltip) return null;
+    const stats = getStationStatsFn(stationTooltip.stationName);
+    const currentMeta = STAT_PARAMS.find(p => p.key === heatmapParam);
+    const val = stats ? (stats[heatmapParam] as number | undefined) : undefined;
+    const dataRange = getParamRange(heatmapParam);
+    const effectiveMin = heatmapCustomRange?.min ?? dataRange.min;
+    const effectiveMax = heatmapCustomRange?.max ?? dataRange.max;
+    const normalized = (val !== undefined && effectiveMax > effectiveMin)
+      ? (val - effectiveMin) / (effectiveMax - effectiveMin) : null;
+    const dotColor = normalized !== null ? heatValueToColor(normalized) : HEATMAP_NO_DATA_COLOR;
+    const filledParams = STAT_PARAMS.filter(p => stats && typeof stats[p.key] === 'number');
+
+    const MARGIN = 8;
+    const vw = typeof window !== 'undefined' ? (window.visualViewport?.width ?? window.innerWidth) : 800;
+    const vh = typeof window !== 'undefined' ? (window.visualViewport?.height ?? window.innerHeight) : 600;
+    const TW = Math.min(280, vw - MARGIN * 2);
+    const rawX = stationTooltip.x + 14;
+    let x = rawX + TW > vw - MARGIN ? stationTooltip.x - TW - 6 : rawX;
+    x = Math.max(MARGIN, Math.min(x, vw - TW - MARGIN));
+    const estH = 120 + filledParams.length * 18;
+    const rawY = stationTooltip.y + 14;
+    const y = Math.max(MARGIN, Math.min(rawY + estH > vh - MARGIN ? stationTooltip.y - estH - 6 : rawY, vh - estH - MARGIN));
+
+    return (
+      <div
+        onMouseEnter={cancelTooltipClose}
+        onMouseLeave={scheduleTooltipClose}
+        style={{
+          position: 'fixed', left: x, top: y, zIndex: 9999,
+          width: `${TW}px`,
+          maxHeight: '480px',
+          backgroundColor: colors.surfaceElevated,
+          border: `1px solid ${colors.border}`,
+          borderRadius: '8px',
+          boxShadow: `0 4px 16px ${colors.shadow}`,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          cursor: 'default',
+        }}
+      >
+        {/* ヘッダー */}
+        <div style={{ padding: '8px 10px 6px', borderBottom: `1px solid ${colors.borderLight}` }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text }}>
+              {stationTooltip.stationName}
+            </span>
+            <span onClick={() => setStationTooltip(null)}
+              style={{ fontSize: '12px', color: colors.textSecondary, cursor: 'pointer', padding: '0 2px' }}>✕</span>
+          </div>
+          <div style={{ display: 'flex', gap: '4px' }}>
+            <button onClick={() => { setDeparture(stationTooltip.station); setStationTooltip(null); }}
+              style={{ backgroundColor: '#4CAF50', color: 'white', border: 'none', padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px' }}>
+              出発に設定
+            </button>
+            <button onClick={() => { setArrival(stationTooltip.station); setStationTooltip(null); }}
+              style={{ backgroundColor: '#F44336', color: 'white', border: 'none', padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px' }}>
+              到着に設定
+            </button>
+          </div>
+        </div>
+
+        {/* 選択パラメータ（大きく表示） */}
+        <div style={{ padding: '8px 10px', borderBottom: `1px solid ${colors.borderLight}`, background: `${dotColor}18` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: dotColor, flexShrink: 0, border: '1px solid rgba(0,0,0,0.2)' }} />
+            <span style={{ fontSize: '11px', color: colors.textSecondary, flex: 1 }}>
+              {currentMeta?.label ?? String(heatmapParam)}
+            </span>
+            <span style={{ fontSize: '18px', fontWeight: 'bold', color: dotColor }}>
+              {val !== undefined ? val : '—'}
+            </span>
+            <span style={{ fontSize: '11px', color: colors.textSecondary }}>{currentMeta?.unit ?? ''}</span>
+          </div>
+        </div>
+
+        {/* 全パラメータ一覧 */}
+        <div className="thin-scrollbar" style={{ padding: '6px 10px', overflowY: 'auto', flex: 1 }}>
+          {filledParams.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 8px' }}>
+              {filledParams.map(p => {
+                const v = stats![p.key] as number;
+                const isActive = p.key === heatmapParam;
+                const src = PARAM_DATA_SOURCES[p.key];
+                const labelEl = src?.url ? (
+                  <a href={src.url} target="_blank" rel="noopener noreferrer"
+                    onClick={e => e.stopPropagation()}
+                    style={{ color: isActive ? dotColor : '#4a90d9', textDecoration: 'underline', fontSize: '10px' }}>
+                    {p.label}
+                  </a>
+                ) : (
+                  <span style={{ color: colors.textSecondary, fontSize: '10px' }}>{p.label}</span>
+                );
+                return (
+                  <div key={String(p.key)} style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    background: isActive ? `${dotColor}22` : 'transparent',
+                    borderRadius: '2px', padding: '1px 2px',
+                  }}>
+                    {labelEl}
+                    <span style={{ fontSize: '10px', color: isActive ? dotColor : colors.text, fontWeight: isActive ? 'bold' : 'normal', marginLeft: '4px' }}>
+                      {v}{p.unit ? ` ${p.unit}` : ''}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div style={{ fontSize: '11px', color: colors.textSecondary, fontStyle: 'italic', padding: '4px 0' }}>
+              この駅のデータは未入力です
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   // クリック時の時刻表ツールチップを浮き上がりで表示（左:路線一覧 / 右:時刻表）
   const renderStationTimetableTooltip = () => {
     if (!timetableModeEnabled || !stationTooltip) return null;
@@ -3858,7 +3977,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
 
           {/* 駅時刻表ツールチップ */}
-          {timetableModeEnabled && renderStationTimetableTooltip()}
+          {heatmapEnabled ? renderHeatmapTooltip() : (timetableModeEnabled && renderStationTimetableTooltip())}
 
           {/* ホバーツールチップ */}
 
