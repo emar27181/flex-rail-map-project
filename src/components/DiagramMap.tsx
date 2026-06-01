@@ -81,7 +81,12 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
   showDimmedRoutes: externalShowDimmed,
 }) => {
   const visibleRoutes = externalVisibleRoutes ?? new Set(DIAGRAM_ROUTE_KEYS);
-  const [transform, setTransform] = useState({ x: 0, y: 0, scale: 0.08 });
+  const [transform, setTransform] = useState(() => {
+    const s = 0.08;
+    const w = typeof window !== 'undefined' ? window.innerWidth : 800;
+    const h = typeof window !== 'undefined' ? window.innerHeight : 600;
+    return { x: w / 2 - CANVAS_CX * s, y: h / 2 - CANVAS_CY * s, scale: s };
+  });
   const [containerSize, setContainerSize] = useState({ w: 800, h: 600 });
   const [internalShowDimmed, setInternalShowDimmed] = useState(true);
   const showDimmedRoutes = externalShowDimmed !== undefined ? externalShowDimmed : internalShowDimmed;
