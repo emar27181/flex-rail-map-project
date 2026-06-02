@@ -15,6 +15,7 @@ import LegendStationMarkers from './legend/LegendStationMarkers';
 import LegendRouteList from './legend/LegendRouteList';
 import LegendRouteRecommendations from './legend/LegendRouteRecommendations';
 import LegendDisplayOptions from './legend/LegendDisplayOptions';
+import MobileBottomPanel from './MobileBottomPanel';
 import type { MapConfig } from './legend/MapConfigPanel';
 import type { StationStats } from '../data/stationStats';
 import {
@@ -3709,110 +3710,80 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
           {/* モバイルフルスクリーン時の統合パネル */}
           {isFullscreen && isMobile && (
-            <>
-              {/* コンテンツエリア（タブバーの上に展開） */}
-              {isMobilePanelExpanded && (
-                <div style={{
-                  position: 'absolute',
-                  bottom: 'calc(44px + env(safe-area-inset-bottom, 0px))',
-                  left: 0,
-                  right: 0,
-                  zIndex: 1001,
-                  backgroundColor: colors.surfaceElevated,
-                  borderTop: `2px solid ${colors.border}`,
-                  borderRadius: '12px 12px 0 0',
-                  maxHeight: 'calc(60vh - 44px)',
-                  overflowY: 'auto',
-                  overscrollBehavior: 'contain',
-                  WebkitOverflowScrolling: 'touch' as any,
-                  touchAction: 'pan-y',
-                  boxShadow: `0 -2px 10px ${colors.shadow}`,
-                }} className="thin-scrollbar">
-                  {/* 折りたたみボタン（右上） */}
-                  <button
-                    onClick={() => setIsMobilePanelExpanded(false)}
-                    style={{
-                      position: 'sticky',
-                      top: 0,
-                      float: 'right',
-                      zIndex: 10,
-                      width: '44px',
-                      height: '44px',
-                      border: 'none',
-                      background: 'none',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      color: colors.textSecondary,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >▼</button>
-                  {mobilePanelTab === 'station' && (
-                    <StationSelector
-                      departure={departure}
-                      arrival={arrival}
-                      onDepartureChange={setDeparture}
-                      onArrivalChange={setArrival}
-                      isExpanded={true}
-                      language={currentLanguage}
-                      departureTime={timetableBaseTime}
-                      onDepartureTimeChange={setTimetableBaseTime}
-                      onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
-                      onSearchingChange={handleSearchingChange}
-                    />
-                  )}
-                  {mobilePanelTab === 'legend' && (
-                    <div style={{ padding: '10px' }}>
-                      <LegendStationMarkers
-                        departure={departure}
-                        arrival={arrival}
-                        theme={theme}
-                        language={currentLanguage}
-                      />
-                      <LegendRouteList
-                        visibleRoutesData={visibleRoutesData}
-                        visibleRoutes={visibleRoutes}
-                        availableRoutes={availableRoutes}
-                        highlightedRouteKeys={highlightedRouteKeys}
-                        routeColors={routeColors}
-                        routeNames={routeNames}
-                        showDimmedRoutes={showDimmedMapRoutes}
-                        onShowDimmedRoutesChange={setShowDimmedMapRoutes}
-                        showTransferStationsOnly={showTransferStationsOnly}
-                        showExpressStationsOnly={showExpressStationsOnly}
-                        showTravelTimes={showTravelTimes}
-                        showStationNames={showStationNames}
-                        showStationNumbers={showStationNumbers}
-                        showFurigana={showFurigana}
-                        showOsmTiles={showOsmTiles}
-                        showLatLngGrid={showLatLngGrid}
-                        theme={theme}
-                        language={currentLanguage}
-                        onToggleRoute={toggleRoute}
-                        onSelectAllRoutes={selectAllRoutes}
-                        onDeselectAllRoutes={deselectAllRoutes}
-                        onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
-                        onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
-                        onShowTravelTimesChange={setShowTravelTimes}
-                        onShowStationNamesChange={setShowStationNames}
-                        onShowStationNumbersChange={setShowStationNumbers}
-                        onShowFuriganaChange={setShowFurigana}
-                        onShowOsmTilesChange={setShowOsmTiles}
-                        heatmapEnabled={heatmapEnabled}
-                        heatmapParam={heatmapParam}
-                        onHeatmapEnabledChange={setHeatmapEnabled}
-                        onHeatmapParamChange={setHeatmapParam}
-                        showStationTooltip={showStationTooltip}
-                        onShowStationTooltipChange={setShowStationTooltip}
+            <MobileBottomPanel
+              activeTab={mobilePanelTab}
+              isExpanded={isMobilePanelExpanded}
+              theme={theme}
+              language={currentLanguage}
+              onTabChange={(tab) => {
+                setMobilePanelTab(tab);
+                setIsMobilePanelExpanded(true);
+              }}
+              onCollapse={() => setIsMobilePanelExpanded(false)}
+              stationContent={
+                <StationSelector
+                  departure={departure}
+                  arrival={arrival}
+                  onDepartureChange={setDeparture}
+                  onArrivalChange={setArrival}
+                  isExpanded={true}
+                  language={currentLanguage}
+                  departureTime={timetableBaseTime}
+                  onDepartureTimeChange={setTimetableBaseTime}
+                  onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
+                  onSearchingChange={handleSearchingChange}
+                />
+              }
+              legendContent={
+                <>
+                  <LegendStationMarkers
+                    departure={departure}
+                    arrival={arrival}
+                    theme={theme}
+                    language={currentLanguage}
+                  />
+                  <LegendRouteList
+                    visibleRoutesData={visibleRoutesData}
+                    visibleRoutes={visibleRoutes}
+                    availableRoutes={availableRoutes}
+                    highlightedRouteKeys={highlightedRouteKeys}
+                    routeColors={routeColors}
+                    routeNames={routeNames}
+                    showDimmedRoutes={showDimmedMapRoutes}
+                    onShowDimmedRoutesChange={setShowDimmedMapRoutes}
+                    showTransferStationsOnly={showTransferStationsOnly}
+                    showExpressStationsOnly={showExpressStationsOnly}
+                    showTravelTimes={showTravelTimes}
+                    showStationNames={showStationNames}
+                    showStationNumbers={showStationNumbers}
+                    showFurigana={showFurigana}
+                    showOsmTiles={showOsmTiles}
+                    theme={theme}
+                    language={currentLanguage}
+                    onToggleRoute={toggleRoute}
+                    onSelectAllRoutes={selectAllRoutes}
+                    onDeselectAllRoutes={deselectAllRoutes}
+                    onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
+                    onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
+                    onShowTravelTimesChange={setShowTravelTimes}
+                    onShowStationNamesChange={setShowStationNames}
+                    onShowStationNumbersChange={setShowStationNumbers}
+                    onShowFuriganaChange={setShowFurigana}
+                    onShowOsmTilesChange={setShowOsmTiles}
+                    heatmapEnabled={heatmapEnabled}
+                    heatmapParam={heatmapParam}
+                    onHeatmapEnabledChange={setHeatmapEnabled}
+                    onHeatmapParamChange={setHeatmapParam}
+                    showStationTooltip={showStationTooltip}
+                    onShowStationTooltipChange={setShowStationTooltip}
                     showFullRouteStations={showFullRouteStations}
                     onShowFullRouteStationsChange={setShowFullRouteStations}
                     showRouteLine={showRouteLine}
                     onShowRouteLineChange={setShowRouteLine}
-                        adjustRouteColorForTheme={adjustRouteColorForTheme}
-                        viewCenter={viewCenter}
-                        showTrainDemo={showTrainDemo}
-                        onTrainDemoToggle={() => {
+                    adjustRouteColorForTheme={adjustRouteColorForTheme}
+                    viewCenter={viewCenter}
+                    showTrainDemo={showTrainDemo}
+                    onTrainDemoToggle={() => {
                       setShowTrainDemo(v => !v);
                       if (!showTrainDemo) {
                         const now = new Date();
@@ -3828,84 +3799,29 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         trainDemoRealTimeRef.current = false;
                       }
                     }}
-                        mapViewMode={mapViewMode}
-                        mapConfig={mapConfig}
-                        onImportConfig={handleImportConfig}
-                      />
-                      <LegendDisplayOptions
-                        mapViewMode={mapViewMode}
-                        theme={theme}
-                        language={currentLanguage}
-                        trainTypeViewEnabled={trainTypeViewEnabled}
-                        onMapViewModeChange={(mode) => { setMapViewMode(mode); setIsMobilePanelExpanded(false); }}
-                      />
-                      <LegendRouteRecommendations
-                        routeRecommendations={routeRecommendations}
-                        selectedRouteIndices={selectedRouteIndices}
-                        theme={theme}
-                        language={currentLanguage}
-                        onRouteToggle={handleRouteToggle}
-                        onSelectAll={handleSelectAllRecommendedRoutes}
-                        onDeselectAll={handleDeselectAllRecommendedRoutes}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* タブバー（常に下端に固定） */}
-              <div style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                zIndex: 1002,
-                backgroundColor: colors.surfaceElevated,
-                borderTop: isMobilePanelExpanded ? 'none' : `2px solid ${colors.border}`,
-                borderRadius: isMobilePanelExpanded ? '0' : '12px 12px 0 0',
-                height: 'calc(44px + env(safe-area-inset-bottom, 0px))',
-                paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-                display: 'flex',
-                alignItems: 'center',
-                padding: `0 4px env(safe-area-inset-bottom, 0px)`,
-                boxShadow: isMobilePanelExpanded ? 'none' : `0 -2px 10px ${colors.shadow}`,
-              }}>
-                <button
-                  onClick={() => { setMobilePanelTab('station'); setIsMobilePanelExpanded(true); }}
-                  style={{
-                    flex: 1,
-                    height: '44px',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    fontWeight: 'bold',
-                    backgroundColor: mobilePanelTab === 'station' && isMobilePanelExpanded ? colors.primary : 'transparent',
-                    color: mobilePanelTab === 'station' && isMobilePanelExpanded ? '#fff' : colors.textSecondary,
-                    transition: 'background-color 0.2s',
-                  }}
-                >
-                  🚉 {translateUI('departure', currentLanguage) + '/' + translateUI('arrival', currentLanguage)}
-                </button>
-                <button
-                  onClick={() => { setMobilePanelTab('legend'); setIsMobilePanelExpanded(true); }}
-                  style={{
-                    flex: 1,
-                    height: '44px',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    backgroundColor: mobilePanelTab === 'legend' && isMobilePanelExpanded ? colors.primary : 'transparent',
-                    color: mobilePanelTab === 'legend' && isMobilePanelExpanded ? '#fff' : colors.textSecondary,
-                    transition: 'background-color 0.2s',
-                  }}
-                >
-                  ⚙ {translateUI('displaySettings', currentLanguage)}
-                </button>
-              </div>
-            </>
+                    mapViewMode={mapViewMode}
+                    mapConfig={mapConfig}
+                    onImportConfig={handleImportConfig}
+                  />
+                  <LegendDisplayOptions
+                    mapViewMode={mapViewMode}
+                    theme={theme}
+                    language={currentLanguage}
+                    trainTypeViewEnabled={trainTypeViewEnabled}
+                    onMapViewModeChange={setMapViewMode}
+                  />
+                  <LegendRouteRecommendations
+                    routeRecommendations={routeRecommendations}
+                    selectedRouteIndices={selectedRouteIndices}
+                    theme={theme}
+                    language={currentLanguage}
+                    onRouteToggle={handleRouteToggle}
+                    onSelectAll={handleSelectAllRecommendedRoutes}
+                    onDeselectAll={handleDeselectAllRecommendedRoutes}
+                  />
+                </>
+              }
+            />
           )}
 
           {/* 左下ボタングループ: フルスクリーン切り替え / 言語 / テーマ */}
