@@ -172,8 +172,9 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
           onClick={(e) => handleDimmedRouteClick(e, routeKey)}
         />,
         <path key={`dimmed-${routeKey}`} d={d} fill="none" stroke={color}
-          strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+          strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"
           opacity={0.22}
+          vectorEffect="non-scaling-stroke"
           style={{ pointerEvents: 'none' }}
         />,
       ];
@@ -219,6 +220,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
 
       return [<path key={routeKey} d={d} fill="none" stroke={color} strokeWidth={sw}
         strokeLinecap="round" strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
         style={{ cursor: 'pointer' }}
         onClick={(e) => handleVisibleRouteClick(e, routeKey)}
       />];
