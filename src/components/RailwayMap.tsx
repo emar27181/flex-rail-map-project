@@ -175,13 +175,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // モバイル検出
   const [isMobile, setIsMobile] = useState(false);
-  const [mobilePanelTab, setMobilePanelTab] = useState<'station' | 'legend'>('station');
   const [isMobilePanelExpanded, setIsMobilePanelExpanded] = useState(true);
   const [isStationSearching, setIsStationSearching] = useState(false);
   const handleSearchingChange = (searching: boolean) => {
     setIsStationSearching(searching);
     if (searching && isFullscreen && isMobile) {
-      setMobilePanelTab('station');
       setIsMobilePanelExpanded(true);
     }
   };
@@ -3711,15 +3709,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           {/* モバイルフルスクリーン時の統合パネル */}
           {isFullscreen && isMobile && (
             <MobileBottomPanel
-              activeTab={mobilePanelTab}
               isExpanded={isMobilePanelExpanded}
               theme={theme}
               language={currentLanguage}
-              onTabChange={(tab) => {
-                setMobilePanelTab(tab);
-                setIsMobilePanelExpanded(true);
-              }}
-              onCollapse={() => setIsMobilePanelExpanded(false)}
+              onToggle={() => setIsMobilePanelExpanded(v => !v)}
+              departureName={departure?.name}
+              arrivalName={arrival?.name}
+              mapViewMode={mapViewMode}
               stationContent={
                 <StationSelector
                   departure={departure}
@@ -3734,7 +3730,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   onSearchingChange={handleSearchingChange}
                 />
               }
-              legendContent={
+              displayToggleContent={
+                <LegendDisplayOptions
+                  mapViewMode={mapViewMode}
+                  theme={theme}
+                  language={currentLanguage}
+                  trainTypeViewEnabled={trainTypeViewEnabled}
+                  onMapViewModeChange={setMapViewMode}
+                />
+              }
+              detailedSettingsContent={
                 <>
                   <LegendStationMarkers
                     departure={departure}
@@ -3802,13 +3807,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     mapViewMode={mapViewMode}
                     mapConfig={mapConfig}
                     onImportConfig={handleImportConfig}
-                  />
-                  <LegendDisplayOptions
-                    mapViewMode={mapViewMode}
-                    theme={theme}
-                    language={currentLanguage}
-                    trainTypeViewEnabled={trainTypeViewEnabled}
-                    onMapViewModeChange={setMapViewMode}
                   />
                   <LegendRouteRecommendations
                     routeRecommendations={routeRecommendations}

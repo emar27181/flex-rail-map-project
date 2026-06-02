@@ -1,75 +1,81 @@
 /**
  * MobileBottomPanel
  *
- * スマホのフルスクリーンモードで画面下部に表示する
- * タブバー + スライドアップパネル UI。
+ * スマホフルスクリーン用の下部折りたたみパネル。
  *
- * 設計方針
+ * ■ 設計方針
  * - マジックナンバー禁止。寸法はすべて名前付き定数で管理。
- * - パネル高さは CSS dvh（dynamic viewport height）を使用。
- *   dvh 未対応ブラウザ向けに svh → vh の順でフォールバック。
- * - スクロールコンテナは thin-scrollbar クラスで統一。
- * - タブを押すと開く / 同じタブを再度押すと閉じる（トグル）。
- * - 表示切替（マップモード変更）時はパネルを自動で閉じない。
- *   ユーザーが手動で閉じる（ドラッグハンドル / ▼ボタン）。
+ * - パネル高さは dvh（Dynamic Viewport Height）を使用し、
+ *   未対応ブラウザ向けに svh → vh の順でフォールバック。
+ * - 「駅設定」と「表示切替」を同時に表示（タブ切替不要）。
+ * - 詳細設定は折りたたみ式サブセクションで表示。
+ * - パネル全体は折りたたみ可能（ドラッグハンドル or ▲/▼ボタン）。
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { getThemeColors } from '../contexts/ThemeContext';
 import { translateUI } from '../utils/translation';
 
-// ── 寸法定数（ハードコーディング禁止のため名前付き管理） ──────────────
+// ── 寸法定数 ─────────────────────────────────────────────────────────
 
-/** タブバーの高さ（Apple HIG / Material Design の最小タッチ目標 44pt） */
-const TAB_BAR_H = 44;
+/** Apple HIG / Material Design 最小タッチ目標 */
+const TOUCH_SIZE = 44;
 
 /**
- * パネルコンテンツの最大高さ。
- * dvh = Dynamic Viewport Height（アドレスバー等の動的 UI を除いた実視野高）
- * svh = Small Viewport Height（UI が出ているときの高さ、Safari 旧版フォールバック）
- * vh  = CSS Viewport Height（最終フォールバック）
- * min() で画面の 55% かつ「全体 - 上マージン 110px」の小さい方を取る。
+ * パネルの最大高さ。
+ * dvh: アドレスバー等を除いた動的視野高さ（iOS Safari 対応）
+ * svh: 小さい方の視野高さ（Safari 旧版フォールバック）
+ * vh:  最終フォールバック
+ * 上マージン 80px を確保して地図が少し見えるようにする。
  */
-const PANEL_MAX_HEIGHT_CSS =
-  'min(55dvh, min(55svh, min(55vh, calc(100% - 110px))))';
+const PANEL_MAX_H = 'min(70dvh, min(70svh, min(70vh, calc(100% - 80px))))';
 
-/** パネル上部の角丸半径 */
-const PANEL_BORDER_RADIUS = 16;
+/** パネル上部の角丸 */
+const RADIUS = 16;
 
-/** CSS を一度だけ注入するための ID */
-const STYLE_ID = 'mobile-bottom-panel-styles';
+/** CSS 注入用 ID */
+const STYLE_ID = 'mbp-styles';
 
 // ─────────────────────────────────────────────────────────────────────
 
-export type PanelTab = 'station' | 'legend';
-
 export interface MobileBottomPanelProps {
-  activeTab: PanelTab;
   isExpanded: boolean;
   theme: 'light' | 'dark';
   language: 'japanese' | 'english';
-  /** タブを切り替える（開く方向） */
-  onTabChange: (tab: PanelTab) => void;
-  /** パネルを閉じる */
-  onCollapse: () => void;
+  onToggle: () => void;
+
+  /** 駅選択コンテンツ（StationSelector） */
   stationContent: React.ReactNode;
-  legendContent: React.ReactNode;
+
+  /** 表示切替コンテンツ（LegendDisplayOptions など） */
+  displayToggleContent: React.ReactNode;
+
+  /** 詳細設定コンテンツ（LegendRouteList 等、折りたたみ式） */
+  detailedSettingsContent: React.ReactNode;
+
+  /** 折りたたみ時のサマリー表示用 */
+  departureName?: string;
+  arrivalName?: string;
+  mapViewMode?: 'realistic' | 'schematic';
 }
 
 const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
-  activeTab,
   isExpanded,
   theme,
   language,
-  onTabChange,
-  onCollapse,
+  onToggle,
   stationContent,
-  legendContent,
+  displayToggleContent,
+  detailedSettingsContent,
+  departureName,
+  arrivalName,
+  mapViewMode,
 }) => {
   const colors = getThemeColors(theme);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
 
-  // CSS を一度だけ <head> に注入
+  // CSS を一度だけ注入
   useEffect(() => {
     if (document.getElementById(STYLE_ID)) return;
     const el = document.createElement('style');
@@ -90,178 +96,201 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
     document.head.appendChild(el);
   }, []);
 
-  // タブが変わったらスクロール位置をリセット
+  // 閉じるときに詳細設定も折りたたむ
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = 0;
-  }, [activeTab]);
+    if (!isExpanded) setDetailOpen(false);
+  }, [isExpanded]);
 
-  /** タブボタンのクリックハンドラ。同じタブを再押しで閉じる。 */
-  const handleTabPress = (tab: PanelTab) => {
-    if (isExpanded && activeTab === tab) {
-      onCollapse();
-    } else {
-      onTabChange(tab);
-    }
-  };
+  const safeBottom = 'env(safe-area-inset-bottom, 0px)';
 
-  const safeAreaBottom = 'env(safe-area-inset-bottom, 0px)';
-
-  return (
-    <>
-      {/* ── コンテンツパネル ── */}
-      {isExpanded && (
-        <div
-          role="dialog"
-          aria-label={
-            activeTab === 'station'
-              ? translateUI('departure', language) + '/' + translateUI('arrival', language)
-              : translateUI('displaySettings', language)
-          }
-          style={{
-            position: 'absolute',
-            bottom: `calc(${TAB_BAR_H}px + ${safeAreaBottom})`,
-            left: 0,
-            right: 0,
-            maxHeight: PANEL_MAX_HEIGHT_CSS,
-            zIndex: 100,
-            backgroundColor: colors.surfaceElevated,
-            borderTop: `1px solid ${colors.border}`,
-            borderRadius: `${PANEL_BORDER_RADIUS}px ${PANEL_BORDER_RADIUS}px 0 0`,
-            boxShadow: `0 -4px 24px ${colors.shadow}`,
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          {/* ドラッグハンドル + 閉じるボタン */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: TAB_BAR_H,
-            flexShrink: 0,
-            position: 'relative',
-          }}>
-            {/* ドラッグハンドル（視覚的なヒント） */}
-            <div style={{
-              width: 36,
-              height: 4,
-              borderRadius: 2,
-              backgroundColor: colors.border,
-            }} />
-
-            {/* 閉じるボタン（右端） */}
-            <button
-              onClick={onCollapse}
-              aria-label="パネルを閉じる"
-              style={{
-                position: 'absolute',
-                right: 0,
-                top: 0,
-                width: TAB_BAR_H,
-                height: TAB_BAR_H,
-                border: 'none',
-                background: 'none',
-                cursor: 'pointer',
-                color: colors.textSecondary,
-                fontSize: 16,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              ▼
-            </button>
-          </div>
-
-          {/* スクロール可能コンテンツ */}
-          <div
-            ref={scrollRef}
-            className="mbp-scroll"
-            style={{ flex: 1, minHeight: 0 }}
-          >
-            {activeTab === 'station' && stationContent}
-            {activeTab === 'legend' && (
-              <div style={{ padding: '0 10px 10px' }}>
-                {legendContent}
-              </div>
-            )}
-          </div>
+  // ── 折りたたみ時のサマリーバー ──────────────────────────────────────
+  if (!isExpanded) {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label="パネルを開く"
+        onClick={onToggle}
+        onKeyDown={(e) => e.key === 'Enter' && onToggle()}
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 100,
+          backgroundColor: colors.surfaceElevated,
+          borderTop: `1px solid ${colors.border}`,
+          borderRadius: `${RADIUS}px ${RADIUS}px 0 0`,
+          boxShadow: `0 -4px 20px ${colors.shadow}`,
+          paddingBottom: safeBottom,
+          cursor: 'pointer',
+          userSelect: 'none',
+          WebkitTapHighlightColor: 'transparent',
+        }}
+      >
+        {/* ドラッグハンドル */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: TOUCH_SIZE,
+          gap: 8,
+        }}>
+          <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: colors.border }} />
         </div>
-      )}
 
-      {/* ── タブバー ── */}
-      <div style={{
+        {/* サマリー行 */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 12px 10px',
+          fontSize: 12,
+          color: colors.textSecondary,
+          gap: 8,
+        }}>
+          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            🚉 {departureName ?? '—'} → {arrivalName ?? '—'}
+          </span>
+          <span style={{
+            flexShrink: 0,
+            padding: '2px 8px',
+            borderRadius: 6,
+            fontSize: 11,
+            backgroundColor: colors.surface,
+            border: `1px solid ${colors.border}`,
+            color: colors.text,
+          }}>
+            {mapViewMode === 'schematic'
+              ? translateUI('schematicView', language)
+              : translateUI('realisticView', language)}
+          </span>
+          <span style={{ color: colors.primary, fontWeight: 'bold', fontSize: 16 }}>▲</span>
+        </div>
+      </div>
+    );
+  }
+
+  // ── 展開時パネル ────────────────────────────────────────────────────
+  return (
+    <div
+      style={{
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
-        zIndex: 101,
+        maxHeight: PANEL_MAX_H,
+        zIndex: 100,
         backgroundColor: colors.surfaceElevated,
-        borderTop: isExpanded ? 'none' : `1px solid ${colors.border}`,
-        borderRadius: isExpanded
-          ? '0'
-          : `${PANEL_BORDER_RADIUS}px ${PANEL_BORDER_RADIUS}px 0 0`,
-        boxShadow: isExpanded ? 'none' : `0 -4px 20px ${colors.shadow}`,
-        /* padding は上部 0、左右 8px、下部はセーフエリア */
-        padding: `0 8px ${safeAreaBottom}`,
+        borderTop: `1px solid ${colors.border}`,
+        borderRadius: `${RADIUS}px ${RADIUS}px 0 0`,
+        boxShadow: `0 -4px 24px ${colors.shadow}`,
         display: 'flex',
-        gap: 4,
+        flexDirection: 'column',
+        paddingBottom: safeBottom,
+      }}
+    >
+      {/* ヘッダー: ドラッグハンドル + 閉じるボタン */}
+      <div style={{
+        display: 'flex',
         alignItems: 'center',
-        minHeight: `calc(${TAB_BAR_H}px + ${safeAreaBottom})`,
+        justifyContent: 'center',
+        height: TOUCH_SIZE,
+        flexShrink: 0,
+        position: 'relative',
       }}>
-        <TabButton
-          active={activeTab === 'station' && isExpanded}
-          colors={colors}
-          onClick={() => handleTabPress('station')}
+        <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: colors.border }} />
+        <button
+          onClick={onToggle}
+          aria-label="パネルを閉じる"
+          style={{
+            position: 'absolute',
+            right: 4,
+            top: 0,
+            width: TOUCH_SIZE,
+            height: TOUCH_SIZE,
+            border: 'none',
+            background: 'none',
+            cursor: 'pointer',
+            color: colors.textSecondary,
+            fontSize: 16,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            WebkitTapHighlightColor: 'transparent',
+          }}
         >
-          🚉 {translateUI('departure', language)}/{translateUI('arrival', language)}
-        </TabButton>
-
-        <TabButton
-          active={activeTab === 'legend' && isExpanded}
-          colors={colors}
-          onClick={() => handleTabPress('legend')}
-        >
-          ⚙ {translateUI('displaySettings', language)}
-        </TabButton>
+          ▼
+        </button>
       </div>
-    </>
+
+      {/* スクロール可能コンテンツ */}
+      <div ref={scrollRef} className="mbp-scroll" style={{ flex: 1, minHeight: 0 }}>
+
+        {/* ── 駅設定 ── */}
+        <section style={{ padding: '0 10px 10px' }}>
+          {stationContent}
+        </section>
+
+        {/* 区切り線 */}
+        <hr style={{ margin: '0 10px', border: 'none', borderTop: `1px solid ${colors.border}` }} />
+
+        {/* ── 表示切替 ── */}
+        <section style={{ padding: '8px 10px' }}>
+          <div style={{
+            fontSize: 11,
+            fontWeight: 'bold',
+            color: colors.textSecondary,
+            marginBottom: 6,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}>
+            {translateUI('mapDisplayMode', language)}
+          </div>
+          {displayToggleContent}
+        </section>
+
+        {/* 区切り線 */}
+        <hr style={{ margin: '0 10px', border: 'none', borderTop: `1px solid ${colors.border}` }} />
+
+        {/* ── 詳細設定（折りたたみ式） ── */}
+        <section>
+          <button
+            onClick={() => setDetailOpen(v => !v)}
+            style={{
+              width: '100%',
+              padding: '10px 14px',
+              border: 'none',
+              background: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              color: colors.text,
+              fontSize: 13,
+              fontWeight: 'bold',
+              WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            <span>⚙ {translateUI('displaySettings', language)}</span>
+            <span style={{
+              color: colors.textSecondary,
+              fontSize: 11,
+              transition: 'transform 0.2s',
+              display: 'inline-block',
+              transform: detailOpen ? 'rotate(180deg)' : 'none',
+            }}>▼</span>
+          </button>
+
+          {detailOpen && (
+            <div style={{ padding: '0 10px 10px' }}>
+              {detailedSettingsContent}
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
   );
 };
-
-// ── 内部コンポーネント: タブボタン ────────────────────────────────────
-
-interface TabButtonProps {
-  active: boolean;
-  colors: ReturnType<typeof getThemeColors>;
-  onClick: () => void;
-  children: React.ReactNode;
-}
-
-const TabButton: React.FC<TabButtonProps> = ({ active, colors, onClick, children }) => (
-  <button
-    onClick={onClick}
-    style={{
-      flex: 1,
-      height: TAB_BAR_H,
-      border: 'none',
-      borderRadius: 8,
-      cursor: 'pointer',
-      fontSize: 12,
-      fontWeight: 'bold',
-      backgroundColor: active ? colors.primary : 'transparent',
-      color: active ? '#fff' : colors.textSecondary,
-      transition: 'background-color 0.15s ease, color 0.15s ease',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 4,
-      userSelect: 'none',
-      WebkitTapHighlightColor: 'transparent',
-    }}
-  >
-    {children}
-  </button>
-);
 
 export default MobileBottomPanel;
