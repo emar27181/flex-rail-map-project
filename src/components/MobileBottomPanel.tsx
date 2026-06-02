@@ -33,6 +33,13 @@ const PANEL_MAX_H = 'min(70dvh, min(70svh, min(70vh, calc(100% - 80px))))';
 /** パネル上部の角丸 */
 const RADIUS = 16;
 
+/**
+ * z-index: Leaflet の最大レイヤー（.leaflet-control: 800）より高い値が必要。
+ * 固定div内のstacking contextではLeafletレイヤーと直接比較されるため。
+ */
+const Z_PANEL = 1000;
+const Z_TAB_BAR = 1001;
+
 /** CSS 注入用 ID */
 const STYLE_ID = 'mbp-styles';
 
@@ -117,7 +124,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
           bottom: 0,
           left: 0,
           right: 0,
-          zIndex: 100,
+          zIndex: Z_PANEL,
           backgroundColor: colors.surfaceElevated,
           borderTop: `1px solid ${colors.border}`,
           borderRadius: `${RADIUS}px ${RADIUS}px 0 0`,
