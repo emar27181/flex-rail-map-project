@@ -16,12 +16,11 @@ const ThemeWrapper: React.FC = () => {
 
   return (
     <ThemeProvider>
+      {/* 追従型広告: RailwayMap より先に置くことで同z-index競合時に地図が前面に来る */}
+      {!isFullscreen && <StickyBottomAd adSlot="0987654321" />}
       <NavigationBar language={language} onLanguageChange={handleLanguageChange} isFullscreen={isFullscreen} />
       <RailwayMap language={language} onLanguageChange={handleLanguageChange} onFullscreenChange={setIsFullscreen} />
       <Footer language={language} />
-
-      {/* 追従型広告（フルスクリーン時は非表示） */}
-      {!isFullscreen && <StickyBottomAd adSlot="0987654321" />}
     </ThemeProvider>
   );
 };

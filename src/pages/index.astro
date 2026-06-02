@@ -192,12 +192,20 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 				color: #b3b3b3 !important;
 			}
 			.leaflet-container {
-				height: 600px !important;
+				height: 600px;
+				width: 100%;
+			}
+			/* フルスクリーン時はLeaflet地図を全画面に */
+			body.fullscreen-map .leaflet-container {
+				height: 100% !important;
 				width: 100% !important;
 			}
-			/* Sticky広告(90px)の上にLeaflet下部コントロールを表示 */
+			/* Sticky広告(90px)の上にLeaflet下部コントロールを表示（非フルスクリーン時のみ） */
 			.leaflet-bottom {
 				bottom: 96px !important;
+			}
+			body.fullscreen-map .leaflet-bottom {
+				bottom: 60px !important;
 			}
 
 			/* COMPREHENSIVE Dark mode support for ALL Leaflet popups */

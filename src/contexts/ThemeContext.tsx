@@ -37,8 +37,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     // テーマ変更時にローカルストレージに保存
     localStorage.setItem('theme', theme);
 
-    // body要素にクラスを追加してグローバルスタイルを適用
-    document.body.className = theme;
+    // body要素にクラスを追加してグローバルスタイルを適用（他クラスは保持）
+    document.body.classList.remove('light', 'dark');
+    document.body.classList.add(theme);
   }, [theme]);
 
   const toggleTheme = () => {

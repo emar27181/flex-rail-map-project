@@ -305,9 +305,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     };
   }, [trainDemoPlaying, showTrainDemo, trainDemoSpeed, trainDemoRealTime]);
 
-  // フルスクリーン状態を親に通知
+  // フルスクリーン状態を親に通知 & body クラスで CSS を切り替え
   useEffect(() => {
     onFullscreenChange?.(isFullscreen);
+    if (isFullscreen) {
+      document.body.classList.add('fullscreen-map');
+    } else {
+      document.body.classList.remove('fullscreen-map');
+    }
+    return () => document.body.classList.remove('fullscreen-map');
   }, [isFullscreen, onFullscreenChange]);
 
   // 駅が変わったらツールチップの選択路線・すべて表示をリセット
