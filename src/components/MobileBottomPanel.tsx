@@ -1,86 +1,73 @@
 /**
  * MobileBottomPanel
  *
- * スマホフルスクリーン用の下部折りたたみパネル。
+ * スマホフルスクリーン用の左下フローティングボタン UI。
  *
  * ■ 設計方針
- * - マジックナンバー禁止。寸法はすべて名前付き定数で管理。
- * - パネル高さは dvh（Dynamic Viewport Height）を使用し、
- *   未対応ブラウザ向けに svh → vh の順でフォールバック。
- * - 「駅設定」と「表示切替」を同時に表示（タブ切替不要）。
- * - 詳細設定は折りたたみ式サブセクションで表示。
- * - パネル全体は折りたたみ可能（ドラッグハンドル or ▲/▼ボタン）。
+ * - 底部に張り付かず、左下にアイコン＋名前のボタンを縦に配置。
+ * - ボタンをタップするとツールチップ（ポップオーバー）が展開。
+ * - 別ボタンをタップ or 背景をタップで閉じる。
+ * - 寸法はすべて名前付き定数で管理（マジックナンバー禁止）。
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { getThemeColors } from '../contexts/ThemeContext';
-import { translateUI } from '../utils/translation';
 
 // ── 寸法定数 ─────────────────────────────────────────────────────────
 
-/** Apple HIG / Material Design 最小タッチ目標 */
-const TOUCH_SIZE = 44;
+/** ボタンの高さ（Apple HIG / Material Design 最小タッチ目標） */
+const BTN_H = 44;
 
-/**
- * パネルの最大高さ。
- * dvh: アドレスバー等を除いた動的視野高さ（iOS Safari 対応）
- * svh: 小さい方の視野高さ（Safari 旧版フォールバック）
- * vh:  最終フォールバック
- * 上マージン 80px を確保して地図が少し見えるようにする。
- */
-const PANEL_MAX_H = 'min(70dvh, min(70svh, min(70vh, calc(100% - 80px))))';
+/** ボタンの最小幅 */
+const BTN_MIN_W = 88;
 
-/** パネル上部の角丸 */
-const RADIUS = 16;
+/** ボタン間のギャップ */
+const BTN_GAP = 6;
 
-/**
- * z-index: Leaflet の最大レイヤー（.leaflet-control: 800）より高い値が必要。
- * 固定div内のstacking contextではLeafletレイヤーと直接比較されるため。
- */
-const Z_PANEL = 1000;
-const Z_TAB_BAR = 1001;
+/** ボタングループの左オフセット */
+const GROUP_LEFT = 10;
+
+/** ポップオーバーの最大幅 */
+const POPOVER_MAX_W = 320;
+
+/** ポップオーバーの最大高さ */
+const POPOVER_MAX_H = '65dvh';
+
+/** z-index: Leaflet (.leaflet-control: 800) より高い値が必要 */
+const Z_BTN = 1001;
+const Z_POPOVER = 1002;
+const Z_BACKDROP = 1000;
 
 /** CSS 注入用 ID */
-const STYLE_ID = 'mbp-styles';
+const STYLE_ID = 'mbp-styles-v2';
 
 // ─────────────────────────────────────────────────────────────────────
 
+export type PopoverKey = 'station' | 'display' | 'settings';
+
+export interface FloatingButtonDef {
+  key: PopoverKey;
+  icon: string;
+  label: string;
+  content: React.ReactNode;
+}
+
 export interface MobileBottomPanelProps {
-  isExpanded: boolean;
+  buttons: FloatingButtonDef[];
   theme: 'light' | 'dark';
-  language: 'japanese' | 'english';
-  onToggle: () => void;
-
-  /** 駅選択コンテンツ（StationSelector） */
-  stationContent: React.ReactNode;
-
-  /** 表示切替コンテンツ（LegendDisplayOptions など） */
-  displayToggleContent: React.ReactNode;
-
-  /** 詳細設定コンテンツ（LegendRouteList 等、折りたたみ式） */
-  detailedSettingsContent: React.ReactNode;
-
-  /** 折りたたみ時のサマリー表示用 */
-  departureName?: string;
-  arrivalName?: string;
-  mapViewMode?: 'realistic' | 'schematic';
+  /** セーフエリア下部の余白（px）。デフォルト 0。 */
+  safeAreaBottom?: number;
 }
 
 const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
-  isExpanded,
+  buttons,
   theme,
-  language,
-  onToggle,
-  stationContent,
-  displayToggleContent,
-  detailedSettingsContent,
-  departureName,
-  arrivalName,
-  mapViewMode,
+  safeAreaBottom = 0,
 }) => {
   const colors = getThemeColors(theme);
+  const [openKey, setOpenKey] = useState<PopoverKey | null>(null);
+  const groupRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
 
   // CSS を一度だけ注入
   useEffect(() => {
@@ -103,200 +90,147 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
     document.head.appendChild(el);
   }, []);
 
-  // 閉じるときに詳細設定も折りたたむ
+  // ポップオーバーが変わったらスクロールをリセット
   useEffect(() => {
-    if (!isExpanded) setDetailOpen(false);
-  }, [isExpanded]);
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+  }, [openKey]);
 
-  const safeBottom = 'env(safe-area-inset-bottom, 0px)';
+  const toggle = useCallback((key: PopoverKey) => {
+    setOpenKey(prev => (prev === key ? null : key));
+  }, []);
 
-  // ── 折りたたみ時のサマリーバー ──────────────────────────────────────
-  if (!isExpanded) {
-    return (
-      <div
-        role="button"
-        tabIndex={0}
-        aria-label="パネルを開く"
-        onClick={onToggle}
-        onKeyDown={(e) => e.key === 'Enter' && onToggle()}
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: Z_PANEL,
-          backgroundColor: colors.surfaceElevated,
-          borderTop: `1px solid ${colors.border}`,
-          borderRadius: `${RADIUS}px ${RADIUS}px 0 0`,
-          boxShadow: `0 -4px 20px ${colors.shadow}`,
-          paddingBottom: safeBottom,
-          cursor: 'pointer',
-          userSelect: 'none',
-          WebkitTapHighlightColor: 'transparent',
-        }}
-      >
-        {/* ドラッグハンドル */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: TOUCH_SIZE,
-          gap: 8,
-        }}>
-          <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: colors.border }} />
-        </div>
+  const close = useCallback(() => setOpenKey(null), []);
 
-        {/* サマリー行 */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 12px 10px',
-          fontSize: 12,
-          color: colors.textSecondary,
-          gap: 8,
-        }}>
-          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            🚉 {departureName ?? '—'} → {arrivalName ?? '—'}
-          </span>
-          <span style={{
-            flexShrink: 0,
-            padding: '2px 8px',
-            borderRadius: 6,
-            fontSize: 11,
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border}`,
-            color: colors.text,
-          }}>
-            {mapViewMode === 'schematic'
-              ? translateUI('schematicView', language)
-              : translateUI('realisticView', language)}
-          </span>
-          <span style={{ color: colors.primary, fontWeight: 'bold', fontSize: 16 }}>▲</span>
-        </div>
-      </div>
-    );
-  }
+  const safeBottom = safeAreaBottom + 10; // ボタンを少し上に浮かせる
 
-  // ── 展開時パネル ────────────────────────────────────────────────────
+  const activeButton = buttons.find(b => b.key === openKey);
+
   return (
-    <div
-      style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        maxHeight: PANEL_MAX_H,
-        zIndex: 100,
-        backgroundColor: colors.surfaceElevated,
-        borderTop: `1px solid ${colors.border}`,
-        borderRadius: `${RADIUS}px ${RADIUS}px 0 0`,
-        boxShadow: `0 -4px 24px ${colors.shadow}`,
-        display: 'flex',
-        flexDirection: 'column',
-        paddingBottom: safeBottom,
-      }}
-    >
-      {/* ヘッダー: ドラッグハンドル + 閉じるボタン */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: TOUCH_SIZE,
-        flexShrink: 0,
-        position: 'relative',
-      }}>
-        <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: colors.border }} />
-        <button
-          onClick={onToggle}
-          aria-label="パネルを閉じる"
+    <>
+      {/* 背景クリックで閉じる透明レイヤー */}
+      {openKey !== null && (
+        <div
+          aria-hidden="true"
+          onClick={close}
           style={{
             position: 'absolute',
-            right: 4,
-            top: 0,
-            width: TOUCH_SIZE,
-            height: TOUCH_SIZE,
-            border: 'none',
-            background: 'none',
-            cursor: 'pointer',
-            color: colors.textSecondary,
-            fontSize: 16,
+            inset: 0,
+            zIndex: Z_BACKDROP,
+          }}
+        />
+      )}
+
+      {/* ポップオーバー */}
+      {openKey !== null && activeButton && (
+        <div
+          role="dialog"
+          aria-label={activeButton.label}
+          style={{
+            position: 'absolute',
+            bottom: safeBottom + BTN_H * buttons.length + BTN_GAP * (buttons.length - 1) + 8,
+            left: GROUP_LEFT,
+            width: `min(${POPOVER_MAX_W}px, calc(100vw - ${GROUP_LEFT * 2}px))`,
+            maxHeight: POPOVER_MAX_H,
+            zIndex: Z_POPOVER,
+            backgroundColor: colors.surfaceElevated,
+            border: `1px solid ${colors.border}`,
+            borderRadius: 12,
+            boxShadow: `0 4px 24px ${colors.shadow}`,
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            WebkitTapHighlightColor: 'transparent',
+            flexDirection: 'column',
           }}
         >
-          ▼
-        </button>
-      </div>
-
-      {/* スクロール可能コンテンツ */}
-      <div ref={scrollRef} className="mbp-scroll" style={{ flex: 1, minHeight: 0 }}>
-
-        {/* ── 駅設定 ── */}
-        <section style={{ padding: '0 10px 10px' }}>
-          {stationContent}
-        </section>
-
-        {/* 区切り線 */}
-        <hr style={{ margin: '0 10px', border: 'none', borderTop: `1px solid ${colors.border}` }} />
-
-        {/* ── 表示切替 ── */}
-        <section style={{ padding: '8px 10px' }}>
+          {/* ポップオーバーヘッダー */}
           <div style={{
-            fontSize: 11,
-            fontWeight: 'bold',
-            color: colors.textSecondary,
-            marginBottom: 6,
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px 14px',
+            borderBottom: `1px solid ${colors.border}`,
+            flexShrink: 0,
           }}>
-            {translateUI('mapDisplayMode', language)}
+            <span style={{ fontSize: 14, fontWeight: 'bold', color: colors.text }}>
+              {activeButton.icon} {activeButton.label}
+            </span>
+            <button
+              onClick={close}
+              aria-label="閉じる"
+              style={{
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                color: colors.textSecondary,
+                fontSize: 18,
+                lineHeight: 1,
+                padding: '4px 8px',
+                borderRadius: 6,
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              ✕
+            </button>
           </div>
-          {displayToggleContent}
-        </section>
 
-        {/* 区切り線 */}
-        <hr style={{ margin: '0 10px', border: 'none', borderTop: `1px solid ${colors.border}` }} />
-
-        {/* ── 詳細設定（折りたたみ式） ── */}
-        <section>
-          <button
-            onClick={() => setDetailOpen(v => !v)}
-            style={{
-              width: '100%',
-              padding: '10px 14px',
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              color: colors.text,
-              fontSize: 13,
-              fontWeight: 'bold',
-              WebkitTapHighlightColor: 'transparent',
-            }}
+          {/* スクロール可能コンテンツ */}
+          <div
+            ref={scrollRef}
+            className="mbp-scroll"
+            style={{ flex: 1, minHeight: 0, padding: '10px 14px' }}
           >
-            <span>⚙ {translateUI('displaySettings', language)}</span>
-            <span style={{
-              color: colors.textSecondary,
-              fontSize: 11,
-              transition: 'transform 0.2s',
-              display: 'inline-block',
-              transform: detailOpen ? 'rotate(180deg)' : 'none',
-            }}>▼</span>
-          </button>
+            {activeButton.content}
+          </div>
+        </div>
+      )}
 
-          {detailOpen && (
-            <div style={{ padding: '0 10px 10px' }}>
-              {detailedSettingsContent}
-            </div>
-          )}
-        </section>
+      {/* フローティングボタングループ（左下） */}
+      <div
+        ref={groupRef}
+        style={{
+          position: 'absolute',
+          bottom: safeBottom,
+          left: GROUP_LEFT,
+          zIndex: Z_BTN,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: BTN_GAP,
+          alignItems: 'flex-start',
+        }}
+      >
+        {buttons.map(btn => {
+          const isActive = openKey === btn.key;
+          return (
+            <button
+              key={btn.key}
+              onClick={() => toggle(btn.key)}
+              aria-expanded={isActive}
+              aria-controls={`mbp-popover-${btn.key}`}
+              style={{
+                height: BTN_H,
+                minWidth: BTN_MIN_W,
+                padding: '0 14px',
+                border: `1px solid ${isActive ? colors.primary : colors.border}`,
+                borderRadius: BTN_H / 2,
+                cursor: 'pointer',
+                backgroundColor: isActive ? colors.primary : colors.surfaceElevated,
+                color: isActive ? '#fff' : colors.text,
+                fontSize: 13,
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                boxShadow: `0 2px 8px ${colors.shadow}`,
+                transition: 'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease',
+                userSelect: 'none',
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              <span style={{ fontSize: 16 }}>{btn.icon}</span>
+              <span>{btn.label}</span>
+            </button>
+          );
+        })}
       </div>
-    </div>
+    </>
   );
 };
 

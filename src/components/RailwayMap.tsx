@@ -175,13 +175,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // モバイル検出
   const [isMobile, setIsMobile] = useState(false);
-  const [isMobilePanelExpanded, setIsMobilePanelExpanded] = useState(true);
   const [isStationSearching, setIsStationSearching] = useState(false);
   const handleSearchingChange = (searching: boolean) => {
     setIsStationSearching(searching);
-    if (searching && isFullscreen && isMobile) {
-      setIsMobilePanelExpanded(true);
-    }
   };
 
   // 駅時刻表ツールチップ状態
@@ -3706,119 +3702,130 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             </div>
           )}
 
-          {/* モバイルフルスクリーン時の統合パネル */}
+          {/* モバイルフルスクリーン時: 左下フローティングボタン */}
           {isFullscreen && isMobile && (
             <MobileBottomPanel
-              isExpanded={isMobilePanelExpanded}
               theme={theme}
-              language={currentLanguage}
-              onToggle={() => setIsMobilePanelExpanded(v => !v)}
-              departureName={departure?.name}
-              arrivalName={arrival?.name}
-              mapViewMode={mapViewMode}
-              stationContent={
-                <StationSelector
-                  departure={departure}
-                  arrival={arrival}
-                  onDepartureChange={setDeparture}
-                  onArrivalChange={setArrival}
-                  isExpanded={true}
-                  language={currentLanguage}
-                  departureTime={timetableBaseTime}
-                  onDepartureTimeChange={setTimetableBaseTime}
-                  onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
-                  onSearchingChange={handleSearchingChange}
-                />
-              }
-              displayToggleContent={
-                <LegendDisplayOptions
-                  mapViewMode={mapViewMode}
-                  theme={theme}
-                  language={currentLanguage}
-                  trainTypeViewEnabled={trainTypeViewEnabled}
-                  onMapViewModeChange={setMapViewMode}
-                />
-              }
-              detailedSettingsContent={
-                <>
-                  <LegendStationMarkers
-                    departure={departure}
-                    arrival={arrival}
-                    theme={theme}
-                    language={currentLanguage}
-                  />
-                  <LegendRouteList
-                    visibleRoutesData={visibleRoutesData}
-                    visibleRoutes={visibleRoutes}
-                    availableRoutes={availableRoutes}
-                    highlightedRouteKeys={highlightedRouteKeys}
-                    routeColors={routeColors}
-                    routeNames={routeNames}
-                    showDimmedRoutes={showDimmedMapRoutes}
-                    onShowDimmedRoutesChange={setShowDimmedMapRoutes}
-                    showTransferStationsOnly={showTransferStationsOnly}
-                    showExpressStationsOnly={showExpressStationsOnly}
-                    showTravelTimes={showTravelTimes}
-                    showStationNames={showStationNames}
-                    showStationNumbers={showStationNumbers}
-                    showFurigana={showFurigana}
-                    showOsmTiles={showOsmTiles}
-                    theme={theme}
-                    language={currentLanguage}
-                    onToggleRoute={toggleRoute}
-                    onSelectAllRoutes={selectAllRoutes}
-                    onDeselectAllRoutes={deselectAllRoutes}
-                    onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
-                    onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
-                    onShowTravelTimesChange={setShowTravelTimes}
-                    onShowStationNamesChange={setShowStationNames}
-                    onShowStationNumbersChange={setShowStationNumbers}
-                    onShowFuriganaChange={setShowFurigana}
-                    onShowOsmTilesChange={setShowOsmTiles}
-                    heatmapEnabled={heatmapEnabled}
-                    heatmapParam={heatmapParam}
-                    onHeatmapEnabledChange={setHeatmapEnabled}
-                    onHeatmapParamChange={setHeatmapParam}
-                    showStationTooltip={showStationTooltip}
-                    onShowStationTooltipChange={setShowStationTooltip}
-                    showFullRouteStations={showFullRouteStations}
-                    onShowFullRouteStationsChange={setShowFullRouteStations}
-                    showRouteLine={showRouteLine}
-                    onShowRouteLineChange={setShowRouteLine}
-                    adjustRouteColorForTheme={adjustRouteColorForTheme}
-                    viewCenter={viewCenter}
-                    showTrainDemo={showTrainDemo}
-                    onTrainDemoToggle={() => {
-                      setShowTrainDemo(v => !v);
-                      if (!showTrainDemo) {
-                        const now = new Date();
-                        const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
-                        const adjusted = nowMin < 5 * 60 ? nowMin + 24 * 60 : nowMin;
-                        trainDemoMinutesRef.current = adjusted;
-                        setTrainDemoMinutes(adjusted);
-                        setTrainDemoRealTime(true);
-                        trainDemoRealTimeRef.current = true;
-                        setTrainDemoPlaying(true);
-                      } else {
-                        setTrainDemoRealTime(false);
-                        trainDemoRealTimeRef.current = false;
-                      }
-                    }}
-                    mapViewMode={mapViewMode}
-                    mapConfig={mapConfig}
-                    onImportConfig={handleImportConfig}
-                  />
-                  <LegendRouteRecommendations
-                    routeRecommendations={routeRecommendations}
-                    selectedRouteIndices={selectedRouteIndices}
-                    theme={theme}
-                    language={currentLanguage}
-                    onRouteToggle={handleRouteToggle}
-                    onSelectAll={handleSelectAllRecommendedRoutes}
-                    onDeselectAll={handleDeselectAllRecommendedRoutes}
-                  />
-                </>
-              }
+              buttons={[
+                {
+                  key: 'station',
+                  icon: '🚉',
+                  label: currentLanguage === 'english' ? 'Station' : '駅設定',
+                  content: (
+                    <StationSelector
+                      departure={departure}
+                      arrival={arrival}
+                      onDepartureChange={setDeparture}
+                      onArrivalChange={setArrival}
+                      isExpanded={true}
+                      language={currentLanguage}
+                      departureTime={timetableBaseTime}
+                      onDepartureTimeChange={setTimetableBaseTime}
+                      onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
+                      onSearchingChange={handleSearchingChange}
+                    />
+                  ),
+                },
+                {
+                  key: 'display',
+                  icon: '🗺',
+                  label: currentLanguage === 'english' ? 'View' : '表示切替',
+                  content: (
+                    <LegendDisplayOptions
+                      mapViewMode={mapViewMode}
+                      theme={theme}
+                      language={currentLanguage}
+                      trainTypeViewEnabled={trainTypeViewEnabled}
+                      onMapViewModeChange={setMapViewMode}
+                    />
+                  ),
+                },
+                {
+                  key: 'settings',
+                  icon: '⚙',
+                  label: currentLanguage === 'english' ? 'Settings' : '詳細設定',
+                  content: (
+                    <>
+                      <LegendStationMarkers
+                        departure={departure}
+                        arrival={arrival}
+                        theme={theme}
+                        language={currentLanguage}
+                      />
+                      <LegendRouteList
+                        visibleRoutesData={visibleRoutesData}
+                        visibleRoutes={visibleRoutes}
+                        availableRoutes={availableRoutes}
+                        highlightedRouteKeys={highlightedRouteKeys}
+                        routeColors={routeColors}
+                        routeNames={routeNames}
+                        showDimmedRoutes={showDimmedMapRoutes}
+                        onShowDimmedRoutesChange={setShowDimmedMapRoutes}
+                        showTransferStationsOnly={showTransferStationsOnly}
+                        showExpressStationsOnly={showExpressStationsOnly}
+                        showTravelTimes={showTravelTimes}
+                        showStationNames={showStationNames}
+                        showStationNumbers={showStationNumbers}
+                        showFurigana={showFurigana}
+                        showOsmTiles={showOsmTiles}
+                        theme={theme}
+                        language={currentLanguage}
+                        onToggleRoute={toggleRoute}
+                        onSelectAllRoutes={selectAllRoutes}
+                        onDeselectAllRoutes={deselectAllRoutes}
+                        onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
+                        onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
+                        onShowTravelTimesChange={setShowTravelTimes}
+                        onShowStationNamesChange={setShowStationNames}
+                        onShowStationNumbersChange={setShowStationNumbers}
+                        onShowFuriganaChange={setShowFurigana}
+                        onShowOsmTilesChange={setShowOsmTiles}
+                        heatmapEnabled={heatmapEnabled}
+                        heatmapParam={heatmapParam}
+                        onHeatmapEnabledChange={setHeatmapEnabled}
+                        onHeatmapParamChange={setHeatmapParam}
+                        showStationTooltip={showStationTooltip}
+                        onShowStationTooltipChange={setShowStationTooltip}
+                        showFullRouteStations={showFullRouteStations}
+                        onShowFullRouteStationsChange={setShowFullRouteStations}
+                        showRouteLine={showRouteLine}
+                        onShowRouteLineChange={setShowRouteLine}
+                        adjustRouteColorForTheme={adjustRouteColorForTheme}
+                        viewCenter={viewCenter}
+                        showTrainDemo={showTrainDemo}
+                        onTrainDemoToggle={() => {
+                          setShowTrainDemo(v => !v);
+                          if (!showTrainDemo) {
+                            const now = new Date();
+                            const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+                            const adjusted = nowMin < 5 * 60 ? nowMin + 24 * 60 : nowMin;
+                            trainDemoMinutesRef.current = adjusted;
+                            setTrainDemoMinutes(adjusted);
+                            setTrainDemoRealTime(true);
+                            trainDemoRealTimeRef.current = true;
+                            setTrainDemoPlaying(true);
+                          } else {
+                            setTrainDemoRealTime(false);
+                            trainDemoRealTimeRef.current = false;
+                          }
+                        }}
+                        mapViewMode={mapViewMode}
+                        mapConfig={mapConfig}
+                        onImportConfig={handleImportConfig}
+                      />
+                      <LegendRouteRecommendations
+                        routeRecommendations={routeRecommendations}
+                        selectedRouteIndices={selectedRouteIndices}
+                        theme={theme}
+                        language={currentLanguage}
+                        onRouteToggle={handleRouteToggle}
+                        onSelectAll={handleSelectAllRecommendedRoutes}
+                        onDeselectAll={handleDeselectAllRecommendedRoutes}
+                      />
+                    </>
+                  ),
+                },
+              ]}
             />
           )}
 
