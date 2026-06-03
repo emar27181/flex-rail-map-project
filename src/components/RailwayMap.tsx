@@ -89,11 +89,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       .leaflet-tooltip::before {
         display: none !important;
       }
-      @media (max-width: 767px) {
-        .leaflet-bottom.leaflet-right {
-          margin-bottom: 70px;
-        }
-      }
     `;
   }, [theme]);
 
@@ -256,6 +251,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // スマホでのパン直後の誤タップを防ぐフラグ
+  const mapDraggedRef = useRef(false);
 
   // 駅ホバーツールチップ: マーカーとパネル両方から離れたときに閉じる遅延タイマー
   const stationTooltipCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -2228,6 +2226,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         const b = e.target.getBounds();
         setViewBounds({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
       },
+      dragstart: () => { mapDraggedRef.current = true; },
+      dragend: () => { setTimeout(() => { mapDraggedRef.current = false; }, 300); },
       click: () => {
         if (justClickedLayerRef.current) { justClickedLayerRef.current = false; return; }
         handleRoutePopupClose();
@@ -2466,14 +2466,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 zIndexOffset={5000}
                 eventHandlers={{
                   mouseover: (e) => {
-                    if (!showStationTooltip) return;
+                    if (!showStationTooltip || isMobile) return;
                     cancelTooltipClose();
                     const oe = e.originalEvent as MouseEvent | undefined;
                     if (!oe) return;
                     setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
                   },
-                  mouseout: () => scheduleTooltipClose(),
+                  mouseout: () => { if (!isMobile) scheduleTooltipClose(); },
                   click: (e) => {
+                    if (isMobile && mapDraggedRef.current) return;
                     const oe = e.originalEvent as MouseEvent | undefined;
                     if (!oe) return;
                     setStationTooltip(prev =>
@@ -2554,14 +2555,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 zIndexOffset={stationZIndex}
                 eventHandlers={{
                   mouseover: (e) => {
-                    if (!showStationTooltip) return;
+                    if (!showStationTooltip || isMobile) return;
                     cancelTooltipClose();
                     const oe = e.originalEvent as MouseEvent | undefined;
                     if (!oe) return;
                     setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
                   },
-                  mouseout: () => scheduleTooltipClose(),
+                  mouseout: () => { if (!isMobile) scheduleTooltipClose(); },
                   click: (e) => {
+                    if (isMobile && mapDraggedRef.current) return;
                     const oe = e.originalEvent as MouseEvent | undefined;
                     if (!oe) return;
                     setStationTooltip(prev =>
@@ -3186,8 +3188,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             />
           )}
 
-          {/* ヒートマップ凡例（PC: 左下固定オーバーレイ、ヒートマップ有効時のみ） */}
-          {heatmapEnabled && !isMobile && mapViewMode === 'realistic' && (() => {
+          {/* ヒートマップ凡例（ヒートマップ有効時のみ・スマホは右下に表示） */}
+          {heatmapEnabled && mapViewMode === 'realistic' && (() => {
             const meta = STAT_PARAMS.find(p => p.key === heatmapParam);
             const gradientCss = buildGradientCss('to right');
             const dataRange = getParamRange(heatmapParam);
@@ -3208,15 +3210,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
             return (
               <div style={{
-                position: 'absolute',
-                bottom: '40px',
-                left: '10px',
-                zIndex: 1000,
+                position: 'fixed',
+                ...(isFullscreen && isMobile
+                  ? { bottom: '10px', right: '10px', left: 'auto' }
+                  : { bottom: '40px', left: '10px' }),
+                zIndex: 1001,
                 background: theme === 'dark' ? 'rgba(30,30,30,0.92)' : 'rgba(255,255,255,0.92)',
                 border: `1px solid ${colors.border}`,
                 borderRadius: '6px',
                 padding: '8px 10px',
-                minWidth: '200px',
+                minWidth: '180px',
+                maxWidth: isFullscreen && isMobile ? '48vw' : '260px',
                 boxShadow: `0 2px 6px ${colors.shadow}`,
               }}>
                 <div style={{ fontSize: '12px', fontWeight: 'bold', color: colors.text, marginBottom: '5px' }}>
@@ -3711,7 +3715,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           {isFullscreen && isMobile && (
             <MobileBottomPanel
               theme={theme}
-              safeAreaBottom={60}
+              safeAreaBottom={25}
               buttons={[
                 {
                   key: 'station',
