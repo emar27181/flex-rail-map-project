@@ -1,29 +1,105 @@
-# 列説明:
-# station_name      : 駅名
-# lat / lng         : 緯度・経度（routes.tsから自動生成）
-# line_count        : 乗り入れ路線数（自動生成）
-# avg_rent_1k       : 1K平均家賃（万円/月）
-# avg_rent_1ldk     : 1LDK平均家賃（万円/月）
-# population_density: 人口密度（人/km²）
-# daily_passengers  : 一日乗降客数（人/日）
-# morning_congestion: 朝ラッシュ混雑度（0-100）
-# izakaya_count     : 居酒屋数（半径500m以内）
-# restaurant_count  : 飲食店数（半径500m以内）
-# cafe_count        : カフェ数（半径500m以内）
-# convenience_store_count: コンビニ数（半径500m以内）
-# ramen_count       : ラーメン屋数（半径500m以内）
-# supermarket_count : スーパー数（半径500m以内）
-# hospital_count    : 病院・クリニック数（半径500m以内）
-# bookstore_count   : 書店数（半径500m以内）
-# crime_index       : 犯罪件数（件/年）
-# safety_score      : 治安スコア（0-100、高いほど安全）
-# park_area_m2      : 公園面積（m²、半径500m以内）
-# noise_score       : 静かさスコア（0-100、高いほど静か）
-# green_ratio_pct   : 緑地率（%）
-# office_count      : オフィスビル数（半径500m以内）
-# coworking_count   : コワーキングスペース数（半径500m以内）
+# ============================================================
+# station-stats.csv  駅別統計データ（正規データソース）
 #
-# 空欄のセルはデータ未入力。手動 or 外部API（国土数値情報等）で補完してください。
+# ■ 運用ルール
+#   - このファイルが唯一の正規データ。stationStats.ts は自動生成物。
+#   - 空欄 = 未入力。null や 0 を入れない。
+#   - データを追加したら git commit してバックアップ。
+#   - 収集日は stationStats.ts 側の PARAM_DATA_SOURCES に記録する。
+#
+# ■ 優先度の目安（上から埋めると効果が高い）
+#   高: daily_passengers, avg_rent_1k, avg_rent_1ldk, crime_index, safety_score
+#   中: population_density, restaurant_count, supermarket_count, park_area_m2
+#   低: morning_congestion, noise_score, green_ratio_pct, coworking_count
+#
+# ============================================================
+# 列定義・収集方法
+# ------------------------------------------------------------
+#
+# [自動生成列 ─ 手動編集不要]
+# station_name       : 駅名（routes.ts と一致させること）
+# lat / lng          : 緯度・経度（routes.ts から generate-station-stats.ts で生成）
+# line_count         : 乗り入れ路線数（同上）
+#
+# [住居・生活コスト]
+# avg_rent_1k        : 1K 平均家賃（万円/月）
+#   収集方法          : SUUMO https://suumo.jp/chintai/tokyo/ek_[駅名]/ で「1K」絞り込み
+#                       → 掲載物件の賃料一覧から中央値（上下10%除外して目算）
+#   精度              : ±1万円程度の概算
+#
+# avg_rent_1ldk      : 1LDK 平均家賃（万円/月）
+#   収集方法          : 同上、「1LDK」絞り込み
+#
+# population_density : 人口密度（人/km²）
+#   収集方法          : 政府統計 e-Stat 国勢調査（令和2年）→ 町丁別人口 / 面積
+#                       https://www.e-stat.go.jp/
+#   備考              : 駅の行政区画の町丁を合算して駅圏（概ね半径1km）を推計
+#
+# [交通]
+# daily_passengers   : 一日乗降客数（人/日）
+#   収集方法          : 各社公表の「駅別乗降人員」を合算
+#                       JR東日本  https://www.jreast.co.jp/passenger/
+#                       東京メトロ https://www.tokyometro.jp/corporate/enterprise/passenger_rail/transport/
+#                       各私鉄    各社 IR・統計ページ
+#   備考              : 複数社乗り入れ駅は合算、単位は人/日（千人単位で概算可）
+#
+# morning_congestion : 朝ラッシュ混雑度（0〜100、高いほど混む）
+#   収集方法          : 国土交通省「都市鉄道の混雑率」報告書の混雑率（%）を
+#                       100超えの場合は100にクリップ、100未満はそのまま整数値で記録
+#                       https://www.mlit.go.jp/toshi/city_transport/toshi_city_transport_tk_000007.html
+#
+# [飲食・娯楽 ─ 駅出口から半径500m以内の店舗数]
+# izakaya_count      : 居酒屋数
+# restaurant_count   : 飲食店数（全ジャンル合計）
+# cafe_count         : カフェ・喫茶店数
+# convenience_store_count : コンビニ数
+# ramen_count        : ラーメン専門店数
+#   収集方法（上記5列共通）:
+#                       Google マップで「駅名 居酒屋（or 飲食店 etc.）」検索
+#                       → 地図上の件数を目視でカウント（概数で可）
+#                       または Overpass API で OSM データから集計
+#                       https://overpass-turbo.eu/
+#
+# [生活利便性 ─ 半径500m以内]
+# supermarket_count  : スーパー数
+# hospital_count     : 病院・クリニック数
+# bookstore_count    : 書店数
+#   収集方法（上記3列共通）: Google マップ or Overpass API（飲食と同様）
+#
+# [治安]
+# crime_index        : 犯罪認知件数（件/年）
+#   収集方法          : 警視庁「区市町村の町丁別、罪種別及び手口別認知件数」
+#                       https://www.keishicho.metro.tokyo.lg.jp/about_mpd/toukei_sishou/toukei/hanzaitoukei.html
+#                       → 駅周辺の町丁を特定して合算
+#
+# safety_score       : 治安スコア（0〜100、高いほど安全）
+#   収集方法          : crime_index を人口で除した犯罪率を 0〜100 に正規化
+#                       safety_score = 100 - round((crime_index / population_density) * 正規化係数)
+#                       ※ crime_index と population_density が揃ったら算出可能
+#
+# [環境]
+# park_area_m2       : 周辺公園面積合計（m²、半径500m以内）
+#   収集方法          : 国土数値情報「都市公園データ」
+#                       https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-P13.html
+#                       → GIS ツール（QGIS 等）で半径500mバッファと重ねて面積合算
+#                       または Overpass API: [leisure=park] で検索
+#
+# noise_score        : 静かさスコア（0〜100、高いほど静か）
+#   収集方法          : 推計値。乗降客数・幹線道路密度・飲食店密度から算出
+#                       high_noise = (daily_passengers/350000)*40 + (restaurant_count/800)*30 + ...
+#                       ※ 直接測定データは環境省の騒音マップ https://www.env.go.jp/air/seikatsu/road_traffic_noise/index.html
+#
+# green_ratio_pct    : 緑地率（%）
+#   収集方法          : 国土数値情報「土地利用細分メッシュ」から農地・森林・公園の割合を算出
+#                       または Google Earth Engine で NDVI を用いた植生率推計
+#
+# [仕事]
+# office_count       : オフィスビル棟数（半径500m以内）
+# coworking_count    : コワーキングスペース数（半径500m以内）
+#   収集方法          : Google マップ or Overpass API（飲食と同様）
+#                       コワーキングは「コワーキング 駅名」で検索
+#
+# ============================================================
 
 station_name,lat,lng,line_count,avg_rent_1k,avg_rent_1ldk,population_density,daily_passengers,morning_congestion,izakaya_count,restaurant_count,cafe_count,convenience_store_count,ramen_count,supermarket_count,hospital_count,bookstore_count,crime_index,safety_score,park_area_m2,noise_score,green_ratio_pct,office_count,coworking_count
 東京,35.680965,139.766685,13,13,22,8000,450000,95,100,400,60,25,20,2,15,8,500,62,50000,35,12,500,25
