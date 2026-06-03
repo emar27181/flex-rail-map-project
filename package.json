@@ -9,7 +9,10 @@
     "astro": "astro",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:prod": "TEST_URL=https://flex-railway-map.netlify.app playwright test"
   },
   "dependencies": {
     "@astrojs/react": "^4.3.0",
@@ -25,6 +28,8 @@
     "react-leaflet": "^5.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^25.9.1",
     "vitest": "^2.1.0"
   }
 }
