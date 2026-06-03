@@ -13,7 +13,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:prod": "TEST_URL=https://flex-railway-map.netlify.app playwright test",
-    "deploy:preview": "netlify deploy 2>&1 | tee /tmp/netlify-preview.log && grep 'Website Draft URL' /tmp/netlify-preview.log",
+    "deploy:preview": "netlify deploy --alias preview",
     "deploy:prod": "npm run test:e2e && netlify deploy --prod"
   },
   "dependencies": {
