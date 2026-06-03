@@ -229,3 +229,115 @@ test.describe('カテゴリ5: レスポンシブ境界値', () => {
     });
   }
 });
+
+// ───────────────────────────────────────────────
+// カテゴリ 6: 初期フルスクリーン状態テスト
+// ───────────────────────────────────────────────
+test.describe('カテゴリ6: モバイル初期フルスクリーン', () => {
+  test.use({ viewport: { width: 375, height: 812 } });
+
+  test('モバイルで読み込み直後からフルスクリーンUIが表示される', async ({ page }) => {
+    await loadPage(page);
+
+    // MobileBottomPanel が最初から表示されていること（フルスクリーンが初期状態）
+    const buttons = page.locator('button[aria-expanded]');
+    await expect(buttons.first()).toBeVisible();
+
+    // fullscreen-map クラスが body に付いていること
+    await expect(page.locator('body')).toHaveClass(/fullscreen-map/);
+  });
+
+  test('モバイルで地図が画面全体を覆っている（position:fixed）', async ({ page }) => {
+    await loadPage(page);
+
+    // 地図コンテナが画面全体を覆う position:fixed 要素であること
+    const mapWrapper = page.locator('.leaflet-container').locator('..');
+    const position = await mapWrapper.evaluate(
+      (el) => window.getComputedStyle(el).position
+    );
+    // フルスクリーン時の外側コンテナが fixed であること
+    const outerContainer = page.locator('body > div').first();
+    const outerPos = await outerContainer.evaluate(
+      (el) => {
+        // position:fixed のコンテナを探す
+        let node: Element | null = el;
+        while (node) {
+          if (window.getComputedStyle(node).position === 'fixed') return 'fixed';
+          node = node.parentElement;
+        }
+        return 'not-fixed';
+      }
+    );
+    expect(outerPos).toBe('fixed');
+  });
+
+  test('フルスクリーン解除ボタンが右上に存在する', async ({ page }) => {
+    await loadPage(page);
+
+    // Minimize2 アイコンのボタン（フルスクリーン解除）が存在すること
+    const exitBtn = page.locator('button[aria-label="Exit fullscreen"]');
+    await expect(exitBtn).toBeVisible();
+
+    const box = await exitBtn.boundingBox();
+    expect(box).not.toBeNull();
+
+    // 右上にある: 画面右半分 かつ 上半分
+    expect(box!.x).toBeGreaterThan(375 / 2);
+    expect(box!.y).toBeLessThan(812 / 2);
+  });
+});
+
+// ───────────────────────────────────────────────
+// カテゴリ 7: インタラクションテスト
+// ───────────────────────────────────────────────
+test.describe('カテゴリ7: インタラクション', () => {
+  test.use({ viewport: { width: 375, height: 812 } });
+
+  test('駅設定ボタンをタップするとポップオーバーが開く', async ({ page }) => {
+    await loadPage(page);
+
+    const stationBtn = page.locator('button[aria-expanded]').first();
+    await expect(stationBtn).toHaveAttribute('aria-expanded', 'false');
+
+    await stationBtn.tap();
+    await expect(page.locator('[role="dialog"]')).toBeVisible();
+    await expect(stationBtn).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('ポップオーバーを開いた後バックドロップをタップすると閉じる', async ({ page }) => {
+    await loadPage(page);
+
+    await page.locator('button[aria-expanded]').first().tap();
+    await expect(page.locator('[role="dialog"]')).toBeVisible();
+
+    // バックドロップ（inset:0 の透明レイヤー）をタップして閉じる
+    await page.mouse.click(370, 100); // 右上（ボタン・ポップオーバー外）
+    await expect(page.locator('[role="dialog"]')).not.toBeVisible();
+  });
+
+  test('詳細設定ボタンをタップするとポップオーバーが切り替わる', async ({ page }) => {
+    await loadPage(page);
+
+    const buttons = page.locator('button[aria-expanded]');
+    await buttons.first().tap(); // 駅設定を開く
+    await expect(page.locator('[role="dialog"]')).toBeVisible();
+
+    await buttons.last().tap(); // 詳細設定に切り替え
+    await expect(page.locator('[role="dialog"]')).toBeVisible(); // まだ開いている
+    await expect(buttons.last()).toHaveAttribute('aria-expanded', 'true');
+    await expect(buttons.first()).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('ボタンサイズが文字に対して適切（過大でない）', async ({ page }) => {
+    await loadPage(page);
+
+    const btn = page.locator('button[aria-expanded]').first();
+    const box = await btn.boundingBox();
+    expect(box).not.toBeNull();
+
+    // 高さが 50px 以下（以前の 44px から縮小済み）
+    expect(box!.height).toBeLessThanOrEqual(50);
+    // 幅が 120px 以下（テキストに対して過大でない）
+    expect(box!.width).toBeLessThanOrEqual(120);
+  });
+});

@@ -174,11 +174,26 @@ src/
 
 ## デプロイ
 
-ユーザーから「デプロイして」と依頼された場合は以下のコマンドを実行する：
+**重要: 本番デプロイ前にE2Eテストを必ず通すこと。**
+
+ユーザーから「デプロイして」と依頼された場合は `npm run deploy:prod` を実行する：
 
 ```bash
+# テスト通過後に本番デプロイ（推奨）
+npm run deploy:prod
+
+# プレビューのみ（テストなし・本番URL変わらず）
+npm run deploy:preview
+
+# 直接デプロイ（テストをスキップ、緊急時のみ）
 netlify deploy --prod
 ```
+
+### テストが通らない場合
+
+- WSL2環境ではブラウザ依存ライブラリ不足でPlaywrightが動かない場合がある
+- その場合は `npm run test:e2e:prod` で本番URLに対してテストを実行するか、
+  WindowsのPowerShellから `npx playwright test` を実行する
 
 ## 現在の重要な問題点と解決策
 

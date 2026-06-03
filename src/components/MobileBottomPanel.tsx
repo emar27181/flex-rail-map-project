@@ -15,11 +15,11 @@ import { getThemeColors } from '../contexts/ThemeContext';
 
 // ── 寸法定数 ─────────────────────────────────────────────────────────
 
-/** ボタンの高さ（Apple HIG / Material Design 最小タッチ目標） */
-const BTN_H = 44;
+/** ボタンの高さ */
+const BTN_H = 34;
 
-/** ボタンの最小幅 */
-const BTN_MIN_W = 88;
+/** ボタンの最小幅（アイコンなし・テキストのみなので小さめ） */
+const BTN_MIN_W = 0;
 
 /** ボタン間のギャップ */
 const BTN_GAP = 6;
@@ -209,8 +209,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
               aria-controls={`mbp-popover-${btn.key}`}
               style={{
                 height: BTN_H,
-                minWidth: BTN_MIN_W,
-                padding: '0 14px',
+                padding: '0 12px',
                 border: `1px solid ${isActive ? colors.primary : colors.border}`,
                 borderRadius: 10,
                 cursor: 'pointer',
