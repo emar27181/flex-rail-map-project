@@ -33,17 +33,20 @@ const POPOVER_MAX_W = 320;
 /** ポップオーバーの最大高さ */
 const POPOVER_MAX_H = '65dvh';
 
-/** z-index: Leaflet (.leaflet-control: 800) より高い値が必要 */
-const Z_BTN = 1001;
-const Z_POPOVER = 1002;
-const Z_BACKDROP = 1000;
+/**
+ * position: fixed + high z-index で確実に最前面に出す。
+ * 外側の position:fixed コンテナ (z-index:9999) より高くする必要がある。
+ */
+const Z_BTN = 10001;
+const Z_POPOVER = 10002;
+const Z_BACKDROP = 10000;
 
 /** CSS 注入用 ID */
 const STYLE_ID = 'mbp-styles-v2';
 
 // ─────────────────────────────────────────────────────────────────────
 
-export type PopoverKey = 'station' | 'display' | 'settings';
+export type PopoverKey = 'station' | 'settings';
 
 export interface FloatingButtonDef {
   key: PopoverKey;
@@ -113,7 +116,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
           aria-hidden="true"
           onClick={close}
           style={{
-            position: 'absolute',
+            position: 'fixed',
             inset: 0,
             zIndex: Z_BACKDROP,
           }}
@@ -126,7 +129,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
           role="dialog"
           aria-label={activeButton.label}
           style={{
-            position: 'absolute',
+            position: 'fixed',
             bottom: safeBottom + BTN_H * buttons.length + BTN_GAP * (buttons.length - 1) + 8,
             left: GROUP_LEFT,
             width: `min(${POPOVER_MAX_W}px, calc(100vw - ${GROUP_LEFT * 2}px))`,
@@ -186,7 +189,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
       <div
         ref={groupRef}
         style={{
-          position: 'absolute',
+          position: 'fixed',
           bottom: safeBottom,
           left: GROUP_LEFT,
           zIndex: Z_BTN,
@@ -209,7 +212,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
                 minWidth: BTN_MIN_W,
                 padding: '0 14px',
                 border: `1px solid ${isActive ? colors.primary : colors.border}`,
-                borderRadius: BTN_H / 2,
+                borderRadius: 10,
                 cursor: 'pointer',
                 backgroundColor: isActive ? colors.primary : colors.surfaceElevated,
                 color: isActive ? '#fff' : colors.text,
@@ -217,14 +220,14 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
                 fontWeight: 'bold',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 6,
+                gap: btn.icon ? 6 : 0,
                 boxShadow: `0 2px 8px ${colors.shadow}`,
                 transition: 'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease',
                 userSelect: 'none',
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
-              <span style={{ fontSize: 16 }}>{btn.icon}</span>
+              {btn.icon && <span style={{ fontSize: 16 }}>{btn.icon}</span>}
               <span>{btn.label}</span>
             </button>
           );

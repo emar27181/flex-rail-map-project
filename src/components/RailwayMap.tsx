@@ -89,6 +89,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       .leaflet-tooltip::before {
         display: none !important;
       }
+      @media (max-width: 767px) {
+        .leaflet-bottom.leaflet-right {
+          margin-bottom: 70px;
+        }
+      }
     `;
   }, [theme]);
 
@@ -3706,10 +3711,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           {isFullscreen && isMobile && (
             <MobileBottomPanel
               theme={theme}
+              safeAreaBottom={60}
               buttons={[
                 {
                   key: 'station',
-                  icon: '🚉',
+                  icon: '',
                   label: currentLanguage === 'english' ? 'Station' : '駅設定',
                   content: (
                     <StationSelector
@@ -3727,22 +3733,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   ),
                 },
                 {
-                  key: 'display',
-                  icon: '🗺',
-                  label: currentLanguage === 'english' ? 'View' : '表示切替',
-                  content: (
-                    <LegendDisplayOptions
-                      mapViewMode={mapViewMode}
-                      theme={theme}
-                      language={currentLanguage}
-                      trainTypeViewEnabled={trainTypeViewEnabled}
-                      onMapViewModeChange={setMapViewMode}
-                    />
-                  ),
-                },
-                {
                   key: 'settings',
-                  icon: '⚙',
+                  icon: '',
                   label: currentLanguage === 'english' ? 'Settings' : '詳細設定',
                   content: (
                     <>
@@ -3833,13 +3825,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           <div style={{
             position: 'absolute',
             ...(isFullscreen && isMobile
-              ? { top: 'calc(env(safe-area-inset-top, 0px) + 10px)', bottom: 'auto' }
+              ? { top: 'calc(env(safe-area-inset-top, 0px) + 16px)', bottom: 'auto', right: '10px', left: 'auto' }
               : !isFullscreen
                 ? isMobile
-                  ? { top: '60px', bottom: 'auto' }
-                  : { bottom: '10px', top: 'auto' }
-                : { bottom: '10px', top: 'auto' }),
-            left: '10px',
+                  ? { top: '60px', bottom: 'auto', left: '10px' }
+                  : { bottom: '10px', top: 'auto', left: '10px' }
+                : { bottom: '10px', top: 'auto', left: '10px' }),
             zIndex: 1003,
             display: 'flex',
             gap: '4px',
