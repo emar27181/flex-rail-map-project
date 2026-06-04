@@ -3554,8 +3554,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           <button style={btnStyle} onClick={onPlus}>▶</button>
                         </div>
                       ))}
-                        </div>
-                      </div>
                     </>
                   );
                 })()}
