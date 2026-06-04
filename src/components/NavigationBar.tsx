@@ -130,7 +130,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             color: colors.text,
             fontFamily: 'monospace'
           }}>
-            {LANG_LABELS[language]}
+            {LANG_LABELS[nextLanguage(language)]}
           </span>
         </button>
 

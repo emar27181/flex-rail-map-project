@@ -254,7 +254,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
               cursor: 'pointer'
             }}
           />
-          {language === 'english' ? 'Show station codes' : '駅コードを表示'}
+          {translateUI('showStationCodes', language)}
         </label>
 
         {/* ふりがな表示オプション（日本語モードのみ） */}
@@ -328,7 +328,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             onChange={e => onHeatmapEnabledChange(e.target.checked)}
             style={{ marginRight: '6px', cursor: 'pointer' }}
           />
-          {language === 'english' ? 'Station heatmap' : '駅統計ヒートマップ'}
+          {translateUI('stationHeatmap', language)}
         </label>
         {heatmapEnabled && (
           <select

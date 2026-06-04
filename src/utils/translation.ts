@@ -2117,6 +2117,16 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   noDataForStation: {
     japanese: "この駅のデータは未入力です",
     english: "No data for this station"
+  },
+
+  // LegendRouteList
+  showStationCodes: {
+    japanese: "駅コードを表示",
+    english: "Show station codes"
+  },
+  stationHeatmap: {
+    japanese: "駅統計ヒートマップ",
+    english: "Station heatmap"
   }
 };
 
@@ -2248,6 +2258,8 @@ const uiChinese: Record<string, string> = {
   reloadButton: "重新加载",
   schematicMapHint: "点击: 设置出发站 | Shift+点击: 设置到达站",
   noDataForStation: "该站暂无数据",
+  showStationCodes: "显示站编码",
+  stationHeatmap: "车站统计热力图",
 };
 
 // 韓国語UI翻訳
@@ -2376,6 +2388,8 @@ const uiKorean: Record<string, string> = {
   reloadButton: "다시 로드",
   schematicMapHint: "클릭: 출발역 설정 | Shift+클릭: 도착역 설정",
   noDataForStation: "이 역의 데이터가 없습니다",
+  showStationCodes: "역 코드 표시",
+  stationHeatmap: "역 통계 히트맵",
 };
 
 // 翻訳ヘルパー関数

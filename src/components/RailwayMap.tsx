@@ -3323,17 +3323,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
               {/* 列車位置デモ: 駅・路線より前面のカスタムペインに表示 */}
               <Pane name="trainDemoPane" style={{ zIndex: 650 }}>
-                {showTrainDemo && trainPositions.map(t => {
+                {showTrainDemo && MapComponents?.DivIcon && MapComponents?.Marker && trainPositions.map(t => {
                   const terminals = DEMO_DIRECTION_TERMINALS[t.lineKey];
                   const dest = terminals?.[t.direction] ?? '';
                   const lineName = routeNames[t.lineKey as RouteKey] ?? t.lineKey;
                   const depTime = formatDemoTime(t.departureMin);
+                  const bearing = t.bearing ?? 0;
+                  const icon = new MapComponents.DivIcon({
+                    html: `<div style="width:16px;height:16px;display:flex;align-items:center;justify-content:center;transform:rotate(${bearing}deg);"><span style="font-size:16px;line-height:1;color:${t.color};text-shadow:0 0 3px #fff,0 0 2px #fff;">▲</span></div>`,
+                    className: '',
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8],
+                  });
                   return (
-                    <CircleMarker
+                    <MapComponents.Marker
                       key={t.id}
-                      center={t.pos}
-                      radius={7}
-                      pathOptions={{ fillColor: t.color, fillOpacity: 1, color: '#fff', weight: 1.5 }}
+                      position={t.pos}
+                      icon={icon}
                     >
                       <Tooltip sticky offset={[8, 0]} direction="right" opacity={0.95}>
                         <div style={{ fontSize: '12px', lineHeight: 1.5, whiteSpace: 'nowrap' }}>
@@ -3342,7 +3348,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           <div style={{ color: '#888', fontSize: '11px' }}>発 {depTime}</div>
                         </div>
                       </Tooltip>
-                    </CircleMarker>
+                    </MapComponents.Marker>
                   );
                 })}
               </Pane>
@@ -4072,7 +4078,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 title="Switch language"
                 aria-label="Switch language"
               >
-                {{ japanese: '日', english: 'En', chinese: '中', korean: '한' }[language]}
+                {(() => { const langs: Language[] = ['japanese', 'english', 'chinese', 'korean']; const next = langs[(langs.indexOf(language) + 1) % langs.length]; return { japanese: '日', english: 'En', chinese: '中', korean: '한' }[next]; })()}
               </button>
             )}
 
