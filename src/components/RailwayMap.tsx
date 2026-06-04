@@ -90,6 +90,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       .leaflet-tooltip::before {
         display: none !important;
       }
+      .bubble-name-label {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        pointer-events: none !important;
+      }
+      .bubble-name-label::before {
+        display: none !important;
+      }
     `;
   }, [theme]);
 
@@ -208,6 +218,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [heatmapParam, setHeatmapParam] = useState<keyof StationStats>('avgRent1K');
   // バブルマップの形状（円 or 四角）
   const [bubbleShape, setBubbleShape] = useState<'circle' | 'square'>('circle');
+  // バブルマップ: 駅名 → 実際に使用する地理的半径(m)（重なり防止後）
+  const [bubbleRadiiMap, setBubbleRadiiMap] = useState<Map<string, number>>(new Map());
   const [heatmapCustomRange, setHeatmapCustomRange] = useState<{ min: number; max: number } | undefined>(undefined);
   const [showStationTooltip, setShowStationTooltip] = useState(true);
   const [showFullRouteStations, setShowFullRouteStations] = useState(true);
@@ -1562,7 +1574,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         if (typeof window === 'undefined') return;
 
         const [
-          { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, Pane, Tooltip },
+          { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Circle, useMapEvents, ZoomControl, Pane, Tooltip },
           { DivIcon }
         ] = await Promise.all([
           import('react-leaflet'),
@@ -1570,7 +1582,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         ]);
 
         if (mounted) {
-          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip });
+          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Circle, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip });
           setIsClient(true);
           setIsLoading(false);
           // デバッグ関数をブラウザコンソールで利用可能にする
@@ -2344,7 +2356,63 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // ─── バブルマップ用: 重なり防止サイズ計算コンポーネント ───────────────
   // MapContainer の子として配置し、useMapEvents でピクセル座標を取得する。
-  // 大きい駅から順に配置し、各駅の最大許容半径を O(n²) 1パスで算出する。
+  // バブルマップ: ズーム/移動ごとに地理的半径（m）を再計算して重なりを防止
+  const BubbleRadiusManager: React.FC<{
+    stations: Array<{ name: string; lat: number; lng: number; value: number }>;
+    onRadiiComputed: (radii: Map<string, number>) => void;
+  }> = ({ stations, onRadiiComputed }) => {
+    const BASE_MIN_M = 100, BASE_MAX_M = 900;
+
+    const compute = React.useCallback((map: ReturnType<typeof useMapEvents>) => {
+      if (stations.length === 0) { onRadiiComputed(new Map()); return; }
+
+      // ピクセル/メートル換算（現在のズームで計算）
+      const center = map.getCenter();
+      const pt0 = map.latLngToContainerPoint([center.lat, center.lng]);
+      const pt1 = map.latLngToContainerPoint([center.lat + 0.001, center.lng]);
+      const pixPerMeter = Math.abs(pt0.y - pt1.y) / 111.32;
+
+      const values = stations.map(s => s.value);
+      const minV = Math.min(...values), maxV = Math.max(...values);
+      const range = maxV - minV || 1;
+
+      // 値の大きい順に処理
+      const sorted = [...stations].sort((a, b) => b.value - a.value);
+      const placed: Array<{ x: number; y: number; r: number }> = [];
+      const radii = new Map<string, number>();
+
+      for (const s of sorted) {
+        const pt = map.latLngToContainerPoint([s.lat, s.lng]);
+        const t = (s.value - minV) / range;
+        let rM = BASE_MIN_M + t * (BASE_MAX_M - BASE_MIN_M);
+        let rPx = rM * pixPerMeter;
+
+        // 配置済み円との重なりを解消（半径を縮小）
+        for (const p of placed) {
+          const d = Math.hypot(p.x - pt.x, p.y - pt.y);
+          const maxPx = d - p.r - 2;
+          if (maxPx < rPx) rPx = maxPx;
+        }
+
+        const MIN_PX = 4;
+        if (rPx >= MIN_PX) {
+          placed.push({ x: pt.x, y: pt.y, r: rPx });
+          radii.set(s.name, rPx / pixPerMeter); // 縮小後をメートルに戻す
+        } else {
+          radii.set(s.name, MIN_PX / pixPerMeter); // 最小表示
+          placed.push({ x: pt.x, y: pt.y, r: MIN_PX });
+        }
+      }
+      onRadiiComputed(radii);
+    }, [stations, onRadiiComputed]);
+
+    const map = useMapEvents({
+      zoomend: (e) => compute(e.target),
+      moveend: (e) => compute(e.target),
+    });
+    React.useEffect(() => { compute(map); }, [compute, map]);
+    return null;
+  };
 
   const getRouteSegmentForStations = (routeKey: RouteKey, stations: Station[], depStation: Station, arrStation: Station) => {
     const depIndex = stations.findIndex(s => s.name === depStation.name);
@@ -3167,52 +3235,45 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               <ZoomControl position="bottomright" />
               <MapEvents />
 
-              {/* バブルマップ: CircleMarker（ピクセル固定半径・全駅常時表示） */}
-              {mapViewMode === 'bubble' && (() => {
-                const values = bubbleStations.map(s => s.value);
-                const minV = Math.min(...values) || 0;
-                const maxV = Math.max(...values) || 1;
-                const range = maxV - minV || 1;
-                return bubbleStations.map(s => {
-                  const color = getStationHeatColor(s.name, heatmapParam, heatmapCustomRange)
-                    ?? (theme === 'dark' ? '#6699cc' : '#3366cc');
-                  // 4〜28px 固定ピクセル半径（ズーム不変）
-                  const t = (s.value - minV) / range;
-                  const r = 4 + t * 24;
-                  const borderColor = theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.25)';
-                  return (
-                    <CircleMarker
-                      key={`bubble-${s.name}`}
-                      center={[s.lat, s.lng]}
-                      radius={r}
-                      pathOptions={{
-                        fillColor: color,
-                        fillOpacity: 0.65,
-                        color: borderColor,
-                        weight: 1,
-                      }}
-                      eventHandlers={{
-                        click: (e) => {
-                          if (isMobile && mapDraggedRef.current) return;
-                          const oe = e.originalEvent as MouseEvent | undefined;
-                          if (!oe) return;
-                          setStationTooltip(prev =>
-                            prev?.stationName === s.name ? null : { stationName: s.name, station: s as unknown as Station, x: oe.clientX, y: oe.clientY }
-                          );
-                        },
-                      }}
-                    >
-                      {showStationNames && r >= 10 && (
-                        <Tooltip direction="center" permanent opacity={1} className="bubble-label">
-                          <span style={{ fontSize: `${Math.max(7, Math.round(r * 0.6))}px`, fontWeight: 'bold', color: '#fff', pointerEvents: 'none' }}>
-                            {translateStation(s.name, currentLanguage)}
-                          </span>
-                        </Tooltip>
-                      )}
-                    </CircleMarker>
-                  );
-                });
-              })()}
+              {/* バブルマップ: 地理的Circle（ズームで拡縮・重なり防止・駅名内表示） */}
+              {mapViewMode === 'bubble' && (
+                <BubbleRadiusManager
+                  stations={bubbleStations}
+                  onRadiiComputed={setBubbleRadiiMap}
+                />
+              )}
+              {mapViewMode === 'bubble' && bubbleStations.map(s => {
+                const radiusM = bubbleRadiiMap.get(s.name);
+                if (radiusM == null) return null;
+                const color = getStationHeatColor(s.name, heatmapParam, heatmapCustomRange)
+                  ?? (theme === 'dark' ? '#6699cc' : '#3366cc');
+                const borderColor = theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.3)';
+                const displayName = translateStation(s.name, currentLanguage);
+                return (
+                  <MapComponents.Circle
+                    key={`bubble-${s.name}`}
+                    center={[s.lat, s.lng]}
+                    radius={radiusM}
+                    pathOptions={{ fillColor: color, fillOpacity: 0.65, color: borderColor, weight: 1.5 }}
+                    eventHandlers={{
+                      click: (e) => {
+                        if (isMobile && mapDraggedRef.current) return;
+                        const oe = e.originalEvent as MouseEvent | undefined;
+                        if (!oe) return;
+                        setStationTooltip(prev =>
+                          prev?.stationName === s.name ? null : { stationName: s.name, station: s as unknown as Station, x: oe.clientX, y: oe.clientY }
+                        );
+                      },
+                    }}
+                  >
+                    <Tooltip direction="center" permanent opacity={1} className="bubble-name-label">
+                      <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#fff', textShadow: '0 0 3px rgba(0,0,0,0.8)', whiteSpace: 'nowrap', pointerEvents: 'none' }}>
+                        {displayName}
+                      </span>
+                    </Tooltip>
+                  </MapComponents.Circle>
+                );
+              })}
 
               {showOsmTiles && mapViewMode !== 'bubble' && (
                 <TileLayer
@@ -3340,7 +3401,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           )}
 
           {/* ヒートマップ凡例（ヒートマップ有効時のみ・スマホは右下に表示） */}
-          {heatmapEnabled && mapViewMode === 'realistic' && (() => {
+          {(heatmapEnabled || mapViewMode === 'bubble') && (mapViewMode === 'realistic' || mapViewMode === 'bubble') && (() => {
             const meta = STAT_PARAMS.find(p => p.key === heatmapParam);
             const gradientCss = buildGradientCss('to right');
             const dataRange = getParamRange(heatmapParam);
