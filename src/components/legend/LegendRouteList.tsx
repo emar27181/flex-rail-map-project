@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import type { RouteKey } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
-import { translateUI } from '../../utils/translation';
+import { translateUI } from '../../utils/translation'
+import type { Language } from '../../utils/translation';
 import RouteToggleItem from '../ui/RouteToggleItem';
 import { STAT_PARAMS } from '../../data/stationStats';
 import type { StationStats, StatCategory } from '../../data/stationStats';
@@ -26,7 +27,7 @@ interface LegendRouteListProps {
   showFurigana: boolean;
   showOsmTiles: boolean;
   theme: 'light' | 'dark';
-  language: 'japanese' | 'english';
+  language: Language;
   onToggleRoute: (routeKey: RouteKey) => void;
   onSelectAllRoutes: () => void;
   onDeselectAllRoutes: () => void;
@@ -43,11 +44,14 @@ interface LegendRouteListProps {
   viewCenter?: [number, number];
   showTrainDemo: boolean;
   onTrainDemoToggle: () => void;
-  mapViewMode: 'realistic' | 'schematic';
+  mapViewMode: 'realistic' | 'schematic' | 'bubble';
+  onMapViewModeChange: (mode: 'realistic' | 'schematic' | 'bubble') => void;
   heatmapEnabled: boolean;
   heatmapParam: keyof StationStats;
   onHeatmapEnabledChange: (v: boolean) => void;
   onHeatmapParamChange: (k: keyof StationStats) => void;
+  bubbleShape: 'circle' | 'square';
+  onBubbleShapeChange: (shape: 'circle' | 'square') => void;
   showLatLngGrid?: boolean;
   showStationTooltip: boolean;
   onShowStationTooltipChange: (v: boolean) => void;
@@ -92,10 +96,13 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   showTrainDemo,
   onTrainDemoToggle,
   mapViewMode,
+  onMapViewModeChange,
   heatmapEnabled,
   heatmapParam,
   onHeatmapEnabledChange,
   onHeatmapParamChange,
+  bubbleShape,
+  onBubbleShapeChange,
   showStationTooltip,
   onShowStationTooltipChange,
   showFullRouteStations,
@@ -358,6 +365,35 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
               );
             })}
           </select>
+        )}
+
+        {/* バブルマップ（ヒートマップと同じパラメータを使用） */}
+        <label style={checkboxLabel(colors)}>
+          <input
+            type="checkbox"
+            checked={mapViewMode === 'bubble'}
+            onChange={e => onMapViewModeChange(e.target.checked ? 'bubble' : 'realistic')}
+            style={{ marginRight: '6px', cursor: 'pointer' }}
+          />
+          {language === 'english' ? 'Bubble map' : 'バブルマップ'}
+        </label>
+        {mapViewMode === 'bubble' && (
+          <div style={{ marginLeft: '22px', marginTop: '4px', display: 'flex', gap: '6px' }}>
+            {(['circle', 'square'] as const).map(shape => (
+              <label key={shape} style={{ display: 'flex', alignItems: 'center', fontSize: '11px', color: colors.text, cursor: 'pointer' }}>
+                <input
+                  type="radio"
+                  name="bubbleShape"
+                  checked={bubbleShape === shape}
+                  onChange={() => onBubbleShapeChange(shape)}
+                  style={{ marginRight: '4px', cursor: 'pointer' }}
+                />
+                {shape === 'circle'
+                  ? (language === 'english' ? '● Circle' : '● 円')
+                  : (language === 'english' ? '■ Square' : '■ 四角')}
+              </label>
+            ))}
+          </div>
         )}
 
         {/* 列車デモ（リアル地図モードのみ） */}

@@ -10,6 +10,7 @@ import { RouteFinder, TimeFilter, type RouteResult, type StationWithTime } from 
 import { getRouteDestination, getRouteDisplayText, getDirectionText, commonDirections } from '../data/routeDestinations';
 import { useTheme, getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
 import { translateStation, translateRoute, translateUI } from '../utils/translation';
+import type { Language } from '../utils/translation';
 import { getFurigana } from '../utils/furigana';
 import LegendStationMarkers from './legend/LegendStationMarkers';
 import LegendRouteList from './legend/LegendRouteList';
@@ -55,8 +56,8 @@ declare global {
 
 interface RailwayMapProps {
   className?: string;
-  language: 'japanese' | 'english';
-  onLanguageChange?: (language: 'japanese' | 'english') => void;
+  language: Language;
+  onLanguageChange?: (language: Language) => void;
   onFullscreenChange?: (isFullscreen: boolean) => void;
 }
 
@@ -139,7 +140,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   const [tapToggleMode, setTapToggleMode] = useState(true);
   // 地図表示モード
-  const [mapViewMode, setMapViewMode] = useState<'realistic' | 'schematic'>('realistic');
+  const [mapViewMode, setMapViewMode] = useState<'realistic' | 'schematic' | 'bubble'>('realistic');
 
   // 列車種別表示モード（常にオン）
   const trainTypeViewEnabled = true;
@@ -201,6 +202,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // ヒートマップ
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
   const [heatmapParam, setHeatmapParam] = useState<keyof StationStats>('avgRent1K');
+  // バブルマップ: 駅名 → 表示半径(px)。BubbleSizer が計算して注入する
+  const [bubbleSizesMap, setBubbleSizesMap] = useState<Map<string, number>>(new Map());
+  // バブルマップの形状（円 or 四角）
+  const [bubbleShape, setBubbleShape] = useState<'circle' | 'square'>('circle');
   const [heatmapCustomRange, setHeatmapCustomRange] = useState<{ min: number; max: number } | undefined>(undefined);
   const [showStationTooltip, setShowStationTooltip] = useState(true);
   const [showFullRouteStations, setShowFullRouteStations] = useState(true);
@@ -666,11 +671,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           <div style={{ display: 'flex', gap: '4px' }}>
             <button onClick={() => { setDeparture(stationTooltip.station); setStationTooltip(null); }}
               style={{ backgroundColor: '#4CAF50', color: 'white', border: 'none', padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px' }}>
-              出発に設定
+              {translateUI('setDepartureStation', currentLanguage)}
             </button>
             <button onClick={() => { setArrival(stationTooltip.station); setStationTooltip(null); }}
               style={{ backgroundColor: '#F44336', color: 'white', border: 'none', padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px' }}>
-              到着に設定
+              {translateUI('setArrivalStation', currentLanguage)}
             </button>
           </div>
         </div>
@@ -722,7 +727,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             </div>
           ) : (
             <div style={{ fontSize: '11px', color: colors.textSecondary, fontStyle: 'italic', padding: '4px 0' }}>
-              この駅のデータは未入力です
+              {translateUI('noDataForStation', currentLanguage)}
             </div>
           )}
         </div>
@@ -957,7 +962,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 </div>
               ) : (
                 <div style={{ fontSize: '10px', color: colors.textSecondary, fontStyle: 'italic' }}>
-                  この駅のデータは未入力です
+                  {translateUI('noDataForStation', currentLanguage)}
                 </div>
               )}
             </div>
@@ -1485,6 +1490,67 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return result;
   }, [visibleRoutesData, viewBounds, viewCenter]);
 
+  /**
+   * 「どの駅を表示するか」の共有ロジック。
+   * 通常マップ・バブルマップ両方がこれを参照する。
+   * 各フィルターフラグを適用した上で、表示すべき駅名 Set を返す。
+   */
+  const stationVisibilityFilter = useMemo(() => {
+    // 駅名 → その駅が属するルートのうち最初のもの（駅番号取得用）
+    const stationRouteMap = new Map<string, RouteKey>();
+    for (const [rk, stationList] of visibleRoutesData) {
+      for (const s of stationList as Station[]) {
+        if (!stationRouteMap.has(s.name)) stationRouteMap.set(s.name, rk as RouteKey);
+      }
+    }
+
+    const shouldShow = (station: Station): boolean => {
+      // 乗換駅のみ
+      if (showTransferStationsOnly && !transferStations.has(station.name)) return false;
+      // 急行駅のみ
+      if (showExpressStationsOnly && !station.isExpress && !transferStations.has(station.name)) return false;
+      // 時間フィルター
+      if (timeFilterEnabled && stationsWithinTime.length > 0) {
+        if (!stationsWithinTime.some(s => s.station.name === station.name)) return false;
+      }
+      // ビューポート上限
+      if (allowedStationNames && !allowedStationNames.has(station.name)) return false;
+      return true;
+    };
+
+    return { shouldShow, stationRouteMap };
+  }, [
+    visibleRoutesData, showTransferStationsOnly, showExpressStationsOnly,
+    timeFilterEnabled, stationsWithinTime, transferStations, allowedStationNames,
+  ]);
+
+  // バブルマップ用: stationVisibilityFilter を通過した駅 + 中心から近い順 最大300件
+  const MAX_BUBBLE_STATIONS = 300;
+  const bubbleStations = useMemo(() => {
+    if (mapViewMode !== 'bubble') return [];
+    const { shouldShow } = stationVisibilityFilter;
+    const seen = new Set<string>();
+    const candidates: Array<{ name: string; lat: number; lng: number; value: number }> = [];
+
+    for (const [, stationList] of visibleRoutesData) {
+      for (const s of stationList as Station[]) {
+        if (seen.has(s.name)) continue;
+        if (!shouldShow(s)) continue;
+        const val = stationStatsData[s.name]?.[heatmapParam] as number | undefined;
+        if (val == null) continue;
+        seen.add(s.name);
+        candidates.push({ name: s.name, lat: s.lat, lng: s.lng, value: val });
+      }
+    }
+
+    if (candidates.length <= MAX_BUBBLE_STATIONS) return candidates;
+
+    const [cLat, cLng] = viewCenter;
+    candidates.sort((a, b) =>
+      ((a.lat - cLat) ** 2 + (a.lng - cLng) ** 2) - ((b.lat - cLat) ** 2 + (b.lng - cLng) ** 2)
+    );
+    return candidates.slice(0, MAX_BUBBLE_STATIONS);
+  }, [mapViewMode, visibleRoutesData, heatmapParam, viewCenter, stationVisibilityFilter]);
 
   useEffect(() => {
     let mounted = true;
@@ -2261,6 +2327,59 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return null;
   };
 
+  // ─── バブルマップ用: 重なり防止サイズ計算コンポーネント ───────────────
+  // MapContainer の子として配置し、useMapEvents でピクセル座標を取得する。
+  // 大きい駅から順に配置し、各駅の最大許容半径を O(n²) 1パスで算出する。
+  const BubbleSizer: React.FC<{
+    stations: Array<{ name: string; lat: number; lng: number; value: number }>;
+    onSizesComputed: (sizes: Map<string, number>) => void;
+  }> = ({ stations, onSizesComputed }) => {
+    const MIN_R = 5, MAX_R = 45;
+
+    const compute = React.useCallback((map: ReturnType<typeof useMapEvents>) => {
+      if (stations.length === 0) { onSizesComputed(new Map()); return; }
+
+      const values = stations.map(s => s.value);
+      const minV = Math.min(...values), maxV = Math.max(...values);
+      const range = maxV - minV || 1;
+
+      // 値の大きい順に配置（重要な駅が大きいサイズを確保）
+      const sorted = [...stations].sort((a, b) => b.value - a.value);
+      const placed: Array<{ x: number; y: number; r: number }> = [];
+      const sizes = new Map<string, number>();
+
+      for (const s of sorted) {
+        const pt = map.latLngToContainerPoint([s.lat, s.lng]);
+        const t = (s.value - minV) / range;
+        let r = MIN_R + t * (MAX_R - MIN_R);
+
+        // 配置済み円との制約から最大許容半径を算出（1パス）
+        for (const p of placed) {
+          const d = Math.hypot(p.x - pt.x, p.y - pt.y);
+          const maxR = d - p.r - 2; // 2px のギャップ
+          if (maxR < r) r = maxR;
+        }
+
+        if (r >= MIN_R) {
+          placed.push({ x: pt.x, y: pt.y, r });
+          sizes.set(s.name, r);
+        }
+        // r < MIN_R → この駅は非表示（sizes に含めない）
+      }
+
+      onSizesComputed(sizes);
+    }, [stations, onSizesComputed]);
+
+    const map = useMapEvents({
+      zoomend: (e) => compute(e.target),
+      moveend: (e) => compute(e.target),
+    });
+
+    React.useEffect(() => { compute(map); }, [compute, map]);
+
+    return null;
+  };
+
   const getRouteSegmentForStations = (routeKey: RouteKey, stations: Station[], depStation: Station, arrStation: Station) => {
     const depIndex = stations.findIndex(s => s.name === depStation.name);
     const arrIndex = stations.findIndex(s => s.name === arrStation.name);
@@ -2414,39 +2533,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           const isArrival = arrival && station.name === arrival.name;
           const isSpecialStation = isDeparture || isArrival;
 
-          // 駅マーカー表示上限（特別駅は常に表示）
-          if (!isSpecialStation && allowedStationNames && !allowedStationNames.has(station.name)) {
+          // 共有フィルターロジックを適用（特別駅は allowedStationNames の上限のみ免除）
+          if (!isSpecialStation && !stationVisibilityFilter.shouldShow(station)) {
             return null;
           }
-
           if (isSpecialStation) {
             // 駅名表示がオフの場合は特別駅も非表示
             if (!showStationNames) {
               return null;
             }
-
-            // 乗換駅のみ表示モード時は、特別駅も乗換駅チェックを適用
-            if (showTransferStationsOnly && !transferStations.has(station.name)) {
-              console.log(`Filtering out special non-transfer station: ${station.name}`);
-              return null;
-            }
-
-            // 急行駅のみ表示モード時は、特別駅も急行駅チェックを適用
-            if (showExpressStationsOnly && !station.isExpress) {
-              console.log(`Filtering out special non-express station: ${station.name}`);
-              return null;
-            }
-
-            // 時間フィルターが有効な場合は、範囲内の駅のみ表示
+            // 特別駅も共有フィルター適用（allowedStationNames は免除済みなので除く）
+            if (showTransferStationsOnly && !transferStations.has(station.name)) return null;
+            if (showExpressStationsOnly && !station.isExpress && !transferStations.has(station.name)) return null;
             if (timeFilterEnabled && stationsWithinTime.length > 0) {
               const stationWithTime = stationsWithinTime.find(sWithTime => sWithTime.station.name === station.name);
-              if (!stationWithTime) {
-                return null;
-              }
+              if (!stationWithTime) return null;
               currentlyDisplayedStations.add(station.name);
             }
-
-            // 時間フィルターが無効な場合は通常表示
             if (!timeFilterEnabled) {
               currentlyDisplayedStations.add(station.name);
             }
@@ -2493,29 +2596,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
             const isTransferStation = transferStations.has(station.name);
 
-            // 時間フィルターが有効な場合は最優先でチェック
+            // 共有フィルターロジック（時間フィルター・乗換・急行を一括適用）
+            // ※ allowedStationNames は上で既にチェック済み
+            if (showTransferStationsOnly && !isTransferStation) return null;
+            if (showExpressStationsOnly && !station.isExpress && !isTransferStation) return null;
             if (timeFilterEnabled && stationsWithinTime.length > 0) {
-              const stationWithTime = stationsWithinTime.find(sWithTime => sWithTime.station.name === station.name);
-              if (!stationWithTime) {
-                // 時間範囲外の駅は表示しない
-                return null;
-              }
-              // 時間範囲内の駅は記録
+              const inRange = stationsWithinTime.find(s => s.station.name === station.name);
+              if (!inRange) return null;
               currentlyDisplayedStations.add(station.name);
-              // console.log removed
             }
-
-            // 乗換駅のみ表示モード（時間フィルター有効時でも適用）
-            if (showTransferStationsOnly && !isTransferStation) {
-              return null;
-            }
-
-            // 急行駅のみ表示モード（時間フィルター有効時でも適用）
-            if (showExpressStationsOnly && !station.isExpress) {
-              return null;
-            }
-
-            // 時間フィルターが無効な場合は通常表示
             if (!timeFilterEnabled) {
               currentlyDisplayedStations.add(station.name);
             }
@@ -3059,18 +3148,102 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           ? { position: 'absolute', inset: 0, border: 'none' }
           : { height: '600px', width: '100%', border: `1px solid ${colors.border}`, position: 'relative' }
         }>
-          {mapViewMode === 'realistic' ? (
+          {(mapViewMode === 'realistic' || mapViewMode === 'bubble') ? (
             <MapContainer
               center={mapCenter}
               zoom={12}
-              style={{ height: '100%', width: '100%' }}
+              style={{
+                height: '100%', width: '100%',
+                backgroundColor: mapViewMode === 'bubble'
+                  ? (theme === 'dark' ? '#1a1a2e' : '#f0f0f5')
+                  : undefined,
+              }}
               scrollWheelZoom={true}
               zoomControl={false}
               ref={mapRef}
             >
               <ZoomControl position="bottomright" />
               <MapEvents />
-              {showOsmTiles && (
+
+              {/* バブルマップ用サイズ計算（重なり防止） */}
+              {mapViewMode === 'bubble' && (
+                <BubbleSizer
+                  stations={bubbleStations}
+                  onSizesComputed={setBubbleSizesMap}
+                />
+              )}
+
+              {/* バブルマップ用 Marker 描画（DivIcon・駅名付き） */}
+              {mapViewMode === 'bubble' && Array.from(bubbleSizesMap.entries()).map(([name, r]) => {
+                const s = bubbleStations.find(st => st.name === name);
+                if (!s) return null;
+                const color = getStationHeatColor(name, heatmapParam, heatmapCustomRange)
+                  ?? (theme === 'dark' ? '#6699cc' : '#3366cc');
+                const d = r * 2;
+                const isCircle = bubbleShape === 'circle';
+                const borderColor = theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.25)';
+                const textColor = '#fff';
+
+                // ── 表示テキスト組み立て（表示フラグに従う） ──
+                const routeKeyForNum = stationVisibilityFilter.stationRouteMap.get(name);
+                const stationNum = showStationNumbers
+                  ? (routeKeyForNum ? getStationNumber(routeKeyForNum, name) : null) ?? getAnyStationNumber(name)
+                  : null;
+                const furigana = (showFurigana && currentLanguage === 'japanese') ? getFurigana(name) : '';
+                const displayName = showStationNames
+                  ? (stationNum ? `${stationNum} ${name}` : name)
+                  : (stationNum ?? '');
+
+                const fontSize = Math.max(7, Math.min(13, r * 0.42));
+                const subSize = Math.max(6, fontSize - 2);
+
+                const innerHtml = displayName
+                  ? (furigana
+                    ? `<div style="display:flex;flex-direction:column;align-items:center;line-height:1.1;overflow:hidden">
+                        <span style="font-size:${subSize}px;opacity:0.85">${furigana}</span>
+                        <span style="font-size:${fontSize}px">${displayName}</span>
+                       </div>`
+                    : `<span style="font-size:${fontSize}px">${displayName}</span>`)
+                  : '';
+
+                const html = `<div style="
+                  width:${d}px;height:${d}px;
+                  border-radius:${isCircle ? '50%' : '6px'};
+                  background:${color};
+                  border:1.5px solid ${borderColor};
+                  display:flex;align-items:center;justify-content:center;
+                  color:${textColor};font-weight:bold;
+                  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+                  padding:0 2px;box-sizing:border-box;
+                  pointer-events:auto;cursor:pointer;
+                ">${innerHtml}</div>`;
+                const icon = new DivIcon({
+                  html,
+                  className: '',
+                  iconSize: [d, d],
+                  iconAnchor: [r, r],
+                });
+                return (
+                  <Marker
+                    key={`bubble-${name}`}
+                    position={[s.lat, s.lng]}
+                    icon={icon}
+                    zIndexOffset={Math.round(r) * 10}
+                    eventHandlers={{
+                      click: (e) => {
+                        if (isMobile && mapDraggedRef.current) return;
+                        const oe = e.originalEvent as MouseEvent | undefined;
+                        if (!oe) return;
+                        setStationTooltip(prev =>
+                          prev?.stationName === name ? null : { stationName: name, station: s as Station, x: oe.clientX, y: oe.clientY }
+                        );
+                      },
+                    }}
+                  />
+                );
+              })}
+
+              {showOsmTiles && mapViewMode !== 'bubble' && (
                 <TileLayer
                   url={theme === 'dark'
                     ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
@@ -3080,8 +3253,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 />
               )}
 
-              {/* 非表示路線（半透明・クリック可能） */}
-              {showDimmedMapRoutes && Object.entries(routes)
+              {/* 非表示路線（半透明・クリック可能）─ バブルモードでは非表示 */}
+              {mapViewMode !== 'bubble' && showDimmedMapRoutes && Object.entries(routes)
                 .filter(([rk]) => !visibleRoutes.has(rk as RouteKey))
                 .map(([rk, stationList]) => {
                   const rKey = rk as RouteKey;
@@ -3134,7 +3307,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 })
               }
 
-              {visibleRoutesData.map(([routeKey, stations]) =>
+              {/* 路線・駅マーカー ─ バブルモードでは非表示（CircleMarker で代替） */}
+              {mapViewMode !== 'bubble' && visibleRoutesData.map(([routeKey, stations]) =>
                 renderRoute(routeKey as RouteKey, stations)
               )}
 
@@ -3212,7 +3386,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               <div style={{
                 position: 'fixed',
                 ...(isFullscreen && isMobile
-                  ? { bottom: '10px', right: '10px', left: 'auto' }
+                  ? { bottom: '60px', right: '10px', left: 'auto' }
                   : { bottom: '40px', left: '10px' }),
                 zIndex: 1001,
                 background: theme === 'dark' ? 'rgba(30,30,30,0.92)' : 'rgba(255,255,255,0.92)',
@@ -3558,6 +3732,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     heatmapParam={heatmapParam}
                     onHeatmapEnabledChange={setHeatmapEnabled}
                     onHeatmapParamChange={setHeatmapParam}
+                    mapViewMode={mapViewMode}
+                    onMapViewModeChange={setMapViewMode}
+                    bubbleShape={bubbleShape}
+                    onBubbleShapeChange={setBubbleShape}
                     showStationTooltip={showStationTooltip}
                     onShowStationTooltipChange={setShowStationTooltip}
                     showFullRouteStations={showFullRouteStations}
@@ -3583,14 +3761,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         trainDemoRealTimeRef.current = false;
                       }
                     }}
-                    mapViewMode={mapViewMode}
                     mapConfig={mapConfig}
                     onImportConfig={handleImportConfig}
                   />
 
                   {/* 3. 表示オプション (Display Options) */}
                   <LegendDisplayOptions
-                    mapViewMode={mapViewMode}
+                    mapViewMode={mapViewMode === 'bubble' ? 'realistic' : mapViewMode}
                     theme={theme}
                     language={currentLanguage}
                     trainTypeViewEnabled={trainTypeViewEnabled}
@@ -3780,6 +3957,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         heatmapParam={heatmapParam}
                         onHeatmapEnabledChange={setHeatmapEnabled}
                         onHeatmapParamChange={setHeatmapParam}
+                        mapViewMode={mapViewMode}
+                        onMapViewModeChange={setMapViewMode}
+                        bubbleShape={bubbleShape}
+                        onBubbleShapeChange={setBubbleShape}
                         showStationTooltip={showStationTooltip}
                         onShowStationTooltipChange={setShowStationTooltip}
                         showFullRouteStations={showFullRouteStations}
@@ -3805,7 +3986,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                             trainDemoRealTimeRef.current = false;
                           }
                         }}
-                        mapViewMode={mapViewMode}
                         mapConfig={mapConfig}
                         onImportConfig={handleImportConfig}
                       />
@@ -3868,7 +4048,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             {/* 言語切り替え */}
             {onLanguageChange && (
               <button
-                onClick={() => onLanguageChange(language === 'japanese' ? 'english' : 'japanese')}
+                onClick={() => {
+                  const langs: Language[] = ['japanese', 'english', 'chinese', 'korean'];
+                  onLanguageChange(langs[(langs.indexOf(language) + 1) % langs.length]);
+                }}
                 style={{
                   display: 'flex',
                   backgroundColor: colors.surface,
@@ -3886,10 +4069,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   fontWeight: 'bold',
                   fontFamily: 'monospace',
                 }}
-                title={language === 'japanese' ? 'Switch to English' : 'Switch to Japanese'}
-                aria-label={language === 'japanese' ? 'Switch to English' : 'Switch to Japanese'}
+                title="Switch language"
+                aria-label="Switch language"
               >
-                {language === 'japanese' ? 'En' : '日'}
+                {{ japanese: '日', english: 'En', chinese: '中', korean: '한' }[language]}
               </button>
             )}
 

@@ -1,9 +1,10 @@
 import React from 'react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
-import { translateUI } from '../utils/translation';
+import { translateUI } from '../utils/translation'
+import type { Language } from '../utils/translation';
 
 interface ThemeToggleProps {
-  language?: 'japanese' | 'english';
+  language?: Language;
 }
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ language = 'japanese' }) => {

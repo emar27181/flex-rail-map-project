@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
-import { translateUI } from '../utils/translation';
+import { translateUI } from '../utils/translation'
+import type { Language } from '../utils/translation';
 import {
   getNextDepartures,
   getDirectionIndex,
@@ -14,7 +15,7 @@ interface TimetablePanelProps {
   routeResult: RouteResult | null;
   departureTime: string;        // "HH:MM"
   onDepartureTimeChange: (t: string) => void;
-  language?: 'japanese' | 'english';
+  language?: Language;
   isMobile?: boolean;
 }
 
@@ -372,7 +373,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
           color: colors.textSecondary,
           lineHeight: '1.5',
         }}>
-          ⚠ {dataVersionLabel.version}{language === 'japanese' ? '（概算値・参考用）' : ' (approx.)'}<br />
+          ⚠ {dataVersionLabel.version}{ language === 'japanese' ? '（概算値・参考用）' : ' (approx.)'}<br />
           {translateUI('timetableUpdatedAt', language, { date: dataVersionLabel.updatedAt })}　{translateUI('timetableDisclaimerNote', language)}
         </div>
       )}

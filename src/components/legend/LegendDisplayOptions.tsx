@@ -1,11 +1,12 @@
 import React from 'react';
 import { getThemeColors } from '../../contexts/ThemeContext';
-import { translateUI } from '../../utils/translation';
+import { translateUI } from '../../utils/translation'
+import type { Language } from '../../utils/translation';
 
 interface LegendDisplayOptionsProps {
   mapViewMode: 'realistic' | 'schematic';
   theme: 'light' | 'dark';
-  language: 'japanese' | 'english';
+  language: Language;
   trainTypeViewEnabled?: boolean;
   onMapViewModeChange: (mode: 'realistic' | 'schematic') => void;
   onTrainTypeViewChange?: (enabled: boolean) => void;
@@ -65,7 +66,8 @@ const LegendDisplayOptions: React.FC<LegendDisplayOptionsProps> = ({
             alignItems: 'center',
             fontSize: '11px',
             color: colors.text,
-            cursor: 'pointer'
+            cursor: 'pointer',
+            marginBottom: '4px'
           }}>
             <input
               type="radio"

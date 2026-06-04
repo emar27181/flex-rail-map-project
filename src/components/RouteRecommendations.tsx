@@ -4,14 +4,15 @@ import { routeColors, routeNames } from '../data/routes';
 import type { RouteResult } from '../utils/routeFinder';
 import { getRouteDestination, getDirectionText, commonDirections } from '../data/routeDestinations';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
-import { translateStation, translateRoute, translateUI } from '../utils/translation';
+import { translateStation, translateRoute, translateUI } from '../utils/translation'
+import type { Language } from '../utils/translation';
 
 interface RouteRecommendationsProps {
   routes: RouteResult[];
   onRouteSelect?: (route: RouteResult) => void;
   selectedRoute?: RouteResult | null;
   onShowAllRoutes?: () => void;
-  language?: 'japanese' | 'english';
+  language?: Language;
 }
 
 const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({

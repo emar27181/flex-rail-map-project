@@ -1,13 +1,14 @@
 import React from 'react';
 import type { Station } from '../../data/yamanote';
 import { getThemeColors } from '../../contexts/ThemeContext';
-import { translateStation, translateUI } from '../../utils/translation';
+import { translateStation, translateUI } from '../../utils/translation'
+import type { Language } from '../../utils/translation';
 
 interface LegendStationMarkersProps {
   departure: Station | null;
   arrival: Station | null;
   theme: 'light' | 'dark';
-  language: 'japanese' | 'english';
+  language: Language;
 }
 
 const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({

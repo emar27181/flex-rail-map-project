@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { routeNames, routeColors } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
-import { translateUI, translateRoute, translateStation } from '../../utils/translation';
+import { translateUI, translateRoute, translateStation } from '../../utils/translation'
+import type { Language } from '../../utils/translation';
 import ToggleableItem from './ToggleableItem';
 
 interface RouteSegment {
@@ -23,7 +24,7 @@ interface RouteRecommendationItemProps {
   index: number;
   isSelected: boolean;
   theme: 'light' | 'dark';
-  language: 'japanese' | 'english';
+  language: Language;
   onToggle: (index: number) => void;
 }
 

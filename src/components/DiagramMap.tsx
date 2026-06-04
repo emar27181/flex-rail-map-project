@@ -3,7 +3,8 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
-import { translateRoute } from '../utils/translation';
+import { translateRoute } from '../utils/translation'
+import type { Language } from '../utils/translation';
 
 // ---- 表示対象路線 ----
 const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
@@ -61,7 +62,7 @@ interface DiagramMapProps {
   departure?: string;
   arrival?: string;
   theme?: 'light' | 'dark';
-  language?: 'japanese' | 'english';
+  language?: Language;
   showStationNames?: boolean;
   onToggleRoute?: (routeKey: RouteKey) => void;
   onHideRoute?: (routeKey: RouteKey) => void;

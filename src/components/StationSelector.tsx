@@ -2,7 +2,8 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
-import { translateStation, translateUI } from '../utils/translation';
+import { translateStation, translateUI } from '../utils/translation'
+import type { Language } from '../utils/translation';
 import { stationReadings, normalizeToHiragana } from '../utils/stationReadings';
 import { FS } from '../constants/ui';
 
@@ -13,7 +14,7 @@ interface StationSelectorProps {
   arrival: Station | null;
   isExpanded?: boolean;
   onToggleExpanded?: () => void;
-  language?: 'japanese' | 'english';
+  language?: Language;
   departureTime?: string;
   onDepartureTimeChange?: (time: string) => void;
   onSetNearestDeparture?: () => void;

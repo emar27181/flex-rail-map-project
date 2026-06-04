@@ -1,6 +1,7 @@
 import React from 'react';
 import { getThemeColors } from '../../contexts/ThemeContext';
-import { translateUI } from '../../utils/translation';
+import { translateUI } from '../../utils/translation'
+import type { Language } from '../../utils/translation';
 import ToggleableItem from '../ui/ToggleableItem';
 import RouteRecommendationItem from '../ui/RouteRecommendationItem';
 
@@ -20,7 +21,7 @@ interface LegendRouteRecommendationsProps {
   routeRecommendations: RouteRecommendation[];
   selectedRouteIndices: Set<number> | null;
   theme: 'light' | 'dark';
-  language: 'japanese' | 'english';
+  language: Language;
   onRouteToggle: (index: number) => void;
   onSelectAll: () => void;
   onDeselectAll: () => void;

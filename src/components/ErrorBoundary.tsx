@@ -1,5 +1,6 @@
 import React from 'react';
-import { translateUI } from '../utils/translation';
+import { translateUI } from '../utils/translation'
+import type { Language } from '../utils/translation';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -8,7 +9,7 @@ interface ErrorBoundaryState {
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
-  language?: 'japanese' | 'english';
+  language?: Language;
 }
 
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {

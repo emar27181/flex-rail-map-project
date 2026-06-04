@@ -1,9 +1,10 @@
 import React from 'react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
-import { translateUI } from '../utils/translation';
+import { translateUI } from '../utils/translation'
+import type { Language } from '../utils/translation';
 
 interface FooterProps {
-  language: 'japanese' | 'english';
+  language: Language;
 }
 
 const Footer: React.FC<FooterProps> = ({ language }) => {

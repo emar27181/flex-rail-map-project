@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import RailwayMap from './RailwayMap';
+import type { Language } from '../utils/translation';
 
 const FullscreenMapWrapper: React.FC = () => {
-  const [language] = useState<'japanese' | 'english'>('japanese');
+  const [language] = useState<Language>('japanese');
 
   return (
     <ThemeProvider>

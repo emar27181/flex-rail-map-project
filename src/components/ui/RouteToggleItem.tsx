@@ -1,6 +1,7 @@
 import React from 'react';
 import type { RouteKey } from '../../data/routes';
-import { translateRoute, translateUI } from '../../utils/translation';
+import { translateRoute, translateUI } from '../../utils/translation'
+import type { Language } from '../../utils/translation';
 import ToggleableItem from './ToggleableItem';
 
 interface RouteToggleItemProps {
@@ -10,7 +11,7 @@ interface RouteToggleItemProps {
   isVisible: boolean;
   isInSelectedRoute: boolean;
   theme: 'light' | 'dark';
-  language: 'japanese' | 'english';
+  language: Language;
   onToggle: (routeKey: RouteKey) => void;
   adjustRouteColorForTheme: (color: string, theme: 'light' | 'dark') => string;
 }

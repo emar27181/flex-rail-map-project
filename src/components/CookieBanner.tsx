@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Cookie, Settings, X } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import type { Language } from '../utils/translation';
 
 interface CookieBannerProps {
-  language: 'japanese' | 'english';
+  language: Language;
 }
 
 const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {

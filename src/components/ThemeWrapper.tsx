@@ -5,12 +5,13 @@ import Footer from './Footer';
 import NavigationBar from './NavigationBar';
 import AdSenseAd from './AdSenseAd';
 import StickyBottomAd from './StickyBottomAd';
+import type { Language } from '../utils/translation';
 
 const ThemeWrapper: React.FC = () => {
-  const [language, setLanguage] = useState<'japanese' | 'english'>('japanese');
+  const [language, setLanguage] = useState<Language>('japanese');
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const handleLanguageChange = (newLanguage: 'japanese' | 'english') => {
+  const handleLanguageChange = (newLanguage: Language) => {
     setLanguage(newLanguage);
   };
 
