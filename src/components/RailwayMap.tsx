@@ -3510,49 +3510,61 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   ))}
                 </div>
                 {/* min/max 編集 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.textSecondary }}>
-                  <input
-                    type="number"
-                    value={effectiveMin}
-                    onChange={e => {
-                      const v = parseFloat(e.target.value);
-                      if (!isNaN(v)) setHeatmapCustomRange({ min: v, max: effectiveMax });
-                    }}
-                    style={{
-                      width: '64px', fontSize: '11px', padding: '2px 4px',
-                      border: `1px solid ${colors.border}`, borderRadius: '3px',
-                      background: theme === 'dark' ? 'rgba(50,50,50,0.9)' : 'rgba(240,240,240,0.9)',
-                      color: colors.text,
-                    }}
-                  />
-                  <span style={{ userSelect: 'none' }}>〜</span>
-                  <input
-                    type="number"
-                    value={effectiveMax}
-                    onChange={e => {
-                      const v = parseFloat(e.target.value);
-                      if (!isNaN(v)) setHeatmapCustomRange({ min: effectiveMin, max: v });
-                    }}
-                    style={{
-                      width: '64px', fontSize: '11px', padding: '2px 4px',
-                      border: `1px solid ${colors.border}`, borderRadius: '3px',
-                      background: theme === 'dark' ? 'rgba(50,50,50,0.9)' : 'rgba(240,240,240,0.9)',
-                      color: colors.text,
-                    }}
-                  />
-                  {heatmapCustomRange && (
-                    <button
-                      onClick={() => setHeatmapCustomRange(undefined)}
-                      style={{
-                        fontSize: '10px', padding: '2px 5px', cursor: 'pointer',
-                        borderRadius: '3px', border: `1px solid ${colors.border}`,
-                        background: 'transparent', color: colors.textSecondary,
-                      }}
-                    >
-                      ↩
-                    </button>
-                  )}
-                </div>
+                {/* min/maxスライダー */}
+                {(() => {
+                  const fullRange = dataRange.max - dataRange.min || 1;
+                  const step = Math.pow(10, Math.floor(Math.log10(fullRange / 20)));
+                  const btnStyle: React.CSSProperties = {
+                    width: '22px', height: '22px', fontSize: '13px', lineHeight: '1',
+                    cursor: 'pointer', borderRadius: '4px', border: `1px solid ${colors.border}`,
+                    background: theme === 'dark' ? 'rgba(60,60,60,0.9)' : 'rgba(230,230,230,0.9)',
+                    color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    userSelect: 'none',
+                  };
+                  const numStyle: React.CSSProperties = {
+                    width: '56px', fontSize: '11px', padding: '2px 4px', textAlign: 'center',
+                    border: `1px solid ${colors.border}`, borderRadius: '3px',
+                    background: theme === 'dark' ? 'rgba(50,50,50,0.9)' : 'rgba(240,240,240,0.9)',
+                    color: colors.text,
+                  };
+                  return (
+                    <>
+                      <div style={{ marginBottom: '4px' }}>
+                        <div style={{ fontSize: '10px', color: colors.textSecondary, marginBottom: '2px' }}>下限</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                          <button style={btnStyle} onClick={() => setHeatmapCustomRange({ min: effectiveMin - step, max: effectiveMax })}>◀</button>
+                          <input type="number" value={effectiveMin} step={step}
+                            onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) setHeatmapCustomRange({ min: v, max: effectiveMax }); }}
+                            style={numStyle} />
+                          <button style={btnStyle} onClick={() => setHeatmapCustomRange({ min: Math.min(effectiveMin + step, effectiveMax - step), max: effectiveMax })}>▶</button>
+                          <input type="range" min={dataRange.min} max={dataRange.max} step={step} value={effectiveMin}
+                            onChange={e => { const v = parseFloat(e.target.value); setHeatmapCustomRange({ min: v, max: Math.max(effectiveMax, v + step) }); }}
+                            style={{ flex: 1, cursor: 'pointer', accentColor: colors.primary }} />
+                        </div>
+                      </div>
+                      <div style={{ marginBottom: '6px' }}>
+                        <div style={{ fontSize: '10px', color: colors.textSecondary, marginBottom: '2px' }}>上限</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                          <button style={btnStyle} onClick={() => setHeatmapCustomRange({ min: effectiveMin, max: Math.max(effectiveMax - step, effectiveMin + step) })}>◀</button>
+                          <input type="number" value={effectiveMax} step={step}
+                            onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) setHeatmapCustomRange({ min: effectiveMin, max: v }); }}
+                            style={numStyle} />
+                          <button style={btnStyle} onClick={() => setHeatmapCustomRange({ min: effectiveMin, max: effectiveMax + step })}>▶</button>
+                          <input type="range" min={dataRange.min} max={dataRange.max} step={step} value={effectiveMax}
+                            onChange={e => { const v = parseFloat(e.target.value); setHeatmapCustomRange({ min: Math.min(effectiveMin, v - step), max: v }); }}
+                            style={{ flex: 1, cursor: 'pointer', accentColor: colors.primary }} />
+                        </div>
+                      </div>
+                      {heatmapCustomRange && (
+                        <button onClick={() => setHeatmapCustomRange(undefined)}
+                          style={{ fontSize: '10px', padding: '2px 8px', cursor: 'pointer', borderRadius: '3px',
+                            border: `1px solid ${colors.border}`, background: 'transparent', color: colors.textSecondary }}>
+                          ↩ リセット
+                        </button>
+                      )}
+                    </>
+                  );
+                })()}
                 <div style={{ fontSize: '10px', color: colors.textSecondary, marginTop: '4px', fontStyle: 'italic' }}>
                   ※ 灰色はデータなし
                 </div>
