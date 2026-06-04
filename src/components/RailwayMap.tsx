@@ -3447,7 +3447,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               const abs = Math.abs(v);
               if (abs >= 100000) return (v / 1000).toFixed(0) + 'k';
               if (abs >= 10000) return (v / 1000).toFixed(1) + 'k';
-              if (abs >= 100) return v.toFixed(0);
+              if (abs >= 1) return v.toFixed(0);  // 1以上は整数表示
               if (abs >= 10) return v.toFixed(1);
               return v.toFixed(2);
             };
@@ -3541,30 +3541,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   };
                   return (
                     <>
-                      <div style={{ marginBottom: '4px' }}>
-                        <div style={{ fontSize: '10px', color: colors.textSecondary, marginBottom: '2px' }}>下限</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                          <button style={btnStyle} onClick={() => setHeatmapCustomRange({ min: effectiveMin - step, max: effectiveMax })}>◀</button>
-                          <input type="number" value={effectiveMin} step={step}
-                            onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) setHeatmapCustomRange({ min: v, max: effectiveMax }); }}
+                      {[
+                        { label: '下限', val: effectiveMin, onSlider: (v: number) => setHeatmapCustomRange({ min: v, max: Math.max(effectiveMax, v + step) }), onMinus: () => setHeatmapCustomRange({ min: effectiveMin - step, max: effectiveMax }), onPlus: () => setHeatmapCustomRange({ min: Math.min(effectiveMin + step, effectiveMax - step), max: effectiveMax }), onInput: (v: number) => setHeatmapCustomRange({ min: v, max: effectiveMax }) },
+                        { label: '上限', val: effectiveMax, onSlider: (v: number) => setHeatmapCustomRange({ min: Math.min(effectiveMin, v - step), max: v }), onMinus: () => setHeatmapCustomRange({ min: effectiveMin, max: Math.max(effectiveMax - step, effectiveMin + step) }), onPlus: () => setHeatmapCustomRange({ min: effectiveMin, max: effectiveMax + step }), onInput: (v: number) => setHeatmapCustomRange({ min: effectiveMin, max: v }) },
+                      ].map(({ label, val, onMinus, onPlus, onInput }) => (
+                        <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '5px' }}>
+                          <span style={{ fontSize: '10px', color: colors.textSecondary, minWidth: '22px' }}>{label}</span>
+                          <button style={btnStyle} onClick={onMinus}>◀</button>
+                          <input type="number" value={step >= 1 ? Math.round(val) : val} step={step >= 1 ? Math.max(1, step) : step}
+                            onChange={e => { const v = step >= 1 ? parseInt(e.target.value) : parseFloat(e.target.value); if (!isNaN(v)) onInput(v); }}
                             style={numStyle} />
-                          <button style={btnStyle} onClick={() => setHeatmapCustomRange({ min: Math.min(effectiveMin + step, effectiveMax - step), max: effectiveMax })}>▶</button>
-                          <input type="range" min={dataRange.min} max={dataRange.max} step={step} value={effectiveMin}
-                            onChange={e => { const v = parseFloat(e.target.value); setHeatmapCustomRange({ min: v, max: Math.max(effectiveMax, v + step) }); }}
-                            style={{ flex: 1, cursor: 'pointer', accentColor: colors.primary }} />
+                          <button style={btnStyle} onClick={onPlus}>▶</button>
                         </div>
-                      </div>
-                      <div style={{ marginBottom: '6px' }}>
-                        <div style={{ fontSize: '10px', color: colors.textSecondary, marginBottom: '2px' }}>上限</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                          <button style={btnStyle} onClick={() => setHeatmapCustomRange({ min: effectiveMin, max: Math.max(effectiveMax - step, effectiveMin + step) })}>◀</button>
-                          <input type="number" value={effectiveMax} step={step}
-                            onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) setHeatmapCustomRange({ min: effectiveMin, max: v }); }}
-                            style={numStyle} />
-                          <button style={btnStyle} onClick={() => setHeatmapCustomRange({ min: effectiveMin, max: effectiveMax + step })}>▶</button>
-                          <input type="range" min={dataRange.min} max={dataRange.max} step={step} value={effectiveMax}
-                            onChange={e => { const v = parseFloat(e.target.value); setHeatmapCustomRange({ min: Math.min(effectiveMin, v - step), max: v }); }}
-                            style={{ flex: 1, cursor: 'pointer', accentColor: colors.primary }} />
+                      ))}
                         </div>
                       </div>
                       {heatmapCustomRange && (
