@@ -220,6 +220,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [bubbleShape, setBubbleShape] = useState<'circle' | 'square'>('circle');
   const [heatmapCustomRange, setHeatmapCustomRange] = useState<{ min: number; max: number } | undefined>(undefined);
   const [heatmapParamSelectorOpen, setHeatmapParamSelectorOpen] = useState(false);
+  const [heatmapRangeFilterEnabled, setHeatmapRangeFilterEnabled] = useState(false);
   const [showStationTooltip, setShowStationTooltip] = useState(true);
   const [showFullRouteStations, setShowFullRouteStations] = useState(true);
   const [showRouteLine, setShowRouteLine] = useState(true);
@@ -1526,6 +1527,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       if (timeFilterEnabled && stationsWithinTime.length > 0) {
         if (!stationsWithinTime.some(s => s.station.name === station.name)) return false;
       }
+      // ヒートマップ レンジフィルター
+      if (heatmapRangeFilterEnabled && heatmapEnabled) {
+        const stats = stationStatsData[station.name];
+        const val = stats ? (stats[heatmapParam] as number | undefined) : undefined;
+        if (val === undefined) return false;
+        const { min: dMin, max: dMax } = getParamRange(heatmapParam);
+        const rMin = heatmapCustomRange?.min ?? dMin;
+        const rMax = heatmapCustomRange?.max ?? dMax;
+        if (val < rMin || val > rMax) return false;
+      }
       // ビューポート上限
       if (allowedStationNames && !allowedStationNames.has(station.name)) return false;
       return true;
@@ -1535,6 +1546,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   }, [
     visibleRoutesData, showTransferStationsOnly, showExpressStationsOnly,
     timeFilterEnabled, stationsWithinTime, transferStations, allowedStationNames,
+    heatmapRangeFilterEnabled, heatmapEnabled, heatmapParam, heatmapCustomRange,
   ]);
 
   // バブルマップ用: stationVisibilityFilter を通過した駅 + 中心から近い順 最大300件
@@ -3565,6 +3577,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     </>
                   );
                 })()}
+                {/* レンジフィルタートグル */}
+                {heatmapEnabled && (
+                  <label style={{
+                    display: 'flex', alignItems: 'center', gap: '5px',
+                    fontSize: '11px', color: colors.text, cursor: 'pointer', marginTop: '6px',
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={heatmapRangeFilterEnabled}
+                      onChange={e => setHeatmapRangeFilterEnabled(e.target.checked)}
+                    />
+                    レンジ内の駅のみ表示
+                  </label>
+                )}
                 <div style={{ fontSize: '10px', color: colors.textSecondary, marginTop: '4px', fontStyle: 'italic' }}>
                   ※ 灰色はデータなし
                 </div>
