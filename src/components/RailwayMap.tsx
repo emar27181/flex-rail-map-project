@@ -1562,7 +1562,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         if (typeof window === 'undefined') return;
 
         const [
-          { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Circle, useMapEvents, ZoomControl, Pane, Tooltip },
+          { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, Pane, Tooltip },
           { DivIcon }
         ] = await Promise.all([
           import('react-leaflet'),
@@ -1570,7 +1570,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         ]);
 
         if (mounted) {
-          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Circle, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip });
+          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip });
           setIsClient(true);
           setIsLoading(false);
           // デバッグ関数をブラウザコンソールで利用可能にする
@@ -2345,12 +2345,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // ─── バブルマップ用: 重なり防止サイズ計算コンポーネント ───────────────
   // MapContainer の子として配置し、useMapEvents でピクセル座標を取得する。
   // 大きい駅から順に配置し、各駅の最大許容半径を O(n²) 1パスで算出する。
-  // バブルマップ用: 値→地理的半径（メートル）変換
-  const valueToMeters = React.useCallback((value: number, minV: number, maxV: number): number => {
-    const range = maxV - minV || 1;
-    const t = (value - minV) / range;
-    return 80 + t * 720; // 80m〜800m の固定範囲
-  }, []);
 
   const getRouteSegmentForStations = (routeKey: RouteKey, stations: Station[], depStation: Station, arrStation: Station) => {
     const depIndex = stations.findIndex(s => s.name === depStation.name);
@@ -3173,52 +3167,49 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               <ZoomControl position="bottomright" />
               <MapEvents />
 
-              {/* バブルマップ: Circle（地理的半径・全駅常時表示） */}
+              {/* バブルマップ: CircleMarker（ピクセル固定半径・全駅常時表示） */}
               {mapViewMode === 'bubble' && (() => {
                 const values = bubbleStations.map(s => s.value);
                 const minV = Math.min(...values) || 0;
                 const maxV = Math.max(...values) || 1;
+                const range = maxV - minV || 1;
                 return bubbleStations.map(s => {
                   const color = getStationHeatColor(s.name, heatmapParam, heatmapCustomRange)
                     ?? (theme === 'dark' ? '#6699cc' : '#3366cc');
-                  const radiusM = valueToMeters(s.value, minV, maxV);
-                  const isCircle = bubbleShape === 'circle';
-                  const borderColor = theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.3)';
+                  // 4〜28px 固定ピクセル半径（ズーム不変）
+                  const t = (s.value - minV) / range;
+                  const r = 4 + t * 24;
+                  const borderColor = theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.25)';
                   return (
-                    <React.Fragment key={`bubble-${s.name}`}>
-                      <MapComponents.Circle
-                        center={[s.lat, s.lng]}
-                        radius={radiusM}
-                        pathOptions={{
-                          fillColor: color,
-                          fillOpacity: 0.55,
-                          color: borderColor,
-                          weight: 1.5,
-                        }}
-                        eventHandlers={{
-                          click: (e) => {
-                            if (isMobile && mapDraggedRef.current) return;
-                            const oe = e.originalEvent as MouseEvent | undefined;
-                            if (!oe) return;
-                            setStationTooltip(prev =>
-                              prev?.stationName === s.name ? null : { stationName: s.name, station: s as unknown as Station, x: oe.clientX, y: oe.clientY }
-                            );
-                          },
-                        }}
-                      />
-                      {showStationNames && (
-                        <Marker
-                          position={[s.lat, s.lng]}
-                          icon={new DivIcon({
-                            html: `<span style="font-size:10px;font-weight:bold;color:#fff;text-shadow:0 0 3px rgba(0,0,0,0.8);white-space:nowrap;pointer-events:none;">${translateStation(s.name, currentLanguage)}</span>`,
-                            className: '',
-                            iconAnchor: [0, 5],
-                          })}
-                          interactive={false}
-                          zIndexOffset={1000}
-                        />
+                    <CircleMarker
+                      key={`bubble-${s.name}`}
+                      center={[s.lat, s.lng]}
+                      radius={r}
+                      pathOptions={{
+                        fillColor: color,
+                        fillOpacity: 0.65,
+                        color: borderColor,
+                        weight: 1,
+                      }}
+                      eventHandlers={{
+                        click: (e) => {
+                          if (isMobile && mapDraggedRef.current) return;
+                          const oe = e.originalEvent as MouseEvent | undefined;
+                          if (!oe) return;
+                          setStationTooltip(prev =>
+                            prev?.stationName === s.name ? null : { stationName: s.name, station: s as unknown as Station, x: oe.clientX, y: oe.clientY }
+                          );
+                        },
+                      }}
+                    >
+                      {showStationNames && r >= 10 && (
+                        <Tooltip direction="center" permanent opacity={1} className="bubble-label">
+                          <span style={{ fontSize: `${Math.max(7, Math.round(r * 0.6))}px`, fontWeight: 'bold', color: '#fff', pointerEvents: 'none' }}>
+                            {translateStation(s.name, currentLanguage)}
+                          </span>
+                        </Tooltip>
                       )}
-                    </React.Fragment>
+                    </CircleMarker>
                   );
                 });
               })()}
