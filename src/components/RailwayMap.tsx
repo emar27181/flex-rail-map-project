@@ -3399,6 +3399,29 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             />
           )}
 
+          {/* バブルマップ「実装中」バナー */}
+          {mapViewMode === 'bubble' && (
+            <div style={{
+              position: 'fixed',
+              top: isFullscreen && isMobile ? 'calc(env(safe-area-inset-top,0px) + 56px)' : '70px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 1002,
+              background: 'linear-gradient(135deg, #667eea, #764ba2)',
+              color: '#fff',
+              padding: '4px 14px',
+              borderRadius: '20px',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              letterSpacing: '0.05em',
+              boxShadow: '0 2px 12px rgba(102,126,234,0.5)',
+              pointerEvents: 'none',
+              whiteSpace: 'nowrap',
+            }}>
+              🚧 バブルマップ — 実装中
+            </div>
+          )}
+
           {/* ヒートマップ凡例（ヒートマップ有効時のみ・スマホは右下に表示） */}
           {(heatmapEnabled || mapViewMode === 'bubble') && (mapViewMode === 'realistic' || mapViewMode === 'bubble') && (() => {
             const meta = STAT_PARAMS.find(p => p.key === heatmapParam);

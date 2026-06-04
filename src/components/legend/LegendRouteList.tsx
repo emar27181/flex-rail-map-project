@@ -376,6 +376,20 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             style={{ marginRight: '6px', cursor: 'pointer' }}
           />
           {translateUI('bubbleMap', language)}
+          <span style={{
+            marginLeft: '6px',
+            fontSize: '9px',
+            fontWeight: 'bold',
+            color: '#fff',
+            background: 'linear-gradient(135deg, #f093fb, #f5576c)',
+            padding: '1px 5px',
+            borderRadius: '8px',
+            letterSpacing: '0.03em',
+            boxShadow: '0 1px 4px rgba(245,87,108,0.4)',
+            verticalAlign: 'middle',
+          }}>
+            🚧 WIP
+          </span>
         </label>
         {mapViewMode === 'bubble' && (
           <div style={{ marginLeft: '22px', marginTop: '4px', display: 'flex', gap: '6px' }}>
