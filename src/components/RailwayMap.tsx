@@ -218,8 +218,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [heatmapParam, setHeatmapParam] = useState<keyof StationStats>('avgRent1K');
   // バブルマップの形状（円 or 四角）
   const [bubbleShape, setBubbleShape] = useState<'circle' | 'square'>('circle');
-  // バブルマップ: 駅名 → 実際に使用する地理的半径(m)（重なり防止後）
-  const [bubbleRadiiMap, setBubbleRadiiMap] = useState<Map<string, number>>(new Map());
   const [heatmapCustomRange, setHeatmapCustomRange] = useState<{ min: number; max: number } | undefined>(undefined);
   const [showStationTooltip, setShowStationTooltip] = useState(true);
   const [showFullRouteStations, setShowFullRouteStations] = useState(true);
@@ -1575,14 +1573,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
         const [
           { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Circle, useMapEvents, ZoomControl, Pane, Tooltip },
-          { DivIcon }
+          leaflet
         ] = await Promise.all([
           import('react-leaflet'),
           import('leaflet'),
         ]);
+        const { DivIcon } = leaflet;
+        const canvasRenderer = leaflet.canvas({ padding: 0.5 });
 
         if (mounted) {
-          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Circle, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip });
+          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Circle, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip, canvasRenderer });
           setIsClient(true);
           setIsLoading(false);
           // デバッグ関数をブラウザコンソールで利用可能にする
@@ -2356,57 +2356,82 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // ─── バブルマップ用: 重なり防止サイズ計算コンポーネント ───────────────
   // MapContainer の子として配置し、useMapEvents でピクセル座標を取得する。
-  // バブルマップ: ズーム変更時のみ地理的半径を再計算（moveendは無視してパフォーマンス改善）
-  const BubbleRadiusManager: React.FC<{
+  // バブルマップ SVG オーバーレイ: 全バブルを1つの SVG に描画（高速）
+  type BubbleItem = { name: string; x: number; y: number; r: number; color: string; displayName: string };
+  const BubbleSVGOverlay: React.FC<{
     stations: Array<{ name: string; lat: number; lng: number; value: number }>;
-    onRadiiComputed: (radii: Map<string, number>) => void;
-  }> = ({ stations, onRadiiComputed }) => {
-    const BASE_MIN_M = 150, BASE_MAX_M = 800;
+    heatmapParam: string;
+    heatmapCustomRange: { min: number; max: number } | undefined;
+    showNames: boolean;
+    language: Language;
+    onBubbleClick: (name: string, x: number, y: number) => void;
+  }> = ({ stations, heatmapParam: param, heatmapCustomRange: customRange, showNames, language, onBubbleClick }) => {
+    const [bubbles, setBubbles] = React.useState<BubbleItem[]>([]);
+    const [size, setSize] = React.useState({ w: 0, h: 0 });
     const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const compute = React.useCallback((map: ReturnType<typeof useMapEvents>) => {
-      if (stations.length === 0) { onRadiiComputed(new Map()); return; }
-
-      const center = map.getCenter();
-      const pt0 = map.latLngToContainerPoint([center.lat, center.lng]);
-      const pt1 = map.latLngToContainerPoint([center.lat + 0.001, center.lng]);
-      const pixPerMeter = Math.abs(pt0.y - pt1.y) / 111.32;
+      if (stations.length === 0) { setBubbles([]); return; }
+      const container = map.getContainer();
+      const w = container.clientWidth, h = container.clientHeight;
+      setSize({ w, h });
 
       const values = stations.map(s => s.value);
       const minV = Math.min(...values), maxV = Math.max(...values);
       const range = maxV - minV || 1;
+      const BASE_MIN = 6, BASE_MAX = 36; // ピクセル半径
 
       const sorted = [...stations].sort((a, b) => b.value - a.value);
       const placed: Array<{ x: number; y: number; r: number }> = [];
-      const radii = new Map<string, number>();
+      const result: BubbleItem[] = [];
 
       for (const s of sorted) {
         const pt = map.latLngToContainerPoint([s.lat, s.lng]);
         const t = (s.value - minV) / range;
-        let rPx = (BASE_MIN_M + t * (BASE_MAX_M - BASE_MIN_M)) * pixPerMeter;
+        let r = BASE_MIN + t * (BASE_MAX - BASE_MIN);
         for (const p of placed) {
-          const maxPx = Math.hypot(p.x - pt.x, p.y - pt.y) - p.r - 2;
-          if (maxPx < rPx) rPx = maxPx;
+          const maxR = Math.hypot(p.x - pt.x, p.y - pt.y) - p.r - 2;
+          if (maxR < r) r = maxR;
         }
-        const MIN_PX = 5;
-        const finalPx = Math.max(rPx, MIN_PX);
-        placed.push({ x: pt.x, y: pt.y, r: finalPx });
-        radii.set(s.name, finalPx / pixPerMeter);
+        const finalR = Math.max(r, 4);
+        placed.push({ x: pt.x, y: pt.y, r: finalR });
+        const color = getStationHeatColor(s.name, param as any, customRange)
+          ?? '#3366cc';
+        result.push({ name: s.name, x: pt.x, y: pt.y, r: finalR, color, displayName: translateStation(s.name, language) });
       }
-      onRadiiComputed(radii);
-    }, [stations, onRadiiComputed]);
+      setBubbles(result);
+    }, [stations, param, customRange, language]);
 
-    const computeDebounced = React.useCallback((map: ReturnType<typeof useMapEvents>) => {
+    const run = React.useCallback((map: ReturnType<typeof useMapEvents>) => {
       if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => compute(map), 150);
+      timerRef.current = setTimeout(() => compute(map), 100);
     }, [compute]);
 
-    const map = useMapEvents({
-      zoomend: (e) => computeDebounced(e.target),
-      // moveendは省略してパフォーマンス改善（移動では半径比率が変わらない）
-    });
+    const map = useMapEvents({ zoomend: e => run(e.target), moveend: e => run(e.target) });
     React.useEffect(() => { compute(map); }, [compute, map]);
-    return null;
+
+    if (!bubbles.length) return null;
+    return (
+      <svg
+        style={{ position: 'absolute', top: 0, left: 0, width: size.w, height: size.h, pointerEvents: 'none', zIndex: 400 }}
+        width={size.w} height={size.h}
+      >
+        {bubbles.map(b => (
+          <g key={b.name} style={{ pointerEvents: 'all', cursor: 'pointer' }}
+            onClick={(e) => onBubbleClick(b.name, e.clientX, e.clientY)}>
+            <circle cx={b.x} cy={b.y} r={b.r} fill={b.color} fillOpacity={0.65} stroke="rgba(255,255,255,0.5)" strokeWidth={1} />
+            {showNames && b.r >= 12 && (
+              <text x={b.x} y={b.y} textAnchor="middle" dominantBaseline="middle"
+                fontSize={Math.max(7, Math.min(11, b.r * 0.55))}
+                fill="#fff" fontWeight="bold"
+                style={{ pointerEvents: 'none', textShadow: '0 0 3px rgba(0,0,0,0.8)' }}>
+                {b.displayName.length > 6 ? b.displayName.slice(0, 5) + '…' : b.displayName}
+              </text>
+            )}
+          </g>
+        ))}
+      </svg>
+    );
   };
 
   const getRouteSegmentForStations = (routeKey: RouteKey, stations: Station[], depStation: Station, arrStation: Station) => {
@@ -3230,45 +3255,24 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               <ZoomControl position="bottomright" />
               <MapEvents />
 
-              {/* バブルマップ: 地理的Circle（ズームで拡縮・重なり防止・駅名内表示） */}
+              {/* バブルマップ: 単一SVGオーバーレイで全バブルを高速描画 */}
               {mapViewMode === 'bubble' && (
-                <BubbleRadiusManager
+                <BubbleSVGOverlay
                   stations={bubbleStations}
-                  onRadiiComputed={setBubbleRadiiMap}
+                  heatmapParam={heatmapParam as string}
+                  heatmapCustomRange={heatmapCustomRange}
+                  showNames={showStationNames}
+                  language={currentLanguage}
+                  onBubbleClick={(name, x, y) => {
+                    if (isMobile && mapDraggedRef.current) return;
+                    const s = bubbleStations.find(st => st.name === name);
+                    if (!s) return;
+                    setStationTooltip(prev =>
+                      prev?.stationName === name ? null : { stationName: name, station: s as unknown as Station, x, y }
+                    );
+                  }}
                 />
               )}
-              {mapViewMode === 'bubble' && bubbleStations.map(s => {
-                const radiusM = bubbleRadiiMap.get(s.name);
-                if (radiusM == null) return null;
-                const color = getStationHeatColor(s.name, heatmapParam, heatmapCustomRange)
-                  ?? (theme === 'dark' ? '#6699cc' : '#3366cc');
-                const borderColor = theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.3)';
-                const displayName = translateStation(s.name, currentLanguage);
-                return (
-                  <MapComponents.Circle
-                    key={`bubble-${s.name}`}
-                    center={[s.lat, s.lng]}
-                    radius={radiusM}
-                    pathOptions={{ fillColor: color, fillOpacity: 0.65, color: borderColor, weight: 1.5 }}
-                    eventHandlers={{
-                      click: (e) => {
-                        if (isMobile && mapDraggedRef.current) return;
-                        const oe = e.originalEvent as MouseEvent | undefined;
-                        if (!oe) return;
-                        setStationTooltip(prev =>
-                          prev?.stationName === s.name ? null : { stationName: s.name, station: s as unknown as Station, x: oe.clientX, y: oe.clientY }
-                        );
-                      },
-                    }}
-                  >
-                    <Tooltip direction="center" permanent opacity={1} className="bubble-name-label">
-                      <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#fff', textShadow: '0 0 3px rgba(0,0,0,0.8)', whiteSpace: 'nowrap', pointerEvents: 'none' }}>
-                        {displayName}
-                      </span>
-                    </Tooltip>
-                  </MapComponents.Circle>
-                );
-              })}
 
               {showOsmTiles && mapViewMode !== 'bubble' && (
                 <TileLayer
