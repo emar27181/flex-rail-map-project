@@ -135,7 +135,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showTravelTimes, setShowTravelTimes] = useState(false);
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
-  const [showStationNumbers, setShowStationNumbers] = useState(language === 'english');
+  const [showStationNumbers, setShowStationNumbers] = useState(language !== 'japanese');
   const [showOsmTiles, setShowOsmTiles] = useState(true);
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   const [tapToggleMode, setTapToggleMode] = useState(true);
@@ -244,9 +244,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 英語モードではデフォルトで駅コードを表示
+  // 日本語以外はデフォルトで駅コードを表示
   useEffect(() => {
-    setShowStationNumbers(language === 'english');
+    setShowStationNumbers(language !== 'japanese');
   }, [language]);
 
   // モバイル幅の監視

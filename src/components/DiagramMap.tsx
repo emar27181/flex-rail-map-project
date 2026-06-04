@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
-import { translateRoute } from '../utils/translation'
+import { translateRoute, translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
 
 // ---- 表示対象路線 ----
@@ -602,9 +602,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
             opacity: showDimmedRoutes ? 1 : 0.6,
           }}
         >
-          {language === 'english'
-            ? (showDimmedRoutes ? 'All routes: ON' : 'All routes: OFF')
-            : (showDimmedRoutes ? '全路線: 表示' : '全路線: 非表示')}
+          {translateUI(showDimmedRoutes ? 'allRoutesOn' : 'allRoutesOff', language)}
         </button>
 
         {/* 非表示路線ツールチップ */}
@@ -653,7 +651,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
                       fontSize: '11px', width: '100%',
                     }}
                   >
-                    {language === 'english' ? 'Hide this route' : 'この路線を非表示にする'}
+                    {translateUI('hideThisRoute', language)}
                   </button>
                 ) : (
                   <button
@@ -664,7 +662,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
                       fontSize: '11px', width: '100%',
                     }}
                   >
-                    {language === 'english' ? 'Show this route' : 'この路線を表示する'}
+                    {translateUI('showThisRoute', language)}
                   </button>
                 )}
               </div>

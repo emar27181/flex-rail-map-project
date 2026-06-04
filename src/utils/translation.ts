@@ -2251,6 +2251,14 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   cookieUsage: {
     japanese: "Cookieの使用について",
     english: "Cookie Usage"
+  },
+  allRoutesOn: {
+    japanese: "全路線: 表示",
+    english: "All routes: ON"
+  },
+  allRoutesOff: {
+    japanese: "全路線: 非表示",
+    english: "All routes: OFF"
   }
 };
 
@@ -2415,6 +2423,8 @@ const uiChinese: Record<string, string> = {
   contactLink: "联系我们",
   approxNote: "（概算值·参考用）",
   cookieUsage: "Cookie 使用说明",
+  allRoutesOn: "全路线: 显示",
+  allRoutesOff: "全路线: 隐藏",
 };
 
 // 韓国語UI翻訳
@@ -2576,6 +2586,8 @@ const uiKorean: Record<string, string> = {
   contactLink: "문의하기",
   approxNote: "（개산값·참고용）",
   cookieUsage: "쿠키 사용 안내",
+  allRoutesOn: "전체 노선: 표시",
+  allRoutesOff: "전체 노선: 숨기기",
 };
 
 // 翻訳ヘルパー関数
