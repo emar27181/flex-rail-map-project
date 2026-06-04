@@ -3457,6 +3457,30 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 maxWidth: isFullscreen && isMobile ? '48vw' : '260px',
                 boxShadow: `0 2px 6px ${colors.shadow}`,
               }}>
+                {/* パラメータ切り替えタブ */}
+                <div style={{
+                  display: 'flex', flexWrap: 'wrap', gap: '3px', marginBottom: '8px',
+                }}>
+                  {STAT_PARAMS.map(p => (
+                    <button
+                      key={String(p.key)}
+                      onClick={() => setHeatmapParam(p.key)}
+                      style={{
+                        fontSize: '10px', padding: '2px 6px', cursor: 'pointer',
+                        borderRadius: '10px',
+                        border: heatmapParam === p.key ? 'none' : `1px solid ${colors.border}`,
+                        background: heatmapParam === p.key
+                          ? colors.primary
+                          : (theme === 'dark' ? 'rgba(50,50,50,0.8)' : 'rgba(240,240,240,0.9)'),
+                        color: heatmapParam === p.key ? '#fff' : colors.textSecondary,
+                        fontWeight: heatmapParam === p.key ? 'bold' : 'normal',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
                 <div style={{ fontSize: '12px', fontWeight: 'bold', color: colors.text, marginBottom: '5px' }}>
                   {meta?.label ?? String(heatmapParam)}
                   {meta?.unit ? `（${meta.unit}）` : ''}
