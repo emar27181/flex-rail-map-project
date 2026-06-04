@@ -2351,41 +2351,47 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     stations: Array<{ name: string; lat: number; lng: number; value: number }>;
     onSizesComputed: (sizes: Map<string, number>) => void;
   }> = ({ stations, onSizesComputed }) => {
-    const MIN_R = 5, MAX_R = 45;
+    const MIN_R = 8;
+
+    // 値から固定ピクセル半径を決定（ズーム不変）
+    // 家賃(万円)や他の統計値を直接スケールに使う
+    const valueToRadius = React.useCallback((value: number, minV: number, maxV: number): number => {
+      const range = maxV - minV || 1;
+      const t = (value - minV) / range;
+      return MIN_R + t * (50 - MIN_R); // 8〜50px の固定範囲
+    }, []);
 
     const compute = React.useCallback((map: ReturnType<typeof useMapEvents>) => {
       if (stations.length === 0) { onSizesComputed(new Map()); return; }
 
       const values = stations.map(s => s.value);
       const minV = Math.min(...values), maxV = Math.max(...values);
-      const range = maxV - minV || 1;
 
-      // 値の大きい順に配置（重要な駅が大きいサイズを確保）
+      // 値の大きい順に処理（大きいバブルを優先表示）
       const sorted = [...stations].sort((a, b) => b.value - a.value);
       const placed: Array<{ x: number; y: number; r: number }> = [];
       const sizes = new Map<string, number>();
 
       for (const s of sorted) {
         const pt = map.latLngToContainerPoint([s.lat, s.lng]);
-        const t = (s.value - minV) / range;
-        let r = MIN_R + t * (MAX_R - MIN_R);
+        // 固定半径（ズームに依存しない）
+        const r = valueToRadius(s.value, minV, maxV);
 
-        // 配置済み円との制約から最大許容半径を算出（1パス）
+        // 配置済み円と重なるか判定（重なる場合は非表示）
+        let overlaps = false;
         for (const p of placed) {
           const d = Math.hypot(p.x - pt.x, p.y - pt.y);
-          const maxR = d - p.r - 2; // 2px のギャップ
-          if (maxR < r) r = maxR;
+          if (d < p.r + r + 2) { overlaps = true; break; }
         }
 
-        if (r >= MIN_R) {
+        if (!overlaps) {
           placed.push({ x: pt.x, y: pt.y, r });
           sizes.set(s.name, r);
         }
-        // r < MIN_R → この駅は非表示（sizes に含めない）
       }
 
       onSizesComputed(sizes);
-    }, [stations, onSizesComputed]);
+    }, [stations, onSizesComputed, valueToRadius]);
 
     const map = useMapEvents({
       zoomend: (e) => compute(e.target),
