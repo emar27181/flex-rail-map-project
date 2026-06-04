@@ -1539,7 +1539,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   ]);
 
   // バブルマップ用: stationVisibilityFilter を通過した駅 + 中心から近い順 最大300件
-  const MAX_BUBBLE_STATIONS = 300;
+  const MAX_BUBBLE_STATIONS = 120;
   const bubbleStations = useMemo(() => {
     if (mapViewMode !== 'bubble') return [];
     const { shouldShow } = stationVisibilityFilter;
@@ -2356,17 +2356,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // ─── バブルマップ用: 重なり防止サイズ計算コンポーネント ───────────────
   // MapContainer の子として配置し、useMapEvents でピクセル座標を取得する。
-  // バブルマップ: ズーム/移動ごとに地理的半径（m）を再計算して重なりを防止
+  // バブルマップ: ズーム変更時のみ地理的半径を再計算（moveendは無視してパフォーマンス改善）
   const BubbleRadiusManager: React.FC<{
     stations: Array<{ name: string; lat: number; lng: number; value: number }>;
     onRadiiComputed: (radii: Map<string, number>) => void;
   }> = ({ stations, onRadiiComputed }) => {
-    const BASE_MIN_M = 100, BASE_MAX_M = 900;
+    const BASE_MIN_M = 150, BASE_MAX_M = 800;
+    const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const compute = React.useCallback((map: ReturnType<typeof useMapEvents>) => {
       if (stations.length === 0) { onRadiiComputed(new Map()); return; }
 
-      // ピクセル/メートル換算（現在のズームで計算）
       const center = map.getCenter();
       const pt0 = map.latLngToContainerPoint([center.lat, center.lng]);
       const pt1 = map.latLngToContainerPoint([center.lat + 0.001, center.lng]);
@@ -2376,7 +2376,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const minV = Math.min(...values), maxV = Math.max(...values);
       const range = maxV - minV || 1;
 
-      // 値の大きい順に処理
       const sorted = [...stations].sort((a, b) => b.value - a.value);
       const placed: Array<{ x: number; y: number; r: number }> = [];
       const radii = new Map<string, number>();
@@ -2384,31 +2383,27 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       for (const s of sorted) {
         const pt = map.latLngToContainerPoint([s.lat, s.lng]);
         const t = (s.value - minV) / range;
-        let rM = BASE_MIN_M + t * (BASE_MAX_M - BASE_MIN_M);
-        let rPx = rM * pixPerMeter;
-
-        // 配置済み円との重なりを解消（半径を縮小）
+        let rPx = (BASE_MIN_M + t * (BASE_MAX_M - BASE_MIN_M)) * pixPerMeter;
         for (const p of placed) {
-          const d = Math.hypot(p.x - pt.x, p.y - pt.y);
-          const maxPx = d - p.r - 2;
+          const maxPx = Math.hypot(p.x - pt.x, p.y - pt.y) - p.r - 2;
           if (maxPx < rPx) rPx = maxPx;
         }
-
-        const MIN_PX = 4;
-        if (rPx >= MIN_PX) {
-          placed.push({ x: pt.x, y: pt.y, r: rPx });
-          radii.set(s.name, rPx / pixPerMeter); // 縮小後をメートルに戻す
-        } else {
-          radii.set(s.name, MIN_PX / pixPerMeter); // 最小表示
-          placed.push({ x: pt.x, y: pt.y, r: MIN_PX });
-        }
+        const MIN_PX = 5;
+        const finalPx = Math.max(rPx, MIN_PX);
+        placed.push({ x: pt.x, y: pt.y, r: finalPx });
+        radii.set(s.name, finalPx / pixPerMeter);
       }
       onRadiiComputed(radii);
     }, [stations, onRadiiComputed]);
 
+    const computeDebounced = React.useCallback((map: ReturnType<typeof useMapEvents>) => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => compute(map), 150);
+    }, [compute]);
+
     const map = useMapEvents({
-      zoomend: (e) => compute(e.target),
-      moveend: (e) => compute(e.target),
+      zoomend: (e) => computeDebounced(e.target),
+      // moveendは省略してパフォーマンス改善（移動では半径比率が変わらない）
     });
     React.useEffect(() => { compute(map); }, [compute, map]);
     return null;
