@@ -2591,8 +2591,12 @@ const uiKorean: Record<string, string> = {
 };
 
 // 翻訳ヘルパー関数
+import { stationTranslationsChinese, stationTranslationsKorean } from './stationTranslationsCJK';
+
 export const translateStation = (stationName: string, language: Language): string => {
-  if (language === 'japanese' || language === 'chinese') return stationName;
+  if (language === 'japanese') return stationName;
+  if (language === 'chinese') return stationTranslationsChinese[stationName] || stationName;
+  if (language === 'korean') return stationTranslationsKorean[stationName] || stationTranslations[stationName] || stationName;
   return stationTranslations[stationName] || stationName;
 };
 

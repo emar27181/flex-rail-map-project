@@ -3343,9 +3343,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     >
                       <Tooltip sticky offset={[8, 0]} direction="right" opacity={0.95}>
                         <div style={{ fontSize: '12px', lineHeight: 1.5, whiteSpace: 'nowrap' }}>
-                          <div style={{ fontWeight: 'bold', color: t.color }}>{lineName}</div>
-                          {dest && <div>{dest}方面</div>}
-                          <div style={{ color: '#888', fontSize: '11px' }}>発 {depTime}</div>
+                          <div style={{ fontWeight: 'bold', color: t.color }}>{translateRoute(lineName, currentLanguage)}</div>
+                          {dest && <div>{translateStation(dest, currentLanguage)}{translateUI('towardSuffix', currentLanguage)}</div>}
+                          <div style={{ color: '#888', fontSize: '11px' }}>{translateUI('departsLabel', currentLanguage)} {depTime}</div>
                         </div>
                       </Tooltip>
                     </MapComponents.Marker>
@@ -4192,7 +4192,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                             fontSize: '18px',
                             fontWeight: 'bold'
                           }}>→</span>
-                          <span>{direction || translateStation(arrival.name, currentLanguage)}</span>
+                          <span>{direction ? translateStation(direction, currentLanguage) : translateStation(arrival.name, currentLanguage)}</span>
                         </div>
                         {direction && direction !== arrival.name && (
                           <div style={{
@@ -4200,7 +4200,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                             color: colors.textSecondary,
                             marginTop: '4px'
                           }}>
-                            {direction}
+                            {translateStation(direction, currentLanguage)}
                           </div>
                         )}
                       </div>
@@ -4220,13 +4220,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         justifyContent: 'center',
                         gap: '8px'
                       }}>
-                        <span>{getRouteDestination(clickedRoute)?.destinations[0] || translateUI('firstTrain', currentLanguage)}</span>
+                        <span>{translateStation(getRouteDestination(clickedRoute)?.destinations[0] || '', currentLanguage) || translateUI('firstTrain', currentLanguage)}</span>
                         <span style={{
                           color: colors.textSecondary,
                           fontSize: '16px',
                           fontWeight: 'bold'
                         }}>⇔</span>
-                        <span>{getRouteDestination(clickedRoute)?.destinations[1] || translateUI('lastStation', currentLanguage)}</span>
+                        <span>{translateStation(getRouteDestination(clickedRoute)?.destinations[1] || '', currentLanguage) || translateUI('lastStation', currentLanguage)}</span>
                       </div>
                     </div>
                   )}

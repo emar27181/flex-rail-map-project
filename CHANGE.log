@@ -1,5 +1,12 @@
 # CHANGE LOG
 
+## [2026-06-04] セッション（CJK駅名翻訳データ追加）
+
+### feat: 中国語（簡体字）・韓国語（ハングル）駅名翻訳辞書を新規作成（`src/utils/stationTranslationsCJK.ts`）
+- `stationTranslationsChinese`: 約500駅の中国語簡体字翻訳（日本語漢字と同じ場合はそのまま、異なる場合は簡体字変換）
+- `stationTranslationsKorean`: 約500駅の韓国語ハングル翻訳（公式・一般的な表記準拠）
+- 対象路線: 山手線・中央線・東海道線・東京メトロ全9路線・都営地下鉄4路線・私鉄主要各線・新交通システム等
+
 ## [2026-06-01] セッション（設定エクスポート・インポート / データ拡充）
 
 ### feat: 表示設定のJSONエクスポート・インポート機能を追加（`src/components/legend/MapConfigPanel.tsx`, `src/components/legend/LegendRouteList.tsx`, `src/components/RailwayMap.tsx`）
