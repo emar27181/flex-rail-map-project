@@ -156,6 +156,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [stationsWithinTime, setStationsWithinTime] = useState<StationWithTime[]>([]);
   const [actuallyDisplayedStations, setActuallyDisplayedStations] = useState<Set<string>>(new Set());
 
+  // 累積所要時間オーバーレイ
+  const [showTravelTimeOverlay, setShowTravelTimeOverlay] = useState(false);
+  const [travelTimeMap, setTravelTimeMap] = useState<Map<string, number>>(new Map());
+
   // フルスクリーン状態（モバイルはデフォルトでフルスクリーン）
   const [isFullscreen, setIsFullscreen] = useState(true);
 
@@ -1714,6 +1718,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     }
   }, [timeFilterEnabled, departure, timeFilterMaxMinutes, routeFinder, maxRouteRecommendations, arrival, timeFilter]);
 
+  // 累積所要時間オーバーレイ: 出発駅変更時に全駅への所要時間を計算
+  useEffect(() => {
+    if (!showTravelTimeOverlay || !departure) {
+      setTravelTimeMap(new Map());
+      return;
+    }
+    const allRoutes = new Set(Object.keys(routes) as RouteKey[]);
+    const results = timeFilter.findStationsWithinTime(departure, 120, allRoutes);
+    const map = new Map<string, number>();
+    results.forEach(r => map.set(r.station.name, Math.round(r.totalTime)));
+    setTravelTimeMap(map);
+  }, [showTravelTimeOverlay, departure, timeFilter]);
+
   // 表示された駅情報を更新するuseEffect
   useEffect(() => {
     if (timeFilterEnabled) {
@@ -2621,6 +2638,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               ? stationTimelineMap.get(station.name)?.find(e => e.routeKey === routeKey)
               : undefined;
             const stationTimeLabel = isDetailed && timelineEntry ? timelineEntry.depTime : undefined;
+            // 累積所要時間オーバーレイ: 所要時間を2行目ラベルとして表示（時刻表ラベルより優先）
+            const travelTimeMins = showTravelTimeOverlay ? travelTimeMap.get(station.name) : undefined;
+            const effectiveTimeLabel = travelTimeMins !== undefined
+              ? `${travelTimeMins}${translateUI('minutesSuffix', currentLanguage)}`
+              : stationTimeLabel;
             // getStationDisplayColor は heatmapEnabled/heatmapParam が deps に入った
             // useCallback なので、モード切替時に自動的に新しい関数参照になる
             // ヒートマップ時の上書き色（undefined = 通常色のまま）
@@ -2630,7 +2652,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             const stationColor = heatOverride ?? routeColor;
             const stationIcon = trainTypeViewEnabled
               ? createTrainTypeStationIcon(station, routeKey, zoomLevel, isDetailed, stationOpacity, heatOverride)
-              : createStationIcon(station, routeColor, zoomLevel, isDetailed, stationOpacity, stationTimeLabel, routeKey, heatOverride);
+              : createStationIcon(station, routeColor, zoomLevel, isDetailed, stationOpacity, effectiveTimeLabel, routeKey, heatOverride);
             if (!stationIcon) return null;
 
             const stationZIndex = (station.isExpress || isTransferStation) ? 3000 : 1000;
@@ -2917,6 +2939,37 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 {translateUI('routeSwitchNote', currentLanguage)}
                 </div>
               </div>
+
+              {/* 累積所要時間オーバーレイ（出発駅設定時のみ表示） */}
+              {departure && (
+                <div style={{
+                  marginBottom: '10px',
+                  padding: '10px',
+                  border: `1px solid ${showTravelTimeOverlay ? '#4CAF50' : colors.borderLight}`,
+                  borderRadius: '6px',
+                  backgroundColor: showTravelTimeOverlay ? 'rgba(76,175,80,0.08)' : colors.surfaceElevated
+                }}>
+                  <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', color: colors.text, cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={showTravelTimeOverlay}
+                      onChange={(e) => setShowTravelTimeOverlay(e.target.checked)}
+                      style={{ marginRight: '8px' }}
+                    />
+                    ⏱ {translateUI('travelTimeOverlay', currentLanguage)}
+                  </label>
+                  {showTravelTimeOverlay && travelTimeMap.size === 0 && (
+                    <div style={{ marginTop: '6px', paddingLeft: '20px', fontSize: '12px', color: colors.textSecondary }}>
+                      {translateUI('calculating', currentLanguage)}
+                    </div>
+                  )}
+                  {showTravelTimeOverlay && travelTimeMap.size > 0 && (
+                    <div style={{ marginTop: '6px', paddingLeft: '20px', fontSize: '12px', color: colors.textSecondary }}>
+                      {travelTimeMap.size}{translateUI('stationsCount', currentLanguage, { count: travelTimeMap.size.toString() }).replace('(', '').replace(')', '')} {translateUI('reachable', currentLanguage)}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* 時間フィルター設定 */}
               <div style={{
@@ -3330,7 +3383,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   const depTime = formatDemoTime(t.departureMin);
                   const bearing = t.bearing ?? 0;
                   const icon = new MapComponents.DivIcon({
-                    html: `<div style="width:16px;height:16px;display:flex;align-items:center;justify-content:center;transform:rotate(${bearing}deg);"><span style="font-size:16px;line-height:1;color:${t.color};text-shadow:0 0 3px #fff,0 0 2px #fff;">▲</span></div>`,
+                    html: `<div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:13px solid ${t.color};transform:rotate(${bearing}deg);filter:drop-shadow(0 1px 1px rgba(0,0,0,0.4));"></div>`,
                     className: '',
                     iconSize: [16, 16],
                     iconAnchor: [8, 8],

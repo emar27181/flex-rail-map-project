@@ -2259,6 +2259,18 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   allRoutesOff: {
     japanese: "全路線: 非表示",
     english: "All routes: OFF"
+  },
+  travelTimeOverlay: {
+    japanese: "所要時間を駅に表示",
+    english: "Show travel time on stations"
+  },
+  calculating: {
+    japanese: "計算中...",
+    english: "Calculating..."
+  },
+  reachable: {
+    japanese: "駅に到達可能",
+    english: "stations reachable"
   }
 };
 
@@ -2425,6 +2437,9 @@ const uiChinese: Record<string, string> = {
   cookieUsage: "Cookie 使用说明",
   allRoutesOn: "全路线: 显示",
   allRoutesOff: "全路线: 隐藏",
+  travelTimeOverlay: "在站点显示所需时间",
+  calculating: "计算中...",
+  reachable: "个站可到达",
 };
 
 // 韓国語UI翻訳
@@ -2588,6 +2603,9 @@ const uiKorean: Record<string, string> = {
   cookieUsage: "쿠키 사용 안내",
   allRoutesOn: "전체 노선: 표시",
   allRoutesOff: "전체 노선: 숨기기",
+  travelTimeOverlay: "역에 소요 시간 표시",
+  calculating: "계산 중...",
+  reachable: "개 역 도달 가능",
 };
 
 // 翻訳ヘルパー関数
