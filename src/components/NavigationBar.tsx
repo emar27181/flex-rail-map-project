@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Sun, Moon, Menu, X, Info } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import { translateUI } from '../utils/translation';
 import type { Language } from '../utils/translation';
 
 const LANGUAGES: Language[] = ['japanese', 'english', 'chinese', 'korean'];
@@ -55,7 +56,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           fontWeight: 'bold',
           color: colors.text
         }}>
-          {language === 'japanese' ? 'フレックス路線図' : language === 'chinese' ? '弹性路线图' : language === 'korean' ? '플렉스 노선도' : 'Flex Railway Map'}
+          {translateUI('appTitle', language)}
         </h1>
       </div>
 
@@ -90,8 +91,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             e.currentTarget.style.backgroundColor = 'transparent';
             e.currentTarget.style.transform = 'scale(1)';
           }}
-          title={language === 'japanese' ? 'このサイトについて' : 'About this site'}
-          aria-label={language === 'japanese' ? 'このサイトについて' : 'About this site'}
+          title={translateUI('aboutSiteTitle', language)}
+          aria-label={translateUI('aboutSiteTitle', language)}
         >
           <Info size={20} />
         </button>
@@ -159,14 +160,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             e.currentTarget.style.backgroundColor = 'transparent';
             e.currentTarget.style.transform = 'scale(1)';
           }}
-          title={language === 'japanese'
-            ? `${theme === 'light' ? 'ダーク' : 'ライト'}モードに切り替え`
-            : `Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`
-          }
-          aria-label={language === 'japanese'
-            ? `${theme === 'light' ? 'ダーク' : 'ライト'}モードに切り替え`
-            : `Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`
-          }
+          title={translateUI(theme === 'light' ? 'switchToDarkMode' : 'switchToLightMode', language)}
+          aria-label={translateUI(theme === 'light' ? 'switchToDarkMode' : 'switchToLightMode', language)}
         >
           {theme === 'light' ? (
             <Moon size={20} />
@@ -200,8 +195,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             e.currentTarget.style.backgroundColor = 'transparent';
             e.currentTarget.style.transform = 'scale(1)';
           }}
-          title={language === 'japanese' ? 'メニュー' : 'Menu'}
-          aria-label={language === 'japanese' ? 'メニューを開く' : 'Open menu'}
+          title={translateUI('menuTitle', language)}
+          aria-label={translateUI('openMenuLabel', language)}
         >
           {isMenuOpen ? (
             <X size={20} />

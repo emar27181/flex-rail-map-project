@@ -2127,6 +2127,130 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   stationHeatmap: {
     japanese: "駅統計ヒートマップ",
     english: "Station heatmap"
+  },
+  showOutsideSegmentRoutes: {
+    japanese: "区間外の路線を表示",
+    english: "Show outside-segment routes"
+  },
+  showMapTiles: {
+    japanese: "地図タイルを表示",
+    english: "Show map tiles"
+  },
+  showFullRouteStations: {
+    japanese: "中間駅以外も表示",
+    english: "Show full route stations"
+  },
+  showRouteLines: {
+    japanese: "路線の線を表示",
+    english: "Show route lines"
+  },
+  stationTooltipLabel: {
+    japanese: "駅ツールチップを表示",
+    english: "Station tooltip"
+  },
+  bubbleMap: {
+    japanese: "バブルマップ",
+    english: "Bubble map"
+  },
+  bubbleCircle: {
+    japanese: "● 円",
+    english: "● Circle"
+  },
+  bubbleSquare: {
+    japanese: "■ 四角",
+    english: "■ Square"
+  },
+  trainDemoLabel: {
+    japanese: "列車デモ",
+    english: "Train Demo"
+  },
+  sortLabel: {
+    japanese: "並順:",
+    english: "Sort:"
+  },
+  sortAlpha: {
+    japanese: "あいうえお",
+    english: "A-Z"
+  },
+  sortColor: {
+    japanese: "色",
+    english: "Color"
+  },
+  sortNearby: {
+    japanese: "近い順",
+    english: "Nearby"
+  },
+  sortDefault: {
+    japanese: "登録順",
+    english: "Default"
+  },
+  hideThisRoute: {
+    japanese: "この路線を非表示にする",
+    english: "Hide this route"
+  },
+  showThisRoute: {
+    japanese: "この路線を表示する",
+    english: "Show this route"
+  },
+  stationSettings: {
+    japanese: "駅設定",
+    english: "Station"
+  },
+  detailSettings: {
+    japanese: "詳細設定",
+    english: "Settings"
+  },
+  minutesSuffix: {
+    japanese: "分",
+    english: "min"
+  },
+  geolocationNotSupported: {
+    japanese: "位置情報はこのブラウザではサポートされていません。",
+    english: "Geolocation is not supported by this browser."
+  },
+  aboutSiteTitle: {
+    japanese: "このサイトについて",
+    english: "About this site"
+  },
+  menuTitle: {
+    japanese: "メニュー",
+    english: "Menu"
+  },
+  openMenuLabel: {
+    japanese: "メニューを開く",
+    english: "Open menu"
+  },
+  appTitle: {
+    japanese: "フレックス路線図",
+    english: "Flex Railway Map"
+  },
+  aboutLink: {
+    japanese: "このサイトについて",
+    english: "About"
+  },
+  faqLink: {
+    japanese: "よくある質問",
+    english: "FAQ"
+  },
+  privacyLink: {
+    japanese: "プライバシーポリシー",
+    english: "Privacy Policy"
+  },
+  termsLink: {
+    japanese: "利用規約",
+    english: "Terms of Service"
+  },
+  contactLink: {
+    japanese: "お問い合わせ",
+    english: "Contact"
+  },
+  approxNote: {
+    japanese: "（概算値・参考用）",
+    english: " (approx.)"
+  },
+  cookieUsage: {
+    japanese: "Cookieの使用について",
+    english: "Cookie Usage"
   }
 };
 
@@ -2260,6 +2384,37 @@ const uiChinese: Record<string, string> = {
   noDataForStation: "该站暂无数据",
   showStationCodes: "显示站编码",
   stationHeatmap: "车站统计热力图",
+  showOutsideSegmentRoutes: "显示区间外路线",
+  showMapTiles: "显示地图图块",
+  showFullRouteStations: "显示所有途经站",
+  showRouteLines: "显示路线",
+  stationTooltipLabel: "显示站点提示",
+  bubbleMap: "气泡地图",
+  bubbleCircle: "● 圆形",
+  bubbleSquare: "■ 方形",
+  trainDemoLabel: "列车演示",
+  sortLabel: "排序:",
+  sortAlpha: "A-Z",
+  sortColor: "颜色",
+  sortNearby: "近距离",
+  sortDefault: "默认",
+  hideThisRoute: "隐藏该路线",
+  showThisRoute: "显示该路线",
+  stationSettings: "站点设置",
+  detailSettings: "详细设置",
+  minutesSuffix: "分钟",
+  geolocationNotSupported: "此浏览器不支持定位功能。",
+  aboutSiteTitle: "关于本站",
+  menuTitle: "菜单",
+  openMenuLabel: "打开菜单",
+  appTitle: "弹性路线图",
+  aboutLink: "关于本站",
+  faqLink: "常见问题",
+  privacyLink: "隐私政策",
+  termsLink: "使用条款",
+  contactLink: "联系我们",
+  approxNote: "（概算值·参考用）",
+  cookieUsage: "Cookie 使用说明",
 };
 
 // 韓国語UI翻訳
@@ -2390,6 +2545,37 @@ const uiKorean: Record<string, string> = {
   noDataForStation: "이 역의 데이터가 없습니다",
   showStationCodes: "역 코드 표시",
   stationHeatmap: "역 통계 히트맵",
+  showOutsideSegmentRoutes: "구간 외 노선 표시",
+  showMapTiles: "지도 타일 표시",
+  showFullRouteStations: "전체 경유역 표시",
+  showRouteLines: "노선 표시",
+  stationTooltipLabel: "역 툴팁 표시",
+  bubbleMap: "버블 맵",
+  bubbleCircle: "● 원형",
+  bubbleSquare: "■ 사각형",
+  trainDemoLabel: "열차 데모",
+  sortLabel: "정렬:",
+  sortAlpha: "가나다",
+  sortColor: "색상",
+  sortNearby: "가까운 순",
+  sortDefault: "기본",
+  hideThisRoute: "이 노선 숨기기",
+  showThisRoute: "이 노선 표시",
+  stationSettings: "역 설정",
+  detailSettings: "상세 설정",
+  minutesSuffix: "분",
+  geolocationNotSupported: "이 브라우저는 위치 정보를 지원하지 않습니다.",
+  aboutSiteTitle: "사이트 소개",
+  menuTitle: "메뉴",
+  openMenuLabel: "메뉴 열기",
+  appTitle: "플렉스 노선도",
+  aboutLink: "사이트 소개",
+  faqLink: "자주 묻는 질문",
+  privacyLink: "개인정보처리방침",
+  termsLink: "이용약관",
+  contactLink: "문의하기",
+  approxNote: "（개산값·참고용）",
+  cookieUsage: "쿠키 사용 안내",
 };
 
 // 翻訳ヘルパー関数

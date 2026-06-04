@@ -184,7 +184,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             onChange={(e) => onShowDimmedRoutesChange(e.target.checked)}
             style={{ marginRight: '6px', cursor: 'pointer' }}
           />
-          {language === 'english' ? 'Show outside-segment routes' : '区間外の路線を表示'}
+          {translateUI('showOutsideSegmentRoutes', language)}
         </label>
 
         {/* 乗換駅のみ表示オプション */}
@@ -284,7 +284,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
               cursor: 'pointer'
             }}
           />
-          {language === 'english' ? 'Show map tiles' : '地図タイルを表示'}
+          {translateUI('showMapTiles', language)}
         </label>
 
         {/* 中間駅以外も表示 */}
@@ -295,7 +295,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             onChange={e => onShowFullRouteStationsChange(e.target.checked)}
             style={{ marginRight: '6px', cursor: 'pointer' }}
           />
-          {language === 'english' ? 'Show full route stations' : '中間駅以外も表示'}
+          {translateUI('showFullRouteStations', language)}
         </label>
 
         {/* 路線の線を表示 */}
@@ -306,7 +306,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             onChange={e => onShowRouteLineChange(e.target.checked)}
             style={{ marginRight: '6px', cursor: 'pointer' }}
           />
-          {language === 'english' ? 'Show route lines' : '路線の線を表示'}
+          {translateUI('showRouteLines', language)}
         </label>
 
         {/* 駅ツールチップ */}
@@ -317,7 +317,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             onChange={e => onShowStationTooltipChange(e.target.checked)}
             style={{ marginRight: '6px', cursor: 'pointer' }}
           />
-          {language === 'english' ? 'Station tooltip' : '駅ツールチップを表示'}
+          {translateUI('stationTooltipLabel', language)}
         </label>
 
         {/* 駅統計ヒートマップ */}
@@ -375,7 +375,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             onChange={e => onMapViewModeChange(e.target.checked ? 'bubble' : 'realistic')}
             style={{ marginRight: '6px', cursor: 'pointer' }}
           />
-          {language === 'english' ? 'Bubble map' : 'バブルマップ'}
+          {translateUI('bubbleMap', language)}
         </label>
         {mapViewMode === 'bubble' && (
           <div style={{ marginLeft: '22px', marginTop: '4px', display: 'flex', gap: '6px' }}>
@@ -388,9 +388,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   onChange={() => onBubbleShapeChange(shape)}
                   style={{ marginRight: '4px', cursor: 'pointer' }}
                 />
-                {shape === 'circle'
-                  ? (language === 'english' ? '● Circle' : '● 円')
-                  : (language === 'english' ? '■ Square' : '■ 四角')}
+                {shape === 'circle' ? translateUI('bubbleCircle', language) : translateUI('bubbleSquare', language)}
               </label>
             ))}
           </div>
@@ -405,7 +403,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
               onChange={onTrainDemoToggle}
               style={{ marginRight: '6px', cursor: 'pointer' }}
             />
-            🚃 {language === 'english' ? 'Train Demo' : '列車デモ'}
+            🚃 {translateUI('trainDemoLabel', language)}
           </label>
         )}
       </div>
@@ -415,16 +413,16 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
       {/* ソート選択 */}
       <div style={{ display: 'flex', gap: '4px', marginTop: '10px', marginBottom: '6px', alignItems: 'center' }}>
         <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
-          {language === 'english' ? 'Sort:' : '並順:'}
+          {translateUI('sortLabel', language)}
         </span>
         {(['name', 'color', 'default', 'distance'] as SortMode[]).map(mode => {
           const label = mode === 'name'
-            ? (language === 'english' ? 'A-Z' : 'あいうえお')
+            ? translateUI('sortAlpha', language)
             : mode === 'color'
-              ? (language === 'english' ? 'Color' : '色')
+              ? translateUI('sortColor', language)
               : mode === 'distance'
-                ? (language === 'english' ? 'Nearby' : '近い順')
-                : (language === 'english' ? 'Default' : '登録順');
+                ? translateUI('sortNearby', language)
+                : translateUI('sortDefault', language);
           return (
             <button
               key={mode}

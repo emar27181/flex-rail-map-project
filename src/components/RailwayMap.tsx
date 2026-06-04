@@ -2161,7 +2161,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 現在地取得ハンドラー（トグル式: ON/OFF）
   const handleLocateUser = useCallback(() => {
     if (!navigator.geolocation) {
-      alert(currentLanguage === 'japanese' ? '位置情報はこのブラウザではサポートされていません。' : 'Geolocation is not supported by this browser.');
+      alert(translateUI('geolocationNotSupported', currentLanguage));
       return;
     }
 
@@ -2204,13 +2204,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         setUserLocation(null);
         isFirstPositionRef.current = true;
 
-        const messages: Record<string, { ja: string; en: string }> = {
-          '1': { ja: '位置情報の使用が許可されていません。', en: 'Location permission denied.' },
-          '2': { ja: '位置情報を取得できませんでした。', en: 'Position unavailable.' },
-          '3': { ja: '位置情報の取得がタイムアウトしました。', en: 'Location request timed out.' },
+        const messages: Record<string, Record<Language, string>> = {
+          '1': { japanese: '位置情報の使用が許可されていません。', english: 'Location permission denied.', chinese: '位置信息使用未获许可。', korean: '위치 정보 사용이 허가되지 않았습니다.' },
+          '2': { japanese: '位置情報を取得できませんでした。', english: 'Position unavailable.', chinese: '无法获取位置信息。', korean: '위치 정보를 가져올 수 없습니다.' },
+          '3': { japanese: '位置情報の取得がタイムアウトしました。', english: 'Location request timed out.', chinese: '位置信息获取超时。', korean: '위치 정보 요청이 시간 초과되었습니다.' },
         };
-        const msg = messages[String(error.code)] || { ja: '位置情報の取得に失敗しました。', en: 'Failed to get location.' };
-        alert(currentLanguage === 'japanese' ? msg.ja : msg.en);
+        const msg = messages[String(error.code)] ?? { japanese: '位置情報の取得に失敗しました。', english: 'Failed to get location.', chinese: '无法获取位置信息。', korean: '위치 정보를 가져오지 못했습니다.' };
+        alert(msg[currentLanguage]);
       },
       { enableHighAccuracy: true, timeout: 30000, maximumAge: 10000 }
     );
@@ -2847,7 +2847,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     checked={showDimmedMapRoutes}
                     onChange={(e) => setShowDimmedMapRoutes(e.target.checked)}
                   />
-                  {currentLanguage === 'english' ? 'Show outside-segment routes' : '区間外の路線を表示'}
+                  {translateUI('showOutsideSegmentRoutes', currentLanguage)}
                 </label>
               </div>
               <div style={{ marginBottom: '10px' }}>
@@ -3618,7 +3618,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         fontSize: '11px', width: '100%',
                       }}
                     >
-                      {currentLanguage === 'english' ? 'Hide this route' : 'この路線を非表示にする'}
+                      {translateUI('hideThisRoute', currentLanguage)}
                     </button>
                   ) : (
                     <button
@@ -3633,7 +3633,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         fontSize: '11px', width: '100%',
                       }}
                     >
-                      {currentLanguage === 'english' ? 'Show this route' : 'この路線を表示する'}
+                      {translateUI('showThisRoute', currentLanguage)}
                     </button>
                   )}
                 </div>
@@ -3903,7 +3903,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 {
                   key: 'station',
                   icon: '',
-                  label: currentLanguage === 'english' ? 'Station' : '駅設定',
+                  label: translateUI('stationSettings', currentLanguage),
                   content: (
                     <StationSelector
                       departure={departure}
@@ -3922,7 +3922,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 {
                   key: 'settings',
                   icon: '',
-                  label: currentLanguage === 'english' ? 'Settings' : '詳細設定',
+                  label: translateUI('detailSettings', currentLanguage),
                   content: (
                     <>
                       <LegendStationMarkers
@@ -4245,7 +4245,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       fontSize: '11px',
                     }}
                   >
-                    {currentLanguage === 'english' ? 'Hide this route' : 'この路線を非表示にする'}
+                    {translateUI('hideThisRoute', currentLanguage)}
                   </button>
                 </div>
               </div>

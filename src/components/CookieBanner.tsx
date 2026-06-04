@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Cookie, Settings, X } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import { translateUI } from '../utils/translation';
 import type { Language } from '../utils/translation';
 
 interface CookieBannerProps {
@@ -97,7 +98,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
               fontWeight: 'bold',
               color: colors.text
             }}>
-              {language === 'japanese' ? 'Cookieの使用について' : 'Cookie Usage'}
+              {translateUI('cookieUsage', language)}
             </h3>
             <p style={{
               margin: '0 0 16px 0',

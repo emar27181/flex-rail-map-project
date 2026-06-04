@@ -373,7 +373,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
           color: colors.textSecondary,
           lineHeight: '1.5',
         }}>
-          ⚠ {dataVersionLabel.version}{ language === 'japanese' ? '（概算値・参考用）' : ' (approx.)'}<br />
+          ⚠ {dataVersionLabel.version}{translateUI('approxNote', language)}<br />
           {translateUI('timetableUpdatedAt', language, { date: dataVersionLabel.updatedAt })}　{translateUI('timetableDisclaimerNote', language)}
         </div>
       )}
