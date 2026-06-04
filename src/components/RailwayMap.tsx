@@ -3556,13 +3556,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       ))}
                         </div>
                       </div>
-                      {heatmapCustomRange && (
-                        <button onClick={() => setHeatmapCustomRange(undefined)}
-                          style={{ fontSize: '10px', padding: '2px 8px', cursor: 'pointer', borderRadius: '3px',
-                            border: `1px solid ${colors.border}`, background: 'transparent', color: colors.textSecondary }}>
-                          ↩ リセット
-                        </button>
-                      )}
                     </>
                   );
                 })()}
