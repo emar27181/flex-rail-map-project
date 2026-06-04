@@ -206,8 +206,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // ヒートマップ
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
   const [heatmapParam, setHeatmapParam] = useState<keyof StationStats>('avgRent1K');
-  // バブルマップ: 駅名 → 表示半径(px)。BubbleSizer が計算して注入する
-  const [bubbleSizesMap, setBubbleSizesMap] = useState<Map<string, number>>(new Map());
   // バブルマップの形状（円 or 四角）
   const [bubbleShape, setBubbleShape] = useState<'circle' | 'square'>('circle');
   const [heatmapCustomRange, setHeatmapCustomRange] = useState<{ min: number; max: number } | undefined>(undefined);
@@ -1564,7 +1562,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         if (typeof window === 'undefined') return;
 
         const [
-          { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, Pane, Tooltip },
+          { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Circle, useMapEvents, ZoomControl, Pane, Tooltip },
           { DivIcon }
         ] = await Promise.all([
           import('react-leaflet'),
@@ -1572,7 +1570,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         ]);
 
         if (mounted) {
-          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip });
+          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Circle, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip });
           setIsClient(true);
           setIsLoading(false);
           // デバッグ関数をブラウザコンソールで利用可能にする
@@ -2347,61 +2345,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // ─── バブルマップ用: 重なり防止サイズ計算コンポーネント ───────────────
   // MapContainer の子として配置し、useMapEvents でピクセル座標を取得する。
   // 大きい駅から順に配置し、各駅の最大許容半径を O(n²) 1パスで算出する。
-  const BubbleSizer: React.FC<{
-    stations: Array<{ name: string; lat: number; lng: number; value: number }>;
-    onSizesComputed: (sizes: Map<string, number>) => void;
-  }> = ({ stations, onSizesComputed }) => {
-    const MIN_R = 8;
-
-    // 値から固定ピクセル半径を決定（ズーム不変）
-    // 家賃(万円)や他の統計値を直接スケールに使う
-    const valueToRadius = React.useCallback((value: number, minV: number, maxV: number): number => {
-      const range = maxV - minV || 1;
-      const t = (value - minV) / range;
-      return MIN_R + t * (50 - MIN_R); // 8〜50px の固定範囲
-    }, []);
-
-    const compute = React.useCallback((map: ReturnType<typeof useMapEvents>) => {
-      if (stations.length === 0) { onSizesComputed(new Map()); return; }
-
-      const values = stations.map(s => s.value);
-      const minV = Math.min(...values), maxV = Math.max(...values);
-
-      // 値の大きい順に処理（大きいバブルを優先表示）
-      const sorted = [...stations].sort((a, b) => b.value - a.value);
-      const placed: Array<{ x: number; y: number; r: number }> = [];
-      const sizes = new Map<string, number>();
-
-      for (const s of sorted) {
-        const pt = map.latLngToContainerPoint([s.lat, s.lng]);
-        // 固定半径（ズームに依存しない）
-        const r = valueToRadius(s.value, minV, maxV);
-
-        // 配置済み円と重なるか判定（重なる場合は非表示）
-        let overlaps = false;
-        for (const p of placed) {
-          const d = Math.hypot(p.x - pt.x, p.y - pt.y);
-          if (d < p.r + r + 2) { overlaps = true; break; }
-        }
-
-        if (!overlaps) {
-          placed.push({ x: pt.x, y: pt.y, r });
-          sizes.set(s.name, r);
-        }
-      }
-
-      onSizesComputed(sizes);
-    }, [stations, onSizesComputed, valueToRadius]);
-
-    const map = useMapEvents({
-      zoomend: (e) => compute(e.target),
-      moveend: (e) => compute(e.target),
-    });
-
-    React.useEffect(() => { compute(map); }, [compute, map]);
-
-    return null;
-  };
+  // バブルマップ用: 値→地理的半径（メートル）変換
+  const valueToMeters = React.useCallback((value: number, minV: number, maxV: number): number => {
+    const range = maxV - minV || 1;
+    const t = (value - minV) / range;
+    return 80 + t * 720; // 80m〜800m の固定範囲
+  }, []);
 
   const getRouteSegmentForStations = (routeKey: RouteKey, stations: Station[], depStation: Station, arrStation: Station) => {
     const depIndex = stations.findIndex(s => s.name === depStation.name);
@@ -3224,83 +3173,55 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               <ZoomControl position="bottomright" />
               <MapEvents />
 
-              {/* バブルマップ用サイズ計算（重なり防止） */}
-              {mapViewMode === 'bubble' && (
-                <BubbleSizer
-                  stations={bubbleStations}
-                  onSizesComputed={setBubbleSizesMap}
-                />
-              )}
-
-              {/* バブルマップ用 Marker 描画（DivIcon・駅名付き） */}
-              {mapViewMode === 'bubble' && Array.from(bubbleSizesMap.entries()).map(([name, r]) => {
-                const s = bubbleStations.find(st => st.name === name);
-                if (!s) return null;
-                const color = getStationHeatColor(name, heatmapParam, heatmapCustomRange)
-                  ?? (theme === 'dark' ? '#6699cc' : '#3366cc');
-                const d = r * 2;
-                const isCircle = bubbleShape === 'circle';
-                const borderColor = theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.25)';
-                const textColor = '#fff';
-
-                // ── 表示テキスト組み立て（表示フラグに従う） ──
-                const routeKeyForNum = stationVisibilityFilter.stationRouteMap.get(name);
-                const stationNum = showStationNumbers
-                  ? (routeKeyForNum ? getStationNumber(routeKeyForNum, name) : null) ?? getAnyStationNumber(name)
-                  : null;
-                const furigana = (showFurigana && currentLanguage === 'japanese') ? getFurigana(name) : '';
-                const displayName = showStationNames
-                  ? (stationNum ? `${stationNum} ${name}` : name)
-                  : (stationNum ?? '');
-
-                const fontSize = Math.max(7, Math.min(13, r * 0.42));
-                const subSize = Math.max(6, fontSize - 2);
-
-                const innerHtml = displayName
-                  ? (furigana
-                    ? `<div style="display:flex;flex-direction:column;align-items:center;line-height:1.1;overflow:hidden">
-                        <span style="font-size:${subSize}px;opacity:0.85">${furigana}</span>
-                        <span style="font-size:${fontSize}px">${displayName}</span>
-                       </div>`
-                    : `<span style="font-size:${fontSize}px">${displayName}</span>`)
-                  : '';
-
-                const html = `<div style="
-                  width:${d}px;height:${d}px;
-                  border-radius:${isCircle ? '50%' : '6px'};
-                  background:${color};
-                  border:1.5px solid ${borderColor};
-                  display:flex;align-items:center;justify-content:center;
-                  color:${textColor};font-weight:bold;
-                  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
-                  padding:0 2px;box-sizing:border-box;
-                  pointer-events:auto;cursor:pointer;
-                ">${innerHtml}</div>`;
-                const icon = new DivIcon({
-                  html,
-                  className: '',
-                  iconSize: [d, d],
-                  iconAnchor: [r, r],
+              {/* バブルマップ: Circle（地理的半径・全駅常時表示） */}
+              {mapViewMode === 'bubble' && (() => {
+                const values = bubbleStations.map(s => s.value);
+                const minV = Math.min(...values) || 0;
+                const maxV = Math.max(...values) || 1;
+                return bubbleStations.map(s => {
+                  const color = getStationHeatColor(s.name, heatmapParam, heatmapCustomRange)
+                    ?? (theme === 'dark' ? '#6699cc' : '#3366cc');
+                  const radiusM = valueToMeters(s.value, minV, maxV);
+                  const isCircle = bubbleShape === 'circle';
+                  const borderColor = theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.3)';
+                  return (
+                    <React.Fragment key={`bubble-${s.name}`}>
+                      <MapComponents.Circle
+                        center={[s.lat, s.lng]}
+                        radius={radiusM}
+                        pathOptions={{
+                          fillColor: color,
+                          fillOpacity: 0.55,
+                          color: borderColor,
+                          weight: 1.5,
+                        }}
+                        eventHandlers={{
+                          click: (e) => {
+                            if (isMobile && mapDraggedRef.current) return;
+                            const oe = e.originalEvent as MouseEvent | undefined;
+                            if (!oe) return;
+                            setStationTooltip(prev =>
+                              prev?.stationName === s.name ? null : { stationName: s.name, station: s as unknown as Station, x: oe.clientX, y: oe.clientY }
+                            );
+                          },
+                        }}
+                      />
+                      {showStationNames && (
+                        <Marker
+                          position={[s.lat, s.lng]}
+                          icon={new DivIcon({
+                            html: `<span style="font-size:10px;font-weight:bold;color:#fff;text-shadow:0 0 3px rgba(0,0,0,0.8);white-space:nowrap;pointer-events:none;">${translateStation(s.name, currentLanguage)}</span>`,
+                            className: '',
+                            iconAnchor: [0, 5],
+                          })}
+                          interactive={false}
+                          zIndexOffset={1000}
+                        />
+                      )}
+                    </React.Fragment>
+                  );
                 });
-                return (
-                  <Marker
-                    key={`bubble-${name}`}
-                    position={[s.lat, s.lng]}
-                    icon={icon}
-                    zIndexOffset={Math.round(r) * 10}
-                    eventHandlers={{
-                      click: (e) => {
-                        if (isMobile && mapDraggedRef.current) return;
-                        const oe = e.originalEvent as MouseEvent | undefined;
-                        if (!oe) return;
-                        setStationTooltip(prev =>
-                          prev?.stationName === name ? null : { stationName: name, station: s as Station, x: oe.clientX, y: oe.clientY }
-                        );
-                      },
-                    }}
-                  />
-                );
-              })}
+              })()}
 
               {showOsmTiles && mapViewMode !== 'bubble' && (
                 <TileLayer
