@@ -200,6 +200,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // 駅時刻表ツールチップ状態
   const [stationTooltip, setStationTooltip] = useState<{ stationName: string; station: Station; x: number; y: number } | null>(null);
+  const [tooltipDragOffset, setTooltipDragOffset] = useState<{ dx: number; dy: number }>({ dx: 0, dy: 0 });
+  const tooltipDragRef = useRef<{ startPx: number; startPy: number; startDx: number; startDy: number } | null>(null);
   // ツールチップ内で選択中の路線
   const [tooltipSelectedRoute, setTooltipSelectedRoute] = useState<string | null>(null);
   const [showAllTooltipDeps, setShowAllTooltipDeps] = useState(false);
@@ -277,6 +279,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // スマホでのパン直後の誤タップを防ぐフラグ
   const mapDraggedRef = useRef(false);
+
+  // ツールチップが変わったらドラッグオフセットをリセット
+  React.useEffect(() => { setTooltipDragOffset({ dx: 0, dy: 0 }); }, [stationTooltip?.stationName]);
 
   // 駅ホバーツールチップ: マーカーとパネル両方から離れたときに閉じる遅延タイマー
   const stationTooltipCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -654,10 +659,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const TW = Math.min(280, vw - MARGIN * 2);
     const rawX = stationTooltip.x + 14;
     let x = rawX + TW > vw - MARGIN ? stationTooltip.x - TW - 6 : rawX;
-    x = Math.max(MARGIN, Math.min(x, vw - TW - MARGIN));
+    x = Math.max(MARGIN, Math.min(x + tooltipDragOffset.dx, vw - TW - MARGIN));
     const estH = 120 + filledParams.length * 18;
     const rawY = stationTooltip.y + 14;
-    const y = Math.max(MARGIN, Math.min(rawY + estH > vh - MARGIN ? stationTooltip.y - estH - 6 : rawY, vh - estH - MARGIN));
+    const y = Math.max(MARGIN, Math.min((rawY + estH > vh - MARGIN ? stationTooltip.y - estH - 6 : rawY) + tooltipDragOffset.dy, vh - estH - MARGIN));
+
+    const dragHandleProps = {
+      onPointerDown: (e: React.PointerEvent) => {
+        e.currentTarget.setPointerCapture(e.pointerId);
+        tooltipDragRef.current = { startPx: e.clientX, startPy: e.clientY, startDx: tooltipDragOffset.dx, startDy: tooltipDragOffset.dy };
+      },
+      onPointerMove: (e: React.PointerEvent) => {
+        if (!tooltipDragRef.current) return;
+        const { startPx, startPy, startDx, startDy } = tooltipDragRef.current;
+        setTooltipDragOffset({ dx: startDx + e.clientX - startPx, dy: startDy + e.clientY - startPy });
+      },
+      onPointerUp: () => { tooltipDragRef.current = null; },
+    };
 
     return (
       <div
@@ -677,8 +695,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           cursor: 'default',
         }}
       >
+        {/* ドラッグハンドル */}
+        <div {...dragHandleProps} style={{ display: 'flex', justifyContent: 'center', padding: '4px 0 1px', cursor: 'grab', flexShrink: 0 }}>
+          <div style={{ width: 32, height: 3, borderRadius: 2, backgroundColor: colors.border }} />
+        </div>
         {/* ヘッダー */}
-        <div style={{ padding: '8px 10px 6px', borderBottom: `1px solid ${colors.borderLight}` }}>
+        <div style={{ padding: '4px 10px 6px', borderBottom: `1px solid ${colors.borderLight}` }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
             <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text }}>
               {translateStation(stationTooltip.stationName, currentLanguage)}
@@ -787,7 +809,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       if (!activeRouteKey || !hasTimetableData(activeRouteKey)) return [];
       const depTime = activeJourneyEntry?.depTime ?? timetableBaseTime;
       const dirIdx  = activeJourneyEntry?.directionIndex ?? 0;
-      return getNextDepartures(activeRouteKey, stationTooltip.stationName, dirIdx, depTime, showAllTooltipDeps ? 50 : 5);
+      return getNextDepartures(activeRouteKey, stationTooltip.stationName, dirIdx, depTime, 50);
     })();
 
     const activeDepTime = activeJourneyEntry?.depTime ?? timetableBaseTime;
@@ -819,17 +841,33 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const maxTooltipH = Math.min(vh - MARGIN * 2, 480);
     const estH = Math.min(52 + Math.max(allRoutes.length * 28, activeDeps.length * 26 + 22) + 20, maxTooltipH);
     const rawY = stationTooltip.y + 14;
-    const y = Math.max(MARGIN, Math.min(
+    const baseX = x;
+    const baseY = Math.max(MARGIN, Math.min(
       rawY + estH > vh - MARGIN ? stationTooltip.y - estH - 6 : rawY,
       vh - estH - MARGIN
     ));
+    const finalX = Math.max(MARGIN, Math.min(baseX + tooltipDragOffset.dx, vw - TW - MARGIN));
+    const finalY = Math.max(MARGIN, Math.min(baseY + tooltipDragOffset.dy, vh - maxTooltipH - MARGIN));
+
+    const dragHandleProps2 = {
+      onPointerDown: (e: React.PointerEvent) => {
+        e.currentTarget.setPointerCapture(e.pointerId);
+        tooltipDragRef.current = { startPx: e.clientX, startPy: e.clientY, startDx: tooltipDragOffset.dx, startDy: tooltipDragOffset.dy };
+      },
+      onPointerMove: (e: React.PointerEvent) => {
+        if (!tooltipDragRef.current) return;
+        const { startPx, startPy, startDx, startDy } = tooltipDragRef.current;
+        setTooltipDragOffset({ dx: startDx + e.clientX - startPx, dy: startDy + e.clientY - startPy });
+      },
+      onPointerUp: () => { tooltipDragRef.current = null; },
+    };
 
     return (
       <div
         onMouseEnter={cancelTooltipClose}
         onMouseLeave={scheduleTooltipClose}
         style={{
-          position: 'fixed', left: x, top: y, zIndex: 9999,
+          position: 'fixed', left: finalX, top: finalY, zIndex: 9999,
           width: `${TW}px`,
           maxHeight: `${maxTooltipH}px`,
           backgroundColor: colors.surfaceElevated,
@@ -842,9 +880,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           cursor: 'default',
         }}
       >
+        {/* ドラッグハンドル */}
+        <div {...dragHandleProps2} style={{ display: 'flex', justifyContent: 'center', padding: '4px 0 1px', cursor: 'grab', flexShrink: 0 }}>
+          <div style={{ width: 32, height: 3, borderRadius: 2, backgroundColor: colors.border }} />
+        </div>
         {/* ヘッダー */}
         <div style={{
-          padding: '7px 10px 6px',
+          padding: '4px 10px 6px',
           borderBottom: `1px solid ${colors.borderLight}`,
         }}>
           {/* 駅名 + 閉じるボタン */}
@@ -887,12 +929,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 style={{
                   border: `1px solid ${colors.border}`,
                   borderRadius: '3px',
-                  padding: '1px 4px',
-                  fontSize: '16px',
+                  padding: '0 3px',
+                  height: '24px',
+                  boxSizing: 'border-box',
+                  fontSize: '13px',
                   backgroundColor: colors.surface,
                   color: colors.text,
                   cursor: 'pointer',
-                  width: '110px',
+                  width: '90px',
                 }}
               />
               <button
@@ -905,7 +949,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 style={{
                   border: `1px solid ${colors.border}`,
                   borderRadius: '3px',
-                  padding: '2px 5px',
+                  padding: '0 6px',
+                  height: '24px',
+                  boxSizing: 'border-box',
                   fontSize: '10px',
                   backgroundColor: colors.surface,
                   color: colors.textSecondary,
@@ -913,7 +959,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   whiteSpace: 'nowrap',
                 }}
               >
-                🕐 {translateUI('currentTime', currentLanguage)}
+                {translateUI('currentTime', currentLanguage)}
               </button>
             </div>
           </div>
@@ -1090,21 +1136,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         </div>
                       </div>
                     ))}
-                    {!showAllTooltipDeps && (
-                      <div
-                        onClick={() => setShowAllTooltipDeps(true)}
-                        style={{
-                          padding: '5px 8px',
-                          fontSize: '10px',
-                          color: colors.primary,
-                          cursor: 'pointer',
-                          textAlign: 'center',
-                          borderTop: `1px solid ${colors.borderLight}`,
-                        }}
-                      >
-                        {translateUI('showAllTimetable', currentLanguage)}
-                      </div>
-                    )}
                   </>
                 )}
               </>
@@ -3542,13 +3573,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       {/* 範囲調整 */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginBottom: '5px', flexWrap: 'nowrap' }}>
                         <input type="number" value={effectiveMin} step={step}
-                          onChange={e => { const v = rnd1(parseFloat(e.target.value)); if (!isNaN(v)) setHeatmapCustomRange({ min: v, max: effectiveMax }); }}
+                          onChange={e => {
+                            if (e.target.value === '') { setHeatmapCustomRange(undefined); return; }
+                            const v = rnd1(parseFloat(e.target.value));
+                            if (!isNaN(v)) setHeatmapCustomRange({ min: v, max: effectiveMax });
+                          }}
                           style={numS} />
                         <button style={btnS} onClick={() => setHeatmapCustomRange({ min: rnd1(effectiveMin - step), max: effectiveMax })}>−</button>
                         <button style={btnS} onClick={() => setHeatmapCustomRange({ min: rnd1(Math.min(effectiveMin + step, effectiveMax - step)), max: effectiveMax })}>+</button>
                         <span style={{ fontSize: '10px', color: colors.textSecondary }}>〜</span>
                         <input type="number" value={effectiveMax} step={step}
-                          onChange={e => { const v = rnd1(parseFloat(e.target.value)); if (!isNaN(v)) setHeatmapCustomRange({ min: effectiveMin, max: v }); }}
+                          onChange={e => {
+                            if (e.target.value === '') { setHeatmapCustomRange(undefined); return; }
+                            const v = rnd1(parseFloat(e.target.value));
+                            if (!isNaN(v)) setHeatmapCustomRange({ min: effectiveMin, max: v });
+                          }}
                           style={numS} />
                         <button style={btnS} onClick={() => setHeatmapCustomRange({ min: effectiveMin, max: rnd1(Math.max(effectiveMax - step, effectiveMin + step)) })}>−</button>
                         <button style={btnS} onClick={() => setHeatmapCustomRange({ min: effectiveMin, max: rnd1(effectiveMax + step) })}>+</button>
