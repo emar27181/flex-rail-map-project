@@ -2336,6 +2336,18 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "データなし",
     english: "No data"
   },
+  travelTimeLabelMode: {
+    japanese: "時間表示",
+    english: "Time display"
+  },
+  travelTimeLabelInterval: {
+    japanese: "間隔",
+    english: "Interval"
+  },
+  travelTimeLabelCumulative: {
+    japanese: "累積",
+    english: "Cumulative"
+  },
   // ── 設定グループ名 ──
   settingsGroupLabel: {
     japanese: "駅ラベル",

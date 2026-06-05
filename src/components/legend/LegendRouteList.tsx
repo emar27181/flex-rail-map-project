@@ -65,6 +65,8 @@ interface LegendRouteListProps {
   onStationLabelFontSizeChange: (v: number) => void;
   stationIconScale: number;
   onStationIconScaleChange: (v: number) => void;
+  travelTimeLabelMode: 'interval' | 'cumulative';
+  onTravelTimeLabelModeChange: (v: 'interval' | 'cumulative') => void;
 }
 
 const LegendRouteList: React.FC<LegendRouteListProps> = ({
@@ -119,6 +121,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onStationLabelFontSizeChange,
   stationIconScale,
   onStationIconScaleChange,
+  travelTimeLabelMode,
+  onTravelTimeLabelModeChange,
 }) => {
   const colors = getThemeColors(theme);
   const [sortMode, setSortMode] = useState<SortMode>('name');
@@ -203,6 +207,23 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
               <input type="checkbox" checked={showTravelTimes} onChange={e => onShowTravelTimesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
               {translateUI('showTravelTimes', language)}
             </label>
+            {showTravelTimes && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', paddingLeft: '22px', marginBottom: '2px' }}>
+                <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('travelTimeLabelMode', language)}:</span>
+                {(['interval', 'cumulative'] as const).map(mode => (
+                  <label key={mode} style={{ display: 'flex', alignItems: 'center', gap: '2px', fontSize: '10px', color: colors.text, cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="travelTimeLabelMode"
+                      checked={travelTimeLabelMode === mode}
+                      onChange={() => onTravelTimeLabelModeChange(mode)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                    {translateUI(mode === 'interval' ? 'travelTimeLabelInterval' : 'travelTimeLabelCumulative', language)}
+                  </label>
+                ))}
+              </div>
+            )}
             <label style={checkboxLabel(colors)}>
               <input type="checkbox" checked={showStationNumbers} onChange={e => onShowStationNumbersChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
               {translateUI('showStationCodes', language)}
