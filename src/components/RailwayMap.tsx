@@ -222,6 +222,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // ヒートマップ
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
   const [heatmapParam, setHeatmapParam] = useState<keyof StationStats>('avgRent1K');
+  // 複数パラメータ選択（空=単一パラメータモード）
+  const [heatmapMultiParams, setHeatmapMultiParams] = useState<Set<keyof StationStats>>(new Set());
   // バブルマップの形状（円 or 四角）
   const [bubbleShape, setBubbleShape] = useState<'circle' | 'square'>('circle');
   const [heatmapCustomRange, setHeatmapCustomRange] = useState<{ min: number; max: number } | undefined>(undefined);
@@ -1200,10 +1202,35 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * heatmapEnabled / heatmapParam が deps に入っているため、
    * これらが変わると関数参照が変わり、呼び出し側のキャッシュを自動的に無効化する。
    */
+  // 複数パラメータの正規化スコアを平均した複合ヒートスコア（0-1）
+  const getCompositeHeatScore = useCallback((stationName: string): number | null => {
+    if (heatmapMultiParams.size === 0) return null;
+    const stats = stationStatsData[stationName];
+    if (!stats) return null;
+    let total = 0, count = 0;
+    for (const key of heatmapMultiParams) {
+      const val = stats[key] as number | undefined;
+      if (val === undefined) continue;
+      const { min, max } = getParamRange(key);
+      if (max <= min) continue;
+      const norm = (val - min) / (max - min);
+      const meta = STAT_PARAMS.find(p => p.key === key);
+      total += (meta?.higherIsBetter === false) ? (1 - norm) : norm;
+      count++;
+    }
+    return count > 0 ? total / count : null;
+  }, [heatmapMultiParams]);
+
   const getStationDisplayColor = useCallback((stationName: string, routeKey: RouteKey): string => {
-    if (heatmapEnabled) return getStationHeatColor(stationName, heatmapParam, heatmapCustomRange);
+    if (heatmapEnabled) {
+      if (heatmapMultiParams.size > 0) {
+        const score = getCompositeHeatScore(stationName);
+        return score !== null ? heatValueToColor(score) : HEATMAP_NO_DATA_COLOR;
+      }
+      return getStationHeatColor(stationName, heatmapParam, heatmapCustomRange);
+    }
     return adjustRouteColorForTheme(routeColors[routeKey], theme);
-  }, [heatmapEnabled, heatmapParam, heatmapCustomRange, theme]);
+  }, [heatmapEnabled, heatmapParam, heatmapCustomRange, heatmapMultiParams, getCompositeHeatScore, theme]);
 
   // アイコン作成関数をメモ化
   // overrideColor が渡されたときはそちらを優先（ヒートマップ色切替用）
@@ -1292,16 +1319,26 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // 路線数ベースのティア（列車種別モードでない場合）
     if (!selectedTrainType) {
       const routeCount = stationRouteCountMap.get(stationName) ?? 1;
+      const gap = theme === 'dark' ? '#1a1a1a' : 'white';
       if (routeCount <= 1) {
         return { borderWidth: 0, borderStyle: 'none' as const, borderColor: 'transparent', description: '1路線', visualLevel: 'basic' as const };
       }
       if (routeCount === 2) {
-        return { borderWidth: 1, borderStyle: 'solid' as const, borderColor: stationColor, description: '2路線', visualLevel: 'basic' as const };
+        // 1リング
+        return { borderWidth: 0, borderStyle: 'none' as const, borderColor: 'transparent',
+          boxShadow: `0 0 0 2px ${gap}, 0 0 0 4px ${stationColor}`,
+          description: '2路線', visualLevel: 'basic' as const };
       }
       if (routeCount <= 4) {
-        return { borderWidth: 2, borderStyle: 'double' as const, borderColor: stationColor, description: '3-4路線', visualLevel: 'enhanced' as const };
+        // 2リング
+        return { borderWidth: 0, borderStyle: 'none' as const, borderColor: 'transparent',
+          boxShadow: `0 0 0 2px ${gap}, 0 0 0 4px ${stationColor}, 0 0 0 6px ${gap}, 0 0 0 8px ${stationColor}`,
+          description: '3-4路線', visualLevel: 'enhanced' as const };
       }
-      return { borderWidth: 2, borderStyle: 'solid' as const, borderColor: stationColor, boxShadow: `0 0 0 2px ${stationColor}`, description: '5+路線', visualLevel: 'premium' as const };
+      // 3リング
+      return { borderWidth: 0, borderStyle: 'none' as const, borderColor: 'transparent',
+        boxShadow: `0 0 0 2px ${gap}, 0 0 0 4px ${stationColor}, 0 0 0 6px ${gap}, 0 0 0 8px ${stationColor}, 0 0 0 10px ${gap}, 0 0 0 12px ${stationColor}`,
+        description: '5+路線', visualLevel: 'premium' as const };
     }
 
     const stops = getSimplifiedStationStops(routeKey, selectedTrainType, stationName);
@@ -3646,7 +3683,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     }}
                   >
                     <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {meta ? translateStatParamLabel(meta.label, currentLanguage) : String(heatmapParam)}{meta?.unit ? ` (${meta.unit})` : ''}
+                      {heatmapMultiParams.size > 0
+                        ? `複合スコア (${heatmapMultiParams.size}件)`
+                        : (meta ? translateStatParamLabel(meta.label, currentLanguage) : String(heatmapParam)) + (meta?.unit ? ` (${meta.unit})` : '')
+                      }
                     </span>
                     <span style={{
                       fontSize: '9px', color: colors.textSecondary, flexShrink: 0, marginLeft: '4px',
@@ -3660,9 +3700,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     <div style={{ padding: '6px 8px' }}>
                       <div style={{ height: '8px', borderRadius: '3px', background: gradientCss, marginBottom: '2px' }} />
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                        {ticks.map((v, i) => (
-                          <span key={i} style={{ fontSize: '10px', color: colors.textSecondary }}>{fmt(v)}</span>
-                        ))}
+                        {ticks.map((v, i) => {
+                          const t = i / (ticks.length - 1);
+                          const tickColor = heatValueToColor(t);
+                          return <span key={i} style={{ fontSize: '10px', fontWeight: 'bold', color: tickColor }}>{fmt(v)}</span>;
+                        })}
                       </div>
                       {/* 範囲調整 */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginBottom: '5px', flexWrap: 'nowrap' }}>
@@ -3715,24 +3757,64 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
                   {/* パラメータ選択（展開時のみ表示） */}
                   {heatmapParamListOpen && (
-                    <div style={{ padding: '5px 7px', display: 'flex', flexWrap: 'wrap', gap: '3px', borderTop: `1px solid ${colors.borderLight}` }}>
-                      {STAT_PARAMS.map(p => (
+                    <div style={{ padding: '5px 7px', borderTop: `1px solid ${colors.borderLight}` }}>
+                      {/* 複合モード説明 */}
+                      {heatmapMultiParams.size > 0 && (
+                        <div style={{ fontSize: '9px', color: colors.textSecondary, marginBottom: '4px', lineHeight: 1.4 }}>
+                          Score = Σ(正規化値) / {heatmapMultiParams.size}件
+                          <br />※ 低いほど良い指標は (1−正規化値) を使用
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
+                        {STAT_PARAMS.map(p => {
+                          const isInMulti = heatmapMultiParams.has(p.key);
+                          const isSingle = heatmapParam === p.key && heatmapMultiParams.size === 0;
+                          const isHighlighted = isInMulti || isSingle;
+                          return (
+                            <button
+                              key={String(p.key)}
+                              title={`${p.description ?? ''}\n${p.higherIsBetter === false ? '低いほど良い（スコア = 1 − 正規化値）' : '高いほど良い（スコア = 正規化値）'}`}
+                              onClick={() => {
+                                if (heatmapMultiParams.size > 0) {
+                                  // 複合モード中: トグル
+                                  const next = new Set(heatmapMultiParams);
+                                  if (isInMulti) next.delete(p.key); else next.add(p.key);
+                                  setHeatmapMultiParams(next);
+                                } else {
+                                  // 単一モード: 同じものクリック→複合モード開始、別のもの→単一切替
+                                  if (isSingle) {
+                                    setHeatmapMultiParams(new Set([p.key]));
+                                  } else {
+                                    setHeatmapParam(p.key);
+                                    setHeatmapCustomRange(undefined);
+                                  }
+                                }
+                              }}
+                              style={{
+                                fontSize: '9px', padding: '2px 5px', cursor: 'pointer',
+                                borderRadius: '8px',
+                                border: isHighlighted ? 'none' : `1px solid ${colors.border}`,
+                                background: isInMulti ? '#e74c3c' : isSingle ? colors.primary : (theme === 'dark' ? 'rgba(50,50,50,0.8)' : 'rgba(235,235,235,0.9)'),
+                                color: isHighlighted ? '#fff' : colors.textSecondary,
+                                fontWeight: isHighlighted ? 'bold' : 'normal',
+                                whiteSpace: 'nowrap',
+                                outline: isInMulti ? '1.5px solid rgba(231,76,60,0.4)' : 'none',
+                              }}
+                            >
+                              {isInMulti ? '✓ ' : ''}{translateStatParamLabel(p.label, currentLanguage)}
+                              {p.higherIsBetter === false ? ' ↓' : ''}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {heatmapMultiParams.size > 0 && (
                         <button
-                          key={String(p.key)}
-                          onClick={() => { setHeatmapParam(p.key); setHeatmapCustomRange(undefined); }}
-                          style={{
-                            fontSize: '9px', padding: '2px 5px', cursor: 'pointer',
-                            borderRadius: '8px',
-                            border: heatmapParam === p.key ? 'none' : `1px solid ${colors.border}`,
-                            background: heatmapParam === p.key ? colors.primary : (theme === 'dark' ? 'rgba(50,50,50,0.8)' : 'rgba(235,235,235,0.9)'),
-                            color: heatmapParam === p.key ? '#fff' : colors.textSecondary,
-                            fontWeight: heatmapParam === p.key ? 'bold' : 'normal',
-                            whiteSpace: 'nowrap',
-                          }}
+                          onClick={() => setHeatmapMultiParams(new Set())}
+                          style={{ marginTop: '4px', fontSize: '9px', padding: '1px 6px', cursor: 'pointer', borderRadius: '4px', border: `1px solid ${colors.border}`, background: 'transparent', color: colors.textSecondary }}
                         >
-                          {translateStatParamLabel(p.label, currentLanguage)}
+                          単一モードに戻す
                         </button>
-                      ))}
+                      )}
                     </div>
                   )}
                 </div>
