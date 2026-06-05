@@ -156,7 +156,7 @@ export default function HeatmapControl({
               }}>
                 <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{translateUI('heatmapSource', language)}</div>
                 <div>{src.title}</div>
-                {src.url && (
+                {src.url && !src.dead && (
                   <a href={src.url} target="_blank" rel="noopener noreferrer"
                     style={{ color: '#4a90d9', wordBreak: 'break-all' }}>
                     {src.url}

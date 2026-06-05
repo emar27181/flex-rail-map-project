@@ -66,6 +66,7 @@ export type StationStats = {
 export type DataSource = {
   title: string;       // データ名称・出典名
   url?: string;        // 参照URL（任意）
+  dead?: boolean;      // URLが無効・リンク切れの場合 true（値は表示するがリンク不可）
   retrievedAt: string; // 参照日 YYYY-MM-DD
   updatedAt?: string;  // データ自体の更新日（公表元）
   note?: string;       // 補足

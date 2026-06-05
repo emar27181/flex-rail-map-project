@@ -232,7 +232,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [heatmapParamSelectorOpen, setHeatmapParamSelectorOpen] = useState(false);
   const [heatmapRangeFilterEnabled, setHeatmapRangeFilterEnabled] = useState(false);
   const [heatmapParamListOpen, setHeatmapParamListOpen] = useState(false);
-  const [showStationTooltip, setShowStationTooltip] = useState(true);
+  const [showStationTooltip, setShowStationTooltip] = useState(false);
   const [showFullRouteStations, setShowFullRouteStations] = useState(true);
   const [showRouteLine, setShowRouteLine] = useState(true);
   const watchIdRef = useRef<number | null>(null);
@@ -762,12 +762,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               {filledParams.map(p => {
                 const v = stats![p.key] as number;
                 const isActive = p.key === heatmapParam;
+                const { min: pMin, max: pMax } = getParamRange(p.key);
+                const pNorm = (pMax > pMin) ? (v - pMin) / (pMax - pMin) : null;
+                const pColor = pNorm !== null ? heatValueToColor(pNorm) : HEATMAP_NO_DATA_COLOR;
                 const src = PARAM_DATA_SOURCES[p.key];
+                const effectiveUrl = src?.dead ? undefined : src?.url;
                 const translatedLabel = translateStatParamLabel(p.label, currentLanguage);
-                const labelEl = src?.url ? (
-                  <a href={src.url} target="_blank" rel="noopener noreferrer"
+                const labelEl = effectiveUrl ? (
+                  <a href={effectiveUrl} target="_blank" rel="noopener noreferrer"
                     onClick={e => e.stopPropagation()}
-                    style={{ color: isActive ? dotColor : '#4a90d9', textDecoration: 'underline', fontSize: '10px' }}>
+                    style={{ color: isActive ? pColor : '#4a90d9', textDecoration: 'underline', fontSize: '10px' }}>
                     {translatedLabel}
                   </a>
                 ) : (
@@ -776,11 +780,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 return (
                   <div key={String(p.key)} style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    background: isActive ? `${dotColor}22` : 'transparent',
+                    background: isActive ? `${pColor}22` : 'transparent',
                     borderRadius: '2px', padding: '1px 2px',
                   }}>
                     {labelEl}
-                    <span style={{ fontSize: '10px', color: isActive ? dotColor : colors.text, fontWeight: isActive ? 'bold' : 'normal', marginLeft: '4px' }}>
+                    <span style={{ fontSize: '10px', color: pColor, fontWeight: isActive ? 'bold' : 'normal', marginLeft: '4px' }}>
                       {v}{p.unit ? ` ${p.unit}` : ''}
                     </span>
                   </div>
@@ -1023,7 +1027,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     const pNorm = (pMax > pMin) ? (v - pMin) / (pMax - pMin) : null;
                     const pColor = pNorm !== null ? heatValueToColor(pNorm) : HEATMAP_NO_DATA_COLOR;
                     const src = PARAM_DATA_SOURCES[p.key];
-                    const url = src?.url;
+                    const url = src?.dead ? undefined : src?.url;
                     const tLabel = translateStatParamLabel(p.label, currentLanguage);
                     const labelEl = url ? (
                       <a href={url} target="_blank" rel="noopener noreferrer"
@@ -2850,7 +2854,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               ? getStationHeatColor(station.name, heatmapParam, heatmapCustomRange)
               : undefined;
             const stationColor = heatOverride ?? routeColor;
-            const tierStyle = !heatmapEnabled ? getStationBorderStyle(routeKey, station.name) : null;
+            const tierStyle = getStationBorderStyle(routeKey, station.name);
             const stationIcon = trainTypeViewEnabled
               ? createTrainTypeStationIcon(station, routeKey, zoomLevel, isDetailed, stationOpacity, heatOverride)
               : createStationIcon(station, routeColor, zoomLevel, isDetailed, stationOpacity, effectiveTimeLabel, routeKey, heatOverride, tierStyle?.boxShadow ?? undefined);
@@ -2858,7 +2862,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
             const routeCount = stationRouteCountMap.get(station.name) ?? 1;
             const stationZIndex = routeCount >= 5 ? 4000 : routeCount >= 3 ? 3000 : routeCount >= 2 ? 2000 : 1000;
-            const markerKey = `${routeKey}-station-${index}-${stationColor}`;
+            const markerKey = `${routeKey}-station-${index}-${stationColor}-${Math.round(stationSizeScale * 10)}`;
 
             return (
               <Marker
@@ -3637,7 +3641,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             const effectiveMin = rnd1(heatmapCustomRange?.min ?? dataRange.min);
             const effectiveMax = rnd1(heatmapCustomRange?.max ?? dataRange.max);
             const fullRange = dataRange.max - dataRange.min || 1;
-            const step = rnd1(Math.pow(10, Math.floor(Math.log10(fullRange / 20))));
+            const niceStep = (r: number) => {
+              if (r <= 0) return 1;
+              const rough = r / 40;
+              const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+              const norm = rough / mag;
+              const s = norm <= 1 ? mag : norm <= 2 ? 2 * mag : norm <= 5 ? 5 * mag : 10 * mag;
+              return rnd1(s);
+            };
+            const step = niceStep(fullRange);
             const fmt = (v: number) => {
               const r = rnd1(v);
               const abs = Math.abs(r);
