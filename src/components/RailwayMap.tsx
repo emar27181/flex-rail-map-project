@@ -1286,7 +1286,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       // ティアあり → tierShadow を使用、なし → デフォルトの drop shadow
       const dotShadow = tierShadow ?? (overrideColor ? 'none' : `0 1px 2px ${shadowColor}`);
       // ティアあり時は icon サイズを影が見えるよう大きめに確保
-      const paddingForShadow = tierShadow ? 16 : 0;
+      const paddingForShadow = tierShadow ? 12 : 0;
       const iconTotal = stationSize + paddingForShadow;
       return new DivIcon({
         html: `<div style="width:${iconTotal}px;height:${iconTotal}px;display:flex;align-items:center;justify-content:center;"><div style="background:${displayColor};width:${stationSize}px;height:${stationSize}px;border:${dotBorder};box-shadow:${dotShadow};opacity:${opacity};border-radius:50%;flex-shrink:0;"></div></div>`,
@@ -1328,20 +1328,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         return { borderWidth: 0, borderStyle: 'none' as const, borderColor: 'transparent', description: '1路線', visualLevel: 'basic' as const };
       }
       if (routeCount === 2) {
-        // 1リング
+        // 1リング（細め）
         return { borderWidth: 0, borderStyle: 'none' as const, borderColor: 'transparent',
-          boxShadow: `0 0 0 2px ${gap}, 0 0 0 4px ${stationColor}`,
+          boxShadow: `0 0 0 1px ${gap}, 0 0 0 3px ${stationColor}`,
           description: '2路線', visualLevel: 'basic' as const };
       }
       if (routeCount <= 4) {
         // 2リング
         return { borderWidth: 0, borderStyle: 'none' as const, borderColor: 'transparent',
-          boxShadow: `0 0 0 2px ${gap}, 0 0 0 4px ${stationColor}, 0 0 0 6px ${gap}, 0 0 0 8px ${stationColor}`,
+          boxShadow: `0 0 0 1px ${gap}, 0 0 0 3px ${stationColor}, 0 0 0 4px ${gap}, 0 0 0 6px ${stationColor}`,
           description: '3-4路線', visualLevel: 'enhanced' as const };
       }
       // 3リング
       return { borderWidth: 0, borderStyle: 'none' as const, borderColor: 'transparent',
-        boxShadow: `0 0 0 2px ${gap}, 0 0 0 4px ${stationColor}, 0 0 0 6px ${gap}, 0 0 0 8px ${stationColor}, 0 0 0 10px ${gap}, 0 0 0 12px ${stationColor}`,
+        boxShadow: `0 0 0 1px ${gap}, 0 0 0 3px ${stationColor}, 0 0 0 4px ${gap}, 0 0 0 6px ${stationColor}, 0 0 0 7px ${gap}, 0 0 0 9px ${stationColor}`,
         description: '5+路線', visualLevel: 'premium' as const };
     }
 
