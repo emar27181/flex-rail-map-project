@@ -9,7 +9,7 @@ import SchematicMap from './SchematicMap';
 import { RouteFinder, TimeFilter, type RouteResult, type StationWithTime } from '../utils/routeFinder';
 import { getRouteDestination, getRouteDisplayText, getDirectionText, commonDirections } from '../data/routeDestinations';
 import { useTheme, getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
-import { translateStation, translateRoute, translateUI } from '../utils/translation';
+import { translateStation, translateRoute, translateUI, translateTrainType, translatePlatform, translateDestination } from '../utils/translation';
 import type { Language } from '../utils/translation';
 import { getFurigana } from '../utils/furigana';
 import LegendStationMarkers from './legend/LegendStationMarkers';
@@ -136,6 +136,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // 折りたたみ状態の管理
   const [isStationSelectorExpanded, setIsStationSelectorExpanded] = useState(true);
+  const [mobileStationExpanded, setMobileStationExpanded] = useState(true);
   const [isRouteToggleExpanded, setIsRouteToggleExpanded] = useState(false);
   const [isLegendExpanded, setIsLegendExpanded] = useState(true);
 
@@ -146,6 +147,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
   const [showStationNumbers, setShowStationNumbers] = useState(language !== 'japanese');
+  const [stationLabelFontSize, setStationLabelFontSize] = useState(11);
+  const [stationIconScale, setStationIconScale] = useState(1.0);
   const [showOsmTiles, setShowOsmTiles] = useState(true);
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   const [tapToggleMode, setTapToggleMode] = useState(true);
@@ -221,6 +224,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [heatmapCustomRange, setHeatmapCustomRange] = useState<{ min: number; max: number } | undefined>(undefined);
   const [heatmapParamSelectorOpen, setHeatmapParamSelectorOpen] = useState(false);
   const [heatmapRangeFilterEnabled, setHeatmapRangeFilterEnabled] = useState(false);
+  const [heatmapParamListOpen, setHeatmapParamListOpen] = useState(false);
   const [showStationTooltip, setShowStationTooltip] = useState(true);
   const [showFullRouteStations, setShowFullRouteStations] = useState(true);
   const [showRouteLine, setShowRouteLine] = useState(true);
@@ -677,7 +681,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         <div style={{ padding: '8px 10px 6px', borderBottom: `1px solid ${colors.borderLight}` }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
             <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text }}>
-              {stationTooltip.stationName}
+              {translateStation(stationTooltip.stationName, currentLanguage)}
             </span>
             <span onClick={() => setStationTooltip(null)}
               style={{ fontSize: '12px', color: colors.textSecondary, cursor: 'pointer', padding: '0 2px' }}>✕</span>
@@ -846,7 +850,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           {/* 駅名 + 閉じるボタン */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
             <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text }}>
-              {stationTooltip.stationName}
+              {translateStation(stationTooltip.stationName, currentLanguage)}
             </span>
             <span
               onClick={() => setStationTooltip(null)}
@@ -1027,7 +1031,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     opacity: hasData ? 1 : 0.5,
                   }}>
-                    {routeNames[rk as RouteKey] ?? rk}
+                    {translateRoute(routeNames[rk as RouteKey] ?? rk, currentLanguage)}
                   </span>
                   {isJourney && (
                     <span style={{ fontSize: '9px', color: colors.primary, flexShrink: 0, marginLeft: 'auto' }}>{translateUI('onboard', currentLanguage)}</span>
@@ -1072,17 +1076,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                             fontSize: '10px', color: '#fff', padding: '1px 4px', borderRadius: '3px',
                             backgroundColor: getTrainTypeBadgeColor(dep.type, activeRouteKey), flexShrink: 0,
                           }}>
-                            {dep.type}
+                            {translateTrainType(dep.type, currentLanguage)}
                           </span>
                           {dep.platform && (
                             <span style={{ fontSize: '10px', color: colors.textSecondary, flexShrink: 0 }}>
-                              {dep.platform}
+                              {translatePlatform(dep.platform, currentLanguage)}
                             </span>
                           )}
                         </div>
                         {/* 2行目: 行き先 */}
                         <div style={{ fontSize: '11px', color: colors.textSecondary, paddingLeft: '2px' }}>
-                          {dep.destination}{dep.toward ? `（${dep.toward} ${translateUI('towardSuffix', currentLanguage)}）` : ''}
+                          {translateDestination(dep.destination, currentLanguage)}{dep.toward ? `（${translateDestination(dep.toward, currentLanguage)}）` : ''}
                         </div>
                       </div>
                     ))}
@@ -1170,9 +1174,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const stationNameWidth = hasTime ? labelWidth : nameWidth;
       const iconHeight = hasFurigana ? (hasTime ? 42 : 30) : (hasTime ? 30 : 18);
       const timeLine = hasTime ? `<div style="font-size:9px;line-height:1;margin-top:1px;font-weight:normal;opacity:0.9">${timeLabel}</div>` : '';
+      const lfs = stationLabelFontSize;
       const htmlContent = hasFurigana || hasTime
-        ? `<div style="background:${displayColor};color:white;padding:1px 3px;border-radius:3px;white-space:nowrap;${borderCss}${shadowCss}text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:8px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:11px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
-        : `<div style="background:${displayColor};color:white;padding:1px 3px;border-radius:3px;font-size:11px;font-weight:bold;white-space:nowrap;${borderCss}${shadowCss}opacity:${opacity}">${displayName}</div>`;
+        ? `<div style="background:${displayColor};color:white;padding:1px 3px;border-radius:3px;white-space:nowrap;${borderCss}${shadowCss}text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:${Math.max(7, Math.round(lfs * 0.75))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${lfs}px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
+        : `<div style="background:${displayColor};color:white;padding:1px 3px;border-radius:3px;font-size:${lfs}px;font-weight:bold;white-space:nowrap;${borderCss}${shadowCss}opacity:${opacity}">${displayName}</div>`;
       return new DivIcon({
         html: htmlContent,
         className: 'station-name-marker',
@@ -1180,7 +1185,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         iconAnchor: [stationNameWidth / 2, iconHeight / 2]
       });
     } else {
-      const stationSize = Math.max(8, Math.min(16, zoomLevel - 8));
+      const stationSize = Math.round(Math.max(4, Math.min(24, zoomLevel - 8)) * stationIconScale);
       const borderColor = theme === 'dark' ? 'rgba(255,255,255,0.8)' : 'white';
       const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)';
       const dotBorder = overrideColor ? 'none' : `1px solid ${borderColor}`;
@@ -1192,7 +1197,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         iconAnchor: [stationSize / 2, stationSize / 2]
       });
     }
-  }, [MapComponents, currentLanguage, theme, showFurigana, showStationNumbers]);
+  }, [MapComponents, currentLanguage, theme, showFurigana, showStationNumbers, stationLabelFontSize, stationIconScale]);
 
   // 列車種別停車パターンの取得（外部データソースを使用）
   const getSimplifiedStationStops = useCallback((routeKey: RouteKey, trainType: string, stationName: string): boolean => {
@@ -2022,6 +2027,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       clearInterval(intervalCheck);
     };
   }, [theme]);
+
+  // モバイルフルスクリーン時: ズームコントロールの下端を設定ボタンに揃える
+  useEffect(() => {
+    const apply = () => {
+      const zoomCtrl = document.querySelector('.leaflet-bottom.leaflet-right') as HTMLElement | null;
+      if (!zoomCtrl) return;
+      zoomCtrl.style.marginBottom = (isFullscreen && isMobile) ? '25px' : '';
+    };
+    apply();
+    const t1 = setTimeout(apply, 100);
+    const t2 = setTimeout(apply, 500);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [isFullscreen, isMobile]);
 
   // タイル非表示時はLeafletコンテナの背景色をテーマに合わせる
   useEffect(() => {
@@ -3465,7 +3483,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               userSelect: 'none' as const,
             };
             const numS: React.CSSProperties = {
-              width: '42px', fontSize: '11px', padding: '1px 3px', textAlign: 'center',
+              width: '34px', fontSize: '11px', padding: '1px 2px', textAlign: 'center',
               border: `1px solid ${colors.border}`, borderRadius: '3px',
               background: theme === 'dark' ? 'rgba(50,50,50,0.9)' : 'rgba(245,245,245,0.9)',
               color: colors.text,
@@ -3473,15 +3491,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
             return (
               <>
-                {/* メイン凡例カード（ヘッダークリックで折りたたみ） */}
+                {/* 凡例カード（パラメータ選択を下端に統合） */}
                 <div style={{
                   position: 'fixed', ...pos, zIndex: 1001,
-                  background: theme === 'dark' ? 'rgba(30,30,30,0.92)' : 'rgba(255,255,255,0.92)',
+                  background: theme === 'dark' ? 'rgba(30,30,30,0.82)' : 'rgba(255,255,255,0.82)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
                   border: `1px solid ${colors.border}`, borderRadius: '8px',
                   boxShadow: `0 2px 6px ${colors.shadow}`,
                   width: cardW, overflow: 'hidden',
                 }}>
-                  {/* ヘッダー：クリックで凡例全体を折りたたむ */}
+                  {/* ヘッダー：クリックで凡例本体を折りたたむ */}
                   <div
                     onClick={() => setHeatmapParamSelectorOpen(o => !o)}
                     style={{
@@ -3499,6 +3519,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       transition: 'transform 0.2s',
                     }}>▲</span>
                   </div>
+
                   {/* 本体（折りたたみ対象） */}
                   {!heatmapParamSelectorOpen && (
                     <div style={{ padding: '6px 8px' }}>
@@ -3508,7 +3529,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           <span key={i} style={{ fontSize: '10px', color: colors.textSecondary }}>{fmt(v)}</span>
                         ))}
                       </div>
-                      {/* 範囲調整: [value −+] 〜 [value −+] */}
+                      {/* 範囲調整 */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginBottom: '5px', flexWrap: 'nowrap' }}>
                         <input type="number" value={effectiveMin} step={step}
                           onChange={e => { const v = rnd1(parseFloat(e.target.value)); if (!isNaN(v)) setHeatmapCustomRange({ min: v, max: effectiveMax }); }}
@@ -3530,39 +3551,47 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       )}
                     </div>
                   )}
-                </div>
 
-                {/* パラメータ選択（凡例の下に独立表示） */}
-                <div style={{
-                  position: 'fixed',
-                  ...(isFullscreen && isMobile
-                    ? { bottom: `calc(35px + 32px + 6px)`, right: '10px', left: 'auto' }
-                    : { bottom: `calc(10px + 32px + 6px)`, left: '10px' }),
-                  zIndex: 1000,
-                  background: theme === 'dark' ? 'rgba(30,30,30,0.88)' : 'rgba(255,255,255,0.88)',
-                  border: `1px solid ${colors.border}`, borderRadius: '8px',
-                  padding: '5px 7px',
-                  boxShadow: `0 2px 6px ${colors.shadow}`,
-                  width: cardW,
-                  display: 'flex', flexWrap: 'wrap', gap: '3px',
-                }}>
-                  {STAT_PARAMS.map(p => (
-                    <button
-                      key={String(p.key)}
-                      onClick={() => { setHeatmapParam(p.key); setHeatmapCustomRange(undefined); }}
-                      style={{
-                        fontSize: '9px', padding: '2px 5px', cursor: 'pointer',
-                        borderRadius: '8px',
-                        border: heatmapParam === p.key ? 'none' : `1px solid ${colors.border}`,
-                        background: heatmapParam === p.key ? colors.primary : (theme === 'dark' ? 'rgba(50,50,50,0.8)' : 'rgba(235,235,235,0.9)'),
-                        color: heatmapParam === p.key ? '#fff' : colors.textSecondary,
-                        fontWeight: heatmapParam === p.key ? 'bold' : 'normal',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {p.label}
-                    </button>
-                  ))}
+                  {/* 「他の情報を表示」トグルバー（常に表示） */}
+                  <div
+                    onClick={() => setHeatmapParamListOpen(o => !o)}
+                    style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      padding: '4px 8px', cursor: 'pointer',
+                      borderTop: `1px solid ${colors.borderLight}`,
+                      background: theme === 'dark' ? 'rgba(40,40,40,0.6)' : 'rgba(245,245,245,0.8)',
+                    }}
+                  >
+                    <span style={{ fontSize: '10px', color: colors.textSecondary }}>他の情報を表示</span>
+                    <span style={{
+                      fontSize: '9px', color: colors.textSecondary, flexShrink: 0,
+                      transform: heatmapParamListOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.2s',
+                    }}>▼</span>
+                  </div>
+
+                  {/* パラメータ選択（展開時のみ表示） */}
+                  {heatmapParamListOpen && (
+                    <div style={{ padding: '5px 7px', display: 'flex', flexWrap: 'wrap', gap: '3px', borderTop: `1px solid ${colors.borderLight}` }}>
+                      {STAT_PARAMS.map(p => (
+                        <button
+                          key={String(p.key)}
+                          onClick={() => { setHeatmapParam(p.key); setHeatmapCustomRange(undefined); }}
+                          style={{
+                            fontSize: '9px', padding: '2px 5px', cursor: 'pointer',
+                            borderRadius: '8px',
+                            border: heatmapParam === p.key ? 'none' : `1px solid ${colors.border}`,
+                            background: heatmapParam === p.key ? colors.primary : (theme === 'dark' ? 'rgba(50,50,50,0.8)' : 'rgba(235,235,235,0.9)'),
+                            color: heatmapParam === p.key ? '#fff' : colors.textSecondary,
+                            fontWeight: heatmapParam === p.key ? 'bold' : 'normal',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </>
             );
@@ -3870,6 +3899,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     }}
                     mapConfig={mapConfig}
                     onImportConfig={handleImportConfig}
+                    stationLabelFontSize={stationLabelFontSize}
+                    onStationLabelFontSizeChange={setStationLabelFontSize}
+                    stationIconScale={stationIconScale}
+                    onStationIconScaleChange={setStationIconScale}
                   />
 
                   {/* 3. 表示オプション (Display Options) */}
@@ -3995,35 +4028,43 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             </div>
           )}
 
-          {/* モバイルフルスクリーン時: 左下フローティングボタン */}
+          {/* モバイルフルスクリーン時: 左上 駅セレクタ */}
+          {isFullscreen && isMobile && (
+            <div style={{
+              position: 'fixed',
+              top: 'calc(env(safe-area-inset-top, 0px) + 16px)',
+              left: '10px',
+              zIndex: 1002,
+              width: 'min(calc(100vw - 145px), 210px)',
+              maxHeight: 'calc(100vh - 80px)',
+              overflowY: 'auto',
+            }}>
+              <StationSelector
+                departure={departure}
+                arrival={arrival}
+                onDepartureChange={setDeparture}
+                onArrivalChange={setArrival}
+                isExpanded={mobileStationExpanded}
+                onToggleExpanded={() => setMobileStationExpanded(v => !v)}
+                language={currentLanguage}
+                departureTime={timetableBaseTime}
+                onDepartureTimeChange={setTimetableBaseTime}
+                onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
+                onSearchingChange={handleSearchingChange}
+              />
+            </div>
+          )}
+
+          {/* モバイルフルスクリーン時: 底面設定パネル */}
           {isFullscreen && isMobile && (
             <MobileBottomPanel
               theme={theme}
               safeAreaBottom={25}
               buttons={[
                 {
-                  key: 'station',
-                  icon: '',
-                  label: translateUI('stationSettings', currentLanguage),
-                  content: (
-                    <StationSelector
-                      departure={departure}
-                      arrival={arrival}
-                      onDepartureChange={setDeparture}
-                      onArrivalChange={setArrival}
-                      isExpanded={true}
-                      language={currentLanguage}
-                      departureTime={timetableBaseTime}
-                      onDepartureTimeChange={setTimetableBaseTime}
-                      onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
-                      onSearchingChange={handleSearchingChange}
-                    />
-                  ),
-                },
-                {
                   key: 'settings',
-                  icon: '',
-                  label: translateUI('detailSettings', currentLanguage),
+                  icon: '⚙️',
+                  label: '設定',
                   content: (
                     <>
                       <LegendStationMarkers
@@ -4095,6 +4136,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         }}
                         mapConfig={mapConfig}
                         onImportConfig={handleImportConfig}
+                        stationLabelFontSize={stationLabelFontSize}
+                        onStationLabelFontSizeChange={setStationLabelFontSize}
+                        stationIconScale={stationIconScale}
+                        onStationIconScaleChange={setStationIconScale}
                       />
                       <LegendRouteRecommendations
                         routeRecommendations={routeRecommendations}
