@@ -2613,7 +2613,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         <Polyline
           positions={segPositions}
           color="transparent"
-          weight={20}
+          weight={36}
           opacity={0}
           eventHandlers={{
             click: (e) => {
@@ -3395,7 +3395,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       />
                       {/* クリック判定用の透明な太い線 */}
                       <Polyline
-                        positions={positions} color="transparent" weight={20} opacity={0}
+                        positions={positions} color="transparent" weight={36} opacity={0}
                         pathOptions={{ cursor: 'pointer' }}
                         eventHandlers={{
                           mouseover: () => setHoveredRoute(rKey),
