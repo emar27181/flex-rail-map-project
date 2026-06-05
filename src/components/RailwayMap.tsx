@@ -3541,19 +3541,27 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   };
                   return (
                     <>
-                      {[
-                        { label: '下限', val: effectiveMin, onSlider: (v: number) => setHeatmapCustomRange({ min: v, max: Math.max(effectiveMax, v + step) }), onMinus: () => setHeatmapCustomRange({ min: effectiveMin - step, max: effectiveMax }), onPlus: () => setHeatmapCustomRange({ min: Math.min(effectiveMin + step, effectiveMax - step), max: effectiveMax }), onInput: (v: number) => setHeatmapCustomRange({ min: v, max: effectiveMax }) },
-                        { label: '上限', val: effectiveMax, onSlider: (v: number) => setHeatmapCustomRange({ min: Math.min(effectiveMin, v - step), max: v }), onMinus: () => setHeatmapCustomRange({ min: effectiveMin, max: Math.max(effectiveMax - step, effectiveMin + step) }), onPlus: () => setHeatmapCustomRange({ min: effectiveMin, max: effectiveMax + step }), onInput: (v: number) => setHeatmapCustomRange({ min: effectiveMin, max: v }) },
-                      ].map(({ label, val, onMinus, onPlus, onInput }) => (
-                        <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '5px' }}>
-                          <span style={{ fontSize: '10px', color: colors.textSecondary, minWidth: '22px' }}>{label}</span>
-                          <button style={btnStyle} onClick={onMinus}>◀</button>
-                          <input type="number" value={step >= 1 ? Math.round(val) : val} step={step >= 1 ? Math.max(1, step) : step}
-                            onChange={e => { const v = step >= 1 ? parseInt(e.target.value) : parseFloat(e.target.value); if (!isNaN(v)) onInput(v); }}
-                            style={numStyle} />
-                          <button style={btnStyle} onClick={onPlus}>▶</button>
-                        </div>
-                      ))}
+                      {(() => {
+                        const rows = [
+                          { label: '下', val: effectiveMin, onMinus: () => setHeatmapCustomRange({ min: effectiveMin - step, max: effectiveMax }), onPlus: () => setHeatmapCustomRange({ min: Math.min(effectiveMin + step, effectiveMax - step), max: effectiveMax }), onInput: (v: number) => setHeatmapCustomRange({ min: v, max: effectiveMax }) },
+                          { label: '上', val: effectiveMax, onMinus: () => setHeatmapCustomRange({ min: effectiveMin, max: Math.max(effectiveMax - step, effectiveMin + step) }), onPlus: () => setHeatmapCustomRange({ min: effectiveMin, max: effectiveMax + step }), onInput: (v: number) => setHeatmapCustomRange({ min: effectiveMin, max: v }) },
+                        ];
+                        return (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'nowrap', marginBottom: '4px' }}>
+                            {rows.map(({ label, val, onMinus, onPlus, onInput }, i) => (
+                              <React.Fragment key={label}>
+                                {i > 0 && <span style={{ fontSize: '10px', color: colors.textSecondary }}>〜</span>}
+                                <span style={{ fontSize: '9px', color: colors.textSecondary }}>{label}</span>
+                                <button style={btnStyle} onClick={onMinus}>◀</button>
+                                <input type="number" value={step >= 1 ? Math.round(val) : val} step={step >= 1 ? Math.max(1, step) : step}
+                                  onChange={e => { const v = step >= 1 ? parseInt(e.target.value) : parseFloat(e.target.value); if (!isNaN(v)) onInput(v); }}
+                                  style={{ ...numStyle, width: '44px' }} />
+                                <button style={btnStyle} onClick={onPlus}>▶</button>
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        );
+                      })()}
                     </>
                   );
                 })()}
