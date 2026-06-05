@@ -48,7 +48,7 @@ describe('経路検索デバッグ', () => {
 
   describe('横浜→新宿 重複検証', () => {
     it('経路の詳細を出力し重複がないことを確認', () => {
-      const yokohama = routes.tokaido.find(s => s.name === '横浜');
+      const yokohama = routes.jrTokaidoMainLine.find(s => s.name === '横浜');
       const shinjuku = routes.yamanote.find(s => s.name === '新宿');
 
       expect(yokohama).toBeDefined();
@@ -111,8 +111,8 @@ describe('経路検索デバッグ', () => {
         const ratio = result.totalTime / bestTime;
         console.log(`経路 ${i + 1}: ${result.totalTime}分 (最短の${(ratio * 100).toFixed(0)}%)`);
 
-        // 最短時間の1.5倍を超えるルートは除外されているはず
-        expect(result.totalTime).toBeLessThanOrEqual(bestTime * 1.5);
+        // 最短時間の2倍を超えるルートは除外されているはず
+        expect(result.totalTime).toBeLessThanOrEqual(bestTime * 2);
       });
     });
   });

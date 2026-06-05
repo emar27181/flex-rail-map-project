@@ -145,7 +145,7 @@ describe('RouteFinder', () => {
 
   describe('重複ルート除去', () => {
     it('横浜→新宿で重複ルートが除去される', () => {
-      const yokohama = routes.tokaido.find(s => s.name === '横浜');
+      const yokohama = routes.jrTokaidoMainLine.find(s => s.name === '横浜');
       const shinjuku = routes.yamanote.find(s => s.name === '新宿');
 
       expect(yokohama).toBeDefined();
@@ -225,7 +225,7 @@ describe('RouteFinder', () => {
     });
 
     it('川崎駅がJR路線に存在する', () => {
-      const kawasaki = routes.tokaido.find(s => s.name === '川崎') ||
+      const kawasaki = routes.jrTokaidoMainLine.find(s => s.name === '川崎') ||
                        routes.keihinTohoku.find(s => s.name === '川崎');
       expect(kawasaki).toBeDefined();
     });

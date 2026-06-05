@@ -1359,6 +1359,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         borderWidth: 1,
         borderStyle: 'dashed' as const,
         borderColor: stationColor,
+        boxShadow: undefined as string | undefined,
         description: `${selectedTrainType}通過`
       };
     }
