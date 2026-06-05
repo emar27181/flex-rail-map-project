@@ -10,11 +10,14 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
+    "test:types": "tsc --project tsconfig.check.json",
+    "test:unit": "vitest run tests/unit",
+    "test:ci": "npm run test:types && npm run test:unit",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:prod": "TEST_URL=https://flex-railway-map.netlify.app playwright test",
-    "deploy:preview": "netlify deploy --alias preview",
-    "deploy:prod": "npm run test:e2e && netlify deploy --prod"
+    "deploy:preview": "npm run test:ci && netlify deploy --alias preview",
+    "deploy:prod": "npm run test:ci && npm run test:e2e && netlify deploy --prod"
   },
   "dependencies": {
     "@astrojs/react": "^4.3.0",
@@ -31,7 +34,11 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^25.9.1",
+    "@vitejs/plugin-react": "^6.0.2",
+    "jsdom": "^29.1.1",
     "vitest": "^2.1.0"
   }
 }
