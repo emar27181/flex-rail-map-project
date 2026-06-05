@@ -554,6 +554,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return transferStationNames;
   }, []);
 
+  // 駅ごとの通過路線数マップ（全路線ベース・静的）
+  const stationRouteCountMap = useMemo(() => {
+    const map = new Map<string, number>();
+    Object.values(routes).forEach(stationList => {
+      stationList.forEach(station => {
+        map.set(station.name, (map.get(station.name) ?? 0) + 1);
+      });
+    });
+    return map;
+  }, []);
+
   // 全駅（重複なし）
   const allUniqueStations = useMemo(() => {
     const map = new Map<string, Station>();
@@ -1276,10 +1287,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     }
 
     // 路線色 or ヒートマップ上書き色
-    const stationColor = colorOverride ?? routeColors[routeKey];
+    const stationColor = colorOverride ?? adjustRouteColorForTheme(routeColors[routeKey], theme);
 
+    // 路線数ベースのティア（列車種別モードでない場合）
     if (!selectedTrainType) {
-      return getStationBorderStyleByPattern(routeKey, stationName, stationColor);
+      const routeCount = stationRouteCountMap.get(stationName) ?? 1;
+      if (routeCount <= 1) {
+        return { borderWidth: 0, borderStyle: 'none' as const, borderColor: 'transparent', description: '1路線', visualLevel: 'basic' as const };
+      }
+      if (routeCount === 2) {
+        return { borderWidth: 1, borderStyle: 'solid' as const, borderColor: stationColor, description: '2路線', visualLevel: 'basic' as const };
+      }
+      if (routeCount <= 4) {
+        return { borderWidth: 2, borderStyle: 'double' as const, borderColor: stationColor, description: '3-4路線', visualLevel: 'enhanced' as const };
+      }
+      return { borderWidth: 2, borderStyle: 'solid' as const, borderColor: stationColor, boxShadow: `0 0 0 2px ${stationColor}`, description: '5+路線', visualLevel: 'premium' as const };
     }
 
     const stops = getSimplifiedStationStops(routeKey, selectedTrainType, stationName);
@@ -1298,7 +1320,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       ...baseStyle,
       description: `${selectedTrainType}停車 (${baseStyle.description})`
     };
-  }, [selectedTrainType, getSimplifiedStationStops, departure, arrival]);
+  }, [selectedTrainType, getSimplifiedStationStops, departure, arrival, stationRouteCountMap, routeColors, theme]);
 
   // 路線別の利用可能な列車種別を取得する関数
   const getAvailableTrainTypes = useCallback((routeKey: RouteKey) => {
