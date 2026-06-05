@@ -1928,8 +1928,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
 
   // Timetable tooltip
   baseTime: {
-    japanese: "基準時刻",
-    english: "Base Time"
+    japanese: "出発時刻",
+    english: "Departure Time"
   },
   onboard: {
     japanese: "乗",
@@ -2278,6 +2278,141 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   reachable: {
     japanese: "駅に到達可能",
     english: "stations reachable"
+  },
+  // ── ヒートマップ凡例・LegendRouteList グループ名 ──
+  heatmapShowOtherInfo: {
+    japanese: "他の情報を表示",
+    english: "Show other data"
+  },
+  heatmapRangeFilter: {
+    japanese: "レンジ内のみ表示",
+    english: "Show in-range only"
+  },
+  heatmapGradientLow: {
+    japanese: "低",
+    english: "Low"
+  },
+  heatmapGradientHigh: {
+    japanese: "高",
+    english: "High"
+  },
+  heatmapDisplayParam: {
+    japanese: "表示パラメータ",
+    english: "Parameter"
+  },
+  heatmapMethodology: {
+    japanese: "集計方法",
+    english: "Method"
+  },
+  heatmapPeriod: {
+    japanese: "基準時点",
+    english: "Reference date"
+  },
+  heatmapRadius: {
+    japanese: "範囲",
+    english: "Radius"
+  },
+  heatmapHigherIsBetter: {
+    japanese: "高いほど 赤",
+    english: "Higher = red"
+  },
+  heatmapLowerIsBetter: {
+    japanese: "低いほど 赤（値が高いほど課題あり）",
+    english: "Lower = red (higher = more issues)"
+  },
+  heatmapSource: {
+    japanese: "参照元",
+    english: "Source"
+  },
+  heatmapRetrievedAt: {
+    japanese: "参照日",
+    english: "Retrieved"
+  },
+  heatmapUpdatedAt: {
+    japanese: "データ更新",
+    english: "Data updated"
+  },
+  noDataLabel: {
+    japanese: "データなし",
+    english: "No data"
+  },
+  // ── 設定グループ名 ──
+  settingsGroupLabel: {
+    japanese: "駅ラベル",
+    english: "Station Labels"
+  },
+  settingsGroupViz: {
+    japanese: "データ可視化",
+    english: "Visualization"
+  },
+  settingsGroupFilter: {
+    japanese: "駅フィルター",
+    english: "Station Filter"
+  },
+  settingsGroupMap: {
+    japanese: "地図表示",
+    english: "Map Display"
+  },
+  settingsLabelSize: {
+    japanese: "ラベルサイズ",
+    english: "Label size"
+  },
+  settingsIconSize: {
+    japanese: "アイコンサイズ",
+    english: "Icon size"
+  },
+  // ── 設定保存・読込 ──
+  configSaveLoad: {
+    japanese: "設定の保存・読込",
+    english: "Save / Load Settings"
+  },
+  configExportDesc: {
+    japanese: "エクスポート（現在の表示設定）",
+    english: "Export (current display settings)"
+  },
+  configExportSave: {
+    japanese: "⬇ JSON保存",
+    english: "⬇ Save JSON"
+  },
+  configExportCopy: {
+    japanese: "📋 テキストコピー",
+    english: "📋 Copy Text"
+  },
+  configExportCopied: {
+    japanese: "✓ コピー済み",
+    english: "✓ Copied"
+  },
+  configImportDesc: {
+    japanese: "インポート（設定を読み込む）",
+    english: "Import (load settings)"
+  },
+  configImportFile: {
+    japanese: "📂 JSONファイルを開く",
+    english: "📂 Open JSON file"
+  },
+  configImportPaste: {
+    japanese: "JSONテキストをここに貼り付け...",
+    english: "Paste JSON text here..."
+  },
+  configImportApply: {
+    japanese: "✅ テキストから適用",
+    english: "✅ Apply from text"
+  },
+  configImportDone: {
+    japanese: "✓ 適用済み",
+    english: "✓ Applied"
+  },
+  configImportErrorJson: {
+    japanese: "JSONの形式が正しくありません",
+    english: "Invalid JSON format"
+  },
+  configImportErrorFile: {
+    japanese: "ファイルの読み込みに失敗しました",
+    english: "Failed to read file"
+  },
+  configImportErrorApply: {
+    japanese: "設定の適用に失敗しました",
+    english: "Failed to apply settings"
   }
 };
 
@@ -2365,7 +2500,7 @@ const uiChinese: Record<string, string> = {
   swapStationsTitle: "交换出发站和到达站",
   departureTime: "出发时间",
   currentTime: "当前时间",
-  baseTime: "基准时间",
+  baseTime: "出发时间",
   onboard: "乘",
   afterSuffix: "以后",
   offRouteReference: "路线外参考",
@@ -2531,7 +2666,7 @@ const uiKorean: Record<string, string> = {
   swapStationsTitle: "출발역과 도착역 교환",
   departureTime: "출발 시간",
   currentTime: "현재 시간",
-  baseTime: "기준 시간",
+  baseTime: "출발 시간",
   onboard: "탑",
   afterSuffix: "이후",
   offRouteReference: "경로 외 참고",

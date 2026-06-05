@@ -913,7 +913,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   whiteSpace: 'nowrap',
                 }}
               >
-                🕐
+                🕐 {translateUI('currentTime', currentLanguage)}
               </button>
             </div>
           </div>
@@ -942,7 +942,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   {currentMeta?.label ?? String(heatmapParam)}
                 </span>
                 <span style={{ fontSize: '12px', fontWeight: 'bold', color: dotColor, marginLeft: 'auto' }}>
-                  {val !== undefined ? `${val} ${currentMeta?.unit ?? ''}` : 'データなし'}
+                  {val !== undefined ? `${val} ${currentMeta?.unit ?? ''}` : translateUI('noDataLabel', currentLanguage)}
                 </span>
               </div>
               {/* 全パラメータ一覧（2列グリッド） */}
@@ -1169,12 +1169,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         ? (getStationNumber(routeKey, station.name) ?? getAnyStationNumber(station.name))
         : undefined;
       const displayName = stationNumber ? `${stationNumber} ${translatedStationName}` : translatedStationName;
-      const nameWidth = estimateTextWidth(displayName);
-      const labelWidth = Math.max(nameWidth, timeLabel ? estimateTextWidth(timeLabel) : 0);
-      const stationNameWidth = hasTime ? labelWidth : nameWidth;
-      const iconHeight = hasFurigana ? (hasTime ? 42 : 30) : (hasTime ? 30 : 18);
-      const timeLine = hasTime ? `<div style="font-size:9px;line-height:1;margin-top:1px;font-weight:normal;opacity:0.9">${timeLabel}</div>` : '';
       const lfs = stationLabelFontSize;
+      // フォントサイズに合わせて文字幅・高さをスケール
+      const scale = lfs / 11;
+      const estimateScaledWidth = (text: string) => {
+        let w = 6;
+        for (const ch of text) w += ch.charCodeAt(0) > 127 ? 12 * scale : 7 * scale;
+        return Math.ceil(w);
+      };
+      const nameWidth = estimateScaledWidth(displayName);
+      const labelWidth = Math.max(nameWidth, timeLabel ? estimateScaledWidth(timeLabel) : 0);
+      const stationNameWidth = hasTime ? labelWidth : nameWidth;
+      const baseH = Math.round(lfs * 1.6 + 2);
+      const furiganaH = hasFurigana ? Math.round(lfs * 0.75 * 1.4 + 1) : 0;
+      const timeH = hasTime ? 12 : 0;
+      const iconHeight = baseH + furiganaH + timeH;
+      const timeLine = hasTime ? `<div style="font-size:9px;line-height:1;margin-top:1px;font-weight:normal;opacity:0.9">${timeLabel}</div>` : '';
       const htmlContent = hasFurigana || hasTime
         ? `<div style="background:${displayColor};color:white;padding:1px 3px;border-radius:3px;white-space:nowrap;${borderCss}${shadowCss}text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:${Math.max(7, Math.round(lfs * 0.75))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${lfs}px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
         : `<div style="background:${displayColor};color:white;padding:1px 3px;border-radius:3px;font-size:${lfs}px;font-weight:bold;white-space:nowrap;${borderCss}${shadowCss}opacity:${opacity}">${displayName}</div>`;
@@ -3546,7 +3556,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       {heatmapEnabled && (
                         <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', color: colors.text, cursor: 'pointer' }}>
                           <input type="checkbox" checked={heatmapRangeFilterEnabled} onChange={e => setHeatmapRangeFilterEnabled(e.target.checked)} />
-                          レンジ内のみ表示
+                          {translateUI('heatmapRangeFilter', currentLanguage)}
                         </label>
                       )}
                     </div>
@@ -3562,7 +3572,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       background: theme === 'dark' ? 'rgba(40,40,40,0.6)' : 'rgba(245,245,245,0.8)',
                     }}
                   >
-                    <span style={{ fontSize: '10px', color: colors.textSecondary }}>他の情報を表示</span>
+                    <span style={{ fontSize: '10px', color: colors.textSecondary }}>{translateUI('heatmapShowOtherInfo', currentLanguage)}</span>
                     <span style={{
                       fontSize: '9px', color: colors.textSecondary, flexShrink: 0,
                       transform: heatmapParamListOpen ? 'rotate(180deg)' : 'rotate(0deg)',

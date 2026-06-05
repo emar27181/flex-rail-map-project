@@ -1,6 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { section, text, btn, btnFull, textarea, L } from './legendStyles';
+import { translateUI } from '../../utils/translation';
+import type { Language } from '../../utils/translation';
 
 export type MapConfig = {
   version: 1;
@@ -26,10 +28,11 @@ export type MapConfig = {
 type Props = {
   config: MapConfig;
   theme: 'light' | 'dark';
+  language: Language;
   onImport: (config: MapConfig) => void;
 };
 
-export default function MapConfigPanel({ config, theme, onImport }: Props) {
+export default function MapConfigPanel({ config, theme, language, onImport }: Props) {
   const colors = getThemeColors(theme);
   const [open, setOpen]           = useState(false);
   const [pasteText, setPasteText] = useState('');
@@ -64,7 +67,7 @@ export default function MapConfigPanel({ config, theme, onImport }: Props) {
       setImportDone(true);
       setTimeout(() => setImportDone(false), 2000);
     } catch {
-      setError('設定の適用に失敗しました');
+      setError(translateUI('configImportErrorApply', language));
     }
   };
 
@@ -72,7 +75,7 @@ export default function MapConfigPanel({ config, theme, onImport }: Props) {
     try {
       applyConfig(JSON.parse(pasteText));
     } catch {
-      setError('JSONの形式が正しくありません');
+      setError(translateUI('configImportErrorJson', language));
     }
   };
 
@@ -82,7 +85,7 @@ export default function MapConfigPanel({ config, theme, onImport }: Props) {
     const reader = new FileReader();
     reader.onload = (ev) => {
       try { applyConfig(JSON.parse(ev.target?.result as string)); }
-      catch { setError('ファイルの読み込みに失敗しました'); }
+      catch { setError(translateUI('configImportErrorFile', language)); }
     };
     reader.readAsText(file);
     e.target.value = '';
@@ -93,10 +96,10 @@ export default function MapConfigPanel({ config, theme, onImport }: Props) {
       {/* ヘッダー */}
       <div style={section.header} onClick={() => setOpen(v => !v)}>
         <span style={section.arrow(colors)}>{open ? '▼' : '▶'}</span>
-        <span style={section.title(colors)}>設定の保存・読込</span>
+        <span style={section.title(colors)}>{translateUI('configSaveLoad', language)}</span>
         {importDone && (
           <span style={{ fontSize: L.fs.xs, color: '#27ae60', marginLeft: L.sp.xs }}>
-            ✓ 適用済み
+            {translateUI('configImportDone', language)}
           </span>
         )}
       </div>
@@ -106,27 +109,27 @@ export default function MapConfigPanel({ config, theme, onImport }: Props) {
 
           {/* エクスポート */}
           <div>
-            <div style={text.desc(colors)}>エクスポート（現在の表示設定）</div>
+            <div style={text.desc(colors)}>{translateUI('configExportDesc', language)}</div>
             <div style={{ display: 'flex', gap: L.sp.xs }}>
-              <button onClick={handleExportDownload} style={btn(colors)}>⬇ JSON保存</button>
+              <button onClick={handleExportDownload} style={btn(colors)}>{translateUI('configExportSave', language)}</button>
               <button onClick={handleCopy}           style={btn(colors)}>
-                {copied ? '✓ コピー済み' : '📋 テキストコピー'}
+                {copied ? translateUI('configExportCopied', language) : translateUI('configExportCopy', language)}
               </button>
             </div>
           </div>
 
           {/* インポート */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
-            <div style={text.desc(colors)}>インポート（設定を読み込む）</div>
+            <div style={text.desc(colors)}>{translateUI('configImportDesc', language)}</div>
             <input ref={fileInputRef} type="file" accept=".json"
               onChange={handleFileImport} style={{ display: 'none' }} />
             <button onClick={() => fileInputRef.current?.click()} style={btnFull(colors)}>
-              📂 JSONファイルを開く
+              {translateUI('configImportFile', language)}
             </button>
             <textarea
               value={pasteText}
               onChange={e => { setPasteText(e.target.value); setError(null); }}
-              placeholder="JSONテキストをここに貼り付け..."
+              placeholder={translateUI('configImportPaste', language)}
               rows={3}
               style={textarea(colors)}
             />
@@ -135,7 +138,7 @@ export default function MapConfigPanel({ config, theme, onImport }: Props) {
               disabled={!pasteText.trim()}
               style={{ ...btnFull(colors), opacity: pasteText.trim() ? 1 : 0.5 }}
             >
-              ✅ テキストから適用
+              {translateUI('configImportApply', language)}
             </button>
             {error && (
               <div style={{ fontSize: L.fs.xs, color: '#e74c3c' }}>{error}</div>

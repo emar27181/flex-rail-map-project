@@ -194,7 +194,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           onClick={() => setGroupLabelOpen(v => !v)}
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', background: colors.surfaceElevated, marginBottom: '2px' }}
         >
-          <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>駅ラベル</span>
+          <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>{translateUI('settingsGroupLabel', language)}</span>
           <span style={{ fontSize: '9px', color: colors.textSecondary, transition: 'transform 0.2s', transform: groupLabelOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
         </div>
         {groupLabelOpen && (
@@ -219,7 +219,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             )}
             {/* ラベルフォントサイズ */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0', marginTop: '2px' }}>
-              <span style={{ flex: 1, color: colors.textSecondary }}>ラベルサイズ</span>
+              <span style={{ flex: 1, color: colors.textSecondary }}>{translateUI('settingsLabelSize', language)}</span>
               <button onClick={() => onStationLabelFontSizeChange(Math.max(8, stationLabelFontSize - 1))}
                 style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
               <span style={{ minWidth: '28px', textAlign: 'center', fontSize: '11px' }}>{stationLabelFontSize}px</span>
@@ -228,7 +228,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             </div>
             {/* アイコンサイズ */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0' }}>
-              <span style={{ flex: 1, color: colors.textSecondary }}>アイコンサイズ</span>
+              <span style={{ flex: 1, color: colors.textSecondary }}>{translateUI('settingsIconSize', language)}</span>
               <button onClick={() => onStationIconScaleChange(Math.max(0.5, Math.round((stationIconScale - 0.25) * 100) / 100))}
                 style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
               <span style={{ minWidth: '28px', textAlign: 'center', fontSize: '11px' }}>{stationIconScale.toFixed(2)}x</span>
@@ -243,7 +243,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           onClick={() => setGroupVizOpen(v => !v)}
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', background: colors.surfaceElevated, marginBottom: '2px' }}
         >
-          <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>データ可視化</span>
+          <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>{translateUI('settingsGroupViz', language)}</span>
           <span style={{ fontSize: '9px', color: colors.textSecondary, transition: 'transform 0.2s', transform: groupVizOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
         </div>
         {groupVizOpen && (
@@ -298,7 +298,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           onClick={() => setGroupFilterOpen(v => !v)}
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', background: colors.surfaceElevated, marginBottom: '2px' }}
         >
-          <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>駅フィルター</span>
+          <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>{translateUI('settingsGroupFilter', language)}</span>
           <span style={{ fontSize: '9px', color: colors.textSecondary, transition: 'transform 0.2s', transform: groupFilterOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
         </div>
         {groupFilterOpen && (
@@ -323,7 +323,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           onClick={() => setGroupMapOpen(v => !v)}
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', background: colors.surfaceElevated, marginBottom: '2px' }}
         >
-          <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>地図表示</span>
+          <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>{translateUI('settingsGroupMap', language)}</span>
           <span style={{ fontSize: '9px', color: colors.textSecondary, transition: 'transform 0.2s', transform: groupMapOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
         </div>
         {groupMapOpen && (
@@ -349,7 +349,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
       </div>
 
-      <MapConfigPanel config={mapConfig} theme={theme} onImport={onImportConfig} />
+      <MapConfigPanel config={mapConfig} theme={theme} language={language} onImport={onImportConfig} />
 
       {/* ソート選択 */}
       <div style={{ display: 'flex', gap: '4px', marginTop: '10px', marginBottom: '6px', alignItems: 'center' }}>

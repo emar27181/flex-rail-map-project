@@ -3,11 +3,14 @@ import { getThemeColors } from '../../contexts/ThemeContext';
 import { STAT_PARAMS, PARAM_DATA_SOURCES, DATA_DISCLAIMER, buildGradientCss } from '../../data/stationStats';
 import type { StationStats, StatCategory } from '../../data/stationStats';
 import { section, text, L } from './legendStyles';
+import { translateUI } from '../../utils/translation';
+import type { Language } from '../../utils/translation';
 
 type Props = {
   enabled: boolean;
   paramKey: keyof StationStats;
   theme: 'light' | 'dark';
+  language: Language;
   onEnabledChange: (v: boolean) => void;
   onParamKeyChange: (k: keyof StationStats) => void;
 };
@@ -25,7 +28,7 @@ const CATEGORY_LABEL: Record<StatCategory, string> = {
 const GRADIENT_CSS = buildGradientCss('to right');
 
 export default function HeatmapControl({
-  enabled, paramKey, theme,
+  enabled, paramKey, theme, language,
   onEnabledChange, onParamKeyChange,
 }: Props) {
   const colors = getThemeColors(theme);
@@ -40,7 +43,7 @@ export default function HeatmapControl({
 
   return (
     <div style={section.wrap(colors)}>
-      {/* ヘッダー: 矢印 + チェックボックス + タイトル */}
+      {/* ヘッダー */}
       <div style={section.header} onClick={() => setOpen(v => !v)}>
         <span style={section.arrow(colors)}>{open ? '▼' : '▶'}</span>
         <label
@@ -53,7 +56,7 @@ export default function HeatmapControl({
             onChange={e => { onEnabledChange(e.target.checked); if (e.target.checked) setOpen(true); }}
             style={{ cursor: 'pointer' }}
           />
-          <span style={section.title(colors)}>駅統計ヒートマップ</span>
+          <span style={section.title(colors)}>{translateUI('stationHeatmap', language)}</span>
         </label>
         {enabled && (
           <span style={{
@@ -73,7 +76,7 @@ export default function HeatmapControl({
 
           {/* パラメータ選択 */}
           <div>
-            <div style={text.desc(colors)}>表示パラメータ</div>
+            <div style={text.desc(colors)}>{translateUI('heatmapDisplayParam', language)}</div>
             <select
               value={paramKey as string}
               onChange={e => onParamKeyChange(e.target.value as keyof StationStats)}
@@ -113,17 +116,19 @@ export default function HeatmapControl({
               <div>{currentMeta.description}</div>
               {currentMeta.methodology && (
                 <div style={{ marginTop: '2px' }}>
-                  <span style={{ fontWeight: 'bold' }}>集計方法:</span> {currentMeta.methodology}
+                  <span style={{ fontWeight: 'bold' }}>{translateUI('heatmapMethodology', language)}:</span> {currentMeta.methodology}
                 </div>
               )}
               {currentMeta.period && (
-                <div><span style={{ fontWeight: 'bold' }}>基準時点:</span> {currentMeta.period}</div>
+                <div><span style={{ fontWeight: 'bold' }}>{translateUI('heatmapPeriod', language)}:</span> {currentMeta.period}</div>
               )}
               {currentMeta.radius && (
-                <div><span style={{ fontWeight: 'bold' }}>範囲:</span> {currentMeta.radius}</div>
+                <div><span style={{ fontWeight: 'bold' }}>{translateUI('heatmapRadius', language)}:</span> {currentMeta.radius}</div>
               )}
               <div style={{ marginTop: '3px', color: colors.textSecondary }}>
-                {currentMeta.higherIsBetter ? '高いほど 赤' : '低いほど 赤（値が高いほど課題あり）'}
+                {currentMeta.higherIsBetter
+                  ? translateUI('heatmapHigherIsBetter', language)
+                  : translateUI('heatmapLowerIsBetter', language)}
               </div>
             </div>
           )}
@@ -132,8 +137,8 @@ export default function HeatmapControl({
           <div>
             <div style={{ height: L.sp.md, borderRadius: L.r.md, background: GRADIENT_CSS }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2px' }}>
-              <span style={text.muted(colors)}>低</span>
-              <span style={text.muted(colors)}>高</span>
+              <span style={text.muted(colors)}>{translateUI('heatmapGradientLow', language)}</span>
+              <span style={text.muted(colors)}>{translateUI('heatmapGradientHigh', language)}</span>
             </div>
           </div>
 
@@ -149,7 +154,7 @@ export default function HeatmapControl({
                 borderRadius: L.r.md,
                 borderLeft:   `2px solid ${colors.border}`,
               }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>参照元</div>
+                <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{translateUI('heatmapSource', language)}</div>
                 <div>{src.title}</div>
                 {src.url && (
                   <a href={src.url} target="_blank" rel="noopener noreferrer"
@@ -158,8 +163,8 @@ export default function HeatmapControl({
                   </a>
                 )}
                 <div style={{ marginTop: '2px' }}>
-                  参照日: {src.retrievedAt}
-                  {src.updatedAt && ` / データ更新: ${src.updatedAt}`}
+                  {translateUI('heatmapRetrievedAt', language)}: {src.retrievedAt}
+                  {src.updatedAt && ` / ${translateUI('heatmapUpdatedAt', language)}: ${src.updatedAt}`}
                 </div>
                 {src.note && <div style={{ fontStyle: 'italic', marginTop: '2px' }}>{src.note}</div>}
               </div>
