@@ -4180,7 +4180,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 {
                   key: 'settings',
                   icon: '⚙️',
-                  label: '設定',
+                  label: translateUI('detailSettings', currentLanguage),
                   content: (
                     <>
                       <LegendStationMarkers
