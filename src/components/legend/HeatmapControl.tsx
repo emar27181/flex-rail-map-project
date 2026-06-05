@@ -3,7 +3,7 @@ import { getThemeColors } from '../../contexts/ThemeContext';
 import { STAT_PARAMS, PARAM_DATA_SOURCES, DATA_DISCLAIMER, buildGradientCss } from '../../data/stationStats';
 import type { StationStats, StatCategory } from '../../data/stationStats';
 import { section, text, L } from './legendStyles';
-import { translateUI } from '../../utils/translation';
+import { translateUI, translateStatParamLabel } from '../../utils/translation';
 import type { Language } from '../../utils/translation';
 
 type Props = {
@@ -95,7 +95,7 @@ export default function HeatmapControl({
                 <optgroup key={cat} label={CATEGORY_LABEL[cat]}>
                   {params.map(p => (
                     <option key={p.key as string} value={p.key as string}>
-                      {p.label}（{p.unit}）
+                      {translateStatParamLabel(p.label, language)}（{p.unit}）
                     </option>
                   ))}
                 </optgroup>

@@ -2281,8 +2281,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   },
   // ── ヒートマップ凡例・LegendRouteList グループ名 ──
   heatmapShowOtherInfo: {
-    japanese: "他の情報を表示",
-    english: "Show other data"
+    japanese: "表示内容の切替",
+    english: "Change display"
   },
   heatmapRangeFilter: {
     japanese: "レンジ内のみ表示",
@@ -2595,7 +2595,7 @@ const uiChinese: Record<string, string> = {
   calculating: "计算中...",
   reachable: "个站可到达",
   // 新規追加キー
-  heatmapShowOtherInfo: "显示其他信息",
+  heatmapShowOtherInfo: "切换显示内容",
   heatmapRangeFilter: "仅显示范围内",
   heatmapGradientLow: "低",
   heatmapGradientHigh: "高",
@@ -2800,7 +2800,7 @@ const uiKorean: Record<string, string> = {
   calculating: "계산 중...",
   reachable: "개 역 도달 가능",
   // 新規追加キー
-  heatmapShowOtherInfo: "다른 정보 표시",
+  heatmapShowOtherInfo: "표시 내용 변경",
   heatmapRangeFilter: "범위 내만 표시",
   heatmapGradientLow: "낮음",
   heatmapGradientHigh: "높음",
@@ -2876,6 +2876,41 @@ export const translateUI = (key: string, language: Language, params?: { [key: st
   }
 
   return text;
+};
+
+/** 駅統計パラメータラベルの翻訳マップ */
+const statParamLabelMap: Record<string, { english: string; chinese: string; korean: string }> = {
+  '家賃(1K)':     { english: 'Rent (1K)',          chinese: '租金(1K)',       korean: '월세(1K)' },
+  '家賃(1LDK)':   { english: 'Rent (1LDK)',         chinese: '租金(1LDK)',     korean: '월세(1LDK)' },
+  '人口密度':     { english: 'Pop. density',         chinese: '人口密度',       korean: '인구밀도' },
+  '乗降客数':     { english: 'Daily passengers',     chinese: '日均客流量',     korean: '일일 이용객' },
+  '朝混雑度':     { english: 'Morning congestion',   chinese: '早高峰拥挤度',   korean: '아침 혼잡도' },
+  '居酒屋数':     { english: 'Izakaya count',        chinese: '居酒屋数量',     korean: '이자카야 수' },
+  '飲食店数':     { english: 'Restaurant count',     chinese: '餐饮店数量',     korean: '음식점 수' },
+  'カフェ数':     { english: 'Cafe count',           chinese: '咖啡馆数量',     korean: '카페 수' },
+  'コンビニ数':   { english: 'Conv. store count',    chinese: '便利店数量',     korean: '편의점 수' },
+  'ラーメン屋数': { english: 'Ramen shop count',     chinese: '拉面店数量',     korean: '라멘 가게 수' },
+  'スーパー数':   { english: 'Supermarket count',    chinese: '超市数量',       korean: '슈퍼마켓 수' },
+  '病院・医院数': { english: 'Hospital count',       chinese: '医院数量',       korean: '병원 수' },
+  '書店数':       { english: 'Bookstore count',      chinese: '书店数量',       korean: '서점 수' },
+  '犯罪件数':     { english: 'Crime count',          chinese: '犯罪件数',       korean: '범죄 건수' },
+  '治安スコア':   { english: 'Safety score',         chinese: '治安评分',       korean: '치안 점수' },
+  '公園面積':     { english: 'Park area',            chinese: '公园面积',       korean: '공원 면적' },
+  '静かさ':       { english: 'Quietness',            chinese: '安静度',         korean: '조용함' },
+  '緑地率':       { english: 'Green ratio',          chinese: '绿地率',         korean: '녹지율' },
+  'オフィス数':   { english: 'Office count',         chinese: '办公楼数量',     korean: '오피스 수' },
+  'コワーキング数': { english: 'Coworking count',    chinese: '共享办公数量',   korean: '코워킹 수' },
+};
+
+/** 駅統計パラメータのラベルを翻訳 */
+export const translateStatParamLabel = (label: string, language: Language): string => {
+  if (language === 'japanese') return label;
+  const t = statParamLabelMap[label];
+  if (!t) return label;
+  if (language === 'english') return t.english;
+  if (language === 'chinese') return t.chinese;
+  if (language === 'korean')  return t.korean;
+  return label;
 };
 
 /** 列車種別を翻訳 ("急行" → "Express" など) */

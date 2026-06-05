@@ -9,7 +9,7 @@ import SchematicMap from './SchematicMap';
 import { RouteFinder, TimeFilter, type RouteResult, type StationWithTime } from '../utils/routeFinder';
 import { getRouteDestination, getRouteDisplayText, getDirectionText, commonDirections } from '../data/routeDestinations';
 import { useTheme, getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
-import { translateStation, translateRoute, translateUI, translateTrainType, translatePlatform, translateDestination } from '../utils/translation';
+import { translateStation, translateRoute, translateUI, translateTrainType, translatePlatform, translateDestination, translateStatParamLabel } from '../utils/translation';
 import type { Language } from '../utils/translation';
 import { getFurigana } from '../utils/furigana';
 import LegendStationMarkers from './legend/LegendStationMarkers';
@@ -731,7 +731,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: dotColor, flexShrink: 0, border: '1px solid rgba(0,0,0,0.2)' }} />
             <span style={{ fontSize: '11px', color: colors.textSecondary, flex: 1 }}>
-              {currentMeta?.label ?? String(heatmapParam)}
+              {currentMeta ? translateStatParamLabel(currentMeta.label, currentLanguage) : String(heatmapParam)}
             </span>
             <span style={{ fontSize: '18px', fontWeight: 'bold', color: dotColor }}>
               {val !== undefined ? val : '—'}
@@ -748,14 +748,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 const v = stats![p.key] as number;
                 const isActive = p.key === heatmapParam;
                 const src = PARAM_DATA_SOURCES[p.key];
+                const translatedLabel = translateStatParamLabel(p.label, currentLanguage);
                 const labelEl = src?.url ? (
                   <a href={src.url} target="_blank" rel="noopener noreferrer"
                     onClick={e => e.stopPropagation()}
                     style={{ color: isActive ? dotColor : '#4a90d9', textDecoration: 'underline', fontSize: '10px' }}>
-                    {p.label}
+                    {translatedLabel}
                   </a>
                 ) : (
-                  <span style={{ color: colors.textSecondary, fontSize: '10px' }}>{p.label}</span>
+                  <span style={{ color: colors.textSecondary, fontSize: '10px' }}>{translatedLabel}</span>
                 );
                 return (
                   <div key={String(p.key)} style={{
@@ -991,7 +992,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
                 <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: dotColor, flexShrink: 0, border: '1px solid rgba(0,0,0,0.2)' }} />
                 <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.text }}>
-                  {currentMeta?.label ?? String(heatmapParam)}
+                  {currentMeta ? translateStatParamLabel(currentMeta.label, currentLanguage) : String(heatmapParam)}
                 </span>
                 <span style={{ fontSize: '12px', fontWeight: 'bold', color: dotColor, marginLeft: 'auto' }}>
                   {val !== undefined ? `${val} ${currentMeta?.unit ?? ''}` : translateUI('noDataLabel', currentLanguage)}
@@ -1008,14 +1009,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     const pColor = pNorm !== null ? heatValueToColor(pNorm) : HEATMAP_NO_DATA_COLOR;
                     const src = PARAM_DATA_SOURCES[p.key];
                     const url = src?.url;
+                    const tLabel = translateStatParamLabel(p.label, currentLanguage);
                     const labelEl = url ? (
                       <a href={url} target="_blank" rel="noopener noreferrer"
                         onClick={e => e.stopPropagation()}
                         style={{ color: isActive ? pColor : colors.textSecondary, textDecoration: 'underline', cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {p.label}
+                        {tLabel}
                       </a>
                     ) : (
-                      <span style={{ color: colors.textSecondary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.label}</span>
+                      <span style={{ color: colors.textSecondary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tLabel}</span>
                     );
                     return (
                       <div key={String(p.key)} style={{
@@ -3609,7 +3611,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 }}>
                   {/* ヘッダー：クリックで凡例本体を折りたたむ */}
                   <div
-                    onClick={() => setHeatmapParamSelectorOpen(o => !o)}
+                    onClick={() => {
+                      setHeatmapParamSelectorOpen(o => {
+                        if (!o) setHeatmapParamListOpen(false); // 閉じるとき内側も閉じる
+                        return !o;
+                      });
+                    }}
                     style={{
                       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                       padding: '6px 8px', cursor: 'pointer',
@@ -3617,7 +3624,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     }}
                   >
                     <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {meta?.label ?? String(heatmapParam)}{meta?.unit ? ` (${meta.unit})` : ''}
+                      {meta ? translateStatParamLabel(meta.label, currentLanguage) : String(heatmapParam)}{meta?.unit ? ` (${meta.unit})` : ''}
                     </span>
                     <span style={{
                       fontSize: '9px', color: colors.textSecondary, flexShrink: 0, marginLeft: '4px',
@@ -3701,7 +3708,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                             whiteSpace: 'nowrap',
                           }}
                         >
-                          {p.label}
+                          {translateStatParamLabel(p.label, currentLanguage)}
                         </button>
                       ))}
                     </div>
