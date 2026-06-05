@@ -3435,154 +3435,136 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             </div>
           )}
 
-          {/* ヒートマップ凡例（ヒートマップ有効時のみ・スマホは右下に表示） */}
+          {/* ヒートマップ凡例 */}
           {(heatmapEnabled || mapViewMode === 'bubble') && (mapViewMode === 'realistic' || mapViewMode === 'bubble') && (() => {
             const meta = STAT_PARAMS.find(p => p.key === heatmapParam);
             const gradientCss = buildGradientCss('to right');
             const dataRange = getParamRange(heatmapParam);
-            const effectiveMin = heatmapCustomRange?.min ?? dataRange.min;
-            const effectiveMax = heatmapCustomRange?.max ?? dataRange.max;
-
-            const formatTick = (v: number) => {
-              const abs = Math.abs(v);
-              if (abs >= 100000) return (v / 1000).toFixed(0) + 'k';
-              if (abs >= 10000) return (v / 1000).toFixed(1) + 'k';
-              if (abs >= 1) return v.toFixed(0);  // 1以上は整数表示
-              if (abs >= 10) return v.toFixed(1);
-              return v.toFixed(2);
+            const rnd1 = (v: number) => Math.round(v * 10) / 10;
+            const effectiveMin = rnd1(heatmapCustomRange?.min ?? dataRange.min);
+            const effectiveMax = rnd1(heatmapCustomRange?.max ?? dataRange.max);
+            const fullRange = dataRange.max - dataRange.min || 1;
+            const step = rnd1(Math.pow(10, Math.floor(Math.log10(fullRange / 20))));
+            const fmt = (v: number) => {
+              const r = rnd1(v);
+              const abs = Math.abs(r);
+              if (abs >= 100000) return (r / 1000).toFixed(0) + 'k';
+              if (abs >= 10000) return (r / 1000).toFixed(1) + 'k';
+              return r.toFixed(1);
             };
-            const ticks = [0, 0.25, 0.5, 0.75, 1.0].map(t =>
-              effectiveMin + t * (effectiveMax - effectiveMin)
-            );
+            const ticks = [0, 0.5, 1.0].map(t => effectiveMin + t * (effectiveMax - effectiveMin));
+            const pos: React.CSSProperties = isFullscreen && isMobile
+              ? { bottom: '35px', right: '10px', left: 'auto' }
+              : { bottom: '10px', left: '10px' };
+            const cardW = isFullscreen && isMobile ? 'min(48vw, 200px)' : '200px';
+            const btnS: React.CSSProperties = {
+              width: '18px', height: '18px', fontSize: '11px', cursor: 'pointer',
+              borderRadius: '3px', border: `1px solid ${colors.border}`, flexShrink: 0,
+              background: theme === 'dark' ? 'rgba(60,60,60,0.9)' : 'rgba(220,220,220,0.9)',
+              color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              userSelect: 'none' as const,
+            };
+            const numS: React.CSSProperties = {
+              width: '42px', fontSize: '11px', padding: '1px 3px', textAlign: 'center',
+              border: `1px solid ${colors.border}`, borderRadius: '3px',
+              background: theme === 'dark' ? 'rgba(50,50,50,0.9)' : 'rgba(245,245,245,0.9)',
+              color: colors.text,
+            };
 
             return (
-              <div style={{
-                position: 'fixed',
-                ...(isFullscreen && isMobile
-                  ? { bottom: '60px', right: '10px', left: 'auto' }
-                  : { bottom: '40px', left: '10px' }),
-                zIndex: 1001,
-                background: theme === 'dark' ? 'rgba(30,30,30,0.92)' : 'rgba(255,255,255,0.92)',
-                border: `1px solid ${colors.border}`,
-                borderRadius: '6px',
-                padding: '8px 10px',
-                minWidth: '180px',
-                maxWidth: isFullscreen && isMobile ? '48vw' : '260px',
-                boxShadow: `0 2px 6px ${colors.shadow}`,
-              }}>
-                {/* パラメータ切り替えタブ（折りたたみ可） */}
-                <div
-                  onClick={() => setHeatmapParamSelectorOpen(o => !o)}
-                  style={{
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    cursor: 'pointer', marginBottom: heatmapParamSelectorOpen ? '6px' : '8px',
-                  }}
-                >
-                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: colors.text }}>
-                    {meta?.label ?? String(heatmapParam)}
-                    {meta?.unit ? `（${meta.unit}）` : ''}
-                  </span>
-                  <span style={{
-                    fontSize: '10px', color: colors.textSecondary,
-                    transform: heatmapParamSelectorOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                    transition: 'transform 0.2s',
-                    marginLeft: '6px',
-                  }}>▼</span>
-                </div>
-                {heatmapParamSelectorOpen && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', marginBottom: '8px' }}>
-                    {STAT_PARAMS.map(p => (
-                      <button
-                        key={String(p.key)}
-                        onClick={(e) => { e.stopPropagation(); setHeatmapParam(p.key); }}
-                        style={{
-                          fontSize: '10px', padding: '2px 6px', cursor: 'pointer',
-                          borderRadius: '10px',
-                          border: heatmapParam === p.key ? 'none' : `1px solid ${colors.border}`,
-                          background: heatmapParam === p.key
-                            ? colors.primary
-                            : (theme === 'dark' ? 'rgba(50,50,50,0.8)' : 'rgba(240,240,240,0.9)'),
-                          color: heatmapParam === p.key ? '#fff' : colors.textSecondary,
-                          fontWeight: heatmapParam === p.key ? 'bold' : 'normal',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {p.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                <div style={{ height: '10px', borderRadius: '4px', background: gradientCss, marginBottom: '3px' }} />
-                {/* 25%刻みのティック */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  {ticks.map((v, i) => (
-                    <span key={i} style={{ fontSize: '11px', color: colors.textSecondary }}>
-                      {formatTick(v)}
+              <>
+                {/* メイン凡例カード（ヘッダークリックで折りたたみ） */}
+                <div style={{
+                  position: 'fixed', ...pos, zIndex: 1001,
+                  background: theme === 'dark' ? 'rgba(30,30,30,0.92)' : 'rgba(255,255,255,0.92)',
+                  border: `1px solid ${colors.border}`, borderRadius: '8px',
+                  boxShadow: `0 2px 6px ${colors.shadow}`,
+                  width: cardW, overflow: 'hidden',
+                }}>
+                  {/* ヘッダー：クリックで凡例全体を折りたたむ */}
+                  <div
+                    onClick={() => setHeatmapParamSelectorOpen(o => !o)}
+                    style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      padding: '6px 8px', cursor: 'pointer',
+                      borderBottom: heatmapParamSelectorOpen ? 'none' : `1px solid ${colors.borderLight}`,
+                    }}
+                  >
+                    <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {meta?.label ?? String(heatmapParam)}{meta?.unit ? ` (${meta.unit})` : ''}
                     </span>
+                    <span style={{
+                      fontSize: '9px', color: colors.textSecondary, flexShrink: 0, marginLeft: '4px',
+                      transform: heatmapParamSelectorOpen ? 'rotate(0deg)' : 'rotate(180deg)',
+                      transition: 'transform 0.2s',
+                    }}>▲</span>
+                  </div>
+                  {/* 本体（折りたたみ対象） */}
+                  {!heatmapParamSelectorOpen && (
+                    <div style={{ padding: '6px 8px' }}>
+                      <div style={{ height: '8px', borderRadius: '3px', background: gradientCss, marginBottom: '2px' }} />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                        {ticks.map((v, i) => (
+                          <span key={i} style={{ fontSize: '10px', color: colors.textSecondary }}>{fmt(v)}</span>
+                        ))}
+                      </div>
+                      {/* 範囲調整: [value −+] 〜 [value −+] */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginBottom: '5px', flexWrap: 'nowrap' }}>
+                        <input type="number" value={effectiveMin} step={step}
+                          onChange={e => { const v = rnd1(parseFloat(e.target.value)); if (!isNaN(v)) setHeatmapCustomRange({ min: v, max: effectiveMax }); }}
+                          style={numS} />
+                        <button style={btnS} onClick={() => setHeatmapCustomRange({ min: rnd1(effectiveMin - step), max: effectiveMax })}>−</button>
+                        <button style={btnS} onClick={() => setHeatmapCustomRange({ min: rnd1(Math.min(effectiveMin + step, effectiveMax - step)), max: effectiveMax })}>+</button>
+                        <span style={{ fontSize: '10px', color: colors.textSecondary }}>〜</span>
+                        <input type="number" value={effectiveMax} step={step}
+                          onChange={e => { const v = rnd1(parseFloat(e.target.value)); if (!isNaN(v)) setHeatmapCustomRange({ min: effectiveMin, max: v }); }}
+                          style={numS} />
+                        <button style={btnS} onClick={() => setHeatmapCustomRange({ min: effectiveMin, max: rnd1(Math.max(effectiveMax - step, effectiveMin + step)) })}>−</button>
+                        <button style={btnS} onClick={() => setHeatmapCustomRange({ min: effectiveMin, max: rnd1(effectiveMax + step) })}>+</button>
+                      </div>
+                      {heatmapEnabled && (
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', color: colors.text, cursor: 'pointer' }}>
+                          <input type="checkbox" checked={heatmapRangeFilterEnabled} onChange={e => setHeatmapRangeFilterEnabled(e.target.checked)} />
+                          レンジ内のみ表示
+                        </label>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* パラメータ選択（凡例の下に独立表示） */}
+                <div style={{
+                  position: 'fixed',
+                  ...(isFullscreen && isMobile
+                    ? { bottom: `calc(35px + 32px + 6px)`, right: '10px', left: 'auto' }
+                    : { bottom: `calc(10px + 32px + 6px)`, left: '10px' }),
+                  zIndex: 1000,
+                  background: theme === 'dark' ? 'rgba(30,30,30,0.88)' : 'rgba(255,255,255,0.88)',
+                  border: `1px solid ${colors.border}`, borderRadius: '8px',
+                  padding: '5px 7px',
+                  boxShadow: `0 2px 6px ${colors.shadow}`,
+                  width: cardW,
+                  display: 'flex', flexWrap: 'wrap', gap: '3px',
+                }}>
+                  {STAT_PARAMS.map(p => (
+                    <button
+                      key={String(p.key)}
+                      onClick={() => { setHeatmapParam(p.key); setHeatmapCustomRange(undefined); }}
+                      style={{
+                        fontSize: '9px', padding: '2px 5px', cursor: 'pointer',
+                        borderRadius: '8px',
+                        border: heatmapParam === p.key ? 'none' : `1px solid ${colors.border}`,
+                        background: heatmapParam === p.key ? colors.primary : (theme === 'dark' ? 'rgba(50,50,50,0.8)' : 'rgba(235,235,235,0.9)'),
+                        color: heatmapParam === p.key ? '#fff' : colors.textSecondary,
+                        fontWeight: heatmapParam === p.key ? 'bold' : 'normal',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {p.label}
+                    </button>
                   ))}
                 </div>
-                {/* min/max 編集 */}
-                {/* min/maxスライダー */}
-                {(() => {
-                  const fullRange = dataRange.max - dataRange.min || 1;
-                  const step = Math.pow(10, Math.floor(Math.log10(fullRange / 20)));
-                  const btnStyle: React.CSSProperties = {
-                    width: '22px', height: '22px', fontSize: '13px', lineHeight: '1',
-                    cursor: 'pointer', borderRadius: '4px', border: `1px solid ${colors.border}`,
-                    background: theme === 'dark' ? 'rgba(60,60,60,0.9)' : 'rgba(230,230,230,0.9)',
-                    color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    userSelect: 'none',
-                  };
-                  const numStyle: React.CSSProperties = {
-                    width: '56px', fontSize: '11px', padding: '2px 4px', textAlign: 'center',
-                    border: `1px solid ${colors.border}`, borderRadius: '3px',
-                    background: theme === 'dark' ? 'rgba(50,50,50,0.9)' : 'rgba(240,240,240,0.9)',
-                    color: colors.text,
-                  };
-                  return (
-                    <>
-                      {(() => {
-                        const rows = [
-                          { label: '下', val: effectiveMin, onMinus: () => setHeatmapCustomRange({ min: effectiveMin - step, max: effectiveMax }), onPlus: () => setHeatmapCustomRange({ min: Math.min(effectiveMin + step, effectiveMax - step), max: effectiveMax }), onInput: (v: number) => setHeatmapCustomRange({ min: v, max: effectiveMax }) },
-                          { label: '上', val: effectiveMax, onMinus: () => setHeatmapCustomRange({ min: effectiveMin, max: Math.max(effectiveMax - step, effectiveMin + step) }), onPlus: () => setHeatmapCustomRange({ min: effectiveMin, max: effectiveMax + step }), onInput: (v: number) => setHeatmapCustomRange({ min: effectiveMin, max: v }) },
-                        ];
-                        return (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'nowrap', marginBottom: '4px' }}>
-                            {rows.map(({ label, val, onMinus, onPlus, onInput }, i) => (
-                              <React.Fragment key={label}>
-                                {i > 0 && <span style={{ fontSize: '10px', color: colors.textSecondary }}>〜</span>}
-                                <span style={{ fontSize: '9px', color: colors.textSecondary }}>{label}</span>
-                                <button style={btnStyle} onClick={onMinus}>◀</button>
-                                <input type="number" value={step >= 1 ? Math.round(val) : val} step={step >= 1 ? Math.max(1, step) : step}
-                                  onChange={e => { const v = step >= 1 ? parseInt(e.target.value) : parseFloat(e.target.value); if (!isNaN(v)) onInput(v); }}
-                                  style={{ ...numStyle, width: '44px' }} />
-                                <button style={btnStyle} onClick={onPlus}>▶</button>
-                              </React.Fragment>
-                            ))}
-                          </div>
-                        );
-                      })()}
-                    </>
-                  );
-                })()}
-                {/* レンジフィルタートグル */}
-                {heatmapEnabled && (
-                  <label style={{
-                    display: 'flex', alignItems: 'center', gap: '5px',
-                    fontSize: '11px', color: colors.text, cursor: 'pointer', marginTop: '6px',
-                  }}>
-                    <input
-                      type="checkbox"
-                      checked={heatmapRangeFilterEnabled}
-                      onChange={e => setHeatmapRangeFilterEnabled(e.target.checked)}
-                    />
-                    レンジ内の駅のみ表示
-                  </label>
-                )}
-                <div style={{ fontSize: '10px', color: colors.textSecondary, marginTop: '4px', fontStyle: 'italic' }}>
-                  ※ 灰色はデータなし
-                </div>
-              </div>
+              </>
             );
           })()}
 
