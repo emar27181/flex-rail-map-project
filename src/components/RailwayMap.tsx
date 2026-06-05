@@ -1234,7 +1234,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // アイコン作成関数をメモ化
   // overrideColor が渡されたときはそちらを優先（ヒートマップ色切替用）
-  const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean, opacity: number = 1, timeLabel?: string, routeKey?: RouteKey, overrideColor?: string) => {
+  const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean, opacity: number = 1, timeLabel?: string, routeKey?: RouteKey, overrideColor?: string, tierShadow?: string) => {
     if (!MapComponents?.DivIcon) return null;
 
     const { DivIcon } = MapComponents;
@@ -1283,12 +1283,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const borderColor = theme === 'dark' ? 'rgba(255,255,255,0.8)' : 'white';
       const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)';
       const dotBorder = overrideColor ? 'none' : `1px solid ${borderColor}`;
-      const dotShadow = overrideColor ? 'none' : `0 1px 2px ${shadowColor}`;
+      // ティアあり → tierShadow を使用、なし → デフォルトの drop shadow
+      const dotShadow = tierShadow ?? (overrideColor ? 'none' : `0 1px 2px ${shadowColor}`);
+      // ティアあり時は icon サイズを影が見えるよう大きめに確保
+      const paddingForShadow = tierShadow ? 16 : 0;
+      const iconTotal = stationSize + paddingForShadow;
       return new DivIcon({
-        html: `<div style="background:${displayColor};width:${stationSize}px;height:${stationSize}px;border:${dotBorder};box-shadow:${dotShadow};opacity:${opacity}"></div>`,
+        html: `<div style="width:${iconTotal}px;height:${iconTotal}px;display:flex;align-items:center;justify-content:center;"><div style="background:${displayColor};width:${stationSize}px;height:${stationSize}px;border:${dotBorder};box-shadow:${dotShadow};opacity:${opacity};border-radius:50%;flex-shrink:0;"></div></div>`,
         className: 'station-marker',
-        iconSize: [stationSize, stationSize],
-        iconAnchor: [stationSize / 2, stationSize / 2]
+        iconSize: [iconTotal, iconTotal],
+        iconAnchor: [iconTotal / 2, iconTotal / 2]
       });
     }
   }, [MapComponents, currentLanguage, theme, showFurigana, showStationNumbers, stationLabelFontSize, stationIconScale]);
@@ -2844,12 +2848,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               ? getStationHeatColor(station.name, heatmapParam, heatmapCustomRange)
               : undefined;
             const stationColor = heatOverride ?? routeColor;
+            const tierStyle = !heatmapEnabled ? getStationBorderStyle(routeKey, station.name) : null;
             const stationIcon = trainTypeViewEnabled
               ? createTrainTypeStationIcon(station, routeKey, zoomLevel, isDetailed, stationOpacity, heatOverride)
-              : createStationIcon(station, routeColor, zoomLevel, isDetailed, stationOpacity, effectiveTimeLabel, routeKey, heatOverride);
+              : createStationIcon(station, routeColor, zoomLevel, isDetailed, stationOpacity, effectiveTimeLabel, routeKey, heatOverride, tierStyle?.boxShadow ?? undefined);
             if (!stationIcon) return null;
 
-            const stationZIndex = (station.isExpress || isTransferStation) ? 3000 : 1000;
+            const routeCount = stationRouteCountMap.get(station.name) ?? 1;
+            const stationZIndex = routeCount >= 5 ? 4000 : routeCount >= 3 ? 3000 : routeCount >= 2 ? 2000 : 1000;
             const markerKey = `${routeKey}-station-${index}-${stationColor}`;
 
             return (
