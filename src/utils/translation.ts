@@ -151,12 +151,19 @@ export const stationTranslations: { [key: string]: string } = {
   "ラピッドアクティー": "Rapid Acty",
   "ロマンスカー": "Romance Car",
   "各駅停車": "Local",
+  "各停": "Local",
+  "普通": "Local",
   "快速": "Rapid",
+  "通勤快速": "Commuter Rapid",
+  "快速アクティー": "Rapid Acty",
   "急行": "Express",
   "準急": "Semi-Express",
+  "通勤急行": "Commuter Express",
+  "快特": "Rapid Limited Express",
   "特急": "Limited Express",
   "特別快速": "Special Rapid",
   "多摩急行": "Tama Express",
+  "方面": "direction",
   "奥多摩": "Okutama",
   "古里": "Kori",
   "鳩ノ巣": "Hatonosu",
@@ -2149,8 +2156,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Station tooltip"
   },
   bubbleMap: {
-    japanese: "バブルマップ",
-    english: "Bubble map"
+    japanese: "バブルマップ(実装中)",
+    english: "Bubble map (WIP)"
   },
   bubbleCircle: {
     japanese: "● 円",
@@ -2644,4 +2651,37 @@ export const translateUI = (key: string, language: Language, params?: { [key: st
   }
 
   return text;
+};
+
+/** 列車種別を翻訳 ("急行" → "Express" など) */
+export const translateTrainType = (type: string, language: Language): string => {
+  if (language === 'japanese') return type;
+  return translateStation(type, language);
+};
+
+/** "X番線" 形式の番線文字列を翻訳 */
+export const translatePlatform = (platform: string, language: Language): string => {
+  if (language === 'japanese') return platform;
+  const match = platform.match(/^(\d+)番線$/);
+  if (!match) return platform;
+  const n = match[1];
+  if (language === 'chinese') return `${n}号站台`;
+  if (language === 'korean') return `${n}번 승강장`;
+  return `Track ${n}`;
+};
+
+/**
+ * "品川・渋谷方面" のような行き先・方面文字列を翻訳。
+ * "方面" を除いて "・" 区切りの各部分を translateStation に通す。
+ */
+export const translateDestination = (dest: string, language: Language): string => {
+  if (language === 'japanese') return dest;
+  const hasMoment = dest.endsWith('方面');
+  const core = hasMoment ? dest.slice(0, -2) : dest;
+  const parts = core.split('・').map(p => translateStation(p.trim(), language));
+  const joined = parts.join(' · ');
+  if (!hasMoment) return joined;
+  if (language === 'chinese') return `${joined}方向`;
+  if (language === 'korean') return `${joined} 방면`;
+  return `toward ${joined}`;
 };
