@@ -61,6 +61,10 @@ interface LegendRouteListProps {
   onShowRouteLineChange: (v: boolean) => void;
   mapConfig: MapConfig;
   onImportConfig: (config: MapConfig) => void;
+  stationLabelFontSize: number;
+  onStationLabelFontSizeChange: (v: number) => void;
+  stationIconScale: number;
+  onStationIconScaleChange: (v: number) => void;
 }
 
 const LegendRouteList: React.FC<LegendRouteListProps> = ({
@@ -111,9 +115,17 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowRouteLineChange,
   mapConfig,
   onImportConfig,
+  stationLabelFontSize,
+  onStationLabelFontSizeChange,
+  stationIconScale,
+  onStationIconScaleChange,
 }) => {
   const colors = getThemeColors(theme);
   const [sortMode, setSortMode] = useState<SortMode>('name');
+  const [groupLabelOpen,  setGroupLabelOpen]  = useState(true);
+  const [groupVizOpen,    setGroupVizOpen]    = useState(true);
+  const [groupFilterOpen, setGroupFilterOpen] = useState(false);
+  const [groupMapOpen,    setGroupMapOpen]    = useState(false);
 
   // HEX色をHue値(0-360)に変換
   const hexToHue = (hex: string): number => {
@@ -174,252 +186,167 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         {translateUI('routeDisplayToggle', language)}
       </div>
 
-      {/* 表示オプション */}
+      {/* 表示オプション（グループ折りたたみ） */}
       <div style={{ marginBottom: '8px' }}>
-        {/* 区間外の路線を半透明で表示 */}
-        <label style={checkboxLabel(colors)}>
-          <input
-            type="checkbox"
-            checked={showDimmedRoutes}
-            onChange={(e) => onShowDimmedRoutesChange(e.target.checked)}
-            style={{ marginRight: '6px', cursor: 'pointer' }}
-          />
-          {translateUI('showOutsideSegmentRoutes', language)}
-        </label>
 
-        {/* 乗換駅のみ表示オプション */}
-        <label style={checkboxLabel(colors)}>
-          <input
-            type="checkbox"
-            checked={showTransferStationsOnly}
-            onChange={(e) => onShowTransferStationsOnlyChange(e.target.checked)}
-            style={{
-              marginRight: '6px',
-              cursor: 'pointer'
-            }}
-          />
-          {translateUI('showOnlyTransferStations', language)}
-        </label>
-
-        {/* 急行駅のみ表示オプション */}
-        <label style={checkboxLabel(colors)}>
-          <input
-            type="checkbox"
-            checked={showExpressStationsOnly}
-            onChange={(e) => onShowExpressStationsOnlyChange(e.target.checked)}
-            style={{
-              marginRight: '6px',
-              cursor: 'pointer'
-            }}
-          />
-          {translateUI('showOnlyExpressStations', language)}
-        </label>
-
-        {/* 所要時間表示オプション */}
-        <label style={checkboxLabel(colors)}>
-          <input
-            type="checkbox"
-            checked={showTravelTimes}
-            onChange={(e) => onShowTravelTimesChange(e.target.checked)}
-            style={{
-              marginRight: '6px',
-              cursor: 'pointer'
-            }}
-          />
-          {translateUI('showTravelTimes', language)}
-        </label>
-
-        {/* 駅名表示オプション */}
-        <label style={checkboxLabel(colors)}>
-          <input
-            type="checkbox"
-            checked={showStationNames}
-            onChange={(e) => onShowStationNamesChange(e.target.checked)}
-            style={{
-              marginRight: '6px',
-              cursor: 'pointer'
-            }}
-          />
-          {translateUI('showStationNames', language)}
-        </label>
-
-        {/* 駅番号表示オプション */}
-        <label style={checkboxLabel(colors)}>
-          <input
-            type="checkbox"
-            checked={showStationNumbers}
-            onChange={(e) => onShowStationNumbersChange(e.target.checked)}
-            style={{
-              marginRight: '6px',
-              cursor: 'pointer'
-            }}
-          />
-          {translateUI('showStationCodes', language)}
-        </label>
-
-        {/* ふりがな表示オプション（日本語モードのみ） */}
-        {language === 'japanese' && (
-          <label style={checkboxLabel(colors)}>
-            <input
-              type="checkbox"
-              checked={showFurigana}
-              onChange={(e) => onShowFuriganaChange(e.target.checked)}
-              style={{
-                marginRight: '6px',
-                cursor: 'pointer'
-              }}
-            />
-            {translateUI('showFurigana', language)}
-          </label>
-        )}
-
-        {/* 地図タイル表示オプション */}
-        <label style={checkboxLabel(colors)}>
-          <input
-            type="checkbox"
-            checked={showOsmTiles}
-            onChange={(e) => onShowOsmTilesChange(e.target.checked)}
-            style={{
-              marginRight: '6px',
-              cursor: 'pointer'
-            }}
-          />
-          {translateUI('showMapTiles', language)}
-        </label>
-
-        {/* 中間駅以外も表示 */}
-        <label style={checkboxLabel(colors)}>
-          <input
-            type="checkbox"
-            checked={showFullRouteStations}
-            onChange={e => onShowFullRouteStationsChange(e.target.checked)}
-            style={{ marginRight: '6px', cursor: 'pointer' }}
-          />
-          {translateUI('showFullRouteStations', language)}
-        </label>
-
-        {/* 路線の線を表示 */}
-        <label style={checkboxLabel(colors)}>
-          <input
-            type="checkbox"
-            checked={showRouteLine}
-            onChange={e => onShowRouteLineChange(e.target.checked)}
-            style={{ marginRight: '6px', cursor: 'pointer' }}
-          />
-          {translateUI('showRouteLines', language)}
-        </label>
-
-        {/* 駅ツールチップ */}
-        <label style={checkboxLabel(colors)}>
-          <input
-            type="checkbox"
-            checked={showStationTooltip}
-            onChange={e => onShowStationTooltipChange(e.target.checked)}
-            style={{ marginRight: '6px', cursor: 'pointer' }}
-          />
-          {translateUI('stationTooltipLabel', language)}
-        </label>
-
-        {/* 駅統計ヒートマップ */}
-        <label style={checkboxLabel(colors)}>
-          <input
-            type="checkbox"
-            checked={heatmapEnabled}
-            onChange={e => onHeatmapEnabledChange(e.target.checked)}
-            style={{ marginRight: '6px', cursor: 'pointer' }}
-          />
-          {translateUI('stationHeatmap', language)}
-        </label>
-        {heatmapEnabled && (
-          <select
-            value={heatmapParam as string}
-            onChange={e => onHeatmapParamChange(e.target.value as keyof StationStats)}
-            style={{
-              marginLeft: '22px',
-              marginTop: '2px',
-              fontSize: '11px',
-              padding: '2px 4px',
-              borderRadius: '3px',
-              border: `1px solid ${colors.border}`,
-              background: colors.surfaceElevated,
-              color: colors.text,
-              cursor: 'pointer',
-              width: 'calc(100% - 22px)',
-            }}
-          >
-            {(['housing','transport','food','convenience','safety','environment','work'] as StatCategory[]).map(cat => {
-              const catLabel: Record<StatCategory, string> = {
-                housing: '住居', transport: '交通', food: '飲食', convenience: '利便性',
-                safety: '治安', environment: '環境', work: '仕事',
-              };
-              const params = STAT_PARAMS.filter(p => p.category === cat);
-              if (params.length === 0) return null;
-              return (
-                <optgroup key={cat} label={catLabel[cat]}>
-                  {params.map(p => (
-                    <option key={p.key as string} value={p.key as string}>
-                      {p.label}（{p.unit}）
-                    </option>
-                  ))}
-                </optgroup>
-              );
-            })}
-          </select>
-        )}
-
-        {/* バブルマップ（ヒートマップと同じパラメータを使用） */}
-        <label style={checkboxLabel(colors)}>
-          <input
-            type="checkbox"
-            checked={mapViewMode === 'bubble'}
-            onChange={e => onMapViewModeChange(e.target.checked ? 'bubble' : 'realistic')}
-            style={{ marginRight: '6px', cursor: 'pointer' }}
-          />
-          {translateUI('bubbleMap', language)}
-          <span style={{
-            marginLeft: '6px',
-            fontSize: '9px',
-            fontWeight: 'bold',
-            color: '#fff',
-            background: 'linear-gradient(135deg, #f093fb, #f5576c)',
-            padding: '1px 5px',
-            borderRadius: '8px',
-            letterSpacing: '0.03em',
-            boxShadow: '0 1px 4px rgba(245,87,108,0.4)',
-            verticalAlign: 'middle',
-          }}>
-            🚧 WIP
-          </span>
-        </label>
-        {mapViewMode === 'bubble' && (
-          <div style={{ marginLeft: '22px', marginTop: '4px', display: 'flex', gap: '6px' }}>
-            {(['circle', 'square'] as const).map(shape => (
-              <label key={shape} style={{ display: 'flex', alignItems: 'center', fontSize: '11px', color: colors.text, cursor: 'pointer' }}>
-                <input
-                  type="radio"
-                  name="bubbleShape"
-                  checked={bubbleShape === shape}
-                  onChange={() => onBubbleShapeChange(shape)}
-                  style={{ marginRight: '4px', cursor: 'pointer' }}
-                />
-                {shape === 'circle' ? translateUI('bubbleCircle', language) : translateUI('bubbleSquare', language)}
+        {/* ── 駅ラベル ── */}
+        <div
+          onClick={() => setGroupLabelOpen(v => !v)}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', background: colors.surfaceElevated, marginBottom: '2px' }}
+        >
+          <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>駅ラベル</span>
+          <span style={{ fontSize: '9px', color: colors.textSecondary, transition: 'transform 0.2s', transform: groupLabelOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
+        </div>
+        {groupLabelOpen && (
+          <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
+            <label style={checkboxLabel(colors)}>
+              <input type="checkbox" checked={showTravelTimes} onChange={e => onShowTravelTimesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+              {translateUI('showTravelTimes', language)}
+            </label>
+            <label style={checkboxLabel(colors)}>
+              <input type="checkbox" checked={showStationNumbers} onChange={e => onShowStationNumbersChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+              {translateUI('showStationCodes', language)}
+            </label>
+            <label style={checkboxLabel(colors)}>
+              <input type="checkbox" checked={showStationNames} onChange={e => onShowStationNamesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+              {translateUI('showStationNames', language)}
+            </label>
+            {language === 'japanese' && (
+              <label style={checkboxLabel(colors)}>
+                <input type="checkbox" checked={showFurigana} onChange={e => onShowFuriganaChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                {translateUI('showFurigana', language)}
               </label>
-            ))}
+            )}
+            {/* ラベルフォントサイズ */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0', marginTop: '2px' }}>
+              <span style={{ flex: 1, color: colors.textSecondary }}>ラベルサイズ</span>
+              <button onClick={() => onStationLabelFontSizeChange(Math.max(8, stationLabelFontSize - 1))}
+                style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
+              <span style={{ minWidth: '28px', textAlign: 'center', fontSize: '11px' }}>{stationLabelFontSize}px</span>
+              <button onClick={() => onStationLabelFontSizeChange(Math.min(20, stationLabelFontSize + 1))}
+                style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
+            </div>
+            {/* アイコンサイズ */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0' }}>
+              <span style={{ flex: 1, color: colors.textSecondary }}>アイコンサイズ</span>
+              <button onClick={() => onStationIconScaleChange(Math.max(0.5, Math.round((stationIconScale - 0.25) * 100) / 100))}
+                style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
+              <span style={{ minWidth: '28px', textAlign: 'center', fontSize: '11px' }}>{stationIconScale.toFixed(2)}x</span>
+              <button onClick={() => onStationIconScaleChange(Math.min(2.0, Math.round((stationIconScale + 0.25) * 100) / 100))}
+                style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
+            </div>
           </div>
         )}
 
-        {/* 列車デモ（リアル地図モードのみ） */}
-        {mapViewMode === 'realistic' && (
-          <label style={checkboxLabel(colors)}>
-            <input
-              type="checkbox"
-              checked={showTrainDemo}
-              onChange={onTrainDemoToggle}
-              style={{ marginRight: '6px', cursor: 'pointer' }}
-            />
-            🚃 {translateUI('trainDemoLabel', language)}
-          </label>
+        {/* ── データ可視化 ── */}
+        <div
+          onClick={() => setGroupVizOpen(v => !v)}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', background: colors.surfaceElevated, marginBottom: '2px' }}
+        >
+          <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>データ可視化</span>
+          <span style={{ fontSize: '9px', color: colors.textSecondary, transition: 'transform 0.2s', transform: groupVizOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
+        </div>
+        {groupVizOpen && (
+          <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
+            <label style={checkboxLabel(colors)}>
+              <input type="checkbox" checked={heatmapEnabled} onChange={e => onHeatmapEnabledChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+              {translateUI('stationHeatmap', language)}
+            </label>
+            {heatmapEnabled && (
+              <select
+                value={heatmapParam as string}
+                onChange={e => onHeatmapParamChange(e.target.value as keyof StationStats)}
+                style={{ marginLeft: '22px', marginTop: '2px', fontSize: '11px', padding: '2px 4px', borderRadius: '3px', border: `1px solid ${colors.border}`, background: colors.surfaceElevated, color: colors.text, cursor: 'pointer', width: 'calc(100% - 22px)' }}
+              >
+                {(['housing','transport','food','convenience','safety','environment','work'] as StatCategory[]).map(cat => {
+                  const catLabel: Record<StatCategory, string> = { housing: '住居', transport: '交通', food: '飲食', convenience: '利便性', safety: '治安', environment: '環境', work: '仕事' };
+                  const params = STAT_PARAMS.filter(p => p.category === cat);
+                  if (params.length === 0) return null;
+                  return (
+                    <optgroup key={cat} label={catLabel[cat]}>
+                      {params.map(p => <option key={p.key as string} value={p.key as string}>{p.label}（{p.unit}）</option>)}
+                    </optgroup>
+                  );
+                })}
+              </select>
+            )}
+            <label style={checkboxLabel(colors)}>
+              <input type="checkbox" checked={mapViewMode === 'bubble'} onChange={e => onMapViewModeChange(e.target.checked ? 'bubble' : 'realistic')} style={{ marginRight: '6px', cursor: 'pointer' }} />
+              {translateUI('bubbleMap', language)}
+            </label>
+            {mapViewMode === 'bubble' && (
+              <div style={{ marginLeft: '22px', marginTop: '4px', display: 'flex', gap: '6px' }}>
+                {(['circle', 'square'] as const).map(shape => (
+                  <label key={shape} style={{ display: 'flex', alignItems: 'center', fontSize: '11px', color: colors.text, cursor: 'pointer' }}>
+                    <input type="radio" name="bubbleShape" checked={bubbleShape === shape} onChange={() => onBubbleShapeChange(shape)} style={{ marginRight: '4px', cursor: 'pointer' }} />
+                    {shape === 'circle' ? translateUI('bubbleCircle', language) : translateUI('bubbleSquare', language)}
+                  </label>
+                ))}
+              </div>
+            )}
+            {mapViewMode === 'realistic' && (
+              <label style={checkboxLabel(colors)}>
+                <input type="checkbox" checked={showTrainDemo} onChange={onTrainDemoToggle} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                {translateUI('trainDemoLabel', language)}
+              </label>
+            )}
+          </div>
         )}
+
+        {/* ── 駅フィルター（デフォルト閉じ） ── */}
+        <div
+          onClick={() => setGroupFilterOpen(v => !v)}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', background: colors.surfaceElevated, marginBottom: '2px' }}
+        >
+          <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>駅フィルター</span>
+          <span style={{ fontSize: '9px', color: colors.textSecondary, transition: 'transform 0.2s', transform: groupFilterOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
+        </div>
+        {groupFilterOpen && (
+          <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
+            <label style={checkboxLabel(colors)}>
+              <input type="checkbox" checked={showTransferStationsOnly} onChange={e => onShowTransferStationsOnlyChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+              {translateUI('showOnlyTransferStations', language)}
+            </label>
+            <label style={checkboxLabel(colors)}>
+              <input type="checkbox" checked={showExpressStationsOnly} onChange={e => onShowExpressStationsOnlyChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+              {translateUI('showOnlyExpressStations', language)}
+            </label>
+            <label style={checkboxLabel(colors)}>
+              <input type="checkbox" checked={showFullRouteStations} onChange={e => onShowFullRouteStationsChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+              {translateUI('showFullRouteStations', language)}
+            </label>
+          </div>
+        )}
+
+        {/* ── 地図表示（デフォルト閉じ） ── */}
+        <div
+          onClick={() => setGroupMapOpen(v => !v)}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', background: colors.surfaceElevated, marginBottom: '2px' }}
+        >
+          <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>地図表示</span>
+          <span style={{ fontSize: '9px', color: colors.textSecondary, transition: 'transform 0.2s', transform: groupMapOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
+        </div>
+        {groupMapOpen && (
+          <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
+            <label style={checkboxLabel(colors)}>
+              <input type="checkbox" checked={showDimmedRoutes} onChange={e => onShowDimmedRoutesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+              {translateUI('showOutsideSegmentRoutes', language)}
+            </label>
+            <label style={checkboxLabel(colors)}>
+              <input type="checkbox" checked={showRouteLine} onChange={e => onShowRouteLineChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+              {translateUI('showRouteLines', language)}
+            </label>
+            <label style={checkboxLabel(colors)}>
+              <input type="checkbox" checked={showStationTooltip} onChange={e => onShowStationTooltipChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+              {translateUI('stationTooltipLabel', language)}
+            </label>
+            <label style={checkboxLabel(colors)}>
+              <input type="checkbox" checked={showOsmTiles} onChange={e => onShowOsmTilesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+              {translateUI('showMapTiles', language)}
+            </label>
+          </div>
+        )}
+
       </div>
 
       <MapConfigPanel config={mapConfig} theme={theme} onImport={onImportConfig} />
