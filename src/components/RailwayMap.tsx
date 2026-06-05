@@ -1081,13 +1081,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               const isActive = rk === activeRouteKey;
               const hasData = hasTimetableData(rk);
               const isJourney = journeyRouteKeys.has(rk);
+              const isShowing = visibleRoutes.has(rk as RouteKey);
               const routeColor = adjustRouteColorForTheme(routeColors[rk as RouteKey] ?? '#888', theme);
               return (
                 <div
                   key={rk}
                   onClick={e => {
                     e.stopPropagation();
-                    setTooltipSelectedRoute(rk);
+                    if (!isShowing) {
+                      // 非表示路線 → 即表示ON
+                      setAvailableRoutes(prev => new Set([...prev, rk as RouteKey]));
+                      setVisibleRoutes(prev => new Set([...prev, rk as RouteKey]));
+                    } else {
+                      setTooltipSelectedRoute(rk);
+                    }
                   }}
                   style={{
                     display: 'flex', alignItems: 'center', gap: '5px',
@@ -1097,6 +1104,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     borderLeft: isActive
                       ? `3px solid ${colors.primary}`
                       : isJourney ? `3px solid ${routeColor}` : '3px solid transparent',
+                    opacity: isShowing ? 1 : 0.5,
                   }}
                 >
                   <div style={{
@@ -1110,11 +1118,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     fontWeight: isJourney ? 'bold' : 'normal',
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     opacity: hasData ? 1 : 0.5,
+                    flex: 1,
                   }}>
                     {translateRoute(routeNames[rk as RouteKey] ?? rk, currentLanguage)}
                   </span>
                   {isJourney && (
-                    <span style={{ fontSize: '9px', color: colors.primary, flexShrink: 0, marginLeft: 'auto' }}>{translateUI('onboard', currentLanguage)}</span>
+                    <span style={{ fontSize: '9px', color: colors.primary, flexShrink: 0 }}>{translateUI('onboard', currentLanguage)}</span>
+                  )}
+                  {!isShowing && (
+                    <span style={{
+                      fontSize: '9px', color: routeColor, flexShrink: 0,
+                      border: `1px solid ${routeColor}`, borderRadius: '3px',
+                      padding: '0 3px', lineHeight: '14px',
+                    }}>＋表示</span>
                   )}
                 </div>
               );
@@ -1612,7 +1628,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (!viewBounds) return null;
     const { north, south, east, west } = viewBounds;
     const allStations: Array<{ name: string; lat: number; lng: number }> = [];
-    visibleRoutesData.forEach(([, stationList]) => {
+    // 表示ONの路線のみを対象にする（非表示路線の駅を枠に含めない）
+    visibleRoutesData.forEach(([routeKey, stationList]) => {
+      if (!visibleRoutes.has(routeKey as RouteKey)) return;
       (stationList as Station[]).forEach(s => {
         if (s.lat <= north && s.lat >= south && s.lng <= east && s.lng >= west) {
           allStations.push({ name: s.name, lat: s.lat, lng: s.lng });
@@ -1633,7 +1651,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const result = new Set<string>();
     for (let i = 0; i < MAX_MARKER_STATIONS; i++) result.add(allStations[i].name);
     return result;
-  }, [visibleRoutesData, viewBounds, viewCenter]);
+  }, [visibleRoutesData, visibleRoutes, viewBounds, viewCenter]);
 
   /**
    * 「どの駅を表示するか」の共有ロジック。
@@ -2687,17 +2705,28 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           const segPositions = segStations.map(s => [s.lat, s.lng]);
           return (
             <React.Fragment key={`${routeKey}-seg-${segIdx}`}>
-        {/* 透明な太い線でマウス判定を緩くする */}
+        {/* 実際に見える路線（先に描画して下層に） */}
+        {showRouteLine && (
+          <Polyline
+            positions={segPositions}
+            pathOptions={{
+              color: routeColor,
+              weight: hoveredRoute === routeKey ? 6 : 4,
+              opacity: hoveredRoute === routeKey ? 0.5 : 0.85,
+            }}
+            interactive={false}
+          />
+        )}
+        {/* 太い透明線でクリック判定を拡大（前面に描画して36px幅を有効化） */}
         <Polyline
           positions={segPositions}
-          color="transparent"
+          color={routeColor}
           weight={36}
-          opacity={0}
+          opacity={0.001}
           eventHandlers={{
             click: (e) => {
               (e.target as any)?.closeTooltip?.();
               if (tapToggleMode) {
-                // 表示切替モード: 路線の表示/非表示をトグル
                 const newVisibleRoutes = new Set(visibleRoutes);
                 if (newVisibleRoutes.has(routeKey)) {
                   newVisibleRoutes.delete(routeKey);
@@ -2734,18 +2763,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             </span>
           </Tooltip>
         </Polyline>
-        {/* 実際に見える路線 */}
-        {showRouteLine && (
-          <Polyline
-            positions={segPositions}
-            pathOptions={{
-              color: routeColor,
-              weight: hoveredRoute === routeKey ? 6 : 4,
-              opacity: hoveredRoute === routeKey ? 0.5 : 0.85,
-            }}
-            interactive={false}
-          />
-        )}
             </React.Fragment>
           );
         })}
@@ -2836,7 +2853,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             //   console.log(`Showing transfer station: ${station.name} on ${routeKey}`);
             // }
 
-            const isDetailed = showStationNames;
+            // 急行駅のみ表示モード時は駅名ラベルを強制表示（絞り込み後の駅数が少ないため）
+            const isDetailed = showStationNames || (showExpressStationsOnly && routeHasExpressMark && station.isExpress);
             const stationOpacity = visibleRoutes.has(routeKey) ? 1 : 0.3;
             // 時刻表モード有効かつ経路上の駅なら出発時刻を2行目に表示
             const timelineEntry = timetableModeEnabled
@@ -3514,9 +3532,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         }}
                         interactive={false}
                       />
-                      {/* クリック判定用の透明な太い線 */}
+                      {/* クリック判定用の太い線（前面・ほぼ透明で36px幅を有効化） */}
                       <Polyline
-                        positions={positions} color="transparent" weight={36} opacity={0}
+                        positions={positions} color={color} weight={36} opacity={0.001}
                         pathOptions={{ cursor: 'pointer' }}
                         eventHandlers={{
                           mouseover: () => setHoveredRoute(rKey),
