@@ -65,6 +65,8 @@ interface LegendRouteListProps {
   onStationLabelFontSizeChange: (v: number) => void;
   stationIconScale: number;
   onStationIconScaleChange: (v: number) => void;
+  stationSizeScale: number;
+  onStationSizeScaleChange: (v: number) => void;
   travelTimeLabelMode: 'interval' | 'cumulative';
   onTravelTimeLabelModeChange: (v: 'interval' | 'cumulative') => void;
 }
@@ -121,6 +123,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onStationLabelFontSizeChange,
   stationIconScale,
   onStationIconScaleChange,
+  stationSizeScale,
+  onStationSizeScaleChange,
   travelTimeLabelMode,
   onTravelTimeLabelModeChange,
 }) => {
@@ -238,22 +242,13 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 {translateUI('showFurigana', language)}
               </label>
             )}
-            {/* ラベルフォントサイズ */}
+            {/* 駅サイズ（ラベル・アイコン一括） */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0', marginTop: '2px' }}>
-              <span style={{ flex: 1, color: colors.textSecondary }}>{translateUI('settingsLabelSize', language)}</span>
-              <button onClick={() => onStationLabelFontSizeChange(Math.max(8, stationLabelFontSize - 1))}
-                style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
-              <span style={{ minWidth: '28px', textAlign: 'center', fontSize: '11px' }}>{stationLabelFontSize}px</span>
-              <button onClick={() => onStationLabelFontSizeChange(Math.min(20, stationLabelFontSize + 1))}
-                style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
-            </div>
-            {/* アイコンサイズ */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0' }}>
               <span style={{ flex: 1, color: colors.textSecondary }}>{translateUI('settingsIconSize', language)}</span>
-              <button onClick={() => onStationIconScaleChange(Math.max(0.5, Math.round((stationIconScale - 0.25) * 100) / 100))}
+              <button onClick={() => onStationSizeScaleChange(Math.max(0.5, Math.round((stationSizeScale - 0.1) * 10) / 10))}
                 style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
-              <span style={{ minWidth: '28px', textAlign: 'center', fontSize: '11px' }}>{stationIconScale.toFixed(2)}x</span>
-              <button onClick={() => onStationIconScaleChange(Math.min(2.0, Math.round((stationIconScale + 0.25) * 100) / 100))}
+              <span style={{ minWidth: '30px', textAlign: 'center', fontSize: '11px' }}>{stationSizeScale.toFixed(1)}x</span>
+              <button onClick={() => onStationSizeScaleChange(Math.min(2.0, Math.round((stationSizeScale + 0.1) * 10) / 10))}
                 style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
             </div>
           </div>

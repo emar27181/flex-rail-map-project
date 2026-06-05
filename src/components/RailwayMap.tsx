@@ -147,8 +147,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
   const [showStationNumbers, setShowStationNumbers] = useState(language !== 'japanese');
-  const [stationLabelFontSize, setStationLabelFontSize] = useState(11);
-  const [stationIconScale, setStationIconScale] = useState(1.0);
+  const [stationSizeScale, setStationSizeScale] = useState(1.0);
+  // 派生値（レンダリング内で都度計算）
+  const stationLabelFontSize = Math.round(11 * stationSizeScale);
+  const stationIconScale = stationSizeScale;
   const [travelTimeLabelMode, setTravelTimeLabelMode] = useState<'interval' | 'cumulative'>('interval');
   const [showOsmTiles, setShowOsmTiles] = useState(true);
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
@@ -4131,9 +4133,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     mapConfig={mapConfig}
                     onImportConfig={handleImportConfig}
                     stationLabelFontSize={stationLabelFontSize}
-                    onStationLabelFontSizeChange={setStationLabelFontSize}
+                    onStationLabelFontSizeChange={() => {}}
                     stationIconScale={stationIconScale}
-                    onStationIconScaleChange={setStationIconScale}
+                    onStationIconScaleChange={() => {}}
+                    stationSizeScale={stationSizeScale}
+                    onStationSizeScaleChange={setStationSizeScale}
                     travelTimeLabelMode={travelTimeLabelMode}
                     onTravelTimeLabelModeChange={setTravelTimeLabelMode}
                   />
