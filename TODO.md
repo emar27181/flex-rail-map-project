@@ -26,8 +26,12 @@
 
 ---
 
+### 🖱️ UI 改善
+
+- [x] **駅ツールチップの路線タップで「この路線を表示」** → **実装済み（2026-06-06）**: 非表示路線に「＋表示」バッジを追加。タップで即 visibleRoutes + availableRoutes に追加。
+
 ### 手書きで追加（後で修正しておいて）
-- ヒートマップ時の駅のツールチップの数値は例えば家賃にフォーカスして表示していても犯罪スコアとかが色付きで表示されるように
+- （完了済み→DONEに移動）
 
 
 ### 🗺️ 駅統計ヒートマップ機能（新機能ロードマップ）
@@ -68,14 +72,28 @@ Phase 3 - カスタム評価式:
 - 所要時間をルートごとの合計で表示する機能の実装
 - 駅の位置情報がずれてるものがある（例えば江ノ島電鉄の駅が海の上に表示されてる）から修正して
     - 江ノ島電鉄に限らず網羅的に調査して緯度経度が合っているか，表示がずれていないかを調査して修正して
-- 急行駅のみ表示で駅名が表示されていない
-    - 藤沢->新宿の推薦で急行駅が表示されてなかった．網羅的に調査して修正して
+- 急行駅のみ表示で駅名が表示されていない → **部分修正済み（2026-06-06）**: 中央線の急行駅は名前強制表示に修正。小田急など isExpress フラグ未設定の路線は未対応。
+    - [ ] 小田急・京急・東急など主要路線に `isExpress: true` フラグを追加して急行駅を明示する
+    - [ ] stationVisibilityFilter で route recommendation と showExpressStationsOnly を組み合わせた場合の表示漏れを調査・修正
 - 所要時間の表示を間隔の駅の中点を指すようにしてほしい
 - 紹介用のデモビデオの作成
 - 位置情報を動的に更新する（例えば1分に一回）機能の追加
 - 時刻表？自分が今載ってる電車と時刻を入れたらその位置時点を基に各駅の到着時間が可視化される機能の実装
 
 ## DONE
+
+### 2026-06-06 TODO実装
+
+- **駅ツールチップの路線タップで「この路線を表示」**: 左カラムの路線一覧で非表示路線に「＋表示」バッジを追加。タップで即 visibleRoutes + availableRoutes に追加するインタラクションを実装。
+  - 変更: `src/components/RailwayMap.tsx` 路線リスト onClick ロジック
+- **路線クリック判定を拡大**: 表示中路線の透明ヒット線 (weight:36) を色線の前面に移動し opacity:0.001 に変更。SVG の `pointer-events: visiblePainted` で透明stroke が hit-test されない問題を修正。非表示(dimmed)路線も同様に修正。
+  - 変更: `src/components/RailwayMap.tsx` 表示/非表示両路線の Polyline 描画順と opacity
+- **急行駅のみ表示モードで駅名を強制表示**: `showExpressStationsOnly && station.isExpress` のとき `isDetailed = true` に設定。
+  - 変更: `src/components/RailwayMap.tsx` isDetailed の計算式
+- **allowedStationNames のバグ修正**: 非表示路線の駅も 400 件枠に含まれ表示 ON 路線の駅が押し出される問題を修正。`visibleRoutes.has()` でフィルター。
+  - 変更: `src/components/RailwayMap.tsx` allowedStationNames useMemo
+
+---
 
 ### 2026-06-05 手書きTODOの対応
 - **ヒートマップの数値入力でゼロクリア許可**: 空欄 → `setHeatmapCustomRange(undefined)` でデフォルト値にリセット
