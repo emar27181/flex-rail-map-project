@@ -3562,8 +3562,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 />
               )}
 
-              {/* 列車位置デモ: 駅・路線より前面のカスタムペインに表示 */}
-              <Pane name="trainDemoPane" style={{ zIndex: 650 }}>
+              {/* 列車位置デモ: markerPane(600)より前面・tooltipPane(650)より後面に表示 */}
+              <Pane name="trainDemoPane" style={{ zIndex: 620 }}>
                 {showTrainDemo && MapComponents?.DivIcon && MapComponents?.Marker && trainPositions.map(t => {
                   const terminals = DEMO_DIRECTION_TERMINALS[t.lineKey];
                   const dest = terminals?.[t.direction] ?? '';
@@ -4386,9 +4386,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         mapConfig={mapConfig}
                         onImportConfig={handleImportConfig}
                         stationLabelFontSize={stationLabelFontSize}
-                        onStationLabelFontSizeChange={setStationLabelFontSize}
+                        onStationLabelFontSizeChange={() => {}}
                         stationIconScale={stationIconScale}
-                        onStationIconScaleChange={setStationIconScale}
+                        onStationIconScaleChange={() => {}}
+                        stationSizeScale={stationSizeScale}
+                        onStationSizeScaleChange={setStationSizeScale}
+                        travelTimeLabelMode={travelTimeLabelMode}
+                        onTravelTimeLabelModeChange={setTravelTimeLabelMode}
                       />
                       <LegendRouteRecommendations
                         routeRecommendations={routeRecommendations}
