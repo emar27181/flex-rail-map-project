@@ -245,7 +245,22 @@ const StationSelector: React.FC<StationSelectorProps> = ({
       onTouchStart={stopTouchPropagation}
       onTouchMove={stopTouchPropagation}
       onTouchEnd={stopTouchPropagation}
-      style={{ marginBottom: '12px', padding: '10px', border: `1px solid ${colors.border}`, borderRadius: '8px', backgroundColor: colors.surface }}
+      style={{
+        marginBottom: '8px',
+        paddingTop: '8px',
+        paddingBottom: isExpanded ? '8px' : '0',
+        paddingLeft: '8px',
+        paddingRight: '8px',
+        height: isExpanded ? 'auto' : '36px',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+        border: `1px solid ${colors.border}`,
+        borderRadius: '8px',
+        backgroundColor: isExpanded ? colors.glassOpen : colors.glassCollapsed,
+        boxShadow: `0 2px 8px ${colors.shadow}`,
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+      }}
     >
       <div 
         onClick={onToggleExpanded}
@@ -254,7 +269,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           justifyContent: 'space-between',
           alignItems: 'center',
           cursor: onToggleExpanded ? 'pointer' : 'default',
-          marginBottom: isExpanded ? '10px' : '0'
+          marginBottom: isExpanded ? '6px' : '0'
         }}
       >
         <h3 style={{ margin: '0', color: colors.text, fontSize: FS.sectionTitle, fontWeight: 'bold' }}>{translateUI('stationSelection', language)}</h3>
@@ -272,7 +287,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         <>
           <div style={{
             display: 'flex',
-            gap: '8px',
+            gap: '4px',
             alignItems: 'flex-start',
             flexDirection: 'row',
             flexWrap: 'wrap'
@@ -320,10 +335,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   placeholder={departure ? translateStation(departure.name, language) : translateUI('stationPlaceholder', language)}
                   style={{
                     width: '100%',
-                    padding: '5px 24px 5px 7px',
+                    padding: '3px 20px 3px 6px',
                     border: `2px solid #4CAF50`,
                     borderRadius: '4px',
-                    fontSize: FS.base,
+                    fontSize: FS.label,
                     boxSizing: 'border-box',
                     backgroundColor: colors.surfaceElevated,
                     color: colors.text
@@ -340,12 +355,12 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       background: 'none',
                       border: 'none',
                       cursor: 'pointer',
-                      fontSize: '18px',
+                      fontSize: '14px',
                       color: colors.textSecondary,
-                      padding: '4px 8px',
+                      padding: '2px 4px',
                       lineHeight: '1',
-                      minWidth: '32px',
-                      minHeight: '32px',
+                      minWidth: '20px',
+                      minHeight: '20px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -423,7 +438,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               justifyContent: 'flex-end'
             }}>
               {/* ラベルと同じ高さのスペーサー */}
-              <div style={{ marginBottom: '3px', height: '18px' }} />
+              <div style={{ marginBottom: '3px', height: '16px' }} />
               <button
                 onClick={() => {
                   const prevDep = departure;
@@ -438,15 +453,16 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   background: 'none',
                   border: 'none',
                   borderRadius: '50%',
-                  width: '32px',
-                  height: '32px',
+                  width: '22px',
+                  height: '22px',
                   cursor: 'pointer',
-                  fontSize: FS.sectionTitle,
+                  fontSize: FS.label,
                   color: colors.textSecondary,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  flexShrink: 0
+                  flexShrink: 0,
+                  padding: 0,
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = colors.surface; }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
@@ -498,10 +514,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   placeholder={arrival ? translateStation(arrival.name, language) : translateUI('stationPlaceholder', language)}
                   style={{
                     width: '100%',
-                    padding: '5px 24px 5px 7px',
+                    padding: '3px 20px 3px 6px',
                     border: `2px solid #f44336`,
                     borderRadius: '4px',
-                    fontSize: FS.base,
+                    fontSize: FS.label,
                     boxSizing: 'border-box',
                     backgroundColor: colors.surfaceElevated,
                     color: colors.text
@@ -518,12 +534,12 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       background: 'none',
                       border: 'none',
                       cursor: 'pointer',
-                      fontSize: '18px',
+                      fontSize: '14px',
                       color: colors.textSecondary,
-                      padding: '4px 8px',
+                      padding: '2px 4px',
                       lineHeight: '1',
-                      minWidth: '32px',
-                      minHeight: '32px',
+                      minWidth: '20px',
+                      minHeight: '20px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -579,12 +595,12 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           {/* 出発時刻 */}
           {onDepartureTimeChange && (
             <div style={{
-              marginTop: '10px',
+              marginTop: '6px',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '5px',
             }}>
-              <label style={{ fontSize: FS.base, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
+              <label style={{ fontSize: FS.label, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
                 {translateUI('departureTime', language)}
               </label>
               <input
@@ -594,8 +610,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 style={{
                   border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
-                  padding: '5px 8px',
-                  fontSize: FS.base,
+                  padding: '0 3px',
+                  height: '22px',
+                  boxSizing: 'border-box',
+                  fontSize: FS.label,
                   backgroundColor: colors.surfaceElevated,
                   color: colors.text,
                   cursor: 'pointer',
@@ -611,8 +629,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 style={{
                   border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
-                  padding: '5px 8px',
-                  fontSize: FS.label,
+                  padding: '0 5px',
+                  height: '22px',
+                  boxSizing: 'border-box',
+                  fontSize: FS.helper,
                   backgroundColor: colors.surface,
                   color: colors.textSecondary,
                   cursor: 'pointer',

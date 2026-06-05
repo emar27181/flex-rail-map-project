@@ -7,6 +7,7 @@
  * - 底部に張り付かず、左下にアイコン＋名前のボタンを縦に配置。
  * - ボタンをタップするとツールチップ（ポップオーバー）が展開。
  * - 別ボタンをタップ or 背景をタップで閉じる。
+ * - ポップオーバー上端のドラッグハンドルで高さ調整可能。
  * - 寸法はすべて名前付き定数で管理（マジックナンバー禁止）。
  */
 
@@ -30,8 +31,11 @@ const GROUP_LEFT = 10;
 /** ポップオーバーの最大幅 */
 const POPOVER_MAX_W = 320;
 
-/** ポップオーバーの最大高さ */
+/** ポップオーバーのデフォルト最大高さ */
 const POPOVER_MAX_H = '65dvh';
+
+/** ポップオーバーの最小高さ（px） */
+const POPOVER_MIN_H = 120;
 
 /**
  * position: fixed + high z-index で確実に最前面に出す。
@@ -69,8 +73,11 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
 }) => {
   const colors = getThemeColors(theme);
   const [openKey, setOpenKey] = useState<PopoverKey | null>(null);
+  const [panelHeight, setPanelHeight] = useState<number | null>(null);
   const groupRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef<{ startY: number; startH: number } | null>(null);
 
   // CSS を一度だけ注入
   useEffect(() => {
@@ -89,6 +96,11 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
         background: rgba(128,128,128,0.35);
         border-radius: 2px;
       }
+      .mbp-drag-handle {
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+      }
     `;
     document.head.appendChild(el);
   }, []);
@@ -103,6 +115,33 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
   }, []);
 
   const close = useCallback(() => setOpenKey(null), []);
+
+  // ── ドラッグハンドルのタッチ操作 ──────────────────────────────────
+  const handleDragStart = useCallback((e: React.TouchEvent) => {
+    e.stopPropagation();
+    const touch = e.touches[0];
+    const el = popoverRef.current;
+    if (!el) return;
+    dragStartRef.current = {
+      startY: touch.clientY,
+      startH: el.getBoundingClientRect().height,
+    };
+  }, []);
+
+  const handleDragMove = useCallback((e: React.TouchEvent) => {
+    if (!dragStartRef.current) return;
+    e.stopPropagation();
+    const touch = e.touches[0];
+    const delta = dragStartRef.current.startY - touch.clientY;
+    const maxH = window.innerHeight * 0.9;
+    const newH = Math.max(POPOVER_MIN_H, Math.min(maxH, dragStartRef.current.startH + delta));
+    setPanelHeight(newH);
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    dragStartRef.current = null;
+  }, []);
+  // ─────────────────────────────────────────────────────────────────
 
   const safeBottom = safeAreaBottom + 10; // ボタンを少し上に浮かせる
 
@@ -126,6 +165,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
       {/* ポップオーバー */}
       {openKey !== null && activeButton && (
         <div
+          ref={popoverRef}
           role="dialog"
           aria-label={activeButton.label}
           style={{
@@ -133,9 +173,13 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
             bottom: safeBottom + BTN_H * buttons.length + BTN_GAP * (buttons.length - 1) + 8,
             left: GROUP_LEFT,
             width: `min(${POPOVER_MAX_W}px, calc(100vw - ${GROUP_LEFT * 2}px))`,
-            maxHeight: POPOVER_MAX_H,
+            ...(panelHeight !== null
+              ? { height: panelHeight }
+              : { maxHeight: POPOVER_MAX_H }),
             zIndex: Z_POPOVER,
-            backgroundColor: colors.surfaceElevated,
+            backgroundColor: colors.glassOpen,
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
             border: `1px solid ${colors.border}`,
             borderRadius: 12,
             boxShadow: `0 4px 24px ${colors.shadow}`,
@@ -143,12 +187,35 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
             flexDirection: 'column',
           }}
         >
+          {/* ドラッグハンドル */}
+          <div
+            className="mbp-drag-handle"
+            onTouchStart={handleDragStart}
+            onTouchMove={handleDragMove}
+            onTouchEnd={handleDragEnd}
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: '6px 0 2px',
+              flexShrink: 0,
+              cursor: 'ns-resize',
+            }}
+          >
+            <div style={{
+              width: 36,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: colors.border,
+            }} />
+          </div>
+
           {/* ポップオーバーヘッダー */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '10px 14px',
+            padding: '6px 14px 8px',
             borderBottom: `1px solid ${colors.border}`,
             flexShrink: 0,
           }}>
@@ -213,7 +280,9 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
                 border: `1px solid ${isActive ? colors.primary : colors.border}`,
                 borderRadius: 10,
                 cursor: 'pointer',
-                backgroundColor: isActive ? colors.primary : colors.surfaceElevated,
+                backgroundColor: isActive ? colors.primary : colors.glassButton,
+                backdropFilter: isActive ? 'none' : 'blur(8px)',
+                WebkitBackdropFilter: isActive ? 'none' : 'blur(8px)',
                 color: isActive ? '#fff' : colors.text,
                 fontSize: 13,
                 fontWeight: 'bold',
