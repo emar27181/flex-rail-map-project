@@ -997,29 +997,36 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   {filledParams.map(p => {
                     const v = stats![p.key] as number;
                     const isActive = p.key === heatmapParam;
+                    const { min: pMin, max: pMax } = getParamRange(p.key);
+                    const pNorm = (pMax > pMin) ? (v - pMin) / (pMax - pMin) : null;
+                    const pColor = pNorm !== null ? heatValueToColor(pNorm) : HEATMAP_NO_DATA_COLOR;
                     const src = PARAM_DATA_SOURCES[p.key];
                     const url = src?.url;
                     const labelEl = url ? (
                       <a href={url} target="_blank" rel="noopener noreferrer"
                         onClick={e => e.stopPropagation()}
-                        style={{ color: isActive ? dotColor : '#4a90d9', textDecoration: 'underline', cursor: 'pointer' }}>
+                        style={{ color: isActive ? pColor : colors.textSecondary, textDecoration: 'underline', cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {p.label}
                       </a>
                     ) : (
-                      <span style={{ color: colors.textSecondary }}>{p.label}</span>
+                      <span style={{ color: colors.textSecondary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.label}</span>
                     );
                     return (
                       <div key={String(p.key)} style={{
-                        display: 'flex', justifyContent: 'space-between',
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                         fontSize: '10px',
-                        background: isActive ? `${dotColor}22` : 'transparent',
+                        background: isActive ? `${pColor}22` : 'transparent',
                         borderRadius: '2px',
-                        padding: '0 2px',
+                        padding: '1px 2px',
+                        gap: '3px',
                       }}>
                         {labelEl}
-                        <span style={{ color: isActive ? dotColor : colors.text, fontWeight: isActive ? 'bold' : 'normal' }}>
-                          {v}{p.unit ? ` ${p.unit}` : ''}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flexShrink: 0 }}>
+                          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: pColor, flexShrink: 0 }} />
+                          <span style={{ color: pColor, fontWeight: isActive ? 'bold' : 'normal' }}>
+                            {v}{p.unit ? ` ${p.unit}` : ''}
+                          </span>
+                        </div>
                       </div>
                     );
                   })}
@@ -1558,17 +1565,25 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const stationVisibilityFilter = useMemo(() => {
     // 駅名 → その駅が属するルートのうち最初のもの（駅番号取得用）
     const stationRouteMap = new Map<string, RouteKey>();
+    const routesWithExpressMark = new Set<RouteKey>();
     for (const [rk, stationList] of visibleRoutesData) {
       for (const s of stationList as Station[]) {
         if (!stationRouteMap.has(s.name)) stationRouteMap.set(s.name, rk as RouteKey);
+      }
+      if ((stationList as Station[]).some(s => s.isExpress)) {
+        routesWithExpressMark.add(rk as RouteKey);
       }
     }
 
     const shouldShow = (station: Station): boolean => {
       // 乗換駅のみ
       if (showTransferStationsOnly && !transferStations.has(station.name)) return false;
-      // 急行駅のみ
-      if (showExpressStationsOnly && !station.isExpress && !transferStations.has(station.name)) return false;
+      // 急行駅のみ（急行データがある路線のみ適用）
+      if (showExpressStationsOnly) {
+        const routeKey = stationRouteMap.get(station.name);
+        const hasExpressMark = routeKey ? routesWithExpressMark.has(routeKey) : false;
+        if (hasExpressMark && !station.isExpress && !transferStations.has(station.name)) return false;
+      }
       // 時間フィルター
       if (timeFilterEnabled && stationsWithinTime.length > 0) {
         if (!stationsWithinTime.some(s => s.station.name === station.name)) return false;
@@ -2525,6 +2540,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const renderRoute = (routeKey: RouteKey, stations: Station[]) => {
     if (!visibleRoutes.has(routeKey)) return null;
 
+    // この路線に急行データがあるか（ない場合 showExpressStationsOnly フィルターをスキップ）
+    const routeHasExpressMark = stations.some(s => s.isExpress);
+
     // 時間フィルター有効時に実際に表示される駅を記録するためのセット
     const currentlyDisplayedStations = new Set<string>();
 
@@ -2670,7 +2688,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             }
             // 特別駅も共有フィルター適用（allowedStationNames は免除済みなので除く）
             if (showTransferStationsOnly && !transferStations.has(station.name)) return null;
-            if (showExpressStationsOnly && !station.isExpress && !transferStations.has(station.name)) return null;
+            if (showExpressStationsOnly && routeHasExpressMark && !station.isExpress && !transferStations.has(station.name)) return null;
             if (timeFilterEnabled && stationsWithinTime.length > 0) {
               const stationWithTime = stationsWithinTime.find(sWithTime => sWithTime.station.name === station.name);
               if (!stationWithTime) return null;
@@ -2725,7 +2743,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             // 共有フィルターロジック（時間フィルター・乗換・急行を一括適用）
             // ※ allowedStationNames は上で既にチェック済み
             if (showTransferStationsOnly && !isTransferStation) return null;
-            if (showExpressStationsOnly && !station.isExpress && !isTransferStation) return null;
+            if (showExpressStationsOnly && routeHasExpressMark && !station.isExpress && !isTransferStation) return null;
             if (timeFilterEnabled && stationsWithinTime.length > 0) {
               const inRange = stationsWithinTime.find(s => s.station.name === station.name);
               if (!inRange) return null;
