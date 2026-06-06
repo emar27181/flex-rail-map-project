@@ -233,7 +233,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // バブルマップの形状（円 or 四角）
   const [bubbleShape, setBubbleShape] = useState<'circle' | 'square'>('circle');
   // バブルマップの地理的最大半径（メートル）。値が最大の駅がこの半径になる
-  const [bubbleMaxRadiusM, setBubbleMaxRadiusM] = useState(5000);
+  const [bubbleMaxRadiusM, setBubbleMaxRadiusM] = useState(1250);
   const [heatmapCustomRange, setHeatmapCustomRange] = useState<{ min: number; max: number } | undefined>(undefined);
   const [heatmapParamSelectorOpen, setHeatmapParamSelectorOpen] = useState(false);
   const [heatmapRangeFilterEnabled, setHeatmapRangeFilterEnabled] = useState(false);
@@ -936,7 +936,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const isMobileView = vw < 500;
     // 幅はビューポートに収まるよう上限を設定
     const TW = Math.min(360, vw - MARGIN * 2);
-    const LEFT_W = Math.min(120, Math.floor(TW * 0.35));
+    const LEFT_W = Math.min(160, Math.floor(TW * 0.48));
     // モバイルでは画面中央寄せ、PCはクリック位置基準
     let x: number;
     if (isMobileView) {
@@ -1220,7 +1220,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           </div>
 
           {/* 右カラム: 時刻表 */}
-          <div style={{ flex: 1, minWidth: '180px', overflowY: 'auto' }}>
+          <div style={{ flex: 1, minWidth: '120px', overflowY: 'auto' }}>
             {activeRouteKey && hasTimetableData(activeRouteKey) ? (
               <>
                 <div style={{
@@ -1814,8 +1814,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     heatmapRangeFilterEnabled, heatmapEnabled, heatmapParam, heatmapCustomRange,
   ]);
 
-  // バブルマップ用: stationVisibilityFilter を通過した駅 + 中心から近い順 最大300件
-  const MAX_BUBBLE_STATIONS = 120;
+  // バブルマップ用: stationVisibilityFilter を通過した駅 + 中心から近い順 最大50件
+  const MAX_BUBBLE_STATIONS = 50;
   const bubbleStations = useMemo(() => {
     if (mapViewMode !== 'bubble') return [];
     const { shouldShow } = stationVisibilityFilter;
@@ -2688,13 +2688,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         // 地理的半径: 値に比例した実距離（最大値 → maxRadiusM）
         const t = (s.value - minV) / range;
         const r_meters = t * maxRadiusM;
-        let r = Math.max(6, r_meters * pixelsPerMeter);
+        // 元の地理半径（ピクセル）。最低 MIN_R px 以上を目標とする
+        const MIN_R = 5;
+        let r = Math.max(MIN_R, r_meters * pixelsPerMeter);
         // 重なり防止：先に配置済みの円との距離で最大半径を制限
         for (const p of placed) {
-          const maxR = Math.hypot(p.x - pt.x, p.y - pt.y) - p.r - 2;
+          const dist = Math.hypot(p.x - pt.x, p.y - pt.y);
+          const maxR = dist - p.r - 1; // 1px の隙間を確保
           if (maxR < r) r = maxR;
         }
-        const finalR = Math.max(r, 4);
+        // 半径が 2px 未満になる場合はその駅をスキップ（完全に埋もれている）
+        if (r < 2) continue;
+        const finalR = Math.max(r, 3);
         placed.push({ x: pt.x, y: pt.y, r: finalR });
         const color = getStationHeatColor(s.name, param as any, customRange)
           ?? '#3366cc';
