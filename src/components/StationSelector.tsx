@@ -253,7 +253,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         paddingRight: '8px',
         height: isExpanded ? 'auto' : '36px',
         boxSizing: 'border-box',
-        overflow: 'hidden',
+        overflow: (showDepartureResults || showArrivalResults) ? 'visible' : 'hidden',
         border: `1px solid ${colors.border}`,
         borderRadius: '8px',
         backgroundColor: isExpanded ? colors.glassOpen : colors.glassCollapsed,
