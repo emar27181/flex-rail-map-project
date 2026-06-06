@@ -144,6 +144,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 表示モードの管理
   const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
   const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
+  const [showStationTierBadges, setShowStationTierBadges] = useState(true); // 乗り入れ路線数リング表示
   const [showTravelTimes, setShowTravelTimes] = useState(false);
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
@@ -1439,6 +1440,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     // 路線数ベースのティア（列車種別モードでない場合）
     if (!selectedTrainType) {
+      // ティア表示がオフのとき or 1路線はリングなし
+      if (!showStationTierBadges) {
+        return { borderWidth: 0, borderStyle: 'none' as const, borderColor: 'transparent', description: '', visualLevel: 'basic' as const };
+      }
       const routeCount = stationRouteCountMap.get(stationName) ?? 1;
       const gap = theme === 'dark' ? '#1a1a1a' : 'white';
       if (routeCount <= 1) {
@@ -1485,7 +1490,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       ...baseStyle,
       description: `${selectedTrainType}停車 (${baseStyle.description})`
     };
-  }, [selectedTrainType, getSimplifiedStationStops, departure, arrival, stationRouteCountMap, routeColors, theme]);
+  }, [selectedTrainType, getSimplifiedStationStops, departure, arrival, stationRouteCountMap, routeColors, theme, showStationTierBadges]);
 
   // 路線別の利用可能な列車種別を取得する関数
   const getAvailableTrainTypes = useCallback((routeKey: RouteKey) => {
@@ -4245,6 +4250,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onBubbleShapeChange={setBubbleShape}
                     bubbleMaxRadiusM={bubbleMaxRadiusM}
                     onBubbleMaxRadiusMChange={setBubbleMaxRadiusM}
+                    showStationTierBadges={showStationTierBadges}
+                    onShowStationTierBadgesChange={setShowStationTierBadges}
                     showStationTooltip={showStationTooltip}
                     onShowStationTooltipChange={setShowStationTooltip}
                     showFullRouteStations={showFullRouteStations}
@@ -4488,7 +4495,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onBubbleShapeChange={setBubbleShape}
                         bubbleMaxRadiusM={bubbleMaxRadiusM}
                         onBubbleMaxRadiusMChange={setBubbleMaxRadiusM}
-                        showStationTooltip={showStationTooltip}
+                        showStationTierBadges={showStationTierBadges}
+                    onShowStationTierBadgesChange={setShowStationTierBadges}
+                    showStationTooltip={showStationTooltip}
                         onShowStationTooltipChange={setShowStationTooltip}
                         showFullRouteStations={showFullRouteStations}
                         onShowFullRouteStationsChange={setShowFullRouteStations}

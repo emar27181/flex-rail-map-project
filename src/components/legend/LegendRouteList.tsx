@@ -55,6 +55,8 @@ interface LegendRouteListProps {
   bubbleMaxRadiusM: number;
   onBubbleMaxRadiusMChange: (v: number) => void;
   showLatLngGrid?: boolean;
+  showStationTierBadges: boolean;
+  onShowStationTierBadgesChange: (v: boolean) => void;
   showStationTooltip: boolean;
   onShowStationTooltipChange: (v: boolean) => void;
   showFullRouteStations: boolean;
@@ -115,6 +117,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onBubbleShapeChange,
   bubbleMaxRadiusM,
   onBubbleMaxRadiusMChange,
+  showStationTierBadges,
+  onShowStationTierBadgesChange,
   showStationTooltip,
   onShowStationTooltipChange,
   showFullRouteStations,
@@ -291,6 +295,10 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
               </select>
             )}
             <label style={checkboxLabel(colors)}>
+              <input type="checkbox" checked={mapViewMode === 'schematic'} onChange={e => onMapViewModeChange(e.target.checked ? 'schematic' : 'realistic')} style={{ marginRight: '6px', cursor: 'pointer' }} />
+              路線図表示 <span style={{ fontSize: '9px', color: colors.textSecondary, marginLeft: '3px' }}>(実装中)</span>
+            </label>
+            <label style={checkboxLabel(colors)}>
               <input type="checkbox" checked={mapViewMode === 'bubble'} onChange={e => onMapViewModeChange(e.target.checked ? 'bubble' : 'realistic')} style={{ marginRight: '6px', cursor: 'pointer' }} />
               {translateUI('bubbleMap', language)}
             </label>
@@ -370,6 +378,10 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             <label style={checkboxLabel(colors)}>
               <input type="checkbox" checked={showRouteLine} onChange={e => onShowRouteLineChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
               {translateUI('showRouteLines', language)}
+            </label>
+            <label style={checkboxLabel(colors)}>
+              <input type="checkbox" checked={showStationTierBadges} onChange={e => onShowStationTierBadgesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+              乗換強調表示
             </label>
             <label style={checkboxLabel(colors)}>
               <input type="checkbox" checked={showStationTooltip} onChange={e => onShowStationTooltipChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />

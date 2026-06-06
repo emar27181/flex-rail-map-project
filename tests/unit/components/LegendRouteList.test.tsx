@@ -87,6 +87,8 @@ const minimalProps = {
   onBubbleShapeChange: noop,
   bubbleMaxRadiusM: 5000,
   onBubbleMaxRadiusMChange: noop,
+  showStationTierBadges: true,
+  onShowStationTierBadgesChange: noopBool,
   showStationTooltip: false,
   onShowStationTooltipChange: noopBool,
   showFullRouteStations: true,
