@@ -1,0 +1,179 @@
+---
+const title = "東京・首都圏の家賃が安い路線・駅ランキング【2025年版】";
+const description = "東京・首都圏の路線別1K平均家賃を比較。JR・東京メトロ・私鉄ごとに家賃相場をまとめ、インタラクティブな路線図ヒートマップで視覚的に確認できます。";
+const ogImage = "/icon_flex_rail_way_map.png";
+const siteUrl = "https://flex-railway-map.netlify.app";
+---
+
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title} | Flex Rail Map</title>
+  <meta name="description" content={description} />
+  <meta name="keywords" content="東京 家賃 沿線 比較,首都圏 住みやすい 路線,1K 家賃 安い 駅,東京 引っ越し 路線,沿線 家賃相場 2025" />
+  <link rel="canonical" href={`${siteUrl}/articles/tokyo-rent-by-route`} />
+
+  <!-- OGP -->
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content={`${siteUrl}/articles/tokyo-rent-by-route`} />
+  <meta property="og:image" content={`${siteUrl}${ogImage}`} />
+  <meta name="twitter:card" content="summary" />
+
+  <!-- Google Ads / Verification（他ページと統一） -->
+  <meta name="google-site-verification" content="uyjBT9z6vOnpxn6lM6YnxbI6R4jLSDIAboC8zo1slhM" />
+  <meta name="google-adsense-account" content="ca-pub-2444529114040977" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2444529114040977" crossorigin="anonymous"></script>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/icon_flex_rail_way_map.png" />
+
+  <!-- JSON-LD 構造化データ -->
+  <script type="application/ld+json">
+  {JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": title,
+    "description": description,
+    "datePublished": "2025-06-06",
+    "dateModified": "2025-06-06",
+    "author": { "@type": "Organization", "name": "Flex Rail Map Project" },
+    "publisher": { "@type": "Organization", "name": "Flex Rail Map Project", "logo": { "@type": "ImageObject", "url": `${siteUrl}${ogImage}` } }
+  })}
+  </script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 16px 20px 60px;
+      color: #222;
+      line-height: 1.8;
+      font-size: 16px;
+    }
+    h1 { font-size: 1.7rem; line-height: 1.4; margin-bottom: 8px; }
+    h2 { font-size: 1.25rem; margin-top: 2.2em; border-left: 4px solid #2196F3; padding-left: 10px; }
+    h3 { font-size: 1.05rem; margin-top: 1.6em; color: #333; }
+    .meta { color: #888; font-size: 0.85rem; margin-bottom: 1.5em; }
+    table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 0.9rem; }
+    th { background: #2196F3; color: #fff; padding: 8px 10px; text-align: left; }
+    td { padding: 8px 10px; border-bottom: 1px solid #e0e0e0; }
+    tr:nth-child(even) td { background: #f5f5f5; }
+    .highlight { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 14px; margin: 1.2em 0; border-radius: 0 4px 4px 0; }
+    .cta-box {
+      background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%);
+      color: #fff;
+      padding: 24px 20px;
+      border-radius: 10px;
+      margin: 2em 0;
+      text-align: center;
+    }
+    .cta-box h3 { color: #fff; margin-top: 0; }
+    .cta-box p { margin: 8px 0; opacity: 0.9; font-size: 0.95rem; }
+    .cta-btn {
+      display: inline-block;
+      background: #fff;
+      color: #1565C0;
+      font-weight: bold;
+      padding: 12px 28px;
+      border-radius: 6px;
+      text-decoration: none;
+      margin-top: 12px;
+      font-size: 1rem;
+    }
+    .cta-btn:hover { background: #e3f2fd; }
+    nav { margin-bottom: 1.5em; font-size: 0.85rem; }
+    nav a { color: #1976D2; text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<nav><a href="/">← トップに戻る</a></nav>
+
+<h1>東京・首都圏の家賃が安い路線・駅ランキング【2025年版】</h1>
+<p class="meta">公開日: 2025年6月 ｜ カテゴリ: 引っ越し・沿線比較</p>
+
+<p>
+  東京での一人暮らしを検討しているなら、<strong>どの路線・駅の家賃が安いか</strong>は最重要ポイントです。
+  都心へのアクセスを確保しながら家賃を抑えるには、路線選びが鍵になります。
+  本記事では首都圏の路線別1K平均家賃を比較し、コスパの良いエリアをわかりやすく解説します。
+</p>
+
+<div class="highlight">
+  💡 <strong>この記事のポイント</strong><br />
+  路線別・駅別の家賃をインタラクティブな路線図でビジュアルに比較できます。下のマップツールも合わせてご活用ください。
+</div>
+
+<h2>路線別 1K平均家賃の目安（2025年）</h2>
+
+<p>以下は主要路線の1K（専有面積20〜30㎡）の月額家賃の目安です。駅や物件によって大きく異なりますが、沿線の相場感の参考にしてください。</p>
+
+<table>
+  <thead>
+    <tr><th>路線</th><th>1K平均家賃（目安）</th><th>特徴</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>山手線（全線）</td><td>12〜18万円</td><td>都心直結、高め</td></tr>
+    <tr><td>中央線（三鷹〜立川）</td><td>7〜10万円</td><td>郊外でコスパ良好</td></tr>
+    <tr><td>小田急線（新宿〜本厚木）</td><td>6〜9万円</td><td>急行で新宿30分圏</td></tr>
+    <tr><td>東急田園都市線</td><td>9〜13万円</td><td>おしゃれ沿線、やや高め</td></tr>
+    <tr><td>京急線（横浜〜川崎方面）</td><td>6〜9万円</td><td>横浜アクセス良好</td></tr>
+    <tr><td>京成本線</td><td>5〜8万円</td><td>下町エリア、低め</td></tr>
+    <tr><td>南武線（川崎〜立川）</td><td>6〜9万円</td><td>川崎・立川の中間帯</td></tr>
+    <tr><td>つくばエクスプレス</td><td>6〜10万円</td><td>新しい路線・快適</td></tr>
+  </tbody>
+</table>
+
+<p class="meta">※ SUUMO・Homes.co.jp などの掲載物件をもとにした概算値です。実際の物件とは異なる場合があります。</p>
+
+<h2>家賃を抑えたいなら「都心から2〜3駅外す」が基本</h2>
+
+<p>山手線の主要駅（新宿・渋谷・池袋など）は家賃が最も高く、1Kで15万円を超えることも珍しくありません。しかし<strong>急行・特急停車駅から2〜3駅離れると、家賃が3〜5万円下がる</strong>ケースが多いです。</p>
+
+<h3>コスパが高いエリア例</h3>
+<ul>
+  <li><strong>中央線沿線（国分寺・立川）</strong>：新宿まで30〜40分、7〜9万円台が狙える</li>
+  <li><strong>小田急線沿線（登戸・向ヶ丘遊園）</strong>：新宿まで25〜30分、7〜8万円台</li>
+  <li><strong>京急線沿線（川崎・横浜寄り）</strong>：都心アクセスよし、6〜8万円台</li>
+  <li><strong>常磐線沿線（松戸・柏）</strong>：上野・秋葉原まで30〜40分、5〜7万円台</li>
+</ul>
+
+<h2>路線選びのチェックポイント</h2>
+
+<p>家賃だけでなく、以下の観点から路線を選ぶとミスマッチが減ります。</p>
+
+<ul>
+  <li>🚉 <strong>通勤時間</strong>：急行・快速があるかで30分以上変わることも</li>
+  <li>🏪 <strong>生活利便性</strong>：駅前のスーパー・コンビニ数</li>
+  <li>🔒 <strong>治安</strong>：犯罪件数・夜間の安心感</li>
+  <li>🌿 <strong>緑地・静かさ</strong>：子育て・静かな環境を求める場合</li>
+  <li>💰 <strong>物価水準</strong>：飲食・日用品の価格帯</li>
+</ul>
+
+<div class="cta-box">
+  <h3>🗺️ 路線図ヒートマップで家賃・治安・利便性を一目で比較</h3>
+  <p>Flex Rail Map の<strong>ヒートマップ機能</strong>を使えば、家賃・人口密度・飲食店数・治安スコアなど<br />複数の指標を路線図上でカラー表示して比較できます。</p>
+  <p>引っ越し先を探している方は、ぜひインタラクティブマップで理想の沿線を見つけてみてください。</p>
+  <a href="/" class="cta-btn">路線図ヒートマップを開く →</a>
+</div>
+
+<h2>まとめ</h2>
+
+<p>
+  東京・首都圏の家賃は路線・駅によって大きく異なります。
+  都心アクセスを確保しながら家賃を抑えるには、<strong>急行停車駅から少し離れた駅</strong>が狙い目です。
+  また家賃だけでなく、治安・利便性・通勤時間を総合的に比較することが、後悔しない引っ越しにつながります。
+</p>
+
+<p>Flex Rail Map のヒートマップ機能では、これらの指標を路線図上でまとめて可視化できます。ぜひ活用してみてください。</p>
+
+<nav style="margin-top: 3em; padding-top: 1em; border-top: 1px solid #e0e0e0; font-size: 0.9rem;">
+  <a href="/">← トップ（インタラクティブ路線図）へ戻る</a>
+</nav>
+
+</body>
+</html>
