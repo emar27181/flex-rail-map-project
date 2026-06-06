@@ -2204,7 +2204,7 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Station"
   },
   detailSettings: {
-    japanese: "詳細設定",
+    japanese: "設定",
     english: "Settings"
   },
   minutesSuffix: {
