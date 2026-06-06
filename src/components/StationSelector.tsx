@@ -435,10 +435,11 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'flex-end'
+              justifyContent: 'flex-end',
+              paddingBottom: '2px',
             }}>
-              {/* ラベルと同じ高さのスペーサー */}
-              <div style={{ marginBottom: '3px', height: '16px' }} />
+              {/* ラベル (line-height≒18px) + margin-bottom 3px 分のオフセット */}
+              <div style={{ height: '21px' }} />
               <button
                 onClick={() => {
                   const prevDep = departure;

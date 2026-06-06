@@ -187,7 +187,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
             flexDirection: 'column',
           }}
         >
-          {/* ドラッグハンドル */}
+          {/* ドラッグハンドル（タップ判定を広く） */}
           <div
             className="mbp-drag-handle"
             onTouchStart={handleDragStart}
@@ -197,15 +197,15 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              padding: '6px 0 2px',
+              padding: '12px 0 8px',
               flexShrink: 0,
               cursor: 'ns-resize',
             }}
           >
             <div style={{
-              width: 36,
-              height: 4,
-              borderRadius: 2,
+              width: 48,
+              height: 5,
+              borderRadius: 3,
               backgroundColor: colors.border,
             }} />
           </div>

@@ -1600,7 +1600,7 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Arrival"
   },
   stationPlaceholder: {
-    japanese: "駅名を入力",
+    japanese: "駅名入力",
     english: "Enter station name"
   },
   swapStations: {
@@ -2285,7 +2285,7 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Change display"
   },
   heatmapRangeFilter: {
-    japanese: "レンジ内のみ表示",
+    japanese: "範囲内のみ表示",
     english: "Show in-range only"
   },
   heatmapGradientLow: {
