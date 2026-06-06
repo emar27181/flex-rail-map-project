@@ -109,6 +109,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [viewBounds, setViewBounds] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
   const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
   const [availableRoutes, setAvailableRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
+  // 路線の描画順（先頭=背面、末尾=最前面）
+  const [routeOrder, setRouteOrder] = useState<RouteKey[]>(() => Object.keys(routes) as RouteKey[]);
   const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [MapComponents, setMapComponents] = useState<any>(null);
@@ -150,10 +152,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showFurigana, setShowFurigana] = useState(false);
   const [showStationNumbers, setShowStationNumbers] = useState(language !== 'japanese');
   const [stationSizeScale, setStationSizeScale] = useState(1.0);
+  const [routeLineWidth, setRouteLineWidth] = useState(3); // 路線の線の太さ（デフォルト3px）
   // 派生値（レンダリング内で都度計算）
   const stationLabelFontSize = Math.round(11 * stationSizeScale);
   const stationIconScale = stationSizeScale;
-  const [travelTimeLabelMode, setTravelTimeLabelMode] = useState<'interval' | 'cumulative'>('interval');
+  const [travelTimeLabelMode, setTravelTimeLabelMode] = useState<'interval' | 'cumulative'>('interval'); // 累積は実装中
   const [showOsmTiles, setShowOsmTiles] = useState(true);
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   const [tapToggleMode, setTapToggleMode] = useState(true);
@@ -1294,8 +1297,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // テキスト幅を文字種別考慮で推定（ASCII約7px, 日本語約12px, パディング12px）
   const estimateTextWidth = (text: string): number => {
-    let w = 6; // padding 1px 3px → 左右3px×2=6px
-    for (const ch of text) w += ch.charCodeAt(0) > 127 ? 12 : 7;
+    const scale = stationLabelFontSize / 11;
+    let w = Math.round(6 * scale); // padding
+    for (const ch of text) w += Math.round((ch.charCodeAt(0) > 127 ? 12 : 7) * scale);
     return w;
   };
 
@@ -1721,6 +1725,28 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return keys.size > 0 ? keys : null;
   }, [departure, arrival, highlightedRouteKeys, routeRecommendations]);
 
+  // 累積所要時間（乗り換えを跨いだ全体累積）: 選択ルートの全セグメントを走破
+  const globalCumulativeTimeMap = useMemo(() => {
+    if (!departure || !selectedRouteIndices || selectedRouteIndices.size === 0 || routeRecommendations.length === 0) {
+      return new Map<string, number>();
+    }
+    const selectedIdx = [...selectedRouteIndices][0];
+    const route = routeRecommendations[selectedIdx];
+    if (!route) return new Map<string, number>();
+
+    const map = new Map<string, number>();
+    let t = 0;
+    for (const seg of route.segments) {
+      for (let i = 0; i < seg.stations.length; i++) {
+        const name = seg.stations[i].name;
+        if (!map.has(name)) map.set(name, t);
+        if (i < seg.stations.length - 1) t += seg.stations[i].timeToNext || 3;
+      }
+      // 最後の駅（次セグメントの乗換駅）は既に t に反映済み
+    }
+    return map;
+  }, [selectedRouteIndices, routeRecommendations, departure]);
+
   // レンダリング最適化：表示する路線のデータを準備
   const visibleRoutesData = useMemo(() => {
     // availableRoutes状態に基づいて凡例に表示する路線を決定
@@ -1745,21 +1771,35 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         }
       });
     });
-    if (allStations.length <= MAX_MARKER_STATIONS) {
-      // bounds内が上限以下なら全部許可
-      return new Set(allStations.map(s => s.name));
+
+    // 範囲内のみ表示が ON のとき: 上限計算を範囲を通過した駅のみで行う
+    const candidateStations = (heatmapRangeFilterEnabled && heatmapEnabled)
+      ? allStations.filter(s => {
+          const stats = stationStatsData[s.name];
+          const val = stats ? (stats[heatmapParam] as number | undefined) : undefined;
+          if (val === undefined) return false;
+          const { min: dMin, max: dMax } = getParamRange(heatmapParam);
+          const rMin = heatmapCustomRange?.min ?? dMin;
+          const rMax = heatmapCustomRange?.max ?? dMax;
+          return val >= rMin && val <= rMax;
+        })
+      : allStations;
+
+    if (candidateStations.length <= MAX_MARKER_STATIONS) {
+      return new Set(candidateStations.map(s => s.name));
     }
     // 上限超過時は中心に近い順で絞る
     const [cLat, cLng] = viewCenter;
-    allStations.sort((a, b) => {
+    candidateStations.sort((a, b) => {
       const da = (a.lat - cLat) ** 2 + (a.lng - cLng) ** 2;
       const db = (b.lat - cLat) ** 2 + (b.lng - cLng) ** 2;
       return da - db;
     });
     const result = new Set<string>();
-    for (let i = 0; i < MAX_MARKER_STATIONS; i++) result.add(allStations[i].name);
+    for (let i = 0; i < MAX_MARKER_STATIONS; i++) result.add(candidateStations[i].name);
     return result;
-  }, [visibleRoutesData, visibleRoutes, viewBounds, viewCenter]);
+  }, [visibleRoutesData, visibleRoutes, viewBounds, viewCenter,
+      heatmapRangeFilterEnabled, heatmapEnabled, heatmapParam, heatmapCustomRange]);
 
   /**
    * 「どの駅を表示するか」の共有ロジック。
@@ -1835,12 +1875,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     if (candidates.length <= MAX_BUBBLE_STATIONS) return candidates;
 
-    const [cLat, cLng] = viewCenter;
-    candidates.sort((a, b) =>
-      ((a.lat - cLat) ** 2 + (a.lng - cLng) ** 2) - ((b.lat - cLat) ** 2 + (b.lng - cLng) ** 2)
-    );
+    // viewCenter ではなく値の大きい順に上位 MAX_BUBBLE_STATIONS を選択
+    // viewCenter を deps に含めるとパンのたびに再計算→compute 二重発火になるため
+    candidates.sort((a, b) => b.value - a.value);
     return candidates.slice(0, MAX_BUBBLE_STATIONS);
-  }, [mapViewMode, visibleRoutesData, heatmapParam, viewCenter, stationVisibilityFilter]);
+  }, [mapViewMode, visibleRoutesData, heatmapParam, stationVisibilityFilter]);
 
   useEffect(() => {
     let mounted = true;
@@ -2645,10 +2684,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return null;
   };
 
-  // ─── バブルマップ用: 重なり防止サイズ計算コンポーネント ───────────────
-  // MapContainer の子として配置し、useMapEvents でピクセル座標を取得する。
-  // バブルマップ SVG オーバーレイ: 全バブルを1つの SVG に描画（高速）
+  // ─── バブルマップ用 SVG オーバーレイ（2フェーズ設計）───────────────
+  // フェーズ1: 駅データ変更時のみ → メートル空間で重なり防止計算 → geoLayout に保存
+  // フェーズ2: パン/ズーム時 → geoLayout のメートル座標をピクセルに変換するだけ（軽量）
   type BubbleItem = { name: string; x: number; y: number; r: number; color: string; displayName: string };
+  type GeoItem = { name: string; lat: number; lng: number; r_m: number; color: string; displayName: string };
+
   const BubbleSVGOverlay: React.FC<{
     stations: Array<{ name: string; lat: number; lng: number; value: number }>;
     heatmapParam: string;
@@ -2658,63 +2699,91 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     maxRadiusM: number;
     onBubbleClick: (name: string, x: number, y: number) => void;
   }> = ({ stations, heatmapParam: param, heatmapCustomRange: customRange, showNames, language, maxRadiusM, onBubbleClick }) => {
+    const [geoLayout, setGeoLayout] = React.useState<GeoItem[]>([]);
     const [bubbles, setBubbles] = React.useState<BubbleItem[]>([]);
     const [size, setSize] = React.useState({ w: 0, h: 0 });
     const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const compute = React.useCallback((map: ReturnType<typeof useMapEvents>) => {
-      if (stations.length === 0) { setBubbles([]); return; }
-      const container = map.getContainer();
-      const w = container.clientWidth, h = container.clientHeight;
-      setSize({ w, h });
-
-      // 地理スケール: 地図中心付近の pixels/meter を計算
-      const center = map.getCenter();
-      const pt1 = map.latLngToContainerPoint([center.lat, center.lng]);
-      const pt2 = map.latLngToContainerPoint([center.lat, center.lng + 0.001]);
-      const geoDist = map.distance([center.lat, center.lng], [center.lat, center.lng + 0.001]);
-      const pixelsPerMeter = Math.abs(pt2.x - pt1.x) / Math.max(geoDist, 1);
+    // フェーズ1: メートル空間でレイアウト計算（駅データ/パラメータ変更時のみ）
+    React.useEffect(() => {
+      if (stations.length === 0) { setGeoLayout([]); return; }
 
       const values = stations.map(s => s.value);
       const minV = Math.min(...values), maxV = Math.max(...values);
       const range = maxV - minV || 1;
 
+      const paramRange = getParamRange(param as any);
+      const effectiveRange = customRange ?? paramRange;
+      const paramMeta = STAT_PARAMS.find(p => p.key === param);
+
       const sorted = [...stations].sort((a, b) => b.value - a.value);
-      const placed: Array<{ x: number; y: number; r: number }> = [];
-      const result: BubbleItem[] = [];
+      const placed: Array<{ lat: number; lng: number; r_m: number }> = [];
+      const result: GeoItem[] = [];
 
       for (const s of sorted) {
-        const pt = map.latLngToContainerPoint([s.lat, s.lng]);
-        // 地理的半径: 値に比例した実距離（最大値 → maxRadiusM）
         const t = (s.value - minV) / range;
-        const r_meters = t * maxRadiusM;
-        // 元の地理半径（ピクセル）。最低 MIN_R px 以上を目標とする
-        const MIN_R = 5;
-        let r = Math.max(MIN_R, r_meters * pixelsPerMeter);
-        // 重なり防止：先に配置済みの円との距離で最大半径を制限
+        let r_m = t * maxRadiusM;
+        // 重なり防止をメートル空間で計算（Leaflet 不要 = ズーム/パンに依存しない）
         for (const p of placed) {
-          const dist = Math.hypot(p.x - pt.x, p.y - pt.y);
-          const maxR = dist - p.r - 1; // 1px の隙間を確保
-          if (maxR < r) r = maxR;
+          const dlat = (p.lat - s.lat) * 111000;
+          const dlng = (p.lng - s.lng) * 111000 * Math.cos(s.lat * Math.PI / 180);
+          const dist_m = Math.sqrt(dlat * dlat + dlng * dlng);
+          const maxR_m = dist_m - p.r_m - 20; // 20m の隙間
+          if (maxR_m < r_m) r_m = maxR_m;
         }
-        // 半径が 2px 未満になる場合はその駅をスキップ（完全に埋もれている）
-        if (r < 2) continue;
-        const finalR = Math.max(r, 3);
-        placed.push({ x: pt.x, y: pt.y, r: finalR });
-        const color = getStationHeatColor(s.name, param as any, customRange)
-          ?? '#3366cc';
-        result.push({ name: s.name, x: pt.x, y: pt.y, r: finalR, color, displayName: translateStation(s.name, language) });
+        if (r_m < 30) continue; // 30m 未満はスキップ
+        placed.push({ lat: s.lat, lng: s.lng, r_m });
+
+        const stats = stationStatsData[s.name];
+        let color = '#3366cc';
+        if (stats) {
+          const val = stats[param as keyof typeof stats] as number | undefined;
+          if (val !== undefined) {
+            const { min, max } = effectiveRange;
+            const norm = max > min ? (val - min) / (max - min) : 0.5;
+            const adjusted = paramMeta?.higherIsBetter === false ? 1 - norm : norm;
+            color = heatValueToColor(Math.max(0, Math.min(1, adjusted)));
+          }
+        }
+        result.push({ name: s.name, lat: s.lat, lng: s.lng, r_m, color, displayName: translateStation(s.name, language) });
       }
-      setBubbles(result);
+      setGeoLayout(result);
     }, [stations, param, customRange, language, maxRadiusM]);
 
-    const run = React.useCallback((map: ReturnType<typeof useMapEvents>) => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => compute(map), 100);
-    }, [compute]);
+    // フェーズ2: geoLayout → ピクセル座標変換（軽量、パン/ズームのたびに実行）
+    const updatePixels = React.useCallback((map: ReturnType<typeof useMapEvents>) => {
+      if (!geoLayout.length) { setBubbles([]); return; }
+      const container = map.getContainer();
+      setSize({ w: container.clientWidth, h: container.clientHeight });
 
-    const map = useMapEvents({ zoomend: e => run(e.target), moveend: e => run(e.target) });
-    React.useEffect(() => { compute(map); }, [compute, map]);
+      const center = map.getCenter();
+      const pt1 = map.latLngToContainerPoint([center.lat, center.lng]);
+      const pt2 = map.latLngToContainerPoint([center.lat, center.lng + 0.001]);
+      const geoDist = map.distance([center.lat, center.lng], [center.lat, center.lng + 0.001]);
+      const ppm = Math.abs(pt2.x - pt1.x) / Math.max(geoDist, 1);
+
+      setBubbles(geoLayout.map(g => {
+        const pt = map.latLngToContainerPoint([g.lat, g.lng]);
+        return { name: g.name, x: pt.x, y: pt.y, r: Math.max(3, g.r_m * ppm), color: g.color, displayName: g.displayName };
+      }));
+    }, [geoLayout]);
+
+    const cancel = React.useCallback(() => {
+      if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
+    }, []);
+    const scheduleUpdate = React.useCallback((map: ReturnType<typeof useMapEvents>) => {
+      cancel();
+      timerRef.current = setTimeout(() => updatePixels(map), 150);
+    }, [updatePixels, cancel]);
+
+    const map = useMapEvents({
+      movestart: cancel,
+      zoomend: e => updatePixels(e.target),   // ズーム終了後は即座に更新
+      moveend: e => scheduleUpdate(e.target), // パン終了後は少し待って更新
+    });
+
+    // geoLayout 変更時（駅/パラメータ変更）は即座にピクセル変換
+    React.useEffect(() => { updatePixels(map); }, [geoLayout, updatePixels, map]);
 
     if (!bubbles.length) return null;
     return (
@@ -2834,7 +2903,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             positions={segPositions}
             pathOptions={{
               color: routeColor,
-              weight: hoveredRoute === routeKey ? 6 : 4,
+              weight: hoveredRoute === routeKey ? routeLineWidth + 2 : routeLineWidth,
               opacity: hoveredRoute === routeKey ? 0.5 : 0.85,
             }}
             interactive={false}
@@ -3062,6 +3131,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               : -1;
             const getTimeAt = (idx: number): number => {
               if (!isCumulative || depIdx < 0) return -1;
+              // 乗り換えを跨いだ全体累積マップがあれば優先使用
+              const nextName = displayStations[idx]?.name;
+              if (globalCumulativeTimeMap.size > 0 && nextName) {
+                const t = globalCumulativeTimeMap.get(nextName);
+                if (t !== undefined) return t;
+              }
+              // フォールバック: 同一路線内での累積
               let t = 0;
               if (idx >= depIdx) {
                 for (let i = depIdx; i < idx; i++) t += displayStations[i].timeToNext || 3;
@@ -3692,7 +3768,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               }
 
               {/* 路線・駅マーカー ─ バブルモードでは非表示（CircleMarker で代替） */}
-              {mapViewMode !== 'bubble' && visibleRoutesData.map(([routeKey, stations]) =>
+              {mapViewMode !== 'bubble' && [...visibleRoutesData].sort(([a], [b]) => {
+                const ai = routeOrder.indexOf(a as RouteKey);
+                const bi = routeOrder.indexOf(b as RouteKey);
+                return (ai === -1 ? 9999 : ai) - (bi === -1 ? 9999 : bi);
+              }).map(([routeKey, stations]) =>
                 renderRoute(routeKey as RouteKey, stations)
               )}
 
@@ -4219,6 +4299,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   {/* 2. 路線一覧 (Route List) */}
                   <LegendRouteList
                     visibleRoutesData={visibleRoutesData}
+                    routeOrder={routeOrder}
+                    onRouteOrderChange={setRouteOrder}
                     visibleRoutes={visibleRoutes}
                     availableRoutes={availableRoutes}
                     highlightedRouteKeys={highlightedRouteKeys}
@@ -4289,6 +4371,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     stationIconScale={stationIconScale}
                     onStationIconScaleChange={() => {}}
                     stationSizeScale={stationSizeScale}
+                    routeLineWidth={routeLineWidth}
+                    onRouteLineWidthChange={setRouteLineWidth}
                     onStationSizeScaleChange={setStationSizeScale}
                     travelTimeLabelMode={travelTimeLabelMode}
                     onTravelTimeLabelModeChange={setTravelTimeLabelMode}
@@ -4464,6 +4548,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       />
                       <LegendRouteList
                         visibleRoutesData={visibleRoutesData}
+                    routeOrder={routeOrder}
+                    onRouteOrderChange={setRouteOrder}
                         visibleRoutes={visibleRoutes}
                         availableRoutes={availableRoutes}
                         highlightedRouteKeys={highlightedRouteKeys}
@@ -4534,6 +4620,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         stationIconScale={stationIconScale}
                         onStationIconScaleChange={() => {}}
                         stationSizeScale={stationSizeScale}
+                    routeLineWidth={routeLineWidth}
+                    onRouteLineWidthChange={setRouteLineWidth}
                         onStationSizeScaleChange={setStationSizeScale}
                         travelTimeLabelMode={travelTimeLabelMode}
                         onTravelTimeLabelModeChange={setTravelTimeLabelMode}

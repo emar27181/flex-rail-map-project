@@ -47,6 +47,8 @@ const noopStr = (_v: string) => {};
 
 const minimalProps = {
   visibleRoutesData: [] as Array<[string, any]>,
+  routeOrder: [] as any[],
+  onRouteOrderChange: noop,
   visibleRoutes: new Set<RouteKey>(),
   availableRoutes: new Set<RouteKey>(),
   highlightedRouteKeys: null,
@@ -87,6 +89,8 @@ const minimalProps = {
   onBubbleShapeChange: noop,
   bubbleMaxRadiusM: 5000,
   onBubbleMaxRadiusMChange: noop,
+  routeLineWidth: 3,
+  onRouteLineWidthChange: noop,
   showStationTierBadges: true,
   onShowStationTierBadgesChange: noopBool,
   showStationTooltip: false,
@@ -114,11 +118,9 @@ describe('LegendRouteList', () => {
   });
 
   it('stationSizeScale が数値のとき toFixed(1) でクラッシュしない', () => {
-    // stationSizeScale=1.0 で正常にレンダリングできることを確認
+    // stationSizeScale=1.0 で正常にレンダリングできることを確認（アイコンサイズは地図表示グループ内=閉じ状態のため表示されない）
     const { container } = render(<LegendRouteList {...minimalProps} stationSizeScale={1.0} />);
     expect(container).toBeTruthy();
-    // "1.0x" というテキストが表示されている
-    expect(container.textContent).toContain('1.0x');
   });
 
   it('stationSizeScale=0.5 の境界値でもクラッシュしない', () => {

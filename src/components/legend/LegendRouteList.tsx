@@ -15,6 +15,8 @@ type SortMode = 'name' | 'color' | 'default' | 'distance';
 interface LegendRouteListProps {
   visibleRoutesData: Array<[string, any]>;
   visibleRoutes: Set<RouteKey>;
+  routeOrder: RouteKey[];
+  onRouteOrderChange: (order: RouteKey[]) => void;
   availableRoutes: Set<RouteKey>;
   highlightedRouteKeys?: Set<RouteKey> | null;
   routeColors: Record<RouteKey, string>;
@@ -71,6 +73,8 @@ interface LegendRouteListProps {
   onStationIconScaleChange: (v: number) => void;
   stationSizeScale: number;
   onStationSizeScaleChange: (v: number) => void;
+  routeLineWidth: number;
+  onRouteLineWidthChange: (v: number) => void;
   travelTimeLabelMode: 'interval' | 'cumulative';
   onTravelTimeLabelModeChange: (v: 'interval' | 'cumulative') => void;
 }
@@ -78,6 +82,8 @@ interface LegendRouteListProps {
 const LegendRouteList: React.FC<LegendRouteListProps> = ({
   visibleRoutesData,
   visibleRoutes,
+  routeOrder,
+  onRouteOrderChange,
   availableRoutes,
   highlightedRouteKeys,
   routeColors,
@@ -133,11 +139,14 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onStationIconScaleChange,
   stationSizeScale,
   onStationSizeScaleChange,
+  routeLineWidth,
+  onRouteLineWidthChange,
   travelTimeLabelMode,
   onTravelTimeLabelModeChange,
 }) => {
   const colors = getThemeColors(theme);
   const [sortMode, setSortMode] = useState<SortMode>('name');
+  const [dragOverKey, setDragOverKey] = useState<string | null>(null);
   const [groupLabelOpen,  setGroupLabelOpen]  = useState(true);
   const [groupVizOpen,    setGroupVizOpen]    = useState(true);
   const [groupFilterOpen, setGroupFilterOpen] = useState(false);
@@ -231,7 +240,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                       onChange={() => onTravelTimeLabelModeChange(mode)}
                       style={{ cursor: 'pointer' }}
                     />
-                    {translateUI(mode === 'interval' ? 'travelTimeLabelInterval' : 'travelTimeLabelCumulative', language)}
+                    {mode === 'interval' ? translateUI('travelTimeLabelInterval', language) : `${translateUI('travelTimeLabelCumulative', language)}（実装中）`}
                   </label>
                 ))}
               </div>
@@ -250,15 +259,6 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 {translateUI('showFurigana', language)}
               </label>
             )}
-            {/* 駅サイズ（ラベル・アイコン一括） */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0', marginTop: '2px' }}>
-              <span style={{ flex: 1, color: colors.textSecondary }}>{translateUI('settingsIconSize', language)}</span>
-              <button onClick={() => onStationSizeScaleChange(Math.max(0.5, Math.round((stationSizeScale - 0.1) * 10) / 10))}
-                style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
-              <span style={{ minWidth: '30px', textAlign: 'center', fontSize: '11px' }}>{stationSizeScale.toFixed(1)}x</span>
-              <button onClick={() => onStationSizeScaleChange(Math.min(2.0, Math.round((stationSizeScale + 0.1) * 10) / 10))}
-                style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
-            </div>
           </div>
         )}
 
@@ -272,6 +272,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         </div>
         {groupVizOpen && (
           <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
+            {/* 1. ヒートマップ */}
             <label style={checkboxLabel(colors)}>
               <input type="checkbox" checked={heatmapEnabled} onChange={e => onHeatmapEnabledChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
               {translateUI('stationHeatmap', language)}
@@ -294,10 +295,14 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 })}
               </select>
             )}
-            <label style={checkboxLabel(colors)}>
-              <input type="checkbox" checked={mapViewMode === 'schematic'} onChange={e => onMapViewModeChange(e.target.checked ? 'schematic' : 'realistic')} style={{ marginRight: '6px', cursor: 'pointer' }} />
-              路線図表示 <span style={{ fontSize: '9px', color: colors.textSecondary, marginLeft: '3px' }}>(実装中)</span>
-            </label>
+            {/* 2. 列車デモ */}
+            {mapViewMode === 'realistic' && (
+              <label style={checkboxLabel(colors)}>
+                <input type="checkbox" checked={showTrainDemo} onChange={onTrainDemoToggle} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                {translateUI('trainDemoLabel', language)}
+              </label>
+            )}
+            {/* 3. バブルマップ */}
             <label style={checkboxLabel(colors)}>
               <input type="checkbox" checked={mapViewMode === 'bubble'} onChange={e => onMapViewModeChange(e.target.checked ? 'bubble' : 'realistic')} style={{ marginRight: '6px', cursor: 'pointer' }} />
               {translateUI('bubbleMap', language)}
@@ -312,7 +317,6 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                     </label>
                   ))}
                 </div>
-                {/* 最大半径スライダー（地理的距離） */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>最大半径</span>
                   <input
@@ -327,12 +331,11 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 </div>
               </div>
             )}
-            {mapViewMode === 'realistic' && (
-              <label style={checkboxLabel(colors)}>
-                <input type="checkbox" checked={showTrainDemo} onChange={onTrainDemoToggle} style={{ marginRight: '6px', cursor: 'pointer' }} />
-                {translateUI('trainDemoLabel', language)}
-              </label>
-            )}
+            {/* 4. 路線図表示（実装中） */}
+            <label style={checkboxLabel(colors)}>
+              <input type="checkbox" checked={mapViewMode === 'schematic'} onChange={e => onMapViewModeChange(e.target.checked ? 'schematic' : 'realistic')} style={{ marginRight: '6px', cursor: 'pointer' }} />
+              路線図表示（実装中）
+            </label>
           </div>
         )}
 
@@ -391,6 +394,24 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
               <input type="checkbox" checked={showOsmTiles} onChange={e => onShowOsmTilesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
               {translateUI('showMapTiles', language)}
             </label>
+            {/* アイコンサイズ */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0', marginTop: '2px' }}>
+              <span style={{ flex: 1, color: colors.textSecondary }}>{translateUI('settingsIconSize', language)}</span>
+              <button onClick={() => onStationSizeScaleChange(Math.max(0.5, Math.round((stationSizeScale - 0.1) * 10) / 10))}
+                style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
+              <span style={{ minWidth: '30px', textAlign: 'center', fontSize: '11px' }}>{stationSizeScale.toFixed(1)}x</span>
+              <button onClick={() => onStationSizeScaleChange(Math.min(2.0, Math.round((stationSizeScale + 0.1) * 10) / 10))}
+                style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
+            </div>
+            {/* 路線の太さ */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0' }}>
+              <span style={{ flex: 1, color: colors.textSecondary }}>路線の太さ</span>
+              <button onClick={() => onRouteLineWidthChange(Math.max(1, routeLineWidth - 0.5))}
+                style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
+              <span style={{ minWidth: '30px', textAlign: 'center', fontSize: '11px' }}>{routeLineWidth.toFixed(1)}px</span>
+              <button onClick={() => onRouteLineWidthChange(Math.min(8, routeLineWidth + 0.5))}
+                style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
+            </div>
           </div>
         )}
 
@@ -466,25 +487,63 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         </button>
       </div>
 
-      {sortedVisibleRoutesData.map(([routeKey]) => {
-        const isVisible = visibleRoutes.has(routeKey as RouteKey);
-        const isInSelectedRoute = !!(highlightedRouteKeys && highlightedRouteKeys.has(routeKey as RouteKey));
-
-        return (
-          <RouteToggleItem
-            key={routeKey}
-            routeKey={routeKey}
-            routeName={routeNames[routeKey as RouteKey]}
-            routeColor={routeColors[routeKey as RouteKey]}
-            isVisible={isVisible}
-            isInSelectedRoute={isInSelectedRoute}
-            theme={theme}
-            language={language}
-            onToggle={onToggleRoute}
-            adjustRouteColorForTheme={adjustRouteColorForTheme}
-          />
-        );
-      })}
+      {/* 路線リスト: 常に routeOrder 順、⠿ ハンドルでドラッグ並び替え可能（リスト下が最前面）*/}
+      <div style={{ fontSize: '9px', color: colors.textSecondary, marginBottom: '3px', textAlign: 'right' }}>
+        ↑ 背面 / 最前面 ↓ &nbsp;<span style={{ opacity: 0.6 }}>⠿ でドラッグ</span>
+      </div>
+      {[...routeOrder]
+        .filter(rk => visibleRoutesData.some(([k]) => k === rk))
+        .map((routeKey) => {
+          const isVisible = visibleRoutes.has(routeKey as RouteKey);
+          const isInSelectedRoute = !!(highlightedRouteKeys && highlightedRouteKeys.has(routeKey as RouteKey));
+          const isDragTarget = dragOverKey === routeKey;
+          return (
+            <div
+              key={routeKey}
+              draggable
+              onDragStart={e => { e.dataTransfer.setData('text/plain', routeKey); e.dataTransfer.effectAllowed = 'move'; }}
+              onDragOver={e => { e.preventDefault(); setDragOverKey(routeKey); }}
+              onDragLeave={() => setDragOverKey(null)}
+              onDrop={e => {
+                e.preventDefault();
+                const from = e.dataTransfer.getData('text/plain') as RouteKey;
+                if (from === routeKey) { setDragOverKey(null); return; }
+                const next = [...routeOrder];
+                const fi = next.indexOf(from as RouteKey), ti = next.indexOf(routeKey);
+                if (fi !== -1 && ti !== -1) { next.splice(fi, 1); next.splice(ti, 0, from as RouteKey); onRouteOrderChange(next); }
+                setDragOverKey(null);
+              }}
+              style={{
+                display: 'flex', alignItems: 'center',
+                outline: isDragTarget ? `2px dashed ${adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme)}` : 'none',
+                borderRadius: '3px',
+                background: isDragTarget ? `${adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme)}18` : 'transparent',
+              }}
+            >
+              {/* ドラッグハンドル */}
+              <span
+                style={{ fontSize: '13px', color: colors.textSecondary, lineHeight: 1, flexShrink: 0, padding: '2px 3px 2px 0', cursor: 'grab', opacity: 0.5 }}
+                onMouseDown={e => e.stopPropagation()}
+              >
+                ⠿
+              </span>
+              {/* 既存の RouteToggleItem */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <RouteToggleItem
+                  routeKey={routeKey}
+                  routeName={routeNames[routeKey as RouteKey]}
+                  routeColor={routeColors[routeKey as RouteKey]}
+                  isVisible={isVisible}
+                  isInSelectedRoute={isInSelectedRoute}
+                  theme={theme}
+                  language={language}
+                  onToggle={onToggleRoute}
+                  adjustRouteColorForTheme={adjustRouteColorForTheme}
+                />
+              </div>
+            </div>
+          );
+        })}
 
     </div>
   );
