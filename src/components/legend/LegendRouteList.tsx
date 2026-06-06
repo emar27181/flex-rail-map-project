@@ -52,6 +52,8 @@ interface LegendRouteListProps {
   onHeatmapParamChange: (k: keyof StationStats) => void;
   bubbleShape: 'circle' | 'square';
   onBubbleShapeChange: (shape: 'circle' | 'square') => void;
+  bubbleMaxRadiusM: number;
+  onBubbleMaxRadiusMChange: (v: number) => void;
   showLatLngGrid?: boolean;
   showStationTooltip: boolean;
   onShowStationTooltipChange: (v: boolean) => void;
@@ -111,6 +113,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onHeatmapParamChange,
   bubbleShape,
   onBubbleShapeChange,
+  bubbleMaxRadiusM,
+  onBubbleMaxRadiusMChange,
   showStationTooltip,
   onShowStationTooltipChange,
   showFullRouteStations,
@@ -291,13 +295,28 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
               {translateUI('bubbleMap', language)}
             </label>
             {mapViewMode === 'bubble' && (
-              <div style={{ marginLeft: '22px', marginTop: '4px', display: 'flex', gap: '6px' }}>
-                {(['circle', 'square'] as const).map(shape => (
-                  <label key={shape} style={{ display: 'flex', alignItems: 'center', fontSize: '11px', color: colors.text, cursor: 'pointer' }}>
-                    <input type="radio" name="bubbleShape" checked={bubbleShape === shape} onChange={() => onBubbleShapeChange(shape)} style={{ marginRight: '4px', cursor: 'pointer' }} />
-                    {shape === 'circle' ? translateUI('bubbleCircle', language) : translateUI('bubbleSquare', language)}
-                  </label>
-                ))}
+              <div style={{ marginLeft: '22px', marginTop: '4px' }}>
+                <div style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
+                  {(['circle', 'square'] as const).map(shape => (
+                    <label key={shape} style={{ display: 'flex', alignItems: 'center', fontSize: '11px', color: colors.text, cursor: 'pointer' }}>
+                      <input type="radio" name="bubbleShape" checked={bubbleShape === shape} onChange={() => onBubbleShapeChange(shape)} style={{ marginRight: '4px', cursor: 'pointer' }} />
+                      {shape === 'circle' ? translateUI('bubbleCircle', language) : translateUI('bubbleSquare', language)}
+                    </label>
+                  ))}
+                </div>
+                {/* 最大半径スライダー（地理的距離） */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>最大半径</span>
+                  <input
+                    type="range" min={500} max={50000} step={500}
+                    value={bubbleMaxRadiusM}
+                    onChange={e => onBubbleMaxRadiusMChange(Number(e.target.value))}
+                    style={{ flex: 1, cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: '10px', color: colors.text, minWidth: '40px', textAlign: 'right' }}>
+                    {bubbleMaxRadiusM >= 1000 ? `${(bubbleMaxRadiusM / 1000).toFixed(1)}km` : `${bubbleMaxRadiusM}m`}
+                  </span>
+                </div>
               </div>
             )}
             {mapViewMode === 'realistic' && (

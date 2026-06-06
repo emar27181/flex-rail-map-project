@@ -85,6 +85,8 @@ const minimalProps = {
   onHeatmapParamChange: noop,
   bubbleShape: 'circle' as const,
   onBubbleShapeChange: noop,
+  bubbleMaxRadiusM: 5000,
+  onBubbleMaxRadiusMChange: noop,
   showStationTooltip: false,
   onShowStationTooltipChange: noopBool,
   showFullRouteStations: true,
