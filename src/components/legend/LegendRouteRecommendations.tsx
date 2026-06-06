@@ -9,6 +9,10 @@ interface RouteSegment {
   routeKey: string;
   startIndex: number;
   endIndex: number;
+  time: number;
+  stations?: { name: string }[];
+  isWalkingTransfer?: boolean;
+  walkingTime?: number;
 }
 
 interface RouteRecommendation {
