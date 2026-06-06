@@ -58,6 +58,9 @@ export type StationStats = {
   // --- 仕事・ワーク ---
   officeCount?: number;        // オフィスビル数（半径500m以内）
   coworkingCount?: number;     // コワーキングスペース数
+
+  // --- 物価・生活コスト ---
+  priceLevel?: number;         // 物価水準（1〜5、高いほど高物価）
 };
 
 /**
@@ -131,6 +134,10 @@ export type ParamMethodology = {
 };
 
 export const PARAM_METHODOLOGY: Partial<Record<keyof StationStats, ParamMethodology>> = {
+  priceLevel: {
+    collectionMethod: '飲食店の価格帯（ランチ相場・居酒屋単価）、スーパー価格、家賃水準を総合して算出。',
+    interpolationLogic: '家賃（avgRent1K）・飲食店数・オフィス集積度を組み合わせて1〜5の5段階に正規化。都心ビジネス街や観光地（銀座・表参道など）が5、郊外住宅地・地方が1〜2。',
+  },
   lineCount: {
     collectionMethod: 'routes.ts の路線データから各駅の乗り入れ路線数を自動集計。',
     interpolationLogic: '実データから直接算出。推計なし。JR・東京メトロ・都営地下鉄・私鉄等すべての乗り入れ路線をカウント。',
@@ -251,6 +258,12 @@ export const STAT_PARAMS: StatParamMeta[] = [
     description: '駅周辺（概ね半径1km圏）の人口密度',
     methodology: '平均値（国勢調査の町丁別人口を面積で除算）',
     period: '令和2年（2020年）国勢調査',
+  },
+  {
+    key: 'priceLevel', label: '物価水準', unit: '（1-5）', category: 'housing', higherIsBetter: false,
+    description: '周辺の物価水準（1=格安〜5=高級）。飲食・日用品の価格帯を総合した指標',
+    methodology: '推計（家賃・飲食店価格帯・商業集積度から算出）',
+    period: '2024〜2025年推計',
   },
   // 交通
   {
