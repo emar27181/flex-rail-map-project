@@ -1,5 +1,45 @@
 # CHANGE LOG
 
+## [2026-06-06] セッション（ヒートマップ改善・バブルマップ地理半径・UI改善）
+
+### feat: バブルマップの円サイズを地理的実距離に連動（`src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`）
+- 半径算出を「ピクセル固定（BASE_MIN〜BASE_MAX）」→「実距離ベース（値の比率 × 最大半径[m]）」に変更
+- ズームイン/アウトで円の地図上サイズが地理的距離に比例して変化するようになった
+- `pixelsPerMeter = map.latLngToContainerPoint 差分 / map.distance()` でリアルタイム換算
+- 重なり防止（パッキング）は従来通りピクセル空間で動作
+- 凡例に「最大半径」スライダー（500m〜50km）を追加。デフォルト 5km
+
+### feat: ヒートマップ複合スコアを 0〜N×10 スケールに変更（`src/components/RailwayMap.tsx`）
+- 各パラメータを 0-10 に正規化して合算（平均でなく合計）
+- 2項目選択 → MAX 20、10項目選択 → MAX 100
+- 凡例 min/max を複合モードでも調整可能（カスタム範囲対応）
+
+### feat: ヒートマップパラメータ解説サブツールチップ（`src/components/RailwayMap.tsx`, `src/data/stationStats.ts`）
+- 全20パラメータの「収集方法」と「補完ロジック」を `PARAM_METHODOLOGY` として追加
+- 駅ツールチップのパラメータ行に ⓘ ボタン → クリックで解説パネルが開く
+- viewport はみ出し防止: `top` クランプ + `maxHeight` + `overflowY: auto`
+
+### feat: ヒートマップ複数選択で全パラメータ行のハイライト連動（`src/components/RailwayMap.tsx`）
+- 複合モード（2個以上）では `heatmapMultiParams` に含まれる全パラメータが背景色ハイライト
+
+### feat: 路線数パラメータをヒートマップに追加（`src/data/stationStats.ts`）
+- `lineCount`（路線数）を交通カテゴリとして `STAT_PARAMS` に追加
+
+### fix: 複合スコアの色表示バグ（`src/components/RailwayMap.tsx`）
+- `heatOverride` が常に単一パラメータ色を使っていた問題を修正。`getStationDisplayColor()` を使用
+
+### fix: 出発・到着アイコンのサイズが stationSizeScale に連動しない問題（`src/components/RailwayMap.tsx`）
+- `createSpecialStationIcon` / `createTrainTypeStationIcon` のハードコードサイズを `stationSizeScale` 連動に変更
+
+### fix: サジェストドロップダウンが入力フォームの枠内に隠れる問題（`src/components/StationSelector.tsx`）
+- `backdropFilter` の影響で fixed 子要素がクリップされていた。サジェスト表示中 `overflow: visible` に切替
+
+### improve: ✕ボタンのタップ判定拡大（`src/components/RailwayMap.tsx`）
+- `padding: '0 2px'` → `padding: '6px 8px'` + `margin: '-6px -8px'` で視覚を変えずヒット領域を拡大
+
+### improve: ヒートマップ凡例タイトルクリックでパラメータリスト連動（`src/components/RailwayMap.tsx`）
+- タイトル展開時に param list も同時に開き、折りたたみ時に閉じるよう連動
+
 ## [2026-06-04] セッション（station-stats.csv 家賃データ拡充）
 
 ### feat: 東京圏90駅以上の avg_rent_1k / avg_rent_1ldk を入力（`data/station-stats.csv`）
