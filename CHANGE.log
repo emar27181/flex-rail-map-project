@@ -1,5 +1,55 @@
 # CHANGE LOG
 
+## [2026-06-08] セッション（設定パネル再構成・多言語対応・バグ修正・デフォルト値調整）
+
+### fix: ヒートマップパラメータ変更がマップに反映されないバグを修正（`src/components/RailwayMap.tsx`）
+- `handleHeatmapParamChange` を追加し `heatmapParam`・`heatmapMultiParams`・`heatmapCustomRange` を同時更新
+
+### fix: 路線描画順序を設定パネルの並び順（上=前面）に合わせる（`src/components/RailwayMap.tsx`）
+- `visibleRoutesData` のソート順を昇順→降順に修正
+
+### fix: 累積所要時間が乗り換え後にリセットされるバグを修正（`src/components/RailwayMap.tsx`）
+- `getTimeAt` が `depIdx < 0` で即 -1 を返していた問題を修正
+- `globalCumulativeTimeMap.size > 0` なら `depIdx` に関係なくマップを参照するよう変更
+- 3箇所の `depIdx >= 0` ガードを `depIdx >= 0 || globalCumulativeTimeMap.size > 0` に変更
+
+### improve: ヒートマップツールチップ数値のコントラスト改善（`src/components/RailwayMap.tsx`）
+- 値 span に `text-shadow` を追加
+
+### improve: 時刻表行き先括弧を言語ごとに切替（`src/components/RailwayMap.tsx`）
+- 日本語は全角（）、他言語は半角 () を使用
+
+### improve: スマホ設定から「現在の駅を設定」セクションを非表示（`src/components/RailwayMap.tsx`）
+
+### improve: デフォルト値の調整（`src/components/RailwayMap.tsx`）
+- `showStationTierBadges`（乗換駅強調表示）: `true` → `false`
+- `showFullRouteStations`（中間駅以外も表示）: `true` → `false`
+- `travelTimeLabelMode`: 出発駅セット時に自動 cumulative 切替する useEffect を削除し、常に interval がデフォルトに
+
+### feat: 翻訳キー完全性テストを追加、多言語対応を拡充（`src/utils/translation.ts`, `tests/unit/utils/translation.test.ts`）
+- `uiChinese`/`uiKorean` を export 化し重複キーを修正
+- 設定パネル用14キーを追加
+- `translateDestination` に「〇〇行き」対応を追加（英語 "for X"・中国語 "开往X"・韓国語 "X행"）
+- `transferHighlight` を「乗換強調表示」→「乗換駅強調表示」にリネーム（全4言語）
+- `settingsGroupMap` を「地図表示」→「表示切替」にリネーム（全4言語）
+
+### improve: SEO強化（`public/sitemap.xml`, `src/pages/articles/_ArticleLayout.astro`）
+- サイトマップに記事一覧と5記事ページを追加
+- JSON-LD に `keywords`・`url`・`mainEntityOfPage` フィールドを追加
+
+### improve: 設定パネルのレイアウト再構成（`src/components/legend/LegendRouteList.tsx`）
+- 路線リストを「表示路線切り替え」セクション最上部に移動
+- 駅ラベル・データ可視化・駅フィルター・表示切替を「表示設定」セクションに集約
+- 路線リストを上位10件表示・「他N路線を表示」ボタンで展開
+- ソートボタン（名前順/色順/近い順/デフォルト）が実際にリスト順序を変更するよう修正
+- ヒートマップ有効化時に「データ可視化」グループを自動展開
+
+### fix: 路線並べ替えのドラッグを ⠿ ハンドル専用に変更（`src/components/legend/LegendRouteList.tsx`）
+- `draggable` を外側 div から `⠿` span 自体に移動（checkbox が drag を奪う問題を修正）
+- `onDragLeave` に `relatedTarget` チェックを追加してハイライトのちらつきを防止
+
+---
+
 ## [2026-06-06] セッション（ヒートマップ改善・バブルマップ地理半径・UI改善）
 
 ### feat: バブルマップの円サイズを地理的実距離に連動（`src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`）
