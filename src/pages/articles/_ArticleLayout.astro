@@ -6,6 +6,7 @@ import {
   ARTICLE_PAGE_TRANSLATIONS,
   ARTICLE_SHELL_TRANSLATIONS,
 } from "../../data/articleI18n";
+import { ARTICLE_BODY_TRANSLATIONS } from "../../data/articleBodyI18n";
 
 export interface Props {
   title: string;
@@ -49,6 +50,7 @@ const i18nPayload = JSON.stringify({
   pages: ARTICLE_PAGE_TRANSLATIONS,
   pageKey: i18nKey,
 });
+const bodyTranslations = ARTICLE_BODY_TRANSLATIONS[i18nKey];
 ---
 
 <!DOCTYPE html>
@@ -131,6 +133,13 @@ const i18nPayload = JSON.stringify({
     </header>
     <slot name="beforeArticle" />
     <article>
+      {bodyTranslations && (
+        <div class="article-body-variants">
+          {ARTICLE_LANGUAGES.map((lang) => bodyTranslations[lang] && (
+            <div data-article-body={lang} hidden={lang !== "ja"} set:html={bodyTranslations[lang]} />
+          ))}
+        </div>
+      )}
       <slot />
     </article>
     <div class="foot">
@@ -188,6 +197,16 @@ const i18nPayload = JSON.stringify({
         });
       }
 
+      function applyArticleBody(lang) {
+        var hasLang = false;
+        document.querySelectorAll('[data-article-body]').forEach(function(body) {
+          var active = body.getAttribute('data-article-body') === lang;
+          if (active) hasLang = true;
+          body.hidden = !active;
+        });
+        if (!hasLang && lang !== 'ja') applyArticleBody('ja');
+      }
+
       function apply(lang) {
         var shell = data.shell && data.shell[lang] ? data.shell[lang] : data.shell.ja;
         var page = data.pages && data.pages[pageKey] && data.pages[pageKey][lang]
@@ -208,6 +227,7 @@ const i18nPayload = JSON.stringify({
           if (desc && page.description) desc.setAttribute('content', page.description);
         }
         applyArticleCards(lang);
+        applyArticleBody(lang);
         if (btn) {
           var next = nextLang(lang);
           btn.textContent = labelMap[next] || next;
@@ -215,13 +235,18 @@ const i18nPayload = JSON.stringify({
           btn.setAttribute('title', shell.switchLanguage || 'Switch language');
           btn.setAttribute('data-current-lang', lang);
         }
-        try { localStorage.setItem('frm-article-lang', lang); } catch (e) {}
+        try {
+          localStorage.setItem('frm-language', { ja: 'japanese', en: 'english', zh: 'chinese', ko: 'korean' }[lang] || lang);
+          localStorage.setItem('frm-article-lang', lang);
+        } catch (e) {}
       }
 
       var params = new URLSearchParams(window.location.search);
       var initial = normalize(params.get('lang'));
       if (!initial) {
-        try { initial = normalize(localStorage.getItem('frm-article-lang')); } catch (e) {}
+        try {
+          initial = normalize(localStorage.getItem('frm-language')) || normalize(localStorage.getItem('frm-article-lang'));
+        } catch (e) {}
       }
       apply(initial || 'ja');
       if (btn) {

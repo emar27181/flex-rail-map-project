@@ -1,45 +1,40 @@
 ---
 import ArticleLayout from "./_ArticleLayout.astro";
+import { ARTICLE_PAGE_TRANSLATIONS } from "../../data/articleI18n";
 
-// 記事のメタデータをリスト化します。
 const articles = [
   {
-    title: "東京の路線図を「理解しやすく」する路線図UIを作っています",
     slug: "flex-rail-map-introduction",
     publishedDate: "2025-06-06",
-    category: "サービス紹介"
   },
   {
-    title: "東京の路線図の読み方・乗り換え方【完全初心者ガイド】",
     slug: "tokyo-train-map-beginner",
     publishedDate: "2025-06-06",
-    category: "初心者ガイド"
   },
   {
-    title: "東京観光で使える路線ガイド（浅草・秋葉原・原宿・お台場）",
     slug: "tokyo-sightseeing-routes",
     publishedDate: "2025-06-06",
-    category: "観光ガイド"
   },
   {
-    title: "通勤30分圏で家賃が安い駅ランキング！主要ターミナル別の穴場路線",
     slug: "commute-30min-cheap-rent",
     publishedDate: "2025-06-06",
-    category: "引っ越し・住まい"
   },
   {
-    title: "東京で治安が良い沿線・エリアの選び方【一人暮らし女性必見】",
     slug: "tokyo-safe-area-by-route",
     publishedDate: "2025-06-06",
-    category: "引っ越し・住まい"
   }
-];
+].map((article) => ({
+  ...article,
+  title: ARTICLE_PAGE_TRANSLATIONS[article.slug].ja.title,
+  category: ARTICLE_PAGE_TRANSLATIONS[article.slug].ja.category,
+}));
 
-const title = "記事一覧";
-const description = "Flex Rail Mapの路線図や駅データを活用した、東京の観光、通勤、引っ越しに関するお役立ち記事一覧です。";
+const meta = ARTICLE_PAGE_TRANSLATIONS.articles.ja;
+const title = meta.title;
+const description = meta.description;
 ---
 
-<ArticleLayout title={title} description={description} slug="" category="記事一覧" kicker="記事一覧" tag="Articles" readTime="全記事" canonicalPath="/articles" kind="index">
+<ArticleLayout title={title} description={description} slug="" category={meta.category} kicker={meta.kicker} tag={meta.tag} readTime={meta.readTime} canonicalPath="/articles" kind="index">
   <section class="article-index" aria-label="記事一覧">
     <ul class="article-list">
     {articles.map(article => (

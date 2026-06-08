@@ -1,104 +1,15 @@
 ---
 import ArticleLayout from "./_ArticleLayout.astro";
+import { ARTICLE_PAGE_KEYWORDS, ARTICLE_PAGE_TRANSLATIONS } from "../../data/articleI18n";
 
-const title = "東京観光で使える路線ガイド（浅草・秋葉原・原宿・お台場）";
-const description = "東京観光をスムーズにするための路線ガイド。浅草、秋葉原、原宿、お台場などの主要観光スポットへアクセスしやすい路線と乗り換えのコツを解説します。";
 const slug = "tokyo-sightseeing-routes";
+const meta = ARTICLE_PAGE_TRANSLATIONS[slug].ja;
+const title = meta.title;
+const description = meta.description;
 const publishedDate = "2025-06-06";
-const category = "観光ガイド";
-const keywords = "東京, 観光, 電車, 路線図, 浅草, 秋葉原, お台場";
+const category = meta.category;
+const keywords = ARTICLE_PAGE_KEYWORDS[slug];
 ---
 
-<ArticleLayout title={title} description={description} keywords={keywords} slug={slug} category={category} publishedDate={publishedDate} kicker="観光ガイド" tag="Travel Guide">
-
-<p>東京は世界屈指の鉄道網を持つ都市ですが、その複雑な路線図は初めて訪れる人にとってはまるで迷路のようです。観光名所に行きたいだけなのに、「どの路線に乗ればいいの？」「どこで乗り換えればいいの？」と迷ってしまうことも少なくありません。</p>
-
-<p>この記事では、東京観光に欠かせない主要な鉄道路線と、浅草・秋葉原・原宿・お台場といった人気スポットへのアクセス方法をわかりやすく解説します。</p>
-
-<div class="highlight">
-  <strong>💡 この記事のポイント</strong>
-  <ul>
-    <li>定番エリアは「JR山手線」だけで回れることが多い</li>
-    <li>浅草・スカイツリー方面は「地下鉄（メトロ・都営）」を活用</li>
-    <li>お台場へは「ゆりかもめ」か「りんかい線」の2択</li>
-  </ul>
-</div>
-
-<h2>1. まずはこれ！大定番の「JR山手線」</h2>
-<p>東京観光の基本となるのが、都心をぐるりと一周する<strong>JR山手線（緑色の電車）</strong>です。主要なターミナル駅を網羅しており、この路線さえ押さえておけば東京観光の半分はマスターしたと言っても過言ではありません。</p>
-
-<table>
-  <tr>
-    <th>駅名</th>
-    <th>主な観光スポット・特徴</th>
-  </tr>
-  <tr>
-    <td><strong>原宿</strong></td>
-    <td>竹下通り、明治神宮、表参道（徒歩圏内）</td>
-  </tr>
-  <tr>
-    <td><strong>渋谷</strong></td>
-    <td>スクランブル交差点、ハチ公像、SHIBUYA SKY</td>
-  </tr>
-  <tr>
-    <td><strong>秋葉原</strong></td>
-    <td>電気街、アニメ・ゲームカルチャーの中心地</td>
-  </tr>
-  <tr>
-    <td><strong>上野</strong></td>
-    <td>上野恩賜公園、動物園、アメ横</td>
-  </tr>
-</table>
-
-<h2>2. 浅草・スカイツリーに強い「東京メトロ銀座線・都営浅草線」</h2>
-<p>日本の伝統を感じられる浅草や、絶景が広がる東京スカイツリーへ行くには、地下鉄の利用が便利です。JR線は通っていないため、上野駅などで乗り換える必要があります。</p>
-<ul>
-  <li><strong>東京メトロ銀座線（オレンジ色の路線）</strong>: 渋谷・表参道・銀座などを経由し、終点が「浅草」です。</li>
-  <li><strong>都営浅草線（ローズ色の路線）</strong>: 浅草駅を通るほか、「押上（スカイツリー前）駅」に直通しており非常に便利です。</li>
-</ul>
-
-<h2>3. お台場エリアを楽しむ「ゆりかもめ」と「りんかい線」</h2>
-<p>海沿いの開放的な景色やショッピングが楽しめるお台場エリア。ここへのアクセスは主に2つの路線があります。</p>
-
-<table>
-  <tr>
-    <th>路線名</th>
-    <th>乗り換え駅</th>
-    <th>特徴</th>
-  </tr>
-  <tr>
-    <td><strong>ゆりかもめ</strong></td>
-    <td>新橋駅（JRなど）</td>
-    <td>レインボーブリッジを渡るため景色が最高。観光気分が盛り上がります。</td>
-  </tr>
-  <tr>
-    <td><strong>りんかい線</strong></td>
-    <td>大崎駅（JRなど）</td>
-    <td>新宿や渋谷から直通電車（埼京線直通）があり、スピード重視の方におすすめです。</td>
-  </tr>
-</table>
-
-<div class="cta-box">
-  <h3>複雑な路線図に迷ったら？</h3>
-  <p>Flex Rail Mapなら、出発駅と到着駅を選ぶだけで<strong>必要な路線だけを絞り込んで表示</strong>してくれます。複雑な東京の路線図から解放されて、スムーズに観光を楽しみましょう！</p>
-  <a href="/" class="cta-btn">路線マップを使ってみる</a>
-</div>
-
-<h2>4. 東京での「乗り換え」をスムーズにするコツ</h2>
-<p>最後に、東京で電車に乗る際のちょっとしたコツをご紹介します。</p>
-<ul>
-  <li><strong>同じ駅名でも遠いことがある</strong>: 例えば、JRの「浅草橋」と地下鉄の「浅草」は歩くと20分以上かかります。目的地の駅名には注意しましょう。</li>
-  <li><strong>ICカード（Suica・PASMOなど）を活用する</strong>: JRと地下鉄を乗り換えるたびに切符を買うのは大変です。ICカードがあれば、改札をタッチするだけでスムーズに移動できます。</li>
-</ul>
-
-<h2>まとめ</h2>
-<p>東京の電車は最初は複雑に感じるかもしれませんが、目的地に合わせて「山手線」「地下鉄」「お台場方面の路線」を使い分ければ、どこへでも簡単にアクセスできます。ぜひ事前に行きたいスポットの最寄り駅をチェックして、快適な東京観光を楽しんでくださいね！</p>
-
-<h2>関連記事</h2>
-<ul>
-  <li><a href="/articles/commute-30min-cheap-rent">通勤30分圏で家賃が安い駅ランキング</a></li>
-  <li><a href="/articles/tokyo-safe-area-by-route">東京で治安が良い沿線・エリアの選び方</a></li>
-  <li><a href="/articles/tokyo-train-map-beginner">東京の路線図の読み方・乗り換え方【完全初心者ガイド】</a></li>
-</ul>
-
+<ArticleLayout title={title} description={description} keywords={keywords} slug={slug} category={category} publishedDate={publishedDate} kicker={meta.kicker} readTime={meta.readTime} tag={meta.tag}>
 </ArticleLayout>

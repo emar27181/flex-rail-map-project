@@ -1,108 +1,15 @@
 ---
 import ArticleLayout from "./_ArticleLayout.astro";
+import { ARTICLE_PAGE_KEYWORDS, ARTICLE_PAGE_TRANSLATIONS } from "../../data/articleI18n";
 
-const title = "東京・首都圏の家賃が安い路線・駅ランキング【2025年版】";
-const description = "東京・首都圏の路線別1K平均家賃を比較。JR・東京メトロ・私鉄ごとに家賃相場をまとめ、インタラクティブな路線図ヒートマップで視覚的に確認できます。";
 const slug = "tokyo-rent-by-route";
+const meta = ARTICLE_PAGE_TRANSLATIONS[slug].ja;
+const title = meta.title;
+const description = meta.description;
 const publishedDate = "2025-06-06";
-const category = "引っ越し・沿線比較";
-const keywords = "東京 家賃 沿線 比較,首都圏 住みやすい 路線,1K 家賃 安い 駅,東京 引っ越し 路線,沿線 家賃相場 2025,路線図 見にくい,路線図 不安,東京 電車 わかりやすい,路線図 複雑 解説";
+const category = meta.category;
+const keywords = ARTICLE_PAGE_KEYWORDS[slug];
 ---
 
-<ArticleLayout title={title} description={description} keywords={keywords} slug={slug} category={category} publishedDate={publishedDate} kicker="住まいガイド" tag="Rent Guide">
-
-<p>
-  東京での一人暮らしを検討しているなら、<strong>どの路線・駅の家賃が安いか</strong>は最重要ポイントです。
-  都心へのアクセスを確保しながら家賃を抑えるには、路線選びが鍵になります。
-  本記事では首都圏の路線別1K平均家賃を比較し、コスパの良いエリアをわかりやすく解説します。
-</p>
-
-<div class="highlight">
-  💡 <strong>この記事のポイント</strong><br />
-  路線別・駅別の家賃をインタラクティブな路線図でビジュアルに比較できます。下のマップツールも合わせてご活用ください。
-</div>
-
-<h2>路線別 1K平均家賃の目安（2025年）</h2>
-
-<p>以下は主要路線の1K（専有面積20〜30㎡）の月額家賃の目安です。駅や物件によって大きく異なりますが、沿線の相場感の参考にしてください。</p>
-
-<table>
-  <thead>
-    <tr><th>路線</th><th>1K平均家賃（目安）</th><th>特徴</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>山手線（全線）</td><td>12〜18万円</td><td>都心直結、高め</td></tr>
-    <tr><td>中央線（三鷹〜立川）</td><td>7〜10万円</td><td>郊外でコスパ良好</td></tr>
-    <tr><td>小田急線（新宿〜本厚木）</td><td>6〜9万円</td><td>急行で新宿30分圏</td></tr>
-    <tr><td>東急田園都市線</td><td>9〜13万円</td><td>おしゃれ沿線、やや高め</td></tr>
-    <tr><td>京急線（横浜〜川崎方面）</td><td>6〜9万円</td><td>横浜アクセス良好</td></tr>
-    <tr><td>京成本線</td><td>5〜8万円</td><td>下町エリア、低め</td></tr>
-    <tr><td>南武線（川崎〜立川）</td><td>6〜9万円</td><td>川崎・立川の中間帯</td></tr>
-    <tr><td>つくばエクスプレス</td><td>6〜10万円</td><td>新しい路線・快適</td></tr>
-  </tbody>
-</table>
-
-<p class="meta">※ SUUMO・Homes.co.jp などの掲載物件をもとにした概算値です。実際の物件とは異なる場合があります。</p>
-
-<h2>家賃を抑えたいなら「都心から2〜3駅外す」が基本</h2>
-
-<p>山手線の主要駅（新宿・渋谷・池袋など）は家賃が最も高く、1Kで15万円を超えることも珍しくありません。しかし<strong>急行・特急停車駅から2〜3駅離れると、家賃が3〜5万円下がる</strong>ケースが多いです。</p>
-
-<h3>コスパが高いエリア例</h3>
-<ul>
-  <li><strong>中央線沿線（国分寺・立川）</strong>：新宿まで30〜40分、7〜9万円台が狙える</li>
-  <li><strong>小田急線沿線（登戸・向ヶ丘遊園）</strong>：新宿まで25〜30分、7〜8万円台</li>
-  <li><strong>京急線沿線（川崎・横浜寄り）</strong>：都心アクセスよし、6〜8万円台</li>
-  <li><strong>常磐線沿線（松戸・柏）</strong>：上野・秋葉原まで30〜40分、5〜7万円台</li>
-</ul>
-
-<h2>路線選びのチェックポイント</h2>
-
-<p>家賃だけでなく、以下の観点から路線を選ぶとミスマッチが減ります。</p>
-
-<ul>
-  <li>🚉 <strong>通勤時間</strong>：急行・快速があるかで30分以上変わることも</li>
-  <li>🏪 <strong>生活利便性</strong>：駅前のスーパー・コンビニ数</li>
-  <li>🔒 <strong>治安</strong>：犯罪件数・夜間の安心感</li>
-  <li>🌿 <strong>緑地・静かさ</strong>：子育て・静かな環境を求める場合</li>
-  <li>💰 <strong>物価水準</strong>：飲食・日用品の価格帯</li>
-</ul>
-
-<div class="cta-box">
-  <h3>🗺️ 路線図ヒートマップで家賃・治安・利便性を一目で比較</h3>
-  <p>Flex Rail Map の<strong>ヒートマップ機能</strong>を使えば、家賃・人口密度・飲食店数・治安スコアなど<br />複数の指標を路線図上でカラー表示して比較できます。</p>
-  <p>引っ越し先を探している方は、ぜひインタラクティブマップで理想の沿線を見つけてみてください。</p>
-  <a href="/" class="cta-btn">路線図ヒートマップを開く →</a>
-</div>
-
-
-<h2>「路線図が見にくい・不安」という方へ</h2>
-
-<p>
-  東京の路線図は路線が40本近くあり、初めて見ると「複雑すぎて不安」「どれに乗ればいいかわからない」と感じる方も多いです。
-  特に引っ越し先を検討している段階では、<strong>自分に関係する路線だけ表示できたら見やすいのに</strong>と思うはずです。
-</p>
-
-<p>
-  Flex Rail Map はまさにその悩みを解決するために作られています。
-  出発駅と到着駅を指定すると<strong>関連する路線だけに絞り込んで表示</strong>できるため、
-  複雑に見える東京の路線図をシンプルに把握できます。
-</p>
-
-<div class="highlight">
-  🗺️ <strong>使い方のポイント</strong><br />
-  上部の入力欄に「出発駅」「到着駅」を入れるだけ。関係する路線のみが強調表示されるので、
-  路線図が苦手な方でも直感的に経路を確認できます。
-</div>
-
-<h2>まとめ</h2>
-
-<p>
-  東京・首都圏の家賃は路線・駅によって大きく異なります。
-  都心アクセスを確保しながら家賃を抑えるには、<strong>急行停車駅から少し離れた駅</strong>が狙い目です。
-  また家賃だけでなく、治安・利便性・通勤時間を総合的に比較することが、後悔しない引っ越しにつながります。
-</p>
-
-<p>Flex Rail Map のヒートマップ機能では、これらの指標を路線図上でまとめて可視化できます。ぜひ活用してみてください。</p>
-
+<ArticleLayout title={title} description={description} keywords={keywords} slug={slug} category={category} publishedDate={publishedDate} kicker={meta.kicker} readTime={meta.readTime} tag={meta.tag}>
 </ArticleLayout>

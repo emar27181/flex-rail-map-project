@@ -60,6 +60,15 @@ export interface ArticleTranslation {
   tag: string;
 }
 
+export const ARTICLE_PAGE_KEYWORDS: Record<string, string> = {
+  "flex-rail-map-introduction": "フレックス路線図, 路線図 見にくい, 路線図 複雑, 必要な路線だけ, インタラクティブ路線図, 乗り換え 分かりやすい",
+  "tokyo-train-map-beginner": "東京 路線図 読み方, 乗り換え 初めて, 駅ナンバリング, 上京 電車, 訪日 電車, Flex Rail Map",
+  "tokyo-sightseeing-routes": "東京, 観光, 電車, 路線図, 浅草, 秋葉原, お台場",
+  "commute-30min-cheap-rent": "通勤, 30分, 家賃, 安い, 駅, 引っ越し, 路線",
+  "tokyo-safe-area-by-route": "東京, 治安, 良い, 沿線, 一人暮らし, 女性, 路線",
+  "tokyo-rent-by-route": "東京 家賃 沿線 比較,首都圏 住みやすい 路線,1K 家賃 安い 駅,東京 引っ越し 路線,沿線 家賃相場 2025,路線図 見にくい,路線図 不安,東京 電車 わかりやすい,路線図 複雑 解説",
+};
+
 export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, ArticleTranslation>> = {
   articles: {
     ja: {

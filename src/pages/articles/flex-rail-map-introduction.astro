@@ -3,9 +3,11 @@ import "../../styles/article-introduction.css";
 import {
   ARTICLE_LANG_LABELS,
   ARTICLE_LANGUAGES,
+  ARTICLE_PAGE_KEYWORDS,
   ARTICLE_PAGE_TRANSLATIONS,
   ARTICLE_SHELL_TRANSLATIONS,
 } from "../../data/articleI18n";
+import { ARTICLE_BODY_TRANSLATIONS } from "../../data/articleBodyI18n";
 
 const i18nPayload = JSON.stringify({
   languages: ARTICLE_LANGUAGES,
@@ -14,6 +16,9 @@ const i18nPayload = JSON.stringify({
   pages: ARTICLE_PAGE_TRANSLATIONS,
   pageKey: "flex-rail-map-introduction",
 });
+const meta = ARTICLE_PAGE_TRANSLATIONS["flex-rail-map-introduction"].ja;
+const bodyTranslations = ARTICLE_BODY_TRANSLATIONS["flex-rail-map-introduction"];
+const keywords = ARTICLE_PAGE_KEYWORDS["flex-rail-map-introduction"];
 ---
 
 <!DOCTYPE html>
@@ -21,11 +26,11 @@ const i18nPayload = JSON.stringify({
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>東京の路線図を「理解しやすく」する路線図UIを作っています | フレックス路線図</title>
-  <meta name="description" content="情報が多すぎて見にくい東京の路線図。必要な路線だけを表示して『今どう進んでいるか』を理解しやすくする路線図UI、フレックス路線図の紹介です。" />
-  <meta name="keywords" content="フレックス路線図, 路線図 見にくい, 路線図 複雑, 必要な路線だけ, インタラクティブ路線図, 乗り換え 分かりやすい" />
+  <title>{meta.title} | Flex Rail Map</title>
+  <meta name="description" content={meta.description} />
+  <meta name="keywords" content={keywords} />
   <meta name="theme-color" content="#4CAF50" />
-  <meta property="og:title" content="東京の路線図を「理解しやすく」する路線図UIを作っています" />
+  <meta property="og:title" content={meta.title} />
   <meta property="og:type" content="article" />
 
   <script is:inline>
@@ -47,7 +52,7 @@ const i18nPayload = JSON.stringify({
     <div class="row">
       <a href="/" class="brand"><span class="mk"></span><span data-i18n="brand">フレックス路線図</span></a>
       <div class="mh-actions">
-        <span class="tagpill" data-i18n-page="tag">Dev Notes</span>
+        <span class="tagpill" data-i18n-page="tag">{meta.tag}</span>
         <button class="lang-btn" id="langBtn" aria-label="言語を切り替え" title="言語を切り替え">En</button>
         <button class="theme-btn" id="themeBtn" aria-label="ダークモード切り替え">
           <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -61,107 +66,41 @@ const i18nPayload = JSON.stringify({
     <nav class="crumb"><a href="/" data-i18n="top">← フレックス路線図 トップ</a> ／ <a href="/articles" data-i18n="articles">記事一覧</a></nav>
 
     <header class="post">
-      <span class="kicker" data-i18n-page="kicker">開発ノート</span>
-      <h1 data-i18n-page="title">東京の路線図を「理解しやすく」するための路線図UIを作っています</h1>
-      <p class="lede" data-i18n-page="description">東京の路線図って、正直かなり難しいと思う。情報量が多く、分岐も多く、初めて見る人には「結局どこを見ればいいのか分からない」状態になりやすい。そんなモヤモヤを、ひとつずつ減らしていくために作っているのが <strong>フレックス路線図</strong> です。</p>
+      <span class="kicker" data-i18n-page="kicker">{meta.kicker}</span>
+      <h1 data-i18n-page="title">{meta.title}</h1>
+      <p class="lede" data-i18n-page="description">{meta.description}</p>
       <div class="byline">
-        <span>2025年6月6日</span><span class="sep">／</span><span data-i18n-page="category">開発ノート・サービス紹介</span><span class="sep">／</span><span data-i18n-page="readTime">読了 約5分</span>
+        <span>2025年6月6日</span><span class="sep">／</span><span data-i18n-page="category">{meta.category}</span><span class="sep">／</span><span data-i18n-page="readTime">{meta.readTime}</span>
       </div>
     </header>
 
     <!-- ================= HERO DEMO ================= -->
     <section class="demo" aria-label="必要な路線だけ表示するデモ">
       <div class="demo-top">
-        <div class="demo-ey">まずは触ってみてください</div>
-        <p class="demo-q">路線が全部出ていると、どこを見ればいいか分かりにくい。<br />でも——必要な路線だけにすると？</p>
-        <p class="demo-hint">下のボタンを切り替えると、表示する路線が変わります。情報を「減らす」だけで、どれだけ見やすくなるかを体験してみてください。</p>
+        <div class="demo-ey" data-intro-demo="ey">まずは触ってみてください</div>
+        <p class="demo-q" data-intro-demo="question">路線が全部出ていると、どこを見ればいいか分かりにくい。<br />でも——必要な路線だけにすると？</p>
+        <p class="demo-hint" data-intro-demo="hint">下のボタンを切り替えると、表示する路線が変わります。情報を「減らす」だけで、どれだけ見やすくなるかを体験してみてください。</p>
       </div>
       <div class="seg" role="tablist" aria-label="表示モード">
-        <button id="modeAll" role="tab" aria-selected="true">ぜんぶ表示 <span class="n" id="nAll">（20）</span></button>
-        <button id="modeClean" role="tab" aria-selected="false">必要な路線だけ <span class="n">（3）</span></button>
+        <button id="modeAll" role="tab" aria-selected="true"><span data-intro-demo="all">ぜんぶ表示</span> <span class="n" id="nAll">（20）</span></button>
+        <button id="modeClean" role="tab" aria-selected="false"><span data-intro-demo="clean">必要な路線だけ</span> <span class="n">（3）</span></button>
       </div>
       <div class="stage-wrap" id="stage">
         <svg id="map" viewBox="0 0 720 480" role="img" aria-label="東京の路線を簡略化した概念図"></svg>
       </div>
       <div class="readout">
-        <span class="countpill"><span class="big" id="cnt">20</span><span>路線を表示中</span></span>
-        <span class="arrow" id="arrowTxt">← ボタンで「必要な路線だけ」に絞れます</span>
+        <span class="countpill"><span class="big" id="cnt">20</span><span data-intro-demo="showing">路線を表示中</span></span>
+        <span class="arrow" id="arrowTxt" data-intro-demo="arrow">← ボタンで「必要な路線だけ」に絞れます</span>
       </div>
-      <div class="demo-note">※ これは仕組みを伝えるための概念図です。実際の駅の位置・路線の形・接続とは異なります。色は各路線のイメージに合わせた参考値です。</div>
+      <div class="demo-note" data-intro-demo="note">※ これは仕組みを伝えるための概念図です。実際の駅の位置・路線の形・接続とは異なります。色は各路線のイメージに合わせた参考値です。</div>
     </section>
-    <p class="figcap">体験デモ：表示する路線を絞り込むと、ごちゃごちゃした路線図が「自分のための地図」に変わる。</p>
-
+    <p class="figcap" data-intro-demo="caption">体験デモ：表示する路線を絞り込むと、ごちゃごちゃした路線図が「自分のための地図」に変わる。</p>
     <article>
-      <h2><span class="num">01</span><span>なぜ作りたかったのか</span></h2>
-      <p>きっかけは、自分自身が電車の中でよく不安になっていたから。たとえば——</p>
-      <ul class="feelist">
-        <li><span class="q">？</span><span>今、どちら方向に進んでいるんだろう</span></li>
-        <li><span class="q">？</span><span>この電車は、本当に目的地の方面で合ってる？</span></li>
-        <li><span class="q">？</span><span>目的の駅まで、あと何駅・何分あるんだろう</span></li>
-        <li><span class="q">？</span><span>分岐したあと、この電車はどこへ向かうんだろう</span></li>
-      </ul>
-      <p>特に、<strong>人が多くて電光掲示板が見えない</strong>、<strong>イヤホンでアナウンスを聞き逃した</strong>、<strong>ぼーっとしていて現在地を見失った</strong>——そんな状況だと、一気に不安になる。この「分からなくて不安」を減らせないか、というのが出発点でした。</p>
-
-      <h2><span class="num">02</span><span>既存サービスにも、足りないものがあった</span></h2>
-      <p>もちろん乗換案内アプリはとても便利。ただ「最適なルートを出す」ことには強い一方で、<strong>今どこを走っているか／路線がどう繋がっているか／分岐後どこへ向かうか／どちら方向に進んでいるか</strong>を理解するには、少し向いていないと感じました。</p>
-      <p>反対に、従来の路線図には、路線同士の繋がりや分岐構造、都市全体の流れを「<strong>絵</strong>」として理解できる良さがある。でも東京の路線図は情報量が多すぎて、必要な情報を探すだけでも大変。「最適解を出す」のではなく、<strong>利用者自身が状況を理解できる</strong>——その間を埋めたかった。</p>
-
-      <div class="shot">
-        <div class="bar"><i></i><i></i><i></i><span class="u">flex-railway-map.netlify.app</span></div>
-        <div class="ph">
-          <span class="lbl">［ アプリ実画面のスクリーンショット ］</span>
-          <span class="sub">あとで実際の画面 or ライブiframeに差し替え</span>
-        </div>
+      <div class="article-body-variants">
+        {ARTICLE_LANGUAGES.map((lang) => bodyTranslations?.[lang] && (
+          <div data-article-body={lang} hidden={lang !== "ja"} set:html={bodyTranslations[lang]} />
+        ))}
       </div>
-      <p class="figcap">プレースホルダー：ここに実際のフレックス路線図の画面（絞り込み前後）を入れる予定。</p>
-
-      <h2><span class="num">03</span><span>フレックス路線図がやること</span></h2>
-      <p>コンセプトはシンプルで、「<strong>必要な情報だけを表示して、今どう進んでいるかを理解しやすくする</strong>」こと。情報を増やすのではなく、不要な情報を減らすことを大事にしています。</p>
-      <div class="cards">
-        <div class="card">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h16M4 18h7"/></svg></div>
-          <h4>必要な路線だけ表示</h4>
-          <p>普通の路線図は全部を一度に出す。でも見たいのは、その瞬間に必要な路線だけ。「山手線だけ」「小田急線だけ」と絞り込めます。</p>
-        </div>
-        <div class="card">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5 8 12 8 12s8-7 8-12a8 8 0 0 0-8-8z"/></svg></div>
-          <h4>「今どこ？」が分かる</h4>
-          <p>移動中に不安になりがちな現在地・通過駅・所要時間・方向を、路線図の上で見やすく示すことを目指しています。</p>
-        </div>
-        <div class="card">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v6a6 6 0 0 0 6 6 6 6 0 0 0 6 6M6 21V3M18 21v-6"/></svg></div>
-          <h4>分岐・行き先が分かる</h4>
-          <p>同じ小田急線でも小田原・江ノ島・多摩線方面に分かれる。「どこ行きなのか」による違いを、視覚的に理解しやすくします。</p>
-        </div>
-      </div>
-
-      <h2><span class="num">04</span><span>こんな時に使えます</span></h2>
-      <div class="uses">
-        <div class="use"><div class="t"><span class="dot"></span>はじめての路線で不安なとき</div><p>上京・出張・観光で土地勘がなくても、使う路線だけを表示して流れを追える。</p></div>
-        <div class="use"><div class="t"><span class="dot"></span>遅延・運休のイレギュラー時</div><p>最適解が崩れた時こそ、路線のつながりを見て「自分で」迂回を判断できる。</p></div>
-        <div class="use"><div class="t"><span class="dot"></span>毎日の通勤ルートの確認</div><p>いつもの路線だけを残して、分岐や行き先を素早くチェックできる。</p></div>
-        <div class="use"><div class="t"><span class="dot"></span>漢字が読めない・訪日のとき</div><p>方向や流れを「絵」で把握できるので、駅名が読めなくても進む向きが分かる。</p></div>
-      </div>
-
-      <h2><span class="num">05</span><span>これからやりたいこと</span></h2>
-      <p>まだ開発途中ですが、これから少しずつ足していきたい機能があります。</p>
-      <ul>
-        <li>快速急行だけ / 各停だけ、といった<strong>種別での絞り込み</strong></li>
-        <li>遅延・運休のリアルタイム反映、時刻表の地図表示、列車位置の可視化</li>
-        <li>現在地・方向表示で「今どう進んでいるか」をリアルタイムに理解</li>
-        <li>路線の歴史や年代ごとの路線図など、見て楽しい可視化</li>
-      </ul>
-      <p>さらに将来は、鉄道だけでなく<strong>高速道路・バス路線・河川</strong>といった「線状ネットワーク」へも応用できたら面白いと思っています。大事なのは「地図を見る」ことではなく、「<strong>線の流れや繋がりを理解する</strong>」こと。フレックス路線図は、その考え方を試す場所でもあります。</p>
-
-      <div class="cta">
-        <div class="ey">Try it now</div>
-        <h3>まずは、自分のルートに関係する路線だけを表示してみてください</h3>
-        <p>フレックス路線図は、出発駅と到着駅に関連する路線だけを絞り込めるインタラクティブ路線図。39路線の表示ON/OFFや乗換駅フィルターで、複雑な東京の路線図を“自分仕様”に整理できます。まだ未完成ですが、ぜひ触ってみてください。</p>
-        <a class="btn" href="/">フレックス路線図をひらく <span class="ar">→</span></a>
-      </div>
-
-      <h2><span class="num">06</span><span>最後に</span></h2>
-      <p>フレックス路線図は、単なる乗換案内ではなく「<strong>人間が理解しやすい路線図</strong>」を目指しています。最適解を提示して終わりではなく、利用者自身が「今どう進んでいるか」を理解できること。まだ道半ばですが、不安を少しでも減らせる路線図にしていきたいと思っています。もし興味があれば、ぜひ触ってみてください。</p>
     </article>
 
     <div class="foot">
@@ -191,6 +130,57 @@ const i18nPayload = JSON.stringify({
       var pageKey = data.pageKey || 'flex-rail-map-introduction';
       var root = document.documentElement;
       var btn = document.getElementById('langBtn');
+      var introDemoTexts = {
+        ja: {
+          ey: 'まずは触ってみてください',
+          question: '路線が全部出ていると、どこを見ればいいか分かりにくい。<br />でも——必要な路線だけにすると？',
+          hint: '下のボタンを切り替えると、表示する路線が変わります。情報を「減らす」だけで、どれだけ見やすくなるかを体験してみてください。',
+          all: 'ぜんぶ表示',
+          clean: '必要な路線だけ',
+          showing: '路線を表示中',
+          arrow: '← ボタンで「必要な路線だけ」に絞れます',
+          arrowClean: '必要な3路線だけ。ぐっと見やすくなりました ✓',
+          note: '※ これは仕組みを伝えるための概念図です。実際の駅の位置・路線の形・接続とは異なります。色は各路線のイメージに合わせた参考値です。',
+          caption: '体験デモ：表示する路線を絞り込むと、ごちゃごちゃした路線図が「自分のための地図」に変わる。'
+        },
+        en: {
+          ey: 'Try it first',
+          question: 'When every line is visible, it is hard to know where to look.<br />But what if only the necessary lines remain?',
+          hint: 'Use the buttons below to switch the visible lines and feel how reducing information makes the map easier to read.',
+          all: 'Show all',
+          clean: 'Needed lines only',
+          showing: 'lines shown',
+          arrow: '← Use the button to narrow the map to only the needed lines',
+          arrowClean: 'Only 3 needed lines remain. Much easier to read ✓',
+          note: 'This is a conceptual diagram for explaining the idea. Actual station positions, line shapes, and connections differ.',
+          caption: 'Demo: filtering visible lines turns a crowded map into a map for your own trip.'
+        },
+        zh: {
+          ey: '先试试看',
+          question: '所有线路都显示时，很难知道该看哪里。<br />如果只留下需要的线路呢？',
+          hint: '切换下面的按钮即可改变显示线路。试试看减少信息后路线图会变得多容易读。',
+          all: '全部显示',
+          clean: '只显示需要线路',
+          showing: '条线路显示中',
+          arrow: '← 使用按钮只保留需要的线路',
+          arrowClean: '只剩 3 条需要的线路，清楚多了 ✓',
+          note: '※ 这是用于说明机制的概念图。实际车站位置、线路形状和连接关系会有所不同。',
+          caption: '体验演示：筛选显示线路后，拥挤的路线图会变成适合自己的地图。'
+        },
+        ko: {
+          ey: '먼저 사용해 보세요',
+          question: '모든 노선이 보이면 어디를 봐야 할지 어렵습니다.<br />그런데 필요한 노선만 남기면 어떨까요?',
+          hint: '아래 버튼을 바꾸면 표시되는 노선이 달라집니다. 정보를 줄이는 것만으로 얼마나 읽기 쉬워지는지 확인해 보세요.',
+          all: '전체 표시',
+          clean: '필요한 노선만',
+          showing: '개 노선 표시 중',
+          arrow: '← 버튼으로 필요한 노선만 남길 수 있습니다',
+          arrowClean: '필요한 3개 노선만 남았습니다. 훨씬 읽기 쉬워졌습니다 ✓',
+          note: '※ 작동 방식을 설명하기 위한 개념도입니다. 실제 역 위치, 노선 형태, 연결과는 다릅니다.',
+          caption: '체험 데모: 표시 노선을 줄이면 복잡한 노선도가 내 이동을 위한 지도로 바뀝니다.'
+        }
+      };
+      window.__INTRO_DEMO__ = { texts: introDemoTexts, current: 'ja' };
 
       function normalize(value) {
         if (!value) return null;
@@ -205,6 +195,25 @@ const i18nPayload = JSON.stringify({
       function nextLang(lang) {
         var index = languages.indexOf(lang);
         return languages[(index + 1) % languages.length] || 'ja';
+      }
+
+      function applyArticleBody(lang) {
+        var hasLang = false;
+        document.querySelectorAll('[data-article-body]').forEach(function(body) {
+          var active = body.getAttribute('data-article-body') === lang;
+          if (active) hasLang = true;
+          body.hidden = !active;
+        });
+        if (!hasLang && lang !== 'ja') applyArticleBody('ja');
+      }
+
+      function applyIntroDemo(lang) {
+        var texts = introDemoTexts[lang] || introDemoTexts.ja;
+        window.__INTRO_DEMO__.current = lang;
+        document.querySelectorAll('[data-intro-demo]').forEach(function(el) {
+          var key = el.getAttribute('data-intro-demo');
+          if (texts[key]) el.innerHTML = texts[key];
+        });
       }
 
       function apply(lang) {
@@ -226,6 +235,8 @@ const i18nPayload = JSON.stringify({
           var desc = document.querySelector('meta[name="description"]');
           if (desc && page.description) desc.setAttribute('content', page.description);
         }
+        applyArticleBody(lang);
+        applyIntroDemo(lang);
         if (btn) {
           var next = nextLang(lang);
           btn.textContent = labelMap[next] || next;
@@ -233,13 +244,18 @@ const i18nPayload = JSON.stringify({
           btn.setAttribute('title', shell.switchLanguage || 'Switch language');
           btn.setAttribute('data-current-lang', lang);
         }
-        try { localStorage.setItem('frm-article-lang', lang); } catch (e) {}
+        try {
+          localStorage.setItem('frm-language', { ja: 'japanese', en: 'english', zh: 'chinese', ko: 'korean' }[lang] || lang);
+          localStorage.setItem('frm-article-lang', lang);
+        } catch (e) {}
       }
 
       var params = new URLSearchParams(window.location.search);
       var initial = normalize(params.get('lang'));
       if (!initial) {
-        try { initial = normalize(localStorage.getItem('frm-article-lang')); } catch (e) {}
+        try {
+          initial = normalize(localStorage.getItem('frm-language')) || normalize(localStorage.getItem('frm-article-lang'));
+        } catch (e) {}
       }
       apply(initial || 'ja');
       if (btn) {
@@ -320,13 +336,15 @@ const i18nPayload = JSON.stringify({
       var essN=LINES.filter(function(l){return l.ess;}).length;
 
       function set(clean){
+        var demo = window.__INTRO_DEMO__ || {};
+        var texts = (demo.texts && demo.texts[demo.current]) || (demo.texts && demo.texts.ja) || {};
         nonEssG.forEach(function(g){ g.style.opacity=clean?'0':'1'; });
         labels.forEach(function(t){ t.style.opacity=clean?'1':'0'; });
         gh.style.opacity=clean?'0':'1';
         if(bAll) bAll.setAttribute('aria-selected',clean?'false':'true');
         if(bClean) bClean.setAttribute('aria-selected',clean?'true':'false');
         if(cnt) cnt.textContent=clean?essN:LINES.length;
-        if(arrow) arrow.textContent=clean?'必要な3路線だけ。ぐっと見やすくなりました ✓':'← ボタンで「必要な路線だけ」に絞れます';
+        if(arrow) arrow.textContent=clean?(texts.arrowClean || '必要な3路線だけ。ぐっと見やすくなりました ✓'):(texts.arrow || '← ボタンで「必要な路線だけ」に絞れます');
       }
       bAll.addEventListener('click',function(){set(false);});
       bClean.addEventListener('click',function(){set(true);});

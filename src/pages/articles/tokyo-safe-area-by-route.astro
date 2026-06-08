@@ -1,63 +1,15 @@
 ---
 import ArticleLayout from "./_ArticleLayout.astro";
+import { ARTICLE_PAGE_KEYWORDS, ARTICLE_PAGE_TRANSLATIONS } from "../../data/articleI18n";
 
-const title = "東京で治安が良い沿線・エリアの選び方【一人暮らし女性必見】";
-const description = "東京で一人暮らしを始める方に向けて、治安が良い沿線とエリアの選び方を解説。犯罪発生率や駅周辺の環境データを基に、安心して住める路線を紹介します。";
 const slug = "tokyo-safe-area-by-route";
+const meta = ARTICLE_PAGE_TRANSLATIONS[slug].ja;
+const title = meta.title;
+const description = meta.description;
 const publishedDate = "2025-06-06";
-const category = "引っ越し・住まい";
-const keywords = "東京, 治安, 良い, 沿線, 一人暮らし, 女性, 路線";
+const category = meta.category;
+const keywords = ARTICLE_PAGE_KEYWORDS[slug];
 ---
 
-<ArticleLayout title={title} description={description} keywords={keywords} slug={slug} category={category} publishedDate={publishedDate} kicker="住まいガイド" tag="Safety Guide">
-
-<p>東京での一人暮らし、特に女性にとって「治安の良さ」は物件選びの最重要ポイントの一つです。しかし、「どのエリアが安全なのか」「どの沿線を選べばいいのか」は、土地勘がないと中々わかりませんよね。</p>
-
-<p>実は、東京の治安は「どの路線に住むか」によっても大きく傾向が変わります。この記事では、客観的なデータや駅周辺の環境から、治安が良く安心して暮らせるおすすめの沿線・エリアをご紹介します。</p>
-
-<div class="highlight">
-  <strong>💡 この記事のポイント</strong>
-  <ul>
-    <li>繁華街・飲み屋街を避けるのが治安対策の基本</li>
-    <li>おすすめは「東急沿線」や「都営地下鉄沿線」の住宅街エリア</li>
-    <li>治安マップ（ヒートマップ）を活用して実際のデータを確認しよう</li>
-  </ul>
-</div>
-
-<h2>1. 治安の良い路線・エリアの特徴とは？</h2>
-<p>治安が良いとされるエリアには、いくつか共通する特徴があります。物件を探す際は、以下のポイントを意識して駅を選びましょう。</p>
-<ul>
-  <li><strong>大きな繁華街や歓楽街がない</strong>：居酒屋や風俗店が密集するエリアは、どうしてもトラブルが増えやすくなります。</li>
-  <li><strong>ファミリー層が多く住む住宅街</strong>：学校や公園が多く、地域住民の防犯意識が高い傾向があります。</li>
-  <li><strong>夜でも適度に明るく、人通りがある</strong>：駅から家までの道が暗すぎないことも重要です。深夜まで営業しているスーパーなどがあると安心です。</li>
-</ul>
-
-<h2>2. 治安の良さで選ぶ！おすすめ沿線ベスト3</h2>
-<p>ここでは、東京都内で特に治安が良く、一人暮らしの方に人気の高い沿線を3つピックアップしました。</p>
-
-<h3>第1位：東急大井町線・東急池上線</h3>
-<p>世田谷区や品川区、大田区などの落ち着いた住宅街を走る東急沿線は、全体的に治安が非常に良好です。特に大井町線や池上線沿線は、大きな繁華街がなく、地域に根ざした商店街が充実しているため、生活しやすく安全です。</p>
-
-<h3>第2位：都営三田線（文京区・板橋区エリア）</h3>
-<p>都営三田線の「白山」や「千石」などの文京区エリアは、学校や警察関連施設が多く、都内トップクラスの治安の良さを誇ります。また、板橋区寄りのエリア（「志村坂上」など）も、ファミリー層が多く穏やかな住環境です。</p>
-
-<h3>第3位：京王井の頭線</h3>
-<p>渋谷と吉祥寺を結ぶ人気路線。沿線には大学が多く、若者やファミリーに人気の住宅街が広がっています。「浜田山」や「永福町」周辺などは、治安が良く緑も豊かなため、女性の一人暮らしに特におすすめです。</p>
-
-<div class="cta-box">
-  <h3>気になる駅の「治安スコア」を地図で確認！</h3>
-  <p>Flex Rail Mapの<strong>ヒートマップ機能</strong>を使えば、「治安スコア」や「犯罪件数」といったデータを地図上で色分けして確認できます。住みたいエリアが本当に安全か、直感的にチェックしてみましょう！</p>
-  <a href="/" class="cta-btn">治安ヒートマップを使ってみる</a>
-</div>
-
-<h2>まとめ：自分に合った「安心できる街」を見つけよう</h2>
-<p>東京は全体的に見れば世界でも非常に安全な都市ですが、エリアによって雰囲気は大きく異なります。今回紹介した沿線を参考にしつつ、Flex Rail Mapの治安データなども活用して、あなたが安心して暮らせる街を見つけてください。</p>
-
-<h2>関連記事</h2>
-<ul>
-  <li><a href="/articles/tokyo-sightseeing-routes">東京観光で使える路線ガイド（浅草・秋葉原・原宿・お台場）</a></li>
-  <li><a href="/articles/commute-30min-cheap-rent">通勤30分圏で家賃が安い駅ランキング</a></li>
-  <li><a href="/articles/tokyo-train-map-beginner">東京の路線図の読み方・乗り換え方【完全初心者ガイド】</a></li>
-</ul>
-
+<ArticleLayout title={title} description={description} keywords={keywords} slug={slug} category={category} publishedDate={publishedDate} kicker={meta.kicker} readTime={meta.readTime} tag={meta.tag}>
 </ArticleLayout>
