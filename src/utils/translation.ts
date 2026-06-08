@@ -2362,8 +2362,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Station Filter"
   },
   settingsGroupMap: {
-    japanese: "地図表示",
-    english: "Map Display"
+    japanese: "表示切替",
+    english: "Display Toggles"
   },
   settingsLabelSize: {
     japanese: "ラベルサイズ",
@@ -2427,8 +2427,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Failed to apply settings"
   },
   transferHighlight: {
-    japanese: "乗換強調表示",
-    english: "Highlight Transfers"
+    japanese: "乗換駅強調表示",
+    english: "Highlight Transfer Stations"
   },
   routeLineWidth: {
     japanese: "路線の太さ",
@@ -2667,7 +2667,7 @@ export const uiChinese: Record<string, string> = {
   settingsGroupLabel: "站点标签",
   settingsGroupViz: "数据可视化",
   settingsGroupFilter: "站点筛选",
-  settingsGroupMap: "地图显示",
+  settingsGroupMap: "显示切换",
   settingsLabelSize: "标签大小",
   settingsIconSize: "图标大小",
   configSaveLoad: "保存·读取设置",
@@ -2683,7 +2683,7 @@ export const uiChinese: Record<string, string> = {
   configImportErrorJson: "JSON格式不正确",
   configImportErrorFile: "文件读取失败",
   configImportErrorApply: "设置应用失败",
-  transferHighlight: "换乘高亮显示",
+  transferHighlight: "换乘站高亮显示",
   routeLineWidth: "路线宽度",
   bubbleMaxRadius: "最大半径",
   schematicMapLabel: "路线图显示（开发中）",
@@ -2883,7 +2883,7 @@ export const uiKorean: Record<string, string> = {
   settingsGroupLabel: "역 레이블",
   settingsGroupViz: "데이터 시각화",
   settingsGroupFilter: "역 필터",
-  settingsGroupMap: "지도 표시",
+  settingsGroupMap: "표시 전환",
   settingsLabelSize: "레이블 크기",
   settingsIconSize: "아이콘 크기",
   configSaveLoad: "설정 저장·불러오기",
@@ -2899,7 +2899,7 @@ export const uiKorean: Record<string, string> = {
   configImportErrorJson: "JSON 형식이 올바르지 않습니다",
   configImportErrorFile: "파일 읽기 실패",
   configImportErrorApply: "설정 적용 실패",
-  transferHighlight: "환승 강조 표시",
+  transferHighlight: "환승역 강조 표시",
   routeLineWidth: "노선 두께",
   bubbleMaxRadius: "최대 반경",
   schematicMapLabel: "노선도 표시（개발 중）",
