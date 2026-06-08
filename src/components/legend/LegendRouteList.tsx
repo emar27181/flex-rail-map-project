@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { RouteKey } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation'
@@ -153,6 +153,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   const [groupFilterOpen, setGroupFilterOpen] = useState(false);
   const [groupMapOpen,    setGroupMapOpen]    = useState(false);
 
+  useEffect(() => { if (heatmapEnabled) setGroupVizOpen(true); }, [heatmapEnabled]);
+
   // HEX色をHue値(0-360)に変換
   const hexToHue = (hex: string): number => {
     const r = parseInt(hex.slice(1, 3), 16) / 255;
@@ -194,7 +196,6 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
     }
     return 0;
   });
-  void sortedVisibleRoutesData;
 
   const sectionHeader = (label: string, isOpen: boolean, onToggle: () => void) => (
     <div
@@ -268,7 +269,9 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
       </div>
 
       {(() => {
-        const allRoutes = [...routeOrder].filter(rk => visibleRoutesData.some(([k]) => k === rk));
+        const allRoutes: RouteKey[] = sortMode === 'default'
+          ? [...routeOrder].filter(rk => visibleRoutesData.some(([k]) => k === rk))
+          : sortedVisibleRoutesData.map(([k]) => k as RouteKey);
         const shown = routeListExpanded ? allRoutes : allRoutes.slice(0, ROUTE_LIST_LIMIT);
         const hidden = allRoutes.length - shown.length;
         return (
@@ -345,6 +348,10 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {sectionHeader(translateUI('settingsGroupLabel', language), groupLabelOpen, () => setGroupLabelOpen(v => !v))}
             {groupLabelOpen && (
               <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
+                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={showTransferStationsOnly} onChange={e => onShowTransferStationsOnlyChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                  {translateUI('showOnlyTransferStations', language)}
+                </label>
                 <label style={checkboxLabel(colors)}>
                   <input type="checkbox" checked={showTravelTimes} onChange={e => onShowTravelTimesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
                   {translateUI('showTravelTimes', language)}
@@ -436,10 +443,6 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {sectionHeader(translateUI('settingsGroupFilter', language), groupFilterOpen, () => setGroupFilterOpen(v => !v))}
             {groupFilterOpen && (
               <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showTransferStationsOnly} onChange={e => onShowTransferStationsOnlyChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
-                  {translateUI('showOnlyTransferStations', language)}
-                </label>
                 <label style={checkboxLabel(colors)}>
                   <input type="checkbox" checked={showExpressStationsOnly} onChange={e => onShowExpressStationsOnlyChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
                   {translateUI('showOnlyExpressStations', language)}
