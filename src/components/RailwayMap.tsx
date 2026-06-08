@@ -146,7 +146,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 表示モードの管理
   const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
   const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
-  const [showStationTierBadges, setShowStationTierBadges] = useState(true); // 乗り入れ路線数リング表示
+  const [showStationTierBadges, setShowStationTierBadges] = useState(false); // 乗り入れ路線数リング表示
   const [showTravelTimes, setShowTravelTimes] = useState(false);
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
@@ -242,7 +242,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [heatmapRangeFilterEnabled, setHeatmapRangeFilterEnabled] = useState(false);
   const [heatmapParamListOpen, setHeatmapParamListOpen] = useState(false);
   const [showStationTooltip, setShowStationTooltip] = useState(false);
-  const [showFullRouteStations, setShowFullRouteStations] = useState(true);
+  const [showFullRouteStations, setShowFullRouteStations] = useState(false);
   const [showRouteLine, setShowRouteLine] = useState(true);
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
@@ -293,11 +293,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // スマホでのパン直後の誤タップを防ぐフラグ
   const mapDraggedRef = useRef(false);
-
-  // 出発駅の有無に応じて時間表示モードを自動切り替え
-  React.useEffect(() => {
-    setTravelTimeLabelMode(departure ? 'cumulative' : 'interval');
-  }, [!!departure]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ツールチップが変わったらドラッグオフセットをリセット
   React.useEffect(() => { setTooltipDragOffset({ dx: 0, dy: 0 }); }, [stationTooltip?.stationName]);
@@ -3137,14 +3132,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               ? displayStations.findIndex(s => s.name === departure!.name)
               : -1;
             const getTimeAt = (idx: number): number => {
-              if (!isCumulative || depIdx < 0) return -1;
-              // 乗り換えを跨いだ全体累積マップがあれば優先使用
-              const nextName = displayStations[idx]?.name;
-              if (globalCumulativeTimeMap.size > 0 && nextName) {
-                const t = globalCumulativeTimeMap.get(nextName);
+              if (!isCumulative) return -1;
+              // 乗り換えを跨いだ全体累積マップがあれば depIdx に関係なく使用
+              const stationName = displayStations[idx]?.name;
+              if (globalCumulativeTimeMap.size > 0 && stationName) {
+                const t = globalCumulativeTimeMap.get(stationName);
                 if (t !== undefined) return t;
               }
-              // フォールバック: 同一路線内での累積
+              // フォールバック: 同一路線内での累積（depIdx が必要）
+              if (depIdx < 0) return -1;
               let t = 0;
               if (idx >= depIdx) {
                 for (let i = depIdx; i < idx; i++) t += displayStations[i].timeToNext || 3;
@@ -3174,7 +3170,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               // 隣接する駅も乗換駅なら個別表示、それ以外は合算表示
               if (endIndex === index + 1) {
                 const midpoint = getMidpoint(station.lat, station.lng, nextStation.lat, nextStation.lng);
-                const displayTime = isCumulative && depIdx >= 0
+                const displayTime = isCumulative && (depIdx >= 0 || globalCumulativeTimeMap.size > 0)
                   ? getTimeAt(index + 1)
                   : station.timeToNext;
                 const timeIcon = createTimeIcon(displayTime, routeColor, zoomLevel, isCumulative);
@@ -3189,7 +3185,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 );
               } else {
                 const midpoint = getRouteBasedMidpoint(displayStations, index, endIndex);
-                const displayTime = isCumulative && depIdx >= 0
+                const displayTime = isCumulative && (depIdx >= 0 || globalCumulativeTimeMap.size > 0)
                   ? getTimeAt(endIndex)
                   : totalTime;
                 const timeIcon = createTimeIcon(displayTime, routeColor, zoomLevel, true);
