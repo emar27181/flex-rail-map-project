@@ -1,4 +1,6 @@
 ---
+import ArticleLayout from "./_ArticleLayout.astro";
+
 // 記事のメタデータをリスト化します。
 const articles = [
   {
@@ -33,42 +35,21 @@ const articles = [
   }
 ];
 
-const title = "記事一覧 | Flex Rail Map";
+const title = "記事一覧";
 const description = "Flex Rail Mapの路線図や駅データを活用した、東京の観光、通勤、引っ越しに関するお役立ち記事一覧です。";
-const siteUrl = "https://flex-railway-map.netlify.app";
 ---
 
-<html lang="ja">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{title}</title>
-  <meta name="description" content={description} />
-  <link rel="canonical" href={`${siteUrl}/articles`} />
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif; max-width: 800px; margin: 0 auto; padding: 16px 20px 60px; color: #222; line-height: 1.8; font-size: 16px; }
-    h1 { font-size: 1.7rem; line-height: 1.4; margin-bottom: 24px; border-bottom: 2px solid #2196F3; padding-bottom: 8px;}
-    .article-list { list-style: none; padding: 0; }
-    .article-list li { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 16px; }
-    .article-list a { color: #1976D2; text-decoration: none; font-size: 1.1rem; font-weight: bold; }
-    .article-list a:hover { text-decoration: underline; }
-    .meta { color: #888; font-size: 0.85rem; margin-top: 4px; }
-    nav { margin-bottom: 1.5em; font-size: 0.85rem; }
-    nav a { color: #1976D2; text-decoration: none; }
-    nav a:hover { text-decoration: underline; }
-  </style>
-</head>
-<body>
-  <nav><a href="/">← トップに戻る</a></nav>
-  <h1>Flex Rail Map 記事一覧</h1>
-  <ul class="article-list">
+<ArticleLayout title={title} description={description} slug="" category="記事一覧" kicker="記事一覧" tag="Articles" readTime="全記事" canonicalPath="/articles" kind="index">
+  <section class="article-index" aria-label="記事一覧">
+    <ul class="article-list">
     {articles.map(article => (
       <li>
-        <a href={`/articles/${article.slug}`}>{article.title}</a>
-        <div class="meta">{article.publishedDate.slice(0, 7).replace('-', '年')}月 ｜ カテゴリ: {article.category}</div>
+        <a href={`/articles/${article.slug}`}>
+          <span class="article-card-title">{article.title}</span>
+          <span class="meta">{article.publishedDate.slice(0, 7).replace('-', '年')}月 ｜ カテゴリ: {article.category}</span>
+        </a>
       </li>
     ))}
-  </ul>
-</body>
-</html>
+    </ul>
+  </section>
+</ArticleLayout>

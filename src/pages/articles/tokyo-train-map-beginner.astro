@@ -1,471 +1,203 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>東京の路線図の読み方・乗り換え方【完全初心者ガイド】 | Flex Rail Map</title>
-  <meta name="description" content="上京・訪日で初めて東京の電車に乗る人へ。複雑に見える路線図の読み方と乗り換えの基本を、色・駅ナンバリング・方面確認の3ステップでやさしく解説します。" />
-  <meta name="keywords" content="東京 路線図 読み方, 乗り換え 初めて, 駅ナンバリング, 上京 電車, 訪日 電車, Flex Rail Map" />
+---
+import ArticleLayout from "./_ArticleLayout.astro";
 
-  <!-- og / schema は .astro 化のとき有効化 -->
-  <meta property="og:title" content="東京の路線図の読み方・乗り換え方【完全初心者ガイド】" />
-  <meta property="og:type" content="article" />
+const title = "東京の路線図の読み方・乗り換え方【完全初心者ガイド】";
+const description = "上京・訪日で初めて東京の電車に乗る人へ。複雑に見える路線図の読み方と乗り換えの基本を、色・駅ナンバリング・方面確認の3ステップでやさしく解説します。";
+const keywords = "東京 路線図 読み方, 乗り換え 初めて, 駅ナンバリング, 上京 電車, 訪日 電車, Flex Rail Map";
+const slug = "tokyo-train-map-beginner";
+const publishedDate = "2025-06-06";
+const category = "使い方ガイド";
+---
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@500;600;700&display=swap" rel="stylesheet" />
+<ArticleLayout title={title} description={description} keywords={keywords} slug={slug} category={category} publishedDate={publishedDate} kicker="はじめての東京の電車" readTime="読了 約6分" tag="Beginner Guide">
+  <p>上京したて、あるいは訪日して初めて東京の電車に乗るとき、多くの人が同じ場所でつまずきます。この記事では、初心者がまず押さえておきたい<strong>路線図の読み方</strong>と、<strong>乗り換えの基本</strong>を、順を追ってやさしく解説します。難しい専門用語は使いません。読み終えるころには、路線図がぐっと身近に感じられるはずです。</p>
 
-  <style>
-    :root{
-      --paper:#F4F1E9;
-      --surface:#FCFAF4;
-      --ink:#211E18;
-      --ink-soft:#5C564B;
-      --ink-faint:#8A8275;
-      --rule:#E0D9C9;
-      --rule-strong:#C9C0AC;
-      --accent:#24486B;        /* 落ち着いた藍 */
-      --accent-deep:#1B3550;
-      --vermilion:#B14A2E;     /* わずかな朱の差し色 */
-      --maxw:720px;
-      --serif:"Noto Serif JP", serif;
-      --sans:"Noto Sans JP", sans-serif;
-    }
-    *{ box-sizing:border-box; }
-    html{ -webkit-text-size-adjust:100%; }
-    body{
-      margin:0;
-      background:var(--paper);
-      color:var(--ink);
-      font-family:var(--sans);
-      font-size:17px;
-      line-height:1.95;
-      letter-spacing:.01em;
-      font-feature-settings:"palt" 1;
-    }
-    .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 22px; }
-
-    /* ---- masthead ---- */
-    .masthead{
-      border-bottom:1px solid var(--rule);
-      background:var(--paper);
-    }
-    .masthead .row{
-      max-width:var(--maxw); margin:0 auto; padding:14px 22px;
-      display:flex; align-items:baseline; justify-content:space-between; gap:16px;
-    }
-    .brand{
-      font-family:var(--serif); font-weight:700; font-size:18px; letter-spacing:.02em;
-      color:var(--ink); text-decoration:none;
-    }
-    .brand .dot{ color:var(--vermilion); }
-    .masthead .tag{
-      font-size:11px; letter-spacing:.32em; text-transform:uppercase; color:var(--ink-faint);
-    }
-
-    nav.crumb{ padding:18px 0 0; }
-    nav.crumb a{ color:var(--accent); text-decoration:none; font-size:13.5px; letter-spacing:.02em; }
-    nav.crumb a:hover{ text-decoration:underline; }
-
-    /* ---- article header ---- */
-    header.post{ padding:30px 0 26px; }
-    .kicker{
-      display:inline-flex; align-items:center; gap:9px;
-      font-size:11.5px; letter-spacing:.26em; text-transform:uppercase;
-      color:var(--vermilion); font-weight:700; margin-bottom:18px;
-    }
-    .kicker::before{ content:""; width:26px; height:1.5px; background:var(--vermilion); display:inline-block; }
-    h1{
-      font-family:var(--serif); font-weight:700;
-      font-size:clamp(28px, 6.2vw, 38px); line-height:1.45; letter-spacing:.005em;
-      margin:0 0 18px;
-    }
-    .lede{
-      font-size:18px; line-height:2.0; color:var(--ink-soft); margin:0;
-    }
-    .byline{
-      display:flex; flex-wrap:wrap; gap:14px; align-items:center;
-      margin-top:24px; padding-top:18px; border-top:1px solid var(--rule);
-      font-size:12.5px; color:var(--ink-faint); letter-spacing:.04em;
-    }
-    .byline .sep{ color:var(--rule-strong); }
-
-    /* ---- body type ---- */
-    article{ padding-bottom:40px; }
-    article p{ margin:1.25em 0; }
-    h2{
-      font-family:var(--serif); font-weight:600;
-      font-size:clamp(21px,4.2vw,25px); line-height:1.5; letter-spacing:.01em;
-      margin:2.4em 0 .7em; padding-top:1.1em; border-top:1px solid var(--rule);
-      display:flex; align-items:baseline; gap:14px;
-    }
-    h2 .num{
-      font-family:var(--sans); font-weight:700; font-size:13px; letter-spacing:.05em;
-      color:var(--vermilion); flex:none; padding-top:.35em;
-    }
-    h3{
-      font-family:var(--sans); font-weight:700; font-size:16.5px; letter-spacing:.02em;
-      margin:1.9em 0 .35em; color:var(--ink);
-    }
-    h3 .lab{
-      display:inline-block; min-width:1.5em; color:var(--accent); font-family:var(--serif);
-    }
-    a.inline{ color:var(--accent); text-decoration:none; border-bottom:1px solid var(--rule-strong); }
-    a.inline:hover{ border-color:var(--accent); }
-    strong{ font-weight:700; }
-    em.note{ font-style:normal; color:var(--ink-faint); font-size:14px; }
-
-    /* lists */
-    ul, ol{ margin:1.1em 0; padding-left:1.3em; }
-    li{ margin:.5em 0; padding-left:.2em; }
-    ol.steps{ list-style:none; counter-reset:st; padding-left:0; }
-    ol.steps > li{
-      counter-increment:st; position:relative; padding:.55em 0 .55em 52px;
-      border-bottom:1px solid var(--rule); margin:0;
-    }
-    ol.steps > li:last-child{ border-bottom:0; }
-    ol.steps > li::before{
-      content:counter(st); position:absolute; left:0; top:.62em;
-      width:32px; height:32px; border-radius:50%; background:var(--accent); color:#fff;
-      font-family:var(--serif); font-weight:600; font-size:15px;
-      display:flex; align-items:center; justify-content:center;
-    }
-
-    /* highlight / point box */
-    .points{
-      background:var(--surface); border:1px solid var(--rule);
-      border-left:3px solid var(--vermilion);
-      padding:22px 24px 20px; margin:30px 0; border-radius:2px;
-    }
-    .points .ttl{
-      font-family:var(--sans); font-weight:700; font-size:12px; letter-spacing:.2em;
-      text-transform:uppercase; color:var(--vermilion); margin-bottom:10px;
-    }
-    .points ul{ margin:0; padding-left:0; list-style:none; }
-    .points li{ position:relative; padding-left:26px; margin:.5em 0; }
-    .points li::before{
-      content:"—"; position:absolute; left:0; color:var(--accent); font-weight:700;
-    }
-
-    /* table */
-    .tbl{ overflow-x:auto; margin:1.6em 0; }
-    table{ width:100%; border-collapse:collapse; font-size:15px; }
-    caption{
-      caption-side:top; text-align:left; font-size:12.5px; letter-spacing:.04em;
-      color:var(--ink-faint); margin-bottom:8px;
-    }
-    th{
-      font-family:var(--sans); font-weight:700; text-align:left;
-      padding:11px 14px; border-bottom:2px solid var(--ink);
-      font-size:13.5px; letter-spacing:.03em; white-space:nowrap;
-    }
-    td{ padding:11px 14px; border-bottom:1px solid var(--rule); vertical-align:top; }
-    tbody tr:last-child td{ border-bottom:1px solid var(--rule-strong); }
-    .mono{ font-feature-settings:normal; letter-spacing:.04em; color:var(--accent); font-weight:700; }
-
-    /* ---- interactive map figure ---- */
-    figure.map{
-      margin:34px 0; padding:0; background:var(--surface);
-      border:1px solid var(--rule); border-radius:4px; overflow:hidden;
-    }
-    .map-head{ padding:18px 22px 4px; }
-    .map-head .cap{
-      font-family:var(--sans); font-weight:700; font-size:13px; letter-spacing:.04em; color:var(--ink);
-    }
-    .map-head .cap b{ color:var(--vermilion); }
-    .map-head .sub{ font-size:13px; color:var(--ink-soft); margin:6px 0 0; line-height:1.7; }
-
-    .chips{ display:flex; flex-wrap:wrap; gap:8px; padding:14px 22px 4px; }
-    .chip{
-      display:inline-flex; align-items:center; gap:8px;
-      font-family:var(--sans); font-size:13px; font-weight:500; letter-spacing:.02em;
-      padding:7px 13px 7px 11px; border:1px solid var(--rule-strong);
-      background:#fff; color:var(--ink); border-radius:999px; cursor:pointer;
-      transition:opacity .2s ease, background .2s ease, color .2s ease, border-color .2s ease;
-      user-select:none; white-space:nowrap;
-    }
-    .chip .sw{ width:14px; height:14px; border-radius:50%; flex:none; }
-    .chip[aria-pressed="false"]{
-      background:transparent; color:var(--ink-faint); border-color:var(--rule);
-      text-decoration:line-through; text-decoration-thickness:1px;
-    }
-    .chip[aria-pressed="false"] .sw{ filter:grayscale(1); opacity:.4; }
-    .chip:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-
-    .map-stage{ padding:6px 14px 14px; }
-    .map-stage svg{ width:100%; height:auto; display:block; }
-    .ln{ transition:opacity .25s ease; }
-    .ln.off{ opacity:.08; }
-    .st-label{
-      font-family:var(--sans); font-size:12px; font-weight:500; fill:var(--ink);
-      paint-order:stroke; stroke:var(--surface); stroke-width:3px; stroke-linejoin:round;
-    }
-    .st-label.faint{ fill:var(--ink-soft); font-size:11px; }
-    .map-note{
-      padding:0 22px 18px; font-size:11.5px; color:var(--ink-faint); letter-spacing:.02em;
-    }
-    .readout{
-      padding:0 22px 16px; font-size:13px; color:var(--ink-soft);
-    }
-    .readout b{ color:var(--accent); font-weight:700; }
-
-    /* ---- CTA ---- */
-    .cta{
-      margin:42px 0; padding:32px 30px; border-radius:6px;
-      background:
-        radial-gradient(120% 140% at 88% -10%, rgba(177,74,46,.22), transparent 55%),
-        linear-gradient(160deg, var(--accent-deep), #122339);
-      color:#F4F1E9; position:relative; overflow:hidden;
-    }
-    .cta .ey{ font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:#A9C2DC; font-weight:700; margin-bottom:12px; }
-    .cta h3{ color:#fff; margin:0 0 8px; font-family:var(--serif); font-weight:600; font-size:21px; line-height:1.5; }
-    .cta p{ margin:0; color:#D4DEE9; font-size:14.5px; line-height:1.8; }
-    .cta .btn{
-      display:inline-flex; align-items:center; gap:9px; margin-top:20px;
-      background:var(--paper); color:var(--accent-deep); font-weight:700; font-size:15px;
-      padding:13px 26px; border-radius:5px; text-decoration:none; letter-spacing:.02em;
-      transition:transform .15s ease, background .2s ease;
-    }
-    .cta .btn:hover{ background:#fff; transform:translateY(-1px); }
-    .cta .btn .ar{ transition:transform .15s ease; }
-    .cta .btn:hover .ar{ transform:translateX(3px); }
-
-    /* footer nav */
-    .foot{ border-top:1px solid var(--rule); margin-top:10px; padding:26px 0 60px; }
-    .foot a{ color:var(--accent); text-decoration:none; font-size:14px; }
-    .foot a:hover{ text-decoration:underline; }
-    .foot .small{ color:var(--ink-faint); font-size:12px; margin-top:14px; letter-spacing:.03em; }
-
-    @media (max-width:560px){
-      body{ font-size:16px; }
-      .lede{ font-size:16.5px; }
-      h2{ flex-direction:column; gap:4px; }
-      h2 .num{ padding-top:0; }
-    }
-  </style>
-</head>
-<body>
-
-  <div class="masthead">
-    <div class="row">
-      <a href="/" class="brand">Flex Rail Map<span class="dot">.</span></a>
-      <span class="tag">Beginner's Guide</span>
-    </div>
+  <div class="points">
+    <div class="ttl">この記事のポイント</div>
+    <ul>
+      <li>東京の電車は複数の会社（JR・メトロ・都営・私鉄）が運行している</li>
+      <li>路線は「色」と「駅ナンバリング（記号＋番号）」で見分ける</li>
+      <li>乗り換えで最も大事なのは「方面（どっち行きか）」の確認</li>
+      <li>必要な路線だけに絞ると、路線図は驚くほど読みやすくなる</li>
+    </ul>
   </div>
 
-  <div class="wrap">
-    <nav class="crumb"><a href="/">← トップに戻る</a> ／ <a href="/articles">記事一覧</a></nav>
+  <h2><span class="num">01</span><span>なぜ東京の路線図は複雑に見えるのか</span></h2>
+  <p>東京の鉄道が分かりにくい最大の理由は、<strong>運行会社が一つではない</strong>こと。JR東日本、東京メトロ、都営地下鉄に加え、小田急・東急・京急などの私鉄が、網の目のように重なっています。</p>
+  <p>さらに「<strong>相互直通運転</strong>」によって、ある会社の電車がそのまま別の会社の路線へ乗り入れます。そのため「同じ電車なのに、途中から路線名が変わる」ことも珍しくありません。一枚にすべてを描いた路線図は情報量が多く、初めての人ほど目が滑ってしまうのです。</p>
 
-    <header class="post">
-      <span class="kicker">はじめての東京の電車</span>
-      <h1>東京の路線図の読み方・<br />乗り換え方【完全初心者ガイド】</h1>
-      <p class="lede">改札前の巨大な路線図を見上げて、思わず固まってしまった——。色とりどりの線が交差し、似た駅名が並ぶ東京の鉄道は、世界でも有数の複雑さです。けれど読み方のコツさえつかめば、路線図は「迷う原因」から「頼れる地図」へと変わります。</p>
-      <div class="byline">
-        <span>公開日：2025年6月6日</span>
-        <span class="sep">／</span>
-        <span>カテゴリ：使い方ガイド</span>
-        <span class="sep">／</span>
-        <span>読了：約6分</span>
-      </div>
-    </header>
-
-    <article>
-      <p>上京したて、あるいは訪日して初めて東京の電車に乗るとき、多くの人が同じ場所でつまずきます。この記事では、初心者がまず押さえておきたい<strong>路線図の読み方</strong>と、<strong>乗り換えの基本</strong>を、順を追ってやさしく解説します。難しい専門用語は使いません。読み終えるころには、路線図がぐっと身近に感じられるはずです。</p>
-
-      <div class="points">
-        <div class="ttl">この記事のポイント</div>
-        <ul>
-          <li>東京の電車は複数の会社（JR・メトロ・都営・私鉄）が運行している</li>
-          <li>路線は「色」と「駅ナンバリング（記号＋番号）」で見分ける</li>
-          <li>乗り換えで最も大事なのは「方面（どっち行きか）」の確認</li>
-          <li>必要な路線だけに絞ると、路線図は驚くほど読みやすくなる</li>
-        </ul>
-      </div>
-
-      <h2><span class="num">01</span><span>なぜ東京の路線図は複雑に見えるのか</span></h2>
-      <p>東京の鉄道が分かりにくい最大の理由は、<strong>運行会社が一つではない</strong>こと。JR東日本、東京メトロ、都営地下鉄に加え、小田急・東急・京急などの私鉄が、網の目のように重なっています。</p>
-      <p>さらに「<strong>相互直通運転</strong>」によって、ある会社の電車がそのまま別の会社の路線へ乗り入れます。そのため「同じ電車なのに、途中から路線名が変わる」ことも珍しくありません。一枚にすべてを描いた路線図は情報量が多く、初めての人ほど目が滑ってしまうのです。</p>
-
-      <div class="tbl">
-        <table>
-          <caption>主な運行会社と見分け方（記号は駅ナンバリングのアルファベット部分）</caption>
-          <thead>
-            <tr><th>運行会社</th><th>代表的な路線</th><th>記号の例</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>JR東日本</td><td>山手線・中央線</td><td class="mono">JY / JC</td></tr>
-            <tr><td>東京メトロ</td><td>銀座線・丸ノ内線</td><td class="mono">G / M</td></tr>
-            <tr><td>都営地下鉄</td><td>大江戸線・浅草線</td><td class="mono">E / A</td></tr>
-            <tr><td>私鉄</td><td>小田急線・東急東横線</td><td class="mono">OH / TY</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h2><span class="num">02</span><span>路線図の読み方 ― 3つの基本</span></h2>
-      <p>複雑に見えても、見るべきポイントはたった3つ。慣れている人は、無意識にこの3点だけを追っています。</p>
-
-      <h3><span class="lab">①</span>色で「一本だけ」追う</h3>
-      <p>路線にはそれぞれ固有の色があります。目的の路線を見つけたら、ほかの線は気にせず、<strong>その色の線だけを目で追いましょう</strong>。すべてを一度に把握しようとしないのがコツです。</p>
-
-      <h3><span class="lab">②</span>記号と番号（駅ナンバリング）</h3>
-      <p>多くの駅には「<span class="mono">JY20</span>」のような記号が振られています。<strong>アルファベットが路線、数字が駅の順番</strong>。たとえば渋谷は山手線で <span class="mono">JY20</span>。漢字が読めなくても、番号をたどれば自分の位置と進む向きが分かります。訪日旅行者にも心強い目印です。</p>
-
-      <h3><span class="lab">③</span>乗換駅のマーク</h3>
-      <p>複数の線が交わる場所にある白い丸（乗換駅マーク）は、<strong>路線を乗り換えられる駅</strong>を表します。ここが旅の「分岐点」。下の図で実際に確かめてみましょう。</p>
-
-      <figure class="map">
-        <div class="map-head">
-          <div class="cap">図：<b>必要な路線だけ</b>表示してみる</div>
-          <p class="sub">チップをタップして路線を消したり戻したりできます。情報を減らすほど、残った路線のつながりがくっきり見えてきます。</p>
-        </div>
-        <div class="chips" id="chips" role="group" aria-label="表示する路線の切り替え"></div>
-        <div class="map-stage">
-          <svg viewBox="0 0 640 440" role="img" aria-label="東京の主要路線を簡略化した概念図">
-            <!-- ===== lines ===== -->
-            <g id="g-yamanote" class="ln" data-line="yamanote">
-              <polygon points="210,95 420,110 470,250 380,365 200,345 150,205"
-                fill="none" stroke="#7FBF3F" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
-            </g>
-            <g id="g-chuo" class="ln" data-line="chuo">
-              <polyline points="150,205 300,225 400,205 470,250"
-                fill="none" stroke="#E8542A" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
-              <circle cx="300" cy="225" r="5" fill="#fff" stroke="#E8542A" stroke-width="2.4"/>
-              <circle cx="400" cy="205" r="5" fill="#fff" stroke="#E8542A" stroke-width="2.4"/>
-              <text class="st-label faint" x="296" y="245">四ツ谷</text>
-              <text class="st-label faint" x="380" y="190">御茶ノ水</text>
-            </g>
-            <g id="g-marunouchi" class="ln" data-line="marunouchi">
-              <polyline points="210,95 330,160 420,215 470,250"
-                fill="none" stroke="#D9362C" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
-              <circle cx="330" cy="160" r="5" fill="#fff" stroke="#D9362C" stroke-width="2.4"/>
-              <text class="st-label faint" x="338" y="156">後楽園</text>
-            </g>
-            <g id="g-ginza" class="ln" data-line="ginza">
-              <polyline points="200,345 275,302 450,302 440,200 420,110"
-                fill="none" stroke="#F5A623" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
-              <circle cx="275" cy="302" r="5" fill="#fff" stroke="#F5A623" stroke-width="2.4"/>
-              <circle cx="450" cy="302" r="5.5" fill="#fff" stroke="#F5A623" stroke-width="2.6"/>
-              <text class="st-label faint" x="246" y="324">表参道</text>
-              <text class="st-label faint" x="460" y="306">銀座</text>
-            </g>
-            <g id="g-odakyu" class="ln" data-line="odakyu">
-              <polyline points="150,205 78,262 40,332"
-                fill="none" stroke="#1F7FC4" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
-              <circle cx="78" cy="262" r="5" fill="#fff" stroke="#1F7FC4" stroke-width="2.4"/>
-              <text class="st-label faint" x="30" y="256" text-anchor="end">下北沢</text>
-              <text class="st-label faint" x="48" y="350">小田原・江ノ島方面 →</text>
-            </g>
-            <g id="g-tozai" class="ln" data-line="tozai">
-              <polyline points="70,168 250,196 420,215 575,215"
-                fill="none" stroke="#16A7CE" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
-              <circle cx="70" cy="168" r="5" fill="#fff" stroke="#16A7CE" stroke-width="2.4"/>
-              <text class="st-label faint" x="62" y="160" text-anchor="end">中野</text>
-              <text class="st-label faint" x="500" y="208">西船橋 →</text>
-            </g>
-
-            <!-- ===== interchange nodes (always visible) ===== -->
-            <g id="nodes">
-              <g class="node"><circle cx="210" cy="95" r="7.5" fill="#fff" stroke="#211E18" stroke-width="2.6"/><text class="st-label" x="210" y="78" text-anchor="middle">池袋</text></g>
-              <g class="node"><circle cx="420" cy="110" r="7.5" fill="#fff" stroke="#211E18" stroke-width="2.6"/><text class="st-label" x="432" y="106">上野</text></g>
-              <g class="node"><circle cx="470" cy="250" r="8.5" fill="#fff" stroke="#211E18" stroke-width="3"/><text class="st-label" x="484" y="254">東京</text></g>
-              <g class="node"><circle cx="380" cy="365" r="7" fill="#fff" stroke="#211E18" stroke-width="2.6"/><text class="st-label" x="392" y="380">品川</text></g>
-              <g class="node"><circle cx="200" cy="345" r="8.5" fill="#fff" stroke="#211E18" stroke-width="3"/><text class="st-label" x="186" y="366" text-anchor="end">渋谷</text></g>
-              <g class="node"><circle cx="150" cy="205" r="8.5" fill="#fff" stroke="#211E18" stroke-width="3"/><text class="st-label" x="136" y="200" text-anchor="end">新宿</text></g>
-              <g class="node"><circle cx="420" cy="215" r="7.5" fill="#fff" stroke="#211E18" stroke-width="2.6"/><text class="st-label" x="432" y="233">大手町</text></g>
-            </g>
-          </svg>
-        </div>
-        <div class="readout" id="readout">表示中の路線：<b>6</b> / 6</div>
-        <div class="map-note">※ これは概念図です。実際の駅の位置・形状・接続とは異なります。色は各路線のイメージに合わせた参考値です。</div>
-      </figure>
-
-      <p>これこそ Flex Rail Map が大切にしている考え方です。路線図は「全部を覚える」ものではなく、<strong>その瞬間に必要な線だけを見ればいい</strong>。情報を足すのではなく、減らすことで、迷いは小さくなります。</p>
-
-      <h2><span class="num">03</span><span>乗り換えの基本4ステップ</span></h2>
-      <p>乗り換えと聞くと身構えてしまいますが、やることは決まっています。次の順番をなぞるだけです。</p>
-      <ol class="steps">
-        <li><strong>目的地の「方面」を確認する。</strong>「上り／下り」や「〜方面」という言葉で、進む向きが決まります。まずは行き先の駅が、どちら側にあるかを把握しましょう。</li>
-        <li><strong>乗り換える路線の色・記号を探す。</strong>路線図で目的の色を一本だけ追い、乗換駅のマークを目印にします。</li>
-        <li><strong>案内サインの色を頼りに移動する。</strong>駅構内の案内も路線カラーで色分けされています。乗換にかかる時間の目安は3〜10分（概算）。</li>
-        <li><strong>電車の「行き先」を必ず確認して乗る。</strong>同じホームでも、行き先の違う電車が来ます。発車標の表示を見てから乗りましょう。</li>
-      </ol>
-
-      <h2><span class="num">04</span><span>初心者がやりがちな失敗と対策</span></h2>
-      <p>つまずきポイントは、実はほとんど決まっています。先に知っておけば、もう怖くありません。</p>
-      <div class="tbl">
-        <table>
-          <caption>よくある失敗とその対策</caption>
-          <thead>
-            <tr><th>よくある失敗</th><th>かんたんな対策</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>行き先を見ずに乗り、反対方向へ</td><td>発車標の「方面」を声に出して確認</td></tr>
-            <tr><td>各停と快速・急行を取り違える</td><td>列車種別（色帯・表示）をチェック</td></tr>
-            <tr><td>似た駅名で降り間違える</td><td>駅ナンバリングの番号で照合する</td></tr>
-            <tr><td>乗換に時間がかかり乗り遅れる</td><td>大きな駅は乗換10分を目安に余裕を持つ</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="cta">
-        <div class="ey">Try it now</div>
-        <h3>「自分のルートに関係する路線」だけを表示してみよう</h3>
-        <p>Flex Rail Map は、出発駅と到着駅に関連する路線だけを絞り込んで表示できるインタラクティブ路線図。39路線の表示ON/OFFや乗換駅フィルターで、複雑な東京の路線図を“自分仕様”にすっきり整理できます。</p>
-        <a class="btn" href="/">Flex Rail Map をひらく <span class="ar">→</span></a>
-      </div>
-
-      <h2><span class="num">05</span><span>まとめ ― 路線図は「引き算」で読む</span></h2>
-      <p>東京の路線図が複雑なのは、たくさんの会社と路線が一枚に重なっているから。けれど、読み方は<strong>色・番号・方面</strong>の3点を押さえるだけでぐっと簡単になります。そして何より大切なのは、<strong>必要な路線だけに絞って見る</strong>こと。</p>
-      <p>全部を覚える必要はありません。今日の目的地につながる線だけを、すっと追えれば十分です。次に改札前で路線図を見上げたとき、あなたはもう固まらないはずです。</p>
-    </article>
-
-    <div class="foot">
-      <a href="/">← トップに戻る</a> ／ <a href="/articles">記事一覧へ戻る</a>
-      <div class="small">Flex Rail Map ／ 東京の鉄道を、必要な情報だけで。</div>
-    </div>
+  <div class="tbl">
+    <table>
+      <caption>主な運行会社と見分け方（記号は駅ナンバリングのアルファベット部分）</caption>
+      <thead>
+        <tr><th>運行会社</th><th>代表的な路線</th><th>記号の例</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>JR東日本</td><td>山手線・中央線</td><td class="mono">JY / JC</td></tr>
+        <tr><td>東京メトロ</td><td>銀座線・丸ノ内線</td><td class="mono">G / M</td></tr>
+        <tr><td>都営地下鉄</td><td>大江戸線・浅草線</td><td class="mono">E / A</td></tr>
+        <tr><td>私鉄</td><td>小田急線・東急東横線</td><td class="mono">OH / TY</td></tr>
+      </tbody>
+    </table>
   </div>
 
-  <script>
-    (function(){
-      var LINES = [
-        { key:"yamanote",   name:"JR山手線",        color:"#7FBF3F" },
-        { key:"chuo",       name:"JR中央線",        color:"#E8542A" },
-        { key:"marunouchi", name:"メトロ丸ノ内線",  color:"#D9362C" },
-        { key:"ginza",      name:"メトロ銀座線",    color:"#F5A623" },
-        { key:"tozai",      name:"メトロ東西線",    color:"#16A7CE" },
-        { key:"odakyu",     name:"小田急線",        color:"#1F7FC4" }
-      ];
-      var chips = document.getElementById('chips');
-      var readout = document.getElementById('readout');
-      var state = {};
-      LINES.forEach(function(l){ state[l.key] = true; });
+  <h2><span class="num">02</span><span>路線図の読み方 ― 3つの基本</span></h2>
+  <p>複雑に見えても、見るべきポイントはたった3つ。慣れている人は、無意識にこの3点だけを追っています。</p>
 
-      function update(){
-        var on = 0;
+  <h3><span class="lab">①</span>色で「一本だけ」追う</h3>
+  <p>路線にはそれぞれ固有の色があります。目的の路線を見つけたら、ほかの線は気にせず、<strong>その色の線だけを目で追いましょう</strong>。すべてを一度に把握しようとしないのがコツです。</p>
+
+  <h3><span class="lab">②</span>記号と番号（駅ナンバリング）</h3>
+  <p>多くの駅には「<span class="mono">JY20</span>」のような記号が振られています。<strong>アルファベットが路線、数字が駅の順番</strong>。たとえば渋谷は山手線で <span class="mono">JY20</span>。漢字が読めなくても、番号をたどれば自分の位置と進む向きが分かります。訪日旅行者にも心強い目印です。</p>
+
+  <h3><span class="lab">③</span>乗換駅のマーク</h3>
+  <p>複数の線が交わる場所にある白い丸（乗換駅マーク）は、<strong>路線を乗り換えられる駅</strong>を表します。ここが旅の「分岐点」。下の図で実際に確かめてみましょう。</p>
+
+  <figure class="map">
+    <div class="map-head">
+      <div class="cap">図：<b>必要な路線だけ</b>表示してみる</div>
+      <p class="sub">チップをタップして路線を消したり戻したりできます。情報を減らすほど、残った路線のつながりがくっきり見えてきます。</p>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="表示する路線の切り替え"></div>
+    <div class="map-stage">
+      <svg viewBox="0 0 640 440" role="img" aria-label="東京の主要路線を簡略化した概念図">
+        <g id="g-yamanote" class="ln" data-line="yamanote">
+          <polygon points="210,95 420,110 470,250 380,365 200,345 150,205"
+            fill="none" stroke="#7FBF3F" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+        </g>
+        <g id="g-chuo" class="ln" data-line="chuo">
+          <polyline points="150,205 300,225 400,205 470,250"
+            fill="none" stroke="#E8542A" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="300" cy="225" r="5" fill="#fff" stroke="#E8542A" stroke-width="2.4"/>
+          <circle cx="400" cy="205" r="5" fill="#fff" stroke="#E8542A" stroke-width="2.4"/>
+          <text class="st-label faint" x="296" y="245">四ツ谷</text>
+          <text class="st-label faint" x="380" y="190">御茶ノ水</text>
+        </g>
+        <g id="g-marunouchi" class="ln" data-line="marunouchi">
+          <polyline points="210,95 330,160 420,215 470,250"
+            fill="none" stroke="#D9362C" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="330" cy="160" r="5" fill="#fff" stroke="#D9362C" stroke-width="2.4"/>
+          <text class="st-label faint" x="338" y="156">後楽園</text>
+        </g>
+        <g id="g-ginza" class="ln" data-line="ginza">
+          <polyline points="200,345 275,302 450,302 440,200 420,110"
+            fill="none" stroke="#F5A623" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="275" cy="302" r="5" fill="#fff" stroke="#F5A623" stroke-width="2.4"/>
+          <circle cx="450" cy="302" r="5.5" fill="#fff" stroke="#F5A623" stroke-width="2.6"/>
+          <text class="st-label faint" x="246" y="324">表参道</text>
+          <text class="st-label faint" x="460" y="306">銀座</text>
+        </g>
+        <g id="g-odakyu" class="ln" data-line="odakyu">
+          <polyline points="150,205 78,262 40,332"
+            fill="none" stroke="#1F7FC4" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="78" cy="262" r="5" fill="#fff" stroke="#1F7FC4" stroke-width="2.4"/>
+          <text class="st-label faint" x="30" y="256" text-anchor="end">下北沢</text>
+          <text class="st-label faint" x="48" y="350">小田原・江ノ島方面 →</text>
+        </g>
+        <g id="g-tozai" class="ln" data-line="tozai">
+          <polyline points="70,168 250,196 420,215 575,215"
+            fill="none" stroke="#16A7CE" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="70" cy="168" r="5" fill="#fff" stroke="#16A7CE" stroke-width="2.4"/>
+          <text class="st-label faint" x="62" y="160" text-anchor="end">中野</text>
+          <text class="st-label faint" x="500" y="208">西船橋 →</text>
+        </g>
+        <g id="nodes">
+          <g class="node"><circle cx="210" cy="95" r="7.5" fill="#fff" stroke="#211E18" stroke-width="2.6"/><text class="st-label" x="210" y="78" text-anchor="middle">池袋</text></g>
+          <g class="node"><circle cx="420" cy="110" r="7.5" fill="#fff" stroke="#211E18" stroke-width="2.6"/><text class="st-label" x="432" y="106">上野</text></g>
+          <g class="node"><circle cx="470" cy="250" r="8.5" fill="#fff" stroke="#211E18" stroke-width="3"/><text class="st-label" x="484" y="254">東京</text></g>
+          <g class="node"><circle cx="380" cy="365" r="7" fill="#fff" stroke="#211E18" stroke-width="2.6"/><text class="st-label" x="392" y="380">品川</text></g>
+          <g class="node"><circle cx="200" cy="345" r="8.5" fill="#fff" stroke="#211E18" stroke-width="3"/><text class="st-label" x="186" y="366" text-anchor="end">渋谷</text></g>
+          <g class="node"><circle cx="150" cy="205" r="8.5" fill="#fff" stroke="#211E18" stroke-width="3"/><text class="st-label" x="136" y="200" text-anchor="end">新宿</text></g>
+          <g class="node"><circle cx="420" cy="215" r="7.5" fill="#fff" stroke="#211E18" stroke-width="2.6"/><text class="st-label" x="432" y="233">大手町</text></g>
+        </g>
+      </svg>
+    </div>
+    <div class="readout" id="readout">表示中の路線：<b>6</b> / 6</div>
+    <div class="map-note">※ これは概念図です。実際の駅の位置・形状・接続とは異なります。色は各路線のイメージに合わせた参考値です。</div>
+  </figure>
+
+  <p>これこそ Flex Rail Map が大切にしている考え方です。路線図は「全部を覚える」ものではなく、<strong>その瞬間に必要な線だけを見ればいい</strong>。情報を足すのではなく、減らすことで、迷いは小さくなります。</p>
+
+  <h2><span class="num">03</span><span>乗り換えの基本4ステップ</span></h2>
+  <p>乗り換えと聞くと身構えてしまいますが、やることは決まっています。次の順番をなぞるだけです。</p>
+  <ol class="steps">
+    <li><strong>目的地の「方面」を確認する。</strong>「上り／下り」や「〜方面」という言葉で、進む向きが決まります。まずは行き先の駅が、どちら側にあるかを把握しましょう。</li>
+    <li><strong>乗り換える路線の色・記号を探す。</strong>路線図で目的の色を一本だけ追い、乗換駅のマークを目印にします。</li>
+    <li><strong>案内サインの色を頼りに移動する。</strong>駅構内の案内も路線カラーで色分けされています。乗換にかかる時間の目安は3〜10分（概算）。</li>
+    <li><strong>電車の「行き先」を必ず確認して乗る。</strong>同じホームでも、行き先の違う電車が来ます。発車標の表示を見てから乗りましょう。</li>
+  </ol>
+
+  <h2><span class="num">04</span><span>初心者がやりがちな失敗と対策</span></h2>
+  <p>つまずきポイントは、実はほとんど決まっています。先に知っておけば、もう怖くありません。</p>
+  <div class="tbl">
+    <table>
+      <caption>よくある失敗とその対策</caption>
+      <thead>
+        <tr><th>よくある失敗</th><th>かんたんな対策</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>行き先を見ずに乗り、反対方向へ</td><td>発車標の「方面」を声に出して確認</td></tr>
+        <tr><td>各停と快速・急行を取り違える</td><td>列車種別（色帯・表示）をチェック</td></tr>
+        <tr><td>似た駅名で降り間違える</td><td>駅ナンバリングの番号で照合する</td></tr>
+        <tr><td>乗換に時間がかかり乗り遅れる</td><td>大きな駅は乗換10分を目安に余裕を持つ</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="cta">
+    <div class="ey">Try it now</div>
+    <h3>「自分のルートに関係する路線」だけを表示してみよう</h3>
+    <p>Flex Rail Map は、出発駅と到着駅に関連する路線だけを絞り込んで表示できるインタラクティブ路線図。39路線の表示ON/OFFや乗換駅フィルターで、複雑な東京の路線図を“自分仕様”にすっきり整理できます。</p>
+    <a class="btn" href="/">Flex Rail Map をひらく <span class="ar">→</span></a>
+  </div>
+
+  <h2><span class="num">05</span><span>まとめ ― 路線図は「引き算」で読む</span></h2>
+  <p>東京の路線図が複雑なのは、たくさんの会社と路線が一枚に重なっているから。けれど、読み方は<strong>色・番号・方面</strong>の3点を押さえるだけでぐっと簡単になります。そして何より大切なのは、<strong>必要な路線だけに絞って見る</strong>こと。</p>
+  <p>全部を覚える必要はありません。今日の目的地につながる線だけを、すっと追えれば十分です。次に改札前で路線図を見上げたとき、あなたはもう固まらないはずです。</p>
+
+  <Fragment slot="scripts">
+    <script is:inline>
+      (function(){
+        var LINES = [
+          { key:"yamanote",   name:"JR山手線",        color:"#7FBF3F" },
+          { key:"chuo",       name:"JR中央線",        color:"#E8542A" },
+          { key:"marunouchi", name:"メトロ丸ノ内線",  color:"#D9362C" },
+          { key:"ginza",      name:"メトロ銀座線",    color:"#F5A623" },
+          { key:"tozai",      name:"メトロ東西線",    color:"#16A7CE" },
+          { key:"odakyu",     name:"小田急線",        color:"#1F7FC4" }
+        ];
+        var chips = document.getElementById('chips');
+        var readout = document.getElementById('readout');
+        if (!chips || !readout) return;
+        var state = {};
+        LINES.forEach(function(l){ state[l.key] = true; });
+
+        function update(){
+          var on = 0;
+          LINES.forEach(function(l){
+            var g = document.getElementById('g-' + l.key);
+            if (!g) return;
+            if(state[l.key]){ g.classList.remove('off'); on++; }
+            else { g.classList.add('off'); }
+          });
+          readout.innerHTML = '表示中の路線：<b>' + on + '</b> / ' + LINES.length;
+        }
+
         LINES.forEach(function(l){
-          var g = document.getElementById('g-' + l.key);
-          if(state[l.key]){ g.classList.remove('off'); on++; }
-          else { g.classList.add('off'); }
+          var b = document.createElement('button');
+          b.className = 'chip';
+          b.type = 'button';
+          b.setAttribute('aria-pressed','true');
+          b.innerHTML = '<span class="sw" style="background:' + l.color + '"></span>' + l.name;
+          b.addEventListener('click', function(){
+            state[l.key] = !state[l.key];
+            b.setAttribute('aria-pressed', state[l.key] ? 'true' : 'false');
+            update();
+          });
+          chips.appendChild(b);
         });
-        readout.innerHTML = '表示中の路線：<b>' + on + '</b> / ' + LINES.length;
-      }
-
-      LINES.forEach(function(l){
-        var b = document.createElement('button');
-        b.className = 'chip';
-        b.type = 'button';
-        b.setAttribute('aria-pressed','true');
-        b.innerHTML = '<span class="sw" style="background:' + l.color + '"></span>' + l.name;
-        b.addEventListener('click', function(){
-          state[l.key] = !state[l.key];
-          b.setAttribute('aria-pressed', state[l.key] ? 'true' : 'false');
-          update();
-        });
-        chips.appendChild(b);
-      });
-      update();
-    })();
-  </script>
-
-</body>
-</html>
+        update();
+      })();
+    </script>
+  </Fragment>
+</ArticleLayout>

@@ -1,109 +1,15 @@
 ---
+import ArticleLayout from "./_ArticleLayout.astro";
+
 const title = "東京観光で使える路線ガイド（浅草・秋葉原・原宿・お台場）";
 const description = "東京観光をスムーズにするための路線ガイド。浅草、秋葉原、原宿、お台場などの主要観光スポットへアクセスしやすい路線と乗り換えのコツを解説します。";
-const ogImage = "/icon_flex_rail_way_map.png";
-const siteUrl = "https://flex-railway-map.netlify.app";
 const slug = "tokyo-sightseeing-routes";
 const publishedDate = "2025-06-06";
+const category = "観光ガイド";
+const keywords = "東京, 観光, 電車, 路線図, 浅草, 秋葉原, お台場";
 ---
 
-<html lang="ja">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{title} | Flex Rail Map</title>
-  <meta name="description" content={description} />
-  <meta name="keywords" content="東京, 観光, 電車, 路線図, 浅草, 秋葉原, お台場" />
-  <link rel="canonical" href={`${siteUrl}/articles/${slug}`} />
-
-  <meta property="og:title" content={title} />
-  <meta property="og:description" content={description} />
-  <meta property="og:type" content="article" />
-  <meta property="og:url" content={`${siteUrl}/articles/${slug}`} />
-  <meta property="og:image" content={`${siteUrl}${ogImage}`} />
-  <meta name="twitter:card" content="summary" />
-
-  <meta name="google-site-verification" content="uyjBT9z6vOnpxn6lM6YnxbI6R4jLSDIAboC8zo1slhW" />
-  <meta name="google-adsense-account" content="ca-pub-2444529114040977" />
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2444529114040977" crossorigin="anonymous"></script>
-
-  <link rel="icon" type="image/png" sizes="32x32" href="/icon_flex_rail_way_map.png" />
-
-  <script type="application/ld+json" set:html={JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": title,
-    "description": description,
-    "datePublished": publishedDate,
-    "dateModified": publishedDate,
-    "author": { "@type": "Organization", "name": "Flex Rail Map Project" },
-    "publisher": {
-      "@type": "Organization",
-      "name": "Flex Rail Map Project",
-      "logo": { "@type": "ImageObject", "url": `${siteUrl}${ogImage}` }
-    }
-  })}></script>
-
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 16px 20px 60px;
-      color: #222;
-      line-height: 1.8;
-      font-size: 16px;
-    }
-    h1 { font-size: 1.7rem; line-height: 1.4; margin-bottom: 8px; }
-    h2 { font-size: 1.25rem; margin-top: 2.2em; border-left: 4px solid #2196F3; padding-left: 10px; }
-    h3 { font-size: 1.05rem; margin-top: 1.6em; color: #333; }
-    .meta { color: #888; font-size: 0.85rem; margin-bottom: 1.5em; }
-    table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 0.9rem; }
-    th { background: #2196F3; color: #fff; padding: 8px 10px; text-align: left; }
-    td { padding: 8px 10px; border-bottom: 1px solid #e0e0e0; }
-    tr:nth-child(even) td { background: #f5f5f5; }
-    .highlight {
-      background: #fff3cd;
-      border-left: 4px solid #ffc107;
-      padding: 12px 14px;
-      margin: 1.2em 0;
-      border-radius: 0 4px 4px 0;
-    }
-    .cta-box {
-      background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%);
-      color: #fff;
-      padding: 24px 20px;
-      border-radius: 10px;
-      margin: 2em 0;
-      text-align: center;
-    }
-    .cta-box h3 { color: #fff; margin-top: 0; }
-    .cta-box p { margin: 8px 0; opacity: 0.9; font-size: 0.95rem; }
-    .cta-btn {
-      display: inline-block;
-      background: #fff;
-      color: #1565C0;
-      font-weight: bold;
-      padding: 12px 28px;
-      border-radius: 6px;
-      text-decoration: none;
-      margin-top: 12px;
-      font-size: 1rem;
-    }
-    .cta-btn:hover { background: #e3f2fd; }
-    nav { margin-bottom: 1.5em; font-size: 0.85rem; }
-    nav a { color: #1976D2; text-decoration: none; }
-    nav a:hover { text-decoration: underline; }
-    ul li, ol li { margin-bottom: 0.4em; }
-  </style>
-</head>
-<body>
-
-<nav><a href="/">← トップに戻る</a> ／ <a href="/articles">記事一覧</a></nav>
-
-<h1>{title}</h1>
-<p class="meta">公開日: 2025年6月 ｜ カテゴリ: 観光ガイド</p>
+<ArticleLayout title={title} description={description} keywords={keywords} slug={slug} category={category} publishedDate={publishedDate} kicker="観光ガイド" tag="Travel Guide">
 
 <p>東京は世界屈指の鉄道網を持つ都市ですが、その複雑な路線図は初めて訪れる人にとってはまるで迷路のようです。観光名所に行きたいだけなのに、「どの路線に乗ればいいの？」「どこで乗り換えればいいの？」と迷ってしまうことも少なくありません。</p>
 
@@ -195,7 +101,4 @@ const publishedDate = "2025-06-06";
   <li><a href="/articles/tokyo-train-map-beginner">東京の路線図の読み方・乗り換え方【完全初心者ガイド】</a></li>
 </ul>
 
-<nav><a href="/">← トップに戻る</a> ／ <a href="/articles">記事一覧へ戻る</a></nav>
-
-</body>
-</html>
+</ArticleLayout>
