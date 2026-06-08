@@ -2425,13 +2425,65 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   configImportErrorApply: {
     japanese: "設定の適用に失敗しました",
     english: "Failed to apply settings"
+  },
+  transferHighlight: {
+    japanese: "乗換強調表示",
+    english: "Highlight Transfers"
+  },
+  routeLineWidth: {
+    japanese: "路線の太さ",
+    english: "Line Width"
+  },
+  bubbleMaxRadius: {
+    japanese: "最大半径",
+    english: "Max Radius"
+  },
+  schematicMapLabel: {
+    japanese: "路線図表示（実装中）",
+    english: "Diagram View (WIP)"
+  },
+  layerOrderHint: {
+    japanese: "↑ 最前面 / 背面 ↓",
+    english: "↑ Front / Back ↓"
+  },
+  dragToSort: {
+    japanese: "⠿ でドラッグ",
+    english: "⠿ drag"
+  },
+  catHousing: {
+    japanese: "住居",
+    english: "Housing"
+  },
+  catTransport: {
+    japanese: "交通",
+    english: "Transport"
+  },
+  catFood: {
+    japanese: "飲食",
+    english: "Food"
+  },
+  catConvenience: {
+    japanese: "利便性",
+    english: "Convenience"
+  },
+  catSafety: {
+    japanese: "治安",
+    english: "Safety"
+  },
+  catEnvironment: {
+    japanese: "環境",
+    english: "Environment"
+  },
+  catWork: {
+    japanese: "仕事",
+    english: "Work"
   }
 };
 
 export type Language = 'japanese' | 'english' | 'chinese' | 'korean';
 
 // 中国語（簡体字）UI翻訳
-const uiChinese: Record<string, string> = {
+export const uiChinese: Record<string, string> = {
   stationSelection: "选择出发站和到达站",
   departureStation: "出发站",
   arrivalStation: "到达站",
@@ -2631,12 +2683,23 @@ const uiChinese: Record<string, string> = {
   configImportErrorJson: "JSON格式不正确",
   configImportErrorFile: "文件读取失败",
   configImportErrorApply: "设置应用失败",
-  baseTime: "出发时间",
-  swapStationsTitle: "交换出发站和到达站",
+  transferHighlight: "换乘高亮显示",
+  routeLineWidth: "路线宽度",
+  bubbleMaxRadius: "最大半径",
+  schematicMapLabel: "路线图显示（开发中）",
+  layerOrderHint: "↑ 最前面 / 背面 ↓",
+  dragToSort: "⠿ 拖动排序",
+  catHousing: "住居",
+  catTransport: "交通",
+  catFood: "饮食",
+  catConvenience: "便利性",
+  catSafety: "治安",
+  catEnvironment: "环境",
+  catWork: "工作",
 };
 
 // 韓国語UI翻訳
-const uiKorean: Record<string, string> = {
+export const uiKorean: Record<string, string> = {
   stationSelection: "출발역·도착역 선택",
   departureStation: "출발역",
   arrivalStation: "도착역",
@@ -2714,7 +2777,7 @@ const uiKorean: Record<string, string> = {
   recommendedRoute: "추천 경로",
   showFurigana: "후리가나 표시",
   currentLocationFrom: "현재 위치에서",
-  swapStationsTitle: "출발역과 도착역 교환",
+  swapStationsTitle: "출발역·도착역 교환",
   departureTime: "출발 시간",
   currentTime: "현재 시간",
   baseTime: "출발 시간",
@@ -2836,8 +2899,19 @@ const uiKorean: Record<string, string> = {
   configImportErrorJson: "JSON 형식이 올바르지 않습니다",
   configImportErrorFile: "파일 읽기 실패",
   configImportErrorApply: "설정 적용 실패",
-  baseTime: "출발 시간",
-  swapStationsTitle: "출발역·도착역 교환",
+  transferHighlight: "환승 강조 표시",
+  routeLineWidth: "노선 두께",
+  bubbleMaxRadius: "최대 반경",
+  schematicMapLabel: "노선도 표시（개발 중）",
+  layerOrderHint: "↑ 최전면 / 배면 ↓",
+  dragToSort: "⠿ 드래그",
+  catHousing: "주거",
+  catTransport: "교통",
+  catFood: "음식",
+  catConvenience: "편의성",
+  catSafety: "치안",
+  catEnvironment: "환경",
+  catWork: "직업",
 };
 
 // 翻訳ヘルパー関数
@@ -2931,17 +3005,25 @@ export const translatePlatform = (platform: string, language: Language): string 
 };
 
 /**
- * "品川・渋谷方面" のような行き先・方面文字列を翻訳。
- * "方面" を除いて "・" 区切りの各部分を translateStation に通す。
+ * "品川・渋谷方面" や "小田原行き" のような行き先・方面文字列を翻訳。
+ * "方面" / "行き" を除いて "・" 区切りの各部分を translateStation に通す。
  */
 export const translateDestination = (dest: string, language: Language): string => {
   if (language === 'japanese') return dest;
   const hasMoment = dest.endsWith('方面');
-  const core = hasMoment ? dest.slice(0, -2) : dest;
+  const hasIki = dest.endsWith('行き');
+  const core = hasMoment ? dest.slice(0, -2) : hasIki ? dest.slice(0, -2) : dest;
   const parts = core.split('・').map(p => translateStation(p.trim(), language));
   const joined = parts.join(' · ');
-  if (!hasMoment) return joined;
-  if (language === 'chinese') return `${joined}方向`;
-  if (language === 'korean') return `${joined} 방면`;
-  return `toward ${joined}`;
+  if (hasMoment) {
+    if (language === 'chinese') return `${joined}方向`;
+    if (language === 'korean') return `${joined} 방면`;
+    return `toward ${joined}`;
+  }
+  if (hasIki) {
+    if (language === 'chinese') return `开往${joined}`;
+    if (language === 'korean') return `${joined}행`;
+    return `for ${joined}`;
+  }
+  return joined;
 };
