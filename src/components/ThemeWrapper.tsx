@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import RailwayMap from './RailwayMap';
 import Footer from './Footer';
@@ -6,10 +6,15 @@ import NavigationBar from './NavigationBar';
 import AdSenseAd from './AdSenseAd';
 import StickyBottomAd from './StickyBottomAd';
 import type { Language } from '../utils/translation';
+import { getInitialLanguage, persistLanguage } from '../utils/languagePersistence';
 
 const ThemeWrapper: React.FC = () => {
-  const [language, setLanguage] = useState<Language>('japanese');
+  const [language, setLanguage] = useState<Language>(getInitialLanguage);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    persistLanguage(language);
+  }, [language]);
 
   const handleLanguageChange = (newLanguage: Language) => {
     setLanguage(newLanguage);
