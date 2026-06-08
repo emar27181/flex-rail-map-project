@@ -396,23 +396,27 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 				background: #2d2d2d !important;
 				color: #ffffff !important;
 			}
-			/* 凡例・パネルの細いスクロールバー（背景なし、バーのみ） */
+			/* 凡例・パネルの細いスクロールバー */
 			.thin-scrollbar {
 				scrollbar-width: thin;
-				scrollbar-color: rgba(128,128,128,0.4) transparent;
+				scrollbar-color: rgba(128,128,128,0.35) transparent;
 			}
 			.thin-scrollbar::-webkit-scrollbar {
-				width: 4px;
+				width: 3px;
 			}
-			.thin-scrollbar::-webkit-scrollbar-track {
-				background: transparent;
+			.thin-scrollbar::-webkit-scrollbar-track,
+			.thin-scrollbar::-webkit-scrollbar-track-piece,
+			.thin-scrollbar::-webkit-scrollbar-corner {
+				background: transparent !important;
+				box-shadow: none !important;
+				border: none !important;
 			}
 			.thin-scrollbar::-webkit-scrollbar-thumb {
-				background: rgba(128,128,128,0.4);
-				border-radius: 2px;
+				background: rgba(128,128,128,0.35);
+				border-radius: 99px;
 			}
 			.thin-scrollbar::-webkit-scrollbar-thumb:hover {
-				background: rgba(128,128,128,0.7);
+				background: rgba(128,128,128,0.6);
 			}
 		</style>
 	</head>
