@@ -6,6 +6,11 @@
     3. 変更した日付・時刻を記録すること
 
 ## TODO
+- 列車デモの再生バー？みたいなUIが出発駅到着駅をセンタ置くとかと重なってるからその分下に移動するように
+- 新小金井が他言語対応されていなかった，この路線含め，他言語対応できてるかどうかを網羅的に調査
+  - 路線と，言語でCSV作っていいかも？対応済みかどうかのラベル付けて
+  - 今は4か国語だけど今後増やすのも見据えたうえでデータで管理しておきたい
+- 同一名の駅の時に駅のツールチップが同一名で異なる駅のものを表示していることがある，
 
 ### 🧪 テスト拡充（優先度順）
 
@@ -17,7 +22,7 @@
 #### 中優先度
 - [ ] **HeatmapControl コンポーネント render テスト**: dead フラグ付きソースがリンクにならないことを検証
 - [ ] **routeFinder 経路検索の網羅テスト**: 藤沢→新宿（小田急経由）、新宿→渋谷（山手線・中央線・京王線）など主要経路がすべて正常に返ることを確認
-- [ ] **翻訳キー完全性テスト**: `translation.ts` の ja/en/zh/ko で同じキーが全言語に存在することをテスト（重複キー警告が出ているものを修正）
+- [x] **翻訳キー完全性テスト** → **実装済み（2026-06-08）**: `tests/unit/utils/translation.test.ts` に4テスト追加。uiChinese/uiKorean をexport化し重複キーも修正。
 - [ ] **駅座標整合性テスト**: 全路線の全駅について緯度（24〜46°）・経度（122〜154°）が日本国内範囲に収まることを検証（江ノ島電鉄の座標ズレ問題などを検出）
 
 #### 低優先度（将来対応）
@@ -29,11 +34,7 @@
 ### 🖱️ UI 改善
 
 - [x] **駅ツールチップの路線タップで「この路線を表示」** → **実装済み（2026-06-06）**: 非表示路線に「＋表示」バッジを追加。タップで即 visibleRoutes + availableRoutes に追加。
-- [ ] **ヒートマップツールチップの低コントラスト文字色を改善**: パラメータ値表示（水色・青系）がテーマによっては背景と同化して読みにくい。デザインを壊さない範囲で対処する。
-  - 案1: 値テキストだけ白い背景（`rgba(255,255,255,0.15)` 等）を敷いてコントラスト確保
-  - 案2: pColor の輝度が一定以下のときはテキストに白 or 黒を重ねて WCAG AA（4.5:1）を満たす
-  - 案3: 淡い色はボールド＋アウトライン（`text-shadow: 0 0 2px rgba(0,0,0,0.6)`）で視認性向上
-  - 参照: `src/components/RailwayMap.tsx` `renderHeatmapTooltip` 内 `pColor` で色付けしている行
+- [x] **ヒートマップツールチップの低コントラスト文字色を改善** → **実装済み（2026-06-08）**: 案3採用。pColorで色付けされた値テキストに `text-shadow: 0 0 3px rgba(0,0,0,0.55)` を追加。
 
 ### 手書きで追加（後で修正しておいて）
 - （完了済み→DONEに移動）
@@ -79,7 +80,6 @@ Phase 3 - カスタム評価式:
 
 - 路線クリック判定を緩くする: 半透明（非表示）の路線を表示/非表示に切り替えるクリック判定の幅を広くする（現在細すぎて操作しにくい）。表示中を非表示にするときも同じ幅に統一。
 - 駅表示数の上限設定（フリーズ防止）: 大量路線表示時、画面中心に近い駅から最大100個だけ描画するように制限する。現状は全駅を描画しようとしてブラウザがフリーズする。
-- 大阪，東京の切り替えボタンの表示をなくして．常にどちらの駅も表示するように
 - 出発駅を複数にして，あるゴールの駅に向かうまでのルートを表示
     - 例えば藤沢，大磯，平塚，流山おおたかの森それぞれから新橋に向かうルートの表示とか
 - 所要時間をルートごとの合計で表示する機能の実装
@@ -94,6 +94,36 @@ Phase 3 - カスタム評価式:
 - 時刻表？自分が今載ってる電車と時刻を入れたらその位置時点を基に各駅の到着時間が可視化される機能の実装
 
 ## DONE
+
+### 2026-06-08 TODO実装（追加）
+
+- **設定の路線順序をマップの前面/背面に反映**: ソート順を逆にして index 小（上）が最前面に描画されるよう修正。UIヒント文字列も「↑ 最前面 / 背面 ↓」に更新。
+  - 変更: `src/components/RailwayMap.tsx` visibleRoutesData のソート順
+  - 変更: `src/utils/translation.ts` layerOrderHint（ja/zh/ko）
+- **ヒートマップ設定ドロップダウンがマップに反映されないバグ修正**: handleHeatmapParamChange を追加し heatmapParam・heatmapMultiParams・heatmapCustomRange を同時更新するよう修正。
+  - 変更: `src/components/RailwayMap.tsx` handleHeatmapParamChange + LegendRouteList/MobileBottomPanel に適用
+
+---
+
+### 2026-06-08 TODO実装
+
+- **ヒートマップツールチップのコントラスト改善**: pColorで色付けされた値テキストに text-shadow を追加（案3）。
+  - 変更: `src/components/RailwayMap.tsx` renderHeatmapTooltip 内の値 span × 2箇所
+- **翻訳キー完全性テスト**: uiChinese/uiKorean を export 化し、全キー網羅チェックテストを追加。重複キー（baseTime・swapStationsTitle）も修正。
+  - 新規: `tests/unit/utils/translation.test.ts`
+  - 変更: `src/utils/translation.ts`
+- **多言語対応: 行き先「〇〇行き」英語化**: translateDestination に hasIki ブランチを追加。英語 "for X"・中国語 "开往X"・韓国語 "X행" で表示。
+  - 変更: `src/utils/translation.ts` translateDestination 関数
+- **多言語対応: toward括弧の言語切り替え**: 日本語は「（）」、それ以外は「()」を使用。
+  - 変更: `src/components/RailwayMap.tsx` 時刻表ツールチップ行き先行
+- **多言語対応: 設定パネル内のハードコード日本語を translateUI 化**: 乗換強調表示・路線の太さ・最大半径・路線図表示（実装中）・レイヤー順ヒント・カテゴリラベル。
+  - 変更: `src/components/legend/LegendRouteList.tsx`・`src/utils/translation.ts` に14キー追加
+- **スマホ設定パネルの「現在の駅を設定」セクション非表示**: MobileBottomPanel内の LegendStationMarkers を削除。
+  - 変更: `src/components/RailwayMap.tsx`
+- **SEO改善**: sitemap.xmlに全記事を追加（5記事＋記事一覧）、JSON-LDにkeywords/url/mainEntityOfPage追加。
+  - 変更: `public/sitemap.xml`・`src/pages/articles/_ArticleLayout.astro`
+
+---
 
 ### 2026-06-06 TODO実装
 
