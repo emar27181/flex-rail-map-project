@@ -68,6 +68,16 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/contact"/>
   </url>
 
+  <!-- Articles index -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/articles</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/articles"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/articles"/>
+  </url>
+
   <!-- Article: 東京家賃が安い路線ランキング -->
   <url>
     <loc>https://flex-railway-map.netlify.app/articles/tokyo-rent-by-route</loc>
@@ -76,6 +86,56 @@
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/articles/tokyo-rent-by-route"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/articles/tokyo-rent-by-route"/>
+  </url>
+
+  <!-- Article: 東京路線図の読み方 初心者向け -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/articles/tokyo-train-map-beginner</loc>
+    <lastmod>2026-06-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/articles/tokyo-train-map-beginner"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/articles/tokyo-train-map-beginner"/>
+  </url>
+
+  <!-- Article: 東京観光おすすめルート -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/articles/tokyo-sightseeing-routes</loc>
+    <lastmod>2026-06-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/articles/tokyo-sightseeing-routes"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/articles/tokyo-sightseeing-routes"/>
+  </url>
+
+  <!-- Article: 通勤30分以内で家賃が安い駅 -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/articles/commute-30min-cheap-rent</loc>
+    <lastmod>2026-06-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/articles/commute-30min-cheap-rent"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/articles/commute-30min-cheap-rent"/>
+  </url>
+
+  <!-- Article: 治安が良い沿線 -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/articles/tokyo-safe-area-by-route</loc>
+    <lastmod>2026-06-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/articles/tokyo-safe-area-by-route"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/articles/tokyo-safe-area-by-route"/>
+  </url>
+
+  <!-- Article: フレックス路線図の使い方紹介 -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/articles/flex-rail-map-introduction</loc>
+    <lastmod>2026-06-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/articles/flex-rail-map-introduction"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/articles/flex-rail-map-introduction"/>
   </url>
 
 </urlset>

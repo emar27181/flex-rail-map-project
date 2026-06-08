@@ -94,14 +94,17 @@ const bodyTranslations = ARTICLE_BODY_TRANSLATIONS[i18nKey];
     "@type": "Article",
     "headline": title,
     "description": description,
+    "keywords": keywords ?? undefined,
     "datePublished": publishedDate,
     "dateModified": publishedDate,
+    "url": canonicalUrl,
     "author": { "@type": "Organization", "name": "Flex Rail Map Project" },
     "publisher": {
       "@type": "Organization",
       "name": "Flex Rail Map Project",
       "logo": { "@type": "ImageObject", "url": `${siteUrl}${ogImage}` }
-    }
+    },
+    "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl }
   })}></script>}
 
   <slot name="head" />
