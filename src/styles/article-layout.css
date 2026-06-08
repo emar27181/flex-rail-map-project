@@ -58,6 +58,8 @@ body{
 .theme-btn{ display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--ink-soft); cursor:pointer; transition:background .2s, color .2s, border-color .2s; }
 .theme-btn:hover{ color:var(--green); border-color:var(--green); }
 .theme-btn svg{ width:18px; height:18px; }
+.lang-btn{ display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--ink); cursor:pointer; transition:background .2s, color .2s, border-color .2s; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size:12.5px; font-weight:800; padding:0; }
+.lang-btn:hover{ color:var(--green); border-color:var(--green); }
 html[data-theme="dark"] .sun{ display:block; }
 html[data-theme="dark"] .moon{ display:none; }
 html[data-theme="light"] .sun{ display:none; }

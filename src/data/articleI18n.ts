@@ -1,0 +1,302 @@
+export const ARTICLE_LANGUAGES = ["ja", "en", "zh", "ko"] as const;
+export type ArticleLanguage = typeof ARTICLE_LANGUAGES[number];
+
+export const ARTICLE_LANG_LABELS: Record<ArticleLanguage, string> = {
+  ja: "日",
+  en: "En",
+  zh: "中",
+  ko: "한",
+};
+
+export const ARTICLE_SHELL_TRANSLATIONS = {
+  ja: {
+    brand: "フレックス路線図",
+    top: "← フレックス路線図 トップ",
+    articles: "記事一覧",
+    articlesBack: "記事一覧へ戻る",
+    footerCopy: "フレックス路線図 ／ 東京の鉄道を、必要な情報だけで。",
+    switchLanguage: "言語を切り替え",
+    switchTheme: "ダークモード切り替え",
+    readAll: "全記事",
+  },
+  en: {
+    brand: "Flex Rail Map",
+    top: "← Flex Rail Map Home",
+    articles: "Articles",
+    articlesBack: "Back to Articles",
+    footerCopy: "Flex Rail Map / Tokyo railways, only the information you need.",
+    switchLanguage: "Switch language",
+    switchTheme: "Toggle dark mode",
+    readAll: "All articles",
+  },
+  zh: {
+    brand: "Flex Rail Map",
+    top: "← Flex Rail Map 首页",
+    articles: "文章列表",
+    articlesBack: "返回文章列表",
+    footerCopy: "Flex Rail Map / 东京铁路，只显示你需要的信息。",
+    switchLanguage: "切换语言",
+    switchTheme: "切换深色模式",
+    readAll: "全部文章",
+  },
+  ko: {
+    brand: "Flex Rail Map",
+    top: "← Flex Rail Map 홈",
+    articles: "기사 목록",
+    articlesBack: "기사 목록으로 돌아가기",
+    footerCopy: "Flex Rail Map / 도쿄 철도에서 필요한 정보만.",
+    switchLanguage: "언어 전환",
+    switchTheme: "다크 모드 전환",
+    readAll: "전체 기사",
+  },
+} satisfies Record<ArticleLanguage, Record<string, string>>;
+
+export interface ArticleTranslation {
+  title: string;
+  description: string;
+  category: string;
+  kicker: string;
+  readTime: string;
+  tag: string;
+}
+
+export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, ArticleTranslation>> = {
+  articles: {
+    ja: {
+      title: "記事一覧",
+      description: "Flex Rail Mapの路線図や駅データを活用した、東京の観光、通勤、引っ越しに関するお役立ち記事一覧です。",
+      category: "記事一覧",
+      kicker: "記事一覧",
+      readTime: "全記事",
+      tag: "Articles",
+    },
+    en: {
+      title: "Articles",
+      description: "Guides for Tokyo sightseeing, commuting, and moving, built around Flex Rail Map route and station data.",
+      category: "Articles",
+      kicker: "Articles",
+      readTime: "All articles",
+      tag: "Articles",
+    },
+    zh: {
+      title: "文章列表",
+      description: "基于 Flex Rail Map 的路线图和车站数据，整理东京观光、通勤和搬家相关指南。",
+      category: "文章列表",
+      kicker: "文章列表",
+      readTime: "全部文章",
+      tag: "Articles",
+    },
+    ko: {
+      title: "기사 목록",
+      description: "Flex Rail Map의 노선도와 역 데이터를 바탕으로 도쿄 관광, 통근, 이사 정보를 정리한 글입니다.",
+      category: "기사 목록",
+      kicker: "기사 목록",
+      readTime: "전체 기사",
+      tag: "Articles",
+    },
+  },
+  "flex-rail-map-introduction": {
+    ja: {
+      title: "東京の路線図を「理解しやすく」するための路線図UIを作っています",
+      description: "東京の路線図って、正直かなり難しいと思う。情報量が多く、分岐も多く、初めて見る人には「結局どこを見ればいいのか分からない」状態になりやすい。そんなモヤモヤを、ひとつずつ減らしていくために作っているのが フレックス路線図 です。",
+      category: "開発ノート・サービス紹介",
+      kicker: "開発ノート",
+      readTime: "読了 約5分",
+      tag: "Dev Notes",
+    },
+    en: {
+      title: "Building a Rail Map UI That Makes Tokyo Easier to Understand",
+      description: "Tokyo's rail map can feel overwhelming. Flex Rail Map is an interface that reduces visual noise and helps you understand the route, direction, and current context.",
+      category: "Development Notes / Product Intro",
+      kicker: "Development Notes",
+      readTime: "About 5 min read",
+      tag: "Dev Notes",
+    },
+    zh: {
+      title: "正在制作让东京路线图更容易理解的 UI",
+      description: "东京路线图信息量很大，初次使用时很容易不知道该看哪里。Flex Rail Map 通过减少不必要的信息，帮助你理解路线、方向和当前位置。",
+      category: "开发笔记・服务介绍",
+      kicker: "开发笔记",
+      readTime: "约 5 分钟阅读",
+      tag: "Dev Notes",
+    },
+    ko: {
+      title: "도쿄 노선도를 더 쉽게 이해하기 위한 UI를 만들고 있습니다",
+      description: "도쿄 노선도는 정보량이 많아 처음 보면 어디를 봐야 할지 헷갈리기 쉽습니다. Flex Rail Map은 필요한 정보만 남겨 경로와 방향, 현재 상황을 이해하기 쉽게 합니다.",
+      category: "개발 노트・서비스 소개",
+      kicker: "개발 노트",
+      readTime: "약 5분 읽기",
+      tag: "Dev Notes",
+    },
+  },
+  "tokyo-train-map-beginner": {
+    ja: {
+      title: "東京の路線図の読み方・乗り換え方【完全初心者ガイド】",
+      description: "東京の電車が初めてでも迷いにくくするために、路線図の見方、色分け、駅名、乗り換えの考え方をやさしく解説します。",
+      category: "初心者ガイド",
+      kicker: "はじめての東京の電車",
+      readTime: "読了 約6分",
+      tag: "Beginner Guide",
+    },
+    en: {
+      title: "How to Read Tokyo Train Maps and Transfer Lines: Beginner Guide",
+      description: "A simple guide to Tokyo rail maps, line colors, station names, and transfer logic for first-time riders.",
+      category: "Beginner Guide",
+      kicker: "Tokyo Trains for Beginners",
+      readTime: "About 6 min read",
+      tag: "Beginner Guide",
+    },
+    zh: {
+      title: "东京路线图怎么看、怎么换乘：新手完整指南",
+      description: "面向第一次乘坐东京电车的人，简单说明路线图、线路颜色、车站名和换乘思路。",
+      category: "新手指南",
+      kicker: "第一次坐东京电车",
+      readTime: "约 6 分钟阅读",
+      tag: "Beginner Guide",
+    },
+    ko: {
+      title: "도쿄 노선도 읽는 법과 환승 방법: 초보자 가이드",
+      description: "도쿄 전철이 처음인 사람을 위해 노선도, 색상, 역 이름, 환승 방식을 쉽게 설명합니다.",
+      category: "초보자 가이드",
+      kicker: "처음 만나는 도쿄 전철",
+      readTime: "약 6분 읽기",
+      tag: "Beginner Guide",
+    },
+  },
+  "tokyo-sightseeing-routes": {
+    ja: {
+      title: "東京観光で使える路線ガイド（浅草・秋葉原・原宿・お台場）",
+      description: "東京観光をスムーズにするための路線ガイド。浅草、秋葉原、原宿、お台場などの主要観光スポットへアクセスしやすい路線と乗り換えのコツを解説します。",
+      category: "観光ガイド",
+      kicker: "観光ガイド",
+      readTime: "読了 約4分",
+      tag: "Travel Guide",
+    },
+    en: {
+      title: "Tokyo Sightseeing Route Guide: Asakusa, Akihabara, Harajuku, and Odaiba",
+      description: "Rail routes and transfer tips for reaching Tokyo's popular sightseeing areas smoothly.",
+      category: "Travel Guide",
+      kicker: "Travel Guide",
+      readTime: "About 4 min read",
+      tag: "Travel Guide",
+    },
+    zh: {
+      title: "东京观光路线指南：浅草、秋叶原、原宿、台场",
+      description: "介绍前往东京主要观光地时好用的线路和换乘技巧。",
+      category: "观光指南",
+      kicker: "观光指南",
+      readTime: "约 4 分钟阅读",
+      tag: "Travel Guide",
+    },
+    ko: {
+      title: "도쿄 관광 노선 가이드: 아사쿠사, 아키하바라, 하라주쿠, 오다이바",
+      description: "도쿄 주요 관광지로 쉽게 이동하기 위한 노선과 환승 팁을 소개합니다.",
+      category: "관광 가이드",
+      kicker: "관광 가이드",
+      readTime: "약 4분 읽기",
+      tag: "Travel Guide",
+    },
+  },
+  "commute-30min-cheap-rent": {
+    ja: {
+      title: "通勤30分圏で家賃が安い駅ランキング！主要ターミナル別の穴場路線",
+      description: "新宿・東京・渋谷まで通勤30分圏内で家賃が安い穴場の駅・路線をランキング形式で紹介。引っ越しや上京を検討中の社会人・学生必見の住みやすさガイドです。",
+      category: "引っ越し・住まい",
+      kicker: "住まいガイド",
+      readTime: "読了 約4分",
+      tag: "Living Guide",
+    },
+    en: {
+      title: "Affordable Stations Within a 30-Minute Commute: Hidden Lines by Major Terminal",
+      description: "A ranking of affordable stations and lines within about 30 minutes of Shinjuku, Tokyo, and Shibuya.",
+      category: "Moving / Living",
+      kicker: "Living Guide",
+      readTime: "About 4 min read",
+      tag: "Living Guide",
+    },
+    zh: {
+      title: "通勤 30 分钟内的低租金车站排行：主要枢纽周边隐藏线路",
+      description: "按新宿、东京、涩谷等主要车站，介绍通勤约 30 分钟内租金较低的车站和线路。",
+      category: "搬家・居住",
+      kicker: "居住指南",
+      readTime: "约 4 分钟阅读",
+      tag: "Living Guide",
+    },
+    ko: {
+      title: "통근 30분권 저렴한 역 랭킹: 주요 터미널별 숨은 노선",
+      description: "신주쿠, 도쿄, 시부야까지 약 30분 안에 갈 수 있는 저렴한 역과 노선을 정리했습니다.",
+      category: "이사・주거",
+      kicker: "주거 가이드",
+      readTime: "약 4분 읽기",
+      tag: "Living Guide",
+    },
+  },
+  "tokyo-safe-area-by-route": {
+    ja: {
+      title: "東京で治安が良い沿線・エリアの選び方【一人暮らし女性必見】",
+      description: "東京で一人暮らしを始める方に向けて、治安が良い沿線とエリアの選び方を解説。犯罪発生率や駅周辺の環境データを基に、安心して住める路線を紹介します。",
+      category: "引っ越し・住まい",
+      kicker: "住まいガイド",
+      readTime: "読了 約4分",
+      tag: "Safety Guide",
+    },
+    en: {
+      title: "How to Choose Safer Lines and Areas in Tokyo for Living Alone",
+      description: "A guide to choosing safer Tokyo neighborhoods and rail corridors using crime and station-area context.",
+      category: "Moving / Living",
+      kicker: "Living Guide",
+      readTime: "About 4 min read",
+      tag: "Safety Guide",
+    },
+    zh: {
+      title: "东京治安较好的沿线和区域怎么选",
+      description: "面向在东京独居的人，介绍如何根据治安和车站周边环境选择适合居住的线路。",
+      category: "搬家・居住",
+      kicker: "居住指南",
+      readTime: "约 4 分钟阅读",
+      tag: "Safety Guide",
+    },
+    ko: {
+      title: "도쿄에서 치안이 좋은 노선과 지역 고르는 법",
+      description: "도쿄에서 혼자 살 계획인 사람을 위해 치안과 역 주변 환경을 바탕으로 거주 노선을 고르는 방법을 소개합니다.",
+      category: "이사・주거",
+      kicker: "주거 가이드",
+      readTime: "약 4분 읽기",
+      tag: "Safety Guide",
+    },
+  },
+  "tokyo-rent-by-route": {
+    ja: {
+      title: "東京・首都圏の家賃が安い路線・駅ランキング【2025年版】",
+      description: "東京・首都圏の路線別1K平均家賃を比較。JR・東京メトロ・私鉄ごとに家賃相場をまとめ、インタラクティブな路線図ヒートマップで視覚的に確認できます。",
+      category: "引っ越し・沿線比較",
+      kicker: "住まいガイド",
+      readTime: "読了 約4分",
+      tag: "Rent Guide",
+    },
+    en: {
+      title: "Affordable Rail Lines and Stations in Greater Tokyo: 2025 Rent Guide",
+      description: "Compare average 1K rents by rail line across Greater Tokyo and explore the patterns with an interactive route-map heatmap.",
+      category: "Moving / Line Comparison",
+      kicker: "Living Guide",
+      readTime: "About 4 min read",
+      tag: "Rent Guide",
+    },
+    zh: {
+      title: "东京・首都圈低租金线路和车站排行【2025】",
+      description: "比较东京首都圈各线路的 1K 平均租金，并可通过交互式路线图热力图直观查看。",
+      category: "搬家・沿线比较",
+      kicker: "居住指南",
+      readTime: "约 4 分钟阅读",
+      tag: "Rent Guide",
+    },
+    ko: {
+      title: "도쿄・수도권 저렴한 노선과 역 랭킹【2025】",
+      description: "수도권 노선별 1K 평균 월세를 비교하고, 인터랙티브 노선도 히트맵으로 시각적으로 확인할 수 있습니다.",
+      category: "이사・노선 비교",
+      kicker: "주거 가이드",
+      readTime: "약 4분 읽기",
+      tag: "Rent Guide",
+    },
+  },
+};
