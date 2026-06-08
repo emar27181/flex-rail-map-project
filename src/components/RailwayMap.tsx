@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Maximize2, Minimize2, Sun, Moon } from 'lucide-react';
+import { Maximize2, Minimize2, Sun, Moon, Info } from 'lucide-react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
@@ -4738,6 +4738,30 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             >
               {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
             </button>
+
+            {/* 記事一覧 */}
+            <a
+              href="/articles"
+              style={{
+                display: 'flex',
+                backgroundColor: colors.surface,
+                color: colors.text,
+                border: `1px solid ${colors.border}`,
+                borderRadius: '8px',
+                width: '36px',
+                height: '36px',
+                cursor: 'pointer',
+                boxShadow: `0 2px 8px ${colors.shadow}`,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backdropFilter: 'blur(4px)',
+                textDecoration: 'none',
+              }}
+              title={language === 'japanese' ? '記事一覧を開く' : 'Open articles'}
+              aria-label={language === 'japanese' ? '記事一覧を開く' : 'Open articles'}
+            >
+              <Info size={18} />
+            </a>
           </div>
 
 
