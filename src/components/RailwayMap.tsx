@@ -602,6 +602,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return nearest;
   }, [allUniqueStations]);
 
+  // ヒートマップパラメータ変更: heatmapParam と heatmapMultiParams を同期
+  const handleHeatmapParamChange = useCallback((k: keyof StationStats) => {
+    setHeatmapParam(k);
+    setHeatmapMultiParams(new Set([k]));
+    setHeatmapCustomRange(undefined);
+  }, []);
+
   // 現在地付近の駅を出発に設定するコールバック
   const handleSetNearestDeparture = useCallback(() => {
     if (!userLocation) return;
@@ -806,7 +813,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     >
                       {translatedLabel}{hasInfo ? ' ⓘ' : ''}
                     </span>
-                    <span style={{ fontSize: '10px', color: pColor, fontWeight: isActive ? 'bold' : 'normal', marginLeft: '4px' }}>
+                    <span style={{ fontSize: '10px', color: pColor, fontWeight: isActive ? 'bold' : 'normal', marginLeft: '4px', textShadow: '0 0 3px rgba(0,0,0,0.55), 0 0 1px rgba(0,0,0,0.4)' }}>
                       {v}{p.unit ? ` ${p.unit}` : ''}
                     </span>
                   </div>
@@ -1135,7 +1142,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         {labelEl}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flexShrink: 0 }}>
                           <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: pColor, flexShrink: 0 }} />
-                          <span style={{ color: pColor, fontWeight: isActive ? 'bold' : 'normal' }}>
+                          <span style={{ color: pColor, fontWeight: isActive ? 'bold' : 'normal', textShadow: '0 0 3px rgba(0,0,0,0.55), 0 0 1px rgba(0,0,0,0.4)' }}>
                             {v}{p.unit ? ` ${p.unit}` : ''}
                           </span>
                         </div>
@@ -1267,7 +1274,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         </div>
                         {/* 2行目: 行き先 */}
                         <div style={{ fontSize: '11px', color: colors.textSecondary, paddingLeft: '2px' }}>
-                          {translateDestination(dep.destination, currentLanguage)}{dep.toward ? `（${translateDestination(dep.toward, currentLanguage)}）` : ''}
+                          {translateDestination(dep.destination, currentLanguage)}{dep.toward ? (currentLanguage === 'japanese' ? `（${translateDestination(dep.toward, currentLanguage)}）` : ` (${translateDestination(dep.toward, currentLanguage)})`) : ''}
                         </div>
                       </div>
                     ))}
@@ -3771,7 +3778,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               {mapViewMode !== 'bubble' && [...visibleRoutesData].sort(([a], [b]) => {
                 const ai = routeOrder.indexOf(a as RouteKey);
                 const bi = routeOrder.indexOf(b as RouteKey);
-                return (ai === -1 ? 9999 : ai) - (bi === -1 ? 9999 : bi);
+                // 上（index小）が最前面になるよう降順（後から描画＝前面）
+                return (bi === -1 ? -9999 : bi) - (ai === -1 ? -9999 : ai);
               }).map(([routeKey, stations]) =>
                 renderRoute(routeKey as RouteKey, stations)
               )}
@@ -4330,7 +4338,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     heatmapEnabled={heatmapEnabled}
                     heatmapParam={heatmapParam}
                     onHeatmapEnabledChange={setHeatmapEnabled}
-                    onHeatmapParamChange={setHeatmapParam}
+                    onHeatmapParamChange={handleHeatmapParamChange}
                     mapViewMode={mapViewMode}
                     onMapViewModeChange={setMapViewMode}
                     bubbleShape={bubbleShape}
@@ -4540,12 +4548,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   label: translateUI('detailSettings', currentLanguage),
                   content: (
                     <>
-                      <LegendStationMarkers
-                        departure={departure}
-                        arrival={arrival}
-                        theme={theme}
-                        language={currentLanguage}
-                      />
                       <LegendRouteList
                         visibleRoutesData={visibleRoutesData}
                     routeOrder={routeOrder}
@@ -4579,7 +4581,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         heatmapEnabled={heatmapEnabled}
                         heatmapParam={heatmapParam}
                         onHeatmapEnabledChange={setHeatmapEnabled}
-                        onHeatmapParamChange={setHeatmapParam}
+                        onHeatmapParamChange={handleHeatmapParamChange}
                         mapViewMode={mapViewMode}
                         onMapViewModeChange={setMapViewMode}
                         bubbleShape={bubbleShape}
