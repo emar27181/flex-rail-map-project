@@ -4,8 +4,7 @@ import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
 import RouteToggleItem from '../ui/RouteToggleItem';
-import { STAT_PARAMS } from '../../data/stationStats';
-import type { StationStats, StatCategory } from '../../data/stationStats';
+import type { StationStats } from '../../data/stationStats';
 import MapConfigPanel from './MapConfigPanel';
 import type { MapConfig } from './MapConfigPanel';
 import { checkboxLabel } from './legendStyles';
@@ -147,6 +146,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   const colors = getThemeColors(theme);
   const [sortMode, setSortMode] = useState<SortMode>('name');
   const [dragOverKey, setDragOverKey] = useState<string | null>(null);
+  const ROUTE_LIST_LIMIT = 10;
+  const [routeListExpanded, setRouteListExpanded] = useState(false);
   const [groupLabelOpen,  setGroupLabelOpen]  = useState(true);
   const [groupVizOpen,    setGroupVizOpen]    = useState(true);
   const [groupFilterOpen, setGroupFilterOpen] = useState(false);
@@ -191,8 +192,19 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
     if (sortMode === 'distance') {
       return routeMinDist(stationsA) - routeMinDist(stationsB);
     }
-    return 0; // default: 登録順のまま
+    return 0;
   });
+  void sortedVisibleRoutesData;
+
+  const sectionHeader = (label: string, isOpen: boolean, onToggle: () => void) => (
+    <div
+      onClick={onToggle}
+      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', background: colors.surfaceElevated, marginBottom: '2px' }}
+    >
+      <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>{label}</span>
+      <span style={{ fontSize: '9px', color: colors.textSecondary, transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
+    </div>
+  );
 
   return (
     <div style={{
@@ -202,225 +214,14 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
       borderRadius: '4px',
       border: `1px solid ${colors.borderLight}`
     }}>
-      <div style={{
-        fontSize: '14px',
-        fontWeight: 'bold',
-        marginBottom: '8px',
-        color: colors.text
-      }}>
+
+      {/* ═══ セクション1: 表示路線切り替え ═══ */}
+      <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: colors.text }}>
         {translateUI('routeDisplayToggle', language)}
       </div>
 
-      {/* 表示オプション（グループ折りたたみ） */}
-      <div style={{ marginBottom: '8px' }}>
-
-        {/* ── 駅ラベル ── */}
-        <div
-          onClick={() => setGroupLabelOpen(v => !v)}
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', background: colors.surfaceElevated, marginBottom: '2px' }}
-        >
-          <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>{translateUI('settingsGroupLabel', language)}</span>
-          <span style={{ fontSize: '9px', color: colors.textSecondary, transition: 'transform 0.2s', transform: groupLabelOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
-        </div>
-        {groupLabelOpen && (
-          <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
-            <label style={checkboxLabel(colors)}>
-              <input type="checkbox" checked={showTravelTimes} onChange={e => onShowTravelTimesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
-              {translateUI('showTravelTimes', language)}
-            </label>
-            {showTravelTimes && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', paddingLeft: '22px', marginBottom: '2px' }}>
-                <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('travelTimeLabelMode', language)}:</span>
-                {(['interval', 'cumulative'] as const).map(mode => (
-                  <label key={mode} style={{ display: 'flex', alignItems: 'center', gap: '2px', fontSize: '10px', color: colors.text, cursor: 'pointer' }}>
-                    <input
-                      type="radio"
-                      name="travelTimeLabelMode"
-                      checked={travelTimeLabelMode === mode}
-                      onChange={() => onTravelTimeLabelModeChange(mode)}
-                      style={{ cursor: 'pointer' }}
-                    />
-                    {mode === 'interval' ? translateUI('travelTimeLabelInterval', language) : `${translateUI('travelTimeLabelCumulative', language)}（実装中）`}
-                  </label>
-                ))}
-              </div>
-            )}
-            <label style={checkboxLabel(colors)}>
-              <input type="checkbox" checked={showStationNumbers} onChange={e => onShowStationNumbersChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
-              {translateUI('showStationCodes', language)}
-            </label>
-            <label style={checkboxLabel(colors)}>
-              <input type="checkbox" checked={showStationNames} onChange={e => onShowStationNamesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
-              {translateUI('showStationNames', language)}
-            </label>
-            {language === 'japanese' && (
-              <label style={checkboxLabel(colors)}>
-                <input type="checkbox" checked={showFurigana} onChange={e => onShowFuriganaChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
-                {translateUI('showFurigana', language)}
-              </label>
-            )}
-          </div>
-        )}
-
-        {/* ── データ可視化 ── */}
-        <div
-          onClick={() => setGroupVizOpen(v => !v)}
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', background: colors.surfaceElevated, marginBottom: '2px' }}
-        >
-          <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>{translateUI('settingsGroupViz', language)}</span>
-          <span style={{ fontSize: '9px', color: colors.textSecondary, transition: 'transform 0.2s', transform: groupVizOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
-        </div>
-        {groupVizOpen && (
-          <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
-            {/* 1. ヒートマップ */}
-            <label style={checkboxLabel(colors)}>
-              <input type="checkbox" checked={heatmapEnabled} onChange={e => onHeatmapEnabledChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
-              {translateUI('stationHeatmap', language)}
-            </label>
-            {heatmapEnabled && (
-              <select
-                value={heatmapParam as string}
-                onChange={e => onHeatmapParamChange(e.target.value as keyof StationStats)}
-                style={{ marginLeft: '22px', marginTop: '2px', fontSize: '11px', padding: '2px 4px', borderRadius: '3px', border: `1px solid ${colors.border}`, background: colors.surfaceElevated, color: colors.text, cursor: 'pointer', width: 'calc(100% - 22px)' }}
-              >
-                {(['housing','transport','food','convenience','safety','environment','work'] as StatCategory[]).map(cat => {
-                  const catLabel: Record<StatCategory, string> = { housing: '住居', transport: '交通', food: '飲食', convenience: '利便性', safety: '治安', environment: '環境', work: '仕事' };
-                  const params = STAT_PARAMS.filter(p => p.category === cat);
-                  if (params.length === 0) return null;
-                  return (
-                    <optgroup key={cat} label={catLabel[cat]}>
-                      {params.map(p => <option key={p.key as string} value={p.key as string}>{p.label}（{p.unit}）</option>)}
-                    </optgroup>
-                  );
-                })}
-              </select>
-            )}
-            {/* 2. 列車デモ */}
-            {mapViewMode === 'realistic' && (
-              <label style={checkboxLabel(colors)}>
-                <input type="checkbox" checked={showTrainDemo} onChange={onTrainDemoToggle} style={{ marginRight: '6px', cursor: 'pointer' }} />
-                {translateUI('trainDemoLabel', language)}
-              </label>
-            )}
-            {/* 3. バブルマップ */}
-            <label style={checkboxLabel(colors)}>
-              <input type="checkbox" checked={mapViewMode === 'bubble'} onChange={e => onMapViewModeChange(e.target.checked ? 'bubble' : 'realistic')} style={{ marginRight: '6px', cursor: 'pointer' }} />
-              {translateUI('bubbleMap', language)}
-            </label>
-            {mapViewMode === 'bubble' && (
-              <div style={{ marginLeft: '22px', marginTop: '4px' }}>
-                <div style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
-                  {(['circle', 'square'] as const).map(shape => (
-                    <label key={shape} style={{ display: 'flex', alignItems: 'center', fontSize: '11px', color: colors.text, cursor: 'pointer' }}>
-                      <input type="radio" name="bubbleShape" checked={bubbleShape === shape} onChange={() => onBubbleShapeChange(shape)} style={{ marginRight: '4px', cursor: 'pointer' }} />
-                      {shape === 'circle' ? translateUI('bubbleCircle', language) : translateUI('bubbleSquare', language)}
-                    </label>
-                  ))}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>最大半径</span>
-                  <input
-                    type="range" min={500} max={50000} step={500}
-                    value={bubbleMaxRadiusM}
-                    onChange={e => onBubbleMaxRadiusMChange(Number(e.target.value))}
-                    style={{ flex: 1, cursor: 'pointer' }}
-                  />
-                  <span style={{ fontSize: '10px', color: colors.text, minWidth: '40px', textAlign: 'right' }}>
-                    {bubbleMaxRadiusM >= 1000 ? `${(bubbleMaxRadiusM / 1000).toFixed(1)}km` : `${bubbleMaxRadiusM}m`}
-                  </span>
-                </div>
-              </div>
-            )}
-            {/* 4. 路線図表示（実装中） */}
-            <label style={checkboxLabel(colors)}>
-              <input type="checkbox" checked={mapViewMode === 'schematic'} onChange={e => onMapViewModeChange(e.target.checked ? 'schematic' : 'realistic')} style={{ marginRight: '6px', cursor: 'pointer' }} />
-              路線図表示（実装中）
-            </label>
-          </div>
-        )}
-
-        {/* ── 駅フィルター（デフォルト閉じ） ── */}
-        <div
-          onClick={() => setGroupFilterOpen(v => !v)}
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', background: colors.surfaceElevated, marginBottom: '2px' }}
-        >
-          <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>{translateUI('settingsGroupFilter', language)}</span>
-          <span style={{ fontSize: '9px', color: colors.textSecondary, transition: 'transform 0.2s', transform: groupFilterOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
-        </div>
-        {groupFilterOpen && (
-          <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
-            <label style={checkboxLabel(colors)}>
-              <input type="checkbox" checked={showTransferStationsOnly} onChange={e => onShowTransferStationsOnlyChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
-              {translateUI('showOnlyTransferStations', language)}
-            </label>
-            <label style={checkboxLabel(colors)}>
-              <input type="checkbox" checked={showExpressStationsOnly} onChange={e => onShowExpressStationsOnlyChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
-              {translateUI('showOnlyExpressStations', language)}
-            </label>
-            <label style={checkboxLabel(colors)}>
-              <input type="checkbox" checked={showFullRouteStations} onChange={e => onShowFullRouteStationsChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
-              {translateUI('showFullRouteStations', language)}
-            </label>
-          </div>
-        )}
-
-        {/* ── 地図表示（デフォルト閉じ） ── */}
-        <div
-          onClick={() => setGroupMapOpen(v => !v)}
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', background: colors.surfaceElevated, marginBottom: '2px' }}
-        >
-          <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>{translateUI('settingsGroupMap', language)}</span>
-          <span style={{ fontSize: '9px', color: colors.textSecondary, transition: 'transform 0.2s', transform: groupMapOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
-        </div>
-        {groupMapOpen && (
-          <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
-            <label style={checkboxLabel(colors)}>
-              <input type="checkbox" checked={showDimmedRoutes} onChange={e => onShowDimmedRoutesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
-              {translateUI('showOutsideSegmentRoutes', language)}
-            </label>
-            <label style={checkboxLabel(colors)}>
-              <input type="checkbox" checked={showRouteLine} onChange={e => onShowRouteLineChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
-              {translateUI('showRouteLines', language)}
-            </label>
-            <label style={checkboxLabel(colors)}>
-              <input type="checkbox" checked={showStationTierBadges} onChange={e => onShowStationTierBadgesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
-              乗換強調表示
-            </label>
-            <label style={checkboxLabel(colors)}>
-              <input type="checkbox" checked={showStationTooltip} onChange={e => onShowStationTooltipChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
-              {translateUI('stationTooltipLabel', language)}
-            </label>
-            <label style={checkboxLabel(colors)}>
-              <input type="checkbox" checked={showOsmTiles} onChange={e => onShowOsmTilesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
-              {translateUI('showMapTiles', language)}
-            </label>
-            {/* アイコンサイズ */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0', marginTop: '2px' }}>
-              <span style={{ flex: 1, color: colors.textSecondary }}>{translateUI('settingsIconSize', language)}</span>
-              <button onClick={() => onStationSizeScaleChange(Math.max(0.5, Math.round((stationSizeScale - 0.1) * 10) / 10))}
-                style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
-              <span style={{ minWidth: '30px', textAlign: 'center', fontSize: '11px' }}>{stationSizeScale.toFixed(1)}x</span>
-              <button onClick={() => onStationSizeScaleChange(Math.min(2.0, Math.round((stationSizeScale + 0.1) * 10) / 10))}
-                style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
-            </div>
-            {/* 路線の太さ */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0' }}>
-              <span style={{ flex: 1, color: colors.textSecondary }}>路線の太さ</span>
-              <button onClick={() => onRouteLineWidthChange(Math.max(1, routeLineWidth - 0.5))}
-                style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
-              <span style={{ minWidth: '30px', textAlign: 'center', fontSize: '11px' }}>{routeLineWidth.toFixed(1)}px</span>
-              <button onClick={() => onRouteLineWidthChange(Math.min(8, routeLineWidth + 0.5))}
-                style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
-            </div>
-          </div>
-        )}
-
-      </div>
-
-      <MapConfigPanel config={mapConfig} theme={theme} language={language} onImport={onImportConfig} />
-
       {/* ソート選択 */}
-      <div style={{ display: 'flex', gap: '4px', marginTop: '10px', marginBottom: '6px', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: '4px', marginBottom: '6px', alignItems: 'center' }}>
         <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
           {translateUI('sortLabel', language)}
         </span>
@@ -450,100 +251,254 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         })}
       </div>
 
-      <div style={{
-        display: 'flex',
-        gap: '4px',
-        marginBottom: '8px'
-      }}>
+      {/* 全表示/全非表示 */}
+      <div style={{ display: 'flex', gap: '4px', marginBottom: '6px' }}>
         <button
           onClick={onSelectAllRoutes}
-          style={{
-            flex: 1,
-            padding: '4px 8px',
-            fontSize: '10px',
-            backgroundColor: '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer'
-          }}
+          style={{ flex: 1, padding: '4px 8px', fontSize: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}
         >
           {translateUI('allShow', language)}
         </button>
         <button
           onClick={onDeselectAllRoutes}
-          style={{
-            flex: 1,
-            padding: '4px 8px',
-            fontSize: '10px',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer'
-          }}
+          style={{ flex: 1, padding: '4px 8px', fontSize: '10px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}
         >
           {translateUI('allHide', language)}
         </button>
       </div>
 
-      {/* 路線リスト: 常に routeOrder 順、⠿ ハンドルでドラッグ並び替え可能（リスト下が最前面）*/}
-      <div style={{ fontSize: '9px', color: colors.textSecondary, marginBottom: '3px', textAlign: 'right' }}>
-        ↑ 背面 / 最前面 ↓ &nbsp;<span style={{ opacity: 0.6 }}>⠿ でドラッグ</span>
-      </div>
-      {[...routeOrder]
-        .filter(rk => visibleRoutesData.some(([k]) => k === rk))
-        .map((routeKey) => {
-          const isVisible = visibleRoutes.has(routeKey as RouteKey);
-          const isInSelectedRoute = !!(highlightedRouteKeys && highlightedRouteKeys.has(routeKey as RouteKey));
-          const isDragTarget = dragOverKey === routeKey;
-          return (
-            <div
-              key={routeKey}
-              draggable
-              onDragStart={e => { e.dataTransfer.setData('text/plain', routeKey); e.dataTransfer.effectAllowed = 'move'; }}
-              onDragOver={e => { e.preventDefault(); setDragOverKey(routeKey); }}
-              onDragLeave={() => setDragOverKey(null)}
-              onDrop={e => {
-                e.preventDefault();
-                const from = e.dataTransfer.getData('text/plain') as RouteKey;
-                if (from === routeKey) { setDragOverKey(null); return; }
-                const next = [...routeOrder];
-                const fi = next.indexOf(from as RouteKey), ti = next.indexOf(routeKey);
-                if (fi !== -1 && ti !== -1) { next.splice(fi, 1); next.splice(ti, 0, from as RouteKey); onRouteOrderChange(next); }
-                setDragOverKey(null);
-              }}
-              style={{
-                display: 'flex', alignItems: 'center',
-                outline: isDragTarget ? `2px dashed ${adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme)}` : 'none',
-                borderRadius: '3px',
-                background: isDragTarget ? `${adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme)}18` : 'transparent',
-              }}
-            >
-              {/* ドラッグハンドル */}
-              <span
-                style={{ fontSize: '13px', color: colors.textSecondary, lineHeight: 1, flexShrink: 0, padding: '2px 3px 2px 0', cursor: 'grab', opacity: 0.5 }}
-                onMouseDown={e => e.stopPropagation()}
+      {(() => {
+        const allRoutes = [...routeOrder].filter(rk => visibleRoutesData.some(([k]) => k === rk));
+        const shown = routeListExpanded ? allRoutes : allRoutes.slice(0, ROUTE_LIST_LIMIT);
+        const hidden = allRoutes.length - shown.length;
+        return (
+          <>
+            {shown.map((routeKey) => {
+              const isVisible = visibleRoutes.has(routeKey as RouteKey);
+              const isInSelectedRoute = !!(highlightedRouteKeys && highlightedRouteKeys.has(routeKey as RouteKey));
+              const isDragTarget = dragOverKey === routeKey;
+              return (
+                <div
+                  key={routeKey}
+                  onDragOver={e => { e.preventDefault(); setDragOverKey(routeKey); }}
+                  onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOverKey(null); }}
+                  onDrop={e => {
+                    e.preventDefault();
+                    const from = e.dataTransfer.getData('text/plain') as RouteKey;
+                    if (from === routeKey) { setDragOverKey(null); return; }
+                    const next = [...routeOrder];
+                    const fi = next.indexOf(from as RouteKey), ti = next.indexOf(routeKey);
+                    if (fi !== -1 && ti !== -1) { next.splice(fi, 1); next.splice(ti, 0, from as RouteKey); onRouteOrderChange(next); }
+                    setDragOverKey(null);
+                  }}
+                  style={{
+                    display: 'flex', alignItems: 'center',
+                    outline: isDragTarget ? `2px dashed ${adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme)}` : 'none',
+                    borderRadius: '3px',
+                    background: isDragTarget ? `${adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme)}18` : 'transparent',
+                  }}
+                >
+                  <span
+                    draggable
+                    onDragStart={e => { e.dataTransfer.setData('text/plain', routeKey); e.dataTransfer.effectAllowed = 'move'; }}
+                    onDragEnd={() => setDragOverKey(null)}
+                    style={{ fontSize: '13px', color: colors.textSecondary, lineHeight: 1, flexShrink: 0, padding: '2px 3px 2px 0', cursor: 'grab', opacity: 0.5, userSelect: 'none' }}
+                  >
+                    ⠿
+                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <RouteToggleItem
+                      routeKey={routeKey}
+                      routeName={routeNames[routeKey as RouteKey]}
+                      routeColor={routeColors[routeKey as RouteKey]}
+                      isVisible={isVisible}
+                      isInSelectedRoute={isInSelectedRoute}
+                      theme={theme}
+                      language={language}
+                      onToggle={onToggleRoute}
+                      adjustRouteColorForTheme={adjustRouteColorForTheme}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+            {(hidden > 0 || routeListExpanded) && (
+              <button
+                onClick={() => setRouteListExpanded(v => !v)}
+                style={{ width: '100%', marginTop: '4px', padding: '4px', fontSize: '10px', background: 'transparent', border: `1px solid ${colors.borderLight}`, borderRadius: '3px', color: colors.textSecondary, cursor: 'pointer' }}
               >
-                ⠿
-              </span>
-              {/* 既存の RouteToggleItem */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <RouteToggleItem
-                  routeKey={routeKey}
-                  routeName={routeNames[routeKey as RouteKey]}
-                  routeColor={routeColors[routeKey as RouteKey]}
-                  isVisible={isVisible}
-                  isInSelectedRoute={isInSelectedRoute}
-                  theme={theme}
-                  language={language}
-                  onToggle={onToggleRoute}
-                  adjustRouteColorForTheme={adjustRouteColorForTheme}
-                />
+                {routeListExpanded ? '▲ 折りたたむ' : `▼ 他 ${hidden} 路線を表示`}
+              </button>
+            )}
+          </>
+        );
+      })()}
+
+      {/* ═══ セクション2: 表示設定 ═══ */}
+      <div style={{ marginTop: '12px', marginBottom: '4px' }}>
+        <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: colors.text }}>
+          {translateUI('displaySettings', language)}
+        </div>
+        <div>
+
+            {/* ── 駅ラベル ── */}
+            {sectionHeader(translateUI('settingsGroupLabel', language), groupLabelOpen, () => setGroupLabelOpen(v => !v))}
+            {groupLabelOpen && (
+              <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
+                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={showTravelTimes} onChange={e => onShowTravelTimesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                  {translateUI('showTravelTimes', language)}
+                </label>
+                {showTravelTimes && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', paddingLeft: '22px', marginBottom: '2px' }}>
+                    <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('travelTimeLabelMode', language)}:</span>
+                    {(['interval', 'cumulative'] as const).map(mode => (
+                      <label key={mode} style={{ display: 'flex', alignItems: 'center', gap: '2px', fontSize: '10px', color: colors.text, cursor: 'pointer' }}>
+                        <input
+                          type="radio"
+                          name="travelTimeLabelMode"
+                          checked={travelTimeLabelMode === mode}
+                          onChange={() => onTravelTimeLabelModeChange(mode)}
+                          style={{ cursor: 'pointer' }}
+                        />
+                        {mode === 'interval' ? translateUI('travelTimeLabelInterval', language) : `${translateUI('travelTimeLabelCumulative', language)}（実装中）`}
+                      </label>
+                    ))}
+                  </div>
+                )}
+                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={showStationNumbers} onChange={e => onShowStationNumbersChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                  {translateUI('showStationCodes', language)}
+                </label>
+                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={showStationNames} onChange={e => onShowStationNamesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                  {translateUI('showStationNames', language)}
+                </label>
+                {language === 'japanese' && (
+                  <label style={checkboxLabel(colors)}>
+                    <input type="checkbox" checked={showFurigana} onChange={e => onShowFuriganaChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                    {translateUI('showFurigana', language)}
+                  </label>
+                )}
               </div>
-            </div>
-          );
-        })}
+            )}
+
+            {/* ── データ可視化 ── */}
+            {sectionHeader(translateUI('settingsGroupViz', language), groupVizOpen, () => setGroupVizOpen(v => !v))}
+            {groupVizOpen && (
+              <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
+                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={heatmapEnabled} onChange={e => onHeatmapEnabledChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                  {translateUI('stationHeatmap', language)}
+                </label>
+                {mapViewMode === 'realistic' && (
+                  <label style={checkboxLabel(colors)}>
+                    <input type="checkbox" checked={showTrainDemo} onChange={onTrainDemoToggle} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                    {translateUI('trainDemoLabel', language)}
+                  </label>
+                )}
+                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={mapViewMode === 'bubble'} onChange={e => onMapViewModeChange(e.target.checked ? 'bubble' : 'realistic')} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                  {translateUI('bubbleMap', language)}
+                </label>
+                {mapViewMode === 'bubble' && (
+                  <div style={{ marginLeft: '22px', marginTop: '4px' }}>
+                    <div style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
+                      {(['circle', 'square'] as const).map(shape => (
+                        <label key={shape} style={{ display: 'flex', alignItems: 'center', fontSize: '11px', color: colors.text, cursor: 'pointer' }}>
+                          <input type="radio" name="bubbleShape" checked={bubbleShape === shape} onChange={() => onBubbleShapeChange(shape)} style={{ marginRight: '4px', cursor: 'pointer' }} />
+                          {shape === 'circle' ? translateUI('bubbleCircle', language) : translateUI('bubbleSquare', language)}
+                        </label>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('bubbleMaxRadius', language)}</span>
+                      <input
+                        type="range" min={500} max={50000} step={500}
+                        value={bubbleMaxRadiusM}
+                        onChange={e => onBubbleMaxRadiusMChange(Number(e.target.value))}
+                        style={{ flex: 1, cursor: 'pointer' }}
+                      />
+                      <span style={{ fontSize: '10px', color: colors.text, minWidth: '40px', textAlign: 'right' }}>
+                        {bubbleMaxRadiusM >= 1000 ? `${(bubbleMaxRadiusM / 1000).toFixed(1)}km` : `${bubbleMaxRadiusM}m`}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={mapViewMode === 'schematic'} onChange={e => onMapViewModeChange(e.target.checked ? 'schematic' : 'realistic')} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                  {translateUI('schematicMapLabel', language)}
+                </label>
+              </div>
+            )}
+
+            {/* ── 駅フィルター ── */}
+            {sectionHeader(translateUI('settingsGroupFilter', language), groupFilterOpen, () => setGroupFilterOpen(v => !v))}
+            {groupFilterOpen && (
+              <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
+                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={showTransferStationsOnly} onChange={e => onShowTransferStationsOnlyChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                  {translateUI('showOnlyTransferStations', language)}
+                </label>
+                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={showExpressStationsOnly} onChange={e => onShowExpressStationsOnlyChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                  {translateUI('showOnlyExpressStations', language)}
+                </label>
+                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={showFullRouteStations} onChange={e => onShowFullRouteStationsChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                  {translateUI('showFullRouteStations', language)}
+                </label>
+              </div>
+            )}
+
+            {/* ── 地図表示 ── */}
+            {sectionHeader(translateUI('settingsGroupMap', language), groupMapOpen, () => setGroupMapOpen(v => !v))}
+            {groupMapOpen && (
+              <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
+                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={showDimmedRoutes} onChange={e => onShowDimmedRoutesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                  {translateUI('showOutsideSegmentRoutes', language)}
+                </label>
+                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={showRouteLine} onChange={e => onShowRouteLineChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                  {translateUI('showRouteLines', language)}
+                </label>
+                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={showStationTierBadges} onChange={e => onShowStationTierBadgesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                  {translateUI('transferHighlight', language)}
+                </label>
+                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={showStationTooltip} onChange={e => onShowStationTooltipChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                  {translateUI('stationTooltipLabel', language)}
+                </label>
+                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={showOsmTiles} onChange={e => onShowOsmTilesChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                  {translateUI('showMapTiles', language)}
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0', marginTop: '2px' }}>
+                  <span style={{ flex: 1, color: colors.textSecondary }}>{translateUI('settingsIconSize', language)}</span>
+                  <button onClick={() => onStationSizeScaleChange(Math.max(0.5, Math.round((stationSizeScale - 0.1) * 10) / 10))}
+                    style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
+                  <span style={{ minWidth: '30px', textAlign: 'center', fontSize: '11px' }}>{stationSizeScale.toFixed(1)}x</span>
+                  <button onClick={() => onStationSizeScaleChange(Math.min(2.0, Math.round((stationSizeScale + 0.1) * 10) / 10))}
+                    style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0' }}>
+                  <span style={{ flex: 1, color: colors.textSecondary }}>{translateUI('routeLineWidth', language)}</span>
+                  <button onClick={() => onRouteLineWidthChange(Math.max(1, routeLineWidth - 0.5))}
+                    style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
+                  <span style={{ minWidth: '30px', textAlign: 'center', fontSize: '11px' }}>{routeLineWidth.toFixed(1)}px</span>
+                  <button onClick={() => onRouteLineWidthChange(Math.min(8, routeLineWidth + 0.5))}
+                    style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
+                </div>
+              </div>
+            )}
+
+        </div>
+      </div>
+
+      {/* ═══ セクション3: 設定の保存/読み込み ═══ */}
+      <MapConfigPanel config={mapConfig} theme={theme} language={language} onImport={onImportConfig} />
 
     </div>
   );
