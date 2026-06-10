@@ -5,7 +5,7 @@
   <!-- Main page -->
   <url>
     <loc>https://flex-railway-map.netlify.app/</loc>
-    <lastmod>2026-01-01</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/?lang=ja"/>
@@ -16,7 +16,7 @@
   <!-- About page -->
   <url>
     <loc>https://flex-railway-map.netlify.app/about</loc>
-    <lastmod>2026-01-01</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/about?lang=ja"/>
@@ -27,7 +27,7 @@
   <!-- FAQ page -->
   <url>
     <loc>https://flex-railway-map.netlify.app/faq</loc>
-    <lastmod>2026-01-01</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/faq?lang=ja"/>
@@ -38,7 +38,7 @@
   <!-- Privacy Policy page -->
   <url>
     <loc>https://flex-railway-map.netlify.app/privacy</loc>
-    <lastmod>2026-01-01</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/privacy?lang=ja"/>
@@ -49,7 +49,7 @@
   <!-- Terms of Service page -->
   <url>
     <loc>https://flex-railway-map.netlify.app/terms</loc>
-    <lastmod>2026-01-01</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/terms?lang=ja"/>
@@ -60,7 +60,7 @@
   <!-- Contact page -->
   <url>
     <loc>https://flex-railway-map.netlify.app/contact</loc>
-    <lastmod>2026-01-01</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/contact?lang=ja"/>
