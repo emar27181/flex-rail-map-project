@@ -37,6 +37,13 @@ export type StationStats = {
 
   // --- 環境（Overpass API / OpenStreetMap、半径500m以内） ---
   parkAreaM2?: number;
+
+  // --- 住居・生活コスト（未収集 → 表示時は灰色） ---
+  avgRent1K?: number;       // 1K 平均家賃（万円/月）
+  avgRent1LDK?: number;     // 1LDK 平均家賃（万円/月）
+
+  // --- 治安（未収集 → 表示時は灰色） ---
+  crimeIndex?: number;      // 犯罪認知件数（件/年）
 };
 
 /**
@@ -88,6 +95,21 @@ export const PARAM_DATA_SOURCES: Partial<Record<keyof StationStats, DataSource>>
     url: 'https://overpass-api.de/',
     retrievedAt: '2026-06-10',
     note: '駅出口から半径500m以内。leisure=park の面積合計（Shoelace法）。',
+  },
+  avgRent1K: {
+    title: '未収集',
+    retrievedAt: '2026-06-11',
+    note: '実データ収集予定。収集済みになるまで全駅灰色表示。',
+  },
+  avgRent1LDK: {
+    title: '未収集',
+    retrievedAt: '2026-06-11',
+    note: '実データ収集予定。収集済みになるまで全駅灰色表示。',
+  },
+  crimeIndex: {
+    title: '未収集',
+    retrievedAt: '2026-06-11',
+    note: '警視庁公開統計からの収集予定。収集済みになるまで全駅灰色表示。',
   },
 };
 
@@ -162,6 +184,11 @@ export const STAT_PARAMS: StatParamMeta[] = [
   { key: 'hospitalCount',       label: '病院・医院数', unit: '軒', category: 'convenience', higherIsBetter: true, description: '病院・クリニック・診療所数', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
   // 環境（Overpass API 実データ）
   { key: 'parkAreaM2',          label: '公園面積',   unit: 'm²', category: 'environment',  higherIsBetter: true,  description: '公園・緑地の面積合計', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API（Shoelace法）', period: '2026年6月収集' },
+  // 住居・生活コスト（未収集 → 全駅灰色）
+  { key: 'avgRent1K',           label: '家賃(1K)',   unit: '万円', category: 'housing',    higherIsBetter: false, description: '1K（20〜30㎡）の月額賃料', methodology: '未収集', period: '収集予定' },
+  { key: 'avgRent1LDK',         label: '家賃(1LDK)', unit: '万円', category: 'housing',   higherIsBetter: false, description: '1LDK（30〜50㎡）の月額賃料', methodology: '未収集', period: '収集予定' },
+  // 治安（未収集 → 全駅灰色）
+  { key: 'crimeIndex',          label: '犯罪件数',   unit: '件/年', category: 'safety',   higherIsBetter: false, description: '年間犯罪認知件数（低いほど安全）', methodology: '未収集（警視庁公開統計予定）', period: '収集予定' },
 ];
 
 
