@@ -151,7 +151,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
   const [showStationNumbers, setShowStationNumbers] = useState(language !== 'japanese');
-  const [stationSizeScale, setStationSizeScale] = useState(1.0);
+  const [stationSizeScale, setStationSizeScale] = useState(0.8);
   const [routeLineWidth, setRouteLineWidth] = useState(3); // 路線の線の太さ（デフォルト3px）
   // 派生値（レンダリング内で都度計算）
   const stationLabelFontSize = Math.round(11 * stationSizeScale);
@@ -186,7 +186,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // 時刻表モード
   const [timetableModeEnabled, setTimetableModeEnabled] = useState(true);
-  const [timetableBaseTime, setTimetableBaseTime] = useState('13:00');
+  const [timetableBaseTime, setTimetableBaseTime] = useState(() => {
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  });
 
   // 列車位置デモ
   const [showTrainDemo, setShowTrainDemo] = useState(false);
@@ -2593,15 +2596,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const { DivIcon } = MapComponents;
     return new DivIcon({
       html: `<div style="
-        width: 18px; height: 18px;
+        width: 11px; height: 11px;
         background: #4285F4;
-        border: 3px solid white;
+        border: 2px solid white;
         border-radius: 50%;
-        box-shadow: 0 0 0 2px #4285F4, 0 2px 6px rgba(0,0,0,0.3);
+        box-shadow: 0 0 0 1px #4285F4, 0 1px 4px rgba(0,0,0,0.3);
       "></div>`,
       className: 'user-location-marker',
-      iconSize: [18, 18],
-      iconAnchor: [9, 9]
+      iconSize: [11, 11],
+      iconAnchor: [5, 5]
     });
   }, [MapComponents, userLocation]);
 
