@@ -144,7 +144,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onTravelTimeLabelModeChange,
 }) => {
   const colors = getThemeColors(theme);
-  const [sortMode, setSortMode] = useState<SortMode>('name');
+  const [sortMode, setSortMode] = useState<SortMode>('distance');
   const [dragOverKey, setDragOverKey] = useState<string | null>(null);
   const ROUTE_LIST_LIMIT = 10;
   const [routeListExpanded, setRouteListExpanded] = useState(false);
