@@ -370,7 +370,8 @@ export const SAMPLE_FORMULAS: CustomScoreFormula[] = [
 // 元データ: data/station-stats_v2.csv（首都圏1541駅）
 // ----------------------------------------------------------------
 import rawStatsData from './station-stats-data.json';
-export const stationStatsData: Record<string, StationStats> = rawStatsData as Record<string, StationStats>;
+const { _meta: _ignored, ...stationStatsRaw } = rawStatsData as Record<string, unknown>;
+export const stationStatsData: Record<string, StationStats> = stationStatsRaw as Record<string, StationStats>;
 
 // 以下は後方互換のための旧データ（JSON で上書きされる）
 
