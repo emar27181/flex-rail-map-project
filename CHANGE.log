@@ -1,5 +1,35 @@
 # CHANGE LOG
 
+## [2026-06-11] セッション（ヒートマップ実データ/推定データ切替・犯罪指数収集・Overpassデータ更新）
+
+### feat: ヒートマップ「推定データを含める」切替機能を追加（`src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`, `src/data/stationStats.ts`）
+- `showEstimatedData` state（デフォルト false）をRailwayMapに追加
+- `getStationHeatColor` に `showEstimatedData` 引数を追加。false時は推定パラメータを灰色表示
+- `handleShowEstimatedDataChange` で「推定→無効にした際に現パラメータが推定なら最初の実パラメータに自動切替」
+- LegendRouteListのデータ可視化セクションにトグルチェックボックス追加
+- ヒートマップパラメータ選択リスト・ツールチップ・統計パネルもフィルタリング対応
+
+### feat: `dataQuality` フィールドを `StatParamMeta` 型に追加（`src/data/stationStats.ts`）
+- 全19パラメータに `dataQuality: 'real' | 'estimated'` を設定
+- 実データ（Overpass API×6項目、警視庁犯罪件数×1項目）と推定データを明確に区別
+
+### feat: 犯罪件数データ（crimeIndex）を収集・統合（`src/data/station-stats-data.json`）
+- 警視庁 R5年「区市町村の町丁別認知件数」+ Nominatim逆ジオコーディングで東京都内438駅に実データ付与
+- 都外駅はデータなし（灰色表示）
+
+### feat: Overpass APIで残り1211駅のヒートマップ施設データを収集（`src/data/station-stats-data.json`）
+- 全1541駅の6項目（コンビニ・飲食店・カフェ・スーパー・病院・公園面積）が実データ化
+
+### improve: 推定データ（家賃・乗降客数等13項目）を station-stats-data.json に復元
+- 以前の git 履歴（fa4e301^）から推定データを抽出し、実データと並存させる形で再統合
+- CLAUDE.md に「実データ以外使用禁止」ルールを明記
+
+### improve: デフォルトヒートマップパラメータを `avgRent1K`（推定）→ `restaurantCount`（実データ）に変更
+
+### improve: 路線リストのデフォルトソートを距離順（近い順）に変更（`src/components/legend/LegendRouteList.tsx`）
+
+### improve: sitemap.xml の lastmod を 2026-06-10 に更新（`public/sitemap.xml`）
+
 ## [2026-06-08] セッション（設定パネル再構成・多言語対応・バグ修正・デフォルト値調整）
 
 ### fix: ヒートマップパラメータ変更がマップに反映されないバグを修正（`src/components/RailwayMap.tsx`）
