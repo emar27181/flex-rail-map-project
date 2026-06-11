@@ -233,9 +233,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // ヒートマップ
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
-  const [heatmapParam, setHeatmapParam] = useState<keyof StationStats>('avgRent1K');
+  const [showEstimatedData, setShowEstimatedData] = useState(false);
+  const [heatmapParam, setHeatmapParam] = useState<keyof StationStats>('restaurantCount');
   // 複数パラメータ選択（1個=単一表示、2個以上=複合シグマモード、0個=全駅データなし色）
-  const [heatmapMultiParams, setHeatmapMultiParams] = useState<Set<keyof StationStats>>(new Set<keyof StationStats>(['avgRent1K']));
+  const [heatmapMultiParams, setHeatmapMultiParams] = useState<Set<keyof StationStats>>(new Set<keyof StationStats>(['restaurantCount']));
   // バブルマップの形状（円 or 四角）
   const [bubbleShape, setBubbleShape] = useState<'circle' | 'square'>('circle');
   // バブルマップの地理的最大半径（メートル）。値が最大の駅がこの半径になる
@@ -607,6 +608,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     setHeatmapCustomRange(undefined);
   }, []);
 
+  const handleShowEstimatedDataChange = useCallback((v: boolean) => {
+    setShowEstimatedData(v);
+    if (!v) {
+      // 推定データを非表示にしたとき、現パラメータが推定なら最初の実データパラメータに切り替え
+      const currentMeta = STAT_PARAMS.find(p => p.key === heatmapParam);
+      if (currentMeta?.dataQuality === 'estimated') {
+        const firstReal = STAT_PARAMS.find(p => p.dataQuality === 'real');
+        if (firstReal) {
+          setHeatmapParam(firstReal.key);
+          setHeatmapMultiParams(new Set([firstReal.key]));
+          setHeatmapCustomRange(undefined);
+        }
+      }
+    }
+  }, [heatmapParam]);
+
   // 現在地付近の駅を出発に設定するコールバック
   const handleSetNearestDeparture = useCallback(() => {
     if (!userLocation) return;
@@ -686,7 +703,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const normalized = (val !== undefined && effectiveMax > effectiveMin)
       ? (val - effectiveMin) / (effectiveMax - effectiveMin) : null;
     const dotColor = normalized !== null ? heatValueToColor(normalized) : HEATMAP_NO_DATA_COLOR;
-    const filledParams = STAT_PARAMS.filter(p => stats && typeof stats[p.key] === 'number');
+    const visibleParams = showEstimatedData ? STAT_PARAMS : STAT_PARAMS.filter(p => p.dataQuality === 'real');
+    const filledParams = visibleParams.filter(p => stats && typeof stats[p.key] === 'number');
 
     const MARGIN = 8;
     const vw = typeof window !== 'undefined' ? (window.visualViewport?.width ?? window.innerWidth) : 800;
@@ -1089,7 +1107,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           const { min, max } = getParamRange(heatmapParam);
           const normalized = (val !== undefined && max > min) ? (val - min) / (max - min) : null;
           const dotColor = normalized !== null ? heatValueToColor(normalized) : HEATMAP_NO_DATA_COLOR;
-          const filledParams = STAT_PARAMS.filter(p => stats && typeof stats[p.key] === 'number');
+          const visibleParams2 = showEstimatedData ? STAT_PARAMS : STAT_PARAMS.filter(p => p.dataQuality === 'real');
+          const filledParams = visibleParams2.filter(p => stats && typeof stats[p.key] === 'number');
 
           return (
             <div style={{
@@ -1352,10 +1371,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       if (heatmapMultiParams.size === 0) return HEATMAP_NO_DATA_COLOR;
       // 単一パラメータモード（size===1 or 0）
       const singleParam = heatmapMultiParams.size === 1 ? [...heatmapMultiParams][0] : heatmapParam;
-      return getStationHeatColor(stationName, singleParam, heatmapCustomRange);
+      return getStationHeatColor(stationName, singleParam, heatmapCustomRange, showEstimatedData);
     }
     return adjustRouteColorForTheme(routeColors[routeKey], theme);
-  }, [heatmapEnabled, heatmapParam, heatmapCustomRange, heatmapMultiParams, getCompositeHeatScore, theme]);
+  }, [heatmapEnabled, heatmapParam, heatmapCustomRange, heatmapMultiParams, getCompositeHeatScore, theme, showEstimatedData]);
 
   // アイコン作成関数をメモ化
   // overrideColor が渡されたときはそちらを優先（ヒートマップ色切替用）
@@ -4020,7 +4039,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         </div>
                       )}
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-                        {STAT_PARAMS.map(p => {
+                        {(showEstimatedData ? STAT_PARAMS : STAT_PARAMS.filter(p => p.dataQuality === 'real')).map(p => {
                           const isSelected = heatmapMultiParams.has(p.key);
                           const isComposite = isSelected && heatmapMultiParams.size >= 2;
                           const isSingle = isSelected && heatmapMultiParams.size === 1;
@@ -4338,6 +4357,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     heatmapParam={heatmapParam}
                     onHeatmapEnabledChange={setHeatmapEnabled}
                     onHeatmapParamChange={handleHeatmapParamChange}
+                    showEstimatedData={showEstimatedData}
+                    onShowEstimatedDataChange={handleShowEstimatedDataChange}
                     mapViewMode={mapViewMode}
                     onMapViewModeChange={setMapViewMode}
                     bubbleShape={bubbleShape}
@@ -4581,6 +4602,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         heatmapParam={heatmapParam}
                         onHeatmapEnabledChange={setHeatmapEnabled}
                         onHeatmapParamChange={handleHeatmapParamChange}
+                        showEstimatedData={showEstimatedData}
+                        onShowEstimatedDataChange={handleShowEstimatedDataChange}
                         mapViewMode={mapViewMode}
                         onMapViewModeChange={setMapViewMode}
                         bubbleShape={bubbleShape}

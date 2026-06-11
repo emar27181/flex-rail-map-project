@@ -51,6 +51,8 @@ interface LegendRouteListProps {
   heatmapParam: keyof StationStats;
   onHeatmapEnabledChange: (v: boolean) => void;
   onHeatmapParamChange: (k: keyof StationStats) => void;
+  showEstimatedData: boolean;
+  onShowEstimatedDataChange: (v: boolean) => void;
   bubbleShape: 'circle' | 'square';
   onBubbleShapeChange: (shape: 'circle' | 'square') => void;
   bubbleMaxRadiusM: number;
@@ -118,6 +120,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   heatmapParam,
   onHeatmapEnabledChange,
   onHeatmapParamChange,
+  showEstimatedData,
+  onShowEstimatedDataChange,
   bubbleShape,
   onBubbleShapeChange,
   bubbleMaxRadiusM,
@@ -398,6 +402,13 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   <input type="checkbox" checked={heatmapEnabled} onChange={e => onHeatmapEnabledChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
                   {translateUI('stationHeatmap', language)}
                 </label>
+                {heatmapEnabled && (
+                  <label style={{ ...checkboxLabel(colors), paddingLeft: '18px', fontSize: '11px' }}>
+                    <input type="checkbox" checked={showEstimatedData} onChange={e => onShowEstimatedDataChange(e.target.checked)} style={{ marginRight: '6px', cursor: 'pointer' }} />
+                    <span>推定データを含める</span>
+                    {!showEstimatedData && <span style={{ marginLeft: '4px', color: '#e88', fontSize: '10px' }}>（実データのみ）</span>}
+                  </label>
+                )}
                 {mapViewMode === 'realistic' && (
                   <label style={checkboxLabel(colors)}>
                     <input type="checkbox" checked={showTrainDemo} onChange={onTrainDemoToggle} style={{ marginRight: '6px', cursor: 'pointer' }} />
