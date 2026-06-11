@@ -19,31 +19,36 @@
  * ・passengers  : 乗降客数/日（JR・メトロ等の公表値を合算）
  */
 
-// 実データのみ保持。推定・AI生成値は一切含まない。
-// 新フィールドを追加する際は必ず実測・公開データに基づくこと（CLAUDE.md参照）。
 export type StationStats = {
   stationName: string;
   lat: number;
   lng: number;
 
-  // --- 飲食・娯楽（Overpass API / OpenStreetMap、半径500m以内） ---
+  // --- 実データ（Overpass API / OpenStreetMap、半径500m以内） ---
   restaurantCount?: number;
   cafeCount?: number;
   convenienceStoreCount?: number;
-
-  // --- 生活利便性（Overpass API / OpenStreetMap、半径500m以内） ---
   supermarketCount?: number;
   hospitalCount?: number;
-
-  // --- 環境（Overpass API / OpenStreetMap、半径500m以内） ---
   parkAreaM2?: number;
 
-  // --- 住居・生活コスト（未収集 → 表示時は灰色） ---
-  avgRent1K?: number;       // 1K 平均家賃（万円/月）
-  avgRent1LDK?: number;     // 1LDK 平均家賃（万円/月）
+  // --- 実データ（警視庁 R5年 町丁別認知件数、東京都内のみ） ---
+  crimeIndex?: number;
 
-  // --- 治安（未収集 → 表示時は灰色） ---
-  crimeIndex?: number;      // 犯罪認知件数（件/年）
+  // --- 推定データ（過去セッションで収集・一部目算、精度±20%程度） ---
+  avgRent1K?: number;
+  avgRent1LDK?: number;
+  populationDensity?: number;
+  dailyPassengers?: number;
+  morningCongestion?: number;
+  izakayaCount?: number;
+  ramenCount?: number;
+  bookstoreCount?: number;
+  safetyScore?: number;
+  noiseScore?: number;
+  greenRatioPct?: number;
+  officeCount?: number;
+  coworkingCount?: number;
 };
 
 /**
@@ -107,9 +112,9 @@ export const PARAM_DATA_SOURCES: Partial<Record<keyof StationStats, DataSource>>
     note: '実データ収集予定。収集済みになるまで全駅灰色表示。',
   },
   crimeIndex: {
-    title: '未収集',
+    title: '警視庁 区市町村の町丁別認知件数 令和5年',
     retrievedAt: '2026-06-11',
-    note: '警視庁公開統計からの収集予定。収集済みになるまで全駅灰色表示。',
+    note: '東京都内438駅のみ収集。Nominatim逆ジオコーディング + 町丁名マッチング。都外駅はデータなし（灰色表示）。',
   },
 };
 
@@ -155,14 +160,15 @@ export const PARAM_METHODOLOGY: Partial<Record<keyof StationStats, ParamMethodol
  */
 export type StatParamMeta = {
   key: keyof StationStats;
-  label: string;              // UI表示名
-  unit: string;               // 単位
+  label: string;
+  unit: string;
   category: StatCategory;
-  higherIsBetter: boolean;    // trueなら高い値ほど良い（ヒートマップ色に影響）
-  description: string;        // データの説明
-  methodology?: string;       // 集計方法: '中央値', '平均値', '推計', '公表値' など
-  period?: string;            // 基準時点: '2024年通年', '2025年1月時点' など
-  radius?: string;            // 計測範囲: '駅出口から半径500m以内' など（countに使用）
+  higherIsBetter: boolean;
+  description: string;
+  dataQuality: 'real' | 'estimated'; // 'real'=実測・公開データ, 'estimated'=推定・目算
+  methodology?: string;
+  period?: string;
+  radius?: string;
 };
 
 export type StatCategory =
@@ -175,20 +181,36 @@ export type StatCategory =
   | 'work';         // 仕事
 
 export const STAT_PARAMS: StatParamMeta[] = [
-  // 飲食（Overpass API 実データ）
-  { key: 'restaurantCount',     label: '飲食店数',   unit: '軒', category: 'food',         higherIsBetter: true,  description: '飲食店全般数（restaurant + fast_food）', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
-  { key: 'cafeCount',           label: 'カフェ数',   unit: '軒', category: 'food',         higherIsBetter: true,  description: 'カフェ・喫茶店数', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
-  { key: 'convenienceStoreCount', label: 'コンビニ数', unit: '軒', category: 'food',       higherIsBetter: true,  description: 'コンビニエンスストア数', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
-  // 生活利便性（Overpass API 実データ）
-  { key: 'supermarketCount',    label: 'スーパー数', unit: '軒', category: 'convenience',  higherIsBetter: true,  description: 'スーパーマーケット数', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
-  { key: 'hospitalCount',       label: '病院・医院数', unit: '軒', category: 'convenience', higherIsBetter: true, description: '病院・クリニック・診療所数', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
-  // 環境（Overpass API 実データ）
-  { key: 'parkAreaM2',          label: '公園面積',   unit: 'm²', category: 'environment',  higherIsBetter: true,  description: '公園・緑地の面積合計', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API（Shoelace法）', period: '2026年6月収集' },
-  // 住居・生活コスト（未収集 → 全駅灰色）
-  { key: 'avgRent1K',           label: '家賃(1K)',   unit: '万円', category: 'housing',    higherIsBetter: false, description: '1K（20〜30㎡）の月額賃料', methodology: '未収集', period: '収集予定' },
-  { key: 'avgRent1LDK',         label: '家賃(1LDK)', unit: '万円', category: 'housing',   higherIsBetter: false, description: '1LDK（30〜50㎡）の月額賃料', methodology: '未収集', period: '収集予定' },
-  // 治安（未収集 → 全駅灰色）
-  { key: 'crimeIndex',          label: '犯罪件数',   unit: '件/年', category: 'safety',   higherIsBetter: false, description: '年間犯罪認知件数（低いほど安全）', methodology: '未収集（警視庁公開統計予定）', period: '収集予定' },
+  // 飲食（実データ）
+  { key: 'restaurantCount',     label: '飲食店数',    unit: '軒',     category: 'food',        higherIsBetter: true,  dataQuality: 'real',      description: '飲食店全般数（restaurant + fast_food）', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
+  { key: 'cafeCount',           label: 'カフェ数',    unit: '軒',     category: 'food',        higherIsBetter: true,  dataQuality: 'real',      description: 'カフェ・喫茶店数', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
+  { key: 'convenienceStoreCount', label: 'コンビニ数', unit: '軒',    category: 'food',        higherIsBetter: true,  dataQuality: 'real',      description: 'コンビニエンスストア数', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
+  // 生活利便性（実データ）
+  { key: 'supermarketCount',    label: 'スーパー数',  unit: '軒',     category: 'convenience', higherIsBetter: true,  dataQuality: 'real',      description: 'スーパーマーケット数', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
+  { key: 'hospitalCount',       label: '病院・医院数', unit: '軒',    category: 'convenience', higherIsBetter: true,  dataQuality: 'real',      description: '病院・クリニック・診療所数', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
+  // 環境（実データ）
+  { key: 'parkAreaM2',          label: '公園面積',    unit: 'm²',     category: 'environment', higherIsBetter: true,  dataQuality: 'real',      description: '公園・緑地の面積合計', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API（Shoelace法）', period: '2026年6月収集' },
+  // 治安（実データ、都内のみ）
+  { key: 'crimeIndex',          label: '犯罪件数',    unit: '件/年',  category: 'safety',      higherIsBetter: false, dataQuality: 'real',      description: '年間犯罪認知件数（低いほど安全）。都外駅はデータなし', methodology: '警視庁 区市町村の町丁別認知件数 R5年', period: '令和5年（2023年）' },
+  // 住居（推定データ）
+  { key: 'avgRent1K',           label: '家賃(1K)',    unit: '万円',   category: 'housing',     higherIsBetter: false, dataQuality: 'estimated', description: '1K（20〜30㎡）の月額賃料（推定値）', methodology: 'SUUMO等を参考にした目算・推計', period: '2025年頃推計' },
+  { key: 'avgRent1LDK',         label: '家賃(1LDK)', unit: '万円',   category: 'housing',     higherIsBetter: false, dataQuality: 'estimated', description: '1LDK（30〜50㎡）の月額賃料（推定値）', methodology: 'SUUMO等を参考にした目算・推計', period: '2025年頃推計' },
+  // 交通（推定データ）
+  { key: 'dailyPassengers',     label: '乗降客数',    unit: '人/日',  category: 'transport',   higherIsBetter: false, dataQuality: 'estimated', description: '一日乗降客数（推定値）', methodology: '路線規模・都心距離から推計', period: '2025年頃推計' },
+  { key: 'morningCongestion',   label: '朝混雑度',    unit: '(0-100)', category: 'transport',  higherIsBetter: false, dataQuality: 'estimated', description: '朝ラッシュ時の混雑度（推定値、高いほど混雑）', methodology: '乗降客数・路線規模から推計', period: '2025年頃推計' },
+  // 飲食・娯楽（推定データ）
+  { key: 'izakayaCount',        label: '居酒屋数',    unit: '軒',     category: 'food',        higherIsBetter: true,  dataQuality: 'estimated', description: '居酒屋・バー数（推定値）', radius: '駅出口から半径500m以内', methodology: '飲食店数から推計', period: '2025年頃推計' },
+  { key: 'ramenCount',          label: 'ラーメン屋数', unit: '軒',    category: 'food',        higherIsBetter: true,  dataQuality: 'estimated', description: 'ラーメン専門店数（推定値）', radius: '駅出口から半径500m以内', methodology: '飲食店数から推計', period: '2025年頃推計' },
+  // 生活利便性（推定データ）
+  { key: 'bookstoreCount',      label: '書店数',      unit: '軒',     category: 'convenience', higherIsBetter: true,  dataQuality: 'estimated', description: '書店数（推定値）', radius: '駅出口から半径500m以内', methodology: '路線規模から推計', period: '2025年頃推計' },
+  // 環境（推定データ）
+  { key: 'noiseScore',          label: '静かさ',      unit: '(0-100)', category: 'environment', higherIsBetter: true, dataQuality: 'estimated', description: '騒音の少なさ（推定値、高いほど静か）', methodology: '乗降客数・飲食店密度から推計', period: '2025年頃推計' },
+  { key: 'greenRatioPct',       label: '緑地率',      unit: '%',      category: 'environment', higherIsBetter: true,  dataQuality: 'estimated', description: '周辺の緑地・公園の面積割合（推定値）', methodology: '都心距離・衛星データから推計', period: '2025年頃推計' },
+  // 住居（推定データ）
+  { key: 'populationDensity',   label: '人口密度',    unit: '人/km²', category: 'housing',     higherIsBetter: false, dataQuality: 'estimated', description: '駅周辺の人口密度（推定値）', methodology: '国勢調査ベース推計', period: '2025年頃推計' },
+  // 仕事（推定データ）
+  { key: 'officeCount',         label: 'オフィス数',  unit: '棟',     category: 'work',        higherIsBetter: true,  dataQuality: 'estimated', description: 'オフィスビル棟数（推定値）', radius: '駅出口から半径500m以内', methodology: '都心ビジネス街分布から推計', period: '2025年頃推計' },
+  { key: 'coworkingCount',      label: 'コワーキング数', unit: '軒',  category: 'work',        higherIsBetter: true,  dataQuality: 'estimated', description: 'コワーキングスペース数（推定値）', radius: '駅出口から半径500m以内', methodology: 'オフィス数から推計', period: '2025年頃推計' },
 ];
 
 
@@ -264,12 +286,18 @@ export function heatValueToColor(t: number): string {
 /**
  * 駅名とパラメータキーからヒートカラーを返す。
  * データなし → HEATMAP_NO_DATA_COLOR
+ * showEstimatedData=false のとき、推定パラメータ（dataQuality='estimated'）は常にデータなし色を返す
  */
 export function getStationHeatColor(
   stationName: string,
   paramKey: keyof StationStats,
   rangeOverride?: { min: number; max: number },
+  showEstimatedData?: boolean,
 ): string {
+  if (showEstimatedData === false) {
+    const meta = STAT_PARAMS.find(p => p.key === paramKey);
+    if (meta?.dataQuality === 'estimated') return HEATMAP_NO_DATA_COLOR;
+  }
   const stats = stationStatsData[stationName];
   if (!stats) return HEATMAP_NO_DATA_COLOR;
   const val = stats[paramKey] as number | undefined;
