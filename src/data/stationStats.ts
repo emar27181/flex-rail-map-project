@@ -198,19 +198,19 @@ export const STAT_PARAMS: StatParamMeta[] = [
   // 交通（推定データ）
   { key: 'dailyPassengers',     label: '乗降客数',    unit: '人/日',  category: 'transport',   higherIsBetter: false, dataQuality: 'estimated', description: '一日乗降客数（推定値）', methodology: '路線規模・都心距離から推計', period: '2025年頃推計' },
   { key: 'morningCongestion',   label: '朝混雑度',    unit: '(0-100)', category: 'transport',  higherIsBetter: false, dataQuality: 'estimated', description: '朝ラッシュ時の混雑度（推定値、高いほど混雑）', methodology: '乗降客数・路線規模から推計', period: '2025年頃推計' },
-  // 飲食・娯楽（推定データ）
-  { key: 'izakayaCount',        label: '居酒屋数',    unit: '軒',     category: 'food',        higherIsBetter: true,  dataQuality: 'estimated', description: '居酒屋・バー数（推定値）', radius: '駅出口から半径500m以内', methodology: '飲食店数から推計', period: '2025年頃推計' },
-  { key: 'ramenCount',          label: 'ラーメン屋数', unit: '軒',    category: 'food',        higherIsBetter: true,  dataQuality: 'estimated', description: 'ラーメン専門店数（推定値）', radius: '駅出口から半径500m以内', methodology: '飲食店数から推計', period: '2025年頃推計' },
-  // 生活利便性（推定データ）
-  { key: 'bookstoreCount',      label: '書店数',      unit: '軒',     category: 'convenience', higherIsBetter: true,  dataQuality: 'estimated', description: '書店数（推定値）', radius: '駅出口から半径500m以内', methodology: '路線規模から推計', period: '2025年頃推計' },
+  // 飲食・娯楽（実データ、Overpass API）
+  { key: 'izakayaCount',        label: '居酒屋・バー数', unit: '軒',  category: 'food',        higherIsBetter: true,  dataQuality: 'real',      description: '居酒屋・バー・パブ数（amenity=bar/pub）', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
+  { key: 'ramenCount',          label: 'ラーメン屋数', unit: '軒',    category: 'food',        higherIsBetter: true,  dataQuality: 'real',      description: 'ラーメン専門店数（cuisine=ramen）', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
+  // 生活利便性（実データ、Overpass API）
+  { key: 'bookstoreCount',      label: '書店数',      unit: '軒',     category: 'convenience', higherIsBetter: true,  dataQuality: 'real',      description: '書店数（shop=books）', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
   // 環境（推定データ）
   { key: 'noiseScore',          label: '静かさ',      unit: '(0-100)', category: 'environment', higherIsBetter: true, dataQuality: 'estimated', description: '騒音の少なさ（推定値、高いほど静か）', methodology: '乗降客数・飲食店密度から推計', period: '2025年頃推計' },
-  { key: 'greenRatioPct',       label: '緑地率',      unit: '%',      category: 'environment', higherIsBetter: true,  dataQuality: 'estimated', description: '周辺の緑地・公園の面積割合（推定値）', methodology: '都心距離・衛星データから推計', period: '2025年頃推計' },
+  { key: 'greenRatioPct',       label: '緑地率',      unit: '%',      category: 'environment', higherIsBetter: true,  dataQuality: 'real',      description: '駅500m圏内の公園面積÷円面積（parkAreaM2から算出）', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap parkAreaM2から算出（÷785,398m²）', period: '2026年6月収集' },
   // 住居（推定データ）
   { key: 'populationDensity',   label: '人口密度',    unit: '人/km²', category: 'housing',     higherIsBetter: false, dataQuality: 'estimated', description: '駅周辺の人口密度（推定値）', methodology: '国勢調査ベース推計', period: '2025年頃推計' },
-  // 仕事（推定データ）
+  // 仕事（推定データ / 実データ混在）
   { key: 'officeCount',         label: 'オフィス数',  unit: '棟',     category: 'work',        higherIsBetter: true,  dataQuality: 'estimated', description: 'オフィスビル棟数（推定値）', radius: '駅出口から半径500m以内', methodology: '都心ビジネス街分布から推計', period: '2025年頃推計' },
-  { key: 'coworkingCount',      label: 'コワーキング数', unit: '軒',  category: 'work',        higherIsBetter: true,  dataQuality: 'estimated', description: 'コワーキングスペース数（推定値）', radius: '駅出口から半径500m以内', methodology: 'オフィス数から推計', period: '2025年頃推計' },
+  { key: 'coworkingCount',      label: 'コワーキング数', unit: '軒',  category: 'work',        higherIsBetter: true,  dataQuality: 'real',      description: 'コワーキングスペース数（amenity=coworking_space + office=coworking）', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
 ];
 
 
