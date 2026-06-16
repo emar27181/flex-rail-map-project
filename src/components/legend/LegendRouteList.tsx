@@ -18,6 +18,7 @@ interface LegendRouteListProps {
   onRouteOrderChange: (order: RouteKey[]) => void;
   availableRoutes: Set<RouteKey>;
   highlightedRouteKeys?: Set<RouteKey> | null;
+  stationRouteKeys?: Set<RouteKey>;
   routeColors: Record<RouteKey, string>;
   routeNames: Record<RouteKey, string>;
   showTransferStationsOnly: boolean;
@@ -87,6 +88,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onRouteOrderChange,
   availableRoutes,
   highlightedRouteKeys,
+  stationRouteKeys,
   routeColors,
   routeNames,
   showTransferStationsOnly,
@@ -273,20 +275,39 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
       </div>
 
       {(() => {
-        const allRoutes: RouteKey[] = sortMode === 'default'
+        let baseRoutes: RouteKey[] = sortMode === 'default'
           ? [...routeOrder].filter(rk => visibleRoutesData.some(([k]) => k === rk))
           : sortedVisibleRoutesData.map(([k]) => k as RouteKey);
+        // 出発/到着駅を通る路線を前にグループ化
+        let dividerIndex = -1;
+        if (stationRouteKeys && stationRouteKeys.size > 0) {
+          const inStation = baseRoutes.filter(rk => stationRouteKeys.has(rk));
+          const notInStation = baseRoutes.filter(rk => !stationRouteKeys.has(rk));
+          if (inStation.length > 0 && notInStation.length > 0) {
+            baseRoutes = [...inStation, ...notInStation];
+            dividerIndex = inStation.length;
+          }
+        }
+        const allRoutes = baseRoutes;
         const shown = routeListExpanded ? allRoutes : allRoutes.slice(0, ROUTE_LIST_LIMIT);
         const hidden = allRoutes.length - shown.length;
         return (
           <>
-            {shown.map((routeKey) => {
+            {shown.map((routeKey, listIdx) => {
               const isVisible = visibleRoutes.has(routeKey as RouteKey);
               const isInSelectedRoute = !!(highlightedRouteKeys && highlightedRouteKeys.has(routeKey as RouteKey));
               const isDragTarget = dragOverKey === routeKey;
+              const showDivider = dividerIndex > 0 && listIdx === dividerIndex;
               return (
+                <React.Fragment key={routeKey}>
+                {showDivider && (
+                  <div style={{ margin: '4px 0', borderTop: `1px dashed ${colors.borderLight}`, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '9px', color: colors.textSecondary, whiteSpace: 'nowrap', padding: '0 4px', background: colors.surface }}>
+                      {translateUI('otherRoutes', language) || 'その他の路線'}
+                    </span>
+                  </div>
+                )}
                 <div
-                  key={routeKey}
                   onDragOver={e => { e.preventDefault(); setDragOverKey(routeKey); }}
                   onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOverKey(null); }}
                   onDrop={e => {
@@ -303,6 +324,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                     outline: isDragTarget ? `2px dashed ${adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme)}` : 'none',
                     borderRadius: '3px',
                     background: isDragTarget ? `${adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme)}18` : 'transparent',
+                    userSelect: 'none',
                   }}
                 >
                   <span
@@ -327,6 +349,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                     />
                   </div>
                 </div>
+                </React.Fragment>
               );
             })}
             {(hidden > 0 || routeListExpanded) && (
