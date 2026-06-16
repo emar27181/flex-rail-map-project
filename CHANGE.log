@@ -1,5 +1,36 @@
 # CHANGE LOG
 
+## [2026-06-16] セッション（現在地自動設定・ツールチップ統合・スマホUX改善・TODO整理）
+
+### feat: 出発駅を現在地の最寄り駅から自動設定（`src/components/RailwayMap.tsx`）
+- departure/arrival のデフォルトを null に変更（横浜→新宿の固定デフォルト廃止）
+- `isManualDeparture` state を追加し、手動設定後は自動上書きを防止
+- `handleManualSetDeparture` を追加し、ツールチップ・スキーマティックなど全設定箇所で使用
+
+### feat: 現在地自動設定時は最寄り駅周辺5路線を表示（`src/components/RailwayMap.tsx`）
+- 自動設定時のみ近隣駅を距離順に探索して計5路線まで表示を拡張
+- 手動設定時はその駅を通る路線のみ表示
+- availableRoutes を常に全路線に設定し、凡例で任意路線を手動ON/OFF可能に
+
+### feat: ヒートマップ有効時も時刻表ツールチップを常時表示（`src/components/RailwayMap.tsx`）
+- renderStationTimetableTooltip の early return を緩和（heatmapEnabled 時も表示）
+- ヒートマップデータパネルをツールチップ内に常時表示（heatmapEnabled 時は上部に優先表示）
+- 通常モード時もツールチップ下部にヒートマップデータの概要をコンパクト表示
+- 別 renderHeatmapTooltip を呼んでいた分岐を廃止し renderStationTimetableTooltip に統一
+
+### feat: 現在地ピンアイコンを非表示（`src/components/RailwayMap.tsx`）
+- userLocation Marker の JSX を削除（位置情報取得・出発駅自動設定は継続動作）
+
+### feat: スマホでの駅タッチ領域を44px以上に拡大（`src/components/RailwayMap.tsx`）
+- createStationIcon / createTrainViewIcon で isMobile 時に透明ラッパーを min 44×44px に設定
+- 視覚的なドットサイズは変えずにタッチターゲットのみ拡大
+
+### docs: TODO.md を整理・新規タスクを追加
+- 2026-06-16 セッション完了項目を DONE に移動
+- ヒートマップ Phase 1・2 を DONE に移動（全1541駅実データ・GUI調整含め完了）
+- ユーザー提供の新規TODOを追加（デザイン統一・スマホUX・所要時間・時刻表可視化など）
+- 対応済み・重複項目を除外（heatmapCustomRange min/max・列車デモ・種別色分け）
+
 ## [2026-06-11] セッション（ヒートマップ実データ/推定データ切替・犯罪指数収集・Overpassデータ更新）
 
 ### feat: ヒートマップ「推定データを含める」切替機能を追加（`src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`, `src/data/stationStats.ts`）
