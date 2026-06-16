@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
@@ -320,10 +321,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setTimeout(() => {
                       if (!departureClickedRef.current) {
                         handleDepartureConfirm();
+                        setShowDepartureResults(false);
                       }
                       departureClickedRef.current = false;
-                      setShowDepartureResults(false);
-                    }, 150);
+                    }, 200);
                     handleSearchBlur();
                   }}
                   onKeyDown={(e) => {
@@ -389,8 +390,11 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 </button>
               )}
 
-              {showDepartureResults && departureDropdownPos && (
-                <div style={{
+              {showDepartureResults && departureDropdownPos && createPortal(
+                <div
+                  onMouseDown={(e) => { e.preventDefault(); departureClickedRef.current = true; }}
+                  onTouchStart={() => { departureClickedRef.current = true; }}
+                  style={{
                   position: 'fixed',
                   top: departureDropdownPos.top,
                   left: departureDropdownPos.left,
@@ -401,7 +405,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   boxShadow: `0 4px 12px ${colors.shadow}`,
                   maxHeight: '200px',
                   overflowY: 'auto',
-                  zIndex: 9999
+                  zIndex: 99999
                 }}>
                   {filteredDepartureStations.map((station, index) => (
                     <div
@@ -426,7 +430,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       {departureSearch ? translateUI('noStationFound', language) : translateUI('majorStationsHint', language)}
                     </div>
                   )}
-                </div>
+                </div>,
+                document.body
               )}
             </div>
 
@@ -500,10 +505,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setTimeout(() => {
                       if (!arrivalClickedRef.current) {
                         handleArrivalConfirm();
+                        setShowArrivalResults(false);
                       }
                       arrivalClickedRef.current = false;
-                      setShowArrivalResults(false);
-                    }, 150);
+                    }, 200);
                     handleSearchBlur();
                   }}
                   onKeyDown={(e) => {
@@ -551,8 +556,11 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 )}
               </div>
               
-              {showArrivalResults && arrivalDropdownPos && (
-                <div style={{
+              {showArrivalResults && arrivalDropdownPos && createPortal(
+                <div
+                  onMouseDown={(e) => { e.preventDefault(); arrivalClickedRef.current = true; }}
+                  onTouchStart={() => { arrivalClickedRef.current = true; }}
+                  style={{
                   position: 'fixed',
                   top: arrivalDropdownPos.top,
                   left: arrivalDropdownPos.left,
@@ -563,7 +571,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   boxShadow: `0 4px 12px ${colors.shadow}`,
                   maxHeight: '200px',
                   overflowY: 'auto',
-                  zIndex: 9999
+                  zIndex: 99999
                 }}>
                   {filteredArrivalStations.map((station, index) => (
                     <div
@@ -588,7 +596,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       {arrivalSearch ? translateUI('noStationFound', language) : translateUI('majorStationsHint', language)}
                     </div>
                   )}
-                </div>
+                </div>,
+                document.body
               )}
             </div>
           </div>
