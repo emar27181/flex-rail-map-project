@@ -300,14 +300,26 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // ツールチップが変わったらドラッグオフセットをリセット
   React.useEffect(() => { setTooltipDragOffset({ dx: 0, dy: 0 }); }, [stationTooltip?.stationName]);
+  // ツールチップが外部から閉じられたときピン状態をリセット
+  React.useEffect(() => { if (!stationTooltip) { tooltipPinnedRef.current = false; } }, [stationTooltip]);
 
   // 駅ホバーツールチップ: マーカーとパネル両方から離れたときに閉じる遅延タイマー
+  const tooltipPinnedRef = useRef(false);
   const stationTooltipCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scheduleTooltipClose = () => {
+    if (tooltipPinnedRef.current) return;
     stationTooltipCloseTimer.current = setTimeout(() => { setStationTooltip(null); setMethodInfoTooltip(null); }, 200);
   };
   const cancelTooltipClose = () => {
     if (stationTooltipCloseTimer.current) clearTimeout(stationTooltipCloseTimer.current);
+  };
+  const pinTooltip = () => {
+    tooltipPinnedRef.current = true;
+  };
+  const closeTooltip = () => {
+    tooltipPinnedRef.current = false;
+    setStationTooltip(null);
+    setMethodInfoTooltip(null);
   };
 
   // 列車位置デモ アニメーション（RafでRefに時刻を蓄積し、15fps でのみReact stateを更新）
@@ -588,6 +600,76 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return Array.from(map.values());
   }, []);
 
+  // 各駅のラベルオフセット（地理座標のみから一度だけ計算、ズーム/移動で再計算しない）
+  // [dAnchorX, dAnchorY]: iconAnchor への加算値。ラベルを押し出す方向と逆の調整。
+  const stationLabelOffsets = useMemo<Map<string, [number, number]>>(() => {
+    const offsets = new Map<string, [number, number]>();
+    if (allUniqueStations.length === 0) return offsets;
+
+    const OFFSET_PX = 16;       // ラベルを移動させるピクセル量
+    const THRESH_LAT = 0.009;   // 近隣判定の緯度閾値 (~1km)
+    const THRESH_LNG = 0.013;   // 近隣判定の経度閾値 (~1km in Tokyo)
+
+    // 空間インデックス: 緯度×10でグリッド化して高速化
+    const grid = new Map<string, Station[]>();
+    const gridKey = (lat: number, lng: number) =>
+      `${Math.round(lat / THRESH_LAT)},${Math.round(lng / THRESH_LNG)}`;
+    for (const s of allUniqueStations) {
+      const k = gridKey(s.lat, s.lng);
+      if (!grid.has(k)) grid.set(k, []);
+      grid.get(k)!.push(s);
+    }
+
+    // 8方向 [screenDX, screenDY] (screen: right=+x, down=+y)
+    // geographic: lat↑ = screen y↓, lng→ = screen x→
+    const DIRS: [number, number][] = [
+      [0, -1], [0, 1], [1, 0], [-1, 0],
+      [1, -1], [-1, -1], [1, 1], [-1, 1],
+    ];
+
+    for (const station of allUniqueStations) {
+      // 周辺グリッドセルを検索
+      const neighbors: Station[] = [];
+      for (let dlat = -1; dlat <= 1; dlat++) {
+        for (let dlng = -1; dlng <= 1; dlng++) {
+          const k = `${Math.round(station.lat / THRESH_LAT) + dlat},${Math.round(station.lng / THRESH_LNG) + dlng}`;
+          const cell = grid.get(k);
+          if (!cell) continue;
+          for (const n of cell) {
+            if (n.name === station.name) continue;
+            if (Math.abs(n.lat - station.lat) < THRESH_LAT && Math.abs(n.lng - station.lng) < THRESH_LNG) {
+              neighbors.push(n);
+            }
+          }
+        }
+      }
+
+      if (neighbors.length === 0) { offsets.set(station.name, [0, 0]); continue; }
+
+      // 各方向のスコア（近隣駅の密度の逆方向を選ぶ）
+      let bestDir: [number, number] = [0, -1];
+      let minScore = Infinity;
+      for (const [dx, dy] of DIRS) {
+        let score = 0;
+        for (const n of neighbors) {
+          const sx = n.lng - station.lng;          // 東 = +x
+          const sy = -(n.lat - station.lat);        // 南 = +y (反転)
+          const dot = sx * dx + sy * dy;
+          if (dot > 0) {
+            const dist = Math.sqrt(sx * sx + sy * sy) + 1e-6;
+            score += dot / (dist * dist);
+          }
+        }
+        if (score < minScore) { minScore = score; bestDir = [dx, dy]; }
+      }
+
+      // iconAnchor 調整: ラベルを bestDir 方向へ移動
+      // 右移動(dx=+1) → anchorX -= OFFSET, 下移動(dy=+1) → anchorY -= OFFSET
+      offsets.set(station.name, [-bestDir[0] * OFFSET_PX, -bestDir[1] * OFFSET_PX]);
+    }
+    return offsets;
+  }, [allUniqueStations]);
+
   // 現在地から最も近い駅を返す
   const findNearestStation = useCallback((lat: number, lng: number): Station | null => {
     let nearest: Station | null = null;
@@ -763,15 +845,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text }}>
               {translateStation(stationTooltip.stationName, currentLanguage)}
             </span>
-            <span onClick={() => setStationTooltip(null)}
+            <span onClick={closeTooltip}
               style={{ fontSize: '12px', color: colors.textSecondary, cursor: 'pointer', padding: '6px 8px', margin: '-6px -8px', borderRadius: '4px' }}>✕</span>
           </div>
           <div style={{ display: 'flex', gap: '4px' }}>
-            <button onClick={() => { handleManualSetDeparture(stationTooltip.station); setStationTooltip(null); }}
+            <button onClick={() => { handleManualSetDeparture(stationTooltip.station); closeTooltip(); }}
               style={{ backgroundColor: '#4CAF50', color: 'white', border: 'none', padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px' }}>
               {translateUI('setDepartureStation', currentLanguage)}
             </button>
-            <button onClick={() => { setArrival(stationTooltip.station); setStationTooltip(null); }}
+            <button onClick={() => { setArrival(stationTooltip.station); closeTooltip(); }}
               style={{ backgroundColor: '#F44336', color: 'white', border: 'none', padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px' }}>
               {translateUI('setArrivalStation', currentLanguage)}
             </button>
@@ -1035,7 +1117,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               {translateStation(stationTooltip.stationName, currentLanguage)}
             </span>
             <span
-              onClick={() => setStationTooltip(null)}
+              onClick={closeTooltip}
               style={{ fontSize: '12px', color: colors.textSecondary, cursor: 'pointer', padding: '6px 8px', margin: '-6px -8px', borderRadius: '4px' }}
             >✕</span>
           </div>
@@ -1046,14 +1128,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <button
-                onClick={() => { handleManualSetDeparture(stationTooltip.station); setStationTooltip(null); }}
+                onClick={() => { handleManualSetDeparture(stationTooltip.station); closeTooltip(); }}
                 style={{
                   backgroundColor: '#4CAF50', color: 'white', border: 'none',
                   padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px',
                 }}
               >{translateUI('setDepartureStation', currentLanguage)}</button>
               <button
-                onClick={() => { setArrival(stationTooltip.station); setStationTooltip(null); }}
+                onClick={() => { setArrival(stationTooltip.station); closeTooltip(); }}
                 style={{
                   backgroundColor: '#F44336', color: 'white', border: 'none',
                   padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px',
@@ -1232,9 +1314,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     fontSize: '10px',
                     color: isActive ? colors.text : isJourney ? colors.text : colors.textSecondary,
                     fontWeight: isJourney ? 'bold' : 'normal',
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    whiteSpace: 'normal', wordBreak: 'keep-all',
                     opacity: hasData ? 1 : 0.5,
                     flex: 1,
+                    lineHeight: 1.3,
                   }}>
                     {translateRoute(routeNames[rk as RouteKey] ?? rk, currentLanguage)}
                   </span>
@@ -1449,11 +1532,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const htmlContent = hasFurigana || hasTime
         ? `<div style="background:${displayColor};color:white;padding:1px 3px;border-radius:3px;white-space:nowrap;${borderCss}${shadowCss}text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:${Math.max(7, Math.round(lfs * 0.75))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${lfs}px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
         : `<div style="background:${displayColor};color:white;padding:1px 3px;border-radius:3px;font-size:${lfs}px;font-weight:bold;white-space:nowrap;${borderCss}${shadowCss}opacity:${opacity}">${displayName}</div>`;
+      const [oDx, oDy] = stationLabelOffsets.get(station.name) ?? [0, 0];
       return new DivIcon({
         html: htmlContent,
         className: 'station-name-marker',
         iconSize: [stationNameWidth, iconHeight],
-        iconAnchor: [stationNameWidth / 2, iconHeight / 2]
+        iconAnchor: [stationNameWidth / 2 + oDx, iconHeight / 2 + oDy]
       });
     } else {
       const stationSize = Math.round(Math.max(4, Math.min(24, zoomLevel - 8)) * stationIconScale);
@@ -1475,7 +1559,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         iconAnchor: [touchTarget / 2, touchTarget / 2]
       });
     }
-  }, [MapComponents, currentLanguage, theme, showFurigana, showStationNumbers, stationLabelFontSize, stationIconScale, isMobile]);
+  }, [MapComponents, currentLanguage, theme, showFurigana, showStationNumbers, stationLabelFontSize, stationIconScale, isMobile, stationLabelOffsets]);
 
   // 列車種別停車パターンの取得（外部データソースを使用）
   const getSimplifiedStationStops = useCallback((routeKey: RouteKey, trainType: string, stationName: string): boolean => {
@@ -1752,6 +1836,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       iconAnchor: [circleSize / 2, circleSize / 2]
     });
   }, [MapComponents, currentLanguage, theme, showTravelTimes, showTrainDemo]);
+
+  // 出発/到着駅を通る路線キーのセット（凡例の区切り線用）
+  const stationRouteKeys = useMemo<Set<RouteKey> | undefined>(() => {
+    if (!departure && !arrival) return undefined;
+    const keys = new Set<RouteKey>();
+    if (departure) getRoutesForStation(departure.name).forEach(rk => keys.add(rk));
+    if (arrival) getRoutesForStation(arrival.name).forEach(rk => keys.add(rk));
+    return keys.size > 0 ? keys : undefined;
+  }, [departure, arrival, getRoutesForStation]);
 
   // 選択された推薦ルートで使用される路線キーのセット（凡例ハイライト用）
   const highlightedRouteKeys = useMemo(() => {
@@ -3073,6 +3166,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 eventHandlers={{
                   mouseover: (e) => {
                     if (!showStationTooltip || isMobile) return;
+                    if (tooltipPinnedRef.current) return;
                     cancelTooltipClose();
                     const oe = e.originalEvent as MouseEvent | undefined;
                     if (!oe) return;
@@ -3083,9 +3177,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     if (isMobile && mapDraggedRef.current) return;
                     const oe = e.originalEvent as MouseEvent | undefined;
                     if (!oe) return;
-                    setStationTooltip(prev =>
-                      prev?.stationName === station.name ? null : { stationName: station.name, station, x: oe.clientX, y: oe.clientY }
-                    );
+                    if (!isMobile) {
+                      if (tooltipPinnedRef.current && stationTooltip?.stationName === station.name) { closeTooltip(); return; }
+                      setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
+                      pinTooltip();
+                    } else {
+                      setStationTooltip(prev =>
+                        prev?.stationName === station.name ? null : { stationName: station.name, station, x: oe.clientX, y: oe.clientY }
+                      );
+                    }
                   },
                 }}
               />
@@ -3156,6 +3256,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 eventHandlers={{
                   mouseover: (e) => {
                     if (!showStationTooltip || isMobile) return;
+                    if (tooltipPinnedRef.current) return;
                     cancelTooltipClose();
                     const oe = e.originalEvent as MouseEvent | undefined;
                     if (!oe) return;
@@ -3166,9 +3267,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     if (isMobile && mapDraggedRef.current) return;
                     const oe = e.originalEvent as MouseEvent | undefined;
                     if (!oe) return;
-                    setStationTooltip(prev =>
-                      prev?.stationName === station.name ? null : { stationName: station.name, station, x: oe.clientX, y: oe.clientY }
-                    );
+                    if (!isMobile) {
+                      if (tooltipPinnedRef.current && stationTooltip?.stationName === station.name) { closeTooltip(); return; }
+                      setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
+                      pinTooltip();
+                    } else {
+                      setStationTooltip(prev =>
+                        prev?.stationName === station.name ? null : { stationName: station.name, station, x: oe.clientX, y: oe.clientY }
+                      );
+                    }
                   },
                 }}
               />
@@ -3330,7 +3437,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               <StationSelector
                 departure={departure}
                 arrival={arrival}
-                onDepartureChange={setDeparture}
+                onDepartureChange={handleManualSetDeparture}
                 onArrivalChange={setArrival}
                 isExpanded={isStationSelectorExpanded}
                 onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
@@ -3346,7 +3453,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           <StationSelector
             departure={departure}
             arrival={arrival}
-            onDepartureChange={setDeparture}
+            onDepartureChange={handleManualSetDeparture}
             onArrivalChange={setArrival}
             isExpanded={isStationSelectorExpanded}
             onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
@@ -4371,6 +4478,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     visibleRoutes={visibleRoutes}
                     availableRoutes={availableRoutes}
                     highlightedRouteKeys={highlightedRouteKeys}
+                    stationRouteKeys={stationRouteKeys}
                     routeColors={routeColors}
                     routeNames={routeNames}
                     showDimmedRoutes={showDimmedMapRoutes}
@@ -4584,7 +4692,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               <StationSelector
                 departure={departure}
                 arrival={arrival}
-                onDepartureChange={setDeparture}
+                onDepartureChange={handleManualSetDeparture}
                 onArrivalChange={setArrival}
                 isExpanded={mobileStationExpanded}
                 onToggleExpanded={() => setMobileStationExpanded(v => !v)}
@@ -4616,6 +4724,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         visibleRoutes={visibleRoutes}
                         availableRoutes={availableRoutes}
                         highlightedRouteKeys={highlightedRouteKeys}
+                        stationRouteKeys={stationRouteKeys}
                         routeColors={routeColors}
                         routeNames={routeNames}
                         showDimmedRoutes={showDimmedMapRoutes}
