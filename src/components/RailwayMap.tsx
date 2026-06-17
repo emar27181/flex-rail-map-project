@@ -1533,11 +1533,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         ? `<div style="background:${displayColor};color:white;padding:1px 3px;border-radius:3px;white-space:nowrap;${borderCss}${shadowCss}text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:${Math.max(7, Math.round(lfs * 0.75))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${lfs}px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
         : `<div style="background:${displayColor};color:white;padding:1px 3px;border-radius:3px;font-size:${lfs}px;font-weight:bold;white-space:nowrap;${borderCss}${shadowCss}opacity:${opacity}">${displayName}</div>`;
       const [oDx, oDy] = stationLabelOffsets.get(station.name) ?? [0, 0];
+      // スマホはタッチターゲットを透明パディングで拡張（視覚は変えずにヒット領域を広げる）
+      const tp = isMobile ? 8 : 0;
+      const totalW = stationNameWidth + tp * 2;
+      const totalH = iconHeight + tp * 2;
       return new DivIcon({
-        html: htmlContent,
+        html: tp > 0
+          ? `<div style="padding:${tp}px;display:inline-flex;align-items:center;justify-content:center;">${htmlContent}</div>`
+          : htmlContent,
         className: 'station-name-marker',
-        iconSize: [stationNameWidth, iconHeight],
-        iconAnchor: [stationNameWidth / 2 + oDx, iconHeight / 2 + oDy]
+        iconSize: [totalW, totalH],
+        iconAnchor: [stationNameWidth / 2 + oDx + tp, iconHeight / 2 + oDy + tp]
       });
     } else {
       const stationSize = Math.round(Math.max(4, Math.min(24, zoomLevel - 8)) * stationIconScale);
@@ -4003,6 +4009,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               showDimmedRoutes={showDimmedMapRoutes}
               onToggleRoute={(routeKey) => { setAvailableRoutes(prev => new Set([...prev, routeKey])); setVisibleRoutes(prev => new Set([...prev, routeKey])); }}
               onHideRoute={(routeKey) => setVisibleRoutes(prev => { const s = new Set(prev); s.delete(routeKey); return s; })}
+              onRouteClick={(routeKey, x, y, isVisible) => setDimmedMapTooltip({ routeKey, x, y, isVisible })}
+              onStationClick={(stationName, x, y) => {
+                const station = allUniqueStations.find(s => s.name === stationName);
+                if (!station) return;
+                setStationTooltip(prev =>
+                  prev?.stationName === stationName ? null : { stationName, station, x, y }
+                );
+              }}
             />
           )}
 
@@ -4329,7 +4343,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           )}
 
           {/* 非表示路線ツールチップ（リアル地図モード） */}
-          {mapViewMode === 'realistic' && dimmedMapTooltip && (() => {
+          {dimmedMapTooltip && (() => {
             const TW = 180;
             const displayName = translateRoute(
               (routeNames as Record<string, string>)[dimmedMapTooltip.routeKey] ?? dimmedMapTooltip.routeKey,
