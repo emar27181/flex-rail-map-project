@@ -152,6 +152,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   const colors = getThemeColors(theme);
   const [sortMode, setSortMode] = useState<SortMode>('distance');
   const [dragOverKey, setDragOverKey] = useState<string | null>(null);
+  const [touchDragKey, setTouchDragKey] = useState<RouteKey | null>(null);
   const ROUTE_LIST_LIMIT = 10;
   const [routeListExpanded, setRouteListExpanded] = useState(false);
   const [groupLabelOpen,  setGroupLabelOpen]  = useState(true);
@@ -308,6 +309,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   </div>
                 )}
                 <div
+                  data-routekey={routeKey}
                   onDragOver={e => { e.preventDefault(); setDragOverKey(routeKey); }}
                   onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOverKey(null); }}
                   onDrop={e => {
@@ -331,7 +333,30 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                     draggable
                     onDragStart={e => { e.dataTransfer.setData('text/plain', routeKey); e.dataTransfer.effectAllowed = 'move'; }}
                     onDragEnd={() => setDragOverKey(null)}
-                    style={{ fontSize: '13px', color: colors.textSecondary, lineHeight: 1, flexShrink: 0, padding: '2px 3px 2px 0', cursor: 'grab', opacity: 0.5, userSelect: 'none' }}
+                    onTouchStart={e => {
+                      e.stopPropagation();
+                      setTouchDragKey(routeKey as RouteKey);
+                      setDragOverKey(routeKey);
+                    }}
+                    onTouchMove={e => {
+                      if (!touchDragKey) return;
+                      e.preventDefault();
+                      const touch = e.touches[0];
+                      const el = document.elementFromPoint(touch.clientX, touch.clientY);
+                      const row = el?.closest('[data-routekey]');
+                      const target = row?.getAttribute('data-routekey');
+                      if (target) setDragOverKey(target);
+                    }}
+                    onTouchEnd={() => {
+                      if (touchDragKey && dragOverKey && touchDragKey !== dragOverKey) {
+                        const next = [...routeOrder];
+                        const fi = next.indexOf(touchDragKey), ti = next.indexOf(dragOverKey as RouteKey);
+                        if (fi !== -1 && ti !== -1) { next.splice(fi, 1); next.splice(ti, 0, touchDragKey); onRouteOrderChange(next); }
+                      }
+                      setTouchDragKey(null);
+                      setDragOverKey(null);
+                    }}
+                    style={{ fontSize: '13px', color: colors.textSecondary, lineHeight: 1, flexShrink: 0, padding: '2px 3px 2px 0', cursor: 'grab', opacity: 0.5, userSelect: 'none', touchAction: 'none', WebkitUserSelect: 'none' }}
                   >
                     ⠿
                   </span>
