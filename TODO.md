@@ -9,12 +9,9 @@
 
 ### 🐛 バグ修正
 
-- 列車デモの再生バーUIが出発駅・到着駅センタUIと重なっているので下に移動する
-- 同一名の駅のときに駅ツールチップが異なる駅のものを表示することがある
 - 駅の位置情報がずれているものがある（例: 江ノ島電鉄の駅が海上に表示）
   - 江ノ島電鉄に限らず網羅的に緯度経度を調査・修正する
   - 駅座標整合性テスト（24〜46°N, 122〜154°E）も追加して検出できるようにする
-- スマホで路線並び替え時に文字選択が出る → `user-select: none` + ドラッグハンドルUIを追加
 
 ### 🌐 多言語対応
 
@@ -96,6 +93,52 @@
 ---
 
 ## DONE
+
+### 2026-06-17 セッション（追記）
+
+- **同一名の駅でツールチップが誤動作する**
+  - 元: 「同一名の駅のときに駅ツールチップが異なる駅のものを表示することがある」
+  - 変更: `src/components/RailwayMap.tsx` トグル判定を `stationName` 文字列比較 → `station.lat/lng` 座標比較に変更（3箇所）
+  - 日時: 2026-06-17
+
+- **列車デモ再生バーが出発/到着UIと重なる**
+  - 元: 「列車デモの再生バーUIが出発駅・到着駅センタUIと重なっているので下に移動する」
+  - 変更: `src/components/RailwayMap.tsx` 再生バーの position を `top:10` → `bottom:10` に変更
+  - 日時: 2026-06-17
+
+---
+
+### 2026-06-17 セッション
+
+- **出発駅復元バグのリグレッションテスト**
+  - 元: 「今ここで発生したバグが再発しないようにテストを設計して」
+  - 変更: `tests/unit/components/departure-revert.test.tsx` 新規作成。6テストケースで useDepartureAutoSet フックを検証
+  - 日時: 2026-06-17
+
+- **スマホで路線並び替え時に文字選択が出る**
+  - 元: 「スマホで路線並び替え時にコピー状態になる」
+  - 変更: `src/components/legend/LegendRouteList.tsx` onTouchStart/Move/End を追加し `touchAction:'none'`, `WebkitUserSelect:'none'` で抑制
+  - 日時: 2026-06-17
+
+- **ヒートマップ駅名タップ精度改善（isDetailed ラベル）**
+  - 元: 「ヒートマップ表示の時の駅名をクリックしてるつもりだけどツールチップがスマホで表示されにくい」
+  - 変更: `src/components/RailwayMap.tsx` isDetailed ラベルアイコンにスマホ用 8px タッチパディングを追加
+  - 日時: 2026-06-17
+
+- **路線図表示と通常表示のロジックを統一（DiagramMap リファクタリング）**
+  - 元: 「通常表示と路線図表示のロジックを同じに」
+  - 変更: `src/components/DiagramMap.tsx` onRouteClick/onStationClick props 化、内部 tooltip 削除、スクリーン座標 hit circle 追加
+  - 変更: `src/components/RailwayMap.tsx` dimmedMapTooltip を両モード共有
+  - 日時: 2026-06-17
+
+- **乗車路線リアルタイム検出機能**
+  - 元: 「次の駅まで何分とかそういう情報を出したい、路線も色付きで」
+  - 変更: `src/utils/trainDetector.ts` 新規（GPS→路線スコアリング）
+  - 変更: `src/components/TrainStatusPanel.tsx` 新規（電光掲示板風UI）
+  - 変更: `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx` に統合
+  - 日時: 2026-06-17
+
+---
 
 ### 2026-06-16 セッション
 

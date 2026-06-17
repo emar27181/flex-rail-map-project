@@ -806,3 +806,44 @@
 - showDimmedMapRoutes=true + visibleRoutes内 → 実線
 - showDimmedMapRoutes=false + visibleRoutes外 → 非表示
 - showDimmedMapRoutes=false + visibleRoutes内 → 実線
+
+---
+
+## 2026-06-17 セッション
+
+### feat: 出発駅復元バグのリグレッションテスト追加
+- `tests/unit/components/departure-revert.test.tsx` (新規)
+- GPS watchPosition 更新で × クリア後の駅が復元されるバグの再発防止テスト
+- `useDepartureAutoSet` フックを抽出し6ケースのテストを実装
+
+### feat: スマホ路線並び替えのテキスト選択防止
+- `src/components/legend/LegendRouteList.tsx`
+- HTML5 DnD は mobile 非対応のため touchStart/Move/End ハンドラに移行
+- `touchAction:'none'`, `WebkitUserSelect:'none'` でコピー状態を防止
+- `data-routekey` 属性 + `document.elementFromPoint` でドロップ先を特定
+
+### feat: 路線図表示モードのロジック統一（DiagramMap リファクタリング）
+- `src/components/DiagramMap.tsx`
+  - `onRouteClick` / `onStationClick` props を追加し内部 tooltip 状態を削除
+  - スクリーン座標の透明 hit circle を SVG に追加してスマホタップ精度を改善
+- `src/components/RailwayMap.tsx`
+  - dimmedMapTooltip を通常表示・路線図表示で共有するよう変更
+
+### feat: ヒートマップ表示時のスマホ駅名タップ精度改善
+- `src/components/RailwayMap.tsx`
+- isDetailed ラベルアイコンにスマホ用 8px タッチパディングを追加
+- iconSize と iconAnchor を padding 分オフセット調整
+
+### feat: 乗車路線リアルタイム検出機能
+- `src/utils/trainDetector.ts` (新規)
+  - GPS 2点の移動ベクトル（速度・方向）から近傍路線セグメントをスコアリング
+  - 約15km/h 以上で走行時に方向推定。速度不明時は30km/hをデフォルトとして所要時間算出
+- `src/components/TrainStatusPanel.tsx` (新規)
+  - 路線名（路線色バッジ）・終着駅方面・次の駅・推定時間を表示
+  - 方向反転・路線変更（検索付きリスト）・自動検出に戻すボタン
+- `src/components/StationSelector.tsx`
+  - `detectedRoute` / `manualTrainRoute` / `onManualTrainRouteChange` props 追加
+  - 出発/到着 UI 内に TrainStatusPanel をレンダリング
+- `src/components/RailwayMap.tsx`
+  - `gpsHistoryRef` で GPS 履歴を最大5点保持し、watchPosition 更新ごとに検出実行
+  - `detectedRoute` / `manualTrainRoute` state を全 StationSelector インスタンスに渡す
