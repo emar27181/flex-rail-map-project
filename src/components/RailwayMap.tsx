@@ -47,6 +47,8 @@ import {
   type Departure,
 } from '../data/timetableData';
 import { FS } from '../constants/ui';
+import { detectCurrentRoute } from '../utils/trainDetector';
+import type { DetectedRoute, GpsPoint } from '../utils/trainDetector';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -224,6 +226,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [isLocating, setIsLocating] = useState(false);
   const [isManualDeparture, setIsManualDeparture] = useState(false);
 
+  // 乗車路線検出
+  const gpsHistoryRef = useRef<GpsPoint[]>([]);
+  const [detectedRoute, setDetectedRoute] = useState<DetectedRoute | null>(null);
+  const [manualTrainRoute, setManualTrainRoute] = useState<DetectedRoute | null>(null);
+
   // ヒートマップ
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
   const [showEstimatedData, setShowEstimatedData] = useState(false);
@@ -256,7 +263,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     isFirstPositionRef.current = true;
     const id = navigator.geolocation.watchPosition(
       (pos) => {
-        setUserLocation([pos.coords.latitude, pos.coords.longitude]);
+        const { latitude, longitude } = pos.coords;
+        setUserLocation([latitude, longitude]);
+
+        const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: pos.timestamp };
+        gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-5);
+        if (gpsHistoryRef.current.length >= 2) {
+          const detected = detectCurrentRoute(gpsHistoryRef.current);
+          setDetectedRoute(detected);
+        }
+
         isFirstPositionRef.current = false;
       },
       () => {
@@ -2716,6 +2732,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         const { latitude, longitude } = position.coords;
         setUserLocation([latitude, longitude]);
 
+        const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: position.timestamp };
+        gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-5);
+        if (gpsHistoryRef.current.length >= 2) {
+          const detected = detectCurrentRoute(gpsHistoryRef.current);
+          setDetectedRoute(detected);
+        }
+
         isFirstPositionRef.current = false;
       },
       (error) => {
@@ -3189,7 +3212,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       pinTooltip();
                     } else {
                       setStationTooltip(prev =>
-                        prev?.stationName === station.name ? null : { stationName: station.name, station, x: oe.clientX, y: oe.clientY }
+                        prev?.station?.lat === station.lat && prev?.station?.lng === station.lng ? null : { stationName: station.name, station, x: oe.clientX, y: oe.clientY }
                       );
                     }
                   },
@@ -3279,7 +3302,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       pinTooltip();
                     } else {
                       setStationTooltip(prev =>
-                        prev?.stationName === station.name ? null : { stationName: station.name, station, x: oe.clientX, y: oe.clientY }
+                        prev?.station?.lat === station.lat && prev?.station?.lng === station.lng ? null : { stationName: station.name, station, x: oe.clientX, y: oe.clientY }
                       );
                     }
                   },
@@ -3452,6 +3475,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onDepartureTimeChange={setTimetableBaseTime}
                 onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
                 onSearchingChange={handleSearchingChange}
+                detectedRoute={detectedRoute}
+                manualTrainRoute={manualTrainRoute}
+                onManualTrainRouteChange={setManualTrainRoute}
+                userLocation={userLocation}
+                hasGps={isLocating}
               />
             </div>
           )
@@ -3468,6 +3496,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             language={currentLanguage}
             onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
             onSearchingChange={handleSearchingChange}
+            detectedRoute={detectedRoute}
+            manualTrainRoute={manualTrainRoute}
+            onManualTrainRouteChange={setManualTrainRoute}
+            userLocation={userLocation}
+            hasGps={isLocating}
           />
         )}
 
@@ -3883,7 +3916,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     const s = bubbleStations.find(st => st.name === name);
                     if (!s) return;
                     setStationTooltip(prev =>
-                      prev?.stationName === name ? null : { stationName: name, station: s as unknown as Station, x, y }
+                      prev?.station?.lat === (s as unknown as Station).lat && prev?.station?.lng === (s as unknown as Station).lng ? null : { stationName: name, station: s as unknown as Station, x, y }
                     );
                   }}
                 />
@@ -4250,7 +4283,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           {/* 列車位置デモ コントロールパネル */}
           {showTrainDemo && mapViewMode === 'realistic' && (
             <div style={{
-              position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
+              position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)',
               zIndex: 1001,
               backgroundColor: colors.surface,
               border: `1px solid ${colors.border}`,
@@ -4715,6 +4748,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onDepartureTimeChange={setTimetableBaseTime}
                 onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
                 onSearchingChange={handleSearchingChange}
+                detectedRoute={detectedRoute}
+                manualTrainRoute={manualTrainRoute}
+                onManualTrainRouteChange={setManualTrainRoute}
+                userLocation={userLocation}
+                hasGps={isLocating}
               />
             </div>
           )}

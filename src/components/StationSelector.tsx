@@ -7,6 +7,8 @@ import { translateStation, translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
 import { stationReadings, normalizeToHiragana } from '../utils/stationReadings';
 import { FS } from '../constants/ui';
+import TrainStatusPanel from './TrainStatusPanel';
+import type { DetectedRoute } from '../utils/trainDetector';
 
 interface StationSelectorProps {
   onDepartureChange: (station: Station | null) => void;
@@ -20,6 +22,11 @@ interface StationSelectorProps {
   onDepartureTimeChange?: (time: string) => void;
   onSetNearestDeparture?: () => void;
   onSearchingChange?: (isSearching: boolean) => void;
+  detectedRoute?: DetectedRoute | null;
+  manualTrainRoute?: DetectedRoute | null;
+  onManualTrainRouteChange?: (route: DetectedRoute | null) => void;
+  userLocation?: [number, number] | null;
+  hasGps?: boolean;
 }
 
 const StationSelector: React.FC<StationSelectorProps> = ({
@@ -34,6 +41,11 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   onDepartureTimeChange,
   onSetNearestDeparture,
   onSearchingChange,
+  detectedRoute = null,
+  manualTrainRoute = null,
+  onManualTrainRouteChange,
+  userLocation = null,
+  hasGps = false,
 }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -601,6 +613,17 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               )}
             </div>
           </div>
+
+          {/* 乗車路線検出パネル */}
+          {hasGps && onManualTrainRouteChange && (
+            <TrainStatusPanel
+              detectedRoute={detectedRoute}
+              manualRoute={manualTrainRoute}
+              onManualRouteChange={onManualTrainRouteChange}
+              userLocation={userLocation}
+              hasGps={hasGps}
+            />
+          )}
 
           {/* 出発時刻 */}
           {onDepartureTimeChange && (
