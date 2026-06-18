@@ -52,3 +52,4 @@ scripts/missing-stations-report.json
 # E2E test outputs
 playwright-report/
 test-results/
+scripts/output/
