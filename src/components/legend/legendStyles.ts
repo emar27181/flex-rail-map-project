@@ -50,6 +50,7 @@ type Colors = {
   borderLight?: string;
   surface: string;
   surfaceElevated: string;
+  primary?: string;
 };
 
 // ── Section (collapsible panel block) ─────────────────────────────────────
@@ -141,6 +142,15 @@ export function checkboxLabel(colors: Colors): CSSProperties {
     cursor:        'pointer',
     padding:       `${L.sp.sm} 0`,
     userSelect:    'none',
+  };
+}
+
+/** Checkbox input element (accent color = primary blue) */
+export function checkboxInput(colors: Colors): CSSProperties {
+  return {
+    marginRight:  L.sp.sm,
+    cursor:       'pointer',
+    accentColor:  colors.primary ?? '#2196F3',
   };
 }
 

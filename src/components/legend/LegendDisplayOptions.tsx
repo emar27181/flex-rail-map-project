@@ -2,6 +2,7 @@ import React from 'react';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
+import { checkboxInput } from './legendStyles';
 
 interface LegendDisplayOptionsProps {
   mapViewMode: 'realistic' | 'schematic';
@@ -98,10 +99,7 @@ const LegendDisplayOptions: React.FC<LegendDisplayOptionsProps> = ({
               type="checkbox"
               checked={trainTypeViewEnabled}
               onChange={(e) => onTrainTypeViewChange(e.target.checked)}
-              style={{
-                marginRight: '6px',
-                cursor: 'pointer'
-              }}
+              style={checkboxInput(colors)}
             />
             🚆 列車種別表示モード
           </label>
