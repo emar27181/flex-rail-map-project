@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { routes } from '../data/routes';
+import { routes, routeColors, routeNames } from '../data/routes';
 import type { RouteKey } from '../data/routes';
-import { makeManualRoute } from '../utils/trainDetector';
+import type { Station } from '../data/yamanote';
+import { makeManualRoute, haversineDistance } from '../utils/trainDetector';
 import type { DetectedRoute } from '../utils/trainDetector';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { FS } from '../constants/ui';
@@ -29,14 +30,25 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
   const effective = manualRoute ?? detectedRoute;
   const isManual = manualRoute !== null;
 
-  // 全路線リスト（変更UI用）
-  const allRoutesList = useMemo(() =>
-    Object.entries(routes).map(([key, r]) => ({
-      key: key as RouteKey,
-      name: r.name,
-      color: r.color,
-    })),
-  []);
+  // 全路線リスト（showOverride が開いたときだけ計算）
+  const allRoutesList = useMemo(() => {
+    if (!showOverride) return [];
+    const [lat, lng] = userLocation ?? [35.6812, 139.7671];
+    return (Object.entries(routes) as [RouteKey, Station[]][])
+      .map(([key, stas]) => {
+        const minDist = stas.reduce((min, s) => {
+          const d = haversineDistance(lat, lng, s.lat, s.lng);
+          return d < min ? d : min;
+        }, Infinity);
+        return {
+          key,
+          name: routeNames[key] ?? key,
+          color: routeColors[key] ?? '#888888',
+          dist: minDist,
+        };
+      })
+      .sort((a, b) => a.dist - b.dist);
+  }, [showOverride, userLocation]);
 
   const filteredRoutes = overrideSearch
     ? allRoutesList.filter(r => r.name.includes(overrideSearch))
@@ -105,7 +117,7 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
         />
         <div style={{ maxHeight: '180px', overflowY: 'auto' }}>
           {filteredRoutes.map(r => {
-            const routeStations = routes[r.key]?.stations ?? [];
+            const routeStations = (routes[r.key] as Station[]) ?? [];
             const termA = routeStations[routeStations.length - 1]?.name ?? '';
             const termB = routeStations[0]?.name ?? '';
             return (
@@ -159,16 +171,15 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
   if (!effective) {
     return (
       <div style={{
-        marginTop: '8px',
-        padding: '6px 8px',
+        marginTop: '6px',
+        padding: '3px 8px',
         border: `1px solid ${colors.border}`,
-        borderRadius: '6px',
+        borderRadius: '4px',
         backgroundColor: colors.surfaceElevated,
         display: 'flex',
         alignItems: 'center',
         gap: '6px',
       }}>
-        <span style={{ fontSize: '14px' }}>🚃</span>
         <span style={{ fontSize: FS.label, color: colors.textSecondary }}>路線を検出中</span>
         <button
           onClick={() => setShowOverride(true)}
@@ -190,16 +201,15 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
   // 路線検出済み
   return (
     <div style={{
-      marginTop: '8px',
-      padding: '6px 8px',
+      marginTop: '6px',
+      padding: '4px 8px',
       border: `1px solid ${effective.routeColor}44`,
       borderLeft: `4px solid ${effective.routeColor}`,
-      borderRadius: '6px',
+      borderRadius: '4px',
       backgroundColor: colors.surfaceElevated,
     }}>
       {/* 路線・方面行 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: '13px' }}>🚃</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
         <span style={{
           fontSize: FS.label,
           fontWeight: 'bold',
@@ -225,7 +235,7 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
       </div>
 
       {/* 次の駅行 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
         <span style={{ fontSize: FS.helper, color: colors.textSecondary, whiteSpace: 'nowrap' }}>次の駅</span>
         <span style={{
           fontSize: FS.base,

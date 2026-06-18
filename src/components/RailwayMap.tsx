@@ -269,8 +269,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: pos.timestamp };
         gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-5);
         if (gpsHistoryRef.current.length >= 2) {
-          const detected = detectCurrentRoute(gpsHistoryRef.current);
-          setDetectedRoute(detected);
+          try {
+            const detected = detectCurrentRoute(gpsHistoryRef.current);
+            setDetectedRoute(detected);
+          } catch (e) {
+            console.warn('Train detection error:', e);
+          }
         }
 
         isFirstPositionRef.current = false;
@@ -2735,8 +2739,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: position.timestamp };
         gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-5);
         if (gpsHistoryRef.current.length >= 2) {
-          const detected = detectCurrentRoute(gpsHistoryRef.current);
-          setDetectedRoute(detected);
+          try {
+            const detected = detectCurrentRoute(gpsHistoryRef.current);
+            setDetectedRoute(detected);
+          } catch (e) {
+            console.warn('Train detection error:', e);
+          }
         }
 
         isFirstPositionRef.current = false;
@@ -3638,7 +3646,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       type="checkbox"
                       checked={showTravelTimeOverlay}
                       onChange={(e) => setShowTravelTimeOverlay(e.target.checked)}
-                      style={{ marginRight: '8px' }}
+                      style={{ marginRight: '8px', accentColor: colors.primary }}
                     />
                     ⏱ {translateUI('travelTimeOverlay', currentLanguage)}
                   </label>
@@ -4198,7 +4206,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       </div>
                       {heatmapEnabled && (
                         <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', color: colors.text, cursor: 'pointer' }}>
-                          <input type="checkbox" checked={heatmapRangeFilterEnabled} onChange={e => setHeatmapRangeFilterEnabled(e.target.checked)} />
+                          <input type="checkbox" checked={heatmapRangeFilterEnabled} onChange={e => setHeatmapRangeFilterEnabled(e.target.checked)} style={{ accentColor: colors.primary }} />
                           {translateUI('heatmapRangeFilter', currentLanguage)}
                         </label>
                       )}

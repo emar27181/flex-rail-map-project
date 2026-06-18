@@ -1,5 +1,6 @@
-import { routes } from '../data/routes';
+import { routes, routeColors, routeNames } from '../data/routes';
 import type { RouteKey } from '../data/routes';
+import type { Station } from '../data/yamanote';
 
 export type GpsPoint = {
   lat: number;
@@ -27,7 +28,7 @@ export function haversineDistance(lat1: number, lng1: number, lat2: number, lng2
   const a =
     Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return EARTH_R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return EARTH_R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(Math.max(0, 1 - a)));
 }
 
 function pointToSegmentDistance(
@@ -78,9 +79,11 @@ export function detectCurrentRoute(gpsHistory: GpsPoint[]): DetectedRoute | null
   let bestScore = -1;
   let best: DetectedRoute | null = null;
 
-  for (const [routeKey, route] of Object.entries(routes)) {
-    const stas = route.stations;
+  for (const [routeKey, stas] of Object.entries(routes) as [RouteKey, Station[]][]) {
     if (!stas || stas.length < 2) continue;
+
+    const name = routeNames[routeKey] ?? routeKey;
+    const color = routeColors[routeKey] ?? '#888888';
 
     for (let i = 0; i < stas.length - 1; i++) {
       const A = stas[i], B = stas[i + 1];
@@ -114,9 +117,9 @@ export function detectCurrentRoute(gpsHistory: GpsPoint[]): DetectedRoute | null
 
         bestScore = score;
         best = {
-          routeKey: routeKey as RouteKey,
-          routeName: route.name,
-          routeColor: route.color,
+          routeKey,
+          routeName: name,
+          routeColor: color,
           directionIndex: dir,
           terminalStation: stas[termIdx].name,
           nextStation: nextSt.name,
@@ -137,10 +140,11 @@ export function makeManualRoute(
   currentLat: number,
   currentLng: number
 ): DetectedRoute | null {
-  const route = routes[routeKey];
-  if (!route || !route.stations || route.stations.length < 2) return null;
+  const stas = routes[routeKey] as Station[] | undefined;
+  if (!stas || stas.length < 2) return null;
 
-  const stas = route.stations;
+  const name = routeNames[routeKey] ?? routeKey;
+  const color = routeColors[routeKey] ?? '#888888';
   const termIdx = directionIndex === 0 ? stas.length - 1 : 0;
   const terminal = stas[termIdx];
 
@@ -162,8 +166,8 @@ export function makeManualRoute(
 
   return {
     routeKey,
-    routeName: route.name,
-    routeColor: route.color,
+    routeName: name,
+    routeColor: color,
     directionIndex,
     terminalStation: terminal.name,
     nextStation: nextSt.name,
