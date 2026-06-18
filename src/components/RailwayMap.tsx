@@ -47,8 +47,8 @@ import {
   type Departure,
 } from '../data/timetableData';
 import { FS } from '../constants/ui';
-import { detectCurrentRoute } from '../utils/trainDetector';
-import type { DetectedRoute, GpsPoint } from '../utils/trainDetector';
+import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, MIN_SPEED_MS, DEFAULT_SPEED_MS } from '../utils/trainDetector';
+import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -230,6 +230,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const gpsHistoryRef = useRef<GpsPoint[]>([]);
   const [detectedRoute, setDetectedRoute] = useState<DetectedRoute | null>(null);
   const [manualTrainRoute, setManualTrainRoute] = useState<DetectedRoute | null>(null);
+  // 訪問駅履歴（ブラウザ起動中のみ保持）
+  const visitHistoryRef = useRef<StationVisit[]>([]);
+  const detectedRouteRef = useRef<DetectedRoute | null>(null);
+  const lastStationCheckTimeRef = useRef<number>(0);
+  const gpsSessionStartRef = useRef<number>(0);
 
   // ヒートマップ
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
@@ -261,17 +266,46 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (!navigator.geolocation) return;
     setIsLocating(true);
     isFirstPositionRef.current = true;
+    gpsSessionStartRef.current = Date.now();
     const id = navigator.geolocation.watchPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
         setUserLocation([latitude, longitude]);
 
+        const now = Date.now();
         const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: pos.timestamp };
         gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-5);
+
         if (gpsHistoryRef.current.length >= 2) {
           try {
-            const detected = detectCurrentRoute(gpsHistoryRef.current);
+            const elapsed = now - gpsSessionStartRef.current;
+            let detected: DetectedRoute | null;
+            if (elapsed < 5000) {
+              detected = detectCurrentRoute(gpsHistoryRef.current);
+            } else {
+              detected = detectRouteWithHistory(gpsHistoryRef.current, visitHistoryRef.current);
+            }
+            detectedRouteRef.current = detected;
             setDetectedRoute(detected);
+
+            // 訪問駅チェック（5秒ごと・検出済み路線のみ）
+            if (detected && now - lastStationCheckTimeRef.current >= 5000) {
+              const prev = gpsHistoryRef.current[gpsHistoryRef.current.length - 2];
+              const dt = (pt.timestamp - prev.timestamp) / 1000;
+              let speedMs = DEFAULT_SPEED_MS;
+              if (dt > 0.5) {
+                const dist = Math.sqrt(
+                  ((latitude - prev.lat) * 111320) ** 2 +
+                  ((longitude - prev.lng) * 111320 * Math.cos(latitude * Math.PI / 180)) ** 2
+                );
+                speedMs = dist / dt;
+              }
+              const newVisits = checkNearStation(latitude, longitude, speedMs, now, detected.routeKey, visitHistoryRef.current);
+              if (newVisits.length > 0) {
+                visitHistoryRef.current = [...visitHistoryRef.current, ...newVisits].slice(-30);
+              }
+              lastStationCheckTimeRef.current = now;
+            }
           } catch (e) {
             console.warn('Train detection error:', e);
           }
@@ -2730,18 +2764,49 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // トラッキング開始
     setIsLocating(true);
     isFirstPositionRef.current = true;
+    gpsSessionStartRef.current = Date.now();
+    visitHistoryRef.current = [];
+    lastStationCheckTimeRef.current = 0;
 
     const id = navigator.geolocation.watchPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         setUserLocation([latitude, longitude]);
 
+        const now = Date.now();
         const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: position.timestamp };
         gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-5);
+
         if (gpsHistoryRef.current.length >= 2) {
           try {
-            const detected = detectCurrentRoute(gpsHistoryRef.current);
+            const elapsed = now - gpsSessionStartRef.current;
+            let detected: DetectedRoute | null;
+            if (elapsed < 5000) {
+              detected = detectCurrentRoute(gpsHistoryRef.current);
+            } else {
+              detected = detectRouteWithHistory(gpsHistoryRef.current, visitHistoryRef.current);
+            }
+            detectedRouteRef.current = detected;
             setDetectedRoute(detected);
+
+            // 訪問駅チェック（5秒ごと・検出済み路線のみ）
+            if (detected && now - lastStationCheckTimeRef.current >= 5000) {
+              const prev = gpsHistoryRef.current[gpsHistoryRef.current.length - 2];
+              const dt = (pt.timestamp - prev.timestamp) / 1000;
+              let speedMs = DEFAULT_SPEED_MS;
+              if (dt > 0.5) {
+                const dist = Math.sqrt(
+                  ((latitude - prev.lat) * 111320) ** 2 +
+                  ((longitude - prev.lng) * 111320 * Math.cos(latitude * Math.PI / 180)) ** 2
+                );
+                speedMs = dist / dt;
+              }
+              const newVisits = checkNearStation(latitude, longitude, speedMs, now, detected.routeKey, visitHistoryRef.current);
+              if (newVisits.length > 0) {
+                visitHistoryRef.current = [...visitHistoryRef.current, ...newVisits].slice(-30);
+              }
+              lastStationCheckTimeRef.current = now;
+            }
           } catch (e) {
             console.warn('Train detection error:', e);
           }
@@ -4037,6 +4102,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   );
                 })}
               </Pane>
+
+              {/* 現在地マーカー */}
+              {userLocation && userLocationIcon && (
+                <Marker
+                  position={userLocation}
+                  icon={userLocationIcon}
+                  zIndexOffset={10000}
+                />
+              )}
             </MapContainer>
           ) : (
             <DiagramMap

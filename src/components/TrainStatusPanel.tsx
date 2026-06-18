@@ -121,43 +121,45 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
             const termA = routeStations[routeStations.length - 1]?.name ?? '';
             const termB = routeStations[0]?.name ?? '';
             return (
-              <div key={r.key} style={{ marginBottom: '4px' }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '4px 6px',
-                  backgroundColor: colors.surface,
-                  borderRadius: '4px',
-                  borderLeft: `4px solid ${r.color}`,
-                }}>
-                  <span style={{ flex: 1, fontSize: FS.label, color: colors.text, fontWeight: 'bold' }}>{r.name}</span>
+              <div key={r.key} style={{
+                marginBottom: '4px',
+                padding: '6px 8px',
+                backgroundColor: colors.surface,
+                borderRadius: '4px',
+                borderLeft: `4px solid ${r.color}`,
+              }}>
+                <div style={{ fontSize: FS.label, color: colors.text, fontWeight: 'bold', marginBottom: '4px' }}>{r.name}</div>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   <button
                     onClick={() => handleSelectRoute(r.key, 0)}
                     style={{
-                      fontSize: FS.helper,
-                      padding: '2px 6px',
-                      borderRadius: '3px',
+                      flex: '1 1 0',
+                      fontSize: FS.label,
+                      padding: '4px 6px',
+                      borderRadius: '4px',
                       border: `1px solid ${r.color}`,
                       backgroundColor: 'transparent',
                       color: r.color,
                       cursor: 'pointer',
                       whiteSpace: 'nowrap',
+                      minWidth: 0,
                     }}
-                  >→ {termA}方面</button>
+                  >→ {termA}</button>
                   <button
                     onClick={() => handleSelectRoute(r.key, 1)}
                     style={{
-                      fontSize: FS.helper,
-                      padding: '2px 6px',
-                      borderRadius: '3px',
+                      flex: '1 1 0',
+                      fontSize: FS.label,
+                      padding: '4px 6px',
+                      borderRadius: '4px',
                       border: `1px solid ${r.color}`,
                       backgroundColor: 'transparent',
                       color: r.color,
                       cursor: 'pointer',
                       whiteSpace: 'nowrap',
+                      minWidth: 0,
                     }}
-                  >→ {termB}方面</button>
+                  >→ {termB}</button>
                 </div>
               </div>
             );
