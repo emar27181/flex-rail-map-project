@@ -3,8 +3,8 @@
 nav.crumb a{ font-size:13.5px; }
 h2{ display:flex; align-items:baseline; gap:13px; }
 h2 .num{ flex:none; margin-right:0; }
-a.inline{ color:var(--green-strong); text-decoration:none; border-bottom:1px solid var(--border-strong); }
-a.inline:hover{ border-color:var(--green); }
+a.inline{ color:var(--accent-strong); text-decoration:none; border-bottom:1px solid var(--border-strong); }
+a.inline:hover{ border-color:var(--accent); }
 
 .demo{ margin:26px 0 8px; background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); overflow:hidden; }
 .demo-top{ padding:20px 22px 0; }
@@ -15,8 +15,8 @@ a.inline:hover{ border-color:var(--green); }
 .seg{ display:inline-flex; padding:4px; gap:4px; background:var(--surface-2); border-radius:11px; margin:16px 22px 0; }
 .seg button{ appearance:none; border:0; background:transparent; cursor:pointer; font-family:var(--sans); font-weight:700; font-size:13.5px; color:var(--ink-soft); padding:9px 16px; border-radius:8px; transition:all .2s ease; display:inline-flex; align-items:center; gap:7px; }
 .seg button .n{ font-size:12px; opacity:.7; font-weight:700; }
-.seg button[aria-selected="true"]{ background:var(--surface); color:var(--green-strong); box-shadow:0 1px 2px rgba(0,0,0,.08); }
-html[data-theme="dark"] .seg button[aria-selected="true"]{ background:#0f1316; color:var(--green-strong); }
+.seg button[aria-selected="true"]{ background:var(--surface); color:var(--accent-strong); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+html[data-theme="dark"] .seg button[aria-selected="true"]{ background:#0f1316; color:var(--accent-strong); }
 
 .stage-wrap{ padding:8px 10px 4px; position:relative; }
 .stage-wrap svg{ width:100%; height:auto; display:block; }
@@ -29,17 +29,17 @@ html[data-theme="dark"] .seg button[aria-selected="true"]{ background:#0f1316; c
 
 .readout{ display:flex; align-items:center; gap:12px; padding:6px 22px 18px; font-size:13px; color:var(--ink-soft); flex-wrap:wrap; }
 .countpill{ display:inline-flex; align-items:baseline; gap:6px; font-weight:800; color:var(--ink); background:var(--surface-2); padding:6px 13px; border-radius:999px; font-size:14px; }
-.countpill .big{ font-size:19px; color:var(--green-strong); }
+.countpill .big{ font-size:19px; color:var(--accent-strong); }
 .readout .arrow{ color:var(--ink-faint); }
 .demo-note{ padding:0 22px 18px; font-size:11.5px; color:var(--ink-faint); line-height:1.6; }
 
 .feelist{ list-style:none; padding:0; margin:1.2em 0; display:grid; gap:1px; background:var(--border); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
 .feelist li{ margin:0; background:var(--surface); padding:13px 16px; display:flex; gap:12px; align-items:flex-start; font-size:15px; }
-.feelist li .q{ color:var(--green); font-weight:800; flex:none; }
+.feelist li .q{ color:var(--accent); font-weight:800; flex:none; }
 
 .cards{ display:grid; gap:14px; margin:1.6em 0; }
 .card{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 18px; box-shadow:var(--shadow); }
-.card .ic{ width:38px; height:38px; border-radius:9px; background:var(--green-tint); color:var(--green-strong); display:flex; align-items:center; justify-content:center; margin-bottom:13px; }
+.card .ic{ width:38px; height:38px; border-radius:9px; background:var(--accent-tint); color:var(--accent-strong); display:flex; align-items:center; justify-content:center; margin-bottom:13px; }
 .card .ic svg{ width:20px; height:20px; }
 .card h4{ margin:0 0 6px; font-size:15.5px; font-weight:700; }
 .card p{ margin:0; font-size:13.5px; color:var(--ink-soft); line-height:1.8; }
@@ -47,7 +47,7 @@ html[data-theme="dark"] .seg button[aria-selected="true"]{ background:#0f1316; c
 .uses{ display:grid; gap:12px; margin:1.4em 0; }
 .use{ background:var(--surface); border:1px solid var(--border); border-radius:11px; padding:16px 17px; }
 .use .t{ font-weight:700; font-size:14.5px; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
-.use .t .dot{ width:7px; height:7px; border-radius:50%; background:var(--green); flex:none; }
+.use .t .dot{ width:7px; height:7px; border-radius:50%; background:var(--accent); flex:none; }
 .use p{ margin:0; font-size:13px; color:var(--ink-soft); line-height:1.75; }
 
 .shot{ margin:1.8em 0; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--surface); box-shadow:var(--shadow); }
