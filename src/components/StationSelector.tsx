@@ -60,17 +60,26 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
   const departureRef = useRef<HTMLDivElement>(null);
   const arrivalRef = useRef<HTMLDivElement>(null);
+  const departurePortalRef = useRef<HTMLDivElement>(null);
+  const arrivalPortalRef = useRef<HTMLDivElement>(null);
   const departureClickedRef = useRef(false);
   const arrivalClickedRef = useRef(false);
   const focusedInputRef = useRef<HTMLInputElement | null>(null);
 
-  // 外側クリックで閉じる機能
+  // 外側クリックで閉じる機能（ポータルドロップダウンは除外）
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (departureRef.current && !departureRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        departureRef.current && !departureRef.current.contains(target) &&
+        !departurePortalRef.current?.contains(target)
+      ) {
         setShowDepartureResults(false);
       }
-      if (arrivalRef.current && !arrivalRef.current.contains(event.target as Node)) {
+      if (
+        arrivalRef.current && !arrivalRef.current.contains(target) &&
+        !arrivalPortalRef.current?.contains(target)
+      ) {
         setShowArrivalResults(false);
       }
     };
@@ -398,12 +407,13 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  📍 {translateUI('currentLocationFrom', language)}
+                  {translateUI('currentLocationFrom', language)}
                 </button>
               )}
 
               {showDepartureResults && departureDropdownPos && createPortal(
                 <div
+                  ref={departurePortalRef}
                   onMouseDown={(e) => { e.preventDefault(); departureClickedRef.current = true; }}
                   onTouchStart={() => { departureClickedRef.current = true; }}
                   style={{
@@ -570,6 +580,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               
               {showArrivalResults && arrivalDropdownPos && createPortal(
                 <div
+                  ref={arrivalPortalRef}
                   onMouseDown={(e) => { e.preventDefault(); arrivalClickedRef.current = true; }}
                   onTouchStart={() => { arrivalClickedRef.current = true; }}
                   style={{
