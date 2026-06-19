@@ -16,6 +16,12 @@ const ThemeWrapper: React.FC = () => {
     persistLanguage(language);
   }, [language]);
 
+  // JS読み込み完了後にローディング画面を非表示にする
+  useEffect(() => {
+    const el = document.getElementById('app-loading');
+    if (el) el.style.display = 'none';
+  }, []);
+
   const handleLanguageChange = (newLanguage: Language) => {
     setLanguage(newLanguage);
   };
