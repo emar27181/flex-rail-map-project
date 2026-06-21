@@ -435,8 +435,8 @@ const tokaidoData: LineTimetableData = {
       label: '下り（横浜・小田原方面）',
       stations: [
         { name: '東京', offset: 0 },   { name: '新橋', offset: 3 },   { name: '品川', offset: 6 },
-        { name: '川崎', offset: 10 },  { name: '横浜', offset: 14 },  { name: '保土ケ谷', offset: 19 },
-        { name: '東戸塚', offset: 22 }, { name: '戸塚', offset: 26 },  { name: '大船', offset: 32 },
+        { name: '川崎', offset: 10 },  { name: '横浜', offset: 14 },
+        { name: '戸塚', offset: 22 },  { name: '大船', offset: 32 },
         { name: '藤沢', offset: 38 },  { name: '辻堂', offset: 42 },  { name: '茅ケ崎', offset: 45 },
         { name: '平塚', offset: 49 },  { name: '大磯', offset: 53 },  { name: '二宮', offset: 56 },
         { name: '国府津', offset: 59 }, { name: '鴨宮', offset: 63 },  { name: '小田原', offset: 66 },
@@ -459,8 +459,8 @@ const tokaidoData: LineTimetableData = {
         { name: '小田原', offset: 0 },  { name: '鴨宮', offset: 3 },   { name: '国府津', offset: 7 },
         { name: '二宮', offset: 10 },   { name: '大磯', offset: 13 },  { name: '平塚', offset: 17 },
         { name: '茅ケ崎', offset: 21 }, { name: '辻堂', offset: 24 },  { name: '藤沢', offset: 28 },
-        { name: '大船', offset: 34 },   { name: '戸塚', offset: 40 },  { name: '東戸塚', offset: 44 },
-        { name: '保土ケ谷', offset: 47 },{ name: '横浜', offset: 52 }, { name: '川崎', offset: 56 },
+        { name: '大船', offset: 34 },   { name: '戸塚', offset: 40 },
+        { name: '横浜', offset: 52 }, { name: '川崎', offset: 56 },
         { name: '品川', offset: 60 },   { name: '新橋', offset: 63 },  { name: '東京', offset: 66 },
       ],
       patterns: [
