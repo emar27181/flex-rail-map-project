@@ -302,10 +302,11 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
               return (
                 <React.Fragment key={routeKey}>
                 {showDivider && (
-                  <div style={{ margin: '4px 0', borderTop: `1px dashed ${colors.borderLight}`, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '9px', color: colors.textSecondary, whiteSpace: 'nowrap', padding: '0 4px', background: colors.surface }}>
-                      {translateUI('otherRoutes', language) || 'その他の路線'}
-                    </span>
+                  <div style={{ margin: '4px 0 2px' }}>
+                    <div style={{ fontSize: '9px', color: colors.textSecondary, whiteSpace: 'nowrap', marginBottom: '2px' }}>
+                      ↑ この駅を通る路線
+                    </div>
+                    <div style={{ borderTop: `1px dashed ${colors.borderLight}` }} />
                   </div>
                 )}
                 <div
