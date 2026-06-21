@@ -1,5 +1,27 @@
 # CHANGE LOG
 
+## [2026-06-19] セッション（JSローディング・TrainStatusPanel改善・凡例ラベル改善）
+
+### feat: JSロード完了まで表示するローディング画面を追加
+- `src/pages/index.astro`: `#app-loading` ローディングオーバーレイを追加（🗺 アイコン + 「地図を読み込み中...」）
+- `src/components/ThemeWrapper.tsx`: コンポーネントマウント時に `#app-loading` を非表示化
+
+### fix: 出発駅の自動設定を初回GPS取得時のみに限定（`src/components/RailwayMap.tsx`）
+- GPS位置更新のたびに出発駅が上書きされていた問題を修正
+- 既存の `autoSetDepartureRef` を活用し、最初の取得時だけ最寄駅をセット
+
+### improve: 「約X分」を現在地から毎回動的に計算（`src/components/TrainStatusPanel.tsx`）
+- `makeManualRoute` 呼び出し時の静的な距離計算から `useMemo` による動的計算に変更
+- `userLocation` が更新されるたびに次駅までの距離を再計算
+- `DEFAULT_SPEED_MS` をエクスポートして `TrainStatusPanel` から参照
+
+### improve: 次の駅表示の ▶ アイコンを削除（`src/components/TrainStatusPanel.tsx`）
+- `▶ {effective.nextStation}` → `{effective.nextStation}` に変更
+
+### improve: 路線凡例の仕切り線ラベルを日本語化（`src/components/legend/LegendRouteList.tsx`）
+- "その他の路線"（`otherRoutes` キー）を廃止
+- 仕切り線の上部に「↑ この駅を通る路線」と表示し、上グループの意味を明確化
+
 ## [2026-06-16] セッション（現在地自動設定・ツールチップ統合・スマホUX改善・TODO整理）
 
 ### feat: 出発駅を現在地の最寄り駅から自動設定（`src/components/RailwayMap.tsx`）
