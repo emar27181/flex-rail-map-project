@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { routes, routeColors, routeNames } from '../data/routes';
 import type { RouteKey } from '../data/routes';
 import type { Station } from '../data/yamanote';
-import { makeManualRoute, haversineDistance } from '../utils/trainDetector';
+import { makeManualRoute, haversineDistance, DEFAULT_SPEED_MS } from '../utils/trainDetector';
 import type { DetectedRoute } from '../utils/trainDetector';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { FS } from '../constants/ui';
@@ -29,6 +29,18 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
 
   const effective = manualRoute ?? detectedRoute;
   const isManual = manualRoute !== null;
+
+  // 次の駅までの所要時間を現在地から動的計算
+  const dynamicEstMinutes = useMemo(() => {
+    if (!effective || !userLocation) return effective?.estimatedMinutes ?? null;
+    const stas = routes[effective.routeKey] as Station[] | undefined;
+    if (!stas) return effective.estimatedMinutes;
+    const nextSta = stas.find(s => s.name === effective.nextStation);
+    if (!nextSta) return effective.estimatedMinutes;
+    const dist = haversineDistance(userLocation[0], userLocation[1], nextSta.lat, nextSta.lng);
+    const estMin = Math.round(dist / DEFAULT_SPEED_MS / 60);
+    return estMin > 0 ? estMin : 1;
+  }, [effective, userLocation]);
 
   // 全路線リスト（showOverride が開いたときだけ計算）
   const allRoutesList = useMemo(() => {
@@ -243,53 +255,55 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
           fontSize: FS.base,
           fontWeight: 'bold',
           color: colors.text,
-        }}>▶ {effective.nextStation}</span>
-        {effective.estimatedMinutes !== null && (
+        }}>{effective.nextStation}</span>
+        {dynamicEstMinutes !== null && (
           <span style={{
             fontSize: FS.label,
             color: colors.textSecondary,
             marginLeft: 'auto',
             whiteSpace: 'nowrap',
-          }}>約 {effective.estimatedMinutes} 分</span>
+          }}>約 {dynamicEstMinutes} 分</span>
         )}
       </div>
 
       {/* 操作ボタン行 */}
-      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
         <button
           onClick={handleFlipDirection}
           title="方向を逆転"
           style={{
-            fontSize: FS.helper,
-            padding: '2px 7px',
-            borderRadius: '3px',
-            border: `1px solid ${colors.border}`,
-            backgroundColor: 'transparent',
-            color: colors.textSecondary,
+            fontSize: FS.label,
+            padding: '5px 12px',
+            borderRadius: '6px',
+            border: `1.5px solid ${colors.border}`,
+            backgroundColor: colors.surfaceElevated,
+            color: colors.text,
             cursor: 'pointer',
+            fontWeight: '500',
           }}
         >⇄ 方向反転</button>
         <button
           onClick={() => setShowOverride(true)}
           style={{
-            fontSize: FS.helper,
-            padding: '2px 7px',
-            borderRadius: '3px',
-            border: `1px solid ${colors.border}`,
-            backgroundColor: 'transparent',
-            color: colors.textSecondary,
+            fontSize: FS.label,
+            padding: '5px 12px',
+            borderRadius: '6px',
+            border: `1.5px solid ${colors.border}`,
+            backgroundColor: colors.surfaceElevated,
+            color: colors.text,
             cursor: 'pointer',
+            fontWeight: '500',
           }}
         >路線変更</button>
         {isManual && (
           <button
             onClick={handleReset}
             style={{
-              fontSize: FS.helper,
-              padding: '2px 7px',
-              borderRadius: '3px',
-              border: `1px solid ${colors.border}`,
-              backgroundColor: 'transparent',
+              fontSize: FS.label,
+              padding: '5px 12px',
+              borderRadius: '6px',
+              border: `1.5px solid ${colors.border}`,
+              backgroundColor: colors.surfaceElevated,
               color: colors.textSecondary,
               cursor: 'pointer',
             }}
