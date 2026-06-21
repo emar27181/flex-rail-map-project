@@ -329,11 +329,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 位置情報取得時に最寄駅を出発駅に自動設定（手動変更後は上書きしない）
+  // 位置情報取得時に最寄駅を出発駅に自動設定（初回取得時のみ・手動変更後は上書きしない）
   useEffect(() => {
     if (!userLocation || isManualDeparture) return;
+    if (autoSetDepartureRef.current) return;
     const nearest = findNearestStation(userLocation[0], userLocation[1]);
-    if (nearest) setDeparture(nearest);
+    if (nearest) {
+      setDeparture(nearest);
+      autoSetDepartureRef.current = true;
+    }
   }, [userLocation, isManualDeparture]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 日本語以外はデフォルトで駅コードを表示
