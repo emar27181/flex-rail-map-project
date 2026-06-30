@@ -66,6 +66,7 @@ import { jrKyotoLine } from './jr-kyoto-line';
 import { jrKobeLine } from './jr-kobe-line';
 import { tokaidoShinkansen } from './tokaido-shinkansen';
 import { yokosukaLine } from './yokosuka-line';
+import { jrShonanShinjukuLine } from './jr-shonan-shinjuku-line';
 import { odakyuTamaLine } from './odakyu-tama-line';
 import { keioSagamiharaLine } from './keio-sagamihara-line';
 import { jrItoLine, izukyuLine, hakoneTozan, izuHakoneSunzu } from './izu-hakone-lines';
@@ -247,6 +248,7 @@ export const routes = {
   jrKobeLine,
   tokaidoShinkansen,
   yokosukaLine,
+  jrShonanShinjukuLine,
   odakyuTamaLine,
   keioSagamiharaLine,
   jrItoLine,
@@ -829,6 +831,7 @@ export const routeColors = {
   jrKobeLine: '#0072BC', // JR Kobe Line blue
   tokaidoShinkansen: '#0072BC', // Tokaido Shinkansen blue
   yokosukaLine: '#0072BC', // Yokosuka Line blue
+  jrShonanShinjukuLine: '#F68B1E', // Shonan-Shinjuku Line orange
   odakyuTamaLine: '#0066CC', // Odakyu Tama Line blue
   keioSagamiharaLine: '#DD0077', // Keio Sagamihara Line magenta
   jrItoLine: '#F68B1E', // JR Ito Line orange
@@ -1409,6 +1412,7 @@ export const routeNames = {
   jrKobeLine: 'JR神戸線',
   tokaidoShinkansen: '東海道新幹線',
   yokosukaLine: '横須賀線',
+  jrShonanShinjukuLine: '湘南新宿ライン',
   odakyuTamaLine: '小田急多摩線',
   keioSagamiharaLine: '京王相模原線',
   jrItoLine: 'JR伊東線',
