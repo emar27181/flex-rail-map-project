@@ -47,7 +47,7 @@ import {
   type Departure,
 } from '../data/timetableData';
 import { FS } from '../constants/ui';
-import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, MIN_SPEED_MS, DEFAULT_SPEED_MS } from '../utils/trainDetector';
+import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS } from '../utils/trainDetector';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
 
 // デバッグ用のwindow拡張
@@ -2172,6 +2172,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
       setRouteRecommendations(finalUniqueRoutes);
       setSelectedRouteIndices(null);
+
+      // 推薦ルートの最初のセグメントをTrainStatusPanelに反映
+      const topRoute = finalUniqueRoutes[0];
+      if (topRoute) {
+        const firstSeg = topRoute.segments.find(s => !s.isWalkingTransfer && s.routeKey !== 'walking');
+        if (firstSeg) {
+          const segStations = routes[firstSeg.routeKey as RouteKey] as Station[] | undefined;
+          if (segStations) {
+            const fromIdx = segStations.findIndex(s => s.name === firstSeg.stations[0]?.name);
+            const toIdx   = segStations.findIndex(s => s.name === firstSeg.stations[firstSeg.stations.length - 1]?.name);
+            const dir: 0 | 1 = (fromIdx !== -1 && toIdx !== -1 && fromIdx < toIdx) ? 0 : 1;
+            const manual = makeManualRoute(firstSeg.routeKey as RouteKey, dir, departure.lat, departure.lng);
+            if (manual) setManualTrainRoute(manual);
+          }
+        }
+      }
 
       // デバッグ：推薦された経路の詳細をログ出力
       console.log(`\n=== Final Route Recommendations for ${departure.name} → ${arrival.name} ===`);
