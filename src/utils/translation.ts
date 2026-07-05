@@ -151,12 +151,19 @@ export const stationTranslations: { [key: string]: string } = {
   "ラピッドアクティー": "Rapid Acty",
   "ロマンスカー": "Romance Car",
   "各駅停車": "Local",
+  "各停": "Local",
+  "普通": "Local",
   "快速": "Rapid",
+  "通勤快速": "Commuter Rapid",
+  "快速アクティー": "Rapid Acty",
   "急行": "Express",
   "準急": "Semi-Express",
+  "通勤急行": "Commuter Express",
+  "快特": "Rapid Limited Express",
   "特急": "Limited Express",
   "特別快速": "Special Rapid",
   "多摩急行": "Tama Express",
+  "方面": "direction",
   "奥多摩": "Okutama",
   "古里": "Kori",
   "鳩ノ巣": "Hatonosu",
@@ -1593,7 +1600,7 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Arrival"
   },
   stationPlaceholder: {
-    japanese: "駅名を入力",
+    japanese: "駅名入力",
     english: "Enter station name"
   },
   swapStations: {
@@ -1921,8 +1928,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
 
   // Timetable tooltip
   baseTime: {
-    japanese: "基準時刻",
-    english: "Base Time"
+    japanese: "出発時刻",
+    english: "Departure Time"
   },
   onboard: {
     japanese: "乗",
@@ -2111,25 +2118,829 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   schematicMapHint: {
     japanese: "クリック: 出発駅設定 | Shift+クリック: 到着駅設定",
     english: "Click: Set Departure | Shift+Click: Set Arrival"
+  },
+
+  // Station stats tooltip
+  noDataForStation: {
+    japanese: "この駅のデータは未入力です",
+    english: "No data for this station"
+  },
+
+  // LegendRouteList
+  showStationCodes: {
+    japanese: "駅コードを表示",
+    english: "Show station codes"
+  },
+  stationHeatmap: {
+    japanese: "駅統計ヒートマップ",
+    english: "Station heatmap"
+  },
+  showOutsideSegmentRoutes: {
+    japanese: "区間外の路線を表示",
+    english: "Show outside-segment routes"
+  },
+  showMapTiles: {
+    japanese: "地図タイルを表示",
+    english: "Show map tiles"
+  },
+  showFullRouteStations: {
+    japanese: "中間駅以外も表示",
+    english: "Show full route stations"
+  },
+  showRouteLines: {
+    japanese: "路線の線を表示",
+    english: "Show route lines"
+  },
+  stationTooltipLabel: {
+    japanese: "駅ツールチップを表示",
+    english: "Station tooltip"
+  },
+  bubbleMap: {
+    japanese: "バブルマップ(実装中)",
+    english: "Bubble map (WIP)"
+  },
+  bubbleCircle: {
+    japanese: "● 円",
+    english: "● Circle"
+  },
+  bubbleSquare: {
+    japanese: "■ 四角",
+    english: "■ Square"
+  },
+  trainDemoLabel: {
+    japanese: "列車デモ",
+    english: "Train Demo"
+  },
+  sortLabel: {
+    japanese: "並順:",
+    english: "Sort:"
+  },
+  sortAlpha: {
+    japanese: "あいうえお",
+    english: "A-Z"
+  },
+  sortColor: {
+    japanese: "色",
+    english: "Color"
+  },
+  sortNearby: {
+    japanese: "近い順",
+    english: "Nearby"
+  },
+  sortDefault: {
+    japanese: "登録順",
+    english: "Default"
+  },
+  hideThisRoute: {
+    japanese: "この路線を非表示にする",
+    english: "Hide this route"
+  },
+  showThisRoute: {
+    japanese: "この路線を表示する",
+    english: "Show this route"
+  },
+  stationSettings: {
+    japanese: "駅設定",
+    english: "Station"
+  },
+  detailSettings: {
+    japanese: "設定",
+    english: "Settings"
+  },
+  minutesSuffix: {
+    japanese: "分",
+    english: "min"
+  },
+  geolocationNotSupported: {
+    japanese: "位置情報はこのブラウザではサポートされていません。",
+    english: "Geolocation is not supported by this browser."
+  },
+  aboutSiteTitle: {
+    japanese: "このサイトについて",
+    english: "About this site"
+  },
+  menuTitle: {
+    japanese: "メニュー",
+    english: "Menu"
+  },
+  openMenuLabel: {
+    japanese: "メニューを開く",
+    english: "Open menu"
+  },
+  appTitle: {
+    japanese: "フレックス路線図",
+    english: "Flex Railway Map"
+  },
+  aboutLink: {
+    japanese: "このサイトについて",
+    english: "About"
+  },
+  faqLink: {
+    japanese: "よくある質問",
+    english: "FAQ"
+  },
+  privacyLink: {
+    japanese: "プライバシーポリシー",
+    english: "Privacy Policy"
+  },
+  termsLink: {
+    japanese: "利用規約",
+    english: "Terms of Service"
+  },
+  contactLink: {
+    japanese: "お問い合わせ",
+    english: "Contact"
+  },
+  approxNote: {
+    japanese: "（概算値・参考用）",
+    english: " (approx.)"
+  },
+  cookieUsage: {
+    japanese: "Cookieの使用について",
+    english: "Cookie Usage"
+  },
+  allRoutesOn: {
+    japanese: "全路線: 表示",
+    english: "All routes: ON"
+  },
+  allRoutesOff: {
+    japanese: "全路線: 非表示",
+    english: "All routes: OFF"
+  },
+  travelTimeOverlay: {
+    japanese: "所要時間を駅に表示",
+    english: "Show travel time on stations"
+  },
+  calculating: {
+    japanese: "計算中...",
+    english: "Calculating..."
+  },
+  reachable: {
+    japanese: "駅に到達可能",
+    english: "stations reachable"
+  },
+  // ── ヒートマップ凡例・LegendRouteList グループ名 ──
+  heatmapShowOtherInfo: {
+    japanese: "表示内容の切替",
+    english: "Change display"
+  },
+  heatmapRangeFilter: {
+    japanese: "範囲内のみ表示",
+    english: "Show in-range only"
+  },
+  heatmapGradientLow: {
+    japanese: "低",
+    english: "Low"
+  },
+  heatmapGradientHigh: {
+    japanese: "高",
+    english: "High"
+  },
+  heatmapDisplayParam: {
+    japanese: "表示パラメータ",
+    english: "Parameter"
+  },
+  heatmapMethodology: {
+    japanese: "集計方法",
+    english: "Method"
+  },
+  heatmapPeriod: {
+    japanese: "基準時点",
+    english: "Reference date"
+  },
+  heatmapRadius: {
+    japanese: "範囲",
+    english: "Radius"
+  },
+  heatmapHigherIsBetter: {
+    japanese: "高いほど 赤",
+    english: "Higher = red"
+  },
+  heatmapLowerIsBetter: {
+    japanese: "低いほど 赤（値が高いほど課題あり）",
+    english: "Lower = red (higher = more issues)"
+  },
+  heatmapSource: {
+    japanese: "参照元",
+    english: "Source"
+  },
+  heatmapRetrievedAt: {
+    japanese: "参照日",
+    english: "Retrieved"
+  },
+  heatmapUpdatedAt: {
+    japanese: "データ更新",
+    english: "Data updated"
+  },
+  noDataLabel: {
+    japanese: "データなし",
+    english: "No data"
+  },
+  travelTimeLabelMode: {
+    japanese: "時間表示",
+    english: "Time display"
+  },
+  travelTimeLabelInterval: {
+    japanese: "間隔",
+    english: "Interval"
+  },
+  travelTimeLabelCumulative: {
+    japanese: "累積",
+    english: "Cumulative"
+  },
+  // ── 設定グループ名 ──
+  settingsGroupLabel: {
+    japanese: "駅ラベル",
+    english: "Station Labels"
+  },
+  settingsGroupViz: {
+    japanese: "データ可視化",
+    english: "Visualization"
+  },
+  settingsGroupFilter: {
+    japanese: "駅フィルター",
+    english: "Station Filter"
+  },
+  settingsGroupMap: {
+    japanese: "表示切替",
+    english: "Display Toggles"
+  },
+  settingsLabelSize: {
+    japanese: "ラベルサイズ",
+    english: "Label size"
+  },
+  settingsIconSize: {
+    japanese: "アイコンサイズ",
+    english: "Icon size"
+  },
+  // ── 設定保存・読込 ──
+  configSaveLoad: {
+    japanese: "設定の保存・読込",
+    english: "Save / Load Settings"
+  },
+  configExportDesc: {
+    japanese: "エクスポート（現在の表示設定）",
+    english: "Export (current display settings)"
+  },
+  configExportSave: {
+    japanese: "⬇ JSON保存",
+    english: "⬇ Save JSON"
+  },
+  configExportCopy: {
+    japanese: "📋 テキストコピー",
+    english: "📋 Copy Text"
+  },
+  configExportCopied: {
+    japanese: "✓ コピー済み",
+    english: "✓ Copied"
+  },
+  configImportDesc: {
+    japanese: "インポート（設定を読み込む）",
+    english: "Import (load settings)"
+  },
+  configImportFile: {
+    japanese: "📂 JSONファイルを開く",
+    english: "📂 Open JSON file"
+  },
+  configImportPaste: {
+    japanese: "JSONテキストをここに貼り付け...",
+    english: "Paste JSON text here..."
+  },
+  configImportApply: {
+    japanese: "✅ テキストから適用",
+    english: "✅ Apply from text"
+  },
+  configImportDone: {
+    japanese: "✓ 適用済み",
+    english: "✓ Applied"
+  },
+  configImportErrorJson: {
+    japanese: "JSONの形式が正しくありません",
+    english: "Invalid JSON format"
+  },
+  configImportErrorFile: {
+    japanese: "ファイルの読み込みに失敗しました",
+    english: "Failed to read file"
+  },
+  configImportErrorApply: {
+    japanese: "設定の適用に失敗しました",
+    english: "Failed to apply settings"
+  },
+  transferHighlight: {
+    japanese: "乗換駅強調表示",
+    english: "Highlight Transfer Stations"
+  },
+  routeLineWidth: {
+    japanese: "路線の太さ",
+    english: "Line Width"
+  },
+  bubbleMaxRadius: {
+    japanese: "最大半径",
+    english: "Max Radius"
+  },
+  schematicMapLabel: {
+    japanese: "路線図表示（実装中）",
+    english: "Diagram View (WIP)"
+  },
+  layerOrderHint: {
+    japanese: "↑ 最前面 / 背面 ↓",
+    english: "↑ Front / Back ↓"
+  },
+  dragToSort: {
+    japanese: "⠿ でドラッグ",
+    english: "⠿ drag"
+  },
+  catHousing: {
+    japanese: "住居",
+    english: "Housing"
+  },
+  catTransport: {
+    japanese: "交通",
+    english: "Transport"
+  },
+  catFood: {
+    japanese: "飲食",
+    english: "Food"
+  },
+  catConvenience: {
+    japanese: "利便性",
+    english: "Convenience"
+  },
+  catSafety: {
+    japanese: "治安",
+    english: "Safety"
+  },
+  catEnvironment: {
+    japanese: "環境",
+    english: "Environment"
+  },
+  catWork: {
+    japanese: "仕事",
+    english: "Work"
   }
 };
 
+export type Language = 'japanese' | 'english' | 'chinese' | 'korean';
+
+// 中国語（簡体字）UI翻訳
+export const uiChinese: Record<string, string> = {
+  stationSelection: "选择出发站和到达站",
+  departureStation: "出发站",
+  arrivalStation: "到达站",
+  stationPlaceholder: "输入站名",
+  swapStations: "⇄ 交换",
+  majorStationsHint: "主要车站: 东京、新宿、涩谷、池袋、横滨、新横滨",
+  noStationFound: "未找到匹配的车站",
+  recommendedRoutes: "推荐路线",
+  showAllRoutes: "显示全部路线",
+  displayOnMap: "在地图上显示",
+  displayingOnMap: "地图显示中",
+  noTransfer: "直达",
+  oneTransfer: "换乘1次",
+  transfers: "换乘{count}次",
+  minutes: "{minutes}分钟",
+  hours: "{hours}小时{minutes}分钟",
+  hoursOnly: "{hours}小时",
+  walkingTransfer: "步行换乘",
+  transfer: "换乘",
+  via: "经由",
+  routeToggle: "路线显示切换",
+  routeDisplayToggle: "路线显示切换",
+  showOnlyTransferStations: "仅显示换乘站",
+  showOnlyExpressStations: "仅显示特快站",
+  showTravelTimes: "显示所需时间",
+  showStationNames: "显示站名",
+  mapDisplayMode: "地图显示模式",
+  realisticView: "实际路线图",
+  schematicView: "路线图风格（准备中）",
+  timeFilter: "时间过滤",
+  accessibleStations: "仅显示从出发站{minutes}分钟内的站",
+  routeNumber: "路线 {number}",
+  selectedStatus: "（选择中）",
+  displayOnMapActive: "地图显示中",
+  displayOnMapButton: "在地图上显示",
+  routeDetails: "路线详情",
+  transferInfo: "换乘信息",
+  walkingTransferShort: "步行",
+  transferShort: "换乘",
+  direction: "前往{destination}",
+  directionArea: "前往{destination}方向",
+  viaStations: "经由",
+  otherStations: "其他{count}站",
+  noRoutesFound: "未找到路线",
+  routeCount: "{count}条路线",
+  setDepartureStation: "设为出发站",
+  setArrivalStation: "设为到达站",
+  routeRecommendationCount: "推荐路线数:",
+  routeSwitchNote: "※请从右上角图例切换路线和换乘站显示",
+  baseStation: "基准站:",
+  pleaseSetDeparture: "请设置出发站",
+  stationsCount: "（{count}站）",
+  currentStationSettings: "当前站设置",
+  departureStationLabel: "出发站:",
+  arrivalStationLabel: "到达站:",
+  minutesShort: "{time}分钟",
+  transfersCount: "换乘{count}次",
+  displayedRoutes: "显示路线切换",
+  allShow: "全部显示",
+  allHide: "全部隐藏",
+  legendDeparture: "S{station}",
+  legendArrival: "G{station}",
+  routeSelection: "推荐路线选择",
+  showAllRoutesLabel: "显示全部路线",
+  copyrightText: "© 2025 Flex Rail Map Project",
+  dataSourceText: "站点数据为原创或使用开放数据。",
+  disclaimerText: "本服务为非官方服务，与各铁路公司无关。",
+  accuracyText: "提供的信息仅供参考。请查看官方网站获取准确的运行信息。",
+  madeWithText: "Made with Claude Code",
+  departure: "出发",
+  arrival: "到达",
+  route: "路线",
+  selected: "已选择",
+  clickToToggleVisibility: "点击切换显示/隐藏",
+  recommendedRoute: "推荐路线",
+  showFurigana: "显示假名注音",
+  currentLocationFrom: "附近",
+  swapStationsTitle: "交换出发站和到达站",
+  departureTime: "出发时间",
+  currentTime: "当前时间",
+  baseTime: "出发时间",
+  onboard: "乘",
+  afterSuffix: "以后",
+  offRouteReference: "路线外参考",
+  noData: "无数据",
+  showAllTimetable: "▼ 显示完整时刻表",
+  onboardRouteNoData: "乘坐路线，\n无时刻数据",
+  noTimetableData: "无时刻数据",
+  approximateNote: "⚠ 概算值·参考用　点击左侧路线名切换",
+  towardSuffix: "方向",
+  loadingMap: "地图加载中...",
+  maxTime: "最大时间:",
+  timetableModeOff: "关闭时刻表模式",
+  timetableModeOn: "开启时刻表模式",
+  exitFullscreen: "缩小显示",
+  enterFullscreen: "全屏显示",
+  refreshLocationNow: "立即更新位置",
+  stopTracking: "关闭位置追踪",
+  showMyLocation: "显示我的位置",
+  fromWhere: "从哪里",
+  firstTrain: "始发",
+  lastStation: "终点",
+  displaySettings: "显示设置",
+  selectStationsPrompt: "请选择出发站和到达站搜索路线",
+  departsLabel: "发",
+  arrivesLabel: "到",
+  approxMinutes: "约{time}分钟",
+  close: "关闭",
+  timetableButton: "时刻表",
+  departsAfterLabel: "{station} {time}以后出发（{route}）",
+  noTimetableDataFound: "未找到时刻数据",
+  timetableUpdatedAt: "更新日: {date}",
+  timetableDisclaimerNote: "请查看官方时刻表确认准确时间",
+  towardDirection: "（前往{direction}方向）",
+  darkMode: "深色模式",
+  lightMode: "浅色模式",
+  switchToDarkMode: "切换至深色模式",
+  switchToLightMode: "切换至浅色模式",
+  mapErrorTitle: "地图加载出错",
+  mapErrorMessage: "请重新加载页面。",
+  errorDetails: "详情",
+  reloadButton: "重新加载",
+  schematicMapHint: "点击: 设置出发站 | Shift+点击: 设置到达站",
+  noDataForStation: "该站暂无数据",
+  showStationCodes: "显示站编码",
+  stationHeatmap: "车站统计热力图",
+  showOutsideSegmentRoutes: "显示区间外路线",
+  showMapTiles: "显示地图图块",
+  showFullRouteStations: "显示所有途经站",
+  showRouteLines: "显示路线",
+  stationTooltipLabel: "显示站点提示",
+  bubbleMap: "气泡地图",
+  bubbleCircle: "● 圆形",
+  bubbleSquare: "■ 方形",
+  trainDemoLabel: "列车演示",
+  sortLabel: "排序:",
+  sortAlpha: "A-Z",
+  sortColor: "颜色",
+  sortNearby: "近距离",
+  sortDefault: "默认",
+  hideThisRoute: "隐藏该路线",
+  showThisRoute: "显示该路线",
+  stationSettings: "站点设置",
+  detailSettings: "详细设置",
+  minutesSuffix: "分钟",
+  geolocationNotSupported: "此浏览器不支持定位功能。",
+  aboutSiteTitle: "关于本站",
+  menuTitle: "菜单",
+  openMenuLabel: "打开菜单",
+  appTitle: "弹性路线图",
+  aboutLink: "关于本站",
+  faqLink: "常见问题",
+  privacyLink: "隐私政策",
+  termsLink: "使用条款",
+  contactLink: "联系我们",
+  approxNote: "（概算值·参考用）",
+  cookieUsage: "Cookie 使用说明",
+  allRoutesOn: "全路线: 显示",
+  allRoutesOff: "全路线: 隐藏",
+  travelTimeOverlay: "在站点显示所需时间",
+  calculating: "计算中...",
+  reachable: "个站可到达",
+  // 新規追加キー
+  heatmapShowOtherInfo: "切换显示内容",
+  heatmapRangeFilter: "仅显示范围内",
+  heatmapGradientLow: "低",
+  heatmapGradientHigh: "高",
+  heatmapDisplayParam: "显示参数",
+  heatmapMethodology: "统计方式",
+  heatmapPeriod: "基准时点",
+  heatmapRadius: "范围",
+  heatmapHigherIsBetter: "越高越红",
+  heatmapLowerIsBetter: "越低越红（值越高问题越多）",
+  heatmapSource: "参考来源",
+  heatmapRetrievedAt: "参考日期",
+  heatmapUpdatedAt: "数据更新",
+  noDataLabel: "无数据",
+  travelTimeLabelMode: "时间显示",
+  travelTimeLabelInterval: "区间",
+  travelTimeLabelCumulative: "累计",
+  settingsGroupLabel: "站点标签",
+  settingsGroupViz: "数据可视化",
+  settingsGroupFilter: "站点筛选",
+  settingsGroupMap: "显示切换",
+  settingsLabelSize: "标签大小",
+  settingsIconSize: "图标大小",
+  configSaveLoad: "保存·读取设置",
+  configExportDesc: "导出（当前显示设置）",
+  configExportSave: "⬇ 保存JSON",
+  configExportCopy: "📋 复制文本",
+  configExportCopied: "✓ 已复制",
+  configImportDesc: "导入（读取设置）",
+  configImportFile: "📂 打开JSON文件",
+  configImportPaste: "在此粘贴JSON文本…",
+  configImportApply: "✅ 从文本应用",
+  configImportDone: "✓ 已应用",
+  configImportErrorJson: "JSON格式不正确",
+  configImportErrorFile: "文件读取失败",
+  configImportErrorApply: "设置应用失败",
+  transferHighlight: "换乘站高亮显示",
+  routeLineWidth: "路线宽度",
+  bubbleMaxRadius: "最大半径",
+  schematicMapLabel: "路线图显示（开发中）",
+  layerOrderHint: "↑ 最前面 / 背面 ↓",
+  dragToSort: "⠿ 拖动排序",
+  catHousing: "住居",
+  catTransport: "交通",
+  catFood: "饮食",
+  catConvenience: "便利性",
+  catSafety: "治安",
+  catEnvironment: "环境",
+  catWork: "工作",
+};
+
+// 韓国語UI翻訳
+export const uiKorean: Record<string, string> = {
+  stationSelection: "출발역·도착역 선택",
+  departureStation: "출발역",
+  arrivalStation: "도착역",
+  stationPlaceholder: "역명 입력",
+  swapStations: "⇄ 교환",
+  majorStationsHint: "주요 역: 도쿄, 신주쿠, 시부야, 이케부쿠로, 요코하마, 신요코하마",
+  noStationFound: "해당하는 역이 없습니다",
+  recommendedRoutes: "추천 경로",
+  showAllRoutes: "전체 경로 표시",
+  displayOnMap: "지도에 표시",
+  displayingOnMap: "지도 표시 중",
+  noTransfer: "직통",
+  oneTransfer: "환승 1회",
+  transfers: "환승 {count}회",
+  minutes: "{minutes}분",
+  hours: "{hours}시간 {minutes}분",
+  hoursOnly: "{hours}시간",
+  walkingTransfer: "도보 환승",
+  transfer: "환승",
+  via: "경유",
+  routeToggle: "노선 표시 전환",
+  routeDisplayToggle: "노선 표시 전환",
+  showOnlyTransferStations: "환승역만 표시",
+  showOnlyExpressStations: "급행역만 표시",
+  showTravelTimes: "소요 시간 표시",
+  showStationNames: "역명 표시",
+  mapDisplayMode: "지도 표시 모드",
+  realisticView: "실제 노선도",
+  schematicView: "노선도 스타일 (준비 중)",
+  timeFilter: "시간 필터",
+  accessibleStations: "출발역에서 {minutes}분 이내 역만 표시",
+  routeNumber: "경로 {number}",
+  selectedStatus: "(선택 중)",
+  displayOnMapActive: "지도 표시 중",
+  displayOnMapButton: "지도에 표시",
+  routeDetails: "노선 상세",
+  transferInfo: "환승 안내",
+  walkingTransferShort: "도보",
+  transferShort: "환승",
+  direction: "{destination}행",
+  directionArea: "{destination} 방면",
+  viaStations: "경유",
+  otherStations: "외 {count}역",
+  noRoutesFound: "경로를 찾을 수 없습니다",
+  routeCount: "{count}개 경로",
+  setDepartureStation: "출발역으로 설정",
+  setArrivalStation: "도착역으로 설정",
+  routeRecommendationCount: "추천 경로 수:",
+  routeSwitchNote: "※오른쪽 위 범례에서 노선 및 환승역 표시 전환",
+  baseStation: "기준역:",
+  pleaseSetDeparture: "출발역을 설정해 주세요",
+  stationsCount: "({count}역)",
+  currentStationSettings: "현재 역 설정",
+  departureStationLabel: "출발역:",
+  arrivalStationLabel: "도착역:",
+  minutesShort: "{time}분",
+  transfersCount: "환승 {count}회",
+  displayedRoutes: "표시 노선 전환",
+  allShow: "전체 표시",
+  allHide: "전체 숨기기",
+  legendDeparture: "S{station}",
+  legendArrival: "G{station}",
+  routeSelection: "추천 경로 선택",
+  showAllRoutesLabel: "전체 경로 표시",
+  copyrightText: "© 2025 Flex Rail Map Project",
+  dataSourceText: "역 데이터는 독자적으로 제작하거나 오픈 데이터를 이용합니다.",
+  disclaimerText: "본 서비스는 비공식이며 각 철도 회사와 관계없습니다.",
+  accuracyText: "제공하는 정보는 참고용입니다. 정확한 운행 정보는 공식 사이트를 확인하세요.",
+  madeWithText: "Made with Claude Code",
+  departure: "출발",
+  arrival: "도착",
+  route: "경로",
+  selected: "선택됨",
+  clickToToggleVisibility: "클릭으로 표시/숨기기 전환",
+  recommendedRoute: "추천 경로",
+  showFurigana: "후리가나 표시",
+  currentLocationFrom: "현재 위치에서",
+  swapStationsTitle: "출발역·도착역 교환",
+  departureTime: "출발 시간",
+  currentTime: "현재 시간",
+  baseTime: "출발 시간",
+  onboard: "탑",
+  afterSuffix: "이후",
+  offRouteReference: "경로 외 참고",
+  noData: "데이터 없음",
+  showAllTimetable: "▼ 전체 시간표 표시",
+  onboardRouteNoData: "탑승 노선,\n시간표 데이터 없음",
+  noTimetableData: "시간표 없음",
+  approximateNote: "⚠ 개산값·참고용　왼쪽 노선명 클릭으로 전환",
+  towardSuffix: "방면",
+  loadingMap: "지도 로딩 중...",
+  maxTime: "최대 시간:",
+  timetableModeOff: "시간표 모드 끄기",
+  timetableModeOn: "시간표 모드 켜기",
+  exitFullscreen: "화면 축소",
+  enterFullscreen: "전체 화면",
+  refreshLocationNow: "위치 즉시 업데이트",
+  stopTracking: "위치 추적 끄기",
+  showMyLocation: "내 위치 표시",
+  fromWhere: "어디서",
+  firstTrain: "첫차",
+  lastStation: "종점",
+  displaySettings: "표시 설정",
+  selectStationsPrompt: "출발역·도착역을 선택해 경로를 검색하세요",
+  departsLabel: "발",
+  arrivesLabel: "착",
+  approxMinutes: "약 {time}분",
+  close: "닫기",
+  timetableButton: "시간표",
+  departsAfterLabel: "{station} {time} 이후 출발（{route}）",
+  noTimetableDataFound: "시간표 데이터를 찾을 수 없습니다",
+  timetableUpdatedAt: "업데이트: {date}",
+  timetableDisclaimerNote: "정확한 시간은 공식 시간표를 확인하세요",
+  towardDirection: "（{direction} 방면）",
+  darkMode: "다크 모드",
+  lightMode: "라이트 모드",
+  switchToDarkMode: "다크 모드로 전환",
+  switchToLightMode: "라이트 모드로 전환",
+  mapErrorTitle: "지도 로딩 오류",
+  mapErrorMessage: "페이지를 다시 로드해 주세요.",
+  errorDetails: "상세",
+  reloadButton: "다시 로드",
+  schematicMapHint: "클릭: 출발역 설정 | Shift+클릭: 도착역 설정",
+  noDataForStation: "이 역의 데이터가 없습니다",
+  showStationCodes: "역 코드 표시",
+  stationHeatmap: "역 통계 히트맵",
+  showOutsideSegmentRoutes: "구간 외 노선 표시",
+  showMapTiles: "지도 타일 표시",
+  showFullRouteStations: "전체 경유역 표시",
+  showRouteLines: "노선 표시",
+  stationTooltipLabel: "역 툴팁 표시",
+  bubbleMap: "버블 맵",
+  bubbleCircle: "● 원형",
+  bubbleSquare: "■ 사각형",
+  trainDemoLabel: "열차 데모",
+  sortLabel: "정렬:",
+  sortAlpha: "가나다",
+  sortColor: "색상",
+  sortNearby: "가까운 순",
+  sortDefault: "기본",
+  hideThisRoute: "이 노선 숨기기",
+  showThisRoute: "이 노선 표시",
+  stationSettings: "역 설정",
+  detailSettings: "상세 설정",
+  minutesSuffix: "분",
+  geolocationNotSupported: "이 브라우저는 위치 정보를 지원하지 않습니다.",
+  aboutSiteTitle: "사이트 소개",
+  menuTitle: "메뉴",
+  openMenuLabel: "메뉴 열기",
+  appTitle: "플렉스 노선도",
+  aboutLink: "사이트 소개",
+  faqLink: "자주 묻는 질문",
+  privacyLink: "개인정보처리방침",
+  termsLink: "이용약관",
+  contactLink: "문의하기",
+  approxNote: "（개산값·참고용）",
+  cookieUsage: "쿠키 사용 안내",
+  allRoutesOn: "전체 노선: 표시",
+  allRoutesOff: "전체 노선: 숨기기",
+  travelTimeOverlay: "역에 소요 시간 표시",
+  calculating: "계산 중...",
+  reachable: "개 역 도달 가능",
+  // 新規追加キー
+  heatmapShowOtherInfo: "표시 내용 변경",
+  heatmapRangeFilter: "범위 내만 표시",
+  heatmapGradientLow: "낮음",
+  heatmapGradientHigh: "높음",
+  heatmapDisplayParam: "표시 파라미터",
+  heatmapMethodology: "집계 방법",
+  heatmapPeriod: "기준 시점",
+  heatmapRadius: "범위",
+  heatmapHigherIsBetter: "높을수록 빨간색",
+  heatmapLowerIsBetter: "낮을수록 빨간색（값이 클수록 문제 많음）",
+  heatmapSource: "참고 출처",
+  heatmapRetrievedAt: "참고 날짜",
+  heatmapUpdatedAt: "데이터 업데이트",
+  noDataLabel: "데이터 없음",
+  travelTimeLabelMode: "시간 표시",
+  travelTimeLabelInterval: "구간",
+  travelTimeLabelCumulative: "누적",
+  settingsGroupLabel: "역 레이블",
+  settingsGroupViz: "데이터 시각화",
+  settingsGroupFilter: "역 필터",
+  settingsGroupMap: "표시 전환",
+  settingsLabelSize: "레이블 크기",
+  settingsIconSize: "아이콘 크기",
+  configSaveLoad: "설정 저장·불러오기",
+  configExportDesc: "내보내기（현재 표시 설정）",
+  configExportSave: "⬇ JSON 저장",
+  configExportCopy: "📋 텍스트 복사",
+  configExportCopied: "✓ 복사됨",
+  configImportDesc: "가져오기（설정 불러오기）",
+  configImportFile: "📂 JSON 파일 열기",
+  configImportPaste: "여기에 JSON 텍스트 붙여넣기…",
+  configImportApply: "✅ 텍스트에서 적용",
+  configImportDone: "✓ 적용됨",
+  configImportErrorJson: "JSON 형식이 올바르지 않습니다",
+  configImportErrorFile: "파일 읽기 실패",
+  configImportErrorApply: "설정 적용 실패",
+  transferHighlight: "환승역 강조 표시",
+  routeLineWidth: "노선 두께",
+  bubbleMaxRadius: "최대 반경",
+  schematicMapLabel: "노선도 표시（개발 중）",
+  layerOrderHint: "↑ 최전면 / 배면 ↓",
+  dragToSort: "⠿ 드래그",
+  catHousing: "주거",
+  catTransport: "교통",
+  catFood: "음식",
+  catConvenience: "편의성",
+  catSafety: "치안",
+  catEnvironment: "환경",
+  catWork: "직업",
+};
+
 // 翻訳ヘルパー関数
-export const translateStation = (stationName: string, language: 'japanese' | 'english'): string => {
+import { stationTranslationsChinese, stationTranslationsKorean } from './stationTranslationsCJK';
+
+export const translateStation = (stationName: string, language: Language): string => {
   if (language === 'japanese') return stationName;
+  if (language === 'chinese') return stationTranslationsChinese[stationName] || stationName;
+  if (language === 'korean') return stationTranslationsKorean[stationName] || stationTranslations[stationName] || stationName;
   return stationTranslations[stationName] || stationName;
 };
 
-export const translateRoute = (routeName: string, language: 'japanese' | 'english'): string => {
+export const translateRoute = (routeName: string, language: Language): string => {
   if (language === 'japanese') return routeName;
+  if (language === 'chinese' || language === 'korean') return routeTranslations[routeName] || routeName;
   return routeTranslations[routeName] || routeName;
 };
 
-export const translateUI = (key: string, language: 'japanese' | 'english', params?: { [key: string]: string | number }): string => {
-  const translation = uiTranslations[key];
-  if (!translation) return key;
-
-  let text = translation[language];
+export const translateUI = (key: string, language: Language, params?: { [key: string]: string | number }): string => {
+  let text: string;
+  if (language === 'chinese') {
+    text = uiChinese[key] ?? uiTranslations[key]?.english ?? key;
+  } else if (language === 'korean') {
+    text = uiKorean[key] ?? uiTranslations[key]?.english ?? key;
+  } else {
+    const translation = uiTranslations[key];
+    if (!translation) return key;
+    text = translation[language];
+  }
 
   // パラメータ置換
   if (params) {
@@ -2139,4 +2950,80 @@ export const translateUI = (key: string, language: 'japanese' | 'english', param
   }
 
   return text;
+};
+
+/** 駅統計パラメータラベルの翻訳マップ */
+const statParamLabelMap: Record<string, { english: string; chinese: string; korean: string }> = {
+  '家賃(1K)':     { english: 'Rent (1K)',          chinese: '租金(1K)',       korean: '월세(1K)' },
+  '家賃(1LDK)':   { english: 'Rent (1LDK)',         chinese: '租金(1LDK)',     korean: '월세(1LDK)' },
+  '人口密度':     { english: 'Pop. density',         chinese: '人口密度',       korean: '인구밀도' },
+  '乗降客数':     { english: 'Daily passengers',     chinese: '日均客流量',     korean: '일일 이용객' },
+  '朝混雑度':     { english: 'Morning congestion',   chinese: '早高峰拥挤度',   korean: '아침 혼잡도' },
+  '居酒屋数':     { english: 'Izakaya count',        chinese: '居酒屋数量',     korean: '이자카야 수' },
+  '飲食店数':     { english: 'Restaurant count',     chinese: '餐饮店数量',     korean: '음식점 수' },
+  'カフェ数':     { english: 'Cafe count',           chinese: '咖啡馆数量',     korean: '카페 수' },
+  'コンビニ数':   { english: 'Conv. store count',    chinese: '便利店数量',     korean: '편의점 수' },
+  'ラーメン屋数': { english: 'Ramen shop count',     chinese: '拉面店数量',     korean: '라멘 가게 수' },
+  'スーパー数':   { english: 'Supermarket count',    chinese: '超市数量',       korean: '슈퍼마켓 수' },
+  '病院・医院数': { english: 'Hospital count',       chinese: '医院数量',       korean: '병원 수' },
+  '書店数':       { english: 'Bookstore count',      chinese: '书店数量',       korean: '서점 수' },
+  '犯罪件数':     { english: 'Crime count',          chinese: '犯罪件数',       korean: '범죄 건수' },
+  '治安スコア':   { english: 'Safety score',         chinese: '治安评分',       korean: '치안 점수' },
+  '公園面積':     { english: 'Park area',            chinese: '公园面积',       korean: '공원 면적' },
+  '静かさ':       { english: 'Quietness',            chinese: '安静度',         korean: '조용함' },
+  '緑地率':       { english: 'Green ratio',          chinese: '绿地率',         korean: '녹지율' },
+  'オフィス数':   { english: 'Office count',         chinese: '办公楼数量',     korean: '오피스 수' },
+  'コワーキング数': { english: 'Coworking count',    chinese: '共享办公数量',   korean: '코워킹 수' },
+};
+
+/** 駅統計パラメータのラベルを翻訳 */
+export const translateStatParamLabel = (label: string, language: Language): string => {
+  if (language === 'japanese') return label;
+  const t = statParamLabelMap[label];
+  if (!t) return label;
+  if (language === 'english') return t.english;
+  if (language === 'chinese') return t.chinese;
+  if (language === 'korean')  return t.korean;
+  return label;
+};
+
+/** 列車種別を翻訳 ("急行" → "Express" など) */
+export const translateTrainType = (type: string, language: Language): string => {
+  if (language === 'japanese') return type;
+  return translateStation(type, language);
+};
+
+/** "X番線" 形式の番線文字列を翻訳 */
+export const translatePlatform = (platform: string, language: Language): string => {
+  if (language === 'japanese') return platform;
+  const match = platform.match(/^(\d+)番線$/);
+  if (!match) return platform;
+  const n = match[1];
+  if (language === 'chinese') return `${n}号站台`;
+  if (language === 'korean') return `${n}번 승강장`;
+  return `Track ${n}`;
+};
+
+/**
+ * "品川・渋谷方面" や "小田原行き" のような行き先・方面文字列を翻訳。
+ * "方面" / "行き" を除いて "・" 区切りの各部分を translateStation に通す。
+ */
+export const translateDestination = (dest: string, language: Language): string => {
+  if (language === 'japanese') return dest;
+  const hasMoment = dest.endsWith('方面');
+  const hasIki = dest.endsWith('行き');
+  const core = hasMoment ? dest.slice(0, -2) : hasIki ? dest.slice(0, -2) : dest;
+  const parts = core.split('・').map(p => translateStation(p.trim(), language));
+  const joined = parts.join(' · ');
+  if (hasMoment) {
+    if (language === 'chinese') return `${joined}方向`;
+    if (language === 'korean') return `${joined} 방면`;
+    return `toward ${joined}`;
+  }
+  if (hasIki) {
+    if (language === 'chinese') return `开往${joined}`;
+    if (language === 'korean') return `${joined}행`;
+    return `for ${joined}`;
+  }
+  return joined;
 };

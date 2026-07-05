@@ -1,10 +1,14 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
-import { translateStation, translateUI } from '../utils/translation';
+import { translateStation, translateUI } from '../utils/translation'
+import type { Language } from '../utils/translation';
 import { stationReadings, normalizeToHiragana } from '../utils/stationReadings';
 import { FS } from '../constants/ui';
+import TrainStatusPanel from './TrainStatusPanel';
+import type { DetectedRoute } from '../utils/trainDetector';
 
 interface StationSelectorProps {
   onDepartureChange: (station: Station | null) => void;
@@ -13,11 +17,16 @@ interface StationSelectorProps {
   arrival: Station | null;
   isExpanded?: boolean;
   onToggleExpanded?: () => void;
-  language?: 'japanese' | 'english';
+  language?: Language;
   departureTime?: string;
   onDepartureTimeChange?: (time: string) => void;
   onSetNearestDeparture?: () => void;
   onSearchingChange?: (isSearching: boolean) => void;
+  detectedRoute?: DetectedRoute | null;
+  manualTrainRoute?: DetectedRoute | null;
+  onManualTrainRouteChange?: (route: DetectedRoute | null) => void;
+  userLocation?: [number, number] | null;
+  hasGps?: boolean;
 }
 
 const StationSelector: React.FC<StationSelectorProps> = ({
@@ -32,6 +41,11 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   onDepartureTimeChange,
   onSetNearestDeparture,
   onSearchingChange,
+  detectedRoute = null,
+  manualTrainRoute = null,
+  onManualTrainRouteChange,
+  userLocation = null,
+  hasGps = false,
 }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -41,20 +55,31 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const [showArrivalResults, setShowArrivalResults] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [departureDropdownPos, setDepartureDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [arrivalDropdownPos, setArrivalDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
 
   const departureRef = useRef<HTMLDivElement>(null);
   const arrivalRef = useRef<HTMLDivElement>(null);
+  const departurePortalRef = useRef<HTMLDivElement>(null);
+  const arrivalPortalRef = useRef<HTMLDivElement>(null);
   const departureClickedRef = useRef(false);
   const arrivalClickedRef = useRef(false);
   const focusedInputRef = useRef<HTMLInputElement | null>(null);
 
-  // 外側クリックで閉じる機能
+  // 外側クリックで閉じる機能（ポータルドロップダウンは除外）
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (departureRef.current && !departureRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        departureRef.current && !departureRef.current.contains(target) &&
+        !departurePortalRef.current?.contains(target)
+      ) {
         setShowDepartureResults(false);
       }
-      if (arrivalRef.current && !arrivalRef.current.contains(event.target as Node)) {
+      if (
+        arrivalRef.current && !arrivalRef.current.contains(target) &&
+        !arrivalPortalRef.current?.contains(target)
+      ) {
         setShowArrivalResults(false);
       }
     };
@@ -242,7 +267,22 @@ const StationSelector: React.FC<StationSelectorProps> = ({
       onTouchStart={stopTouchPropagation}
       onTouchMove={stopTouchPropagation}
       onTouchEnd={stopTouchPropagation}
-      style={{ marginBottom: '12px', padding: '10px', border: `1px solid ${colors.border}`, borderRadius: '8px', backgroundColor: colors.surface }}
+      style={{
+        marginBottom: '8px',
+        paddingTop: '8px',
+        paddingBottom: isExpanded ? '8px' : '0',
+        paddingLeft: '8px',
+        paddingRight: '8px',
+        height: isExpanded ? 'auto' : '36px',
+        boxSizing: 'border-box',
+        overflow: (showDepartureResults || showArrivalResults) ? 'visible' : 'hidden',
+        border: `1px solid ${colors.border}`,
+        borderRadius: '8px',
+        backgroundColor: isExpanded ? colors.glassOpen : colors.glassCollapsed,
+        boxShadow: `0 2px 8px ${colors.shadow}`,
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+      }}
     >
       <div 
         onClick={onToggleExpanded}
@@ -251,7 +291,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           justifyContent: 'space-between',
           alignItems: 'center',
           cursor: onToggleExpanded ? 'pointer' : 'default',
-          marginBottom: isExpanded ? '10px' : '0'
+          marginBottom: isExpanded ? '6px' : '0'
         }}
       >
         <h3 style={{ margin: '0', color: colors.text, fontSize: FS.sectionTitle, fontWeight: 'bold' }}>{translateUI('stationSelection', language)}</h3>
@@ -269,7 +309,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         <>
           <div style={{
             display: 'flex',
-            gap: '8px',
+            gap: '4px',
             alignItems: 'flex-start',
             flexDirection: 'row',
             flexWrap: 'wrap'
@@ -293,6 +333,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                   onFocus={(e) => {
                     focusedInputRef.current = e.currentTarget;
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setDepartureDropdownPos({ top: rect.bottom + 2, left: rect.left, width: rect.width });
                     setShowDepartureResults(true);
                     handleSearchFocus();
                   }}
@@ -300,10 +342,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setTimeout(() => {
                       if (!departureClickedRef.current) {
                         handleDepartureConfirm();
+                        setShowDepartureResults(false);
                       }
                       departureClickedRef.current = false;
-                      setShowDepartureResults(false);
-                    }, 150);
+                    }, 200);
                     handleSearchBlur();
                   }}
                   onKeyDown={(e) => {
@@ -315,10 +357,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   placeholder={departure ? translateStation(departure.name, language) : translateUI('stationPlaceholder', language)}
                   style={{
                     width: '100%',
-                    padding: '5px 24px 5px 7px',
+                    padding: '3px 20px 3px 6px',
                     border: `2px solid #4CAF50`,
                     borderRadius: '4px',
-                    fontSize: FS.base,
+                    fontSize: FS.label,
                     boxSizing: 'border-box',
                     backgroundColor: colors.surfaceElevated,
                     color: colors.text
@@ -335,12 +377,12 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       background: 'none',
                       border: 'none',
                       cursor: 'pointer',
-                      fontSize: '18px',
+                      fontSize: '14px',
                       color: colors.textSecondary,
-                      padding: '4px 8px',
+                      padding: '2px 4px',
                       lineHeight: '1',
-                      minWidth: '32px',
-                      minHeight: '32px',
+                      minWidth: '20px',
+                      minHeight: '20px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -350,7 +392,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   </button>
                 )}
               </div>
-              {onSetNearestDeparture && !isSearching && (
+              {onSetNearestDeparture && (
                 <button
                   onClick={onSetNearestDeparture}
                   style={{
@@ -365,23 +407,27 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  📍 {translateUI('currentLocationFrom', language)}
+                  {translateUI('currentLocationFrom', language)}
                 </button>
               )}
 
-              {showDepartureResults && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  right: 0,
+              {showDepartureResults && departureDropdownPos && createPortal(
+                <div
+                  ref={departurePortalRef}
+                  onMouseDown={(e) => { e.preventDefault(); departureClickedRef.current = true; }}
+                  onTouchStart={() => { departureClickedRef.current = true; }}
+                  style={{
+                  position: 'fixed',
+                  top: departureDropdownPos.top,
+                  left: departureDropdownPos.left,
+                  width: departureDropdownPos.width,
                   backgroundColor: colors.surfaceElevated,
                   border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
-                  boxShadow: `0 2px 4px ${colors.shadow}`,
+                  boxShadow: `0 4px 12px ${colors.shadow}`,
                   maxHeight: '200px',
                   overflowY: 'auto',
-                  zIndex: 1000
+                  zIndex: 99999
                 }}>
                   {filteredDepartureStations.map((station, index) => (
                     <div
@@ -406,7 +452,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       {departureSearch ? translateUI('noStationFound', language) : translateUI('majorStationsHint', language)}
                     </div>
                   )}
-                </div>
+                </div>,
+                document.body
               )}
             </div>
 
@@ -415,10 +462,11 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'flex-end'
+              justifyContent: 'flex-end',
+              paddingBottom: '2px',
             }}>
-              {/* ラベルと同じ高さのスペーサー */}
-              <div style={{ marginBottom: '3px', height: '18px' }} />
+              {/* ラベル (line-height≒18px) + margin-bottom 3px 分のオフセット */}
+              <div style={{ height: '21px' }} />
               <button
                 onClick={() => {
                   const prevDep = departure;
@@ -433,15 +481,16 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   background: 'none',
                   border: 'none',
                   borderRadius: '50%',
-                  width: '32px',
-                  height: '32px',
+                  width: '22px',
+                  height: '22px',
                   cursor: 'pointer',
-                  fontSize: FS.sectionTitle,
+                  fontSize: FS.label,
                   color: colors.textSecondary,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  flexShrink: 0
+                  flexShrink: 0,
+                  padding: 0,
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = colors.surface; }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
@@ -469,6 +518,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                   onFocus={(e) => {
                     focusedInputRef.current = e.currentTarget;
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setArrivalDropdownPos({ top: rect.bottom + 2, left: rect.left, width: rect.width });
                     setShowArrivalResults(true);
                     handleSearchFocus();
                   }}
@@ -476,10 +527,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setTimeout(() => {
                       if (!arrivalClickedRef.current) {
                         handleArrivalConfirm();
+                        setShowArrivalResults(false);
                       }
                       arrivalClickedRef.current = false;
-                      setShowArrivalResults(false);
-                    }, 150);
+                    }, 200);
                     handleSearchBlur();
                   }}
                   onKeyDown={(e) => {
@@ -491,10 +542,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   placeholder={arrival ? translateStation(arrival.name, language) : translateUI('stationPlaceholder', language)}
                   style={{
                     width: '100%',
-                    padding: '5px 24px 5px 7px',
+                    padding: '3px 20px 3px 6px',
                     border: `2px solid #f44336`,
                     borderRadius: '4px',
-                    fontSize: FS.base,
+                    fontSize: FS.label,
                     boxSizing: 'border-box',
                     backgroundColor: colors.surfaceElevated,
                     color: colors.text
@@ -511,12 +562,12 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       background: 'none',
                       border: 'none',
                       cursor: 'pointer',
-                      fontSize: '18px',
+                      fontSize: '14px',
                       color: colors.textSecondary,
-                      padding: '4px 8px',
+                      padding: '2px 4px',
                       lineHeight: '1',
-                      minWidth: '32px',
-                      minHeight: '32px',
+                      minWidth: '20px',
+                      minHeight: '20px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -527,19 +578,23 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 )}
               </div>
               
-              {showArrivalResults && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  right: 0,
+              {showArrivalResults && arrivalDropdownPos && createPortal(
+                <div
+                  ref={arrivalPortalRef}
+                  onMouseDown={(e) => { e.preventDefault(); arrivalClickedRef.current = true; }}
+                  onTouchStart={() => { arrivalClickedRef.current = true; }}
+                  style={{
+                  position: 'fixed',
+                  top: arrivalDropdownPos.top,
+                  left: arrivalDropdownPos.left,
+                  width: arrivalDropdownPos.width,
                   backgroundColor: colors.surfaceElevated,
                   border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
-                  boxShadow: `0 2px 4px ${colors.shadow}`,
+                  boxShadow: `0 4px 12px ${colors.shadow}`,
                   maxHeight: '200px',
                   overflowY: 'auto',
-                  zIndex: 1000
+                  zIndex: 99999
                 }}>
                   {filteredArrivalStations.map((station, index) => (
                     <div
@@ -564,20 +619,32 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       {arrivalSearch ? translateUI('noStationFound', language) : translateUI('majorStationsHint', language)}
                     </div>
                   )}
-                </div>
+                </div>,
+                document.body
               )}
             </div>
           </div>
 
-          {/* 出発時刻（駅名入力中は非表示） */}
-          {onDepartureTimeChange && !isSearching && (
+          {/* 乗車路線検出パネル */}
+          {hasGps && onManualTrainRouteChange && (
+            <TrainStatusPanel
+              detectedRoute={detectedRoute}
+              manualRoute={manualTrainRoute}
+              onManualRouteChange={onManualTrainRouteChange}
+              userLocation={userLocation}
+              hasGps={hasGps}
+            />
+          )}
+
+          {/* 出発時刻 */}
+          {onDepartureTimeChange && (
             <div style={{
-              marginTop: '10px',
+              marginTop: '6px',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '5px',
             }}>
-              <label style={{ fontSize: FS.base, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
+              <label style={{ fontSize: FS.label, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
                 {translateUI('departureTime', language)}
               </label>
               <input
@@ -587,8 +654,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 style={{
                   border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
-                  padding: '5px 8px',
-                  fontSize: FS.base,
+                  padding: '0 3px',
+                  height: '22px',
+                  boxSizing: 'border-box',
+                  fontSize: FS.label,
                   backgroundColor: colors.surfaceElevated,
                   color: colors.text,
                   cursor: 'pointer',
@@ -604,8 +673,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 style={{
                   border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
-                  padding: '5px 8px',
-                  fontSize: FS.label,
+                  padding: '0 5px',
+                  height: '22px',
+                  boxSizing: 'border-box',
+                  fontSize: FS.helper,
                   backgroundColor: colors.surface,
                   color: colors.textSecondary,
                   cursor: 'pointer',

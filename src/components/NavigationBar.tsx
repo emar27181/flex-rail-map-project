@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { Sun, Moon, Menu, X, Info } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import { translateUI } from '../utils/translation';
+import type { Language } from '../utils/translation';
+
+const LANGUAGES: Language[] = ['japanese', 'english', 'chinese', 'korean'];
+const LANG_LABELS: Record<Language, string> = { japanese: '日', english: 'En', chinese: '中', korean: '한' };
+const nextLanguage = (lang: Language): Language => LANGUAGES[(LANGUAGES.indexOf(lang) + 1) % LANGUAGES.length];
 
 interface NavigationBarProps {
-  language: 'japanese' | 'english';
-  onLanguageChange: (language: 'japanese' | 'english') => void;
+  language: Language;
+  onLanguageChange: (language: Language) => void;
   isFullscreen?: boolean;
 }
 
@@ -50,7 +56,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           fontWeight: 'bold',
           color: colors.text
         }}>
-          {language === 'japanese' ? 'フレックス路線図' : 'Flex Railway Map'}
+          {translateUI('appTitle', language)}
         </h1>
       </div>
 
@@ -85,15 +91,15 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             e.currentTarget.style.backgroundColor = 'transparent';
             e.currentTarget.style.transform = 'scale(1)';
           }}
-          title={language === 'japanese' ? 'このサイトについて' : 'About this site'}
-          aria-label={language === 'japanese' ? 'このサイトについて' : 'About this site'}
+          title={translateUI('aboutSiteTitle', language)}
+          aria-label={translateUI('aboutSiteTitle', language)}
         >
           <Info size={20} />
         </button>
 
         {/* 言語切り替えボタン */}
         <button
-          onClick={() => onLanguageChange(language === 'japanese' ? 'english' : 'japanese')}
+          onClick={() => onLanguageChange(nextLanguage(language))}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -116,8 +122,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             e.currentTarget.style.backgroundColor = 'transparent';
             e.currentTarget.style.transform = 'scale(1)';
           }}
-          title={language === 'japanese' ? 'Switch to English' : 'Switch to Japanese'}
-          aria-label={language === 'japanese' ? 'Switch to English' : 'Switch to Japanese'}
+          title="Switch language"
+          aria-label="Switch language"
         >
           <span style={{
             fontSize: '13px',
@@ -125,7 +131,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             color: colors.text,
             fontFamily: 'monospace'
           }}>
-            {language === 'japanese' ? 'En' : '日'}
+            {LANG_LABELS[nextLanguage(language)]}
           </span>
         </button>
 
@@ -154,14 +160,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             e.currentTarget.style.backgroundColor = 'transparent';
             e.currentTarget.style.transform = 'scale(1)';
           }}
-          title={language === 'japanese'
-            ? `${theme === 'light' ? 'ダーク' : 'ライト'}モードに切り替え`
-            : `Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`
-          }
-          aria-label={language === 'japanese'
-            ? `${theme === 'light' ? 'ダーク' : 'ライト'}モードに切り替え`
-            : `Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`
-          }
+          title={translateUI(theme === 'light' ? 'switchToDarkMode' : 'switchToLightMode', language)}
+          aria-label={translateUI(theme === 'light' ? 'switchToDarkMode' : 'switchToLightMode', language)}
         >
           {theme === 'light' ? (
             <Moon size={20} />
@@ -195,8 +195,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             e.currentTarget.style.backgroundColor = 'transparent';
             e.currentTarget.style.transform = 'scale(1)';
           }}
-          title={language === 'japanese' ? 'メニュー' : 'Menu'}
-          aria-label={language === 'japanese' ? 'メニューを開く' : 'Open menu'}
+          title={translateUI('menuTitle', language)}
+          aria-label={translateUI('openMenuLabel', language)}
         >
           {isMenuOpen ? (
             <X size={20} />
@@ -231,11 +231,12 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             onClick={() => {
-              window.location.href = `/about?lang=${language === 'japanese' ? 'ja' : 'en'}`;
+              const lp = { japanese: 'ja', english: 'en', chinese: 'zh', korean: 'ko' }[language];
+              window.location.href = `/about?lang=${lp}`;
               setIsMenuOpen(false);
             }}
           >
-            {language === 'japanese' ? 'このサイトについて' : 'About'}
+            {{ japanese: 'このサイトについて', english: 'About', chinese: '关于本站', korean: '사이트 소개' }[language]}
           </div>
           <div
             style={{
@@ -248,11 +249,12 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             onClick={() => {
-              window.location.href = `/faq?lang=${language === 'japanese' ? 'ja' : 'en'}`;
+              const lp = { japanese: 'ja', english: 'en', chinese: 'zh', korean: 'ko' }[language];
+              window.location.href = `/faq?lang=${lp}`;
               setIsMenuOpen(false);
             }}
           >
-            {language === 'japanese' ? 'よくある質問' : 'FAQ'}
+            {{ japanese: 'よくある質問', english: 'FAQ', chinese: '常见问题', korean: '자주 묻는 질문' }[language]}
           </div>
           <div
             style={{
@@ -265,11 +267,12 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             onClick={() => {
-              window.location.href = `/privacy?lang=${language === 'japanese' ? 'ja' : 'en'}`;
+              const lp = { japanese: 'ja', english: 'en', chinese: 'zh', korean: 'ko' }[language];
+              window.location.href = `/privacy?lang=${lp}`;
               setIsMenuOpen(false);
             }}
           >
-            {language === 'japanese' ? 'プライバシーポリシー' : 'Privacy Policy'}
+            {{ japanese: 'プライバシーポリシー', english: 'Privacy Policy', chinese: '隐私政策', korean: '개인정보처리방침' }[language]}
           </div>
           <div
             style={{
@@ -282,11 +285,12 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             onClick={() => {
-              window.location.href = `/terms?lang=${language === 'japanese' ? 'ja' : 'en'}`;
+              const lp = { japanese: 'ja', english: 'en', chinese: 'zh', korean: 'ko' }[language];
+              window.location.href = `/terms?lang=${lp}`;
               setIsMenuOpen(false);
             }}
           >
-            {language === 'japanese' ? '利用規約' : 'Terms of Service'}
+            {{ japanese: '利用規約', english: 'Terms of Service', chinese: '使用条款', korean: '이용약관' }[language]}
           </div>
           <div
             style={{
@@ -302,7 +306,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
               setIsMenuOpen(false);
             }}
           >
-            {language === 'japanese' ? 'Claude Code で作成' : 'Made with Claude Code'}
+            Made with Claude Code
           </div>
         </div>
       )}

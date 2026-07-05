@@ -97,6 +97,7 @@ export interface TrainPosition {
   lineKey: string;
   color: string;
   direction: number;
+  bearing: number;
   departureMin: number;
   pos: [number, number];
 }
@@ -162,6 +163,60 @@ function interpolate(stations: StationWithCoord[], elapsed: number, circular: bo
   // 線形路線の終端
   const last = stations[stations.length - 1];
   return [last.lat, last.lng];
+}
+
+function calcBearing(aLat: number, aLng: number, bLat: number, bLng: number): number {
+  return Math.atan2(bLng - aLng, bLat - aLat) * 180 / Math.PI;
+}
+
+function interpolateWithBearing(
+  stations: StationWithCoord[], elapsed: number, circular: boolean
+): { pos: [number, number]; bearing: number } | null {
+  const totalMin = stations[stations.length - 1].offset;
+  const e = circular ? ((elapsed % totalMin) + totalMin) % totalMin : elapsed;
+
+  for (let i = 0; i < stations.length - 1; i++) {
+    const a = stations[i], b = stations[i + 1];
+    if (e < a.offset || e >= b.offset) continue;
+    const segDur = b.offset - a.offset;
+    const dwell = Math.min(DWELL_MIN, segDur * 0.4);
+    const moveDur = segDur - dwell;
+    if (e < a.offset + moveDur) {
+      const r = moveDur > 0 ? (e - a.offset) / moveDur : 1;
+      return {
+        pos: [a.lat + r * (b.lat - a.lat), a.lng + r * (b.lng - a.lng)],
+        bearing: calcBearing(a.lat, a.lng, b.lat, b.lng),
+      };
+    } else {
+      const next = stations[i + 2];
+      return {
+        pos: [b.lat, b.lng],
+        bearing: next ? calcBearing(b.lat, b.lng, next.lat, next.lng) : calcBearing(a.lat, a.lng, b.lat, b.lng),
+      };
+    }
+  }
+
+  if (circular) {
+    const last = stations[stations.length - 1];
+    const first = stations[0];
+    const segDur = totalMin - last.offset;
+    const dwell = Math.min(DWELL_MIN, segDur * 0.4);
+    const moveDur = segDur - dwell;
+    if (e >= last.offset) {
+      if (moveDur > 0 && e < last.offset + moveDur) {
+        const r = (e - last.offset) / moveDur;
+        return {
+          pos: [last.lat + r * (first.lat - last.lat), last.lng + r * (first.lng - last.lng)],
+          bearing: calcBearing(last.lat, last.lng, first.lat, first.lng),
+        };
+      }
+      return { pos: [first.lat, first.lng], bearing: calcBearing(last.lat, last.lng, first.lat, first.lng) };
+    }
+  }
+
+  const last = stations[stations.length - 1];
+  const prev = stations[stations.length - 2];
+  return { pos: [last.lat, last.lng], bearing: prev ? calcBearing(prev.lat, prev.lng, last.lat, last.lng) : 0 };
 }
 
 function getActiveDepartures(patterns: PatternSimple[], windowStart: number, windowEnd: number): number[] {
@@ -2845,15 +2900,16 @@ export function getAllTrainPositions(currentMinutes: number, allowedKeys?: Set<s
       for (const d of departures) {
         const elapsed = currentMinutes - d;
         if (elapsed < 0) continue;
-        const pos = interpolate(dir.stations, elapsed, dir.isCircular);
-        if (!pos) continue;
+        const result2 = interpolateWithBearing(dir.stations, elapsed, dir.isCircular);
+        if (!result2) continue;
         result.push({
           id: `${line.key}_${di}_${Math.round(d * 100)}`,
           lineKey: line.key,
           color: line.color,
           direction: di,
           departureMin: d,
-          pos,
+          pos: result2.pos,
+          bearing: result2.bearing,
         });
       }
     }
@@ -2870,4 +2926,18 @@ export function formatDemoTime(minutes: number): string {
 
 export const DEMO_LINE_COLORS: Record<string, string> = Object.fromEntries(
   DEMO_LINES.map(l => [l.key, l.color])
+);
+
+/**
+ * 各路線・方向の終端駅名を返す。
+ * ツールチップの「〇〇方面」表示に使用。
+ * direction=0 → stations[0] が出発、最後の駅が終点
+ * direction=1 → 逆方向の終点
+ */
+export const DEMO_DIRECTION_TERMINALS: Record<string, [string, string]> = Object.fromEntries(
+  DEMO_LINES.map(l => {
+    const d0end = l.directions[0]?.stations.at(-1)?.name ?? '';
+    const d1end = l.directions[1]?.stations.at(-1)?.name ?? '';
+    return [l.key, [d0end, d1end] as [string, string]];
+  })
 );

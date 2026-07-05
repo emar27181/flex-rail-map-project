@@ -1,9 +1,10 @@
 import React from 'react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
-import { translateUI } from '../utils/translation';
+import { translateUI } from '../utils/translation'
+import type { Language } from '../utils/translation';
 
 interface FooterProps {
-  language: 'japanese' | 'english';
+  language: Language;
 }
 
 const Footer: React.FC<FooterProps> = ({ language }) => {
@@ -40,61 +41,26 @@ const Footer: React.FC<FooterProps> = ({ language }) => {
           fontSize: '12px',
           flexWrap: 'wrap'
         }}>
-          <a
-            href={`/about?lang=${language === 'japanese' ? 'ja' : 'en'}`}
-            style={{
-              color: colors.primary,
-              textDecoration: 'none'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
-            onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
-          >
-            {language === 'japanese' ? 'このサイトについて' : 'About'}
-          </a>
-          <a
-            href={`/faq?lang=${language === 'japanese' ? 'ja' : 'en'}`}
-            style={{
-              color: colors.primary,
-              textDecoration: 'none'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
-            onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
-          >
-            {language === 'japanese' ? 'よくある質問' : 'FAQ'}
-          </a>
-          <a
-            href={`/privacy?lang=${language === 'japanese' ? 'ja' : 'en'}`}
-            style={{
-              color: colors.primary,
-              textDecoration: 'none'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
-            onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
-          >
-            {language === 'japanese' ? 'プライバシーポリシー' : 'Privacy Policy'}
-          </a>
-          <a
-            href={`/terms?lang=${language === 'japanese' ? 'ja' : 'en'}`}
-            style={{
-              color: colors.primary,
-              textDecoration: 'none'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
-            onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
-          >
-            {language === 'japanese' ? '利用規約' : 'Terms of Service'}
-          </a>
-          <a
-            href={`/contact?lang=${language === 'japanese' ? 'ja' : 'en'}`}
-            style={{
-              color: colors.primary,
-              textDecoration: 'none'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
-            onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
-          >
-            {language === 'japanese' ? 'お問い合わせ' : 'Contact'}
-          </a>
+          {([
+            ['about', 'aboutLink'],
+            ['faq', 'faqLink'],
+            ['privacy', 'privacyLink'],
+            ['terms', 'termsLink'],
+            ['contact', 'contactLink'],
+          ] as [string, string][]).map(([page, key]) => {
+            const lp = { japanese: 'ja', english: 'en', chinese: 'zh', korean: 'ko' }[language];
+            return (
+              <a
+                key={page}
+                href={`/${page}?lang=${lp}`}
+                style={{ color: colors.primary, textDecoration: 'none' }}
+                onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+              >
+                {translateUI(key, language)}
+              </a>
+            );
+          })}
         </div>
 
         <p style={{ margin: '0 0 8px 0', fontSize: '12px' }}>

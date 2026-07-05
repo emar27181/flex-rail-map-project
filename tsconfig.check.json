@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/data/stationNumbers.ts",
+    "src/data/stationStats.ts",
+    "src/data/routes.ts"
+  ],
+  "exclude": ["dist"],
+  "compilerOptions": {
+    "noEmit": true
+  }
+}

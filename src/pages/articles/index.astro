@@ -1,0 +1,52 @@
+---
+import ArticleLayout from "./_ArticleLayout.astro";
+import { ARTICLE_PAGE_TRANSLATIONS } from "../../data/articleI18n";
+
+const articles = [
+  {
+    slug: "flex-rail-map-introduction",
+    publishedDate: "2025-06-06",
+  },
+  {
+    slug: "tokyo-train-map-beginner",
+    publishedDate: "2025-06-06",
+  },
+  {
+    slug: "tokyo-sightseeing-routes",
+    publishedDate: "2025-06-06",
+  },
+  {
+    slug: "commute-30min-cheap-rent",
+    publishedDate: "2025-06-06",
+  },
+  {
+    slug: "tokyo-safe-area-by-route",
+    publishedDate: "2025-06-06",
+  }
+].map((article) => ({
+  ...article,
+  title: ARTICLE_PAGE_TRANSLATIONS[article.slug].ja.title,
+  category: ARTICLE_PAGE_TRANSLATIONS[article.slug].ja.category,
+}));
+
+const meta = ARTICLE_PAGE_TRANSLATIONS.articles.ja;
+const title = meta.title;
+const description = meta.description;
+---
+
+<ArticleLayout title={title} description={description} slug="" category={meta.category} kicker={meta.kicker} tag={meta.tag} readTime={meta.readTime} canonicalPath="/articles" kind="index">
+  <section class="article-index" aria-label="記事一覧">
+    <ul class="article-list">
+    {articles.map(article => (
+      <li data-article-card={article.slug}>
+        <a href={`/articles/${article.slug}`}>
+          <span class="article-card-title" data-article-title>{article.title}</span>
+          <span class="meta">
+            {article.publishedDate.slice(0, 7).replace('-', '年')}月 ｜ <span data-article-meta>{article.category}</span>
+          </span>
+        </a>
+      </li>
+    ))}
+    </ul>
+  </section>
+</ArticleLayout>

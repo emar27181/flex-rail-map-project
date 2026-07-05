@@ -1,0 +1,62 @@
+---
+import ArticleLayout from "./_ArticleLayout.astro";
+import { ARTICLE_PAGE_KEYWORDS, ARTICLE_PAGE_TRANSLATIONS } from "../../data/articleI18n";
+
+const slug = "tokyo-train-map-beginner";
+const meta = ARTICLE_PAGE_TRANSLATIONS[slug].ja;
+const title = meta.title;
+const description = meta.description;
+const publishedDate = "2025-06-06";
+const category = meta.category;
+const keywords = ARTICLE_PAGE_KEYWORDS[slug];
+---
+
+<ArticleLayout title={title} description={description} keywords={keywords} slug={slug} category={category} publishedDate={publishedDate} kicker={meta.kicker} readTime={meta.readTime} tag={meta.tag}>
+
+
+  <Fragment slot="scripts">
+    <script is:inline>
+      (function(){
+        var LINES = [
+          { key:"yamanote",   name:"JR山手線",        color:"#7FBF3F" },
+          { key:"chuo",       name:"JR中央線",        color:"#E8542A" },
+          { key:"marunouchi", name:"メトロ丸ノ内線",  color:"#D9362C" },
+          { key:"ginza",      name:"メトロ銀座線",    color:"#F5A623" },
+          { key:"tozai",      name:"メトロ東西線",    color:"#16A7CE" },
+          { key:"odakyu",     name:"小田急線",        color:"#1F7FC4" }
+        ];
+        var chips = document.getElementById('chips');
+        var readout = document.getElementById('readout');
+        if (!chips || !readout) return;
+        var state = {};
+        LINES.forEach(function(l){ state[l.key] = true; });
+
+        function update(){
+          var on = 0;
+          LINES.forEach(function(l){
+            var g = document.getElementById('g-' + l.key);
+            if (!g) return;
+            if(state[l.key]){ g.classList.remove('off'); on++; }
+            else { g.classList.add('off'); }
+          });
+          readout.innerHTML = '表示中の路線：<b>' + on + '</b> / ' + LINES.length;
+        }
+
+        LINES.forEach(function(l){
+          var b = document.createElement('button');
+          b.className = 'chip';
+          b.type = 'button';
+          b.setAttribute('aria-pressed','true');
+          b.innerHTML = '<span class="sw" style="background:' + l.color + '"></span>' + l.name;
+          b.addEventListener('click', function(){
+            state[l.key] = !state[l.key];
+            b.setAttribute('aria-pressed', state[l.key] ? 'true' : 'false');
+            update();
+          });
+          chips.appendChild(b);
+        });
+        update();
+      })();
+    </script>
+  </Fragment>
+</ArticleLayout>

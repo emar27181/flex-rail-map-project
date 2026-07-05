@@ -1,11 +1,13 @@
 import React from 'react';
 import { getThemeColors } from '../../contexts/ThemeContext';
-import { translateUI } from '../../utils/translation';
+import { translateUI } from '../../utils/translation'
+import type { Language } from '../../utils/translation';
+import { checkboxInput } from './legendStyles';
 
 interface LegendDisplayOptionsProps {
   mapViewMode: 'realistic' | 'schematic';
   theme: 'light' | 'dark';
-  language: 'japanese' | 'english';
+  language: Language;
   trainTypeViewEnabled?: boolean;
   onMapViewModeChange: (mode: 'realistic' | 'schematic') => void;
   onTrainTypeViewChange?: (enabled: boolean) => void;
@@ -65,7 +67,8 @@ const LegendDisplayOptions: React.FC<LegendDisplayOptionsProps> = ({
             alignItems: 'center',
             fontSize: '11px',
             color: colors.text,
-            cursor: 'pointer'
+            cursor: 'pointer',
+            marginBottom: '4px'
           }}>
             <input
               type="radio"
@@ -96,10 +99,7 @@ const LegendDisplayOptions: React.FC<LegendDisplayOptionsProps> = ({
               type="checkbox"
               checked={trainTypeViewEnabled}
               onChange={(e) => onTrainTypeViewChange(e.target.checked)}
-              style={{
-                marginRight: '6px',
-                cursor: 'pointer'
-              }}
+              style={checkboxInput(colors)}
             />
             🚆 列車種別表示モード
           </label>

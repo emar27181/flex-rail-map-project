@@ -192,12 +192,20 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 				color: #b3b3b3 !important;
 			}
 			.leaflet-container {
-				height: 600px !important;
+				height: 600px;
+				width: 100%;
+			}
+			/* フルスクリーン時はLeaflet地図を全画面に */
+			body.fullscreen-map .leaflet-container {
+				height: 100% !important;
 				width: 100% !important;
 			}
-			/* Sticky広告(90px)の上にLeaflet下部コントロールを表示 */
+			/* Sticky広告(90px)の上にLeaflet下部コントロールを表示（非フルスクリーン時のみ） */
 			.leaflet-bottom {
 				bottom: 96px !important;
+			}
+			body.fullscreen-map .leaflet-bottom {
+				bottom: 60px !important;
 			}
 
 			/* COMPREHENSIVE Dark mode support for ALL Leaflet popups */
@@ -388,9 +396,48 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 				background: #2d2d2d !important;
 				color: #ffffff !important;
 			}
+			/* 凡例・パネルの細いスクロールバー */
+			.thin-scrollbar {
+				scrollbar-width: thin;
+				scrollbar-color: rgba(128,128,128,0.35) transparent;
+			}
+			.thin-scrollbar::-webkit-scrollbar {
+				width: 3px;
+			}
+			.thin-scrollbar::-webkit-scrollbar-track,
+			.thin-scrollbar::-webkit-scrollbar-track-piece,
+			.thin-scrollbar::-webkit-scrollbar-corner {
+				background: transparent !important;
+				box-shadow: none !important;
+				border: none !important;
+			}
+			.thin-scrollbar::-webkit-scrollbar-thumb {
+				background: rgba(128,128,128,0.35);
+				border-radius: 99px;
+			}
+			.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+				background: rgba(128,128,128,0.6);
+			}
+		</style>
+		<!-- 記事ページと共通フォント -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet" />
+		<style>
+			body, button, input, select { font-family: "Noto Sans JP", system-ui, sans-serif; }
+			input[type="checkbox"] { accent-color: #2196F3; }
 		</style>
 	</head>
 	<body>
+		<!-- JSロード中のローディング画面（ThemeWrapper がマウントしたら消える） -->
+		<div id="app-loading" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f6f7f8;z-index:9999;font-family:'Noto Sans JP',sans-serif;">
+			<div style="text-align:center;color:#555;">
+				<div style="font-size:32px;margin-bottom:16px;">🗺</div>
+				<div style="font-size:16px;font-weight:600;margin-bottom:8px;">フレックス路線図</div>
+				<div style="font-size:13px;color:#888;">地図を読み込み中...</div>
+			</div>
+		</div>
+
 		<!-- SEO用静的コンテンツ（検索エンジンがJS描画前にクロール可能） -->
 		<noscript>
 			<div style="padding: 20px; font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">

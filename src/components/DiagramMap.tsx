@@ -3,7 +3,8 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
-import { translateRoute } from '../utils/translation';
+import { translateRoute, translateUI } from '../utils/translation'
+import type { Language } from '../utils/translation';
 
 // ---- 表示対象路線 ----
 const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
@@ -61,11 +62,15 @@ interface DiagramMapProps {
   departure?: string;
   arrival?: string;
   theme?: 'light' | 'dark';
-  language?: 'japanese' | 'english';
+  language?: Language;
   showStationNames?: boolean;
   onToggleRoute?: (routeKey: RouteKey) => void;
   onHideRoute?: (routeKey: RouteKey) => void;
   showDimmedRoutes?: boolean;
+  /** 路線クリック時に親へ委譲（未指定時は内部トグル動作） */
+  onRouteClick?: (routeKey: RouteKey, x: number, y: number, isVisible: boolean) => void;
+  /** 駅クリック時に親へ委譲 */
+  onStationClick?: (stationName: string, x: number, y: number) => void;
 }
 
 const DiagramMap: React.FC<DiagramMapProps> = ({
@@ -79,13 +84,19 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
   onToggleRoute,
   onHideRoute,
   showDimmedRoutes: externalShowDimmed,
+  onRouteClick,
+  onStationClick,
 }) => {
   const visibleRoutes = externalVisibleRoutes ?? new Set(DIAGRAM_ROUTE_KEYS);
-  const [transform, setTransform] = useState({ x: 0, y: 0, scale: 0.08 });
+  const [transform, setTransform] = useState(() => {
+    const s = 0.08;
+    const w = typeof window !== 'undefined' ? window.innerWidth : 800;
+    const h = typeof window !== 'undefined' ? window.innerHeight : 600;
+    return { x: w / 2 - CANVAS_CX * s, y: h / 2 - CANVAS_CY * s, scale: s };
+  });
   const [containerSize, setContainerSize] = useState({ w: 800, h: 600 });
   const [internalShowDimmed, setInternalShowDimmed] = useState(true);
   const showDimmedRoutes = externalShowDimmed !== undefined ? externalShowDimmed : internalShowDimmed;
-  const [dimmedTooltip, setDimmedTooltip] = useState<{ routeKey: RouteKey; x: number; y: number; isVisible: boolean } | null>(null);
   const isPanning = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
   const mapAreaRef = useRef<HTMLDivElement>(null);
@@ -113,20 +124,24 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     return { stationPos, transferStations };
   }, [visibleRoutes]);
 
-  // ---- 非表示路線クリックハンドラ ----
+  // ---- 路線クリックハンドラ（親コールバック優先、なければ内部 onToggleRoute/onHideRoute を直接呼ぶ） ----
   const handleDimmedRouteClick = useCallback((e: React.MouseEvent<SVGPathElement>, routeKey: RouteKey) => {
     e.stopPropagation();
-    const rect = mapAreaRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    setDimmedTooltip({ routeKey, x: e.clientX - rect.left, y: e.clientY - rect.top, isVisible: false });
-  }, []);
+    if (onRouteClick) {
+      onRouteClick(routeKey, e.clientX, e.clientY, false);
+    } else {
+      onToggleRoute?.(routeKey);
+    }
+  }, [onRouteClick, onToggleRoute]);
 
   const handleVisibleRouteClick = useCallback((e: React.MouseEvent<SVGPathElement>, routeKey: RouteKey) => {
     e.stopPropagation();
-    const rect = mapAreaRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    setDimmedTooltip({ routeKey, x: e.clientX - rect.left, y: e.clientY - rect.top, isVisible: true });
-  }, []);
+    if (onRouteClick) {
+      onRouteClick(routeKey, e.clientX, e.clientY, true);
+    } else {
+      onHideRoute?.(routeKey);
+    }
+  }, [onRouteClick, onHideRoute]);
 
   // ---- 非表示路線（半透明・transform非依存） ----
   const dimmedPathElements = useMemo(() => {
@@ -167,8 +182,9 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
           onClick={(e) => handleDimmedRouteClick(e, routeKey)}
         />,
         <path key={`dimmed-${routeKey}`} d={d} fill="none" stroke={color}
-          strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+          strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"
           opacity={0.22}
+          vectorEffect="non-scaling-stroke"
           style={{ pointerEvents: 'none' }}
         />,
       ];
@@ -214,6 +230,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
 
       return [<path key={routeKey} d={d} fill="none" stroke={color} strokeWidth={sw}
         strokeLinecap="round" strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
         style={{ cursor: 'pointer' }}
         onClick={(e) => handleVisibleRouteClick(e, routeKey)}
       />];
@@ -269,7 +286,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       return [lx, ly];
     }
 
-    const stations: Array<{ name: string; sx: number; sy: number; isTransfer: boolean }> = [];
+    const stations: Array<{ name: string; sx: number; sy: number; isTransfer: boolean; routeKey: RouteKey }> = [];
     const seen = new Set<string>();
 
     DIAGRAM_ROUTE_KEYS.forEach(routeKey => {
@@ -281,7 +298,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         seen.add(st.name);
         const pos = stationPos.get(st.name);
         if (!pos) return;
-        stations.push({ name: st.name, sx: pos[0], sy: pos[1], isTransfer: transferStations.has(st.name) });
+        stations.push({ name: st.name, sx: pos[0], sy: pos[1], isTransfer: transferStations.has(st.name), routeKey });
       });
     });
     stations.sort((a, b) => {
@@ -317,18 +334,44 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     return { stations, placements };
   }, [schematicData, visibleRoutes, highlightedRouteKeys]);
 
+  // ---- 駅ヒットエリア（スクリーン空間・常時一定サイズ・onStationClick がある場合のみ） ----
+  // transform 変化のたびに再計算するがビューポート外を除外して軽量化
+  const stationHitElements = useMemo(() => {
+    if (!onStationClick) return null;
+    const { stations } = stationLayout;
+    const { x: tx, y: ty, scale: s } = transform;
+    const HIT_R = 16; // 画面上の半径(px)
+    return stations
+      .map(({ name, sx, sy }) => {
+        const screenX = sx * s + tx;
+        const screenY = sy * s + ty;
+        if (screenX < -HIT_R || screenX > containerSize.w + HIT_R) return null;
+        if (screenY < -HIT_R || screenY > containerSize.h + HIT_R) return null;
+        return (
+          <circle key={`hit-${name}`} cx={screenX} cy={screenY} r={HIT_R}
+            fill="transparent"
+            style={{ cursor: 'pointer', pointerEvents: 'all' }}
+            onClick={(e) => { e.stopPropagation(); onStationClick(name, e.clientX, e.clientY); }}
+          />
+        );
+      })
+      .filter(Boolean);
+  }, [stationLayout, transform, containerSize, onStationClick]);
+
   // ---- 駅ドット（スケール非依存・ズーム中も安定） ----
   const stationDotElements = useMemo(() => {
     const colors = getThemeColors(theme);
     const { stations } = stationLayout;
 
-    return stations.map(({ name, sx, sy, isTransfer }) => {
+    return stations.map(({ name, sx, sy, isTransfer, routeKey }) => {
       const r = isTransfer ? REF_R_TRANSFER : REF_R_REGULAR;
+      const routeColor = adjustRouteColorForTheme(routeColors[routeKey] ?? colors.textMuted, theme);
       return (
         <circle key={name} cx={sx} cy={sy} r={r}
-          fill={isTransfer ? colors.surfaceElevated : colors.textMuted}
+          fill={isTransfer ? colors.surfaceElevated : routeColor}
           stroke={isTransfer ? colors.textSecondary : 'none'}
           strokeWidth={isTransfer ? 0.8 : 0}
+          style={{ pointerEvents: 'none' }}
         />
       );
     });
@@ -383,19 +426,21 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     return () => ro.disconnect();
   }, []);
 
-  // ---- 初期表示: 新宿を中央に ----
+  // ---- 初期表示: 新宿を中央に（実コンテナサイズが確定してから設定） ----
+  // ユーザーが手動でパンしたかどうかを記録
+  const userPannedRef = useRef(false);
   useEffect(() => {
-    const area = mapAreaRef.current;
-    if (!area) return;
-    const rect = area.getBoundingClientRect();
-    if (rect.width === 0) return;
+    // ユーザーが既に操作していたら自動リセットしない
+    if (userPannedRef.current) return;
+    // 実サイズが確定していない(デフォルト800x600のまま)は待つ
+    if (containerSize.w === 800 && containerSize.h === 600) return;
     const initialScale = 0.08;
     setTransform({
-      x: rect.width / 2 - CANVAS_CX * initialScale,
-      y: rect.height / 2 - CANVAS_CY * initialScale,
+      x: containerSize.w / 2 - CANVAS_CX * initialScale,
+      y: containerSize.h / 2 - CANVAS_CY * initialScale,
       scale: initialScale,
     });
-  }, []);
+  }, [containerSize]);
 
   // ---- パン操作 ----
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -406,6 +451,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isPanning.current) return;
+    userPannedRef.current = true;
     const dx = e.clientX - lastPos.current.x;
     const dy = e.clientY - lastPos.current.y;
     setTransform(t => ({ ...t, x: t.x + dx, y: t.y + dy }));
@@ -445,6 +491,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
     const onTouchMove = (e: TouchEvent) => {
       e.preventDefault();
       if (!lastTouches) return;
+      userPannedRef.current = true;
       const rect = area.getBoundingClientRect();
       if (e.touches.length === 1 && lastTouches.length === 1) {
         const dx = e.touches[0].clientX - lastTouches[0].clientX;
@@ -549,6 +596,9 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
           {/* ラベル（スクリーン空間・常時12px） */}
           {labelElements}
 
+          {/* 駅ヒットエリア（スクリーン空間・透明円・クリック検出用） */}
+          {stationHitElements}
+
           {/* 出発駅マーカー（スクリーン空間） */}
           {depScreenX !== null && depScreenY !== null && (
             <g style={{ pointerEvents: 'none' }}>
@@ -589,75 +639,9 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
             opacity: showDimmedRoutes ? 1 : 0.6,
           }}
         >
-          {language === 'english'
-            ? (showDimmedRoutes ? 'All routes: ON' : 'All routes: OFF')
-            : (showDimmedRoutes ? '全路線: 表示' : '全路線: 非表示')}
+          {translateUI(showDimmedRoutes ? 'allRoutesOn' : 'allRoutesOff', language)}
         </button>
 
-        {/* 非表示路線ツールチップ */}
-        {dimmedTooltip && (() => {
-          const TW = 180;
-          const TH = 78;
-          const rawX = dimmedTooltip.x + 12;
-          const rawY = dimmedTooltip.y + 12;
-          const tx = rawX + TW > containerSize.w - 8 ? dimmedTooltip.x - TW - 4 : rawX;
-          const ty = rawY + TH > containerSize.h - 8 ? dimmedTooltip.y - TH - 4 : rawY;
-          const displayName = translateRoute(
-            (routeNames as Record<string, string>)[dimmedTooltip.routeKey] ?? dimmedTooltip.routeKey,
-            language
-          );
-          return (
-            <div
-              onClick={e => e.stopPropagation()}
-              style={{
-                position: 'absolute', left: tx, top: ty, zIndex: 50,
-                width: TW, backgroundColor: colors.surfaceElevated,
-                border: `1px solid ${colors.border}`, borderRadius: '8px',
-                boxShadow: `0 4px 16px ${colors.shadow}`,
-                overflow: 'hidden',
-              }}
-            >
-              <div style={{
-                padding: '7px 10px 6px',
-                borderBottom: `1px solid ${colors.borderLight}`,
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              }}>
-                <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text }}>
-                  {displayName}
-                </span>
-                <span
-                  onClick={() => setDimmedTooltip(null)}
-                  style={{ fontSize: '12px', color: colors.textSecondary, cursor: 'pointer', padding: '0 2px' }}
-                >✕</span>
-              </div>
-              <div style={{ padding: '8px 10px' }}>
-                {dimmedTooltip.isVisible ? (
-                  <button
-                    onClick={() => { onHideRoute?.(dimmedTooltip.routeKey); setDimmedTooltip(null); }}
-                    style={{
-                      backgroundColor: '#F44336', color: 'white', border: 'none',
-                      padding: '3px 8px', borderRadius: '3px', cursor: 'pointer',
-                      fontSize: '11px', width: '100%',
-                    }}
-                  >
-                    {language === 'english' ? 'Hide this route' : 'この路線を非表示にする'}
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => { onToggleRoute?.(dimmedTooltip.routeKey); setDimmedTooltip(null); }}
-                    style={{
-                      backgroundColor: '#4CAF50', color: 'white', border: 'none',
-                      padding: '3px 8px', borderRadius: '3px', cursor: 'pointer',
-                      fontSize: '11px', width: '100%',
-                    }}
-                  >
-                    {language === 'english' ? 'Show this route' : 'この路線を表示する'}
-                  </button>
-                )}
-              </div>
-            </div>
-          );
-        })()}
       </div>
     </div>
   );

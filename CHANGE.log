@@ -1,5 +1,284 @@
 # CHANGE LOG
 
+## [2026-06-19] セッション（JSローディング・TrainStatusPanel改善・凡例ラベル改善）
+
+### feat: JSロード完了まで表示するローディング画面を追加
+- `src/pages/index.astro`: `#app-loading` ローディングオーバーレイを追加（🗺 アイコン + 「地図を読み込み中...」）
+- `src/components/ThemeWrapper.tsx`: コンポーネントマウント時に `#app-loading` を非表示化
+
+### fix: 出発駅の自動設定を初回GPS取得時のみに限定（`src/components/RailwayMap.tsx`）
+- GPS位置更新のたびに出発駅が上書きされていた問題を修正
+- 既存の `autoSetDepartureRef` を活用し、最初の取得時だけ最寄駅をセット
+
+### improve: 「約X分」を現在地から毎回動的に計算（`src/components/TrainStatusPanel.tsx`）
+- `makeManualRoute` 呼び出し時の静的な距離計算から `useMemo` による動的計算に変更
+- `userLocation` が更新されるたびに次駅までの距離を再計算
+- `DEFAULT_SPEED_MS` をエクスポートして `TrainStatusPanel` から参照
+
+### improve: 次の駅表示の ▶ アイコンを削除（`src/components/TrainStatusPanel.tsx`）
+- `▶ {effective.nextStation}` → `{effective.nextStation}` に変更
+
+### improve: 路線凡例の仕切り線ラベルを日本語化（`src/components/legend/LegendRouteList.tsx`）
+- "その他の路線"（`otherRoutes` キー）を廃止
+- 仕切り線の上部に「↑ この駅を通る路線」と表示し、上グループの意味を明確化
+
+## [2026-06-16] セッション（現在地自動設定・ツールチップ統合・スマホUX改善・TODO整理）
+
+### feat: 出発駅を現在地の最寄り駅から自動設定（`src/components/RailwayMap.tsx`）
+- departure/arrival のデフォルトを null に変更（横浜→新宿の固定デフォルト廃止）
+- `isManualDeparture` state を追加し、手動設定後は自動上書きを防止
+- `handleManualSetDeparture` を追加し、ツールチップ・スキーマティックなど全設定箇所で使用
+
+### feat: 現在地自動設定時は最寄り駅周辺5路線を表示（`src/components/RailwayMap.tsx`）
+- 自動設定時のみ近隣駅を距離順に探索して計5路線まで表示を拡張
+- 手動設定時はその駅を通る路線のみ表示
+- availableRoutes を常に全路線に設定し、凡例で任意路線を手動ON/OFF可能に
+
+### feat: ヒートマップ有効時も時刻表ツールチップを常時表示（`src/components/RailwayMap.tsx`）
+- renderStationTimetableTooltip の early return を緩和（heatmapEnabled 時も表示）
+- ヒートマップデータパネルをツールチップ内に常時表示（heatmapEnabled 時は上部に優先表示）
+- 通常モード時もツールチップ下部にヒートマップデータの概要をコンパクト表示
+- 別 renderHeatmapTooltip を呼んでいた分岐を廃止し renderStationTimetableTooltip に統一
+
+### feat: 現在地ピンアイコンを非表示（`src/components/RailwayMap.tsx`）
+- userLocation Marker の JSX を削除（位置情報取得・出発駅自動設定は継続動作）
+
+### feat: スマホでの駅タッチ領域を44px以上に拡大（`src/components/RailwayMap.tsx`）
+- createStationIcon / createTrainViewIcon で isMobile 時に透明ラッパーを min 44×44px に設定
+- 視覚的なドットサイズは変えずにタッチターゲットのみ拡大
+
+### docs: TODO.md を整理・新規タスクを追加
+- 2026-06-16 セッション完了項目を DONE に移動
+- ヒートマップ Phase 1・2 を DONE に移動（全1541駅実データ・GUI調整含め完了）
+- ユーザー提供の新規TODOを追加（デザイン統一・スマホUX・所要時間・時刻表可視化など）
+- 対応済み・重複項目を除外（heatmapCustomRange min/max・列車デモ・種別色分け）
+
+## [2026-06-11] セッション（ヒートマップ実データ/推定データ切替・犯罪指数収集・Overpassデータ更新）
+
+### feat: ヒートマップ「推定データを含める」切替機能を追加（`src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`, `src/data/stationStats.ts`）
+- `showEstimatedData` state（デフォルト false）をRailwayMapに追加
+- `getStationHeatColor` に `showEstimatedData` 引数を追加。false時は推定パラメータを灰色表示
+- `handleShowEstimatedDataChange` で「推定→無効にした際に現パラメータが推定なら最初の実パラメータに自動切替」
+- LegendRouteListのデータ可視化セクションにトグルチェックボックス追加
+- ヒートマップパラメータ選択リスト・ツールチップ・統計パネルもフィルタリング対応
+
+### feat: `dataQuality` フィールドを `StatParamMeta` 型に追加（`src/data/stationStats.ts`）
+- 全19パラメータに `dataQuality: 'real' | 'estimated'` を設定
+- 実データ（Overpass API×6項目、警視庁犯罪件数×1項目）と推定データを明確に区別
+
+### feat: 犯罪件数データ（crimeIndex）を収集・統合（`src/data/station-stats-data.json`）
+- 警視庁 R5年「区市町村の町丁別認知件数」+ Nominatim逆ジオコーディングで東京都内438駅に実データ付与
+- 都外駅はデータなし（灰色表示）
+
+### feat: Overpass APIで残り1211駅のヒートマップ施設データを収集（`src/data/station-stats-data.json`）
+- 全1541駅の6項目（コンビニ・飲食店・カフェ・スーパー・病院・公園面積）が実データ化
+
+### improve: 推定データ（家賃・乗降客数等13項目）を station-stats-data.json に復元
+- 以前の git 履歴（fa4e301^）から推定データを抽出し、実データと並存させる形で再統合
+- CLAUDE.md に「実データ以外使用禁止」ルールを明記
+
+### improve: デフォルトヒートマップパラメータを `avgRent1K`（推定）→ `restaurantCount`（実データ）に変更
+
+### improve: 路線リストのデフォルトソートを距離順（近い順）に変更（`src/components/legend/LegendRouteList.tsx`）
+
+### improve: sitemap.xml の lastmod を 2026-06-10 に更新（`public/sitemap.xml`）
+
+## [2026-06-08] セッション（設定パネル再構成・多言語対応・バグ修正・デフォルト値調整）
+
+### fix: ヒートマップパラメータ変更がマップに反映されないバグを修正（`src/components/RailwayMap.tsx`）
+- `handleHeatmapParamChange` を追加し `heatmapParam`・`heatmapMultiParams`・`heatmapCustomRange` を同時更新
+
+### fix: 路線描画順序を設定パネルの並び順（上=前面）に合わせる（`src/components/RailwayMap.tsx`）
+- `visibleRoutesData` のソート順を昇順→降順に修正
+
+### fix: 累積所要時間が乗り換え後にリセットされるバグを修正（`src/components/RailwayMap.tsx`）
+- `getTimeAt` が `depIdx < 0` で即 -1 を返していた問題を修正
+- `globalCumulativeTimeMap.size > 0` なら `depIdx` に関係なくマップを参照するよう変更
+- 3箇所の `depIdx >= 0` ガードを `depIdx >= 0 || globalCumulativeTimeMap.size > 0` に変更
+
+### improve: ヒートマップツールチップ数値のコントラスト改善（`src/components/RailwayMap.tsx`）
+- 値 span に `text-shadow` を追加
+
+### improve: 時刻表行き先括弧を言語ごとに切替（`src/components/RailwayMap.tsx`）
+- 日本語は全角（）、他言語は半角 () を使用
+
+### improve: スマホ設定から「現在の駅を設定」セクションを非表示（`src/components/RailwayMap.tsx`）
+
+### improve: デフォルト値の調整（`src/components/RailwayMap.tsx`）
+- `showStationTierBadges`（乗換駅強調表示）: `true` → `false`
+- `showFullRouteStations`（中間駅以外も表示）: `true` → `false`
+- `travelTimeLabelMode`: 出発駅セット時に自動 cumulative 切替する useEffect を削除し、常に interval がデフォルトに
+
+### feat: 翻訳キー完全性テストを追加、多言語対応を拡充（`src/utils/translation.ts`, `tests/unit/utils/translation.test.ts`）
+- `uiChinese`/`uiKorean` を export 化し重複キーを修正
+- 設定パネル用14キーを追加
+- `translateDestination` に「〇〇行き」対応を追加（英語 "for X"・中国語 "开往X"・韓国語 "X행"）
+- `transferHighlight` を「乗換強調表示」→「乗換駅強調表示」にリネーム（全4言語）
+- `settingsGroupMap` を「地図表示」→「表示切替」にリネーム（全4言語）
+
+### improve: SEO強化（`public/sitemap.xml`, `src/pages/articles/_ArticleLayout.astro`）
+- サイトマップに記事一覧と5記事ページを追加
+- JSON-LD に `keywords`・`url`・`mainEntityOfPage` フィールドを追加
+
+### improve: 設定パネルのレイアウト再構成（`src/components/legend/LegendRouteList.tsx`）
+- 路線リストを「表示路線切り替え」セクション最上部に移動
+- 駅ラベル・データ可視化・駅フィルター・表示切替を「表示設定」セクションに集約
+- 路線リストを上位10件表示・「他N路線を表示」ボタンで展開
+- ソートボタン（名前順/色順/近い順/デフォルト）が実際にリスト順序を変更するよう修正
+- ヒートマップ有効化時に「データ可視化」グループを自動展開
+
+### fix: 路線並べ替えのドラッグを ⠿ ハンドル専用に変更（`src/components/legend/LegendRouteList.tsx`）
+- `draggable` を外側 div から `⠿` span 自体に移動（checkbox が drag を奪う問題を修正）
+- `onDragLeave` に `relatedTarget` チェックを追加してハイライトのちらつきを防止
+
+---
+
+## [2026-06-06] セッション（ヒートマップ改善・バブルマップ地理半径・UI改善）
+
+### feat: バブルマップの円サイズを地理的実距離に連動（`src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`）
+- 半径算出を「ピクセル固定（BASE_MIN〜BASE_MAX）」→「実距離ベース（値の比率 × 最大半径[m]）」に変更
+- ズームイン/アウトで円の地図上サイズが地理的距離に比例して変化するようになった
+- `pixelsPerMeter = map.latLngToContainerPoint 差分 / map.distance()` でリアルタイム換算
+- 重なり防止（パッキング）は従来通りピクセル空間で動作
+- 凡例に「最大半径」スライダー（500m〜50km）を追加。デフォルト 5km
+
+### feat: ヒートマップ複合スコアを 0〜N×10 スケールに変更（`src/components/RailwayMap.tsx`）
+- 各パラメータを 0-10 に正規化して合算（平均でなく合計）
+- 2項目選択 → MAX 20、10項目選択 → MAX 100
+- 凡例 min/max を複合モードでも調整可能（カスタム範囲対応）
+
+### feat: ヒートマップパラメータ解説サブツールチップ（`src/components/RailwayMap.tsx`, `src/data/stationStats.ts`）
+- 全20パラメータの「収集方法」と「補完ロジック」を `PARAM_METHODOLOGY` として追加
+- 駅ツールチップのパラメータ行に ⓘ ボタン → クリックで解説パネルが開く
+- viewport はみ出し防止: `top` クランプ + `maxHeight` + `overflowY: auto`
+
+### feat: ヒートマップ複数選択で全パラメータ行のハイライト連動（`src/components/RailwayMap.tsx`）
+- 複合モード（2個以上）では `heatmapMultiParams` に含まれる全パラメータが背景色ハイライト
+
+### feat: 路線数パラメータをヒートマップに追加（`src/data/stationStats.ts`）
+- `lineCount`（路線数）を交通カテゴリとして `STAT_PARAMS` に追加
+
+### fix: 複合スコアの色表示バグ（`src/components/RailwayMap.tsx`）
+- `heatOverride` が常に単一パラメータ色を使っていた問題を修正。`getStationDisplayColor()` を使用
+
+### fix: 出発・到着アイコンのサイズが stationSizeScale に連動しない問題（`src/components/RailwayMap.tsx`）
+- `createSpecialStationIcon` / `createTrainTypeStationIcon` のハードコードサイズを `stationSizeScale` 連動に変更
+
+### fix: サジェストドロップダウンが入力フォームの枠内に隠れる問題（`src/components/StationSelector.tsx`）
+- `backdropFilter` の影響で fixed 子要素がクリップされていた。サジェスト表示中 `overflow: visible` に切替
+
+### improve: ✕ボタンのタップ判定拡大（`src/components/RailwayMap.tsx`）
+- `padding: '0 2px'` → `padding: '6px 8px'` + `margin: '-6px -8px'` で視覚を変えずヒット領域を拡大
+
+### improve: ヒートマップ凡例タイトルクリックでパラメータリスト連動（`src/components/RailwayMap.tsx`）
+- タイトル展開時に param list も同時に開き、折りたたみ時に閉じるよう連動
+
+## [2026-06-04] セッション（station-stats.csv 家賃データ拡充）
+
+### feat: 東京圏90駅以上の avg_rent_1k / avg_rent_1ldk を入力（`data/station-stats.csv`）
+- 収集方法: SUUMO・CHINTAI・ieagent・Homes.co.jp 等のポータルサイトをWebSearchで調査
+- 更新対象路線・エリア:
+  - JR中央線（東小金井・武蔵小金井・西国分寺・日野・豊田・西八王子・高尾）
+  - JR中央・総武線（大久保・東中野・阿佐ケ谷）
+  - 東京メトロ丸ノ内線（新大塚・淡路町・四谷三丁目・新宿御苑前・新宿三丁目・西新宿・中野坂上・新中野・東高円寺・新高円寺・南阿佐ケ谷）
+  - 東京メトロ銀座線（田原町・稲荷町・上野広小路・末広町・三越前・日本橋・京橋・溜池山王）
+  - 東京メトロ日比谷線（三ノ輪・入谷・仲御徒町・小伝馬町・人形町・八丁堀・東銀座・虎ノ門ヒルズ・神谷町）
+  - 東京メトロ東西線（西船橋・原木中山・妙典・行徳・南行徳・浦安・葛西・西葛西）
+  - 都営新宿線（船堀・一之江・瑞江・篠崎・本八幡）
+  - 新京成・北総・東武野田線周辺（東松戸・新八柱・みのり台・八柱・常盤平・五香・元山・くぬぎ山・北初富・新鎌ヶ谷・初富・二和向台・三咲・馬込沢・塚田・北習志野・薬園台・前原・市川大野・秋山・北国分・矢切・松飛台・大町）
+  - JR総武線（津田沼）
+  - 横浜市営地下鉄ブルーライン（上大岡・弘明寺・蒔田・吉野町・阪東橋・伊勢佐木長者町）
+  - 京急本線（仲木戸・神奈川・子安・国道・花月園前）
+  - 東武東上線（川越市・鶴ケ島・若葉・坂戸・北坂戸・高坂・東松山・森林公園・つきのわ・武蔵嵐山）
+  - 小田急・相模鉄道（大和）
+  - その他都心部（国会議事堂前・市ケ谷・信濃町・千駄ケ谷）
+
+## [2026-06-04] セッション（CJK駅名翻訳辞書補完）
+
+### feat: 中国語・韓国語翻訳辞書に未収録駅名を大量補完（`src/utils/stationTranslationsCJK.ts`）
+- 追加対象: 約270駅（千葉・外房・内房・北総線・埼玉・北関東・神奈川・箱根・相模・多摩・西東京・伊豆急行方面等）
+- 両辞書（`stationTranslationsChinese`, `stationTranslationsKorean`）に同時追加
+- 中国語: 漢字が同じ場合はそのまま、異なる場合は簡体字変換
+- 韓国語: 公式または一般的なハングル読みを採用
+- 路線名（ゆりかもめ・りんかい線）はスキップ、重複エントリなし
+
+### feat: 中国語（簡体字）・韓国語（ハングル）駅名翻訳辞書を新規作成（`src/utils/stationTranslationsCJK.ts`）
+- `stationTranslationsChinese`: 約500駅の中国語簡体字翻訳（日本語漢字と同じ場合はそのまま、異なる場合は簡体字変換）
+- `stationTranslationsKorean`: 約500駅の韓国語ハングル翻訳（公式・一般的な表記準拠）
+- 対象路線: 山手線・中央線・東海道線・東京メトロ全9路線・都営地下鉄4路線・私鉄主要各線・新交通システム等
+
+## [2026-06-01] セッション（設定エクスポート・インポート / データ拡充）
+
+### feat: 表示設定のJSONエクスポート・インポート機能を追加（`src/components/legend/MapConfigPanel.tsx`, `src/components/legend/LegendRouteList.tsx`, `src/components/RailwayMap.tsx`）
+- `MapConfigPanel`コンポーネントを新規作成（凡例パネル最下部に「設定の保存・読込」セクション）
+- エクスポート: JSONファイルダウンロード / クリップボードへのテキストコピー
+- インポート: JSONファイルアップロード / テキスト貼り付けから適用
+- 対象設定: ヒートマップON/OFF・パラメータ・レンジ、表示路線リスト、フィルター各種、地図モード等
+
+### feat: ツールチップの統計パラメータ名を参照元URLへのリンクに（`src/components/RailwayMap.tsx`）
+- `PARAM_DATA_SOURCES` に URL が登録されているパラメータは青字下線リンクで表示
+- クリックで新タブに参照元ページを開く（家賃はSUUMO等）
+
+### feat: 駅統計データを約190駅 → 約660駅に大幅拡充（`src/data/stationStats.ts`）
+- 銀座線・丸ノ内線・日比谷線・東西線・千代田線・有楽町線・副都心線・半蔵門線・南北線
+- 都営浅草線・三田線・新宿線・大江戸線
+- 京急線・小田急線（小田原まで）・東急各線（東横・田園都市・目黒・多摩川・大井町・池上・世田谷）
+- 京王線（京王八王子まで）・京王井の頭線・西武新宿線・西武池袋線・東武東上線・常磐線・中央線
+- りんかい線・ゆりかもめ全駅・東京モノレール・京急羽田方面
+- 鶴見線・南武線支線・横浜市営地下鉄ブルーライン全駅・グリーンライン・みなとみらい線
+- 相鉄線（海老名・湘南台まで）・総武線千葉方面（幕張・津田沼等）
+
+## [2026-06-01] セッション（ヒートマップ凡例UI改善）
+
+### improve: ヒートマップ凡例を25%刻み数値ラベル＋min/max編集UIに改良（`src/components/RailwayMap.tsx`, `src/data/stationStats.ts`）
+- 凡例グラデーションバーの下に0%/25%/50%/75%/100%の実際の数値を表示
+- 凡例下部にmin・maxの入力欄を追加し、範囲をユーザーが直接変更可能に
+- カスタム範囲変更時はヒートマップの色分けにも即時反映（`getStationHeatColor`に`rangeOverride`引数追加）
+- パラメータ切替時はカスタム範囲を自動リセット（↩ボタンでも手動リセット可）
+- フォントサイズを全体的に拡大（タイトル12px、ティック11px）、グラデーションバーを10pxに拡大
+
+## [2026-05-31] セッション（駅統計ヒートマップ機能）
+
+### feat: 駅別統計データの型定義・サンプルデータ・グラデーションユーティリティを追加（`src/data/stationStats.ts`, `src/types/leaflet-heat.d.ts`）
+- `StationStats` 型（24パラメータ・6カテゴリ）・`STAT_PARAMS`・`CustomScoreFormula` を定義
+- 山手線全31駅 + 主要ターミナル駅など計42駅のサンプルデータを入力
+- `DataSource` 型で参照元・参照日・更新日を管理する `PARAM_DATA_SOURCES` を追加
+- `GRADIENT_STOPS` を export し `buildGradientCss()` で CSS グラデーション文字列を動的生成
+- `getStationHeatColor()` / `heatValueToColor()` で値→色変換ユーティリティを実装
+
+### feat: 全駅CSVテンプレート生成スクリプトを追加（`scripts/generate-station-stats.ts`, `data/station-stats.csv`）
+- `routes.ts` の全6002駅を lat/lng/line_count 入り CSVに出力
+- `stationStatsData` 入力済み駅は既存値をCSVに反映
+
+### feat: leaflet.heat パッケージを追加（`package.json`）
+
+### feat: 駅統計ヒートマップ表示機能を実装（`src/components/legend/LegendRouteList.tsx`, `src/components/RailwayMap.tsx`, `src/components/legend/HeatmapControl.tsx`）
+- 凡例パネルの表示オプション行（駅名・コード等と同列）にチェックボックス＋パラメータ選択を追加
+- ヒートマップ有効時、Fragment key にパラメータ名を含めて全駅アイコンを強制再マウント
+- 駅アイコンの背景色をヒートマップカラーで上書き（データなし駅は灰色 `#aaaaaa`）
+- 駅クリック時のツールチップにパラメータ全値一覧（ヒートマップ有効時のみ）を表示
+- `HeatmapControl.tsx`：凡例グラデーションバー・参照元URL・参照日・免責事項を表示
+
+## [2026-05-24] セッション（続き5）
+
+### feat: 緯度・経度グリッドのON/OFF切替機能を追加（`src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`）
+- 凡例パネルに「緯度・経度グリッドを表示」チェックボックスを追加
+- ズームレベルに応じてグリッド間隔を自動調整（0.05°〜2°）
+- 各グリッド線に緯度・経度のラベルを表示
+- ライト/ダークモード対応のグリッド色
+
+## [2026-05-24] セッション（続き4）
+
+### fix: 駅名サジェスト候補がパネル内にクリップされる問題を修正（`src/components/StationSelector.tsx`）
+- 出発・到着の候補ドロップダウンを `position: absolute` から `position: fixed` に変更
+- `onFocus` 時に `getBoundingClientRect()` でビューポート座標を取得し、`overflowY: auto` の親コンテナ外に候補を表示
+- `zIndex` を 1000 → 9999 に引き上げて前面表示を保証
+
+## [2026-05-24] セッション（続き3）
+
+### fix: 駅名入力中に現在地ボタン・出発時刻が消えるUIの崩れを修正（`src/components/StationSelector.tsx`）
+- `!isSearching` 条件を削除し、入力中も「現在地ボタン」「出発時刻」を常時表示
+
 ## [2026-05-24] セッション（続き2）
 
 ### fix: 路線ツールチップの白い長方形を解消（`src/components/RailwayMap.tsx`）
@@ -549,3 +828,44 @@
 - showDimmedMapRoutes=true + visibleRoutes内 → 実線
 - showDimmedMapRoutes=false + visibleRoutes外 → 非表示
 - showDimmedMapRoutes=false + visibleRoutes内 → 実線
+
+---
+
+## 2026-06-17 セッション
+
+### feat: 出発駅復元バグのリグレッションテスト追加
+- `tests/unit/components/departure-revert.test.tsx` (新規)
+- GPS watchPosition 更新で × クリア後の駅が復元されるバグの再発防止テスト
+- `useDepartureAutoSet` フックを抽出し6ケースのテストを実装
+
+### feat: スマホ路線並び替えのテキスト選択防止
+- `src/components/legend/LegendRouteList.tsx`
+- HTML5 DnD は mobile 非対応のため touchStart/Move/End ハンドラに移行
+- `touchAction:'none'`, `WebkitUserSelect:'none'` でコピー状態を防止
+- `data-routekey` 属性 + `document.elementFromPoint` でドロップ先を特定
+
+### feat: 路線図表示モードのロジック統一（DiagramMap リファクタリング）
+- `src/components/DiagramMap.tsx`
+  - `onRouteClick` / `onStationClick` props を追加し内部 tooltip 状態を削除
+  - スクリーン座標の透明 hit circle を SVG に追加してスマホタップ精度を改善
+- `src/components/RailwayMap.tsx`
+  - dimmedMapTooltip を通常表示・路線図表示で共有するよう変更
+
+### feat: ヒートマップ表示時のスマホ駅名タップ精度改善
+- `src/components/RailwayMap.tsx`
+- isDetailed ラベルアイコンにスマホ用 8px タッチパディングを追加
+- iconSize と iconAnchor を padding 分オフセット調整
+
+### feat: 乗車路線リアルタイム検出機能
+- `src/utils/trainDetector.ts` (新規)
+  - GPS 2点の移動ベクトル（速度・方向）から近傍路線セグメントをスコアリング
+  - 約15km/h 以上で走行時に方向推定。速度不明時は30km/hをデフォルトとして所要時間算出
+- `src/components/TrainStatusPanel.tsx` (新規)
+  - 路線名（路線色バッジ）・終着駅方面・次の駅・推定時間を表示
+  - 方向反転・路線変更（検索付きリスト）・自動検出に戻すボタン
+- `src/components/StationSelector.tsx`
+  - `detectedRoute` / `manualTrainRoute` / `onManualTrainRouteChange` props 追加
+  - 出発/到着 UI 内に TrainStatusPanel をレンダリング
+- `src/components/RailwayMap.tsx`
+  - `gpsHistoryRef` で GPS 履歴を最大5点保持し、watchPosition 更新ごとに検出実行
+  - `detectedRoute` / `manualTrainRoute` state を全 StationSelector インスタンスに渡す

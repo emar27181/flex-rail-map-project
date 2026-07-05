@@ -1,0 +1,15 @@
+---
+import ArticleLayout from "./_ArticleLayout.astro";
+import { ARTICLE_PAGE_KEYWORDS, ARTICLE_PAGE_TRANSLATIONS } from "../../data/articleI18n";
+
+const slug = "tokyo-rent-by-route";
+const meta = ARTICLE_PAGE_TRANSLATIONS[slug].ja;
+const title = meta.title;
+const description = meta.description;
+const publishedDate = "2025-06-06";
+const category = meta.category;
+const keywords = ARTICLE_PAGE_KEYWORDS[slug];
+---
+
+<ArticleLayout title={title} description={description} keywords={keywords} slug={slug} category={category} publishedDate={publishedDate} kicker={meta.kicker} readTime={meta.readTime} tag={meta.tag}>
+</ArticleLayout>
