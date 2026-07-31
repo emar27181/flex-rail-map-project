@@ -141,6 +141,25 @@ describe('RouteFinder', () => {
       // 期待：乗り換え1回のルートが存在する
       expect(oneTransferRoute).toBeDefined();
     });
+
+    it('藤沢→新宿の小田急線経由ルートが上位3件以内に入る（各駅停車ベースの所要時間で埋もれない）', () => {
+      // 過去の不具合: odakyu-line/odakyu-enoshima-lineのtimeToNextが各駅停車ベースの
+      // 生値だったため、駅数の多い小田急線の所要時間がJR幹線より大幅に長く算出され、
+      // 実際には表示件数内でも順位が低すぎて事実上見えなくなっていた。
+      const fujisawa = routes.odakyuEnoshimaLine.find(s => s.name === '藤沢');
+      const shinjuku = routes.odakyuLine.find(s => s.name === '新宿');
+
+      const results = routeFinder.findRoutes(fujisawa!, shinjuku!, 10);
+
+      const odakyuRank = results.findIndex(r =>
+        r.segments.some(seg =>
+          seg.routeKey === 'odakyuLine' || seg.routeKey === 'odakyuEnoshimaLine'
+        )
+      );
+
+      expect(odakyuRank).toBeGreaterThanOrEqual(0);
+      expect(odakyuRank).toBeLessThan(3);
+    });
   });
 
   describe('重複ルート除去', () => {
