@@ -3566,9 +3566,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               top: '10px',
               left: '10px',
               zIndex: 1001,
-              width: '320px',
+              // 全画面時はテーマ切替・記事一覧ボタンを隠している分、
+              // 右端を伸ばして出発駅・到着駅の入力欄を広く使えるようにする
+              width: '400px',
+              maxWidth: 'calc(100% - 20px)',
               maxHeight: 'calc(100% - 20px)',
               overflowY: 'auto',
+              overflowX: 'hidden',
               borderRadius: '8px',
             }}>
               <StationSelector
@@ -5058,7 +5062,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               </button>
             )}
 
-            {/* テーマ切り替え */}
+            {/* テーマ切り替え・記事一覧は全画面時は地図を広く使うため隠す
+                （全画面を解除すると再表示される） */}
+            {!isFullscreen && (
             <button
               onClick={toggleTheme}
               style={{
@@ -5083,8 +5089,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             >
               {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
             </button>
+            )}
 
             {/* 記事一覧 */}
+            {!isFullscreen && (
             <a
               href="/articles"
               style={{
@@ -5107,6 +5115,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             >
               <Info size={18} />
             </a>
+            )}
           </div>
 
 
