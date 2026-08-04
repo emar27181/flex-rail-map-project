@@ -47,7 +47,7 @@ import {
   type Departure,
 } from '../data/timetableData';
 import { FS } from '../constants/ui';
-import { readableTextColor } from '../utils/contrast';
+import { readableTextColor, darkenForWhiteText, meetsContrast, LIGHT_TEXT } from '../utils/contrast';
 import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE } from '../utils/trainDetector';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
 
@@ -1588,10 +1588,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const timeH = hasTime ? 12 : 0;
       const iconHeight = baseH + furiganaH + timeH;
       const timeLine = hasTime ? `<div style="font-size:9px;line-height:1;margin-top:1px;font-weight:normal;opacity:0.9">${timeLabel}</div>` : '';
-      const labelTextColor = readableTextColor(displayColor);
+      // ダークモードは駅名を白字に統一する。路線色を明るく補正している関係で
+      // そのままだと白字のコントラストが不足する路線があるため、色相を保ったまま
+      // 必要最小限だけ背景を暗くして 4.5:1 に近づける（見た目は同じ路線色のまま）。
+      // 総武線の黄色のように暗色化の下限まで下げても 4.5:1 に届かない色は、
+      // 地図ラベルで一般的な文字ハロー（暗い縁取り）を重ねて可読性を担保する。
+      // ライトモードは従来どおり背景に応じて白/黒を選ぶ。
+      const labelBgColor = theme === 'dark' ? darkenForWhiteText(displayColor) : displayColor;
+      const labelTextColor = theme === 'dark' ? LIGHT_TEXT : readableTextColor(labelBgColor);
+      const needsHalo = theme === 'dark' && !meetsContrast(labelBgColor, LIGHT_TEXT);
+      const haloCss = needsHalo
+        ? 'text-shadow:0 0 2px rgba(0,0,0,0.95),0 1px 2px rgba(0,0,0,0.9);'
+        : '';
       const htmlContent = hasFurigana || hasTime
-        ? `<div style="background:${displayColor};color:${labelTextColor};padding:1px 3px;border-radius:3px;white-space:nowrap;${borderCss}${shadowCss}text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:${Math.max(7, Math.round(lfs * 0.75))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${lfs}px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
-        : `<div style="background:${displayColor};color:${labelTextColor};padding:1px 3px;border-radius:3px;font-size:${lfs}px;font-weight:bold;white-space:nowrap;${borderCss}${shadowCss}opacity:${opacity}">${displayName}</div>`;
+        ? `<div style="background:${labelBgColor};color:${labelTextColor};${haloCss}padding:1px 3px;border-radius:3px;white-space:nowrap;${borderCss}${shadowCss}text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:${Math.max(7, Math.round(lfs * 0.75))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${lfs}px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
+        : `<div style="background:${labelBgColor};color:${labelTextColor};${haloCss}padding:1px 3px;border-radius:3px;font-size:${lfs}px;font-weight:bold;white-space:nowrap;${borderCss}${shadowCss}opacity:${opacity}">${displayName}</div>`;
       const [oDx, oDy] = stationLabelOffsets.get(station.name) ?? [0, 0];
       // スマホはタッチターゲットを透明パディングで拡張（視覚は変えずにヒット領域を広げる）
       const tp = isMobile ? 8 : 0;
@@ -1773,11 +1784,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         ? `<div style="font-size:${ttFuriganaSize}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:${ttFontSize}px;font-weight:bold;line-height:1">${displayName}</div>`
         : displayName;
 
-      const bgColor1 = heatOverride ?? routeColors[routeKey];
+      const rawBgColor1 = heatOverride ?? routeColors[routeKey];
+      // 駅名ラベルと同じ規則: ダークモードは白字に統一し、背景側で可読性を確保する
+      const bgColor1 = theme === 'dark' ? darkenForWhiteText(rawBgColor1) : rawBgColor1;
       return new DivIcon({
         html: `<div style="
           background:${bgColor1};
-          color:${readableTextColor(bgColor1)};
+          color:${theme === 'dark' ? LIGHT_TEXT : readableTextColor(bgColor1)};
           padding:1px 3px;
           border-radius:2px;
           ${hasFurigana ? '' : `font-size:${ttFontSize}px;font-weight:bold;`}
