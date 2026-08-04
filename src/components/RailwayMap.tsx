@@ -4612,6 +4612,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   minHeight: 0,
                   maxHeight: isFullscreen ? undefined : '350px',
                   overflowY: 'auto',
+                  // overflowY のみだと x 軸が auto 扱いになり横スライドできてしまう
+                  overflowX: 'hidden',
                 }} className="thin-scrollbar">
                   {/* 1. マーカー表示 (Current Station Settings) */}
                   <LegendStationMarkers
