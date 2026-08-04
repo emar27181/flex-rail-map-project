@@ -33,7 +33,6 @@ import { rinkaiLine } from '../data/rinkai-line';
 import { yurikamomeLine } from '../data/yurikamome-line';
 import { keioLine } from '../data/keio-line';
 import { jrNanbuLine } from '../data/jr-nanbu-line';
-import { jrNegishiLine } from '../data/jr-kanto-additional';
 import { jrYokohamaLine } from '../data/jr-yokohama-line';
 import { tokyuMeguro } from '../data/tokyu-additional';
 import { seibuShinjukuLine } from '../data/seibu-shinjuku-line';
@@ -1198,27 +1197,7 @@ const nanbuPatterns: PatternSimple[] = [
   { fromMin: m(20),   toMin: m(24),   intervalMin: 10 },
 ];
 
-// 根岸線（横浜→大船方面: 0 / 逆: 1）
-const negishiMap = buildCoordMap(jrNegishiLine);
-const negishiDir0 = withCoords([
-  { name: '横浜', offset: 0 }, { name: '桜木町', offset: 3 }, { name: '関内', offset: 5 },
-  { name: '石川町', offset: 7 }, { name: '山手', offset: 9 }, { name: '根岸', offset: 12 },
-  { name: '磯子', offset: 15 }, { name: '新杉田', offset: 18 }, { name: '洋光台', offset: 21 },
-  { name: '港南台', offset: 24 }, { name: '本郷台', offset: 27 },
-], negishiMap);
-const negishiDir1 = withCoords([
-  { name: '本郷台', offset: 0 }, { name: '港南台', offset: 3 }, { name: '洋光台', offset: 6 },
-  { name: '新杉田', offset: 9 }, { name: '磯子', offset: 12 }, { name: '根岸', offset: 15 },
-  { name: '山手', offset: 18 }, { name: '石川町', offset: 20 }, { name: '関内', offset: 22 },
-  { name: '桜木町', offset: 24 }, { name: '横浜', offset: 27 },
-], negishiMap);
-const negishiPatterns: PatternSimple[] = [
-  { fromMin: m(5),    toMin: m(7,30), intervalMin: 7 },
-  { fromMin: m(7,30), toMin: m(10),   intervalMin: 4 },
-  { fromMin: m(10),   toMin: m(17),   intervalMin: 7 },
-  { fromMin: m(17),   toMin: m(20),   intervalMin: 4 },
-  { fromMin: m(20),   toMin: m(24),   intervalMin: 10 },
-];
+// 根岸線は keihinTohoku（大宮〜大船）に統合済みのため個別定義を削除
 
 // 横浜線（東神奈川→八王子: 0 / 逆: 1）
 const yokohamaLineMap = buildCoordMap(jrYokohamaLine);
@@ -2529,14 +2508,6 @@ const DEMO_LINES: LineDemo[] = [
     directions: [
       { stations: nanbuDir0, travelMin: 49, isCircular: false, patterns: nanbuPatterns },
       { stations: nanbuDir1, travelMin: 49, isCircular: false, patterns: nanbuPatterns },
-    ],
-  },
-  {
-    key: 'jrNegishiLine',
-    color: '#00B5E2',
-    directions: [
-      { stations: negishiDir0, travelMin: 27, isCircular: false, patterns: negishiPatterns },
-      { stations: negishiDir1, travelMin: 27, isCircular: false, patterns: negishiPatterns },
     ],
   },
   {

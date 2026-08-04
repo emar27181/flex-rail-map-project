@@ -47,7 +47,8 @@ import {
   type Departure,
 } from '../data/timetableData';
 import { FS } from '../constants/ui';
-import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS } from '../utils/trainDetector';
+import { readableTextColor } from '../utils/contrast';
+import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE } from '../utils/trainDetector';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
 
 // デバッグ用のwindow拡張
@@ -274,13 +275,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
         const now = Date.now();
         const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: pos.timestamp };
-        gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-5);
+        gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-GPS_HISTORY_SIZE);
 
         if (gpsHistoryRef.current.length >= 2) {
           try {
             const elapsed = now - gpsSessionStartRef.current;
             let detected: DetectedRoute | null;
-            if (elapsed < 5000) {
+            if (elapsed < DETECTION_WARMUP_MS) {
               detected = detectCurrentRoute(gpsHistoryRef.current);
             } else {
               detected = detectRouteWithHistory(gpsHistoryRef.current, visitHistoryRef.current);
@@ -1587,9 +1588,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const timeH = hasTime ? 12 : 0;
       const iconHeight = baseH + furiganaH + timeH;
       const timeLine = hasTime ? `<div style="font-size:9px;line-height:1;margin-top:1px;font-weight:normal;opacity:0.9">${timeLabel}</div>` : '';
+      const labelTextColor = readableTextColor(displayColor);
       const htmlContent = hasFurigana || hasTime
-        ? `<div style="background:${displayColor};color:white;padding:1px 3px;border-radius:3px;white-space:nowrap;${borderCss}${shadowCss}text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:${Math.max(7, Math.round(lfs * 0.75))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${lfs}px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
-        : `<div style="background:${displayColor};color:white;padding:1px 3px;border-radius:3px;font-size:${lfs}px;font-weight:bold;white-space:nowrap;${borderCss}${shadowCss}opacity:${opacity}">${displayName}</div>`;
+        ? `<div style="background:${displayColor};color:${labelTextColor};padding:1px 3px;border-radius:3px;white-space:nowrap;${borderCss}${shadowCss}text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:${Math.max(7, Math.round(lfs * 0.75))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${lfs}px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
+        : `<div style="background:${displayColor};color:${labelTextColor};padding:1px 3px;border-radius:3px;font-size:${lfs}px;font-weight:bold;white-space:nowrap;${borderCss}${shadowCss}opacity:${opacity}">${displayName}</div>`;
       const [oDx, oDy] = stationLabelOffsets.get(station.name) ?? [0, 0];
       // スマホはタッチターゲットを透明パディングで拡張（視覚は変えずにヒット領域を広げる）
       const tp = isMobile ? 8 : 0;
@@ -1775,7 +1777,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       return new DivIcon({
         html: `<div style="
           background:${bgColor1};
-          color:white;
+          color:${readableTextColor(bgColor1)};
           padding:1px 3px;
           border-radius:2px;
           ${hasFurigana ? '' : `font-size:${ttFontSize}px;font-weight:bold;`}
@@ -2795,13 +2797,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
         const now = Date.now();
         const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: position.timestamp };
-        gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-5);
+        gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-GPS_HISTORY_SIZE);
 
         if (gpsHistoryRef.current.length >= 2) {
           try {
             const elapsed = now - gpsSessionStartRef.current;
             let detected: DetectedRoute | null;
-            if (elapsed < 5000) {
+            if (elapsed < DETECTION_WARMUP_MS) {
               detected = detectCurrentRoute(gpsHistoryRef.current);
             } else {
               detected = detectRouteWithHistory(gpsHistoryRef.current, visitHistoryRef.current);
@@ -4610,6 +4612,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   minHeight: 0,
                   maxHeight: isFullscreen ? undefined : '350px',
                   overflowY: 'auto',
+                  // overflowY のみだと x 軸が auto 扱いになり横スライドできてしまう
+                  overflowX: 'hidden',
                 }} className="thin-scrollbar">
                   {/* 1. マーカー表示 (Current Station Settings) */}
                   <LegendStationMarkers

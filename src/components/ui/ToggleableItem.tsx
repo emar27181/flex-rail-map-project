@@ -65,7 +65,9 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
         }}
         style={{
           marginRight: '8px',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          // 長いラベルに押されて潰れないようにする
+          flexShrink: 0
         }}
       />
 
@@ -91,7 +93,12 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
             : colors.textMuted,
         lineHeight: '1.2',
         fontWeight: isHighlighted ? 'bold' : 'normal',
-        opacity: isActive ? 1 : 0.6
+        opacity: isActive ? 1 : 0.6,
+        // 長い路線名が行幅を押し広げて親コンテナに横スクロールを
+        // 発生させていたため、縮小と折り返しを許可する
+        minWidth: 0,
+        flex: 1,
+        overflowWrap: 'anywhere'
       }}>
         {label}
         {badge && (

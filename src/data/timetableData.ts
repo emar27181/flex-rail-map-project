@@ -1850,46 +1850,7 @@ const jrUtsunomiyaData: LineTimetableData = {
   ],
 };
 
-const jrNegishiData: LineTimetableData = {
-  key: 'jrNegishiLine',
-  name: '根岸線',
-  updatedAt: '2025-03-15',
-  dataVersion: '2025年版（概算）',
-  directions: [
-    {
-      label: '横浜→大船方面',
-      stations: [
-        { name: '横浜', offset: 0 }, { name: '桜木町', offset: 4 }, { name: '関内', offset: 7 },
-        { name: '石川町', offset: 9 }, { name: '山手', offset: 12 }, { name: '根岸', offset: 15 },
-        { name: '磯子', offset: 18 }, { name: '新杉田', offset: 21 }, { name: '洋光台', offset: 24 },
-        { name: '港南台', offset: 27 }, { name: '本郷台', offset: 30 }, { name: '大船', offset: 33 },
-      ],
-      patterns: [
-        { fromMin: m(5),    toMin: m(7),    intervalMin: 10, type: '普通', destination: '大船行き' },
-        { fromMin: m(7),    toMin: m(9),    intervalMin: 5,  type: '普通', destination: '大船行き' },
-        { fromMin: m(9),    toMin: m(17),   intervalMin: 8,  type: '普通', destination: '大船行き' },
-        { fromMin: m(17),   toMin: m(20),   intervalMin: 5,  type: '普通', destination: '大船行き' },
-        { fromMin: m(20),   toMin: m(23,30),intervalMin: 10, type: '普通', destination: '大船行き' },
-      ],
-    },
-    {
-      label: '大船→横浜方面',
-      stations: [
-        { name: '大船', offset: 0 }, { name: '本郷台', offset: 3 }, { name: '港南台', offset: 6 },
-        { name: '洋光台', offset: 9 }, { name: '新杉田', offset: 12 }, { name: '磯子', offset: 15 },
-        { name: '根岸', offset: 18 }, { name: '山手', offset: 21 }, { name: '石川町', offset: 24 },
-        { name: '関内', offset: 26 }, { name: '桜木町', offset: 29 }, { name: '横浜', offset: 33 },
-      ],
-      patterns: [
-        { fromMin: m(5),    toMin: m(7),    intervalMin: 10, type: '普通', destination: '横浜行き' },
-        { fromMin: m(7),    toMin: m(9),    intervalMin: 5,  type: '普通', destination: '横浜行き' },
-        { fromMin: m(9),    toMin: m(17),   intervalMin: 8,  type: '普通', destination: '横浜行き' },
-        { fromMin: m(17),   toMin: m(20),   intervalMin: 5,  type: '普通', destination: '横浜行き' },
-        { fromMin: m(20),   toMin: m(23,30),intervalMin: 10, type: '普通', destination: '横浜行き' },
-      ],
-    },
-  ],
-};
+// 根岸線の時刻表は keihinTohoku（大宮〜大船）に含まれるため削除
 
 const keioInokashiraData: LineTimetableData = {
   key: 'keioInokashiraLine',
@@ -4474,7 +4435,6 @@ export const timetableLines: LineTimetableData[] = [
   yokosukaData,
   jrNanbuData,
   jrUtsunomiyaData,
-  jrNegishiData,
   keioInokashiraData,
   tokyuOimachiData,
   tobuIsesakiData,

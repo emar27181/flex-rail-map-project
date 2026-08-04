@@ -87,6 +87,9 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
     el.textContent = `
       .mbp-scroll {
         overflow-y: auto;
+        /* overflow-y だけ指定すると x 軸は auto 扱いになり、
+           内容がはみ出したときに横スライドできてしまうため明示的に止める */
+        overflow-x: hidden;
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
         touch-action: pan-y;

@@ -481,8 +481,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   background: 'none',
                   border: 'none',
                   borderRadius: '50%',
-                  width: '22px',
-                  height: '22px',
+                  // WCAG 2.2 AA (2.5.8 ターゲットサイズ) の最小24pxを満たす
+                  width: '24px',
+                  height: '24px',
                   cursor: 'pointer',
                   fontSize: FS.label,
                   color: colors.textSecondary,
@@ -655,7 +656,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
                   padding: '0 3px',
-                  height: '22px',
+                  // WCAG 2.2 AA (2.5.8 ターゲットサイズ) の最小24pxを満たす
+                  height: '24px',
                   boxSizing: 'border-box',
                   fontSize: FS.label,
                   backgroundColor: colors.surfaceElevated,
@@ -674,7 +676,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
                   padding: '0 5px',
-                  height: '22px',
+                  // WCAG 2.2 AA (2.5.8 ターゲットサイズ) の最小24pxを満たす
+                  height: '24px',
                   boxSizing: 'border-box',
                   fontSize: FS.helper,
                   backgroundColor: colors.surface,

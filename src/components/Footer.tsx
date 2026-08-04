@@ -53,7 +53,14 @@ const Footer: React.FC<FooterProps> = ({ language }) => {
               <a
                 key={page}
                 href={`/${page}?lang=${lp}`}
-                style={{ color: colors.primary, textDecoration: 'none' }}
+                style={{
+                  color: colors.primary,
+                  textDecoration: 'none',
+                  // WCAG 2.2 AA (2.5.8 ターゲットサイズ) の最小24pxを満たす
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  minHeight: '24px',
+                }}
                 onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
                 onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
               >

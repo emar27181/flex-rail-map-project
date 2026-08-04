@@ -14,11 +14,26 @@ import { test, expect, type Page } from '@playwright/test';
 
 // ページ読み込みとReactハイドレーション完了を待つ共通処理
 async function loadPage(page: Page) {
+  // Cookie同意バナーは画面下部を覆い、MobileBottomPanelのボタンへのクリックを
+  // 遮ってしまう。事前に同意済みの状態を仕込んでバナー自体を出さない。
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      'cookieConsent',
+      JSON.stringify({ necessary: true, analytics: false, advertising: false })
+    );
+    localStorage.setItem('cookieConsentDate', new Date().toISOString());
+  });
+
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  // ハイドレーション完了の目安: aria-expanded ボタンが出現するまで待つ
-  await page.waitForSelector('button[aria-expanded]', { timeout: 10000 });
-  // Leaflet地図の初期化を待つ
-  await page.waitForSelector('.leaflet-container', { timeout: 10000 });
+  // Leaflet地図の初期化を待つ（ハイドレーション完了の目安。全画面幅で共通）
+  await page.waitForSelector('.leaflet-container', { timeout: 15000 });
+
+  // MobileBottomPanel はモバイル幅（768px未満）でしか描画されないため、
+  // デスクトップ幅で待つと必ずタイムアウトする。モバイル幅のときだけ待つ。
+  const width = page.viewportSize()?.width ?? 0;
+  if (width < 768) {
+    await page.waitForSelector('button[aria-expanded]', { timeout: 15000 });
+  }
 }
 
 // ───────────────────────────────────────────────
@@ -45,7 +60,7 @@ test.describe('カテゴリ1: z-index / 表示優先度', () => {
     await loadPage(page);
 
     const firstBtn = page.locator('button[aria-expanded]').first();
-    await firstBtn.tap();
+    await firstBtn.click();
 
     const dialog = page.locator('[role="dialog"]');
     await expect(dialog).toBeVisible();
@@ -64,13 +79,13 @@ test.describe('カテゴリ1: z-index / 表示優先度', () => {
     expect(box).not.toBeNull();
 
     // ボタン中心座標でクリックできるか（見えない要素に遮られていないか）
-    await firstBtn.tap();
+    await firstBtn.click();
     await expect(page.locator('[role="dialog"]')).toBeVisible();
   });
 
   test('ポップオーバーが position:fixed を使用している', async ({ page }) => {
     await loadPage(page);
-    await page.locator('button[aria-expanded]').first().tap();
+    await page.locator('button[aria-expanded]').first().click();
 
     const dialog = page.locator('[role="dialog"]');
     const position = await dialog.evaluate(
@@ -299,7 +314,7 @@ test.describe('カテゴリ7: インタラクション', () => {
     const stationBtn = page.locator('button[aria-expanded]').first();
     await expect(stationBtn).toHaveAttribute('aria-expanded', 'false');
 
-    await stationBtn.tap();
+    await stationBtn.click();
     await expect(page.locator('[role="dialog"]')).toBeVisible();
     await expect(stationBtn).toHaveAttribute('aria-expanded', 'true');
   });
@@ -307,7 +322,7 @@ test.describe('カテゴリ7: インタラクション', () => {
   test('ポップオーバーを開いた後バックドロップをタップすると閉じる', async ({ page }) => {
     await loadPage(page);
 
-    await page.locator('button[aria-expanded]').first().tap();
+    await page.locator('button[aria-expanded]').first().click();
     await expect(page.locator('[role="dialog"]')).toBeVisible();
 
     // バックドロップ（inset:0 の透明レイヤー）をタップして閉じる
@@ -319,10 +334,10 @@ test.describe('カテゴリ7: インタラクション', () => {
     await loadPage(page);
 
     const buttons = page.locator('button[aria-expanded]');
-    await buttons.first().tap(); // 駅設定を開く
+    await buttons.first().click(); // 駅設定を開く
     await expect(page.locator('[role="dialog"]')).toBeVisible();
 
-    await buttons.last().tap(); // 詳細設定に切り替え
+    await buttons.last().click(); // 詳細設定に切り替え
     await expect(page.locator('[role="dialog"]')).toBeVisible(); // まだ開いている
     await expect(buttons.last()).toHaveAttribute('aria-expanded', 'true');
     await expect(buttons.first()).toHaveAttribute('aria-expanded', 'false');

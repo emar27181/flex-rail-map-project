@@ -201,6 +201,8 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
             marginLeft: 'auto',
             fontSize: FS.helper,
             padding: '2px 6px',
+            // WCAG 2.2 AA (2.5.8 ターゲットサイズ) の最小24pxを満たす
+            minHeight: '24px',
             borderRadius: '3px',
             border: `1px solid ${colors.border}`,
             backgroundColor: 'transparent',
@@ -248,23 +250,40 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
         )}
       </div>
 
-      {/* 次の駅行 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-        <span style={{ fontSize: FS.helper, color: colors.textSecondary, whiteSpace: 'nowrap' }}>次の駅</span>
-        <span style={{
-          fontSize: FS.base,
-          fontWeight: 'bold',
-          color: colors.text,
-        }}>{effective.nextStation}</span>
-        {dynamicEstMinutes !== null && (
+      {/* 駅行: 停車中は現在の駅、走行中は次の駅を表示 */}
+      {effective.currentStation ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+          <span style={{ fontSize: FS.helper, color: colors.textSecondary, whiteSpace: 'nowrap' }}>現在の駅</span>
+          <span style={{
+            fontSize: FS.base,
+            fontWeight: 'bold',
+            color: colors.text,
+          }}>{effective.currentStation}</span>
           <span style={{
             fontSize: FS.label,
             color: colors.textSecondary,
             marginLeft: 'auto',
             whiteSpace: 'nowrap',
-          }}>約 {dynamicEstMinutes} 分</span>
-        )}
-      </div>
+          }}>停車中</span>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+          <span style={{ fontSize: FS.helper, color: colors.textSecondary, whiteSpace: 'nowrap' }}>次の駅</span>
+          <span style={{
+            fontSize: FS.base,
+            fontWeight: 'bold',
+            color: colors.text,
+          }}>{effective.nextStation}</span>
+          {dynamicEstMinutes !== null && (
+            <span style={{
+              fontSize: FS.label,
+              color: colors.textSecondary,
+              marginLeft: 'auto',
+              whiteSpace: 'nowrap',
+            }}>約 {dynamicEstMinutes} 分</span>
+          )}
+        </div>
+      )}
 
       {/* 操作ボタン行 */}
       <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
