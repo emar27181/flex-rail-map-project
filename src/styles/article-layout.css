@@ -6,7 +6,7 @@
   --surface-2:#F1F3F4;
   --ink:#191D1F;
   --ink-soft:#525A5F;
-  --ink-faint:#8A9298;
+  --ink-faint:#6B7379;
   --border:#E4E7E9;
   --border-strong:#D2D7DA;
   --accent:#2196F3;
@@ -24,7 +24,7 @@ html[data-theme="dark"]{
   --surface-2:#222a2f;
   --ink:#E9EDEF;
   --ink-soft:#A7B0B6;
-  --ink-faint:#6E767C;
+  --ink-faint:#868E94;
   --border:#2A3137;
   --border-strong:#3A434A;
   --accent:#4a9eff;
@@ -69,6 +69,9 @@ html[data-theme="light"] .moon{ display:block; }
 nav.crumb{ padding:18px 0 0; }
 nav.crumb a, .foot a, article a{ color:var(--accent-strong); text-decoration:none; }
 nav.crumb a:hover, .foot a:hover, article a:hover{ text-decoration:underline; }
+/* WCAG 2.2 AA(2.5.8 ターゲットサイズ)の最小24pxを満たすため、
+   本文中のリンクと違い単独で並ぶナビゲーションリンクには高さを確保する */
+nav.crumb a, .foot a{ display:inline-flex; align-items:center; min-height:24px; }
 
 header.post{ padding:26px 0 6px; }
 .kicker{ display:inline-flex; align-items:center; gap:9px; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent-strong); font-weight:700; margin-bottom:16px; font-family:var(--mono); }
@@ -153,7 +156,12 @@ html[data-theme="dark"] .cta-box, html[data-theme="dark"] .cta{ background:linea
 .foot{ border-top:1px solid var(--border); margin-top:8px; padding:24px 0 64px; }
 .foot a{ font-size:14px; }
 .foot .small{ color:var(--ink-faint); font-size:12px; margin-top:12px; }
-.foot-app-link{ display:inline-flex; align-items:center; gap:8px; margin-top:18px; background:var(--accent); color:#fff; font-weight:800; font-size:13.5px; padding:10px 20px; border-radius:8px; text-decoration:none; transition:opacity .15s; }
+/* `.foot a` の詳細度に負けて文字色が accent-strong に上書きされ、
+   青地に青文字（コントラスト1.25:1）で読めなくなっていた。
+   セレクタを `.foot a.foot-app-link` にして確実に適用し、
+   地色を accent-strong、文字色を --bg にすることで
+   ライト5.36:1 / ダーク8.19:1 と AA を満たす。 */
+.foot a.foot-app-link{ display:inline-flex; align-items:center; gap:8px; margin-top:18px; background:var(--accent-strong); color:var(--bg); font-weight:800; font-size:13.5px; padding:10px 20px; border-radius:8px; text-decoration:none; transition:opacity .15s; }
 .foot-app-link:hover{ opacity:.85; text-decoration:none; }
 .foot-app-link::before{ content:"🗺"; font-size:15px; }
 

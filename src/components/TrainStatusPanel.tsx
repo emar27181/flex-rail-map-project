@@ -201,6 +201,8 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
             marginLeft: 'auto',
             fontSize: FS.helper,
             padding: '2px 6px',
+            // WCAG 2.2 AA (2.5.8 ターゲットサイズ) の最小24pxを満たす
+            minHeight: '24px',
             borderRadius: '3px',
             border: `1px solid ${colors.border}`,
             backgroundColor: 'transparent',
