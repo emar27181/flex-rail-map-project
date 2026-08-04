@@ -6,7 +6,7 @@ import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { translateStation, translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
 import { stationReadings, normalizeToHiragana } from '../utils/stationReadings';
-import { FS } from '../constants/ui';
+import { FS, TARGET } from '../constants/ui';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 
@@ -357,10 +357,12 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   placeholder={departure ? translateStation(departure.name, language) : translateUI('stationPlaceholder', language)}
                   style={{
                     width: '100%',
-                    padding: '3px 20px 3px 6px',
+                    padding: '4px 20px 4px 6px',
                     border: `2px solid #4CAF50`,
                     borderRadius: '4px',
-                    fontSize: FS.label,
+                    // iOS Safari の自動ズームを防ぐため入力欄は16px下限
+                    fontSize: FS.input,
+                    minHeight: `${TARGET.min}px`,
                     boxSizing: 'border-box',
                     backgroundColor: colors.surfaceElevated,
                     color: colors.text
@@ -543,10 +545,12 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   placeholder={arrival ? translateStation(arrival.name, language) : translateUI('stationPlaceholder', language)}
                   style={{
                     width: '100%',
-                    padding: '3px 20px 3px 6px',
+                    padding: '4px 20px 4px 6px',
                     border: `2px solid #f44336`,
                     borderRadius: '4px',
-                    fontSize: FS.label,
+                    // iOS Safari の自動ズームを防ぐため入力欄は16px下限
+                    fontSize: FS.input,
+                    minHeight: `${TARGET.min}px`,
                     boxSizing: 'border-box',
                     backgroundColor: colors.surfaceElevated,
                     color: colors.text
@@ -657,9 +661,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   borderRadius: '4px',
                   padding: '0 3px',
                   // WCAG 2.2 AA (2.5.8 ターゲットサイズ) の最小24pxを満たす
-                  height: '24px',
+                  height: `${TARGET.min}px`,
                   boxSizing: 'border-box',
-                  fontSize: FS.label,
+                  // iOS Safari の自動ズームを防ぐため入力欄は16px下限
+                  fontSize: FS.input,
                   backgroundColor: colors.surfaceElevated,
                   color: colors.text,
                   cursor: 'pointer',

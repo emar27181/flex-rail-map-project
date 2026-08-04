@@ -2,6 +2,7 @@ import React from 'react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
+import { TARGET } from '../constants/ui';
 
 interface FooterProps {
   language: Language;
@@ -78,7 +79,11 @@ const Footer: React.FC<FooterProps> = ({ language }) => {
             rel="noopener noreferrer"
             style={{
               color: colors.primary,
-              textDecoration: 'none'
+              textDecoration: 'none',
+              // WCAG 2.2 AA (2.5.8 ターゲットサイズ) の最小24pxを満たす
+              display: 'inline-flex',
+              alignItems: 'center',
+              minHeight: `${TARGET.min}px`
             }}
             onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
             onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
@@ -87,7 +92,7 @@ const Footer: React.FC<FooterProps> = ({ language }) => {
           </a>
         </p>
         <p style={{ margin: '0', fontSize: '12px' }}>
-          <a href="https://claude.ai/code" target="_blank" style={{ color: colors.primary, textDecoration: 'none' }}>
+          <a href="https://claude.ai/code" target="_blank" style={{ color: colors.primary, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', minHeight: `${TARGET.min}px` }}>
             {translateUI('madeWithText', language)}
           </a>
         </p>
