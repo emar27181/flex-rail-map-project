@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { ArrowLeftRight } from 'lucide-react';
 import { routes, routeColors, routeNames } from '../data/routes';
 import type { RouteKey } from '../data/routes';
 import type { Station } from '../data/yamanote';
@@ -300,7 +301,7 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
             cursor: 'pointer',
             fontWeight: '500',
           }}
-        >⇄ 方向反転</button>
+        ><ArrowLeftRight size={13} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />方向反転</button>
         <button
           onClick={() => setShowOverride(true)}
           style={{

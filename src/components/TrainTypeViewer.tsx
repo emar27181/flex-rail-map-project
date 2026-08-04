@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { TrainFront } from 'lucide-react';
 import { RouteKey } from '../data/routes';
 import { trainServices, getStationStops, getStationBorderStyle } from '../data/trainServices';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
@@ -85,7 +86,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <span style={{ fontWeight: '600', fontSize: '14px' }}>
-          🚆 列車種別表示
+          <TrainFront size={15} style={{ verticalAlign: 'text-bottom', marginRight: 5 }} />列車種別表示
         </span>
         <span style={{
           fontSize: '12px',

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { TriangleAlert } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
@@ -373,7 +374,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
           color: colors.textSecondary,
           lineHeight: '1.5',
         }}>
-          ⚠ {dataVersionLabel.version}{translateUI('approxNote', language)}<br />
+          <TriangleAlert size={11} style={{ verticalAlign: 'text-bottom', marginRight: 3 }} />{dataVersionLabel.version}{translateUI('approxNote', language)}<br />
           {translateUI('timetableUpdatedAt', language, { date: dataVersionLabel.updatedAt })}　{translateUI('timetableDisclaimerNote', language)}
         </div>
       )}

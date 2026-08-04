@@ -1,4 +1,5 @@
 import React from 'react';
+import { MapPin, RefreshCw, CircleDot } from 'lucide-react';
 import { routeNames, routeColors } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI, translateRoute, translateStation } from '../../utils/translation'
@@ -125,7 +126,7 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
               {/* 出発駅（最初のセグメントのみ） */}
               {i === 0 && fromName && (
                 <div style={{ fontWeight: 'bold', color: '#4CAF50', fontSize: '10px' }}>
-                  🟢 {translateStation(fromName, language)}
+                  <CircleDot size={12} style={{ verticalAlign: 'text-bottom' }} /> {translateStation(fromName, language)}
                 </div>
               )}
               {/* 路線 */}
@@ -142,7 +143,7 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
                   color: isLast ? '#F44336' : colors.text,
                   fontSize: '10px',
                 }}>
-                  {isLast ? '🔴' : '🔄'} {translateStation(toName, language)}
+                  {isLast ? <MapPin size={12} style={{ verticalAlign: 'text-bottom' }} /> : <RefreshCw size={12} style={{ verticalAlign: 'text-bottom' }} />} {translateStation(toName, language)}
                   {!isLast && <span style={{ fontSize: '9px', fontWeight: 'normal', color: colors.textSecondary, marginLeft: '3px' }}>乗換</span>}
                 </div>
               )}

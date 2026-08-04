@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { ArrowLeftRight } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
@@ -498,7 +499,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = colors.surface; }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
               >
-                ⇆
+                <ArrowLeftRight size={14} />
               </button>
             </div>
 

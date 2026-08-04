@@ -1,4 +1,5 @@
 import React from 'react';
+import { TrainFront } from 'lucide-react';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
@@ -101,7 +102,7 @@ const LegendDisplayOptions: React.FC<LegendDisplayOptionsProps> = ({
               onChange={(e) => onTrainTypeViewChange(e.target.checked)}
               style={checkboxInput(colors)}
             />
-            🚆 列車種別表示モード
+            <TrainFront size={13} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />列車種別表示モード
           </label>
         </div>
       )}

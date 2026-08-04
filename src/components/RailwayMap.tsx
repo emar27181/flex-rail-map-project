@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Maximize2, Minimize2, Sun, Moon, Info } from 'lucide-react';
+import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock } from 'lucide-react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
@@ -1037,18 +1037,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         </div>
         {methodology.collectionMethod && (
           <div style={{ marginBottom: '6px' }}>
-            <div style={{ fontWeight: 'bold', color: colors.primary, marginBottom: '2px' }}>📋 収集方法</div>
+            <div style={{ fontWeight: 'bold', color: colors.primary, marginBottom: '2px' }}><ClipboardList size={12} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />収集方法</div>
             <div style={{ color: colors.text }}>{methodology.collectionMethod}</div>
           </div>
         )}
         <div style={{ marginBottom: effectiveUrl ? '6px' : '0' }}>
-          <div style={{ fontWeight: 'bold', color: colors.primary, marginBottom: '2px' }}>🔧 補完ロジック</div>
+          <div style={{ fontWeight: 'bold', color: colors.primary, marginBottom: '2px' }}><Wrench size={12} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />補完ロジック</div>
           <div style={{ color: colors.text }}>{methodology.interpolationLogic}</div>
         </div>
         {effectiveUrl && (
           <a href={effectiveUrl} target="_blank" rel="noopener noreferrer"
             style={{ display: 'inline-block', marginTop: '4px', fontSize: '10px', color: '#4a90d9', textDecoration: 'underline' }}>
-            🔗 {src?.title ?? 'データソースを開く'}
+            <LinkIcon size={12} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />{src?.title ?? 'データソースを開く'}
           </a>
         )}
       </div>
@@ -4193,7 +4193,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               pointerEvents: 'none',
               whiteSpace: 'nowrap',
             }}>
-              🚧 バブルマップ — 実装中
+              <Construction size={14} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />バブルマップ — 実装中
             </div>
           )}
 
@@ -4416,7 +4416,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               whiteSpace: 'nowrap',
             }}>
               <span style={{ fontWeight: 'bold', color: '#9ACD32' }}>
-                🚃 {Object.keys(DEMO_LINE_COLORS).filter(k => visibleRoutes.has(k as any)).length}/{Object.keys(DEMO_LINE_COLORS).length}路線
+                <TrainFront size={13} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />{Object.keys(DEMO_LINE_COLORS).filter(k => visibleRoutes.has(k as any)).length}/{Object.keys(DEMO_LINE_COLORS).length}路線
               </span>
               <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 'bold', minWidth: '42px', textAlign: 'center' }}>
                 {formatDemoTime(trainDemoMinutes)}
@@ -4471,7 +4471,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   padding: '2px 6px', cursor: 'pointer', fontSize: '11px',
                 }}
               >
-                🕐
+                <Clock size={13} />
               </button>
               <button
                 onClick={() => { trainDemoMinutesRef.current = 5 * 60; setTrainDemoMinutes(5 * 60); setTrainDemoPlaying(false); }}
@@ -4756,7 +4756,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       textAlign: 'center'
                     }}>
                       <div style={{ fontSize: '12px', color: colors.text }}>
-                        <div style={{ marginBottom: '12px', fontWeight: 'bold' }}>🚆 列車種別表示</div>
+                        <div style={{ marginBottom: '12px', fontWeight: 'bold' }}><TrainFront size={14} style={{ verticalAlign: 'text-bottom', marginRight: 5 }} />列車種別表示</div>
 
                         <div style={{ marginBottom: '8px', textAlign: 'left' }}>
                           <label style={{ fontSize: '11px', color: colors.textSecondary, display: 'block', marginBottom: '4px' }}>
@@ -4888,7 +4888,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               buttons={[
                 {
                   key: 'settings',
-                  icon: '⚙️',
+                  icon: <Settings size={16} />,
                   label: translateUI('detailSettings', currentLanguage),
                   content: (
                     <>

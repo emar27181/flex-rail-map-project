@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Map, MousePointerClick, CircleCheck } from 'lucide-react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 
 // Yokohama → Shinjuku corridor routes only
@@ -27,21 +28,21 @@ const KEY_STATIONS = [
 const TUTORIAL_STEPS = [
   {
     step: 1,
-    emoji: '🗺️',
+    icon: <Map size={28} />,
     title: '横浜 → 新宿の路線図',
     desc: '現在2路線を表示中。左の路線パネルをクリックすると、路線を追加・非表示にできます。',
     panelHighlight: false,
   },
   {
     step: 2,
-    emoji: '👆',
+    icon: <MousePointerClick size={28} />,
     title: '路線をクリックして追加しよう',
     desc: '灰色（非表示）の路線をクリックしてみてください。地図に追加されます！',
     panelHighlight: true,
   },
   {
     step: 3,
-    emoji: '✅',
+    icon: <CircleCheck size={28} />,
     title: '自分だけのシンプル路線図！',
     desc: '必要な路線だけを選択することで、遅延・運休時も自分で乗り換えを判断できます。',
     panelHighlight: false,
