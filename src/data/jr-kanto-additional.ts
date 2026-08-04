@@ -26,18 +26,5 @@ export const jrUtsunomiyaLine: Station[] = [
   { name: '宇都宮', lat: 36.559807, lng: 139.898743 },
 ];
 
-// JR根岸線: 横浜→大船
-export const jrNegishiLine: Station[] = [
-  { name: '横浜', lat: 35.465407, lng: 139.622253, timeToNext: 3 },
-  { name: '桜木町', lat: 35.451100, lng: 139.630880, timeToNext: 2 },
-  { name: '関内', lat: 35.444220, lng: 139.635987, timeToNext: 2 },
-  { name: '石川町', lat: 35.438907, lng: 139.642917, timeToNext: 2 },
-  { name: '山手', lat: 35.426800, lng: 139.646470, timeToNext: 3 },
-  { name: '根岸', lat: 35.415860, lng: 139.636095, timeToNext: 3 },
-  { name: '磯子', lat: 35.400575, lng: 139.618470, timeToNext: 3 },
-  { name: '新杉田', lat: 35.386800, lng: 139.619435, timeToNext: 3 },
-  { name: '洋光台', lat: 35.378810, lng: 139.596937, timeToNext: 3 },
-  { name: '港南台', lat: 35.375147, lng: 139.576177, timeToNext: 3 },
-  { name: '本郷台', lat: 35.367855, lng: 139.550115, timeToNext: 3 },
-  { name: '大船', lat: 35.352520, lng: 139.531393 },
-];
+// JR根岸線(横浜〜大船)は keihin-tohoku.ts の keihinTohoku が
+// 大宮〜大船として全区間を含むため、重複定義を削除した。

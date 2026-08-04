@@ -73,7 +73,9 @@ import { jrItoLine, izukyuLine, hakoneTozan, izuHakoneSunzu } from './izu-hakone
 import { keikyuKurihamaLine, keikyuAirportLine } from './keikyu-branch-lines';
 import { keiseiOshiageLine, hokusouLine } from './keisei-branch-lines';
 import { saitamaRailway, newShuttle } from './saitama-lines';
-import { jrUtsunomiyaLine, jrNegishiLine } from './jr-kanto-additional';
+// 根岸線(横浜〜大船)は keihinTohoku が大宮〜大船として全区間を含むため登録しない
+// （同一区間・同一色の重複描画になり、凡例トグルが1回で効かなくなる）
+import { jrUtsunomiyaLine } from './jr-kanto-additional';
 import { tobuNikkoLine } from './tobu-nikko-line';
 import { shonanMonorail } from './shonan-monorail';
 import { sotetsuJRLine } from './sotetsu-jr-line';
@@ -262,7 +264,6 @@ export const routes = {
   saitamaRailway,
   newShuttle,
   jrUtsunomiyaLine,
-  jrNegishiLine,
   tobuNikkoLine,
   shonanMonorail,
   sotetsuJRLine,
@@ -845,7 +846,6 @@ export const routeColors = {
   saitamaRailway: '#2E8B57', // Saitama Railway green
   newShuttle: '#FF6347', // New Shuttle tomato
   jrUtsunomiyaLine: '#F68B1E', // JR Utsunomiya Line orange
-  jrNegishiLine: '#00B5E2', // JR Negishi Line blue
   tobuNikkoLine: '#F68B1E', // Tobu Nikko Line orange
   shonanMonorail: '#2E8B57', // Shonan Monorail green
   sotetsuJRLine: '#2E8B57', // Sotetsu-JR Direct Line green
@@ -1426,7 +1426,6 @@ export const routeNames = {
   saitamaRailway: '埼玉高速鉄道',
   newShuttle: 'ニューシャトル',
   jrUtsunomiyaLine: 'JR宇都宮線',
-  jrNegishiLine: 'JR根岸線',
   tobuNikkoLine: '東武日光線',
   shonanMonorail: '湘南モノレール',
   sotetsuJRLine: '相鉄・JR直通線',

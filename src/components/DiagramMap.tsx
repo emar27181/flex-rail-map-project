@@ -11,7 +11,7 @@ const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
   'yamanote', 'chuo', 'keihinTohoku', 'jrSobuLine', 'jrJobanLine',
   'jrSaikyoLine', 'jrTakasakiLine', 'jrTokaidoMainLine', 'jrMusashinoLine',
   'jrYokohamaLine', 'jrNanbuLine', 'jrSobuChiba', 'jrKeiyo',
-  'jrOmeLine', 'jrHachikoLine', 'jrItsukaichiLine', 'jrUtsunomiyaLine', 'jrNegishiLine',
+  'jrOmeLine', 'jrHachikoLine', 'jrItsukaichiLine', 'jrUtsunomiyaLine',
   'yokosukaLine',
   'ginzaLine', 'marunouchiLine', 'hibiyaLine', 'tozaiLine', 'chiyodaLine',
   'yurakuchoLine', 'hanzomonLine', 'nambokuLine', 'fukutoshinLine',

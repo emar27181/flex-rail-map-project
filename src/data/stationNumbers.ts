@@ -99,11 +99,7 @@ export const stationNumbers: Partial<Record<RouteKey, Record<string, string>>> =
     '相原': 'JH17', '八王子みなみ野': 'JH18', '片倉': 'JH19', '八王子': 'JH20',
   },
 
-  jrNegishiLine: {
-    '大船': 'JK01', '本郷台': 'JK02', '港南台': 'JK03', '洋光台': 'JK04',
-    '新杉田': 'JK05', '磯子': 'JK06', '根岸': 'JK07', '山手': 'JK08',
-    '石川町': 'JK09', '関内': 'JK10', '桜木町': 'JK11', '横浜': 'JK12',
-  },
+  // 根岸線(JK01〜JK12)は keihinTohoku 側に JK47〜JK01 として全て含まれるため削除
 
   jrUtsunomiyaLine: {
     '上野': 'JU02', '赤羽': 'JU04', '浦和': 'JU05', 'さいたま新都心': 'JU06',
