@@ -47,7 +47,7 @@ import {
   type Departure,
 } from '../data/timetableData';
 import { FS } from '../constants/ui';
-import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS } from '../utils/trainDetector';
+import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE } from '../utils/trainDetector';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
 
 // デバッグ用のwindow拡張
@@ -274,13 +274,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
         const now = Date.now();
         const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: pos.timestamp };
-        gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-5);
+        gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-GPS_HISTORY_SIZE);
 
         if (gpsHistoryRef.current.length >= 2) {
           try {
             const elapsed = now - gpsSessionStartRef.current;
             let detected: DetectedRoute | null;
-            if (elapsed < 5000) {
+            if (elapsed < DETECTION_WARMUP_MS) {
               detected = detectCurrentRoute(gpsHistoryRef.current);
             } else {
               detected = detectRouteWithHistory(gpsHistoryRef.current, visitHistoryRef.current);
@@ -2795,13 +2795,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
         const now = Date.now();
         const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: position.timestamp };
-        gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-5);
+        gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-GPS_HISTORY_SIZE);
 
         if (gpsHistoryRef.current.length >= 2) {
           try {
             const elapsed = now - gpsSessionStartRef.current;
             let detected: DetectedRoute | null;
-            if (elapsed < 5000) {
+            if (elapsed < DETECTION_WARMUP_MS) {
               detected = detectCurrentRoute(gpsHistoryRef.current);
             } else {
               detected = detectRouteWithHistory(gpsHistoryRef.current, visitHistoryRef.current);

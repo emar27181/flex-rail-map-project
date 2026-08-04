@@ -25,6 +25,10 @@ export type DetectedRoute = {
   nextStation: string;
   estimatedMinutes: number | null;
   confidence: number;
+  /** 停車中（速度がほぼ0）かどうか */
+  isStopped: boolean;
+  /** 停車中に駅構内にいる場合の現在駅名。走行中や駅から離れている場合は null */
+  currentStation: string | null;
 };
 
 const EARTH_R = 6371000;
@@ -69,6 +73,73 @@ const STATION_PASS_DIST_M = 80;   // 通過時の駅判定距離
 const VISIT_DEDUP_MS = 30000;     // 同一駅の重複記録を防ぐウィンドウ
 
 /**
+ * 路線推定のウォームアップ時間。
+ * この時間はGPSサンプルを蓄積し、直近2点だけの瞬間値ではなく
+ * 時間窓全体から速度・進行方向を求めることでGPSノイズの影響を抑える。
+ */
+export const DETECTION_WARMUP_MS = 15000;
+
+/** 速度・進行方向を求める時間窓（ウォームアップと揃える） */
+const MOTION_WINDOW_MS = DETECTION_WARMUP_MS;
+
+/** GPS履歴の保持数（1秒間隔でも MOTION_WINDOW_MS を十分カバーする長さ） */
+export const GPS_HISTORY_SIZE = 30;
+
+/**
+ * 時間窓全体から速度と進行方向を推定する。
+ *
+ * 直近2点だけで計算するとGPSの揺らぎで方向が反転しうるため、
+ * 窓の先頭と末尾を結んだ変位から求めて安定させる。
+ */
+function estimateMotion(gpsHistory: GpsPoint[]): { speedMs: number; heading: number | null } {
+  if (gpsHistory.length < 2) return { speedMs: 0, heading: null };
+
+  const cur = gpsHistory[gpsHistory.length - 1];
+
+  // 時間窓に入る最も古い点を探す（窓内に無ければ直前の点にフォールバック）
+  let base = gpsHistory[gpsHistory.length - 2];
+  for (let i = 0; i < gpsHistory.length - 1; i++) {
+    if (cur.timestamp - gpsHistory[i].timestamp <= MOTION_WINDOW_MS) {
+      base = gpsHistory[i];
+      break;
+    }
+  }
+
+  const dt = (cur.timestamp - base.timestamp) / 1000;
+  if (dt <= 0.5) return { speedMs: 0, heading: null };
+
+  const dist = haversineDistance(base.lat, base.lng, cur.lat, cur.lng);
+  const speedMs = dist / dt;
+
+  let heading: number | null = null;
+  if (speedMs >= MIN_SPEED_MS) {
+    const dLat = cur.lat - base.lat;
+    const dLng = (cur.lng - base.lng) * Math.cos(toRad((cur.lat + base.lat) / 2));
+    heading = Math.atan2(dLng, dLat);
+  }
+
+  return { speedMs, heading };
+}
+
+/** 現在地が停車中とみなせる駅を返す（停車中でなければ null） */
+function findStoppedStation(
+  lat: number,
+  lng: number,
+  speedMs: number,
+  stas: Station[]
+): string | null {
+  if (speedMs >= STOP_SPEED_MS) return null;
+
+  let minDist = Infinity;
+  let nearest: string | null = null;
+  for (const s of stas) {
+    const d = haversineDistance(lat, lng, s.lat, s.lng);
+    if (d < minDist) { minDist = d; nearest = s.name; }
+  }
+  return minDist <= STATION_STOP_DIST_M ? nearest : null;
+}
+
+/**
  * GPS位置情報のみによる基本的な路線推定（初期5秒間用）
  */
 export function detectCurrentRoute(gpsHistory: GpsPoint[]): DetectedRoute | null {
@@ -76,22 +147,8 @@ export function detectCurrentRoute(gpsHistory: GpsPoint[]): DetectedRoute | null
 
   const cur = gpsHistory[gpsHistory.length - 1];
 
-  let heading: number | null = null;
-  let speedMs = 0;
-
-  if (gpsHistory.length >= 2) {
-    const prev = gpsHistory[gpsHistory.length - 2];
-    const dt = (cur.timestamp - prev.timestamp) / 1000;
-    if (dt > 0.5) {
-      const dist = haversineDistance(prev.lat, prev.lng, cur.lat, cur.lng);
-      speedMs = dist / dt;
-      if (speedMs >= MIN_SPEED_MS) {
-        const dLat = cur.lat - prev.lat;
-        const dLng = (cur.lng - prev.lng) * Math.cos(toRad((cur.lat + prev.lat) / 2));
-        heading = Math.atan2(dLng, dLat);
-      }
-    }
-  }
+  // 直近2点ではなく時間窓全体から求めることでGPSノイズによる方向反転を抑える
+  const { speedMs, heading } = estimateMotion(gpsHistory);
 
   let bestScore = -1;
   let best: DetectedRoute | null = null;
@@ -140,6 +197,8 @@ export function detectCurrentRoute(gpsHistory: GpsPoint[]): DetectedRoute | null
           nextStation: nextSt.name,
           estimatedMinutes: estMin > 0 ? estMin : 1,
           confidence: score,
+          isStopped: speedMs < STOP_SPEED_MS,
+          currentStation: findStoppedStation(cur.lat, cur.lng, speedMs, stas),
         };
       }
     }
@@ -254,20 +313,13 @@ export function detectRouteWithHistory(
   const termIdx = bestDir === 0 ? stas.length - 1 : 0;
   const nextSt = stas[nextIdx];
 
-  // 速度推定（GPSから）
-  let speedMs = DEFAULT_SPEED_MS;
-  if (gpsHistory.length >= 2) {
-    const prev = gpsHistory[gpsHistory.length - 2];
-    const dt = (cur.timestamp - prev.timestamp) / 1000;
-    if (dt > 0.5) {
-      const dist = haversineDistance(prev.lat, prev.lng, cur.lat, cur.lng);
-      const sp = dist / dt;
-      if (sp >= MIN_SPEED_MS) speedMs = sp;
-    }
-  }
+  // 速度推定（時間窓全体から。停車判定にも使うため実測値をそのまま保持する）
+  const { speedMs: measuredSpeed } = estimateMotion(gpsHistory);
+  // 所要時間の算出には停車中や低速時に発散しないよう下限を設ける
+  const speedForEta = measuredSpeed >= MIN_SPEED_MS ? measuredSpeed : DEFAULT_SPEED_MS;
 
   const distToNext = haversineDistance(cur.lat, cur.lng, nextSt.lat, nextSt.lng);
-  const estMin = Math.round(distToNext / speedMs / 60);
+  const estMin = Math.round(distToNext / speedForEta / 60);
 
   return {
     routeKey: bestRouteKey,
@@ -278,6 +330,8 @@ export function detectRouteWithHistory(
     nextStation: nextSt.name,
     estimatedMinutes: estMin > 0 ? estMin : 1,
     confidence: Math.min(bestScore / 8, 1),
+    isStopped: measuredSpeed < STOP_SPEED_MS,
+    currentStation: findStoppedStation(cur.lat, cur.lng, measuredSpeed, stas),
   };
 }
 
@@ -320,5 +374,8 @@ export function makeManualRoute(
     nextStation: nextSt.name,
     estimatedMinutes: estMin > 0 ? estMin : 1,
     confidence: 1,
+    // 手動設定は現在地の速度情報を持たないため停車判定は行わない
+    isStopped: false,
+    currentStation: null,
   };
 }
