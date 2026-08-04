@@ -18,6 +18,11 @@ export default defineConfig({
     {
       name: 'desktop-chrome',
       use: { ...devices['Desktop Chrome'] },
+      // mobile-layout.test.ts はモバイル端末コンテキスト（タッチ・セーフエリア・
+      // デバイス解像度）を前提に書かれており、デスクトップブラウザで動かすと
+      // アプリの不具合ではない失敗が出る。ファイル内でビューポートを切り替えて
+      // デスクトップ幅の挙動も検証しているため、mobile-chrome側だけで実行すれば足りる。
+      testIgnore: /mobile-layout\.test\.ts$/,
     },
   ],
   webServer: process.env['TEST_URL']
