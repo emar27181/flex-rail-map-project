@@ -1391,9 +1391,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     fontSize: '10px',
                     color: isActive ? colors.text : isJourney ? colors.text : colors.textSecondary,
                     fontWeight: isJourney ? 'bold' : 'normal',
-                    whiteSpace: 'normal', wordBreak: 'keep-all',
+                    whiteSpace: 'normal', wordBreak: 'keep-all', overflowWrap: 'break-word',
                     opacity: hasData ? 1 : 0.5,
                     flex: 1,
+                    minWidth: 0,
                     lineHeight: 1.3,
                   }}>
                     {translateRoute(routeNames[rk as RouteKey] ?? rk, currentLanguage)}
