@@ -639,6 +639,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               onManualRouteChange={onManualTrainRouteChange}
               userLocation={userLocation}
               hasGps={hasGps}
+              language={language}
             />
           )}
 

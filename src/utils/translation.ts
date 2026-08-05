@@ -2477,6 +2477,64 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   catWork: {
     japanese: "仕事",
     english: "Work"
+  },
+
+  // 現在地からの路線検出パネル (TrainStatusPanel)
+  detectingRoute: {
+    japanese: "路線を検出中",
+    english: "Detecting route..."
+  },
+  manualSetRoute: {
+    japanese: "手動設定",
+    english: "Manual"
+  },
+  selectRouteTitle: {
+    japanese: "路線を選択",
+    english: "Select route"
+  },
+  searchRoutePlaceholder: {
+    japanese: "路線名を検索...",
+    english: "Search route name..."
+  },
+  manualBadge: {
+    japanese: "手動",
+    english: "Manual"
+  },
+  currentStationLabel: {
+    japanese: "現在の駅",
+    english: "Current station"
+  },
+  stoppedLabel: {
+    japanese: "停車中",
+    english: "Stopped"
+  },
+  nextStationLabel: {
+    japanese: "次の駅",
+    english: "Next station"
+  },
+  flipDirectionTitle: {
+    japanese: "方向を逆転",
+    english: "Reverse direction"
+  },
+  flipDirection: {
+    japanese: "方向反転",
+    english: "Flip"
+  },
+  changeRoute: {
+    japanese: "路線変更",
+    english: "Change route"
+  },
+  resetToAutoDetect: {
+    japanese: "自動検出に戻す",
+    english: "Back to auto-detect"
+  },
+  boundForStation: {
+    japanese: "{station}方面",
+    english: "Bound for {station}"
+  },
+  approxMinutesLabel: {
+    japanese: "約 {minutes} 分",
+    english: "approx. {minutes} min"
   }
 };
 
@@ -2696,6 +2754,22 @@ export const uiChinese: Record<string, string> = {
   catSafety: "治安",
   catEnvironment: "环境",
   catWork: "工作",
+
+  // 现在地からの路线検出パネル
+  detectingRoute: "正在检测路线",
+  manualSetRoute: "手动设置",
+  selectRouteTitle: "选择路线",
+  searchRoutePlaceholder: "搜索路线名...",
+  manualBadge: "手动",
+  currentStationLabel: "当前车站",
+  stoppedLabel: "停车中",
+  nextStationLabel: "下一站",
+  flipDirectionTitle: "反转方向",
+  flipDirection: "反转方向",
+  changeRoute: "更改路线",
+  resetToAutoDetect: "恢复自动检测",
+  boundForStation: "开往{station}方向",
+  approxMinutesLabel: "约 {minutes} 分钟",
 };
 
 // 韓国語UI翻訳
@@ -2912,6 +2986,22 @@ export const uiKorean: Record<string, string> = {
   catSafety: "치안",
   catEnvironment: "환경",
   catWork: "직업",
+
+  // 현재 위치 기반 노선 감지 패널
+  detectingRoute: "노선 감지 중",
+  manualSetRoute: "수동 설정",
+  selectRouteTitle: "노선 선택",
+  searchRoutePlaceholder: "노선 이름 검색...",
+  manualBadge: "수동",
+  currentStationLabel: "현재 역",
+  stoppedLabel: "정차 중",
+  nextStationLabel: "다음 역",
+  flipDirectionTitle: "방향 전환",
+  flipDirection: "방향 전환",
+  changeRoute: "노선 변경",
+  resetToAutoDetect: "자동 감지로 복귀",
+  boundForStation: "{station} 방면",
+  approxMinutesLabel: "약 {minutes}분",
 };
 
 // 翻訳ヘルパー関数
