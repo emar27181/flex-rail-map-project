@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ArrowLeftRight, X } from 'lucide-react';
 import { routes, routeColors, routeNames } from '../data/routes';
 import type { RouteKey } from '../data/routes';
@@ -31,6 +31,22 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
   const colors = getThemeColors(theme);
   const [showOverride, setShowOverride] = useState(false);
   const [overrideSearch, setOverrideSearch] = useState('');
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const searchInputFocusedRef = useRef(false);
+
+  // iOSなどでソフトキーボード表示時に検索欄が隠れないよう、
+  // visualViewportのリサイズに合わせてフォーカス中の欄までスクロールする
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return;
+    const vv = window.visualViewport;
+    const handleResize = () => {
+      if (searchInputFocusedRef.current && searchInputRef.current) {
+        searchInputRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    };
+    vv.addEventListener('resize', handleResize);
+    return () => vv.removeEventListener('resize', handleResize);
+  }, []);
 
   const effective = manualRoute ?? detectedRoute;
   const isManual = manualRoute !== null;
@@ -116,9 +132,12 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
           ><X size={16} /></button>
         </div>
         <input
+          ref={searchInputRef}
           type="text"
           value={overrideSearch}
           onChange={e => setOverrideSearch(e.target.value)}
+          onFocus={() => { searchInputFocusedRef.current = true; }}
+          onBlur={() => { searchInputFocusedRef.current = false; }}
           placeholder={translateUI('searchRoutePlaceholder', language)}
           style={{
             width: '100%',

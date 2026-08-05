@@ -658,6 +658,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 type="time"
                 value={departureTime ?? ''}
                 onChange={e => onDepartureTimeChange(e.target.value)}
+                onFocus={(e) => { focusedInputRef.current = e.currentTarget; }}
+                onBlur={() => { focusedInputRef.current = null; }}
                 style={{
                   border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
