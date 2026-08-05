@@ -108,6 +108,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   }, [theme]);
 
   const [mapCenter, setMapCenter] = useState<[number, number]>([35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
+  const [mapZoom, setMapZoom] = useState(12);
   const [viewCenter, setViewCenter] = useState<[number, number]>([35.57765, 139.66165]); // Updates on moveend/zoomend
   const [viewBounds, setViewBounds] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
   const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
@@ -257,6 +258,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
   const autoSetDepartureRef = useRef(false);
+  const hasCenteredOnUserRef = useRef(false);
   const isFirstPositionRef = useRef(true);
   const locationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -340,6 +342,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       autoSetDepartureRef.current = true;
     }
   }, [userLocation, isManualDeparture]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 初回の位置情報取得時、地図を現在地中心に移動する。
+  // これまでは現在地に応じて最寄り路線が選択される一方で、地図の表示範囲自体は
+  // 横浜〜新宿間の固定デフォルト位置のままだったため、ユーザーが遠方にいる場合
+  // 自分の位置も周辺の路線も画面外になっていた。
+  // ズーム13は「駅名や乗換が読み取れる」かつ「近隣の複数路線が視界に収まる」
+  // 広さの妥協点（駅間ルート確定時のfitBoundsのmaxZoomと同じ値で統一）。
+  useEffect(() => {
+    if (!userLocation || hasCenteredOnUserRef.current) return;
+    hasCenteredOnUserRef.current = true;
+    setMapCenter(userLocation);
+    setMapZoom(13);
+    // マウント前(mapRef.current が null)は上の state 更新が初期表示に反映される。
+    // マウント済みなら setView で即座に反映する（両方呼んでおくことでレースを回避）。
+    mapRef.current?.setView(userLocation, 13);
+  }, [userLocation]);
 
   // 日本語以外はデフォルトで駅コードを表示
   useEffect(() => {
@@ -2964,6 +2982,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // mapRefに地図インスタンスを保存、初回boundsを取得
     if (map && !mapRef.current) {
       mapRef.current = map;
+      // E2Eテストがコンテナ要素経由でLeafletの状態を検証できるようにする
+      // （tests/e2e/*.test.ts が `.leaflet-container` の _leaflet_map を参照する）
+      (map.getContainer() as unknown as { _leaflet_map?: typeof map })._leaflet_map = map;
       const b = map.getBounds();
       setViewBounds({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
 
@@ -4000,7 +4021,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           {(mapViewMode === 'realistic' || mapViewMode === 'bubble') ? (
             <MapContainer
               center={mapCenter}
-              zoom={12}
+              zoom={mapZoom}
               style={{
                 height: '100%', width: '100%',
                 backgroundColor: mapViewMode === 'bubble'
