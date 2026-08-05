@@ -60,3 +60,75 @@ export function readableTextColor(background: string): string {
 
   return contrastRatio(bg, white) >= contrastRatio(bg, dark) ? LIGHT_TEXT : DARK_TEXT;
 }
+
+/**
+ * 白文字用に背景を暗くするときの、RGB スケール係数の下限。
+ *
+ * 0.62 は「明るいブランド色でも色として同一と判断できる範囲」で決めた値。
+ * これより小さくすると総武線の黄色などが別の色（黄土色）に見えてしまう。
+ */
+export const MIN_DARKEN_SCALE = 0.62;
+
+/** [r,g,b] を #RRGGBB に戻す */
+function toHex([r, g, b]: [number, number, number]): string {
+  const h = (n: number) => Math.round(Math.max(0, Math.min(255, n))).toString(16).padStart(2, '0');
+  return `#${h(r)}${h(g)}${h(b)}`;
+}
+
+/**
+ * 白文字を載せたときに目標コントラスト比を満たすまで、背景色を必要最小限だけ暗くする。
+ *
+ * ダークモードでは路線色を明るく補正しているため、白文字とのコントラストが
+ * 落ちて readableTextColor が黒文字を返し、路線ごとに白文字と黒文字が
+ * 混在して見た目が不統一になっていた。
+ *
+ * 文字色は白に統一したまま可読性を確保するため、RGB を一律の係数で
+ * スケールして輝度だけを落とす。色相と彩度の比率は保たれるので、
+ * 人間には「同じ路線色のまま少し濃くなった」程度にしか見えない。
+ *
+ * ただし総武線の黄色(#FED100)のような明るいブランド色は、白字で 4.5:1 を
+ * 満たすところまで暗くすると元の路線色とは別の色に見えてしまう。
+ * そのため暗くする量に下限 (minScale) を設けて色の同一性を優先し、
+ * それでも比が足りない分は駅ラベル側の文字ハロー（縁取り）で補う。
+ *
+ * @param background 元の背景色 (#RGB / #RRGGBB)
+ * @param targetRatio 目標コントラスト比。既定は WCAG AA の 4.5:1
+ * @param minScale RGBを縮小する係数の下限。小さいほど暗くできるが色が変わる
+ */
+export function darkenForWhiteText(background: string, targetRatio = 4.5, minScale = MIN_DARKEN_SCALE): string {
+  const bg = parseHexColor(background);
+  if (!bg) return background;
+
+  const white: [number, number, number] = [255, 255, 255];
+  if (contrastRatio(bg, white) >= targetRatio) return background;
+
+  // 係数 k で RGB をスケールし、条件を満たす最大の k（＝元色に最も近い色）を二分探索する。
+  // 判定は必ず「丸めたあとの実際の出力色」で行う。連続値で判定すると、
+  // toHex の丸め上げによって最終的な色が目標比をわずかに下回ることがある。
+  const scaledHex = (k: number) => toHex([bg[0] * k, bg[1] * k, bg[2] * k]);
+  const meets = (k: number) => contrastRatio(parseHexColor(scaledHex(k))!, white) >= targetRatio;
+
+  // 下限まで暗くしても届かない色は、色の同一性を優先して下限で止める
+  if (!meets(minScale)) return scaledHex(minScale);
+
+  let lo = minScale;
+  let hi = 1;
+  for (let i = 0; i < 20; i++) {
+    const mid = (lo + hi) / 2;
+    if (meets(mid)) {
+      lo = mid;
+    } else {
+      hi = mid;
+    }
+  }
+
+  return scaledHex(lo);
+}
+
+/** 2色が目標コントラスト比（既定 WCAG AA の 4.5:1）を満たすか */
+export function meetsContrast(background: string, text: string, targetRatio = 4.5): boolean {
+  const bg = parseHexColor(background);
+  const fg = parseHexColor(text);
+  if (!bg || !fg) return false;
+  return contrastRatio(bg, fg) >= targetRatio;
+}

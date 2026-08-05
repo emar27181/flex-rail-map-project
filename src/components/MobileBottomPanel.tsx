@@ -12,6 +12,7 @@
  */
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { X } from 'lucide-react';
 import { getThemeColors } from '../contexts/ThemeContext';
 
 // ── 寸法定数 ─────────────────────────────────────────────────────────
@@ -54,7 +55,8 @@ export type PopoverKey = 'station' | 'settings';
 
 export interface FloatingButtonDef {
   key: PopoverKey;
-  icon: string;
+  /** アイコン要素。絵文字ではなく lucide-react のアイコンコンポーネントを渡す */
+  icon: React.ReactNode;
   label: string;
   content: React.ReactNode;
 }
@@ -222,8 +224,9 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
             borderBottom: `1px solid ${colors.border}`,
             flexShrink: 0,
           }}>
-            <span style={{ fontSize: 14, fontWeight: 'bold', color: colors.text }}>
-              {activeButton.icon} {activeButton.label}
+            <span style={{ fontSize: 14, fontWeight: 'bold', color: colors.text, display: 'flex', alignItems: 'center', gap: 6 }}>
+              {activeButton.icon}
+              {activeButton.label}
             </span>
             <button
               onClick={close}
@@ -240,7 +243,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
-              ✕
+              <X size={18} />
             </button>
           </div>
 
@@ -298,7 +301,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
-              {btn.icon && <span style={{ fontSize: 16 }}>{btn.icon}</span>}
+              {btn.icon && <span style={{ display: 'flex', alignItems: 'center' }}>{btn.icon}</span>}
               <span>{btn.label}</span>
             </button>
           );

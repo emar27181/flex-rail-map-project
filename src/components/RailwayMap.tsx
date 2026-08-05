@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Maximize2, Minimize2, Sun, Moon, Info } from 'lucide-react';
+import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock } from 'lucide-react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
@@ -47,7 +47,7 @@ import {
   type Departure,
 } from '../data/timetableData';
 import { FS } from '../constants/ui';
-import { readableTextColor } from '../utils/contrast';
+import { readableTextColor, darkenForWhiteText, meetsContrast, LIGHT_TEXT } from '../utils/contrast';
 import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE } from '../utils/trainDetector';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
 
@@ -108,6 +108,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   }, [theme]);
 
   const [mapCenter, setMapCenter] = useState<[number, number]>([35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
+  const [mapZoom, setMapZoom] = useState(12);
   const [viewCenter, setViewCenter] = useState<[number, number]>([35.57765, 139.66165]); // Updates on moveend/zoomend
   const [viewBounds, setViewBounds] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
   const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
@@ -257,6 +258,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
   const autoSetDepartureRef = useRef(false);
+  const hasCenteredOnUserRef = useRef(false);
   const isFirstPositionRef = useRef(true);
   const locationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -340,6 +342,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       autoSetDepartureRef.current = true;
     }
   }, [userLocation, isManualDeparture]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 初回の位置情報取得時、地図を現在地中心に移動する。
+  // これまでは現在地に応じて最寄り路線が選択される一方で、地図の表示範囲自体は
+  // 横浜〜新宿間の固定デフォルト位置のままだったため、ユーザーが遠方にいる場合
+  // 自分の位置も周辺の路線も画面外になっていた。
+  // ズーム13は「駅名や乗換が読み取れる」かつ「近隣の複数路線が視界に収まる」
+  // 広さの妥協点（駅間ルート確定時のfitBoundsのmaxZoomと同じ値で統一）。
+  useEffect(() => {
+    if (!userLocation || hasCenteredOnUserRef.current) return;
+    hasCenteredOnUserRef.current = true;
+    setMapCenter(userLocation);
+    setMapZoom(13);
+    // マウント前(mapRef.current が null)は上の state 更新が初期表示に反映される。
+    // マウント済みなら setView で即座に反映する（両方呼んでおくことでレースを回避）。
+    mapRef.current?.setView(userLocation, 13);
+  }, [userLocation]);
 
   // 日本語以外はデフォルトで駅コードを表示
   useEffect(() => {
@@ -1037,18 +1055,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         </div>
         {methodology.collectionMethod && (
           <div style={{ marginBottom: '6px' }}>
-            <div style={{ fontWeight: 'bold', color: colors.primary, marginBottom: '2px' }}>📋 収集方法</div>
+            <div style={{ fontWeight: 'bold', color: colors.primary, marginBottom: '2px' }}><ClipboardList size={12} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />収集方法</div>
             <div style={{ color: colors.text }}>{methodology.collectionMethod}</div>
           </div>
         )}
         <div style={{ marginBottom: effectiveUrl ? '6px' : '0' }}>
-          <div style={{ fontWeight: 'bold', color: colors.primary, marginBottom: '2px' }}>🔧 補完ロジック</div>
+          <div style={{ fontWeight: 'bold', color: colors.primary, marginBottom: '2px' }}><Wrench size={12} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />補完ロジック</div>
           <div style={{ color: colors.text }}>{methodology.interpolationLogic}</div>
         </div>
         {effectiveUrl && (
           <a href={effectiveUrl} target="_blank" rel="noopener noreferrer"
             style={{ display: 'inline-block', marginTop: '4px', fontSize: '10px', color: '#4a90d9', textDecoration: 'underline' }}>
-            🔗 {src?.title ?? 'データソースを開く'}
+            <LinkIcon size={12} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />{src?.title ?? 'データソースを開く'}
           </a>
         )}
       </div>
@@ -1588,10 +1606,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const timeH = hasTime ? 12 : 0;
       const iconHeight = baseH + furiganaH + timeH;
       const timeLine = hasTime ? `<div style="font-size:9px;line-height:1;margin-top:1px;font-weight:normal;opacity:0.9">${timeLabel}</div>` : '';
-      const labelTextColor = readableTextColor(displayColor);
+      // ダークモードは駅名を白字に統一する。路線色を明るく補正している関係で
+      // そのままだと白字のコントラストが不足する路線があるため、色相を保ったまま
+      // 必要最小限だけ背景を暗くして 4.5:1 に近づける（見た目は同じ路線色のまま）。
+      // 総武線の黄色のように暗色化の下限まで下げても 4.5:1 に届かない色は、
+      // 地図ラベルで一般的な文字ハロー（暗い縁取り）を重ねて可読性を担保する。
+      // ライトモードは従来どおり背景に応じて白/黒を選ぶ。
+      const labelBgColor = theme === 'dark' ? darkenForWhiteText(displayColor) : displayColor;
+      const labelTextColor = theme === 'dark' ? LIGHT_TEXT : readableTextColor(labelBgColor);
+      const needsHalo = theme === 'dark' && !meetsContrast(labelBgColor, LIGHT_TEXT);
+      const haloCss = needsHalo
+        ? 'text-shadow:0 0 2px rgba(0,0,0,0.95),0 1px 2px rgba(0,0,0,0.9);'
+        : '';
       const htmlContent = hasFurigana || hasTime
-        ? `<div style="background:${displayColor};color:${labelTextColor};padding:1px 3px;border-radius:3px;white-space:nowrap;${borderCss}${shadowCss}text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:${Math.max(7, Math.round(lfs * 0.75))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${lfs}px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
-        : `<div style="background:${displayColor};color:${labelTextColor};padding:1px 3px;border-radius:3px;font-size:${lfs}px;font-weight:bold;white-space:nowrap;${borderCss}${shadowCss}opacity:${opacity}">${displayName}</div>`;
+        ? `<div style="background:${labelBgColor};color:${labelTextColor};${haloCss}padding:1px 3px;border-radius:3px;white-space:nowrap;${borderCss}${shadowCss}text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:${Math.max(7, Math.round(lfs * 0.75))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${lfs}px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
+        : `<div style="background:${labelBgColor};color:${labelTextColor};${haloCss}padding:1px 3px;border-radius:3px;font-size:${lfs}px;font-weight:bold;white-space:nowrap;${borderCss}${shadowCss}opacity:${opacity}">${displayName}</div>`;
       const [oDx, oDy] = stationLabelOffsets.get(station.name) ?? [0, 0];
       // スマホはタッチターゲットを透明パディングで拡張（視覚は変えずにヒット領域を広げる）
       const tp = isMobile ? 8 : 0;
@@ -1773,11 +1802,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         ? `<div style="font-size:${ttFuriganaSize}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:${ttFontSize}px;font-weight:bold;line-height:1">${displayName}</div>`
         : displayName;
 
-      const bgColor1 = heatOverride ?? routeColors[routeKey];
+      const rawBgColor1 = heatOverride ?? routeColors[routeKey];
+      // 駅名ラベルと同じ規則: ダークモードは白字に統一し、背景側で可読性を確保する
+      const bgColor1 = theme === 'dark' ? darkenForWhiteText(rawBgColor1) : rawBgColor1;
       return new DivIcon({
         html: `<div style="
           background:${bgColor1};
-          color:${readableTextColor(bgColor1)};
+          color:${theme === 'dark' ? LIGHT_TEXT : readableTextColor(bgColor1)};
           padding:1px 3px;
           border-radius:2px;
           ${hasFurigana ? '' : `font-size:${ttFontSize}px;font-weight:bold;`}
@@ -2951,6 +2982,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // mapRefに地図インスタンスを保存、初回boundsを取得
     if (map && !mapRef.current) {
       mapRef.current = map;
+      // E2Eテストがコンテナ要素経由でLeafletの状態を検証できるようにする
+      // （tests/e2e/*.test.ts が `.leaflet-container` の _leaflet_map を参照する）
+      (map.getContainer() as unknown as { _leaflet_map?: typeof map })._leaflet_map = map;
       const b = map.getBounds();
       setViewBounds({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
 
@@ -3553,9 +3587,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               top: '10px',
               left: '10px',
               zIndex: 1001,
-              width: '320px',
+              // 全画面時はテーマ切替・記事一覧ボタンを隠している分、
+              // 右端を伸ばして出発駅・到着駅の入力欄を広く使えるようにする
+              width: '400px',
+              maxWidth: 'calc(100% - 20px)',
               maxHeight: 'calc(100% - 20px)',
               overflowY: 'auto',
+              overflowX: 'hidden',
               borderRadius: '8px',
             }}>
               <StationSelector
@@ -3983,7 +4021,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           {(mapViewMode === 'realistic' || mapViewMode === 'bubble') ? (
             <MapContainer
               center={mapCenter}
-              zoom={12}
+              zoom={mapZoom}
               style={{
                 height: '100%', width: '100%',
                 backgroundColor: mapViewMode === 'bubble'
@@ -4176,7 +4214,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               pointerEvents: 'none',
               whiteSpace: 'nowrap',
             }}>
-              🚧 バブルマップ — 実装中
+              <Construction size={14} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />バブルマップ — 実装中
             </div>
           )}
 
@@ -4399,7 +4437,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               whiteSpace: 'nowrap',
             }}>
               <span style={{ fontWeight: 'bold', color: '#9ACD32' }}>
-                🚃 {Object.keys(DEMO_LINE_COLORS).filter(k => visibleRoutes.has(k as any)).length}/{Object.keys(DEMO_LINE_COLORS).length}路線
+                <TrainFront size={13} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />{Object.keys(DEMO_LINE_COLORS).filter(k => visibleRoutes.has(k as any)).length}/{Object.keys(DEMO_LINE_COLORS).length}路線
               </span>
               <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 'bold', minWidth: '42px', textAlign: 'center' }}>
                 {formatDemoTime(trainDemoMinutes)}
@@ -4454,7 +4492,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   padding: '2px 6px', cursor: 'pointer', fontSize: '11px',
                 }}
               >
-                🕐
+                <Clock size={13} />
               </button>
               <button
                 onClick={() => { trainDemoMinutesRef.current = 5 * 60; setTrainDemoMinutes(5 * 60); setTrainDemoPlaying(false); }}
@@ -4739,7 +4777,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       textAlign: 'center'
                     }}>
                       <div style={{ fontSize: '12px', color: colors.text }}>
-                        <div style={{ marginBottom: '12px', fontWeight: 'bold' }}>🚆 列車種別表示</div>
+                        <div style={{ marginBottom: '12px', fontWeight: 'bold' }}><TrainFront size={14} style={{ verticalAlign: 'text-bottom', marginRight: 5 }} />列車種別表示</div>
 
                         <div style={{ marginBottom: '8px', textAlign: 'left' }}>
                           <label style={{ fontSize: '11px', color: colors.textSecondary, display: 'block', marginBottom: '4px' }}>
@@ -4871,7 +4909,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               buttons={[
                 {
                   key: 'settings',
-                  icon: '⚙️',
+                  icon: <Settings size={16} />,
                   label: translateUI('detailSettings', currentLanguage),
                   content: (
                     <>
@@ -5045,7 +5083,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               </button>
             )}
 
-            {/* テーマ切り替え */}
+            {/* テーマ切り替え・記事一覧は全画面時は地図を広く使うため隠す
+                （全画面を解除すると再表示される） */}
+            {!isFullscreen && (
             <button
               onClick={toggleTheme}
               style={{
@@ -5070,8 +5110,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             >
               {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
             </button>
+            )}
 
             {/* 記事一覧 */}
+            {!isFullscreen && (
             <a
               href="/articles"
               style={{
@@ -5094,6 +5136,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             >
               <Info size={18} />
             </a>
+            )}
           </div>
 
 

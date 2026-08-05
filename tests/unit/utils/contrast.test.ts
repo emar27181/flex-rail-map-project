@@ -13,6 +13,8 @@ import {
   readableTextColor,
   DARK_TEXT,
   LIGHT_TEXT,
+  darkenForWhiteText,
+  MIN_DARKEN_SCALE,
 } from '../../../src/utils/contrast';
 import { routeColors } from '../../../src/data/routes';
 
@@ -71,5 +73,80 @@ describe('全路線色での駅ラベル可読性', () => {
       if (ratio < 4.5) failures.push(`${key} (${color}) = ${ratio.toFixed(2)}`);
     }
     expect(failures).toEqual([]);
+  });
+});
+
+describe('darkenForWhiteText（ダークモードの駅名白字統一）', () => {
+  const WHITE: [number, number, number] = [255, 255, 255];
+
+  it('すでに白字で読める色はそのまま返す', () => {
+    // 濃い青。白字とのコントラストは十分ある
+    expect(darkenForWhiteText('#0067C0')).toBe('#0067C0');
+  });
+
+  /**
+   * 関数の契約: 「白字で4.5:1を満たす」か「色の同一性を守るため下限で止めた」かの
+   * どちらかであること。下限で止めた場合の可読性は駅ラベル側の文字ハローが担保する。
+   */
+  it('全ての路線色で「4.5:1を満たす」か「下限で止まっている」のどちらかになる', () => {
+    const violations: string[] = [];
+
+    for (const [key, color] of Object.entries(routeColors)) {
+      const before = parseHexColor(color);
+      if (!before) continue;
+
+      const adjusted = darkenForWhiteText(color);
+      const after = parseHexColor(adjusted)!;
+      const ratio = contrastRatio(after, WHITE);
+      if (ratio >= 4.5) continue;
+
+      // 目標未達なら、下限係数まで暗くし切っているはず
+      const brightest = Math.max(before[0], before[1], before[2]);
+      const scale = brightest === 0 ? 1 : Math.max(after[0], after[1], after[2]) / brightest;
+      if (Math.abs(scale - MIN_DARKEN_SCALE) > 0.02) {
+        violations.push(`${key} (${color} -> ${adjusted}) 比${ratio.toFixed(2)} 係数${scale.toFixed(2)}`);
+      }
+    }
+
+    expect(violations).toEqual([]);
+  });
+
+  it('下限まで暗くしても届かない色は、色の同一性を優先して下限で止める', () => {
+    // 総武線の黄色などは 4.5:1 に必要なだけ暗くすると黄土色になってしまう
+    const color = '#FFCC00';
+    const before = parseHexColor(color)!;
+    const after = parseHexColor(darkenForWhiteText(color))!;
+
+    expect(after[0] / before[0]).toBeCloseTo(MIN_DARKEN_SCALE, 1);
+    expect(contrastRatio(after, WHITE)).toBeLessThan(4.5);
+  });
+
+  it('下限を緩めれば4.5:1に到達できる（上限で止めているだけと確認）', () => {
+    const adjusted = darkenForWhiteText('#FFCC00', 4.5, 0);
+    expect(contrastRatio(parseHexColor(adjusted)!, WHITE)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('色相を保つ（RGBの大小関係が変わらない）ので同じ路線色に見える', () => {
+    for (const color of ['#FFCC00', '#44ddaa', '#ff77bb']) {
+      const before = parseHexColor(color)!;
+      const after = parseHexColor(darkenForWhiteText(color))!;
+
+      // 各チャンネルの順位関係が維持されていれば色味は同系統に保たれる
+      const rank = (c: [number, number, number]) =>
+        [0, 1, 2].sort((a, b) => c[b] - c[a]).join('');
+      expect(rank(after), color).toBe(rank(before));
+    }
+  });
+
+  it('必要以上に暗くしない（目標比を大きく超えない）', () => {
+    for (const color of ['#FFCC00', '#44ddaa', '#cccccc']) {
+      const ratio = contrastRatio(parseHexColor(darkenForWhiteText(color))!, WHITE);
+      // ちょうど4.5:1付近に収まること = 元の色から最小限の変化
+      expect(ratio, color).toBeLessThan(5.0);
+    }
+  });
+
+  it('解釈できない色はそのまま返す', () => {
+    expect(darkenForWhiteText('rgb(1,2,3)')).toBe('rgb(1,2,3)');
   });
 });

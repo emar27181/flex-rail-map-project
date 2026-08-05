@@ -1,4 +1,5 @@
 import React from 'react';
+import { Moon, Sun } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
@@ -41,7 +42,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ language = 'japanese' }) => {
       title={translateUI(theme === 'light' ? 'switchToDarkMode' : 'switchToLightMode', language)}
     >
       <span style={{ fontSize: '16px' }}>
-        {theme === 'light' ? '🌙' : '☀️'}
+        {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
       </span>
       <span>
         {translateUI(theme === 'light' ? 'darkMode' : 'lightMode', language)}

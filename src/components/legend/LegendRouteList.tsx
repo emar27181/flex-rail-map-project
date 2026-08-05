@@ -8,6 +8,7 @@ import type { StationStats } from '../../data/stationStats';
 import MapConfigPanel from './MapConfigPanel';
 import type { MapConfig } from './MapConfigPanel';
 import { checkboxLabel, checkboxInput } from './legendStyles';
+import { TARGET } from '../../constants/ui';
 
 type SortMode = 'name' | 'color' | 'default' | 'distance';
 
@@ -253,6 +254,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 backgroundColor: sortMode === mode ? colors.primary : 'transparent',
                 color: sortMode === mode ? '#fff' : colors.textSecondary,
                 cursor: 'pointer',
+                // WCAG 2.2 AA (2.5.8 ターゲットサイズ) の最小24px
+                minHeight: `${TARGET.min}px`,
               }}
             >{label}</button>
           );
@@ -263,13 +266,13 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
       <div style={{ display: 'flex', gap: '4px', marginBottom: '6px' }}>
         <button
           onClick={onSelectAllRoutes}
-          style={{ flex: 1, padding: '4px 8px', fontSize: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}
+          style={{ flex: 1, padding: '4px 8px', fontSize: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer', minHeight: `${TARGET.min}px` }}
         >
           {translateUI('allShow', language)}
         </button>
         <button
           onClick={onDeselectAllRoutes}
-          style={{ flex: 1, padding: '4px 8px', fontSize: '10px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}
+          style={{ flex: 1, padding: '4px 8px', fontSize: '10px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer', minHeight: `${TARGET.min}px` }}
         >
           {translateUI('allHide', language)}
         </button>
