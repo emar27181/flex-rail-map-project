@@ -1,5 +1,91 @@
 # CHANGE LOG
 
+## [2026-08-06] セッション（スマホUX・地図クリック判定・複数出発駅・v2 UI基盤）
+
+### fix: キーボード表示時に出発時刻欄と路線検索欄が隠れる問題を修正
+- `src/components/StationSelector.tsx`: 出発時刻の`<input type="time">`にvisualViewport連動のフォーカス管理を追加
+- `src/components/TrainStatusPanel.tsx`: 路線検索入力に同様のvisualViewport監視を新規追加（既存のフックが皆無だった）
+
+### fix: 駅ツールチップの長い路線名が改行されず見切れる問題を修正
+- `src/components/RailwayMap.tsx`
+- `wordBreak: 'keep-all'`はスペースを含まない日本語路線名だと改行点が一切なくなり、
+  コンテナ幅を超えても1行で溢れていた
+- `overflowWrap: 'break-word'`をフォールバックに追加、flexアイテムに`minWidth: 0`を設定
+
+### fix: 路線図(schematic)の表示中路線のクリック判定を非表示路線と同じ幅に拡大
+- `src/components/DiagramMap.tsx`
+- 表示中の路線は可視線そのもの(stroke-width 2〜3px)だけがクリック対象で、非表示路線の
+  当たり判定(12px)より大幅に狭かった
+- 非表示路線と同じ仕組み(透明な太い当たり判定パス)を追加し、幅も16pxに統一
+
+### fix: 駅マーカー表示上限を100件に戻しフリーズを防止
+- `src/components/RailwayMap.tsx`
+- `MAX_MARKER_STATIONS`が無関係なコミットに紛れて100→300→400と引き上げられていた
+- TODO記載の「画面中心に近い駅から最大100個だけ描画」の方針どおり100に戻す
+
+### feat: 複数出発駅から共通ゴール駅への経路比較機能を追加
+- `src/components/MultiDepartureRoutes.tsx` (新規)
+- メインの出発駅(departure)とは別に追加出発駅(extraDepartures)を管理し、各駅から
+  同じゴール駅へのベスト経路をrouteFinder.findRoutesでまとめて算出・一覧表示
+- 一覧の各カードをクリックするとその駅をメイン出発駅に昇格でき既存の地図ハイライトに乗る
+- `src/components/RailwayMap.tsx`, `src/utils/translation.ts`
+
+### feat: v2 UI基盤を追加（デザイントークン一元管理 + v1/v2切替）
+- `src/design/tokens.ts`, `cssVars.ts`, `DesignTokensProvider.tsx`, `DesignDebugPanel.tsx` (新規)
+  - 色・フォント・余白・角丸・影・breakpoint等を単一の情報源として定義し`--v2-*`のCSS変数として注入
+  - 全トークンをその場で自由編集できるデバッグパネル（localStorageに永続化）
+- `src/utils/uiVersionPersistence.ts` (新規): v1/v2切り替えをlocalStorage/URLパラメータで永続化
+- `src/components/NavigationBar.tsx`: Sparklesアイコンのv1/v2切り替えボタンを追加
+- `src/v2/StationPickerV2.tsx`, `RouteResultsV2.tsx`, `RailwayMapV2.tsx` (新規)
+  - 既存のRouteFinder（経路探索アルゴリズム）・DiagramMap（地図描画）はそのまま再利用し、
+    外側のレイアウト・配色・タイポグラフィのみ刷新
+  - 駅選択→経路検索結果表示→地図ハイライトの一連の流れをv2デザインで提供
+- `src/components/ThemeWrapper.tsx`: uiVersionに応じてRailwayMap(v1)/RailwayMapV2を出し分け
+- 既知の制約: ヒートマップ設定・列車デモ・設定インポート/エクスポートなど
+  v1の上級者向け機能はv2未対応（今後段階的に移植予定）
+
+### feat: v2に路線表示切替(凡例)と複数出発駅機能を追加
+- `src/components/DiagramMap.tsx`: `DIAGRAM_ROUTE_KEYS`をexportし、v2の凡例が
+  実際の描画対象路線と完全に一致するようにした（独自リストの二重管理を回避）
+- `src/v2/RouteLegendV2.tsx` (新規): 路線名検索・全表示/全非表示・個別チェック
+  ボックスに対応。地図上の路線を直接クリックしても同じ状態をトグルできるよう
+  `onToggleRoute`/`onHideRoute`をDiagramMapへ配線(v1と同じクリック体験)
+- `src/v2/MultiDepartureRoutesV2.tsx` (新規): v1のMultiDepartureRoutesと同じ
+  設計で、複数出発駅から共通ゴール駅への経路比較をv2デザインで提供
+
+### feat: v2に全画面モードと表示設定パネルを追加
+- `src/v2/RailwayMapV2.tsx`: 地図左上のボタンで全画面表示を切り替え可能に。
+  全画面時は地図がビューポート全体を占め、サイドパネルは左上のオーバーレイに
+  なる(v1と同じ体験)。`onFullscreenChange`propを追加しNavigationBar・
+  下部Sticky広告を全画面時に隠すよう配線
+- `src/v2/DisplaySettingsV2.tsx` (新規): 駅名表示のオン/オフ
+
+### fix: pre-existingなTypeScriptエラー120件(TODO記載114件)を全て解消
+`tsc --noEmit -p tsconfig.json` がsrc/全体でエラー0件になるまで修正。
+- `src/utils/stationReadings.ts`: 重複キー86件を削除(値は全て一致、
+  純粋な重複挿入と確認した上で後発エントリを削除)
+- `src/utils/translation.ts`: 重複していた「大岡山」キーを削除
+  (テスト実行時に毎回出ていたvite重複キー警告の原因)
+- `src/utils/routeFinder.ts`: `RouteSegment.routeKey`の型を
+  `RouteKey | 'walking'`に拡張(徒歩乗換区間用の特別値)。存在しない
+  'tokaido'/'jrTokaidoKanagawa'キーとの比較(既にjrTokaidoMainLineに
+  統合済みで生きていなかった)を削除
+- `src/components/RouteRecommendations.tsx`: 上記の型拡張に伴う
+  routeColors/routeNamesの'walking'索引を修正、存在しない
+  `colors.selectedBackground`参照を削除
+- `src/data/trainServices.ts`, `src/components/TrainTypeViewer.tsx`:
+  verbatimModuleSyntax対応でtype-only importに変更
+- `src/components/RailwayMap.tsx`: 動的import経由のLeafletイベント
+  ハンドラに`LeafletEvent`/`LeafletMouseEvent`型を明示注釈、
+  `&&`連鎖が`boolean | null/undefined`を返していた箇所を`!!()`で明示化
+- `src/components/DemoMap.tsx`: 絵文字→react-icons移行時に取り残されて
+  いた`currentStep.emoji`参照を`currentStep.icon`に修正
+- `src/components/DiagramMap.tsx`: 背景クリック時に存在しない関数
+  `setDimmedTooltip`を呼んでいた行を削除。2026-06-17のtooltip状態リ
+  ファクタの消し忘れで、実行時はクリックのたびにReferenceErrorを投げていた
+- `src/data/stationTrainTypeAnalysis.ts`: 5路線分のデータしか持たない
+  マップの型を`Record<RouteKey,...>`から`Partial<Record<RouteKey,...>>`に修正
+
 ## [2026-06-19] セッション（JSローディング・TrainStatusPanel改善・凡例ラベル改善）
 
 ### feat: JSロード完了まで表示するローディング画面を追加

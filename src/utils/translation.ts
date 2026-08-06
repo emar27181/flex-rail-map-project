@@ -1312,7 +1312,6 @@ export const stationTranslations: { [key: string]: string } = {
   "尾山台": "Oyamadai",
   "矢口渡": "Yaguchi-no-Watashi",
   "北千束": "Kita-Senzoku",
-  "大岡山": "Ookayama",
   "戸越公園": "Togoshi-Koen",
   "大森町": "Omori-Machi",
   "六郷土手": "Rokugodote",
@@ -2538,6 +2537,30 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "全ルート表示",
     english: "Show All Routes"
   },
+  uiVersionBetaLabel: {
+    japanese: "新デザインを試す (β)",
+    english: "Try new design (Beta)"
+  },
+  uiVersionBackLabel: {
+    japanese: "以前のデザインに戻す",
+    english: "Back to classic design"
+  },
+  multiDepartureTitle: {
+    japanese: "複数の出発駅から検索",
+    english: "Multiple Departures"
+  },
+  addDepartureButton: {
+    japanese: "出発駅を追加",
+    english: "Add departure station"
+  },
+  removeDepartureLabel: {
+    japanese: "この出発駅を削除",
+    english: "Remove this departure"
+  },
+  focusThisDeparture: {
+    japanese: "この駅を出発駅にする",
+    english: "Use as main departure"
+  },
 
   // Footer text
   copyrightText: {
@@ -3289,6 +3312,12 @@ export const uiChinese: Record<string, string> = {
   legendArrival: "G{station}",
   routeSelection: "推荐路线选择",
   showAllRoutesLabel: "显示全部路线",
+  uiVersionBetaLabel: "试用新设计 (Beta)",
+  uiVersionBackLabel: "返回旧版设计",
+  multiDepartureTitle: "多个出发站",
+  addDepartureButton: "添加出发站",
+  removeDepartureLabel: "删除此出发站",
+  focusThisDeparture: "设为主出发站",
   copyrightText: "© 2025 Flex Rail Map Project",
   dataSourceText: "站点数据为原创或使用开放数据。",
   disclaimerText: "本服务为非官方服务，与各铁路公司无关。",
@@ -3521,6 +3550,12 @@ export const uiKorean: Record<string, string> = {
   legendArrival: "G{station}",
   routeSelection: "추천 경로 선택",
   showAllRoutesLabel: "전체 경로 표시",
+  uiVersionBetaLabel: "새 디자인 체험 (베타)",
+  uiVersionBackLabel: "이전 디자인으로 돌아가기",
+  multiDepartureTitle: "여러 출발역",
+  addDepartureButton: "출발역 추가",
+  removeDepartureLabel: "이 출발역 삭제",
+  focusThisDeparture: "메인 출발역으로 설정",
   copyrightText: "© 2025 Flex Rail Map Project",
   dataSourceText: "역 데이터는 독자적으로 제작하거나 오픈 데이터를 이용합니다.",
   disclaimerText: "본 서비스는 비공식이며 각 철도 회사와 관계없습니다.",

@@ -7,7 +7,7 @@ import { translateRoute, translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
 
 // ---- 表示対象路線 ----
-const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
+export const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
   'yamanote', 'chuo', 'keihinTohoku', 'jrSobuLine', 'jrJobanLine',
   'jrSaikyoLine', 'jrTakasakiLine', 'jrTokaidoMainLine', 'jrMusashinoLine',
   'jrYokohamaLine', 'jrNanbuLine', 'jrSobuChiba', 'jrKeiyo',
@@ -54,6 +54,8 @@ const REF_R_TRANSFER = 2.5;
 const REF_R_REGULAR = 1.5;
 const SCREEN_FS = 12; // 固定スクリーン空間フォントサイズ
 const MARKER_R = 8;   // 出発/到着マーカー半径（スクリーンpx）
+// 路線クリック判定の当たり幅（スクリーンpx基準）。表示中・非表示中の路線で同じ値を使う。
+const ROUTE_CLICK_HIT_SW = 16;
 
 // ---- Props ----
 interface DiagramMapProps {
@@ -174,7 +176,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
 
       if (!d || d.length < 3) return [];
 
-      const clickSW = 12 / transform.scale;
+      const clickSW = ROUTE_CLICK_HIT_SW / transform.scale;
       return [
         <path key={`click-${routeKey}`} d={d} fill="none" stroke={color}
           strokeWidth={clickSW}
@@ -228,14 +230,21 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
 
       if (!d || d.length < 3) return [];
 
-      return [<path key={routeKey} d={d} fill="none" stroke={color} strokeWidth={sw}
-        strokeLinecap="round" strokeLinejoin="round"
-        vectorEffect="non-scaling-stroke"
-        style={{ cursor: 'pointer' }}
-        onClick={(e) => handleVisibleRouteClick(e, routeKey)}
-      />];
+      const clickSW = ROUTE_CLICK_HIT_SW / transform.scale;
+      return [
+        <path key={`click-${routeKey}`} d={d} fill="none" stroke={color}
+          strokeWidth={clickSW}
+          style={{ cursor: 'pointer', pointerEvents: 'all' }} opacity={0}
+          onClick={(e) => handleVisibleRouteClick(e, routeKey)}
+        />,
+        <path key={routeKey} d={d} fill="none" stroke={color} strokeWidth={sw}
+          strokeLinecap="round" strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+          style={{ pointerEvents: 'none' }}
+        />,
+      ];
     });
-  }, [schematicData, visibleRoutes, highlightedRouteKeys, theme, handleVisibleRouteClick]);
+  }, [schematicData, visibleRoutes, highlightedRouteKeys, theme, handleVisibleRouteClick, transform.scale]);
 
   // ---- 駅レイアウト計算（スケール非依存） ----
   const stationLayout = useMemo(() => {
@@ -571,7 +580,6 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        onClick={() => setDimmedTooltip(null)}
       >
         <div style={{
           position: 'absolute', bottom: 8, right: 8, zIndex: 20,
