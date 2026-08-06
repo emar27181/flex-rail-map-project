@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock } from 'lucide-react';
+import type { LeafletEvent, LeafletMouseEvent } from 'leaflet';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
@@ -2971,14 +2972,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   const MapEvents = () => {
     const map = useMapEvents({
-      zoomend: (e) => {
+      zoomend: (e: LeafletEvent) => {
         setZoomLevel(e.target.getZoom());
         const c = e.target.getCenter();
         setViewCenter([c.lat, c.lng]);
         const b = e.target.getBounds();
         setViewBounds({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
       },
-      moveend: (e) => {
+      moveend: (e: LeafletEvent) => {
         const c = e.target.getCenter();
         setViewCenter([c.lat, c.lng]);
         const b = e.target.getBounds();
@@ -3116,8 +3117,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     const map = useMapEvents({
       movestart: cancel,
-      zoomend: e => updatePixels(e.target),   // ズーム終了後は即座に更新
-      moveend: e => scheduleUpdate(e.target), // パン終了後は少し待って更新
+      zoomend: (e: LeafletEvent) => updatePixels(e.target),   // ズーム終了後は即座に更新
+      moveend: (e: LeafletEvent) => scheduleUpdate(e.target), // パン終了後は少し待って更新
     });
 
     // geoLayout 変更時（駅/パラメータ変更）は即座にピクセル変換
@@ -3254,7 +3255,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           weight={36}
           opacity={0.001}
           eventHandlers={{
-            click: (e) => {
+            click: (e: LeafletMouseEvent) => {
               (e.target as any)?.closeTooltip?.();
               if (tapToggleMode) {
                 const newVisibleRoutes = new Set(visibleRoutes);
@@ -3298,7 +3299,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         })}
         {/* 駅マーカー（全セグメントの和集合） */}
         {displayStations.map((station, index) => {
-          const isDeparture = departure && station.name === departure.name;
+          const isDeparture = !!(departure && station.name === departure.name);
           const isArrival = arrival && station.name === arrival.name;
           const isSpecialStation = isDeparture || isArrival;
 
@@ -3337,7 +3338,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 icon={specialIcon}
                 zIndexOffset={5000}
                 eventHandlers={{
-                  mouseover: (e) => {
+                  mouseover: (e: LeafletMouseEvent) => {
                     if (!showStationTooltip || isMobile) return;
                     if (tooltipPinnedRef.current) return;
                     cancelTooltipClose();
@@ -3346,7 +3347,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
                   },
                   mouseout: () => { if (!isMobile) scheduleTooltipClose(); },
-                  click: (e) => {
+                  click: (e: LeafletMouseEvent) => {
                     if (isMobile && mapDraggedRef.current) return;
                     const oe = e.originalEvent as MouseEvent | undefined;
                     if (!oe) return;
@@ -3391,7 +3392,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             // }
 
             // 急行駅のみ表示モード時は駅名ラベルを強制表示（絞り込み後の駅数が少ないため）
-            const isDetailed = showStationNames || (showExpressStationsOnly && routeHasExpressMark && station.isExpress);
+            const isDetailed = !!(showStationNames || (showExpressStationsOnly && routeHasExpressMark && station.isExpress));
             const stationOpacity = visibleRoutes.has(routeKey) ? 1 : 0.3;
             // 時刻表モード有効かつ経路上の駅なら出発時刻を2行目に表示
             const timelineEntry = timetableModeEnabled
@@ -3427,7 +3428,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 icon={stationIcon}
                 zIndexOffset={stationZIndex}
                 eventHandlers={{
-                  mouseover: (e) => {
+                  mouseover: (e: LeafletMouseEvent) => {
                     if (!showStationTooltip || isMobile) return;
                     if (tooltipPinnedRef.current) return;
                     cancelTooltipClose();
@@ -3436,7 +3437,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
                   },
                   mouseout: () => { if (!isMobile) scheduleTooltipClose(); },
-                  click: (e) => {
+                  click: (e: LeafletMouseEvent) => {
                     if (isMobile && mapDraggedRef.current) return;
                     const oe = e.originalEvent as MouseEvent | undefined;
                     if (!oe) return;
@@ -4106,7 +4107,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         eventHandlers={{
                           mouseover: () => setHoveredRoute(rKey),
                           mouseout: () => setHoveredRoute(null),
-                          click: (e) => {
+                          click: (e: LeafletMouseEvent) => {
                           (e.target as any)?.closeTooltip?.();
                           justClickedLayerRef.current = true;
                           if (tapToggleMode) {
@@ -4850,7 +4851,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                               }}
                             >
                               <option value="">列車種別を選択してください</option>
-                              {getAvailableTrainTypes(selectedTrainRoute).map(trainType => (
+                              {getAvailableTrainTypes(selectedTrainRoute as RouteKey).map(trainType => (
                                 <option key={trainType.id} value={trainType.id}>
                                   {trainType.name}
                                 </option>
@@ -5227,7 +5228,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     <div style={{
                       width: '20px',
                       height: '20px',
-                      backgroundColor: routeColors[clickedRoute] || colors.textSecondary,
+                      backgroundColor: routeColors[clickedRoute as RouteKey] || colors.textSecondary,
                       borderRadius: '50%'
                     }} />
                     <div style={{
