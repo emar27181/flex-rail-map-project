@@ -1,5 +1,49 @@
 # CHANGE LOG
 
+## [2026-08-06] セッション（スマホUX・地図クリック判定・複数出発駅・v2 UI基盤）
+
+### fix: キーボード表示時に出発時刻欄と路線検索欄が隠れる問題を修正
+- `src/components/StationSelector.tsx`: 出発時刻の`<input type="time">`にvisualViewport連動のフォーカス管理を追加
+- `src/components/TrainStatusPanel.tsx`: 路線検索入力に同様のvisualViewport監視を新規追加（既存のフックが皆無だった）
+
+### fix: 駅ツールチップの長い路線名が改行されず見切れる問題を修正
+- `src/components/RailwayMap.tsx`
+- `wordBreak: 'keep-all'`はスペースを含まない日本語路線名だと改行点が一切なくなり、
+  コンテナ幅を超えても1行で溢れていた
+- `overflowWrap: 'break-word'`をフォールバックに追加、flexアイテムに`minWidth: 0`を設定
+
+### fix: 路線図(schematic)の表示中路線のクリック判定を非表示路線と同じ幅に拡大
+- `src/components/DiagramMap.tsx`
+- 表示中の路線は可視線そのもの(stroke-width 2〜3px)だけがクリック対象で、非表示路線の
+  当たり判定(12px)より大幅に狭かった
+- 非表示路線と同じ仕組み(透明な太い当たり判定パス)を追加し、幅も16pxに統一
+
+### fix: 駅マーカー表示上限を100件に戻しフリーズを防止
+- `src/components/RailwayMap.tsx`
+- `MAX_MARKER_STATIONS`が無関係なコミットに紛れて100→300→400と引き上げられていた
+- TODO記載の「画面中心に近い駅から最大100個だけ描画」の方針どおり100に戻す
+
+### feat: 複数出発駅から共通ゴール駅への経路比較機能を追加
+- `src/components/MultiDepartureRoutes.tsx` (新規)
+- メインの出発駅(departure)とは別に追加出発駅(extraDepartures)を管理し、各駅から
+  同じゴール駅へのベスト経路をrouteFinder.findRoutesでまとめて算出・一覧表示
+- 一覧の各カードをクリックするとその駅をメイン出発駅に昇格でき既存の地図ハイライトに乗る
+- `src/components/RailwayMap.tsx`, `src/utils/translation.ts`
+
+### feat: v2 UI基盤を追加（デザイントークン一元管理 + v1/v2切替）
+- `src/design/tokens.ts`, `cssVars.ts`, `DesignTokensProvider.tsx`, `DesignDebugPanel.tsx` (新規)
+  - 色・フォント・余白・角丸・影・breakpoint等を単一の情報源として定義し`--v2-*`のCSS変数として注入
+  - 全トークンをその場で自由編集できるデバッグパネル（localStorageに永続化）
+- `src/utils/uiVersionPersistence.ts` (新規): v1/v2切り替えをlocalStorage/URLパラメータで永続化
+- `src/components/NavigationBar.tsx`: Sparklesアイコンのv1/v2切り替えボタンを追加
+- `src/v2/StationPickerV2.tsx`, `RouteResultsV2.tsx`, `RailwayMapV2.tsx` (新規)
+  - 既存のRouteFinder（経路探索アルゴリズム）・DiagramMap（地図描画）はそのまま再利用し、
+    外側のレイアウト・配色・タイポグラフィのみ刷新
+  - 駅選択→経路検索結果表示→地図ハイライトの一連の流れをv2デザインで提供
+- `src/components/ThemeWrapper.tsx`: uiVersionに応じてRailwayMap(v1)/RailwayMapV2を出し分け
+- 既知の制約: ヒートマップ設定・列車デモ・設定インポート/エクスポート・路線表示トグルなど
+  v1の上級者向け機能はv2未対応（今後段階的に移植予定）
+
 ## [2026-06-19] セッション（JSローディング・TrainStatusPanel改善・凡例ラベル改善）
 
 ### feat: JSロード完了まで表示するローディング画面を追加
