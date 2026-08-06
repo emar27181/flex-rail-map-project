@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TrainFront } from 'lucide-react';
-import { RouteKey } from '../data/routes';
+import type { RouteKey } from '../data/routes';
 import { trainServices, getStationStops, getStationBorderStyle } from '../data/trainServices';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 

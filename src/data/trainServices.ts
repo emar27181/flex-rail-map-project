@@ -1,6 +1,7 @@
 // 路線ごとの列車種別と停車駅データ
 
-import { commonTrainTypes, jrTrainTypes, privateRailwayTrainTypes, TrainType, StationStop, RouteTrainService } from './trainTypes';
+import { commonTrainTypes, jrTrainTypes, privateRailwayTrainTypes } from './trainTypes';
+import type { TrainType, StationStop, RouteTrainService } from './trainTypes';
 import { routes } from './routes';
 
 // 山手線（各駅停車のみ）

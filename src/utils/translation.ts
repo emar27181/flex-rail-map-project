@@ -1312,7 +1312,6 @@ export const stationTranslations: { [key: string]: string } = {
   "尾山台": "Oyamadai",
   "矢口渡": "Yaguchi-no-Watashi",
   "北千束": "Kita-Senzoku",
-  "大岡山": "Ookayama",
   "戸越公園": "Togoshi-Koen",
   "大森町": "Omori-Machi",
   "六郷土手": "Rokugodote",
