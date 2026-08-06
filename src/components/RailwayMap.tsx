@@ -16,6 +16,7 @@ import LegendStationMarkers from './legend/LegendStationMarkers';
 import LegendRouteList from './legend/LegendRouteList';
 import LegendRouteRecommendations from './legend/LegendRouteRecommendations';
 import LegendDisplayOptions from './legend/LegendDisplayOptions';
+import MultiDepartureRoutes from './MultiDepartureRoutes';
 import MobileBottomPanel from './MobileBottomPanel';
 import type { MapConfig } from './legend/MapConfigPanel';
 import type { StationStats } from '../data/stationStats';
@@ -126,6 +127,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [arrival, setArrival] = useState<Station | null>(null);
   const [routeRecommendations, setRouteRecommendations] = useState<RouteResult[]>([]);
   const [selectedRouteIndices, setSelectedRouteIndices] = useState<Set<number> | null>(null);
+  // メインの出発駅とは別に、同じゴール駅への経路を比較したい追加出発駅（例: 藤沢・大磯・平塚から新橋）
+  const [extraDepartures, setExtraDepartures] = useState<Station[]>([]);
 
   // Language state management
   const currentLanguage = language;
@@ -789,6 +792,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     setDeparture(station);
     setIsManualDeparture(true);
   }, []);
+
+  // 複数出発駅比較機能: 追加出発駅の追加・削除・メイン出発駅への昇格
+  const handleAddExtraDeparture = useCallback((station: Station) => {
+    setExtraDepartures(prev => prev.some(s => s.name === station.name) ? prev : [...prev, station]);
+  }, []);
+  const handleRemoveExtraDeparture = useCallback((name: string) => {
+    setExtraDepartures(prev => prev.filter(s => s.name !== name));
+  }, []);
+  const handleFocusExtraDeparture = useCallback((station: Station) => {
+    handleManualSetDeparture(station);
+  }, [handleManualSetDeparture]);
 
   const handleSetNearestDeparture = useCallback(() => {
     if (!userLocation) return;
@@ -4767,6 +4781,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onDeselectAll={handleDeselectAllRecommendedRoutes}
                   />
 
+                  {/* 4.5 複数出発駅から共通ゴールへの経路比較 */}
+                  <MultiDepartureRoutes
+                    arrival={arrival}
+                    extraDepartures={extraDepartures}
+                    routeFinder={routeFinder}
+                    onAddDeparture={handleAddExtraDeparture}
+                    onRemoveDeparture={handleRemoveExtraDeparture}
+                    onFocusDeparture={handleFocusExtraDeparture}
+                    language={currentLanguage}
+                  />
+
                   {/* 5. 列車種別ビューア - 非表示 */}
                   {false && (
                     <div style={{
@@ -5005,6 +5030,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onRouteToggle={handleRouteToggle}
                         onSelectAll={handleSelectAllRecommendedRoutes}
                         onDeselectAll={handleDeselectAllRecommendedRoutes}
+                      />
+                      <MultiDepartureRoutes
+                        arrival={arrival}
+                        extraDepartures={extraDepartures}
+                        routeFinder={routeFinder}
+                        onAddDeparture={handleAddExtraDeparture}
+                        onRemoveDeparture={handleRemoveExtraDeparture}
+                        onFocusDeparture={handleFocusExtraDeparture}
+                        language={currentLanguage}
                       />
                     </>
                   ),
