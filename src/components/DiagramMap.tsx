@@ -7,7 +7,7 @@ import { translateRoute, translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
 
 // ---- 表示対象路線 ----
-const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
+export const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
   'yamanote', 'chuo', 'keihinTohoku', 'jrSobuLine', 'jrJobanLine',
   'jrSaikyoLine', 'jrTakasakiLine', 'jrTokaidoMainLine', 'jrMusashinoLine',
   'jrYokohamaLine', 'jrNanbuLine', 'jrSobuChiba', 'jrKeiyo',

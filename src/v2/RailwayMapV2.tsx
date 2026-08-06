@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
-import DiagramMap from '../components/DiagramMap';
+import DiagramMap, { DIAGRAM_ROUTE_KEYS } from '../components/DiagramMap';
 import { RouteFinder } from '../utils/routeFinder';
 import type { RouteResult } from '../utils/routeFinder';
 import type { RouteKey } from '../data/routes';
@@ -13,6 +13,8 @@ import { DesignTokensProvider } from '../design/DesignTokensProvider';
 import DesignDebugPanel from '../design/DesignDebugPanel';
 import StationPickerV2 from './StationPickerV2';
 import RouteResultsV2 from './RouteResultsV2';
+import RouteLegendV2 from './RouteLegendV2';
+import MultiDepartureRoutesV2 from './MultiDepartureRoutesV2';
 
 interface RailwayMapV2Props {
   language: Language;
@@ -33,6 +35,8 @@ const RailwayMapV2Inner: React.FC<RailwayMapV2Props> = ({ language }) => {
   const [arrival, setArrival] = useState<Station | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(() => new Set(DIAGRAM_ROUTE_KEYS));
+  const [extraDepartures, setExtraDepartures] = useState<Station[]>([]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
@@ -68,6 +72,23 @@ const RailwayMapV2Inner: React.FC<RailwayMapV2Props> = ({ language }) => {
     else if (!arrival) setArrival(station);
     else { setDeparture(station); setArrival(null); }
   }, [allStations, departure, arrival]);
+
+  const handleToggleRoute = useCallback((key: RouteKey) => {
+    setVisibleRoutes(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  }, []);
+  const handleShowAllRoutes = useCallback(() => setVisibleRoutes(new Set(DIAGRAM_ROUTE_KEYS)), []);
+  const handleHideAllRoutes = useCallback(() => setVisibleRoutes(new Set()), []);
+
+  const handleAddExtraDeparture = useCallback((station: Station) => {
+    setExtraDepartures(prev => prev.some(s => s.name === station.name) ? prev : [...prev, station]);
+  }, []);
+  const handleRemoveExtraDeparture = useCallback((name: string) => {
+    setExtraDepartures(prev => prev.filter(s => s.name !== name));
+  }, []);
 
   return (
     <div style={{
@@ -124,6 +145,24 @@ const RailwayMapV2Inner: React.FC<RailwayMapV2Props> = ({ language }) => {
             />
           </div>
         )}
+
+        <MultiDepartureRoutesV2
+          arrival={arrival}
+          extraDepartures={extraDepartures}
+          routeFinder={routeFinder}
+          onAddDeparture={handleAddExtraDeparture}
+          onRemoveDeparture={handleRemoveExtraDeparture}
+          onFocusDeparture={setDeparture}
+          language={language}
+        />
+
+        <RouteLegendV2
+          visibleRoutes={visibleRoutes}
+          onToggleRoute={handleToggleRoute}
+          onShowAll={handleShowAllRoutes}
+          onHideAll={handleHideAllRoutes}
+          language={language}
+        />
       </div>
 
       {/* 地図エリア */}
@@ -141,11 +180,14 @@ const RailwayMapV2Inner: React.FC<RailwayMapV2Props> = ({ language }) => {
         <DiagramMap
           departure={departure?.name ?? ''}
           arrival={arrival?.name ?? ''}
+          visibleRoutes={visibleRoutes}
           highlightedRouteKeys={highlightedRouteKeys}
           theme={theme}
           language={language}
           showStationNames={true}
           onStationClick={handleMapStationClick}
+          onToggleRoute={handleToggleRoute}
+          onHideRoute={handleToggleRoute}
         />
         {(departure || arrival) && (
           <button
