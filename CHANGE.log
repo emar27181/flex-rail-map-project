@@ -53,6 +53,13 @@
 - `src/v2/MultiDepartureRoutesV2.tsx` (新規): v1のMultiDepartureRoutesと同じ
   設計で、複数出発駅から共通ゴール駅への経路比較をv2デザインで提供
 
+### feat: v2に全画面モードと表示設定パネルを追加
+- `src/v2/RailwayMapV2.tsx`: 地図左上のボタンで全画面表示を切り替え可能に。
+  全画面時は地図がビューポート全体を占め、サイドパネルは左上のオーバーレイに
+  なる(v1と同じ体験)。`onFullscreenChange`propを追加しNavigationBar・
+  下部Sticky広告を全画面時に隠すよう配線
+- `src/v2/DisplaySettingsV2.tsx` (新規): 駅名表示のオン/オフ
+
 ## [2026-06-19] セッション（JSローディング・TrainStatusPanel改善・凡例ラベル改善）
 
 ### feat: JSロード完了まで表示するローディング画面を追加
