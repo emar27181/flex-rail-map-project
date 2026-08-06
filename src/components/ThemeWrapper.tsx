@@ -45,7 +45,7 @@ const ThemeWrapper: React.FC = () => {
         onUiVersionChange={setUiVersion}
       />
       {uiVersion === 'v2' ? (
-        <RailwayMapV2 language={language} />
+        <RailwayMapV2 language={language} onFullscreenChange={setIsFullscreen} />
       ) : (
         <RailwayMap language={language} onLanguageChange={handleLanguageChange} onFullscreenChange={setIsFullscreen} />
       )}
