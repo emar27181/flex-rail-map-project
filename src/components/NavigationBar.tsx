@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Sun, Moon, Menu, X, Info } from 'lucide-react';
+import { Sun, Moon, Menu, X, Info, Sparkles } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { translateUI } from '../utils/translation';
 import type { Language } from '../utils/translation';
+import type { UiVersion } from '../utils/uiVersionPersistence';
 
 const LANGUAGES: Language[] = ['japanese', 'english', 'chinese', 'korean'];
 const LANG_LABELS: Record<Language, string> = { japanese: '日', english: 'En', chinese: '中', korean: '한' };
@@ -12,9 +13,11 @@ interface NavigationBarProps {
   language: Language;
   onLanguageChange: (language: Language) => void;
   isFullscreen?: boolean;
+  uiVersion?: UiVersion;
+  onUiVersionChange?: (version: UiVersion) => void;
 }
 
-const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChange, isFullscreen = false }) => {
+const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChange, isFullscreen = false, uiVersion = 'v1', onUiVersionChange }) => {
   const { theme, toggleTheme } = useTheme();
   const colors = getThemeColors(theme);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -169,6 +172,39 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             <Sun size={20} />
           )}
         </button>
+
+        {/* v1/v2 UI切り替えボタン */}
+        {onUiVersionChange && (
+          <button
+            onClick={() => onUiVersionChange(uiVersion === 'v2' ? 'v1' : 'v2')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '36px',
+              height: '36px',
+              backgroundColor: uiVersion === 'v2' ? colors.primary : 'transparent',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              color: uiVersion === 'v2' ? colors.onPrimary : colors.text,
+              padding: '6px'
+            }}
+            onMouseEnter={(e) => {
+              if (uiVersion !== 'v2') e.currentTarget.style.backgroundColor = colors.surfaceElevated;
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = uiVersion === 'v2' ? colors.primary : 'transparent';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+            title={translateUI(uiVersion === 'v2' ? 'uiVersionBackLabel' : 'uiVersionBetaLabel', language)}
+            aria-label={translateUI(uiVersion === 'v2' ? 'uiVersionBackLabel' : 'uiVersionBetaLabel', language)}
+          >
+            <Sparkles size={20} />
+          </button>
+        )}
 
         {/* ハンバーガーメニューボタン */}
         <button

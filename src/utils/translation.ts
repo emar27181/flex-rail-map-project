@@ -2538,6 +2538,14 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "全ルート表示",
     english: "Show All Routes"
   },
+  uiVersionBetaLabel: {
+    japanese: "新デザインを試す (β)",
+    english: "Try new design (Beta)"
+  },
+  uiVersionBackLabel: {
+    japanese: "以前のデザインに戻す",
+    english: "Back to classic design"
+  },
   multiDepartureTitle: {
     japanese: "複数の出発駅から検索",
     english: "Multiple Departures"
@@ -3305,6 +3313,8 @@ export const uiChinese: Record<string, string> = {
   legendArrival: "G{station}",
   routeSelection: "推荐路线选择",
   showAllRoutesLabel: "显示全部路线",
+  uiVersionBetaLabel: "试用新设计 (Beta)",
+  uiVersionBackLabel: "返回旧版设计",
   multiDepartureTitle: "多个出发站",
   addDepartureButton: "添加出发站",
   removeDepartureLabel: "删除此出发站",
@@ -3541,6 +3551,8 @@ export const uiKorean: Record<string, string> = {
   legendArrival: "G{station}",
   routeSelection: "추천 경로 선택",
   showAllRoutesLabel: "전체 경로 표시",
+  uiVersionBetaLabel: "새 디자인 체험 (베타)",
+  uiVersionBackLabel: "이전 디자인으로 돌아가기",
   multiDepartureTitle: "여러 출발역",
   addDepartureButton: "출발역 추가",
   removeDepartureLabel: "이 출발역 삭제",
