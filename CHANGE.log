@@ -60,6 +60,32 @@
   下部Sticky広告を全画面時に隠すよう配線
 - `src/v2/DisplaySettingsV2.tsx` (新規): 駅名表示のオン/オフ
 
+### fix: pre-existingなTypeScriptエラー120件(TODO記載114件)を全て解消
+`tsc --noEmit -p tsconfig.json` がsrc/全体でエラー0件になるまで修正。
+- `src/utils/stationReadings.ts`: 重複キー86件を削除(値は全て一致、
+  純粋な重複挿入と確認した上で後発エントリを削除)
+- `src/utils/translation.ts`: 重複していた「大岡山」キーを削除
+  (テスト実行時に毎回出ていたvite重複キー警告の原因)
+- `src/utils/routeFinder.ts`: `RouteSegment.routeKey`の型を
+  `RouteKey | 'walking'`に拡張(徒歩乗換区間用の特別値)。存在しない
+  'tokaido'/'jrTokaidoKanagawa'キーとの比較(既にjrTokaidoMainLineに
+  統合済みで生きていなかった)を削除
+- `src/components/RouteRecommendations.tsx`: 上記の型拡張に伴う
+  routeColors/routeNamesの'walking'索引を修正、存在しない
+  `colors.selectedBackground`参照を削除
+- `src/data/trainServices.ts`, `src/components/TrainTypeViewer.tsx`:
+  verbatimModuleSyntax対応でtype-only importに変更
+- `src/components/RailwayMap.tsx`: 動的import経由のLeafletイベント
+  ハンドラに`LeafletEvent`/`LeafletMouseEvent`型を明示注釈、
+  `&&`連鎖が`boolean | null/undefined`を返していた箇所を`!!()`で明示化
+- `src/components/DemoMap.tsx`: 絵文字→react-icons移行時に取り残されて
+  いた`currentStep.emoji`参照を`currentStep.icon`に修正
+- `src/components/DiagramMap.tsx`: 背景クリック時に存在しない関数
+  `setDimmedTooltip`を呼んでいた行を削除。2026-06-17のtooltip状態リ
+  ファクタの消し忘れで、実行時はクリックのたびにReferenceErrorを投げていた
+- `src/data/stationTrainTypeAnalysis.ts`: 5路線分のデータしか持たない
+  マップの型を`Record<RouteKey,...>`から`Partial<Record<RouteKey,...>>`に修正
+
 ## [2026-06-19] セッション（JSローディング・TrainStatusPanel改善・凡例ラベル改善）
 
 ### feat: JSロード完了まで表示するローディング画面を追加
