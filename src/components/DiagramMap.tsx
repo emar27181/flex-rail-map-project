@@ -580,7 +580,6 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        onClick={() => setDimmedTooltip(null)}
       >
         <div style={{
           position: 'absolute', bottom: 8, right: 8, zIndex: 20,
