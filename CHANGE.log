@@ -41,8 +41,17 @@
     外側のレイアウト・配色・タイポグラフィのみ刷新
   - 駅選択→経路検索結果表示→地図ハイライトの一連の流れをv2デザインで提供
 - `src/components/ThemeWrapper.tsx`: uiVersionに応じてRailwayMap(v1)/RailwayMapV2を出し分け
-- 既知の制約: ヒートマップ設定・列車デモ・設定インポート/エクスポート・路線表示トグルなど
+- 既知の制約: ヒートマップ設定・列車デモ・設定インポート/エクスポートなど
   v1の上級者向け機能はv2未対応（今後段階的に移植予定）
+
+### feat: v2に路線表示切替(凡例)と複数出発駅機能を追加
+- `src/components/DiagramMap.tsx`: `DIAGRAM_ROUTE_KEYS`をexportし、v2の凡例が
+  実際の描画対象路線と完全に一致するようにした（独自リストの二重管理を回避）
+- `src/v2/RouteLegendV2.tsx` (新規): 路線名検索・全表示/全非表示・個別チェック
+  ボックスに対応。地図上の路線を直接クリックしても同じ状態をトグルできるよう
+  `onToggleRoute`/`onHideRoute`をDiagramMapへ配線(v1と同じクリック体験)
+- `src/v2/MultiDepartureRoutesV2.tsx` (新規): v1のMultiDepartureRoutesと同じ
+  設計で、複数出発駅から共通ゴール駅への経路比較をv2デザインで提供
 
 ## [2026-06-19] セッション（JSローディング・TrainStatusPanel改善・凡例ラベル改善）
 
