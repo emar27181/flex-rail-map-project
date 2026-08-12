@@ -4617,6 +4617,139 @@ export const stationTranslations: { [key: string]: string } = {
   "澄川": "Sumikawa",
   "自衛隊前": "Jieitai-mae",
   "真駒内": "Makomanai",
+
+  // ───────────────────────────────────────────────
+  // 甲信越: JR越後線・信越本線（新潟方面）
+  // ───────────────────────────────────────────────
+  "新潟": "Niigata",
+  "青山": "Aoyama",
+  "小針": "Kobari",
+  "寺尾": "Terao",
+  "内野": "Uchino",
+  "新潟大学前": "Niigatadaigaku-mae",
+  "内野西が丘": "Uchino-Nishigaoka",
+  "越後曽根": "Echigo-Sone",
+  "越後赤塚": "Echigo-Akatsuka",
+  "分水": "Bunsui",
+  "寺泊": "Teradomari",
+  "出雲崎": "Izumozaki",
+  "石地": "Ishiji",
+  "小木ノ城": "Oginojo",
+  "出雲崎駅": "Izumozaki",
+
+  // ───────────────────────────────────────────────
+  // 名古屋: 名鉄犬山線
+  // ───────────────────────────────────────────────
+  "下小田井": "Shimo-Otai",
+  "中小田井": "Naka-Otai",
+  "上小田井": "Kami-Otai",
+  "西春": "Nishiharu",
+  "徳重・名古屋芸大": "Tokushige-Nagoya-Geidai",
+  "大山寺": "Taisanji",
+  "岩倉": "Iwakura",
+  "石仏": "Ishibotoke",
+  "布袋": "Hotei",
+  "江南": "Konan",
+  "柏森": "Kashimori",
+  "扶桑": "Fuso",
+  "木津用水": "Kotsuyosui",
+  "犬山口": "Inuyamaguchi",
+  "犬山": "Inuyama",
+
+  // ───────────────────────────────────────────────
+  // 東北: IGRいわて銀河鉄道
+  // ───────────────────────────────────────────────
+  "盛岡": "Morioka",
+  "厨川": "Kuriyagawa",
+  "巣子": "Sugo",
+  "滝沢": "Takizawa",
+  "渋民": "Shibutami",
+  "岩手川口": "Iwate-Kawaguchi",
+  "いわて沼宮内": "Iwate-Numakunai",
+  "御堂": "Mido",
+  "奥中山高原": "Okunakayama-Kogen",
+  "小繋": "Kotsunagi",
+  "小鳥谷": "Kozuya",
+  "一戸": "Ichinohe",
+  "二戸": "Ninohe",
+  "斗米": "Tomai",
+  "金田一温泉": "Kintaichi-onsen",
+
+  // ───────────────────────────────────────────────
+  // 東海: JR御殿場線
+  // ───────────────────────────────────────────────
+  "下曽我": "Shimoso",
+  "上大井": "Kami-Oi",
+  "相模金子": "Sagami-Kaneko",
+  "松田": "Matsuda",
+  "東山北": "Higashi-Yamakita",
+  "山北": "Yamakita",
+  "谷峨": "Yaga",
+  "駿河小山": "Suruga-Oyama",
+  "御殿場": "Gotemba",
+  "南御殿場": "Minami-Gotemba",
+  "富士岡": "Fujioka",
+  "岩波": "Iwanami",
+  "裾野": "Susono",
+  "長泉なめり": "Nagaizumi-Nameri",
+  "下土狩": "Shimotogari",
+
+  // ───────────────────────────────────────────────
+  // 東海: 豊橋鉄道渥美線
+  // ───────────────────────────────────────────────
+  "柳生橋": "Yagyubashi",
+  "小池": "Koike",
+  "愛知大学前": "Aichidaigaku-mae",
+  "南栄": "Minami-Sakae",
+  "高師": "Takashi",
+  "芦原": "Ashihara",
+  "植田": "Ueta",
+  "向ケ丘": "Mukaigaoka",
+  "神戸": "Kambe",
+  "大清水": "Oshimizu",
+  "老津": "Oitsu",
+  "やぐま台": "Yagumadai",
+  "豊島": "Toshima",
+  "神戸ノ森": "Kambenomori",
+  "三河田原": "Mikawa-Tahara",
+
+  // ───────────────────────────────────────────────
+  // 中国: 一畑電車北松江線
+  // ───────────────────────────────────────────────
+  "電鉄出雲市": "Dentetsu-Izumoshi",
+  "大津町": "Otsumachi",
+  "武志": "Takeshi",
+  "川跡": "Kawato",
+  "高ノ宮": "Takanomiya",
+  "旅伏": "Tabushi",
+  "雲州平田": "Unshu-Hirata",
+  "布崎": "Nunozaki",
+  "湖遊館新駅": "Koyukan-Shinnochi",
+  "一畑口": "Ichibataguchi",
+  "津ノ森": "Tsunomori",
+  "松江フォーゲルパーク": "Matsue Vogel Park",
+  "浜乃木": "Hamanogi",
+  "美談": "Midami",
+  "松江しんじ湖温泉": "Matsue-Shinjiko-onsen",
+
+  // ───────────────────────────────────────────────
+  // 関東: 上信電鉄
+  // ───────────────────────────────────────────────
+  "南高崎": "Minami-Takasaki",
+  "根小屋": "Negoya",
+  "高崎商科大学前": "Takasaki-Shokadaigaku-mae",
+  "佐野のわたし": "Sano-no-Watashi",
+  "馬庭": "Maniwa",
+  "西吉井": "Nishi-Yoshii",
+  "東富岡": "Higashi-Tomioka",
+  "上州富岡": "Joshu-Tomioka",
+  "上州七日市": "Joshu-Nanukaichi",
+  "上州一ノ宮": "Joshu-Ichinomiya",
+  "神農原": "Kanohara",
+  "上州新屋": "Joshu-Shinya",
+  "上州福島": "Joshu-Fukushima",
+  "千平": "Sendaira",
+  "下仁田": "Shimonita",
 }
 // 路線名翻訳辞書
 export const routeTranslations: { [key: string]: string } = {
