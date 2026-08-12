@@ -5740,6 +5740,174 @@ export const stationTranslations: { [key: string]: string } = {
   "隼": "Hayabusa",
   "坂野": "Sakano",
   "若桜": "Wakasa",
+
+  // ───────────────────────────────────────────────
+  // 四国: 伊予鉄道高浜線・横河原線
+  // ───────────────────────────────────────────────
+  "松山市": "Matsuyamashi",
+  "西堀端": "Nishi-Horibata",
+  "南堀端": "Minami-Horibata",
+  "西衣山": "Nishi-Kinuyama",
+  "衣山": "Kinuyama",
+  "福音寺": "Fukuonji",
+  "北久米": "Kita-Kume",
+  "久米": "Kume",
+  "石手川公園": "Ishitegawa-koen",
+  "いよ立花": "Iyo-Tachibana",
+  "梅本": "Umenomoto",
+
+  // ───────────────────────────────────────────────
+  // 関西: 叡山電鉄鞍馬線
+  // ───────────────────────────────────────────────
+  "元田中": "Moto-Tanaka",
+  "茶山": "Chayama",
+  "一乗寺": "Ichijoji",
+  "修学院": "Shugakuin",
+  "宝ヶ池": "Takaragaike",
+  "三宅八幡": "Miyake-Hachiman",
+  "木野": "Kino",
+  "市原": "Ichihara",
+  "二ノ瀬": "Ninose",
+  "貴船口": "Kibuneguchi",
+  "鞍馬": "Kurama",
+
+  // ───────────────────────────────────────────────
+  // 北陸新幹線・北海道: JR千歳線
+  // ───────────────────────────────────────────────
+  "本庄早稲田": "Honjo-Waseda",
+  "安中榛名": "Annaka-Haruna",
+  "佐久平": "Sakudaira",
+  "長野": "Nagano",
+  "上越妙高": "Joetsu-Myoko",
+  "黒部宇奈月温泉": "Kurobe-Unazukionsen",
+  "金沢": "Kanazawa",
+  "小松": "Komatsu",
+  "加賀温泉": "Kaga-onsen",
+  "越前たけふ": "Echizen-Takefu",
+  "新千歳空港": "New Chitose Airport",
+  "南千歳": "Minami-Chitose",
+  "恵庭": "Eniwa",
+  "恵み野": "Megumino",
+  "島松": "Shimamatsu",
+  "北広島": "Kita-Hiroshima",
+  "上野幌": "Kami-Nopporo",
+  "新札幌": "Shin-Sapporo",
+  "平和": "Heiwa",
+  "苗穂": "Naebo",
+
+  // ───────────────────────────────────────────────
+  // 九州: 長崎電気軌道
+  // ───────────────────────────────────────────────
+  "赤迫": "Akasako",
+  "昭和町通": "Showamachi-dori",
+  "長崎駅前": "Nagasaki-ekimae",
+  "五島町": "Gotomachi",
+  "大波止": "Ohato",
+  "桜町": "Sakuramachi",
+  "めがね橋": "Meganebashi",
+  "浜町アーケード": "Hamanomachi Arcade",
+  "思案橋": "Shianbashi",
+  "正覚寺下": "Shokakuji-shita",
+
+  // ───────────────────────────────────────────────
+  // 関西: JR草津線・北陸鉄道石川線
+  // ───────────────────────────────────────────────
+  "手原": "Tehara",
+  "石部": "Ishibe",
+  "三雲": "Mikumo",
+  "甲西": "Kosei",
+  "油日": "Aburahi",
+  "甲賀": "Koka",
+  "寺庄": "Terasho",
+  "甲南": "Konan",
+  "蒲生野": "Gamono",
+  "柘植": "Tsuge",
+  "野町": "Nomachi",
+  "西泉": "Nishi-Izumi",
+  "押野": "Oshino",
+  "野々市": "Nonoichi",
+  "三納": "Sanno",
+  "四十万": "Shijima",
+  "乙丸": "Otomaru",
+  "陽羽里": "Hiwari",
+  "道法寺": "Dohoji",
+  "鶴来": "Tsurugi",
+
+  // ───────────────────────────────────────────────
+  // 北海道: JR富良野線・留萌本線
+  // ───────────────────────────────────────────────
+  "学田": "Gakuden",
+  "西中": "Nishinaka",
+  "鹿討": "Shikauchi",
+  "中富良野": "Naka-Furano",
+  "ラベンダー畑": "Lavender-batake",
+  "上富良野": "Kami-Furano",
+  "西神楽": "Nishi-Kagura",
+  "西瑞穂": "Nishi-Mizuho",
+  "西御料": "Nishi-Goryo",
+  "神楽岡": "Kaguraoka",
+  "北一已": "Kita-Ichiyan",
+  "秩父別": "Chippubetsu",
+  "北秩父別": "Kita-Chippubetsu",
+  "石狩沼田": "Ishikari-Numata",
+  "真布": "Mappu",
+  "恵比島": "Ebishima",
+  "峠下": "Togeshita",
+  "幌糠": "Horonuka",
+  "藤山": "Fujiyama",
+  "留萌": "Rumoi",
+
+  // ───────────────────────────────────────────────
+  // 四国: JR予土線
+  // ───────────────────────────────────────────────
+  "若井": "Wakai",
+  "川奥信号場": "Kawaoku Signal Station",
+  "家地川": "Iejigawa",
+  "打井川": "Uigawa",
+  "西ヶ方": "Nishigaho",
+  "真土": "Matsuchi",
+  "吉野生": "Yoshinobu",
+  "松丸": "Matsumaru",
+  "出目": "Deme",
+  "北宇和島": "Kita-Uwajima",
+
+  // ───────────────────────────────────────────────
+  // 関西: 神戸電鉄有馬線
+  // ───────────────────────────────────────────────
+  "湊川": "Minatogawa",
+  "新開地": "Shinkaichi",
+  "鵯越": "Hiyodorigoe",
+  "鈴蘭台": "Suzurandai",
+  "北鈴蘭台": "Kita-Suzurandai",
+  "山の街": "Yamanomachi",
+  "箕谷": "Minotani",
+  "谷上": "Tanigami",
+  "有馬口": "Arimaguchi",
+  "有馬温泉": "Arima-onsen",
+
+  // ───────────────────────────────────────────────
+  // 九州: 平成筑豊鉄道・東北: 津軽鉄道
+  // ───────────────────────────────────────────────
+  "令和コスタ行橋": "Reiwa-Costa-Yukuhashi",
+  "椎地": "Shiiji",
+  "源じいの森": "Genjii-no-Mori",
+  "油須原": "Yusubaru",
+  "赤": "Aka",
+  "呼野": "Yobuno",
+  "採銅所": "Saidosho",
+  "柿下温泉口": "Kakishita-onsenguchi",
+  "豊前川崎": "Buzen-Kawasaki",
+  "田川伊田": "Tagawa-Ita",
+  "津軽五所川原": "Tsugaru-Goshogawara",
+  "津軽飯詰": "Tsugaru-Iizume",
+  "毘沙門": "Bishamon",
+  "嘉瀬": "Kase",
+  "金木": "Kanagi",
+  "芦野公園": "Ashino-koen",
+  "川倉": "Kawakura",
+  "大沢内": "Osawanai",
+  "深郷田": "Fukagoda",
+  "津軽中里": "Tsugaru-Nakazato",
 }
 // 路線名翻訳辞書
 export const routeTranslations: { [key: string]: string } = {
