@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { uiTranslations, uiChinese, uiKorean, stationTranslations, routeTranslations } from '../../../src/utils/translation';
 import { routes } from '../../../src/data/routes';
+import { stationTranslationsChinese, stationTranslationsKorean } from '../../../src/utils/stationTranslationsCJK';
 
 describe('翻訳キー完全性', () => {
   const jaEnKeys = Object.keys(uiTranslations);
@@ -95,6 +96,51 @@ describe('英語表記のカバレッジ', () => {
       missing.length,
       `英語表記が未登録の駅(${missing.length}件, 先頭20件): ${missing.slice(0, 20).join(', ')}`
     ).toBe(0);
+  });
+});
+
+describe('中国語・韓国語 駅名表記の健全性', () => {
+  /**
+   * 中国語（簡体字）の値に、日本語の新字体がそのまま残っていることが
+   * 実際にあった（例: 目黒→"目黒", 高円寺→"高円寺", 稲毛→"稲毛"）。
+   * これらは中国語には存在しない字形なので、簡体字に直す必要がある。
+   * 日中で字形が異なる代表的な文字を機械的に検出する。
+   *
+   * 「辻」「峠」「畑」「込」など簡体字に対応字形が無い国字は、
+   * 日本語表記のまま残すのが正しいためここでは対象外にしている。
+   */
+  const JP_SHINJITAI_TO_SIMPLIFIED: Record<string, string> = {
+    巣: '巢', 鴨: '鸭', 黒: '黑', 円: '圆', 郷: '乡', 稲: '稻',
+    浜: '滨', 経: '经', 楽: '乐', 沢: '泽', 巻: '卷', 戸: '户',
+    馬: '马', 駅: '站', 桜: '樱', 塩: '盐', 亀: '龟', 蔵: '藏',
+    渋: '涩', 岡: '冈', 竜: '龙', 発: '发', 関: '关', 図: '图',
+    総: '总', 転: '转', 権: '权', 実: '实', 気: '气', 満: '满',
+  };
+
+  it('中国語の値に日本語の新字体が残っていない', () => {
+    const bad: string[] = [];
+    for (const [ja, zh] of Object.entries(stationTranslationsChinese)) {
+      for (const [jp, sc] of Object.entries(JP_SHINJITAI_TO_SIMPLIFIED)) {
+        if (zh.includes(jp)) bad.push(`${ja}=${zh} (${jp}→${sc})`);
+      }
+    }
+    expect(bad.length, `日本語字形が残っている: ${bad.slice(0, 15).join(', ')}`).toBe(0);
+  });
+
+  it('中国語の値にかなが残っていない', () => {
+    // 「・」(U+30FB) はカタカナブロックだが区切り記号として正当なので除外する
+    const KANA = /[ぁ-ゟ゠-ヿ]/u;
+    const bad = Object.entries(stationTranslationsChinese)
+      .filter(([, v]) => KANA.test(v.replace(/・/g, '')));
+    expect(bad.length, `かなが残っている: ${bad.slice(0, 10).map(([k, v]) => `${k}=${v}`).join(', ')}`).toBe(0);
+  });
+
+  it('韓国語の値がハングル（と記号）で構成されている', () => {
+    // 同名駅の区別に全角括弧を使っているエントリがあるため許可する
+    // 例: あびこ = 아비코（난카이）
+    const ALLOWED = /^[가-힣ㄱ-ㅎㅏ-ㅣ0-9 \-.·・()（）]+$/u;
+    const bad = Object.entries(stationTranslationsKorean).filter(([, v]) => !ALLOWED.test(v));
+    expect(bad.length, `ハングル以外を含む: ${bad.slice(0, 10).map(([k, v]) => `${k}=${v}`).join(', ')}`).toBe(0);
   });
 });
 
