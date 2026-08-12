@@ -4075,6 +4075,100 @@ export const stationTranslations: { [key: string]: string } = {
   "遠州芝本": "Enshu-Shibamoto",
   "遠州二俣": "Enshu-Futamata",
   "西鹿島": "Nishi-Kajima",
+
+  // ───────────────────────────────────────────────
+  // 北海道: JR根室本線・花咲線
+  // ───────────────────────────────────────────────
+  "釧路": "Kushiro",
+  "東釧路": "Higashi-Kushiro",
+  "武佐": "Musa",
+  "別保": "Beppo",
+  "上別保": "Kami-Beppo",
+  "上尾幌": "Kami-Oboro",
+  "尾幌": "Oboro",
+  "門静": "Monshizu",
+  "厚岸": "Akkeshi",
+  "糸魚沢": "Itoizawa",
+  "茶内": "Chanai",
+  "浜中": "Hamanaka",
+  "姉別": "Anebetsu",
+  "厚床": "Attoko",
+  "初田牛": "Hattaushi",
+  "別当賀": "Bettoga",
+  "落石": "Ochiishi",
+  "昆布盛": "Kombumori",
+  "西和田": "Nishi-Wada",
+  "和田": "Wada",
+  "花咲": "Hanasaki",
+  "東根室": "Higashi-Nemuro",
+  "根室": "Nemuro",
+
+  // ───────────────────────────────────────────────
+  // 北海道: 函館市電
+  // ───────────────────────────────────────────────
+  "湯の川": "Yunokawa",
+  "湯の川温泉": "Yunokawa-onsen",
+  "新川町": "Shinkawacho",
+  "駒場車庫前": "Komaba-shako-mae",
+  "杉並町": "Suginamicho",
+  "柏木町": "Kashiwagicho",
+  "千代台": "Chiyogadai",
+  "五稜郭公園前": "Goryokaku-koen-mae",
+  "深堀町": "Fukaboricho",
+  "本通": "Hondori",
+  "昭和橋": "Showabashi",
+  "中央病院前": "Chuo-byoin-mae",
+  "函館アリーナ前": "Hakodate Arena-mae",
+  "市民会館前": "Shiminkaikan-mae",
+  "函館駅前": "Hakodate-ekimae",
+  "松風町": "Matsukazecho",
+  "十字街": "Jujigai",
+  "豊川町": "Toyokawacho",
+  "谷地頭": "Yachigashira",
+
+  // ───────────────────────────────────────────────
+  // 九州: JR日南線
+  // ───────────────────────────────────────────────
+  "曽山寺": "Sozanji",
+  "子供の国": "Kodomonokuni",
+  "青島": "Aoshima",
+  "折生迫": "Orionzako",
+  "内海": "Uchiumi",
+  "小内海": "Kouchiumi",
+  "伊比井": "Ibii",
+  "北郷": "Kitago",
+  "内之田": "Uchinota",
+  "飫肥": "Obi",
+  "日南": "Nichinan",
+  "油津": "Aburatsu",
+  "大堂津": "Odotsu",
+  "南郷": "Nango",
+  "夫婦浦": "Meotoura",
+  "串間": "Kushima",
+  "福島今町": "Fukushima-Imamachi",
+  "志布志": "Shibushi",
+
+  // ───────────────────────────────────────────────
+  // 東北: JR奥羽本線（新庄〜秋田）
+  // ───────────────────────────────────────────────
+  "真室川": "Mamurogawa",
+  "及位": "Nozoki",
+  "院内": "Innai",
+  "三関": "Miseki",
+  "下湯沢": "Shimo-Yuzawa",
+  "湯沢": "Yuzawa",
+  "十文字": "Jumonji",
+  "醍醐": "Daigo",
+  "柳田": "Yanagita",
+  "横手": "Yokote",
+  "後三年": "Gosannen",
+  "飯詰": "Iizume",
+  "大曲": "Omagari",
+  "神宮寺": "Jinguji",
+  "刈和野": "Kariwano",
+  "峰吉川": "Mineyoshikawa",
+  "羽後境": "Ugo-Sakai",
+  "大張野": "Oharino",
 }
 // 路線名翻訳辞書
 export const routeTranslations: { [key: string]: string } = {
