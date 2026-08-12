@@ -81,7 +81,7 @@ export const sanrikuRiasLine: Station[] = [
   { name: "陸前赤崎",   lat: 39.068208, lng: 141.742102, timeToNext: 8 },
   { name: "綾里",      lat: 39.054201, lng: 141.798979, timeToNext: 8 },
   { name: "恋し浜",    lat: 39.074400, lng: 141.816394, timeToNext: 8 },
-  { name: "甫嶋",      lat: 39.222180, lng: 141.735880, timeToNext: 8 },
+  { name: "甫嶺",      lat: 39.222180, lng: 141.735880, timeToNext: 8 },
   { name: "大船渡",    lat: 39.077520, lng: 141.709220, timeToNext: 8 },
   { name: "下船渡",    lat: 39.038442, lng: 141.721197, timeToNext: 8 },
   { name: "細浦",      lat: 39.015316, lng: 141.713894, timeToNext: 8 },

@@ -1,5 +1,91 @@
 # CHANGE LOG
 
+## [2026-08-06] セッション（スマホUX・地図クリック判定・複数出発駅・v2 UI基盤）
+
+### fix: キーボード表示時に出発時刻欄と路線検索欄が隠れる問題を修正
+- `src/components/StationSelector.tsx`: 出発時刻の`<input type="time">`にvisualViewport連動のフォーカス管理を追加
+- `src/components/TrainStatusPanel.tsx`: 路線検索入力に同様のvisualViewport監視を新規追加（既存のフックが皆無だった）
+
+### fix: 駅ツールチップの長い路線名が改行されず見切れる問題を修正
+- `src/components/RailwayMap.tsx`
+- `wordBreak: 'keep-all'`はスペースを含まない日本語路線名だと改行点が一切なくなり、
+  コンテナ幅を超えても1行で溢れていた
+- `overflowWrap: 'break-word'`をフォールバックに追加、flexアイテムに`minWidth: 0`を設定
+
+### fix: 路線図(schematic)の表示中路線のクリック判定を非表示路線と同じ幅に拡大
+- `src/components/DiagramMap.tsx`
+- 表示中の路線は可視線そのもの(stroke-width 2〜3px)だけがクリック対象で、非表示路線の
+  当たり判定(12px)より大幅に狭かった
+- 非表示路線と同じ仕組み(透明な太い当たり判定パス)を追加し、幅も16pxに統一
+
+### fix: 駅マーカー表示上限を100件に戻しフリーズを防止
+- `src/components/RailwayMap.tsx`
+- `MAX_MARKER_STATIONS`が無関係なコミットに紛れて100→300→400と引き上げられていた
+- TODO記載の「画面中心に近い駅から最大100個だけ描画」の方針どおり100に戻す
+
+### feat: 複数出発駅から共通ゴール駅への経路比較機能を追加
+- `src/components/MultiDepartureRoutes.tsx` (新規)
+- メインの出発駅(departure)とは別に追加出発駅(extraDepartures)を管理し、各駅から
+  同じゴール駅へのベスト経路をrouteFinder.findRoutesでまとめて算出・一覧表示
+- 一覧の各カードをクリックするとその駅をメイン出発駅に昇格でき既存の地図ハイライトに乗る
+- `src/components/RailwayMap.tsx`, `src/utils/translation.ts`
+
+### feat: v2 UI基盤を追加（デザイントークン一元管理 + v1/v2切替）
+- `src/design/tokens.ts`, `cssVars.ts`, `DesignTokensProvider.tsx`, `DesignDebugPanel.tsx` (新規)
+  - 色・フォント・余白・角丸・影・breakpoint等を単一の情報源として定義し`--v2-*`のCSS変数として注入
+  - 全トークンをその場で自由編集できるデバッグパネル（localStorageに永続化）
+- `src/utils/uiVersionPersistence.ts` (新規): v1/v2切り替えをlocalStorage/URLパラメータで永続化
+- `src/components/NavigationBar.tsx`: Sparklesアイコンのv1/v2切り替えボタンを追加
+- `src/v2/StationPickerV2.tsx`, `RouteResultsV2.tsx`, `RailwayMapV2.tsx` (新規)
+  - 既存のRouteFinder（経路探索アルゴリズム）・DiagramMap（地図描画）はそのまま再利用し、
+    外側のレイアウト・配色・タイポグラフィのみ刷新
+  - 駅選択→経路検索結果表示→地図ハイライトの一連の流れをv2デザインで提供
+- `src/components/ThemeWrapper.tsx`: uiVersionに応じてRailwayMap(v1)/RailwayMapV2を出し分け
+- 既知の制約: ヒートマップ設定・列車デモ・設定インポート/エクスポートなど
+  v1の上級者向け機能はv2未対応（今後段階的に移植予定）
+
+### feat: v2に路線表示切替(凡例)と複数出発駅機能を追加
+- `src/components/DiagramMap.tsx`: `DIAGRAM_ROUTE_KEYS`をexportし、v2の凡例が
+  実際の描画対象路線と完全に一致するようにした（独自リストの二重管理を回避）
+- `src/v2/RouteLegendV2.tsx` (新規): 路線名検索・全表示/全非表示・個別チェック
+  ボックスに対応。地図上の路線を直接クリックしても同じ状態をトグルできるよう
+  `onToggleRoute`/`onHideRoute`をDiagramMapへ配線(v1と同じクリック体験)
+- `src/v2/MultiDepartureRoutesV2.tsx` (新規): v1のMultiDepartureRoutesと同じ
+  設計で、複数出発駅から共通ゴール駅への経路比較をv2デザインで提供
+
+### feat: v2に全画面モードと表示設定パネルを追加
+- `src/v2/RailwayMapV2.tsx`: 地図左上のボタンで全画面表示を切り替え可能に。
+  全画面時は地図がビューポート全体を占め、サイドパネルは左上のオーバーレイに
+  なる(v1と同じ体験)。`onFullscreenChange`propを追加しNavigationBar・
+  下部Sticky広告を全画面時に隠すよう配線
+- `src/v2/DisplaySettingsV2.tsx` (新規): 駅名表示のオン/オフ
+
+### fix: pre-existingなTypeScriptエラー120件(TODO記載114件)を全て解消
+`tsc --noEmit -p tsconfig.json` がsrc/全体でエラー0件になるまで修正。
+- `src/utils/stationReadings.ts`: 重複キー86件を削除(値は全て一致、
+  純粋な重複挿入と確認した上で後発エントリを削除)
+- `src/utils/translation.ts`: 重複していた「大岡山」キーを削除
+  (テスト実行時に毎回出ていたvite重複キー警告の原因)
+- `src/utils/routeFinder.ts`: `RouteSegment.routeKey`の型を
+  `RouteKey | 'walking'`に拡張(徒歩乗換区間用の特別値)。存在しない
+  'tokaido'/'jrTokaidoKanagawa'キーとの比較(既にjrTokaidoMainLineに
+  統合済みで生きていなかった)を削除
+- `src/components/RouteRecommendations.tsx`: 上記の型拡張に伴う
+  routeColors/routeNamesの'walking'索引を修正、存在しない
+  `colors.selectedBackground`参照を削除
+- `src/data/trainServices.ts`, `src/components/TrainTypeViewer.tsx`:
+  verbatimModuleSyntax対応でtype-only importに変更
+- `src/components/RailwayMap.tsx`: 動的import経由のLeafletイベント
+  ハンドラに`LeafletEvent`/`LeafletMouseEvent`型を明示注釈、
+  `&&`連鎖が`boolean | null/undefined`を返していた箇所を`!!()`で明示化
+- `src/components/DemoMap.tsx`: 絵文字→react-icons移行時に取り残されて
+  いた`currentStep.emoji`参照を`currentStep.icon`に修正
+- `src/components/DiagramMap.tsx`: 背景クリック時に存在しない関数
+  `setDimmedTooltip`を呼んでいた行を削除。2026-06-17のtooltip状態リ
+  ファクタの消し忘れで、実行時はクリックのたびにReferenceErrorを投げていた
+- `src/data/stationTrainTypeAnalysis.ts`: 5路線分のデータしか持たない
+  マップの型を`Record<RouteKey,...>`から`Partial<Record<RouteKey,...>>`に修正
+
 ## [2026-06-19] セッション（JSローディング・TrainStatusPanel改善・凡例ラベル改善）
 
 ### feat: JSロード完了まで表示するローディング画面を追加
@@ -869,3 +955,96 @@
 - `src/components/RailwayMap.tsx`
   - `gpsHistoryRef` で GPS 履歴を最大5点保持し、watchPosition 更新ごとに検出実行
   - `detectedRoute` / `manualTrainRoute` state を全 StationSelector インスタンスに渡す
+
+---
+
+## 2026-08-12 セッション
+
+### feat: 駅名の英語表記を全駅（6001駅）に拡充し 100% を達成
+- `src/utils/translation.ts`
+- セッション開始時点のカバレッジ 33.0% → 100.0%
+- 地域・路線ごとに約4,000行の `stationTranslations` エントリを追加
+  （烏山線・日光線・野岩鉄道・京都市営烏丸線・ポートライナー・のと鉄道、
+  土佐くろしお鉄道・リニモ・井原鉄道・南阿蘇鉄道・黒部峡谷鉄道・みなとみらい線、
+  鶴見線・九州新幹線・甘木鉄道・嵐電北野線・六甲ライナー ほか多数）
+- 表記規約: マクロンなしのASCIIのみ。接頭辞は `Nishi-` `Kita-` `Higashi-` `Shin-`、
+  接尾辞は `-cho` `-mae` `-koen` 形式に統一
+- `stationTranslations` は漢字をキーとするフラット構造のため、
+  路線ごとに読みが異なる同表記駅（例: 石原 = Ishiwara / Isa）は区別できない旨をコメントで明記
+
+### fix: 壊れた駅名データを修正
+- `src/data/kinki-jr-more2.ts`: 三岐鉄道北勢線の `"East西藤原"` → `東藤原`
+  （部分的に英訳された文字列が駅名として残っていた）
+- `src/data/tohoku-private-lines.ts`: 三陸鉄道リアス線の `"甫嶋"` → `甫嶺`（誤字）
+- `src/data/chugoku-more3.ts`: 若桜鉄道に混入していた `"フラワー長井線"` を削除
+  （別路線の路線名が駅として登録されていた）
+- 飯田線の `"豊橋市 豊根口"` は実在駅を特定できないためデータは変更せず、
+  音写のみ付与して `translation.ts` にコメントを残した（要追加調査）
+
+### test: 翻訳データの回帰テストを追加
+- `tests/unit/utils/translation.test.ts`
+- 全駅に `stationTranslations` のエントリがあることを保証（英語表記の追加漏れ検出）
+- 値に日本語・キリル文字・空文字・プレースホルダが混入していないことを検証
+  （過去に `"Kour<キリル文字>".replace(...)` のような式が値として混入した事故の再発防止）
+
+### improve: 出発駅の入力候補に近隣駅を表示
+- `src/utils/nearestStations.ts` (新規): 緯度経度の二乗距離で最近傍N駅を返す
+- `src/components/StationSelector.tsx`: `filterStations` に `emptySearchDefault` を追加し、
+  出発駅欄では未入力時に現在地周辺の駅を、到着駅欄では従来どおり主要駅を表示
+
+### improve: v2 UI をデフォルト非表示にする
+- `src/components/ThemeWrapper.tsx`: `SHOW_UI_VERSION_TOGGLE = false` で切り替えボタンを隠す
+- `src/utils/uiVersionPersistence.ts`: `getInitialUiVersion(toggleEnabled)` を追加し、
+  トグル非表示時は localStorage の保存値を無視して v1 に固定
+  （以前 v2 を選んでいたユーザーが v2 から戻れなくなるのを防ぐ）
+- 開発用に `?ui=v2` は引き続き有効。v2 のコード（`src/v2/`, `src/design/`）は残置
+
+### fix: 既存の TypeScript エラー（src配下120件）を解消
+- 型修正の過程で2件の実バグを発見・修正
+  - `src/components/DiagramMap.tsx`: 背景クリックのたびに ReferenceError を投げていた
+    未定義参照の `onClick` ハンドラを削除
+  - `DemoMap`: アイコン未指定を修正
+
+### feat: 中国語の駅名表記を全駅（6000/6001）に拡充
+- `src/utils/stationTranslationsCJK.ts`
+- 開始時 17.9% → 100%
+- かな・カタカナを含む駅名364件は手作業で追加
+  - 表記方針: 助詞の「ヶ/ケ/が」は省略（茅ヶ崎→茅崎）、「ノ/の」は之に置換（森ノ宮→森之宫）、
+    「ツ/つ」は省略（四ツ橋→四桥）、かな地名は漢字表記に戻す（さっぽろ→札幌、いわき→磐城）、
+    外来語は定着した中国語名を使う（ハウステンボス→豪斯登堡、ニセコ→新雪谷）
+- 漢字のみの駅名4560件は OpenCC(jp→cn) + 補正表で機械変換
+  - OpenCC はプロジェクトの依存には追加せず、生成時のみ scratchpad で使用
+  - 素の OpenCC は一致率90.7%（戸/郷/渋/氷/々/駄/舎 の変換漏れ、篠→筿・研→硏 の誤変換）
+  - 補正表を追加して96.5%まで改善したうえで生成
+  - 生成後のスキャンで繁体字形の残留（郞/緖/鶴/戶/蘇/輪/鐘/見/場/淵/塚）を検出・修正
+
+### fix: 中国語データに残っていた日本語新字体・誤字を修正
+- 目黒→目黑、高円寺→高圆寺、稲毛→稻毛、本郷台→本乡台 など33件
+- さいたま新都心の「琦玉新都心」（誤字）→ 埼玉新都心
+- 錦糸町の「锦系町」→ 锦糸町
+- かなが残っていた 虎ノ門ヒルズ・四ツ木
+
+### fix: 英語ローマ字の誤り計43件を修正
+- 韓国語ハングル音写スクリプトの出力を既存データと突き合わせて検出した
+- 長音のローマ字漏れ: 四街道 Yotsukaidou→Yotsukaido、善行 Zengyou→Zengyo ほか
+- 読み違い: 東浪見 Tounami→Torami、平和台 Heidai→Heiwadai、飯山満 Iiyama→Hasama、
+  谷在家 Yatsuka→Yazaike / 谷塚 Yatsutsuka→Yatsuka（2駅の取り違え）、
+  古淵 Kobuchi→Furubuchi、五月台 Gogatsu-dai→Satsukidai、牧之郷 Makinoko→Makinosato、
+  荏原中延 Ebara-nakanoshin→Ebara-Nakanobu ほか
+- 表記の不統一: 多摩動物公園・岸根公園を -koen 形式に統一
+
+### test: 中国語・韓国語データの回帰テストを追加
+- `tests/unit/utils/translation.test.ts`
+- 中国語の値に日中で字形が異なる文字が残っていないか検出
+- 中国語の値にかなが残っていないか検出（区切りの「・」は除外）
+- 韓国語の値がハングルと記号のみで構成されているか検出
+
+### 未着手: 韓国語の駅名表記（17.7%のまま）
+- 既存データ1,118件が内部で矛盾しており、中国語で使った
+  「生成→既存データで答え合わせ→補正」の検証手法が機能しないため保留中
+  - 語頭/語中規則: 東小金井→히가시코가네이（激音）だが 下北沢→시모기타자와（平音）
+  - 一般名詞: 泉体育館→이즈미타이이쿠칸（音写）だが 柴崎体育館→시바자키체육관（訳）
+  - 適用単位: 要素ごと89.1% / 語全体85.8% でどちらも1割超が不一致
+- 既存側の明確な誤りも多数（鎌倉高校前→고교마에、さくら夙川→사쿠라니시노미야가와、
+  幸手→사이테、土気→도게、福生→후사、実籾→지모미 など）
+- 外来語表記法に沿った純粋音写への統一（既存分も再生成）を推奨。要判断

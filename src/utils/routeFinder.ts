@@ -32,7 +32,8 @@ const TRANSFER_PENALTY_HUB_MIN = 8; // 主要ターミナルは少し短い
 const MAX_DETOUR_RATIO = 2.2;
 
 export interface RouteSegment {
-  routeKey: RouteKey;
+  /** 徒歩乗換区間は 'walking'（実路線を持たないためRouteKeyの外側の特別値） */
+  routeKey: RouteKey | 'walking';
   routeName: string;
   stations: Station[];
   startIndex: number;
@@ -383,8 +384,8 @@ export class RouteFinder {
     });
 
     // Normalize route keys for duplicate detection (unify Tokaido lines)
-    const normalizeRouteKey = (routeKey: RouteKey): string => {
-      if (routeKey === 'tokaido' || routeKey === 'jrTokaidoMainLine' || routeKey === 'jrTokaidoKanagawa') {
+    const normalizeRouteKey = (routeKey: RouteKey | 'walking'): string => {
+      if (routeKey === 'jrTokaidoMainLine') {
         return 'tokaido-unified';
       }
       return routeKey;

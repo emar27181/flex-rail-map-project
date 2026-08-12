@@ -136,7 +136,7 @@ const DemoMap: React.FC = () => {
           zIndex: 1000,
           boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
         }}>
-          <span style={{ fontSize: '20px', flexShrink: 0 }}>{currentStep.emoji}</span>
+          <span style={{ fontSize: '20px', flexShrink: 0, display: 'flex' }}>{currentStep.icon}</span>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 'bold', fontSize: '13px', marginBottom: '2px' }}>
               <span style={{

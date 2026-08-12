@@ -29,7 +29,9 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
 
   const buildTooltip = (route: RouteResult): string => {
     return route.segments.map((seg, i) => {
-      const name = routeNames[seg.routeKey] || seg.routeName;
+      const name = seg.routeKey === 'walking'
+        ? translateUI('walkingTransferShort', language)
+        : (routeNames[seg.routeKey] || seg.routeName);
       if (i === 0) return name;
       const transferStation = seg.stations[0]?.name ?? '';
       return `${transferStation} → ${name}`;
@@ -181,7 +183,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
               onMouseLeave={() => setTooltip(null)}
               style={{
                 padding: '10px 12px',
-                backgroundColor: isSelected ? colors.selectedBackground || colors.surfaceElevated : colors.surface,
+                backgroundColor: isSelected ? colors.surfaceElevated : colors.surface,
                 borderRadius: '6px',
                 border: isSelected ? '2px solid #2196F3' : `1px solid ${colors.borderLight}`,
                 transition: 'all 0.2s ease',
@@ -254,8 +256,12 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
             {/* 路線フロービジュアル */}
             <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', rowGap: '6px' }}>
               {route.segments.map((segment, segIndex) => {
-                const segColor = segment.isWalkingTransfer ? '#4CAF50' : (routeColors[segment.routeKey] || '#888');
-                const segName = routeNames[segment.routeKey] || segment.routeName;
+                const segColor = segment.isWalkingTransfer || segment.routeKey === 'walking'
+                  ? '#4CAF50'
+                  : (routeColors[segment.routeKey] || '#888');
+                const segName = segment.routeKey === 'walking'
+                  ? translateUI('walkingTransferShort', language)
+                  : (routeNames[segment.routeKey] || segment.routeName);
                 const startName = translateStation(segment.stations[0].name, language);
                 const endName = translateStation(segment.stations[segment.stations.length - 1].name, language);
                 const isLast = segIndex === route.segments.length - 1;

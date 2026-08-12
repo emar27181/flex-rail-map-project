@@ -26,7 +26,7 @@ export interface RouteStationAnalysis {
 }
 
 // 路線別の列車種別と停車駅パターン
-const trainServicePatterns: Record<RouteKey, Record<string, string[]>> = {
+const trainServicePatterns: Partial<Record<RouteKey, Record<string, string[]>>> = {
   yamanote: {
     local: ['all'], // 山手線は全駅停車
     rapid: ['東京', '新橋', '品川', '渋谷', '新宿', '池袋', '上野'], // 主要ターミナル駅
@@ -124,7 +124,7 @@ export function generateRouteStationAnalysis(routeKey: RouteKey): RouteStationAn
   const route = routes[routeKey];
   if (!route) return null;
 
-  const routeNames: Record<RouteKey, string> = {
+  const routeNames: Partial<Record<RouteKey, string>> = {
     yamanote: '山手線',
     chuo: '中央線',
     odakyuLine: '小田急小田原線',
@@ -196,7 +196,7 @@ export function getStationServiceAcrossRoutes(stationName: string): {
   }[];
 } {
   const supportedRoutes: RouteKey[] = ['yamanote', 'chuo', 'odakyuLine', 'keihinTohoku', 'ginzaLine'];
-  const routeNames: Record<RouteKey, string> = {
+  const routeNames: Partial<Record<RouteKey, string>> = {
     yamanote: '山手線',
     chuo: '中央線',
     odakyuLine: '小田急小田原線',

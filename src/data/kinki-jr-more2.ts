@@ -74,7 +74,7 @@ export const sangiBonsen: Station[] = [
   { name: "大安",       lat: 35.060960, lng: 136.602580, timeToNext: 5 },
   { name: "丹生川",     lat: 35.088120, lng: 136.591820, timeToNext: 5 },
   { name: "伊勢治田",   lat: 35.101430, lng: 136.578640, timeToNext: 5 },
-  { name: "East西藤原", lat: 35.125380, lng: 136.554900, timeToNext: 5 },
+  { name: "東藤原",     lat: 35.125380, lng: 136.554900, timeToNext: 5 },
   { name: "西藤原",     lat: 35.145900, lng: 136.525870, timeToNext: 0 },
 ];
 
