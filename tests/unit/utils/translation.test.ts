@@ -75,6 +75,29 @@ describe('stationTranslations / routeTranslations の取り違え検出', () => 
   });
 });
 
+describe('英語表記のカバレッジ', () => {
+  /**
+   * 路線データ上の全駅に英語表記が存在することを保証する。
+   * 新しい路線・駅を追加した際、英訳の追加を忘れると英語UIで
+   * 日本語のまま表示されてしまうため、ここで検出する。
+   */
+  it('全ての駅に stationTranslations のエントリがある', () => {
+    const missing: string[] = [];
+    const seen = new Set<string>();
+    for (const stations of Object.values(routes)) {
+      for (const s of stations) {
+        if (seen.has(s.name)) continue;
+        seen.add(s.name);
+        if (!stationTranslations[s.name]) missing.push(s.name);
+      }
+    }
+    expect(
+      missing.length,
+      `英語表記が未登録の駅(${missing.length}件, 先頭20件): ${missing.slice(0, 20).join(', ')}`
+    ).toBe(0);
+  });
+});
+
 describe('stationTranslations の値の健全性', () => {
   /**
    * 大量の駅名翻訳を手作業で追記する際、値の側が壊れていても
