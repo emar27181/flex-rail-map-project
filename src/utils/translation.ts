@@ -5003,6 +5003,133 @@ export const stationTranslations: { [key: string]: string } = {
   "貝津": "Kaizu",
   "保田ケ池": "Hodagaike",
   "八草": "Yakusa",
+
+  // ───────────────────────────────────────────────
+  // 東北: JR羽越本線
+  // ───────────────────────────────────────────────
+  "新発田": "Shibata",
+  "中条": "Nakajo",
+  "府屋": "Fuya",
+  "鼠ヶ関": "Nezugaseki",
+  "あつみ温泉": "Atsumi-onsen",
+  "鶴岡": "Tsuruoka",
+  "余目": "Amarume",
+  "酒田": "Sakata",
+  "遊佐": "Yuza",
+  "象潟": "Kisakata",
+  "仁賀保": "Nikaho",
+  "羽後本荘": "Ugo-Honjo",
+  "羽後亀田": "Ugo-Kameda",
+
+  // ───────────────────────────────────────────────
+  // 中国: JR山陰本線（出雲市〜下関）
+  // ───────────────────────────────────────────────
+  "出雲市": "Izumoshi",
+  "西出雲": "Nishi-Izumo",
+  "出雲神西": "Izumo-Jinzai",
+  "直江": "Naoe",
+  "大田市": "Odashi",
+  "石見銀山": "Iwami-Ginzan",
+  "江津": "Gotsu",
+  "浜田": "Hamada",
+  "東萩": "Higashi-Hagi",
+  "萩": "Hagi",
+  "長門市": "Nagatoshi",
+  "小串": "Kogushi",
+  "下関": "Shimonoseki",
+
+  // ───────────────────────────────────────────────
+  // 中国: JR可部線・福塩線・芸備線
+  // ───────────────────────────────────────────────
+  "横川": "Yokogawa",
+  "三滝": "Mitaki",
+  "安芸長束": "Aki-Nagatsuka",
+  "下祇園": "Shimo-Gion",
+  "古市橋": "Furuichibashi",
+  "緑井": "Midorii",
+  "七軒茶屋": "Shichikenjaya",
+  "梅林": "Bairin",
+  "上八木": "Kami-Yagi",
+  "中島": "Nakashima",
+  "可部": "Kabe",
+  "河戸帆待川": "Koda-Homachigawa",
+  "あき亀山": "Aki-Kameyama",
+  "福山": "Fukuyama",
+  "備後本庄": "Bingo-Honjo",
+  "光武": "Mitsutake",
+  "神辺": "Kannabe",
+  "湯田村": "Yudamura",
+  "道上": "Michinoue",
+  "万能倉": "Mananokura",
+  "駅家": "Ekiya",
+  "近田": "Chikata",
+  "川北": "Kawakita",
+  "吉舎": "Kisa",
+  "三良坂": "Mirasaka",
+  "塩町": "Shiomachi",
+  "矢賀": "Yaga",
+  "戸坂": "Hesaka",
+  "安芸矢口": "Aki-Yaguchi",
+  "中深川": "Naka-Fukawa",
+  "下深川": "Shimo-Fukawa",
+  "玖村": "Kumura",
+  "志和口": "Shiwaguchi",
+  "上三田": "Kami-Mita",
+  "三次": "Miyoshi",
+  "西三次": "Nishi-Miyoshi",
+  "甲立": "Koutachi",
+  "吉田口": "Yoshidaguchi",
+  "備中神代": "Bitchu-Kojiro",
+
+  // ───────────────────────────────────────────────
+  // 九州: JR大村線
+  // ───────────────────────────────────────────────
+  "市布": "Ichinuno",
+  "肥前古賀": "Hizen-Koga",
+  "現川": "Utsutsugawa",
+  "竹松": "Takematsu",
+  "諫早市内バス": "Isahaya City Bus",
+  "大村": "Omura",
+  "岩松": "Iwamatsu",
+  "千綿": "Chiwata",
+  "彼杵": "Sonogi",
+  "川棚": "Kawatana",
+  "小串郷": "Ogushigo",
+  "ハウステンボス": "Huis Ten Bosch",
+  "早岐": "Haiki",
+
+  // ───────────────────────────────────────────────
+  // 北海道: JR根室本線（滝川〜新得）
+  // ───────────────────────────────────────────────
+  "東滝川": "Higashi-Takikawa",
+  "赤平": "Akabira",
+  "茂尻": "Mojiri",
+  "芦別": "Ashibetsu",
+  "野花南": "Nokanan",
+  "島ノ下": "Shimanoshita",
+  "富良野": "Furano",
+  "布部": "Nunobe",
+  "山部": "Yamabe",
+  "下金山": "Shimo-Kanayama",
+  "東鹿越": "Higashi-Shikagoe",
+  "新得": "Shintoku",
+
+  // ───────────────────────────────────────────────
+  // 関西: JR桜井線（万葉まほろば線）
+  // ───────────────────────────────────────────────
+  "奈良": "Nara",
+  "京終": "Kyobate",
+  "帯解": "Obitoke",
+  "櫟本": "Ichinomoto",
+  "長柄": "Nagara",
+  "柳本": "Yanagimoto",
+  "巻向": "Makimuku",
+  "三輪": "Miwa",
+  "玄番": "Gemba",
+  "金橋": "Kanahashi",
+  "香久山": "Kaguyama",
+  "畝傍": "Unebi",
+  "金田": "Kanda",
 }
 // 路線名翻訳辞書
 export const routeTranslations: { [key: string]: string } = {
