@@ -41,12 +41,23 @@ const RailwayMapV2Inner: React.FC<RailwayMapV2Props> = ({ language, onFullscreen
   const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(() => new Set(DIAGRAM_ROUTE_KEYS));
   const [extraDepartures, setExtraDepartures] = useState<Station[]>([]);
   const [showStationNames, setShowStationNames] = useState(true);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // 出発駅の入力候補に現在地周辺の駅を出すための一度きりの位置情報取得(継続監視は不要)
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setUserLocation([pos.coords.latitude, pos.coords.longitude]),
+      () => { /* 権限拒否・取得失敗時は主要駅にフォールバックするため何もしない */ },
+      { maximumAge: 5 * 60 * 1000, timeout: 8000 }
+    );
   }, []);
 
   useEffect(() => {
@@ -113,6 +124,7 @@ const RailwayMapV2Inner: React.FC<RailwayMapV2Props> = ({ language, onFullscreen
           onDepartureChange={setDeparture}
           onArrivalChange={setArrival}
           language={language}
+          userLocation={userLocation}
         />
       </div>
 

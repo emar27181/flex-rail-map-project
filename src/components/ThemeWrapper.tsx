@@ -10,10 +10,19 @@ import type { Language } from '../utils/translation';
 import { getInitialLanguage, persistLanguage } from '../utils/languagePersistence';
 import { getInitialUiVersion, persistUiVersion, type UiVersion } from '../utils/uiVersionPersistence';
 
+/**
+ * v2 UI切り替えボタンの表示フラグ。
+ *
+ * v2は開発途上のため通常は非表示にしておく。コード自体は残してあるので、
+ * この定数を true にすればナビゲーションバーに切り替えボタンが戻る。
+ * URLに ?ui=v2 を付ければこのフラグに関係なくv2を確認できる（開発用）。
+ */
+const SHOW_UI_VERSION_TOGGLE = false;
+
 const ThemeWrapper: React.FC = () => {
   const [language, setLanguage] = useState<Language>(getInitialLanguage);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [uiVersion, setUiVersion] = useState<UiVersion>(getInitialUiVersion);
+  const [uiVersion, setUiVersion] = useState<UiVersion>(() => getInitialUiVersion(SHOW_UI_VERSION_TOGGLE));
 
   useEffect(() => {
     persistLanguage(language);
@@ -42,7 +51,7 @@ const ThemeWrapper: React.FC = () => {
         onLanguageChange={handleLanguageChange}
         isFullscreen={isFullscreen}
         uiVersion={uiVersion}
-        onUiVersionChange={setUiVersion}
+        {...(SHOW_UI_VERSION_TOGGLE ? { onUiVersionChange: setUiVersion } : {})}
       />
       {uiVersion === 'v2' ? (
         <RailwayMapV2 language={language} onFullscreenChange={setIsFullscreen} />

@@ -7,6 +7,7 @@ import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { translateStation, translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
 import { stationReadings, normalizeToHiragana } from '../utils/stationReadings';
+import { findNearestStations } from '../utils/nearestStations';
 import { FS, TARGET } from '../constants/ui';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
@@ -154,9 +155,15 @@ const StationSelector: React.FC<StationSelectorProps> = ({
       .filter(station => station !== undefined) as Station[];
   }, [allStations]);
 
+  // 現在地周辺5駅（出発駅の入力候補用。位置情報が未取得の場合は主要駅にフォールバック）
+  const nearbyStations = useMemo(() => {
+    if (!userLocation) return null;
+    return findNearestStations(allStations, userLocation[0], userLocation[1], 5);
+  }, [allStations, userLocation]);
+
   // 検索文字列でフィルタし、前方一致優先・読み順でソートして上位10件を返す
-  function filterStations(search: string): Station[] {
-    if (!search) return majorStations;
+  function filterStations(search: string, emptySearchDefault: Station[] = majorStations): Station[] {
+    if (!search) return emptySearchDefault;
     const term = normalizeToHiragana(search.toLowerCase());
     return allStations
       .filter(station => {
@@ -179,8 +186,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   }
 
   const filteredDepartureStations = useMemo(
-    () => filterStations(departureSearch),
-    [allStations, departureSearch, majorStations]
+    () => filterStations(departureSearch, nearbyStations ?? majorStations),
+    [allStations, departureSearch, majorStations, nearbyStations]
   );
 
   const filteredArrivalStations = useMemo(

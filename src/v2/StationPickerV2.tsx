@@ -3,6 +3,7 @@ import { ArrowLeftRight, MapPin, Flag, X } from 'lucide-react';
 import type { Station } from '../data/yamanote';
 import { getAllStations } from '../utils/allStations';
 import { stationReadings, normalizeToHiragana } from '../utils/stationReadings';
+import { findNearestStations } from '../utils/nearestStations';
 import { translateStation, translateUI } from '../utils/translation';
 import type { Language } from '../utils/translation';
 
@@ -12,10 +13,12 @@ interface StationPickerV2Props {
   onDepartureChange: (station: Station | null) => void;
   onArrivalChange: (station: Station | null) => void;
   language: Language;
+  /** 出発駅の入力候補を現在地周辺の駅にするための位置情報(未取得ならnull) */
+  userLocation?: [number, number] | null;
 }
 
-function filterStations(allStations: Station[], search: string): Station[] {
-  if (!search) return [];
+function filterStations(allStations: Station[], search: string, emptySearchDefault: Station[] = []): Station[] {
+  if (!search) return emptySearchDefault;
   const term = normalizeToHiragana(search.toLowerCase());
   return allStations
     .filter(s => {
@@ -42,9 +45,10 @@ interface FieldProps {
   onChange: (station: Station | null) => void;
   language: Language;
   allStations: Station[];
+  emptySearchDefault?: Station[];
 }
 
-const StationField: React.FC<FieldProps> = ({ icon, label, station, onChange, language, allStations }) => {
+const StationField: React.FC<FieldProps> = ({ icon, label, station, onChange, language, allStations, emptySearchDefault }) => {
   const [search, setSearch] = useState('');
   const [showResults, setShowResults] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -63,7 +67,10 @@ const StationField: React.FC<FieldProps> = ({ icon, label, station, onChange, la
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const results = useMemo(() => filterStations(allStations, search), [allStations, search]);
+  const results = useMemo(
+    () => filterStations(allStations, search, emptySearchDefault),
+    [allStations, search, emptySearchDefault]
+  );
 
   return (
     <div ref={wrapperRef} style={{ position: 'relative' }}>
@@ -129,9 +136,15 @@ const StationField: React.FC<FieldProps> = ({ icon, label, station, onChange, la
 };
 
 const StationPickerV2: React.FC<StationPickerV2Props> = ({
-  departure, arrival, onDepartureChange, onArrivalChange, language,
+  departure, arrival, onDepartureChange, onArrivalChange, language, userLocation,
 }) => {
   const allStations = useMemo(() => getAllStations(), []);
+
+  // 現在地周辺5駅(出発駅の入力候補用。位置情報が未取得なら候補なし)
+  const nearbyStations = useMemo(() => {
+    if (!userLocation) return undefined;
+    return findNearestStations(allStations, userLocation[0], userLocation[1], 5);
+  }, [allStations, userLocation]);
 
   const handleSwap = () => {
     onDepartureChange(arrival);
@@ -150,6 +163,7 @@ const StationPickerV2: React.FC<StationPickerV2Props> = ({
           onChange={onDepartureChange}
           language={language}
           allStations={allStations}
+          emptySearchDefault={nearbyStations}
         />
         <StationField
           icon={<Flag size={13} />}
