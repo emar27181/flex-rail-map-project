@@ -955,3 +955,52 @@
 - `src/components/RailwayMap.tsx`
   - `gpsHistoryRef` で GPS 履歴を最大5点保持し、watchPosition 更新ごとに検出実行
   - `detectedRoute` / `manualTrainRoute` state を全 StationSelector インスタンスに渡す
+
+---
+
+## 2026-08-12 セッション
+
+### feat: 駅名の英語表記を全駅（6001駅）に拡充し 100% を達成
+- `src/utils/translation.ts`
+- セッション開始時点のカバレッジ 33.0% → 100.0%
+- 地域・路線ごとに約4,000行の `stationTranslations` エントリを追加
+  （烏山線・日光線・野岩鉄道・京都市営烏丸線・ポートライナー・のと鉄道、
+  土佐くろしお鉄道・リニモ・井原鉄道・南阿蘇鉄道・黒部峡谷鉄道・みなとみらい線、
+  鶴見線・九州新幹線・甘木鉄道・嵐電北野線・六甲ライナー ほか多数）
+- 表記規約: マクロンなしのASCIIのみ。接頭辞は `Nishi-` `Kita-` `Higashi-` `Shin-`、
+  接尾辞は `-cho` `-mae` `-koen` 形式に統一
+- `stationTranslations` は漢字をキーとするフラット構造のため、
+  路線ごとに読みが異なる同表記駅（例: 石原 = Ishiwara / Isa）は区別できない旨をコメントで明記
+
+### fix: 壊れた駅名データを修正
+- `src/data/kinki-jr-more2.ts`: 三岐鉄道北勢線の `"East西藤原"` → `東藤原`
+  （部分的に英訳された文字列が駅名として残っていた）
+- `src/data/tohoku-private-lines.ts`: 三陸鉄道リアス線の `"甫嶋"` → `甫嶺`（誤字）
+- `src/data/chugoku-more3.ts`: 若桜鉄道に混入していた `"フラワー長井線"` を削除
+  （別路線の路線名が駅として登録されていた）
+- 飯田線の `"豊橋市 豊根口"` は実在駅を特定できないためデータは変更せず、
+  音写のみ付与して `translation.ts` にコメントを残した（要追加調査）
+
+### test: 翻訳データの回帰テストを追加
+- `tests/unit/utils/translation.test.ts`
+- 全駅に `stationTranslations` のエントリがあることを保証（英語表記の追加漏れ検出）
+- 値に日本語・キリル文字・空文字・プレースホルダが混入していないことを検証
+  （過去に `"Kour<キリル文字>".replace(...)` のような式が値として混入した事故の再発防止）
+
+### improve: 出発駅の入力候補に近隣駅を表示
+- `src/utils/nearestStations.ts` (新規): 緯度経度の二乗距離で最近傍N駅を返す
+- `src/components/StationSelector.tsx`: `filterStations` に `emptySearchDefault` を追加し、
+  出発駅欄では未入力時に現在地周辺の駅を、到着駅欄では従来どおり主要駅を表示
+
+### improve: v2 UI をデフォルト非表示にする
+- `src/components/ThemeWrapper.tsx`: `SHOW_UI_VERSION_TOGGLE = false` で切り替えボタンを隠す
+- `src/utils/uiVersionPersistence.ts`: `getInitialUiVersion(toggleEnabled)` を追加し、
+  トグル非表示時は localStorage の保存値を無視して v1 に固定
+  （以前 v2 を選んでいたユーザーが v2 から戻れなくなるのを防ぐ）
+- 開発用に `?ui=v2` は引き続き有効。v2 のコード（`src/v2/`, `src/design/`）は残置
+
+### fix: 既存の TypeScript エラー（src配下120件）を解消
+- 型修正の過程で2件の実バグを発見・修正
+  - `src/components/DiagramMap.tsx`: 背景クリックのたびに ReferenceError を投げていた
+    未定義参照の `onClick` ハンドラを削除
+  - `DemoMap`: アイコン未指定を修正
