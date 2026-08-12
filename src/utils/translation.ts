@@ -5574,6 +5574,172 @@ export const stationTranslations: { [key: string]: string } = {
   "久根別": "Kunebetsu",
   "東久根別": "Higashi-Kunebetsu",
   "七重浜": "Nanaehama",
+
+  // ───────────────────────────────────────────────
+  // 甲信越: 上田電鉄別所線
+  // ───────────────────────────────────────────────
+  "城下": "Shiroshita",
+  "三好町": "Miyoshicho",
+  "赤坂上": "Akasakaue",
+  "上田原": "Uedahara",
+  "寺下": "Terashita",
+  "神畑": "Kambatake",
+  "下之郷": "Shimonogo",
+  "中塩田": "Naka-Shioda",
+  "塩田町": "Shiodamachi",
+  "舞田": "Maida",
+  "別所温泉": "Bessho-onsen",
+
+  // ───────────────────────────────────────────────
+  // 四国: 高松琴平電鉄志度線
+  // ───────────────────────────────────────────────
+  "今橋": "Imabashi",
+  "松島二丁目": "Matsushima-nichome",
+  "沖松島": "Oki-Matsushima",
+  "春日川": "Kasugagawa",
+  "潟元": "Katamoto",
+  "琴電屋島": "Kotoden-Yashima",
+  "古高松南": "Furutakamatsu-minami",
+  "八栗": "Yakuri",
+  "八栗新道": "Yakuri-Shindo",
+  "房前": "Fusazaki",
+  "琴電志度": "Kotoden-Shido",
+
+  // ───────────────────────────────────────────────
+  // 東北: JR大船渡線
+  // ───────────────────────────────────────────────
+  "一ノ関": "Ichinoseki",
+  "真滝": "Mataki",
+  "陸中門崎": "Rikuchu-Kanzaki",
+  "柴宿": "Shibajuku",
+  "摺沢": "Surisawa",
+  "千厩": "Senmaya",
+  "小梨": "Konashi",
+  "矢越": "Yagoshi",
+  "折壁": "Orikabe",
+  "新月": "Nitsuki",
+  "気仙沼": "Kesennuma",
+
+  // ───────────────────────────────────────────────
+  // 関東: JR久留里線
+  // ───────────────────────────────────────────────
+  "祇園": "Gion",
+  "上総清川": "Kazusa-Kiyokawa",
+  "東清川": "Higashi-Kiyokawa",
+  "横田": "Yokota",
+  "東横田": "Higashi-Yokota",
+  "馬来田": "Makuta",
+  "下郡": "Shimogori",
+  "久留里": "Kururi",
+  "平山": "Hirayama",
+  "上総松丘": "Kazusa-Matsuoka",
+  "上総亀山": "Kazusa-Kameyama",
+
+  // ───────────────────────────────────────────────
+  // 名古屋: 名鉄瀬戸線・尾西線
+  // ───────────────────────────────────────────────
+  "東大手": "Higashi-Ote",
+  "尼ヶ坂": "Amagasaka",
+  "守山自衛隊前": "Moriyama-Jieitai-mae",
+  "喜多山": "Kitayama",
+  "大森・金城学院前": "Omori-Kinjogakuin-mae",
+  "印場": "Inba",
+  "旭前": "Asahimae",
+  "水野": "Mizuno",
+  "新瀬戸": "Shin-Seto",
+  "瀬戸市役所前": "Seto-Shiyakusho-mae",
+  "尾張瀬戸": "Owari-Seto",
+  "五ノ三": "Gonosan",
+  "佐屋": "Saya",
+  "日比野": "Hibino",
+  "津島": "Tsushima",
+  "勝幡": "Shobata",
+  "藤浪": "Fujinami",
+  "木田": "Kida",
+  "青塚": "Aotsuka",
+  "稲沢市役所前": "Inazawa-Shiyakusho-mae",
+  "奥町": "Okumachi",
+  "玉ノ井": "Tamanoi",
+
+  // ───────────────────────────────────────────────
+  // 東北: 弘南鉄道大鰐線
+  // ───────────────────────────────────────────────
+  "中央弘前": "Chuo-Hirosaki",
+  "弘高下": "Hirokoshita",
+  "千年": "Chitose",
+  "聖愛中高前": "Seiai-Chuko-mae",
+  "運動公園前": "Undokoen-mae",
+  "石川プール前": "Ishikawa-Pool-mae",
+  "義塾高校前": "Gijuku-Koko-mae",
+  "津軽大沢": "Tsugaru-Osawa",
+  "松木平": "Matsukidaira",
+  "宿川原": "Shukugawara",
+  "大鰐": "Owani",
+
+  // ───────────────────────────────────────────────
+  // 関東: JR水郡線
+  // ───────────────────────────────────────────────
+  "常陸青柳": "Hitachi-Aoyagi",
+  "常陸津田": "Hitachi-Tsuda",
+  "後台": "Godai",
+  "下菅谷": "Shimo-Sugaya",
+  "中菅谷": "Naka-Sugaya",
+  "上菅谷": "Kami-Sugaya",
+  "南酒出": "Minami-Sakaide",
+  "河合": "Kawai",
+  "瓜連": "Urizura",
+  "静": "Shizu",
+  "常陸大宮": "Hitachi-Omiya",
+
+  // ───────────────────────────────────────────────
+  // 関東: 伊豆箱根鉄道大雄山線
+  // ───────────────────────────────────────────────
+  "緑町": "Midoricho",
+  "井細田": "Isaida",
+  "五百羅漢": "Gohyakurakan",
+  "穴部": "Anabe",
+  "飯田岡": "Iidaoka",
+  "相模沼田": "Sagami-Numata",
+  "岩原": "Iwahara",
+  "塚原": "Tsukahara",
+  "和田河原": "Wadagahara",
+  "富士フイルム前": "Fujifilm-mae",
+  "大雄山": "Daiyuzan",
+
+  // ───────────────────────────────────────────────
+  // 中国: 智頭急行・三岐鉄道・若桜鉄道
+  // ───────────────────────────────────────────────
+  "苔縄": "Konawa",
+  "久崎": "Kuzaki",
+  "平福": "Hirafuku",
+  "石井": "Ishii",
+  "宮本武蔵": "Miyamoto-Musashi",
+  "西粟倉": "Nishi-Awakura",
+  "あわくら温泉": "Awakura-onsen",
+  "山郷": "Yamasato",
+  "恋山形": "Koi-Yamagata",
+  "土師": "Haji",
+  "智頭": "Chizu",
+  "近鉄富田": "Kintetsu-Tomida",
+  "大矢知": "Oyachi",
+  "保々": "Hobo",
+  "北勢中央公園口": "Hokusei-Chuo-koenguchi",
+  "山城": "Yamashiro",
+  "いなべ": "Inabe",
+  "大安": "Daian",
+  "丹生川": "Nyugawa",
+  "伊勢治田": "Ise-Hatta",
+  "西藤原": "Nishi-Fujiwara",
+  "郡家": "Koge",
+  "八頭高校前": "Yazu-Koko-mae",
+  "因幡船岡": "Inaba-Funaoka",
+  "徳丸": "Tokumaru",
+  "丹比": "Tanpi",
+  "安部": "Abe",
+  "八東": "Hatto",
+  "隼": "Hayabusa",
+  "坂野": "Sakano",
+  "若桜": "Wakasa",
 }
 // 路線名翻訳辞書
 export const routeTranslations: { [key: string]: string } = {
