@@ -5265,6 +5265,158 @@ export const stationTranslations: { [key: string]: string } = {
   "誕生寺": "Tanjoji",
   "亀甲": "Kameko",
   "佐良山": "Sarayama",
+
+  // ───────────────────────────────────────────────
+  // 関東: JR相模線
+  // ───────────────────────────────────────────────
+  "茅ヶ崎": "Chigasaki",
+  "北茅ヶ崎": "Kita-Chigasaki",
+  "香川": "Kagawa",
+  "寒川": "Samukawa",
+  "宮山": "Miyayama",
+  "倉見": "Kurami",
+  "門沢橋": "Kadosawabashi",
+  "社家": "Shake",
+  "相武台下": "Sobudaishita",
+  "下溝": "Shimomizo",
+  "原当麻": "Hara-Taima",
+  "南橋本": "Minami-Hashimoto",
+
+  // ───────────────────────────────────────────────
+  // 九州: 鹿児島市電
+  // ───────────────────────────────────────────────
+  "鹿児島中央駅前": "Kagoshima-Chuo-ekimae",
+  "都通": "Miyakodori",
+  "朝日通": "Asahi-dori",
+  "市役所前": "Shiyakusho-mae",
+  "天文館通": "Tenmonkan-dori",
+  "高見馬場": "Takamibaba",
+  "武之橋": "Takenobashi",
+  "二中通": "Nichu-dori",
+  "鴨池": "Kamoike",
+  "騎射場": "Kishaba",
+  "郡元（南国分病院前）": "Korimoto (Nangoku-Bunbyoin-mae)",
+  "工学部前": "Kogakubu-mae",
+
+  // ───────────────────────────────────────────────
+  // 北海道: JR日高本線・釧網本線
+  // ───────────────────────────────────────────────
+  "沼ノ端": "Numanohata",
+  "遠浅": "Toasa",
+  "鵡川": "Mukawa",
+  "汐見": "Shiomi",
+  "富川": "Tomikawa",
+  "日高門別": "Hidaka-Monbetsu",
+  "節婦": "Seppu",
+  "新冠": "Niikappu",
+  "静内": "Shizunai",
+  "東静内": "Higashi-Shizunai",
+  "春立": "Harutachi",
+  "様似": "Samani",
+  "釧路湿原": "Kushiro-Shitsugen",
+  "細岡": "Hosooka",
+  "塘路": "Toro",
+  "茅沼": "Kayanuma",
+  "標茶": "Shibecha",
+  "磯分内": "Isobunnai",
+  "摩周": "Mashu",
+  "美留和": "Biruwa",
+  "川湯温泉": "Kawayu-onsen",
+  "緑": "Midori",
+  "西女満別": "Nishi-Memanbetsu",
+  "女満別": "Memanbetsu",
+
+  // ───────────────────────────────────────────────
+  // 関西: 和歌山電鐵貴志川線
+  // ───────────────────────────────────────────────
+  "田中口": "Tanakaguchi",
+  "日前宮": "Nichizengu",
+  "竈山": "Kamayama",
+  "交通センター前": "Kotsu-Center-mae",
+  "岡崎前": "Okazakimae",
+  "吉礼": "Kire",
+  "伊太祁曽": "Idakiso",
+  "山東": "Sando",
+  "大池遊園": "Oikeyuen",
+  "西山口": "Nishi-Yamaguchi",
+  "甘露寺前": "Kanroji-mae",
+  "貴志": "Kishi",
+
+  // ───────────────────────────────────────────────
+  // 四国: JR徳島線
+  // ───────────────────────────────────────────────
+  "三縄": "Minawa",
+  "祖谷口": "Iyaguchi",
+  "阿波川口": "Awa-Kawaguchi",
+  "阿波山川": "Awa-Yamakawa",
+  "山瀬": "Yamase",
+  "貞光": "Sadamitsu",
+  "小島": "Ojima",
+  "穴吹": "Anabuki",
+  "阿波川島": "Awa-Kawashima",
+  "西麻植": "Nishi-Oe",
+  "麻植塚": "Oezuka",
+  "鴨島": "Kamojima",
+
+  // ───────────────────────────────────────────────
+  // 東北: JR山田線
+  // ───────────────────────────────────────────────
+  "上米内": "Kami-Yonai",
+  "大志田": "Oshida",
+  "浅岸": "Asagishi",
+  "区界": "Kuzakai",
+  "松草": "Matsukusa",
+  "平津戸": "Hiratsuto",
+  "箱石": "Hakoishi",
+  "陸中川井": "Rikuchu-Kawai",
+  "腹帯": "Haratai",
+  "茂市": "Moichi",
+  "蟇目": "Hikime",
+  "千徳": "Sentoku",
+
+  // ───────────────────────────────────────────────
+  // 関西: 京都市営地下鉄東西線・京都丹後鉄道
+  // ───────────────────────────────────────────────
+  "太秦天神川": "Uzumasa-Tenjingawa",
+  "嵐電天神川": "Randen-Tenjingawa",
+  "西大路御池": "Nishioji-Oike",
+  "二条城前": "Nijojo-mae",
+  "烏丸御池": "Karasuma-Oike",
+  "京都市役所前": "Kyoto-Shiyakusho-mae",
+  "三条京阪": "Sanjo-Keihan",
+  "蹴上": "Keage",
+  "御陵": "Misasagi",
+  "東野": "Higashino",
+  "椥辻": "Nagitsuji",
+  "石田": "Ishida",
+  "宮津": "Miyazu",
+  "天橋立": "Amanohashidate",
+  "岩滝口": "Iwatakiguchi",
+  "野田川": "Nodagawa",
+  "京丹後大宮": "Kyotango-Omiya",
+  "峰山": "Mineyama",
+  "網野": "Amino",
+  "木津温泉": "Kitsu-onsen",
+  "夕日ヶ浦木津温泉": "Yuhigaura-Kitsu-onsen",
+  "小天橋": "Shotenkyo",
+  "久美浜": "Kumihama",
+  "コウノトリの郷": "Kounotori-no-Sato",
+
+  // ───────────────────────────────────────────────
+  // 北陸: JR城端線
+  // ───────────────────────────────────────────────
+  "新高岡": "Shin-Takaoka",
+  "二塚": "Futatsuka",
+  "林": "Hayashi",
+  "戸出": "Toide",
+  "油田": "Aburaden",
+  "砺波": "Tonami",
+  "東野尻": "Higashi-Nojiri",
+  "福野": "Fukuno",
+  "高儀": "Takagi",
+  "福光": "Fukumitsu",
+  "越中山田": "Etchu-Yamada",
+  "城端": "Johana",
 }
 // 路線名翻訳辞書
 export const routeTranslations: { [key: string]: string } = {
