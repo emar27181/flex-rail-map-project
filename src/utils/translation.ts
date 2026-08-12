@@ -5417,6 +5417,163 @@ export const stationTranslations: { [key: string]: string } = {
   "福光": "Fukumitsu",
   "越中山田": "Etchu-Yamada",
   "城端": "Johana",
+
+  // ───────────────────────────────────────────────
+  // 九州: 福岡市営地下鉄七隈線
+  // ───────────────────────────────────────────────
+  "次郎丸": "Jiromaru",
+  "賀茂": "Kamo",
+  "野芥": "Noke",
+  "福大前": "Fukudai-mae",
+  "七隈": "Nanakuma",
+  "田島": "Tajima",
+  "桜坂": "Sakurazaka",
+  "薬院大通": "Yakuin-odori",
+  "渡辺通": "Watanabe-dori",
+  "天神南": "Tenjin-Minami",
+  "天神": "Tenjin",
+
+  // ───────────────────────────────────────────────
+  // 名古屋: 市営地下鉄鶴舞線
+  // ───────────────────────────────────────────────
+  "庄内通": "Shonaidori",
+  "浄心": "Joshin",
+  "浅間町": "Sengencho",
+  "大須観音": "Osu-Kannon",
+  "鶴舞": "Tsurumai",
+  "荒畑": "Arahata",
+  "川名": "Kawana",
+  "いりなか": "Irinaka",
+  "塩釜口": "Shiogamaguchi",
+  "平針": "Hirabari",
+  "赤池": "Akaike",
+
+  // ───────────────────────────────────────────────
+  // 東北: JR北上線・津軽線・阿武隈急行
+  // ───────────────────────────────────────────────
+  "北上": "Kitakami",
+  "柳原": "Yanagihara",
+  "江釣子": "Ezuriko",
+  "藤根": "Fujine",
+  "立川目": "Tachikawame",
+  "矢美津": "Yabitsu",
+  "ゆだ錦秋湖": "Yuda-Kinshuko",
+  "ゆだ高原": "Yuda-Kogen",
+  "ほっとゆだ": "Hotto-Yuda",
+  "平石": "Hiraishi",
+  "飯豊": "Iide",
+  "油川": "Aburakawa",
+  "津軽宮田": "Tsugaru-Miyata",
+  "後潟": "Ushirogata",
+  "中沢": "Nakazawa",
+  "蟹田": "Kanita",
+  "大平": "Ohira",
+  "浜名": "Hamana",
+  "瀬辺地": "Seheji",
+  "蓬田": "Yomogita",
+  "郷沢": "Gosawa",
+  "三厩": "Minmaya",
+  "東船岡": "Higashi-Funaoka",
+  "角田": "Kakuda",
+  "岡": "Oka",
+  "丸森": "Marumori",
+  "川原子": "Kawarago",
+  "梁川": "Yanagawa",
+  "やながわ希望の森公園前": "Yanagawa-Kibonomori-koen-mae",
+  "富野": "Tomino",
+  "兜": "Kabuto",
+  "保原": "Hobara",
+  "二井田": "Niida",
+
+  // ───────────────────────────────────────────────
+  // 中国: 広島電鉄市内線
+  // ───────────────────────────────────────────────
+  "銀山町": "Kanayamacho",
+  "胡町": "Ebisucho",
+  "立町": "Tatemachi",
+  "紙屋町東": "Kamiyacho-higashi",
+  "紙屋町西": "Kamiyacho-nishi",
+  "原爆ドーム前": "Genbaku-Dome-mae",
+  "本川町": "Honkawacho",
+  "十日市町": "Tokaichimachi",
+  "横川駅": "Yokogawa-eki",
+  "西広島": "Nishi-Hiroshima",
+  "己斐": "Koi",
+
+  // ───────────────────────────────────────────────
+  // 四国: JR土讃線（高知〜多ノ郷）
+  // ───────────────────────────────────────────────
+  "入明": "Irimyo",
+  "円行寺口": "Engyojiguchi",
+  "高知商業前": "Kochi-Shogyo-mae",
+  "朝倉": "Asakura",
+  "波川": "Hakawa",
+  "日下": "Kusaka",
+  "岡花": "Okabana",
+  "土佐加茂": "Tosa-Kamo",
+  "斗賀野": "Tokano",
+  "吾桑": "Asso",
+  "多ノ郷": "Onogo",
+
+  // ───────────────────────────────────────────────
+  // 関西: 神戸市営地下鉄西神・山手線
+  // ───────────────────────────────────────────────
+  "新神戸": "Shin-Kobe",
+  "三宮・花時計前": "Sannomiya-Hanadokeimae",
+  "湊川公園": "Minatogawa-koen",
+  "上沢": "Kamisawa",
+  "板宿": "Itayado",
+  "妙法寺": "Myohoji",
+  "名谷": "Myodani",
+  "学園都市": "Gakuentoshi",
+  "伊川谷": "Ikawadani",
+  "西神南": "Seishin-Minami",
+  "西神中央": "Seishin-Chuo",
+
+  // ───────────────────────────────────────────────
+  // 北陸: えちぜん鉄道勝山永平寺線
+  // ───────────────────────────────────────────────
+  "新福井": "Shin-Fukui",
+  "越前開田": "Echizen-Kaiden",
+  "三郎丸": "Saburomaru",
+  "東藤島": "Higashi-Fujishima",
+  "松岡": "Matsuoka",
+  "志比堺": "Shiizakai",
+  "永平寺口": "Eiheijiguchi",
+  "東古市": "Higashi-Furuichi",
+  "発坂": "Hossaka",
+  "比島": "Hijima",
+  "勝山": "Katsuyama",
+
+  // ───────────────────────────────────────────────
+  // 名古屋: 名鉄常滑線
+  // ───────────────────────────────────────────────
+  "豊田本町": "Toyota-Honmachi",
+  "道徳": "Dotoku",
+  "大江": "Oe",
+  "大同町": "Daidocho",
+  "柴田": "Shibata",
+  "名和": "Nawa",
+  "聚楽園": "Shurakuen",
+  "新舞子": "Shin-Maiko",
+  "大野町": "Onomachi",
+  "西ノ口": "Nishinoguchi",
+  "常滑": "Tokoname",
+
+  // ───────────────────────────────────────────────
+  // 北海道: 道南いさりび鉄道
+  // ───────────────────────────────────────────────
+  "木古内": "Kikonai",
+  "札苅": "Satsukari",
+  "泉沢": "Izumisawa",
+  "釜谷": "Kamaya",
+  "渡島当別": "Oshima-Tobetsu",
+  "茂辺地": "Moheji",
+  "上磯": "Kamiiso",
+  "清川口": "Kiyokawaguchi",
+  "久根別": "Kunebetsu",
+  "東久根別": "Higashi-Kunebetsu",
+  "七重浜": "Nanaehama",
 }
 // 路線名翻訳辞書
 export const routeTranslations: { [key: string]: string } = {
