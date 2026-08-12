@@ -4750,6 +4750,127 @@ export const stationTranslations: { [key: string]: string } = {
   "上州福島": "Joshu-Fukushima",
   "千平": "Sendaira",
   "下仁田": "Shimonita",
+
+  // ───────────────────────────────────────────────
+  // 中国: JR宇野線
+  // ───────────────────────────────────────────────
+  "大元": "Omoto",
+  "備前西市": "Bizen-Nishiichi",
+  "備中箕島": "Bitchu-Mishima",
+  "早島": "Hayashima",
+  "久々原": "Kugahara",
+  "茶屋町": "Chayamachi",
+  "植松": "Uematsu",
+  "木見": "Kimi",
+  "彦崎": "Hikosaki",
+  "備前片岡": "Bizen-Kataoka",
+  "八浜": "Hachihama",
+  "常山": "Tsuneyama",
+  "宇野": "Uno",
+
+  // ───────────────────────────────────────────────
+  // 北陸: 富山ライトレール・万葉線
+  // ───────────────────────────────────────────────
+  "富山駅北": "Toyama-eki-kita",
+  "インテック本社前": "Intec Honsha-mae",
+  "奥田中学校前": "Okuda-chugakko-mae",
+  "下奥井": "Shimo-Okui",
+  "粟島（大阪屋ショップ前）": "Awashima (Osakaya Shop-mae)",
+  "越中中島": "Etchu-Nakajima",
+  "城川原": "Jogawara",
+  "犬島新町": "Inujima-shinmachi",
+  "蓮町（馬場記念公園前）": "Hasumachi (Baba-kinen-koen-mae)",
+  "大広田": "Ohirota",
+  "東岩瀬": "Higashi-Iwase",
+  "競輪場前": "Keirinjo-mae",
+  "岩瀬カナル会館前": "Iwase Canal Kaikan-mae",
+  "岩瀬浜": "Iwasehama",
+  "急患医療センター前": "Kyukan-iryo-center-mae",
+  "志貴野中学校前": "Shikino-chugakko-mae",
+  "江尻": "Ejiri",
+  "旭ヶ丘": "Asahigaoka",
+  "荻布": "Ogino",
+  "新能町": "Shin-Nomachi",
+  "米島口": "Yoneshimaguchi",
+  "能町口": "Nomachiguchi",
+  "新吉久": "Shin-Yoshihisa",
+  "吉久": "Yoshihisa",
+  "中新湊": "Naka-Shinminato",
+  "東新湊": "Higashi-Shinminato",
+  "海王丸": "Kaiwomaru",
+  "越ノ潟": "Koshinokata",
+
+  // ───────────────────────────────────────────────
+  // 東海: JR関西本線（名古屋〜亀山）
+  // ───────────────────────────────────────────────
+  "春田": "Haruta",
+  "蟹江": "Kanie",
+  "永和": "Eiwa",
+  "弥富": "Yatomi",
+  "長島": "Nagashima",
+  "朝日": "Asahi",
+  "四日市": "Yokkaichi",
+  "南四日市": "Minami-Yokkaichi",
+  "河原田": "Kawarada",
+  "鈴鹿": "Suzuka",
+  "徳田": "Tokuda",
+  "河曲": "Kawano",
+  "加佐登": "Kasado",
+  "井田川": "Idagawa",
+
+  // ───────────────────────────────────────────────
+  // 関東: 真岡鐵道
+  // ───────────────────────────────────────────────
+  "下館二高前": "Shimodate-Nikomae",
+  "折本": "Orimoto",
+  "ひぐち": "Higuchi",
+  "ものおい": "Monooi",
+  "真岡": "Mooka",
+  "北真岡": "Kita-Mooka",
+  "西田井": "Nishidai",
+  "益子": "Mashiko",
+  "七井": "Nanai",
+  "多田羅": "Tatara",
+  "市塙": "Ichihana",
+  "笹原田": "Sasaharada",
+  "天矢場": "Tenyaba",
+  "茂木": "Motegi",
+
+  // ───────────────────────────────────────────────
+  // 甲信越: しなの鉄道
+  // ───────────────────────────────────────────────
+  "軽井沢": "Karuizawa",
+  "中軽井沢": "Naka-Karuizawa",
+  "信濃追分": "Shinano-Oiwake",
+  "御代田": "Miyota",
+  "小諸": "Komoro",
+  "滋野": "Shigeno",
+  "田中": "Tanaka",
+  "大屋": "Oya",
+  "信濃国分寺": "Shinano-Kokubunji",
+  "上田": "Ueda",
+  "坂城": "Sakaki",
+  "戸倉": "Togura",
+  "千曲": "Chikuma",
+  "篠ノ井": "Shinonoi",
+
+  // ───────────────────────────────────────────────
+  // 関東: 鹿島臨海鉄道
+  // ───────────────────────────────────────────────
+  "東水戸": "Higashi-Mito",
+  "常澄": "Tsunezumi",
+  "大洗": "Oarai",
+  "涸沼": "Hinuma",
+  "鹿島旭": "Kashima-Asahi",
+  "徳宿": "Tokushuku",
+  "新鉾田": "Shin-Hokota",
+  "北浦湖畔": "Kitaura-kohan",
+  "大洋": "Taiyo",
+  "鹿島灘": "Kashimanada",
+  "鹿島大野": "Kashima-Ono",
+  "長者ヶ浜潮騒はまなす公園前": "Chojagahama-Shiosai-Hamanasu-koen-mae",
+  "荒野台": "Konodai",
+  "鹿島サッカースタジアム": "Kashima Soccer Stadium",
 }
 // 路線名翻訳辞書
 export const routeTranslations: { [key: string]: string } = {
