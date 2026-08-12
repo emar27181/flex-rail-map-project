@@ -74,3 +74,32 @@ describe('stationTranslations / routeTranslations の取り違え検出', () => 
     expect(suspicious.length, `駅名の可能性があるキー: ${suspicious.slice(0, 10).join(', ')}`).toBeLessThan(5);
   });
 });
+
+describe('stationTranslations の値の健全性', () => {
+  /**
+   * 大量の駅名翻訳を手作業で追記する際、値の側が壊れていても
+   * TypeScript の型チェック（string であればOK）では検出できない。
+   * 実際に、式を書いてしまった `"Kour<キリル文字>".replace(...)` や、
+   * 日本語が残ったままのエントリが混入しかけたことがある。
+   * 英字表記として妥当な文字だけで構成されていることを機械的に検証する。
+   */
+  const entries = Object.entries(stationTranslations);
+
+  it('値に日本語（かな・漢字）が残っていない', () => {
+    const JAPANESE = /[぀-ヿ一-鿿]/;
+    const bad = entries.filter(([, v]) => JAPANESE.test(v));
+    expect(bad.length, `日本語が残っている: ${bad.slice(0, 10).map(([k, v]) => `${k}=${v}`).join(', ')}`).toBe(0);
+  });
+
+  it('値がラテン文字・数字・記号のみで構成されている（キリル文字等の混入がない）', () => {
+    // 許可: 英数字, 空白, ハイフン, ピリオド, アポストロフィ, 丸括弧, スラッシュ, アンパサンド
+    const ALLOWED = /^[A-Za-z0-9 \-.'()\/&]+$/;
+    const bad = entries.filter(([, v]) => !ALLOWED.test(v));
+    expect(bad.length, `想定外の文字を含む: ${bad.slice(0, 10).map(([k, v]) => `${k}=${JSON.stringify(v)}`).join(', ')}`).toBe(0);
+  });
+
+  it('値が空文字やプレースホルダになっていない', () => {
+    const bad = entries.filter(([, v]) => v.trim().length === 0 || v.includes('undefined') || v.includes('TODO'));
+    expect(bad.length, `不正な値: ${bad.slice(0, 10).map(([k, v]) => `${k}=${v}`).join(', ')}`).toBe(0);
+  });
+});
