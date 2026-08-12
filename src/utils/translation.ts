@@ -3894,6 +3894,75 @@ export const stationTranslations: { [key: string]: string } = {
   "岡田": "Okada",
   "金蔵寺": "Konzoji",
   "琴電琴平": "Kotoden-Kotohira",
+
+  // ───────────────────────────────────────────────
+  // 北陸: 富山地方鉄道本線
+  // ───────────────────────────────────────────────
+  "電鉄富山": "Dentetsu-Toyama",
+  "新庄田中": "Shinjo-Tanaka",
+  "不二越": "Fujikoshi",
+  "大泉": "Oizumi",
+  "上市": "Kamiichi",
+  "新宮川": "Shin-Miyagawa",
+  "中加積": "Naka-Kazumi",
+  "西加積": "Nishi-Kazumi",
+  "越中中村": "Etchu-Nakamura",
+  "榎町": "Enokimachi",
+  "下立口": "Otadateguchi",
+  "下立": "Otadate",
+  "愛本": "Aimoto",
+  "内山": "Uchiyama",
+  "舌山": "Shitayama",
+  "若栗": "Wakakuri",
+  "栃屋": "Tochiya",
+  "浦山": "Urayama",
+  "宇奈月": "Unazuki",
+  "宇奈月温泉": "Unazuki-onsen",
+
+  // ───────────────────────────────────────────────
+  // 北海道: 札幌市電
+  // ───────────────────────────────────────────────
+  "すすきの": "Susukino",
+  "狸小路": "Tanukikoji",
+  "西4丁目": "Nishi-4-chome",
+  "中央区役所前": "Chuo-kuyakusho-mae",
+  "西8丁目": "Nishi-8-chome",
+  "西11丁目": "Nishi-11-chome",
+  "西15丁目": "Nishi-15-chome",
+  "西18丁目": "Nishi-18-chome",
+  "西21丁目": "Nishi-21-chome",
+  "電車事業所前": "Denshajigyosho-mae",
+  "中島公園通": "Nakajima-koen-dori",
+  "山鼻9条": "Yamahana-9-jo",
+  "山鼻19条": "Yamahana-19-jo",
+  "静修学園前": "Seishugakuen-mae",
+  "行啓通": "Gyokei-dori",
+  "幌南小学校前": "Konan-shogakko-mae",
+  "石山通": "Ishiyama-dori",
+  "東屯田通": "Higashi-tonden-dori",
+  "ロープウェイ入口": "Ropeway Iriguchi",
+
+  // ───────────────────────────────────────────────
+  // 中国: JR木次線
+  // ───────────────────────────────────────────────
+  "宍道": "Shinji",
+  "南宍道": "Minami-Shinji",
+  "加茂中": "Kamonaka",
+  "幡屋": "Hataya",
+  "出雲大東": "Izumo-Daito",
+  "南大東": "Minami-Daito",
+  "木次": "Kisuki",
+  "日登": "Hinobori",
+  "下久野": "Shimokuno",
+  "出雲八代": "Izumo-Yashiro",
+  "出雲三成": "Izumo-Minari",
+  "亀嵩": "Kamedake",
+  "出雲横田": "Izumo-Yokota",
+  "八川": "Yakawa",
+  "出雲坂根": "Izumo-Sakane",
+  "三井野原": "Miinohara",
+  "油木": "Yuki",
+  "備後落合": "Bingo-Ochiai",
 }
 // 路線名翻訳辞書
 export const routeTranslations: { [key: string]: string } = {
