@@ -4871,6 +4871,138 @@ export const stationTranslations: { [key: string]: string } = {
   "長者ヶ浜潮騒はまなす公園前": "Chojagahama-Shiosai-Hamanasu-koen-mae",
   "荒野台": "Konodai",
   "鹿島サッカースタジアム": "Kashima Soccer Stadium",
+
+  // ───────────────────────────────────────────────
+  // 東北: JR八戸線
+  // ───────────────────────────────────────────────
+  "本八戸": "Hon-Hachinohe",
+  "陸奥湊": "Mutsu-Minato",
+  "白銀": "Shirogane",
+  "鮫": "Same",
+  "大久喜": "Okuki",
+  "金浜": "Kanehama",
+  "大蛇": "Ohebi",
+  "平内": "Hiranai",
+  "種差海岸": "Tanesashi-Kaigan",
+  "陸奥白浜": "Mutsu-Shirahama",
+  "有家": "Uge",
+  "陸奥中野": "Mutsu-Nakano",
+  "侍浜": "Samurahama",
+  "陸中夏井": "Rikuchu-Natsui",
+
+  // ───────────────────────────────────────────────
+  // 中国: JR岩徳線
+  // ───────────────────────────────────────────────
+  "岩国": "Iwakuni",
+  "西岩国": "Nishi-Iwakuni",
+  "柱野": "Hashirano",
+  "欽明路": "Kinmeiji",
+  "玖珂": "Kuga",
+  "周防高森": "Suo-Takamori",
+  "高照寺山": "Koshojiyama",
+  "通津": "Tsuzu",
+  "由宇": "Yu",
+  "神代": "Kojiro",
+  "大畠": "Obatake",
+  "周防花岡": "Suo-Hanaoka",
+  "櫛ヶ浜": "Kushigahama",
+  "徳山": "Tokuyama",
+
+  // ───────────────────────────────────────────────
+  // 中国: 広島電鉄宮島線・アストラムライン
+  // ───────────────────────────────────────────────
+  "広電西広島": "Hiroden-Nishi-Hiroshima",
+  "商工センター入口": "Shokosenta-iriguchi",
+  "広電五日市": "Hiroden-Itsukaichi",
+  "佐伯区役所前": "Saeki-kuyakusho-mae",
+  "楽々園": "Rakurakuen",
+  "廿日市市役所前": "Hatsukaichi-shiyakusho-mae",
+  "廿日市": "Hatsukaichi",
+  "宮内串戸": "Miyauchi-Kushido",
+  "阿品東": "Ajina-higashi",
+  "広電阿品": "Hiroden-Ajina",
+  "広電廿日市": "Hiroden-Hatsukaichi",
+  "地御前": "Jigozen",
+  "前空": "Maesora",
+  "広電宮島口": "Hiroden-Miyajimaguchi",
+  "城北": "Johoku",
+  "新白島": "Shin-Hakushima",
+  "白島": "Hakushima",
+  "不動院前": "Fudoin-mae",
+  "祇園新橋北": "Gion-Shinbashi-kita",
+  "中筋": "Nakasuji",
+  "毘沙門台": "Bishamondai",
+  "安東": "Yasuhigashi",
+  "上安": "Kamiyasu",
+  "高取団地": "Takatori-danchi",
+  "長楽寺": "Chorakuji",
+  "伴": "Tomo",
+  "伴中央": "Tomo-Chuo",
+  "広域公園前": "Koikikoen-mae",
+
+  // ───────────────────────────────────────────────
+  // 中国: JR境線
+  // ───────────────────────────────────────────────
+  "米子": "Yonago",
+  "博労町": "Bakuromachi",
+  "三本松口": "Sambonmatsuguchi",
+  "河崎口": "Kawasakiguchi",
+  "弓ヶ浜": "Yumigahama",
+  "和田浜": "Wadahama",
+  "大篠津町": "Ozashinocho",
+  "米子空港": "Yonago Airport",
+  "中浜": "Nakahama",
+  "高松町": "Takamatsucho",
+  "余子": "Amariko",
+  "上道": "Agarimichi",
+  "馬場崎町": "Babasakicho",
+  "境港": "Sakaiminato",
+
+  // ───────────────────────────────────────────────
+  // 北海道・東北: 札幌市営地下鉄東西線・仙台市営地下鉄南北線
+  // ───────────────────────────────────────────────
+  "宮の沢": "Miyanosawa",
+  "発寒南": "Hassamu-minami",
+  "二十四軒": "Nijuyonken",
+  "西28丁目": "Nishi-28-chome",
+  "円山公園": "Maruyama-koen",
+  "バスセンター前": "Bus Center-mae",
+  "菊水": "Kikusui",
+  "東札幌": "Higashi-Sapporo",
+  "南郷7丁目": "Nango-7-chome",
+  "南郷13丁目": "Nango-13-chome",
+  "南郷18丁目": "Nango-18-chome",
+  "大谷地": "Oyachi",
+  "新さっぽろ": "Shin-Sapporo",
+  "泉中央": "Izumi-Chuo",
+  "八乙女": "Yaotome",
+  "黒松": "Kuromatsu",
+  "台原": "Dainohara",
+  "北四番丁": "Kita-Yobancho",
+  "勾当台公園": "Kotodai-koen",
+  "広瀬通": "Hirose-dori",
+  "五橋": "Itsutsubashi",
+  "愛宕橋": "Atagobashi",
+  "長町一丁目": "Nagamachi-itchome",
+  "長町南": "Nagamachi-minami",
+  "富沢": "Tomizawa",
+
+  // ───────────────────────────────────────────────
+  // 東海: 愛知環状鉄道
+  // ───────────────────────────────────────────────
+  "北岡崎": "Kita-Okazaki",
+  "北野桝塚": "Kitano-Masuzuka",
+  "三河上郷": "Mikawa-Kamigo",
+  "永覚": "Ekaku",
+  "末野原": "Suenohara",
+  "豊田市": "Toyotashi",
+  "新上挙母": "Shin-Uwagoromo",
+  "新豊田": "Shin-Toyota",
+  "愛環梅坪": "Aikan-Umetsubo",
+  "四郷": "Shigo",
+  "貝津": "Kaizu",
+  "保田ケ池": "Hodagaike",
+  "八草": "Yakusa",
 }
 // 路線名翻訳辞書
 export const routeTranslations: { [key: string]: string } = {
