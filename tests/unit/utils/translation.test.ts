@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { uiTranslations, uiChinese, uiKorean, stationTranslations, routeTranslations } from '../../../src/utils/translation';
-import { routes } from '../../../src/data/routes';
+import { routes, routeNames } from '../../../src/data/routes';
 import { stationTranslationsChinese, stationTranslationsKorean } from '../../../src/utils/stationTranslationsCJK';
 
 describe('翻訳キー完全性', () => {
@@ -96,6 +96,28 @@ describe('英語表記のカバレッジ', () => {
       missing.length,
       `英語表記が未登録の駅(${missing.length}件, 先頭20件): ${missing.slice(0, 20).join(', ')}`
     ).toBe(0);
+  });
+});
+
+describe('路線名の翻訳カバレッジ', () => {
+  /**
+   * 駅ツールチップ・凡例・経路推薦はいずれも translateRoute を通すが、
+   * routeTranslations に無い路線名は日本語のまま表示される。
+   * 実際に、路線名の登録が490路線中89件しかなく、英語表示でも
+   * 「関東鉄道常総線」のように日本語が出ていた。
+   */
+  it('全ての路線に routeTranslations のエントリがある', () => {
+    const missing = Object.values(routeNames).filter(n => !routeTranslations[n]);
+    expect(
+      missing.length,
+      `翻訳が未登録の路線(${missing.length}件, 先頭10件): ${missing.slice(0, 10).join(', ')}`
+    ).toBe(0);
+  });
+
+  it('路線名の訳に日本語が残っていない', () => {
+    const JAPANESE = /[぀-ヿ一-鿿]/;
+    const bad = Object.entries(routeTranslations).filter(([, v]) => JAPANESE.test(v));
+    expect(bad.length, `日本語が残っている: ${bad.slice(0, 10).map(([k, v]) => `${k}=${v}`).join(', ')}`).toBe(0);
   });
 });
 

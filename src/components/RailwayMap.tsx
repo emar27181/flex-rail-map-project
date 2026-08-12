@@ -10,7 +10,7 @@ import SchematicMap from './SchematicMap';
 import { RouteFinder, TimeFilter, type RouteResult, type StationWithTime } from '../utils/routeFinder';
 import { getRouteDestination, getRouteDisplayText, getDirectionText, commonDirections } from '../data/routeDestinations';
 import { useTheme, getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
-import { translateStation, translateRoute, translateUI, translateTrainType, translatePlatform, translateDestination, translateStatParamLabel } from '../utils/translation';
+import { translateStation, translateRoute, translateUI, translateTrainType, translatePlatform, translateDestination, translateStatParamLabel, translateStatUnit } from '../utils/translation';
 import type { Language } from '../utils/translation';
 import { getFurigana } from '../utils/furigana';
 import LegendStationMarkers from './legend/LegendStationMarkers';
@@ -1009,7 +1009,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       {translatedLabel}{hasInfo ? ' ⓘ' : ''}
                     </span>
                     <span style={{ fontSize: '10px', color: pColor, fontWeight: isActive ? 'bold' : 'normal', marginLeft: '4px', textShadow: '0 0 3px rgba(0,0,0,0.55), 0 0 1px rgba(0,0,0,0.4)' }}>
-                      {v}{p.unit ? ` ${p.unit}` : ''}
+                      {v}{translateStatUnit(p.unit, currentLanguage) ? ` ${translateStatUnit(p.unit, currentLanguage)}` : ''}
                     </span>
                   </div>
                 );
@@ -1340,7 +1340,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flexShrink: 0 }}>
                           <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: pColor, flexShrink: 0 }} />
                           <span style={{ color: pColor, fontWeight: isActive ? 'bold' : 'normal', textShadow: '0 0 3px rgba(0,0,0,0.55), 0 0 1px rgba(0,0,0,0.4)' }}>
-                            {v}{p.unit ? ` ${p.unit}` : ''}
+                            {v}{translateStatUnit(p.unit, currentLanguage) ? ` ${translateStatUnit(p.unit, currentLanguage)}` : ''}
                           </span>
                         </div>
                       </div>
@@ -1500,18 +1500,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           if (filledParams.length === 0) return null;
           return (
             <div style={{ padding: '4px 10px', borderTop: `1px solid ${colors.borderLight}`, background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}>
-              <div style={{ fontSize: '9px', color: colors.textSecondary, marginBottom: '2px' }}>ヒートマップデータ</div>
+              <div style={{ fontSize: '9px', color: colors.textSecondary, marginBottom: '2px' }}>{translateUI('heatmapDataLabel', currentLanguage)}</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 8px' }}>
                 {filledParams.slice(0, 4).map(p => {
                   const v = stats![p.key] as number;
                   const pColor = getStationHeatColor(stationTooltip.stationName, p.key, undefined, showEstimatedData);
                   return (
                     <span key={String(p.key)} style={{ fontSize: '10px', color: pColor }}>
-                      {translateStatParamLabel(p.label, currentLanguage)}: {v}{p.unit ? ` ${p.unit}` : ''}
+                      {translateStatParamLabel(p.label, currentLanguage)}: {v}{(() => {
+                        const u = translateStatUnit(p.unit, currentLanguage);
+                        return u ? ` ${u}` : '';
+                      })()}
                     </span>
                   );
                 })}
-                {filledParams.length > 4 && <span style={{ fontSize: '10px', color: colors.textSecondary }}>+{filledParams.length - 4}件</span>}
+                {filledParams.length > 4 && <span style={{ fontSize: '10px', color: colors.textSecondary }}>{translateUI('moreItemsCount', currentLanguage, { count: filledParams.length - 4 })}</span>}
               </div>
             </div>
           );
