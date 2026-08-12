@@ -9,7 +9,6 @@ export const wakasaRailway: Station[] = [
   { name: "丹比",       lat: 35.448340, lng: 134.258760, timeToNext: 5 },
   { name: "安部",       lat: 35.453260, lng: 134.277380, timeToNext: 5 },
   { name: "八東",       lat: 35.462150, lng: 134.300270, timeToNext: 5 },
-  { name: "フラワー長井線", lat: 35.465370, lng: 134.323680, timeToNext: 5 },
   { name: "隼",         lat: 35.464340, lng: 134.351680, timeToNext: 6 },
   { name: "坂野",       lat: 35.464820, lng: 134.373870, timeToNext: 5 },
   { name: "若桜",       lat: 35.472530, lng: 134.399930, timeToNext: 0 },

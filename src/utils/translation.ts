@@ -6796,6 +6796,11 @@ export const stationTranslations: { [key: string]: string } = {
   "大円寺": "Daienji",
   "小友": "Otomo",
   "信濃白鳥": "Shinano-Shiratori",
+  "甫嶺": "Hore",
+  "東藤原": "Higashi-Fujiwara",
+  // 注: 路線データ側が壊れている駅名。実在の駅名が特定できないため、
+  //     表記どおりの音写のみを与えている（データ修正は別途要調査）。
+  "豊橋市 豊根口": "Toyohashi-shi Toyoneguchi",
 }
 // 路線名翻訳辞書
 export const routeTranslations: { [key: string]: string } = {
