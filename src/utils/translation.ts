@@ -4498,6 +4498,125 @@ export const stationTranslations: { [key: string]: string } = {
   "潟町": "Katamachi",
   "上下浜": "Jogehama",
   "直江津": "Naoetsu",
+
+  // ───────────────────────────────────────────────
+  // 九州: JR指宿枕崎線
+  // ───────────────────────────────────────────────
+  "南鹿児島": "Minami-Kagoshima",
+  "谷山": "Taniyama",
+  "慈眼寺": "Jigenji",
+  "坂之上": "Sakanoue",
+  "五位野": "Goino",
+  "平川": "Hirakawa",
+  "瀬々串": "Sezekushi",
+  "中名": "Nakamyo",
+  "喜入": "Kiire",
+  "前之浜": "Maenohama",
+  "生見": "Nukumi",
+  "薩摩今和泉": "Satsuma-Imaizumi",
+  "宮ヶ浜": "Miyagahama",
+  "西大山": "Nishi-Oyama",
+  "山川": "Yamakawa",
+  "指宿": "Ibusuki",
+
+  // ───────────────────────────────────────────────
+  // 中国: JR呉線・山陽本線（広島周辺）
+  // ───────────────────────────────────────────────
+  "広島": "Hiroshima",
+  "海田市": "Kaitaichi",
+  "安芸中野": "Aki-Nakano",
+  "瀬野": "Seno",
+  "八本松": "Hachihonmatsu",
+  "西条": "Saijo",
+  "寺家": "Jike",
+  "中野東": "Nakano-higashi",
+  "矢野": "Yano",
+  "坂": "Saka",
+  "呉": "Kure",
+  "広": "Hiro",
+  "安芸川尻": "Aki-Kawajiri",
+  "忠海": "Tadanoumi",
+  "竹原": "Takehara",
+  "三原": "Mihara",
+
+  // ───────────────────────────────────────────────
+  // 関西: JR琵琶湖線
+  // ───────────────────────────────────────────────
+  "彦根": "Hikone",
+  "南彦根": "Minami-Hikone",
+  "河瀬": "Kawase",
+  "稲枝": "Inae",
+  "能登川": "Notogawa",
+  "安土": "Azuchi",
+  "近江八幡": "Omi-Hachiman",
+  "篠原": "Shinohara",
+  "野洲": "Yasu",
+  "守山": "Moriyama",
+  "栗東": "Ritto",
+  "草津": "Kusatsu",
+  "瀬田": "Seta",
+  "石山": "Ishiyama",
+  "膳所": "Zeze",
+  "大津": "Otsu",
+
+  // ───────────────────────────────────────────────
+  // 北陸: 福井鉄道福武線
+  // ───────────────────────────────────────────────
+  "越前武生": "Echizen-Takefu",
+  "北府": "Kitago",
+  "家久": "Ieku",
+  "サンドーム西": "Sun Dome Nishi",
+  "鯖浦": "Saba-ura",
+  "水落": "Mizuochi",
+  "たけふ新": "Takefu-shin",
+  "三十八社": "Sanjuhassha",
+  "泰澄の里": "Taicho-no-Sato",
+  "清明": "Seimei",
+  "経田": "Kyoden",
+  "花堂": "Hanando",
+  "江端": "Ebata",
+  "ベル前": "Bell-mae",
+  "赤十字前": "Sekijuji-mae",
+  "福井城址大名町": "Fukui-Joshi-Daimyocho",
+
+  // ───────────────────────────────────────────────
+  // 関東: 富士急行線
+  // ───────────────────────────────────────────────
+  "大月": "Otsuki",
+  "上大月": "Kami-Otsuki",
+  "田野倉": "Tanokura",
+  "禾生": "Kasei",
+  "都留市": "Tsurushi",
+  "谷村町": "Yamuramachi",
+  "都留文科大学前": "Tsurubunkadaigaku-mae",
+  "東桂": "Higashi-Katsura",
+  "三つ峠": "Mitsutoge",
+  "寿": "Kotobuki",
+  "葭池温泉前": "Yoshiike-onsen-mae",
+  "下吉田": "Shimo-Yoshida",
+  "月江寺": "Gekkoji",
+  "富士山": "Mt. Fuji",
+  "富士急ハイランド": "Fujikyu Highland",
+  "河口湖": "Kawaguchiko",
+
+  // ───────────────────────────────────────────────
+  // 北海道: 札幌市営地下鉄南北線
+  // ───────────────────────────────────────────────
+  "麻生": "Asabu",
+  "北34条": "Kita-34-jo",
+  "北24条": "Kita-24-jo",
+  "北18条": "Kita-18-jo",
+  "北12条": "Kita-12-jo",
+  "さっぽろ": "Sapporo",
+  "大通": "Odori",
+  "中島公園": "Nakajima-koen",
+  "幌平橋": "Horohirabashi",
+  "中の島": "Nakanoshima",
+  "平岸": "Hiragishi",
+  "南平岸": "Minami-Hiragishi",
+  "澄川": "Sumikawa",
+  "自衛隊前": "Jieitai-mae",
+  "真駒内": "Makomanai",
 }
 // 路線名翻訳辞書
 export const routeTranslations: { [key: string]: string } = {
