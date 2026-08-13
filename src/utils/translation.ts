@@ -7747,6 +7747,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "ヒートマップデータ",
     english: "Heatmap data"
   },
+  showTrainStatusPanel: {
+    japanese: "乗車中の路線を表示",
+    english: "Show current train info"
+  },
   moreItemsCount: {
     japanese: "+{count}件",
     english: "+{count} more"
@@ -8426,6 +8430,7 @@ export const uiChinese: Record<string, string> = {
   noTimetableData: "无时刻数据",
   approximateNote: "⚠ 概算值·参考用　点击左侧路线名切换",
   heatmapDataLabel: "热力图数据",
+  showTrainStatusPanel: "显示乘车路线",
   moreItemsCount: "+{count}项",
   towardSuffix: "方向",
   loadingMap: "地图加载中...",
@@ -8666,6 +8671,7 @@ export const uiKorean: Record<string, string> = {
   noTimetableData: "시간표 없음",
   approximateNote: "⚠ 개산값·참고용　왼쪽 노선명 클릭으로 전환",
   heatmapDataLabel: "히트맵 데이터",
+  showTrainStatusPanel: "탑승 노선 표시",
   moreItemsCount: "+{count}건",
   towardSuffix: "방면",
   loadingMap: "지도 로딩 중...",

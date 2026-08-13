@@ -8,13 +8,24 @@ import { translateStation, translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
 import { stationReadings, normalizeToHiragana } from '../utils/stationReadings';
 import { findNearestStations } from '../utils/nearestStations';
+import { loadStationHistory, recordStationSelection, buildSuggestions } from '../utils/stationHistory';
+import type { StationHistoryEntry } from '../utils/stationHistory';
 import { FS, TARGET } from '../constants/ui';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 
-/** 駅名検索の結果と、現在地周辺の候補として出す最大件数 */
+/** 駅名検索の結果として出す最大件数 */
 const STATION_SUGGESTION_LIMIT = 10;
-/** 出発駅欄で未入力時に出す現在地周辺の駅数 */
+/** 未入力時の候補の先頭5件の内訳: 近くの駅3件 + よく使う駅2件 */
+const SUGGESTION_NEARBY_COUNT = 3;
+const SUGGESTION_FREQUENT_COUNT = 2;
+const SUGGESTION_HEAD_COUNT = SUGGESTION_NEARBY_COUNT + SUGGESTION_FREQUENT_COUNT;
+/**
+ * 駅選択パネル内の「出発時刻」行を出すか。
+ * 同じ設定が駅ツールチップ側にもあるため既定では出さない。
+ */
+const SHOW_DEPARTURE_TIME_ROW: boolean = false;
+/** 近隣駅は候補の補充にも使うため、先頭3件より多めに求めておく */
 const NEARBY_STATION_COUNT = STATION_SUGGESTION_LIMIT;
 
 interface StationSelectorProps {
@@ -34,6 +45,8 @@ interface StationSelectorProps {
   onManualTrainRouteChange?: (route: DetectedRoute | null) => void;
   userLocation?: [number, number] | null;
   hasGps?: boolean;
+  /** 乗車中の路線・到着予定を出すか。既定は非表示で、表示設定からONにできる */
+  showTrainStatusPanel?: boolean;
 }
 
 const StationSelector: React.FC<StationSelectorProps> = ({
@@ -53,6 +66,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   onManualTrainRouteChange,
   userLocation = null,
   hasGps = false,
+  showTrainStatusPanel = false,
 }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -72,6 +86,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const departureClickedRef = useRef(false);
   const arrivalClickedRef = useRef(false);
   const focusedInputRef = useRef<HTMLInputElement | null>(null);
+
+  // 選択回数の履歴。候補の一部をここから埋める（localStorage 由来なのでマウント後に読む）
+  const [stationHistory, setStationHistory] = useState<StationHistoryEntry[]>([]);
+  useEffect(() => { setStationHistory(loadStationHistory()); }, []);
 
   // 外側クリックで閉じる機能（ポータルドロップダウンは除外）
   useEffect(() => {
@@ -197,14 +215,43 @@ const StationSelector: React.FC<StationSelectorProps> = ({
       .slice(0, STATION_SUGGESTION_LIMIT);
   }
 
+  const findStationByName = useMemo(() => {
+    const map = new Map(allStations.map(s => [s.name, s]));
+    return (name: string) => map.get(name);
+  }, [allStations]);
+
+  /**
+   * 未入力時に出す候補。
+   * 先頭5件を「近くの駅3件 + よく使う駅2件」にし、残りは近隣駅・主要駅で補って
+   * スクロールで辿れるようにする。位置情報が無い場合は主要駅で埋まる。
+   */
+  const emptySearchSuggestions = useMemo(() => {
+    const nearby = nearbyStations ?? [];
+    const head = buildSuggestions(nearby, stationHistory, majorStations, findStationByName, {
+      nearbyCount: SUGGESTION_NEARBY_COUNT,
+      frequentCount: SUGGESTION_FREQUENT_COUNT,
+      total: SUGGESTION_HEAD_COUNT,
+    });
+    // 6件目以降は近隣駅→主要駅の順で補う
+    const seen = new Set(head.map(s => s.name));
+    const rest: Station[] = [];
+    for (const s of [...nearby, ...majorStations]) {
+      if (head.length + rest.length >= STATION_SUGGESTION_LIMIT) break;
+      if (seen.has(s.name)) continue;
+      seen.add(s.name);
+      rest.push(s);
+    }
+    return [...head, ...rest];
+  }, [nearbyStations, stationHistory, majorStations, findStationByName]);
+
   const filteredDepartureStations = useMemo(
-    () => filterStations(departureSearch, nearbyStations ?? majorStations),
-    [allStations, departureSearch, majorStations, nearbyStations]
+    () => filterStations(departureSearch, emptySearchSuggestions),
+    [allStations, departureSearch, emptySearchSuggestions]
   );
 
   const filteredArrivalStations = useMemo(
-    () => filterStations(arrivalSearch),
-    [allStations, arrivalSearch, majorStations]
+    () => filterStations(arrivalSearch, emptySearchSuggestions),
+    [allStations, arrivalSearch, emptySearchSuggestions]
   );
 
   const handleDepartureSelect = (station: Station) => {
@@ -212,6 +259,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     onDepartureChange(station);
     setDepartureSearch(translateStation(station.name, language));
     setShowDepartureResults(false);
+    setStationHistory(recordStationSelection(station.name));
   };
 
   const handleArrivalSelect = (station: Station) => {
@@ -219,6 +267,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     onArrivalChange(station);
     setArrivalSearch(translateStation(station.name, language));
     setShowArrivalResults(false);
+    setStationHistory(recordStationSelection(station.name));
   };
 
   // 完全一致する駅を検索
@@ -375,6 +424,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     }
                   }}
                   placeholder={departure ? translateStation(departure.name, language) : translateUI('stationPlaceholder', language)}
+                  className="station-input-filled"
                   style={{
                     width: '100%',
                     padding: '4px 20px 4px 6px',
@@ -384,8 +434,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     fontSize: FS.input,
                     minHeight: `${TARGET.min}px`,
                     boxSizing: 'border-box',
-                    backgroundColor: colors.surfaceElevated,
-                    color: colors.text
+                    // 出発＝緑 で塗りつぶし、文字は白。地図の上でも役割が一目で分かるようにする
+                    backgroundColor: '#4CAF50',
+                    color: '#ffffff',
                   }}
                 />
                 {departure && (
@@ -400,7 +451,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       border: 'none',
                       cursor: 'pointer',
                       fontSize: '14px',
-                      color: colors.textSecondary,
+                      // 塗りつぶした入力欄の上に置くため白系にする
+                      color: 'rgba(255,255,255,0.9)',
                       padding: '2px 4px',
                       lineHeight: '1',
                       minWidth: '20px',
@@ -423,8 +475,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     borderRadius: '4px',
                     padding: '2px 7px',
                     fontSize: FS.helper,
-                    backgroundColor: 'transparent',
-                    color: '#4CAF50',
+                    // 出発駅欄と同じ緑の塗りつぶしで、出発側の操作だと分かるようにする
+                    backgroundColor: '#4CAF50',
+                    color: '#ffffff',
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
                   }}
@@ -437,7 +490,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 <div
                   ref={departurePortalRef}
                   onMouseDown={(e) => { e.preventDefault(); departureClickedRef.current = true; }}
-                  onTouchStart={() => { departureClickedRef.current = true; }}
+                  onTouchStart={(e) => { e.stopPropagation(); departureClickedRef.current = true; }}
+                  onTouchMove={(e) => e.stopPropagation()}
                   style={{
                   position: 'fixed',
                   top: departureDropdownPos.top,
@@ -447,12 +501,15 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
                   boxShadow: `0 4px 12px ${colors.shadow}`,
-                  maxHeight: '200px',
+                  maxHeight: '240px',
                   overflowY: 'auto',
                   // iOSで候補内をスクロールしたとき、端に達しても地図やページ側へ
                   // スクロールが伝播しないようにする
                   overscrollBehavior: 'contain',
                   WebkitOverflowScrolling: 'touch',
+                  // body に touch-action: manipulation が掛かっており、
+                  // 指定しないと縦スワイプがスクロールとして扱われない端末がある
+                  touchAction: 'pan-y',
                   zIndex: 99999
                 }}>
                   {filteredDepartureStations.map((station, index) => (
@@ -567,6 +624,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     }
                   }}
                   placeholder={arrival ? translateStation(arrival.name, language) : translateUI('stationPlaceholder', language)}
+                  className="station-input-filled"
                   style={{
                     width: '100%',
                     padding: '4px 20px 4px 6px',
@@ -576,8 +634,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     fontSize: FS.input,
                     minHeight: `${TARGET.min}px`,
                     boxSizing: 'border-box',
-                    backgroundColor: colors.surfaceElevated,
-                    color: colors.text
+                    // 到着＝赤 で塗りつぶし、文字は白（出発欄と対になる配色）
+                    backgroundColor: '#f44336',
+                    color: '#ffffff',
                   }}
                 />
                 {arrival && (
@@ -592,7 +651,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       border: 'none',
                       cursor: 'pointer',
                       fontSize: '14px',
-                      color: colors.textSecondary,
+                      // 塗りつぶした入力欄の上に置くため白系にする
+                      color: 'rgba(255,255,255,0.9)',
                       padding: '2px 4px',
                       lineHeight: '1',
                       minWidth: '20px',
@@ -611,7 +671,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 <div
                   ref={arrivalPortalRef}
                   onMouseDown={(e) => { e.preventDefault(); arrivalClickedRef.current = true; }}
-                  onTouchStart={() => { arrivalClickedRef.current = true; }}
+                  onTouchStart={(e) => { e.stopPropagation(); arrivalClickedRef.current = true; }}
+                  onTouchMove={(e) => e.stopPropagation()}
                   style={{
                   position: 'fixed',
                   top: arrivalDropdownPos.top,
@@ -621,12 +682,15 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   border: `1px solid ${colors.border}`,
                   borderRadius: '4px',
                   boxShadow: `0 4px 12px ${colors.shadow}`,
-                  maxHeight: '200px',
+                  maxHeight: '240px',
                   overflowY: 'auto',
                   // iOSで候補内をスクロールしたとき、端に達しても地図やページ側へ
                   // スクロールが伝播しないようにする
                   overscrollBehavior: 'contain',
                   WebkitOverflowScrolling: 'touch',
+                  // body に touch-action: manipulation が掛かっており、
+                  // 指定しないと縦スワイプがスクロールとして扱われない端末がある
+                  touchAction: 'pan-y',
                   zIndex: 99999
                 }}>
                   {filteredArrivalStations.map((station, index) => (
@@ -658,8 +722,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             </div>
           </div>
 
-          {/* 乗車路線検出パネル */}
-          {hasGps && onManualTrainRouteChange && (
+          {/* 乗車路線検出パネル（表示設定でONにしたときだけ出す） */}
+          {showTrainStatusPanel && hasGps && onManualTrainRouteChange && (
             <TrainStatusPanel
               detectedRoute={detectedRoute}
               manualRoute={manualTrainRoute}
@@ -670,8 +734,12 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             />
           )}
 
-          {/* 出発時刻 */}
-          {onDepartureTimeChange && (
+          {/*
+            出発時刻の行はここでは表示しない。
+            駅ツールチップ側に同じ設定（timetableBaseTime を共有）があり、
+            駅選択パネルでは駅の指定に集中させたいため。
+          */}
+          {SHOW_DEPARTURE_TIME_ROW && onDepartureTimeChange && (
             <div style={{
               marginTop: '6px',
               display: 'flex',

@@ -145,6 +145,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // 表示モードの管理
   const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
+  // 乗車中の路線・到着予定のパネル。情報量が多く常時は邪魔になるため既定は非表示
+  const [showTrainStatusPanel, setShowTrainStatusPanel] = useState(false);
   const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
   const [showStationTierBadges, setShowStationTierBadges] = useState(false); // 乗り入れ路線数リング表示
   const [showTravelTimes, setShowTravelTimes] = useState(false);
@@ -2076,7 +2078,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    *
    * 路線を1つでも表示ONにすると通常の描画に戻る（このモードは抜ける）。
    */
-  const isTransferHintMode = !departure && !arrival && visibleRoutes.size === 0;
+  // 出発駅が決まっていない間はヒント表示にする（到着駅だけ選ばれている場合も含む）
+  const isTransferHintMode = !departure && visibleRoutes.size === 0;
 
   const transferHintStations = useMemo(() => {
     if (!isTransferHintMode) return [] as Station[];
@@ -2458,9 +2461,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       setAvailableRoutes(new Set(allRouteKeys));
       setVisibleRoutes(routeSet);
     } else if (arrival && !departure) {
-      const arrivalRoutes = getRoutesForStation(arrival.name);
+      // 到着駅だけ決まっている状態では、経路がまだ確定しないので
+      // 出発駅未選択時と同じく全路線を非表示にし、乗換駅ヒントから
+      // 出発側の路線を選べるようにする
       setAvailableRoutes(new Set(allRouteKeys));
-      setVisibleRoutes(new Set(arrivalRoutes));
+      setVisibleRoutes(new Set());
     } else {
       // 出発駅・到着駅が両方未選択のときは全路線を非表示にする。
       // 代わりに乗換駅だけをヒントとして出し（下の transferHintStations）、
@@ -3681,6 +3686,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onManualTrainRouteChange={setManualTrainRoute}
                 userLocation={userLocation}
                 hasGps={isLocating}
+                showTrainStatusPanel={showTrainStatusPanel}
               />
             </div>
           )
@@ -3702,6 +3708,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             onManualTrainRouteChange={setManualTrainRoute}
             userLocation={userLocation}
             hasGps={isLocating}
+            showTrainStatusPanel={showTrainStatusPanel}
           />
         )}
 
@@ -4796,6 +4803,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     showDimmedRoutes={showDimmedMapRoutes}
                     onShowDimmedRoutesChange={setShowDimmedMapRoutes}
                     showTransferStationsOnly={showTransferStationsOnly}
+                    showTrainStatusPanel={showTrainStatusPanel}
                     showExpressStationsOnly={showExpressStationsOnly}
                     showTravelTimes={showTravelTimes}
                     showStationNames={showStationNames}
@@ -4808,6 +4816,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onSelectAllRoutes={selectAllRoutes}
                     onDeselectAllRoutes={deselectAllRoutes}
                     onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
+                    onShowTrainStatusPanelChange={setShowTrainStatusPanel}
                     onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
                     onShowTravelTimesChange={setShowTravelTimes}
                     onShowStationNamesChange={setShowStationNames}
@@ -5008,7 +5017,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               top: 'calc(env(safe-area-inset-top, 0px) + 16px)',
               left: '10px',
               zIndex: 1002,
-              width: 'min(calc(100vw - 145px), 210px)',
+              width: 'min(calc(100vw - 120px), 280px)',
               maxHeight: 'calc(100vh - 80px)',
               overflowY: 'auto',
             }}>
@@ -5029,6 +5038,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onManualTrainRouteChange={setManualTrainRoute}
                 userLocation={userLocation}
                 hasGps={isLocating}
+                showTrainStatusPanel={showTrainStatusPanel}
               />
             </div>
           )}
@@ -5058,6 +5068,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         showDimmedRoutes={showDimmedMapRoutes}
                         onShowDimmedRoutesChange={setShowDimmedMapRoutes}
                         showTransferStationsOnly={showTransferStationsOnly}
+                        showTrainStatusPanel={showTrainStatusPanel}
                         showExpressStationsOnly={showExpressStationsOnly}
                         showTravelTimes={showTravelTimes}
                         showStationNames={showStationNames}
@@ -5070,6 +5081,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onSelectAllRoutes={selectAllRoutes}
                         onDeselectAllRoutes={deselectAllRoutes}
                         onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
+                        onShowTrainStatusPanelChange={setShowTrainStatusPanel}
                         onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
                         onShowTravelTimesChange={setShowTravelTimes}
                         onShowStationNamesChange={setShowStationNames}

@@ -199,6 +199,18 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 				touch-action: manipulation;
 				overscroll-behavior: none;
 			}
+			/*
+				出発駅・到着駅の入力欄は緑/赤で塗りつぶしているため、
+				既定のプレースホルダ色（暗いグレー）だと読めない。
+				擬似要素はインラインスタイルで指定できないのでここで白系にする。
+			*/
+			.station-input-filled::placeholder {
+				color: rgba(255, 255, 255, 0.85);
+				opacity: 1;
+			}
+			.station-input-filled::-webkit-input-placeholder {
+				color: rgba(255, 255, 255, 0.85);
+			}
 			/* iOS Safari 自動ズーム防止: 全inputを16px以上に固定 */
 			input, select, textarea {
 				font-size: 16px !important;
