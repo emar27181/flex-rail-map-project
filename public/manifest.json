@@ -4,8 +4,8 @@
   "description": "必要な路線だけ選んで表示できるシンプルなインタラクティブ路線図",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4CAF50",
+  "background_color": "#1a1a1a",
+  "theme_color": "#1a1a1a",
   "orientation": "any",
   "lang": "ja",
   "icons": [
