@@ -12,6 +12,11 @@ import { FS, TARGET } from '../constants/ui';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 
+/** 駅名検索の結果と、現在地周辺の候補として出す最大件数 */
+const STATION_SUGGESTION_LIMIT = 10;
+/** 出発駅欄で未入力時に出す現在地周辺の駅数 */
+const NEARBY_STATION_COUNT = STATION_SUGGESTION_LIMIT;
+
 interface StationSelectorProps {
   onDepartureChange: (station: Station | null) => void;
   onArrivalChange: (station: Station | null) => void;
@@ -147,21 +152,28 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     });
   }, []);
 
-  // 主要駅6選
+  // 未入力時に出す主要駅。位置情報が取れないときの出発駅候補と、到着駅候補に使う。
+  // 候補欄は6件ほどで打ち切られスクロールするため、6件だと「その先」が無く
+  // スクロールできない。STATION_SUGGESTION_LIMIT 件まで並べる。
   const majorStations = useMemo(() => {
-    const majorStationNames = ['東京', '新宿', '渋谷', '池袋', '横浜', '新横浜'];
+    const majorStationNames = [
+      '東京', '新宿', '渋谷', '池袋', '品川', '上野',
+      '横浜', '新横浜', '大宮', '千葉',
+    ];
     return majorStationNames
       .map(name => allStations.find(station => station.name === name))
       .filter(station => station !== undefined) as Station[];
   }, [allStations]);
 
-  // 現在地周辺5駅（出発駅の入力候補用。位置情報が未取得の場合は主要駅にフォールバック）
+  // 現在地周辺の駅（出発駅の入力候補用。位置情報が未取得の場合は主要駅にフォールバック）
+  // 候補欄は6件ほどで打ち切られスクロールするため、その先も辿れるよう
+  // 検索結果の上限（10件）と同じ件数を出す。
   const nearbyStations = useMemo(() => {
     if (!userLocation) return null;
-    return findNearestStations(allStations, userLocation[0], userLocation[1], 5);
+    return findNearestStations(allStations, userLocation[0], userLocation[1], NEARBY_STATION_COUNT);
   }, [allStations, userLocation]);
 
-  // 検索文字列でフィルタし、前方一致優先・読み順でソートして上位10件を返す
+  // 検索文字列でフィルタし、前方一致優先・読み順でソートして上位 STATION_SUGGESTION_LIMIT 件を返す
   function filterStations(search: string, emptySearchDefault: Station[] = majorStations): Station[] {
     if (!search) return emptySearchDefault;
     const term = normalizeToHiragana(search.toLowerCase());
@@ -182,7 +194,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         if (aStarts !== bStarts) return aStarts - bStarts;
         return ra.localeCompare(rb, 'ja');
       })
-      .slice(0, 10);
+      .slice(0, STATION_SUGGESTION_LIMIT);
   }
 
   const filteredDepartureStations = useMemo(
@@ -437,6 +449,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   boxShadow: `0 4px 12px ${colors.shadow}`,
                   maxHeight: '200px',
                   overflowY: 'auto',
+                  // iOSで候補内をスクロールしたとき、端に達しても地図やページ側へ
+                  // スクロールが伝播しないようにする
+                  overscrollBehavior: 'contain',
+                  WebkitOverflowScrolling: 'touch',
                   zIndex: 99999
                 }}>
                   {filteredDepartureStations.map((station, index) => (
@@ -607,6 +623,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   boxShadow: `0 4px 12px ${colors.shadow}`,
                   maxHeight: '200px',
                   overflowY: 'auto',
+                  // iOSで候補内をスクロールしたとき、端に達しても地図やページ側へ
+                  // スクロールが伝播しないようにする
+                  overscrollBehavior: 'contain',
+                  WebkitOverflowScrolling: 'touch',
                   zIndex: 99999
                 }}>
                   {filteredArrivalStations.map((station, index) => (
