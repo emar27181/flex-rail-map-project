@@ -147,6 +147,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
   // 乗車中の路線・到着予定のパネル。情報量が多く常時は邪魔になるため既定は非表示
   const [showTrainStatusPanel, setShowTrainStatusPanel] = useState(false);
+  /**
+   * 位置情報を使う機能（現在地の取得・最寄駅の自動設定・乗車路線の推定）。
+   * 既定はOFF。ONだと起動しただけで出発駅が埋まってしまい、
+   * 「駅未選択なら乗換駅だけ出す」表示に入れないため。
+   */
+  const [locationFeaturesEnabled, setLocationFeaturesEnabled] = useState(false);
   const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
   const [showStationTierBadges, setShowStationTierBadges] = useState(false); // 乗り入れ路線数リング表示
   const [showTravelTimes, setShowTravelTimes] = useState(false);
@@ -270,8 +276,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
 
 
-  // 位置情報をデフォルトでON（初回マウント時に自動開始）
+  // 位置情報の取得。設定でONにしたときだけ開始する（既定はOFF）
   useEffect(() => {
+    if (!locationFeaturesEnabled) return;
     if (!navigator.geolocation) return;
     setIsLocating(true);
     isFirstPositionRef.current = true;
@@ -336,10 +343,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       navigator.geolocation.clearWatch(id);
       watchIdRef.current = null;
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [locationFeaturesEnabled]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 位置情報取得時に最寄駅を出発駅に自動設定（初回取得時のみ・手動変更後は上書きしない）
   useEffect(() => {
+    if (!locationFeaturesEnabled) return;
     if (!userLocation || isManualDeparture) return;
     if (autoSetDepartureRef.current) return;
     const nearest = findNearestStation(userLocation[0], userLocation[1]);
@@ -347,7 +355,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       setDeparture(nearest);
       autoSetDepartureRef.current = true;
     }
-  }, [userLocation, isManualDeparture]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userLocation, isManualDeparture, locationFeaturesEnabled]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 初回の位置情報取得時、地図を現在地中心に移動する。
   // これまでは現在地に応じて最寄り路線が選択される一方で、地図の表示範囲自体は
@@ -3679,9 +3687,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 language={currentLanguage}
                 departureTime={timetableBaseTime}
                 onDepartureTimeChange={setTimetableBaseTime}
-                onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
+                onSetNearestDeparture={locationFeaturesEnabled && userLocation ? handleSetNearestDeparture : undefined}
                 onSearchingChange={handleSearchingChange}
-                detectedRoute={detectedRoute}
+                detectedRoute={locationFeaturesEnabled ? detectedRoute : null}
                 manualTrainRoute={manualTrainRoute}
                 onManualTrainRouteChange={setManualTrainRoute}
                 userLocation={userLocation}
@@ -3701,9 +3709,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             departureTime={timetableBaseTime}
             onDepartureTimeChange={setTimetableBaseTime}
             language={currentLanguage}
-            onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
+            onSetNearestDeparture={locationFeaturesEnabled && userLocation ? handleSetNearestDeparture : undefined}
             onSearchingChange={handleSearchingChange}
-            detectedRoute={detectedRoute}
+            detectedRoute={locationFeaturesEnabled ? detectedRoute : null}
             manualTrainRoute={manualTrainRoute}
             onManualTrainRouteChange={setManualTrainRoute}
             userLocation={userLocation}
@@ -4804,6 +4812,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onShowDimmedRoutesChange={setShowDimmedMapRoutes}
                     showTransferStationsOnly={showTransferStationsOnly}
                     showTrainStatusPanel={showTrainStatusPanel}
+                    locationFeaturesEnabled={locationFeaturesEnabled}
                     showExpressStationsOnly={showExpressStationsOnly}
                     showTravelTimes={showTravelTimes}
                     showStationNames={showStationNames}
@@ -4817,6 +4826,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onDeselectAllRoutes={deselectAllRoutes}
                     onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
                     onShowTrainStatusPanelChange={setShowTrainStatusPanel}
+                    onLocationFeaturesEnabledChange={setLocationFeaturesEnabled}
                     onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
                     onShowTravelTimesChange={setShowTravelTimes}
                     onShowStationNamesChange={setShowStationNames}
@@ -5031,9 +5041,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 language={currentLanguage}
                 departureTime={timetableBaseTime}
                 onDepartureTimeChange={setTimetableBaseTime}
-                onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
+                onSetNearestDeparture={locationFeaturesEnabled && userLocation ? handleSetNearestDeparture : undefined}
                 onSearchingChange={handleSearchingChange}
-                detectedRoute={detectedRoute}
+                detectedRoute={locationFeaturesEnabled ? detectedRoute : null}
                 manualTrainRoute={manualTrainRoute}
                 onManualTrainRouteChange={setManualTrainRoute}
                 userLocation={userLocation}
@@ -5069,6 +5079,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onShowDimmedRoutesChange={setShowDimmedMapRoutes}
                         showTransferStationsOnly={showTransferStationsOnly}
                         showTrainStatusPanel={showTrainStatusPanel}
+                        locationFeaturesEnabled={locationFeaturesEnabled}
                         showExpressStationsOnly={showExpressStationsOnly}
                         showTravelTimes={showTravelTimes}
                         showStationNames={showStationNames}
@@ -5082,6 +5093,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onDeselectAllRoutes={deselectAllRoutes}
                         onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
                         onShowTrainStatusPanelChange={setShowTrainStatusPanel}
+                        onLocationFeaturesEnabledChange={setLocationFeaturesEnabled}
                         onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
                         onShowTravelTimesChange={setShowTravelTimes}
                         onShowStationNamesChange={setShowStationNames}
