@@ -2067,6 +2067,50 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       heatmapRangeFilterEnabled, heatmapEnabled, heatmapParam, heatmapCustomRange]);
 
   /**
+   * 乗換駅ヒント表示。
+   *
+   * 出発駅・到着駅が未選択で、かつ表示ONの路線が1つも無いときに使う。
+   * 路線の線は引かず、2路線以上が通る駅（乗換駅）だけをマーカーで出して
+   * 「どの路線を表示するか」を選ぶ手掛かりにする。駅をタップすると
+   * ツールチップの路線一覧が開き、そこから路線を表示ONにできる。
+   *
+   * 路線を1つでも表示ONにすると通常の描画に戻る（このモードは抜ける）。
+   */
+  const isTransferHintMode = !departure && !arrival && visibleRoutes.size === 0;
+
+  const transferHintStations = useMemo(() => {
+    if (!isTransferHintMode) return [] as Station[];
+
+    // 同じ駅が複数路線に登場するため名前で重複排除する
+    const unique = new Map<string, Station>();
+    for (const stationList of Object.values(routes)) {
+      for (const s of stationList as Station[]) {
+        if (!allTransferStations.has(s.name)) continue;
+        if (!unique.has(s.name)) unique.set(s.name, s);
+      }
+    }
+
+    let list = Array.from(unique.values());
+
+    // 表示範囲内に限定（範囲未取得の初回は全件のまま上限で絞る）
+    if (viewBounds) {
+      const { north, south, east, west } = viewBounds;
+      list = list.filter(s => s.lat <= north && s.lat >= south && s.lng <= east && s.lng >= west);
+    }
+
+    // 通常の駅マーカーと同じ上限を適用してフリーズを防ぐ
+    if (list.length > MAX_MARKER_STATIONS) {
+      const [cLat, cLng] = viewCenter;
+      list.sort((a, b) =>
+        ((a.lat - cLat) ** 2 + (a.lng - cLng) ** 2) - ((b.lat - cLat) ** 2 + (b.lng - cLng) ** 2)
+      );
+      list = list.slice(0, MAX_MARKER_STATIONS);
+    }
+
+    return list;
+  }, [isTransferHintMode, allTransferStations, viewBounds, viewCenter]);
+
+  /**
    * 「どの駅を表示するか」の共有ロジック。
    * 通常マップ・バブルマップ両方がこれを参照する。
    * 各フィルターフラグを適用した上で、表示すべき駅名 Set を返す。
@@ -2418,8 +2462,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       setAvailableRoutes(new Set(allRouteKeys));
       setVisibleRoutes(new Set(arrivalRoutes));
     } else {
+      // 出発駅・到着駅が両方未選択のときは全路線を非表示にする。
+      // 代わりに乗換駅だけをヒントとして出し（下の transferHintStations）、
+      // 駅をタップ → ツールチップの路線一覧から見たい路線だけを表示ONにする、
+      // という絞り込みの起点にする。全路線を一度に描くと線が重なって
+      // どの路線を選べばよいか分からないため。
       setAvailableRoutes(new Set(allRouteKeys));
-      setVisibleRoutes(new Set(allRouteKeys));
+      setVisibleRoutes(new Set());
     }
   }, [departure, arrival, isManualDeparture]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -4147,6 +4196,59 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               }).map(([routeKey, stations]) =>
                 renderRoute(routeKey as RouteKey, stations)
               )}
+
+              {/* 乗換駅ヒント: 路線が1つも表示されていないときの起点表示 */}
+              {mapViewMode !== 'bubble' && isTransferHintMode && transferHintStations.map(station => {
+                const stationRoutes = getRoutesForStation(station.name) as RouteKey[];
+                const primaryRouteKey = stationRoutes[0];
+                // 路線を選ぶ前なので特定の路線色は使わず、乗換駅共通の色で描く
+                const icon = createStationIcon(
+                  station,
+                  colors.textSecondary,
+                  zoomLevel,
+                  showStationNames,
+                  1,
+                  undefined,
+                  primaryRouteKey,
+                );
+                if (!icon) return null;
+                const routeCount = stationRoutes.length;
+                return (
+                  <Marker
+                    key={`transfer-hint-${station.name}`}
+                    position={[station.lat, station.lng]}
+                    icon={icon}
+                    zIndexOffset={routeCount >= 5 ? 4000 : routeCount >= 3 ? 3000 : 2000}
+                    eventHandlers={{
+                      mouseover: (e: LeafletMouseEvent) => {
+                        if (!showStationTooltip || isMobile) return;
+                        if (tooltipPinnedRef.current) return;
+                        cancelTooltipClose();
+                        const oe = e.originalEvent as MouseEvent | undefined;
+                        if (!oe) return;
+                        setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
+                      },
+                      mouseout: () => { if (!isMobile) scheduleTooltipClose(); },
+                      click: (e: LeafletMouseEvent) => {
+                        if (isMobile && mapDraggedRef.current) return;
+                        const oe = e.originalEvent as MouseEvent | undefined;
+                        if (!oe) return;
+                        if (!isMobile) {
+                          if (tooltipPinnedRef.current && stationTooltip?.stationName === station.name) { closeTooltip(); return; }
+                          setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
+                          pinTooltip();
+                        } else {
+                          setStationTooltip(prev =>
+                            prev?.station?.lat === station.lat && prev?.station?.lng === station.lng
+                              ? null
+                              : { stationName: station.name, station, x: oe.clientX, y: oe.clientY }
+                          );
+                        }
+                      },
+                    }}
+                  />
+                );
+              })}
 
               {/* 現在地マーカー: 非表示 */}
 
