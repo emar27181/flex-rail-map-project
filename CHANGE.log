@@ -1048,3 +1048,65 @@
 - 既存側の明確な誤りも多数（鎌倉高校前→고교마에、さくら夙川→사쿠라니시노미야가와、
   幸手→사이테、土気→도게、福生→후사、実籾→지모미 など）
 - 外来語表記法に沿った純粋音写への統一（既存分も再生成）を推奨。要判断
+
+---
+
+## 2026-08-13 セッション
+
+### fix: ダークモードでiPhoneの画面上部が白くなる問題を修正
+- `src/pages/index.astro`, `src/contexts/ThemeContext.tsx`, `public/manifest.json`
+- 原因は2つ
+  - PWA: `apple-mobile-web-app-status-bar-style` が `default` で、iOSが不透明な
+    白いステータスバーを描いていた（ページ側の背景色では変えられない）
+  - ブラウザ: `viewport-fit=cover` でページがセーフエリアまで広がるため、
+    ステータスバー背後は `body` ではなく `html` のキャンバスと `theme-color` が塗る。
+    背景色が `body.dark` にしか無く、`theme-color` も固定の緑(#4CAF50)だった
+- `html` にも背景色を指定し、`theme-color` をテーマに追従させる
+- ハイドレーション前に localStorage のテーマを読んで背景色を確定させる
+  インラインスクリプトを追加（初回描画〜マウント間の白い点滅を防止）
+- ステータスバーを `black-translucent` にし、manifest の色も既定テーマ(dark)に統一
+- **既知の制約**: `black-translucent` は文字色をアプリ側で制御できずiOS任せになる。
+  アプリをライトテーマ・端末をダーク設定にすると読みにくくなる可能性がある
+
+### fix: PWAでナビゲーションバーがステータスバーに隠れないようにする
+- `src/components/NavigationBar.tsx`
+- 上パディングに `env(safe-area-inset-top)` を加算。ブラウザ表示では0に解決される
+
+### fix: 路線名とツールチップ内の固定文字列を多言語対応
+- `src/utils/translation.ts`, `src/components/RailwayMap.tsx`
+- `translateRoute` は呼ばれていたが `routeTranslations` の登録が490路線中89件
+  （18.2%）しかなく、大半が日本語にフォールバックしていた。401路線を追加し100%に
+- ハードコードされていた「ヒートマップデータ」「+N件」をUIキー化
+- 駅統計の単位（軒・棟・万円・人/日 など）を訳す `translateStatUnit` を追加
+
+### feat: 駅未選択時は全路線を非表示にし乗換駅だけをヒントとして出す
+- `src/components/RailwayMap.tsx`
+- 全490路線を実線で描くと重なって路線を選べないため、出発駅が未選択の間は
+  路線を全て非表示（淡色）にし、2路線以上が通る駅だけをマーカーで出す
+- 淡色路線のタップ、または乗換駅タップ→ツールチップの路線一覧から表示ONにできる
+- 到着駅だけ選択されている場合も同じ扱いにする
+
+### feat: 駅選択UIの整理と選択履歴にもとづく候補推薦
+- `src/utils/stationHistory.ts` (新規), `src/components/StationSelector.tsx`
+- 選んだ駅の回数を localStorage に記録し、未入力時の候補の先頭5件を
+  「近くの駅3件 + 選択回数の多い駅2件」で構成する
+- 候補欄に `touch-action: pan-y` とタッチイベントの伝播停止を追加。
+  body の `touch-action: manipulation` により端末によって縦スワイプが
+  スクロールにならなかったため
+- 出発時刻の行を非表示に（同じ設定が駅ツールチップ側にある）
+- 「現在地から」ボタンと入力欄を塗りつぶし配色に（出発=緑 / 到着=赤 + 白文字）
+- モバイル全画面時のパネル幅を 210px → 280px
+
+### fix: 位置情報を使う機能を既定でオフにする
+- `src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`
+- 起動しただけでGPS監視が始まり最寄駅が出発駅に自動設定されていたため、
+  「駅未選択なら乗換駅だけ出す」表示に入れなかった
+- GPS監視・最寄駅の自動設定・路線推定・「現在地から」ボタンをまとめて設定化し既定OFF
+- 表示設定の「現在地を使う（最寄駅の自動設定・路線推定）」でONにできる
+- 乗車路線パネル（TrainStatusPanel）も既定OFFにし、別項目で切り替え可能にした
+
+### docs: プレビュー確認を挟む運用に変更
+- `CLAUDE.md`
+- 「プレビュー更新 → ユーザーが実機で目視確認 → OKが出たら main にマージ」の順に統一
+- E2Eは時間がかかるため省略可とし、型・ユニット・ビルドは必須のまま
+- プレビューURLを固定する方法（NetlifyのBranch deploys）を記載

@@ -213,9 +213,16 @@ src/
 
 ## デプロイ
 
-**重要: 本番デプロイ前にE2Eテストを必ず通すこと。**
+**2026-08-13更新: 本番反映はユーザーの目視確認を経てから行う。E2Eは省略可。**
 
-ユーザーから「デプロイして」と依頼された場合は `npm run deploy:prod` を実行する：
+本番へは「プレビュー更新 → ユーザーが実機で目視確認 → OKが出たら `main` にマージ」
+の順で反映する。目視確認を飛ばして `main` にマージしないこと。
+
+E2E（`npm run test:e2e`）は時間がかかるため省略してよい。
+`test:types` / `test:unit` / `build` は従来どおり必須。
+
+`npm run deploy:prod` を直接実行する場合は以下（サンドボックスからは
+Netlify CLI が未認証のため実行できない）：
 
 ```bash
 # テスト通過後に本番デプロイ（推奨）
@@ -391,10 +398,37 @@ Made with Claude Code
 
 ### プレビューデプロイルール
 
-**作業がひと区切りついたら、自動的に `npm run deploy:preview` を実行してプレビューURLをユーザーに共有すること。**
+**2026-08-13更新: プレビューでの目視確認を挟む運用に変更。E2Eは省略可。**
 
-- ユーザーから「/preview」や「デプロイして」と言われなくても、まとまった作業が完了したタイミングで自発的に実行する
-- Draft URL を返してユーザーが確認できるようにする
+作業がひと区切りついたらプレビューを更新し、URLをユーザーに共有すること。
+
+**運用フロー:**
+1. 作業ブランチにコミット・push する（品質チェックは従来どおり必須）
+2. プレビューが更新されたことをユーザーに伝える
+3. **ユーザーが実機で目視確認する**
+4. 目視でOKが出たら `main` にマージして本番反映する
+
+- 手順3のユーザー確認を飛ばして `main` にマージしないこと
+- E2E（`npm run test:e2e`）は時間がかかるため省略してよい。
+  代わりに `test:types` / `test:unit` / `build` は必ず通すこと
+
+**プレビューURLを固定にする:**
+
+PRごとの `deploy-preview-<番号>--flex-railway-map.netlify.app` はPR番号が変わると
+URLも変わってしまう。ブランチ名は固定なので、Netlifyの **Branch deploys** を
+有効にすると次のURLが常に使える。
+
+```
+https://claude-project-loading-ktm7lo--flex-railway-map.netlify.app
+```
+
+Netlify管理画面の Site configuration → Build & deploy → Branch deploys で
+対象ブランチ（`claude/project-loading-ktm7lo`）を許可すると有効になる。
+（`/` と `_` はハイフンに置換され、小文字化されたものがサブドメインになる）
+
+サンドボックスから `npm run deploy:preview` は実行できない（Netlify CLI が
+未認証で `NETLIFY_AUTH_TOKEN` も無い）。push によるNetlifyの自動ビルドを使う。
+
 - 本番デプロイ（`--prod`）はユーザーの明示的な指示があった場合のみ実行する
 
 ### CHANGE.log 記録ルール
