@@ -2032,6 +2032,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // 駅マーカー表示制限: 画面表示範囲内の駅のみ表示（フリーズ防止）
   const MAX_MARKER_STATIONS = 100;
+  /** 乗換駅ヒントに出す最小路線数。相互直通による重複定義を拾いすぎないよう3以上にする */
+  const TRANSFER_HINT_MIN_ROUTES = 3;
   const allowedStationNames = useMemo(() => {
     // boundsが未取得の場合は制限なし（初回表示まで）
     if (!viewBounds) return null;
@@ -2092,11 +2094,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const transferHintStations = useMemo(() => {
     if (!isTransferHintMode) return [] as Station[];
 
-    // 同じ駅が複数路線に登場するため名前で重複排除する
+    // 同じ駅が複数路線に登場するため名前で重複排除する。
+    // 2路線以上だと相互直通の重複定義まで拾って数が多くなるため、
+    // ヒントとしては3路線以上の主要な乗換駅に絞る
+    // （表示設定の「乗換駅のみ表示」は従来どおり2路線以上のまま）
     const unique = new Map<string, Station>();
     for (const stationList of Object.values(routes)) {
       for (const s of stationList as Station[]) {
-        if (!allTransferStations.has(s.name)) continue;
+        if ((stationRouteCountMap.get(s.name) ?? 0) < TRANSFER_HINT_MIN_ROUTES) continue;
         if (!unique.has(s.name)) unique.set(s.name, s);
       }
     }
@@ -2119,7 +2124,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     }
 
     return list;
-  }, [isTransferHintMode, allTransferStations, viewBounds, viewCenter]);
+  }, [isTransferHintMode, stationRouteCountMap, viewBounds, viewCenter]);
 
   /**
    * 「どの駅を表示するか」の共有ロジック。
@@ -4216,10 +4221,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               {mapViewMode !== 'bubble' && isTransferHintMode && transferHintStations.map(station => {
                 const stationRoutes = getRoutesForStation(station.name) as RouteKey[];
                 const primaryRouteKey = stationRoutes[0];
-                // 路線を選ぶ前なので特定の路線色は使わず、乗換駅共通の色で描く
+                // その駅を通る路線の色で描く（どの路線の乗換駅か色で見当がつくように）
+                const hintColor = adjustRouteColorForTheme(
+                  (primaryRouteKey ? routeColors[primaryRouteKey] : undefined) ?? '#888',
+                  theme,
+                );
                 const icon = createStationIcon(
                   station,
-                  colors.textSecondary,
+                  hintColor,
                   zoomLevel,
                   showStationNames,
                   1,

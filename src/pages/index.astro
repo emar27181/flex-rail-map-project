@@ -204,12 +204,22 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 				既定のプレースホルダ色（暗いグレー）だと読めない。
 				擬似要素はインラインスタイルで指定できないのでここで白系にする。
 			*/
-			.station-input-filled::placeholder {
+			/*
+				:global() が必須。Astroは<style>内のセレクタに [data-astro-cid-*] を
+				付けてスコープするが、この入力欄はReactが描画するためその属性を持たず、
+				スコープ付きのままだと一致せずプレースホルダが既定のグレーで残る。
+			*/
+			:global(.station-input-filled)::placeholder {
 				color: rgba(255, 255, 255, 0.85);
 				opacity: 1;
 			}
-			.station-input-filled::-webkit-input-placeholder {
+			:global(.station-input-filled)::-webkit-input-placeholder {
 				color: rgba(255, 255, 255, 0.85);
+			}
+			/* 入力文字自体も、塗りつぶした背景の上で読めるよう白に固定する */
+			:global(.station-input-filled) {
+				color: #ffffff;
+				-webkit-text-fill-color: #ffffff;
 			}
 			/* iOS Safari 自動ズーム防止: 全inputを16px以上に固定 */
 			input, select, textarea {
