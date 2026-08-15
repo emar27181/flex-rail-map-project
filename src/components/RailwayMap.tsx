@@ -241,6 +241,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 現在地表示
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+  /** 位置情報が取れなかった理由。UIに出して再取得の導線を見せるために持つ */
+  const [locationError, setLocationError] = useState<'denied' | 'unavailable' | 'timeout' | null>(null);
+  /** 再取得ボタンで監視をやり直すためのカウンタ */
+  const [locationRetryCount, setLocationRetryCount] = useState(0);
   const [isManualDeparture, setIsManualDeparture] = useState(false);
 
   // 乗車路線検出
@@ -284,10 +288,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   useEffect(() => {
     if (!navigator.geolocation) return;
     setIsLocating(true);
+    setLocationError(null);
     isFirstPositionRef.current = true;
     gpsSessionStartRef.current = Date.now();
-    const id = navigator.geolocation.watchPosition(
+
+    // highAccuracy を落として張り直せるよう関数にしておく
+    const start = (highAccuracy: boolean) => {
+      const id = navigator.geolocation.watchPosition(
       (pos) => {
+        setLocationError(null);
         const { latitude, longitude } = pos.coords;
         setUserLocation([latitude, longitude]);
 
@@ -332,21 +341,44 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
         isFirstPositionRef.current = false;
       },
-      () => {
-        if (watchIdRef.current !== null) {
-          navigator.geolocation.clearWatch(watchIdRef.current);
-          watchIdRef.current = null;
+      (err) => {
+        // 以前はどのエラーでも監視を捨てていたため、屋内での一時的な
+        // タイムアウト一回で以後ずっと現在地が出なくなっていた。
+        // 権限拒否だけは再試行しても無駄なので止め、それ以外は
+        // 高精度をあきらめて粘る。
+        if (err.code === err.PERMISSION_DENIED) {
+          if (watchIdRef.current !== null) {
+            navigator.geolocation.clearWatch(watchIdRef.current);
+            watchIdRef.current = null;
+          }
+          setIsLocating(false);
+          setLocationError('denied');
+          return;
         }
-        setIsLocating(false);
+        setLocationError(err.code === err.TIMEOUT ? 'timeout' : 'unavailable');
+        if (highAccuracy) {
+          // 高精度で取れないだけの可能性があるので、精度を落として張り直す
+          if (watchIdRef.current !== null) {
+            navigator.geolocation.clearWatch(watchIdRef.current);
+            watchIdRef.current = null;
+          }
+          start(false);
+        }
+        // 低精度でも失敗した場合は監視を残したまま次の更新を待つ
       },
-      { enableHighAccuracy: true, timeout: 30000, maximumAge: 10000 }
-    );
-    watchIdRef.current = id;
-    return () => {
-      navigator.geolocation.clearWatch(id);
-      watchIdRef.current = null;
+        { enableHighAccuracy: highAccuracy, timeout: highAccuracy ? 15000 : 30000, maximumAge: 10000 }
+      );
+      watchIdRef.current = id;
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    start(true);
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+    };
+  }, [locationRetryCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 位置情報取得時に最寄駅を出発駅に自動設定（初回取得時のみ・手動変更後は上書きしない）
   useEffect(() => {
@@ -3784,6 +3816,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 userLocation={userLocation}
                 hasGps={isLocating}
                 showTrainStatusPanel={showTrainStatusPanel}
+                locationError={locationError}
+                onRetryLocation={() => setLocationRetryCount(c => c + 1)}
               />
             </div>
           )
@@ -3806,6 +3840,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             userLocation={userLocation}
             hasGps={isLocating}
             showTrainStatusPanel={showTrainStatusPanel}
+            locationError={locationError}
+            onRetryLocation={() => setLocationRetryCount(c => c + 1)}
           />
         )}
 
@@ -5133,6 +5169,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 userLocation={userLocation}
                 hasGps={isLocating}
                 showTrainStatusPanel={showTrainStatusPanel}
+                locationError={locationError}
+                onRetryLocation={() => setLocationRetryCount(c => c + 1)}
               />
             </div>
           )}

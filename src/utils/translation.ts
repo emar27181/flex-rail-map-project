@@ -7751,6 +7751,18 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "乗車中の路線を表示",
     english: "Show current train info"
   },
+  locationDenied: {
+    japanese: "位置情報が許可されていません",
+    english: "Location permission denied"
+  },
+  locationUnavailable: {
+    japanese: "現在地を取得できません",
+    english: "Location unavailable"
+  },
+  retryLocation: {
+    japanese: "再取得",
+    english: "Retry"
+  },
   useLocationFeatures: {
     japanese: "現在地から出発駅を自動設定",
     english: "Auto-set departure from location"
@@ -8435,6 +8447,9 @@ export const uiChinese: Record<string, string> = {
   approximateNote: "⚠ 概算值·参考用　点击左侧路线名切换",
   heatmapDataLabel: "热力图数据",
   showTrainStatusPanel: "显示乘车路线",
+  locationDenied: "未允许获取位置信息",
+  locationUnavailable: "无法获取当前位置",
+  retryLocation: "重试",
   useLocationFeatures: "根据当前位置自动设置出发站",
   moreItemsCount: "+{count}项",
   towardSuffix: "方向",
@@ -8677,6 +8692,9 @@ export const uiKorean: Record<string, string> = {
   approximateNote: "⚠ 개산값·참고용　왼쪽 노선명 클릭으로 전환",
   heatmapDataLabel: "히트맵 데이터",
   showTrainStatusPanel: "탑승 노선 표시",
+  locationDenied: "위치 정보가 허용되지 않았습니다",
+  locationUnavailable: "현재 위치를 가져올 수 없습니다",
+  retryLocation: "다시 시도",
   useLocationFeatures: "현재 위치로 출발역 자동 설정",
   moreItemsCount: "+{count}건",
   towardSuffix: "방면",

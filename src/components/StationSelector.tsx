@@ -47,6 +47,10 @@ interface StationSelectorProps {
   hasGps?: boolean;
   /** 乗車中の路線・到着予定を出すか。既定は非表示で、表示設定からONにできる */
   showTrainStatusPanel?: boolean;
+  /** 位置情報が取れなかった理由。取れているときは null */
+  locationError?: 'denied' | 'unavailable' | 'timeout' | null;
+  /** 位置情報の再取得 */
+  onRetryLocation?: () => void;
 }
 
 const StationSelector: React.FC<StationSelectorProps> = ({
@@ -67,6 +71,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   userLocation = null,
   hasGps = false,
   showTrainStatusPanel = false,
+  locationError = null,
+  onRetryLocation,
 }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -466,6 +472,28 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   </button>
                 )}
               </div>
+              {/*
+                位置情報が取れないときは黙って何も出さないと、
+                なぜ現在地が使えないのか分からず再取得もできない。
+              */}
+              {locationError && (
+                <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: FS.helper, color: colors.textSecondary }}>
+                    {translateUI(locationError === 'denied' ? 'locationDenied' : 'locationUnavailable', language)}
+                  </span>
+                  {locationError !== 'denied' && onRetryLocation && (
+                    <button
+                      onClick={onRetryLocation}
+                      style={{
+                        border: `1px solid ${colors.border}`, borderRadius: '4px',
+                        padding: '1px 6px', fontSize: FS.helper,
+                        backgroundColor: colors.surface, color: colors.text, cursor: 'pointer',
+                        minHeight: `${TARGET.min}px`,
+                      }}
+                    >{translateUI('retryLocation', language)}</button>
+                  )}
+                </div>
+              )}
               {onSetNearestDeparture && (
                 <button
                   onClick={onSetNearestDeparture}
