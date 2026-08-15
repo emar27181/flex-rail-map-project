@@ -2034,6 +2034,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const MAX_MARKER_STATIONS = 100;
   /** 乗換駅ヒントに出す最小路線数。相互直通による重複定義を拾いすぎないよう3以上にする */
   const TRANSFER_HINT_MIN_ROUTES = 3;
+  /**
+   * 路線の表示状態に関わらず常に出す主要駅の最小路線数。
+   * 新宿・東京・横浜のようなターミナルは地図上の位置の手掛かりになるため、
+   * 路線を絞り込んでいる最中でも目印として残す。対象は55駅。
+   */
+  const ALWAYS_VISIBLE_MIN_ROUTES = 5;
   const allowedStationNames = useMemo(() => {
     // boundsが未取得の場合は制限なし（初回表示まで）
     if (!viewBounds) return null;
@@ -2125,6 +2131,41 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     return list;
   }, [isTransferHintMode, stationRouteCountMap, viewBounds, viewCenter]);
+
+  /**
+   * 路線の表示状態に関わらず常に出す主要駅（ALWAYS_VISIBLE_MIN_ROUTES 路線以上）。
+   *
+   * 表示ONの路線に含まれる駅や、乗換駅ヒントで既に描いている駅は
+   * renderRoute / ヒント側が描くため、ここでは除いて二重描画を防ぐ。
+   */
+  const alwaysVisibleStations = useMemo(() => {
+    const covered = new Set<string>();
+    if (isTransferHintMode) {
+      for (const s of transferHintStations) covered.add(s.name);
+    } else {
+      for (const [rk, stationList] of Object.entries(routes)) {
+        if (!visibleRoutes.has(rk as RouteKey)) continue;
+        for (const s of stationList as Station[]) covered.add(s.name);
+      }
+    }
+
+    const unique = new Map<string, Station>();
+    for (const stationList of Object.values(routes)) {
+      for (const s of stationList as Station[]) {
+        if ((stationRouteCountMap.get(s.name) ?? 0) < ALWAYS_VISIBLE_MIN_ROUTES) continue;
+        if (covered.has(s.name)) continue;
+        if (!unique.has(s.name)) unique.set(s.name, s);
+      }
+    }
+
+    let list = Array.from(unique.values());
+    // 表示範囲内に限定する（対象は55駅なので上限による間引きは不要）
+    if (viewBounds) {
+      const { north, south, east, west } = viewBounds;
+      list = list.filter(s => s.lat <= north && s.lat >= south && s.lng <= east && s.lng >= west);
+    }
+    return list;
+  }, [isTransferHintMode, transferHintStations, visibleRoutes, stationRouteCountMap, viewBounds]);
 
   /**
    * 「どの駅を表示するか」の共有ロジック。
@@ -3253,10 +3294,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   ) => {
     const routeColor = adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme);
     const isDetailed = !!(showStationNames || (showExpressStationsOnly && routeHasExpressMark && station.isExpress));
-    // 非表示路線の駅は薄く描く。ただし乗換駅ヒント時は表示ONの路線が
-    // 1つも無い状態なので、その規則をあてると全駅が薄くなってしまう。
-    // ヒント時のマーカーはそれ自体が主役なので通常の濃さで描く。
-    const stationOpacity = (isTransferHintMode || visibleRoutes.has(routeKey)) ? 1 : 0.3;
+    // 非表示路線の駅は薄く描く。ただし次の2つは例外として通常の濃さで描く。
+    //  - 乗換駅ヒント時: 表示ONの路線が1つも無いため、そのまま当てると全駅が薄くなる
+    //  - 主要ターミナル(5路線以上): 位置の目印として常に読める必要がある
+    const isLandmarkStation =
+      (stationRouteCountMap.get(station.name) ?? 0) >= ALWAYS_VISIBLE_MIN_ROUTES;
+    const stationOpacity =
+      (isTransferHintMode || isLandmarkStation || visibleRoutes.has(routeKey)) ? 1 : 0.3;
     // 時刻表モード有効かつ経路上の駅なら出発時刻を2行目に表示
     const timelineEntry = timetableModeEnabled
       ? stationTimelineMap.get(station.name)?.find(e => e.routeKey === routeKey)
@@ -4256,6 +4300,24 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   station,
                   primaryRouteKey,
                   `transfer-hint-${station.name}`,
+                  routeHasExpressMark,
+                );
+              })}
+
+              {/*
+                主要ターミナル（5路線以上）は路線の表示状態に関わらず常に出す。
+                描画は renderStationMarker に集約しているので通常の駅と同じデザイン。
+              */}
+              {mapViewMode !== 'bubble' && alwaysVisibleStations.map(station => {
+                const stationRoutes = getRoutesForStation(station.name) as RouteKey[];
+                const primaryRouteKey = stationRoutes[0];
+                if (!primaryRouteKey) return null;
+                const routeHasExpressMark = (routes[primaryRouteKey] as Station[] | undefined)
+                  ?.some(s => s.isExpress) ?? false;
+                return renderStationMarker(
+                  station,
+                  primaryRouteKey,
+                  `always-visible-${station.name}`,
                   routeHasExpressMark,
                 );
               })}
