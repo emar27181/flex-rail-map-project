@@ -3234,6 +3234,91 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     };
   };
 
+  /**
+   * 駅マーカーの描画。
+   *
+   * 通常の路線描画（renderRoute）と、駅未選択時の乗換駅ヒントの両方から呼ぶ。
+   * 見た目の決定をここ一箇所に集約し、どちらの経路から描いても
+   * 同じデザイン（アイコン・サイズ・色・ラベル・重なり順・クリック挙動）になるようにする。
+   *
+   * @param routeKey    駅の色や駅ナンバリングの基準にする路線
+   * @param keyPrefix   React の key に使う接頭辞（呼び出し元で一意になるようにする）
+   * @param routeHasExpressMark その路線に急行データがあるか（急行駅のみ表示の判定に使う）
+   */
+  const renderStationMarker = (
+    station: Station,
+    routeKey: RouteKey,
+    keyPrefix: string,
+    routeHasExpressMark: boolean,
+  ) => {
+    const routeColor = adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme);
+    const isDetailed = !!(showStationNames || (showExpressStationsOnly && routeHasExpressMark && station.isExpress));
+    // 非表示路線の駅は薄く描く。ただし乗換駅ヒント時は表示ONの路線が
+    // 1つも無い状態なので、その規則をあてると全駅が薄くなってしまう。
+    // ヒント時のマーカーはそれ自体が主役なので通常の濃さで描く。
+    const stationOpacity = (isTransferHintMode || visibleRoutes.has(routeKey)) ? 1 : 0.3;
+    // 時刻表モード有効かつ経路上の駅なら出発時刻を2行目に表示
+    const timelineEntry = timetableModeEnabled
+      ? stationTimelineMap.get(station.name)?.find(e => e.routeKey === routeKey)
+      : undefined;
+    const stationTimeLabel = isDetailed && timelineEntry ? timelineEntry.depTime : undefined;
+    // 累積所要時間オーバーレイ: 所要時間を2行目ラベルとして表示（時刻表ラベルより優先）
+    const travelTimeMins = showTravelTimeOverlay ? travelTimeMap.get(station.name) : undefined;
+    const effectiveTimeLabel = travelTimeMins !== undefined
+      ? `${travelTimeMins}${translateUI('minutesSuffix', currentLanguage)}`
+      : stationTimeLabel;
+    // getStationDisplayColor は heatmapEnabled/heatmapParam/heatmapMultiParams が deps に入った
+    // useCallback なので、モード切替時に自動的に新しい関数参照になる
+    // ヒートマップ時の上書き色（undefined = 通常色のまま）複合モード時は複合スコア色を使用
+    const heatOverride = heatmapEnabled
+      ? getStationDisplayColor(station.name, routeKey)
+      : undefined;
+    const stationColor = heatOverride ?? routeColor;
+    const tierStyle = getStationBorderStyle(routeKey, station.name);
+    const stationIcon = trainTypeViewEnabled
+      ? createTrainTypeStationIcon(station, routeKey, zoomLevel, isDetailed, stationOpacity, heatOverride)
+      : createStationIcon(station, routeColor, zoomLevel, isDetailed, stationOpacity, effectiveTimeLabel, routeKey, heatOverride, tierStyle?.boxShadow ?? undefined);
+    if (!stationIcon) return null;
+
+    const routeCount = stationRouteCountMap.get(station.name) ?? 1;
+    const stationZIndex = routeCount >= 10 ? 5000 : routeCount >= 5 ? 4000 : routeCount >= 3 ? 3000 : routeCount >= 2 ? 2000 : 1000;
+    const markerKey = `${keyPrefix}-${stationColor}-${Math.round(stationSizeScale * 10)}`;
+
+    return (
+      <Marker
+        key={markerKey}
+        position={[station.lat, station.lng]}
+        icon={stationIcon}
+        zIndexOffset={stationZIndex}
+        eventHandlers={{
+          mouseover: (e: LeafletMouseEvent) => {
+            if (!showStationTooltip || isMobile) return;
+            if (tooltipPinnedRef.current) return;
+            cancelTooltipClose();
+            const oe = e.originalEvent as MouseEvent | undefined;
+            if (!oe) return;
+            setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
+          },
+          mouseout: () => { if (!isMobile) scheduleTooltipClose(); },
+          click: (e: LeafletMouseEvent) => {
+            if (isMobile && mapDraggedRef.current) return;
+            const oe = e.originalEvent as MouseEvent | undefined;
+            if (!oe) return;
+            if (!isMobile) {
+              if (tooltipPinnedRef.current && stationTooltip?.stationName === station.name) { closeTooltip(); return; }
+              setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
+              pinTooltip();
+            } else {
+              setStationTooltip(prev =>
+                prev?.station?.lat === station.lat && prev?.station?.lng === station.lng ? null : { stationName: station.name, station, x: oe.clientX, y: oe.clientY }
+              );
+            }
+          },
+        }}
+      />
+    );
+  };
+
   const renderRoute = (routeKey: RouteKey, stations: Station[]) => {
     if (!visibleRoutes.has(routeKey)) return null;
 
@@ -3462,68 +3547,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             // }
 
             // 急行駅のみ表示モード時は駅名ラベルを強制表示（絞り込み後の駅数が少ないため）
-            const isDetailed = !!(showStationNames || (showExpressStationsOnly && routeHasExpressMark && station.isExpress));
-            const stationOpacity = visibleRoutes.has(routeKey) ? 1 : 0.3;
-            // 時刻表モード有効かつ経路上の駅なら出発時刻を2行目に表示
-            const timelineEntry = timetableModeEnabled
-              ? stationTimelineMap.get(station.name)?.find(e => e.routeKey === routeKey)
-              : undefined;
-            const stationTimeLabel = isDetailed && timelineEntry ? timelineEntry.depTime : undefined;
-            // 累積所要時間オーバーレイ: 所要時間を2行目ラベルとして表示（時刻表ラベルより優先）
-            const travelTimeMins = showTravelTimeOverlay ? travelTimeMap.get(station.name) : undefined;
-            const effectiveTimeLabel = travelTimeMins !== undefined
-              ? `${travelTimeMins}${translateUI('minutesSuffix', currentLanguage)}`
-              : stationTimeLabel;
-            // getStationDisplayColor は heatmapEnabled/heatmapParam/heatmapMultiParams が deps に入った
-            // useCallback なので、モード切替時に自動的に新しい関数参照になる
-            // ヒートマップ時の上書き色（undefined = 通常色のまま）複合モード時は複合スコア色を使用
-            const heatOverride = heatmapEnabled
-              ? getStationDisplayColor(station.name, routeKey)
-              : undefined;
-            const stationColor = heatOverride ?? routeColor;
-            const tierStyle = getStationBorderStyle(routeKey, station.name);
-            const stationIcon = trainTypeViewEnabled
-              ? createTrainTypeStationIcon(station, routeKey, zoomLevel, isDetailed, stationOpacity, heatOverride)
-              : createStationIcon(station, routeColor, zoomLevel, isDetailed, stationOpacity, effectiveTimeLabel, routeKey, heatOverride, tierStyle?.boxShadow ?? undefined);
-            if (!stationIcon) return null;
-
-            const routeCount = stationRouteCountMap.get(station.name) ?? 1;
-            const stationZIndex = routeCount >= 10 ? 5000 : routeCount >= 5 ? 4000 : routeCount >= 3 ? 3000 : routeCount >= 2 ? 2000 : 1000;
-            const markerKey = `${routeKey}-station-${index}-${stationColor}-${Math.round(stationSizeScale * 10)}`;
-
-            return (
-              <Marker
-                key={markerKey}
-                position={[station.lat, station.lng]}
-                icon={stationIcon}
-                zIndexOffset={stationZIndex}
-                eventHandlers={{
-                  mouseover: (e: LeafletMouseEvent) => {
-                    if (!showStationTooltip || isMobile) return;
-                    if (tooltipPinnedRef.current) return;
-                    cancelTooltipClose();
-                    const oe = e.originalEvent as MouseEvent | undefined;
-                    if (!oe) return;
-                    setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
-                  },
-                  mouseout: () => { if (!isMobile) scheduleTooltipClose(); },
-                  click: (e: LeafletMouseEvent) => {
-                    if (isMobile && mapDraggedRef.current) return;
-                    const oe = e.originalEvent as MouseEvent | undefined;
-                    if (!oe) return;
-                    if (!isMobile) {
-                      if (tooltipPinnedRef.current && stationTooltip?.stationName === station.name) { closeTooltip(); return; }
-                      setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
-                      pinTooltip();
-                    } else {
-                      setStationTooltip(prev =>
-                        prev?.station?.lat === station.lat && prev?.station?.lng === station.lng ? null : { stationName: station.name, station, x: oe.clientX, y: oe.clientY }
-                      );
-                    }
-                  },
-                }}
-              />
-            );
+            return renderStationMarker(station, routeKey, `${routeKey}-station-${index}`, routeHasExpressMark);
           }
         })}
         {(() => {
@@ -4217,60 +4241,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 renderRoute(routeKey as RouteKey, stations)
               )}
 
-              {/* 乗換駅ヒント: 路線が1つも表示されていないときの起点表示 */}
+              {/*
+                乗換駅ヒント: 路線が1つも表示されていないときの起点表示。
+                マーカーの見た目は renderStationMarker に集約しており、
+                通常の路線描画と同じデザインで描かれる。
+              */}
               {mapViewMode !== 'bubble' && isTransferHintMode && transferHintStations.map(station => {
                 const stationRoutes = getRoutesForStation(station.name) as RouteKey[];
                 const primaryRouteKey = stationRoutes[0];
-                // その駅を通る路線の色で描く（どの路線の乗換駅か色で見当がつくように）
-                const hintColor = adjustRouteColorForTheme(
-                  (primaryRouteKey ? routeColors[primaryRouteKey] : undefined) ?? '#888',
-                  theme,
-                );
-                const icon = createStationIcon(
+                if (!primaryRouteKey) return null;
+                const routeHasExpressMark = (routes[primaryRouteKey] as Station[] | undefined)
+                  ?.some(s => s.isExpress) ?? false;
+                return renderStationMarker(
                   station,
-                  hintColor,
-                  zoomLevel,
-                  showStationNames,
-                  1,
-                  undefined,
                   primaryRouteKey,
-                );
-                if (!icon) return null;
-                const routeCount = stationRoutes.length;
-                return (
-                  <Marker
-                    key={`transfer-hint-${station.name}`}
-                    position={[station.lat, station.lng]}
-                    icon={icon}
-                    zIndexOffset={routeCount >= 5 ? 4000 : routeCount >= 3 ? 3000 : 2000}
-                    eventHandlers={{
-                      mouseover: (e: LeafletMouseEvent) => {
-                        if (!showStationTooltip || isMobile) return;
-                        if (tooltipPinnedRef.current) return;
-                        cancelTooltipClose();
-                        const oe = e.originalEvent as MouseEvent | undefined;
-                        if (!oe) return;
-                        setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
-                      },
-                      mouseout: () => { if (!isMobile) scheduleTooltipClose(); },
-                      click: (e: LeafletMouseEvent) => {
-                        if (isMobile && mapDraggedRef.current) return;
-                        const oe = e.originalEvent as MouseEvent | undefined;
-                        if (!oe) return;
-                        if (!isMobile) {
-                          if (tooltipPinnedRef.current && stationTooltip?.stationName === station.name) { closeTooltip(); return; }
-                          setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
-                          pinTooltip();
-                        } else {
-                          setStationTooltip(prev =>
-                            prev?.station?.lat === station.lat && prev?.station?.lng === station.lng
-                              ? null
-                              : { stationName: station.name, station, x: oe.clientX, y: oe.clientY }
-                          );
-                        }
-                      },
-                    }}
-                  />
+                  `transfer-hint-${station.name}`,
+                  routeHasExpressMark,
                 );
               })}
 
