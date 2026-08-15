@@ -3071,7 +3071,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   }, [MapComponents, userLocation]);
 
   if (!isClient || isLoading || !MapComponents) {
-    console.log('RailwayMap loading state:', { isClient, isLoading, MapComponents: !!MapComponents });
     return (
       <div style={{
         height: '600px',
@@ -3082,17 +3081,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         justifyContent: 'center',
         backgroundColor: colors.surface
       }}>
-        <div>
-          <div>{translateUI('loadingMap', currentLanguage)}</div>
-          <div style={{ fontSize: '12px', color: colors.textSecondary, marginTop: '10px' }}>
-            Client: {isClient ? 'OK' : 'Loading'},
-            Loading: {isLoading ? 'Yes' : 'No'},
-            Components: {MapComponents ? 'OK' : 'Loading'}
-          </div>
-          <div style={{ fontSize: '12px', color: '#999', marginTop: '10px' }}>
-            Window: {typeof window !== 'undefined' ? 'Available' : 'Not Available'}
-          </div>
-        </div>
+        <div>{translateUI('loadingMap', currentLanguage)}</div>
       </div>
     );
   }
