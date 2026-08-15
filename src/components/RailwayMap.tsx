@@ -2040,6 +2040,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * 路線を絞り込んでいる最中でも目印として残す。対象は55駅。
    */
   const ALWAYS_VISIBLE_MIN_ROUTES = 5;
+  /** 常時表示する主要駅の上限。中心に近い順に残す（広域ズーム時の遠方駅を出さないため） */
+  const MAX_ALWAYS_VISIBLE_STATIONS = 20;
   const allowedStationNames = useMemo(() => {
     // boundsが未取得の場合は制限なし（初回表示まで）
     if (!viewBounds) return null;
@@ -2153,19 +2155,30 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     for (const stationList of Object.values(routes)) {
       for (const s of stationList as Station[]) {
         if ((stationRouteCountMap.get(s.name) ?? 0) < ALWAYS_VISIBLE_MIN_ROUTES) continue;
-        if (covered.has(s.name)) continue;
         if (!unique.has(s.name)) unique.set(s.name, s);
       }
     }
 
     let list = Array.from(unique.values());
-    // 表示範囲内に限定する（対象は55駅なので上限による間引きは不要）
+    // 表示範囲内に限定する
     if (viewBounds) {
       const { north, south, east, west } = viewBounds;
       list = list.filter(s => s.lat <= north && s.lat >= south && s.lng <= east && s.lng >= west);
     }
-    return list;
-  }, [isTransferHintMode, transferHintStations, visibleRoutes, stationRouteCountMap, viewBounds]);
+    // 広域までズームアウトすると表示範囲に大阪・名古屋・仙台まで入る。
+    // 目印として意味があるのは中心付近のものだけなので、近い順で打ち切る。
+    //
+    // 打ち切りは covered を除く前に行う。逆にすると、近くの主要駅は
+    // 既に他の層で描かれていて covered に入るため、残った遠方の駅だけで
+    // 枠が埋まり「明らかに遠い駅ばかり並ぶ」ことになる。
+    const [cLat, cLng] = viewCenter;
+    list.sort((a, b) =>
+      ((a.lat - cLat) ** 2 + (a.lng - cLng) ** 2) - ((b.lat - cLat) ** 2 + (b.lng - cLng) ** 2)
+    );
+    return list
+      .slice(0, MAX_ALWAYS_VISIBLE_STATIONS)
+      .filter(s => !covered.has(s.name));
+  }, [isTransferHintMode, transferHintStations, visibleRoutes, stationRouteCountMap, viewBounds, viewCenter]);
 
   /**
    * 「どの駅を表示するか」の共有ロジック。
@@ -3102,6 +3115,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         if (justClickedLayerRef.current) { justClickedLayerRef.current = false; return; }
         handleRoutePopupClose();
         setDimmedMapTooltip(null);
+      },
+      // 端末回転・全画面切替などでコンテナの大きさが変わったときも取り込む
+      resize: (e: LeafletEvent) => {
+        const c = e.target.getCenter();
+        setViewCenter([c.lat, c.lng]);
+        const b = e.target.getBounds();
+        setViewBounds({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
       },
       mousemove: () => {}
     });
