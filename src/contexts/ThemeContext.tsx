@@ -40,6 +40,15 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     // body要素にクラスを追加してグローバルスタイルを適用（他クラスは保持）
     document.body.classList.remove('light', 'dark');
     document.body.classList.add(theme);
+
+    // iOS Safari は viewport-fit=cover 時、ステータスバー背後の領域を
+    // html のキャンバス背景と theme-color で塗る。body のクラスだけでは
+    // この領域が塗られず、ダークモードでも画面上部が白く残る。
+    const bg = theme === 'dark' ? '#1a1a1a' : '#ffffff';
+    document.documentElement.style.backgroundColor = bg;
+    document.documentElement.style.setProperty('--app-bg', bg);
+    document.documentElement.style.setProperty('--app-loading-fg', theme === 'dark' ? '#b3b3b3' : '#555555');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', bg);
   }, [theme]);
 
   const toggleTheme = () => {

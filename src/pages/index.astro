@@ -30,10 +30,35 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 		/>
 		<link rel="shortcut icon" href="/icon_flex_rail_way_map.png" />
 		<link rel="manifest" href="/manifest.json" />
-		<meta name="theme-color" content="#4CAF50" />
+		<!--
+			iOS Safari はステータスバー背後の領域を theme-color とキャンバス背景で塗る。
+			ここが固定の緑（旧 #4CAF50）だとダークモードでも上部だけ色が合わない。
+			初期値はアプリの既定テーマ（dark）に合わせ、実際の値は下の初期化スクリプトと
+			ThemeProvider が localStorage のテーマに追従して書き換える。
+		-->
+		<meta name="theme-color" content="#1a1a1a" />
 		<meta name="mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
-		<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+		<!-- ホーム画面起動時もステータスバーをアプリ側の背景で塗るため translucent にする -->
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<script is:inline>
+			// ハイドレーション前に背景色を確定させる。
+			// これをやらないと、ダークモードでも初回描画からReactのマウントまでの間、
+			// html のキャンバスとローディング画面が白いままになる。
+			(function () {
+				var t = 'dark';
+				try {
+					var saved = localStorage.getItem('theme');
+					if (saved === 'light' || saved === 'dark') t = saved;
+				} catch (e) { /* localStorage 不可でも既定のdarkで続行 */ }
+				var bg = t === 'dark' ? '#1a1a1a' : '#ffffff';
+				document.documentElement.style.backgroundColor = bg;
+				document.documentElement.style.setProperty('--app-bg', bg);
+				document.documentElement.style.setProperty('--app-loading-fg', t === 'dark' ? '#b3b3b3' : '#555555');
+				var m = document.querySelector('meta[name="theme-color"]');
+				if (m) m.setAttribute('content', bg);
+			})();
+		</script>
 		<meta name="apple-mobile-web-app-title" content="路線図" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 		<meta name="generator" content={Astro.generator} />
@@ -154,6 +179,15 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 				--sal: env(safe-area-inset-left, 0px);
 				--sar: env(safe-area-inset-right, 0px);
 			}
+			/*
+				viewport-fit=cover でページがセーフエリアまで広がるため、
+				ステータスバー背後を塗るのは body ではなく html のキャンバス。
+				body にだけ背景を置くとiPhoneで上部が白く残るので html 側にも指定する。
+				既定はアプリの既定テーマ（dark）。実値は head の初期化スクリプトが上書きする。
+			*/
+			html {
+				background-color: #1a1a1a;
+			}
 			body {
 				margin: 0 0 100px 0; /* Sticky広告用の下部マージン */
 				padding: 0;
@@ -164,6 +198,28 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 				-webkit-tap-highlight-color: transparent;
 				touch-action: manipulation;
 				overscroll-behavior: none;
+			}
+			/*
+				出発駅・到着駅の入力欄は緑/赤で塗りつぶしているため、
+				既定のプレースホルダ色（暗いグレー）だと読めない。
+				擬似要素はインラインスタイルで指定できないのでここで白系にする。
+			*/
+			/*
+				:global() が必須。Astroは<style>内のセレクタに [data-astro-cid-*] を
+				付けてスコープするが、この入力欄はReactが描画するためその属性を持たず、
+				スコープ付きのままだと一致せずプレースホルダが既定のグレーで残る。
+			*/
+			:global(.station-input-filled)::placeholder {
+				color: rgba(255, 255, 255, 0.85);
+				opacity: 1;
+			}
+			:global(.station-input-filled)::-webkit-input-placeholder {
+				color: rgba(255, 255, 255, 0.85);
+			}
+			/* 入力文字自体も、塗りつぶした背景の上で読めるよう白に固定する */
+			:global(.station-input-filled) {
+				color: #ffffff;
+				-webkit-text-fill-color: #ffffff;
 			}
 			/* iOS Safari 自動ズーム防止: 全inputを16px以上に固定 */
 			input, select, textarea {
@@ -430,8 +486,8 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 	</head>
 	<body>
 		<!-- JSロード中のローディング画面（ThemeWrapper がマウントしたら消える） -->
-		<div id="app-loading" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f6f7f8;z-index:9999;font-family:'Noto Sans JP',sans-serif;">
-			<div style="text-align:center;color:#555;">
+		<div id="app-loading" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--app-bg, #1a1a1a);z-index:9999;font-family:'Noto Sans JP',sans-serif;">
+			<div style="text-align:center;color:var(--app-loading-fg, #b3b3b3);">
 				<div style="margin-bottom:16px;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg></div>
 				<div style="font-size:16px;font-weight:600;margin-bottom:8px;">フレックス路線図</div>
 				<div style="font-size:13px;color:#888;">地図を読み込み中...</div>

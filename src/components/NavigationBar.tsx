@@ -30,7 +30,11 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '12px 20px',
+      // PWA（ホーム画面起動）ではステータスバーを black-translucent にしており、
+      // ページがステータスバーの下まで広がる。上端にそのまま置くとロゴや
+      // ボタンが時刻・電池表示に隠れるため、セーフエリア分だけ下げる。
+      // ブラウザ表示時は inset が 0 なので見た目は変わらない。
+      padding: 'calc(12px + env(safe-area-inset-top, 0px)) 20px 12px',
       backgroundColor: colors.surface,
       borderBottom: `1px solid ${colors.border}`,
       boxShadow: `0 2px 4px ${colors.shadow}`,

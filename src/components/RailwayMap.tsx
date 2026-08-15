@@ -145,6 +145,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // 表示モードの管理
   const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
+  // 乗車中の路線・到着予定のパネル。情報量が多く常時は邪魔になるため既定は非表示
+  const [showTrainStatusPanel, setShowTrainStatusPanel] = useState(false);
+  /**
+   * 位置情報を使う機能（現在地の取得・最寄駅の自動設定・乗車路線の推定）。
+   * 既定はOFF。ONだと起動しただけで出発駅が埋まってしまい、
+   * 「駅未選択なら乗換駅だけ出す」表示に入れないため。
+   */
+  const [locationFeaturesEnabled, setLocationFeaturesEnabled] = useState(false);
   const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
   const [showStationTierBadges, setShowStationTierBadges] = useState(false); // 乗り入れ路線数リング表示
   const [showTravelTimes, setShowTravelTimes] = useState(false);
@@ -268,8 +276,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
 
 
-  // 位置情報をデフォルトでON（初回マウント時に自動開始）
+  // 位置情報の取得。設定でONにしたときだけ開始する（既定はOFF）
   useEffect(() => {
+    if (!locationFeaturesEnabled) return;
     if (!navigator.geolocation) return;
     setIsLocating(true);
     isFirstPositionRef.current = true;
@@ -334,10 +343,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       navigator.geolocation.clearWatch(id);
       watchIdRef.current = null;
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [locationFeaturesEnabled]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 位置情報取得時に最寄駅を出発駅に自動設定（初回取得時のみ・手動変更後は上書きしない）
   useEffect(() => {
+    if (!locationFeaturesEnabled) return;
     if (!userLocation || isManualDeparture) return;
     if (autoSetDepartureRef.current) return;
     const nearest = findNearestStation(userLocation[0], userLocation[1]);
@@ -345,7 +355,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       setDeparture(nearest);
       autoSetDepartureRef.current = true;
     }
-  }, [userLocation, isManualDeparture]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userLocation, isManualDeparture, locationFeaturesEnabled]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 初回の位置情報取得時、地図を現在地中心に移動する。
   // これまでは現在地に応じて最寄り路線が選択される一方で、地図の表示範囲自体は
@@ -2022,6 +2032,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // 駅マーカー表示制限: 画面表示範囲内の駅のみ表示（フリーズ防止）
   const MAX_MARKER_STATIONS = 100;
+  /** 乗換駅ヒントに出す最小路線数。相互直通による重複定義を拾いすぎないよう3以上にする */
+  const TRANSFER_HINT_MIN_ROUTES = 3;
+  /**
+   * 路線の表示状態に関わらず常に出す主要駅の最小路線数。
+   * 新宿・東京・横浜のようなターミナルは地図上の位置の手掛かりになるため、
+   * 路線を絞り込んでいる最中でも目印として残す。対象は55駅。
+   */
+  const ALWAYS_VISIBLE_MIN_ROUTES = 5;
   const allowedStationNames = useMemo(() => {
     // boundsが未取得の場合は制限なし（初回表示まで）
     if (!viewBounds) return null;
@@ -2065,6 +2083,89 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return result;
   }, [visibleRoutesData, visibleRoutes, viewBounds, viewCenter,
       heatmapRangeFilterEnabled, heatmapEnabled, heatmapParam, heatmapCustomRange]);
+
+  /**
+   * 乗換駅ヒント表示。
+   *
+   * 出発駅・到着駅が未選択で、かつ表示ONの路線が1つも無いときに使う。
+   * 路線の線は引かず、2路線以上が通る駅（乗換駅）だけをマーカーで出して
+   * 「どの路線を表示するか」を選ぶ手掛かりにする。駅をタップすると
+   * ツールチップの路線一覧が開き、そこから路線を表示ONにできる。
+   *
+   * 路線を1つでも表示ONにすると通常の描画に戻る（このモードは抜ける）。
+   */
+  // 出発駅が決まっていない間はヒント表示にする（到着駅だけ選ばれている場合も含む）
+  const isTransferHintMode = !departure && visibleRoutes.size === 0;
+
+  const transferHintStations = useMemo(() => {
+    if (!isTransferHintMode) return [] as Station[];
+
+    // 同じ駅が複数路線に登場するため名前で重複排除する。
+    // 2路線以上だと相互直通の重複定義まで拾って数が多くなるため、
+    // ヒントとしては3路線以上の主要な乗換駅に絞る
+    // （表示設定の「乗換駅のみ表示」は従来どおり2路線以上のまま）
+    const unique = new Map<string, Station>();
+    for (const stationList of Object.values(routes)) {
+      for (const s of stationList as Station[]) {
+        if ((stationRouteCountMap.get(s.name) ?? 0) < TRANSFER_HINT_MIN_ROUTES) continue;
+        if (!unique.has(s.name)) unique.set(s.name, s);
+      }
+    }
+
+    let list = Array.from(unique.values());
+
+    // 表示範囲内に限定（範囲未取得の初回は全件のまま上限で絞る）
+    if (viewBounds) {
+      const { north, south, east, west } = viewBounds;
+      list = list.filter(s => s.lat <= north && s.lat >= south && s.lng <= east && s.lng >= west);
+    }
+
+    // 通常の駅マーカーと同じ上限を適用してフリーズを防ぐ
+    if (list.length > MAX_MARKER_STATIONS) {
+      const [cLat, cLng] = viewCenter;
+      list.sort((a, b) =>
+        ((a.lat - cLat) ** 2 + (a.lng - cLng) ** 2) - ((b.lat - cLat) ** 2 + (b.lng - cLng) ** 2)
+      );
+      list = list.slice(0, MAX_MARKER_STATIONS);
+    }
+
+    return list;
+  }, [isTransferHintMode, stationRouteCountMap, viewBounds, viewCenter]);
+
+  /**
+   * 路線の表示状態に関わらず常に出す主要駅（ALWAYS_VISIBLE_MIN_ROUTES 路線以上）。
+   *
+   * 表示ONの路線に含まれる駅や、乗換駅ヒントで既に描いている駅は
+   * renderRoute / ヒント側が描くため、ここでは除いて二重描画を防ぐ。
+   */
+  const alwaysVisibleStations = useMemo(() => {
+    const covered = new Set<string>();
+    if (isTransferHintMode) {
+      for (const s of transferHintStations) covered.add(s.name);
+    } else {
+      for (const [rk, stationList] of Object.entries(routes)) {
+        if (!visibleRoutes.has(rk as RouteKey)) continue;
+        for (const s of stationList as Station[]) covered.add(s.name);
+      }
+    }
+
+    const unique = new Map<string, Station>();
+    for (const stationList of Object.values(routes)) {
+      for (const s of stationList as Station[]) {
+        if ((stationRouteCountMap.get(s.name) ?? 0) < ALWAYS_VISIBLE_MIN_ROUTES) continue;
+        if (covered.has(s.name)) continue;
+        if (!unique.has(s.name)) unique.set(s.name, s);
+      }
+    }
+
+    let list = Array.from(unique.values());
+    // 表示範囲内に限定する（対象は55駅なので上限による間引きは不要）
+    if (viewBounds) {
+      const { north, south, east, west } = viewBounds;
+      list = list.filter(s => s.lat <= north && s.lat >= south && s.lng <= east && s.lng >= west);
+    }
+    return list;
+  }, [isTransferHintMode, transferHintStations, visibleRoutes, stationRouteCountMap, viewBounds]);
 
   /**
    * 「どの駅を表示するか」の共有ロジック。
@@ -2414,12 +2515,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       setAvailableRoutes(new Set(allRouteKeys));
       setVisibleRoutes(routeSet);
     } else if (arrival && !departure) {
-      const arrivalRoutes = getRoutesForStation(arrival.name);
+      // 到着駅だけ決まっている状態では、経路がまだ確定しないので
+      // 出発駅未選択時と同じく全路線を非表示にし、乗換駅ヒントから
+      // 出発側の路線を選べるようにする
       setAvailableRoutes(new Set(allRouteKeys));
-      setVisibleRoutes(new Set(arrivalRoutes));
+      setVisibleRoutes(new Set());
     } else {
+      // 出発駅・到着駅が両方未選択のときは全路線を非表示にする。
+      // 代わりに乗換駅だけをヒントとして出し（下の transferHintStations）、
+      // 駅をタップ → ツールチップの路線一覧から見たい路線だけを表示ONにする、
+      // という絞り込みの起点にする。全路線を一度に描くと線が重なって
+      // どの路線を選べばよいか分からないため。
       setAvailableRoutes(new Set(allRouteKeys));
-      setVisibleRoutes(new Set(allRouteKeys));
+      setVisibleRoutes(new Set());
     }
   }, [departure, arrival, isManualDeparture]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -3167,6 +3275,94 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     };
   };
 
+  /**
+   * 駅マーカーの描画。
+   *
+   * 通常の路線描画（renderRoute）と、駅未選択時の乗換駅ヒントの両方から呼ぶ。
+   * 見た目の決定をここ一箇所に集約し、どちらの経路から描いても
+   * 同じデザイン（アイコン・サイズ・色・ラベル・重なり順・クリック挙動）になるようにする。
+   *
+   * @param routeKey    駅の色や駅ナンバリングの基準にする路線
+   * @param keyPrefix   React の key に使う接頭辞（呼び出し元で一意になるようにする）
+   * @param routeHasExpressMark その路線に急行データがあるか（急行駅のみ表示の判定に使う）
+   */
+  const renderStationMarker = (
+    station: Station,
+    routeKey: RouteKey,
+    keyPrefix: string,
+    routeHasExpressMark: boolean,
+  ) => {
+    const routeColor = adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme);
+    const isDetailed = !!(showStationNames || (showExpressStationsOnly && routeHasExpressMark && station.isExpress));
+    // 非表示路線の駅は薄く描く。ただし次の2つは例外として通常の濃さで描く。
+    //  - 乗換駅ヒント時: 表示ONの路線が1つも無いため、そのまま当てると全駅が薄くなる
+    //  - 主要ターミナル(5路線以上): 位置の目印として常に読める必要がある
+    const isLandmarkStation =
+      (stationRouteCountMap.get(station.name) ?? 0) >= ALWAYS_VISIBLE_MIN_ROUTES;
+    const stationOpacity =
+      (isTransferHintMode || isLandmarkStation || visibleRoutes.has(routeKey)) ? 1 : 0.3;
+    // 時刻表モード有効かつ経路上の駅なら出発時刻を2行目に表示
+    const timelineEntry = timetableModeEnabled
+      ? stationTimelineMap.get(station.name)?.find(e => e.routeKey === routeKey)
+      : undefined;
+    const stationTimeLabel = isDetailed && timelineEntry ? timelineEntry.depTime : undefined;
+    // 累積所要時間オーバーレイ: 所要時間を2行目ラベルとして表示（時刻表ラベルより優先）
+    const travelTimeMins = showTravelTimeOverlay ? travelTimeMap.get(station.name) : undefined;
+    const effectiveTimeLabel = travelTimeMins !== undefined
+      ? `${travelTimeMins}${translateUI('minutesSuffix', currentLanguage)}`
+      : stationTimeLabel;
+    // getStationDisplayColor は heatmapEnabled/heatmapParam/heatmapMultiParams が deps に入った
+    // useCallback なので、モード切替時に自動的に新しい関数参照になる
+    // ヒートマップ時の上書き色（undefined = 通常色のまま）複合モード時は複合スコア色を使用
+    const heatOverride = heatmapEnabled
+      ? getStationDisplayColor(station.name, routeKey)
+      : undefined;
+    const stationColor = heatOverride ?? routeColor;
+    const tierStyle = getStationBorderStyle(routeKey, station.name);
+    const stationIcon = trainTypeViewEnabled
+      ? createTrainTypeStationIcon(station, routeKey, zoomLevel, isDetailed, stationOpacity, heatOverride)
+      : createStationIcon(station, routeColor, zoomLevel, isDetailed, stationOpacity, effectiveTimeLabel, routeKey, heatOverride, tierStyle?.boxShadow ?? undefined);
+    if (!stationIcon) return null;
+
+    const routeCount = stationRouteCountMap.get(station.name) ?? 1;
+    const stationZIndex = routeCount >= 10 ? 5000 : routeCount >= 5 ? 4000 : routeCount >= 3 ? 3000 : routeCount >= 2 ? 2000 : 1000;
+    const markerKey = `${keyPrefix}-${stationColor}-${Math.round(stationSizeScale * 10)}`;
+
+    return (
+      <Marker
+        key={markerKey}
+        position={[station.lat, station.lng]}
+        icon={stationIcon}
+        zIndexOffset={stationZIndex}
+        eventHandlers={{
+          mouseover: (e: LeafletMouseEvent) => {
+            if (!showStationTooltip || isMobile) return;
+            if (tooltipPinnedRef.current) return;
+            cancelTooltipClose();
+            const oe = e.originalEvent as MouseEvent | undefined;
+            if (!oe) return;
+            setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
+          },
+          mouseout: () => { if (!isMobile) scheduleTooltipClose(); },
+          click: (e: LeafletMouseEvent) => {
+            if (isMobile && mapDraggedRef.current) return;
+            const oe = e.originalEvent as MouseEvent | undefined;
+            if (!oe) return;
+            if (!isMobile) {
+              if (tooltipPinnedRef.current && stationTooltip?.stationName === station.name) { closeTooltip(); return; }
+              setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
+              pinTooltip();
+            } else {
+              setStationTooltip(prev =>
+                prev?.station?.lat === station.lat && prev?.station?.lng === station.lng ? null : { stationName: station.name, station, x: oe.clientX, y: oe.clientY }
+              );
+            }
+          },
+        }}
+      />
+    );
+  };
+
   const renderRoute = (routeKey: RouteKey, stations: Station[]) => {
     if (!visibleRoutes.has(routeKey)) return null;
 
@@ -3395,68 +3591,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             // }
 
             // 急行駅のみ表示モード時は駅名ラベルを強制表示（絞り込み後の駅数が少ないため）
-            const isDetailed = !!(showStationNames || (showExpressStationsOnly && routeHasExpressMark && station.isExpress));
-            const stationOpacity = visibleRoutes.has(routeKey) ? 1 : 0.3;
-            // 時刻表モード有効かつ経路上の駅なら出発時刻を2行目に表示
-            const timelineEntry = timetableModeEnabled
-              ? stationTimelineMap.get(station.name)?.find(e => e.routeKey === routeKey)
-              : undefined;
-            const stationTimeLabel = isDetailed && timelineEntry ? timelineEntry.depTime : undefined;
-            // 累積所要時間オーバーレイ: 所要時間を2行目ラベルとして表示（時刻表ラベルより優先）
-            const travelTimeMins = showTravelTimeOverlay ? travelTimeMap.get(station.name) : undefined;
-            const effectiveTimeLabel = travelTimeMins !== undefined
-              ? `${travelTimeMins}${translateUI('minutesSuffix', currentLanguage)}`
-              : stationTimeLabel;
-            // getStationDisplayColor は heatmapEnabled/heatmapParam/heatmapMultiParams が deps に入った
-            // useCallback なので、モード切替時に自動的に新しい関数参照になる
-            // ヒートマップ時の上書き色（undefined = 通常色のまま）複合モード時は複合スコア色を使用
-            const heatOverride = heatmapEnabled
-              ? getStationDisplayColor(station.name, routeKey)
-              : undefined;
-            const stationColor = heatOverride ?? routeColor;
-            const tierStyle = getStationBorderStyle(routeKey, station.name);
-            const stationIcon = trainTypeViewEnabled
-              ? createTrainTypeStationIcon(station, routeKey, zoomLevel, isDetailed, stationOpacity, heatOverride)
-              : createStationIcon(station, routeColor, zoomLevel, isDetailed, stationOpacity, effectiveTimeLabel, routeKey, heatOverride, tierStyle?.boxShadow ?? undefined);
-            if (!stationIcon) return null;
-
-            const routeCount = stationRouteCountMap.get(station.name) ?? 1;
-            const stationZIndex = routeCount >= 10 ? 5000 : routeCount >= 5 ? 4000 : routeCount >= 3 ? 3000 : routeCount >= 2 ? 2000 : 1000;
-            const markerKey = `${routeKey}-station-${index}-${stationColor}-${Math.round(stationSizeScale * 10)}`;
-
-            return (
-              <Marker
-                key={markerKey}
-                position={[station.lat, station.lng]}
-                icon={stationIcon}
-                zIndexOffset={stationZIndex}
-                eventHandlers={{
-                  mouseover: (e: LeafletMouseEvent) => {
-                    if (!showStationTooltip || isMobile) return;
-                    if (tooltipPinnedRef.current) return;
-                    cancelTooltipClose();
-                    const oe = e.originalEvent as MouseEvent | undefined;
-                    if (!oe) return;
-                    setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
-                  },
-                  mouseout: () => { if (!isMobile) scheduleTooltipClose(); },
-                  click: (e: LeafletMouseEvent) => {
-                    if (isMobile && mapDraggedRef.current) return;
-                    const oe = e.originalEvent as MouseEvent | undefined;
-                    if (!oe) return;
-                    if (!isMobile) {
-                      if (tooltipPinnedRef.current && stationTooltip?.stationName === station.name) { closeTooltip(); return; }
-                      setStationTooltip({ stationName: station.name, station, x: oe.clientX, y: oe.clientY });
-                      pinTooltip();
-                    } else {
-                      setStationTooltip(prev =>
-                        prev?.station?.lat === station.lat && prev?.station?.lng === station.lng ? null : { stationName: station.name, station, x: oe.clientX, y: oe.clientY }
-                      );
-                    }
-                  },
-                }}
-              />
-            );
+            return renderStationMarker(station, routeKey, `${routeKey}-station-${index}`, routeHasExpressMark);
           }
         })}
         {(() => {
@@ -3625,13 +3760,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 language={currentLanguage}
                 departureTime={timetableBaseTime}
                 onDepartureTimeChange={setTimetableBaseTime}
-                onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
+                onSetNearestDeparture={locationFeaturesEnabled && userLocation ? handleSetNearestDeparture : undefined}
                 onSearchingChange={handleSearchingChange}
-                detectedRoute={detectedRoute}
+                detectedRoute={locationFeaturesEnabled ? detectedRoute : null}
                 manualTrainRoute={manualTrainRoute}
                 onManualTrainRouteChange={setManualTrainRoute}
                 userLocation={userLocation}
                 hasGps={isLocating}
+                showTrainStatusPanel={showTrainStatusPanel}
               />
             </div>
           )
@@ -3646,13 +3782,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             departureTime={timetableBaseTime}
             onDepartureTimeChange={setTimetableBaseTime}
             language={currentLanguage}
-            onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
+            onSetNearestDeparture={locationFeaturesEnabled && userLocation ? handleSetNearestDeparture : undefined}
             onSearchingChange={handleSearchingChange}
-            detectedRoute={detectedRoute}
+            detectedRoute={locationFeaturesEnabled ? detectedRoute : null}
             manualTrainRoute={manualTrainRoute}
             onManualTrainRouteChange={setManualTrainRoute}
             userLocation={userLocation}
             hasGps={isLocating}
+            showTrainStatusPanel={showTrainStatusPanel}
           />
         )}
 
@@ -4147,6 +4284,43 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               }).map(([routeKey, stations]) =>
                 renderRoute(routeKey as RouteKey, stations)
               )}
+
+              {/*
+                乗換駅ヒント: 路線が1つも表示されていないときの起点表示。
+                マーカーの見た目は renderStationMarker に集約しており、
+                通常の路線描画と同じデザインで描かれる。
+              */}
+              {mapViewMode !== 'bubble' && isTransferHintMode && transferHintStations.map(station => {
+                const stationRoutes = getRoutesForStation(station.name) as RouteKey[];
+                const primaryRouteKey = stationRoutes[0];
+                if (!primaryRouteKey) return null;
+                const routeHasExpressMark = (routes[primaryRouteKey] as Station[] | undefined)
+                  ?.some(s => s.isExpress) ?? false;
+                return renderStationMarker(
+                  station,
+                  primaryRouteKey,
+                  `transfer-hint-${station.name}`,
+                  routeHasExpressMark,
+                );
+              })}
+
+              {/*
+                主要ターミナル（5路線以上）は路線の表示状態に関わらず常に出す。
+                描画は renderStationMarker に集約しているので通常の駅と同じデザイン。
+              */}
+              {mapViewMode !== 'bubble' && alwaysVisibleStations.map(station => {
+                const stationRoutes = getRoutesForStation(station.name) as RouteKey[];
+                const primaryRouteKey = stationRoutes[0];
+                if (!primaryRouteKey) return null;
+                const routeHasExpressMark = (routes[primaryRouteKey] as Station[] | undefined)
+                  ?.some(s => s.isExpress) ?? false;
+                return renderStationMarker(
+                  station,
+                  primaryRouteKey,
+                  `always-visible-${station.name}`,
+                  routeHasExpressMark,
+                );
+              })}
 
               {/* 現在地マーカー: 非表示 */}
 
@@ -4694,6 +4868,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     showDimmedRoutes={showDimmedMapRoutes}
                     onShowDimmedRoutesChange={setShowDimmedMapRoutes}
                     showTransferStationsOnly={showTransferStationsOnly}
+                    showTrainStatusPanel={showTrainStatusPanel}
+                    locationFeaturesEnabled={locationFeaturesEnabled}
                     showExpressStationsOnly={showExpressStationsOnly}
                     showTravelTimes={showTravelTimes}
                     showStationNames={showStationNames}
@@ -4706,6 +4882,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onSelectAllRoutes={selectAllRoutes}
                     onDeselectAllRoutes={deselectAllRoutes}
                     onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
+                    onShowTrainStatusPanelChange={setShowTrainStatusPanel}
+                    onLocationFeaturesEnabledChange={setLocationFeaturesEnabled}
                     onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
                     onShowTravelTimesChange={setShowTravelTimes}
                     onShowStationNamesChange={setShowStationNames}
@@ -4906,7 +5084,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               top: 'calc(env(safe-area-inset-top, 0px) + 16px)',
               left: '10px',
               zIndex: 1002,
-              width: 'min(calc(100vw - 145px), 210px)',
+              width: 'min(calc(100vw - 120px), 280px)',
               maxHeight: 'calc(100vh - 80px)',
               overflowY: 'auto',
             }}>
@@ -4920,13 +5098,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 language={currentLanguage}
                 departureTime={timetableBaseTime}
                 onDepartureTimeChange={setTimetableBaseTime}
-                onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
+                onSetNearestDeparture={locationFeaturesEnabled && userLocation ? handleSetNearestDeparture : undefined}
                 onSearchingChange={handleSearchingChange}
-                detectedRoute={detectedRoute}
+                detectedRoute={locationFeaturesEnabled ? detectedRoute : null}
                 manualTrainRoute={manualTrainRoute}
                 onManualTrainRouteChange={setManualTrainRoute}
                 userLocation={userLocation}
                 hasGps={isLocating}
+                showTrainStatusPanel={showTrainStatusPanel}
               />
             </div>
           )}
@@ -4956,6 +5135,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         showDimmedRoutes={showDimmedMapRoutes}
                         onShowDimmedRoutesChange={setShowDimmedMapRoutes}
                         showTransferStationsOnly={showTransferStationsOnly}
+                        showTrainStatusPanel={showTrainStatusPanel}
+                        locationFeaturesEnabled={locationFeaturesEnabled}
                         showExpressStationsOnly={showExpressStationsOnly}
                         showTravelTimes={showTravelTimes}
                         showStationNames={showStationNames}
@@ -4968,6 +5149,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onSelectAllRoutes={selectAllRoutes}
                         onDeselectAllRoutes={deselectAllRoutes}
                         onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
+                        onShowTrainStatusPanelChange={setShowTrainStatusPanel}
+                        onLocationFeaturesEnabledChange={setLocationFeaturesEnabled}
                         onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
                         onShowTravelTimesChange={setShowTravelTimes}
                         onShowStationNamesChange={setShowStationNames}

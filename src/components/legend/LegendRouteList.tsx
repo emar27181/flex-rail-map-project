@@ -27,6 +27,8 @@ interface LegendRouteListProps {
   showTravelTimes: boolean;
   showStationNames: boolean;
   showStationNumbers: boolean;
+  showTrainStatusPanel: boolean;
+  locationFeaturesEnabled: boolean;
   showFurigana: boolean;
   showOsmTiles: boolean;
   theme: 'light' | 'dark';
@@ -41,6 +43,8 @@ interface LegendRouteListProps {
   onShowTravelTimesChange: (value: boolean) => void;
   onShowStationNamesChange: (value: boolean) => void;
   onShowStationNumbersChange: (value: boolean) => void;
+  onShowTrainStatusPanelChange: (value: boolean) => void;
+  onLocationFeaturesEnabledChange: (value: boolean) => void;
   onShowFuriganaChange: (value: boolean) => void;
   onShowOsmTilesChange: (value: boolean) => void;
   adjustRouteColorForTheme: (color: string, theme: 'light' | 'dark') => string;
@@ -97,6 +101,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   showTravelTimes,
   showStationNames,
   showStationNumbers,
+  showTrainStatusPanel,
+  locationFeaturesEnabled,
   showFurigana,
   showOsmTiles,
   theme,
@@ -111,6 +117,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowTravelTimesChange,
   onShowStationNamesChange,
   onShowStationNumbersChange,
+  onShowTrainStatusPanelChange,
+  onLocationFeaturesEnabledChange,
   onShowFuriganaChange,
   onShowOsmTilesChange,
   adjustRouteColorForTheme,
@@ -432,6 +440,13 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 <label style={checkboxLabel(colors)}>
                   <input type="checkbox" checked={showStationNumbers} onChange={e => onShowStationNumbersChange(e.target.checked)} style={checkboxInput(colors)} />
                   {translateUI('showStationCodes', language)}
+                </label>
+                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={locationFeaturesEnabled} onChange={e => onLocationFeaturesEnabledChange(e.target.checked)} style={checkboxInput(colors)} />
+                  {translateUI('useLocationFeatures', language)}
+                </label>                <label style={checkboxLabel(colors)}>
+                  <input type="checkbox" checked={showTrainStatusPanel} onChange={e => onShowTrainStatusPanelChange(e.target.checked)} style={checkboxInput(colors)} />
+                  {translateUI('showTrainStatusPanel', language)}
                 </label>
                 <label style={checkboxLabel(colors)}>
                   <input type="checkbox" checked={showStationNames} onChange={e => onShowStationNamesChange(e.target.checked)} style={checkboxInput(colors)} />
