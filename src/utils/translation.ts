@@ -7752,8 +7752,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Show current train info"
   },
   useLocationFeatures: {
-    japanese: "現在地を使う（最寄駅の自動設定・路線推定）",
-    english: "Use location (auto departure, train detection)"
+    japanese: "現在地から出発駅を自動設定",
+    english: "Auto-set departure from location"
   },
   moreItemsCount: {
     japanese: "+{count}件",
@@ -8435,7 +8435,7 @@ export const uiChinese: Record<string, string> = {
   approximateNote: "⚠ 概算值·参考用　点击左侧路线名切换",
   heatmapDataLabel: "热力图数据",
   showTrainStatusPanel: "显示乘车路线",
-  useLocationFeatures: "使用当前位置（自动设置最近车站·路线推定）",
+  useLocationFeatures: "根据当前位置自动设置出发站",
   moreItemsCount: "+{count}项",
   towardSuffix: "方向",
   loadingMap: "地图加载中...",
@@ -8677,7 +8677,7 @@ export const uiKorean: Record<string, string> = {
   approximateNote: "⚠ 개산값·참고용　왼쪽 노선명 클릭으로 전환",
   heatmapDataLabel: "히트맵 데이터",
   showTrainStatusPanel: "탑승 노선 표시",
-  useLocationFeatures: "현재 위치 사용(최근접역 자동 설정·노선 추정)",
+  useLocationFeatures: "현재 위치로 출발역 자동 설정",
   moreItemsCount: "+{count}건",
   towardSuffix: "방면",
   loadingMap: "지도 로딩 중...",
