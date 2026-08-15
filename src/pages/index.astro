@@ -1,5 +1,6 @@
 ---
 import ThemeWrapper from "../components/ThemeWrapper.tsx";
+import leafletCss from "leaflet/dist/leaflet.css?url";
 ---
 
 <html lang="ja">
@@ -162,16 +163,15 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 		<link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/" />
 		<link rel="alternate" hreflang="en" href="https://flex-railway-map.netlify.app/" />
 		<link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/" />
-		<link
-			rel="stylesheet"
-			href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-			integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-			crossorigin=""
-		/>
-		<script
-			src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-			integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-			crossorigin=""></script>
+		<!--
+			Leaflet の CSS は CDN ではなく依存パッケージから読む。
+			CDN 経由だと unpkg に到達できないときにスタイルが当たらず、
+			Leaflet のペインが position:static のまま縦に積み上がって
+			地図が真っ白（駅も路線も表示されない）になる。
+			leaflet 本体は react-leaflet 経由でバンドルされるため
+			CDN の <script> も不要。
+		-->
+		<link rel="stylesheet" href={leafletCss} />
 		<style>
 			:root {
 				--sat: env(safe-area-inset-top, 0px);

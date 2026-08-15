@@ -1918,10 +1918,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const hasFurigana = furigana.length > 0;
     const totalHeight = hasFurigana ? markerHeight + 12 : markerHeight;
 
-    // ヒートマップ有効時: 背景色を上書き・枠線も非表示
-    const bgColor = overrideBgColor ?? (theme === 'dark' ? colors.surfaceElevated : 'white');
-    const textColor = overrideBgColor ? 'white' : markerColor;
-    const borderCssSpecial = overrideBgColor ? 'border:none;' : `border:4px solid ${markerColor};`;
+    // 出発=緑 / 到着=赤 で背景を塗りつぶし、文字は白。
+    // 以前は白背景＋太い色枠だったが、駅選択欄の配色（塗りつぶし）と揃え、
+    // 地図上でもどちらが出発でどちらが到着か一目で分かるようにする。
+    // ヒートマップ有効時は色が意味を持つので上書き色を優先する。
+    const bgColor = overrideBgColor ?? markerColor;
+    const textColor = 'white';
+    // 地図の背景に溶けないよう細い白フチだけ残す
+    const borderCssSpecial = overrideBgColor ? 'border:none;' : 'border:2px solid rgba(255,255,255,0.9);';
     const htmlContent = hasFurigana
       ? `<div style="background:${bgColor};${borderCssSpecial}border-radius:5px;width:${markerWidth}px;height:${totalHeight}px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;color:${textColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px"><div style="font-size:${Math.max(9, Math.round(fontSize * 0.55))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:${fontSize}px;line-height:1">${displayStationName}</div></div>`
       : `<div style="background:${bgColor};${borderCssSpecial}border-radius:5px;width:${markerWidth}px;height:${totalHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${textColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px">${displayStationName}</div>`;
