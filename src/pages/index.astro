@@ -1,5 +1,6 @@
 ---
 import ThemeWrapper from "../components/ThemeWrapper.tsx";
+import leafletCss from "leaflet/dist/leaflet.css?url";
 ---
 
 <html lang="ja">
@@ -10,7 +11,21 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 			content="uyjBT9z6vOnpxn6lM6YnxbI6R4jLSDIAboC8zo1slhM"
 		/>
 		<meta name="google-adsense-account" content="ca-pub-2444529114040977" />
-		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2444529114040977" crossorigin="anonymous"></script>
+		<script is:inline>
+			// 広告スクリプトは head で読むとアプリのJSと帯域・実行時間を奪い合い、
+			// 地図が出るまでの時間が延びる。表示に必要なものが揃ってから読み込む。
+			(function () {
+				var load = function () {
+					var s = document.createElement('script');
+					s.async = true;
+					s.crossOrigin = 'anonymous';
+					s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2444529114040977';
+					document.head.appendChild(s);
+				};
+				if (document.readyState === 'complete') load();
+				else window.addEventListener('load', load, { once: true });
+			})();
+		</script>
 		<link
 			rel="icon"
 			type="image/png"
@@ -162,16 +177,15 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 		<link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/" />
 		<link rel="alternate" hreflang="en" href="https://flex-railway-map.netlify.app/" />
 		<link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/" />
-		<link
-			rel="stylesheet"
-			href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-			integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-			crossorigin=""
-		/>
-		<script
-			src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-			integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-			crossorigin=""></script>
+		<!--
+			Leaflet の CSS は CDN ではなく依存パッケージから読む。
+			CDN 経由だと unpkg に到達できないときにスタイルが当たらず、
+			Leaflet のペインが position:static のまま縦に積み上がって
+			地図が真っ白（駅も路線も表示されない）になる。
+			leaflet 本体は react-leaflet 経由でバンドルされるため
+			CDN の <script> も不要。
+		-->
+		<link rel="stylesheet" href={leafletCss} />
 		<style>
 			:root {
 				--sat: env(safe-area-inset-top, 0px);
@@ -478,7 +492,22 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 		<!-- 記事ページと共通フォント -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet" />
+		<!--
+			フォントの stylesheet はそのまま置くとレンダリングブロックになり、
+			fonts.googleapis.com が遅い・届かない環境では地図が出るまで
+			その分だけ待たされる。media="print" で非ブロックに読み込み、
+			読み終わってから all に切り替えて適用する。
+			JS 無効時のために <noscript> のフォールバックも置く。
+		-->
+		<link
+			href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&display=swap"
+			rel="stylesheet"
+			media="print"
+			onload="this.media='all'"
+		/>
+		<noscript>
+			<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet" />
+		</noscript>
 		<style>
 			body, button, input, select { font-family: "Noto Sans JP", system-ui, sans-serif; }
 			input[type="checkbox"] { accent-color: #2196F3; }
@@ -488,7 +517,6 @@ import ThemeWrapper from "../components/ThemeWrapper.tsx";
 		<!-- JSロード中のローディング画面（ThemeWrapper がマウントしたら消える） -->
 		<div id="app-loading" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--app-bg, #1a1a1a);z-index:9999;font-family:'Noto Sans JP',sans-serif;">
 			<div style="text-align:center;color:var(--app-loading-fg, #b3b3b3);">
-				<div style="margin-bottom:16px;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg></div>
 				<div style="font-size:16px;font-weight:600;margin-bottom:8px;">フレックス路線図</div>
 				<div style="font-size:13px;color:#888;">地図を読み込み中...</div>
 			</div>

@@ -148,11 +148,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 乗車中の路線・到着予定のパネル。情報量が多く常時は邪魔になるため既定は非表示
   const [showTrainStatusPanel, setShowTrainStatusPanel] = useState(false);
   /**
-   * 位置情報を使う機能（現在地の取得・最寄駅の自動設定・乗車路線の推定）。
-   * 既定はOFF。ONだと起動しただけで出発駅が埋まってしまい、
-   * 「駅未選択なら乗換駅だけ出す」表示に入れないため。
+   * 現在地から最寄駅を出発駅に自動設定するか。既定はOFF。
+   * ONだと起動しただけで出発駅が埋まり、「駅未選択なら乗換駅だけ出す」
+   * 表示に入れなくなるため。
+   *
+   * 位置情報の取得自体はこの設定に関係なく行う。現在地マーカーの表示と、
+   * 出発駅候補の「近くの駅」の算出に必要で、これらは駅を自動で選ぶわけではない。
    */
-  const [locationFeaturesEnabled, setLocationFeaturesEnabled] = useState(false);
+  const [autoSetDepartureFromLocation, setAutoSetDepartureFromLocation] = useState(false);
   const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
   const [showStationTierBadges, setShowStationTierBadges] = useState(false); // 乗り入れ路線数リング表示
   const [showTravelTimes, setShowTravelTimes] = useState(false);
@@ -238,6 +241,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 現在地表示
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+  /** 位置情報が取れなかった理由。UIに出して再取得の導線を見せるために持つ */
+  const [locationError, setLocationError] = useState<'denied' | 'unavailable' | 'timeout' | null>(null);
+  /** 再取得ボタンで監視をやり直すためのカウンタ */
+  const [locationRetryCount, setLocationRetryCount] = useState(0);
   const [isManualDeparture, setIsManualDeparture] = useState(false);
 
   // 乗車路線検出
@@ -276,15 +283,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
 
 
-  // 位置情報の取得。設定でONにしたときだけ開始する（既定はOFF）
+  // 位置情報の取得。現在地マーカーと「近くの駅」候補に使うため常に行う。
+  // 取得しても出発駅を自動で埋めることはしない（下の useEffect を参照）。
   useEffect(() => {
-    if (!locationFeaturesEnabled) return;
     if (!navigator.geolocation) return;
     setIsLocating(true);
+    setLocationError(null);
     isFirstPositionRef.current = true;
     gpsSessionStartRef.current = Date.now();
-    const id = navigator.geolocation.watchPosition(
+
+    // highAccuracy を落として張り直せるよう関数にしておく
+    const start = (highAccuracy: boolean) => {
+      const id = navigator.geolocation.watchPosition(
       (pos) => {
+        setLocationError(null);
         const { latitude, longitude } = pos.coords;
         setUserLocation([latitude, longitude]);
 
@@ -329,25 +341,48 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
         isFirstPositionRef.current = false;
       },
-      () => {
-        if (watchIdRef.current !== null) {
-          navigator.geolocation.clearWatch(watchIdRef.current);
-          watchIdRef.current = null;
+      (err) => {
+        // 以前はどのエラーでも監視を捨てていたため、屋内での一時的な
+        // タイムアウト一回で以後ずっと現在地が出なくなっていた。
+        // 権限拒否だけは再試行しても無駄なので止め、それ以外は
+        // 高精度をあきらめて粘る。
+        if (err.code === err.PERMISSION_DENIED) {
+          if (watchIdRef.current !== null) {
+            navigator.geolocation.clearWatch(watchIdRef.current);
+            watchIdRef.current = null;
+          }
+          setIsLocating(false);
+          setLocationError('denied');
+          return;
         }
-        setIsLocating(false);
+        setLocationError(err.code === err.TIMEOUT ? 'timeout' : 'unavailable');
+        if (highAccuracy) {
+          // 高精度で取れないだけの可能性があるので、精度を落として張り直す
+          if (watchIdRef.current !== null) {
+            navigator.geolocation.clearWatch(watchIdRef.current);
+            watchIdRef.current = null;
+          }
+          start(false);
+        }
+        // 低精度でも失敗した場合は監視を残したまま次の更新を待つ
       },
-      { enableHighAccuracy: true, timeout: 30000, maximumAge: 10000 }
-    );
-    watchIdRef.current = id;
-    return () => {
-      navigator.geolocation.clearWatch(id);
-      watchIdRef.current = null;
+        { enableHighAccuracy: highAccuracy, timeout: highAccuracy ? 15000 : 30000, maximumAge: 10000 }
+      );
+      watchIdRef.current = id;
     };
-  }, [locationFeaturesEnabled]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    start(true);
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+    };
+  }, [locationRetryCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 位置情報取得時に最寄駅を出発駅に自動設定（初回取得時のみ・手動変更後は上書きしない）
   useEffect(() => {
-    if (!locationFeaturesEnabled) return;
+    if (!autoSetDepartureFromLocation) return;
     if (!userLocation || isManualDeparture) return;
     if (autoSetDepartureRef.current) return;
     const nearest = findNearestStation(userLocation[0], userLocation[1]);
@@ -355,7 +390,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       setDeparture(nearest);
       autoSetDepartureRef.current = true;
     }
-  }, [userLocation, isManualDeparture, locationFeaturesEnabled]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userLocation, isManualDeparture, autoSetDepartureFromLocation]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 初回の位置情報取得時、地図を現在地中心に移動する。
   // これまでは現在地に応じて最寄り路線が選択される一方で、地図の表示範囲自体は
@@ -1915,10 +1950,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const hasFurigana = furigana.length > 0;
     const totalHeight = hasFurigana ? markerHeight + 12 : markerHeight;
 
-    // ヒートマップ有効時: 背景色を上書き・枠線も非表示
-    const bgColor = overrideBgColor ?? (theme === 'dark' ? colors.surfaceElevated : 'white');
-    const textColor = overrideBgColor ? 'white' : markerColor;
-    const borderCssSpecial = overrideBgColor ? 'border:none;' : `border:4px solid ${markerColor};`;
+    // 出発=緑 / 到着=赤 で背景を塗りつぶし、文字は白。
+    // 以前は白背景＋太い色枠だったが、駅選択欄の配色（塗りつぶし）と揃え、
+    // 地図上でもどちらが出発でどちらが到着か一目で分かるようにする。
+    // ヒートマップ有効時は色が意味を持つので上書き色を優先する。
+    const bgColor = overrideBgColor ?? markerColor;
+    const textColor = 'white';
+    // 地図の背景に溶けないよう細い白フチだけ残す
+    const borderCssSpecial = overrideBgColor ? 'border:none;' : 'border:2px solid rgba(255,255,255,0.9);';
     const htmlContent = hasFurigana
       ? `<div style="background:${bgColor};${borderCssSpecial}border-radius:5px;width:${markerWidth}px;height:${totalHeight}px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;color:${textColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px"><div style="font-size:${Math.max(9, Math.round(fontSize * 0.55))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:${fontSize}px;line-height:1">${displayStationName}</div></div>`
       : `<div style="background:${bgColor};${borderCssSpecial}border-radius:5px;width:${markerWidth}px;height:${totalHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${textColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px">${displayStationName}</div>`;
@@ -2040,6 +2079,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * 路線を絞り込んでいる最中でも目印として残す。対象は55駅。
    */
   const ALWAYS_VISIBLE_MIN_ROUTES = 5;
+  /** 常時表示する主要駅の上限。中心に近い順に残す（広域ズーム時の遠方駅を出さないため） */
+  const MAX_ALWAYS_VISIBLE_STATIONS = 20;
   const allowedStationNames = useMemo(() => {
     // boundsが未取得の場合は制限なし（初回表示まで）
     if (!viewBounds) return null;
@@ -2153,19 +2194,30 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     for (const stationList of Object.values(routes)) {
       for (const s of stationList as Station[]) {
         if ((stationRouteCountMap.get(s.name) ?? 0) < ALWAYS_VISIBLE_MIN_ROUTES) continue;
-        if (covered.has(s.name)) continue;
         if (!unique.has(s.name)) unique.set(s.name, s);
       }
     }
 
     let list = Array.from(unique.values());
-    // 表示範囲内に限定する（対象は55駅なので上限による間引きは不要）
+    // 表示範囲内に限定する
     if (viewBounds) {
       const { north, south, east, west } = viewBounds;
       list = list.filter(s => s.lat <= north && s.lat >= south && s.lng <= east && s.lng >= west);
     }
-    return list;
-  }, [isTransferHintMode, transferHintStations, visibleRoutes, stationRouteCountMap, viewBounds]);
+    // 広域までズームアウトすると表示範囲に大阪・名古屋・仙台まで入る。
+    // 目印として意味があるのは中心付近のものだけなので、近い順で打ち切る。
+    //
+    // 打ち切りは covered を除く前に行う。逆にすると、近くの主要駅は
+    // 既に他の層で描かれていて covered に入るため、残った遠方の駅だけで
+    // 枠が埋まり「明らかに遠い駅ばかり並ぶ」ことになる。
+    const [cLat, cLng] = viewCenter;
+    list.sort((a, b) =>
+      ((a.lat - cLat) ** 2 + (a.lng - cLng) ** 2) - ((b.lat - cLat) ** 2 + (b.lng - cLng) ** 2)
+    );
+    return list
+      .slice(0, MAX_ALWAYS_VISIBLE_STATIONS)
+      .filter(s => !covered.has(s.name));
+  }, [isTransferHintMode, transferHintStations, visibleRoutes, stationRouteCountMap, viewBounds, viewCenter]);
 
   /**
    * 「どの駅を表示するか」の共有ロジック。
@@ -3051,7 +3103,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   }, [MapComponents, userLocation]);
 
   if (!isClient || isLoading || !MapComponents) {
-    console.log('RailwayMap loading state:', { isClient, isLoading, MapComponents: !!MapComponents });
     return (
       <div style={{
         height: '600px',
@@ -3062,17 +3113,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         justifyContent: 'center',
         backgroundColor: colors.surface
       }}>
-        <div>
-          <div>{translateUI('loadingMap', currentLanguage)}</div>
-          <div style={{ fontSize: '12px', color: colors.textSecondary, marginTop: '10px' }}>
-            Client: {isClient ? 'OK' : 'Loading'},
-            Loading: {isLoading ? 'Yes' : 'No'},
-            Components: {MapComponents ? 'OK' : 'Loading'}
-          </div>
-          <div style={{ fontSize: '12px', color: '#999', marginTop: '10px' }}>
-            Window: {typeof window !== 'undefined' ? 'Available' : 'Not Available'}
-          </div>
-        </div>
+        <div>{translateUI('loadingMap', currentLanguage)}</div>
       </div>
     );
   }
@@ -3102,6 +3143,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         if (justClickedLayerRef.current) { justClickedLayerRef.current = false; return; }
         handleRoutePopupClose();
         setDimmedMapTooltip(null);
+      },
+      // 端末回転・全画面切替などでコンテナの大きさが変わったときも取り込む
+      resize: (e: LeafletEvent) => {
+        const c = e.target.getCenter();
+        setViewCenter([c.lat, c.lng]);
+        const b = e.target.getBounds();
+        setViewBounds({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
       },
       mousemove: () => {}
     });
@@ -3760,14 +3808,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 language={currentLanguage}
                 departureTime={timetableBaseTime}
                 onDepartureTimeChange={setTimetableBaseTime}
-                onSetNearestDeparture={locationFeaturesEnabled && userLocation ? handleSetNearestDeparture : undefined}
+                onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
                 onSearchingChange={handleSearchingChange}
-                detectedRoute={locationFeaturesEnabled ? detectedRoute : null}
+                detectedRoute={showTrainStatusPanel ? detectedRoute : null}
                 manualTrainRoute={manualTrainRoute}
                 onManualTrainRouteChange={setManualTrainRoute}
                 userLocation={userLocation}
                 hasGps={isLocating}
                 showTrainStatusPanel={showTrainStatusPanel}
+                locationError={locationError}
+                onRetryLocation={() => setLocationRetryCount(c => c + 1)}
               />
             </div>
           )
@@ -3782,14 +3832,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             departureTime={timetableBaseTime}
             onDepartureTimeChange={setTimetableBaseTime}
             language={currentLanguage}
-            onSetNearestDeparture={locationFeaturesEnabled && userLocation ? handleSetNearestDeparture : undefined}
+            onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
             onSearchingChange={handleSearchingChange}
-            detectedRoute={locationFeaturesEnabled ? detectedRoute : null}
+            detectedRoute={showTrainStatusPanel ? detectedRoute : null}
             manualTrainRoute={manualTrainRoute}
             onManualTrainRouteChange={setManualTrainRoute}
             userLocation={userLocation}
             hasGps={isLocating}
             showTrainStatusPanel={showTrainStatusPanel}
+            locationError={locationError}
+            onRetryLocation={() => setLocationRetryCount(c => c + 1)}
           />
         )}
 
@@ -4322,7 +4374,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 );
               })}
 
-              {/* 現在地マーカー: 非表示 */}
+              {/*
+                現在地マーカー。位置情報が取れているときだけ出す。
+                駅を自動で選ぶわけではないので、出発駅の自動設定の設定とは独立。
+              */}
+              {userLocation && userLocationIcon && (
+                <Marker
+                  position={userLocation}
+                  icon={userLocationIcon}
+                  zIndexOffset={6000}
+                  interactive={false}
+                />
+              )}
 
               {/* 列車位置デモ: markerPane(600)より前面・tooltipPane(650)より後面に表示 */}
               <Pane name="trainDemoPane" style={{ zIndex: 620 }}>
@@ -4869,7 +4932,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onShowDimmedRoutesChange={setShowDimmedMapRoutes}
                     showTransferStationsOnly={showTransferStationsOnly}
                     showTrainStatusPanel={showTrainStatusPanel}
-                    locationFeaturesEnabled={locationFeaturesEnabled}
+                    autoSetDepartureFromLocation={autoSetDepartureFromLocation}
                     showExpressStationsOnly={showExpressStationsOnly}
                     showTravelTimes={showTravelTimes}
                     showStationNames={showStationNames}
@@ -4883,7 +4946,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onDeselectAllRoutes={deselectAllRoutes}
                     onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
                     onShowTrainStatusPanelChange={setShowTrainStatusPanel}
-                    onLocationFeaturesEnabledChange={setLocationFeaturesEnabled}
+                    onAutoSetDepartureFromLocationChange={setAutoSetDepartureFromLocation}
                     onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
                     onShowTravelTimesChange={setShowTravelTimes}
                     onShowStationNamesChange={setShowStationNames}
@@ -5098,14 +5161,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 language={currentLanguage}
                 departureTime={timetableBaseTime}
                 onDepartureTimeChange={setTimetableBaseTime}
-                onSetNearestDeparture={locationFeaturesEnabled && userLocation ? handleSetNearestDeparture : undefined}
+                onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
                 onSearchingChange={handleSearchingChange}
-                detectedRoute={locationFeaturesEnabled ? detectedRoute : null}
+                detectedRoute={showTrainStatusPanel ? detectedRoute : null}
                 manualTrainRoute={manualTrainRoute}
                 onManualTrainRouteChange={setManualTrainRoute}
                 userLocation={userLocation}
                 hasGps={isLocating}
                 showTrainStatusPanel={showTrainStatusPanel}
+                locationError={locationError}
+                onRetryLocation={() => setLocationRetryCount(c => c + 1)}
               />
             </div>
           )}
@@ -5136,7 +5201,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onShowDimmedRoutesChange={setShowDimmedMapRoutes}
                         showTransferStationsOnly={showTransferStationsOnly}
                         showTrainStatusPanel={showTrainStatusPanel}
-                        locationFeaturesEnabled={locationFeaturesEnabled}
+                        autoSetDepartureFromLocation={autoSetDepartureFromLocation}
                         showExpressStationsOnly={showExpressStationsOnly}
                         showTravelTimes={showTravelTimes}
                         showStationNames={showStationNames}
@@ -5150,7 +5215,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onDeselectAllRoutes={deselectAllRoutes}
                         onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
                         onShowTrainStatusPanelChange={setShowTrainStatusPanel}
-                        onLocationFeaturesEnabledChange={setLocationFeaturesEnabled}
+                        onAutoSetDepartureFromLocationChange={setAutoSetDepartureFromLocation}
                         onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
                         onShowTravelTimesChange={setShowTravelTimes}
                         onShowStationNamesChange={setShowStationNames}
