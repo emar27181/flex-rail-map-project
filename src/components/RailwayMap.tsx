@@ -109,6 +109,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     `;
   }, [theme]);
 
+  /**
+   * 現在地を取得できたときに合わせるズーム。
+   *
+   * 以前は13だったが、駅名は読めても隣の路線が画面外になり、
+   * 自分がどのあたりに居るのか掴みにくかった。11にすると
+   * 半径10km程度が視界に入り、近隣のターミナルと路線の広がりが見える。
+   */
+  const INITIAL_LOCATION_ZOOM = 11;
+
   const [mapCenter, setMapCenter] = useState<[number, number]>([35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
   const [mapZoom, setMapZoom] = useState(12);
   const [viewCenter, setViewCenter] = useState<[number, number]>([35.57765, 139.66165]); // Updates on moveend/zoomend
@@ -396,16 +405,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // これまでは現在地に応じて最寄り路線が選択される一方で、地図の表示範囲自体は
   // 横浜〜新宿間の固定デフォルト位置のままだったため、ユーザーが遠方にいる場合
   // 自分の位置も周辺の路線も画面外になっていた。
-  // ズーム13は「駅名や乗換が読み取れる」かつ「近隣の複数路線が視界に収まる」
-  // 広さの妥協点（駅間ルート確定時のfitBoundsのmaxZoomと同じ値で統一）。
   useEffect(() => {
     if (!userLocation || hasCenteredOnUserRef.current) return;
     hasCenteredOnUserRef.current = true;
     setMapCenter(userLocation);
-    setMapZoom(13);
+    setMapZoom(INITIAL_LOCATION_ZOOM);
     // マウント前(mapRef.current が null)は上の state 更新が初期表示に反映される。
     // マウント済みなら setView で即座に反映する（両方呼んでおくことでレースを回避）。
-    mapRef.current?.setView(userLocation, 13);
+    mapRef.current?.setView(userLocation, INITIAL_LOCATION_ZOOM);
   }, [userLocation]);
 
   // 日本語以外はデフォルトで駅コードを表示
