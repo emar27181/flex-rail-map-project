@@ -49,7 +49,8 @@ import {
   type Departure,
 } from '../data/timetableData';
 import { FS, TARGET } from '../constants/ui';
-import { readableTextColor, darkenForWhiteText, meetsContrast, LIGHT_TEXT } from '../utils/contrast';
+import ColorChip from './ui/ColorChip';
+import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, LIGHT_TEXT } from '../utils/contrast';
 import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE } from '../utils/trainDetector';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
 
@@ -1501,11 +1502,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     <span style={{ fontSize: '9px', color: colors.primary, flexShrink: 0 }}>{translateUI('onboard', currentLanguage)}</span>
                   )}
                   {!isShowing && (
-                    <span style={{
-                      fontSize: '9px', color: routeColor, flexShrink: 0,
-                      border: `1px solid ${routeColor}`, borderRadius: '3px',
-                      padding: '0 3px', lineHeight: '14px',
-                    }}>＋表示</span>
+                    <ColorChip color={routeColor} theme={theme} fontSize={FS.helper}>
+                      ＋{translateUI('show', currentLanguage)}
+                    </ColorChip>
                   )}
                 </div>
               );
@@ -1543,12 +1542,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           <span style={{ fontWeight: 'bold', fontSize: '13px', color: colors.text, flexShrink: 0 }}>
                             {dep.time}
                           </span>
-                          <span style={{
-                            fontSize: '10px', color: '#fff', padding: '1px 4px', borderRadius: '3px',
-                            backgroundColor: getTrainTypeBadgeColor(dep.type, activeRouteKey), flexShrink: 0,
-                          }}>
+                          <ColorChip
+                            color={getTrainTypeBadgeColor(dep.type, activeRouteKey)}
+                            theme={theme}
+                            fontSize={FS.tiny}
+                          >
                             {translateTrainType(dep.type, currentLanguage)}
-                          </span>
+                          </ColorChip>
                           {dep.platform && (
                             <span style={{ fontSize: '10px', color: colors.textSecondary, flexShrink: 0 }}>
                               {translatePlatform(dep.platform, currentLanguage)}
@@ -1588,13 +1588,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 {filledParams.slice(0, 4).map(p => {
                   const v = stats![p.key] as number;
                   const pColor = getStationHeatColor(stationTooltip.stationName, p.key, undefined, showEstimatedData);
+                  const unit = translateStatUnit(p.unit, currentLanguage);
                   return (
-                    <span key={String(p.key)} style={{ fontSize: '10px', color: pColor }}>
-                      {translateStatParamLabel(p.label, currentLanguage)}: {v}{(() => {
-                        const u = translateStatUnit(p.unit, currentLanguage);
-                        return u ? ` ${u}` : '';
-                      })()}
-                    </span>
+                    <ColorChip key={String(p.key)} color={pColor} theme={theme} fontSize={FS.tiny}>
+                      {translateStatParamLabel(p.label, currentLanguage)}: {v}{unit ? ` ${unit}` : ''}
+                    </ColorChip>
                   );
                 })}
                 {filledParams.length > 4 && <span style={{ fontSize: '10px', color: colors.textSecondary }}>{translateUI('moreItemsCount', currentLanguage, { count: filledParams.length - 4 })}</span>}
@@ -1788,9 +1786,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       // 総武線の黄色のように暗色化の下限まで下げても 4.5:1 に届かない色は、
       // 地図ラベルで一般的な文字ハロー（暗い縁取り）を重ねて可読性を担保する。
       // ライトモードは従来どおり背景に応じて白/黒を選ぶ。
-      const labelBgColor = theme === 'dark' ? darkenForWhiteText(displayColor) : displayColor;
-      const labelTextColor = theme === 'dark' ? LIGHT_TEXT : readableTextColor(labelBgColor);
-      const needsHalo = theme === 'dark' && !meetsContrast(labelBgColor, LIGHT_TEXT);
+      const {
+        background: labelBgColor,
+        text: labelTextColor,
+        needsHalo,
+      } = filledLabelColors(displayColor, theme);
       const haloCss = needsHalo
         ? 'text-shadow:0 0 2px rgba(0,0,0,0.95),0 1px 2px rgba(0,0,0,0.9);'
         : '';
@@ -1973,12 +1973,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         ? `<div style="font-size:${ttFuriganaSize}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:${ttFontSize}px;font-weight:bold;line-height:1">${displayName}</div>`
         : displayName;
 
-      const rawBgColor1 = heatOverride ?? routeColors[routeKey];
-      // 駅名ラベルと同じ規則: ダークモードは白字に統一し、背景側で可読性を確保する
-      const bgColor1 = theme === 'dark' ? darkenForWhiteText(rawBgColor1) : rawBgColor1;
+      // 駅名ラベル・ツールチップのチップと同じ配色規則を使う
+      const { background: bgColor1, text: fgColor1 } = filledLabelColors(heatOverride ?? routeColors[routeKey], theme);
       const labelHtml = `<div style="
           background:${bgColor1};
-          color:${theme === 'dark' ? LIGHT_TEXT : readableTextColor(bgColor1)};
+          color:${fgColor1};
           padding:1px 3px;
           border-radius:2px;
           ${hasFurigana ? '' : `font-size:${ttFontSize}px;font-weight:bold;`}

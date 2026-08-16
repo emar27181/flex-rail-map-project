@@ -7715,6 +7715,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "乗",
     english: "On"
   },
+  show: {
+    japanese: "表示",
+    english: "Show"
+  },
   afterSuffix: {
     japanese: "以降",
     english: "onwards"
@@ -8438,6 +8442,7 @@ export const uiChinese: Record<string, string> = {
   currentTime: "当前时间",
   baseTime: "出发时间",
   onboard: "乘",
+  show: "显示",
   afterSuffix: "以后",
   offRouteReference: "路线外参考",
   noData: "无数据",
@@ -8683,6 +8688,7 @@ export const uiKorean: Record<string, string> = {
   currentTime: "현재 시간",
   baseTime: "출발 시간",
   onboard: "탑",
+  show: "표시",
   afterSuffix: "이후",
   offRouteReference: "경로 외 참고",
   noData: "데이터 없음",
