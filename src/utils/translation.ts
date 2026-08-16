@@ -8878,6 +8878,7 @@ export const translateUI = (key: string, language: Language, params?: { [key: st
 
 /** 駅統計パラメータラベルの翻訳マップ */
 const statParamLabelMap: Record<string, { english: string; chinese: string; korean: string }> = {
+  '路線数':       { english: 'Line count',           chinese: '线路数量',       korean: '노선 수' },
   '家賃(1K)':     { english: 'Rent (1K)',          chinese: '租金(1K)',       korean: '월세(1K)' },
   '家賃(1LDK)':   { english: 'Rent (1LDK)',         chinese: '租金(1LDK)',     korean: '월세(1LDK)' },
   '人口密度':     { english: 'Pop. density',         chinese: '人口密度',       korean: '인구밀도' },
@@ -8906,6 +8907,7 @@ const statParamLabelMap: Record<string, { english: string; chinese: string; kore
  * 「軒」「棟」はラベル側に count / 数 が含まれるため、日本語以外では単位を出さない。
  */
 const statUnitMap: { [ja: string]: { english: string; chinese: string; korean: string } } = {
+  '路線': { english: 'lines', chinese: '条', korean: '개' },
   '軒': { english: '', chinese: '家', korean: '곳' },
   '棟': { english: '', chinese: '栋', korean: '동' },
   '件/年': { english: '/yr', chinese: '件/年', korean: '건/년' },
