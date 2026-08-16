@@ -7719,6 +7719,14 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "表示",
     english: "Show"
   },
+  lastUpdated: {
+    japanese: "最終更新",
+    english: "Last updated"
+  },
+  dataSource: {
+    japanese: "出典",
+    english: "Source"
+  },
   afterSuffix: {
     japanese: "以降",
     english: "onwards"
@@ -8443,6 +8451,8 @@ export const uiChinese: Record<string, string> = {
   baseTime: "出发时间",
   onboard: "乘",
   show: "显示",
+  lastUpdated: "最后更新",
+  dataSource: "来源",
   afterSuffix: "以后",
   offRouteReference: "路线外参考",
   noData: "无数据",
@@ -8689,6 +8699,8 @@ export const uiKorean: Record<string, string> = {
   baseTime: "출발 시간",
   onboard: "탑",
   show: "표시",
+  lastUpdated: "최종 갱신",
+  dataSource: "출처",
   afterSuffix: "이후",
   offRouteReference: "경로 외 참고",
   noData: "데이터 없음",

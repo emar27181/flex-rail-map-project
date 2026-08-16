@@ -45,6 +45,8 @@ import {
   getDeparturesAround,
   getDirectionIndex as getTimetableDirectionIndex,
   hasTimetableData,
+  getLineTimetable,
+  TIMETABLE_SOURCE,
   addMinutes,
   type Departure,
 } from '../data/timetableData';
@@ -1563,6 +1565,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     ))}
                   </>
                 )}
+                {/* 出典と最終更新日。概算値であることが分かるようにここで明記する */}
+                {(() => {
+                  const line = getLineTimetable(activeRouteKey);
+                  if (!line) return null;
+                  return (
+                    <div style={{
+                      padding: '5px 8px',
+                      borderTop: `1px solid ${colors.borderLight}`,
+                      fontSize: FS.micro, color: colors.textSecondary, lineHeight: 1.5,
+                    }}>
+                      <div>{translateUI('lastUpdated', currentLanguage)}: {line.updatedAt}</div>
+                      <div>{translateUI('dataSource', currentLanguage)}: {line.source ?? TIMETABLE_SOURCE.title}</div>
+                      <div style={{ opacity: 0.75 }}>{TIMETABLE_SOURCE.note}</div>
+                    </div>
+                  );
+                })()}
               </>
             ) : (
               <div style={{ padding: '10px 8px', fontSize: '11px', color: colors.textSecondary, whiteSpace: 'pre-line' }}>
