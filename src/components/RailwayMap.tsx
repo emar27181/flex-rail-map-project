@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock } from 'lucide-react';
-import type { LeafletEvent, LeafletMouseEvent } from 'leaflet';
+import type { LeafletEvent, LeafletMouseEvent, Map as LeafletMap } from 'leaflet';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
@@ -432,6 +432,33 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const mapDraggedRef = useRef(false);
   /** ドラッグ開始時の地図中心。タップと地図移動を実移動量で区別するために持つ */
   const dragStartPointRef = useRef<{ lat: number; lng: number } | null>(null);
+
+  /**
+   * 駅を描く範囲を画面より少し広げる比率（画面の縦横それぞれに対して）。
+   *
+   * 表示範囲ちょうどで切ると、スライドした瞬間に画面の縁が空白になり、
+   * 指を離すまで駅が出てこない。あらかじめ画面外まで描いておくことで
+   * スライド中もそのまま駅が現れる。
+   */
+  const VIEW_BUFFER_RATIO = 0.25;
+  /** 最後に表示範囲を確定したときの地図中心 */
+  const lastCommittedCenterRef = useRef<{ lat: number; lng: number } | null>(null);
+
+  /** 現在の地図の位置から、余白を足した表示範囲を確定する */
+  const commitView = useCallback((map: LeafletMap) => {
+    const c = map.getCenter();
+    const b = map.getBounds();
+    const latPad = (b.getNorth() - b.getSouth()) * VIEW_BUFFER_RATIO;
+    const lngPad = (b.getEast() - b.getWest()) * VIEW_BUFFER_RATIO;
+    lastCommittedCenterRef.current = { lat: c.lat, lng: c.lng };
+    setViewCenter([c.lat, c.lng]);
+    setViewBounds({
+      north: b.getNorth() + latPad,
+      south: b.getSouth() - latPad,
+      east: b.getEast() + lngPad,
+      west: b.getWest() - lngPad,
+    });
+  }, []);
 
   // ツールチップが変わったらドラッグオフセットをリセット
   React.useEffect(() => { setTooltipDragOffset({ dx: 0, dy: 0 }); }, [stationTooltip?.stationName]);
@@ -2097,7 +2124,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   }, [availableRoutes]);
 
   // 駅マーカー表示制限: 画面表示範囲内の駅のみ表示（フリーズ防止）
-  const MAX_MARKER_STATIONS = 100;
+  // 画面外の余白ぶんも描くため、画面に見える数は従来どおり100前後に収まる。
+  const MAX_MARKER_STATIONS = 150;
   /** 乗換駅ヒントに出す最小路線数。相互直通による重複定義を拾いすぎないよう3以上にする */
   const TRANSFER_HINT_MIN_ROUTES = 3;
   /**
@@ -3158,16 +3186,24 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const map = useMapEvents({
       zoomend: (e: LeafletEvent) => {
         setZoomLevel(e.target.getZoom());
-        const c = e.target.getCenter();
-        setViewCenter([c.lat, c.lng]);
-        const b = e.target.getBounds();
-        setViewBounds({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
+        commitView(e.target);
       },
       moveend: (e: LeafletEvent) => {
-        const c = e.target.getCenter();
-        setViewCenter([c.lat, c.lng]);
-        const b = e.target.getBounds();
-        setViewBounds({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
+        commitView(e.target);
+      },
+      // スライド中も駅を追従させる。毎フレーム再計算すると重いので、
+      // 余白を使い切る前（余白の4割を動いた時点）にだけ描き直す。
+      move: (e: LeafletEvent) => {
+        const map = e.target as LeafletMap;
+        const last = lastCommittedCenterRef.current;
+        if (last) {
+          const moved = map.latLngToContainerPoint(last)
+            .distanceTo(map.latLngToContainerPoint(map.getCenter()));
+          const size = map.getSize();
+          const refreshAt = Math.min(size.x, size.y) * VIEW_BUFFER_RATIO * 0.4;
+          if (moved < refreshAt) return;
+        }
+        commitView(map);
       },
       // 以前は dragstart が来た時点でタップを無効にしていたが、
       // Leaflet は指がわずかに動いただけでも dragstart を出すため、
@@ -3208,8 +3244,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       // E2Eテストがコンテナ要素経由でLeafletの状態を検証できるようにする
       // （tests/e2e/*.test.ts が `.leaflet-container` の _leaflet_map を参照する）
       (map.getContainer() as unknown as { _leaflet_map?: typeof map })._leaflet_map = map;
-      const b = map.getBounds();
-      setViewBounds({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
+      commitView(map);
 
       // 初期表示時に出発・到着駅が両方設定済みならその範囲にフィット
       if (departure && arrival) {
