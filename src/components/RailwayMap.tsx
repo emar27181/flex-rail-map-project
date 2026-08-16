@@ -1199,7 +1199,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       x = rawX + TW > vw - MARGIN ? stationTooltip.x - TW - 6 : rawX;
       x = Math.max(MARGIN, Math.min(x, vw - TW - MARGIN));
     }
-    const maxTooltipH = Math.min(vh - MARGIN * 2, 480);
+    // スマホでは高さ480pxが画面の6割を占め、地図がほとんど隠れて
+    // 次の駅を選べなくなる。画面の半分までに抑えて地図側を残す。
+    const maxTooltipH = Math.min(vh - MARGIN * 2, isMobileView ? Math.round(vh * 0.5) : 480);
     const estH = Math.min(52 + Math.max(allRoutes.length * 28, activeDeps.length * 26 + 22) + 20, maxTooltipH);
     const rawY = stationTooltip.y + 14;
     const baseX = x;
@@ -3182,13 +3184,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         if (justClickedLayerRef.current) { justClickedLayerRef.current = false; return; }
         handleRoutePopupClose();
         setDimmedMapTooltip(null);
+        // 駅ツールチップは画面の大半を覆うため、閉じる手段が小さな✕だけだと
+        // 次の駅を選ぶのが難しい。地図の何もない所をタップしても閉じられるようにする。
+        closeTooltip();
       },
       // 端末回転・全画面切替などでコンテナの大きさが変わったときも取り込む
       resize: (e: LeafletEvent) => {
-        const c = e.target.getCenter();
-        setViewCenter([c.lat, c.lng]);
-        const b = e.target.getBounds();
-        setViewBounds({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
+        commitView(e.target);
       },
       mousemove: () => {}
     });
