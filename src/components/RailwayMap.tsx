@@ -1650,6 +1650,61 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return count > 0 ? total : null;  // 0 〜 count×10
   }, [heatmapMultiParams]);
 
+  /**
+   * 駅のヒートマップ値を 0〜1 の正規化値として返す（データなしは null）。
+   *
+   * getStationDisplayColor が返すのは色なので、路線ごとの平均を取るには
+   * 色になる前の数値が要る。複合モード・単一モードの正規化規則は
+   * getStationDisplayColor と同じものを使い、色と平均がずれないようにする。
+   */
+  const getStationHeatValue = useCallback((stationName: string): number | null => {
+    if (heatmapMultiParams.size >= 2) {
+      const score = getCompositeHeatScore(stationName);
+      if (score === null) return null;
+      const minScore = heatmapCustomRange?.min ?? 0;
+      const maxScore = heatmapCustomRange?.max ?? (heatmapMultiParams.size * 10);
+      if (maxScore <= minScore) return null;
+      const clamped = Math.max(minScore, Math.min(maxScore, score));
+      return (clamped - minScore) / (maxScore - minScore);
+    }
+    if (heatmapMultiParams.size === 0) return null;
+    const key = heatmapMultiParams.size === 1 ? [...heatmapMultiParams][0] : heatmapParam;
+    const meta = STAT_PARAMS.find(p => p.key === key);
+    if (showEstimatedData === false && meta?.dataQuality === 'estimated') return null;
+    const val = stationStatsData[stationName]?.[key] as number | undefined;
+    if (val === undefined) return null;
+    const dataRange = getParamRange(key);
+    const min = heatmapCustomRange?.min ?? dataRange.min;
+    const max = heatmapCustomRange?.max ?? dataRange.max;
+    if (max <= min) return null;
+    return Math.max(0, Math.min(1, (val - min) / (max - min)));
+  }, [heatmapParam, heatmapCustomRange, heatmapMultiParams, getCompositeHeatScore, showEstimatedData]);
+
+  /**
+   * ヒートマップ表示中の路線色。
+   *
+   * 駅だけ色が変わって路線が元の色のままだと、どの路線が全体として
+   * 高いのか低いのかが読み取れない。その路線が通る駅の値の平均を
+   * 同じグラデーションに乗せて線の色にする。
+   * データがある駅が1つも無い路線は元の路線色のままにする。
+   */
+  const routeHeatColors = useMemo(() => {
+    const colorByRoute = new Map<RouteKey, string>();
+    if (!heatmapEnabled) return colorByRoute;
+    for (const [rk, stationList] of Object.entries(routes)) {
+      let sum = 0;
+      let count = 0;
+      for (const s of stationList as Station[]) {
+        const v = getStationHeatValue(s.name);
+        if (v === null) continue;
+        sum += v;
+        count++;
+      }
+      if (count > 0) colorByRoute.set(rk as RouteKey, heatValueToColor(sum / count));
+    }
+    return colorByRoute;
+  }, [heatmapEnabled, getStationHeatValue]);
+
   const getStationDisplayColor = useCallback((stationName: string, routeKey: RouteKey): string => {
     if (heatmapEnabled) {
       if (heatmapMultiParams.size >= 2) {
@@ -3553,8 +3608,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       displaySegments = [stations];
     }
 
-    // 路線色（Polyline・所要時間ラベル用）は常に route color を使う
+    // 所要時間ラベルなどは常に route color を使う
     const routeColor = adjustRouteColorForTheme(routeColors[routeKey], theme);
+    // 線の色だけはヒートマップ表示中、その路線の駅の平均値に応じた色にする
+    const routeLineColor = routeHeatColors.get(routeKey) ?? routeColor;
 
     // Fragment key に heatmap 設定を含めることで、モード切替時に全 Marker を強制再マウント
     const fragmentKey = `${routeKey}-${heatmapEnabled ? String(heatmapParam) : 'off'}`;
@@ -3571,7 +3628,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           <Polyline
             positions={segPositions}
             pathOptions={{
-              color: routeColor,
+              color: routeLineColor,
               weight: hoveredRoute === routeKey ? routeLineWidth + 2 : routeLineWidth,
               opacity: hoveredRoute === routeKey ? 0.5 : 0.85,
             }}
@@ -4361,7 +4418,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 .filter(([rk]) => !visibleRoutes.has(rk as RouteKey))
                 .map(([rk, stationList]) => {
                   const rKey = rk as RouteKey;
-                  const color = adjustRouteColorForTheme(routeColors[rKey] ?? '#888', theme);
+                  // ヒートマップ表示中はその路線の駅の平均値に応じた色にする。
+                  // 路線を1つも表示していない初期状態ではこの層が全路線を描くため、
+                  // ここを通さないとヒートマップにしても線の色が変わらない。
+                  const color = routeHeatColors.get(rKey)
+                    ?? adjustRouteColorForTheme(routeColors[rKey] ?? '#888', theme);
                   const positions = (stationList as any[]).map((s: any) => [s.lat, s.lng] as [number, number]);
                   return (
                     <React.Fragment key={`dimmed-${rKey}`}>
