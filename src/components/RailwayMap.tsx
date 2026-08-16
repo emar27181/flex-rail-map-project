@@ -48,7 +48,7 @@ import {
   addMinutes,
   type Departure,
 } from '../data/timetableData';
-import { FS } from '../constants/ui';
+import { FS, TARGET } from '../constants/ui';
 import { readableTextColor, darkenForWhiteText, meetsContrast, LIGHT_TEXT } from '../utils/contrast';
 import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE } from '../utils/trainDetector';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
@@ -1637,6 +1637,25 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // アイコン作成関数をメモ化
   // overrideColor が渡されたときはそちらを優先（ヒートマップ色切替用）
+  /**
+   * スマホのタッチターゲットを透明な余白で広げる。
+   *
+   * 駅名ラベルは高さ14px前後しかなく、WCAG 2.2 AA の 2.5.8 が求める
+   * 24px四方に届かない。見た目は変えずにヒット領域だけ広げる。
+   * 駅アイコンの生成関数が複数あるため、計算をここに集約して
+   * どちらから作っても同じ当たり判定になるようにする。
+   */
+  const withTouchPadding = useCallback((html: string, w: number, h: number) => {
+    const pad = isMobile ? Math.max(8, Math.ceil((TARGET.min - h) / 2)) : 0;
+    return {
+      html: pad > 0
+        ? `<div style="padding:${pad}px;display:inline-flex;align-items:center;justify-content:center;">${html}</div>`
+        : html,
+      size: [w + pad * 2, h + pad * 2] as [number, number],
+      pad,
+    };
+  }, [isMobile]);
+
   const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean, opacity: number = 1, timeLabel?: string, routeKey?: RouteKey, overrideColor?: string, tierShadow?: string) => {
     if (!MapComponents?.DivIcon) return null;
 
@@ -1688,17 +1707,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         ? `<div style="background:${labelBgColor};color:${labelTextColor};${haloCss}padding:1px 3px;border-radius:3px;white-space:nowrap;${borderCss}${shadowCss}text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:${Math.max(7, Math.round(lfs * 0.75))}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${lfs}px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
         : `<div style="background:${labelBgColor};color:${labelTextColor};${haloCss}padding:1px 3px;border-radius:3px;font-size:${lfs}px;font-weight:bold;white-space:nowrap;${borderCss}${shadowCss}opacity:${opacity}">${displayName}</div>`;
       const [oDx, oDy] = stationLabelOffsets.get(station.name) ?? [0, 0];
-      // スマホはタッチターゲットを透明パディングで拡張（視覚は変えずにヒット領域を広げる）
-      const tp = isMobile ? 8 : 0;
-      const totalW = stationNameWidth + tp * 2;
-      const totalH = iconHeight + tp * 2;
+      const padded = withTouchPadding(htmlContent, stationNameWidth, iconHeight);
       return new DivIcon({
-        html: tp > 0
-          ? `<div style="padding:${tp}px;display:inline-flex;align-items:center;justify-content:center;">${htmlContent}</div>`
-          : htmlContent,
+        html: padded.html,
         className: 'station-name-marker',
-        iconSize: [totalW, totalH],
-        iconAnchor: [stationNameWidth / 2 + oDx + tp, iconHeight / 2 + oDy + tp]
+        iconSize: padded.size,
+        iconAnchor: [stationNameWidth / 2 + oDx + padded.pad, iconHeight / 2 + oDy + padded.pad]
       });
     } else {
       const stationSize = Math.round(Math.max(4, Math.min(24, zoomLevel - 8)) * stationIconScale);
@@ -1712,7 +1726,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         ? (tierShadow.includes('12px') ? 16 : 12)
         : 0;
       const iconTotal = stationSize + paddingForShadow;
-      const touchTarget = isMobile ? Math.max(iconTotal, 44) : iconTotal;
+      const touchTarget = isMobile ? Math.max(iconTotal, TARGET.touch) : iconTotal;
       return new DivIcon({
         html: `<div style="width:${touchTarget}px;height:${touchTarget}px;display:flex;align-items:center;justify-content:center;"><div style="background:${displayColor};width:${stationSize}px;height:${stationSize}px;border:${dotBorder};box-shadow:${dotShadow};opacity:${opacity};border-radius:50%;flex-shrink:0;"></div></div>`,
         className: 'station-marker',
@@ -1720,7 +1734,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         iconAnchor: [touchTarget / 2, touchTarget / 2]
       });
     }
-  }, [MapComponents, currentLanguage, theme, showFurigana, showStationNumbers, stationLabelFontSize, stationIconScale, isMobile, stationLabelOffsets]);
+  }, [MapComponents, currentLanguage, theme, showFurigana, showStationNumbers, stationLabelFontSize, stationIconScale, isMobile, stationLabelOffsets, withTouchPadding]);
 
   // 列車種別停車パターンの取得（外部データソースを使用）
   const getSimplifiedStationStops = useCallback((routeKey: RouteKey, trainType: string, stationName: string): boolean => {
@@ -1871,8 +1885,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const rawBgColor1 = heatOverride ?? routeColors[routeKey];
       // 駅名ラベルと同じ規則: ダークモードは白字に統一し、背景側で可読性を確保する
       const bgColor1 = theme === 'dark' ? darkenForWhiteText(rawBgColor1) : rawBgColor1;
-      return new DivIcon({
-        html: `<div style="
+      const labelHtml = `<div style="
           background:${bgColor1};
           color:${theme === 'dark' ? LIGHT_TEXT : readableTextColor(bgColor1)};
           padding:1px 3px;
@@ -1889,10 +1902,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           justify-content:center;
           box-sizing:border-box;
           opacity:${opacity}
-        ">${innerHtml}</div>`,
+        ">${innerHtml}</div>`;
+      const padded = withTouchPadding(labelHtml, stationNameWidth, stationNameHeight);
+      return new DivIcon({
+        html: padded.html,
         className: 'station-name-marker train-type-marker',
-        iconSize: [stationNameWidth, stationNameHeight],
-        iconAnchor: [stationNameWidth / 2, stationNameHeight / 2]
+        iconSize: padded.size,
+        iconAnchor: [stationNameWidth / 2 + padded.pad, stationNameHeight / 2 + padded.pad]
       });
     } else {
       const baseStationSize = Math.round(Math.max(8, Math.min(16, zoomLevel - 8)) * stationIconScale);
@@ -1904,7 +1920,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const shadowColor = isSelectedStation ? 'transparent' : (theme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)');
 
       const bgColor2 = heatOverride ?? routeColors[routeKey];
-      const touchTarget2 = isMobile ? Math.max(stationSize, 44) : stationSize;
+      const touchTarget2 = isMobile ? Math.max(stationSize, TARGET.touch) : stationSize;
       return new DivIcon({
         html: `<div style="width:${touchTarget2}px;height:${touchTarget2}px;display:flex;align-items:center;justify-content:center;"><div style="
           background:${bgColor2};
@@ -1922,7 +1938,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         iconAnchor: [touchTarget2 / 2, touchTarget2 / 2]
       });
     }
-  }, [MapComponents, currentLanguage, theme, trainTypeViewEnabled, selectedTrainRoute, selectedTrainType, createStationIcon, getStationBorderStyle, showFurigana, showStationNumbers, stationIconScale, stationLabelFontSize, isMobile]);
+  }, [MapComponents, currentLanguage, theme, trainTypeViewEnabled, selectedTrainRoute, selectedTrainType, createStationIcon, getStationBorderStyle, showFurigana, showStationNumbers, stationIconScale, stationLabelFontSize, isMobile, withTouchPadding]);
 
   const getTimeMarkerSize = (zoom: number) => {
     const baseSize = 20;
