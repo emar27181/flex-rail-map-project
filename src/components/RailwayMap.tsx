@@ -423,6 +423,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // スマホでのパン直後の誤タップを防ぐフラグ
   const mapDraggedRef = useRef(false);
+  /** ドラッグ開始時の地図中心。タップと地図移動を実移動量で区別するために持つ */
+  const dragStartPointRef = useRef<{ lat: number; lng: number } | null>(null);
 
   // ツールチップが変わったらドラッグオフセットをリセット
   React.useEffect(() => { setTooltipDragOffset({ dx: 0, dy: 0 }); }, [stationTooltip?.stationName]);
@@ -2079,6 +2081,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * 路線を絞り込んでいる最中でも目印として残す。対象は55駅。
    */
   const ALWAYS_VISIBLE_MIN_ROUTES = 5;
+  /**
+   * この距離(px)を超えて地図が動いたときだけ「ドラッグした」とみなす。
+   * これ未満はタップの手ブレとして扱い、駅のタップを通す。
+   */
+  const MAP_DRAG_THRESHOLD_PX = 10;
   /** 常時表示する主要駅の上限。中心に近い順に残す（広域ズーム時の遠方駅を出さないため） */
   const MAX_ALWAYS_VISIBLE_STATIONS = 20;
   const allowedStationNames = useMemo(() => {
@@ -3137,8 +3144,24 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         const b = e.target.getBounds();
         setViewBounds({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
       },
-      dragstart: () => { mapDraggedRef.current = true; },
-      dragend: () => { setTimeout(() => { mapDraggedRef.current = false; }, 300); },
+      // 以前は dragstart が来た時点でタップを無効にしていたが、
+      // Leaflet は指がわずかに動いただけでも dragstart を出すため、
+      // 普通に駅をタップしただけで反応しないことが多かった。
+      // 実際に地図が動いた距離を見て、意図した地図移動のときだけ弾く。
+      dragstart: (e: LeafletEvent) => {
+        dragStartPointRef.current = e.target.getCenter();
+      },
+      dragend: (e: LeafletEvent) => {
+        const from = dragStartPointRef.current;
+        dragStartPointRef.current = null;
+        if (!from) return;
+        // 緯度経度ではなく画面上のピクセル距離で判定する（ズームに依存しないため）
+        const map = e.target;
+        const moved = map.latLngToContainerPoint(from).distanceTo(map.latLngToContainerPoint(map.getCenter()));
+        if (moved < MAP_DRAG_THRESHOLD_PX) return;
+        mapDraggedRef.current = true;
+        setTimeout(() => { mapDraggedRef.current = false; }, 150);
+      },
       click: () => {
         if (justClickedLayerRef.current) { justClickedLayerRef.current = false; return; }
         handleRoutePopupClose();
