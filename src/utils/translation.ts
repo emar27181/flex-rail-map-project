@@ -7723,6 +7723,18 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "最終更新",
     english: "Last updated"
   },
+  alwaysShowMajorStations: {
+    japanese: "主要駅を常に表示",
+    english: "Always show major stations"
+  },
+  minRouteCount: {
+    japanese: "対象:",
+    english: "Threshold:"
+  },
+  routeCountOption: {
+    japanese: "{count}路線以上",
+    english: "{count}+ lines"
+  },
   dataSource: {
     japanese: "出典",
     english: "Source"
@@ -8452,6 +8464,9 @@ export const uiChinese: Record<string, string> = {
   onboard: "乘",
   show: "显示",
   lastUpdated: "最后更新",
+  alwaysShowMajorStations: "始终显示主要车站",
+  minRouteCount: "对象:",
+  routeCountOption: "{count}条线路以上",
   dataSource: "来源",
   afterSuffix: "以后",
   offRouteReference: "路线外参考",
@@ -8700,6 +8715,9 @@ export const uiKorean: Record<string, string> = {
   onboard: "탑",
   show: "표시",
   lastUpdated: "최종 갱신",
+  alwaysShowMajorStations: "주요 역 항상 표시",
+  minRouteCount: "대상:",
+  routeCountOption: "{count}개 노선 이상",
   dataSource: "출처",
   afterSuffix: "이후",
   offRouteReference: "경로 외 참고",

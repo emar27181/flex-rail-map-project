@@ -168,6 +168,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * 出発駅候補の「近くの駅」の算出に必要で、これらは駅を自動で選ぶわけではない。
    */
   const [autoSetDepartureFromLocation, setAutoSetDepartureFromLocation] = useState(false);
+  /**
+   * 主要駅の常時表示。
+   *
+   * 路線を絞り込んでいる最中でも、新宿・東京・横浜のようなターミナルを
+   * 目印として残す機能。どこまでを「主要」とするかは人によって違う
+   * （乗換駅を広く出したい / 本当に大きい駅だけでいい）ため、
+   * しきい値と on/off をどちらも設定から変えられるようにする。
+   */
+  const [alwaysVisibleStationsEnabled, setAlwaysVisibleStationsEnabled] = useState(true);
+  /** 常時表示の対象とする最小路線数。この本数以上が乗り入れる駅を残す */
+  const [alwaysVisibleMinRoutes, setAlwaysVisibleMinRoutes] = useState(5);
   const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
   const [showStationTierBadges, setShowStationTierBadges] = useState(false); // 乗り入れ路線数リング表示
   const [showTravelTimes, setShowTravelTimes] = useState(false);
@@ -584,11 +595,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     showStationTooltip,
     showFullRouteStations,
     showRouteLine,
+    alwaysVisibleStationsEnabled,
+    alwaysVisibleMinRoutes,
   }), [heatmapEnabled, heatmapParam, heatmapCustomRange, visibleRoutes,
       showTransferStationsOnly, showExpressStationsOnly, showTravelTimes,
       showStationNames, showFurigana, showStationNumbers, showOsmTiles,
       mapViewMode, timeFilterEnabled, timeFilterMaxMinutes,
-      showStationTooltip, showFullRouteStations]);
+      showStationTooltip, showFullRouteStations,
+      alwaysVisibleStationsEnabled, alwaysVisibleMinRoutes]);
 
   // インポートされた設定を一括適用
   const handleImportConfig = useCallback((cfg: MapConfig) => {
@@ -609,6 +623,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (cfg.showStationTooltip !== undefined) setShowStationTooltip(cfg.showStationTooltip);
     if (cfg.showFullRouteStations !== undefined) setShowFullRouteStations(cfg.showFullRouteStations);
     if (cfg.showRouteLine !== undefined) setShowRouteLine(cfg.showRouteLine);
+    if (cfg.alwaysVisibleStationsEnabled !== undefined) setAlwaysVisibleStationsEnabled(cfg.alwaysVisibleStationsEnabled);
+    if (cfg.alwaysVisibleMinRoutes !== undefined) setAlwaysVisibleMinRoutes(cfg.alwaysVisibleMinRoutes);
   }, []);
 
   const routeFinder = useMemo(() => {
@@ -2198,14 +2214,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 駅マーカー表示制限: 画面表示範囲内の駅のみ表示（フリーズ防止）
   // 画面外の余白ぶんも描くため、画面に見える数は従来どおり100前後に収まる。
   const MAX_MARKER_STATIONS = 150;
-  /** 乗換駅ヒントに出す最小路線数。相互直通による重複定義を拾いすぎないよう3以上にする */
-  const TRANSFER_HINT_MIN_ROUTES = 3;
   /**
-   * 路線の表示状態に関わらず常に出す主要駅の最小路線数。
-   * 新宿・東京・横浜のようなターミナルは地図上の位置の手掛かりになるため、
-   * 路線を絞り込んでいる最中でも目印として残す。対象は55駅。
+   * 路線の選択に関係なく残す主要駅のしきい値（設定から変更できる）。
+   * オフのときはどの駅も満たさない値にして層ごと止める。
    */
-  const ALWAYS_VISIBLE_MIN_ROUTES = 5;
+  const ALWAYS_VISIBLE_MIN_ROUTES = alwaysVisibleStationsEnabled
+    ? alwaysVisibleMinRoutes
+    : Number.POSITIVE_INFINITY;
+  /**
+   * 駅も路線も未選択のときに出す乗換駅ヒントのしきい値。
+   *
+   * こちらは起点を選ぶための入口なので既定の3路線以上のままにする。
+   * ただし主要駅の常時表示をオフにしたときは、こちらも止めないと
+   * 「常に出る駅を消したのに駅が並んだまま」になるため連動させる。
+   */
+  const TRANSFER_HINT_MIN_ROUTES = alwaysVisibleStationsEnabled
+    ? Math.min(3, alwaysVisibleMinRoutes)
+    : Number.POSITIVE_INFINITY;
   /**
    * この距離(px)を超えて地図が動いたときだけ「ドラッグした」とみなす。
    * これ未満はタップの手ブレとして扱い、駅のタップを通す。
@@ -2303,7 +2328,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     }
 
     return list;
-  }, [isTransferHintMode, stationRouteCountMap, viewBounds, viewCenter]);
+  }, [isTransferHintMode, stationRouteCountMap, viewBounds, viewCenter, TRANSFER_HINT_MIN_ROUTES]);
 
   /**
    * 路線の表示状態に関わらず常に出す主要駅（ALWAYS_VISIBLE_MIN_ROUTES 路線以上）。
@@ -2312,6 +2337,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * renderRoute / ヒント側が描くため、ここでは除いて二重描画を防ぐ。
    */
   const alwaysVisibleStations = useMemo(() => {
+    if (!alwaysVisibleStationsEnabled) return [] as Station[];
     const covered = new Set<string>();
     if (isTransferHintMode) {
       for (const s of transferHintStations) covered.add(s.name);
@@ -2349,7 +2375,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return list
       .slice(0, MAX_ALWAYS_VISIBLE_STATIONS)
       .filter(s => !covered.has(s.name));
-  }, [isTransferHintMode, transferHintStations, visibleRoutes, stationRouteCountMap, viewBounds, viewCenter]);
+  }, [isTransferHintMode, transferHintStations, visibleRoutes, stationRouteCountMap, viewBounds, viewCenter,
+      alwaysVisibleStationsEnabled, ALWAYS_VISIBLE_MIN_ROUTES]);
 
   /**
    * 「どの駅を表示するか」の共有ロジック。
@@ -5094,6 +5121,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     showTransferStationsOnly={showTransferStationsOnly}
                     showTrainStatusPanel={showTrainStatusPanel}
                     autoSetDepartureFromLocation={autoSetDepartureFromLocation}
+                    alwaysVisibleStationsEnabled={alwaysVisibleStationsEnabled}
+                    alwaysVisibleMinRoutes={alwaysVisibleMinRoutes}
                     showExpressStationsOnly={showExpressStationsOnly}
                     showTravelTimes={showTravelTimes}
                     showStationNames={showStationNames}
@@ -5108,6 +5137,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
                     onShowTrainStatusPanelChange={setShowTrainStatusPanel}
                     onAutoSetDepartureFromLocationChange={setAutoSetDepartureFromLocation}
+                    onAlwaysVisibleStationsEnabledChange={setAlwaysVisibleStationsEnabled}
+                    onAlwaysVisibleMinRoutesChange={setAlwaysVisibleMinRoutes}
                     onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
                     onShowTravelTimesChange={setShowTravelTimes}
                     onShowStationNamesChange={setShowStationNames}
@@ -5363,6 +5394,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         showTransferStationsOnly={showTransferStationsOnly}
                         showTrainStatusPanel={showTrainStatusPanel}
                         autoSetDepartureFromLocation={autoSetDepartureFromLocation}
+                        alwaysVisibleStationsEnabled={alwaysVisibleStationsEnabled}
+                        alwaysVisibleMinRoutes={alwaysVisibleMinRoutes}
                         showExpressStationsOnly={showExpressStationsOnly}
                         showTravelTimes={showTravelTimes}
                         showStationNames={showStationNames}
@@ -5377,6 +5410,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
                         onShowTrainStatusPanelChange={setShowTrainStatusPanel}
                         onAutoSetDepartureFromLocationChange={setAutoSetDepartureFromLocation}
+                        onAlwaysVisibleStationsEnabledChange={setAlwaysVisibleStationsEnabled}
+                        onAlwaysVisibleMinRoutesChange={setAlwaysVisibleMinRoutes}
                         onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
                         onShowTravelTimesChange={setShowTravelTimes}
                         onShowStationNamesChange={setShowStationNames}

@@ -23,6 +23,10 @@ export type MapConfig = {
   showStationTooltip: boolean;
   showFullRouteStations: boolean;
   showRouteLine: boolean;
+  /** 主要駅の常時表示（旧バージョンの設定ファイルには無いため任意） */
+  alwaysVisibleStationsEnabled?: boolean;
+  /** 常時表示の対象とする最小路線数 */
+  alwaysVisibleMinRoutes?: number;
 };
 
 type Props = {
