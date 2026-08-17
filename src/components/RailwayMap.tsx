@@ -52,6 +52,7 @@ import {
 } from '../data/timetableData';
 import { FS, TARGET } from '../constants/ui';
 import ColorChip from './ui/ColorChip';
+import { checkboxInput } from './legend/legendStyles';
 import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, LIGHT_TEXT } from '../utils/contrast';
 import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE } from '../utils/trainDetector';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
@@ -4077,6 +4078,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     type="checkbox"
                     checked={showDimmedMapRoutes}
                     onChange={(e) => setShowDimmedMapRoutes(e.target.checked)}
+                    style={checkboxInput(colors)}
                   />
                   {translateUI('showOutsideSegmentRoutes', currentLanguage)}
                 </label>
@@ -4163,7 +4165,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       type="checkbox"
                       checked={showTravelTimeOverlay}
                       onChange={(e) => setShowTravelTimeOverlay(e.target.checked)}
-                      style={{ marginRight: '8px', accentColor: colors.primary }}
+                      style={checkboxInput(colors)}
                     />
                     ⏱ {translateUI('travelTimeOverlay', currentLanguage)}
                   </label>
@@ -4200,7 +4202,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       type="checkbox"
                       checked={timeFilterEnabled}
                       onChange={(e) => setTimeFilterEnabled(e.target.checked)}
-                      style={{ marginRight: '8px' }}
+                      style={checkboxInput(colors)}
                     />
 {translateUI('timeFilter', currentLanguage)}
                   </label>
@@ -4784,7 +4786,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       </div>
                       {heatmapEnabled && (
                         <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', color: colors.text, cursor: 'pointer' }}>
-                          <input type="checkbox" checked={heatmapRangeFilterEnabled} onChange={e => setHeatmapRangeFilterEnabled(e.target.checked)} style={{ accentColor: colors.primary }} />
+                          <input type="checkbox" checked={heatmapRangeFilterEnabled} onChange={e => setHeatmapRangeFilterEnabled(e.target.checked)} style={checkboxInput(colors)} />
                           {translateUI('heatmapRangeFilter', currentLanguage)}
                         </label>
                       )}

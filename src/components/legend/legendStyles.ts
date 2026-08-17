@@ -145,12 +145,24 @@ export function checkboxLabel(colors: Colors): CSSProperties {
   };
 }
 
-/** Checkbox input element (accent color = primary blue) */
+/**
+ * Checkbox input element (accent color = primary blue)
+ *
+ * 大きさは指定しない。チェックボックスは必ずクリック可能な
+ * ラベル行（実測 257×40px）の中に置く運用なので、WCAG 2.2 AA の
+ * 2.5.8「ターゲットサイズ(最小)」で測るべき対象はその行の方であり、
+ * 入力欄そのものを 24px に広げると白い四角が目立つだけで得がない。
+ *
+ * チェックボックスを単独で（クリック可能な行の外に）置く場合は、
+ * ここではなく置く側で 24px 以上の当たり判定を用意すること。
+ */
 export function checkboxInput(colors: Colors): CSSProperties {
   return {
     marginRight:  L.sp.sm,
     cursor:       'pointer',
     accentColor:  colors.primary ?? '#2196F3',
+    // 長いラベルに押されて潰れないようにする
+    flexShrink:   0,
   };
 }
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { MapPin, RefreshCw, CircleDot } from 'lucide-react';
 import { routeNames, routeColors } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
+import { checkboxInput } from '../legend/legendStyles';
 import { translateUI, translateRoute, translateStation } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
 
@@ -63,7 +64,7 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
           type="checkbox"
           checked={isSelected}
           onChange={e => { e.stopPropagation(); onToggle(index); }}
-          style={{ cursor: 'pointer', flexShrink: 0 }}
+          style={checkboxInput(colors)}
         />
 
         {/* 路線カラードット */}

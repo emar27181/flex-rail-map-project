@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { STAT_PARAMS, PARAM_DATA_SOURCES, DATA_DISCLAIMER, buildGradientCss } from '../../data/stationStats';
 import type { StationStats, StatCategory } from '../../data/stationStats';
-import { section, text, L } from './legendStyles';
+import { section, text, L, checkboxInput } from './legendStyles';
 import { translateUI, translateStatParamLabel } from '../../utils/translation';
 import type { Language } from '../../utils/translation';
 
@@ -54,7 +54,7 @@ export default function HeatmapControl({
             type="checkbox"
             checked={enabled}
             onChange={e => { onEnabledChange(e.target.checked); if (e.target.checked) setOpen(true); }}
-            style={{ cursor: 'pointer' }}
+            style={checkboxInput(colors)}
           />
           <span style={section.title(colors)}>{translateUI('stationHeatmap', language)}</span>
         </label>

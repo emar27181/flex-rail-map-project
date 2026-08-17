@@ -1,5 +1,6 @@
 import React from 'react';
 import { getThemeColors } from '../../contexts/ThemeContext';
+import { checkboxInput } from '../legend/legendStyles';
 
 interface ToggleableItemProps {
   id: string;
@@ -63,12 +64,7 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
           e.stopPropagation();
           onToggle(id);
         }}
-        style={{
-          marginRight: '8px',
-          cursor: 'pointer',
-          // 長いラベルに押されて潰れないようにする
-          flexShrink: 0
-        }}
+        style={checkboxInput(colors)}
       />
 
       {colorIndicator && (
