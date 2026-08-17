@@ -1255,3 +1255,36 @@
 - `TODO.md`
 - データ源の候補と、着手時に決める論点（停留所の間引き、鉄道との乗換判定、
   路線図と混ざらない線種）まで記載
+
+## 2026-08-16 セッション（第4部: デザインの一元管理の調査）
+
+### improve: チェックボックスのスタイルを共有ヘルパに統一
+- `src/components/legend/legendStyles.ts`, `HeatmapControl.tsx`,
+  `src/components/ui/ToggleableItem.tsx`, `RouteRecommendationItem.tsx`,
+  `src/components/RailwayMap.tsx`
+- `accentColor` や `marginRight` を6箇所が各自インラインで持っていて、
+  路線一覧のものだけ余白が違うなど見た目が揃っていなかった
+- すべて `checkboxInput` 経由にした
+- 調査中に一度 24px へ拡大したが、WCAG 2.5.8 が測るのは「タップできる範囲」で
+  あり、ラベル行（実測257×40px）が既に基準を満たしていたため戻した。
+  入力欄自体を広げると白い四角が目立って見た目が悪化する
+
+### docs: デザインの一元管理を調査して文書化
+- `docs/design-system.md`（新規）, `CLAUDE.md`
+- 色・サイズ・余白・ボタンがどこで決まっているかを機械的に調査した
+  - トークン定義が3系統に分裂（`constants/ui.ts` / `legendStyles.ts` / `design/tokens.ts`）
+    し、同じ 10px が `FS.tiny` と `L.fs.xs` の2つの名前を持つ
+  - `<button>` 93個のうち91個がインラインstyle。共有ボタンコンポーネントが無い
+  - 「出発=緑」のような意味を持つ色が12ファイルに分散してベタ書き（92箇所）
+  - 余白84種・色224種・角丸11種と、定義済みの段階がほとんど機能していない
+  - テーマから色を取っていないコンポーネントが42中9
+- 「書くときの判断表」と着手順を記載した
+
+### feat: デザイン一元管理の点検スクリプトとスキルを追加
+- `scripts/audit-design-tokens.mjs`（新規）, `.claude/skills/design-tokens/`（新規）
+- `node scripts/audit-design-tokens.mjs` でベタ書きの箇所数・種類数・
+  ファイル別の偏り・意味を持つ色の分散を数え直せる。
+  `--list <fontSize|borderRadius|spacing|hexColor|rgba>` で該当箇所を列挙
+- `docs/design-system.md` の表はこのスクリプトの出力を元にする運用にした
+- UIを書く作業のときに読むスキルを `.claude/skills/design-tokens/SKILL.md` に置き、
+  CLAUDE.md から参照できるようにした
