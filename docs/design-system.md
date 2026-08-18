@@ -129,6 +129,9 @@ UI の色・サイズ・余白・ボタンが「どこで決まっているか�
 
 | 仕組み | 場所 | 何を1箇所にまとめたか |
 |---|---|---|
+| `stationLabelBox` | `src/components/RailwayMap.tsx` | 駅ラベルの文字サイズ・高さ・角丸・余白（3つのアイコン生成関数で共有） |
+| `selectableCard()` | `src/components/legend/legendStyles.ts` | 選択できるカード・行の枠線と背景（選択でずれない） |
+| `tintColor()` | `src/utils/contrast.ts` | 色を薄い背景として敷くときの rgba 変換 |
 | `filledLabelColors()` | `src/utils/contrast.ts` | 「色を背景にして文字を載せる」ときの背景色・文字色・縁取りの決め方 |
 | `ColorChip` | `src/components/ui/ColorChip.tsx` | 色付き小ラベルの見た目（＋表示 / 件数 / 種別バッジ） |
 | `renderStationMarker()` | `src/components/RailwayMap.tsx` | 駅マーカーの描画（通常・乗換ヒント・常時表示の3経路で共有） |
@@ -170,6 +173,39 @@ UI の色・サイズ・余白・ボタンが「どこで決まっているか�
 
 ---
 
+## 7. 寸法を揃える（2026-08-16 対応済み）
+
+### 駅ラベルの高さが揃っていなかった
+
+駅ラベルを作る関数が3つあり、それぞれが独自に文字サイズと高さを決めていた。
+
+| 生成関数 | 修正前の文字サイズ | 修正前の高さ | 角丸 |
+|---|---|---|---|
+| `createStationIcon`（通常） | 9px | 15.5px | 3px |
+| `createTrainTypeStationIcon`（列車種別） | 9px | 18/30px の独自値 | 2px |
+| `createSpecialStationIcon`（出発/到着） | 12px | 24px | 5px |
+
+地図上で出発・到着駅だけひと回り大きく、高さも揃っていなかった。
+`stationLabelBox` に寸法をまとめて3つとも参照させ、**強調は大きさではなく背景色**で付ける方針にした。
+修正後は通常 15.5px / 出発到着 16px（枠線ぶんの0.5px差のみ）。
+
+### 選択すると行の大きさが変わっていた
+
+選択状態を `border: isSelected ? '2px solid' : '1px solid'` で表す書き方が3箇所にあった。
+`box-sizing` が `content-box` のままだと、選択した瞬間に外形が2px大きくなって並びがずれる。
+
+`selectableCard()` にまとめ、次の3点を規則にした。
+
+1. **枠線の太さは選択・非選択で変えない**（非選択時は色を `transparent` にして場所だけ確保）
+2. **`box-sizing: border-box`** で枠線を寸法に含める
+3. **選択は枠線の色だけでなく背景も塗る** — 枠線だけだと細くて気づきにくく、
+   色覚特性によっては差が分かりにくい
+
+路線一覧では accent にその路線の色を渡し、選択された路線が自分の色で塗られるようにした。
+`tests/unit/components/legend/legendStyles.test.ts` でこの3点を固定している。
+
+---
+
 ## 書くときの判断表
 
 新しく UI コードを書くとき、この順で判断する。
@@ -182,6 +218,9 @@ UI の色・サイズ・余白・ボタンが「どこで決まっているか�
 | 文字色・背景・境界線 | `getThemeColors(theme)` | ❌ ダークモードが壊れる |
 | 色の上に文字を載せる | `filledLabelColors(color, theme)` | ❌ 自前でコントラスト判定しない |
 | 色付きの小ラベル | `<ColorChip>` | ❌ |
+| 選択できるカード・行 | `selectableCard(colors, {selected, accent})` | ❌ 枠線の太さを選択で変えない |
+| 色を薄く背景に敷く | `tintColor(color, alpha)` | ❌ |
+| 地図上の駅ラベルの寸法 | `stationLabelBox` | ❌ 生成関数ごとに決めない |
 | ボタン | `<Button>`（未作成。作るまでは `btn()`） | ⚠️ |
 | 余白・角丸 | `L.sp` / `L.r` | ⚠️ 段階に無い値が要るなら段階を足す |
 

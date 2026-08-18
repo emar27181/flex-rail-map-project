@@ -21,6 +21,9 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 | 文字色・背景・境界線 | `getThemeColors(theme)` | `src/contexts/ThemeContext.tsx` |
 | 色の上に文字を載せる | `filledLabelColors(color, theme)` | `src/utils/contrast.ts` |
 | 色付きの小ラベル | `<ColorChip color=... theme=... />` | `src/components/ui/ColorChip.tsx` |
+| 選択できるカード・行 | `selectableCard(colors, { selected, accent })` | `src/components/legend/legendStyles.ts` |
+| 色を薄く背景に敷く | `tintColor(color, alpha)` | `src/utils/contrast.ts` |
+| 地図上の駅ラベルの寸法 | `stationLabelBox` | `src/components/RailwayMap.tsx` |
 | 余白・角丸 | `L.sp` / `L.r` | `src/components/legend/legendStyles.ts` |
 | 路線色 | `routeColors[routeKey]` + `adjustRouteColorForTheme` | `src/data/routes.ts` |
 
@@ -32,6 +35,24 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 - `color: '#fff'` / `backgroundColor: '#333'` の直書き → `getThemeColors(theme)`
 - 自前でのコントラスト判定（`theme === 'dark' ? white : black` のような分岐）
   → `filledLabelColors()`。この分岐は3箇所に重複していて実際に不整合が出た
+
+## 寸法を揃える
+
+見た目の状態を変えるときに**要素の外形が変わってはいけない**。並びがずれる。
+
+- 選択・強調は**枠線の太さではなく、色と背景**で示す。
+  枠線の太さは固定し、非選択時は `transparent` にして場所だけ確保する
+- 大きさを明示する要素には `box-sizing: border-box` を付けて枠線を寸法に含める
+- 同じ種類のものは同じ寸法にする。強調したいなら大きさではなく**背景色**を変える
+  （地図の出発・到着駅がこれ。以前は他の駅より大きくて高さが揃っていなかった）
+
+```ts
+// ✗ 選択で外形が2px変わる
+border: isSelected ? '2px solid #2196F3' : '1px solid #ccc'
+
+// ✓ 太さは固定、色と背景で示す
+...selectableCard(colors, { selected: isSelected })
+```
 
 ## 判断のしかた
 

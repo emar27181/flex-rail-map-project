@@ -1288,3 +1288,33 @@
 - `docs/design-system.md` の表はこのスクリプトの出力を元にする運用にした
 - UIを書く作業のときに読むスキルを `.claude/skills/design-tokens/SKILL.md` に置き、
   CLAUDE.md から参照できるようにした
+
+## 2026-08-16 セッション（第5部: 寸法の統一と選択表現）
+
+### fix: 地図上の駅ラベルの高さと文字サイズを揃える
+- `src/components/RailwayMap.tsx`
+- 駅ラベルを作る関数が3つあり、それぞれが独自に寸法を決めていたため、
+  出発・到着駅だけ文字12px・高さ24px、他は9px・15.5px と不揃いだった
+- 寸法を `stationLabelBox` にまとめて3つとも参照させ、
+  強調は大きさではなく背景色（出発=緑 / 到着=赤）で付ける方針にした
+- 角丸・余白・ふりがなの文字サイズも同じ定義から取る
+- 修正後の実測は通常15.5px / 出発到着16px（枠線ぶんの0.5px差のみ）
+
+### fix: 選択で行の大きさが変わらないようにし、選択を背景色でも示す
+- `src/components/legend/legendStyles.ts`, `src/utils/contrast.ts`,
+  `RouteRecommendations.tsx`, `ui/RouteRecommendationItem.tsx`, `ui/ToggleableItem.tsx`
+- 選択状態を border の太さ(1px→2px)で表す書き方が3箇所にあり、
+  `box-sizing: content-box` のままなので選択した瞬間に外形が2px大きくなり
+  一覧の並びがずれていた
+- `selectableCard()` にまとめ、次を規則にした
+  1. 枠線の太さは選択・非選択で変えない（非選択時は色を透明にして場所だけ確保）
+  2. `box-sizing: border-box` で枠線を寸法に含める
+  3. 選択は枠線の色だけでなく背景も塗る（枠線だけだと気づきにくいため）
+- 路線一覧では accent にその路線の色を渡し、選択された路線が自分の色で塗られる
+- 色を薄い背景として敷く rgba 変換は `tintColor()` に切り出した
+- `tests/unit/components/legend/legendStyles.test.ts` で3点を固定（9件）
+
+### docs: 寸法の揃え方をデザイン文書とスキルに追記
+- `docs/design-system.md`, `.claude/skills/design-tokens/SKILL.md`
+- 「見た目の状態を変えるときに外形が変わってはいけない」を明文化
+- 判断表に `selectableCard` / `tintColor` / `stationLabelBox` を追加
