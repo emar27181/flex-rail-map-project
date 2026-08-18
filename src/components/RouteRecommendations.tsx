@@ -4,6 +4,7 @@ import { routeColors, routeNames } from '../data/routes';
 import type { RouteResult } from '../utils/routeFinder';
 import { getRouteDestination, getDirectionText, commonDirections } from '../data/routeDestinations';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import { selectableCard } from './legend/legendStyles';
 import { translateStation, translateRoute, translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
 
@@ -183,10 +184,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
               onMouseLeave={() => setTooltip(null)}
               style={{
                 padding: '10px 12px',
-                backgroundColor: isSelected ? colors.surfaceElevated : colors.surface,
-                borderRadius: '6px',
-                border: isSelected ? '2px solid #2196F3' : `1px solid ${colors.borderLight}`,
-                transition: 'all 0.2s ease',
+                ...selectableCard(colors, { selected: isSelected, radius: '6px' }),
                 boxShadow: isSelected ? '0 2px 8px rgba(33,150,243,0.3)' : `0 1px 3px ${colors.shadow}`
               }}
             >

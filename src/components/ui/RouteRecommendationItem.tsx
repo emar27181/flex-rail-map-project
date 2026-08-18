@@ -2,7 +2,7 @@ import React from 'react';
 import { MapPin, RefreshCw, CircleDot } from 'lucide-react';
 import { routeNames, routeColors } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
-import { checkboxInput } from '../legend/legendStyles';
+import { checkboxInput, selectableCard } from '../legend/legendStyles';
 import { translateUI, translateRoute, translateStation } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
 
@@ -49,12 +49,9 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
       onClick={() => onToggle(index)}
       style={{
         padding: '5px 6px',
-        borderRadius: '5px',
         cursor: 'pointer',
         marginBottom: '4px',
-        backgroundColor: isSelected ? 'rgba(33,150,243,0.12)' : 'rgba(108,117,125,0.07)',
-        border: isSelected ? '1.5px solid #2196F3' : `1px solid ${colors.borderLight}`,
-        transition: 'all 0.15s ease',
+        ...selectableCard(colors, { selected: isSelected }),
         userSelect: 'none',
       }}
     >

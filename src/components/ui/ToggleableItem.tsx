@@ -1,6 +1,7 @@
 import React from 'react';
 import { getThemeColors } from '../../contexts/ThemeContext';
-import { checkboxInput } from '../legend/legendStyles';
+import { checkboxInput, selectableCard } from '../legend/legendStyles';
+import { tintColor } from '../../utils/contrast';
 
 interface ToggleableItemProps {
   id: string;
@@ -44,16 +45,20 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
         fontSize: '12px',
         cursor: 'pointer',
         padding: '4px',
-        borderRadius: '3px',
+        // 選択・強調は枠線の太さではなく色と背景で示す。
+        // 太さを変えると行の幅と高さが動いて一覧の並びがずれる。
+        ...selectableCard(colors, {
+          selected: isHighlighted || isActive,
+          // 経路に含まれる行は強調色、単に表示ONの行はその路線の色
+          accent: isHighlighted ? undefined : colorIndicator?.color,
+          radius: '3px',
+        }),
+        // 強調（経路に含まれる）行は背景をもう少し濃くして区別する
         backgroundColor: isHighlighted
-          ? 'rgba(33, 150, 243, 0.25)'
+          ? tintColor(colors.primary ?? '#2196F3', 0.28)
           : isActive
-            ? 'rgba(0, 123, 255, 0.1)'
-            : 'rgba(108, 117, 125, 0.1)',
-        border: isHighlighted
-          ? '2px solid #2196F3'
-          : `1px solid ${isActive ? '#007bff' : '#6c757d'}`,
-        transition: 'all 0.2s ease'
+            ? tintColor(colorIndicator?.color ?? colors.primary ?? '#2196F3', 0.16)
+            : colors.surface,
       }}
     >
       <input

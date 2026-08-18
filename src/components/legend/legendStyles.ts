@@ -8,6 +8,7 @@
  *   </div>
  */
 import type { CSSProperties } from 'react';
+import { tintColor } from '../../utils/contrast';
 
 // ── Design tokens ──────────────────────────────────────────────────────────
 
@@ -186,5 +187,39 @@ export function textarea(colors: Colors): CSSProperties {
     display:       'block',
     resize:        'vertical',
     boxSizing:     'border-box',
+  };
+}
+
+// ── 選択できるカード・行 ───────────────────────────────────────────────
+
+/**
+ * 選択状態を示す枠線の太さ。選択・非選択で変えない。
+ *
+ * 「選択時だけ枠線を太くする」書き方が3箇所にあり、box-sizing が
+ * content-box のままだと選択した瞬間に幅と高さが変わって並びがずれていた。
+ * 太さは固定し、色と背景だけを切り替える。
+ */
+export const SELECTION_BORDER_WIDTH = 2;
+
+/**
+ * 選択できるカード・行の共通スタイル。
+ *
+ * 選択は「枠線の色」だけでなく「背景を薄く塗る」ことでも示す。
+ * 枠線だけだと細くて気づきにくく、色覚特性によっては差が分かりにくいため。
+ *
+ * @param accent 選択時の色。省略時は primary（青）
+ */
+export function selectableCard(
+  colors: Colors,
+  opts: { selected: boolean; accent?: string; radius?: string },
+): CSSProperties {
+  const accent = opts.accent ?? colors.primary ?? '#2196F3';
+  return {
+    boxSizing: 'border-box',
+    borderRadius: opts.radius ?? L.r.md,
+    // 太さは常に同じ。非選択時は色を透明にして場所だけ確保する
+    border: `${SELECTION_BORDER_WIDTH}px solid ${opts.selected ? accent : 'transparent'}`,
+    backgroundColor: opts.selected ? tintColor(accent, 0.18) : colors.surface,
+    transition: 'background-color 0.15s ease, border-color 0.15s ease',
   };
 }

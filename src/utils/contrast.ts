@@ -126,6 +126,18 @@ export function darkenForWhiteText(background: string, targetRatio = 4.5, minSca
 }
 
 /**
+ * 色を「薄く敷く背景」として使うための rgba を返す。
+ *
+ * 選択状態を枠線だけで示すと分かりにくいうえ、枠線の太さを変えると
+ * 並びがずれる。背景を薄く塗って示すために使う。
+ */
+export function tintColor(hex: string, alpha: number): string {
+  const rgb = parseHexColor(hex);
+  if (!rgb) return 'transparent';
+  return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
+}
+
+/**
  * 路線色などを「塗りつぶしのラベル」として使うときの配色。
  *
  * 駅名ラベル・駅アイコン・ツールチップ内のバッジがそれぞれ別々に
