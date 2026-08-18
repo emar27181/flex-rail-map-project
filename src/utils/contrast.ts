@@ -125,6 +125,40 @@ export function darkenForWhiteText(background: string, targetRatio = 4.5, minSca
   return scaledHex(lo);
 }
 
+/**
+ * 色を「薄く敷く背景」として使うための rgba を返す。
+ *
+ * 選択状態を枠線だけで示すと分かりにくいうえ、枠線の太さを変えると
+ * 並びがずれる。背景を薄く塗って示すために使う。
+ */
+export function tintColor(hex: string, alpha: number): string {
+  const rgb = parseHexColor(hex);
+  if (!rgb) return 'transparent';
+  return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
+}
+
+/**
+ * 路線色などを「塗りつぶしのラベル」として使うときの配色。
+ *
+ * 駅名ラベル・駅アイコン・ツールチップ内のバッジがそれぞれ別々に
+ * 「ダークなら白字、ライトなら明るさで白黒を選ぶ」を書いていて、
+ * 直すたびに片方だけ変わってしまっていた。規則をここ1箇所にまとめる。
+ *
+ * - ダークモード: 文字は白に統一し、足りない分は背景を必要最小限だけ暗くする
+ * - ライトモード: 背景はそのままで、明るさに応じて白/黒の読みやすい方を選ぶ
+ * - それでも 4.5:1 に届かない明るい色（総武線の黄色など）は needsHalo が true。
+ *   呼び出し側で文字の縁取りを足して可読性を補う
+ */
+export function filledLabelColors(baseColor: string, theme: 'light' | 'dark'): {
+  background: string;
+  text: string;
+  needsHalo: boolean;
+} {
+  const background = theme === 'dark' ? darkenForWhiteText(baseColor) : baseColor;
+  const text = theme === 'dark' ? LIGHT_TEXT : readableTextColor(background);
+  return { background, text, needsHalo: !meetsContrast(background, text) };
+}
+
 /** 2色が目標コントラスト比（既定 WCAG AA の 4.5:1）を満たすか */
 export function meetsContrast(background: string, text: string, targetRatio = 4.5): boolean {
   const bg = parseHexColor(background);

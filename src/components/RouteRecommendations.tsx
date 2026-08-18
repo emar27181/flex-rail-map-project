@@ -4,6 +4,7 @@ import { routeColors, routeNames } from '../data/routes';
 import type { RouteResult } from '../utils/routeFinder';
 import { getRouteDestination, getDirectionText, commonDirections } from '../data/routeDestinations';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import { selectableCard } from './legend/legendStyles';
 import { translateStation, translateRoute, translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
 
@@ -31,10 +32,10 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
     return route.segments.map((seg, i) => {
       const name = seg.routeKey === 'walking'
         ? translateUI('walkingTransferShort', language)
-        : (routeNames[seg.routeKey] || seg.routeName);
+        : translateRoute(routeNames[seg.routeKey] ?? seg.routeName, language);
       if (i === 0) return name;
       const transferStation = seg.stations[0]?.name ?? '';
-      return `${transferStation} → ${name}`;
+      return `${translateStation(transferStation, language)} → ${name}`;
     }).join(' → ');
   };
 
@@ -183,10 +184,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
               onMouseLeave={() => setTooltip(null)}
               style={{
                 padding: '10px 12px',
-                backgroundColor: isSelected ? colors.surfaceElevated : colors.surface,
-                borderRadius: '6px',
-                border: isSelected ? '2px solid #2196F3' : `1px solid ${colors.borderLight}`,
-                transition: 'all 0.2s ease',
+                ...selectableCard(colors, { selected: isSelected, radius: '6px' }),
                 boxShadow: isSelected ? '0 2px 8px rgba(33,150,243,0.3)' : `0 1px 3px ${colors.shadow}`
               }}
             >
@@ -261,7 +259,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                   : (routeColors[segment.routeKey] || '#888');
                 const segName = segment.routeKey === 'walking'
                   ? translateUI('walkingTransferShort', language)
-                  : (routeNames[segment.routeKey] || segment.routeName);
+                  : translateRoute(routeNames[segment.routeKey] ?? segment.routeName, language);
                 const startName = translateStation(segment.stations[0].name, language);
                 const endName = translateStation(segment.stations[segment.stations.length - 1].name, language);
                 const isLast = segIndex === route.segments.length - 1;

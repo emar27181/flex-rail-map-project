@@ -8,7 +8,7 @@ import type { StationStats } from '../../data/stationStats';
 import MapConfigPanel from './MapConfigPanel';
 import type { MapConfig } from './MapConfigPanel';
 import { checkboxLabel, checkboxInput } from './legendStyles';
-import { TARGET } from '../../constants/ui';
+import { FS, TARGET } from '../../constants/ui';
 
 type SortMode = 'name' | 'color' | 'default' | 'distance';
 
@@ -29,6 +29,8 @@ interface LegendRouteListProps {
   showStationNumbers: boolean;
   showTrainStatusPanel: boolean;
   autoSetDepartureFromLocation: boolean;
+  alwaysVisibleStationsEnabled: boolean;
+  alwaysVisibleMinRoutes: number;
   showFurigana: boolean;
   showOsmTiles: boolean;
   theme: 'light' | 'dark';
@@ -43,6 +45,8 @@ interface LegendRouteListProps {
   onShowTravelTimesChange: (value: boolean) => void;
   onShowStationNamesChange: (value: boolean) => void;
   onShowStationNumbersChange: (value: boolean) => void;
+  onAlwaysVisibleStationsEnabledChange: (value: boolean) => void;
+  onAlwaysVisibleMinRoutesChange: (value: number) => void;
   onShowTrainStatusPanelChange: (value: boolean) => void;
   onAutoSetDepartureFromLocationChange: (value: boolean) => void;
   onShowFuriganaChange: (value: boolean) => void;
@@ -103,6 +107,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   showStationNumbers,
   showTrainStatusPanel,
   autoSetDepartureFromLocation,
+  alwaysVisibleStationsEnabled,
+  alwaysVisibleMinRoutes,
   showFurigana,
   showOsmTiles,
   theme,
@@ -117,6 +123,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowTravelTimesChange,
   onShowStationNamesChange,
   onShowStationNumbersChange,
+  onAlwaysVisibleStationsEnabledChange,
+  onAlwaysVisibleMinRoutesChange,
   onShowTrainStatusPanelChange,
   onAutoSetDepartureFromLocationChange,
   onShowFuriganaChange,
@@ -452,6 +460,42 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   <input type="checkbox" checked={showStationNames} onChange={e => onShowStationNamesChange(e.target.checked)} style={checkboxInput(colors)} />
                   {translateUI('showStationNames', language)}
                 </label>
+                {/* 主要駅の常時表示。しきい値（何路線以上か）も変えられるようにする */}
+                <label style={checkboxLabel(colors)}>
+                  <input
+                    type="checkbox"
+                    checked={alwaysVisibleStationsEnabled}
+                    onChange={e => onAlwaysVisibleStationsEnabledChange(e.target.checked)}
+                    style={checkboxInput(colors)}
+                  />
+                  {translateUI('alwaysShowMajorStations', language)}
+                </label>
+                {alwaysVisibleStationsEnabled && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '2px 0 4px 22px' }}>
+                    <span style={{ fontSize: FS.helper, color: colors.textSecondary }}>
+                      {translateUI('minRouteCount', language)}
+                    </span>
+                    <select
+                      value={alwaysVisibleMinRoutes}
+                      onChange={e => onAlwaysVisibleMinRoutesChange(Number(e.target.value))}
+                      style={{
+                        fontSize: FS.helper,
+                        padding: '2px 4px',
+                        minHeight: `${TARGET.min}px`,
+                        border: `1px solid ${colors.border}`,
+                        borderRadius: '4px',
+                        background: colors.surface,
+                        color: colors.text,
+                      }}
+                    >
+                      {[2, 3, 4, 5, 6, 7, 8, 10].map(n => (
+                        <option key={n} value={n}>
+                          {translateUI('routeCountOption', language, { count: n })}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 {language === 'japanese' && (
                   <label style={checkboxLabel(colors)}>
                     <input type="checkbox" checked={showFurigana} onChange={e => onShowFuriganaChange(e.target.checked)} style={checkboxInput(colors)} />

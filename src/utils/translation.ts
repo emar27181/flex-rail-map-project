@@ -7715,6 +7715,30 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "乗",
     english: "On"
   },
+  show: {
+    japanese: "表示",
+    english: "Show"
+  },
+  lastUpdated: {
+    japanese: "最終更新",
+    english: "Last updated"
+  },
+  alwaysShowMajorStations: {
+    japanese: "主要駅を常に表示",
+    english: "Always show major stations"
+  },
+  minRouteCount: {
+    japanese: "対象:",
+    english: "Threshold:"
+  },
+  routeCountOption: {
+    japanese: "{count}路線以上",
+    english: "{count}+ lines"
+  },
+  dataSource: {
+    japanese: "出典",
+    english: "Source"
+  },
   afterSuffix: {
     japanese: "以降",
     english: "onwards"
@@ -8438,6 +8462,12 @@ export const uiChinese: Record<string, string> = {
   currentTime: "当前时间",
   baseTime: "出发时间",
   onboard: "乘",
+  show: "显示",
+  lastUpdated: "最后更新",
+  alwaysShowMajorStations: "始终显示主要车站",
+  minRouteCount: "对象:",
+  routeCountOption: "{count}条线路以上",
+  dataSource: "来源",
   afterSuffix: "以后",
   offRouteReference: "路线外参考",
   noData: "无数据",
@@ -8683,6 +8713,12 @@ export const uiKorean: Record<string, string> = {
   currentTime: "현재 시간",
   baseTime: "출발 시간",
   onboard: "탑",
+  show: "표시",
+  lastUpdated: "최종 갱신",
+  alwaysShowMajorStations: "주요 역 항상 표시",
+  minRouteCount: "대상:",
+  routeCountOption: "{count}개 노선 이상",
+  dataSource: "출처",
   afterSuffix: "이후",
   offRouteReference: "경로 외 참고",
   noData: "데이터 없음",
@@ -8878,6 +8914,7 @@ export const translateUI = (key: string, language: Language, params?: { [key: st
 
 /** 駅統計パラメータラベルの翻訳マップ */
 const statParamLabelMap: Record<string, { english: string; chinese: string; korean: string }> = {
+  '路線数':       { english: 'Line count',           chinese: '线路数量',       korean: '노선 수' },
   '家賃(1K)':     { english: 'Rent (1K)',          chinese: '租金(1K)',       korean: '월세(1K)' },
   '家賃(1LDK)':   { english: 'Rent (1LDK)',         chinese: '租金(1LDK)',     korean: '월세(1LDK)' },
   '人口密度':     { english: 'Pop. density',         chinese: '人口密度',       korean: '인구밀도' },
@@ -8906,6 +8943,7 @@ const statParamLabelMap: Record<string, { english: string; chinese: string; kore
  * 「軒」「棟」はラベル側に count / 数 が含まれるため、日本語以外では単位を出さない。
  */
 const statUnitMap: { [ja: string]: { english: string; chinese: string; korean: string } } = {
+  '路線': { english: 'lines', chinese: '条', korean: '개' },
   '軒': { english: '', chinese: '家', korean: '곳' },
   '棟': { english: '', chinese: '栋', korean: '동' },
   '件/年': { english: '/yr', chinese: '件/年', korean: '건/년' },
