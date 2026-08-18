@@ -1318,3 +1318,21 @@
 - `docs/design-system.md`, `.claude/skills/design-tokens/SKILL.md`
 - 「見た目の状態を変えるときに外形が変わってはいけない」を明文化
 - 判断表に `selectableCard` / `tintColor` / `stationLabelBox` を追加
+
+## 2026-08-16 セッション（第6部: 路線名の多言語対応漏れ）
+
+### fix: 路線をクリックしたときの路線名が日本語のままだった問題を修正
+- `src/components/RailwayMap.tsx`, `src/components/RouteRecommendations.tsx`
+- `routeTranslations` 側は全490路線そろっていたが、呼び出し側が
+  `translateRoute` を通し忘れていて日本語のまま表示されていた
+- 直した箇所
+  - 表示中の路線のツールチップ
+  - 非表示の路線のツールチップ
+  - 地図上の路線切替リスト（幅の計算も翻訳後の文字数で行う）
+  - 経路推薦の区間名とホバー時のツールチップ（乗換駅名も併せて翻訳）
+- `tests/unit/utils/routeNameI18n.test.ts`（新規）で、JSXへ翻訳前の路線名を
+  直接埋め込んでいないかを検査する。わざと戻すと落ちることを確認済み
+- **既知の制約**: `translateRoute` の辞書は英語のみで、中国語・韓国語は
+  英語表記にフォールバックする（日本語のままではなくなったが未対応）
+- `TrainTypeViewer.tsx` にも同じ抜けがあるが、どこからも import されていない
+  未使用ファイルのため対象外とした
