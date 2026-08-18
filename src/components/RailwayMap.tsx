@@ -3749,7 +3749,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%',
                 backgroundColor: adjustRouteColorForTheme(routeColor, theme), flexShrink: 0,
               }} />
-              {routeNames[routeKey] || routeKey}
+              {translateRoute(routeNames[routeKey] ?? routeKey, currentLanguage)}
             </span>
           </Tooltip>
         </Polyline>
@@ -4365,7 +4365,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 }}
               >
                 {Object.entries(routes).map(([routeKey, _]) => {
-                  const routeName = routeNames[routeKey as RouteKey];
+                  const routeName = translateRoute(routeNames[routeKey as RouteKey] ?? routeKey, currentLanguage);
                   const routeColor = adjustRouteColorForTheme(routeColors[routeKey as RouteKey], theme);
                   const isSelected = visibleRoutes.has(routeKey as RouteKey);
                   // 幅をより正確に計算: アイコン12px + マージン8px + テキスト + パディング16px
@@ -4535,7 +4535,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                               display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%',
                               backgroundColor: color, flexShrink: 0, opacity: 0.7,
                             }} />
-                            {routeNames[rKey] || rKey}
+                            {translateRoute(routeNames[rKey] ?? rKey, currentLanguage)}
                           </span>
                         </Tooltip>
                       </Polyline>

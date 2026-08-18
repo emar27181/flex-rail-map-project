@@ -32,10 +32,10 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
     return route.segments.map((seg, i) => {
       const name = seg.routeKey === 'walking'
         ? translateUI('walkingTransferShort', language)
-        : (routeNames[seg.routeKey] || seg.routeName);
+        : translateRoute(routeNames[seg.routeKey] ?? seg.routeName, language);
       if (i === 0) return name;
       const transferStation = seg.stations[0]?.name ?? '';
-      return `${transferStation} → ${name}`;
+      return `${translateStation(transferStation, language)} → ${name}`;
     }).join(' → ');
   };
 
@@ -259,7 +259,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                   : (routeColors[segment.routeKey] || '#888');
                 const segName = segment.routeKey === 'walking'
                   ? translateUI('walkingTransferShort', language)
-                  : (routeNames[segment.routeKey] || segment.routeName);
+                  : translateRoute(routeNames[segment.routeKey] ?? segment.routeName, language);
                 const startName = translateStation(segment.stations[0].name, language);
                 const endName = translateStation(segment.stations[segment.stations.length - 1].name, language);
                 const isLast = segIndex === route.segments.length - 1;
