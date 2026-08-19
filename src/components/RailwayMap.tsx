@@ -2143,8 +2143,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (!MapComponents?.DivIcon || !showTravelTimes || showTrainDemo) return null;
 
     const { DivIcon } = MapComponents;
-    const fontSize = 12;
-    const circleSize = 20;
+    // 駅間に並ぶ小さな目印なので、駅名ラベルより控えめにする。
+    // 中身は数字だけなので FS.tiny でも読める。
+    const fontSize = parseInt(FS.tiny, 10);
+    const circleSize = 16;
+    const borderWidth = 1.5;
 
     const bgColor = theme === 'dark' ? 'rgba(40,40,40,0.9)' : 'rgba(255,255,255,0.9)';
     const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
@@ -2155,7 +2158,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         width:${circleSize}px;
         height:${circleSize}px;
         border-radius:50%;
-        border:2px solid ${color};
+        border:${borderWidth}px solid ${color};
         background:${bgColor};
         display:flex;
         align-items:center;
