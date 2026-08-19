@@ -449,6 +449,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     mapRef.current?.setView(userLocation, INITIAL_LOCATION_ZOOM);
   }, [userLocation]);
 
+  /**
+   * 現在地から路線を推定して出しているだけの状態では、駅間の所要時間を自動で出す。
+   *
+   * 出発駅も到着駅も自分で指定していないので経路が引けず、
+   * 「隣の駅まで何分か」が唯一の手掛かりになる。
+   * 一度自動で入れたら以後は触らない（自分でオフにした判断を上書きしないため）。
+   */
+  const travelTimeAutoAppliedRef = useRef(false);
+  useEffect(() => {
+    if (travelTimeAutoAppliedRef.current) return;
+    if (!userLocation) return;
+    // 自分で駅を指定していたら、そちらの経路表示が主役なので触らない
+    if (isManualDeparture || arrival) return;
+    travelTimeAutoAppliedRef.current = true;
+    setShowTravelTimes(true);
+  }, [userLocation, isManualDeparture, arrival]);
+
   // 日本語以外はデフォルトで駅コードを表示
   useEffect(() => {
     setShowStationNumbers(language !== 'japanese');
