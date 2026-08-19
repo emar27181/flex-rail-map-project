@@ -3762,6 +3762,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           const isArrival = arrival && station.name === arrival.name;
           const isSpecialStation = isDeparture || isArrival;
 
+          /**
+           * 同じ駅が複数の路線に属していると路線ごとに1枚ずつ描かれ、
+           * ラベルが重なって描画量も無駄になる。さらに武蔵小杉の横須賀線ホームや
+           * 渋谷のように路線によって座標が違う駅では、ずれた位置に二重に見える。
+           * この駅を通る表示中の路線のうち、先頭の1つだけが描くようにする。
+           */
+          const labelOwnerRouteKey = (getRoutesForStation(station.name) as RouteKey[])
+            .find(rk => visibleRoutes.has(rk));
+          if (labelOwnerRouteKey && labelOwnerRouteKey !== routeKey) {
+            return null;
+          }
+
           // 共有フィルターロジックを適用（特別駅は allowedStationNames の上限のみ免除）
           if (!isSpecialStation && !stationVisibilityFilter.shouldShow(station)) {
             return null;
