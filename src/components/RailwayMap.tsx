@@ -1274,7 +1274,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     }
     // スマホでは高さ480pxが画面の6割を占め、地図がほとんど隠れて
     // 次の駅を選べなくなる。画面の半分までに抑えて地図側を残す。
-    const maxTooltipH = Math.min(vh - MARGIN * 2, isMobileView ? Math.round(vh * 0.5) : 480);
+    // 画面の7割まで使う。以前は半分に抑えていたが時刻表が数本しか見えず狭かった。
+    // 地図の空きタップでも閉じられるので、多少大きくても操作は詰まらない。
+    const maxTooltipH = Math.min(vh - MARGIN * 2, isMobileView ? Math.round(vh * 0.7) : 620);
     const estH = Math.min(52 + Math.max(allRoutes.length * 28, activeDeps.length * 26 + 22) + 20, maxTooltipH);
     const rawY = stationTooltip.y + 14;
     const baseX = x;
@@ -1629,31 +1631,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         </div>
         )} {/* end timetableModeEnabled && allRoutes.length > 0 */}
 
-        {/* 通常モード時: コンパクトなヒートマップデータ概要 */}
-        {!heatmapEnabled && (() => {
-          const stats = getStationStatsFn(stationTooltip.stationName);
-          const visibleParams = showEstimatedData ? STAT_PARAMS : STAT_PARAMS.filter(p => p.dataQuality === 'real');
-          const filledParams = visibleParams.filter(p => stats && typeof stats[p.key] === 'number');
-          if (filledParams.length === 0) return null;
-          return (
-            <div style={{ padding: '4px 10px', borderTop: `1px solid ${colors.borderLight}`, background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}>
-              <div style={{ fontSize: '9px', color: colors.textSecondary, marginBottom: '2px' }}>{translateUI('heatmapDataLabel', currentLanguage)}</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 8px' }}>
-                {filledParams.slice(0, 4).map(p => {
-                  const v = stats![p.key] as number;
-                  const pColor = getStationHeatColor(stationTooltip.stationName, p.key, undefined, showEstimatedData);
-                  const unit = translateStatUnit(p.unit, currentLanguage);
-                  return (
-                    <ColorChip key={String(p.key)} color={pColor} theme={theme} fontSize={FS.tiny}>
-                      {translateStatParamLabel(p.label, currentLanguage)}: {v}{unit ? ` ${unit}` : ''}
-                    </ColorChip>
-                  );
-                })}
-                {filledParams.length > 4 && <span style={{ fontSize: '10px', color: colors.textSecondary }}>{translateUI('moreItemsCount', currentLanguage, { count: filledParams.length - 4 })}</span>}
-              </div>
-            </div>
-          );
-        })()}
+        {/*
+          ヒートマップデータの概要はここには出さない。
+          駅ツールチップの主役は路線一覧と時刻表で、統計値が縦幅を食って
+          肝心の時刻表が数本しか見えなくなっていたため。
+          統計はヒートマップ表示に切り替えたときの専用ツールチップで見る。
+        */}
 
         <div style={{
           padding: '3px 10px',
