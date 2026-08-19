@@ -16,9 +16,13 @@ import type { DetectedRoute } from '../utils/trainDetector';
 
 /** 駅名検索の結果として出す最大件数 */
 const STATION_SUGGESTION_LIMIT = 10;
-/** 未入力時の候補の先頭5件の内訳: 近くの駅3件 + よく使う駅2件 */
-const SUGGESTION_NEARBY_COUNT = 3;
-const SUGGESTION_FREQUENT_COUNT = 2;
+/**
+ * 未入力時の候補の先頭5件の内訳。
+ * よく使う駅（履歴）を先に出し、残りを近くの駅で埋める。
+ * 到着駅は現在地の近くを出しても意味がないので近くの駅は使わない。
+ */
+const SUGGESTION_FREQUENT_COUNT = 3;
+const SUGGESTION_NEARBY_COUNT = 2;
 const SUGGESTION_HEAD_COUNT = SUGGESTION_NEARBY_COUNT + SUGGESTION_FREQUENT_COUNT;
 /**
  * 駅選択パネル内の「出発時刻」行を出すか。
@@ -176,17 +180,19 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     });
   }, []);
 
-  // 未入力時に出す主要駅。位置情報が取れないときの出発駅候補と、到着駅候補に使う。
-  // 候補欄は6件ほどで打ち切られスクロールするため、6件だと「その先」が無く
-  // スクロールできない。STATION_SUGGESTION_LIMIT 件まで並べる。
+  // 未入力時に出す「大きい駅」。乗り入れ路線数の多い順に並べる。
+  // 以前は東京・新宿…の固定リストだったが、関東以外に居ると1件も役に立たない。
+  // 路線データから数えれば、どの地域でもその土地の主要駅が上に来る。
   const majorStations = useMemo(() => {
-    const majorStationNames = [
-      '東京', '新宿', '渋谷', '池袋', '品川', '上野',
-      '横浜', '新横浜', '大宮', '千葉',
-    ];
-    return majorStationNames
-      .map(name => allStations.find(station => station.name === name))
-      .filter(station => station !== undefined) as Station[];
+    const routeCount = new Map<string, number>();
+    for (const stationList of Object.values(routes)) {
+      for (const st of stationList as Station[]) {
+        routeCount.set(st.name, (routeCount.get(st.name) ?? 0) + 1);
+      }
+    }
+    return [...allStations]
+      .sort((a, b) => (routeCount.get(b.name) ?? 0) - (routeCount.get(a.name) ?? 0))
+      .slice(0, STATION_SUGGESTION_LIMIT * 3);
   }, [allStations]);
 
   // 現在地周辺の駅（出発駅の入力候補用。位置情報が未取得の場合は主要駅にフォールバック）
@@ -227,18 +233,20 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   }, [allStations]);
 
   /**
-   * 未入力時に出す候補。
-   * 先頭5件を「近くの駅3件 + よく使う駅2件」にし、残りは近隣駅・主要駅で補って
-   * スクロールで辿れるようにする。位置情報が無い場合は主要駅で埋まる。
+   * 未入力時に出す候補を組み立てる。
+   *
+   * 並びは「よく使う駅（履歴）→ 近くの駅 → 大きい駅」。
+   * 到着駅は現在地の近くを出しても意味がないので近くの駅を外す
+   * （その分、履歴と大きい駅が上に来る）。
    */
-  const emptySearchSuggestions = useMemo(() => {
-    const nearby = nearbyStations ?? [];
+  const buildEmptySuggestions = (useNearby: boolean): Station[] => {
+    const nearby = useNearby ? (nearbyStations ?? []) : [];
     const head = buildSuggestions(nearby, stationHistory, majorStations, findStationByName, {
-      nearbyCount: SUGGESTION_NEARBY_COUNT,
+      nearbyCount: useNearby ? SUGGESTION_NEARBY_COUNT : 0,
       frequentCount: SUGGESTION_FREQUENT_COUNT,
       total: SUGGESTION_HEAD_COUNT,
     });
-    // 6件目以降は近隣駅→主要駅の順で補う
+    // 6件目以降はスクロールで辿れるよう 近隣→大きい駅 の順で補う
     const seen = new Set(head.map(s => s.name));
     const rest: Station[] = [];
     for (const s of [...nearby, ...majorStations]) {
@@ -248,16 +256,25 @@ const StationSelector: React.FC<StationSelectorProps> = ({
       rest.push(s);
     }
     return [...head, ...rest];
-  }, [nearbyStations, stationHistory, majorStations, findStationByName]);
+  };
+
+  const departureSuggestions = useMemo(
+    () => buildEmptySuggestions(true),
+    [nearbyStations, stationHistory, majorStations, findStationByName]
+  );
+  const arrivalSuggestions = useMemo(
+    () => buildEmptySuggestions(false),
+    [nearbyStations, stationHistory, majorStations, findStationByName]
+  );
 
   const filteredDepartureStations = useMemo(
-    () => filterStations(departureSearch, emptySearchSuggestions),
-    [allStations, departureSearch, emptySearchSuggestions]
+    () => filterStations(departureSearch, departureSuggestions),
+    [allStations, departureSearch, departureSuggestions]
   );
 
   const filteredArrivalStations = useMemo(
-    () => filterStations(arrivalSearch, emptySearchSuggestions),
-    [allStations, arrivalSearch, emptySearchSuggestions]
+    () => filterStations(arrivalSearch, arrivalSuggestions),
+    [allStations, arrivalSearch, arrivalSuggestions]
   );
 
   const handleDepartureSelect = (station: Station) => {

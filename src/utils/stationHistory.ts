@@ -78,9 +78,10 @@ export const getFrequentStationNames = (history: StationHistoryEntry[], limit: n
 /**
  * 未入力時に出す候補を組み立てる。
  *
- * 先頭は「近くの駅 nearbyCount 件 + よく使う駅 frequentCount 件」。
- * 重複は取り除き、片方が足りない場合はもう片方で埋める。
- * それでも total に満たない場合は fallback（主要駅）で補う。
+ * 並び順は「よく使う駅（履歴）→ 近くの駅 → 大きい駅」。
+ * 履歴を最優先にするのは、毎日使う駅は現在地から遠くても真っ先に出したいから。
+ * 到着駅は現在地の近くを出しても意味がないので nearbyCount に 0 を渡す。
+ * 足りない分は fallback（路線数の多い駅）で補う。
  */
 export const buildSuggestions = <T extends { name: string }>(
   nearby: T[],
@@ -99,14 +100,15 @@ export const buildSuggestions = <T extends { name: string }>(
     picked.push(s);
   };
 
-  nearby.slice(0, nearbyCount).forEach(push);
-  getFrequentStationNames(history, frequentCount + nearbyCount)
+  // 1. よく使う駅を先頭に
+  getFrequentStationNames(history, frequentCount)
     .map(findByName)
-    .filter((s): s is T => !!s && !seen.has(s.name))
-    .slice(0, frequentCount)
     .forEach(push);
 
-  // 上位5件の枠が埋まらなかった分を、近隣 → 主要駅 の順で補う
+  // 2. 近くの駅（到着駅では nearbyCount=0 なので出ない）
+  nearby.slice(0, nearbyCount).forEach(push);
+
+  // 3. 枠が余ったら 近隣 → 大きい駅 の順で補う
   for (const s of nearby) {
     if (picked.length >= total) break;
     push(s);
