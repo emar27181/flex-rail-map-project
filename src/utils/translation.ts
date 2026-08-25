@@ -7727,6 +7727,22 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "主要駅を常に表示",
     english: "Always show major stations"
   },
+  arrivalAlert: {
+    japanese: "降車駅アラーム",
+    english: "Arrival alert"
+  },
+  arrivalAlertTiming: {
+    japanese: "知らせる:",
+    english: "Notify:"
+  },
+  arrivalAlertMinutesOption: {
+    japanese: "約{count}分前",
+    english: "~{count} min before"
+  },
+  arrivalAlertNote: {
+    japanese: "時刻表ではなく現在地と実際の速度から残り時間を出します。遅延していても目安になります。",
+    english: "Uses your GPS position and actual speed, not the timetable, so it still works during delays."
+  },
   minRouteCount: {
     japanese: "対象:",
     english: "Threshold:"
@@ -8465,6 +8481,10 @@ export const uiChinese: Record<string, string> = {
   show: "显示",
   lastUpdated: "最后更新",
   alwaysShowMajorStations: "始终显示主要车站",
+  arrivalAlert: "到站提醒",
+  arrivalAlertTiming: "提醒时机:",
+  arrivalAlertMinutesOption: "约{count}分钟前",
+  arrivalAlertNote: "根据当前位置和实际速度计算剩余时间，不使用时刻表，因此延误时也可参考。",
   minRouteCount: "对象:",
   routeCountOption: "{count}条线路以上",
   dataSource: "来源",
@@ -8716,6 +8736,10 @@ export const uiKorean: Record<string, string> = {
   show: "표시",
   lastUpdated: "최종 갱신",
   alwaysShowMajorStations: "주요 역 항상 표시",
+  arrivalAlert: "하차역 알림",
+  arrivalAlertTiming: "알림 시점:",
+  arrivalAlertMinutesOption: "약 {count}분 전",
+  arrivalAlertNote: "시각표가 아니라 현재 위치와 실제 속도로 남은 시간을 계산하므로 지연 시에도 참고할 수 있습니다.",
   minRouteCount: "대상:",
   routeCountOption: "{count}개 노선 이상",
   dataSource: "출처",

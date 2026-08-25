@@ -27,6 +27,10 @@ export type MapConfig = {
   alwaysVisibleStationsEnabled?: boolean;
   /** 常時表示の対象とする最小路線数 */
   alwaysVisibleMinRoutes?: number;
+  /** 降車駅アラーム（旧バージョンの設定ファイルには無いため任意） */
+  arrivalAlertEnabled?: boolean;
+  /** 降車駅アラームを鳴らす何分前か */
+  arrivalAlertMinutes?: number;
 };
 
 type Props = {

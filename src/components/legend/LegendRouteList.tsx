@@ -9,6 +9,7 @@ import MapConfigPanel from './MapConfigPanel';
 import type { MapConfig } from './MapConfigPanel';
 import { checkboxLabel, checkboxInput } from './legendStyles';
 import { FS, TARGET } from '../../constants/ui';
+import { ALERT_MINUTE_OPTIONS } from '../../utils/arrivalAlert';
 
 type SortMode = 'name' | 'color' | 'default' | 'distance';
 
@@ -31,6 +32,8 @@ interface LegendRouteListProps {
   autoSetDepartureFromLocation: boolean;
   alwaysVisibleStationsEnabled: boolean;
   alwaysVisibleMinRoutes: number;
+  arrivalAlertEnabled: boolean;
+  arrivalAlertMinutes: number;
   showFurigana: boolean;
   showOsmTiles: boolean;
   theme: 'light' | 'dark';
@@ -47,6 +50,8 @@ interface LegendRouteListProps {
   onShowStationNumbersChange: (value: boolean) => void;
   onAlwaysVisibleStationsEnabledChange: (value: boolean) => void;
   onAlwaysVisibleMinRoutesChange: (value: number) => void;
+  onArrivalAlertEnabledChange: (value: boolean) => void;
+  onArrivalAlertMinutesChange: (value: number) => void;
   onShowTrainStatusPanelChange: (value: boolean) => void;
   onAutoSetDepartureFromLocationChange: (value: boolean) => void;
   onShowFuriganaChange: (value: boolean) => void;
@@ -109,6 +114,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   autoSetDepartureFromLocation,
   alwaysVisibleStationsEnabled,
   alwaysVisibleMinRoutes,
+  arrivalAlertEnabled,
+  arrivalAlertMinutes,
   showFurigana,
   showOsmTiles,
   theme,
@@ -125,6 +132,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowStationNumbersChange,
   onAlwaysVisibleStationsEnabledChange,
   onAlwaysVisibleMinRoutesChange,
+  onArrivalAlertEnabledChange,
+  onArrivalAlertMinutesChange,
   onShowTrainStatusPanelChange,
   onAutoSetDepartureFromLocationChange,
   onShowFuriganaChange,
@@ -456,6 +465,47 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   <input type="checkbox" checked={showTrainStatusPanel} onChange={e => onShowTrainStatusPanelChange(e.target.checked)} style={checkboxInput(colors)} />
                   {translateUI('showTrainStatusPanel', language)}
                 </label>
+                {/* 降車駅アラーム。時刻表ではなく現在地から残り時間を出して知らせる */}
+                <label style={checkboxLabel(colors)}>
+                  <input
+                    type="checkbox"
+                    checked={arrivalAlertEnabled}
+                    onChange={e => onArrivalAlertEnabledChange(e.target.checked)}
+                    style={checkboxInput(colors)}
+                  />
+                  {translateUI('arrivalAlert', language)}
+                </label>
+                {arrivalAlertEnabled && (
+                  <div style={{ paddingLeft: '22px', paddingBottom: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: FS.helper, color: colors.textSecondary }}>
+                        {translateUI('arrivalAlertTiming', language)}
+                      </span>
+                      <select
+                        value={arrivalAlertMinutes}
+                        onChange={e => onArrivalAlertMinutesChange(Number(e.target.value))}
+                        style={{
+                          fontSize: FS.helper,
+                          padding: '2px 4px',
+                          minHeight: `${TARGET.min}px`,
+                          border: `1px solid ${colors.border}`,
+                          borderRadius: '4px',
+                          background: colors.surface,
+                          color: colors.text,
+                        }}
+                      >
+                        {ALERT_MINUTE_OPTIONS.map(n => (
+                          <option key={n} value={n}>
+                            {translateUI('arrivalAlertMinutesOption', language, { count: n })}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div style={{ fontSize: FS.micro, color: colors.textSecondary, marginTop: '4px', lineHeight: 1.5 }}>
+                      {translateUI('arrivalAlertNote', language)}
+                    </div>
+                  </div>
+                )}
                 <label style={checkboxLabel(colors)}>
                   <input type="checkbox" checked={showStationNames} onChange={e => onShowStationNamesChange(e.target.checked)} style={checkboxInput(colors)} />
                   {translateUI('showStationNames', language)}

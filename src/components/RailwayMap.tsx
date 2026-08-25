@@ -50,11 +50,13 @@ import {
   addMinutes,
   type Departure,
 } from '../data/timetableData';
-import { FS, TARGET } from '../constants/ui';
+import { FS, TARGET, SEMANTIC } from '../constants/ui';
 import ColorChip from './ui/ColorChip';
 import { checkboxInput } from './legend/legendStyles';
 import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, LIGHT_TEXT } from '../utils/contrast';
-import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE } from '../utils/trainDetector';
+import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE, haversineDistance } from '../utils/trainDetector';
+import { estimateArrival, shouldNotifyArrival, buildArrivalMessage, isPlausibleSpeed, DEFAULT_ALERT_MINUTES } from '../utils/arrivalAlert';
+import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
 
 // デバッグ用のwindow拡張
@@ -283,6 +285,27 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // 現在地表示
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  /**
+   * 降車駅アラーム。
+   *
+   * 遅延しているとき時刻表の「◯分後に到着」は当てにならないので、
+   * GPSの現在地と実測速度だけで残り時間を出して、しきい値を切ったら知らせる。
+   * 通知の許可が要るため既定はオフ。
+   */
+  const [arrivalAlertEnabled, setArrivalAlertEnabled] = useState(false);
+  const [arrivalAlertMinutes, setArrivalAlertMinutes] = useState<number>(DEFAULT_ALERT_MINUTES);
+  /** 通知が使えない環境向けの画面内バナー */
+  const [arrivalBanner, setArrivalBanner] = useState<{ title: string; body: string } | null>(null);
+  /** 同じ降車駅で二度鳴らさないための記録 */
+  const arrivalNotifiedForRef = useRef<string | null>(null);
+  /** 停車中の見積もりに使う、直近で走行していたときの速度 */
+  const recentSpeedMsRef = useRef<number | undefined>(undefined);
+  /**
+   * GPS更新のたびに呼ぶ判定関数。
+   * 位置情報の監視は起動時に一度だけ張るので、そのコールバックから
+   * 最新の降車駅・設定を見られるよう ref 経由で差し替える。
+   */
+  const arrivalAlertRef = useRef<((lat: number, lng: number, speedMs: number) => void) | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   /** 位置情報が取れなかった理由。UIに出して再取得の導線を見せるために持つ */
   const [locationError, setLocationError] = useState<'denied' | 'unavailable' | 'timeout' | null>(null);
@@ -382,6 +405,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           }
         }
 
+        // 降車駅アラーム: 時刻表を使わず、実測の位置と速度だけで残り時間を出す
+        if (gpsHistoryRef.current.length >= 2) {
+          const prev = gpsHistoryRef.current[gpsHistoryRef.current.length - 2];
+          const dt = (pt.timestamp - prev.timestamp) / 1000;
+          if (dt > 0.5) {
+            const movedM = haversineDistance(prev.lat, prev.lng, latitude, longitude);
+            const speedMs = movedM / dt;
+            // 測位が飛んだときの異常値を「直近の速度」として残さない
+            if (isPlausibleSpeed(speedMs)) recentSpeedMsRef.current = speedMs;
+            arrivalAlertRef.current?.(latitude, longitude, speedMs);
+          }
+        }
+
         isFirstPositionRef.current = false;
       },
       (err) => {
@@ -449,6 +485,67 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     mapRef.current?.setView(userLocation, INITIAL_LOCATION_ZOOM);
   }, [userLocation]);
 
+
+  /**
+   * 降車駅アラームの on/off。
+   * オンにした瞬間に通知の許可を求める（許可が要ることを操作と結びつけて分かるように）。
+   * 許可されなくても機能は止めず、画面内バナーで知らせる方に倒す。
+   */
+  const handleArrivalAlertEnabledChange = useCallback(async (value: boolean) => {
+    setArrivalAlertEnabled(value);
+    if (!value) {
+      setArrivalBanner(null);
+      return;
+    }
+    if (getNotifyPermission() === 'default') {
+      await requestNotifyPermission();
+    }
+  }, []);
+
+  // 降車駅が変わったら「通知済み」をリセットして、新しい駅で改めて鳴らせるようにする
+  useEffect(() => {
+    if (arrivalNotifiedForRef.current !== (arrival?.name ?? null)) {
+      arrivalNotifiedForRef.current = null;
+      setArrivalBanner(null);
+    }
+  }, [arrival]);
+
+  /**
+   * 降車駅アラームの判定を最新の設定で差し替える。
+   *
+   * 位置情報の監視は起動時に一度だけ張るため、そのコールバックが
+   * 古い降車駅を掴んだままにならないよう ref を毎回更新する。
+   */
+  useEffect(() => {
+    if (!arrivalAlertEnabled || !arrival) {
+      arrivalAlertRef.current = null;
+      return;
+    }
+    arrivalAlertRef.current = (lat, lng, speedMs) => {
+      if (arrivalNotifiedForRef.current === arrival.name) return;
+      const estimate = estimateArrival(
+        { lat, lng },
+        { lat: arrival.lat, lng: arrival.lng },
+        speedMs,
+        recentSpeedMsRef.current,
+      );
+      const fire = shouldNotifyArrival({
+        estimate,
+        thresholdMinutes: arrivalAlertMinutes,
+        alreadyNotified: false,
+      });
+      if (!fire) return;
+      arrivalNotifiedForRef.current = arrival.name;
+      const { title, body } = buildArrivalMessage(
+        translateStation(arrival.name, currentLanguage),
+        estimate,
+      );
+      // OS通知が出せない環境（未許可・iOSのタブ表示など）では画面内バナーで代替する
+      const delivered = sendNotification(title, body, 'arrival-alert');
+      vibrate();
+      if (!delivered) setArrivalBanner({ title, body });
+    };
+  }, [arrivalAlertEnabled, arrivalAlertMinutes, arrival, currentLanguage]);
 
   // 日本語以外はデフォルトで駅コードを表示
   useEffect(() => {
@@ -618,12 +715,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     showRouteLine,
     alwaysVisibleStationsEnabled,
     alwaysVisibleMinRoutes,
+    arrivalAlertEnabled,
+    arrivalAlertMinutes,
   }), [heatmapEnabled, heatmapParam, heatmapCustomRange, visibleRoutes,
       showTransferStationsOnly, showExpressStationsOnly, showTravelTimes,
       showStationNames, showFurigana, showStationNumbers, showOsmTiles,
       mapViewMode, timeFilterEnabled, timeFilterMaxMinutes,
       showStationTooltip, showFullRouteStations,
-      alwaysVisibleStationsEnabled, alwaysVisibleMinRoutes]);
+      alwaysVisibleStationsEnabled, alwaysVisibleMinRoutes,
+      arrivalAlertEnabled, arrivalAlertMinutes]);
 
   // インポートされた設定を一括適用
   const handleImportConfig = useCallback((cfg: MapConfig) => {
@@ -646,6 +746,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (cfg.showRouteLine !== undefined) setShowRouteLine(cfg.showRouteLine);
     if (cfg.alwaysVisibleStationsEnabled !== undefined) setAlwaysVisibleStationsEnabled(cfg.alwaysVisibleStationsEnabled);
     if (cfg.alwaysVisibleMinRoutes !== undefined) setAlwaysVisibleMinRoutes(cfg.alwaysVisibleMinRoutes);
+    if (cfg.arrivalAlertEnabled !== undefined) setArrivalAlertEnabled(cfg.arrivalAlertEnabled);
+    if (cfg.arrivalAlertMinutes !== undefined) setArrivalAlertMinutes(cfg.arrivalAlertMinutes);
   }, []);
 
   const routeFinder = useMemo(() => {
@@ -4990,6 +5092,35 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           )}
 
           {/* 非表示路線ツールチップ（リアル地図モード） */}
+          {/*
+            降車駅アラームの画面内バナー。
+            OS通知が出せない環境（未許可 / iOSでホーム画面に追加していない等）でも
+            気づけるようにするための代替。タップで閉じる。
+          */}
+          {arrivalBanner && (
+            <div
+              onClick={() => setArrivalBanner(null)}
+              style={{
+                position: 'fixed',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                top: `calc(12px + env(safe-area-inset-top, 0px))`,
+                zIndex: 10000,
+                maxWidth: 'min(360px, calc(100vw - 24px))',
+                boxSizing: 'border-box',
+                padding: '10px 14px',
+                borderRadius: '10px',
+                backgroundColor: SEMANTIC.arrival,
+                color: '#ffffff',
+                boxShadow: `0 4px 16px ${colors.shadow}`,
+                cursor: 'pointer',
+              }}
+            >
+              <div style={{ fontSize: FS.base, fontWeight: 'bold' }}>{arrivalBanner.title}</div>
+              <div style={{ fontSize: FS.helper, opacity: 0.9, marginTop: '2px' }}>{arrivalBanner.body}</div>
+            </div>
+          )}
+
           {dimmedMapTooltip && (() => {
             const TW = 180;
             const displayName = translateRoute(
@@ -5151,6 +5282,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     autoSetDepartureFromLocation={autoSetDepartureFromLocation}
                     alwaysVisibleStationsEnabled={alwaysVisibleStationsEnabled}
                     alwaysVisibleMinRoutes={alwaysVisibleMinRoutes}
+                    arrivalAlertEnabled={arrivalAlertEnabled}
+                    arrivalAlertMinutes={arrivalAlertMinutes}
                     showExpressStationsOnly={showExpressStationsOnly}
                     showTravelTimes={showTravelTimes}
                     showStationNames={showStationNames}
@@ -5167,6 +5300,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onAutoSetDepartureFromLocationChange={setAutoSetDepartureFromLocation}
                     onAlwaysVisibleStationsEnabledChange={setAlwaysVisibleStationsEnabled}
                     onAlwaysVisibleMinRoutesChange={setAlwaysVisibleMinRoutes}
+                    onArrivalAlertEnabledChange={handleArrivalAlertEnabledChange}
+                    onArrivalAlertMinutesChange={setArrivalAlertMinutes}
                     onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
                     onShowTravelTimesChange={setShowTravelTimes}
                     onShowStationNamesChange={setShowStationNames}
@@ -5424,6 +5559,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         autoSetDepartureFromLocation={autoSetDepartureFromLocation}
                         alwaysVisibleStationsEnabled={alwaysVisibleStationsEnabled}
                         alwaysVisibleMinRoutes={alwaysVisibleMinRoutes}
+                        arrivalAlertEnabled={arrivalAlertEnabled}
+                        arrivalAlertMinutes={arrivalAlertMinutes}
                         showExpressStationsOnly={showExpressStationsOnly}
                         showTravelTimes={showTravelTimes}
                         showStationNames={showStationNames}
@@ -5440,6 +5577,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onAutoSetDepartureFromLocationChange={setAutoSetDepartureFromLocation}
                         onAlwaysVisibleStationsEnabledChange={setAlwaysVisibleStationsEnabled}
                         onAlwaysVisibleMinRoutesChange={setAlwaysVisibleMinRoutes}
+                        onArrivalAlertEnabledChange={handleArrivalAlertEnabledChange}
+                        onArrivalAlertMinutesChange={setArrivalAlertMinutes}
                         onShowExpressStationsOnlyChange={setShowExpressStationsOnly}
                         onShowTravelTimesChange={setShowTravelTimes}
                         onShowStationNamesChange={setShowStationNames}
