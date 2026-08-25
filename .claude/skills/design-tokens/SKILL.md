@@ -18,6 +18,7 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 |---|---|---|
 | フォントサイズ | `FS.sectionTitle` / `base` / `label` / `helper` / `tiny` / `micro` / `input` | `src/constants/ui.ts` |
 | 操作要素の最小サイズ | `TARGET.min`(24) / `TARGET.touch`(44) | `src/constants/ui.ts` |
+| 出発/到着/primary の色 | `SEMANTIC.departure` / `arrival` / `primary` | `src/constants/ui.ts` |
 | 文字色・背景・境界線 | `getThemeColors(theme)` | `src/contexts/ThemeContext.tsx` |
 | 色の上に文字を載せる | `filledLabelColors(color, theme)` | `src/utils/contrast.ts` |
 | 色付きの小ラベル | `<ColorChip color=... theme=... />` | `src/components/ui/ColorChip.tsx` |
@@ -30,8 +31,9 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 ## 禁止
 
 - `fontSize: '12px'` のような数値の直書き → `FS.label`
-- `#4CAF50`(出発) `#F44336`(到着) `#2196F3`(primary) の直書き → 意味付きの定数を使う。
-  定数がまだ無ければ `src/constants/ui.ts` に追加してから使う
+- `#4CAF50`(出発) `#F44336`(到着) `#2196F3`(primary) の直書き → `SEMANTIC.*` を使う。
+  `rgba(76,175,80,0.12)` のように同じ色をrgbaで書き直すのも禁止 → `tintColor(SEMANTIC.departure, 0.12)`。
+  `tests/unit/constants/semanticColors.test.ts` が `constants/ui.ts` 以外での出現を落とす
 - `color: '#fff'` / `backgroundColor: '#333'` の直書き → `getThemeColors(theme)`
 - 自前でのコントラスト判定（`theme === 'dark' ? white : black` のような分岐）
   → `filledLabelColors()`。この分岐は3箇所に重複していて実際に不整合が出た
