@@ -1409,3 +1409,14 @@
 - `tests/unit/constants/semanticColors.test.ts`（新規）: `constants/ui.ts` 以外に
   この3色が現れたら失敗する。実際に1箇所戻して落ちることを確認済み
 - `docs/design-system.md` / `.claude/skills/design-tokens/SKILL.md` を対応済みに更新
+
+### fix: 候補ルートが設定パネルを開くまで見えない問題を修正
+- `src/components/RailwayMap.tsx`, `src/components/MobileBottomPanel.tsx`,
+  `src/components/legend/LegendRouteRecommendations.tsx`
+- 経路探索は動いていて地図に線も引かれていたが、一覧を描くコンポーネントが
+  設定パネルの中にしか置かれておらず、設定を開くまで候補の存在が分からなかった
+- スマホ全画面: 下部に「推薦ルート選択 (件数)」ボタンを追加し、設定より前に配置
+- PC・全画面(PC): 駅セレクタの直後に一覧を表示
+- 同じ一覧の組み立てを1箇所にまとめて使い回す形にした
+  （従来も設定パネル内で同じJSXが2つ重複していた）
+- 下部パネルは自前で見出しを描くため、`showTitle={false}` で中の見出しを省く
