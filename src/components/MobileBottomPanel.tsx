@@ -51,7 +51,7 @@ const STYLE_ID = 'mbp-styles-v2';
 
 // ─────────────────────────────────────────────────────────────────────
 
-export type PopoverKey = 'station' | 'settings';
+export type PopoverKey = 'station' | 'settings' | 'routes';
 
 export interface FloatingButtonDef {
   key: PopoverKey;

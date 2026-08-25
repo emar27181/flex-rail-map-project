@@ -4084,6 +4084,28 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   };
 
 
+  /**
+   * 出発〜到着の候補ルート一覧。
+   *
+   * 以前は設定パネルの中にしか置いていなかったため、駅を選んでも
+   * 設定を開くまで候補が見えず「候補が出ない」ように見えていた。
+   * 同じ内容を複数の画面（PC・全画面・スマホ）に出すので、
+   * ここで1つだけ組み立てて各所で使い回す。
+   */
+  const renderRouteRecommendations = (showTitle = true) => (
+    <LegendRouteRecommendations
+      routeRecommendations={routeRecommendations}
+      selectedRouteIndices={selectedRouteIndices}
+      theme={theme}
+      language={currentLanguage}
+      onRouteToggle={handleRouteToggle}
+      onSelectAll={handleSelectAllRecommendedRoutes}
+      onDeselectAll={handleDeselectAllRecommendedRoutes}
+      showTitle={showTitle}
+    />
+  );
+  const routeRecommendationsPanel = renderRouteRecommendations();
+
   return (
     <ErrorBoundary language={currentLanguage}>
       <div
@@ -4132,6 +4154,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 locationError={locationError}
                 onRetryLocation={() => setLocationRetryCount(c => c + 1)}
               />
+              {routeRecommendationsPanel}
             </div>
           )
         ) : (
@@ -4161,7 +4184,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         {/* カバレッジ分析 - オフ */}
         {/* <CoverageAnalysis /> */}
 
-        {/* ルート推薦表示は凡例内に統合 */}
+        {/* 候補ルートは駅を選んだ直後に見えている必要があるので、
+            設定パネルの中だけでなくここにも出す */}
+        {routeRecommendationsPanel}
 
         {showRouteToggleSection && (
           <div style={{
@@ -5371,15 +5396,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   />
 
                   {/* 4. 推薦ルート選択 (Route Recommendations) */}
-                  <LegendRouteRecommendations
-                    routeRecommendations={routeRecommendations}
-                    selectedRouteIndices={selectedRouteIndices}
-                    theme={theme}
-                    language={currentLanguage}
-                    onRouteToggle={handleRouteToggle}
-                    onSelectAll={handleSelectAllRecommendedRoutes}
-                    onDeselectAll={handleDeselectAllRecommendedRoutes}
-                  />
+                  {routeRecommendationsPanel}
 
                   {/* 4.5 複数出発駅から共通ゴールへの経路比較 */}
                   <MultiDepartureRoutes
@@ -5536,6 +5553,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               theme={theme}
               safeAreaBottom={25}
               buttons={[
+                // 候補ルートは駅を選んだ直後に見たいものなので、設定より前に置く。
+                // 候補が無いときはボタン自体を出さない
+                ...(routeRecommendations.length > 0 ? [{
+                  key: 'routes' as const,
+                  icon: <TrainFront size={16} />,
+                  label: `${translateUI('routeSelection', currentLanguage)} (${routeRecommendations.length})`,
+                  // 下部パネル側が既に見出しを描くので、中の見出しは省く
+                  content: renderRouteRecommendations(false),
+                }] : []),
                 {
                   key: 'settings',
                   icon: <Settings size={16} />,
@@ -5637,15 +5663,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         travelTimeLabelMode={travelTimeLabelMode}
                         onTravelTimeLabelModeChange={setTravelTimeLabelMode}
                       />
-                      <LegendRouteRecommendations
-                        routeRecommendations={routeRecommendations}
-                        selectedRouteIndices={selectedRouteIndices}
-                        theme={theme}
-                        language={currentLanguage}
-                        onRouteToggle={handleRouteToggle}
-                        onSelectAll={handleSelectAllRecommendedRoutes}
-                        onDeselectAll={handleDeselectAllRecommendedRoutes}
-                      />
+                      {routeRecommendationsPanel}
                       <MultiDepartureRoutes
                         arrival={arrival}
                         extraDepartures={extraDepartures}

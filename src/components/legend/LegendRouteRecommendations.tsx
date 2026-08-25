@@ -29,6 +29,11 @@ interface LegendRouteRecommendationsProps {
   onRouteToggle: (index: number) => void;
   onSelectAll: () => void;
   onDeselectAll: () => void;
+  /**
+   * 見出しを出すか。既定は出す。
+   * 呼び出し側（スマホの下部パネルなど）が既に同じ見出しを持つ場合だけ false にする。
+   */
+  showTitle?: boolean;
 }
 
 const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
@@ -38,7 +43,8 @@ const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
   language,
   onRouteToggle,
   onSelectAll,
-  onDeselectAll
+  onDeselectAll,
+  showTitle = true
 }) => {
   const colors = getThemeColors(theme);
 
@@ -54,14 +60,16 @@ const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
       borderRadius: '4px',
       border: `1px solid ${colors.borderLight}`
     }}>
-      <div style={{
-        fontSize: '14px',
-        fontWeight: 'bold',
-        marginBottom: '8px',
-        color: colors.text
-      }}>
-        {translateUI('routeSelection', language)}
-      </div>
+      {showTitle && (
+        <div style={{
+          fontSize: '14px',
+          fontWeight: 'bold',
+          marginBottom: '8px',
+          color: colors.text
+        }}>
+          {translateUI('routeSelection', language)}
+        </div>
+      )}
 
       <div style={{
         display: 'flex',
