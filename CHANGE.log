@@ -1399,3 +1399,13 @@
 - 「出発は緑・到着は赤」という約束事を12ファイルが各自ベタ書きしており、
   片方だけ直して色が食い違う不具合を実際に起こしていた
 - 新規コードが参照する単一の定義元を用意した（既存のベタ書きは触る箇所から置換）
+
+### improve: 出発/到着/primary の色 67箇所を SEMANTIC に置き換え
+- `src/constants/ui.ts` の `SEMANTIC` を唯一の定義元にし、14ファイルのベタ書きを置換
+- 対象: `#4CAF50`(31) / `#F44336`(24) / `#2196F3`(12)
+- 大文字小文字が混在（`#F44336` と `#f44336`）していて検索で取りこぼしていた
+- 同じ色を `rgba()` で書き直していた4箇所も `tintColor(SEMANTIC.*, alpha)` に寄せた
+- ダークモード用の値は `ThemeContext` が持ち、ライト側の値だけ `SEMANTIC` から取る
+- `tests/unit/constants/semanticColors.test.ts`（新規）: `constants/ui.ts` 以外に
+  この3色が現れたら失敗する。実際に1箇所戻して落ちることを確認済み
+- `docs/design-system.md` / `.claude/skills/design-tokens/SKILL.md` を対応済みに更新
