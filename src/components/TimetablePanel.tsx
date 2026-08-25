@@ -11,6 +11,7 @@ import {
   type Departure,
 } from '../data/timetableData';
 import type { RouteResult } from '../utils/routeFinder';
+import { SEMANTIC } from '../constants/ui';
 
 interface TimetablePanelProps {
   routeResult: RouteResult | null;
@@ -212,7 +213,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
               }}>
                 <span style={{
                   width: '8px', height: '8px', borderRadius: '50%',
-                  backgroundColor: idx === 0 ? '#4CAF50' : colors.primary,
+                  backgroundColor: idx === 0 ? SEMANTIC.departure : colors.primary,
                   flexShrink: 0,
                 }} />
                 <span style={{ fontWeight: 'bold', color: colors.text }}>
@@ -220,7 +221,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                 </span>
                 <span style={{
                   fontSize: '14px', fontWeight: 'bold',
-                  color: idx === 0 ? '#4CAF50' : colors.primary,
+                  color: idx === 0 ? SEMANTIC.departure : colors.primary,
                   marginLeft: 'auto',
                 }}>
                   {seg.departTime} {translateUI('departsLabel', language)}
@@ -347,14 +348,14 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                 }}>
                   <span style={{
                     width: '8px', height: '8px', borderRadius: '50%',
-                    backgroundColor: '#F44336', flexShrink: 0,
+                    backgroundColor: SEMANTIC.arrival, flexShrink: 0,
                   }} />
                   <span style={{ fontWeight: 'bold', color: colors.text }}>
                     {seg.toStation}
                   </span>
                   <span style={{
                     fontSize: '14px', fontWeight: 'bold',
-                    color: '#F44336', marginLeft: 'auto',
+                    color: SEMANTIC.arrival, marginLeft: 'auto',
                   }}>
                     {totalArriveTime} {translateUI('arrivesLabel', language)}
                   </span>

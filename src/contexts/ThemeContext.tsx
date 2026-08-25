@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { SEMANTIC } from '../constants/ui';
 
 export type Theme = 'light' | 'dark';
 
@@ -74,15 +75,15 @@ export const getThemeColors = (theme: Theme) => {
     text: theme === 'dark' ? '#ffffff' : '#333',
     textSecondary: theme === 'dark' ? '#b3b3b3' : '#666',
     textMuted: theme === 'dark' ? '#888888' : '#888',
-    primary: theme === 'dark' ? '#4a9eff' : '#2196F3',
+    primary: theme === 'dark' ? '#4a9eff' : SEMANTIC.primary,
     primaryHover: theme === 'dark' ? '#3d8ce6' : '#1976D2',
     onPrimary: '#ffffff',
     onSurface: theme === 'dark' ? '#ffffff' : '#333',
-    success: theme === 'dark' ? '#5cb85c' : '#4CAF50',
+    success: theme === 'dark' ? '#5cb85c' : SEMANTIC.departure,
     successLight: theme === 'dark' ? '#2d4a2d' : '#e8f5e9',
     warning: theme === 'dark' ? '#f0ad4e' : '#ff9800',
     warningLight: theme === 'dark' ? '#4a3d2d' : '#fff3e0',
-    info: theme === 'dark' ? '#5bc0de' : '#2196F3',
+    info: theme === 'dark' ? '#5bc0de' : SEMANTIC.primary,
     infoLight: theme === 'dark' ? '#2d3d4a' : '#e3f2fd',
     shadow: theme === 'dark' ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.15)',
     shadowHeavy: theme === 'dark' ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.3)',

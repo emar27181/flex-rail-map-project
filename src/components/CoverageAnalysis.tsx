@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { routes, routeNames, type RouteKey } from '../data/routes';
+import { SEMANTIC } from '../constants/ui';
 
 interface CoverageStats {
   totalRoutes: number;
@@ -99,11 +100,11 @@ const CoverageAnalysis: React.FC = () => {
   const getCoverageGrade = (stats: CoverageStats): { grade: string; color: string } => {
     const completenessScore = (stats.totalRoutes / 40) * 100; // 40路線を満点とする
     
-    if (completenessScore >= 90) return { grade: 'A', color: '#4CAF50' };
+    if (completenessScore >= 90) return { grade: 'A', color: SEMANTIC.departure };
     if (completenessScore >= 80) return { grade: 'B', color: '#8BC34A' };
     if (completenessScore >= 70) return { grade: 'C', color: '#FFC107' };
     if (completenessScore >= 60) return { grade: 'D', color: '#FF9800' };
-    return { grade: 'F', color: '#f44336' };
+    return { grade: 'F', color: SEMANTIC.arrival };
   };
 
   const { grade, color } = getCoverageGrade(coverageStats);
@@ -161,11 +162,11 @@ const CoverageAnalysis: React.FC = () => {
           </div>
 
           <div style={{ marginBottom: '15px' }}>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#f44336' }}>不完全な路線</h4>
+            <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: SEMANTIC.arrival }}>不完全な路線</h4>
             {coverageStats.incompleteRoutes.map((route, index) => (
               <div key={index} style={{ marginBottom: '4px' }}>
                 <strong>{route.routeName}</strong>: {route.currentStations}/{route.expectedStations}駅 
-                <span style={{ color: route.completeness < 70 ? '#f44336' : '#FF9800' }}>
+                <span style={{ color: route.completeness < 70 ? SEMANTIC.arrival : '#FF9800' }}>
                   ({route.completeness}%)
                 </span>
               </div>
@@ -173,7 +174,7 @@ const CoverageAnalysis: React.FC = () => {
           </div>
 
           <div style={{ marginBottom: '15px' }}>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#f44336' }}>欠落している重要路線</h4>
+            <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: SEMANTIC.arrival }}>欠落している重要路線</h4>
             <div style={{ fontSize: '11px', color: '#666' }}>
               {coverageStats.missingCriticalRoutes.join('、')}
             </div>

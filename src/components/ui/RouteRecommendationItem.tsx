@@ -5,6 +5,7 @@ import { getThemeColors } from '../../contexts/ThemeContext';
 import { checkboxInput, selectableCard } from '../legend/legendStyles';
 import { translateUI, translateRoute, translateStation } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
+import { SEMANTIC } from '../../constants/ui';
 
 interface RouteSegment {
   routeKey: string;
@@ -93,7 +94,7 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
         <div style={{ flexShrink: 0, display: 'flex', alignItems: 'baseline', gap: '1px' }}>
           <span style={{
             fontSize: '18px', fontWeight: 'bold', lineHeight: 1,
-            color: isSelected ? '#2196F3' : colors.text,
+            color: isSelected ? SEMANTIC.primary : colors.text,
             opacity: isSelected ? 1 : 0.5,
           }}>
             {totalMin}
@@ -123,7 +124,7 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
             <div key={i}>
               {/* 出発駅（最初のセグメントのみ） */}
               {i === 0 && fromName && (
-                <div style={{ fontWeight: 'bold', color: '#4CAF50', fontSize: '10px' }}>
+                <div style={{ fontWeight: 'bold', color: SEMANTIC.departure, fontSize: '10px' }}>
                   <CircleDot size={12} style={{ verticalAlign: 'text-bottom' }} /> {translateStation(fromName, language)}
                 </div>
               )}
@@ -138,7 +139,7 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
               {toName && (
                 <div style={{
                   fontWeight: 'bold',
-                  color: isLast ? '#F44336' : colors.text,
+                  color: isLast ? SEMANTIC.arrival : colors.text,
                   fontSize: '10px',
                 }}>
                   {isLast ? <MapPin size={12} style={{ verticalAlign: 'text-bottom' }} /> : <RefreshCw size={12} style={{ verticalAlign: 'text-bottom' }} />} {translateStation(toName, language)}

@@ -7,6 +7,8 @@ import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { selectableCard } from './legend/legendStyles';
 import { translateStation, translateRoute, translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
+import { SEMANTIC } from '../constants/ui';
+import { tintColor } from '../utils/contrast';
 
 interface RouteRecommendationsProps {
   routes: RouteResult[];
@@ -185,7 +187,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
               style={{
                 padding: '10px 12px',
                 ...selectableCard(colors, { selected: isSelected, radius: '6px' }),
-                boxShadow: isSelected ? '0 2px 8px rgba(33,150,243,0.3)' : `0 1px 3px ${colors.shadow}`
+                boxShadow: isSelected ? `0 2px 8px ${tintColor(SEMANTIC.primary, 0.3)}` : `0 1px 3px ${colors.shadow}`
               }}
             >
             {/* ルートヘッダー: 番号・時間・乗換・ボタン */}
@@ -209,7 +211,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                   alignItems: 'baseline',
                   gap: '2px'
                 }}>
-                  <span style={{ fontSize: '20px', fontWeight: 'bold', color: isSelected ? '#2196F3' : colors.text, lineHeight: '1' }}>
+                  <span style={{ fontSize: '20px', fontWeight: 'bold', color: isSelected ? SEMANTIC.primary : colors.text, lineHeight: '1' }}>
                     {Math.round(route.totalTime)}
                   </span>
                   <span style={{ fontSize: '11px', color: colors.textSecondary }}>{translateUI('minutesSuffix', language)}</span>
@@ -217,9 +219,9 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                 {/* 乗換数 */}
                 <span style={{
                   fontSize: '12px',
-                  color: route.transfers === 0 ? '#4CAF50' : '#ff9800',
+                  color: route.transfers === 0 ? SEMANTIC.departure : '#ff9800',
                   padding: '2px 7px',
-                  backgroundColor: route.transfers === 0 ? 'rgba(76,175,80,0.12)' : 'rgba(255,152,0,0.12)',
+                  backgroundColor: route.transfers === 0 ? tintColor(SEMANTIC.departure, 0.12) : 'rgba(255,152,0,0.12)',
                   borderRadius: '10px',
                   fontWeight: '500',
                   whiteSpace: 'nowrap'
@@ -234,7 +236,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                 disabled={isSelected}
                 style={{
                   padding: '5px 12px',
-                  backgroundColor: isSelected ? colors.textSecondary : '#2196F3',
+                  backgroundColor: isSelected ? colors.textSecondary : SEMANTIC.primary,
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
@@ -245,7 +247,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                   transition: 'background-color 0.2s ease'
                 }}
                 onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = '#1976D2'; }}
-                onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = '#2196F3'; }}
+                onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = SEMANTIC.primary; }}
               >
                 {isSelected ? translateUI('displayOnMapActive', language) : translateUI('displayOnMapButton', language)}
               </button>
@@ -255,7 +257,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', rowGap: '6px' }}>
               {route.segments.map((segment, segIndex) => {
                 const segColor = segment.isWalkingTransfer || segment.routeKey === 'walking'
-                  ? '#4CAF50'
+                  ? SEMANTIC.departure
                   : (routeColors[segment.routeKey] || '#888');
                 const segName = segment.routeKey === 'walking'
                   ? translateUI('walkingTransferShort', language)
@@ -271,7 +273,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                         <span style={{
                           fontSize: '9px',
                           color: '#fff',
-                          backgroundColor: segment.isWalkingTransfer ? '#4CAF50' : '#ff9800',
+                          backgroundColor: segment.isWalkingTransfer ? SEMANTIC.departure : '#ff9800',
                           padding: '1px 5px',
                           borderRadius: '6px',
                           whiteSpace: 'nowrap'

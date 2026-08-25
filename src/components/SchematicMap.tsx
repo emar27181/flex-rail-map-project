@@ -5,6 +5,7 @@ import type { RouteResult } from '../utils/routeFinder';
 import { createSchematicLayout, getRouteLayout, type SchematicStationLayout } from '../data/schematicLayout';
 import { translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
+import { SEMANTIC } from '../constants/ui';
 
 interface SchematicMapProps {
   visibleRoutes: Set<RouteKey>;
@@ -198,7 +199,7 @@ const SchematicMap: React.FC<SchematicMapProps> = ({
                   width="80"
                   height="20"
                   fill="white"
-                  stroke={station.isDeparture ? '#4CAF50' : '#F44336'}
+                  stroke={station.isDeparture ? SEMANTIC.departure : SEMANTIC.arrival}
                   strokeWidth="3"
                   rx="4"
                   style={{ cursor: 'pointer' }}
@@ -226,7 +227,7 @@ const SchematicMap: React.FC<SchematicMapProps> = ({
                   textAnchor="middle"
                   fontSize="12"
                   fontWeight="bold"
-                  fill={station.isDeparture ? '#4CAF50' : station.isArrival ? '#F44336' : '#333'}
+                  fill={station.isDeparture ? SEMANTIC.departure : station.isArrival ? SEMANTIC.arrival : '#333'}
                   style={{ cursor: 'pointer' }}
                   onClick={(e) => handleStationClick(station, e)}
                 >

@@ -10,7 +10,7 @@ import { stationReadings, normalizeToHiragana } from '../utils/stationReadings';
 import { findNearestStations } from '../utils/nearestStations';
 import { loadStationHistory, recordStationSelection, buildSuggestions } from '../utils/stationHistory';
 import type { StationHistoryEntry } from '../utils/stationHistory';
-import { FS, TARGET } from '../constants/ui';
+import { FS, TARGET, SEMANTIC } from '../constants/ui';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 
@@ -451,14 +451,14 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   style={{
                     width: '100%',
                     padding: '4px 20px 4px 6px',
-                    border: `2px solid #4CAF50`,
+                    border: `2px solid ${SEMANTIC.departure}`,
                     borderRadius: '4px',
                     // iOS Safari の自動ズームを防ぐため入力欄は16px下限
                     fontSize: FS.input,
                     minHeight: `${TARGET.min}px`,
                     boxSizing: 'border-box',
                     // 出発＝緑 で塗りつぶし、文字は白。地図の上でも役割が一目で分かるようにする
-                    backgroundColor: '#4CAF50',
+                    backgroundColor: SEMANTIC.departure,
                     color: '#ffffff',
                   }}
                 />
@@ -516,12 +516,12 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   onClick={onSetNearestDeparture}
                   style={{
                     marginTop: '4px',
-                    border: `1px solid #4CAF50`,
+                    border: `1px solid ${SEMANTIC.departure}`,
                     borderRadius: '4px',
                     padding: '2px 7px',
                     fontSize: FS.helper,
                     // 出発駅欄と同じ緑の塗りつぶしで、出発側の操作だと分かるようにする
-                    backgroundColor: '#4CAF50',
+                    backgroundColor: SEMANTIC.departure,
                     color: '#ffffff',
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
@@ -673,14 +673,14 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   style={{
                     width: '100%',
                     padding: '4px 20px 4px 6px',
-                    border: `2px solid #f44336`,
+                    border: `2px solid ${SEMANTIC.arrival}`,
                     borderRadius: '4px',
                     // iOS Safari の自動ズームを防ぐため入力欄は16px下限
                     fontSize: FS.input,
                     minHeight: `${TARGET.min}px`,
                     boxSizing: 'border-box',
                     // 到着＝赤 で塗りつぶし、文字は白（出発欄と対になる配色）
-                    backgroundColor: '#f44336',
+                    backgroundColor: SEMANTIC.arrival,
                     color: '#ffffff',
                   }}
                 />

@@ -53,7 +53,7 @@ import {
 import { FS, TARGET, SEMANTIC } from '../constants/ui';
 import ColorChip from './ui/ColorChip';
 import { checkboxInput } from './legend/legendStyles';
-import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, LIGHT_TEXT } from '../utils/contrast';
+import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, tintColor, LIGHT_TEXT } from '../utils/contrast';
 import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE, haversineDistance } from '../utils/trainDetector';
 import { estimateArrival, shouldNotifyArrival, buildArrivalMessage, isPlausibleSpeed, DEFAULT_ALERT_MINUTES } from '../utils/arrivalAlert';
 import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
@@ -1165,11 +1165,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           </div>
           <div style={{ display: 'flex', gap: '4px' }}>
             <button onClick={() => { handleManualSetDeparture(stationTooltip.station); closeTooltip(); }}
-              style={{ backgroundColor: '#4CAF50', color: 'white', border: 'none', padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px' }}>
+              style={{ backgroundColor: SEMANTIC.departure, color: 'white', border: 'none', padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px' }}>
               {translateUI('setDepartureStation', currentLanguage)}
             </button>
             <button onClick={() => { setArrival(stationTooltip.station); closeTooltip(); }}
-              style={{ backgroundColor: '#F44336', color: 'white', border: 'none', padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px' }}>
+              style={{ backgroundColor: SEMANTIC.arrival, color: 'white', border: 'none', padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px' }}>
               {translateUI('setArrivalStation', currentLanguage)}
             </button>
           </div>
@@ -1449,14 +1449,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               <button
                 onClick={() => { handleManualSetDeparture(stationTooltip.station); closeTooltip(); }}
                 style={{
-                  backgroundColor: '#4CAF50', color: 'white', border: 'none',
+                  backgroundColor: SEMANTIC.departure, color: 'white', border: 'none',
                   padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px',
                 }}
               >{translateUI('setDepartureStation', currentLanguage)}</button>
               <button
                 onClick={() => { setArrival(stationTooltip.station); closeTooltip(); }}
                 style={{
-                  backgroundColor: '#F44336', color: 'white', border: 'none',
+                  backgroundColor: SEMANTIC.arrival, color: 'white', border: 'none',
                   padding: '3px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px',
                 }}
               >{translateUI('setArrivalStation', currentLanguage)}</button>
@@ -2188,7 +2188,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // ひと回り大きく高さも揃わなかった。強調は大きさではなく背景色で付ける。
     const fontSize = stationLabelBox.fontSize;
     const markerHeight = stationLabelBox.height;
-    const markerColor = isDeparture ? '#4CAF50' : '#F44336';
+    const markerColor = isDeparture ? SEMANTIC.departure : SEMANTIC.arrival;
 
     const stationNumber = showStationNumbers
       ? ((routeKey ? getStationNumber(routeKey, originalName ?? stationName) : undefined) ?? getAnyStationNumber(originalName ?? stationName))
@@ -4284,9 +4284,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 <div style={{
                   marginBottom: '10px',
                   padding: '10px',
-                  border: `1px solid ${showTravelTimeOverlay ? '#4CAF50' : colors.borderLight}`,
+                  border: `1px solid ${showTravelTimeOverlay ? SEMANTIC.departure : colors.borderLight}`,
                   borderRadius: '6px',
-                  backgroundColor: showTravelTimeOverlay ? 'rgba(76,175,80,0.08)' : colors.surfaceElevated
+                  backgroundColor: showTravelTimeOverlay ? tintColor(SEMANTIC.departure, 0.08) : colors.surfaceElevated
                 }}>
                   <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', color: colors.text, cursor: 'pointer' }}>
                     <input
@@ -4349,7 +4349,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       <span style={{
                         padding: '4px 8px',
                         backgroundColor: departure ? colors.successLight : colors.surface,
-                        border: departure ? '1px solid #4CAF50' : `1px solid ${colors.border}`,
+                        border: departure ? `1px solid ${SEMANTIC.departure}` : `1px solid ${colors.border}`,
                         borderRadius: '4px',
                         color: departure ? colors.success : colors.textSecondary,
                         fontSize: '13px',
@@ -5170,7 +5170,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         setDimmedMapTooltip(null);
                       }}
                       style={{
-                        backgroundColor: '#F44336', color: 'white', border: 'none',
+                        backgroundColor: SEMANTIC.arrival, color: 'white', border: 'none',
                         padding: '3px 8px', borderRadius: '3px', cursor: 'pointer',
                         fontSize: '11px', width: '100%',
                       }}
@@ -5185,7 +5185,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         setDimmedMapTooltip(null);
                       }}
                       style={{
-                        backgroundColor: '#4CAF50', color: 'white', border: 'none',
+                        backgroundColor: SEMANTIC.departure, color: 'white', border: 'none',
                         padding: '3px 8px', borderRadius: '3px', cursor: 'pointer',
                         fontSize: '11px', width: '100%',
                       }}
@@ -5872,7 +5872,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         }}>
                           <strong>{translateStation(departure.name, currentLanguage)}</strong>
                           <span style={{
-                            color: '#4CAF50',
+                            color: SEMANTIC.departure,
                             fontSize: '18px',
                             fontWeight: 'bold'
                           }}>→</span>
@@ -5924,7 +5924,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     style={{
                       marginTop: '10px',
                       width: '100%',
-                      backgroundColor: '#F44336', color: 'white', border: 'none',
+                      backgroundColor: SEMANTIC.arrival, color: 'white', border: 'none',
                       padding: '4px 8px', borderRadius: '4px', cursor: 'pointer',
                       fontSize: '11px',
                     }}

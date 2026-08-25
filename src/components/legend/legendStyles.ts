@@ -9,6 +9,7 @@
  */
 import type { CSSProperties } from 'react';
 import { tintColor } from '../../utils/contrast';
+import { SEMANTIC } from '../../constants/ui';
 
 // ── Design tokens ──────────────────────────────────────────────────────────
 
@@ -161,7 +162,7 @@ export function checkboxInput(colors: Colors): CSSProperties {
   return {
     marginRight:  L.sp.sm,
     cursor:       'pointer',
-    accentColor:  colors.primary ?? '#2196F3',
+    accentColor:  colors.primary ?? SEMANTIC.primary,
     // 長いラベルに押されて潰れないようにする
     flexShrink:   0,
   };
@@ -213,7 +214,7 @@ export function selectableCard(
   colors: Colors,
   opts: { selected: boolean; accent?: string; radius?: string },
 ): CSSProperties {
-  const accent = opts.accent ?? colors.primary ?? '#2196F3';
+  const accent = opts.accent ?? colors.primary ?? SEMANTIC.primary;
   return {
     boxSizing: 'border-box',
     borderRadius: opts.radius ?? L.r.md,

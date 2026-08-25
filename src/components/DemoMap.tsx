@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Map, MousePointerClick, CircleCheck } from 'lucide-react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
+import { SEMANTIC } from '../constants/ui';
+import { tintColor } from '../utils/contrast';
 
 // Yokohama → Shinjuku corridor routes only
 const DEMO_ROUTES: RouteKey[] = [
@@ -140,7 +142,7 @@ const DemoMap: React.FC = () => {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 'bold', fontSize: '13px', marginBottom: '2px' }}>
               <span style={{
-                backgroundColor: '#4CAF50',
+                backgroundColor: SEMANTIC.departure,
                 color: '#fff',
                 borderRadius: '10px',
                 padding: '1px 7px',
@@ -161,7 +163,7 @@ const DemoMap: React.FC = () => {
                 onClick={handleNext}
                 style={{
                   padding: '5px 12px',
-                  backgroundColor: '#4CAF50',
+                  backgroundColor: SEMANTIC.departure,
                   color: '#fff',
                   border: 'none',
                   borderRadius: '4px',
@@ -178,7 +180,7 @@ const DemoMap: React.FC = () => {
                 onClick={() => setTutorialDismissed(true)}
                 style={{
                   padding: '5px 12px',
-                  backgroundColor: '#4CAF50',
+                  backgroundColor: SEMANTIC.departure,
                   color: '#fff',
                   border: 'none',
                   borderRadius: '4px',
@@ -231,7 +233,7 @@ const DemoMap: React.FC = () => {
             overflow: 'hidden',
             transition: 'box-shadow 0.3s ease',
             boxShadow: isPanelHighlighted
-              ? '0 0 0 3px #4CAF50, 0 0 20px rgba(76,175,80,0.4)'
+              ? `0 0 0 3px ${SEMANTIC.departure}, 0 0 20px ${tintColor(SEMANTIC.departure, 0.4)}`
               : 'none',
             position: 'relative',
             zIndex: isPanelHighlighted ? 10 : 1,
@@ -251,7 +253,7 @@ const DemoMap: React.FC = () => {
               <span style={{
                 display: 'block',
                 fontSize: '10px',
-                color: '#4CAF50',
+                color: SEMANTIC.departure,
                 marginTop: '2px',
                 animation: 'pulse-text 1s infinite',
               }}>

@@ -2,6 +2,7 @@ import React from 'react';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { checkboxInput, selectableCard } from '../legend/legendStyles';
 import { tintColor } from '../../utils/contrast';
+import { SEMANTIC } from '../../constants/ui';
 
 interface ToggleableItemProps {
   id: string;
@@ -55,9 +56,9 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
         }),
         // 強調（経路に含まれる）行は背景をもう少し濃くして区別する
         backgroundColor: isHighlighted
-          ? tintColor(colors.primary ?? '#2196F3', 0.28)
+          ? tintColor(colors.primary ?? SEMANTIC.primary, 0.28)
           : isActive
-            ? tintColor(colorIndicator?.color ?? colors.primary ?? '#2196F3', 0.16)
+            ? tintColor(colorIndicator?.color ?? colors.primary ?? SEMANTIC.primary, 0.16)
             : colors.surface,
       }}
     >
@@ -88,7 +89,7 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
 
       <span style={{
         color: isHighlighted
-          ? '#2196F3'
+          ? SEMANTIC.primary
           : isActive
             ? colors.text
             : colors.textMuted,
@@ -106,7 +107,7 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
           <span style={{
             fontSize: '10px',
             marginLeft: '4px',
-            color: '#2196F3',
+            color: SEMANTIC.primary,
             fontWeight: 'normal'
           }}>
             ({badge})

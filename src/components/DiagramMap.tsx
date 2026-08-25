@@ -5,6 +5,7 @@ import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
 import { translateRoute, translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
+import { SEMANTIC } from '../constants/ui';
 
 // ---- 表示対象路線 ----
 export const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
@@ -569,7 +570,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
   const arrScreenX = arrSVGPos ? arrSVGPos[0] * transform.scale + transform.x : null;
   const arrScreenY = arrSVGPos ? arrSVGPos[1] * transform.scale + transform.y : null;
   const depColor = colors.success;
-  const arrColor = theme === 'dark' ? '#ff5555' : '#F44336';
+  const arrColor = theme === 'dark' ? '#ff5555' : SEMANTIC.arrival;
 
   return (
     <div style={{ display: 'flex', height: '100%', width: '100%', fontFamily: 'sans-serif', background: colors.background }}>

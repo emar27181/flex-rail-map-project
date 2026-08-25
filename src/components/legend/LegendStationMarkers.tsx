@@ -3,6 +3,7 @@ import type { Station } from '../../data/yamanote';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateStation, translateUI } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
+import { SEMANTIC } from '../../constants/ui';
 
 interface LegendStationMarkersProps {
   departure: Station | null;
@@ -62,14 +63,14 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
               width: '16px',
               height: '16px',
               backgroundColor: colors.surfaceElevated,
-              border: '2px solid #4CAF50',
+              border: `2px solid ${SEMANTIC.departure}`,
               borderRadius: '3px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '10px',
               fontWeight: 'bold',
-              color: '#4CAF50',
+              color: SEMANTIC.departure,
               flexShrink: 0
             }}>
               S
@@ -79,7 +80,7 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
             </span>
           </div>
           <span style={{
-            color: '#4CAF50',
+            color: SEMANTIC.departure,
             fontSize: '14px',
             fontWeight: 'bold'
           }}>→</span>
@@ -92,14 +93,14 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
               width: '16px',
               height: '16px',
               backgroundColor: colors.surfaceElevated,
-              border: '2px solid #F44336',
+              border: `2px solid ${SEMANTIC.arrival}`,
               borderRadius: '3px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '10px',
               fontWeight: 'bold',
-              color: '#F44336',
+              color: SEMANTIC.arrival,
               flexShrink: 0
             }}>
               G
@@ -122,7 +123,7 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
             width: '20px',
             height: '20px',
             backgroundColor: colors.surfaceElevated,
-            border: '3px solid #4CAF50',
+            border: `3px solid ${SEMANTIC.departure}`,
             borderRadius: '4px',
             marginRight: '8px',
             display: 'flex',
@@ -130,7 +131,7 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
             justifyContent: 'center',
             fontSize: '12px',
             fontWeight: 'bold',
-            color: '#4CAF50',
+            color: SEMANTIC.departure,
             flexShrink: 0
           }}>
             S
@@ -152,7 +153,7 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
             width: '20px',
             height: '20px',
             backgroundColor: colors.surfaceElevated,
-            border: '3px solid #F44336',
+            border: `3px solid ${SEMANTIC.arrival}`,
             borderRadius: '4px',
             marginRight: '8px',
             display: 'flex',
@@ -160,7 +161,7 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
             justifyContent: 'center',
             fontSize: '12px',
             fontWeight: 'bold',
-            color: '#F44336',
+            color: SEMANTIC.arrival,
             flexShrink: 0
           }}>
             G
