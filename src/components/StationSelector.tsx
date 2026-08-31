@@ -513,19 +513,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   )}
                 </div>
               )}
-              {onSetNearestDeparture && (
-                <Button
-                  theme={theme}
-                  // 出発駅欄と同じ緑の塗りつぶしで、出発側の操作だと分かるようにする
-                  variant="positive"
-                  size="sm"
-                  onClick={onSetNearestDeparture}
-                  styleOverride={{ marginTop: L.sp.xs }}
-                >
-                  {translateUI('currentLocationFrom', language)}
-                </Button>
-              )}
-
               {showDepartureResults && departureDropdownPos && createPortal(
                 <div
                   ref={departurePortalRef}
@@ -775,26 +762,50 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           )}
 
           {/*
-            駅間の所要時間（駅と駅のあいだに出る丸）の切り替え。
-            以前は開発用の「路線表示切替セクション」と設定パネルの中にしか無く、
+            駅の指定に付随する操作をまとめた行。
+
+            「現在地から」は出発駅の列の中に置いていたが、列幅が110pxしかなく
+            所要時間トグル(115px)を横に並べられなかった。パネル幅(270px)を
+            使える位置に出して横並びにする。
+
+            所要時間は駅と駅のあいだに出る丸の切り替え。以前は開発用の
+            「路線表示切替セクション」と設定パネルの中にしか無く、
             経路を見ている最中に切り替えられなかった。
 
-            見た目は選択できる行の共通スタイル（selectableCard）に合わせる。
-            枠線の太さは選択で変えず、選択は背景も塗って示す規則。
-            詳細は docs/design-system.md を参照。
+            寸法は Button の size="sm" に揃えてあるので2つの大きさは一致する。
           */}
-          {onShowTravelTimeChange && (
-            <Button
-              theme={theme}
-              variant="primary"
-              size="sm"
-              pressed={!!showTravelTime}
-              onClick={() => onShowTravelTimeChange(!showTravelTime)}
-              icon={<Clock size={14} aria-hidden />}
-              styleOverride={{ marginTop: L.sp.sm }}
-            >
-              {translateUI('showTravelTimes', language)}
-            </Button>
+          {(onSetNearestDeparture || onShowTravelTimeChange) && (
+            <div style={{
+              marginTop: L.sp.xs,
+              display: 'flex',
+              alignItems: 'center',
+              gap: L.sp.xs,
+              flexWrap: 'wrap',
+            }}>
+              {onSetNearestDeparture && (
+                <Button
+                  theme={theme}
+                  // 出発駅欄と同じ緑の塗りつぶしで、出発側の操作だと分かるようにする
+                  variant="positive"
+                  size="sm"
+                  onClick={onSetNearestDeparture}
+                >
+                  {translateUI('currentLocationFrom', language)}
+                </Button>
+              )}
+              {onShowTravelTimeChange && (
+                <Button
+                  theme={theme}
+                  variant="primary"
+                  size="sm"
+                  pressed={!!showTravelTime}
+                  onClick={() => onShowTravelTimeChange(!showTravelTime)}
+                  icon={<Clock size={14} aria-hidden />}
+                >
+                  {translateUI('showTravelTimes', language)}
+                </Button>
+              )}
+            </div>
           )}
 
           {/*
