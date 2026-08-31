@@ -18,7 +18,10 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 |---|---|---|
 | フォントサイズ | `FS.sectionTitle` / `base` / `label` / `helper` / `tiny` / `micro` / `input` | `src/constants/ui.ts` |
 | 操作要素の最小サイズ | `TARGET.min`(24) / `TARGET.touch`(44) | `src/constants/ui.ts` |
+| ボタン | `<Button theme variant size>` | `src/components/ui/atoms/Button.tsx` |
+| 排他選択のボタン列 | `<SegmentedControl>` | `src/components/ui/molecules/SegmentedControl.tsx` |
 | 出発/到着/primary の色 | `SEMANTIC.departure` / `arrival` / `primary` | `src/constants/ui.ts` |
+| 白・黒 | `NEUTRAL.white` / `NEUTRAL.black`、半透明は `alphaWhite()` / `alphaBlack()` | `src/constants/ui.ts` |
 | 文字色・背景・境界線 | `getThemeColors(theme)` | `src/contexts/ThemeContext.tsx` |
 | 色の上に文字を載せる | `filledLabelColors(color, theme)` | `src/utils/contrast.ts` |
 | 色付きの小ラベル | `<ColorChip color=... theme=... />` | `src/components/ui/ColorChip.tsx` |
@@ -34,7 +37,10 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 - `#4CAF50`(出発) `#F44336`(到着) `#2196F3`(primary) の直書き → `SEMANTIC.*` を使う。
   `rgba(76,175,80,0.12)` のように同じ色をrgbaで書き直すのも禁止 → `tintColor(SEMANTIC.departure, 0.12)`。
   `tests/unit/constants/semanticColors.test.ts` が `constants/ui.ts` 以外での出現を落とす
-- `color: '#fff'` / `backgroundColor: '#333'` の直書き → `getThemeColors(theme)`
+- `color: '#fff'` / `'white'` / `backgroundColor: '#333'` の直書き → `getThemeColors(theme)`。
+  塗った色の上の文字は `colors.onPrimary`。テーマではなく下の色で決まる白だけ `NEUTRAL.white`。
+  `tests/unit/constants/semanticColors.test.ts` が直書きを落とす
+- `<button>` にインラインstyleで色や寸法を書く → `ui/atoms/Button` の `variant` / `size` で指定する
 - 自前でのコントラスト判定（`theme === 'dark' ? white : black` のような分岐）
   → `filledLabelColors()`。この分岐は3箇所に重複していて実際に不整合が出た
 

@@ -11,7 +11,7 @@ UI の色・サイズ・余白・ボタンが「どこで決まっているか�
 ## 結論（先に3行）
 
 1. デザイントークンの定義が **3系統に分裂**していて、どれを使うかが決まっていない
-2. `<button>` は **93個中91個がインラインstyle**。共有ボタンコンポーネントが無い
+2. ~~`<button>` は93個中91個がインラインstyle~~ → `ui/atoms/Button` を用意（2026-08-25）。既存の置き換えは順次
 3. ~~「出発=緑 / 到着=赤」のような意味を持つ色にベタ書き~~ → `SEMANTIC` に一元化済み（2026-08-25）
 
 ---
@@ -83,20 +83,64 @@ UI の色・サイズ・余白・ボタンが「どこで決まっているか�
 
 ---
 
-## 3. ボタンが共通化されていない
+## 3. ボタンの共通化（2026-08-25 着手）
 
-- `<button>` 要素: **93個**
-- 共有ヘルパ `btn()` を使っているもの: **2個**
-- 共有ボタンコンポーネント: **無い**
+対応前は `<button>` 93個のうち91個がインラインstyleで、`backgroundColor` `padding`
+`borderRadius` `fontSize` を毎回手書きしていた。同じ役割のボタンでも高さも色も違い、
+「塗った色の上の文字」を `white` / `#fff` / `#ffffff` の3通りで書いていた。
 
-残り91個はすべてインラインstyleで、`backgroundColor` `padding` `borderRadius` `fontSize`
-を毎回手書きしている。結果として同じ役割のボタンでも見た目が微妙に違う。
+`src/components/ui/atoms/Button.tsx` を作り、外から指定するのは
+`variant`（primary / positive / danger / outline / ghost）と `size`（sm / md）だけにした。
+**新規ボタンは必ずこれを使う。**
 
-`src/components/ui/` にあるのは `ColorChip` `RouteToggleItem` `RouteRecommendationItem`
-`ToggleableItem` の4つで、いずれも用途特化。汎用ボタンが無い。
+```tsx
+<Button theme={theme} variant="positive" size="sm" onClick={...}>全表示</Button>
+// トグルは pressed を渡す。押されていない間は塗らない
+<Button theme={theme} variant="primary" pressed={on} onClick={...}>所要時間を表示</Button>
+```
 
-**方針:** `src/components/ui/Button.tsx` を作り、`variant`（primary / danger / ghost）と
-`size`（sm / md）だけを外から指定する形にする。新規ボタンは必ずこれを使う。
+移行済み: `StationSelector` の所要時間トグル、`RouteSwitchBoard` の全表示/全非表示と
+「さらに表示」、`LegendRouteList` の全表示/全非表示・並び順・表示方式。
+残りは触る箇所から順次置き換える。
+
+### アトミックデザインの層
+
+`src/components/ui/` を役割で分ける。**どの層に置くかは「何を知っているか」で決める。**
+
+| 層 | 置き場所 | 知ってよいこと | 例 |
+|---|---|---|---|
+| atoms | `ui/atoms/` | デザイントークンだけ。アプリの概念（路線・駅）を知らない | `Button` |
+| molecules | `ui/molecules/` | アトムの組み合わせ方。まだ路線・駅は知らない | `SegmentedControl` |
+| organisms | `components/`, `components/legend/` | アプリの概念とデータ | `RouteSwitchBoard`, `LegendRouteList` |
+
+既存の `ui/ColorChip` `ui/ToggleableItem` `ui/RouteToggleItem`
+`ui/RouteRecommendationItem` は未移動。前2つは molecules、後2つは
+路線・経路を知っているので organisms 寄り。触るときに移す。
+
+---
+
+## 3.5 白と黒（2026-08-25 対応済み）
+
+`color: 'white'` `'#fff'` `'#ffffff'` が **76箇所** に散らばっていた。
+同じ「塗った色の上に載せる文字」なのに3通りの書き方が混在し、
+検索で取りこぼして「直したつもりで残る」ということが起きていた。
+
+`src/constants/ui.ts` の `NEUTRAL.white` / `NEUTRAL.black` を唯一の定義元にし、
+半透明は `alphaWhite(a)` / `alphaBlack(a)` を通す。`ThemeContext` の
+`onPrimary` などもここから取る。
+
+**使い分け:**
+
+| 場面 | 使うもの |
+|---|---|
+| UIの文字色・背景・境界線 | `getThemeColors(theme)` |
+| 塗った色の上に載せる文字 | `colors.onPrimary`（テーマ由来の白） |
+| 路線色など「下の色」で決まる文字 | `filledLabelColors(color, theme)` |
+| 地図アイコンの縁取りなど、テーマではなく下の色で決まる白 | `NEUTRAL.white` |
+
+`tests/unit/constants/semanticColors.test.ts` が `constants/ui.ts` 以外での
+白・黒の直書きを落とす。記事本文のSVG挿絵（`data/articleBodyI18n.ts`）だけは
+UIのテーマと無関係なため明示的に除外している。
 
 ---
 

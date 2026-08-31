@@ -1475,3 +1475,22 @@
 - アイコンは絵文字ではなく lucide の `Clock`、余白は `L.sp`、
   文字サイズは `FS`、高さは `TARGET.touch` から取る（docs/design-system.md の判断表）
 - 丸は表示中の路線に対して出るもので出発駅を必要としないため、常に置く
+
+### improve: 白・黒の一元化とボタンのアトム化（アトミックデザイン）
+- `src/constants/ui.ts`, `src/contexts/ThemeContext.tsx`, `src/utils/contrast.ts`,
+  `src/components/ui/atoms/Button.tsx`（新規）,
+  `src/components/ui/molecules/SegmentedControl.tsx`（新規）ほか
+- `color: 'white'` `'#fff'` `'#ffffff'` が76箇所に散らばり、同じ「塗った色の上の文字」を
+  3通りの書き方で持っていた。検索で取りこぼして「直したつもりで残る」原因になっていた
+- `NEUTRAL.white` / `NEUTRAL.black` を唯一の定義元にし、半透明は
+  `alphaWhite()` / `alphaBlack()` を通す。`ThemeContext` の `onPrimary` や
+  `contrast.ts` の `LIGHT_TEXT` / `DARK_TEXT` もここから取る
+- `tests/unit/constants/semanticColors.test.ts` に白・黒の直書きを落とす検査を追加
+  （記事本文のSVG挿絵はUIのテーマと無関係なので明示的に除外）
+- `<button>` 93個中91個がインラインstyleだったので `ui/atoms/Button` を用意。
+  外から指定するのは `variant`（primary/positive/danger/outline/ghost）と `size`（sm/md）だけ
+- 「並順」「ボード/一覧」のような排他選択は `ui/molecules/SegmentedControl` にまとめた
+- 層の分け方は「何を知っているか」で決める（atoms はトークンだけ、molecules はアトムの
+  組み合わせ、organisms はアプリの概念とデータ）。`docs/design-system.md` に表を追加
+- 所要時間トグルは `selectableCard` だとライトモードで枠線も背景もほぼ見えず
+  ボタンと分からなかったため、他の操作と同じ `Button` に揃えた
