@@ -7435,6 +7435,46 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "表示路線切り替え",
     english: "Route Display Toggle"
   },
+  routeViewBoard: {
+    japanese: "ボード",
+    english: "Board"
+  },
+  routeViewClassic: {
+    japanese: "一覧",
+    english: "List"
+  },
+  routeSearchPlaceholder: {
+    japanese: "路線名で絞り込む",
+    english: "Filter by route name"
+  },
+  routeGroupOnRoute: {
+    japanese: "経路上の路線",
+    english: "On your route"
+  },
+  routeGroupAtStation: {
+    japanese: "選択した駅を通る路線",
+    english: "Through selected stations"
+  },
+  routeGroupVisible: {
+    japanese: "表示中",
+    english: "Shown"
+  },
+  routeGroupHidden: {
+    japanese: "非表示",
+    english: "Hidden"
+  },
+  routeShowMore: {
+    japanese: "さらに{count}件",
+    english: "{count} more"
+  },
+  routeNoMatch: {
+    japanese: "一致する路線がありません",
+    english: "No matching routes"
+  },
+  routeVisibleSummary: {
+    japanese: "{shown} / {total} 路線を表示中",
+    english: "{shown} of {total} routes shown"
+  },
   showOnlyTransferStations: {
     japanese: "乗換駅のみ表示",
     english: "Show Transfer Stations Only"
@@ -8390,6 +8430,16 @@ export type Language = 'japanese' | 'english' | 'chinese' | 'korean';
 
 // 中国語（簡体字）UI翻訳
 export const uiChinese: Record<string, string> = {
+  routeViewBoard: "面板",
+  routeViewClassic: "列表",
+  routeSearchPlaceholder: "按线路名称筛选",
+  routeGroupOnRoute: "路线上的线路",
+  routeGroupAtStation: "经过所选车站的线路",
+  routeGroupVisible: "显示中",
+  routeGroupHidden: "已隐藏",
+  routeShowMore: "再显示{count}条",
+  routeNoMatch: "没有符合的线路",
+  routeVisibleSummary: "已显示 {shown} / {total} 条线路",
   stationSelection: "选择出发站和到达站",
   departureStation: "出发站",
   arrivalStation: "到达站",
@@ -8645,6 +8695,16 @@ export const uiChinese: Record<string, string> = {
 
 // 韓国語UI翻訳
 export const uiKorean: Record<string, string> = {
+  routeViewBoard: "보드",
+  routeViewClassic: "목록",
+  routeSearchPlaceholder: "노선 이름으로 검색",
+  routeGroupOnRoute: "경로상의 노선",
+  routeGroupAtStation: "선택한 역을 지나는 노선",
+  routeGroupVisible: "표시 중",
+  routeGroupHidden: "숨김",
+  routeShowMore: "{count}개 더 보기",
+  routeNoMatch: "일치하는 노선이 없습니다",
+  routeVisibleSummary: "{total}개 중 {shown}개 노선 표시 중",
   stationSelection: "출발역·도착역 선택",
   departureStation: "출발역",
   arrivalStation: "도착역",
