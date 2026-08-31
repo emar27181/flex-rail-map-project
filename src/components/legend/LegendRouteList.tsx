@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { RouteKey } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation'
@@ -9,9 +9,13 @@ import MapConfigPanel from './MapConfigPanel';
 import type { MapConfig } from './MapConfigPanel';
 import { checkboxLabel, checkboxInput } from './legendStyles';
 import { FS, TARGET } from '../../constants/ui';
+import RouteSwitchBoard from './RouteSwitchBoard';
 import { ALERT_MINUTE_OPTIONS } from '../../utils/arrivalAlert';
 
 type SortMode = 'name' | 'color' | 'default' | 'distance';
+
+/** 路線切り替えの表示方式の保存キー */
+const ROUTE_UI_MODE_KEY = 'routeSwitchUiMode';
 
 interface LegendRouteListProps {
   visibleRoutesData: Array<[string, any]>;
@@ -176,6 +180,25 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onTravelTimeLabelModeChange,
 }) => {
   const colors = getThemeColors(theme);
+  /**
+   * 路線切り替えの表示方式。
+   * 従来の一覧（classic）は並べ替え・ドラッグ順の変更ができるので残し、
+   * 読みやすさを優先したボード表示（board）を既定にする。
+   * 選んだ方式は次回も同じで開けるよう保存する。
+   */
+  const [routeUiMode, setRouteUiMode] = useState<'board' | 'classic'>(() => {
+    if (typeof window === 'undefined') return 'board';
+    try {
+      return window.localStorage.getItem(ROUTE_UI_MODE_KEY) === 'classic' ? 'classic' : 'board';
+    } catch {
+      // プライベートブラウズなどで localStorage が使えなくても既定で動く
+      return 'board';
+    }
+  });
+  const changeRouteUiMode = (mode: 'board' | 'classic') => {
+    setRouteUiMode(mode);
+    try { window.localStorage.setItem(ROUTE_UI_MODE_KEY, mode); } catch { /* 保存できなくても表示は変わる */ }
+  };
   const [sortMode, setSortMode] = useState<SortMode>('distance');
   const [dragOverKey, setDragOverKey] = useState<string | null>(null);
   const [touchDragKey, setTouchDragKey] = useState<RouteKey | null>(null);
@@ -230,6 +253,18 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
     return 0;
   });
 
+  /**
+   * ボード表示に渡す並び順。
+   * 全国490路線を名前順にすると「IGRいわて銀河鉄道」から始まって
+   * 手元の路線に届かないので、画面中心から近い順で渡す。
+   */
+  const boardRouteKeys = useMemo(
+    () => [...visibleRoutesData]
+      .sort(([, a], [, b]) => routeMinDist(a) - routeMinDist(b))
+      .map(([k]) => k as RouteKey),
+    [visibleRoutesData, viewCenter],
+  );
+
   const sectionHeader = (label: string, isOpen: boolean, onToggle: () => void) => (
     <div
       onClick={onToggle}
@@ -250,10 +285,64 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
     }}>
 
       {/* ═══ セクション1: 表示路線切り替え ═══ */}
-      <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: colors.text }}>
-        {translateUI('routeDisplayToggle', language)}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '8px',
+        marginBottom: '8px',
+      }}>
+        <div style={{ fontSize: '14px', fontWeight: 'bold', color: colors.text }}>
+          {translateUI('routeDisplayToggle', language)}
+        </div>
+        {/* 表示方式の切り替え。従来の一覧も選べる形で残している */}
+        <div style={{ display: 'flex', gap: '2px' }}>
+          {(['board', 'classic'] as const).map(mode => {
+            const active = routeUiMode === mode;
+            return (
+              <button
+                key={mode}
+                onClick={() => changeRouteUiMode(mode)}
+                aria-pressed={active}
+                style={{
+                  padding: '0 8px',
+                  fontSize: FS.helper,
+                  // 枠線の太さは状態で変えない（変えるとボタンの外形がずれる）
+                  border: `1px solid ${active ? colors.primary : colors.borderLight}`,
+                  boxSizing: 'border-box',
+                  borderRadius: '3px',
+                  backgroundColor: active ? colors.primary : 'transparent',
+                  color: active ? '#fff' : colors.textSecondary,
+                  cursor: 'pointer',
+                  minHeight: `${TARGET.min}px`,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {translateUI(mode === 'board' ? 'routeViewBoard' : 'routeViewClassic', language)}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
+      {routeUiMode === 'board' && (
+        <RouteSwitchBoard
+          routeKeys={boardRouteKeys}
+          visibleRoutes={visibleRoutes}
+          highlightedRouteKeys={highlightedRouteKeys}
+          stationRouteKeys={stationRouteKeys}
+          routeColors={routeColors}
+          routeNames={routeNames}
+          theme={theme}
+          language={language}
+          onToggleRoute={onToggleRoute}
+          onSelectAllRoutes={onSelectAllRoutes}
+          onDeselectAllRoutes={onDeselectAllRoutes}
+          adjustRouteColorForTheme={adjustRouteColorForTheme}
+        />
+      )}
+
+      {routeUiMode === 'classic' && (<>
       {/* ソート選択 */}
       <div style={{ display: 'flex', gap: '4px', marginBottom: '6px', alignItems: 'center' }}>
         <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
@@ -417,6 +506,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           </>
         );
       })()}
+
+      </>)}
 
       {/* ═══ セクション2: 表示設定 ═══ */}
       <div style={{ marginTop: '12px', marginBottom: '4px' }}>
