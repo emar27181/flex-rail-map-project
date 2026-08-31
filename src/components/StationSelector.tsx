@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { ArrowLeftRight } from 'lucide-react';
+import { ArrowLeftRight, Clock } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
@@ -11,6 +11,7 @@ import { findNearestStations } from '../utils/nearestStations';
 import { loadStationHistory, recordStationSelection, buildSuggestions } from '../utils/stationHistory';
 import type { StationHistoryEntry } from '../utils/stationHistory';
 import { FS, TARGET, SEMANTIC } from '../constants/ui';
+import { selectableCard, L } from './legend/legendStyles';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 
@@ -55,7 +56,7 @@ interface StationSelectorProps {
   locationError?: 'denied' | 'unavailable' | 'timeout' | null;
   /** 位置情報の再取得 */
   onRetryLocation?: () => void;
-  /** 出発駅からの所要時間を地図上の駅に出すか */
+  /** 駅と駅のあいだに所要時間の丸を出すか */
   showTravelTime?: boolean;
   /** 所要時間表示の切り替え。渡されたときだけボタンを出す */
   onShowTravelTimeChange?: (value: boolean) => void;
@@ -786,32 +787,35 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           )}
 
           {/*
-            所要時間表示の切り替え。
-            以前は開発用の「路線表示切替セクション」の中にしか無く、
-            そのセクションが既定で非表示のため画面から到達できなかった。
-            出発駅を起点に計算するので、出発駅が決まっているときだけ出す。
+            駅間の所要時間（駅と駅のあいだに出る丸）の切り替え。
+            以前は開発用の「路線表示切替セクション」と設定パネルの中にしか無く、
+            経路を見ている最中に切り替えられなかった。
+
+            見た目は選択できる行の共通スタイル（selectableCard）に合わせる。
+            枠線の太さは選択で変えず、選択は背景も塗って示す規則。
+            詳細は docs/design-system.md を参照。
           */}
-          {onShowTravelTimeChange && departure && (
+          {onShowTravelTimeChange && (
             <button
               onClick={() => onShowTravelTimeChange(!showTravelTime)}
               aria-pressed={showTravelTime}
               style={{
-                marginTop: '6px',
+                ...selectableCard(colors, { selected: !!showTravelTime }),
+                marginTop: L.sp.sm,
                 width: '100%',
-                // 枠線の太さは状態で変えない。変えると押すたびに高さがずれる
-                border: `1px solid ${showTravelTime ? SEMANTIC.primary : colors.border}`,
-                boxSizing: 'border-box',
-                borderRadius: '4px',
-                minHeight: `${TARGET.min}px`,
+                display: 'flex',
+                alignItems: 'center',
+                gap: L.sp.sm,
+                justifyContent: 'center',
+                minHeight: `${TARGET.touch}px`,
                 fontSize: FS.label,
-                // オンは枠線だけでなく背景ごと塗る（枠線だけだと気づきにくい）
-                backgroundColor: showTravelTime ? SEMANTIC.primary : colors.surface,
-                color: showTravelTime ? '#ffffff' : colors.text,
+                color: colors.text,
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
               }}
             >
-              ⏱ {translateUI('travelTimeOverlay', language)}
+              <Clock size={14} aria-hidden />
+              {translateUI('showTravelTimes', language)}
             </button>
           )}
 
