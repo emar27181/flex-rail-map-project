@@ -1464,3 +1464,14 @@
 - `tests/unit/components/legend/RouteSwitchBoard.test.tsx`（新規, 8件）:
   並び順を変えないこと・絞り込み・状態で外形が変わらないことを固定
   （並べ替えを戻すと落ちることを確認済み）
+
+### fix: 駅選択パネルの所要時間ボタンを駅間の丸の切り替えに変更
+- `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`
+- 「所要時間の表示」として想定されていたのは駅と駅のあいだに出る丸（区間の所要時間）
+  だったが、駅ラベルに累積時間を出す別機能につないでいた
+- 切り替え対象を丸（`showTravelTimes`）に変更
+- 見た目は `selectableCard()` に寄せ、他の選択できる行と同じ規則にした。
+  枠線の太さは選択で変えず、選択は枠線の色と背景の両方で示す
+- アイコンは絵文字ではなく lucide の `Clock`、余白は `L.sp`、
+  文字サイズは `FS`、高さは `TARGET.touch` から取る（docs/design-system.md の判断表）
+- 丸は表示中の路線に対して出るもので出発駅を必要としないため、常に置く
