@@ -1420,3 +1420,28 @@
 - 同じ一覧の組み立てを1箇所にまとめて使い回す形にした
   （従来も設定パネル内で同じJSXが2つ重複していた）
 - 下部パネルは自前で見出しを描くため、`showTitle={false}` で中の見出しを省く
+
+### perf: 所要時間の探索を単一始点最短路に置き換え
+- `src/utils/routeFinder.ts`
+- `findStationsWithinTime` が「全駅について `findRoutes` を1回ずつ呼ぶ」実装で、
+  駅6,000に対して経路探索を6,000回まわしていた（駅ごとに `console.log` 付き）
+- 所要時間表示をONにすると画面が数分固まり、タップが返ってこない状態だった
+- 単一始点最短路1回に置き換え。コストの規則は `findRoutes` と揃えた
+  （駅間の所要時間・乗換ペナルティ・徒歩乗換・新幹線のオーバーヘッド／最低距離・乗換2回まで）
+- 東京から120分以内 3,278駅の算出が 59ms
+- 探索の実体は索引を持つ `RouteFinder` 側に移し、`TimeFilter` は委譲する
+- `tests/unit/utils/findStationsWithinTime.test.ts`（新規, 8件）で速度と結果の妥当性を固定
+
+### feat: 所要時間表示の切り替えを駅選択パネルから行えるように
+- `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`
+- 切り替えが開発用の「路線表示切替セクション」の中にしかなく、
+  そのセクションが既定で非表示のため画面から到達できなかった
+- 出発駅が決まっているときだけボタンを出す（出発駅を起点に計算するため）
+- 枠線の太さは状態で変えず、オンのときは背景ごと塗る（design-system.md の規則）
+
+### fix: 駅ラベルの2行目（所要時間・出発時刻）が表示されない問題を修正
+- `src/components/RailwayMap.tsx`
+- `trainTypeViewEnabled` が常に true のため駅アイコンは必ず
+  `createTrainTypeStationIcon` を通るが、こちらは2行目のラベルを受け取らず捨てていた
+- 所要時間オーバーレイと時刻表モードの出発時刻の両方が出ていなかった
+- ラベルを渡すようにし、幅と高さも2行目ぶん確保する
