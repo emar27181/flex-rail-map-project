@@ -2349,14 +2349,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     ? alwaysVisibleMinRoutes
     : Number.POSITIVE_INFINITY;
   /**
-   * 駅も路線も未選択のときに出す乗換駅ヒントのしきい値。
+   * 駅も路線も未選択のときに出す乗換駅ヒントの基準（乗り入れ路線数）。
    *
-   * こちらは起点を選ぶための入口なので既定の3路線以上のままにする。
-   * ただし主要駅の常時表示をオフにしたときは、こちらも止めないと
+   * 起点を選ぶための入口なので、主要駅の常時表示（設定で変えられる）とは
+   * 別に持つ。3路線以上だと画面に45駅が並んで密すぎたため4路線以上にした。
+   */
+  const TRANSFER_HINT_BASE_MIN_ROUTES = 4;
+  /**
+   * 実際に使うしきい値。
+   * 主要駅の常時表示をオフにしたときはこちらも止めないと
    * 「常に出る駅を消したのに駅が並んだまま」になるため連動させる。
+   * また、常時表示の基準をこれより小さくしている場合はそちらに合わせる
+   * （入口のほうが厳しくなって主要駅より駅が減るのを防ぐ）。
    */
   const TRANSFER_HINT_MIN_ROUTES = alwaysVisibleStationsEnabled
-    ? Math.min(3, alwaysVisibleMinRoutes)
+    ? Math.min(TRANSFER_HINT_BASE_MIN_ROUTES, alwaysVisibleMinRoutes)
     : Number.POSITIVE_INFINITY;
   /**
    * この距離(px)を超えて地図が動いたときだけ「ドラッグした」とみなす。
