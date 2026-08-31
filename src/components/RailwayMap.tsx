@@ -2075,9 +2075,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   }, []);
 
   // 列車種別表示用の駅アイコン作成関数
-  const createTrainTypeStationIcon = useCallback((station: Station, routeKey: RouteKey, zoomLevel: number, isDetailed: boolean, opacity: number = 1, heatOverride?: string) => {
+  const createTrainTypeStationIcon = useCallback((station: Station, routeKey: RouteKey, zoomLevel: number, isDetailed: boolean, opacity: number = 1, heatOverride?: string, timeLabel?: string) => {
     if (!MapComponents?.DivIcon || !trainTypeViewEnabled) {
-      return createStationIcon(station, routeColors[routeKey], zoomLevel, isDetailed, opacity, undefined, routeKey, heatOverride);
+      return createStationIcon(station, routeColors[routeKey], zoomLevel, isDetailed, opacity, timeLabel, routeKey, heatOverride);
     }
 
     const { DivIcon } = MapComponents;
@@ -2098,22 +2098,32 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         ? (getStationNumber(routeKey, station.name) ?? getAnyStationNumber(station.name))
         : undefined;
       const displayName = stationNumber ? `${stationNumber} ${translatedStationName}` : translatedStationName;
-      const baseWidth = estimateTextWidth(displayName);
+      const baseWidth = Math.max(
+        estimateTextWidth(displayName),
+        timeLabel ? estimateTextWidth(timeLabel) : 0,
+      );
       // 枠線の太さを考慮して幅を調整
       const borderAdjustment = borderStyle.borderWidth * 2; // 左右の枠線分
       const stationNameWidth = baseWidth + borderAdjustment;
       // 高さは通常の駅ラベルと同じ定義を使う（以前は 18/30px の独自値で不揃いだった）
       const stationNameHeight = (hasFurigana
         ? stationLabelBox.height + stationLabelBox.furiganaHeight
-        : stationLabelBox.height) + borderAdjustment;
+        : stationLabelBox.height)
+        + (timeLabel ? stationLabelBox.furiganaHeight : 0)
+        + borderAdjustment;
       // 出発駅・到着駅は影なし、その他は通常の影
       const isSelectedStation = (departure && departure.name === station.name) || (arrival && arrival.name === station.name);
       const shadowColor = isSelectedStation ? 'transparent' : (theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)');
       const ttFontSize = stationLabelBox.fontSize;
       const ttFuriganaSize = stationLabelBox.furiganaFontSize;
 
-      const innerHtml = hasFurigana
-        ? `<div style="font-size:${ttFuriganaSize}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:${ttFontSize}px;font-weight:bold;line-height:1">${displayName}</div>`
+      // 所要時間・出発時刻の2行目。通常アイコン(createStationIcon)と同じ見た目にする
+      const hasTime = !!timeLabel;
+      const timeLine = hasTime
+        ? `<div style="font-size:${stationLabelBox.furiganaFontSize}px;line-height:1;margin-top:1px;font-weight:normal;opacity:0.9">${timeLabel}</div>`
+        : '';
+      const innerHtml = (hasFurigana || hasTime)
+        ? `${hasFurigana ? `<div style="font-size:${ttFuriganaSize}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${ttFontSize}px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}`
         : displayName;
 
       // 駅名ラベル・ツールチップのチップと同じ配色規則を使う
@@ -2123,14 +2133,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           color:${fgColor1};
           padding:${stationLabelBox.paddingCss};
           border-radius:${stationLabelBox.radiusCss};
-          ${hasFurigana ? '' : `font-size:${ttFontSize}px;font-weight:bold;`}
+          ${(hasFurigana || hasTime) ? '' : `font-size:${ttFontSize}px;font-weight:bold;`}
           white-space:nowrap;
           border:${borderStyle.borderWidth}px ${borderStyle.borderStyle} ${borderStyle.borderColor};
           ${borderStyle.boxShadow ? `box-shadow:${borderStyle.boxShadow};` : ''}
           ${isSelectedStation ? 'box-shadow: none !important;' : ''}
           text-align:center;
           display:flex;
-          ${hasFurigana ? 'flex-direction:column;' : ''}
+          ${(hasFurigana || hasTime) ? 'flex-direction:column;' : ''}
           align-items:center;
           justify-content:center;
           box-sizing:border-box;
@@ -3667,7 +3677,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const stationColor = heatOverride ?? routeColor;
     const tierStyle = getStationBorderStyle(routeKey, station.name);
     const stationIcon = trainTypeViewEnabled
-      ? createTrainTypeStationIcon(station, routeKey, zoomLevel, isDetailed, stationOpacity, heatOverride)
+      ? createTrainTypeStationIcon(station, routeKey, zoomLevel, isDetailed, stationOpacity, heatOverride, effectiveTimeLabel)
       : createStationIcon(station, routeColor, zoomLevel, isDetailed, stationOpacity, effectiveTimeLabel, routeKey, heatOverride, tierStyle?.boxShadow ?? undefined);
     if (!stationIcon) return null;
 
@@ -4153,6 +4163,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 showTrainStatusPanel={showTrainStatusPanel}
                 locationError={locationError}
                 onRetryLocation={() => setLocationRetryCount(c => c + 1)}
+                showTravelTime={showTravelTimeOverlay}
+                onShowTravelTimeChange={setShowTravelTimeOverlay}
               />
               {routeRecommendationsPanel}
             </div>
@@ -4178,6 +4190,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             showTrainStatusPanel={showTrainStatusPanel}
             locationError={locationError}
             onRetryLocation={() => setLocationRetryCount(c => c + 1)}
+            showTravelTime={showTravelTimeOverlay}
+            onShowTravelTimeChange={setShowTravelTimeOverlay}
           />
         )}
 
@@ -5543,6 +5557,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 showTrainStatusPanel={showTrainStatusPanel}
                 locationError={locationError}
                 onRetryLocation={() => setLocationRetryCount(c => c + 1)}
+                showTravelTime={showTravelTimeOverlay}
+                onShowTravelTimeChange={setShowTravelTimeOverlay}
               />
             </div>
           )}

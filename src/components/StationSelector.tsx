@@ -55,6 +55,10 @@ interface StationSelectorProps {
   locationError?: 'denied' | 'unavailable' | 'timeout' | null;
   /** 位置情報の再取得 */
   onRetryLocation?: () => void;
+  /** 出発駅からの所要時間を地図上の駅に出すか */
+  showTravelTime?: boolean;
+  /** 所要時間表示の切り替え。渡されたときだけボタンを出す */
+  onShowTravelTimeChange?: (value: boolean) => void;
 }
 
 const StationSelector: React.FC<StationSelectorProps> = ({
@@ -77,6 +81,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   showTrainStatusPanel = false,
   locationError = null,
   onRetryLocation,
+  showTravelTime = false,
+  onShowTravelTimeChange,
 }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -777,6 +783,36 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               hasGps={hasGps}
               language={language}
             />
+          )}
+
+          {/*
+            所要時間表示の切り替え。
+            以前は開発用の「路線表示切替セクション」の中にしか無く、
+            そのセクションが既定で非表示のため画面から到達できなかった。
+            出発駅を起点に計算するので、出発駅が決まっているときだけ出す。
+          */}
+          {onShowTravelTimeChange && departure && (
+            <button
+              onClick={() => onShowTravelTimeChange(!showTravelTime)}
+              aria-pressed={showTravelTime}
+              style={{
+                marginTop: '6px',
+                width: '100%',
+                // 枠線の太さは状態で変えない。変えると押すたびに高さがずれる
+                border: `1px solid ${showTravelTime ? SEMANTIC.primary : colors.border}`,
+                boxSizing: 'border-box',
+                borderRadius: '4px',
+                minHeight: `${TARGET.min}px`,
+                fontSize: FS.label,
+                // オンは枠線だけでなく背景ごと塗る（枠線だけだと気づきにくい）
+                backgroundColor: showTravelTime ? SEMANTIC.primary : colors.surface,
+                color: showTravelTime ? '#ffffff' : colors.text,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ⏱ {translateUI('travelTimeOverlay', language)}
+            </button>
           )}
 
           {/*
