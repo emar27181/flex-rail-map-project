@@ -6,6 +6,7 @@
  * 1.5:1 程度となり判読が困難だった。背景の明るさに応じて
  * 白と濃色を切り替えることで、どの路線色でも AA を満たすようにする。
  */
+import { NEUTRAL } from '../constants/ui';
 
 /** #RGB / #RRGGBB を [r, g, b] に変換する。解釈できない場合は null */
 export function parseHexColor(hex: string): [number, number, number] | null {
@@ -44,8 +45,8 @@ export function contrastRatio(
  * #111111 では緑系(#2E8B57 など)や赤系(#E73820)の路線色で 4.45:1 と
  * わずかに AA を下回るため、純黒を用いて全路線色で 4.5:1 以上を確保する。
  */
-export const DARK_TEXT = '#000000';
-export const LIGHT_TEXT = '#FFFFFF';
+export const DARK_TEXT = NEUTRAL.black;
+export const LIGHT_TEXT = NEUTRAL.white;
 
 /**
  * 背景色に対してコントラスト比が高くなる方の文字色を返す。

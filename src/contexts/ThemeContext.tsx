@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { SEMANTIC } from '../constants/ui';
+import { SEMANTIC, NEUTRAL } from '../constants/ui';
 
 export type Theme = 'light' | 'dark';
 
@@ -45,7 +45,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     // iOS Safari は viewport-fit=cover 時、ステータスバー背後の領域を
     // html のキャンバス背景と theme-color で塗る。body のクラスだけでは
     // この領域が塗られず、ダークモードでも画面上部が白く残る。
-    const bg = theme === 'dark' ? '#1a1a1a' : '#ffffff';
+    const bg = theme === 'dark' ? '#1a1a1a' : NEUTRAL.white;
     document.documentElement.style.backgroundColor = bg;
     document.documentElement.style.setProperty('--app-bg', bg);
     document.documentElement.style.setProperty('--app-loading-fg', theme === 'dark' ? '#b3b3b3' : '#555555');
@@ -66,19 +66,19 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 // テーマに応じた色の定義
 export const getThemeColors = (theme: Theme) => {
   return {
-    background: theme === 'dark' ? '#1a1a1a' : '#ffffff',
+    background: theme === 'dark' ? '#1a1a1a' : NEUTRAL.white,
     surface: theme === 'dark' ? '#2d2d2d' : '#f9f9f9',
-    surfaceElevated: theme === 'dark' ? '#3a3a3a' : '#ffffff',
+    surfaceElevated: theme === 'dark' ? '#3a3a3a' : NEUTRAL.white,
     surfaceHover: theme === 'dark' ? '#404040' : '#f0f0f0',
     border: theme === 'dark' ? '#404040' : '#ddd',
     borderLight: theme === 'dark' ? '#505050' : '#eee',
-    text: theme === 'dark' ? '#ffffff' : '#333',
+    text: theme === 'dark' ? NEUTRAL.white : '#333',
     textSecondary: theme === 'dark' ? '#b3b3b3' : '#666',
     textMuted: theme === 'dark' ? '#888888' : '#888',
     primary: theme === 'dark' ? '#4a9eff' : SEMANTIC.primary,
     primaryHover: theme === 'dark' ? '#3d8ce6' : '#1976D2',
-    onPrimary: '#ffffff',
-    onSurface: theme === 'dark' ? '#ffffff' : '#333',
+    onPrimary: NEUTRAL.white,
+    onSurface: theme === 'dark' ? NEUTRAL.white : '#333',
     success: theme === 'dark' ? '#5cb85c' : SEMANTIC.departure,
     successLight: theme === 'dark' ? '#2d4a2d' : '#e8f5e9',
     warning: theme === 'dark' ? '#f0ad4e' : '#ff9800',

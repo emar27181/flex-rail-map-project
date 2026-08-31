@@ -11,12 +11,19 @@
 import { describe, it, expect } from 'vitest';
 import { readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
-import { SEMANTIC } from '../../../src/constants/ui';
+import { SEMANTIC, NEUTRAL } from '../../../src/constants/ui';
 
 const SRC = join(process.cwd(), 'src');
 
 /** ここでだけ実際の色を書いてよい */
 const DEFINITION_FILE = join('constants', 'ui.ts');
+
+/**
+ * 検査から外すファイル。
+ * articleBodyI18n.ts は記事本文のHTMLとSVGの挿絵を持つデータで、
+ * 挿絵の配色はUIのテーマとは無関係（テーマを切り替えても挿絵は変わらない）。
+ */
+const EXCLUDED = new Set([join('data', 'articleBodyI18n.ts')]);
 
 function listSourceFiles(dir: string, base = ''): string[] {
   return readdirSync(dir).flatMap((name) => {
@@ -45,5 +52,30 @@ describe('意味を持つ色の一元管理', () => {
   it('SEMANTIC の色は互いに異なる', () => {
     const values = Object.values(SEMANTIC);
     expect(new Set(values).size).toBe(values.length);
+  });
+});
+
+describe('白と黒の一元管理', () => {
+  /**
+   * `color: 'white'` `'#fff'` `'#ffffff'` が3通り混在して76箇所に散らばっていた。
+   * 同じ「塗った色の上に載せる文字」なのに書き方が違うため、
+   * 検索での取りこぼしが起き、直したつもりで残るということが起きていた。
+   */
+  const RAW_WHITE_OR_BLACK = /['"](?:white|black|#fff|#ffffff|#FFF|#FFFFFF|#000|#000000)['"]/;
+
+  it('白・黒の直書きが constants/ui.ts 以外に無い', () => {
+    const offenders = listSourceFiles(SRC)
+      .filter((rel) => rel !== DEFINITION_FILE && !EXCLUDED.has(rel))
+      .filter((rel) => RAW_WHITE_OR_BLACK.test(readFileSync(join(SRC, rel), 'utf-8')));
+
+    expect(
+      offenders,
+      `NEUTRAL.white / NEUTRAL.black か getThemeColors() を使うこと。直書きが残っている: ${offenders.join(', ')}`,
+    ).toEqual([]);
+  });
+
+  it('NEUTRAL は白と黒を持つ', () => {
+    expect(NEUTRAL.white.toLowerCase()).toBe('#ffffff');
+    expect(NEUTRAL.black.toLowerCase()).toBe('#000000');
   });
 });

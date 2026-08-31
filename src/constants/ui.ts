@@ -63,3 +63,29 @@ export const SEMANTIC = {
   /** 選択中・リンクなどの主色 */
   primary: '#2196F3',
 } as const;
+
+/**
+ * 白と黒の唯一の定義。
+ *
+ * `color: 'white'` `'#fff'` `'#ffffff'` が76箇所に散らばっていて、
+ * 同じ「塗った色の上に載せる文字」を各ファイルが別々の書き方で持っていた
+ * （`white` / `#fff` / `#ffffff` の3通りが混在し、検索でも取りこぼしていた）。
+ *
+ * UIの文字色・背景・境界線は原則 `getThemeColors(theme)` から取ること。
+ * ここを直接使ってよいのは、テーマではなく「下の色」で決まる場合だけ:
+ * 路線色で塗ったボタンやチップの上に載せる文字、地図ラベルの縁取りなど。
+ * その場合も、コントラスト判定が要るなら `filledLabelColors()` を使う。
+ */
+export const NEUTRAL = {
+  white: '#ffffff',
+  black: '#000000',
+} as const;
+
+/**
+ * 白・黒に不透明度をかけた色。
+ *
+ * `rgba(255,255,255,0.8)` のような直書きが散らばると、
+ * 「白の半透明」を変えたいときに全部を探して直すことになる。
+ */
+export const alphaWhite = (alpha: number) => `rgba(255, 255, 255, ${alpha})`;
+export const alphaBlack = (alpha: number) => `rgba(0, 0, 0, ${alpha})`;
