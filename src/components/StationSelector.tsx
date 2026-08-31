@@ -507,36 +507,23 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     {translateUI(locationError === 'denied' ? 'locationDenied' : 'locationUnavailable', language)}
                   </span>
                   {locationError !== 'denied' && onRetryLocation && (
-                    <button
-                      onClick={onRetryLocation}
-                      style={{
-                        border: `1px solid ${colors.border}`, borderRadius: '4px',
-                        padding: '1px 6px', fontSize: FS.helper,
-                        backgroundColor: colors.surface, color: colors.text, cursor: 'pointer',
-                        minHeight: `${TARGET.min}px`,
-                      }}
-                    >{translateUI('retryLocation', language)}</button>
+                    <Button theme={theme} variant="outline" size="sm" onClick={onRetryLocation}>
+                      {translateUI('retryLocation', language)}
+                    </Button>
                   )}
                 </div>
               )}
               {onSetNearestDeparture && (
-                <button
+                <Button
+                  theme={theme}
+                  // 出発駅欄と同じ緑の塗りつぶしで、出発側の操作だと分かるようにする
+                  variant="positive"
+                  size="sm"
                   onClick={onSetNearestDeparture}
-                  style={{
-                    marginTop: '4px',
-                    border: `1px solid ${SEMANTIC.departure}`,
-                    borderRadius: '4px',
-                    padding: '2px 7px',
-                    fontSize: FS.helper,
-                    // 出発駅欄と同じ緑の塗りつぶしで、出発側の操作だと分かるようにする
-                    backgroundColor: SEMANTIC.departure,
-                    color: colors.onPrimary,
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                  }}
+                  styleOverride={{ marginTop: L.sp.xs }}
                 >
                   {translateUI('currentLocationFrom', language)}
-                </button>
+                </Button>
               )}
 
               {showDepartureResults && departureDropdownPos && createPortal(
@@ -800,8 +787,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             <Button
               theme={theme}
               variant="primary"
-              size="md"
-              fullWidth
+              size="sm"
               pressed={!!showTravelTime}
               onClick={() => onShowTravelTimeChange(!showTravelTime)}
               icon={<Clock size={14} aria-hidden />}
