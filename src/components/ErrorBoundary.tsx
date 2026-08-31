@@ -1,7 +1,7 @@
 import React from 'react';
 import { translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
-import { SEMANTIC } from '../constants/ui';
+import { SEMANTIC, NEUTRAL } from '../constants/ui';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -51,7 +51,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
             style={{
               padding: '8px 16px',
               backgroundColor: SEMANTIC.arrival,
-              color: 'white',
+              color: NEUTRAL.white,
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer'

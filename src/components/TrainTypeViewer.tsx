@@ -188,7 +188,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                     }}>
                       <span style={{
                         backgroundColor: trainType.color,
-                        color: 'white',
+                        color: colors.onPrimary,
                         padding: '4px 8px',
                         borderRadius: '4px',
                         fontSize: '12px',

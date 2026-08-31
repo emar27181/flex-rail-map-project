@@ -83,7 +83,7 @@ const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
             padding: '4px 8px',
             fontSize: '10px',
             backgroundColor: '#28a745',
-            color: 'white',
+            color: colors.onPrimary,
             border: 'none',
             borderRadius: '3px',
             cursor: 'pointer'
@@ -98,7 +98,7 @@ const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
             padding: '4px 8px',
             fontSize: '10px',
             backgroundColor: '#dc3545',
-            color: 'white',
+            color: colors.onPrimary,
             border: 'none',
             borderRadius: '3px',
             cursor: 'pointer'

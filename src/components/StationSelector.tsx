@@ -11,7 +11,8 @@ import { findNearestStations } from '../utils/nearestStations';
 import { loadStationHistory, recordStationSelection, buildSuggestions } from '../utils/stationHistory';
 import type { StationHistoryEntry } from '../utils/stationHistory';
 import { FS, TARGET, SEMANTIC } from '../constants/ui';
-import { selectableCard, L } from './legend/legendStyles';
+import { L } from './legend/legendStyles';
+import Button from './ui/atoms/Button';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 
@@ -466,7 +467,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     boxSizing: 'border-box',
                     // 出発＝緑 で塗りつぶし、文字は白。地図の上でも役割が一目で分かるようにする
                     backgroundColor: SEMANTIC.departure,
-                    color: '#ffffff',
+                    color: colors.onPrimary,
                   }}
                 />
                 {departure && (
@@ -529,7 +530,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     fontSize: FS.helper,
                     // 出発駅欄と同じ緑の塗りつぶしで、出発側の操作だと分かるようにする
                     backgroundColor: SEMANTIC.departure,
-                    color: '#ffffff',
+                    color: colors.onPrimary,
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
                   }}
@@ -688,7 +689,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     boxSizing: 'border-box',
                     // 到着＝赤 で塗りつぶし、文字は白（出発欄と対になる配色）
                     backgroundColor: SEMANTIC.arrival,
-                    color: '#ffffff',
+                    color: colors.onPrimary,
                   }}
                 />
                 {arrival && (
@@ -796,27 +797,18 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             詳細は docs/design-system.md を参照。
           */}
           {onShowTravelTimeChange && (
-            <button
+            <Button
+              theme={theme}
+              variant="primary"
+              size="md"
+              fullWidth
+              pressed={!!showTravelTime}
               onClick={() => onShowTravelTimeChange(!showTravelTime)}
-              aria-pressed={showTravelTime}
-              style={{
-                ...selectableCard(colors, { selected: !!showTravelTime }),
-                marginTop: L.sp.sm,
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                gap: L.sp.sm,
-                justifyContent: 'center',
-                minHeight: `${TARGET.touch}px`,
-                fontSize: FS.label,
-                color: colors.text,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
+              icon={<Clock size={14} aria-hidden />}
+              styleOverride={{ marginTop: L.sp.sm }}
             >
-              <Clock size={14} aria-hidden />
               {translateUI('showTravelTimes', language)}
-            </button>
+            </Button>
           )}
 
           {/*

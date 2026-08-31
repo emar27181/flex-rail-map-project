@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { routes, routeNames, type RouteKey } from '../data/routes';
-import { SEMANTIC } from '../constants/ui';
+import { SEMANTIC, NEUTRAL } from '../constants/ui';
 
 interface CoverageStats {
   totalRoutes: number;
@@ -137,7 +137,7 @@ const CoverageAnalysis: React.FC = () => {
         <h3 style={{ margin: 0, fontSize: '14px' }}>路線カバレッジ分析</h3>
         <div style={{
           backgroundColor: color,
-          color: 'white',
+          color: NEUTRAL.white,
           borderRadius: '50%',
           width: '24px',
           height: '24px',

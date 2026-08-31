@@ -64,7 +64,7 @@ export default function HeatmapControl({
             padding: `1px ${L.sp.sm}`,
             borderRadius: L.r.pill,
             background: '#a50026',
-            color: '#fff',
+            color: colors.onPrimary,
           }}>
             {currentMeta?.label ?? paramKey as string}
           </span>

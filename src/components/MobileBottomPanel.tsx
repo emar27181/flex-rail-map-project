@@ -289,7 +289,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
                 backgroundColor: isActive ? colors.primary : colors.glassButton,
                 backdropFilter: isActive ? 'none' : 'blur(8px)',
                 WebkitBackdropFilter: isActive ? 'none' : 'blur(8px)',
-                color: isActive ? '#fff' : colors.text,
+                color: isActive ? colors.onPrimary : colors.text,
                 fontSize: 13,
                 fontWeight: 'bold',
                 display: 'flex',

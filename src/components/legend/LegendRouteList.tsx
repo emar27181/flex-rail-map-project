@@ -10,6 +10,8 @@ import type { MapConfig } from './MapConfigPanel';
 import { checkboxLabel, checkboxInput } from './legendStyles';
 import { FS, TARGET } from '../../constants/ui';
 import RouteSwitchBoard from './RouteSwitchBoard';
+import Button from '../ui/atoms/Button';
+import SegmentedControl from '../ui/molecules/SegmentedControl';
 import { ALERT_MINUTE_OPTIONS } from '../../utils/arrivalAlert';
 
 type SortMode = 'name' | 'color' | 'default' | 'distance';
@@ -296,33 +298,16 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           {translateUI('routeDisplayToggle', language)}
         </div>
         {/* 表示方式の切り替え。従来の一覧も選べる形で残している */}
-        <div style={{ display: 'flex', gap: '2px' }}>
-          {(['board', 'classic'] as const).map(mode => {
-            const active = routeUiMode === mode;
-            return (
-              <button
-                key={mode}
-                onClick={() => changeRouteUiMode(mode)}
-                aria-pressed={active}
-                style={{
-                  padding: '0 8px',
-                  fontSize: FS.helper,
-                  // 枠線の太さは状態で変えない（変えるとボタンの外形がずれる）
-                  border: `1px solid ${active ? colors.primary : colors.borderLight}`,
-                  boxSizing: 'border-box',
-                  borderRadius: '3px',
-                  backgroundColor: active ? colors.primary : 'transparent',
-                  color: active ? '#fff' : colors.textSecondary,
-                  cursor: 'pointer',
-                  minHeight: `${TARGET.min}px`,
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {translateUI(mode === 'board' ? 'routeViewBoard' : 'routeViewClassic', language)}
-              </button>
-            );
-          })}
-        </div>
+        <SegmentedControl
+          theme={theme}
+          value={routeUiMode}
+          onChange={changeRouteUiMode}
+          ariaLabel={translateUI('routeDisplayToggle', language)}
+          options={[
+            { value: 'board' as const, label: translateUI('routeViewBoard', language) },
+            { value: 'classic' as const, label: translateUI('routeViewClassic', language) },
+          ]}
+        />
       </div>
 
       {routeUiMode === 'board' && (
@@ -348,48 +333,28 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
           {translateUI('sortLabel', language)}
         </span>
-        {(['name', 'color', 'default', 'distance'] as SortMode[]).map(mode => {
-          const label = mode === 'name'
-            ? translateUI('sortAlpha', language)
-            : mode === 'color'
-              ? translateUI('sortColor', language)
-              : mode === 'distance'
-                ? translateUI('sortNearby', language)
-                : translateUI('sortDefault', language);
-          return (
-            <button
-              key={mode}
-              onClick={() => setSortMode(mode)}
-              style={{
-                padding: '2px 6px',
-                fontSize: '10px',
-                border: `1px solid ${sortMode === mode ? colors.primary : colors.borderLight}`,
-                borderRadius: '3px',
-                backgroundColor: sortMode === mode ? colors.primary : 'transparent',
-                color: sortMode === mode ? '#fff' : colors.textSecondary,
-                cursor: 'pointer',
-                // WCAG 2.2 AA (2.5.8 ターゲットサイズ) の最小24px
-                minHeight: `${TARGET.min}px`,
-              }}
-            >{label}</button>
-          );
-        })}
+        <SegmentedControl
+          theme={theme}
+          value={sortMode}
+          onChange={setSortMode}
+          ariaLabel={translateUI('sortLabel', language)}
+          options={[
+            { value: 'name' as SortMode, label: translateUI('sortAlpha', language) },
+            { value: 'color' as SortMode, label: translateUI('sortColor', language) },
+            { value: 'default' as SortMode, label: translateUI('sortDefault', language) },
+            { value: 'distance' as SortMode, label: translateUI('sortNearby', language) },
+          ]}
+        />
       </div>
 
       {/* 全表示/全非表示 */}
       <div style={{ display: 'flex', gap: '4px', marginBottom: '6px' }}>
-        <button
-          onClick={onSelectAllRoutes}
-          style={{ flex: 1, padding: '4px 8px', fontSize: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer', minHeight: `${TARGET.min}px` }}
-        >
+        <Button theme={theme} variant="positive" size="sm" onClick={onSelectAllRoutes} styleOverride={{ flex: 1 }}>
           {translateUI('allShow', language)}
-        </button>
-        <button
-          onClick={onDeselectAllRoutes}
-          style={{ flex: 1, padding: '4px 8px', fontSize: '10px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer', minHeight: `${TARGET.min}px` }}
-        >
+        </Button>
+        <Button theme={theme} variant="danger" size="sm" onClick={onDeselectAllRoutes} styleOverride={{ flex: 1 }}>
           {translateUI('allHide', language)}
-        </button>
+        </Button>
       </div>
 
       {(() => {

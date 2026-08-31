@@ -91,7 +91,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
         left: tooltip.x + 12,
         top: tooltip.y - 36,
         backgroundColor: 'rgba(30,30,30,0.92)',
-        color: '#fff',
+        color: colors.onPrimary,
         padding: '5px 10px',
         borderRadius: '5px',
         fontSize: '12px',
@@ -237,7 +237,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                 style={{
                   padding: '5px 12px',
                   backgroundColor: isSelected ? colors.textSecondary : SEMANTIC.primary,
-                  color: 'white',
+                  color: colors.onPrimary,
                   border: 'none',
                   borderRadius: '4px',
                   cursor: isSelected ? 'default' : 'pointer',
@@ -272,7 +272,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                       {segIndex > 0 && (
                         <span style={{
                           fontSize: '9px',
-                          color: '#fff',
+                          color: colors.onPrimary,
                           backgroundColor: segment.isWalkingTransfer ? SEMANTIC.departure : '#ff9800',
                           padding: '1px 5px',
                           borderRadius: '6px',

@@ -22,6 +22,7 @@ import type { Language } from '../../utils/translation';
 import { filledLabelColors } from '../../utils/contrast';
 import { FS, TARGET, SEMANTIC } from '../../constants/ui';
 import { L } from './legendStyles';
+import Button from '../ui/atoms/Button';
 
 /** 1グループで最初に見せる件数。全部描くと490個のチップになり操作が重くなる */
 const GROUP_INITIAL_LIMIT = 24;
@@ -193,23 +194,16 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
           {shown.map(chip)}
         </div>
         {rest > 0 && (
-          <button
+          <Button
+            theme={theme}
+            variant="outline"
+            size="sm"
+            fullWidth
             onClick={() => setLimits(prev => ({ ...prev, [key]: prev[key] + GROUP_STEP }))}
-            style={{
-              marginTop: L.sp.sm,
-              width: '100%',
-              minHeight: `${TARGET.min}px`,
-              border: `1px solid ${colors.borderLight}`,
-              boxSizing: 'border-box',
-              borderRadius: L.r.md,
-              background: 'transparent',
-              color: colors.textSecondary,
-              fontSize: FS.label,
-              cursor: 'pointer',
-            }}
+            styleOverride={{ marginTop: L.sp.sm }}
           >
             {translateUI('routeShowMore', language, { count: String(rest) })}
-          </button>
+          </Button>
         )}
       </div>
     );
@@ -238,36 +232,12 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
       />
 
       <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.md }}>
-        <button
-          onClick={onSelectAllRoutes}
-          style={{
-            flex: 1,
-            minHeight: `${TARGET.min}px`,
-            border: 'none',
-            borderRadius: L.r.md,
-            backgroundColor: SEMANTIC.departure,
-            color: '#ffffff',
-            fontSize: FS.label,
-            cursor: 'pointer',
-          }}
-        >
+        <Button theme={theme} variant="positive" size="sm" onClick={onSelectAllRoutes} styleOverride={{ flex: 1 }}>
           {translateUI('allShow', language)}
-        </button>
-        <button
-          onClick={onDeselectAllRoutes}
-          style={{
-            flex: 1,
-            minHeight: `${TARGET.min}px`,
-            border: 'none',
-            borderRadius: L.r.md,
-            backgroundColor: SEMANTIC.arrival,
-            color: '#ffffff',
-            fontSize: FS.label,
-            cursor: 'pointer',
-          }}
-        >
+        </Button>
+        <Button theme={theme} variant="danger" size="sm" onClick={onDeselectAllRoutes} styleOverride={{ flex: 1 }}>
           {translateUI('allHide', language)}
-        </button>
+        </Button>
       </div>
 
       <div style={{ fontSize: FS.helper, color: colors.textSecondary, marginBottom: L.sp.md }}>

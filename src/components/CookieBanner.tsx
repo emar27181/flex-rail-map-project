@@ -135,7 +135,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                 onClick={handleAcceptAll}
                 style={{
                   backgroundColor: colors.primary,
-                  color: 'white',
+                  color: colors.onPrimary,
                   border: 'none',
                   borderRadius: '6px',
                   padding: '10px 20px',
@@ -264,7 +264,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                   opacity: 0.5
                 }}>
                   <div style={{
-                    backgroundColor: 'white',
+                    backgroundColor: colors.onPrimary,
                     borderRadius: '10px',
                     width: '20px',
                     height: '20px',
@@ -329,7 +329,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                   }}
                 >
                   <div style={{
-                    backgroundColor: 'white',
+                    backgroundColor: colors.onPrimary,
                     borderRadius: '10px',
                     width: '20px',
                     height: '20px',
@@ -343,7 +343,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                     left: cookiePreferences.analytics ? '6px' : '28px',
                     top: '0',
                     fontSize: '10px',
-                    color: 'white',
+                    color: colors.onPrimary,
                     lineHeight: '24px',
                     fontWeight: 'bold'
                   }}>
@@ -395,7 +395,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                   }}
                 >
                   <div style={{
-                    backgroundColor: 'white',
+                    backgroundColor: colors.onPrimary,
                     borderRadius: '10px',
                     width: '20px',
                     height: '20px',
@@ -409,7 +409,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                     left: cookiePreferences.advertising ? '6px' : '28px',
                     top: '0',
                     fontSize: '10px',
-                    color: 'white',
+                    color: colors.onPrimary,
                     lineHeight: '24px',
                     fontWeight: 'bold'
                   }}>
@@ -446,7 +446,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                 onClick={handleSaveSettings}
                 style={{
                   backgroundColor: colors.primary,
-                  color: 'white',
+                  color: colors.onPrimary,
                   border: 'none',
                   borderRadius: '6px',
                   padding: '8px 16px',

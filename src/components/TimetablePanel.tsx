@@ -263,7 +263,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                       padding: '2px 7px',
                       fontSize: '11px',
                       backgroundColor: isExpanded ? colors.primary : 'transparent',
-                      color: isExpanded ? '#fff' : colors.primary,
+                      color: isExpanded ? colors.onPrimary : colors.primary,
                       cursor: 'pointer',
                     }}
                   >
@@ -308,7 +308,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                         </span>
                         <span style={{
                           fontSize: '11px',
-                          color: '#fff',
+                          color: colors.onPrimary,
                           backgroundColor: typeColor(dep.type),
                           borderRadius: '3px',
                           padding: '1px 5px',

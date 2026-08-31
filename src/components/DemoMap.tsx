@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Map, MousePointerClick, CircleCheck } from 'lucide-react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
-import { SEMANTIC } from '../constants/ui';
+import { SEMANTIC, NEUTRAL } from '../constants/ui';
 import { tintColor } from '../utils/contrast';
 
 // Yokohama → Shinjuku corridor routes only
@@ -129,7 +129,7 @@ const DemoMap: React.FC = () => {
       {!tutorialDismissed && currentStep && (
         <div style={{
           backgroundColor: '#1a1a2e',
-          color: '#fff',
+          color: NEUTRAL.white,
           padding: '10px 16px',
           display: 'flex',
           alignItems: 'center',
@@ -143,7 +143,7 @@ const DemoMap: React.FC = () => {
             <div style={{ fontWeight: 'bold', fontSize: '13px', marginBottom: '2px' }}>
               <span style={{
                 backgroundColor: SEMANTIC.departure,
-                color: '#fff',
+                color: NEUTRAL.white,
                 borderRadius: '10px',
                 padding: '1px 7px',
                 fontSize: '11px',
@@ -164,7 +164,7 @@ const DemoMap: React.FC = () => {
                 style={{
                   padding: '5px 12px',
                   backgroundColor: SEMANTIC.departure,
-                  color: '#fff',
+                  color: NEUTRAL.white,
                   border: 'none',
                   borderRadius: '4px',
                   cursor: 'pointer',
@@ -181,7 +181,7 @@ const DemoMap: React.FC = () => {
                 style={{
                   padding: '5px 12px',
                   backgroundColor: SEMANTIC.departure,
-                  color: '#fff',
+                  color: NEUTRAL.white,
                   border: 'none',
                   borderRadius: '4px',
                   cursor: 'pointer',
@@ -226,7 +226,7 @@ const DemoMap: React.FC = () => {
           style={{
             width: '160px',
             flexShrink: 0,
-            backgroundColor: '#fff',
+            backgroundColor: NEUTRAL.white,
             borderRight: '1px solid #ddd',
             display: 'flex',
             flexDirection: 'column',
@@ -243,7 +243,7 @@ const DemoMap: React.FC = () => {
           <div style={{
             padding: '10px 12px',
             backgroundColor: '#1a1a2e',
-            color: '#fff',
+            color: NEUTRAL.white,
             fontSize: '11px',
             fontWeight: 'bold',
             flexShrink: 0,
@@ -369,7 +369,7 @@ const DemoMap: React.FC = () => {
                   radius={st.isEndpoint ? 9 : 6}
                   pathOptions={{
                     color: st.isEndpoint ? '#1a1a2e' : '#555',
-                    fillColor: st.isEndpoint ? '#fff' : '#fff',
+                    fillColor: st.isEndpoint ? NEUTRAL.white : NEUTRAL.white,
                     fillOpacity: 1,
                     weight: st.isEndpoint ? 3 : 2,
                   }}
