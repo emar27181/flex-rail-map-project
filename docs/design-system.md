@@ -103,19 +103,81 @@ UI の色・サイズ・余白・ボタンが「どこで決まっているか�
 「さらに表示」、`LegendRouteList` の全表示/全非表示・並び順・表示方式。
 残りは触る箇所から順次置き換える。
 
-### アトミックデザインの層
+---
 
-`src/components/ui/` を役割で分ける。**どの層に置くかは「何を知っているか」で決める。**
+## 3.1 アトミックデザインの規格
 
-| 層 | 置き場所 | 知ってよいこと | 例 |
-|---|---|---|---|
-| atoms | `ui/atoms/` | デザイントークンだけ。アプリの概念（路線・駅）を知らない | `Button` |
-| molecules | `ui/molecules/` | アトムの組み合わせ方。まだ路線・駅は知らない | `SegmentedControl` |
-| organisms | `components/`, `components/legend/` | アプリの概念とデータ | `RouteSwitchBoard`, `LegendRouteList` |
+### 層の分け方
 
-既存の `ui/ColorChip` `ui/ToggleableItem` `ui/RouteToggleItem`
-`ui/RouteRecommendationItem` は未移動。前2つは molecules、後2つは
-路線・経路を知っているので organisms 寄り。触るときに移す。
+**どの層に置くかは「何を知っているか」で決める。** 見た目の複雑さではない。
+
+| 層 | 置き場所 | 知ってよいこと | 知ってはいけないこと | 今あるもの |
+|---|---|---|---|---|
+| atoms | `ui/atoms/` | デザイントークン（`CONTROL_SIZE` `FS` `SEMANTIC` `getThemeColors`） | 路線・駅・経路といったアプリの概念、データの取得元 | `Button` `Chip` `TextField` |
+| molecules | `ui/molecules/` | アトムの並べ方・組み合わせ方 | 同上 | `SegmentedControl` |
+| organisms | `components/`, `components/legend/` | アプリの概念とデータ、状態 | — | `RouteSwitchBoard` `LegendRouteList` `StationSelector` |
+
+判定に迷ったら次を自問する。
+
+- **「路線」「駅」という語をこの部品から消せるか？** 消せないなら organism
+- **props を差し替えれば別のアプリでも使えるか？** 使えるなら atom / molecule
+
+例: 路線チップは「色・ラベル・選択状態」だけを受け取る `Chip`（atom）にし、
+「どの路線がどの色か」は呼び出し側（organism）が渡す。
+
+### アトムの書き方（守ること）
+
+1. **寸法は `ui/atoms/controlSize.ts` の `CONTROL_SIZE` から取る。** 部品ごとに
+   高さや角丸を書かない
+2. **色は `getThemeColors(theme)` / `SEMANTIC` / `filledLabelColors()` から取る。**
+   直書きは `tests/unit/constants/semanticColors.test.ts` が落とす
+3. **`theme` を props で受け取る。** アトムは context を読まない（テストしにくくなる）
+4. **状態で外形を変えない。** 枠線の太さ・文字の太さ・大きさを選択状態で変えると、
+   押すたびに並びが動く。状態は**塗り**で示す
+5. **文言を持たない。** 表示する文字は props で受け取る。翻訳は organism の仕事
+6. **アイコンは lucide-react のコンポーネント。** 絵文字は使わない
+
+### 寸法の規格（`CONTROL_SIZE`）
+
+段階は2つだけ。増やすと「どれを使うか」が決まらなくなる。
+
+| 段階 | 高さ | 文字 | 使うところ | 根拠 |
+|---|---|---|---|---|
+| `md` | 44px | 12px | 指で何度も押すもの。パネルの主要な操作 | Apple HIG 44pt |
+| `sm` | 24px | 11px | 補助操作。密なヘッダー、インラインのボタン | WCAG 2.2 AA 2.5.8 の下限 |
+
+**同じ行・同じグループに並ぶ操作は必ず同じ段階にする。**
+隣り合う部品で高さが違うのが「揃っていない」の主な原因だった
+（例: 路線チップ44px の隣に全表示ボタン24px が並んでいた）。
+
+パネル単位で段階を決め、そのパネルの中では定数にして使い回す
+（`RouteSwitchBoard` の `BOARD_CONTROL_SIZE` が実例）。
+
+入力欄だけは文字サイズが規格から外れて **16px 固定**。iOS Safari が
+16px 未満の入力欄でページを自動拡大するため。
+
+### 色の規格
+
+| 用途 | 使うもの |
+|---|---|
+| 主操作 | `variant="primary"`（`SEMANTIC.primary`） |
+| 出発・肯定 | `variant="positive"`（`SEMANTIC.departure`） |
+| 到着・否定・削除 | `variant="danger"`（`SEMANTIC.arrival`） |
+| 補助 | `variant="outline"`（枠線のみ） |
+| 目立たせない | `variant="ghost"`（枠線も塗りもなし。太さは確保する） |
+| それ自身の色を持つもの（路線） | `<Chip color={路線色}>` |
+
+塗った色の上に載せる文字は `colors.onPrimary`、
+路線色のように色が動くものは `filledLabelColors()` に決めさせる。
+
+### テストで固定していること
+
+`tests/unit/components/ui/atoms.test.tsx`
+
+- 段階は2つだけ、`sm` < `md`
+- `Button` と `Chip` は同じ段階なら高さ・角丸・枠線・文字サイズが一致する
+- 選択・非選択で枠線と文字の太さが変わらない（塗りだけが変わる）
+- 入力欄の文字は16pxを下回らない
 
 ---
 
@@ -265,6 +327,11 @@ UIのテーマと無関係なため明示的に除外している。
 
 | 書こうとしているもの | 使うもの | 直接書いてよいか |
 |---|---|---|
+| ボタン | `<Button theme variant size>` | ❌ `<button style={{...}}>` は禁止 |
+| 色を持つ切り替え（路線など） | `<Chip color label selected>` | ❌ |
+| 排他選択のボタン列 | `<SegmentedControl>` | ❌ |
+| 1行入力欄 | `<TextField theme size>` | ❌ |
+| 操作部品の高さ・角丸 | `CONTROL_SIZE[size]` | ❌ |
 | フォントサイズ | `FS.base` など `src/constants/ui.ts` | ❌ `fontSize: '12px'` は禁止 |
 | 操作要素の最小サイズ | `TARGET.min` / `TARGET.touch` | ❌ |
 | 出発/到着/primary の色 | `SEMANTIC.*` | ❌ `#4CAF50` の直書きは禁止 |

@@ -1537,3 +1537,20 @@
 - 判定は駅名の組が一致するかで行うため、駅が違う並走区間は対象外
 - `tests/unit/utils/routeOffset.test.ts`（新規, 23件）: 単独区間はずらさない、
   段数の合計が0になる、ずらす向きが線と直交する、同一座標が連続しても壊れない、等
+
+### feat: アトミックデザインを規格化し、路線切り替えを組み直す
+- `src/components/ui/atoms/controlSize.ts`（新規）,
+  `src/components/ui/atoms/Chip.tsx`（新規）, `src/components/ui/atoms/TextField.tsx`（新規）,
+  `src/components/ui/atoms/Button.tsx`, `src/components/legend/RouteSwitchBoard.tsx`
+- ボタンだけが寸法規格を持っていたため、路線チップ（高さ44px・文字13px・角丸8px）と
+  隣の全表示ボタン（高さ24px・文字11px・角丸4px）が同じパネルの中で揃っていなかった
+- 高さ・文字・余白・角丸を `CONTROL_SIZE` に集約。段階は `md`(44px, 指で押すもの) と
+  `sm`(24px, 補助操作) の2つだけ
+- 路線チップを `Chip`（色・ラベル・選択状態だけを受け取り、路線を知らない）に、
+  絞り込み欄を `TextField` に置き換え、パネル内の操作をすべて md に統一
+- 入力欄だけ文字サイズを規格から外して16px固定（iOS Safari の自動ズーム対策）
+- `tests/unit/components/ui/atoms.test.tsx`（新規, 11件）: 段階は2つだけ、
+  同じ段階なら Button と Chip の高さ・角丸・枠線・文字が一致、
+  選択で外形が変わらない、入力欄は16pxを下回らない
+- 層の分け方（何を知っているか）・寸法規格・色の規格を
+  `docs/design-system.md` と `CLAUDE.md`、`.claude/skills/design-tokens/SKILL.md` に明記

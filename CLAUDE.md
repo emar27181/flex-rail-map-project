@@ -491,7 +491,7 @@ Made with Claude Code
 
 ## 🔧 開発ガイドライン
 
-### デザインの一元管理
+### デザインの一元管理（アトミックデザイン）
 
 UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域）を書くときは、値を直接書かず
 定義元から取ること。**同じ値・同じ規則を2箇所目に書こうとしたら、書く前に共通化する。**
@@ -499,6 +499,33 @@ UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域
 - 判断表と現状の調査結果: **`docs/design-system.md`**
 - 作業時に読むスキル: **`.claude/skills/design-tokens/SKILL.md`**
 - 現状を数え直す: `node scripts/audit-design-tokens.mjs`
+
+**UIコンポーネントはアトミックデザインの3層に分ける。
+どの層に置くかは「何を知っているか」で決める（見た目の複雑さではない）。**
+
+| 層 | 置き場所 | 知ってよいこと | 例 |
+|---|---|---|---|
+| atoms | `src/components/ui/atoms/` | デザイントークンだけ | `Button` `Chip` `TextField` |
+| molecules | `src/components/ui/molecules/` | アトムの組み合わせ方 | `SegmentedControl` |
+| organisms | `src/components/`, `src/components/legend/` | アプリの概念（路線・駅）とデータ | `RouteSwitchBoard` `StationSelector` |
+
+判定に迷ったら「路線」「駅」という語をその部品から消せるかを見る。消せないなら organism。
+
+**新しくボタン・入力欄・チップを書かないこと。** 既存のアトムを使う。
+`<button style={{...}}>` を書こうとしたら、それは `ui/atoms/Button` で足りないか先に考える。
+
+**寸法は `ui/atoms/controlSize.ts` の `CONTROL_SIZE` だけから取る。**
+段階は `md`(44px, 指で押すもの) と `sm`(24px, 補助操作) の2つのみ。
+**同じ行・同じグループに並ぶ操作は必ず同じ段階にする**
+（隣り合う部品で高さが違うのが「揃っていない」の主な原因だった）。
+
+**状態は塗りで示す。** 選択・非選択で枠線の太さや文字の太さを変えると、
+押すたびに外形が動いて並びがずれる。
+
+色は `SEMANTIC.*`（出発=緑 / 到着=赤 / primary=青）、白黒は `NEUTRAL.*`、
+それ以外は `getThemeColors(theme)` から取る。直書きはテストで落ちる
+（`tests/unit/constants/semanticColors.test.ts`）。
+寸法の一致は `tests/unit/components/ui/atoms.test.tsx` が固定している。
 
 このプロジェクトは「同じ規則を2箇所に書いて片方だけ直す」不具合を繰り返しているため
 （入力欄だけ色が変わる、駅アイコンの片方だけタッチ領域が広がる等）、

@@ -19,6 +19,9 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 | フォントサイズ | `FS.sectionTitle` / `base` / `label` / `helper` / `tiny` / `micro` / `input` | `src/constants/ui.ts` |
 | 操作要素の最小サイズ | `TARGET.min`(24) / `TARGET.touch`(44) | `src/constants/ui.ts` |
 | ボタン | `<Button theme variant size>` | `src/components/ui/atoms/Button.tsx` |
+| 色を持つ切り替え（路線など） | `<Chip color label selected>` | `src/components/ui/atoms/Chip.tsx` |
+| 1行入力欄 | `<TextField theme size>` | `src/components/ui/atoms/TextField.tsx` |
+| 操作部品の高さ・角丸・余白 | `CONTROL_SIZE[size]`（sm=24px / md=44px） | `src/components/ui/atoms/controlSize.ts` |
 | 排他選択のボタン列 | `<SegmentedControl>` | `src/components/ui/molecules/SegmentedControl.tsx` |
 | 出発/到着/primary の色 | `SEMANTIC.departure` / `arrival` / `primary` | `src/constants/ui.ts` |
 | 白・黒 | `NEUTRAL.white` / `NEUTRAL.black`、半透明は `alphaWhite()` / `alphaBlack()` | `src/constants/ui.ts` |
@@ -40,7 +43,11 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 - `color: '#fff'` / `'white'` / `backgroundColor: '#333'` の直書き → `getThemeColors(theme)`。
   塗った色の上の文字は `colors.onPrimary`。テーマではなく下の色で決まる白だけ `NEUTRAL.white`。
   `tests/unit/constants/semanticColors.test.ts` が直書きを落とす
-- `<button>` にインラインstyleで色や寸法を書く → `ui/atoms/Button` の `variant` / `size` で指定する
+- `<button>` `<input>` にインラインstyleで色や寸法を書く
+  → `ui/atoms/` の `Button` / `Chip` / `TextField` を使い、`variant` / `size` で指定する
+- 同じ行・同じグループに並ぶ操作で `size` を変える → 高さが揃わない。パネル単位で1つに決める
+- アトムがアプリの概念（路線・駅）を知る → props で受け取る。層の判定は
+  「路線」「駅」という語をその部品から消せるかで決める（消せないなら organism）
 - 自前でのコントラスト判定（`theme === 'dark' ? white : black` のような分岐）
   → `filledLabelColors()`。この分岐は3箇所に重複していて実際に不整合が出た
 
