@@ -7435,6 +7435,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "表示路線切り替え",
     english: "Route Display Toggle"
   },
+  clearSelection: {
+    japanese: "選択を解除",
+    english: "Clear"
+  },
   routeViewBoard: {
     japanese: "ボード",
     english: "Board"
@@ -8430,6 +8434,7 @@ export type Language = 'japanese' | 'english' | 'chinese' | 'korean';
 
 // 中国語（簡体字）UI翻訳
 export const uiChinese: Record<string, string> = {
+  clearSelection: "清除选择",
   routeViewBoard: "面板",
   routeViewClassic: "列表",
   routeSearchPlaceholder: "按线路名称筛选",
@@ -8695,6 +8700,7 @@ export const uiChinese: Record<string, string> = {
 
 // 韓国語UI翻訳
 export const uiKorean: Record<string, string> = {
+  clearSelection: "선택 해제",
   routeViewBoard: "보드",
   routeViewClassic: "목록",
   routeSearchPlaceholder: "노선 이름으로 검색",

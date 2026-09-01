@@ -3,6 +3,7 @@ import { getThemeColors } from '../../contexts/ThemeContext';
 import { section, text, btn, btnFull, textarea, L } from './legendStyles';
 import { translateUI } from '../../utils/translation';
 import type { Language } from '../../utils/translation';
+import Button from '../ui/atoms/Button';
 
 export type MapConfig = {
   version: 1;
@@ -119,10 +120,12 @@ export default function MapConfigPanel({ config, theme, language, onImport }: Pr
           <div>
             <div style={text.desc(colors)}>{translateUI('configExportDesc', language)}</div>
             <div style={{ display: 'flex', gap: L.sp.xs }}>
-              <button onClick={handleExportDownload} style={btn(colors)}>{translateUI('configExportSave', language)}</button>
-              <button onClick={handleCopy}           style={btn(colors)}>
+              <Button theme={theme} variant="outline" size="sm" onClick={handleExportDownload}>
+                {translateUI('configExportSave', language)}
+              </Button>
+              <Button theme={theme} variant="outline" size="sm" onClick={handleCopy}>
                 {copied ? translateUI('configExportCopied', language) : translateUI('configExportCopy', language)}
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -131,9 +134,9 @@ export default function MapConfigPanel({ config, theme, language, onImport }: Pr
             <div style={text.desc(colors)}>{translateUI('configImportDesc', language)}</div>
             <input ref={fileInputRef} type="file" accept=".json"
               onChange={handleFileImport} style={{ display: 'none' }} />
-            <button onClick={() => fileInputRef.current?.click()} style={btnFull(colors)}>
+            <Button theme={theme} variant="outline" size="sm" fullWidth onClick={() => fileInputRef.current?.click()}>
               {translateUI('configImportFile', language)}
-            </button>
+            </Button>
             <textarea
               value={pasteText}
               onChange={e => { setPasteText(e.target.value); setError(null); }}
@@ -141,13 +144,16 @@ export default function MapConfigPanel({ config, theme, language, onImport }: Pr
               rows={3}
               style={textarea(colors)}
             />
-            <button
+            <Button
+              theme={theme}
+              variant="primary"
+              size="sm"
+              fullWidth
               onClick={handleImportText}
               disabled={!pasteText.trim()}
-              style={{ ...btnFull(colors), opacity: pasteText.trim() ? 1 : 0.5 }}
             >
               {translateUI('configImportApply', language)}
-            </button>
+            </Button>
             {error && (
               <div style={{ fontSize: L.fs.xs, color: '#e74c3c' }}>{error}</div>
             )}

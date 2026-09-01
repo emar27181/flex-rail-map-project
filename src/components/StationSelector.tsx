@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { ArrowLeftRight, Clock } from 'lucide-react';
+import { ArrowLeftRight, Clock, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
@@ -10,9 +10,10 @@ import { stationReadings, normalizeToHiragana } from '../utils/stationReadings';
 import { findNearestStations } from '../utils/nearestStations';
 import { loadStationHistory, recordStationSelection, buildSuggestions } from '../utils/stationHistory';
 import type { StationHistoryEntry } from '../utils/stationHistory';
-import { FS, TARGET, SEMANTIC } from '../constants/ui';
+import { FS, TARGET, SEMANTIC, alphaWhite } from '../constants/ui';
 import { L } from './legend/legendStyles';
 import Button from './ui/atoms/Button';
+import IconButton from './ui/atoms/IconButton';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 
@@ -471,30 +472,21 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                 />
                 {departure && (
-                  <button
+                  <IconButton
+                    theme={theme}
+                    size="sm"
                     onClick={clearDeparture}
-                    style={{
+                    label={translateUI('clearSelection', language)}
+                    icon={<X size={14} />}
+                    styleOverride={{
                       position: 'absolute',
                       right: '2px',
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '14px',
                       // 塗りつぶした入力欄の上に置くため白系にする
-                      color: 'rgba(255,255,255,0.9)',
-                      padding: '2px 4px',
-                      lineHeight: '1',
-                      minWidth: '20px',
-                      minHeight: '20px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      color: alphaWhite(0.9),
                     }}
-                  >
-                    ×
-                  </button>
+                  />
                 )}
               </div>
               {/*
@@ -577,7 +569,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             }}>
               {/* ラベル (line-height≒18px) + margin-bottom 3px 分のオフセット */}
               <div style={{ height: '21px' }} />
-              <button
+              <IconButton
+                theme={theme}
+                size="sm"
                 onClick={() => {
                   const prevDep = departure;
                   const prevArr = arrival;
@@ -586,28 +580,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   setDepartureSearch(prevArr ? translateStation(prevArr.name, language) : '');
                   setArrivalSearch(prevDep ? translateStation(prevDep.name, language) : '');
                 }}
-                title={translateUI('swapStationsTitle', language)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  borderRadius: '50%',
-                  // WCAG 2.2 AA (2.5.8 ターゲットサイズ) の最小24pxを満たす
-                  width: '24px',
-                  height: '24px',
-                  cursor: 'pointer',
-                  fontSize: FS.label,
-                  color: colors.textSecondary,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  padding: 0,
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = colors.surface; }}
-                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-              >
-                <ArrowLeftRight size={14} />
-              </button>
+                label={translateUI('swapStationsTitle', language)}
+                icon={<ArrowLeftRight size={14} />}
+                styleOverride={{ flexShrink: 0 }}
+              />
             </div>
 
             {/* 到着駅選択 */}
@@ -667,30 +643,21 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                 />
                 {arrival && (
-                  <button
+                  <IconButton
+                    theme={theme}
+                    size="sm"
                     onClick={clearArrival}
-                    style={{
+                    label={translateUI('clearSelection', language)}
+                    icon={<X size={14} />}
+                    styleOverride={{
                       position: 'absolute',
                       right: '2px',
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '14px',
                       // 塗りつぶした入力欄の上に置くため白系にする
-                      color: 'rgba(255,255,255,0.9)',
-                      padding: '2px 4px',
-                      lineHeight: '1',
-                      minWidth: '20px',
-                      minHeight: '20px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      color: alphaWhite(0.9),
                     }}
-                  >
-                    ×
-                  </button>
+                  />
                 )}
               </div>
               
@@ -843,29 +810,19 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   cursor: 'pointer',
                 }}
               />
-              <button
+              <Button
+                theme={theme}
+                variant="outline"
+                size="sm"
                 onClick={() => {
                   const now = new Date();
                   const hh = String(now.getHours()).padStart(2, '0');
                   const mm = String(now.getMinutes()).padStart(2, '0');
                   onDepartureTimeChange(`${hh}:${mm}`);
                 }}
-                style={{
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: '4px',
-                  padding: '0 5px',
-                  // WCAG 2.2 AA (2.5.8 ターゲットサイズ) の最小24pxを満たす
-                  height: '24px',
-                  boxSizing: 'border-box',
-                  fontSize: FS.helper,
-                  backgroundColor: colors.surface,
-                  color: colors.textSecondary,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}
               >
                 {translateUI('currentTime', language)}
-              </button>
+              </Button>
             </div>
           )}
 

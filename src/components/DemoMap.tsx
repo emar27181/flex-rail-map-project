@@ -4,6 +4,11 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Map, MousePointerClick, CircleCheck } from 'lucide-react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { SEMANTIC, NEUTRAL } from '../constants/ui';
+import Button from './ui/atoms/Button';
+import Chip from './ui/atoms/Chip';
+
+/** デモ画面はテーマ切替を持たずライト固定 */
+const DEMO_THEME = 'light' as const;
 import { tintColor } from '../utils/contrast';
 
 // Yokohama → Shinjuku corridor routes only
@@ -159,55 +164,17 @@ const DemoMap: React.FC = () => {
           </div>
           <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
             {tutorialStep < TUTORIAL_STEPS.length ? (
-              <button
-                onClick={handleNext}
-                style={{
-                  padding: '5px 12px',
-                  backgroundColor: SEMANTIC.departure,
-                  color: NEUTRAL.white,
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  fontWeight: 'bold',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+              <Button theme={DEMO_THEME} variant="positive" size="sm" onClick={handleNext}>
                 次へ →
-              </button>
+              </Button>
             ) : (
-              <button
-                onClick={() => setTutorialDismissed(true)}
-                style={{
-                  padding: '5px 12px',
-                  backgroundColor: SEMANTIC.departure,
-                  color: NEUTRAL.white,
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  fontWeight: 'bold',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+              <Button theme={DEMO_THEME} variant="positive" size="sm" onClick={() => setTutorialDismissed(true)}>
                 完了 ✓
-              </button>
+              </Button>
             )}
-            <button
-              onClick={() => setTutorialDismissed(true)}
-              style={{
-                padding: '5px 8px',
-                backgroundColor: 'transparent',
-                color: '#aaa',
-                border: '1px solid #555',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                whiteSpace: 'nowrap',
-              }}
-            >
+            <Button theme={DEMO_THEME} variant="outline" size="sm" onClick={() => setTutorialDismissed(true)}>
               閉じる
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -276,43 +243,19 @@ const DemoMap: React.FC = () => {
               const name = getRouteName(rk);
               const isVisible = visibleRoutes.has(rk);
               return (
-                <button
+                <Chip
                   key={rk}
+                  theme={DEMO_THEME}
+                  size="sm"
+                  color={color}
+                  label={name}
+                  selected={isVisible}
                   onClick={() => handleRouteToggle(rk)}
-                  title={isVisible ? '非表示にする' : '表示する'}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '7px',
-                    padding: '7px 8px',
-                    border: isVisible ? `2px solid ${color}` : '2px solid #ddd',
-                    borderRadius: '6px',
-                    backgroundColor: isVisible ? `${color}18` : '#fafafa',
-                    cursor: 'pointer',
-                    textAlign: 'left',
+                  styleOverride={{
                     width: '100%',
-                    transition: 'all 0.15s ease',
                     animation: isPanelHighlighted && !isVisible ? 'wiggle 1.5s infinite' : 'none',
                   }}
-                >
-                  <span style={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    backgroundColor: color,
-                    flexShrink: 0,
-                    opacity: isVisible ? 1 : 0.35,
-                    transition: 'opacity 0.15s',
-                  }} />
-                  <span style={{
-                    fontSize: '11px',
-                    fontWeight: isVisible ? 'bold' : 'normal',
-                    color: isVisible ? color : '#999',
-                    lineHeight: 1.3,
-                  }}>
-                    {name}
-                  </span>
-                </button>
+                />
               );
             })}
           </div>
