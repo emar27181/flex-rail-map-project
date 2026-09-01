@@ -12,6 +12,7 @@ import { FS, TARGET } from '../../constants/ui';
 import RouteSwitchBoard from './RouteSwitchBoard';
 import Button from '../ui/atoms/Button';
 import SegmentedControl from '../ui/molecules/SegmentedControl';
+import Stepper from '../ui/molecules/Stepper';
 import { ALERT_MINUTE_OPTIONS } from '../../utils/arrivalAlert';
 
 type SortMode = 'name' | 'color' | 'default' | 'distance';
@@ -461,12 +462,18 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
               );
             })}
             {(hidden > 0 || routeListExpanded) && (
-              <button
+              <Button
+                theme={theme}
+                variant="outline"
+                size="sm"
+                fullWidth
                 onClick={() => setRouteListExpanded(v => !v)}
-                style={{ width: '100%', marginTop: '4px', padding: '4px', fontSize: '10px', background: 'transparent', border: `1px solid ${colors.borderLight}`, borderRadius: '3px', color: colors.textSecondary, cursor: 'pointer' }}
+                styleOverride={{ marginTop: '4px' }}
               >
-                {routeListExpanded ? '▲ 折りたたむ' : `▼ 他 ${hidden} 路線を表示`}
-              </button>
+                {routeListExpanded
+                  ? translateUI('collapseList', language)
+                  : translateUI('showMoreRoutes', language, { count: String(hidden) })}
+              </Button>
             )}
           </>
         );
@@ -706,22 +713,30 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   <input type="checkbox" checked={showOsmTiles} onChange={e => onShowOsmTilesChange(e.target.checked)} style={checkboxInput(colors)} />
                   {translateUI('showMapTiles', language)}
                 </label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0', marginTop: '2px' }}>
-                  <span style={{ flex: 1, color: colors.textSecondary }}>{translateUI('settingsIconSize', language)}</span>
-                  <button onClick={() => onStationSizeScaleChange(Math.max(0.5, Math.round((stationSizeScale - 0.1) * 10) / 10))}
-                    style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
-                  <span style={{ minWidth: '30px', textAlign: 'center', fontSize: '11px' }}>{stationSizeScale.toFixed(1)}x</span>
-                  <button onClick={() => onStationSizeScaleChange(Math.min(2.0, Math.round((stationSizeScale + 0.1) * 10) / 10))}
-                    style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0' }}>
-                  <span style={{ flex: 1, color: colors.textSecondary }}>{translateUI('routeLineWidth', language)}</span>
-                  <button onClick={() => onRouteLineWidthChange(Math.max(1, routeLineWidth - 0.5))}
-                    style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
-                  <span style={{ minWidth: '30px', textAlign: 'center', fontSize: '11px' }}>{routeLineWidth.toFixed(1)}px</span>
-                  <button onClick={() => onRouteLineWidthChange(Math.min(8, routeLineWidth + 0.5))}
-                    style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
-                </div>
+                <Stepper
+                  theme={theme}
+                  label={translateUI('settingsIconSize', language)}
+                  value={stationSizeScale}
+                  min={0.5}
+                  max={2.0}
+                  step={0.1}
+                  onChange={onStationSizeScaleChange}
+                  format={(v) => `${v.toFixed(1)}x`}
+                  decreaseLabel={translateUI('decrease', language)}
+                  increaseLabel={translateUI('increase', language)}
+                />
+                <Stepper
+                  theme={theme}
+                  label={translateUI('routeLineWidth', language)}
+                  value={routeLineWidth}
+                  min={1}
+                  max={8}
+                  step={0.5}
+                  onChange={onRouteLineWidthChange}
+                  format={(v) => `${v.toFixed(1)}px`}
+                  decreaseLabel={translateUI('decrease', language)}
+                  increaseLabel={translateUI('increase', language)}
+                />
               </div>
             )}
 

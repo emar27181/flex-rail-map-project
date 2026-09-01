@@ -9,6 +9,9 @@ import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { FS } from '../constants/ui';
 import { translateUI, translateRoute, translateStation } from '../utils/translation';
 import type { Language } from '../utils/translation';
+import Button from './ui/atoms/Button';
+import IconButton from './ui/atoms/IconButton';
+import Chip from './ui/atoms/Chip';
 
 interface TrainStatusPanelProps {
   detectedRoute: DetectedRoute | null;
@@ -126,10 +129,13 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
           <span style={{ fontSize: FS.label, fontWeight: 'bold', color: colors.text }}>{translateUI('selectRouteTitle', language)}</span>
-          <button
+          <IconButton
+            theme={theme}
+            size="sm"
             onClick={() => { setShowOverride(false); setOverrideSearch(''); }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: colors.textSecondary, fontSize: FS.base, display: 'flex', alignItems: 'center' }}
-          ><X size={16} /></button>
+            label={translateUI('close', language)}
+            icon={<X size={16} />}
+          />
         </div>
         <input
           ref={searchInputRef}
@@ -166,36 +172,24 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
               }}>
                 <div style={{ fontSize: FS.label, color: colors.text, fontWeight: 'bold', marginBottom: '4px' }}>{translateRoute(r.name, language)}</div>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  <button
+                  <Chip
+                    theme={theme}
+                    size="sm"
+                    color={r.color}
+                    label={`→ ${translateStation(termA, language)}`}
+                    selected={false}
                     onClick={() => handleSelectRoute(r.key, 0)}
-                    style={{
-                      flex: '1 1 0',
-                      fontSize: FS.label,
-                      padding: '4px 6px',
-                      borderRadius: '4px',
-                      border: `1px solid ${r.color}`,
-                      backgroundColor: 'transparent',
-                      color: r.color,
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      minWidth: 0,
-                    }}
-                  >→ {translateStation(termA, language)}</button>
-                  <button
+                    styleOverride={{ flex: '1 1 0', minWidth: 0 }}
+                  />
+                  <Chip
+                    theme={theme}
+                    size="sm"
+                    color={r.color}
+                    label={`→ ${translateStation(termB, language)}`}
+                    selected={false}
                     onClick={() => handleSelectRoute(r.key, 1)}
-                    style={{
-                      flex: '1 1 0',
-                      fontSize: FS.label,
-                      padding: '4px 6px',
-                      borderRadius: '4px',
-                      border: `1px solid ${r.color}`,
-                      backgroundColor: 'transparent',
-                      color: r.color,
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      minWidth: 0,
-                    }}
-                  >→ {translateStation(termB, language)}</button>
+                    styleOverride={{ flex: '1 1 0', minWidth: 0 }}
+                  />
                 </div>
               </div>
             );
@@ -219,21 +213,13 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
         gap: '6px',
       }}>
         <span style={{ fontSize: FS.label, color: colors.textSecondary }}>{translateUI('detectingRoute', language)}</span>
-        <button
+        <Button
+          theme={theme}
+          variant="outline"
+          size="sm"
           onClick={() => setShowOverride(true)}
-          style={{
-            marginLeft: 'auto',
-            fontSize: FS.helper,
-            padding: '2px 6px',
-            // WCAG 2.2 AA (2.5.8 ターゲットサイズ) の最小24pxを満たす
-            minHeight: '24px',
-            borderRadius: '3px',
-            border: `1px solid ${colors.border}`,
-            backgroundColor: 'transparent',
-            color: colors.textSecondary,
-            cursor: 'pointer',
-          }}
-        >{translateUI('manualSetRoute', language)}</button>
+          styleOverride={{ marginLeft: 'auto' }}
+        >{translateUI('manualSetRoute', language)}</Button>
       </div>
     );
   }
@@ -311,46 +297,21 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
 
       {/* 操作ボタン行 */}
       <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
-        <button
+        <Button
+          theme={theme}
+          variant="outline"
+          size="sm"
           onClick={handleFlipDirection}
           title={translateUI('flipDirectionTitle', language)}
-          style={{
-            fontSize: FS.label,
-            padding: '5px 12px',
-            borderRadius: '6px',
-            border: `1.5px solid ${colors.border}`,
-            backgroundColor: colors.surfaceElevated,
-            color: colors.text,
-            cursor: 'pointer',
-            fontWeight: '500',
-          }}
-        ><ArrowLeftRight size={13} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />{translateUI('flipDirection', language)}</button>
-        <button
-          onClick={() => setShowOverride(true)}
-          style={{
-            fontSize: FS.label,
-            padding: '5px 12px',
-            borderRadius: '6px',
-            border: `1.5px solid ${colors.border}`,
-            backgroundColor: colors.surfaceElevated,
-            color: colors.text,
-            cursor: 'pointer',
-            fontWeight: '500',
-          }}
-        >{translateUI('changeRoute', language)}</button>
+          icon={<ArrowLeftRight size={13} />}
+        >{translateUI('flipDirection', language)}</Button>
+        <Button theme={theme} variant="outline" size="sm" onClick={() => setShowOverride(true)}>
+          {translateUI('changeRoute', language)}
+        </Button>
         {isManual && (
-          <button
-            onClick={handleReset}
-            style={{
-              fontSize: FS.label,
-              padding: '5px 12px',
-              borderRadius: '6px',
-              border: `1.5px solid ${colors.border}`,
-              backgroundColor: colors.surfaceElevated,
-              color: colors.textSecondary,
-              cursor: 'pointer',
-            }}
-          >{translateUI('resetToAutoDetect', language)}</button>
+          <Button theme={theme} variant="ghost" size="sm" onClick={handleReset}>
+            {translateUI('resetToAutoDetect', language)}
+          </Button>
         )}
       </div>
     </div>

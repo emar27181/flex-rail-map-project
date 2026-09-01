@@ -7439,6 +7439,22 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "選択を解除",
     english: "Clear"
   },
+  decrease: {
+    japanese: "小さくする",
+    english: "Decrease"
+  },
+  increase: {
+    japanese: "大きくする",
+    english: "Increase"
+  },
+  collapseList: {
+    japanese: "▲ 折りたたむ",
+    english: "▲ Collapse"
+  },
+  showMoreRoutes: {
+    japanese: "▼ 他 {count} 路線を表示",
+    english: "▼ Show {count} more routes"
+  },
   routeViewBoard: {
     japanese: "ボード",
     english: "Board"
@@ -8435,6 +8451,10 @@ export type Language = 'japanese' | 'english' | 'chinese' | 'korean';
 // 中国語（簡体字）UI翻訳
 export const uiChinese: Record<string, string> = {
   clearSelection: "清除选择",
+  decrease: "缩小",
+  increase: "放大",
+  collapseList: "▲ 折叠",
+  showMoreRoutes: "▼ 显示其他 {count} 条线路",
   routeViewBoard: "面板",
   routeViewClassic: "列表",
   routeSearchPlaceholder: "按线路名称筛选",
@@ -8701,6 +8721,10 @@ export const uiChinese: Record<string, string> = {
 // 韓国語UI翻訳
 export const uiKorean: Record<string, string> = {
   clearSelection: "선택 해제",
+  decrease: "작게",
+  increase: "크게",
+  collapseList: "▲ 접기",
+  showMoreRoutes: "▼ 다른 {count}개 노선 표시",
   routeViewBoard: "보드",
   routeViewClassic: "목록",
   routeSearchPlaceholder: "노선 이름으로 검색",
