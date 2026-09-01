@@ -4,6 +4,8 @@ import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
 import { checkboxInput } from './legendStyles';
+import Radio from '../ui/atoms/Radio';
+import Checkbox from '../ui/atoms/Checkbox';
 
 interface LegendDisplayOptionsProps {
   mapViewMode: 'realistic' | 'schematic';
@@ -43,67 +45,38 @@ const LegendDisplayOptions: React.FC<LegendDisplayOptionsProps> = ({
           {translateUI('mapDisplayMode', language)}:
         </label>
         <div style={{ marginBottom: '12px' }}>
-          <label style={{
-            display: 'flex',
-            alignItems: 'center',
-            fontSize: '11px',
-            color: colors.text,
-            cursor: 'pointer',
-            marginBottom: '4px'
-          }}>
-            <input
-              type="radio"
-              name="mapViewMode"
-              checked={mapViewMode === 'realistic'}
-              onChange={() => onMapViewModeChange('realistic')}
-              style={{
-                marginRight: '6px',
-                cursor: 'pointer'
-              }}
-            />
+          <Radio
+            theme={theme}
+            size="sm"
+            name="mapViewMode"
+            checked={mapViewMode === 'realistic'}
+            onChange={() => onMapViewModeChange('realistic')}
+          >
             {translateUI('realisticView', language)}
-          </label>
-          <label style={{
-            display: 'flex',
-            alignItems: 'center',
-            fontSize: '11px',
-            color: colors.text,
-            cursor: 'pointer',
-            marginBottom: '4px'
-          }}>
-            <input
-              type="radio"
-              name="mapViewMode"
-              checked={mapViewMode === 'schematic'}
-              onChange={() => onMapViewModeChange('schematic')}
-              style={{
-                marginRight: '6px',
-                cursor: 'pointer'
-              }}
-            />
+          </Radio>
+          <Radio
+            theme={theme}
+            size="sm"
+            name="mapViewMode"
+            checked={mapViewMode === 'schematic'}
+            onChange={() => onMapViewModeChange('schematic')}
+          >
             {translateUI('schematicView', language)}
-          </label>
+          </Radio>
         </div>
       </div>
 
       {/* 列車種別表示モード */}
       {onTrainTypeViewChange && (
         <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: `1px solid ${colors.borderLight}` }}>
-          <label style={{
-            display: 'flex',
-            alignItems: 'center',
-            fontSize: '11px',
-            color: colors.text,
-            cursor: 'pointer'
-          }}>
-            <input
-              type="checkbox"
-              checked={trainTypeViewEnabled}
-              onChange={(e) => onTrainTypeViewChange(e.target.checked)}
-              style={checkboxInput(colors)}
-            />
+          <Checkbox
+            theme={theme}
+            size="sm"
+            checked={trainTypeViewEnabled}
+            onChange={onTrainTypeViewChange}
+          >
             <TrainFront size={13} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />列車種別表示モード
-          </label>
+          </Checkbox>
         </div>
       )}
     </div>

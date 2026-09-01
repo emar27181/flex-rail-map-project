@@ -16,6 +16,7 @@ import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
+import TextField from './ui/atoms/TextField';
 
 /** 駅名検索の結果として出す最大件数 */
 const STATION_SUGGESTION_LIMIT = 10;
@@ -425,7 +426,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 {translateUI('departureStation', language)}
               </label>
               <div style={{ position: 'relative' }}>
-                <input
+                <TextField
+                  theme={theme}
+                  size="md"
                   type="text"
                   value={departureSearch}
                   onChange={(e) => {
@@ -457,19 +460,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                   placeholder={departure ? translateStation(departure.name, language) : translateUI('stationPlaceholder', language)}
                   className="station-input-filled"
-                  style={{
-                    width: '100%',
-                    padding: '4px 20px 4px 6px',
-                    border: `2px solid ${SEMANTIC.departure}`,
-                    borderRadius: '4px',
-                    // iOS Safari の自動ズームを防ぐため入力欄は16px下限
-                    fontSize: FS.input,
-                    minHeight: `${TARGET.min}px`,
-                    boxSizing: 'border-box',
-                    // 出発＝緑 で塗りつぶし、文字は白。地図の上でも役割が一目で分かるようにする
-                    backgroundColor: SEMANTIC.departure,
-                    color: colors.onPrimary,
-                  }}
                 />
                 {departure && (
                   <IconButton
@@ -596,7 +586,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 {translateUI('arrivalStation', language)}
               </label>
               <div style={{ position: 'relative' }}>
-                <input
+                <TextField
+                  theme={theme}
+                  size="md"
                   type="text"
                   value={arrivalSearch}
                   onChange={(e) => {
@@ -628,19 +620,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                   placeholder={arrival ? translateStation(arrival.name, language) : translateUI('stationPlaceholder', language)}
                   className="station-input-filled"
-                  style={{
-                    width: '100%',
-                    padding: '4px 20px 4px 6px',
-                    border: `2px solid ${SEMANTIC.arrival}`,
-                    borderRadius: '4px',
-                    // iOS Safari の自動ズームを防ぐため入力欄は16px下限
-                    fontSize: FS.input,
-                    minHeight: `${TARGET.min}px`,
-                    boxSizing: 'border-box',
-                    // 到着＝赤 で塗りつぶし、文字は白（出発欄と対になる配色）
-                    backgroundColor: SEMANTIC.arrival,
-                    color: colors.onPrimary,
-                  }}
                 />
                 {arrival && (
                   <IconButton
@@ -790,25 +769,15 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               <label style={{ fontSize: FS.label, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
                 {translateUI('departureTime', language)}
               </label>
-              <input
+              <TextField
+                theme={theme}
+                size="sm"
                 type="time"
                 value={departureTime ?? ''}
                 onChange={e => onDepartureTimeChange(e.target.value)}
                 onFocus={(e) => { focusedInputRef.current = e.currentTarget; }}
                 onBlur={() => { focusedInputRef.current = null; }}
-                style={{
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: '4px',
-                  padding: '0 3px',
-                  // WCAG 2.2 AA (2.5.8 ターゲットサイズ) の最小24pxを満たす
-                  height: `${TARGET.min}px`,
-                  boxSizing: 'border-box',
-                  // iOS Safari の自動ズームを防ぐため入力欄は16px下限
-                  fontSize: FS.input,
-                  backgroundColor: colors.surfaceElevated,
-                  color: colors.text,
-                  cursor: 'pointer',
-                }}
+                fullWidth={false}
               />
               <Button
                 theme={theme}

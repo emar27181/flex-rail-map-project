@@ -4,6 +4,7 @@ import { section, text, btn, btnFull, textarea, L } from './legendStyles';
 import { translateUI } from '../../utils/translation';
 import type { Language } from '../../utils/translation';
 import Button from '../ui/atoms/Button';
+import TextArea from '../ui/atoms/TextArea';
 
 export type MapConfig = {
   version: 1;
@@ -132,17 +133,22 @@ export default function MapConfigPanel({ config, theme, language, onImport }: Pr
           {/* インポート */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
             <div style={text.desc(colors)}>{translateUI('configImportDesc', language)}</div>
+            {/*
+              * 画面に出ないファイル選択欄。見た目を持たないのでアトムを通さない。
+              * 実際に押されるのは下のボタンで、そちらは規格どおり。
+              */}
             <input ref={fileInputRef} type="file" accept=".json"
               onChange={handleFileImport} style={{ display: 'none' }} />
             <Button theme={theme} variant="outline" size="sm" fullWidth onClick={() => fileInputRef.current?.click()}>
               {translateUI('configImportFile', language)}
             </Button>
-            <textarea
+            <TextArea
+              theme={theme}
+              size="sm"
               value={pasteText}
               onChange={e => { setPasteText(e.target.value); setError(null); }}
               placeholder={translateUI('configImportPaste', language)}
               rows={3}
-              style={textarea(colors)}
             />
             <Button
               theme={theme}

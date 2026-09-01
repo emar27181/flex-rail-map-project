@@ -6,6 +6,7 @@ import { checkboxInput, selectableCard } from '../legend/legendStyles';
 import { translateUI, translateRoute, translateStation } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
 import { SEMANTIC } from '../../constants/ui';
+import ToggleMark from './atoms/ToggleMark';
 
 interface RouteSegment {
   routeKey: string;
@@ -58,11 +59,9 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
     >
       {/* 上段: チェック・カラードット・番号・時間 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <input
-          type="checkbox"
+        <ToggleMark
           checked={isSelected}
           onChange={e => { e.stopPropagation(); onToggle(index); }}
-          style={checkboxInput(colors)}
         />
 
         {/* 路線カラードット */}

@@ -60,6 +60,10 @@ import { buildCorridorRoutes, vertexRanks, offsetPoints } from '../utils/routeOf
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import Select from './ui/atoms/Select';
+import TextField from './ui/atoms/TextField';
+import Checkbox from './ui/atoms/Checkbox';
+import LinkButton from './ui/atoms/LinkButton';
+
 import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
 
@@ -1459,22 +1463,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <span style={{ fontSize: '10px', color: colors.textSecondary }}>{translateUI('baseTime', currentLanguage)}</span>
-              <input
+              <TextField
+                theme={theme}
+                size="sm"
                 type="time"
                 value={timetableBaseTime}
                 onChange={e => setTimetableBaseTime(e.target.value)}
-                style={{
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: '3px',
-                  padding: '0 3px',
-                  height: '24px',
-                  boxSizing: 'border-box',
-                  fontSize: '13px',
-                  backgroundColor: colors.surface,
-                  color: colors.text,
-                  cursor: 'pointer',
-                  width: '90px',
-                }}
+                fullWidth={false}
               />
               <Button
                 theme={theme}
@@ -4297,15 +4292,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             <div style={{ padding: '15px', maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
               {/* 区間外路線を半透明で表示 */}
               <div style={{ marginBottom: '10px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: FS.base, color: colors.text, cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={showDimmedMapRoutes}
-                    onChange={(e) => setShowDimmedMapRoutes(e.target.checked)}
-                    style={checkboxInput(colors)}
-                  />
-                  {translateUI('showOutsideSegmentRoutes', currentLanguage)}
-                </label>
+                <Checkbox theme={theme} size="sm" checked={showDimmedMapRoutes} onChange={setShowDimmedMapRoutes}>
+                    {translateUI('showOutsideSegmentRoutes', currentLanguage)}
+                  </Checkbox>
               </div>
               <div style={{ marginBottom: '10px' }}>
                 <div style={{
@@ -4317,24 +4306,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   flexWrap: 'nowrap'
                 }}>
                   <span style={{ marginRight: '4px', whiteSpace: 'nowrap' }}>{translateUI('routeRecommendationCount', currentLanguage)}</span>
-                  <select
+                  <Select
+                    theme={theme}
+                    size="sm"
                     value={maxRouteRecommendations}
                     onChange={(e) => setMaxRouteRecommendations(Number(e.target.value))}
-                    style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      border: `1px solid ${colors.border}`,
-                      fontSize: FS.base,
-                      backgroundColor: colors.surfaceElevated,
-                      color: colors.text
-                    }}
                   >
                     <option value={1}>{translateUI('routeCount', currentLanguage, { count: '1' })}</option>
                     <option value={2}>{translateUI('routeCount', currentLanguage, { count: '2' })}</option>
                     <option value={3}>{translateUI('routeCount', currentLanguage, { count: '3' })}</option>
                     <option value={5}>{translateUI('routeCount', currentLanguage, { count: '5' })}</option>
                     <option value={10}>{translateUI('routeCount', currentLanguage, { count: '10' })}</option>
-                  </select>
+                  </Select>
                   <Button theme={theme} variant="positive" size="sm" onClick={selectAllRoutes}>
                     {translateUI('allShow', currentLanguage)}
                   </Button>
@@ -4360,15 +4343,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   borderRadius: '6px',
                   backgroundColor: showTravelTimeOverlay ? tintColor(SEMANTIC.departure, 0.08) : colors.surfaceElevated
                 }}>
-                  <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', color: colors.text, cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={showTravelTimeOverlay}
-                      onChange={(e) => setShowTravelTimeOverlay(e.target.checked)}
-                      style={checkboxInput(colors)}
-                    />
+                  <Checkbox theme={theme} size="sm" checked={showTravelTimeOverlay} onChange={setShowTravelTimeOverlay}>
                     ⏱ {translateUI('travelTimeOverlay', currentLanguage)}
-                  </label>
+                  </Checkbox>
                   {showTravelTimeOverlay && travelTimeMap.size === 0 && (
                     <div style={{ marginTop: '6px', paddingLeft: '20px', fontSize: '12px', color: colors.textSecondary }}>
                       {translateUI('calculating', currentLanguage)}
@@ -4391,21 +4368,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 backgroundColor: colors.surfaceElevated
               }}>
                 <div style={{ marginBottom: '8px' }}>
-                  <label style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    fontSize: '14px',
-                    color: colors.text,
-                    cursor: 'pointer'
-                  }}>
-                    <input
-                      type="checkbox"
-                      checked={timeFilterEnabled}
-                      onChange={(e) => setTimeFilterEnabled(e.target.checked)}
-                      style={checkboxInput(colors)}
-                    />
-{translateUI('timeFilter', currentLanguage)}
-                  </label>
+                  <Checkbox theme={theme} size="sm" checked={timeFilterEnabled} onChange={setTimeFilterEnabled}>
+                    {translateUI('timeFilter', currentLanguage)}
+                  </Checkbox>
                 </div>
 
                 {timeFilterEnabled && (
@@ -4438,15 +4403,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       fontSize: '13px'
                     }}>
                       <span style={{ color: '#555' }}>{translateUI('maxTime', currentLanguage)}</span>
-                      <select
+                      <Select
+                        theme={theme}
+                        size="sm"
                         value={timeFilterMaxMinutes}
                         onChange={(e) => setTimeFilterMaxMinutes(Number(e.target.value))}
-                        style={{
-                          padding: '3px 6px',
-                          borderRadius: '4px',
-                          border: `1px solid ${colors.border}`,
-                          fontSize: '13px'
-                        }}
                         disabled={!departure}
                       >
                         <option value={5}>{translateUI('minutesShort', currentLanguage, { time: '5' })}</option>
@@ -4456,7 +4417,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         <option value={30}>{translateUI('minutesShort', currentLanguage, { time: '30' })}</option>
                         <option value={45}>{translateUI('minutesShort', currentLanguage, { time: '45' })}</option>
                         <option value={60}>{translateUI('minutesShort', currentLanguage, { time: '60' })}</option>
-                      </select>
+                      </Select>
                       {timeFilterEnabled && departure && stationsWithinTime.length > 0 && (
                         <span style={{ color: colors.textSecondary, fontSize: '11px' }}>
 {translateUI('stationsCount', currentLanguage, { count: stationsWithinTime.length.toString() })}
@@ -4951,13 +4912,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       </div>
                       {/* 範囲調整（単一・複合モード共通） */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginBottom: '5px', flexWrap: 'nowrap' }}>
-                        <input type="number" value={effectiveMin} step={step}
+                        <TextField
+                          theme={theme}
+                          size="sm"
+                          type="number"
+                          value={effectiveMin}
+                          step={step}
+                          fullWidth={false}
                           onChange={e => {
                             if (e.target.value === '') { setHeatmapCustomRange(undefined); return; }
                             const v = rnd1(parseFloat(e.target.value));
                             if (!isNaN(v)) setHeatmapCustomRange({ min: v, max: effectiveMax });
                           }}
-                          style={numS} />
+                          styleOverride={{ width: '52px' }}
+                        />
                         <IconButton theme={theme} size="sm" variant="outline"
                           label={translateUI('decrease', currentLanguage)} icon={<Minus size={12} />}
                           onClick={() => setHeatmapCustomRange({ min: rnd1(effectiveMin - step), max: effectiveMax })} />
@@ -4965,13 +4933,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           label={translateUI('increase', currentLanguage)} icon={<Plus size={12} />}
                           onClick={() => setHeatmapCustomRange({ min: rnd1(Math.min(effectiveMin + step, effectiveMax - step)), max: effectiveMax })} />
                         <span style={{ fontSize: '10px', color: colors.textSecondary }}>〜</span>
-                        <input type="number" value={effectiveMax} step={step}
+                        <TextField
+                          theme={theme}
+                          size="sm"
+                          type="number"
+                          value={effectiveMax}
+                          step={step}
+                          fullWidth={false}
                           onChange={e => {
                             if (e.target.value === '') { setHeatmapCustomRange(undefined); return; }
                             const v = rnd1(parseFloat(e.target.value));
                             if (!isNaN(v)) setHeatmapCustomRange({ min: effectiveMin, max: v });
                           }}
-                          style={numS} />
+                          styleOverride={{ width: '52px' }}
+                        />
                         <IconButton theme={theme} size="sm" variant="outline"
                           label={translateUI('decrease', currentLanguage)} icon={<Minus size={12} />}
                           onClick={() => setHeatmapCustomRange({ min: effectiveMin, max: rnd1(Math.max(effectiveMax - step, effectiveMin + step)) })} />
@@ -4980,10 +4955,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           onClick={() => setHeatmapCustomRange({ min: effectiveMin, max: rnd1(effectiveMax + step) })} />
                       </div>
                       {heatmapEnabled && (
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', color: colors.text, cursor: 'pointer' }}>
-                          <input type="checkbox" checked={heatmapRangeFilterEnabled} onChange={e => setHeatmapRangeFilterEnabled(e.target.checked)} style={checkboxInput(colors)} />
-                          {translateUI('heatmapRangeFilter', currentLanguage)}
-                        </label>
+                        <Checkbox theme={theme} size="sm" checked={heatmapRangeFilterEnabled} onChange={setHeatmapRangeFilterEnabled}>
+                            {translateUI('heatmapRangeFilter', currentLanguage)}
+                          </Checkbox>
                       )}
                     </div>
                   )}
@@ -5087,13 +5061,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 label={trainDemoPlaying ? translateUI('pause', currentLanguage) : translateUI('play', currentLanguage)}
                 icon={trainDemoPlaying ? <Pause size={14} /> : <Play size={14} />}
               />
-              <select
+              <Select
+                theme={theme}
+                size="sm"
                 value={trainDemoSpeed}
                 onChange={e => setTrainDemoSpeed(Number(e.target.value))}
-                style={{
-                  background: colors.surfaceElevated, border: `1px solid ${colors.border}`,
-                  borderRadius: '4px', color: colors.text, fontSize: '11px', padding: '2px 4px',
-                }}
               >
                 <option value={1}>×1</option>
                 <option value={2}>×2</option>
@@ -5103,7 +5075,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 <option value={60}>×60</option>
                 <option value={120}>×120</option>
                 <option value={300}>×300</option>
-              </select>
+              </Select>
               <IconButton
                 theme={theme}
                 size="sm"
@@ -5451,18 +5423,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           <label style={{ fontSize: '11px', color: colors.textSecondary, display: 'block', marginBottom: '4px' }}>
                             路線選択:
                           </label>
-                          <select
+                          <Select
+                            theme={theme}
+                            size="sm"
+                            fullWidth
                             value={selectedTrainRoute || ''}
                             onChange={(e) => setSelectedTrainRoute(e.target.value as RouteKey || null)}
-                            style={{
-                              width: '100%',
-                              padding: '4px 8px',
-                              borderRadius: '4px',
-                              border: `1px solid ${colors.border}`,
-                              fontSize: '11px',
-                              backgroundColor: colors.surface,
-                              color: colors.text
-                            }}
                           >
                             <option value="">路線を選択してください</option>
                             <option value="yamanote">山手線</option>
@@ -5470,7 +5436,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                             <option value="odakyuLine">小田急小田原線</option>
                             <option value="keihinTohoku">京浜東北線</option>
                             <option value="ginzaLine">銀座線</option>
-                          </select>
+                          </Select>
                         </div>
 
                         {selectedTrainRoute && (
@@ -5478,18 +5444,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                             <label style={{ fontSize: '11px', color: colors.textSecondary, display: 'block', marginBottom: '4px' }}>
                               列車種別:
                             </label>
-                            <select
+                            <Select
+                              theme={theme}
+                              size="sm"
+                              fullWidth
                               value={selectedTrainType || ''}
                               onChange={(e) => setSelectedTrainType(e.target.value || null)}
-                              style={{
-                                width: '100%',
-                                padding: '4px 8px',
-                                borderRadius: '4px',
-                                border: `1px solid ${colors.border}`,
-                                fontSize: '11px',
-                                backgroundColor: colors.surface,
-                                color: colors.text
-                              }}
                             >
                               <option value="">列車種別を選択してください</option>
                               {getAvailableTrainTypes(selectedTrainRoute as RouteKey).map(trainType => (
@@ -5497,7 +5457,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                                   {trainType.name}
                                 </option>
                               ))}
-                            </select>
+                            </Select>
                           </div>
                         )}
 
@@ -5774,28 +5734,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
             {/* 記事一覧 */}
             {!isFullscreen && (
-            <a
+            <LinkButton
               href="/articles"
-              style={{
-                display: 'flex',
-                backgroundColor: colors.surface,
-                color: colors.text,
-                border: `1px solid ${colors.border}`,
-                borderRadius: '8px',
-                width: '36px',
-                height: '36px',
-                cursor: 'pointer',
-                boxShadow: `0 2px 8px ${colors.shadow}`,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backdropFilter: 'blur(4px)',
-                textDecoration: 'none',
-              }}
+              theme={theme}
+              size="sm"
+              iconOnly
               title={language === 'japanese' ? '記事一覧を開く' : 'Open articles'}
               aria-label={language === 'japanese' ? '記事一覧を開く' : 'Open articles'}
-            >
-              <Info size={18} />
-            </a>
+              icon={<Info size={18} />}
+              styleOverride={{ boxShadow: `0 2px 8px ${colors.shadow}`, backdropFilter: 'blur(4px)' }}
+            />
             )}
           </div>
 

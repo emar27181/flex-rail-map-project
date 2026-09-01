@@ -12,6 +12,7 @@ import type { Language } from '../utils/translation';
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import Chip from './ui/atoms/Chip';
+import TextField from './ui/atoms/TextField';
 
 interface TrainStatusPanelProps {
   detectedRoute: DetectedRoute | null;
@@ -137,25 +138,16 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
             icon={<X size={16} />}
           />
         </div>
-        <input
-          ref={searchInputRef}
+        <TextField
+          theme={theme}
+          size="sm"
           type="text"
+          ref={searchInputRef}
           value={overrideSearch}
           onChange={e => setOverrideSearch(e.target.value)}
           onFocus={() => { searchInputFocusedRef.current = true; }}
           onBlur={() => { searchInputFocusedRef.current = false; }}
           placeholder={translateUI('searchRoutePlaceholder', language)}
-          style={{
-            width: '100%',
-            boxSizing: 'border-box',
-            padding: '4px 6px',
-            fontSize: FS.label,
-            border: `1px solid ${colors.border}`,
-            borderRadius: '4px',
-            backgroundColor: colors.surface,
-            color: colors.text,
-            marginBottom: '6px',
-          }}
         />
         <div style={{ maxHeight: '180px', overflowY: 'auto' }}>
           {filteredRoutes.map(r => {

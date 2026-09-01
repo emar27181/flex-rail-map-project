@@ -7,13 +7,16 @@ import RouteToggleItem from '../ui/RouteToggleItem';
 import type { StationStats } from '../../data/stationStats';
 import MapConfigPanel from './MapConfigPanel';
 import type { MapConfig } from './MapConfigPanel';
-import { checkboxLabel, checkboxInput } from './legendStyles';
-import { FS, TARGET } from '../../constants/ui';
+import Checkbox from '../ui/atoms/Checkbox';
+import { FS, TARGET, SEMANTIC } from '../../constants/ui';
 import RouteSwitchBoard from './RouteSwitchBoard';
 import Button from '../ui/atoms/Button';
 import SegmentedControl from '../ui/molecules/SegmentedControl';
 import Stepper from '../ui/molecules/Stepper';
 import { ALERT_MINUTE_OPTIONS } from '../../utils/arrivalAlert';
+import Select from '../ui/atoms/Select';
+import Radio from '../ui/atoms/Radio';
+import Slider from '../ui/atoms/Slider';
 
 type SortMode = 'name' | 'color' | 'default' | 'distance';
 
@@ -492,128 +495,94 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {sectionHeader(translateUI('settingsGroupLabel', language), groupLabelOpen, () => setGroupLabelOpen(v => !v))}
             {groupLabelOpen && (
               <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showTransferStationsOnly} onChange={e => onShowTransferStationsOnlyChange(e.target.checked)} style={checkboxInput(colors)} />
+                <Checkbox theme={theme} checked={showTransferStationsOnly} onChange={onShowTransferStationsOnlyChange}>
                   {translateUI('showOnlyTransferStations', language)}
-                </label>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showTravelTimes} onChange={e => onShowTravelTimesChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>
+                <Checkbox theme={theme} checked={showTravelTimes} onChange={onShowTravelTimesChange}>
                   {translateUI('showTravelTimes', language)}
-                </label>
+                </Checkbox>
                 {showTravelTimes && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', paddingLeft: '22px', marginBottom: '2px' }}>
                     <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('travelTimeLabelMode', language)}:</span>
                     {(['interval', 'cumulative'] as const).map(mode => (
-                      <label key={mode} style={{ display: 'flex', alignItems: 'center', gap: '2px', fontSize: '10px', color: colors.text, cursor: 'pointer' }}>
-                        <input
-                          type="radio"
+                      <Radio
+                          theme={theme}
+                          size="sm"
                           name="travelTimeLabelMode"
                           checked={travelTimeLabelMode === mode}
                           onChange={() => onTravelTimeLabelModeChange(mode)}
-                          style={{ cursor: 'pointer' }}
-                        />
-                        {mode === 'interval' ? translateUI('travelTimeLabelInterval', language) : `${translateUI('travelTimeLabelCumulative', language)}（実装中）`}
-                      </label>
+                        >
+                          {mode === 'interval' ? translateUI('travelTimeLabelInterval', language) : `${translateUI('travelTimeLabelCumulative', language)}（実装中）`}
+                        </Radio>
                     ))}
                   </div>
                 )}
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showStationNumbers} onChange={e => onShowStationNumbersChange(e.target.checked)} style={checkboxInput(colors)} />
+                <Checkbox theme={theme} checked={showStationNumbers} onChange={onShowStationNumbersChange}>
                   {translateUI('showStationCodes', language)}
-                </label>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={autoSetDepartureFromLocation} onChange={e => onAutoSetDepartureFromLocationChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>
+                <Checkbox theme={theme} checked={autoSetDepartureFromLocation} onChange={onAutoSetDepartureFromLocationChange}>
                   {translateUI('useLocationFeatures', language)}
-                </label>                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showTrainStatusPanel} onChange={e => onShowTrainStatusPanelChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>                <Checkbox theme={theme} checked={showTrainStatusPanel} onChange={onShowTrainStatusPanelChange}>
                   {translateUI('showTrainStatusPanel', language)}
-                </label>
+                </Checkbox>
                 {/* 降車駅アラーム。時刻表ではなく現在地から残り時間を出して知らせる */}
-                <label style={checkboxLabel(colors)}>
-                  <input
-                    type="checkbox"
-                    checked={arrivalAlertEnabled}
-                    onChange={e => onArrivalAlertEnabledChange(e.target.checked)}
-                    style={checkboxInput(colors)}
-                  />
+                <Checkbox theme={theme} checked={arrivalAlertEnabled} onChange={onArrivalAlertEnabledChange}>
                   {translateUI('arrivalAlert', language)}
-                </label>
+                </Checkbox>
                 {arrivalAlertEnabled && (
                   <div style={{ paddingLeft: '22px', paddingBottom: '4px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ fontSize: FS.helper, color: colors.textSecondary }}>
                         {translateUI('arrivalAlertTiming', language)}
                       </span>
-                      <select
+                      <Select
+                        theme={theme}
+                        size="sm"
                         value={arrivalAlertMinutes}
                         onChange={e => onArrivalAlertMinutesChange(Number(e.target.value))}
-                        style={{
-                          fontSize: FS.helper,
-                          padding: '2px 4px',
-                          minHeight: `${TARGET.min}px`,
-                          border: `1px solid ${colors.border}`,
-                          borderRadius: '4px',
-                          background: colors.surface,
-                          color: colors.text,
-                        }}
                       >
                         {ALERT_MINUTE_OPTIONS.map(n => (
                           <option key={n} value={n}>
                             {translateUI('arrivalAlertMinutesOption', language, { count: n })}
                           </option>
                         ))}
-                      </select>
+                      </Select>
                     </div>
                     <div style={{ fontSize: FS.micro, color: colors.textSecondary, marginTop: '4px', lineHeight: 1.5 }}>
                       {translateUI('arrivalAlertNote', language)}
                     </div>
                   </div>
                 )}
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showStationNames} onChange={e => onShowStationNamesChange(e.target.checked)} style={checkboxInput(colors)} />
+                <Checkbox theme={theme} checked={showStationNames} onChange={onShowStationNamesChange}>
                   {translateUI('showStationNames', language)}
-                </label>
+                </Checkbox>
                 {/* 主要駅の常時表示。しきい値（何路線以上か）も変えられるようにする */}
-                <label style={checkboxLabel(colors)}>
-                  <input
-                    type="checkbox"
-                    checked={alwaysVisibleStationsEnabled}
-                    onChange={e => onAlwaysVisibleStationsEnabledChange(e.target.checked)}
-                    style={checkboxInput(colors)}
-                  />
+                <Checkbox theme={theme} checked={alwaysVisibleStationsEnabled} onChange={onAlwaysVisibleStationsEnabledChange}>
                   {translateUI('alwaysShowMajorStations', language)}
-                </label>
+                </Checkbox>
                 {alwaysVisibleStationsEnabled && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '2px 0 4px 22px' }}>
                     <span style={{ fontSize: FS.helper, color: colors.textSecondary }}>
                       {translateUI('minRouteCount', language)}
                     </span>
-                    <select
-                      value={alwaysVisibleMinRoutes}
+                    <Select
+                        theme={theme}
+                        size="sm"
+                        value={alwaysVisibleMinRoutes}
                       onChange={e => onAlwaysVisibleMinRoutesChange(Number(e.target.value))}
-                      style={{
-                        fontSize: FS.helper,
-                        padding: '2px 4px',
-                        minHeight: `${TARGET.min}px`,
-                        border: `1px solid ${colors.border}`,
-                        borderRadius: '4px',
-                        background: colors.surface,
-                        color: colors.text,
-                      }}
-                    >
+                      >
                       {[2, 3, 4, 5, 6, 7, 8, 10].map(n => (
                         <option key={n} value={n}>
                           {translateUI('routeCountOption', language, { count: n })}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </div>
                 )}
                 {language === 'japanese' && (
-                  <label style={checkboxLabel(colors)}>
-                    <input type="checkbox" checked={showFurigana} onChange={e => onShowFuriganaChange(e.target.checked)} style={checkboxInput(colors)} />
-                    {translateUI('showFurigana', language)}
-                  </label>
+                  <Checkbox theme={theme} checked={showFurigana} onChange={onShowFuriganaChange}>
+                  {translateUI('showFurigana', language)}
+                </Checkbox>
                 )}
               </div>
             )}
@@ -622,44 +591,50 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {sectionHeader(translateUI('settingsGroupViz', language), groupVizOpen, () => setGroupVizOpen(v => !v))}
             {groupVizOpen && (
               <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={heatmapEnabled} onChange={e => onHeatmapEnabledChange(e.target.checked)} style={checkboxInput(colors)} />
+                <Checkbox theme={theme} checked={heatmapEnabled} onChange={onHeatmapEnabledChange}>
                   {translateUI('stationHeatmap', language)}
-                </label>
+                </Checkbox>
                 {heatmapEnabled && (
-                  <label style={{ ...checkboxLabel(colors), paddingLeft: '18px', fontSize: '11px' }}>
-                    <input type="checkbox" checked={showEstimatedData} onChange={e => onShowEstimatedDataChange(e.target.checked)} style={checkboxInput(colors)} />
+                  <Checkbox
+                    theme={theme}
+                    size="sm"
+                    checked={showEstimatedData}
+                    onChange={onShowEstimatedDataChange}
+                    styleOverride={{ paddingLeft: '18px' }}
+                  >
                     <span>推定データを含める</span>
-                    {!showEstimatedData && <span style={{ marginLeft: '4px', color: '#e88', fontSize: '10px' }}>（実データのみ）</span>}
-                  </label>
+                    {!showEstimatedData && <span style={{ marginLeft: '4px', color: SEMANTIC.arrival, fontSize: FS.tiny }}>（実データのみ）</span>}
+                  </Checkbox>
                 )}
                 {mapViewMode === 'realistic' && (
-                  <label style={checkboxLabel(colors)}>
-                    <input type="checkbox" checked={showTrainDemo} onChange={onTrainDemoToggle} style={checkboxInput(colors)} />
-                    {translateUI('trainDemoLabel', language)}
-                  </label>
+                  <Checkbox theme={theme} checked={showTrainDemo} onChange={onTrainDemoToggle}>
+                  {translateUI('trainDemoLabel', language)}
+                </Checkbox>
                 )}
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={mapViewMode === 'bubble'} onChange={e => onMapViewModeChange(e.target.checked ? 'bubble' : 'realistic')} style={checkboxInput(colors)} />
+                <Checkbox theme={theme} checked={mapViewMode === 'bubble'} onChange={(checked) => onMapViewModeChange(checked ? 'bubble' : 'realistic')}>
                   {translateUI('bubbleMap', language)}
-                </label>
+                </Checkbox>
                 {mapViewMode === 'bubble' && (
                   <div style={{ marginLeft: '22px', marginTop: '4px' }}>
                     <div style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
                       {(['circle', 'square'] as const).map(shape => (
-                        <label key={shape} style={{ display: 'flex', alignItems: 'center', fontSize: '11px', color: colors.text, cursor: 'pointer' }}>
-                          <input type="radio" name="bubbleShape" checked={bubbleShape === shape} onChange={() => onBubbleShapeChange(shape)} style={{ marginRight: '4px', cursor: 'pointer' }} />
+                        <Radio
+                          theme={theme}
+                          size="sm"
+                          name="bubbleShape"
+                          checked={bubbleShape === shape}
+                          onChange={() => onBubbleShapeChange(shape)}
+                        >
                           {shape === 'circle' ? translateUI('bubbleCircle', language) : translateUI('bubbleSquare', language)}
-                        </label>
+                        </Radio>
                       ))}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('bubbleMaxRadius', language)}</span>
-                      <input
-                        type="range" min={500} max={50000} step={500}
+                      <Slider
+                        min={500} max={50000} step={500}
                         value={bubbleMaxRadiusM}
                         onChange={e => onBubbleMaxRadiusMChange(Number(e.target.value))}
-                        style={{ flex: 1, cursor: 'pointer' }}
                       />
                       <span style={{ fontSize: '10px', color: colors.text, minWidth: '40px', textAlign: 'right' }}>
                         {bubbleMaxRadiusM >= 1000 ? `${(bubbleMaxRadiusM / 1000).toFixed(1)}km` : `${bubbleMaxRadiusM}m`}
@@ -667,10 +642,9 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                     </div>
                   </div>
                 )}
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={mapViewMode === 'schematic'} onChange={e => onMapViewModeChange(e.target.checked ? 'schematic' : 'realistic')} style={checkboxInput(colors)} />
+                <Checkbox theme={theme} checked={mapViewMode === 'schematic'} onChange={(checked) => onMapViewModeChange(checked ? 'schematic' : 'realistic')}>
                   {translateUI('schematicMapLabel', language)}
-                </label>
+                </Checkbox>
               </div>
             )}
 
@@ -678,14 +652,12 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {sectionHeader(translateUI('settingsGroupFilter', language), groupFilterOpen, () => setGroupFilterOpen(v => !v))}
             {groupFilterOpen && (
               <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showExpressStationsOnly} onChange={e => onShowExpressStationsOnlyChange(e.target.checked)} style={checkboxInput(colors)} />
+                <Checkbox theme={theme} checked={showExpressStationsOnly} onChange={onShowExpressStationsOnlyChange}>
                   {translateUI('showOnlyExpressStations', language)}
-                </label>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showFullRouteStations} onChange={e => onShowFullRouteStationsChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>
+                <Checkbox theme={theme} checked={showFullRouteStations} onChange={onShowFullRouteStationsChange}>
                   {translateUI('showFullRouteStations', language)}
-                </label>
+                </Checkbox>
               </div>
             )}
 
@@ -693,26 +665,21 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {sectionHeader(translateUI('settingsGroupMap', language), groupMapOpen, () => setGroupMapOpen(v => !v))}
             {groupMapOpen && (
               <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showDimmedRoutes} onChange={e => onShowDimmedRoutesChange(e.target.checked)} style={checkboxInput(colors)} />
+                <Checkbox theme={theme} checked={showDimmedRoutes} onChange={onShowDimmedRoutesChange}>
                   {translateUI('showOutsideSegmentRoutes', language)}
-                </label>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showRouteLine} onChange={e => onShowRouteLineChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>
+                <Checkbox theme={theme} checked={showRouteLine} onChange={onShowRouteLineChange}>
                   {translateUI('showRouteLines', language)}
-                </label>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showStationTierBadges} onChange={e => onShowStationTierBadgesChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>
+                <Checkbox theme={theme} checked={showStationTierBadges} onChange={onShowStationTierBadgesChange}>
                   {translateUI('transferHighlight', language)}
-                </label>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showStationTooltip} onChange={e => onShowStationTooltipChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>
+                <Checkbox theme={theme} checked={showStationTooltip} onChange={onShowStationTooltipChange}>
                   {translateUI('stationTooltipLabel', language)}
-                </label>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showOsmTiles} onChange={e => onShowOsmTilesChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>
+                <Checkbox theme={theme} checked={showOsmTiles} onChange={onShowOsmTilesChange}>
                   {translateUI('showMapTiles', language)}
-                </label>
+                </Checkbox>
                 <Stepper
                   theme={theme}
                   label={translateUI('settingsIconSize', language)}

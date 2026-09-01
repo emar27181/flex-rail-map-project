@@ -3,6 +3,7 @@ import { getThemeColors } from '../../contexts/ThemeContext';
 import { checkboxInput, selectableCard } from '../legend/legendStyles';
 import { tintColor } from '../../utils/contrast';
 import { SEMANTIC } from '../../constants/ui';
+import ToggleMark from './atoms/ToggleMark';
 
 interface ToggleableItemProps {
   id: string;
@@ -62,7 +63,7 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
             : colors.surface,
       }}
     >
-      <input
+      <ToggleMark
         type={inputType}
         name={inputName}
         checked={isActive}
@@ -70,7 +71,6 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
           e.stopPropagation();
           onToggle(id);
         }}
-        style={checkboxInput(colors)}
       />
 
       {colorIndicator && (

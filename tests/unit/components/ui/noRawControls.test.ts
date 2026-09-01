@@ -38,14 +38,35 @@ const targetFiles = listTsxFiles(COMPONENTS)
   .filter((rel) => !rel.startsWith(ATOM_DIR))
   .filter((rel) => !EXCLUDED_PREFIXES.some((p) => rel.startsWith(p)));
 
+/**
+ * 画面に出ないものは検査から外す。
+ * ファイル選択欄は display:none で、実際に押されるのは別のボタン。
+ */
+const HIDDEN_INPUT = /<input[^>]*type="file"/;
+
+/** 生の要素と、代わりに使うアトム */
+const RULES: Array<{ tag: RegExp; use: string }> = [
+  { tag: /<button[\s>]/, use: 'Button / IconButton / Chip' },
+  { tag: /<select[\s>]/, use: 'Select' },
+  { tag: /<textarea[\s>]/, use: 'TextArea' },
+  { tag: /<input[\s>]/, use: 'TextField / Checkbox / Radio / Slider / ToggleMark' },
+];
+
 describe('操作要素はアトムを通す', () => {
-  it('アトム以外に生の <button> が無い', () => {
-    const offenders = targetFiles.filter((rel) =>
-      /<button[\s>]/.test(readFileSync(join(COMPONENTS, rel), 'utf-8')),
-    );
+  it.each(RULES)('アトム以外に生の要素が無い ($use)', ({ tag, use }) => {
+    const offenders = targetFiles.filter((rel) => {
+      const text = readFileSync(join(COMPONENTS, rel), 'utf-8');
+      if (!tag.test(text)) return false;
+      // 画面に出ない input だけの場合は許す
+      if (tag.source.includes('input')) {
+        const inputs = text.match(/<input[^>]*>/g) ?? [];
+        return inputs.some((one) => !HIDDEN_INPUT.test(one));
+      }
+      return true;
+    });
     expect(
       offenders,
-      `ui/atoms/ の Button / IconButton / Chip を使うこと。生の button が残っている: ${offenders.join(', ')}`,
+      `ui/atoms/ の ${use} を使うこと。生の要素が残っている: ${offenders.join(', ')}`,
     ).toEqual([]);
   });
 

@@ -24,19 +24,24 @@ export interface TextFieldProps
   styleOverride?: CSSProperties;
 }
 
-const TextField: React.FC<TextFieldProps> = ({
+/**
+ * ref を通す。呼び出し側が focus() や scrollIntoView() を使うため
+ * （キーボード表示時の位置調整など）、ここで止めてはいけない。
+ */
+const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(({
   theme,
   size = 'md',
   fullWidth = true,
   styleOverride,
   ...rest
-}) => {
+}, ref) => {
   const colors = getThemeColors(theme);
   const dims = CONTROL_SIZE[size];
 
   return (
     <input
       {...rest}
+      ref={ref}
       style={{
         width: fullWidth ? '100%' : undefined,
         boxSizing: 'border-box',
@@ -52,6 +57,8 @@ const TextField: React.FC<TextFieldProps> = ({
       }}
     />
   );
-};
+});
+
+TextField.displayName = 'TextField';
 
 export default TextField;

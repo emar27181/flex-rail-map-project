@@ -13,6 +13,7 @@ import {
 import type { RouteResult } from '../utils/routeFinder';
 import { SEMANTIC } from '../constants/ui';
 import Button from './ui/atoms/Button';
+import TextField from './ui/atoms/TextField';
 
 interface TimetablePanelProps {
   routeResult: RouteResult | null;
@@ -159,19 +160,13 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
         flexWrap: 'wrap',
       }}>
         <span style={{ fontWeight: 'bold', color: colors.text }}>⏰ {translateUI('departureTime', language)}</span>
-        <input
+        <TextField
+          theme={theme}
+          size="sm"
           type="time"
           value={departureTime}
           onChange={e => onDepartureTimeChange(e.target.value)}
-          style={{
-            border: `1px solid ${colors.border}`,
-            borderRadius: '4px',
-            padding: '4px 8px',
-            fontSize: '14px',
-            backgroundColor: colors.surface,
-            color: colors.text,
-            cursor: 'pointer',
-          }}
+          fullWidth={false}
         />
         <Button
           theme={theme}

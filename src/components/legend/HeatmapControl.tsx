@@ -5,6 +5,8 @@ import type { StationStats, StatCategory } from '../../data/stationStats';
 import { section, text, L, checkboxInput } from './legendStyles';
 import { translateUI, translateStatParamLabel } from '../../utils/translation';
 import type { Language } from '../../utils/translation';
+import Select from '../ui/atoms/Select';
+import Checkbox from '../ui/atoms/Checkbox';
 
 type Props = {
   enabled: boolean;
@@ -46,18 +48,9 @@ export default function HeatmapControl({
       {/* ヘッダー */}
       <div style={section.header} onClick={() => setOpen(v => !v)}>
         <span style={section.arrow(colors)}>{open ? '▼' : '▶'}</span>
-        <label
-          style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, cursor: 'pointer', userSelect: 'none' }}
-          onClick={e => e.stopPropagation()}
-        >
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={e => { onEnabledChange(e.target.checked); if (e.target.checked) setOpen(true); }}
-            style={checkboxInput(colors)}
-          />
-          <span style={section.title(colors)}>{translateUI('stationHeatmap', language)}</span>
-        </label>
+        <Checkbox theme={theme} size="sm" checked={enabled} onChange={onEnabledChange}>
+            <span style={section.title(colors)}>{translateUI('stationHeatmap', language)}</span>
+          </Checkbox>
         {enabled && (
           <span style={{
             fontSize: L.fs.xs,
@@ -77,20 +70,12 @@ export default function HeatmapControl({
           {/* パラメータ選択 */}
           <div>
             <div style={text.desc(colors)}>{translateUI('heatmapDisplayParam', language)}</div>
-            <select
-              value={paramKey as string}
+            <Select
+                        theme={theme}
+                        size="sm"
+                        value={paramKey as string}
               onChange={e => onParamKeyChange(e.target.value as keyof StationStats)}
-              style={{
-                width:        '100%',
-                fontSize:     L.fs.md,
-                padding:      `${L.sp.xs} ${L.sp.sm}`,
-                borderRadius: L.r.md,
-                border:       `1px solid ${colors.border}`,
-                background:   colors.surfaceElevated,
-                color:        colors.text,
-                cursor:       'pointer',
-              }}
-            >
+                      >
               {(Object.entries(grouped) as [StatCategory, typeof STAT_PARAMS][]).map(([cat, params]) => (
                 <optgroup key={cat} label={CATEGORY_LABEL[cat]}>
                   {params.map(p => (
@@ -100,7 +85,7 @@ export default function HeatmapControl({
                   ))}
                 </optgroup>
               ))}
-            </select>
+            </Select>
           </div>
 
           {/* 選択中パラメータの説明 */}

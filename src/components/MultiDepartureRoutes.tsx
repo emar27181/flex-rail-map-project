@@ -10,6 +10,7 @@ import { stationReadings, normalizeToHiragana } from '../utils/stationReadings';
 import { FS } from '../constants/ui';
 import RouteRecommendationItem from './ui/RouteRecommendationItem';
 import IconButton from './ui/atoms/IconButton';
+import TextField from './ui/atoms/TextField';
 
 interface MultiDepartureRoutesProps {
   /** 全出発駅の共通ゴール */
@@ -127,18 +128,15 @@ const MultiDepartureRoutes: React.FC<MultiDepartureRoutesProps> = ({
       )}
 
       <div ref={wrapperRef} style={{ position: 'relative', marginBottom: entries.length > 0 ? '8px' : 0 }}>
-        <input
+        <TextField
+          theme={theme}
+          size="sm"
           type="text"
+          
           value={search}
           onChange={e => { setSearch(e.target.value); setShowResults(true); }}
           onFocus={() => setShowResults(true)}
           placeholder={translateUI('addDepartureButton', language)}
-          style={{
-            width: '100%', boxSizing: 'border-box',
-            padding: '4px 6px', fontSize: FS.label,
-            border: `1px solid ${colors.border}`, borderRadius: '4px',
-            backgroundColor: colors.surfaceElevated, color: colors.text,
-          }}
         />
         {showResults && filteredStations.length > 0 && (
           <div style={{

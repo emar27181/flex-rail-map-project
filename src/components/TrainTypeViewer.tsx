@@ -3,6 +3,8 @@ import { TrainFront } from 'lucide-react';
 import type { RouteKey } from '../data/routes';
 import { trainServices, getStationStops, getStationBorderStyle } from '../data/trainServices';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import Select from './ui/atoms/Select';
+import TextField from './ui/atoms/TextField';
 
 interface TrainTypeViewerProps {
   selectedRoute: RouteKey | null;
@@ -110,26 +112,19 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
             }}>
               路線選択
             </label>
-            <select
-              value={selectedRoute || ''}
+            <Select
+                        theme={theme}
+                        size="sm"
+                        value={selectedRoute || ''}
               onChange={handleRouteChange}
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                borderRadius: '4px',
-                border: `1px solid ${colors.border}`,
-                backgroundColor: colors.surface,
-                color: colors.onSurface,
-                fontSize: '13px'
-              }}
-            >
+                      >
               <option value="">路線を選択してください</option>
               {availableRoutes.map(routeKey => (
                 <option key={routeKey} value={routeKey}>
                   {getRouteDisplayName(routeKey)}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           {/* 列車種別選択 */}
@@ -144,26 +139,19 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
               }}>
                 列車種別
               </label>
-              <select
-                value={selectedTrainType || ''}
+              <Select
+                        theme={theme}
+                        size="sm"
+                        value={selectedTrainType || ''}
                 onChange={handleTrainTypeChange}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  borderRadius: '4px',
-                  border: `1px solid ${colors.border}`,
-                  backgroundColor: colors.surface,
-                  color: colors.onSurface,
-                  fontSize: '13px'
-                }}
-              >
+                      >
                 <option value="">列車種別を選択してください</option>
                 {selectedRouteService.trainTypes.map(trainType => (
                   <option key={trainType.id} value={trainType.id}>
                     {trainType.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           )}
 
@@ -228,21 +216,15 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
               }}>
                 駅名フィルター
               </label>
-              <input
-                type="text"
+              <TextField
+          theme={theme}
+          size="sm"
+          type="text"
+          
                 placeholder="駅名で絞り込み..."
                 value={stationFilter}
                 onChange={(e) => setStationFilter(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  borderRadius: '4px',
-                  border: `1px solid ${colors.border}`,
-                  backgroundColor: colors.surface,
-                  color: colors.onSurface,
-                  fontSize: '13px'
-                }}
-              />
+        />
             </div>
           )}
 
