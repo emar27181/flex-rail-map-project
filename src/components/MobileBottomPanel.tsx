@@ -286,8 +286,10 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
               aria-controls={`mbp-popover-${btn.key}`}
               icon={btn.icon}
               styleOverride={{
-                // 地図の上に浮かせるので、下の地図が透けるガラス調にする
-                backgroundColor: isActive ? undefined : colors.glassButton,
+                // 地図の上に浮かせるので、開いていないときは下の地図が透けるガラス調にする。
+                // 開いているときは variant の塗りをそのまま使う
+                // （ここで backgroundColor: undefined を渡すと塗りを消してしまう）
+                ...(isActive ? {} : { backgroundColor: colors.glassButton }),
                 backdropFilter: isActive ? 'none' : 'blur(8px)',
                 WebkitBackdropFilter: isActive ? 'none' : 'blur(8px)',
                 fontWeight: 'bold',

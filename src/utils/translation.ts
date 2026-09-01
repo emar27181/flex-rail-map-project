@@ -7443,6 +7443,14 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "小さくする",
     english: "Decrease"
   },
+  play: {
+    japanese: "再生",
+    english: "Play"
+  },
+  pause: {
+    japanese: "一時停止",
+    english: "Pause"
+  },
   increase: {
     japanese: "大きくする",
     english: "Increase"
@@ -8452,6 +8460,8 @@ export type Language = 'japanese' | 'english' | 'chinese' | 'korean';
 export const uiChinese: Record<string, string> = {
   clearSelection: "清除选择",
   decrease: "缩小",
+  play: "播放",
+  pause: "暂停",
   increase: "放大",
   collapseList: "▲ 折叠",
   showMoreRoutes: "▼ 显示其他 {count} 条线路",
@@ -8722,6 +8732,8 @@ export const uiChinese: Record<string, string> = {
 export const uiKorean: Record<string, string> = {
   clearSelection: "선택 해제",
   decrease: "작게",
+  play: "재생",
+  pause: "일시정지",
   increase: "크게",
   collapseList: "▲ 접기",
   showMoreRoutes: "▼ 다른 {count}개 노선 표시",
