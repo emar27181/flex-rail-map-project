@@ -20,6 +20,11 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 | 操作要素の最小サイズ | `TARGET.min`(24) / `TARGET.touch`(44) | `src/constants/ui.ts` |
 | ボタン | `<Button theme variant size>` | `src/components/ui/atoms/Button.tsx` |
 | 色を持つ切り替え（路線など） | `<Chip color label selected>` | `src/components/ui/atoms/Chip.tsx` |
+| アイコンだけのボタン | `<IconButton label icon>` | `src/components/ui/atoms/IconButton.tsx` |
+| 画面遷移するボタン | `<LinkButton href>` | `src/components/ui/atoms/LinkButton.tsx` |
+| チェック・ラジオの行 | `<Checkbox>` / `<Radio>` | `src/components/ui/atoms/` |
+| 選択欄・複数行入力・スライダー | `<Select>` / `<TextArea>` / `<Slider>` | `src/components/ui/atoms/` |
+| −／＋の増減行 | `<Stepper>` | `src/components/ui/molecules/Stepper.tsx` |
 | 1行入力欄 | `<TextField theme size>` | `src/components/ui/atoms/TextField.tsx` |
 | 操作部品の高さ・角丸・余白 | `CONTROL_SIZE[size]`（sm=24px / md=44px） | `src/components/ui/atoms/controlSize.ts` |
 | 排他選択のボタン列 | `<SegmentedControl>` | `src/components/ui/molecules/SegmentedControl.tsx` |

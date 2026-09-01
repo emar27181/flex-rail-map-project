@@ -1574,3 +1574,17 @@
 - 移行中に見つけた不具合: 地図上に浮かぶボタンのガラス調を `styleOverride` で
   足す際、開いている状態で `backgroundColor: undefined` を渡すと variant の塗りを
   消してしまう。閉じているときだけ背景を上書きするようにした
+
+### feat: ボタン以外の操作要素もアトム化し、生の要素を全面的に禁止
+- `src/components/ui/atoms/`（`Checkbox` `Radio` `ToggleMark` `TextArea` `LinkButton` `Slider` を追加）
+- 前回はボタンだけで、選択欄10・チェックボックス20・ラベル行41・テキスト/時刻入力・
+  スライダー・複数行入力・ボタン風リンクが生のまま残っていた
+- `Checkbox` / `Radio` は行そのものがタップ対象なので高さを `CONTROL_SIZE` に合わせた
+- `ToggleMark` は「行の見た目は呼び出し側が持ち、印だけ欲しい」場合用
+  （路線一覧の行のように独自の中身を並べる行）
+- `TextField` は ref を通すようにした（フォーカス制御で必要）
+- `Select` は前回作ったが未使用だったので10箇所を移行
+- `tests/unit/components/ui/noRawControls.test.ts` を全種類に拡張。
+  アトム以外で `button` / `select` / `textarea` / `input` を書くと落ちる。
+  除外は `src/v2/`・`src/design/`・`display:none` のファイル選択欄の3つだけ
+  （生の select を1つ戻すと落ちることを確認済み）

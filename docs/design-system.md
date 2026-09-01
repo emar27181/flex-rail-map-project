@@ -113,14 +113,34 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 
 | 層 | 置き場所 | 知ってよいこと | 知ってはいけないこと | 今あるもの |
 |---|---|---|---|---|
-| atoms | `ui/atoms/` | デザイントークン（`CONTROL_SIZE` `FS` `SEMANTIC` `getThemeColors`） | 路線・駅・経路といったアプリの概念、データの取得元 | `Button` `IconButton` `Chip` `TextField` `Select` `Switch` |
+| atoms | `ui/atoms/` | デザイントークン（`CONTROL_SIZE` `FS` `SEMANTIC` `getThemeColors`） | 路線・駅・経路といったアプリの概念、データの取得元 | `Button` `IconButton` `LinkButton` `Chip` `TextField` `TextArea` `Select` `Checkbox` `Radio` `ToggleMark` `Switch` `Slider` |
 | molecules | `ui/molecules/` | アトムの並べ方・組み合わせ方 | 同上 | `SegmentedControl` `Stepper` |
 | organisms | `components/`, `components/legend/` | アプリの概念とデータ、状態 | — | `RouteSwitchBoard` `LegendRouteList` `StationSelector` |
 
-**アトム以外で `<button>` を書くとテストが落ちる**
+**アトム以外で `<button>` `<select>` `<textarea>` `<input>` を書くとテストが落ちる**
 （`tests/unit/components/ui/noRawControls.test.ts`）。
-`src/v2/`（本番未使用の実験UI）と `src/design/`（開発者向けデバッグパネル）だけ
-理由を書いたうえで検査から外している。
+除外しているのは3つだけで、いずれも理由を書いてある。
+`src/v2/`（本番未使用の実験UI）、`src/design/`（開発者向けデバッグパネル）、
+`display:none` のファイル選択欄（画面に出ず、実際に押されるのは別のボタン）。
+
+### どの部品を使うか
+
+| 書こうとしているもの | 使うアトム |
+|---|---|
+| 文字のボタン | `Button` |
+| アイコンだけのボタン | `IconButton`（正方形。`label` 必須） |
+| 押すと画面遷移する | `LinkButton`（要素は `<a>` のまま） |
+| 色を持つ切り替え（路線など） | `Chip` |
+| 1行入力・時刻・数値 | `TextField` |
+| 複数行入力 | `TextArea` |
+| 選択欄 | `Select` |
+| チェックの行 | `Checkbox` |
+| 排他選択の行 | `Radio` |
+| 行の見た目は自前で、印だけ欲しい | `ToggleMark` |
+| 横長のオン・オフ | `Switch` |
+| つまみで数値を選ぶ | `Slider` |
+| −／＋の増減行 | `Stepper`（molecule） |
+| 排他選択のボタン列 | `SegmentedControl`（molecule） |
 
 判定に迷ったら次を自問する。
 
