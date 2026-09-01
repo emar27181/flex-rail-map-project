@@ -6,6 +6,7 @@ import { getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeConte
 import { translateRoute, translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
 import { SEMANTIC } from '../constants/ui';
+import Button from './ui/atoms/Button';
 
 // ---- 表示対象路線 ----
 export const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
@@ -636,20 +637,16 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         </svg>
 
         {/* 非表示路線の半透明表示トグルボタン */}
-        <button
+        <Button
+          theme={theme}
+          variant="primary"
+          size="sm"
+          pressed={showDimmedRoutes}
           onClick={e => { e.stopPropagation(); setInternalShowDimmed(v => !v); }}
-          style={{
-            position: 'absolute', bottom: 8, left: 8, zIndex: 20,
-            background: colors.surfaceElevated,
-            border: `1px solid ${showDimmedRoutes ? colors.border : colors.borderLight}`,
-            borderRadius: '4px', padding: '4px 8px', fontSize: '11px',
-            color: showDimmedRoutes ? colors.text : colors.textSecondary,
-            cursor: 'pointer', boxShadow: `0 1px 4px ${colors.shadow}`,
-            opacity: showDimmedRoutes ? 1 : 0.6,
-          }}
+          styleOverride={{ position: 'absolute', bottom: 8, left: 8, zIndex: 20, boxShadow: `0 1px 4px ${colors.shadow}` }}
         >
           {translateUI(showDimmedRoutes ? 'allRoutesOn' : 'allRoutesOff', language)}
-        </button>
+        </Button>
 
       </div>
     </div>

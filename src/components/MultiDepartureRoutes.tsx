@@ -9,6 +9,7 @@ import type { Language } from '../utils/translation';
 import { stationReadings, normalizeToHiragana } from '../utils/stationReadings';
 import { FS } from '../constants/ui';
 import RouteRecommendationItem from './ui/RouteRecommendationItem';
+import IconButton from './ui/atoms/IconButton';
 
 interface MultiDepartureRoutesProps {
   /** 全出発駅の共通ゴール */
@@ -113,15 +114,13 @@ const MultiDepartureRoutes: React.FC<MultiDepartureRoutesProps> = ({
               color: colors.text,
             }}>
               {translateStation(station.name, language)}
-              <button
+              <IconButton
+                theme={theme}
+                size="sm"
                 onClick={() => onRemoveDeparture(station.name)}
-                aria-label={translateUI('removeDepartureLabel', language)}
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  width: '16px', height: '16px', border: 'none', borderRadius: '50%',
-                  backgroundColor: 'transparent', color: colors.textSecondary, cursor: 'pointer', padding: 0,
-                }}
-              ><X size={12} /></button>
+                label={translateUI('removeDepartureLabel', language)}
+                icon={<X size={12} />}
+              />
             </span>
           ))}
         </div>

@@ -4,6 +4,7 @@ import { translateUI } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
 import ToggleableItem from '../ui/ToggleableItem';
 import RouteRecommendationItem from '../ui/RouteRecommendationItem';
+import Button from '../ui/atoms/Button';
 
 interface RouteSegment {
   routeKey: string;
@@ -76,36 +77,12 @@ const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
         gap: '4px',
         marginBottom: '8px'
       }}>
-        <button
-          onClick={onSelectAll}
-          style={{
-            flex: 1,
-            padding: '4px 8px',
-            fontSize: '10px',
-            backgroundColor: '#28a745',
-            color: colors.onPrimary,
-            border: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer'
-          }}
-        >
+        <Button theme={theme} variant="positive" size="sm" onClick={onSelectAll} styleOverride={{ flex: 1 }}>
           {translateUI('allShow', language)}
-        </button>
-        <button
-          onClick={onDeselectAll}
-          style={{
-            flex: 1,
-            padding: '4px 8px',
-            fontSize: '10px',
-            backgroundColor: '#dc3545',
-            color: colors.onPrimary,
-            border: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer'
-          }}
-        >
+        </Button>
+        <Button theme={theme} variant="danger" size="sm" onClick={onDeselectAll} styleOverride={{ flex: 1 }}>
           {translateUI('allHide', language)}
-        </button>
+        </Button>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>

@@ -2,6 +2,7 @@ import React from 'react';
 import { translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
 import { SEMANTIC, NEUTRAL } from '../constants/ui';
+import Button from './ui/atoms/Button';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -46,19 +47,9 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
               <pre>{this.state.error.toString()}</pre>
             </details>
           )}
-          <button
-            onClick={() => window.location.reload()}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: SEMANTIC.arrival,
-              color: NEUTRAL.white,
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
+          <Button theme="light" variant="danger" size="md" onClick={() => window.location.reload()}>
             {translateUI('reloadButton', lang)}
-          </button>
+          </Button>
         </div>
       );
     }

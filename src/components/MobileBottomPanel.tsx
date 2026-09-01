@@ -14,11 +14,21 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { getThemeColors } from '../contexts/ThemeContext';
+import Button from './ui/atoms/Button';
+import IconButton from './ui/atoms/IconButton';
+import { CONTROL_SIZE } from './ui/atoms/controlSize';
 
 // ── 寸法定数 ─────────────────────────────────────────────────────────
 
-/** ボタンの高さ */
-const BTN_H = 34;
+/**
+ * フローティングボタンの大きさ。
+ * 地図の上で指で押すものなので md（44px）。
+ * 高さの実値は controlSize が持つ（ここで px を書かない）。
+ */
+const PANEL_BUTTON_SIZE = 'md' as const;
+
+/** 上のポップオーバーを置く位置の計算に使うボタンの高さ */
+const BTN_H = CONTROL_SIZE[PANEL_BUTTON_SIZE].minHeight;
 
 /** ボタンの最小幅（アイコンなし・テキストのみなので小さめ） */
 const BTN_MIN_W = 0;
@@ -228,23 +238,13 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
               {activeButton.icon}
               {activeButton.label}
             </span>
-            <button
+            <IconButton
+              theme={theme}
+              size="sm"
               onClick={close}
-              aria-label="閉じる"
-              style={{
-                border: 'none',
-                background: 'none',
-                cursor: 'pointer',
-                color: colors.textSecondary,
-                fontSize: 18,
-                lineHeight: 1,
-                padding: '4px 8px',
-                borderRadius: 6,
-                WebkitTapHighlightColor: 'transparent',
-              }}
-            >
-              <X size={18} />
-            </button>
+              label="閉じる"
+              icon={<X size={18} />}
+            />
           </div>
 
           {/* スクロール可能コンテンツ */}
@@ -275,35 +275,29 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
         {buttons.map(btn => {
           const isActive = openKey === btn.key;
           return (
-            <button
+            <Button
               key={btn.key}
+              theme={theme}
+              variant="primary"
+              size={PANEL_BUTTON_SIZE}
+              pressed={isActive}
               onClick={() => toggle(btn.key)}
               aria-expanded={isActive}
               aria-controls={`mbp-popover-${btn.key}`}
-              style={{
-                height: BTN_H,
-                padding: '0 12px',
-                border: `1px solid ${isActive ? colors.primary : colors.border}`,
-                borderRadius: 10,
-                cursor: 'pointer',
-                backgroundColor: isActive ? colors.primary : colors.glassButton,
+              icon={btn.icon}
+              styleOverride={{
+                // 地図の上に浮かせるので、下の地図が透けるガラス調にする
+                backgroundColor: isActive ? undefined : colors.glassButton,
                 backdropFilter: isActive ? 'none' : 'blur(8px)',
                 WebkitBackdropFilter: isActive ? 'none' : 'blur(8px)',
-                color: isActive ? colors.onPrimary : colors.text,
-                fontSize: 13,
                 fontWeight: 'bold',
-                display: 'flex',
-                alignItems: 'center',
-                gap: btn.icon ? 6 : 0,
                 boxShadow: `0 2px 8px ${colors.shadow}`,
-                transition: 'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease',
                 userSelect: 'none',
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
-              {btn.icon && <span style={{ display: 'flex', alignItems: 'center' }}>{btn.icon}</span>}
-              <span>{btn.label}</span>
-            </button>
+              {btn.label}
+            </Button>
           );
         })}
       </div>

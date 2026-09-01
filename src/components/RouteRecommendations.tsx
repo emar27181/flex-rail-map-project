@@ -9,6 +9,7 @@ import { translateStation, translateRoute, translateUI } from '../utils/translat
 import type { Language } from '../utils/translation';
 import { SEMANTIC } from '../constants/ui';
 import { tintColor } from '../utils/contrast';
+import Button from './ui/atoms/Button';
 
 interface RouteRecommendationsProps {
   routes: RouteResult[];
@@ -133,28 +134,9 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
 {translateUI('recommendedRoutes', language)} ({translateUI('routeCount', language, { count: routes.length.toString() })})
           </span>
           {selectedRoute && onShowAllRoutes && (
-            <button
-              onClick={onShowAllRoutes}
-              style={{
-                padding: '4px 8px',
-                backgroundColor: colors.surface,
-                border: `1px solid ${colors.border}`,
-                borderRadius: '4px',
-                fontSize: '12px',
-                cursor: 'pointer',
-                color: colors.textSecondary,
-                width: 'fit-content',
-                whiteSpace: 'nowrap'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#e0e0e0';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#f5f5f5';
-              }}
-            >
-{translateUI('showAllRoutes', language)}
-            </button>
+            <Button theme={theme} variant="outline" size="sm" onClick={onShowAllRoutes}>
+              {translateUI('showAllRoutes', language)}
+            </Button>
           )}
         </div>
         <span style={{
@@ -231,26 +213,16 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
               </div>
 
               {/* 地図で表示ボタン */}
-              <button
+              <Button
+                theme={theme}
+                variant="primary"
+                size="sm"
                 onClick={() => onRouteSelect?.(route)}
                 disabled={isSelected}
-                style={{
-                  padding: '5px 12px',
-                  backgroundColor: isSelected ? colors.textSecondary : SEMANTIC.primary,
-                  color: colors.onPrimary,
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: isSelected ? 'default' : 'pointer',
-                  fontSize: '12px',
-                  fontWeight: '500',
-                  flexShrink: 0,
-                  transition: 'background-color 0.2s ease'
-                }}
-                onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = '#1976D2'; }}
-                onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = SEMANTIC.primary; }}
+                styleOverride={{ flexShrink: 0 }}
               >
                 {isSelected ? translateUI('displayOnMapActive', language) : translateUI('displayOnMapButton', language)}
-              </button>
+              </Button>
             </div>
 
             {/* 路線フロービジュアル */}

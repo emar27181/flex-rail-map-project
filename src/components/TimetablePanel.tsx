@@ -12,6 +12,7 @@ import {
 } from '../data/timetableData';
 import type { RouteResult } from '../utils/routeFinder';
 import { SEMANTIC } from '../constants/ui';
+import Button from './ui/atoms/Button';
 
 interface TimetablePanelProps {
   routeResult: RouteResult | null;
@@ -172,25 +173,19 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
             cursor: 'pointer',
           }}
         />
-        <button
+        <Button
+          theme={theme}
+          variant="outline"
+          size="sm"
           onClick={() => {
             const now = new Date();
             const hh  = String(now.getHours()).padStart(2, '0');
             const mm  = String(now.getMinutes()).padStart(2, '0');
             onDepartureTimeChange(`${hh}:${mm}`);
           }}
-          style={{
-            border: `1px solid ${colors.border}`,
-            borderRadius: '4px',
-            padding: '4px 8px',
-            fontSize: '12px',
-            backgroundColor: colors.surface,
-            color: colors.textSecondary,
-            cursor: 'pointer',
-          }}
         >
           {translateUI('currentTime', language)}
-        </button>
+        </Button>
       </div>
 
       {/* タイムライン */}
@@ -254,21 +249,16 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                   {translateUI('approxMinutes', language, { time: seg.segTime })}
                 </span>
                 {seg.hasTimetable && (
-                  <button
+                  <Button
+                    theme={theme}
+                    variant="primary"
+                    size="sm"
+                    pressed={isExpanded}
                     onClick={() => toggleExpand(seg.segIndex)}
-                    style={{
-                      marginLeft: 'auto',
-                      border: `1px solid ${colors.primary}`,
-                      borderRadius: '4px',
-                      padding: '2px 7px',
-                      fontSize: '11px',
-                      backgroundColor: isExpanded ? colors.primary : 'transparent',
-                      color: isExpanded ? colors.onPrimary : colors.primary,
-                      cursor: 'pointer',
-                    }}
+                    styleOverride={{ marginLeft: 'auto' }}
                   >
                     {isExpanded ? `▲ ${translateUI('close', language)}` : `▼ ${translateUI('timetableButton', language)}`}
-                  </button>
+                  </Button>
                 )}
               </div>
 
