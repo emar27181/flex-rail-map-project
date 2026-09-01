@@ -19,10 +19,18 @@ import type { RouteKey } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateRoute, translateUI } from '../../utils/translation';
 import type { Language } from '../../utils/translation';
-import { filledLabelColors } from '../../utils/contrast';
-import { FS, TARGET, SEMANTIC } from '../../constants/ui';
+import { FS, SEMANTIC } from '../../constants/ui';
 import { L } from './legendStyles';
 import Button from '../ui/atoms/Button';
+import Chip from '../ui/atoms/Chip';
+import TextField from '../ui/atoms/TextField';
+
+/**
+ * このパネルの操作部品の大きさ。
+ * 同じパネルに並ぶものは1つの段階に揃える（隣り合う部品で高さが違うのを防ぐ）。
+ * 路線の出し入れは指で何度も押すので md（44px）。
+ */
+const BOARD_CONTROL_SIZE = 'md' as const;
 
 /** 1グループで最初に見せる件数。全部描くと490個のチップになり操作が重くなる */
 const GROUP_INITIAL_LIMIT = 24;
@@ -110,59 +118,19 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
 
   const totalShown = groups.onRoute.length + groups.atStation.length + groups.visible.length + groups.hidden.length;
 
-  const chip = (routeKey: RouteKey) => {
-    const isOn = visibleRoutes.has(routeKey);
-    const baseColor = adjustRouteColorForTheme(routeColors[routeKey] ?? '#888888', theme);
-    // オンは路線色で塗り、その上に載る文字色は共通の規則から取る
-    const { background, text } = filledLabelColors(baseColor, theme);
-    return (
-      <button
-        key={routeKey}
-        // 表示切り替えのボタン類と区別できるようにしておく（E2Eの目印にもなる）
-        data-route-chip={routeKey}
-        onClick={() => onToggleRoute(routeKey)}
-        aria-pressed={isOn}
-        title={labelOf(routeKey)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: L.sp.sm,
-          // 枠線の太さは状態で変えない。変えるとチップの外形がずれて並びが動く
-          border: `1px solid ${isOn ? background : colors.border}`,
-          boxSizing: 'border-box',
-          borderRadius: L.r.pill,
-          padding: `0 ${L.sp.lg}`,
-          minHeight: `${TARGET.touch}px`,
-          // オフでも路線が読めるよう、背景ではなく文字色は通常色を使う
-          backgroundColor: isOn ? background : colors.surfaceElevated,
-          color: isOn ? text : colors.text,
-          // 路線名は従来の一覧と同じ扱い（FS.base = 路線名の標準サイズ）
-          fontSize: FS.base,
-          // 太さは状態で変えない。太字にするとチップの幅が変わって並びが動く
-          fontWeight: 'normal',
-          cursor: 'pointer',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {/*
-          オフのときは路線色が背景に出ないので、この丸で色を示す。
-          オンのときは背景がすでに路線色なので、丸は文字色で塗って
-          「入っている」印として読ませる。大きさは状態で変えない。
-        */}
-        <span
-          aria-hidden
-          style={{
-            width: '10px',
-            height: '10px',
-            borderRadius: '50%',
-            flexShrink: 0,
-            backgroundColor: isOn ? text : baseColor,
-          }}
-        />
-        {labelOf(routeKey)}
-      </button>
-    );
-  };
+  const chip = (routeKey: RouteKey) => (
+    <Chip
+      key={routeKey}
+      color={adjustRouteColorForTheme(routeColors[routeKey] ?? colors.textSecondary, theme)}
+      label={labelOf(routeKey)}
+      selected={visibleRoutes.has(routeKey)}
+      theme={theme}
+      size={BOARD_CONTROL_SIZE}
+      onClick={() => onToggleRoute(routeKey)}
+      // 表示方式の切り替えボタン等と区別する目印（E2Eでも使う）
+      dataAttr={{ 'data-route-chip': routeKey }}
+    />
+  );
 
   const group = (key: GroupKey, title: string, items: RouteKey[], accent?: string) => {
     if (items.length === 0) return null;
@@ -197,7 +165,7 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
           <Button
             theme={theme}
             variant="outline"
-            size="sm"
+            size={BOARD_CONTROL_SIZE}
             fullWidth
             onClick={() => setLimits(prev => ({ ...prev, [key]: prev[key] + GROUP_STEP }))}
             styleOverride={{ marginTop: L.sp.sm }}
@@ -211,31 +179,21 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
 
   return (
     <div>
-      <input
+      <TextField
+        theme={theme}
+        size={BOARD_CONTROL_SIZE}
         type="search"
         value={query}
         onChange={e => setQuery(e.target.value)}
         placeholder={translateUI('routeSearchPlaceholder', language)}
-        style={{
-          width: '100%',
-          boxSizing: 'border-box',
-          minHeight: `${TARGET.touch}px`,
-          padding: `0 ${L.sp.lg}`,
-          marginBottom: L.sp.md,
-          border: `1px solid ${colors.border}`,
-          borderRadius: L.r.md,
-          backgroundColor: colors.surfaceElevated,
-          color: colors.text,
-          // iOS Safari の自動ズームを防ぐため入力欄は16px下限
-          fontSize: FS.input,
-        }}
+        styleOverride={{ marginBottom: L.sp.md }}
       />
 
       <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.md }}>
-        <Button theme={theme} variant="positive" size="sm" onClick={onSelectAllRoutes} styleOverride={{ flex: 1 }}>
+        <Button theme={theme} variant="positive" size={BOARD_CONTROL_SIZE} onClick={onSelectAllRoutes} styleOverride={{ flex: 1 }}>
           {translateUI('allShow', language)}
         </Button>
-        <Button theme={theme} variant="danger" size="sm" onClick={onDeselectAllRoutes} styleOverride={{ flex: 1 }}>
+        <Button theme={theme} variant="danger" size={BOARD_CONTROL_SIZE} onClick={onDeselectAllRoutes} styleOverride={{ flex: 1 }}>
           {translateUI('allHide', language)}
         </Button>
       </div>
