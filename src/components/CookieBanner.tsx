@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Cookie, Settings, X } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import Button from './ui/atoms/Button';
+import Switch from './ui/atoms/Switch';
 import { translateUI } from '../utils/translation';
 import type { Language } from '../utils/translation';
 
@@ -131,78 +133,23 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
               flexWrap: 'wrap',
               alignItems: 'center'
             }}>
-              <button
-                onClick={handleAcceptAll}
-                style={{
-                  backgroundColor: colors.primary,
-                  color: colors.onPrimary,
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '10px 20px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-              >
+              <Button theme={theme} variant="primary" size="md" onClick={handleAcceptAll}>
                 {language === 'japanese' ? 'すべて同意' : 'Accept All'}
-              </button>
+              </Button>
 
-              <button
+              <Button
+                theme={theme}
+                variant="outline"
+                size="md"
                 onClick={() => setShowSettings(!showSettings)}
-                style={{
-                  backgroundColor: 'transparent',
-                  color: colors.text,
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: '6px',
-                  padding: '10px 20px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.surfaceElevated;
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
+                icon={<Settings size={16} />}
               >
-                <Settings size={16} />
                 {language === 'japanese' ? '設定管理' : 'Manage Settings'}
-              </button>
+              </Button>
 
-              <button
-                onClick={handleReject}
-                style={{
-                  backgroundColor: 'transparent',
-                  color: colors.textSecondary,
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '10px 20px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.surfaceElevated;
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
+              <Button theme={theme} variant="ghost" size="md" onClick={handleReject}>
                 {language === 'japanese' ? '必要なもののみ' : 'Essential Only'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -314,42 +261,12 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                     }
                   </p>
                 </div>
-                <button
-                  onClick={() => setCookiePreferences(prev => ({ ...prev, analytics: !prev.analytics }))}
-                  style={{
-                    backgroundColor: cookiePreferences.analytics ? colors.primary : colors.textSecondary,
-                    border: 'none',
-                    borderRadius: '12px',
-                    padding: '2px',
-                    width: '44px',
-                    height: '24px',
-                    position: 'relative',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <div style={{
-                    backgroundColor: colors.onPrimary,
-                    borderRadius: '10px',
-                    width: '20px',
-                    height: '20px',
-                    position: 'absolute',
-                    left: cookiePreferences.analytics ? '22px' : '2px',
-                    top: '2px',
-                    transition: 'left 0.2s ease'
-                  }} />
-                  <span style={{
-                    position: 'absolute',
-                    left: cookiePreferences.analytics ? '6px' : '28px',
-                    top: '0',
-                    fontSize: '10px',
-                    color: colors.onPrimary,
-                    lineHeight: '24px',
-                    fontWeight: 'bold'
-                  }}>
-                    {cookiePreferences.analytics ? 'ON' : 'OFF'}
-                  </span>
-                </button>
+                <Switch
+                  theme={theme}
+                  checked={cookiePreferences.analytics}
+                  onChange={(v) => setCookiePreferences(prev => ({ ...prev, analytics: v }))}
+                  label={language === 'japanese' ? '分析Cookie' : 'Analytics cookies'}
+                />
               </div>
 
               {/* Advertising Cookies */}
@@ -380,42 +297,12 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                     }
                   </p>
                 </div>
-                <button
-                  onClick={() => setCookiePreferences(prev => ({ ...prev, advertising: !prev.advertising }))}
-                  style={{
-                    backgroundColor: cookiePreferences.advertising ? colors.primary : colors.textSecondary,
-                    border: 'none',
-                    borderRadius: '12px',
-                    padding: '2px',
-                    width: '44px',
-                    height: '24px',
-                    position: 'relative',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <div style={{
-                    backgroundColor: colors.onPrimary,
-                    borderRadius: '10px',
-                    width: '20px',
-                    height: '20px',
-                    position: 'absolute',
-                    left: cookiePreferences.advertising ? '22px' : '2px',
-                    top: '2px',
-                    transition: 'left 0.2s ease'
-                  }} />
-                  <span style={{
-                    position: 'absolute',
-                    left: cookiePreferences.advertising ? '6px' : '28px',
-                    top: '0',
-                    fontSize: '10px',
-                    color: colors.onPrimary,
-                    lineHeight: '24px',
-                    fontWeight: 'bold'
-                  }}>
-                    {cookiePreferences.advertising ? 'ON' : 'OFF'}
-                  </span>
-                </button>
+                <Switch
+                  theme={theme}
+                  checked={cookiePreferences.advertising}
+                  onChange={(v) => setCookiePreferences(prev => ({ ...prev, advertising: v }))}
+                  label={language === 'japanese' ? '広告Cookie' : 'Advertising cookies'}
+                />
               </div>
             </div>
 
@@ -425,41 +312,12 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
               gap: '12px',
               justifyContent: 'flex-end'
             }}>
-              <button
-                onClick={() => setShowSettings(false)}
-                style={{
-                  backgroundColor: 'transparent',
-                  color: colors.textSecondary,
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: '6px',
-                  padding: '8px 16px',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
+              <Button theme={theme} variant="outline" size="md" onClick={() => setShowSettings(false)}>
                 {language === 'japanese' ? 'キャンセル' : 'Cancel'}
-              </button>
-              <button
-                onClick={handleSaveSettings}
-                style={{
-                  backgroundColor: colors.primary,
-                  color: colors.onPrimary,
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '8px 16px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-              >
+              </Button>
+              <Button theme={theme} variant="primary" size="md" onClick={handleSaveSettings}>
                 {language === 'japanese' ? '設定を保存' : 'Save Settings'}
-              </button>
+              </Button>
             </div>
           </div>
         )}

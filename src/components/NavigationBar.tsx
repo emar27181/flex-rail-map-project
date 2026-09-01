@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Sun, Moon, Menu, X, Info, Sparkles } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import IconButton from './ui/atoms/IconButton';
+import { FS } from '../constants/ui';
 import { translateUI } from '../utils/translation';
 import type { Language } from '../utils/translation';
 import type { UiVersion } from '../utils/uiVersionPersistence';
@@ -16,6 +18,9 @@ interface NavigationBarProps {
   uiVersion?: UiVersion;
   onUiVersionChange?: (version: UiVersion) => void;
 }
+
+/** ヘッダーのアイコンの大きさ。ボタンの外形は IconButton の規格が決める */
+const ICON_SIZE = 20;
 
 const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChange, isFullscreen = false, uiVersion = 'v1', onUiVersionChange }) => {
   const { theme, toggleTheme } = useTheme();
@@ -74,176 +79,57 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
         gap: '8px'
       }}>
         {/* Infoボタン */}
-        <button
+        <IconButton
+          theme={theme}
+          size="sm"
           onClick={() => setIsInfoModalOpen(true)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '36px',
-            height: '36px',
-            backgroundColor: 'transparent',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            color: colors.text,
-            padding: '6px'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = colors.surfaceElevated;
-            e.currentTarget.style.transform = 'scale(1.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-          title={translateUI('aboutSiteTitle', language)}
-          aria-label={translateUI('aboutSiteTitle', language)}
-        >
-          <Info size={20} />
-        </button>
+          label={translateUI('aboutSiteTitle', language)}
+          icon={<Info size={ICON_SIZE} />}
+        />
 
-        {/* 言語切り替えボタン */}
-        <button
+        {/* 言語切り替えボタン。アイコンではなく次の言語の略称を出す */}
+        <IconButton
+          theme={theme}
+          size="sm"
           onClick={() => onLanguageChange(nextLanguage(language))}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '36px',
-            height: '36px',
-            backgroundColor: 'transparent',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            color: colors.text,
-            padding: '6px'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = colors.surfaceElevated;
-            e.currentTarget.style.transform = 'scale(1.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-          title="Switch language"
-          aria-label="Switch language"
-        >
-          <span style={{
-            fontSize: '13px',
-            fontWeight: 'bold',
-            color: colors.text,
-            fontFamily: 'monospace'
-          }}>
-            {LANG_LABELS[nextLanguage(language)]}
-          </span>
-        </button>
+          label="Switch language"
+          icon={
+            <span style={{ fontSize: FS.base, fontWeight: 'bold', fontFamily: 'monospace' }}>
+              {LANG_LABELS[nextLanguage(language)]}
+            </span>
+          }
+        />
 
         {/* テーマ切り替えボタン */}
-        <button
+        <IconButton
+          theme={theme}
+          size="sm"
           onClick={toggleTheme}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '36px',
-            height: '36px',
-            backgroundColor: 'transparent',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            color: colors.text,
-            padding: '6px'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = colors.surfaceElevated;
-            e.currentTarget.style.transform = 'scale(1.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-          title={translateUI(theme === 'light' ? 'switchToDarkMode' : 'switchToLightMode', language)}
-          aria-label={translateUI(theme === 'light' ? 'switchToDarkMode' : 'switchToLightMode', language)}
-        >
-          {theme === 'light' ? (
-            <Moon size={20} />
-          ) : (
-            <Sun size={20} />
-          )}
-        </button>
+          label={translateUI(theme === 'light' ? 'switchToDarkMode' : 'switchToLightMode', language)}
+          icon={theme === 'light' ? <Moon size={ICON_SIZE} /> : <Sun size={ICON_SIZE} />}
+        />
 
         {/* v1/v2 UI切り替えボタン */}
         {onUiVersionChange && (
-          <button
+          <IconButton
+            theme={theme}
+            size="sm"
+            variant="primary"
+            pressed={uiVersion === 'v2'}
             onClick={() => onUiVersionChange(uiVersion === 'v2' ? 'v1' : 'v2')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '36px',
-              height: '36px',
-              backgroundColor: uiVersion === 'v2' ? colors.primary : 'transparent',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              color: uiVersion === 'v2' ? colors.onPrimary : colors.text,
-              padding: '6px'
-            }}
-            onMouseEnter={(e) => {
-              if (uiVersion !== 'v2') e.currentTarget.style.backgroundColor = colors.surfaceElevated;
-              e.currentTarget.style.transform = 'scale(1.05)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = uiVersion === 'v2' ? colors.primary : 'transparent';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-            title={translateUI(uiVersion === 'v2' ? 'uiVersionBackLabel' : 'uiVersionBetaLabel', language)}
-            aria-label={translateUI(uiVersion === 'v2' ? 'uiVersionBackLabel' : 'uiVersionBetaLabel', language)}
-          >
-            <Sparkles size={20} />
-          </button>
+            label={translateUI(uiVersion === 'v2' ? 'uiVersionBackLabel' : 'uiVersionBetaLabel', language)}
+            icon={<Sparkles size={ICON_SIZE} />}
+          />
         )}
 
         {/* ハンバーガーメニューボタン */}
-        <button
+        <IconButton
+          theme={theme}
+          size="sm"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '36px',
-            height: '36px',
-            backgroundColor: 'transparent',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            color: colors.text,
-            padding: '6px'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = colors.surfaceElevated;
-            e.currentTarget.style.transform = 'scale(1.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-          title={translateUI('menuTitle', language)}
-          aria-label={translateUI('openMenuLabel', language)}
-        >
-          {isMenuOpen ? (
-            <X size={20} />
-          ) : (
-            <Menu size={20} />
-          )}
-        </button>
+          label={translateUI('openMenuLabel', language)}
+          icon={isMenuOpen ? <X size={ICON_SIZE} /> : <Menu size={ICON_SIZE} />}
+        />
       </div>
 
       {/* ドロップダウンメニュー */}
@@ -385,22 +271,14 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             onClick={(e) => e.stopPropagation()}
           >
             {/* 閉じるボタン */}
-            <button
+            <IconButton
+              theme={theme}
+              size="sm"
               onClick={() => setIsInfoModalOpen(false)}
-              style={{
-                position: 'absolute',
-                top: '16px',
-                right: '16px',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                color: colors.textSecondary,
-                padding: '4px'
-              }}
-              aria-label={language === 'japanese' ? '閉じる' : 'Close'}
-            >
-              <X size={24} />
-            </button>
+              label={language === 'japanese' ? '閉じる' : 'Close'}
+              icon={<X size={ICON_SIZE} />}
+              styleOverride={{ position: 'absolute', top: '16px', right: '16px' }}
+            />
 
             {/* コンテンツ */}
             <div style={{ paddingRight: '40px' }}>
