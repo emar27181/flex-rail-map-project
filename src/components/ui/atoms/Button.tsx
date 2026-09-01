@@ -16,8 +16,9 @@
 import React from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { getThemeColors } from '../../../contexts/ThemeContext';
-import { FS, TARGET, SEMANTIC } from '../../../constants/ui';
-import { L } from '../../legend/legendStyles';
+import { SEMANTIC } from '../../../constants/ui';
+import { CONTROL_SIZE, CONTROL_BORDER_WIDTH } from './controlSize';
+import type { ControlSize } from './controlSize';
 
 export type ButtonVariant =
   /** 主操作。青で塗る */
@@ -31,7 +32,7 @@ export type ButtonVariant =
   /** 目立たせない操作。枠線も塗りもなし */
   | 'ghost';
 
-export type ButtonSize = 'sm' | 'md';
+export type ButtonSize = ControlSize;
 
 export interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'style'> {
   variant?: ButtonVariant;
@@ -48,14 +49,6 @@ export interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonE
   styleOverride?: CSSProperties;
 }
 
-/** 大きさの規則。高さはタッチ操作の下限を守る */
-const SIZE: Record<ButtonSize, { minHeight: number; padding: string; fontSize: string }> = {
-  // WCAG 2.2 AA (2.5.8) の下限。ポインタ操作や密なパネル向け
-  sm: { minHeight: TARGET.min, padding: `0 ${L.sp.md}`, fontSize: FS.helper },
-  // Apple HIG の推奨値。指で押すものはこちら
-  md: { minHeight: TARGET.touch, padding: `0 ${L.sp.lg}`, fontSize: FS.label },
-};
-
 const Button: React.FC<ButtonProps> = ({
   variant = 'outline',
   size = 'md',
@@ -69,7 +62,7 @@ const Button: React.FC<ButtonProps> = ({
   ...rest
 }) => {
   const colors = getThemeColors(theme);
-  const dims = SIZE[size];
+  const dims = CONTROL_SIZE[size];
 
   /** 塗りつぶす色。枠線だけの variant では undefined */
   const fill =
@@ -90,15 +83,17 @@ const Button: React.FC<ButtonProps> = ({
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: L.sp.sm,
+        gap: dims.gap,
         width: fullWidth ? '100%' : undefined,
         minHeight: `${dims.minHeight}px`,
         padding: dims.padding,
         fontSize: dims.fontSize,
         // 太さは状態で変えない。変えると押すたびに外形が動いて並びがずれる
-        border: variant === 'ghost' ? '1px solid transparent' : `1px solid ${isFilled ? (fill as string) : colors.border}`,
+        border: `${CONTROL_BORDER_WIDTH}px solid ${
+          variant === 'ghost' ? 'transparent' : (isFilled ? (fill as string) : colors.border)
+        }`,
         boxSizing: 'border-box',
-        borderRadius: L.r.md,
+        borderRadius: dims.radius,
         backgroundColor: isFilled ? (fill as string) : (variant === 'ghost' ? 'transparent' : colors.surface),
         // 塗った色の上の文字はテーマではなく下の色で決まる
         color: isFilled ? colors.onPrimary : colors.text,
