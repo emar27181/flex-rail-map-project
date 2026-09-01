@@ -99,9 +99,9 @@ UI の色・サイズ・余白・ボタンが「どこで決まっているか�
 <Button theme={theme} variant="primary" pressed={on} onClick={...}>所要時間を表示</Button>
 ```
 
-移行済み: `StationSelector` の所要時間トグル、`RouteSwitchBoard` の全表示/全非表示と
-「さらに表示」、`LegendRouteList` の全表示/全非表示・並び順・表示方式。
-残りは触る箇所から順次置き換える。
+**v1 のコンポーネントからは生の `<button>` が0になった**（対応前は91個）。
+padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたものが規格の2段階に揃い、
+ヒートマップの範囲調整（18px相当）など WCAG の下限を下回っていた当たり判定も直った。
 
 ---
 
@@ -113,9 +113,14 @@ UI の色・サイズ・余白・ボタンが「どこで決まっているか�
 
 | 層 | 置き場所 | 知ってよいこと | 知ってはいけないこと | 今あるもの |
 |---|---|---|---|---|
-| atoms | `ui/atoms/` | デザイントークン（`CONTROL_SIZE` `FS` `SEMANTIC` `getThemeColors`） | 路線・駅・経路といったアプリの概念、データの取得元 | `Button` `Chip` `TextField` |
-| molecules | `ui/molecules/` | アトムの並べ方・組み合わせ方 | 同上 | `SegmentedControl` |
+| atoms | `ui/atoms/` | デザイントークン（`CONTROL_SIZE` `FS` `SEMANTIC` `getThemeColors`） | 路線・駅・経路といったアプリの概念、データの取得元 | `Button` `IconButton` `Chip` `TextField` `Select` `Switch` |
+| molecules | `ui/molecules/` | アトムの並べ方・組み合わせ方 | 同上 | `SegmentedControl` `Stepper` |
 | organisms | `components/`, `components/legend/` | アプリの概念とデータ、状態 | — | `RouteSwitchBoard` `LegendRouteList` `StationSelector` |
+
+**アトム以外で `<button>` を書くとテストが落ちる**
+（`tests/unit/components/ui/noRawControls.test.ts`）。
+`src/v2/`（本番未使用の実験UI）と `src/design/`（開発者向けデバッグパネル）だけ
+理由を書いたうえで検査から外している。
 
 判定に迷ったら次を自問する。
 

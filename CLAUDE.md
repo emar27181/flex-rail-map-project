@@ -505,14 +505,15 @@ UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域
 
 | 層 | 置き場所 | 知ってよいこと | 例 |
 |---|---|---|---|
-| atoms | `src/components/ui/atoms/` | デザイントークンだけ | `Button` `Chip` `TextField` |
-| molecules | `src/components/ui/molecules/` | アトムの組み合わせ方 | `SegmentedControl` |
+| atoms | `src/components/ui/atoms/` | デザイントークンだけ | `Button` `IconButton` `Chip` `TextField` `Select` `Switch` |
+| molecules | `src/components/ui/molecules/` | アトムの組み合わせ方 | `SegmentedControl` `Stepper` |
 | organisms | `src/components/`, `src/components/legend/` | アプリの概念（路線・駅）とデータ | `RouteSwitchBoard` `StationSelector` |
 
 判定に迷ったら「路線」「駅」という語をその部品から消せるかを見る。消せないなら organism。
 
 **新しくボタン・入力欄・チップを書かないこと。** 既存のアトムを使う。
-`<button style={{...}}>` を書こうとしたら、それは `ui/atoms/Button` で足りないか先に考える。
+**アトム以外で `<button>` を書くとテストが落ちる**
+（`tests/unit/components/ui/noRawControls.test.ts`）。
 
 **寸法は `ui/atoms/controlSize.ts` の `CONTROL_SIZE` だけから取る。**
 段階は `md`(44px, 指で押すもの) と `sm`(24px, 補助操作) の2つのみ。

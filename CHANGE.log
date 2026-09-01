@@ -1554,3 +1554,23 @@
   選択で外形が変わらない、入力欄は16pxを下回らない
 - 層の分け方（何を知っているか）・寸法規格・色の規格を
   `docs/design-system.md` と `CLAUDE.md`、`.claude/skills/design-tokens/SKILL.md` に明記
+
+### improve: すべてのボタン・バーをアトミックデザインの部品に統一
+- `src/components/ui/atoms/`（`IconButton` `Select` `Switch` を追加）,
+  `src/components/ui/molecules/Stepper.tsx`（新規）ほか v1 の全コンポーネント
+- 対応前は `<button>` 93個のうち91個がインラインstyleで、padding が
+  2/3/5/6/8/10px、角丸が 3/4/6/8/10px とばらついていた
+- **v1 のコンポーネントから生の `<button>` が0になった**
+- 追加したアトム: `IconButton`（正方形。幅にも高さの規格を使い当たり判定を確保）、
+  `Select`、`Switch`（Cookie設定のトグル）
+- 追加したモレキュール: `Stepper`（−／＋の増減行。18×18pxで WCAG 2.2 AA の
+  下限24pxを下回っていたものを規格に載せ、上限・下限で押せないようにした）
+- ヒートマップの範囲調整も同じく18px相当だったので当たり判定が広がった
+- `tests/unit/components/ui/noRawControls.test.ts`（新規）で、アトム以外に
+  生の `<button>` があると落ちるようにした。`src/v2/`（本番未使用の実験UI）と
+  `src/design/`（開発用デバッグパネル）は理由を書いて除外
+- 読み上げ用の文言「選択を解除」「小さくする」「大きくする」「再生」「一時停止」と
+  折りたたみの文言を4言語に追加（折りたたみは日本語が直書きされていた）
+- 移行中に見つけた不具合: 地図上に浮かぶボタンのガラス調を `styleOverride` で
+  足す際、開いている状態で `backgroundColor: undefined` を渡すと variant の塗りを
+  消してしまう。閉じているときだけ背景を上書きするようにした
