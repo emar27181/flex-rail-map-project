@@ -56,6 +56,7 @@ import { checkboxInput } from './legend/legendStyles';
 import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, tintColor, LIGHT_TEXT } from '../utils/contrast';
 import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE, haversineDistance } from '../utils/trainDetector';
 import { estimateArrival, shouldNotifyArrival, buildArrivalMessage, isPlausibleSpeed, DEFAULT_ALERT_MINUTES } from '../utils/arrivalAlert';
+import { buildCorridorRoutes, vertexRanks, offsetPoints } from '../utils/routeOffset';
 import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
 
@@ -2341,6 +2342,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 駅マーカー表示制限: 画面表示範囲内の駅のみ表示（フリーズ防止）
   // 画面外の余白ぶんも描くため、画面に見える数は従来どおり100前後に収まる。
   const MAX_MARKER_STATIONS = 150;
+  /** 非表示路線を薄く描くときの線の太さ。ずらし幅もこれに合わせる */
+  const DIMMED_ROUTE_WEIGHT = 3;
   /**
    * 路線の選択に関係なく残す主要駅のしきい値（設定から変更できる）。
    * オフのときはどの駅も満たさない値にして層ごと止める。
@@ -3395,6 +3398,68 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     });
   }, [MapComponents, userLocation]);
 
+  /**
+   * 同じ区間を走る路線の索引。
+   *
+   * 路線データそのものから決まるので、表示・非表示や
+   * ズームには依存しない。一度だけ作って使い回す。
+   */
+  const corridorRoutes = useMemo(
+    () => buildCorridorRoutes(Object.entries(routes) as Array<[string, Station[]]>),
+    [],
+  );
+
+  /**
+   * 全区間を描くとき（薄い層）のずらし段数。
+   *
+   * 路線データだけで決まりズームにも表示状態にも依存しないので、
+   * 490路線ぶんを毎回数え直さずに一度だけ作る。
+   */
+  const fullRouteRanks = useMemo(() => {
+    const m = new Map<string, number[]>();
+    (Object.entries(routes) as Array<[string, Station[]]>).forEach(([rk, list]) => {
+      m.set(rk, vertexRanks(list.map(st => st.name), rk, corridorRoutes));
+    });
+    return m;
+  }, [corridorRoutes]);
+
+  /**
+   * 重なっている路線を、線に対して垂直にずらした座標を返す。
+   *
+   * 山手線と京浜東北線のように同じ区間を走る路線は座標がほぼ同じで、
+   * 上に描いた1本しか見えていなかった。重なっている本数ぶん左右に振り分ける。
+   *
+   * ずらし量は画面上の距離(px)で決める。緯度経度でずらすとズームによって
+   * 見た目の間隔が変わってしまうため、投影してからずらして戻す。
+   */
+  const offsetPositions = useCallback((
+    stationList: Array<{ name: string; lat: number; lng: number }>,
+    routeKey: RouteKey,
+    spacingPx: number,
+    precomputedRanks?: number[],
+  ): [number, number][] => {
+    const raw = stationList.map(s => [s.lat, s.lng] as [number, number]);
+    const map = mapRef.current;
+    if (!map || raw.length < 2) return raw;
+
+    const ranks = precomputedRanks
+      ?? vertexRanks(stationList.map(s => s.name), routeKey, corridorRoutes);
+    // すべて0なら投影の往復をせずに元の座標を返す（大半の路線はこちら）
+    if (ranks.every(r => r === 0)) return raw;
+
+    try {
+      const projected = raw.map(([lat, lng]) => map.project([lat, lng], zoomLevel));
+      const moved = offsetPoints(projected, ranks, spacingPx);
+      return moved.map(pt => {
+        const ll = map.unproject([pt.x, pt.y], zoomLevel);
+        return [ll.lat, ll.lng] as [number, number];
+      });
+    } catch {
+      // 地図がまだ初期化されていないなど、投影できないときは元の座標のまま描く
+      return raw;
+    }
+  }, [corridorRoutes, zoomLevel]);
+
   if (!isClient || isLoading || !MapComponents) {
     return (
       <div style={{
@@ -3798,7 +3863,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       <React.Fragment key={fragmentKey}>
         {/* 各セグメントを個別描画（非連続区間を誤接続しない） */}
         {displaySegments.map((segStations, segIdx) => {
-          const segPositions = segStations.map(s => [s.lat, s.lng]);
+          // 重なっている路線は線1本分ずつ垂直にずらす
+          const segPositions = offsetPositions(segStations, routeKey, routeLineWidth);
           return (
             <React.Fragment key={`${routeKey}-seg-${segIdx}`}>
         {/* 実際に見える路線（先に描画して下層に） */}
@@ -4643,7 +4709,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   // ここを通さないとヒートマップにしても線の色が変わらない。
                   const color = routeHeatColors.get(rKey)
                     ?? adjustRouteColorForTheme(routeColors[rKey] ?? '#888', theme);
-                  const positions = (stationList as any[]).map((s: any) => [s.lat, s.lng] as [number, number]);
+                  // 薄い層も同じ規則でずらす（この層の線の太さは3px）
+                  const positions = offsetPositions(stationList as any[], rKey, DIMMED_ROUTE_WEIGHT, fullRouteRanks.get(rKey));
                   return (
                     <React.Fragment key={`dimmed-${rKey}`}>
                       {/* 視覚的な半透明路線 */}
@@ -4651,7 +4718,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         positions={positions}
                         pathOptions={{
                           color,
-                          weight: 3,
+                          weight: DIMMED_ROUTE_WEIGHT,
                           opacity: hoveredRoute === rKey ? 0.6 : 0.25,
                         }}
                         interactive={false}
