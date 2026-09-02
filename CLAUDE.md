@@ -527,6 +527,11 @@ UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域
 色は `SEMANTIC.*`（出発=緑 / 到着=赤 / primary=青）、白黒は `NEUTRAL.*`、
 それ以外は `getThemeColors(theme)` から取る。直書きはテストで落ちる
 （`tests/unit/constants/semanticColors.test.ts`）。
+
+**文字サイズは `FS`、余白は `L.sp`、角丸は `L.r` から取る。**
+`fontSize: '12px'` のような直書きはテストで落ちる
+（`tests/unit/components/ui/noRawSizes.test.ts`）。
+段階に無い値は近い段階に丸める。新しい段階を足す前に既存で足りないか確認すること。
 寸法の一致は `tests/unit/components/ui/atoms.test.tsx` が固定している。
 
 このプロジェクトは「同じ規則を2箇所に書いて片方だけ直す」不具合を繰り返しているため

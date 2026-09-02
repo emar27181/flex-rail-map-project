@@ -195,6 +195,24 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 塗った色の上に載せる文字は `colors.onPrimary`、
 路線色のように色が動くものは `filledLabelColors()` に決めさせる。
 
+### 寸法の直書きは書けない
+
+文字サイズ196箇所・余白322箇所・角丸85箇所を定数に置き換え、
+`tests/unit/components/ui/noRawSizes.test.ts` で直書きを落とすようにした。
+
+| 対象 | 使うもの | 段階 |
+|---|---|---|
+| 文字サイズ | `FS` | micro(9) tiny(10) helper(11) label(12) base(13) sectionTitle(14) input(16) emphasis(18) heading(20) display(24) |
+| 余白・間隔 | `L.sp` | xxs(2) xs(4) sm(6) md(8) lg(10) xl(12) 2xl(16) 3xl(20) 4xl(24) 5xl(40) |
+| 角丸 | `L.r` | sm(3) md(4) pill(8) |
+| 操作部品の高さ | `CONTROL_SIZE` | sm(24) md(44) |
+
+段階に無い値（1/3/5/7/14/18/22/26/28px など）は近い段階に丸めてある。
+新しい段階を足す前に、既存の段階で足りないか確認すること。
+
+除外は定義元2ファイル（`legendStyles.ts` `controlSize.ts`）と
+`src/v2/`・`src/design/` だけ。
+
 ### テストで固定していること
 
 `tests/unit/components/ui/atoms.test.tsx`
