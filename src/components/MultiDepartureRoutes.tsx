@@ -150,7 +150,7 @@ const MultiDepartureRoutes: React.FC<MultiDepartureRoutesProps> = ({
               <div
                 key={station.name}
                 onClick={() => handleSelect(station)}
-                style={{ padding: '5px 8px', fontSize: FS.label, color: colors.text, cursor: 'pointer' }}
+                style={{ padding: `${L.sp.xs} ${L.sp.md}`, fontSize: FS.label, color: colors.text, cursor: 'pointer' }}
               >{translateStation(station.name, language)}</div>
             ))}
           </div>

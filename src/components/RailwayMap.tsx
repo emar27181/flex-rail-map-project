@@ -1159,17 +1159,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         }}
       >
         {/* ドラッグハンドル */}
-        <div {...dragHandleProps} style={{ display: 'flex', justifyContent: 'center', padding: '4px 0 1px', cursor: 'grab', flexShrink: 0 }}>
+        <div {...dragHandleProps} style={{ display: 'flex', justifyContent: 'center', padding: `${L.sp.xs} 0 ${L.sp.xxs}`, cursor: 'grab', flexShrink: 0 }}>
           <div style={{ width: 32, height: 3, borderRadius: 2, backgroundColor: colors.border }} />
         </div>
         {/* ヘッダー */}
-        <div style={{ padding: '4px 10px 6px', borderBottom: `1px solid ${colors.borderLight}` }}>
+        <div style={{ padding: `${L.sp.xs} ${L.sp.lg} ${L.sp.sm}`, borderBottom: `1px solid ${colors.borderLight}` }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: L.sp.sm }}>
             <span style={{ fontWeight: 'bold', fontSize: FS.base, color: colors.text }}>
               {translateStation(stationTooltip.stationName, currentLanguage)}
             </span>
             <span onClick={closeTooltip}
-              style={{ fontSize: FS.label, color: colors.textSecondary, cursor: 'pointer', padding: `${L.sp.sm} ${L.sp.md}`, margin: '-6px -8px', borderRadius: L.r.md }}>✕</span>
+              style={{ fontSize: FS.label, color: colors.textSecondary, cursor: 'pointer', padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, borderRadius: L.r.md }}>✕</span>
           </div>
           <div style={{ display: 'flex', gap: L.sp.xs }}>
             <Button theme={theme} variant="positive" size="sm"
@@ -1220,7 +1220,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   <div key={String(p.key)} style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     background: isActive ? `${pColor}22` : 'transparent',
-                    borderRadius: L.r.sm, padding: '1px 2px',
+                    borderRadius: L.r.sm, padding: `${L.sp.xxs} ${L.sp.xxs}`,
                   }}>
                     <span
                       onClick={hasInfo ? e => {
@@ -1247,7 +1247,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               })}
             </div>
           ) : (
-            <div style={{ fontSize: FS.helper, color: colors.textSecondary, fontStyle: 'italic', padding: '4px 0' }}>
+            <div style={{ fontSize: FS.helper, color: colors.textSecondary, fontStyle: 'italic', padding: `${L.sp.xs} 0` }}>
               {translateUI('noDataForStation', currentLanguage)}
             </div>
           )}
@@ -1297,7 +1297,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             {meta?.unit ? ` (${meta.unit})` : ''} — 解説
           </span>
           <span onClick={() => setMethodInfoTooltip(null)}
-            style={{ cursor: 'pointer', color: colors.textSecondary, padding: `${L.sp.sm} ${L.sp.md}`, margin: '-6px -8px', fontSize: FS.sectionTitle, borderRadius: L.r.md, lineHeight: 1 }}>✕</span>
+            style={{ cursor: 'pointer', color: colors.textSecondary, padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, fontSize: FS.sectionTitle, borderRadius: L.r.md, lineHeight: 1 }}>✕</span>
         </div>
         {methodology.collectionMethod && (
           <div style={{ marginBottom: L.sp.sm }}>
@@ -1430,12 +1430,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         }}
       >
         {/* ドラッグハンドル */}
-        <div {...dragHandleProps2} style={{ display: 'flex', justifyContent: 'center', padding: '4px 0 1px', cursor: 'grab', flexShrink: 0 }}>
+        <div {...dragHandleProps2} style={{ display: 'flex', justifyContent: 'center', padding: `${L.sp.xs} 0 ${L.sp.xxs}`, cursor: 'grab', flexShrink: 0 }}>
           <div style={{ width: 32, height: 3, borderRadius: 2, backgroundColor: colors.border }} />
         </div>
         {/* ヘッダー */}
         <div style={{
-          padding: '4px 10px 6px',
+          padding: `${L.sp.xs} ${L.sp.lg} ${L.sp.sm}`,
           borderBottom: `1px solid ${colors.borderLight}`,
         }}>
           {/* 駅名 + 閉じるボタン */}
@@ -1445,7 +1445,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             </span>
             <span
               onClick={closeTooltip}
-              style={{ fontSize: FS.label, color: colors.textSecondary, cursor: 'pointer', padding: `${L.sp.sm} ${L.sp.md}`, margin: '-6px -8px', borderRadius: L.r.md }}
+              style={{ fontSize: FS.label, color: colors.textSecondary, cursor: 'pointer', padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, borderRadius: L.r.md }}
             >✕</span>
           </div>
           {/* 出発/到着ボタン + 基準時刻 */}
@@ -1515,7 +1515,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               </div>
               {/* 全パラメータ一覧（2列グリッド） */}
               {filledParams.length > 0 ? (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px 8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: `${L.sp.xxs} ${L.sp.md}` }}>
                   {filledParams.map(p => {
                     const v = stats![p.key] as number;
                     const isActive = p.key === heatmapParam;
@@ -1540,7 +1540,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         fontSize: FS.tiny,
                         background: isActive ? `${pColor}22` : 'transparent',
                         borderRadius: L.r.sm,
-                        padding: '1px 2px',
+                        padding: `${L.sp.xxs} ${L.sp.xxs}`,
                         gap: L.sp.xs,
                       }}>
                         {labelEl}
@@ -1595,7 +1595,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   }}
                   style={{
                     display: 'flex', alignItems: 'center', gap: L.sp.xs,
-                    padding: '5px 8px',
+                    padding: `${L.sp.xs} ${L.sp.md}`,
                     cursor: 'pointer',
                     backgroundColor: isActive ? colors.primary + '22' : 'transparent',
                     borderLeft: isActive
@@ -1692,7 +1692,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   if (!line) return null;
                   return (
                     <div style={{
-                      padding: '5px 8px',
+                      padding: `${L.sp.xs} ${L.sp.md}`,
                       borderTop: `1px solid ${colors.borderLight}`,
                       fontSize: FS.micro, color: colors.textSecondary, lineHeight: 1.5,
                     }}>
@@ -4174,7 +4174,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         className={className}
         style={isFullscreen
           ? { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, overflow: 'hidden', backgroundColor: colors.background }
-          : { padding: '0 20px' }
+          : { padding: `0 ${L.sp['3xl']}` }
         }
       >
         {/* 駅選択UI */}
@@ -4276,7 +4276,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               borderBottom: isRouteToggleExpanded ? `1px solid ${colors.borderLight}` : 'none'
             }}
           >
-            <h3 style={{ margin: '0', color: colors.text, fontSize: FS.sectionTitle, fontWeight: 'bold' }}>{translateUI('routeToggle', currentLanguage)}</h3>
+            <h3 style={{ margin: `0`, color: colors.text, fontSize: FS.sectionTitle, fontWeight: 'bold' }}>{translateUI('routeToggle', currentLanguage)}</h3>
             <span style={{
               fontSize: FS.label,
               color: colors.textSecondary,
@@ -4799,7 +4799,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               zIndex: 1002,
               background: 'linear-gradient(135deg, #667eea, #764ba2)',
               color: colors.onPrimary,
-              padding: '4px 14px',
+              padding: `${L.sp.xs} ${L.sp['2xl']}`,
               borderRadius: L.r.pill,
               fontSize: FS.label,
               fontWeight: 'bold',
@@ -4852,7 +4852,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               userSelect: 'none' as const,
             };
             const numS: React.CSSProperties = {
-              width: '34px', fontSize: FS.helper, padding: '1px 2px', textAlign: 'center',
+              width: '34px', fontSize: FS.helper, padding: `${L.sp.xxs} ${L.sp.xxs}`, textAlign: 'center',
               border: `1px solid ${colors.border}`, borderRadius: L.r.sm,
               background: theme === 'dark' ? 'rgba(50,50,50,0.9)' : 'rgba(245,245,245,0.9)',
               color: colors.text,
@@ -4982,7 +4982,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
                   {/* パラメータ選択（展開時のみ表示） */}
                   {heatmapParamListOpen && (
-                    <div style={{ padding: '5px 7px', borderTop: `1px solid ${colors.borderLight}` }}>
+                    <div style={{ padding: `${L.sp.xs} ${L.sp.sm}`, borderTop: `1px solid ${colors.borderLight}` }}>
                       {/* 複合モード説明（2個以上選択時のみ） */}
                       {heatmapMultiParams.size >= 2 && (
                         <div style={{ fontSize: FS.micro, color: colors.textSecondary, marginBottom: L.sp.xs, lineHeight: 1.4 }}>
@@ -5128,11 +5128,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 position: 'fixed',
                 left: '50%',
                 transform: 'translateX(-50%)',
-                top: `calc(12px + env(safe-area-inset-top, 0px))`,
+                top: `calc(${L.sp.xl} + env(safe-area-inset-top, 0px))`,
                 zIndex: 10000,
                 maxWidth: 'min(360px, calc(100vw - 24px))',
                 boxSizing: 'border-box',
-                padding: '10px 14px',
+                padding: `${L.sp.lg} ${L.sp['2xl']}`,
                 borderRadius: L.r.pill,
                 backgroundColor: SEMANTIC.arrival,
                 color: colors.onPrimary,
@@ -5168,7 +5168,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 }}
               >
                 <div style={{
-                  padding: '7px 10px 6px',
+                  padding: `${L.sp.sm} ${L.sp.lg} ${L.sp.sm}`,
                   borderBottom: `1px solid ${colors.borderLight}`,
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 }}>
@@ -5183,7 +5183,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   </div>
                   <span
                     onClick={() => setDimmedMapTooltip(null)}
-                    style={{ fontSize: FS.label, color: colors.textSecondary, cursor: 'pointer', padding: `${L.sp.sm} ${L.sp.md}`, margin: '-6px -8px', borderRadius: L.r.md }}
+                    style={{ fontSize: FS.label, color: colors.textSecondary, cursor: 'pointer', padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, borderRadius: L.r.md }}
                   >✕</span>
                 </div>
                 <div style={{ padding: `${L.sp.md} ${L.sp.lg}` }}>
@@ -5766,12 +5766,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   backgroundColor: colors.surfaceElevated,
                   border: `1px solid ${colors.border}`,
                   borderRadius: L.r.pill,
-                  padding: '12px 14px',
+                  padding: `${L.sp.xl} ${L.sp['2xl']}`,
                   boxShadow: `0 4px 16px ${colors.shadow}`,
                   zIndex: 9999,
                   minWidth: '180px',
                   transform: 'translate(-50%, -100%)',
-                  marginTop: '-12px',
+                  marginTop: `-${L.sp.xl}`,
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
@@ -5786,7 +5786,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       color: colors.textSecondary,
                       cursor: 'pointer',
                       padding: L.sp.md,
-                      margin: '-8px',
+                      margin: `-${L.sp.md}`,
                       borderRadius: L.r.md,
                     }}
                   >✕</span>

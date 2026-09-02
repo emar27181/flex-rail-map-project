@@ -40,7 +40,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
       // ページがステータスバーの下まで広がる。上端にそのまま置くとロゴや
       // ボタンが時刻・電池表示に隠れるため、セーフエリア分だけ下げる。
       // ブラウザ表示時は inset が 0 なので見た目は変わらない。
-      padding: 'calc(12px + env(safe-area-inset-top, 0px)) 20px 12px',
+      // 上端はノッチ（セーフエリア）ぶんを足す
+      padding: `calc(${L.sp.xl} + env(safe-area-inset-top, 0px)) ${L.sp['3xl']} ${L.sp.xl}`,
       backgroundColor: colors.surface,
       borderBottom: `1px solid ${colors.border}`,
       boxShadow: `0 2px 4px ${colors.shadow}`,
@@ -145,7 +146,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           boxShadow: `0 4px 12px ${colors.shadow}`,
           zIndex: 1000,
           minWidth: '200px',
-          padding: '8px 0'
+          padding: `${L.sp.md} 0`
         }}>
           <div
             style={{
@@ -284,7 +285,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             {/* コンテンツ */}
             <div style={{ paddingRight: L.sp['5xl'] }}>
               <h2 style={{
-                margin: '0 0 16px 0',
+                margin: `0 0 ${L.sp['2xl']} 0`,
                 fontSize: FS.display,
                 fontWeight: 'bold',
                 color: colors.text,
@@ -297,7 +298,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
               </h2>
 
               <p style={{
-                margin: '0 0 24px 0',
+                margin: `0 0 ${L.sp['4xl']} 0`,
                 fontSize: FS.input,
                 lineHeight: '1.6',
                 color: colors.text

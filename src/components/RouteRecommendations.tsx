@@ -93,7 +93,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
         top: tooltip.y - 36,
         backgroundColor: 'rgba(30,30,30,0.92)',
         color: colors.onPrimary,
-        padding: '5px 10px',
+        padding: `${L.sp.xs} ${L.sp.lg}`,
         borderRadius: L.r.md,
         fontSize: FS.label,
         pointerEvents: 'none',
@@ -129,7 +129,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
             fontSize: FS.sectionTitle,
             fontWeight: 'bold',
             color: colors.text,
-            margin: '0'
+            margin: `0`
           }}>
 {translateUI('recommendedRoutes', language)} ({translateUI('routeCount', language, { count: routes.length.toString() })})
           </span>
@@ -202,7 +202,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                 <span style={{
                   fontSize: FS.label,
                   color: route.transfers === 0 ? SEMANTIC.departure : '#ff9800',
-                  padding: '2px 7px',
+                  padding: `${L.sp.xxs} ${L.sp.sm}`,
                   backgroundColor: route.transfers === 0 ? tintColor(SEMANTIC.departure, 0.12) : 'rgba(255,152,0,0.12)',
                   borderRadius: L.r.pill,
                   fontWeight: '500',
@@ -246,7 +246,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                           fontSize: FS.micro,
                           color: colors.onPrimary,
                           backgroundColor: segment.isWalkingTransfer ? SEMANTIC.departure : '#ff9800',
-                          padding: '1px 5px',
+                          padding: `${L.sp.xxs} ${L.sp.xs}`,
                           borderRadius: L.r.md,
                           whiteSpace: 'nowrap'
                         }}>

@@ -17,6 +17,7 @@ import { getThemeColors } from '../contexts/ThemeContext';
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import { CONTROL_SIZE } from './ui/atoms/controlSize';
+import { L } from './legend/legendStyles';
 
 // ── 寸法定数 ─────────────────────────────────────────────────────────
 
@@ -212,7 +213,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              padding: '12px 0 8px',
+              padding: `${L.sp.xl} 0 ${L.sp.md}`,
               flexShrink: 0,
               cursor: 'ns-resize',
             }}
@@ -230,7 +231,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '6px 14px 8px',
+            padding: `${L.sp.sm} ${L.sp['2xl']} ${L.sp.md}`,
             borderBottom: `1px solid ${colors.border}`,
             flexShrink: 0,
           }}>
@@ -251,7 +252,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
           <div
             ref={scrollRef}
             className="mbp-scroll"
-            style={{ flex: 1, minHeight: 0, padding: '10px 14px' }}
+            style={{ flex: 1, minHeight: 0, padding: `${L.sp.lg} ${L.sp['2xl']}` }}
           >
             {activeButton.content}
           </div>

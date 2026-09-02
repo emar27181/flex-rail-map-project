@@ -155,7 +155,7 @@ const CoverageAnalysis: React.FC = () => {
       {isExpanded && (
         <div>
           <div style={{ marginBottom: L.sp['2xl'] }}>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: FS.base }}>基本統計</h4>
+            <h4 style={{ margin: `0 0 ${L.sp.md} 0`, fontSize: FS.base }}>基本統計</h4>
             <div>登録路線数: <strong>{coverageStats.totalRoutes}</strong></div>
             <div>総駅数: <strong>{coverageStats.totalStations}</strong></div>
             <div>ユニーク駅数: <strong>{coverageStats.uniqueStations}</strong></div>
@@ -163,7 +163,7 @@ const CoverageAnalysis: React.FC = () => {
           </div>
 
           <div style={{ marginBottom: L.sp['2xl'] }}>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: FS.base, color: SEMANTIC.arrival }}>不完全な路線</h4>
+            <h4 style={{ margin: `0 0 ${L.sp.md} 0`, fontSize: FS.base, color: SEMANTIC.arrival }}>不完全な路線</h4>
             {coverageStats.incompleteRoutes.map((route, index) => (
               <div key={index} style={{ marginBottom: L.sp.xs }}>
                 <strong>{route.routeName}</strong>: {route.currentStations}/{route.expectedStations}駅 
@@ -175,14 +175,14 @@ const CoverageAnalysis: React.FC = () => {
           </div>
 
           <div style={{ marginBottom: L.sp['2xl'] }}>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: FS.base, color: SEMANTIC.arrival }}>欠落している重要路線</h4>
+            <h4 style={{ margin: `0 0 ${L.sp.md} 0`, fontSize: FS.base, color: SEMANTIC.arrival }}>欠落している重要路線</h4>
             <div style={{ fontSize: FS.helper, color: '#666' }}>
               {coverageStats.missingCriticalRoutes.join('、')}
             </div>
           </div>
 
           <div>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: FS.base }}>路線別駅数 (上位10)</h4>
+            <h4 style={{ margin: `0 0 ${L.sp.md} 0`, fontSize: FS.base }}>路線別駅数 (上位10)</h4>
             <div style={{ maxHeight: '120px', overflowY: 'auto' }}>
               {coverageStats.routeBreakdown.slice(0, 10).map((route, index) => (
                 <div key={route.routeKey} style={{ 

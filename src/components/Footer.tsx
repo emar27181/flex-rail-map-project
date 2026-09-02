@@ -23,23 +23,23 @@ const Footer: React.FC<FooterProps> = ({ language }) => {
       color: colors.textSecondary
     }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <p style={{ margin: '0 0 10px 0', fontWeight: 'bold', color: colors.text }}>
+        <p style={{ margin: `0 0 ${L.sp.lg} 0`, fontWeight: 'bold', color: colors.text }}>
           {translateUI('copyrightText', language)}
         </p>
-        <p style={{ margin: '0 0 5px 0' }}>
+        <p style={{ margin: `0 0 ${L.sp.xs} 0` }}>
           {translateUI('dataSourceText', language)}
         </p>
-        <p style={{ margin: '0 0 5px 0' }}>
+        <p style={{ margin: `0 0 ${L.sp.xs} 0` }}>
           {translateUI('disclaimerText', language)}
         </p>
-        <p style={{ margin: '0 0 10px 0' }}>
+        <p style={{ margin: `0 0 ${L.sp.lg} 0` }}>
           {translateUI('accuracyText', language)}
         </p>
 
         <div style={{
           display: 'flex',
           gap: L.sp['3xl'],
-          margin: '0 0 15px 0',
+          margin: `0 0 ${L.sp['2xl']} 0`,
           fontSize: FS.label,
           flexWrap: 'wrap'
         }}>
@@ -72,7 +72,7 @@ const Footer: React.FC<FooterProps> = ({ language }) => {
           })}
         </div>
 
-        <p style={{ margin: '0 0 8px 0', fontSize: FS.label }}>
+        <p style={{ margin: `0 0 ${L.sp.md} 0`, fontSize: FS.label }}>
           Developed by{' '}
           <a
             href="https://github.com/emar27181"
@@ -92,7 +92,7 @@ const Footer: React.FC<FooterProps> = ({ language }) => {
             ema | GitHub: emar27181
           </a>
         </p>
-        <p style={{ margin: '0', fontSize: FS.label }}>
+        <p style={{ margin: `0`, fontSize: FS.label }}>
           <a href="https://claude.ai/code" target="_blank" style={{ color: colors.primary, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', minHeight: `${TARGET.min}px` }}>
             {translateUI('madeWithText', language)}
           </a>

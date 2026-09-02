@@ -50,7 +50,7 @@ const targetFiles = listFiles(COMPONENTS).filter(
  */
 const RULES: Array<{ name: string; re: RegExp; use: string }> = [
   { name: '文字サイズ', re: /fontSize: '\d+(\.\d+)?px'/, use: 'FS' },
-  { name: '余白', re: /(padding|margin|gap)(Top|Bottom|Left|Right)?: '\d+px'/, use: 'L.sp' },
+  { name: '余白', re: /(padding|margin|gap)(Top|Bottom|Left|Right)?: '[^']*\d+px[^']*'/, use: 'L.sp' },
   { name: '角丸', re: /borderRadius: '\d+px'/, use: 'L.r' },
 ];
 

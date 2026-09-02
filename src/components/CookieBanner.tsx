@@ -97,7 +97,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
 
           <div style={{ flex: 1, minWidth: '300px' }}>
             <h3 style={{
-              margin: '0 0 8px 0',
+              margin: `0 0 ${L.sp.md} 0`,
               fontSize: FS.emphasis,
               fontWeight: 'bold',
               color: colors.text
@@ -105,7 +105,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
               {translateUI('cookieUsage', language)}
             </h3>
             <p style={{
-              margin: '0 0 16px 0',
+              margin: `0 0 ${L.sp['2xl']} 0`,
               fontSize: FS.sectionTitle,
               lineHeight: '1.5',
               color: colors.textSecondary
@@ -119,7 +119,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                 style={{
                   color: colors.primary,
                   textDecoration: 'none',
-                  margin: '0 4px'
+                  margin: `0 ${L.sp.xs}`
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
                 onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
@@ -166,7 +166,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
             border: `1px solid ${colors.borderLight}`
           }}>
             <h4 style={{
-              margin: '0 0 16px 0',
+              margin: `0 0 ${L.sp['2xl']} 0`,
               fontSize: FS.input,
               fontWeight: 'bold',
               color: colors.text
@@ -184,7 +184,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
               }}>
                 <div style={{ flex: 1 }}>
                   <h5 style={{
-                    margin: '0 0 4px 0',
+                    margin: `0 0 ${L.sp.xs} 0`,
                     fontSize: FS.sectionTitle,
                     fontWeight: '600',
                     color: colors.text
@@ -244,7 +244,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
               }}>
                 <div style={{ flex: 1 }}>
                   <h5 style={{
-                    margin: '0 0 4px 0',
+                    margin: `0 0 ${L.sp.xs} 0`,
                     fontSize: FS.sectionTitle,
                     fontWeight: '600',
                     color: colors.text
@@ -280,7 +280,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
               }}>
                 <div style={{ flex: 1 }}>
                   <h5 style={{
-                    margin: '0 0 4px 0',
+                    margin: `0 0 ${L.sp.xs} 0`,
                     fontSize: FS.sectionTitle,
                     fontWeight: '600',
                     color: colors.text

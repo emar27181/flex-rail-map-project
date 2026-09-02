@@ -50,7 +50,7 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
     <div
       onClick={() => onToggle(index)}
       style={{
-        padding: '5px 6px',
+        padding: `${L.sp.xs} ${L.sp.sm}`,
         cursor: 'pointer',
         marginBottom: L.sp.xs,
         ...selectableCard(colors, { selected: isSelected }),

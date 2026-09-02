@@ -7,7 +7,7 @@ const DataTest: React.FC = () => {
     <div style={{ 
       padding: L.sp['3xl'],
       border: '1px solid #ccc',
-      margin: '10px 0'
+      margin: `${L.sp.lg} 0`
     }}>
       <h3>データテスト</h3>
       <p>読み込まれた路線データ:</p>

@@ -40,8 +40,8 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
           backgroundColor: '#ffebee',
           margin: L.sp['3xl']
         }}>
-          <h3 style={{ color: SEMANTIC.arrival, margin: '0 0 10px 0' }}>{translateUI('mapErrorTitle', lang)}</h3>
-          <p style={{ margin: '0 0 10px 0' }}>{translateUI('mapErrorMessage', lang)}</p>
+          <h3 style={{ color: SEMANTIC.arrival, margin: `0 0 ${L.sp.lg} 0` }}>{translateUI('mapErrorTitle', lang)}</h3>
+          <p style={{ margin: `0 0 ${L.sp.lg} 0` }}>{translateUI('mapErrorMessage', lang)}</p>
           {this.state.error && (
             <details style={{ fontSize: FS.label, color: '#666' }}>
               <summary>{translateUI('errorDetails', lang)}</summary>

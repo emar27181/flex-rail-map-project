@@ -389,7 +389,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
               return (
                 <React.Fragment key={routeKey}>
                 {showDivider && (
-                  <div style={{ margin: '4px 0 2px' }}>
+                  <div style={{ margin: `${L.sp.xs} 0 ${L.sp.xxs}` }}>
                     <div style={{ fontSize: FS.micro, color: colors.textSecondary, whiteSpace: 'nowrap', marginBottom: L.sp.xxs }}>
                       ↑ この駅を通る路線
                     </div>
@@ -444,7 +444,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                       setTouchDragKey(null);
                       setDragOverKey(null);
                     }}
-                    style={{ fontSize: FS.base, color: colors.textSecondary, lineHeight: 1, flexShrink: 0, padding: '2px 3px 2px 0', cursor: 'grab', opacity: 0.5, userSelect: 'none', touchAction: 'none', WebkitUserSelect: 'none' }}
+                    style={{ fontSize: FS.base, color: colors.textSecondary, lineHeight: 1, flexShrink: 0, padding: `${L.sp.xxs} ${L.sp.xs} ${L.sp.xxs} 0`, cursor: 'grab', opacity: 0.5, userSelect: 'none', touchAction: 'none', WebkitUserSelect: 'none' }}
                   >
                     ⠿
                   </span>
@@ -562,7 +562,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   {translateUI('alwaysShowMajorStations', language)}
                 </Checkbox>
                 {alwaysVisibleStationsEnabled && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, padding: '2px 0 4px 22px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, padding: `${L.sp.xxs} 0 ${L.sp.xs} ${L.sp['4xl']}` }}>
                     <span style={{ fontSize: FS.helper, color: colors.textSecondary }}>
                       {translateUI('minRouteCount', language)}
                     </span>

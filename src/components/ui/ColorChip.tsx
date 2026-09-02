@@ -50,7 +50,7 @@ export default function ColorChip({
         fontSize,
         fontWeight: bold ? 'bold' : 'normal',
         borderRadius: L.r.sm,
-        padding: '1px 5px',
+        padding: `${L.sp.xxs} ${L.sp.xs}`,
         lineHeight: 1.4,
         whiteSpace: 'nowrap',
         flexShrink: 0,

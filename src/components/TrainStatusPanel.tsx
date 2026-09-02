@@ -234,7 +234,7 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
           fontWeight: 'bold',
           color: effective.routeColor,
           backgroundColor: effective.routeColor + '1a',
-          padding: '1px 6px',
+          padding: `${L.sp.xxs} ${L.sp.sm}`,
           borderRadius: L.r.pill,
           border: `1px solid ${effective.routeColor}66`,
         }}>{translateRoute(effective.routeName, language)}</span>
@@ -246,7 +246,7 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
             fontSize: FS.helper,
             color: colors.textSecondary,
             backgroundColor: colors.surface,
-            padding: '1px 4px',
+            padding: `${L.sp.xxs} ${L.sp.xs}`,
             borderRadius: L.r.sm,
             border: `1px solid ${colors.border}`,
           }}>{translateUI('manualBadge', language)}</span>

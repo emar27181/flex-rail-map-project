@@ -151,7 +151,7 @@ const DemoMap: React.FC = () => {
                 backgroundColor: SEMANTIC.departure,
                 color: NEUTRAL.white,
                 borderRadius: L.r.pill,
-                padding: '1px 7px',
+                padding: `${L.sp.xxs} ${L.sp.sm}`,
                 fontSize: FS.helper,
                 marginRight: L.sp.sm,
               }}>
@@ -356,7 +356,7 @@ const DemoMap: React.FC = () => {
             fontSize: FS.micro,
             color: '#888',
             backgroundColor: 'rgba(255,255,255,0.7)',
-            padding: '1px 4px',
+            padding: `${L.sp.xxs} ${L.sp.xs}`,
             borderRadius: L.r.sm,
             pointerEvents: 'none',
             zIndex: 500,

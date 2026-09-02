@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { L } from './legend/legendStyles';
 
 interface AdSenseAdProps {
   adSlot: string;
@@ -40,7 +41,7 @@ const AdSenseAd: React.FC<AdSenseAdProps> = ({
       ref={adRef}
       style={{
         textAlign: 'center',
-        margin: '20px 0',
+        margin: `${L.sp['3xl']} 0`,
         ...style
       }}
       className={className}

@@ -185,7 +185,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
       </div>
 
       {/* タイムライン */}
-      <div style={{ padding: '8px 0' }}>
+      <div style={{ padding: `${L.sp.md} 0` }}>
         {timeline.map((seg, idx) => {
           const isExpanded = expandedSegments.has(seg.segIndex);
           const nextDeps   = isExpanded && seg.hasTimetable
@@ -221,7 +221,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
 
               {/* 路線・所要時間 + 時刻表ボタン */}
               <div style={{
-                padding: '2px 12px 2px 26px',
+                padding: `${L.sp.xxs} ${L.sp.xl} ${L.sp.xxs} ${L.sp['4xl']}`,
                 display: 'flex',
                 alignItems: 'center',
                 gap: L.sp.sm,
@@ -238,7 +238,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                   backgroundColor: colors.surface,
                   border: `1px solid ${colors.borderLight}`,
                   borderRadius: L.r.sm,
-                  padding: '0 5px',
+                  padding: `0 ${L.sp.xs}`,
                   fontSize: FS.helper,
                   color: colors.textSecondary,
                 }}>
@@ -261,14 +261,14 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
               {/* 展開された時刻表 */}
               {isExpanded && (
                 <div style={{
-                  margin: '4px 12px 4px 28px',
+                  margin: `${L.sp.xs} ${L.sp.xl} ${L.sp.xs} ${L.sp['4xl']}`,
                   backgroundColor: colors.surface,
                   border: `1px solid ${colors.borderLight}`,
                   borderRadius: L.r.md,
                   overflow: 'hidden',
                 }}>
                   <div style={{
-                    padding: '5px 8px',
+                    padding: `${L.sp.xs} ${L.sp.md}`,
                     fontSize: FS.helper,
                     color: colors.textSecondary,
                     borderBottom: `1px solid ${colors.borderLight}`,
@@ -283,7 +283,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                   ) : (
                     nextDeps.map((dep, di) => (
                       <div key={di} style={{
-                        padding: '5px 8px',
+                        padding: `${L.sp.xs} ${L.sp.md}`,
                         display: 'flex',
                         alignItems: 'center',
                         gap: L.sp.md,
@@ -297,7 +297,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                           color: colors.onPrimary,
                           backgroundColor: typeColor(dep.type),
                           borderRadius: L.r.sm,
-                          padding: '1px 5px',
+                          padding: `${L.sp.xxs} ${L.sp.xs}`,
                           minWidth: '28px',
                           textAlign: 'center',
                         }}>
@@ -319,7 +319,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
 
               {/* 矢印 */}
               {!isLast && (
-                <div style={{ padding: '0 12px 0 26px', color: colors.textSecondary, fontSize: FS.helper }}>
+                <div style={{ padding: `0 ${L.sp.xl} 0 ${L.sp['4xl']}`, color: colors.textSecondary, fontSize: FS.helper }}>
                   ▼
                 </div>
               )}
