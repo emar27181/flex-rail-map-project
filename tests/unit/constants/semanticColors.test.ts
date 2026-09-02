@@ -25,14 +25,38 @@ const DEFINITION_FILE = join('constants', 'ui.ts');
  */
 const EXCLUDED = new Set([join('data', 'articleBodyI18n.ts')]);
 
-function listSourceFiles(dir: string, base = ''): string[] {
+function listFiles(dir: string, pattern: RegExp, base = ''): string[] {
   return readdirSync(dir).flatMap((name) => {
     const abs = join(dir, name);
     const rel = base ? join(base, name) : name;
-    if (statSync(abs).isDirectory()) return listSourceFiles(abs, rel);
-    return /\.(ts|tsx)$/.test(name) ? [rel] : [];
+    if (statSync(abs).isDirectory()) return listFiles(abs, pattern, rel);
+    return pattern.test(name) ? [rel] : [];
   });
 }
+
+const listSourceFiles = (dir: string) => listFiles(dir, /\.(ts|tsx)$/);
+
+/**
+ * ページ（.astro）とスタイルシート（.css）も見る。
+ *
+ * 固定ページ5枚が同じ `#2196F3` を各自書いていて、そのうち3枚だけ
+ * 古いドメインの hreflang を持ったまま取り残されていた。TypeScript だけ
+ * 検査しても、同じ事故がページ側で起き続ける。
+ *
+ * 未対応のものは除外する。いずれも別課題として残っている:
+ * - pages/index.astro … Leaflet のポップアップを上書きするCSSに約70箇所
+ * - pages/articles/ と styles/ … 記事は本体UIと別の配色系統を使っている
+ */
+const MARKUP_EXCLUDED = [
+  join('pages', 'index.astro'),
+  join('pages', 'articles'),
+  'styles',
+];
+
+const listMarkupFiles = (dir: string) =>
+  listFiles(dir, /\.(astro|css)$/).filter(
+    (rel) => !MARKUP_EXCLUDED.some((p) => rel === p || rel.startsWith(p + '/')),
+  );
 
 describe('意味を持つ色の一元管理', () => {
   it('SEMANTIC の色は constants/ui.ts 以外にベタ書きされていない', () => {
@@ -46,6 +70,19 @@ describe('意味を持つ色の一元管理', () => {
     expect(
       offenders,
       `SEMANTIC.* を使うこと。ベタ書きが残っている: ${offenders.join(', ')}`,
+    ).toEqual([]);
+  });
+
+  it('SEMANTIC の色は .astro / .css にもベタ書きされていない', () => {
+    const pattern = new RegExp(Object.values(SEMANTIC).join('|'), 'i');
+
+    const offenders = listMarkupFiles(SRC).filter((rel) =>
+      pattern.test(readFileSync(join(SRC, rel), 'utf-8')),
+    );
+
+    expect(
+      offenders,
+      `レイアウト(layouts/staticPageStyles.ts)から取ること。ベタ書きが残っている: ${offenders.join(', ')}`,
     ).toEqual([]);
   });
 
