@@ -19,7 +19,7 @@ const Footer: React.FC<FooterProps> = ({ language }) => {
       padding: L.sp['3xl'],
       backgroundColor: colors.surface,
       borderTop: `1px solid ${colors.border}`,
-      fontSize: FS.sectionTitle,
+      fontSize: FS.title,
       color: colors.textSecondary
     }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
@@ -40,7 +40,7 @@ const Footer: React.FC<FooterProps> = ({ language }) => {
           display: 'flex',
           gap: L.sp['3xl'],
           margin: `0 0 ${L.sp['2xl']} 0`,
-          fontSize: FS.label,
+          fontSize: FS.caption,
           flexWrap: 'wrap'
         }}>
           {([
@@ -72,7 +72,7 @@ const Footer: React.FC<FooterProps> = ({ language }) => {
           })}
         </div>
 
-        <p style={{ margin: `0 0 ${L.sp.md} 0`, fontSize: FS.label }}>
+        <p style={{ margin: `0 0 ${L.sp.md} 0`, fontSize: FS.caption }}>
           Developed by{' '}
           <a
             href="https://github.com/emar27181"
@@ -92,7 +92,7 @@ const Footer: React.FC<FooterProps> = ({ language }) => {
             ema | GitHub: emar27181
           </a>
         </p>
-        <p style={{ margin: `0`, fontSize: FS.label }}>
+        <p style={{ margin: `0`, fontSize: FS.caption }}>
           <a href="https://claude.ai/code" target="_blank" style={{ color: colors.primary, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', minHeight: `${TARGET.min}px` }}>
             {translateUI('madeWithText', language)}
           </a>

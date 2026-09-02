@@ -144,14 +144,14 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
           alignItems: 'center',
           gap: L.sp.sm,
           marginBottom: L.sp.sm,
-          fontSize: FS.helper,
+          fontSize: FS.caption,
           color: colors.textSecondary,
         }}>
           {accent && (
             <span aria-hidden style={{
               width: '3px',
               alignSelf: 'stretch',
-              borderRadius: L.r.sm,
+              borderRadius: L.r.control,
               backgroundColor: accent,
             }} />
           )}
@@ -198,7 +198,7 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
         </Button>
       </div>
 
-      <div style={{ fontSize: FS.helper, color: colors.textSecondary, marginBottom: L.sp.md }}>
+      <div style={{ fontSize: FS.caption, color: colors.textSecondary, marginBottom: L.sp.md }}>
         {translateUI('routeVisibleSummary', language, {
           shown: String(routeKeys.filter(rk => visibleRoutes.has(rk)).length),
           total: String(routeKeys.length),
@@ -206,7 +206,7 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
       </div>
 
       {totalShown === 0 ? (
-        <div style={{ fontSize: FS.label, color: colors.textSecondary, padding: L.sp.lg }}>
+        <div style={{ fontSize: FS.caption, color: colors.textSecondary, padding: L.sp.lg }}>
           {translateUI('routeNoMatch', language)}
         </div>
       ) : (

@@ -61,7 +61,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             width: '32px',
             height: '32px',
             flexShrink: 0,
-            borderRadius: L.r.md
+            borderRadius: L.r.control
           }}
         />
         <h1 style={{
@@ -96,7 +96,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           onClick={() => onLanguageChange(nextLanguage(language))}
           label="Switch language"
           icon={
-            <span style={{ fontSize: FS.base, fontWeight: 'bold', fontFamily: 'monospace' }}>
+            <span style={{ fontSize: FS.body, fontWeight: 'bold', fontFamily: 'monospace' }}>
               {LANG_LABELS[nextLanguage(language)]}
             </span>
           }
@@ -142,7 +142,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           right: '20px',
           backgroundColor: colors.surface,
           border: `1px solid ${colors.border}`,
-          borderRadius: L.r.pill,
+          borderRadius: L.r.card,
           boxShadow: `0 4px 12px ${colors.shadow}`,
           zIndex: 1000,
           minWidth: '200px',
@@ -152,7 +152,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             style={{
               padding: `${L.sp.xl} ${L.sp['2xl']}`,
               cursor: 'pointer',
-              fontSize: FS.sectionTitle,
+              fontSize: FS.title,
               color: colors.text,
               borderBottom: `1px solid ${colors.borderLight}`
             }}
@@ -170,7 +170,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             style={{
               padding: `${L.sp.xl} ${L.sp['2xl']}`,
               cursor: 'pointer',
-              fontSize: FS.sectionTitle,
+              fontSize: FS.title,
               color: colors.text,
               borderBottom: `1px solid ${colors.borderLight}`
             }}
@@ -188,7 +188,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             style={{
               padding: `${L.sp.xl} ${L.sp['2xl']}`,
               cursor: 'pointer',
-              fontSize: FS.sectionTitle,
+              fontSize: FS.title,
               color: colors.text,
               borderBottom: `1px solid ${colors.borderLight}`
             }}
@@ -206,7 +206,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             style={{
               padding: `${L.sp.xl} ${L.sp['2xl']}`,
               cursor: 'pointer',
-              fontSize: FS.sectionTitle,
+              fontSize: FS.title,
               color: colors.text,
               borderBottom: `1px solid ${colors.borderLight}`
             }}
@@ -224,7 +224,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             style={{
               padding: `${L.sp.xl} ${L.sp['2xl']}`,
               cursor: 'pointer',
-              fontSize: FS.sectionTitle,
+              fontSize: FS.title,
               color: colors.text
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
@@ -260,7 +260,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           <div
             style={{
               backgroundColor: colors.surface,
-              borderRadius: L.r.pill,
+              borderRadius: L.r.card,
               padding: L.sp['4xl'],
               maxWidth: '600px',
               width: '100%',
@@ -313,7 +313,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
               <div style={{
                 borderTop: `1px solid ${colors.borderLight}`,
                 paddingTop: L.sp['2xl'],
-                fontSize: FS.sectionTitle,
+                fontSize: FS.title,
                 color: colors.textSecondary
               }}>
                 Developed by{' '}

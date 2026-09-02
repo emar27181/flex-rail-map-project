@@ -379,7 +379,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         boxSizing: 'border-box',
         overflow: (showDepartureResults || showArrivalResults) ? 'visible' : 'hidden',
         border: `1px solid ${colors.border}`,
-        borderRadius: L.r.pill,
+        borderRadius: L.r.card,
         backgroundColor: isExpanded ? colors.glassOpen : colors.glassCollapsed,
         boxShadow: `0 2px 8px ${colors.shadow}`,
         backdropFilter: 'blur(10px)',
@@ -396,10 +396,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           marginBottom: isExpanded ? '6px' : '0'
         }}
       >
-        <h3 style={{ margin: `0`, color: colors.text, fontSize: FS.sectionTitle, fontWeight: 'bold' }}>{translateUI('stationSelection', language)}</h3>
+        <h3 style={{ margin: `0`, color: colors.text, fontSize: FS.title, fontWeight: 'bold' }}>{translateUI('stationSelection', language)}</h3>
         {onToggleExpanded && (
           <span style={{
-            fontSize: FS.label,
+            fontSize: FS.caption,
             color: colors.textSecondary,
             transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 0.3s ease',
@@ -422,7 +422,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               minWidth: '0',
               position: 'relative'
             }}>
-              <label style={{ display: 'block', marginBottom: L.sp.xs, fontWeight: 'bold', color: colors.textSecondary, fontSize: FS.label }}>
+              <label style={{ display: 'block', marginBottom: L.sp.xs, fontWeight: 'bold', color: colors.textSecondary, fontSize: FS.caption }}>
                 {translateUI('departureStation', language)}
               </label>
               <div style={{ position: 'relative' }}>
@@ -493,7 +493,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               */}
               {locationError && (
                 <div style={{ marginTop: L.sp.xs, display: 'flex', alignItems: 'center', gap: L.sp.xs, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: FS.helper, color: colors.textSecondary }}>
+                  <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
                     {translateUI(locationError === 'denied' ? 'locationDenied' : 'locationUnavailable', language)}
                   </span>
                   {locationError !== 'denied' && onRetryLocation && (
@@ -516,7 +516,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   width: departureDropdownPos.width,
                   backgroundColor: colors.surfaceElevated,
                   border: `1px solid ${colors.border}`,
-                  borderRadius: L.r.md,
+                  borderRadius: L.r.control,
                   boxShadow: `0 4px 12px ${colors.shadow}`,
                   maxHeight: '240px',
                   overflowY: 'auto',
@@ -537,7 +537,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                         padding: `${L.sp.md} ${L.sp.xl}`,
                         cursor: 'pointer',
                         borderBottom: index < filteredDepartureStations.length - 1 ? `1px solid ${colors.borderLight}` : 'none',
-                        fontSize: FS.base,
+                        fontSize: FS.body,
                         wordBreak: language === 'english' ? 'break-word' : 'normal',
                         lineHeight: '1.3'
                       }}
@@ -548,7 +548,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     </div>
                   ))}
                   {filteredDepartureStations.length === 0 && (
-                    <div style={{ padding: `${L.sp.md} ${L.sp.xl}`, color: colors.textSecondary, fontSize: FS.base }}>
+                    <div style={{ padding: `${L.sp.md} ${L.sp.xl}`, color: colors.textSecondary, fontSize: FS.body }}>
                       {departureSearch ? translateUI('noStationFound', language) : translateUI('majorStationsHint', language)}
                     </div>
                   )}
@@ -590,7 +590,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               minWidth: '0',
               position: 'relative'
             }}>
-              <label style={{ display: 'block', marginBottom: L.sp.xs, fontWeight: 'bold', color: colors.textSecondary, fontSize: FS.label }}>
+              <label style={{ display: 'block', marginBottom: L.sp.xs, fontWeight: 'bold', color: colors.textSecondary, fontSize: FS.caption }}>
                 {translateUI('arrivalStation', language)}
               </label>
               <div style={{ position: 'relative' }}>
@@ -669,7 +669,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   width: arrivalDropdownPos.width,
                   backgroundColor: colors.surfaceElevated,
                   border: `1px solid ${colors.border}`,
-                  borderRadius: L.r.md,
+                  borderRadius: L.r.control,
                   boxShadow: `0 4px 12px ${colors.shadow}`,
                   maxHeight: '240px',
                   overflowY: 'auto',
@@ -690,7 +690,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                         padding: `${L.sp.md} ${L.sp.xl}`,
                         cursor: 'pointer',
                         borderBottom: index < filteredArrivalStations.length - 1 ? `1px solid ${colors.borderLight}` : 'none',
-                        fontSize: FS.base,
+                        fontSize: FS.body,
                         wordBreak: language === 'english' ? 'break-word' : 'normal',
                         lineHeight: '1.3'
                       }}
@@ -701,7 +701,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     </div>
                   ))}
                   {filteredArrivalStations.length === 0 && (
-                    <div style={{ padding: `${L.sp.md} ${L.sp.xl}`, color: colors.textSecondary, fontSize: FS.base }}>
+                    <div style={{ padding: `${L.sp.md} ${L.sp.xl}`, color: colors.textSecondary, fontSize: FS.body }}>
                       {arrivalSearch ? translateUI('noStationFound', language) : translateUI('majorStationsHint', language)}
                     </div>
                   )}
@@ -782,7 +782,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               alignItems: 'center',
               gap: L.sp.xs,
             }}>
-              <label style={{ fontSize: FS.label, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
+              <label style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
                 {translateUI('departureTime', language)}
               </label>
               <TextField

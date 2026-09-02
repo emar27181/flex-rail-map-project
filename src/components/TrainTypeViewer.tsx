@@ -71,7 +71,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
       style={{
         backgroundColor: colors.surface,
         border: `1px solid ${colors.border}`,
-        borderRadius: L.r.pill,
+        borderRadius: L.r.card,
         overflow: 'hidden',
         fontFamily: 'system-ui, -apple-system, sans-serif'
       }}
@@ -89,11 +89,11 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
         }}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <span style={{ fontWeight: '600', fontSize: FS.sectionTitle }}>
+        <span style={{ fontWeight: '600', fontSize: FS.title }}>
           <TrainFront size={15} style={{ verticalAlign: 'text-bottom', marginRight: 5 }} />列車種別表示
         </span>
         <span style={{
-          fontSize: FS.label,
+          fontSize: FS.caption,
           transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
           transition: 'transform 0.2s ease'
         }}>
@@ -108,7 +108,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
             <label style={{
               display: 'block',
               marginBottom: L.sp.md,
-              fontSize: FS.label,
+              fontSize: FS.caption,
               fontWeight: '500',
               color: colors.onSurface
             }}>
@@ -135,7 +135,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
               <label style={{
                 display: 'block',
                 marginBottom: L.sp.md,
-                fontSize: FS.label,
+                fontSize: FS.caption,
                 fontWeight: '500',
                 color: colors.onSurface
               }}>
@@ -168,7 +168,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                   <div style={{
                     padding: L.sp.xl,
                     backgroundColor: trainType.color + '20',
-                    borderRadius: L.r.md,
+                    borderRadius: L.r.control,
                     border: `1px solid ${trainType.color}50`
                   }}>
                     <div style={{
@@ -180,20 +180,20 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                         backgroundColor: trainType.color,
                         color: colors.onPrimary,
                         padding: `${L.sp.xs} ${L.sp.md}`,
-                        borderRadius: L.r.md,
-                        fontSize: FS.label,
+                        borderRadius: L.r.control,
+                        fontSize: FS.caption,
                         fontWeight: 'bold',
                         marginRight: L.sp.md
                       }}>
                         {trainType.displayName}
                       </span>
-                      <span style={{ fontSize: FS.base, fontWeight: '500', color: colors.onSurface }}>
+                      <span style={{ fontSize: FS.body, fontWeight: '500', color: colors.onSurface }}>
                         {trainType.name}
                       </span>
                     </div>
                     {trainType.description && (
                       <p style={{
-                        fontSize: FS.label,
+                        fontSize: FS.caption,
                         color: colors.onSurface + '80',
                         margin: 0
                       }}>
@@ -212,7 +212,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
               <label style={{
                 display: 'block',
                 marginBottom: L.sp.md,
-                fontSize: FS.label,
+                fontSize: FS.caption,
                 fontWeight: '500',
                 color: colors.onSurface
               }}>
@@ -240,14 +240,14 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                 alignItems: 'center'
               }}>
                 <span style={{
-                  fontSize: FS.label,
+                  fontSize: FS.caption,
                   fontWeight: '500',
                   color: colors.onSurface
                 }}>
                   停車駅一覧
                 </span>
                 <span style={{
-                  fontSize: FS.helper,
+                  fontSize: FS.caption,
                   color: colors.onSurface + '60'
                 }}>
                   {filteredStations.filter(([, stops]) => stops).length} / {filteredStations.length} 駅
@@ -258,7 +258,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                 maxHeight: '300px',
                 overflowY: 'auto',
                 border: `1px solid ${colors.border}`,
-                borderRadius: L.r.md
+                borderRadius: L.r.control
               }}>
                 {filteredStations.map(([stationName, stops], index) => {
                   // 個別駅の枠線スタイルを取得
@@ -290,7 +290,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                         )}
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <span style={{
-                            fontSize: FS.base,
+                            fontSize: FS.body,
                             color: colors.onSurface,
                             fontWeight: stops ? '500' : 'normal'
                           }}>
@@ -298,7 +298,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                           </span>
                           {borderStyle && (
                             <span style={{
-                              fontSize: FS.tiny,
+                              fontSize: FS.caption,
                               color: colors.onSurface + '60'
                             }}>
                               {borderStyle.description}
@@ -308,7 +308,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                       </div>
 
                       <span style={{
-                        fontSize: FS.label,
+                        fontSize: FS.caption,
                         fontWeight: '500',
                         color: stops ? '#22C55E' : '#EF4444'
                       }}>
@@ -327,7 +327,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
               <label style={{
                 display: 'block',
                 marginBottom: L.sp.md,
-                fontSize: FS.label,
+                fontSize: FS.caption,
                 fontWeight: '500',
                 color: colors.onSurface
               }}>
@@ -335,7 +335,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
               </label>
               <div style={{
                 border: `1px solid ${colors.border}`,
-                borderRadius: L.r.md,
+                borderRadius: L.r.control,
                 backgroundColor: colors.surface + '50',
                 padding: L.sp.xl
               }}>
@@ -350,7 +350,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                       backgroundColor: '#FF6666',
                       flexShrink: 0
                     }} />
-                    <span style={{ fontSize: FS.helper, color: colors.onSurface }}>
+                    <span style={{ fontSize: FS.caption, color: colors.onSurface }}>
                       太い二重線：特急・急行・快速系統停車
                     </span>
                   </div>
@@ -364,7 +364,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                       backgroundColor: '#FF9966',
                       flexShrink: 0
                     }} />
-                    <span style={{ fontSize: FS.helper, color: colors.onSurface }}>
+                    <span style={{ fontSize: FS.caption, color: colors.onSurface }}>
                       太い一重線：急行系統停車
                     </span>
                   </div>
@@ -378,7 +378,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                       backgroundColor: '#6699FF',
                       flexShrink: 0
                     }} />
-                    <span style={{ fontSize: FS.helper, color: colors.onSurface }}>
+                    <span style={{ fontSize: FS.caption, color: colors.onSurface }}>
                       中太一重線：快速系統停車
                     </span>
                   </div>
@@ -392,7 +392,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                       backgroundColor: '#CCCCCC',
                       flexShrink: 0
                     }} />
-                    <span style={{ fontSize: FS.helper, color: colors.onSurface }}>
+                    <span style={{ fontSize: FS.caption, color: colors.onSurface }}>
                       細い一重線：各駅停車のみ
                     </span>
                   </div>
@@ -406,7 +406,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                       backgroundColor: 'transparent',
                       flexShrink: 0
                     }} />
-                    <span style={{ fontSize: FS.helper, color: colors.onSurface }}>
+                    <span style={{ fontSize: FS.caption, color: colors.onSurface }}>
                       破線：通過のみ
                     </span>
                   </div>
@@ -421,7 +421,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
               textAlign: 'center',
               padding: L.sp['3xl'],
               color: colors.onSurface + '60',
-              fontSize: FS.base
+              fontSize: FS.body
             }}>
               路線を選択すると、その路線の列車種別と停車駅情報を表示できます
             </div>

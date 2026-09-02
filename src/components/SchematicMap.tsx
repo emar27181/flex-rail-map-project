@@ -247,8 +247,8 @@ const SchematicMap: React.FC<SchematicMapProps> = ({
         left: '10px',
         backgroundColor: 'rgba(255, 255, 255, 0.9)',
         padding: L.sp.md,
-        borderRadius: L.r.md,
-        fontSize: FS.helper,
+        borderRadius: L.r.control,
+        fontSize: FS.caption,
         color: '#666'
       }}>
         {translateUI('schematicMapHint', language)}

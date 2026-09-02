@@ -60,12 +60,12 @@ const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
       marginBottom: L.sp['2xl'],
       padding: L.sp.lg,
       backgroundColor: colors.surface,
-      borderRadius: L.r.md,
+      borderRadius: L.r.control,
       border: `1px solid ${colors.borderLight}`
     }}>
       {showTitle && (
         <div style={{
-          fontSize: FS.sectionTitle,
+          fontSize: FS.title,
           fontWeight: 'bold',
           marginBottom: L.sp.md,
           color: colors.text

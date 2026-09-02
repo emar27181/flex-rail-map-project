@@ -61,7 +61,7 @@ const Stepper: React.FC<StepperProps> = ({
       display: 'flex',
       alignItems: 'center',
       gap: L.sp.xs,
-      fontSize: FS.helper,
+      fontSize: FS.caption,
       color: colors.text,
       padding: `${L.sp.xs} 0`,
     }}>

@@ -32,14 +32,14 @@ const LegendDisplayOptions: React.FC<LegendDisplayOptionsProps> = ({
       marginBottom: L.sp['2xl'],
       padding: L.sp.lg,
       backgroundColor: colors.surface,
-      borderRadius: L.r.md,
+      borderRadius: L.r.control,
       border: `1px solid ${colors.borderLight}`
     }}>
       <div style={{ marginBottom: L.sp.lg }}>
         <label style={{
           display: 'block',
           marginBottom: L.sp.md,
-          fontSize: FS.label,
+          fontSize: FS.caption,
           fontWeight: 'bold',
           color: colors.text
         }}>

@@ -275,10 +275,10 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   const sectionHeader = (label: string, isOpen: boolean, onToggle: () => void) => (
     <div
       onClick={onToggle}
-      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${L.sp.xs} ${L.sp.sm}`, cursor: 'pointer', borderRadius: L.r.md, background: colors.surfaceElevated, marginBottom: L.sp.xxs }}
+      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${L.sp.xs} ${L.sp.sm}`, cursor: 'pointer', borderRadius: L.r.control, background: colors.surfaceElevated, marginBottom: L.sp.xxs }}
     >
-      <span style={{ fontSize: FS.helper, fontWeight: 'bold', color: colors.textSecondary }}>{label}</span>
-      <span style={{ fontSize: FS.micro, color: colors.textSecondary, transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
+      <span style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary }}>{label}</span>
+      <span style={{ fontSize: FS.caption, color: colors.textSecondary, transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
     </div>
   );
 
@@ -287,7 +287,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
       marginBottom: L.sp['2xl'],
       padding: L.sp.lg,
       backgroundColor: colors.surface,
-      borderRadius: L.r.md,
+      borderRadius: L.r.control,
       border: `1px solid ${colors.borderLight}`
     }}>
 
@@ -299,7 +299,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         gap: L.sp.md,
         marginBottom: L.sp.md,
       }}>
-        <div style={{ fontSize: FS.sectionTitle, fontWeight: 'bold', color: colors.text }}>
+        <div style={{ fontSize: FS.title, fontWeight: 'bold', color: colors.text }}>
           {translateUI('routeDisplayToggle', language)}
         </div>
         {/* 表示方式の切り替え。従来の一覧も選べる形で残している */}
@@ -335,7 +335,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
       {routeUiMode === 'classic' && (<>
       {/* ソート選択 */}
       <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.sm, alignItems: 'center' }}>
-        <span style={{ fontSize: FS.tiny, color: colors.textSecondary, whiteSpace: 'nowrap' }}>
+        <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>
           {translateUI('sortLabel', language)}
         </span>
         <SegmentedControl
@@ -390,7 +390,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 <React.Fragment key={routeKey}>
                 {showDivider && (
                   <div style={{ margin: `${L.sp.xs} 0 ${L.sp.xxs}` }}>
-                    <div style={{ fontSize: FS.micro, color: colors.textSecondary, whiteSpace: 'nowrap', marginBottom: L.sp.xxs }}>
+                    <div style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap', marginBottom: L.sp.xxs }}>
                       ↑ この駅を通る路線
                     </div>
                     <div style={{ borderTop: `1px dashed ${colors.borderLight}` }} />
@@ -412,7 +412,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   style={{
                     display: 'flex', alignItems: 'center',
                     outline: isDragTarget ? `2px dashed ${adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme)}` : 'none',
-                    borderRadius: L.r.sm,
+                    borderRadius: L.r.control,
                     background: isDragTarget ? `${adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme)}18` : 'transparent',
                     userSelect: 'none',
                   }}
@@ -444,7 +444,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                       setTouchDragKey(null);
                       setDragOverKey(null);
                     }}
-                    style={{ fontSize: FS.base, color: colors.textSecondary, lineHeight: 1, flexShrink: 0, padding: `${L.sp.xxs} ${L.sp.xs} ${L.sp.xxs} 0`, cursor: 'grab', opacity: 0.5, userSelect: 'none', touchAction: 'none', WebkitUserSelect: 'none' }}
+                    style={{ fontSize: FS.body, color: colors.textSecondary, lineHeight: 1, flexShrink: 0, padding: `${L.sp.xxs} ${L.sp.xs} ${L.sp.xxs} 0`, cursor: 'grab', opacity: 0.5, userSelect: 'none', touchAction: 'none', WebkitUserSelect: 'none' }}
                   >
                     ⠿
                   </span>
@@ -487,7 +487,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
       {/* ═══ セクション2: 表示設定 ═══ */}
       <div style={{ marginTop: L.sp.xl, marginBottom: L.sp.xs }}>
-        <div style={{ fontSize: FS.sectionTitle, fontWeight: 'bold', marginBottom: L.sp.md, color: colors.text }}>
+        <div style={{ fontSize: FS.title, fontWeight: 'bold', marginBottom: L.sp.md, color: colors.text }}>
           {translateUI('displaySettings', language)}
         </div>
         <div>
@@ -504,7 +504,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 </Checkbox>
                 {showTravelTimes && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, paddingLeft: L.sp['4xl'], marginBottom: L.sp.xxs }}>
-                    <span style={{ fontSize: FS.tiny, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('travelTimeLabelMode', language)}:</span>
+                    <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('travelTimeLabelMode', language)}:</span>
                     {(['interval', 'cumulative'] as const).map(mode => (
                       <Radio
                           theme={theme}
@@ -533,7 +533,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 {arrivalAlertEnabled && (
                   <div style={{ paddingLeft: L.sp['4xl'], paddingBottom: L.sp.xs }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm }}>
-                      <span style={{ fontSize: FS.helper, color: colors.textSecondary }}>
+                      <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
                         {translateUI('arrivalAlertTiming', language)}
                       </span>
                       <Select
@@ -549,7 +549,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                         ))}
                       </Select>
                     </div>
-                    <div style={{ fontSize: FS.micro, color: colors.textSecondary, marginTop: L.sp.xs, lineHeight: 1.5 }}>
+                    <div style={{ fontSize: FS.caption, color: colors.textSecondary, marginTop: L.sp.xs, lineHeight: 1.5 }}>
                       {translateUI('arrivalAlertNote', language)}
                     </div>
                   </div>
@@ -563,7 +563,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 </Checkbox>
                 {alwaysVisibleStationsEnabled && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, padding: `${L.sp.xxs} 0 ${L.sp.xs} ${L.sp['4xl']}` }}>
-                    <span style={{ fontSize: FS.helper, color: colors.textSecondary }}>
+                    <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
                       {translateUI('minRouteCount', language)}
                     </span>
                     <Select
@@ -604,7 +604,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                     styleOverride={{ paddingLeft: L.sp['2xl'] }}
                   >
                     <span>推定データを含める</span>
-                    {!showEstimatedData && <span style={{ marginLeft: L.sp.xs, color: SEMANTIC.arrival, fontSize: FS.tiny }}>（実データのみ）</span>}
+                    {!showEstimatedData && <span style={{ marginLeft: L.sp.xs, color: SEMANTIC.arrival, fontSize: FS.caption }}>（実データのみ）</span>}
                   </Checkbox>
                 )}
                 {mapViewMode === 'realistic' && (
@@ -631,13 +631,13 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                       ))}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm }}>
-                      <span style={{ fontSize: FS.tiny, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('bubbleMaxRadius', language)}</span>
+                      <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('bubbleMaxRadius', language)}</span>
                       <Slider
                         min={500} max={50000} step={500}
                         value={bubbleMaxRadiusM}
                         onChange={e => onBubbleMaxRadiusMChange(Number(e.target.value))}
                       />
-                      <span style={{ fontSize: FS.tiny, color: colors.text, minWidth: '40px', textAlign: 'right' }}>
+                      <span style={{ fontSize: FS.caption, color: colors.text, minWidth: '40px', textAlign: 'right' }}>
                         {bubbleMaxRadiusM >= 1000 ? `${(bubbleMaxRadiusM / 1000).toFixed(1)}km` : `${bubbleMaxRadiusM}m`}
                       </span>
                     </div>

@@ -34,15 +34,16 @@ export const CONTROL_SIZE: Record<ControlSize, ControlSizeSpec> = {
   sm: {
     minHeight: TARGET.min,
     padding: `0 ${L.sp.md}`,
-    fontSize: FS.helper,
-    radius: L.r.md,
+    fontSize: FS.caption,
+    radius: L.r.control,
     gap: L.sp.xs,
   },
   md: {
     minHeight: TARGET.touch,
     padding: `0 ${L.sp.lg}`,
-    fontSize: FS.label,
-    radius: L.r.md,
+    // 大きいほうは文字も一段上げる。同じ文字で高さだけ違うと間延びして見える
+    fontSize: FS.body,
+    radius: L.r.control,
     gap: L.sp.sm,
   },
 };

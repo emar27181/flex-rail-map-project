@@ -44,7 +44,7 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
         display: 'flex',
         alignItems: 'center',
         marginBottom: L.sp.sm,
-        fontSize: FS.label,
+        fontSize: FS.caption,
         cursor: 'pointer',
         padding: L.sp.xs,
         // 選択・強調は枠線の太さではなく色と背景で示す。
@@ -81,7 +81,7 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
             ? adjustColorForTheme(colorIndicator.color, theme)
             : colorIndicator.color,
           marginRight: L.sp.md,
-          borderRadius: L.r.sm,
+          borderRadius: L.r.control,
           flexShrink: 0,
           opacity: isActive ? (colorIndicator.opacity || 1) : 0.3
         }} />
@@ -105,7 +105,7 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
         {label}
         {badge && (
           <span style={{
-            fontSize: FS.tiny,
+            fontSize: FS.caption,
             marginLeft: L.sp.xs,
             color: SEMANTIC.primary,
             fontWeight: 'normal'

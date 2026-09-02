@@ -126,11 +126,11 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
         marginTop: L.sp.md,
         padding: L.sp.md,
         border: `1px solid ${colors.border}`,
-        borderRadius: L.r.md,
+        borderRadius: L.r.control,
         backgroundColor: colors.surfaceElevated,
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: L.sp.sm }}>
-          <span style={{ fontSize: FS.label, fontWeight: 'bold', color: colors.text }}>{translateUI('selectRouteTitle', language)}</span>
+          <span style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.text }}>{translateUI('selectRouteTitle', language)}</span>
           <IconButton
             theme={theme}
             size="sm"
@@ -160,10 +160,10 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
                 marginBottom: L.sp.xs,
                 padding: `${L.sp.sm} ${L.sp.md}`,
                 backgroundColor: colors.surface,
-                borderRadius: L.r.md,
+                borderRadius: L.r.control,
                 borderLeft: `4px solid ${r.color}`,
               }}>
-                <div style={{ fontSize: FS.label, color: colors.text, fontWeight: 'bold', marginBottom: L.sp.xs }}>{translateRoute(r.name, language)}</div>
+                <div style={{ fontSize: FS.caption, color: colors.text, fontWeight: 'bold', marginBottom: L.sp.xs }}>{translateRoute(r.name, language)}</div>
                 <div style={{ display: 'flex', gap: L.sp.sm, flexWrap: 'wrap' }}>
                   <Chip
                     theme={theme}
@@ -199,13 +199,13 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
         marginTop: L.sp.sm,
         padding: `${L.sp.xs} ${L.sp.md}`,
         border: `1px solid ${colors.border}`,
-        borderRadius: L.r.md,
+        borderRadius: L.r.control,
         backgroundColor: colors.surfaceElevated,
         display: 'flex',
         alignItems: 'center',
         gap: L.sp.sm,
       }}>
-        <span style={{ fontSize: FS.label, color: colors.textSecondary }}>{translateUI('detectingRoute', language)}</span>
+        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('detectingRoute', language)}</span>
         <Button
           theme={theme}
           variant="outline"
@@ -224,30 +224,30 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
       padding: `${L.sp.xs} ${L.sp.md}`,
       border: `1px solid ${effective.routeColor}44`,
       borderLeft: `4px solid ${effective.routeColor}`,
-      borderRadius: L.r.md,
+      borderRadius: L.r.control,
       backgroundColor: colors.surfaceElevated,
     }}>
       {/* 路線・方面行 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, marginBottom: L.sp.xxs, flexWrap: 'wrap' }}>
         <span style={{
-          fontSize: FS.label,
+          fontSize: FS.caption,
           fontWeight: 'bold',
           color: effective.routeColor,
           backgroundColor: effective.routeColor + '1a',
           padding: `${L.sp.xxs} ${L.sp.sm}`,
-          borderRadius: L.r.pill,
+          borderRadius: L.r.card,
           border: `1px solid ${effective.routeColor}66`,
         }}>{translateRoute(effective.routeName, language)}</span>
-        <span style={{ fontSize: FS.label, color: colors.text }}>
+        <span style={{ fontSize: FS.caption, color: colors.text }}>
           {translateUI('boundForStation', language, { station: translateStation(effective.terminalStation, language) })}
         </span>
         {isManual && (
           <span style={{
-            fontSize: FS.helper,
+            fontSize: FS.caption,
             color: colors.textSecondary,
             backgroundColor: colors.surface,
             padding: `${L.sp.xxs} ${L.sp.xs}`,
-            borderRadius: L.r.sm,
+            borderRadius: L.r.control,
             border: `1px solid ${colors.border}`,
           }}>{translateUI('manualBadge', language)}</span>
         )}
@@ -256,14 +256,14 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
       {/* 駅行: 停車中は現在の駅、走行中は次の駅を表示 */}
       {effective.currentStation ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, marginBottom: L.sp.xxs }}>
-          <span style={{ fontSize: FS.helper, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('currentStationLabel', language)}</span>
+          <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('currentStationLabel', language)}</span>
           <span style={{
-            fontSize: FS.base,
+            fontSize: FS.body,
             fontWeight: 'bold',
             color: colors.text,
           }}>{translateStation(effective.currentStation, language)}</span>
           <span style={{
-            fontSize: FS.label,
+            fontSize: FS.caption,
             color: colors.textSecondary,
             marginLeft: 'auto',
             whiteSpace: 'nowrap',
@@ -271,15 +271,15 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
         </div>
       ) : (
         <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, marginBottom: L.sp.xxs }}>
-          <span style={{ fontSize: FS.helper, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('nextStationLabel', language)}</span>
+          <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('nextStationLabel', language)}</span>
           <span style={{
-            fontSize: FS.base,
+            fontSize: FS.body,
             fontWeight: 'bold',
             color: colors.text,
           }}>{translateStation(effective.nextStation, language)}</span>
           {dynamicEstMinutes !== null && (
             <span style={{
-              fontSize: FS.label,
+              fontSize: FS.caption,
               color: colors.textSecondary,
               marginLeft: 'auto',
               whiteSpace: 'nowrap',

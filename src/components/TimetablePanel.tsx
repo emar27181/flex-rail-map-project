@@ -133,7 +133,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
       <div style={{
         padding: L.sp.xl,
         color: colors.textSecondary,
-        fontSize: FS.base,
+        fontSize: FS.body,
         textAlign: 'center',
       }}>
         {translateUI('selectStationsPrompt', language)}
@@ -144,7 +144,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
   const panelStyle: React.CSSProperties = {
     backgroundColor: colors.surfaceElevated,
     color: colors.text,
-    fontSize: FS.base,
+    fontSize: FS.body,
     overflowY: 'auto',
     maxHeight: isMobile ? 'calc(60vh - 88px)' : '70vh',
   };
@@ -211,7 +211,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                   {seg.fromStation}
                 </span>
                 <span style={{
-                  fontSize: FS.sectionTitle, fontWeight: 'bold',
+                  fontSize: FS.title, fontWeight: 'bold',
                   color: idx === 0 ? SEMANTIC.departure : colors.primary,
                   marginLeft: 'auto',
                 }}>
@@ -231,15 +231,15 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                   width: '2px', height: '24px', backgroundColor: colors.borderLight,
                   marginRight: L.sp.xs, flexShrink: 0,
                 }} />
-                <span style={{ color: colors.textSecondary, fontSize: FS.label }}>
+                <span style={{ color: colors.textSecondary, fontSize: FS.caption }}>
                   {seg.routeName}
                 </span>
                 <span style={{
                   backgroundColor: colors.surface,
                   border: `1px solid ${colors.borderLight}`,
-                  borderRadius: L.r.sm,
+                  borderRadius: L.r.control,
                   padding: `0 ${L.sp.xs}`,
-                  fontSize: FS.helper,
+                  fontSize: FS.caption,
                   color: colors.textSecondary,
                 }}>
                   {translateUI('approxMinutes', language, { time: seg.segTime })}
@@ -264,12 +264,12 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                   margin: `${L.sp.xs} ${L.sp.xl} ${L.sp.xs} ${L.sp['4xl']}`,
                   backgroundColor: colors.surface,
                   border: `1px solid ${colors.borderLight}`,
-                  borderRadius: L.r.md,
+                  borderRadius: L.r.control,
                   overflow: 'hidden',
                 }}>
                   <div style={{
                     padding: `${L.sp.xs} ${L.sp.md}`,
-                    fontSize: FS.helper,
+                    fontSize: FS.caption,
                     color: colors.textSecondary,
                     borderBottom: `1px solid ${colors.borderLight}`,
                     backgroundColor: colors.surfaceElevated,
@@ -277,7 +277,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                     {translateUI('departsAfterLabel', language, { station: seg.fromStation, time: seg.departTime, route: seg.routeName })}
                   </div>
                   {nextDeps.length === 0 ? (
-                    <div style={{ padding: L.sp.md, color: colors.textSecondary, fontSize: FS.label }}>
+                    <div style={{ padding: L.sp.md, color: colors.textSecondary, fontSize: FS.caption }}>
                       {translateUI('noTimetableDataFound', language)}
                     </div>
                   ) : (
@@ -289,14 +289,14 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                         gap: L.sp.md,
                         borderBottom: di < nextDeps.length - 1 ? `1px solid ${colors.borderLight}` : 'none',
                       }}>
-                        <span style={{ fontWeight: 'bold', fontSize: FS.sectionTitle, color: colors.text, minWidth: '45px' }}>
+                        <span style={{ fontWeight: 'bold', fontSize: FS.title, color: colors.text, minWidth: '45px' }}>
                           {dep.time}
                         </span>
                         <span style={{
-                          fontSize: FS.helper,
+                          fontSize: FS.caption,
                           color: colors.onPrimary,
                           backgroundColor: typeColor(dep.type),
-                          borderRadius: L.r.sm,
+                          borderRadius: L.r.control,
                           padding: `${L.sp.xxs} ${L.sp.xs}`,
                           minWidth: '28px',
                           textAlign: 'center',
@@ -304,11 +304,11 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                           {dep.type}
                         </span>
                         {dep.platform && (
-                          <span style={{ fontSize: FS.tiny, color: colors.textSecondary, whiteSpace: 'nowrap' }}>
+                          <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>
                             {dep.platform}
                           </span>
                         )}
-                        <span style={{ fontSize: FS.label, color: colors.textSecondary }}>
+                        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
                           {dep.destination}{dep.toward ? translateUI('towardDirection', language, { direction: dep.toward }) : ''}
                         </span>
                       </div>
@@ -319,7 +319,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
 
               {/* 矢印 */}
               {!isLast && (
-                <div style={{ padding: `0 ${L.sp.xl} 0 ${L.sp['4xl']}`, color: colors.textSecondary, fontSize: FS.helper }}>
+                <div style={{ padding: `0 ${L.sp.xl} 0 ${L.sp['4xl']}`, color: colors.textSecondary, fontSize: FS.caption }}>
                   ▼
                 </div>
               )}
@@ -340,7 +340,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                     {seg.toStation}
                   </span>
                   <span style={{
-                    fontSize: FS.sectionTitle, fontWeight: 'bold',
+                    fontSize: FS.title, fontWeight: 'bold',
                     color: SEMANTIC.arrival, marginLeft: 'auto',
                   }}>
                     {totalArriveTime} {translateUI('arrivesLabel', language)}
@@ -357,7 +357,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
         <div style={{
           padding: `${L.sp.md} ${L.sp.xl}`,
           borderTop: `1px solid ${colors.borderLight}`,
-          fontSize: FS.tiny,
+          fontSize: FS.caption,
           color: colors.textSecondary,
           lineHeight: '1.5',
         }}>

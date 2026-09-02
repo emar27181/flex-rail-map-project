@@ -146,20 +146,20 @@ const DemoMap: React.FC = () => {
         }}>
           <span style={{ fontSize: FS.heading, flexShrink: 0, display: 'flex' }}>{currentStep.icon}</span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 'bold', fontSize: FS.base, marginBottom: L.sp.xxs }}>
+            <div style={{ fontWeight: 'bold', fontSize: FS.body, marginBottom: L.sp.xxs }}>
               <span style={{
                 backgroundColor: SEMANTIC.departure,
                 color: NEUTRAL.white,
-                borderRadius: L.r.pill,
+                borderRadius: L.r.card,
                 padding: `${L.sp.xxs} ${L.sp.sm}`,
-                fontSize: FS.helper,
+                fontSize: FS.caption,
                 marginRight: L.sp.sm,
               }}>
                 STEP {currentStep.step}/{TUTORIAL_STEPS.length}
               </span>
               {currentStep.title}
             </div>
-            <div style={{ fontSize: FS.label, color: '#ccc', lineHeight: 1.4 }}>
+            <div style={{ fontSize: FS.caption, color: '#ccc', lineHeight: 1.4 }}>
               {currentStep.desc}
             </div>
           </div>
@@ -212,7 +212,7 @@ const DemoMap: React.FC = () => {
             padding: `${L.sp.lg} ${L.sp.xl}`,
             backgroundColor: '#1a1a2e',
             color: NEUTRAL.white,
-            fontSize: FS.helper,
+            fontSize: FS.caption,
             fontWeight: 'bold',
             flexShrink: 0,
           }}>
@@ -220,7 +220,7 @@ const DemoMap: React.FC = () => {
             {isPanelHighlighted && (
               <span style={{
                 display: 'block',
-                fontSize: FS.tiny,
+                fontSize: FS.caption,
                 color: SEMANTIC.departure,
                 marginTop: L.sp.xxs,
                 animation: 'pulse-text 1s infinite',
@@ -265,7 +265,7 @@ const DemoMap: React.FC = () => {
           <div style={{
             padding: `${L.sp.md} ${L.sp.lg}`,
             borderTop: '1px solid #eee',
-            fontSize: FS.tiny,
+            fontSize: FS.caption,
             color: '#aaa',
             flexShrink: 0,
           }}>
@@ -325,7 +325,7 @@ const DemoMap: React.FC = () => {
                     className="demo-station-label"
                   >
                     <span style={{
-                      fontSize: FS.helper,
+                      fontSize: FS.caption,
                       fontWeight: st.isEndpoint ? 'bold' : 'normal',
                       color: st.isEndpoint ? '#1a1a2e' : '#444',
                     }}>
@@ -342,7 +342,7 @@ const DemoMap: React.FC = () => {
               alignItems: 'center',
               justifyContent: 'center',
               color: '#888',
-              fontSize: FS.sectionTitle,
+              fontSize: FS.title,
             }}>
               読み込み中...
             </div>
@@ -353,11 +353,11 @@ const DemoMap: React.FC = () => {
             position: 'absolute',
             bottom: '4px',
             right: '4px',
-            fontSize: FS.micro,
+            fontSize: FS.caption,
             color: '#888',
             backgroundColor: 'rgba(255,255,255,0.7)',
             padding: `${L.sp.xxs} ${L.sp.xs}`,
-            borderRadius: L.r.sm,
+            borderRadius: L.r.control,
             pointerEvents: 'none',
             zIndex: 500,
           }}>

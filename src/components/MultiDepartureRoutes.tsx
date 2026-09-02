@@ -99,10 +99,10 @@ const MultiDepartureRoutes: React.FC<MultiDepartureRoutesProps> = ({
       marginBottom: L.sp['2xl'],
       padding: L.sp.lg,
       backgroundColor: colors.surface,
-      borderRadius: L.r.md,
+      borderRadius: L.r.control,
       border: `1px solid ${colors.borderLight}`,
     }}>
-      <div style={{ fontSize: FS.sectionTitle, fontWeight: 'bold', marginBottom: L.sp.md, color: colors.text }}>
+      <div style={{ fontSize: FS.title, fontWeight: 'bold', marginBottom: L.sp.md, color: colors.text }}>
         {translateUI('multiDepartureTitle', language)}
       </div>
 
@@ -111,7 +111,7 @@ const MultiDepartureRoutes: React.FC<MultiDepartureRoutesProps> = ({
           {extraDepartures.map(station => (
             <span key={station.name} style={{
               display: 'inline-flex', alignItems: 'center', gap: L.sp.xs,
-              fontSize: FS.label, padding: `${L.sp.xxs} ${L.sp.sm}`, borderRadius: L.r.pill,
+              fontSize: FS.caption, padding: `${L.sp.xxs} ${L.sp.sm}`, borderRadius: L.r.card,
               backgroundColor: colors.surfaceElevated, border: `1px solid ${colors.border}`,
               color: colors.text,
             }}>
@@ -144,13 +144,13 @@ const MultiDepartureRoutes: React.FC<MultiDepartureRoutesProps> = ({
             position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20,
             marginTop: L.sp.xxs, maxHeight: '160px', overflowY: 'auto',
             backgroundColor: colors.surfaceElevated, border: `1px solid ${colors.border}`,
-            borderRadius: L.r.md, boxShadow: `0 4px 12px ${colors.shadow}`,
+            borderRadius: L.r.control, boxShadow: `0 4px 12px ${colors.shadow}`,
           }}>
             {filteredStations.map(station => (
               <div
                 key={station.name}
                 onClick={() => handleSelect(station)}
-                style={{ padding: `${L.sp.xs} ${L.sp.md}`, fontSize: FS.label, color: colors.text, cursor: 'pointer' }}
+                style={{ padding: `${L.sp.xs} ${L.sp.md}`, fontSize: FS.caption, color: colors.text, cursor: 'pointer' }}
               >{translateStation(station.name, language)}</div>
             ))}
           </div>
@@ -172,8 +172,8 @@ const MultiDepartureRoutes: React.FC<MultiDepartureRoutesProps> = ({
               />
             ) : (
               <div key={station.name} style={{
-                padding: L.sp.sm, fontSize: FS.label, color: colors.textSecondary,
-                border: `1px solid ${colors.borderLight}`, borderRadius: L.r.md,
+                padding: L.sp.sm, fontSize: FS.caption, color: colors.textSecondary,
+                border: `1px solid ${colors.borderLight}`, borderRadius: L.r.control,
               }}>
                 {translateStation(station.name, language)}: {translateUI('noRoutesFound', language)}
               </div>

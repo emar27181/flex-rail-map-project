@@ -55,7 +55,7 @@ export default function HeatmapControl({
           <span style={{
             fontSize: L.fs.xs,
             padding: `1px ${L.sp.sm}`,
-            borderRadius: L.r.pill,
+            borderRadius: L.r.card,
             background: '#a50026',
             color: colors.onPrimary,
           }}>
@@ -95,7 +95,7 @@ export default function HeatmapControl({
               color:        colors.textSecondary,
               background:   colors.surface,
               padding:      `${L.sp.xs} ${L.sp.md}`,
-              borderRadius: L.r.md,
+              borderRadius: L.r.control,
               borderLeft:   `3px solid ${(colors as any).primary ?? '#4a90d9'}`,
             }}>
               <div>{currentMeta.description}</div>
@@ -120,7 +120,7 @@ export default function HeatmapControl({
 
           {/* 凡例グラデーション */}
           <div>
-            <div style={{ height: L.sp.md, borderRadius: L.r.md, background: GRADIENT_CSS }} />
+            <div style={{ height: L.sp.md, borderRadius: L.r.control, background: GRADIENT_CSS }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: L.sp.xxs }}>
               <span style={text.muted(colors)}>{translateUI('heatmapGradientLow', language)}</span>
               <span style={text.muted(colors)}>{translateUI('heatmapGradientHigh', language)}</span>
@@ -136,7 +136,7 @@ export default function HeatmapControl({
                 color:        colors.textSecondary,
                 background:   colors.surface,
                 padding:      `${L.sp.xs} ${L.sp.lg}`,
-                borderRadius: L.r.md,
+                borderRadius: L.r.control,
                 borderLeft:   `2px solid ${colors.border}`,
               }}>
                 <div style={{ fontWeight: 'bold', marginBottom: L.sp.xxs }}>{translateUI('heatmapSource', language)}</div>

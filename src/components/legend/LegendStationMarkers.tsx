@@ -30,11 +30,11 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
       marginBottom: L.sp['2xl'],
       padding: L.sp.lg,
       backgroundColor: colors.surface,
-      borderRadius: L.r.md,
+      borderRadius: L.r.control,
       border: `1px solid ${colors.borderLight}`
     }}>
       <div style={{
-        fontSize: FS.sectionTitle,
+        fontSize: FS.title,
         fontWeight: 'bold',
         marginBottom: L.sp.md,
         color: colors.text
@@ -49,10 +49,10 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
           justifyContent: 'center',
           gap: L.sp.md,
           marginBottom: L.sp.md,
-          fontSize: FS.label,
+          fontSize: FS.caption,
           padding: L.sp.md,
           backgroundColor: colors.infoLight,
-          borderRadius: L.r.md,
+          borderRadius: L.r.control,
           border: `1px solid ${colors.border}`
         }}>
           <div style={{
@@ -65,11 +65,11 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
               height: '16px',
               backgroundColor: colors.surfaceElevated,
               border: `2px solid ${SEMANTIC.departure}`,
-              borderRadius: L.r.sm,
+              borderRadius: L.r.control,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: FS.tiny,
+              fontSize: FS.caption,
               fontWeight: 'bold',
               color: SEMANTIC.departure,
               flexShrink: 0
@@ -82,7 +82,7 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
           </div>
           <span style={{
             color: SEMANTIC.departure,
-            fontSize: FS.sectionTitle,
+            fontSize: FS.title,
             fontWeight: 'bold'
           }}>→</span>
           <div style={{
@@ -95,11 +95,11 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
               height: '16px',
               backgroundColor: colors.surfaceElevated,
               border: `2px solid ${SEMANTIC.arrival}`,
-              borderRadius: L.r.sm,
+              borderRadius: L.r.control,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: FS.tiny,
+              fontSize: FS.caption,
               fontWeight: 'bold',
               color: SEMANTIC.arrival,
               flexShrink: 0
@@ -118,19 +118,19 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
           display: 'flex',
           alignItems: 'center',
           marginBottom: L.sp.sm,
-          fontSize: FS.label
+          fontSize: FS.caption
         }}>
           <div style={{
             width: '20px',
             height: '20px',
             backgroundColor: colors.surfaceElevated,
             border: `3px solid ${SEMANTIC.departure}`,
-            borderRadius: L.r.md,
+            borderRadius: L.r.control,
             marginRight: L.sp.md,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: FS.label,
+            fontSize: FS.caption,
             fontWeight: 'bold',
             color: SEMANTIC.departure,
             flexShrink: 0
@@ -148,19 +148,19 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
           display: 'flex',
           alignItems: 'center',
           marginBottom: L.sp.sm,
-          fontSize: FS.label
+          fontSize: FS.caption
         }}>
           <div style={{
             width: '20px',
             height: '20px',
             backgroundColor: colors.surfaceElevated,
             border: `3px solid ${SEMANTIC.arrival}`,
-            borderRadius: L.r.md,
+            borderRadius: L.r.control,
             marginRight: L.sp.md,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: FS.label,
+            fontSize: FS.caption,
             fontWeight: 'bold',
             color: SEMANTIC.arrival,
             flexShrink: 0

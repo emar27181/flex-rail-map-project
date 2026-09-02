@@ -81,7 +81,7 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
 
         {/* 番号 + 乗換数 */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ fontSize: FS.tiny, color: isSelected ? colors.textSecondary : colors.textMuted, lineHeight: 1 }}>
+          <span style={{ fontSize: FS.caption, color: isSelected ? colors.textSecondary : colors.textMuted, lineHeight: 1 }}>
             {translateUI('routeNumber', language, { number: (index + 1).toString() })}
             {route.transfers > 0 && (
               <span style={{ marginLeft: L.sp.xs }}>{transferText}</span>
@@ -92,13 +92,13 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
         {/* 合計時間 */}
         <div style={{ flexShrink: 0, display: 'flex', alignItems: 'baseline', gap: L.sp.xxs }}>
           <span style={{
-            fontSize: FS.emphasis, fontWeight: 'bold', lineHeight: 1,
+            fontSize: FS.heading, fontWeight: 'bold', lineHeight: 1,
             color: isSelected ? SEMANTIC.primary : colors.text,
             opacity: isSelected ? 1 : 0.5,
           }}>
             {totalMin}
           </span>
-          <span style={{ fontSize: FS.helper, color: isSelected ? colors.textSecondary : colors.textMuted, opacity: isSelected ? 1 : 0.5 }}>
+          <span style={{ fontSize: FS.caption, color: isSelected ? colors.textSecondary : colors.textMuted, opacity: isSelected ? 1 : 0.5 }}>
             {translateUI('minutesSuffix', language)}
           </span>
         </div>
@@ -107,7 +107,7 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
       {/* 下段: セグメント詳細（出発 → 路線 → 乗換 → 路線 → 到着） */}
       <div style={{
         marginTop: L.sp.xs, paddingLeft: L.sp['3xl'],
-        fontSize: FS.tiny, color: colors.textSecondary, lineHeight: 1.5,
+        fontSize: FS.caption, color: colors.textSecondary, lineHeight: 1.5,
         opacity: isSelected ? 1 : 0.6,
       }}>
         {route.segments.map((seg, i) => {
@@ -123,7 +123,7 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
             <div key={i}>
               {/* 出発駅（最初のセグメントのみ） */}
               {i === 0 && fromName && (
-                <div style={{ fontWeight: 'bold', color: SEMANTIC.departure, fontSize: FS.tiny }}>
+                <div style={{ fontWeight: 'bold', color: SEMANTIC.departure, fontSize: FS.caption }}>
                   <CircleDot size={12} style={{ verticalAlign: 'text-bottom' }} /> {translateStation(fromName, language)}
                 </div>
               )}
@@ -139,10 +139,10 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
                 <div style={{
                   fontWeight: 'bold',
                   color: isLast ? SEMANTIC.arrival : colors.text,
-                  fontSize: FS.tiny,
+                  fontSize: FS.caption,
                 }}>
                   {isLast ? <MapPin size={12} style={{ verticalAlign: 'text-bottom' }} /> : <RefreshCw size={12} style={{ verticalAlign: 'text-bottom' }} />} {translateStation(toName, language)}
-                  {!isLast && <span style={{ fontSize: FS.micro, fontWeight: 'normal', color: colors.textSecondary, marginLeft: L.sp.xs }}>乗換</span>}
+                  {!isLast && <span style={{ fontSize: FS.caption, fontWeight: 'normal', color: colors.textSecondary, marginLeft: L.sp.xs }}>乗換</span>}
                 </div>
               )}
             </div>
