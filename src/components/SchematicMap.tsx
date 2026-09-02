@@ -5,7 +5,8 @@ import type { RouteResult } from '../utils/routeFinder';
 import { createSchematicLayout, getRouteLayout, type SchematicStationLayout } from '../data/schematicLayout';
 import { translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
-import { SEMANTIC, NEUTRAL } from '../constants/ui';
+import { SEMANTIC, NEUTRAL, FS} from '../constants/ui';
+import { L } from './legend/legendStyles';
 
 interface SchematicMapProps {
   visibleRoutes: Set<RouteKey>;
@@ -245,9 +246,9 @@ const SchematicMap: React.FC<SchematicMapProps> = ({
         bottom: '10px',
         left: '10px',
         backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        padding: '8px',
-        borderRadius: '4px',
-        fontSize: '11px',
+        padding: L.sp.md,
+        borderRadius: L.r.md,
+        fontSize: FS.helper,
         color: '#666'
       }}>
         {translateUI('schematicMapHint', language)}

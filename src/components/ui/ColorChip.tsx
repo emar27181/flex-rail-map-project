@@ -10,6 +10,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { filledLabelColors } from '../../utils/contrast';
 import { FS } from '../../constants/ui';
+import { L } from '../legend/legendStyles';
 
 export type ColorChipProps = {
   /** 元になる色（路線色・ヒートマップ色など） */
@@ -48,7 +49,7 @@ export default function ColorChip({
         textShadow: needsHalo ? '0 0 2px rgba(0,0,0,0.95),0 1px 2px rgba(0,0,0,0.9)' : undefined,
         fontSize,
         fontWeight: bold ? 'bold' : 'normal',
-        borderRadius: '3px',
+        borderRadius: L.r.sm,
         padding: '1px 5px',
         lineHeight: 1.4,
         whiteSpace: 'nowrap',

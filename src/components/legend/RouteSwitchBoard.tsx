@@ -151,7 +151,7 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
             <span aria-hidden style={{
               width: '3px',
               alignSelf: 'stretch',
-              borderRadius: '2px',
+              borderRadius: L.r.sm,
               backgroundColor: accent,
             }} />
           )}

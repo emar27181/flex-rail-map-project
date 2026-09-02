@@ -11,6 +11,7 @@ import { FS } from '../constants/ui';
 import RouteRecommendationItem from './ui/RouteRecommendationItem';
 import IconButton from './ui/atoms/IconButton';
 import TextField from './ui/atoms/TextField';
+import { L } from './legend/legendStyles';
 
 interface MultiDepartureRoutesProps {
   /** 全出発駅の共通ゴール */
@@ -95,22 +96,22 @@ const MultiDepartureRoutes: React.FC<MultiDepartureRoutesProps> = ({
 
   return (
     <div style={{
-      marginBottom: '15px',
-      padding: '10px',
+      marginBottom: L.sp['2xl'],
+      padding: L.sp.lg,
       backgroundColor: colors.surface,
-      borderRadius: '4px',
+      borderRadius: L.r.md,
       border: `1px solid ${colors.borderLight}`,
     }}>
-      <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: colors.text }}>
+      <div style={{ fontSize: FS.sectionTitle, fontWeight: 'bold', marginBottom: L.sp.md, color: colors.text }}>
         {translateUI('multiDepartureTitle', language)}
       </div>
 
       {extraDepartures.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.xs, marginBottom: L.sp.md }}>
           {extraDepartures.map(station => (
             <span key={station.name} style={{
-              display: 'inline-flex', alignItems: 'center', gap: '4px',
-              fontSize: FS.label, padding: '2px 6px', borderRadius: '12px',
+              display: 'inline-flex', alignItems: 'center', gap: L.sp.xs,
+              fontSize: FS.label, padding: `${L.sp.xxs} ${L.sp.sm}`, borderRadius: L.r.pill,
               backgroundColor: colors.surfaceElevated, border: `1px solid ${colors.border}`,
               color: colors.text,
             }}>
@@ -141,9 +142,9 @@ const MultiDepartureRoutes: React.FC<MultiDepartureRoutesProps> = ({
         {showResults && filteredStations.length > 0 && (
           <div style={{
             position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20,
-            marginTop: '2px', maxHeight: '160px', overflowY: 'auto',
+            marginTop: L.sp.xxs, maxHeight: '160px', overflowY: 'auto',
             backgroundColor: colors.surfaceElevated, border: `1px solid ${colors.border}`,
-            borderRadius: '4px', boxShadow: `0 4px 12px ${colors.shadow}`,
+            borderRadius: L.r.md, boxShadow: `0 4px 12px ${colors.shadow}`,
           }}>
             {filteredStations.map(station => (
               <div
@@ -157,7 +158,7 @@ const MultiDepartureRoutes: React.FC<MultiDepartureRoutesProps> = ({
       </div>
 
       {entries.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
           {entries.map(({ station, route }) => (
             route ? (
               <RouteRecommendationItem
@@ -171,8 +172,8 @@ const MultiDepartureRoutes: React.FC<MultiDepartureRoutesProps> = ({
               />
             ) : (
               <div key={station.name} style={{
-                padding: '6px', fontSize: FS.label, color: colors.textSecondary,
-                border: `1px solid ${colors.borderLight}`, borderRadius: '5px',
+                padding: L.sp.sm, fontSize: FS.label, color: colors.textSecondary,
+                border: `1px solid ${colors.borderLight}`, borderRadius: L.r.md,
               }}>
                 {translateStation(station.name, language)}: {translateUI('noRoutesFound', language)}
               </div>

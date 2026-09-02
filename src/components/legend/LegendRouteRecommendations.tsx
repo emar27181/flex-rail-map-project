@@ -5,6 +5,8 @@ import type { Language } from '../../utils/translation';
 import ToggleableItem from '../ui/ToggleableItem';
 import RouteRecommendationItem from '../ui/RouteRecommendationItem';
 import Button from '../ui/atoms/Button';
+import { FS } from '../../constants/ui';
+import { L } from './legendStyles';
 
 interface RouteSegment {
   routeKey: string;
@@ -55,17 +57,17 @@ const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
 
   return (
     <div style={{
-      marginBottom: '15px',
-      padding: '10px',
+      marginBottom: L.sp['2xl'],
+      padding: L.sp.lg,
       backgroundColor: colors.surface,
-      borderRadius: '4px',
+      borderRadius: L.r.md,
       border: `1px solid ${colors.borderLight}`
     }}>
       {showTitle && (
         <div style={{
-          fontSize: '14px',
+          fontSize: FS.sectionTitle,
           fontWeight: 'bold',
-          marginBottom: '8px',
+          marginBottom: L.sp.md,
           color: colors.text
         }}>
           {translateUI('routeSelection', language)}
@@ -74,8 +76,8 @@ const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
 
       <div style={{
         display: 'flex',
-        gap: '4px',
-        marginBottom: '8px'
+        gap: L.sp.xs,
+        marginBottom: L.sp.md
       }}>
         <Button theme={theme} variant="positive" size="sm" onClick={onSelectAll} styleOverride={{ flex: 1 }}>
           {translateUI('allShow', language)}
@@ -85,7 +87,7 @@ const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
         </Button>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
         {routeRecommendations.map((route, index) => {
           const isSelected = selectedRouteIndices === null || selectedRouteIndices.has(index);
 

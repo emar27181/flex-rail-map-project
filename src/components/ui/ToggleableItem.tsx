@@ -1,8 +1,8 @@
 import React from 'react';
 import { getThemeColors } from '../../contexts/ThemeContext';
-import { checkboxInput, selectableCard } from '../legend/legendStyles';
+import { checkboxInput, selectableCard, L} from '../legend/legendStyles';
 import { tintColor } from '../../utils/contrast';
-import { SEMANTIC } from '../../constants/ui';
+import { SEMANTIC, FS} from '../../constants/ui';
 import ToggleMark from './atoms/ToggleMark';
 
 interface ToggleableItemProps {
@@ -43,10 +43,10 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
       style={{
         display: 'flex',
         alignItems: 'center',
-        marginBottom: '6px',
-        fontSize: '12px',
+        marginBottom: L.sp.sm,
+        fontSize: FS.label,
         cursor: 'pointer',
-        padding: '4px',
+        padding: L.sp.xs,
         // 選択・強調は枠線の太さではなく色と背景で示す。
         // 太さを変えると行の幅と高さが動いて一覧の並びがずれる。
         ...selectableCard(colors, {
@@ -80,8 +80,8 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
           backgroundColor: adjustColorForTheme
             ? adjustColorForTheme(colorIndicator.color, theme)
             : colorIndicator.color,
-          marginRight: '8px',
-          borderRadius: '1px',
+          marginRight: L.sp.md,
+          borderRadius: L.r.sm,
           flexShrink: 0,
           opacity: isActive ? (colorIndicator.opacity || 1) : 0.3
         }} />
@@ -105,8 +105,8 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
         {label}
         {badge && (
           <span style={{
-            fontSize: '10px',
-            marginLeft: '4px',
+            fontSize: FS.tiny,
+            marginLeft: L.sp.xs,
             color: SEMANTIC.primary,
             fontWeight: 'normal'
           }}>

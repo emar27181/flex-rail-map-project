@@ -5,8 +5,9 @@ import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
 import { translateRoute, translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
-import { SEMANTIC } from '../constants/ui';
+import { SEMANTIC, FS} from '../constants/ui';
 import Button from './ui/atoms/Button';
+import { L } from './legend/legendStyles';
 
 // ---- 表示対象路線 ----
 export const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
@@ -586,7 +587,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         <div style={{
           position: 'absolute', bottom: 8, right: 8, zIndex: 20,
           background: colors.surfaceElevated, border: `1px solid ${colors.border}`,
-          borderRadius: '4px', padding: '4px 7px', fontSize: '10px',
+          borderRadius: L.r.md, padding: '4px 7px', fontSize: FS.tiny,
           color: colors.textSecondary, boxShadow: `0 1px 4px ${colors.shadow}`,
           display: 'none',
         }} className="diagram-hint">

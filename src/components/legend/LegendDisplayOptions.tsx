@@ -3,9 +3,10 @@ import { TrainFront } from 'lucide-react';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
-import { checkboxInput } from './legendStyles';
+import { checkboxInput, L} from './legendStyles';
 import Radio from '../ui/atoms/Radio';
 import Checkbox from '../ui/atoms/Checkbox';
+import { FS } from '../../constants/ui';
 
 interface LegendDisplayOptionsProps {
   mapViewMode: 'realistic' | 'schematic';
@@ -28,23 +29,23 @@ const LegendDisplayOptions: React.FC<LegendDisplayOptionsProps> = ({
 
   return (
     <div style={{
-      marginBottom: '15px',
-      padding: '10px',
+      marginBottom: L.sp['2xl'],
+      padding: L.sp.lg,
       backgroundColor: colors.surface,
-      borderRadius: '4px',
+      borderRadius: L.r.md,
       border: `1px solid ${colors.borderLight}`
     }}>
-      <div style={{ marginBottom: '10px' }}>
+      <div style={{ marginBottom: L.sp.lg }}>
         <label style={{
           display: 'block',
-          marginBottom: '8px',
-          fontSize: '12px',
+          marginBottom: L.sp.md,
+          fontSize: FS.label,
           fontWeight: 'bold',
           color: colors.text
         }}>
           {translateUI('mapDisplayMode', language)}:
         </label>
-        <div style={{ marginBottom: '12px' }}>
+        <div style={{ marginBottom: L.sp.xl }}>
           <Radio
             theme={theme}
             size="sm"
@@ -68,7 +69,7 @@ const LegendDisplayOptions: React.FC<LegendDisplayOptionsProps> = ({
 
       {/* 列車種別表示モード */}
       {onTrainTypeViewChange && (
-        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: `1px solid ${colors.borderLight}` }}>
+        <div style={{ marginTop: L.sp.xl, paddingTop: L.sp.xl, borderTop: `1px solid ${colors.borderLight}` }}>
           <Checkbox
             theme={theme}
             size="sm"

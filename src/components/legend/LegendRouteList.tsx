@@ -17,6 +17,7 @@ import { ALERT_MINUTE_OPTIONS } from '../../utils/arrivalAlert';
 import Select from '../ui/atoms/Select';
 import Radio from '../ui/atoms/Radio';
 import Slider from '../ui/atoms/Slider';
+import { L } from './legendStyles';
 
 type SortMode = 'name' | 'color' | 'default' | 'distance';
 
@@ -274,19 +275,19 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   const sectionHeader = (label: string, isOpen: boolean, onToggle: () => void) => (
     <div
       onClick={onToggle}
-      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', background: colors.surfaceElevated, marginBottom: '2px' }}
+      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${L.sp.xs} ${L.sp.sm}`, cursor: 'pointer', borderRadius: L.r.md, background: colors.surfaceElevated, marginBottom: L.sp.xxs }}
     >
-      <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>{label}</span>
-      <span style={{ fontSize: '9px', color: colors.textSecondary, transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
+      <span style={{ fontSize: FS.helper, fontWeight: 'bold', color: colors.textSecondary }}>{label}</span>
+      <span style={{ fontSize: FS.micro, color: colors.textSecondary, transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
     </div>
   );
 
   return (
     <div style={{
-      marginBottom: '15px',
-      padding: '10px',
+      marginBottom: L.sp['2xl'],
+      padding: L.sp.lg,
       backgroundColor: colors.surface,
-      borderRadius: '4px',
+      borderRadius: L.r.md,
       border: `1px solid ${colors.borderLight}`
     }}>
 
@@ -295,10 +296,10 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: '8px',
-        marginBottom: '8px',
+        gap: L.sp.md,
+        marginBottom: L.sp.md,
       }}>
-        <div style={{ fontSize: '14px', fontWeight: 'bold', color: colors.text }}>
+        <div style={{ fontSize: FS.sectionTitle, fontWeight: 'bold', color: colors.text }}>
           {translateUI('routeDisplayToggle', language)}
         </div>
         {/* 表示方式の切り替え。従来の一覧も選べる形で残している */}
@@ -333,8 +334,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
       {routeUiMode === 'classic' && (<>
       {/* ソート選択 */}
-      <div style={{ display: 'flex', gap: '4px', marginBottom: '6px', alignItems: 'center' }}>
-        <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
+      <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.sm, alignItems: 'center' }}>
+        <span style={{ fontSize: FS.tiny, color: colors.textSecondary, whiteSpace: 'nowrap' }}>
           {translateUI('sortLabel', language)}
         </span>
         <SegmentedControl
@@ -352,7 +353,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
       </div>
 
       {/* 全表示/全非表示 */}
-      <div style={{ display: 'flex', gap: '4px', marginBottom: '6px' }}>
+      <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.sm }}>
         <Button theme={theme} variant="positive" size="sm" onClick={onSelectAllRoutes} styleOverride={{ flex: 1 }}>
           {translateUI('allShow', language)}
         </Button>
@@ -389,7 +390,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 <React.Fragment key={routeKey}>
                 {showDivider && (
                   <div style={{ margin: '4px 0 2px' }}>
-                    <div style={{ fontSize: '9px', color: colors.textSecondary, whiteSpace: 'nowrap', marginBottom: '2px' }}>
+                    <div style={{ fontSize: FS.micro, color: colors.textSecondary, whiteSpace: 'nowrap', marginBottom: L.sp.xxs }}>
                       ↑ この駅を通る路線
                     </div>
                     <div style={{ borderTop: `1px dashed ${colors.borderLight}` }} />
@@ -411,7 +412,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   style={{
                     display: 'flex', alignItems: 'center',
                     outline: isDragTarget ? `2px dashed ${adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme)}` : 'none',
-                    borderRadius: '3px',
+                    borderRadius: L.r.sm,
                     background: isDragTarget ? `${adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme)}18` : 'transparent',
                     userSelect: 'none',
                   }}
@@ -443,7 +444,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                       setTouchDragKey(null);
                       setDragOverKey(null);
                     }}
-                    style={{ fontSize: '13px', color: colors.textSecondary, lineHeight: 1, flexShrink: 0, padding: '2px 3px 2px 0', cursor: 'grab', opacity: 0.5, userSelect: 'none', touchAction: 'none', WebkitUserSelect: 'none' }}
+                    style={{ fontSize: FS.base, color: colors.textSecondary, lineHeight: 1, flexShrink: 0, padding: '2px 3px 2px 0', cursor: 'grab', opacity: 0.5, userSelect: 'none', touchAction: 'none', WebkitUserSelect: 'none' }}
                   >
                     ⠿
                   </span>
@@ -471,7 +472,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 size="sm"
                 fullWidth
                 onClick={() => setRouteListExpanded(v => !v)}
-                styleOverride={{ marginTop: '4px' }}
+                styleOverride={{ marginTop: L.sp.xs }}
               >
                 {routeListExpanded
                   ? translateUI('collapseList', language)
@@ -485,8 +486,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
       </>)}
 
       {/* ═══ セクション2: 表示設定 ═══ */}
-      <div style={{ marginTop: '12px', marginBottom: '4px' }}>
-        <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: colors.text }}>
+      <div style={{ marginTop: L.sp.xl, marginBottom: L.sp.xs }}>
+        <div style={{ fontSize: FS.sectionTitle, fontWeight: 'bold', marginBottom: L.sp.md, color: colors.text }}>
           {translateUI('displaySettings', language)}
         </div>
         <div>
@@ -494,7 +495,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {/* ── 駅ラベル ── */}
             {sectionHeader(translateUI('settingsGroupLabel', language), groupLabelOpen, () => setGroupLabelOpen(v => !v))}
             {groupLabelOpen && (
-              <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
+              <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
                 <Checkbox theme={theme} checked={showTransferStationsOnly} onChange={onShowTransferStationsOnlyChange}>
                   {translateUI('showOnlyTransferStations', language)}
                 </Checkbox>
@@ -502,8 +503,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   {translateUI('showTravelTimes', language)}
                 </Checkbox>
                 {showTravelTimes && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', paddingLeft: '22px', marginBottom: '2px' }}>
-                    <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('travelTimeLabelMode', language)}:</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, paddingLeft: L.sp['4xl'], marginBottom: L.sp.xxs }}>
+                    <span style={{ fontSize: FS.tiny, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('travelTimeLabelMode', language)}:</span>
                     {(['interval', 'cumulative'] as const).map(mode => (
                       <Radio
                           theme={theme}
@@ -530,8 +531,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   {translateUI('arrivalAlert', language)}
                 </Checkbox>
                 {arrivalAlertEnabled && (
-                  <div style={{ paddingLeft: '22px', paddingBottom: '4px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ paddingLeft: L.sp['4xl'], paddingBottom: L.sp.xs }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm }}>
                       <span style={{ fontSize: FS.helper, color: colors.textSecondary }}>
                         {translateUI('arrivalAlertTiming', language)}
                       </span>
@@ -548,7 +549,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                         ))}
                       </Select>
                     </div>
-                    <div style={{ fontSize: FS.micro, color: colors.textSecondary, marginTop: '4px', lineHeight: 1.5 }}>
+                    <div style={{ fontSize: FS.micro, color: colors.textSecondary, marginTop: L.sp.xs, lineHeight: 1.5 }}>
                       {translateUI('arrivalAlertNote', language)}
                     </div>
                   </div>
@@ -561,7 +562,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   {translateUI('alwaysShowMajorStations', language)}
                 </Checkbox>
                 {alwaysVisibleStationsEnabled && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '2px 0 4px 22px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, padding: '2px 0 4px 22px' }}>
                     <span style={{ fontSize: FS.helper, color: colors.textSecondary }}>
                       {translateUI('minRouteCount', language)}
                     </span>
@@ -590,7 +591,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {/* ── データ可視化 ── */}
             {sectionHeader(translateUI('settingsGroupViz', language), groupVizOpen, () => setGroupVizOpen(v => !v))}
             {groupVizOpen && (
-              <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
+              <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
                 <Checkbox theme={theme} checked={heatmapEnabled} onChange={onHeatmapEnabledChange}>
                   {translateUI('stationHeatmap', language)}
                 </Checkbox>
@@ -600,10 +601,10 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                     size="sm"
                     checked={showEstimatedData}
                     onChange={onShowEstimatedDataChange}
-                    styleOverride={{ paddingLeft: '18px' }}
+                    styleOverride={{ paddingLeft: L.sp['2xl'] }}
                   >
                     <span>推定データを含める</span>
-                    {!showEstimatedData && <span style={{ marginLeft: '4px', color: SEMANTIC.arrival, fontSize: FS.tiny }}>（実データのみ）</span>}
+                    {!showEstimatedData && <span style={{ marginLeft: L.sp.xs, color: SEMANTIC.arrival, fontSize: FS.tiny }}>（実データのみ）</span>}
                   </Checkbox>
                 )}
                 {mapViewMode === 'realistic' && (
@@ -615,8 +616,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   {translateUI('bubbleMap', language)}
                 </Checkbox>
                 {mapViewMode === 'bubble' && (
-                  <div style={{ marginLeft: '22px', marginTop: '4px' }}>
-                    <div style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
+                  <div style={{ marginLeft: L.sp['4xl'], marginTop: L.sp.xs }}>
+                    <div style={{ display: 'flex', gap: L.sp.sm, marginBottom: L.sp.sm }}>
                       {(['circle', 'square'] as const).map(shape => (
                         <Radio
                           theme={theme}
@@ -629,14 +630,14 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                         </Radio>
                       ))}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('bubbleMaxRadius', language)}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm }}>
+                      <span style={{ fontSize: FS.tiny, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('bubbleMaxRadius', language)}</span>
                       <Slider
                         min={500} max={50000} step={500}
                         value={bubbleMaxRadiusM}
                         onChange={e => onBubbleMaxRadiusMChange(Number(e.target.value))}
                       />
-                      <span style={{ fontSize: '10px', color: colors.text, minWidth: '40px', textAlign: 'right' }}>
+                      <span style={{ fontSize: FS.tiny, color: colors.text, minWidth: '40px', textAlign: 'right' }}>
                         {bubbleMaxRadiusM >= 1000 ? `${(bubbleMaxRadiusM / 1000).toFixed(1)}km` : `${bubbleMaxRadiusM}m`}
                       </span>
                     </div>
@@ -651,7 +652,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {/* ── 駅フィルター ── */}
             {sectionHeader(translateUI('settingsGroupFilter', language), groupFilterOpen, () => setGroupFilterOpen(v => !v))}
             {groupFilterOpen && (
-              <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
+              <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
                 <Checkbox theme={theme} checked={showExpressStationsOnly} onChange={onShowExpressStationsOnlyChange}>
                   {translateUI('showOnlyExpressStations', language)}
                 </Checkbox>
@@ -664,7 +665,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {/* ── 地図表示 ── */}
             {sectionHeader(translateUI('settingsGroupMap', language), groupMapOpen, () => setGroupMapOpen(v => !v))}
             {groupMapOpen && (
-              <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
+              <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
                 <Checkbox theme={theme} checked={showDimmedRoutes} onChange={onShowDimmedRoutesChange}>
                   {translateUI('showOutsideSegmentRoutes', language)}
                 </Checkbox>

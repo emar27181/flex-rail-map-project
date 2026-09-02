@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import IconButton from './ui/atoms/IconButton';
+import { L } from './legend/legendStyles';
 
 interface StickyBottomAdProps {
   adSlot: string;
@@ -78,7 +79,7 @@ const StickyBottomAd: React.FC<StickyBottomAdProps> = ({ adSlot }) => {
           borderBottom: 'none',
           boxShadow: `0 -2px 8px ${colors.shadow}`,
           zIndex: 9999,
-          padding: '8px',
+          padding: L.sp.md,
           height: '90px',
           display: 'flex',
           alignItems: 'center',

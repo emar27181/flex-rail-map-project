@@ -3,7 +3,8 @@ import type { Station } from '../../data/yamanote';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateStation, translateUI } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
-import { SEMANTIC } from '../../constants/ui';
+import { SEMANTIC, FS} from '../../constants/ui';
+import { L } from './legendStyles';
 
 interface LegendStationMarkersProps {
   departure: Station | null;
@@ -26,16 +27,16 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
 
   return (
     <div style={{
-      marginBottom: '15px',
-      padding: '10px',
+      marginBottom: L.sp['2xl'],
+      padding: L.sp.lg,
       backgroundColor: colors.surface,
-      borderRadius: '4px',
+      borderRadius: L.r.md,
       border: `1px solid ${colors.borderLight}`
     }}>
       <div style={{
-        fontSize: '14px',
+        fontSize: FS.sectionTitle,
         fontWeight: 'bold',
-        marginBottom: '8px',
+        marginBottom: L.sp.md,
         color: colors.text
       }}>
         {translateUI('currentStationSettings', language)}
@@ -46,29 +47,29 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '8px',
-          marginBottom: '8px',
-          fontSize: '12px',
-          padding: '8px',
+          gap: L.sp.md,
+          marginBottom: L.sp.md,
+          fontSize: FS.label,
+          padding: L.sp.md,
           backgroundColor: colors.infoLight,
-          borderRadius: '4px',
+          borderRadius: L.r.md,
           border: `1px solid ${colors.border}`
         }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '4px'
+            gap: L.sp.xs
           }}>
             <div style={{
               width: '16px',
               height: '16px',
               backgroundColor: colors.surfaceElevated,
               border: `2px solid ${SEMANTIC.departure}`,
-              borderRadius: '3px',
+              borderRadius: L.r.sm,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '10px',
+              fontSize: FS.tiny,
               fontWeight: 'bold',
               color: SEMANTIC.departure,
               flexShrink: 0
@@ -81,24 +82,24 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
           </div>
           <span style={{
             color: SEMANTIC.departure,
-            fontSize: '14px',
+            fontSize: FS.sectionTitle,
             fontWeight: 'bold'
           }}>→</span>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '4px'
+            gap: L.sp.xs
           }}>
             <div style={{
               width: '16px',
               height: '16px',
               backgroundColor: colors.surfaceElevated,
               border: `2px solid ${SEMANTIC.arrival}`,
-              borderRadius: '3px',
+              borderRadius: L.r.sm,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '10px',
+              fontSize: FS.tiny,
               fontWeight: 'bold',
               color: SEMANTIC.arrival,
               flexShrink: 0
@@ -116,20 +117,20 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          marginBottom: '6px',
-          fontSize: '12px'
+          marginBottom: L.sp.sm,
+          fontSize: FS.label
         }}>
           <div style={{
             width: '20px',
             height: '20px',
             backgroundColor: colors.surfaceElevated,
             border: `3px solid ${SEMANTIC.departure}`,
-            borderRadius: '4px',
-            marginRight: '8px',
+            borderRadius: L.r.md,
+            marginRight: L.sp.md,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '12px',
+            fontSize: FS.label,
             fontWeight: 'bold',
             color: SEMANTIC.departure,
             flexShrink: 0
@@ -146,20 +147,20 @@ const LegendStationMarkers: React.FC<LegendStationMarkersProps> = ({
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          marginBottom: '6px',
-          fontSize: '12px'
+          marginBottom: L.sp.sm,
+          fontSize: FS.label
         }}>
           <div style={{
             width: '20px',
             height: '20px',
             backgroundColor: colors.surfaceElevated,
             border: `3px solid ${SEMANTIC.arrival}`,
-            borderRadius: '4px',
-            marginRight: '8px',
+            borderRadius: L.r.md,
+            marginRight: L.sp.md,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '12px',
+            fontSize: FS.label,
             fontWeight: 'bold',
             color: SEMANTIC.arrival,
             flexShrink: 0

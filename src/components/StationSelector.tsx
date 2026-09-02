@@ -370,16 +370,16 @@ const StationSelector: React.FC<StationSelectorProps> = ({
       onTouchMove={stopTouchPropagation}
       onTouchEnd={stopTouchPropagation}
       style={{
-        marginBottom: '8px',
-        paddingTop: '8px',
+        marginBottom: L.sp.md,
+        paddingTop: L.sp.md,
         paddingBottom: isExpanded ? '8px' : '0',
-        paddingLeft: '8px',
-        paddingRight: '8px',
+        paddingLeft: L.sp.md,
+        paddingRight: L.sp.md,
         height: isExpanded ? 'auto' : '36px',
         boxSizing: 'border-box',
         overflow: (showDepartureResults || showArrivalResults) ? 'visible' : 'hidden',
         border: `1px solid ${colors.border}`,
-        borderRadius: '8px',
+        borderRadius: L.r.pill,
         backgroundColor: isExpanded ? colors.glassOpen : colors.glassCollapsed,
         boxShadow: `0 2px 8px ${colors.shadow}`,
         backdropFilter: 'blur(10px)',
@@ -411,7 +411,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         <>
           <div style={{
             display: 'flex',
-            gap: '4px',
+            gap: L.sp.xs,
             alignItems: 'flex-start',
             flexDirection: 'row',
             flexWrap: 'wrap'
@@ -422,7 +422,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               minWidth: '0',
               position: 'relative'
             }}>
-              <label style={{ display: 'block', marginBottom: '3px', fontWeight: 'bold', color: colors.textSecondary, fontSize: FS.label }}>
+              <label style={{ display: 'block', marginBottom: L.sp.xs, fontWeight: 'bold', color: colors.textSecondary, fontSize: FS.label }}>
                 {translateUI('departureStation', language)}
               </label>
               <div style={{ position: 'relative' }}>
@@ -460,6 +460,14 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                   placeholder={departure ? translateStation(departure.name, language) : translateUI('stationPlaceholder', language)}
                   className="station-input-filled"
+                  styleOverride={{
+                    // ✕ を重ねるので右側だけ余白を広げる
+                    paddingRight: L.sp['3xl'],
+                    // 出発＝緑 で塗りつぶし、文字は白。地図の上でも役割が一目で分かるようにする
+                    border: `2px solid ${SEMANTIC.departure}`,
+                    backgroundColor: SEMANTIC.departure,
+                    color: colors.onPrimary,
+                  }}
                 />
                 {departure && (
                   <IconButton
@@ -484,7 +492,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 なぜ現在地が使えないのか分からず再取得もできない。
               */}
               {locationError && (
-                <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                <div style={{ marginTop: L.sp.xs, display: 'flex', alignItems: 'center', gap: L.sp.xs, flexWrap: 'wrap' }}>
                   <span style={{ fontSize: FS.helper, color: colors.textSecondary }}>
                     {translateUI(locationError === 'denied' ? 'locationDenied' : 'locationUnavailable', language)}
                   </span>
@@ -508,7 +516,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   width: departureDropdownPos.width,
                   backgroundColor: colors.surfaceElevated,
                   border: `1px solid ${colors.border}`,
-                  borderRadius: '4px',
+                  borderRadius: L.r.md,
                   boxShadow: `0 4px 12px ${colors.shadow}`,
                   maxHeight: '240px',
                   overflowY: 'auto',
@@ -526,7 +534,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       key={`${station.name}-${index}`}
                       onClick={() => handleDepartureSelect(station)}
                       style={{
-                        padding: '8px 12px',
+                        padding: `${L.sp.md} ${L.sp.xl}`,
                         cursor: 'pointer',
                         borderBottom: index < filteredDepartureStations.length - 1 ? `1px solid ${colors.borderLight}` : 'none',
                         fontSize: FS.base,
@@ -540,7 +548,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     </div>
                   ))}
                   {filteredDepartureStations.length === 0 && (
-                    <div style={{ padding: '8px 12px', color: colors.textSecondary, fontSize: FS.base }}>
+                    <div style={{ padding: `${L.sp.md} ${L.sp.xl}`, color: colors.textSecondary, fontSize: FS.base }}>
                       {departureSearch ? translateUI('noStationFound', language) : translateUI('majorStationsHint', language)}
                     </div>
                   )}
@@ -555,7 +563,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'flex-end',
-              paddingBottom: '2px',
+              paddingBottom: L.sp.xxs,
             }}>
               {/* ラベル (line-height≒18px) + margin-bottom 3px 分のオフセット */}
               <div style={{ height: '21px' }} />
@@ -582,7 +590,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               minWidth: '0',
               position: 'relative'
             }}>
-              <label style={{ display: 'block', marginBottom: '3px', fontWeight: 'bold', color: colors.textSecondary, fontSize: FS.label }}>
+              <label style={{ display: 'block', marginBottom: L.sp.xs, fontWeight: 'bold', color: colors.textSecondary, fontSize: FS.label }}>
                 {translateUI('arrivalStation', language)}
               </label>
               <div style={{ position: 'relative' }}>
@@ -620,6 +628,14 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                   placeholder={arrival ? translateStation(arrival.name, language) : translateUI('stationPlaceholder', language)}
                   className="station-input-filled"
+                  styleOverride={{
+                    // ✕ を重ねるので右側だけ余白を広げる
+                    paddingRight: L.sp['3xl'],
+                    // 到着＝赤 で塗りつぶし、文字は白（出発欄と対になる配色）
+                    border: `2px solid ${SEMANTIC.arrival}`,
+                    backgroundColor: SEMANTIC.arrival,
+                    color: colors.onPrimary,
+                  }}
                 />
                 {arrival && (
                   <IconButton
@@ -653,7 +669,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   width: arrivalDropdownPos.width,
                   backgroundColor: colors.surfaceElevated,
                   border: `1px solid ${colors.border}`,
-                  borderRadius: '4px',
+                  borderRadius: L.r.md,
                   boxShadow: `0 4px 12px ${colors.shadow}`,
                   maxHeight: '240px',
                   overflowY: 'auto',
@@ -671,7 +687,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       key={`${station.name}-${index}`}
                       onClick={() => handleArrivalSelect(station)}
                       style={{
-                        padding: '8px 12px',
+                        padding: `${L.sp.md} ${L.sp.xl}`,
                         cursor: 'pointer',
                         borderBottom: index < filteredArrivalStations.length - 1 ? `1px solid ${colors.borderLight}` : 'none',
                         fontSize: FS.base,
@@ -685,7 +701,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     </div>
                   ))}
                   {filteredArrivalStations.length === 0 && (
-                    <div style={{ padding: '8px 12px', color: colors.textSecondary, fontSize: FS.base }}>
+                    <div style={{ padding: `${L.sp.md} ${L.sp.xl}`, color: colors.textSecondary, fontSize: FS.base }}>
                       {arrivalSearch ? translateUI('noStationFound', language) : translateUI('majorStationsHint', language)}
                     </div>
                   )}
@@ -761,10 +777,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           */}
           {SHOW_DEPARTURE_TIME_ROW && onDepartureTimeChange && (
             <div style={{
-              marginTop: '6px',
+              marginTop: L.sp.sm,
               display: 'flex',
               alignItems: 'center',
-              gap: '5px',
+              gap: L.sp.xs,
             }}>
               <label style={{ fontSize: FS.label, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
                 {translateUI('departureTime', language)}

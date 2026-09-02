@@ -6,6 +6,7 @@ import { FS } from '../constants/ui';
 import { translateUI } from '../utils/translation';
 import type { Language } from '../utils/translation';
 import type { UiVersion } from '../utils/uiVersionPersistence';
+import { L } from './legend/legendStyles';
 
 const LANGUAGES: Language[] = ['japanese', 'english', 'chinese', 'korean'];
 const LANG_LABELS: Record<Language, string> = { japanese: '日', english: 'En', chinese: '中', korean: '한' };
@@ -43,14 +44,14 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
       backgroundColor: colors.surface,
       borderBottom: `1px solid ${colors.border}`,
       boxShadow: `0 2px 4px ${colors.shadow}`,
-      marginBottom: '20px',
+      marginBottom: L.sp['3xl'],
       position: 'relative',
     }}>
       {/* ロゴ・タイトル部分 */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '12px'
+        gap: L.sp.xl
       }}>
         <img
           src="/icon_flex_rail_way_map.png"
@@ -59,12 +60,12 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             width: '32px',
             height: '32px',
             flexShrink: 0,
-            borderRadius: '4px'
+            borderRadius: L.r.md
           }}
         />
         <h1 style={{
           margin: 0,
-          fontSize: '20px',
+          fontSize: FS.heading,
           fontWeight: 'bold',
           color: colors.text
         }}>
@@ -76,7 +77,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '8px'
+        gap: L.sp.md
       }}>
         {/* Infoボタン */}
         <IconButton
@@ -140,7 +141,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           right: '20px',
           backgroundColor: colors.surface,
           border: `1px solid ${colors.border}`,
-          borderRadius: '8px',
+          borderRadius: L.r.pill,
           boxShadow: `0 4px 12px ${colors.shadow}`,
           zIndex: 1000,
           minWidth: '200px',
@@ -148,9 +149,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
         }}>
           <div
             style={{
-              padding: '12px 16px',
+              padding: `${L.sp.xl} ${L.sp['2xl']}`,
               cursor: 'pointer',
-              fontSize: '14px',
+              fontSize: FS.sectionTitle,
               color: colors.text,
               borderBottom: `1px solid ${colors.borderLight}`
             }}
@@ -166,9 +167,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           </div>
           <div
             style={{
-              padding: '12px 16px',
+              padding: `${L.sp.xl} ${L.sp['2xl']}`,
               cursor: 'pointer',
-              fontSize: '14px',
+              fontSize: FS.sectionTitle,
               color: colors.text,
               borderBottom: `1px solid ${colors.borderLight}`
             }}
@@ -184,9 +185,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           </div>
           <div
             style={{
-              padding: '12px 16px',
+              padding: `${L.sp.xl} ${L.sp['2xl']}`,
               cursor: 'pointer',
-              fontSize: '14px',
+              fontSize: FS.sectionTitle,
               color: colors.text,
               borderBottom: `1px solid ${colors.borderLight}`
             }}
@@ -202,9 +203,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           </div>
           <div
             style={{
-              padding: '12px 16px',
+              padding: `${L.sp.xl} ${L.sp['2xl']}`,
               cursor: 'pointer',
-              fontSize: '14px',
+              fontSize: FS.sectionTitle,
               color: colors.text,
               borderBottom: `1px solid ${colors.borderLight}`
             }}
@@ -220,9 +221,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           </div>
           <div
             style={{
-              padding: '12px 16px',
+              padding: `${L.sp.xl} ${L.sp['2xl']}`,
               cursor: 'pointer',
-              fontSize: '14px',
+              fontSize: FS.sectionTitle,
               color: colors.text
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
@@ -251,15 +252,15 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 10000,
-            padding: '20px'
+            padding: L.sp['3xl']
           }}
           onClick={() => setIsInfoModalOpen(false)}
         >
           <div
             style={{
               backgroundColor: colors.surface,
-              borderRadius: '12px',
-              padding: '24px',
+              borderRadius: L.r.pill,
+              padding: L.sp['4xl'],
               maxWidth: '600px',
               width: '100%',
               maxHeight: '80vh',
@@ -281,10 +282,10 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             />
 
             {/* コンテンツ */}
-            <div style={{ paddingRight: '40px' }}>
+            <div style={{ paddingRight: L.sp['5xl'] }}>
               <h2 style={{
                 margin: '0 0 16px 0',
-                fontSize: '24px',
+                fontSize: FS.display,
                 fontWeight: 'bold',
                 color: colors.text,
                 lineHeight: '1.3'
@@ -297,7 +298,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
 
               <p style={{
                 margin: '0 0 24px 0',
-                fontSize: '16px',
+                fontSize: FS.input,
                 lineHeight: '1.6',
                 color: colors.text
               }}>
@@ -310,8 +311,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
               {/* 作者情報 */}
               <div style={{
                 borderTop: `1px solid ${colors.borderLight}`,
-                paddingTop: '16px',
-                fontSize: '14px',
+                paddingTop: L.sp['2xl'],
+                fontSize: FS.sectionTitle,
                 color: colors.textSecondary
               }}>
                 Developed by{' '}

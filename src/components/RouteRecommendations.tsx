@@ -4,10 +4,10 @@ import { routeColors, routeNames } from '../data/routes';
 import type { RouteResult } from '../utils/routeFinder';
 import { getRouteDestination, getDirectionText, commonDirections } from '../data/routeDestinations';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
-import { selectableCard } from './legend/legendStyles';
+import { selectableCard, L} from './legend/legendStyles';
 import { translateStation, translateRoute, translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
-import { SEMANTIC } from '../constants/ui';
+import { SEMANTIC, FS} from '../constants/ui';
 import { tintColor } from '../utils/contrast';
 import Button from './ui/atoms/Button';
 
@@ -94,8 +94,8 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
         backgroundColor: 'rgba(30,30,30,0.92)',
         color: colors.onPrimary,
         padding: '5px 10px',
-        borderRadius: '5px',
-        fontSize: '12px',
+        borderRadius: L.r.md,
+        fontSize: FS.label,
         pointerEvents: 'none',
         zIndex: 9999,
         maxWidth: '420px',
@@ -106,10 +106,10 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
       document.body
     )}
     <div style={{
-      marginBottom: '20px',
+      marginBottom: L.sp['3xl'],
       backgroundColor: colors.surfaceElevated,
       border: `1px solid ${colors.border}`,
-      borderRadius: '6px',
+      borderRadius: L.r.md,
       boxShadow: `0 2px 6px ${colors.shadow}`,
       minWidth: '200px'
     }}>
@@ -120,13 +120,13 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
           justifyContent: 'space-between',
           alignItems: 'center',
           cursor: 'pointer',
-          padding: '10px',
+          padding: L.sp.lg,
           borderBottom: isExpanded ? `1px solid ${colors.borderLight}` : 'none'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.lg }}>
           <span style={{
-            fontSize: '14px',
+            fontSize: FS.sectionTitle,
             fontWeight: 'bold',
             color: colors.text,
             margin: '0'
@@ -140,7 +140,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
           )}
         </div>
         <span style={{
-          fontSize: '12px',
+          fontSize: FS.label,
           color: '#666',
           transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
           transition: 'transform 0.3s ease'
@@ -153,8 +153,8 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
         <div style={{ 
           display: 'flex', 
           flexDirection: 'column', 
-          gap: '12px',
-          padding: '10px',
+          gap: L.sp.xl,
+          padding: L.sp.lg,
           maxHeight: '400px',
           overflowY: 'auto'
         }}>
@@ -167,7 +167,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
               onMouseMove={(e) => setTooltip(t => t ? { ...t, x: e.clientX, y: e.clientY } : null)}
               onMouseLeave={() => setTooltip(null)}
               style={{
-                padding: '10px 12px',
+                padding: `${L.sp.lg} ${L.sp.xl}`,
                 ...selectableCard(colors, { selected: isSelected, radius: '6px' }),
                 boxShadow: isSelected ? `0 2px 8px ${tintColor(SEMANTIC.primary, 0.3)}` : `0 1px 3px ${colors.shadow}`
               }}
@@ -177,12 +177,12 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '10px',
-              gap: '8px'
+              marginBottom: L.sp.lg,
+              gap: L.sp.md
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.md, flexWrap: 'wrap' }}>
                 <span style={{
-                  fontSize: '12px',
+                  fontSize: FS.label,
                   color: colors.textSecondary
                 }}>
                   {translateUI('routeNumber', language, { number: (index + 1).toString() })}
@@ -191,20 +191,20 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                 <div style={{
                   display: 'flex',
                   alignItems: 'baseline',
-                  gap: '2px'
+                  gap: L.sp.xxs
                 }}>
-                  <span style={{ fontSize: '20px', fontWeight: 'bold', color: isSelected ? SEMANTIC.primary : colors.text, lineHeight: '1' }}>
+                  <span style={{ fontSize: FS.heading, fontWeight: 'bold', color: isSelected ? SEMANTIC.primary : colors.text, lineHeight: '1' }}>
                     {Math.round(route.totalTime)}
                   </span>
-                  <span style={{ fontSize: '11px', color: colors.textSecondary }}>{translateUI('minutesSuffix', language)}</span>
+                  <span style={{ fontSize: FS.helper, color: colors.textSecondary }}>{translateUI('minutesSuffix', language)}</span>
                 </div>
                 {/* 乗換数 */}
                 <span style={{
-                  fontSize: '12px',
+                  fontSize: FS.label,
                   color: route.transfers === 0 ? SEMANTIC.departure : '#ff9800',
                   padding: '2px 7px',
                   backgroundColor: route.transfers === 0 ? tintColor(SEMANTIC.departure, 0.12) : 'rgba(255,152,0,0.12)',
-                  borderRadius: '10px',
+                  borderRadius: L.r.pill,
                   fontWeight: '500',
                   whiteSpace: 'nowrap'
                 }}>
@@ -226,7 +226,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
             </div>
 
             {/* 路線フロービジュアル */}
-            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', rowGap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', rowGap: L.sp.sm }}>
               {route.segments.map((segment, segIndex) => {
                 const segColor = segment.isWalkingTransfer || segment.routeKey === 'walking'
                   ? SEMANTIC.departure
@@ -240,14 +240,14 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                 return (
                   <React.Fragment key={segIndex}>
                     {/* 出発駅 or 乗換駅 */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: L.sp.xxs }}>
                       {segIndex > 0 && (
                         <span style={{
-                          fontSize: '9px',
+                          fontSize: FS.micro,
                           color: colors.onPrimary,
                           backgroundColor: segment.isWalkingTransfer ? SEMANTIC.departure : '#ff9800',
                           padding: '1px 5px',
-                          borderRadius: '6px',
+                          borderRadius: L.r.md,
                           whiteSpace: 'nowrap'
                         }}>
                           {segment.isWalkingTransfer
@@ -256,7 +256,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                         </span>
                       )}
                       <span style={{
-                        fontSize: '11px',
+                        fontSize: FS.helper,
                         fontWeight: 'bold',
                         color: colors.text,
                         whiteSpace: 'nowrap',
@@ -272,23 +272,23 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                     {/* 路線バー */}
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '1 1 40px', minWidth: '40px' }}>
                       <span style={{
-                        fontSize: '10px',
+                        fontSize: FS.tiny,
                         color: segColor,
                         fontWeight: 'bold',
                         whiteSpace: 'nowrap',
-                        marginBottom: '2px',
+                        marginBottom: L.sp.xxs,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         maxWidth: '100%'
                       }}>
                         {segName}
                       </span>
-                      <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2px' }}>
-                        <div style={{ flex: 1, height: '5px', backgroundColor: segColor, borderRadius: '2px' }} />
-                        <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: L.sp.xxs }}>
+                        <div style={{ flex: 1, height: '5px', backgroundColor: segColor, borderRadius: L.r.sm }} />
+                        <span style={{ fontSize: FS.tiny, color: colors.textSecondary, whiteSpace: 'nowrap', flexShrink: 0 }}>
                           {Math.round(segment.time)}{translateUI('minutesSuffix', language)}
                         </span>
-                        <div style={{ flex: 1, height: '5px', backgroundColor: segColor, borderRadius: '2px' }} />
+                        <div style={{ flex: 1, height: '5px', backgroundColor: segColor, borderRadius: L.r.sm }} />
                       </div>
                     </div>
 
@@ -296,7 +296,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                     {isLast && (
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         <span style={{
-                          fontSize: '11px',
+                          fontSize: FS.helper,
                           fontWeight: 'bold',
                           color: colors.text,
                           whiteSpace: 'nowrap',
@@ -321,10 +321,10 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
 
       {isExpanded && routes.length === 0 && (
         <div style={{
-          padding: '20px',
+          padding: L.sp['3xl'],
           textAlign: 'center',
           color: '#666',
-          fontSize: '14px'
+          fontSize: FS.sectionTitle
         }}>
 {translateUI('noRoutesFound', language)}
         </div>

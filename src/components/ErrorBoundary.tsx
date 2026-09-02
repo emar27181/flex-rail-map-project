@@ -1,8 +1,9 @@
 import React from 'react';
 import { translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
-import { SEMANTIC, NEUTRAL } from '../constants/ui';
+import { SEMANTIC, NEUTRAL, FS} from '../constants/ui';
 import Button from './ui/atoms/Button';
+import { L } from './legend/legendStyles';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -33,16 +34,16 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
       const lang = this.props.language ?? 'japanese';
       return (
         <div style={{
-          padding: '20px',
+          padding: L.sp['3xl'],
           border: `1px solid ${SEMANTIC.arrival}`,
-          borderRadius: '8px',
+          borderRadius: L.r.pill,
           backgroundColor: '#ffebee',
-          margin: '20px'
+          margin: L.sp['3xl']
         }}>
           <h3 style={{ color: SEMANTIC.arrival, margin: '0 0 10px 0' }}>{translateUI('mapErrorTitle', lang)}</h3>
           <p style={{ margin: '0 0 10px 0' }}>{translateUI('mapErrorMessage', lang)}</p>
           {this.state.error && (
-            <details style={{ fontSize: '12px', color: '#666' }}>
+            <details style={{ fontSize: FS.label, color: '#666' }}>
               <summary>{translateUI('errorDetails', lang)}</summary>
               <pre>{this.state.error.toString()}</pre>
             </details>

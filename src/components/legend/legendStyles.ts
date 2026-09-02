@@ -24,12 +24,20 @@ export const L = {
   },
   /** Spacing (padding / margin / gap) */
   sp: {
+    /** 隣接する要素をわずかに離すだけ */
+    xxs: '2px',
     xs:  '4px',
     sm:  '6px',
     md:  '8px',
     lg:  '10px',
     xl:  '12px',
     '2xl': '16px',
+    /** パネルの外周など、ひとまわり大きい余白 */
+    '3xl': '20px',
+    /** ダイアログの内側、チェックボックス配下のインデント */
+    '4xl': '24px',
+    /** 節と節のあいだ、フッターの上 */
+    '5xl': '40px',
   },
   /** Border radius */
   r: {
