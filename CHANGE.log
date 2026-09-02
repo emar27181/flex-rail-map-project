@@ -1621,3 +1621,30 @@
 - `tests/unit/constants/ui.test.ts` に12px未満の段階を禁じる検査を追加
 - 実測: 画面上の文字は 12/14/16px と Leaflet 自身の22pxだけになった。
   駅ラベルの重なりは18ラベル中1組→3組に増えた（文字を大きくした分のトレードオフ）
+
+### improve: 固定ページ5枚の共通部分を1つのレイアウトにまとめる
+- `src/layouts/StaticPage.astro`, `src/layouts/staticPageStyles.ts`（新規）
+- `src/pages/about.astro`, `contact.astro`, `faq.astro`, `privacy.astro`, `terms.astro`
+- 5ページが `<head>` のボイラープレート・68行の `<style>`・言語切替スクリプトを
+  丸ごとコピーして持っていた。5つの `<style>` は完全に同一で、
+  同じ `#2196F3` を各ページが4箇所ずつ書いていた
+- コピーであるがゆえに片方だけ古くなる事故が実際に起きていた:
+  hreflang が about / privacy / terms の3枚だけ存在しないドメイン
+  `flex-rail-map.netlify.app` を指したままだった（正しくは flex-railway-map）
+- 色は `getThemeColors()`、余白・角丸は `L.sp` / `L.r`、
+  文字サイズは `FS`、戻るリンクの高さは `CONTROL_SIZE.md`(44px) から取る。
+  静的ページだけ違う青・違う余白になる状態を作らないため
+- あわせて直したもの:
+  - canonical を全ページに追加（従来は faq だけ）
+  - `<html lang>` を ja に統一（本文は日本語が既定なのに en になっていた）
+  - 「路線図に戻る」が padding 8px の小さなリンクで、指で押す大きさに足りなかった
+  - インライン style の見出し・囲みを `.page-title` / `.info-box` に置き換え
+- ページ側の記述は about で227行→89行になった
+
+### test: 色のベタ書き検査を .astro と .css にも広げる
+- `tests/unit/constants/semanticColors.test.ts`
+- 従来は `.ts` / `.tsx` しか見ておらず、上記の hreflang 取り残しのように
+  ページ側で同じ事故が起き続ける状態だった
+- 未対応のものは理由を書いて除外する。
+  `pages/index.astro`（Leaflet のポップアップ上書きCSSに約70箇所）と、
+  本体UIとは別の配色系統を使う `pages/articles/` `styles/`
