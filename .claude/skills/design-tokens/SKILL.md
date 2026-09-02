@@ -16,7 +16,8 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 
 | 書こうとしているもの | 使うもの | import 元 |
 |---|---|---|
-| フォントサイズ | `FS.sectionTitle` / `base` / `label` / `helper` / `tiny` / `micro` / `input` | `src/constants/ui.ts` |
+| フォントサイズ | `FS.caption`(12) / `body`(14) / `input`・`title`(16) / `heading`(20) / `display`(24) | `src/constants/ui.ts` |
+| 角の丸み | `L.r.control`(8) / `card`(12) / `pill`(999) | `src/components/legend/legendStyles.ts` |
 | 操作要素の最小サイズ | `TARGET.min`(24) / `TARGET.touch`(44) | `src/constants/ui.ts` |
 | ボタン | `<Button theme variant size>` | `src/components/ui/atoms/Button.tsx` |
 | 色を持つ切り替え（路線など） | `<Chip color label selected>` | `src/components/ui/atoms/Chip.tsx` |
@@ -41,7 +42,8 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 
 ## 禁止
 
-- `fontSize: '12px'` のような数値の直書き → `FS.label`
+- `fontSize: '12px'` のような数値の直書き → `FS.caption`。**12px未満は作らない**
+  （Apple HIG / Material / GOV.UK のいずれも12pxが下限。例外はふりがなのルビのみ）
 - `#4CAF50`(出発) `#F44336`(到着) `#2196F3`(primary) の直書き → `SEMANTIC.*` を使う。
   `rgba(76,175,80,0.12)` のように同じ色をrgbaで書き直すのも禁止 → `tintColor(SEMANTIC.departure, 0.12)`。
   `tests/unit/constants/semanticColors.test.ts` が `constants/ui.ts` 以外での出現を落とす
