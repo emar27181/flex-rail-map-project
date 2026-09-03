@@ -1668,3 +1668,16 @@
 - 実測（430px幅・初期表示）: 画面上の丸みは3pxが35要素・8pxが1要素で、
   残りは Leaflet 自身のズームボタンだけ
 - `CLAUDE.md`, `docs/design-system.md`, `.claude/skills/design-tokens/SKILL.md` を更新
+
+### docs: プレビューURLは推測せず Netlify ボットのコメントから取る規約に修正
+- `CLAUDE.md`（プレビューデプロイルール）
+- 「push のたびにURLを書く」規約を入れたが、貼っていた
+  `<ブランチ名>--flex-railway-map.netlify.app` は Branch deploys が
+  無効なため存在せず、ユーザーが2回とも開けなかった
+- 開けるのはPRの Deploy Preview だけ
+  （`https://deploy-preview-<PR番号>--flex-railway-map.netlify.app`）
+- push のたびにPRの netlify[bot] コメントを読み、URL・対象コミット・
+  ビルド状態を確認してから書く手順に変更。
+  サンドボックスからNetlifyには到達できないが、ビルド完了はこのコメントで
+  確認できるので「ビルド中かもしれません」と濁さない
+- ブランチ固定URLはユーザーがダッシュボードで有効化するまで貼らない

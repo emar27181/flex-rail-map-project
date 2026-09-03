@@ -571,31 +571,40 @@ URLが無ければユーザーは確認に着手できない。
 - 「前と同じURLです」で済ませるのも**不可**。毎回そのまま書く
 - リンクは省略・短縮せず、クリックできる形で全文を書く
 - あわせて push したコミットのハッシュも書く（どの版を見ているか分かるように）
-- 複数ブランチに push したときは、実際に見てほしい方のURLを書く
 
-貼るURL:
+**貼るURLは推測せず、Netlifyボットのコメントから取ること。**
 
-```
-https://claude-project-loading-ktm7lo--flex-railway-map.netlify.app
-https://preview--flex-railway-map.netlify.app
-```
-
-サンドボックスからは Netlify に到達できないためビルド完了は確認できない。
-その旨も一言添える（「ビルド中の可能性があります」）。
-
-**プレビューURLを固定にする:**
-
-PRごとの `deploy-preview-<番号>--flex-railway-map.netlify.app` はPR番号が変わると
-URLも変わってしまう。ブランチ名は固定なので、Netlifyの **Branch deploys** を
-有効にすると次のURLが常に使える。
+現在このリポジトリで開けるのは**PRのDeploy Previewだけ**である。
 
 ```
-https://claude-project-loading-ktm7lo--flex-railway-map.netlify.app
+https://deploy-preview-<PR番号>--flex-railway-map.netlify.app
 ```
 
+`<ブランチ名>--flex-railway-map.netlify.app` 形式のURLは
+**Branch deploys が無効なので存在しない**。貼っても404になる。
+（2026-09-02: 実際にこれを貼り続けてユーザーが2回開けなかった）
+
+**手順（push のたびに毎回）:**
+1. push する
+2. `mcp__github__pull_request_read` の `get_comments` で該当PRを読む
+3. netlify[bot] のコメントから次を確認して書く
+   - Deploy Preview のURL
+   - `Latest commit` が今 push したコミットと一致しているか
+   - `✅ ready` か `🔨 building` か
+
+サンドボックスから Netlify へは到達できないが、**ビルド完了はこのコメントで
+確認できる**。「ビルド中かもしれません」と曖昧に濁さず、ボットの状態を書くこと。
+コメントのコミットが古いままならまだビルド中なので、そう書く。
+
+**将来URLを固定にしたい場合:**
+
+PRごとのURLはPR番号が変わると変わってしまう。ブランチ名は固定なので、
 Netlify管理画面の Site configuration → Build & deploy → Branch deploys で
-対象ブランチ（`claude/project-loading-ktm7lo`）を許可すると有効になる。
+対象ブランチ（`claude/project-loading-ktm7lo`）を許可すると
+`https://claude-project-loading-ktm7lo--flex-railway-map.netlify.app` が使える。
 （`/` と `_` はハイフンに置換され、小文字化されたものがサブドメインになる）
+**この設定はユーザーがダッシュボードで行う必要がある。有効化を確認するまでは
+このURLを貼らないこと。**
 
 サンドボックスから `npm run deploy:preview` は実行できない（Netlify CLI が
 未認証で `NETLIFY_AUTH_TOKEN` も無い）。push によるNetlifyの自動ビルドを使う。
