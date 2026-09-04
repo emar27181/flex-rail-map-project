@@ -578,6 +578,7 @@ URLが無ければユーザーは確認に着手できない。
 **貼るURLは推測せず、Netlifyボットのコメントから取ること。**
 
 現在このリポジトリで開けるのは**PRのDeploy Previewだけ**である。
+（2026-09-04: ユーザーが実機で開けることを確認済み）
 
 ```
 https://deploy-preview-<PR番号>--flex-railway-map.netlify.app
