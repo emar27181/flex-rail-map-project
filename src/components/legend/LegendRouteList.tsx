@@ -8,7 +8,7 @@ import type { StationStats } from '../../data/stationStats';
 import MapConfigPanel from './MapConfigPanel';
 import type { MapConfig } from './MapConfigPanel';
 import Checkbox from '../ui/atoms/Checkbox';
-import { FS, TARGET, SEMANTIC } from '../../constants/ui';
+import { FS, TARGET, SEMANTIC, MAP_LABEL, ROUTE_LINE } from '../../constants/ui';
 import RouteSwitchBoard from './RouteSwitchBoard';
 import Button from '../ui/atoms/Button';
 import SegmentedControl from '../ui/molecules/SegmentedControl';
@@ -685,11 +685,12 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   theme={theme}
                   label={translateUI('settingsIconSize', language)}
                   value={stationSizeScale}
-                  min={0.5}
-                  max={2.0}
-                  step={0.1}
+                  min={MAP_LABEL.minScale}
+                  max={MAP_LABEL.maxScale}
+                  step={MAP_LABEL.scaleStep}
                   onChange={onStationSizeScaleChange}
-                  format={(v) => `${v.toFixed(1)}x`}
+                  // 倍率だけだと何pxになるのか分からないので実際の文字サイズも出す
+                  format={(v) => `${Math.round(MAP_LABEL.baseFontPx * v)}px`}
                   decreaseLabel={translateUI('decrease', language)}
                   increaseLabel={translateUI('increase', language)}
                 />
@@ -697,9 +698,9 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   theme={theme}
                   label={translateUI('routeLineWidth', language)}
                   value={routeLineWidth}
-                  min={1}
-                  max={8}
-                  step={0.5}
+                  min={ROUTE_LINE.minWidth}
+                  max={ROUTE_LINE.maxWidth}
+                  step={ROUTE_LINE.widthStep}
                   onChange={onRouteLineWidthChange}
                   format={(v) => `${v.toFixed(1)}px`}
                   decreaseLabel={translateUI('decrease', language)}

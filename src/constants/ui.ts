@@ -93,3 +93,42 @@ export const NEUTRAL = {
  */
 export const alphaWhite = (alpha: number) => `rgba(255, 255, 255, ${alpha})`;
 export const alphaBlack = (alpha: number) => `rgba(0, 0, 0, ${alpha})`;
+
+/**
+ * 地図の駅ラベルの寸法。
+ *
+ * **ここは `FS` の12px下限の例外。** 地図のラベルは本文ではなく、
+ * 「読みやすさ」と「重ならずに何個並ぶか」のトレードオフが本文と違う。
+ * 12pxに上げたところ18ラベル中3組が重なった（従来は1組）ため、
+ * 既定値は従来（`main`）と同じ 11px × 0.8 = 9px に戻している。
+ *
+ * 大きさはユーザーが設定パネルの「駅アイコンの大きさ」で変えられ、
+ * 選んだ倍率は次回以降も保持される（`utils/mapSizePersistence.ts`）。
+ * 既定値を変えたいときはこのオブジェクトだけを直せばよい。
+ */
+export const MAP_LABEL = {
+  /** 駅名の基準サイズ(px)。これに倍率をかけたものが実際の文字サイズ */
+  baseFontPx: 11,
+  /** 既定の倍率。11 × 0.8 = 9px */
+  defaultScale: 0.8,
+  /** 倍率の下限・上限と刻み（設定パネルの増減ボタン） */
+  minScale: 0.5,
+  maxScale: 2.0,
+  scaleStep: 0.1,
+  /** ふりがなはルビなので駅名の75%。下限は7px */
+  furiganaRatio: 0.75,
+  furiganaMinPx: 7,
+  /** ラベルの内側の余白(px) */
+  paddingYPx: 1,
+  paddingXPx: 3,
+} as const;
+
+/**
+ * 路線の線の太さ(px)。駅ラベルと同じく設定パネルで変えられ、保持される。
+ */
+export const ROUTE_LINE = {
+  defaultWidth: 3,
+  minWidth: 1,
+  maxWidth: 8,
+  widthStep: 0.5,
+} as const;

@@ -1681,3 +1681,24 @@
   サンドボックスからNetlifyには到達できないが、ビルド完了はこのコメントで
   確認できるので「ビルド中かもしれません」と濁さない
 - ブランチ固定URLはユーザーがダッシュボードで有効化するまで貼らない
+
+### fix: 地図の駅ラベルの大きさを main の値に戻し、調整結果を保持する
+- `src/constants/ui.ts`（`MAP_LABEL` / `ROUTE_LINE` を追加）
+- `src/utils/mapSizePersistence.ts`（新規）
+- `src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`,
+  `src/components/legend/MapConfigPanel.tsx`
+- 文字サイズを12px下限の規格に揃えた際、地図の駅ラベルも
+  11px×0.8=9px → 12px×1.0 に上がって以前と見た目が変わっていた。
+  地図は「読みやすさ」と「ラベルが重ならずに何個並ぶか」のトレードオフが
+  本文と違い、12pxではラベルの重なりが18中1組→3組に増えていた
+- **既定値を main と同じに戻す**: 駅ラベル 11px×0.8=9px、ふりがな 75%・下限7px、
+  余白 1px 3px、線の太さ 3px。文字幅の見積もりの基準も11pxに戻した
+- 数値は `MAP_LABEL` / `ROUTE_LINE` の1箇所に集約し、既定値を変えるときは
+  ここだけ直せばよいようにした。`FS` の12px下限の例外であることを明記
+- **調整結果を保持する**: これまで設定パネルで大きさを変えても
+  リロードで既定値に戻っていた。localStorage に保存し、
+  設定の保存/読み込み（MapConfig）にも含めた
+- 増減ボタンの表示を「0.8x」から実際の文字サイズ「9px」に変えた
+  （倍率だけでは何pxになるか分からなかった）
+- `tests/unit/utils/mapSizePersistence.test.ts`（新規, 9件）で既定値を数値で固定。
+  空文字の保存値が 0 と解釈されて下限に丸められる不具合をこのテストで発見・修正

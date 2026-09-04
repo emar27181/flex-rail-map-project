@@ -50,7 +50,13 @@ import {
   addMinutes,
   type Departure,
 } from '../data/timetableData';
-import { FS, TARGET, SEMANTIC, NEUTRAL, alphaWhite, alphaBlack } from '../constants/ui';
+import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, alphaWhite, alphaBlack } from '../constants/ui';
+import {
+  getInitialStationSizeScale,
+  persistStationSizeScale,
+  getInitialRouteLineWidth,
+  persistRouteLineWidth,
+} from '../utils/mapSizePersistence';
 import ColorChip from './ui/ColorChip';
 import { checkboxInput, L} from './legend/legendStyles';
 import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, tintColor, LIGHT_TEXT } from '../utils/contrast';
@@ -197,17 +203,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showFurigana, setShowFurigana] = useState(false);
   const [showStationNumbers, setShowStationNumbers] = useState(language !== 'japanese');
   /**
-   * 駅ラベルの倍率。1.0 で規格どおりの12px。
+   * 駅ラベルの倍率と路線の線の太さ。
    *
-   * 以前は 0.8 が既定で、11px × 0.8 = 9px の文字が地図上に並んでいた。
-   * Apple HIG / Material / GOV.UK のいずれも12pxを下限としており、
-   * 地図の主コンテンツである駅名がそれを大きく下回っていた。
+   * 既定値・下限・上限は `MAP_LABEL` / `ROUTE_LINE` の1箇所で決める。
+   * 一度 12px（倍率1.0）に上げたが、地図はラベルが重ならずに何個並ぶかが
+   * 効くため、従来どおり 11px × 0.8 = 9px を既定に戻した。
+   *
+   * ユーザーが変えた値は次回以降も保持する（毎回調整し直さずに済むように）。
    */
-  const [stationSizeScale, setStationSizeScale] = useState(1.0);
-  const [routeLineWidth, setRouteLineWidth] = useState(3); // 路線の線の太さ（デフォルト3px）
+  const [stationSizeScale, setStationSizeScale] = useState(getInitialStationSizeScale);
+  const [routeLineWidth, setRouteLineWidth] = useState(getInitialRouteLineWidth);
+  useEffect(() => { persistStationSizeScale(stationSizeScale); }, [stationSizeScale]);
+  useEffect(() => { persistRouteLineWidth(routeLineWidth); }, [routeLineWidth]);
   // 派生値（レンダリング内で都度計算）
-  /** 駅ラベルの文字サイズ。規格の最小段階を基準に倍率をかける */
-  const stationLabelFontSize = Math.round(parseFloat(FS.caption) * stationSizeScale);
+  /** 駅ラベルの文字サイズ。基準サイズに倍率をかける */
+  const stationLabelFontSize = Math.round(MAP_LABEL.baseFontPx * stationSizeScale);
   const stationIconScale = stationSizeScale;
   /**
    * 駅ラベルの寸法・装飾の単一定義。
@@ -222,14 +232,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     /** ラベル1行ぶんの高さ（padding込み） */
     height: Math.round(stationLabelFontSize * 1.6 + 2),
     /** ふりがな行の高さ */
-    furiganaHeight: Math.round(stationLabelFontSize * 0.75 * 1.4 + 1),
+    furiganaHeight: Math.round(stationLabelFontSize * MAP_LABEL.furiganaRatio * 1.4 + 1),
     /**
      * ふりがなは駅名の読みを補うルビで、本文として読ませる文字ではない。
-     * 一般的なルビと同じく本文の75%にするが、10pxは下回らせない。
+     * 一般的なルビと同じく駅名の75%にする。
      */
-    furiganaFontSize: Math.max(10, Math.round(stationLabelFontSize * 0.75)),
+    furiganaFontSize: Math.max(
+      MAP_LABEL.furiganaMinPx,
+      Math.round(stationLabelFontSize * MAP_LABEL.furiganaRatio),
+    ),
     radiusCss: L.r.control,
-    paddingCss: `${L.sp.xxs} ${L.sp.xs}`,
+    paddingCss: `${MAP_LABEL.paddingYPx}px ${MAP_LABEL.paddingXPx}px`,
     borderWidth: 1,
   }), [stationLabelFontSize]);
   const [travelTimeLabelMode, setTravelTimeLabelMode] = useState<'interval' | 'cumulative'>('interval'); // 累積は実装中
@@ -737,13 +750,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     alwaysVisibleMinRoutes,
     arrivalAlertEnabled,
     arrivalAlertMinutes,
+    stationSizeScale,
+    routeLineWidth,
   }), [heatmapEnabled, heatmapParam, heatmapCustomRange, visibleRoutes,
       showTransferStationsOnly, showExpressStationsOnly, showTravelTimes,
       showStationNames, showFurigana, showStationNumbers, showOsmTiles,
       mapViewMode, timeFilterEnabled, timeFilterMaxMinutes,
       showStationTooltip, showFullRouteStations,
       alwaysVisibleStationsEnabled, alwaysVisibleMinRoutes,
-      arrivalAlertEnabled, arrivalAlertMinutes]);
+      arrivalAlertEnabled, arrivalAlertMinutes,
+      stationSizeScale, routeLineWidth]);
 
   // インポートされた設定を一括適用
   const handleImportConfig = useCallback((cfg: MapConfig) => {
@@ -768,6 +784,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (cfg.alwaysVisibleMinRoutes !== undefined) setAlwaysVisibleMinRoutes(cfg.alwaysVisibleMinRoutes);
     if (cfg.arrivalAlertEnabled !== undefined) setArrivalAlertEnabled(cfg.arrivalAlertEnabled);
     if (cfg.arrivalAlertMinutes !== undefined) setArrivalAlertMinutes(cfg.arrivalAlertMinutes);
+    if (cfg.stationSizeScale !== undefined) setStationSizeScale(cfg.stationSizeScale);
+    if (cfg.routeLineWidth !== undefined) setRouteLineWidth(cfg.routeLineWidth);
   }, []);
 
   const routeFinder = useMemo(() => {
@@ -1746,7 +1764,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // テキスト幅を文字種別考慮で推定（ASCII約7px, 日本語約12px, パディング12px）
   const estimateTextWidth = (text: string): number => {
-    const scale = stationLabelFontSize / parseFloat(FS.caption);
+    const scale = stationLabelFontSize / MAP_LABEL.baseFontPx;
     let w = Math.round(6 * scale); // padding
     for (const ch of text) w += Math.round((ch.charCodeAt(0) > 127 ? 12 : 7) * scale);
     return w;
@@ -1898,7 +1916,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const displayName = stationNumber ? `${stationNumber} ${translatedStationName}` : translatedStationName;
       const lfs = stationLabelFontSize;
       // フォントサイズに合わせて文字幅・高さをスケール
-      const scale = lfs / parseFloat(FS.caption);
+      const scale = lfs / MAP_LABEL.baseFontPx;
       const estimateScaledWidth = (text: string) => {
         let w = 6;
         for (const ch of text) w += ch.charCodeAt(0) > 127 ? 12 * scale : 7 * scale;

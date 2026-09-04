@@ -43,7 +43,8 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 ## 禁止
 
 - `fontSize: '12px'` のような数値の直書き → `FS.caption`。**12px未満は作らない**
-  （Apple HIG / Material / GOV.UK のいずれも12pxが下限。例外はふりがなのルビのみ）
+  （Apple HIG / Material / GOV.UK のいずれも12pxが下限）。
+  例外は地図の駅ラベルとそのふりがなだけで、こちらは `MAP_LABEL` から取る
 - `#4CAF50`(出発) `#F44336`(到着) `#2196F3`(primary) の直書き → `SEMANTIC.*` を使う。
   `rgba(76,175,80,0.12)` のように同じ色をrgbaで書き直すのも禁止 → `tintColor(SEMANTIC.departure, 0.12)`。
   `tests/unit/constants/semanticColors.test.ts` が `constants/ui.ts` 以外での出現を落とす

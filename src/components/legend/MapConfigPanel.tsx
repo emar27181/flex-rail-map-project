@@ -33,6 +33,10 @@ export type MapConfig = {
   arrivalAlertEnabled?: boolean;
   /** 降車駅アラームを鳴らす何分前か */
   arrivalAlertMinutes?: number;
+  /** 駅ラベルの倍率（旧バージョンの設定ファイルには無いため任意） */
+  stationSizeScale?: number;
+  /** 路線の線の太さ(px) */
+  routeLineWidth?: number;
 };
 
 type Props = {
