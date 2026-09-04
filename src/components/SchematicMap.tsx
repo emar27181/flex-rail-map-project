@@ -5,6 +5,8 @@ import type { RouteResult } from '../utils/routeFinder';
 import { createSchematicLayout, getRouteLayout, type SchematicStationLayout } from '../data/schematicLayout';
 import { translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
+import { SEMANTIC, NEUTRAL, FS} from '../constants/ui';
+import { L } from './legend/legendStyles';
 
 interface SchematicMapProps {
   visibleRoutes: Set<RouteKey>;
@@ -197,8 +199,8 @@ const SchematicMap: React.FC<SchematicMapProps> = ({
                   y={station.y - 10}
                   width="80"
                   height="20"
-                  fill="white"
-                  stroke={station.isDeparture ? '#4CAF50' : '#F44336'}
+                  fill={NEUTRAL.white}
+                  stroke={station.isDeparture ? SEMANTIC.departure : SEMANTIC.arrival}
                   strokeWidth="3"
                   rx="4"
                   style={{ cursor: 'pointer' }}
@@ -211,7 +213,7 @@ const SchematicMap: React.FC<SchematicMapProps> = ({
                 cx={station.x}
                 cy={station.y}
                 r={station.isTransfer ? 6 : 4}
-                fill="white"
+                fill={NEUTRAL.white}
                 stroke={route.color}
                 strokeWidth="2"
                 style={{ cursor: 'pointer' }}
@@ -226,7 +228,7 @@ const SchematicMap: React.FC<SchematicMapProps> = ({
                   textAnchor="middle"
                   fontSize="12"
                   fontWeight="bold"
-                  fill={station.isDeparture ? '#4CAF50' : station.isArrival ? '#F44336' : '#333'}
+                  fill={station.isDeparture ? SEMANTIC.departure : station.isArrival ? SEMANTIC.arrival : '#333'}
                   style={{ cursor: 'pointer' }}
                   onClick={(e) => handleStationClick(station, e)}
                 >
@@ -244,9 +246,9 @@ const SchematicMap: React.FC<SchematicMapProps> = ({
         bottom: '10px',
         left: '10px',
         backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        padding: '8px',
-        borderRadius: '4px',
-        fontSize: '11px',
+        padding: L.sp.md,
+        borderRadius: L.r.control,
+        fontSize: FS.caption,
         color: '#666'
       }}>
         {translateUI('schematicMapHint', language)}

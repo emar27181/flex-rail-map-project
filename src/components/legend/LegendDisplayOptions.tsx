@@ -3,7 +3,10 @@ import { TrainFront } from 'lucide-react';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
-import { checkboxInput } from './legendStyles';
+import { checkboxInput, L} from './legendStyles';
+import Radio from '../ui/atoms/Radio';
+import Checkbox from '../ui/atoms/Checkbox';
+import { FS } from '../../constants/ui';
 
 interface LegendDisplayOptionsProps {
   mapViewMode: 'realistic' | 'schematic';
@@ -26,84 +29,55 @@ const LegendDisplayOptions: React.FC<LegendDisplayOptionsProps> = ({
 
   return (
     <div style={{
-      marginBottom: '15px',
-      padding: '10px',
+      marginBottom: L.sp['2xl'],
+      padding: L.sp.lg,
       backgroundColor: colors.surface,
-      borderRadius: '4px',
+      borderRadius: L.r.control,
       border: `1px solid ${colors.borderLight}`
     }}>
-      <div style={{ marginBottom: '10px' }}>
+      <div style={{ marginBottom: L.sp.lg }}>
         <label style={{
           display: 'block',
-          marginBottom: '8px',
-          fontSize: '12px',
+          marginBottom: L.sp.md,
+          fontSize: FS.caption,
           fontWeight: 'bold',
           color: colors.text
         }}>
           {translateUI('mapDisplayMode', language)}:
         </label>
-        <div style={{ marginBottom: '12px' }}>
-          <label style={{
-            display: 'flex',
-            alignItems: 'center',
-            fontSize: '11px',
-            color: colors.text,
-            cursor: 'pointer',
-            marginBottom: '4px'
-          }}>
-            <input
-              type="radio"
-              name="mapViewMode"
-              checked={mapViewMode === 'realistic'}
-              onChange={() => onMapViewModeChange('realistic')}
-              style={{
-                marginRight: '6px',
-                cursor: 'pointer'
-              }}
-            />
+        <div style={{ marginBottom: L.sp.xl }}>
+          <Radio
+            theme={theme}
+            size="sm"
+            name="mapViewMode"
+            checked={mapViewMode === 'realistic'}
+            onChange={() => onMapViewModeChange('realistic')}
+          >
             {translateUI('realisticView', language)}
-          </label>
-          <label style={{
-            display: 'flex',
-            alignItems: 'center',
-            fontSize: '11px',
-            color: colors.text,
-            cursor: 'pointer',
-            marginBottom: '4px'
-          }}>
-            <input
-              type="radio"
-              name="mapViewMode"
-              checked={mapViewMode === 'schematic'}
-              onChange={() => onMapViewModeChange('schematic')}
-              style={{
-                marginRight: '6px',
-                cursor: 'pointer'
-              }}
-            />
+          </Radio>
+          <Radio
+            theme={theme}
+            size="sm"
+            name="mapViewMode"
+            checked={mapViewMode === 'schematic'}
+            onChange={() => onMapViewModeChange('schematic')}
+          >
             {translateUI('schematicView', language)}
-          </label>
+          </Radio>
         </div>
       </div>
 
       {/* 列車種別表示モード */}
       {onTrainTypeViewChange && (
-        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: `1px solid ${colors.borderLight}` }}>
-          <label style={{
-            display: 'flex',
-            alignItems: 'center',
-            fontSize: '11px',
-            color: colors.text,
-            cursor: 'pointer'
-          }}>
-            <input
-              type="checkbox"
-              checked={trainTypeViewEnabled}
-              onChange={(e) => onTrainTypeViewChange(e.target.checked)}
-              style={checkboxInput(colors)}
-            />
+        <div style={{ marginTop: L.sp.xl, paddingTop: L.sp.xl, borderTop: `1px solid ${colors.borderLight}` }}>
+          <Checkbox
+            theme={theme}
+            size="sm"
+            checked={trainTypeViewEnabled}
+            onChange={onTrainTypeViewChange}
+          >
             <TrainFront size={13} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />列車種別表示モード
-          </label>
+          </Checkbox>
         </div>
       )}
     </div>

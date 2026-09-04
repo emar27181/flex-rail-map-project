@@ -9,6 +9,9 @@ import type { Language } from '../utils/translation';
 import { stationReadings, normalizeToHiragana } from '../utils/stationReadings';
 import { FS } from '../constants/ui';
 import RouteRecommendationItem from './ui/RouteRecommendationItem';
+import IconButton from './ui/atoms/IconButton';
+import TextField from './ui/atoms/TextField';
+import { L } from './legend/legendStyles';
 
 interface MultiDepartureRoutesProps {
   /** 全出発駅の共通ゴール */
@@ -93,66 +96,61 @@ const MultiDepartureRoutes: React.FC<MultiDepartureRoutesProps> = ({
 
   return (
     <div style={{
-      marginBottom: '15px',
-      padding: '10px',
+      marginBottom: L.sp['2xl'],
+      padding: L.sp.lg,
       backgroundColor: colors.surface,
-      borderRadius: '4px',
+      borderRadius: L.r.control,
       border: `1px solid ${colors.borderLight}`,
     }}>
-      <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: colors.text }}>
+      <div style={{ fontSize: FS.title, fontWeight: 'bold', marginBottom: L.sp.md, color: colors.text }}>
         {translateUI('multiDepartureTitle', language)}
       </div>
 
       {extraDepartures.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.xs, marginBottom: L.sp.md }}>
           {extraDepartures.map(station => (
             <span key={station.name} style={{
-              display: 'inline-flex', alignItems: 'center', gap: '4px',
-              fontSize: FS.label, padding: '2px 6px', borderRadius: '12px',
+              display: 'inline-flex', alignItems: 'center', gap: L.sp.xs,
+              fontSize: FS.caption, padding: `${L.sp.xxs} ${L.sp.sm}`, borderRadius: L.r.card,
               backgroundColor: colors.surfaceElevated, border: `1px solid ${colors.border}`,
               color: colors.text,
             }}>
               {translateStation(station.name, language)}
-              <button
+              <IconButton
+                theme={theme}
+                size="sm"
                 onClick={() => onRemoveDeparture(station.name)}
-                aria-label={translateUI('removeDepartureLabel', language)}
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  width: '16px', height: '16px', border: 'none', borderRadius: '50%',
-                  backgroundColor: 'transparent', color: colors.textSecondary, cursor: 'pointer', padding: 0,
-                }}
-              ><X size={12} /></button>
+                label={translateUI('removeDepartureLabel', language)}
+                icon={<X size={12} />}
+              />
             </span>
           ))}
         </div>
       )}
 
       <div ref={wrapperRef} style={{ position: 'relative', marginBottom: entries.length > 0 ? '8px' : 0 }}>
-        <input
+        <TextField
+          theme={theme}
+          size="sm"
           type="text"
+          
           value={search}
           onChange={e => { setSearch(e.target.value); setShowResults(true); }}
           onFocus={() => setShowResults(true)}
           placeholder={translateUI('addDepartureButton', language)}
-          style={{
-            width: '100%', boxSizing: 'border-box',
-            padding: '4px 6px', fontSize: FS.label,
-            border: `1px solid ${colors.border}`, borderRadius: '4px',
-            backgroundColor: colors.surfaceElevated, color: colors.text,
-          }}
         />
         {showResults && filteredStations.length > 0 && (
           <div style={{
             position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20,
-            marginTop: '2px', maxHeight: '160px', overflowY: 'auto',
+            marginTop: L.sp.xxs, maxHeight: '160px', overflowY: 'auto',
             backgroundColor: colors.surfaceElevated, border: `1px solid ${colors.border}`,
-            borderRadius: '4px', boxShadow: `0 4px 12px ${colors.shadow}`,
+            borderRadius: L.r.control, boxShadow: `0 4px 12px ${colors.shadow}`,
           }}>
             {filteredStations.map(station => (
               <div
                 key={station.name}
                 onClick={() => handleSelect(station)}
-                style={{ padding: '5px 8px', fontSize: FS.label, color: colors.text, cursor: 'pointer' }}
+                style={{ padding: `${L.sp.xs} ${L.sp.md}`, fontSize: FS.caption, color: colors.text, cursor: 'pointer' }}
               >{translateStation(station.name, language)}</div>
             ))}
           </div>
@@ -160,7 +158,7 @@ const MultiDepartureRoutes: React.FC<MultiDepartureRoutesProps> = ({
       </div>
 
       {entries.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
           {entries.map(({ station, route }) => (
             route ? (
               <RouteRecommendationItem
@@ -174,8 +172,8 @@ const MultiDepartureRoutes: React.FC<MultiDepartureRoutesProps> = ({
               />
             ) : (
               <div key={station.name} style={{
-                padding: '6px', fontSize: FS.label, color: colors.textSecondary,
-                border: `1px solid ${colors.borderLight}`, borderRadius: '5px',
+                padding: L.sp.sm, fontSize: FS.caption, color: colors.textSecondary,
+                border: `1px solid ${colors.borderLight}`, borderRadius: L.r.control,
               }}>
                 {translateStation(station.name, language)}: {translateUI('noRoutesFound', language)}
               </div>

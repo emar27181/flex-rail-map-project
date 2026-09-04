@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import IconButton from './ui/atoms/IconButton';
+import { L } from './legend/legendStyles';
 
 interface StickyBottomAdProps {
   adSlot: string;
@@ -77,7 +79,7 @@ const StickyBottomAd: React.FC<StickyBottomAdProps> = ({ adSlot }) => {
           borderBottom: 'none',
           boxShadow: `0 -2px 8px ${colors.shadow}`,
           zIndex: 9999,
-          padding: '8px',
+          padding: L.sp.md,
           height: '90px',
           display: 'flex',
           alignItems: 'center',
@@ -87,46 +89,25 @@ const StickyBottomAd: React.FC<StickyBottomAdProps> = ({ adSlot }) => {
         }}
       >
         {/* 閉じるボタン */}
-        <button
+        <IconButton
+          theme={theme}
+          variant="outline"
+          size="sm"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             handleClose();
           }}
-          style={{
+          label="広告を閉じる"
+          icon={<X size={16} />}
+          styleOverride={{
             position: 'absolute',
             top: '8px',
             right: '8px',
-            background: colors.surface,
-            border: `1px solid ${colors.border}`,
-            cursor: 'pointer',
-            color: colors.textSecondary,
-            padding: '6px',
-            borderRadius: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.2s ease',
             zIndex: 10000,
-            minWidth: '28px',
-            minHeight: '28px',
-            boxShadow: `0 2px 4px ${colors.shadow}`
+            boxShadow: `0 2px 4px ${colors.shadow}`,
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = colors.surfaceElevated;
-            e.currentTarget.style.color = colors.text;
-            e.currentTarget.style.transform = 'scale(1.1)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = colors.surface;
-            e.currentTarget.style.color = colors.textSecondary;
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-          title="広告を閉じる"
-          aria-label="広告を閉じる"
-        >
-          <X size={16} />
-        </button>
+        />
 
         {/* 広告枠 */}
         <div

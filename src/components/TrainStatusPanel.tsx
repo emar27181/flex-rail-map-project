@@ -9,6 +9,11 @@ import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { FS } from '../constants/ui';
 import { translateUI, translateRoute, translateStation } from '../utils/translation';
 import type { Language } from '../utils/translation';
+import Button from './ui/atoms/Button';
+import IconButton from './ui/atoms/IconButton';
+import Chip from './ui/atoms/Chip';
+import TextField from './ui/atoms/TextField';
+import { L } from './legend/legendStyles';
 
 interface TrainStatusPanelProps {
   detectedRoute: DetectedRoute | null;
@@ -118,38 +123,32 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
   if (showOverride) {
     return (
       <div style={{
-        marginTop: '8px',
-        padding: '8px',
+        marginTop: L.sp.md,
+        padding: L.sp.md,
         border: `1px solid ${colors.border}`,
-        borderRadius: '6px',
+        borderRadius: L.r.control,
         backgroundColor: colors.surfaceElevated,
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-          <span style={{ fontSize: FS.label, fontWeight: 'bold', color: colors.text }}>{translateUI('selectRouteTitle', language)}</span>
-          <button
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: L.sp.sm }}>
+          <span style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.text }}>{translateUI('selectRouteTitle', language)}</span>
+          <IconButton
+            theme={theme}
+            size="sm"
             onClick={() => { setShowOverride(false); setOverrideSearch(''); }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: colors.textSecondary, fontSize: FS.base, display: 'flex', alignItems: 'center' }}
-          ><X size={16} /></button>
+            label={translateUI('close', language)}
+            icon={<X size={16} />}
+          />
         </div>
-        <input
-          ref={searchInputRef}
+        <TextField
+          theme={theme}
+          size="sm"
           type="text"
+          ref={searchInputRef}
           value={overrideSearch}
           onChange={e => setOverrideSearch(e.target.value)}
           onFocus={() => { searchInputFocusedRef.current = true; }}
           onBlur={() => { searchInputFocusedRef.current = false; }}
           placeholder={translateUI('searchRoutePlaceholder', language)}
-          style={{
-            width: '100%',
-            boxSizing: 'border-box',
-            padding: '4px 6px',
-            fontSize: FS.label,
-            border: `1px solid ${colors.border}`,
-            borderRadius: '4px',
-            backgroundColor: colors.surface,
-            color: colors.text,
-            marginBottom: '6px',
-          }}
         />
         <div style={{ maxHeight: '180px', overflowY: 'auto' }}>
           {filteredRoutes.map(r => {
@@ -158,44 +157,32 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
             const termB = routeStations[0]?.name ?? '';
             return (
               <div key={r.key} style={{
-                marginBottom: '4px',
-                padding: '6px 8px',
+                marginBottom: L.sp.xs,
+                padding: `${L.sp.sm} ${L.sp.md}`,
                 backgroundColor: colors.surface,
-                borderRadius: '4px',
+                borderRadius: L.r.control,
                 borderLeft: `4px solid ${r.color}`,
               }}>
-                <div style={{ fontSize: FS.label, color: colors.text, fontWeight: 'bold', marginBottom: '4px' }}>{translateRoute(r.name, language)}</div>
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  <button
+                <div style={{ fontSize: FS.caption, color: colors.text, fontWeight: 'bold', marginBottom: L.sp.xs }}>{translateRoute(r.name, language)}</div>
+                <div style={{ display: 'flex', gap: L.sp.sm, flexWrap: 'wrap' }}>
+                  <Chip
+                    theme={theme}
+                    size="sm"
+                    color={r.color}
+                    label={`→ ${translateStation(termA, language)}`}
+                    selected={false}
                     onClick={() => handleSelectRoute(r.key, 0)}
-                    style={{
-                      flex: '1 1 0',
-                      fontSize: FS.label,
-                      padding: '4px 6px',
-                      borderRadius: '4px',
-                      border: `1px solid ${r.color}`,
-                      backgroundColor: 'transparent',
-                      color: r.color,
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      minWidth: 0,
-                    }}
-                  >→ {translateStation(termA, language)}</button>
-                  <button
+                    styleOverride={{ flex: '1 1 0', minWidth: 0 }}
+                  />
+                  <Chip
+                    theme={theme}
+                    size="sm"
+                    color={r.color}
+                    label={`→ ${translateStation(termB, language)}`}
+                    selected={false}
                     onClick={() => handleSelectRoute(r.key, 1)}
-                    style={{
-                      flex: '1 1 0',
-                      fontSize: FS.label,
-                      padding: '4px 6px',
-                      borderRadius: '4px',
-                      border: `1px solid ${r.color}`,
-                      backgroundColor: 'transparent',
-                      color: r.color,
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      minWidth: 0,
-                    }}
-                  >→ {translateStation(termB, language)}</button>
+                    styleOverride={{ flex: '1 1 0', minWidth: 0 }}
+                  />
                 </div>
               </div>
             );
@@ -209,31 +196,23 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
   if (!effective) {
     return (
       <div style={{
-        marginTop: '6px',
-        padding: '3px 8px',
+        marginTop: L.sp.sm,
+        padding: `${L.sp.xs} ${L.sp.md}`,
         border: `1px solid ${colors.border}`,
-        borderRadius: '4px',
+        borderRadius: L.r.control,
         backgroundColor: colors.surfaceElevated,
         display: 'flex',
         alignItems: 'center',
-        gap: '6px',
+        gap: L.sp.sm,
       }}>
-        <span style={{ fontSize: FS.label, color: colors.textSecondary }}>{translateUI('detectingRoute', language)}</span>
-        <button
+        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('detectingRoute', language)}</span>
+        <Button
+          theme={theme}
+          variant="outline"
+          size="sm"
           onClick={() => setShowOverride(true)}
-          style={{
-            marginLeft: 'auto',
-            fontSize: FS.helper,
-            padding: '2px 6px',
-            // WCAG 2.2 AA (2.5.8 ターゲットサイズ) の最小24pxを満たす
-            minHeight: '24px',
-            borderRadius: '3px',
-            border: `1px solid ${colors.border}`,
-            backgroundColor: 'transparent',
-            color: colors.textSecondary,
-            cursor: 'pointer',
-          }}
-        >{translateUI('manualSetRoute', language)}</button>
+          styleOverride={{ marginLeft: 'auto' }}
+        >{translateUI('manualSetRoute', language)}</Button>
       </div>
     );
   }
@@ -241,34 +220,34 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
   // 路線検出済み
   return (
     <div style={{
-      marginTop: '6px',
-      padding: '4px 8px',
+      marginTop: L.sp.sm,
+      padding: `${L.sp.xs} ${L.sp.md}`,
       border: `1px solid ${effective.routeColor}44`,
       borderLeft: `4px solid ${effective.routeColor}`,
-      borderRadius: '4px',
+      borderRadius: L.r.control,
       backgroundColor: colors.surfaceElevated,
     }}>
       {/* 路線・方面行 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, marginBottom: L.sp.xxs, flexWrap: 'wrap' }}>
         <span style={{
-          fontSize: FS.label,
+          fontSize: FS.caption,
           fontWeight: 'bold',
           color: effective.routeColor,
           backgroundColor: effective.routeColor + '1a',
-          padding: '1px 6px',
-          borderRadius: '10px',
+          padding: `${L.sp.xxs} ${L.sp.sm}`,
+          borderRadius: L.r.card,
           border: `1px solid ${effective.routeColor}66`,
         }}>{translateRoute(effective.routeName, language)}</span>
-        <span style={{ fontSize: FS.label, color: colors.text }}>
+        <span style={{ fontSize: FS.caption, color: colors.text }}>
           {translateUI('boundForStation', language, { station: translateStation(effective.terminalStation, language) })}
         </span>
         {isManual && (
           <span style={{
-            fontSize: FS.helper,
+            fontSize: FS.caption,
             color: colors.textSecondary,
             backgroundColor: colors.surface,
-            padding: '1px 4px',
-            borderRadius: '3px',
+            padding: `${L.sp.xxs} ${L.sp.xs}`,
+            borderRadius: L.r.control,
             border: `1px solid ${colors.border}`,
           }}>{translateUI('manualBadge', language)}</span>
         )}
@@ -276,31 +255,31 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
 
       {/* 駅行: 停車中は現在の駅、走行中は次の駅を表示 */}
       {effective.currentStation ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-          <span style={{ fontSize: FS.helper, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('currentStationLabel', language)}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, marginBottom: L.sp.xxs }}>
+          <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('currentStationLabel', language)}</span>
           <span style={{
-            fontSize: FS.base,
+            fontSize: FS.body,
             fontWeight: 'bold',
             color: colors.text,
           }}>{translateStation(effective.currentStation, language)}</span>
           <span style={{
-            fontSize: FS.label,
+            fontSize: FS.caption,
             color: colors.textSecondary,
             marginLeft: 'auto',
             whiteSpace: 'nowrap',
           }}>{translateUI('stoppedLabel', language)}</span>
         </div>
       ) : (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-          <span style={{ fontSize: FS.helper, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('nextStationLabel', language)}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, marginBottom: L.sp.xxs }}>
+          <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('nextStationLabel', language)}</span>
           <span style={{
-            fontSize: FS.base,
+            fontSize: FS.body,
             fontWeight: 'bold',
             color: colors.text,
           }}>{translateStation(effective.nextStation, language)}</span>
           {dynamicEstMinutes !== null && (
             <span style={{
-              fontSize: FS.label,
+              fontSize: FS.caption,
               color: colors.textSecondary,
               marginLeft: 'auto',
               whiteSpace: 'nowrap',
@@ -310,47 +289,22 @@ const TrainStatusPanel: React.FC<TrainStatusPanelProps> = ({
       )}
 
       {/* 操作ボタン行 */}
-      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
-        <button
+      <div style={{ display: 'flex', gap: L.sp.sm, flexWrap: 'wrap', marginTop: L.sp.xs }}>
+        <Button
+          theme={theme}
+          variant="outline"
+          size="sm"
           onClick={handleFlipDirection}
           title={translateUI('flipDirectionTitle', language)}
-          style={{
-            fontSize: FS.label,
-            padding: '5px 12px',
-            borderRadius: '6px',
-            border: `1.5px solid ${colors.border}`,
-            backgroundColor: colors.surfaceElevated,
-            color: colors.text,
-            cursor: 'pointer',
-            fontWeight: '500',
-          }}
-        ><ArrowLeftRight size={13} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />{translateUI('flipDirection', language)}</button>
-        <button
-          onClick={() => setShowOverride(true)}
-          style={{
-            fontSize: FS.label,
-            padding: '5px 12px',
-            borderRadius: '6px',
-            border: `1.5px solid ${colors.border}`,
-            backgroundColor: colors.surfaceElevated,
-            color: colors.text,
-            cursor: 'pointer',
-            fontWeight: '500',
-          }}
-        >{translateUI('changeRoute', language)}</button>
+          icon={<ArrowLeftRight size={13} />}
+        >{translateUI('flipDirection', language)}</Button>
+        <Button theme={theme} variant="outline" size="sm" onClick={() => setShowOverride(true)}>
+          {translateUI('changeRoute', language)}
+        </Button>
         {isManual && (
-          <button
-            onClick={handleReset}
-            style={{
-              fontSize: FS.label,
-              padding: '5px 12px',
-              borderRadius: '6px',
-              border: `1.5px solid ${colors.border}`,
-              backgroundColor: colors.surfaceElevated,
-              color: colors.textSecondary,
-              cursor: 'pointer',
-            }}
-          >{translateUI('resetToAutoDetect', language)}</button>
+          <Button theme={theme} variant="ghost" size="sm" onClick={handleReset}>
+            {translateUI('resetToAutoDetect', language)}
+          </Button>
         )}
       </div>
     </div>

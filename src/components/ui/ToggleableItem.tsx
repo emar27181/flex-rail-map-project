@@ -1,5 +1,9 @@
 import React from 'react';
 import { getThemeColors } from '../../contexts/ThemeContext';
+import { checkboxInput, selectableCard, L} from '../legend/legendStyles';
+import { tintColor } from '../../utils/contrast';
+import { SEMANTIC, FS} from '../../constants/ui';
+import ToggleMark from './atoms/ToggleMark';
 
 interface ToggleableItemProps {
   id: string;
@@ -39,35 +43,33 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
       style={{
         display: 'flex',
         alignItems: 'center',
-        marginBottom: '6px',
-        fontSize: '12px',
+        marginBottom: L.sp.sm,
+        fontSize: FS.caption,
         cursor: 'pointer',
-        padding: '4px',
-        borderRadius: '3px',
+        padding: L.sp.xs,
+        // 選択・強調は枠線の太さではなく色と背景で示す。
+        // 太さを変えると行の幅と高さが動いて一覧の並びがずれる。
+        ...selectableCard(colors, {
+          selected: isHighlighted || isActive,
+          // 経路に含まれる行は強調色、単に表示ONの行はその路線の色
+          accent: isHighlighted ? undefined : colorIndicator?.color,
+          radius: '3px',
+        }),
+        // 強調（経路に含まれる）行は背景をもう少し濃くして区別する
         backgroundColor: isHighlighted
-          ? 'rgba(33, 150, 243, 0.25)'
+          ? tintColor(colors.primary ?? SEMANTIC.primary, 0.28)
           : isActive
-            ? 'rgba(0, 123, 255, 0.1)'
-            : 'rgba(108, 117, 125, 0.1)',
-        border: isHighlighted
-          ? '2px solid #2196F3'
-          : `1px solid ${isActive ? '#007bff' : '#6c757d'}`,
-        transition: 'all 0.2s ease'
+            ? tintColor(colorIndicator?.color ?? colors.primary ?? SEMANTIC.primary, 0.16)
+            : colors.surface,
       }}
     >
-      <input
+      <ToggleMark
         type={inputType}
         name={inputName}
         checked={isActive}
         onChange={(e) => {
           e.stopPropagation();
           onToggle(id);
-        }}
-        style={{
-          marginRight: '8px',
-          cursor: 'pointer',
-          // 長いラベルに押されて潰れないようにする
-          flexShrink: 0
         }}
       />
 
@@ -78,8 +80,8 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
           backgroundColor: adjustColorForTheme
             ? adjustColorForTheme(colorIndicator.color, theme)
             : colorIndicator.color,
-          marginRight: '8px',
-          borderRadius: '1px',
+          marginRight: L.sp.md,
+          borderRadius: L.r.control,
           flexShrink: 0,
           opacity: isActive ? (colorIndicator.opacity || 1) : 0.3
         }} />
@@ -87,7 +89,7 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
 
       <span style={{
         color: isHighlighted
-          ? '#2196F3'
+          ? SEMANTIC.primary
           : isActive
             ? colors.text
             : colors.textMuted,
@@ -103,9 +105,9 @@ const ToggleableItem: React.FC<ToggleableItemProps> = ({
         {label}
         {badge && (
           <span style={{
-            fontSize: '10px',
-            marginLeft: '4px',
-            color: '#2196F3',
+            fontSize: FS.caption,
+            marginLeft: L.sp.xs,
+            color: SEMANTIC.primary,
             fontWeight: 'normal'
           }}>
             ({badge})

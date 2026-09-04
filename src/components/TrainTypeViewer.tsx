@@ -3,6 +3,10 @@ import { TrainFront } from 'lucide-react';
 import type { RouteKey } from '../data/routes';
 import { trainServices, getStationStops, getStationBorderStyle } from '../data/trainServices';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import Select from './ui/atoms/Select';
+import TextField from './ui/atoms/TextField';
+import { FS } from '../constants/ui';
+import { L } from './legend/legendStyles';
 
 interface TrainTypeViewerProps {
   selectedRoute: RouteKey | null;
@@ -67,7 +71,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
       style={{
         backgroundColor: colors.surface,
         border: `1px solid ${colors.border}`,
-        borderRadius: '8px',
+        borderRadius: L.r.card,
         overflow: 'hidden',
         fontFamily: 'system-ui, -apple-system, sans-serif'
       }}
@@ -77,7 +81,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
         style={{
           backgroundColor: colors.primary,
           color: colors.onPrimary,
-          padding: '12px 16px',
+          padding: `${L.sp.xl} ${L.sp['2xl']}`,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -85,11 +89,11 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
         }}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <span style={{ fontWeight: '600', fontSize: '14px' }}>
+        <span style={{ fontWeight: '600', fontSize: FS.title }}>
           <TrainFront size={15} style={{ verticalAlign: 'text-bottom', marginRight: 5 }} />列車種別表示
         </span>
         <span style={{
-          fontSize: '12px',
+          fontSize: FS.caption,
           transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
           transition: 'transform 0.2s ease'
         }}>
@@ -98,112 +102,98 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
       </div>
 
       {isExpanded && (
-        <div style={{ padding: '16px' }}>
+        <div style={{ padding: L.sp['2xl'] }}>
           {/* 路線選択 */}
-          <div style={{ marginBottom: '16px' }}>
+          <div style={{ marginBottom: L.sp['2xl'] }}>
             <label style={{
               display: 'block',
-              marginBottom: '8px',
-              fontSize: '12px',
+              marginBottom: L.sp.md,
+              fontSize: FS.caption,
               fontWeight: '500',
               color: colors.onSurface
             }}>
               路線選択
             </label>
-            <select
-              value={selectedRoute || ''}
+            <Select
+                        theme={theme}
+                        size="sm"
+                        value={selectedRoute || ''}
               onChange={handleRouteChange}
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                borderRadius: '4px',
-                border: `1px solid ${colors.border}`,
-                backgroundColor: colors.surface,
-                color: colors.onSurface,
-                fontSize: '13px'
-              }}
-            >
+                      >
               <option value="">路線を選択してください</option>
               {availableRoutes.map(routeKey => (
                 <option key={routeKey} value={routeKey}>
                   {getRouteDisplayName(routeKey)}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           {/* 列車種別選択 */}
           {selectedRouteService && (
-            <div style={{ marginBottom: '16px' }}>
+            <div style={{ marginBottom: L.sp['2xl'] }}>
               <label style={{
                 display: 'block',
-                marginBottom: '8px',
-                fontSize: '12px',
+                marginBottom: L.sp.md,
+                fontSize: FS.caption,
                 fontWeight: '500',
                 color: colors.onSurface
               }}>
                 列車種別
               </label>
-              <select
-                value={selectedTrainType || ''}
+              <Select
+                        theme={theme}
+                        size="sm"
+                        value={selectedTrainType || ''}
                 onChange={handleTrainTypeChange}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  borderRadius: '4px',
-                  border: `1px solid ${colors.border}`,
-                  backgroundColor: colors.surface,
-                  color: colors.onSurface,
-                  fontSize: '13px'
-                }}
-              >
+                      >
                 <option value="">列車種別を選択してください</option>
                 {selectedRouteService.trainTypes.map(trainType => (
                   <option key={trainType.id} value={trainType.id}>
                     {trainType.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           )}
 
           {/* 列車種別の説明 */}
           {selectedRouteService && selectedTrainType && (
-            <div style={{ marginBottom: '16px' }}>
+            <div style={{ marginBottom: L.sp['2xl'] }}>
               {(() => {
                 const trainType = selectedRouteService.trainTypes.find(t => t.id === selectedTrainType);
                 if (!trainType) return null;
 
                 return (
                   <div style={{
-                    padding: '12px',
+                    padding: L.sp.xl,
                     backgroundColor: trainType.color + '20',
-                    borderRadius: '6px',
+                    borderRadius: L.r.control,
                     border: `1px solid ${trainType.color}50`
                   }}>
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      marginBottom: '8px'
+                      marginBottom: L.sp.md
                     }}>
                       <span style={{
                         backgroundColor: trainType.color,
-                        color: 'white',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        fontSize: '12px',
+                        color: colors.onPrimary,
+                        padding: `${L.sp.xs} ${L.sp.md}`,
+                        borderRadius: L.r.control,
+                        fontSize: FS.caption,
                         fontWeight: 'bold',
-                        marginRight: '8px'
+                        marginRight: L.sp.md
                       }}>
                         {trainType.displayName}
                       </span>
-                      <span style={{ fontSize: '13px', fontWeight: '500', color: colors.onSurface }}>
+                      <span style={{ fontSize: FS.body, fontWeight: '500', color: colors.onSurface }}>
                         {trainType.name}
                       </span>
                     </div>
                     {trainType.description && (
                       <p style={{
-                        fontSize: '12px',
+                        fontSize: FS.caption,
                         color: colors.onSurface + '80',
                         margin: 0
                       }}>
@@ -218,31 +208,25 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
 
           {/* 駅フィルター */}
           {Object.keys(stationStops).length > 0 && (
-            <div style={{ marginBottom: '16px' }}>
+            <div style={{ marginBottom: L.sp['2xl'] }}>
               <label style={{
                 display: 'block',
-                marginBottom: '8px',
-                fontSize: '12px',
+                marginBottom: L.sp.md,
+                fontSize: FS.caption,
                 fontWeight: '500',
                 color: colors.onSurface
               }}>
                 駅名フィルター
               </label>
-              <input
-                type="text"
+              <TextField
+          theme={theme}
+          size="sm"
+          type="text"
+          
                 placeholder="駅名で絞り込み..."
                 value={stationFilter}
                 onChange={(e) => setStationFilter(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  borderRadius: '4px',
-                  border: `1px solid ${colors.border}`,
-                  backgroundColor: colors.surface,
-                  color: colors.onSurface,
-                  fontSize: '13px'
-                }}
-              />
+        />
             </div>
           )}
 
@@ -250,20 +234,20 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
           {Object.keys(stationStops).length > 0 && (
             <div>
               <div style={{
-                marginBottom: '12px',
+                marginBottom: L.sp.xl,
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center'
               }}>
                 <span style={{
-                  fontSize: '12px',
+                  fontSize: FS.caption,
                   fontWeight: '500',
                   color: colors.onSurface
                 }}>
                   停車駅一覧
                 </span>
                 <span style={{
-                  fontSize: '11px',
+                  fontSize: FS.caption,
                   color: colors.onSurface + '60'
                 }}>
                   {filteredStations.filter(([, stops]) => stops).length} / {filteredStations.length} 駅
@@ -274,7 +258,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                 maxHeight: '300px',
                 overflowY: 'auto',
                 border: `1px solid ${colors.border}`,
-                borderRadius: '4px'
+                borderRadius: L.r.control
               }}>
                 {filteredStations.map(([stationName, stops], index) => {
                   // 個別駅の枠線スタイルを取得
@@ -284,7 +268,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                     <div
                       key={stationName}
                       style={{
-                        padding: '8px 12px',
+                        padding: `${L.sp.md} ${L.sp.xl}`,
                         borderBottom: index < filteredStations.length - 1 ? `1px solid ${colors.border}` : 'none',
                         backgroundColor: colors.surface,
                         display: 'flex',
@@ -292,7 +276,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                         alignItems: 'center'
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.md }}>
                         {/* 枠線プレビュー */}
                         {borderStyle && (
                           <div style={{
@@ -306,7 +290,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                         )}
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <span style={{
-                            fontSize: '13px',
+                            fontSize: FS.body,
                             color: colors.onSurface,
                             fontWeight: stops ? '500' : 'normal'
                           }}>
@@ -314,7 +298,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                           </span>
                           {borderStyle && (
                             <span style={{
-                              fontSize: '10px',
+                              fontSize: FS.caption,
                               color: colors.onSurface + '60'
                             }}>
                               {borderStyle.description}
@@ -324,7 +308,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                       </div>
 
                       <span style={{
-                        fontSize: '12px',
+                        fontSize: FS.caption,
                         fontWeight: '500',
                         color: stops ? '#22C55E' : '#EF4444'
                       }}>
@@ -339,11 +323,11 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
 
           {/* 枠線スタイル凡例 */}
           {selectedRoute && (
-            <div style={{ marginTop: '16px' }}>
+            <div style={{ marginTop: L.sp['2xl'] }}>
               <label style={{
                 display: 'block',
-                marginBottom: '8px',
-                fontSize: '12px',
+                marginBottom: L.sp.md,
+                fontSize: FS.caption,
                 fontWeight: '500',
                 color: colors.onSurface
               }}>
@@ -351,13 +335,13 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
               </label>
               <div style={{
                 border: `1px solid ${colors.border}`,
-                borderRadius: '6px',
+                borderRadius: L.r.control,
                 backgroundColor: colors.surface + '50',
-                padding: '12px'
+                padding: L.sp.xl
               }}>
                 {/* 枠線パターンの説明 */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.md }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.md }}>
                     <div style={{
                       width: '20px',
                       height: '20px',
@@ -366,12 +350,12 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                       backgroundColor: '#FF6666',
                       flexShrink: 0
                     }} />
-                    <span style={{ fontSize: '11px', color: colors.onSurface }}>
+                    <span style={{ fontSize: FS.caption, color: colors.onSurface }}>
                       太い二重線：特急・急行・快速系統停車
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.md }}>
                     <div style={{
                       width: '20px',
                       height: '20px',
@@ -380,12 +364,12 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                       backgroundColor: '#FF9966',
                       flexShrink: 0
                     }} />
-                    <span style={{ fontSize: '11px', color: colors.onSurface }}>
+                    <span style={{ fontSize: FS.caption, color: colors.onSurface }}>
                       太い一重線：急行系統停車
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.md }}>
                     <div style={{
                       width: '20px',
                       height: '20px',
@@ -394,12 +378,12 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                       backgroundColor: '#6699FF',
                       flexShrink: 0
                     }} />
-                    <span style={{ fontSize: '11px', color: colors.onSurface }}>
+                    <span style={{ fontSize: FS.caption, color: colors.onSurface }}>
                       中太一重線：快速系統停車
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.md }}>
                     <div style={{
                       width: '20px',
                       height: '20px',
@@ -408,12 +392,12 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                       backgroundColor: '#CCCCCC',
                       flexShrink: 0
                     }} />
-                    <span style={{ fontSize: '11px', color: colors.onSurface }}>
+                    <span style={{ fontSize: FS.caption, color: colors.onSurface }}>
                       細い一重線：各駅停車のみ
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.md }}>
                     <div style={{
                       width: '20px',
                       height: '20px',
@@ -422,7 +406,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
                       backgroundColor: 'transparent',
                       flexShrink: 0
                     }} />
-                    <span style={{ fontSize: '11px', color: colors.onSurface }}>
+                    <span style={{ fontSize: FS.caption, color: colors.onSurface }}>
                       破線：通過のみ
                     </span>
                   </div>
@@ -435,9 +419,9 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
           {!selectedRoute && (
             <div style={{
               textAlign: 'center',
-              padding: '20px',
+              padding: L.sp['3xl'],
               color: colors.onSurface + '60',
-              fontSize: '13px'
+              fontSize: FS.body
             }}>
               路線を選択すると、その路線の列車種別と停車駅情報を表示できます
             </div>

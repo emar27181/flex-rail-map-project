@@ -7435,6 +7435,74 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "表示路線切り替え",
     english: "Route Display Toggle"
   },
+  clearSelection: {
+    japanese: "選択を解除",
+    english: "Clear"
+  },
+  decrease: {
+    japanese: "小さくする",
+    english: "Decrease"
+  },
+  play: {
+    japanese: "再生",
+    english: "Play"
+  },
+  pause: {
+    japanese: "一時停止",
+    english: "Pause"
+  },
+  increase: {
+    japanese: "大きくする",
+    english: "Increase"
+  },
+  collapseList: {
+    japanese: "▲ 折りたたむ",
+    english: "▲ Collapse"
+  },
+  showMoreRoutes: {
+    japanese: "▼ 他 {count} 路線を表示",
+    english: "▼ Show {count} more routes"
+  },
+  routeViewBoard: {
+    japanese: "ボード",
+    english: "Board"
+  },
+  routeViewClassic: {
+    japanese: "一覧",
+    english: "List"
+  },
+  routeSearchPlaceholder: {
+    japanese: "路線名で絞り込む",
+    english: "Filter by route name"
+  },
+  routeGroupOnRoute: {
+    japanese: "経路上の路線",
+    english: "On your route"
+  },
+  routeGroupAtStation: {
+    japanese: "選択した駅を通る路線",
+    english: "Through selected stations"
+  },
+  routeGroupVisible: {
+    japanese: "表示中",
+    english: "Shown"
+  },
+  routeGroupHidden: {
+    japanese: "非表示",
+    english: "Hidden"
+  },
+  routeShowMore: {
+    japanese: "さらに{count}件",
+    english: "{count} more"
+  },
+  routeNoMatch: {
+    japanese: "一致する路線がありません",
+    english: "No matching routes"
+  },
+  routeVisibleSummary: {
+    japanese: "{shown} / {total} 路線を表示中",
+    english: "{shown} of {total} routes shown"
+  },
   showOnlyTransferStations: {
     japanese: "乗換駅のみ表示",
     english: "Show Transfer Stations Only"
@@ -7714,6 +7782,46 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   onboard: {
     japanese: "乗",
     english: "On"
+  },
+  show: {
+    japanese: "表示",
+    english: "Show"
+  },
+  lastUpdated: {
+    japanese: "最終更新",
+    english: "Last updated"
+  },
+  alwaysShowMajorStations: {
+    japanese: "主要駅を常に表示",
+    english: "Always show major stations"
+  },
+  arrivalAlert: {
+    japanese: "降車駅アラーム",
+    english: "Arrival alert"
+  },
+  arrivalAlertTiming: {
+    japanese: "知らせる:",
+    english: "Notify:"
+  },
+  arrivalAlertMinutesOption: {
+    japanese: "約{count}分前",
+    english: "~{count} min before"
+  },
+  arrivalAlertNote: {
+    japanese: "時刻表ではなく現在地と実際の速度から残り時間を出します。遅延していても目安になります。",
+    english: "Uses your GPS position and actual speed, not the timetable, so it still works during delays."
+  },
+  minRouteCount: {
+    japanese: "対象:",
+    english: "Threshold:"
+  },
+  routeCountOption: {
+    japanese: "{count}路線以上",
+    english: "{count}+ lines"
+  },
+  dataSource: {
+    japanese: "出典",
+    english: "Source"
   },
   afterSuffix: {
     japanese: "以降",
@@ -8350,6 +8458,23 @@ export type Language = 'japanese' | 'english' | 'chinese' | 'korean';
 
 // 中国語（簡体字）UI翻訳
 export const uiChinese: Record<string, string> = {
+  clearSelection: "清除选择",
+  decrease: "缩小",
+  play: "播放",
+  pause: "暂停",
+  increase: "放大",
+  collapseList: "▲ 折叠",
+  showMoreRoutes: "▼ 显示其他 {count} 条线路",
+  routeViewBoard: "面板",
+  routeViewClassic: "列表",
+  routeSearchPlaceholder: "按线路名称筛选",
+  routeGroupOnRoute: "路线上的线路",
+  routeGroupAtStation: "经过所选车站的线路",
+  routeGroupVisible: "显示中",
+  routeGroupHidden: "已隐藏",
+  routeShowMore: "再显示{count}条",
+  routeNoMatch: "没有符合的线路",
+  routeVisibleSummary: "已显示 {shown} / {total} 条线路",
   stationSelection: "选择出发站和到达站",
   departureStation: "出发站",
   arrivalStation: "到达站",
@@ -8438,6 +8563,16 @@ export const uiChinese: Record<string, string> = {
   currentTime: "当前时间",
   baseTime: "出发时间",
   onboard: "乘",
+  show: "显示",
+  lastUpdated: "最后更新",
+  alwaysShowMajorStations: "始终显示主要车站",
+  arrivalAlert: "到站提醒",
+  arrivalAlertTiming: "提醒时机:",
+  arrivalAlertMinutesOption: "约{count}分钟前",
+  arrivalAlertNote: "根据当前位置和实际速度计算剩余时间，不使用时刻表，因此延误时也可参考。",
+  minRouteCount: "对象:",
+  routeCountOption: "{count}条线路以上",
+  dataSource: "来源",
   afterSuffix: "以后",
   offRouteReference: "路线外参考",
   noData: "无数据",
@@ -8595,6 +8730,23 @@ export const uiChinese: Record<string, string> = {
 
 // 韓国語UI翻訳
 export const uiKorean: Record<string, string> = {
+  clearSelection: "선택 해제",
+  decrease: "작게",
+  play: "재생",
+  pause: "일시정지",
+  increase: "크게",
+  collapseList: "▲ 접기",
+  showMoreRoutes: "▼ 다른 {count}개 노선 표시",
+  routeViewBoard: "보드",
+  routeViewClassic: "목록",
+  routeSearchPlaceholder: "노선 이름으로 검색",
+  routeGroupOnRoute: "경로상의 노선",
+  routeGroupAtStation: "선택한 역을 지나는 노선",
+  routeGroupVisible: "표시 중",
+  routeGroupHidden: "숨김",
+  routeShowMore: "{count}개 더 보기",
+  routeNoMatch: "일치하는 노선이 없습니다",
+  routeVisibleSummary: "{total}개 중 {shown}개 노선 표시 중",
   stationSelection: "출발역·도착역 선택",
   departureStation: "출발역",
   arrivalStation: "도착역",
@@ -8683,6 +8835,16 @@ export const uiKorean: Record<string, string> = {
   currentTime: "현재 시간",
   baseTime: "출발 시간",
   onboard: "탑",
+  show: "표시",
+  lastUpdated: "최종 갱신",
+  alwaysShowMajorStations: "주요 역 항상 표시",
+  arrivalAlert: "하차역 알림",
+  arrivalAlertTiming: "알림 시점:",
+  arrivalAlertMinutesOption: "약 {count}분 전",
+  arrivalAlertNote: "시각표가 아니라 현재 위치와 실제 속도로 남은 시간을 계산하므로 지연 시에도 참고할 수 있습니다.",
+  minRouteCount: "대상:",
+  routeCountOption: "{count}개 노선 이상",
+  dataSource: "출처",
   afterSuffix: "이후",
   offRouteReference: "경로 외 참고",
   noData: "데이터 없음",
@@ -8878,6 +9040,7 @@ export const translateUI = (key: string, language: Language, params?: { [key: st
 
 /** 駅統計パラメータラベルの翻訳マップ */
 const statParamLabelMap: Record<string, { english: string; chinese: string; korean: string }> = {
+  '路線数':       { english: 'Line count',           chinese: '线路数量',       korean: '노선 수' },
   '家賃(1K)':     { english: 'Rent (1K)',          chinese: '租金(1K)',       korean: '월세(1K)' },
   '家賃(1LDK)':   { english: 'Rent (1LDK)',         chinese: '租金(1LDK)',     korean: '월세(1LDK)' },
   '人口密度':     { english: 'Pop. density',         chinese: '人口密度',       korean: '인구밀도' },
@@ -8906,6 +9069,7 @@ const statParamLabelMap: Record<string, { english: string; chinese: string; kore
  * 「軒」「棟」はラベル側に count / 数 が含まれるため、日本語以外では単位を出さない。
  */
 const statUnitMap: { [ja: string]: { english: string; chinese: string; korean: string } } = {
+  '路線': { english: 'lines', chinese: '条', korean: '개' },
   '軒': { english: '', chinese: '家', korean: '곳' },
   '棟': { english: '', chinese: '栋', korean: '동' },
   '件/年': { english: '/yr', chinese: '件/年', korean: '건/년' },

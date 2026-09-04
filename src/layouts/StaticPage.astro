@@ -1,0 +1,107 @@
+---
+/**
+ * 固定ページ（about / contact / faq / privacy / terms）の骨組み。
+ *
+ * この5ページは <head> のボイラープレート・スタイル・言語切替スクリプトを
+ * 丸ごとコピーして持っていた。同一のはずが実際には食い違っていて、
+ * hreflang のドメインが3ページだけ存在しない `flex-rail-map.netlify.app`
+ * を指したままになっていた（正しくは flex-railway-map）。
+ *
+ * ページ側には中身だけを書く。日本語版を `<div id={`${langPrefix}-ja`}>`、
+ * 英語版を `-en` で囲むと、?lang= に応じてどちらかが表示される。
+ */
+import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
+import { staticPageCss } from './staticPageStyles';
+
+/** 公開URL。hreflang と canonical はここだけを見る */
+const SITE_URL = 'https://flex-railway-map.netlify.app';
+
+interface Props {
+  /** <title> にそのまま入る */
+  title: string;
+  /** meta description */
+  description: string;
+  /** meta keywords（無いページは省略してよい） */
+  keywords?: string;
+  /** このページのパス（"/about" など）。canonical と hreflang に使う */
+  path: string;
+  /** 言語切替する要素のid接頭辞。"about" なら about-ja / about-en を切り替える */
+  langPrefix: string;
+  /** <html lang>。既定は日本語 */
+  htmlLang?: string;
+  /** 戻るリンクの文言 */
+  backLabel?: string;
+}
+
+const {
+  title,
+  description,
+  keywords,
+  path,
+  langPrefix,
+  htmlLang = 'ja',
+  backLabel = '← 路線図に戻る / Back to Map',
+} = Astro.props;
+---
+
+<html lang={htmlLang}>
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="google-site-verification"
+			content="uyjBT9z6vOnpxn6lM6YnxbI6R4jLSDIAboC8zo1slhM"
+		/>
+		<meta name="google-adsense-account" content="ca-pub-2444529114040977" />
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2444529114040977" crossorigin="anonymous"></script>
+		<link rel="icon" type="image/png" sizes="32x32" href="/icon_flex_rail_way_map.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="/icon_flex_rail_way_map.png" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/icon_flex_rail_way_map.png" />
+		<link rel="shortcut icon" href="/icon_flex_rail_way_map.png" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		{keywords && <meta name="keywords" content={keywords} />}
+		<meta name="robots" content="index, follow" />
+
+		<link rel="canonical" href={`${SITE_URL}${path}`} />
+		<link rel="alternate" hreflang="ja" href={`${SITE_URL}${path}?lang=ja`} />
+		<link rel="alternate" hreflang="en" href={`${SITE_URL}${path}?lang=en`} />
+		<link rel="alternate" hreflang="x-default" href={`${SITE_URL}${path}`} />
+
+		<slot name="head" />
+
+		<style set:html={staticPageCss}></style>
+	</head>
+	<body>
+		<div class="container">
+			<a href="/" class="back-link">{backLabel}</a>
+			<slot />
+		</div>
+
+		<script is:inline define:vars={{ langPrefix }}>
+			// ?lang=en なら英語版の塊だけを出す。既定は日本語
+			function switchLanguage() {
+				const lang = new URLSearchParams(window.location.search).get('lang') || 'ja';
+				const ja = document.getElementById(langPrefix + '-ja');
+				const en = document.getElementById(langPrefix + '-en');
+				if (!ja || !en) return;
+				ja.style.display = lang === 'en' ? 'none' : 'block';
+				en.style.display = lang === 'en' ? 'block' : 'none';
+			}
+
+			// 地図側と同じ localStorage のテーマに合わせる
+			function applyTheme() {
+				document.body.className = localStorage.getItem('theme') || 'light';
+			}
+
+			document.addEventListener('DOMContentLoaded', () => {
+				switchLanguage();
+				applyTheme();
+			});
+		</script>
+
+		<SimpleThemeWrapper client:only="react" />
+	</body>
+</html>

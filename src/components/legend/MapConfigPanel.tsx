@@ -3,6 +3,8 @@ import { getThemeColors } from '../../contexts/ThemeContext';
 import { section, text, btn, btnFull, textarea, L } from './legendStyles';
 import { translateUI } from '../../utils/translation';
 import type { Language } from '../../utils/translation';
+import Button from '../ui/atoms/Button';
+import TextArea from '../ui/atoms/TextArea';
 
 export type MapConfig = {
   version: 1;
@@ -23,6 +25,18 @@ export type MapConfig = {
   showStationTooltip: boolean;
   showFullRouteStations: boolean;
   showRouteLine: boolean;
+  /** 主要駅の常時表示（旧バージョンの設定ファイルには無いため任意） */
+  alwaysVisibleStationsEnabled?: boolean;
+  /** 常時表示の対象とする最小路線数 */
+  alwaysVisibleMinRoutes?: number;
+  /** 降車駅アラーム（旧バージョンの設定ファイルには無いため任意） */
+  arrivalAlertEnabled?: boolean;
+  /** 降車駅アラームを鳴らす何分前か */
+  arrivalAlertMinutes?: number;
+  /** 駅ラベルの倍率（旧バージョンの設定ファイルには無いため任意） */
+  stationSizeScale?: number;
+  /** 路線の線の太さ(px) */
+  routeLineWidth?: number;
 };
 
 type Props = {
@@ -111,35 +125,45 @@ export default function MapConfigPanel({ config, theme, language, onImport }: Pr
           <div>
             <div style={text.desc(colors)}>{translateUI('configExportDesc', language)}</div>
             <div style={{ display: 'flex', gap: L.sp.xs }}>
-              <button onClick={handleExportDownload} style={btn(colors)}>{translateUI('configExportSave', language)}</button>
-              <button onClick={handleCopy}           style={btn(colors)}>
+              <Button theme={theme} variant="outline" size="sm" onClick={handleExportDownload}>
+                {translateUI('configExportSave', language)}
+              </Button>
+              <Button theme={theme} variant="outline" size="sm" onClick={handleCopy}>
                 {copied ? translateUI('configExportCopied', language) : translateUI('configExportCopy', language)}
-              </button>
+              </Button>
             </div>
           </div>
 
           {/* インポート */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
             <div style={text.desc(colors)}>{translateUI('configImportDesc', language)}</div>
+            {/*
+              * 画面に出ないファイル選択欄。見た目を持たないのでアトムを通さない。
+              * 実際に押されるのは下のボタンで、そちらは規格どおり。
+              */}
             <input ref={fileInputRef} type="file" accept=".json"
               onChange={handleFileImport} style={{ display: 'none' }} />
-            <button onClick={() => fileInputRef.current?.click()} style={btnFull(colors)}>
+            <Button theme={theme} variant="outline" size="sm" fullWidth onClick={() => fileInputRef.current?.click()}>
               {translateUI('configImportFile', language)}
-            </button>
-            <textarea
+            </Button>
+            <TextArea
+              theme={theme}
+              size="sm"
               value={pasteText}
               onChange={e => { setPasteText(e.target.value); setError(null); }}
               placeholder={translateUI('configImportPaste', language)}
               rows={3}
-              style={textarea(colors)}
             />
-            <button
+            <Button
+              theme={theme}
+              variant="primary"
+              size="sm"
+              fullWidth
               onClick={handleImportText}
               disabled={!pasteText.trim()}
-              style={{ ...btnFull(colors), opacity: pasteText.trim() ? 1 : 0.5 }}
             >
               {translateUI('configImportApply', language)}
-            </button>
+            </Button>
             {error && (
               <div style={{ fontSize: L.fs.xs, color: '#e74c3c' }}>{error}</div>
             )}

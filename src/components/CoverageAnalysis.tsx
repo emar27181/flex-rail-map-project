@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { routes, routeNames, type RouteKey } from '../data/routes';
+import { SEMANTIC, NEUTRAL, FS} from '../constants/ui';
+import { L } from './legend/legendStyles';
 
 interface CoverageStats {
   totalRoutes: number;
@@ -99,11 +101,11 @@ const CoverageAnalysis: React.FC = () => {
   const getCoverageGrade = (stats: CoverageStats): { grade: string; color: string } => {
     const completenessScore = (stats.totalRoutes / 40) * 100; // 40路線を満点とする
     
-    if (completenessScore >= 90) return { grade: 'A', color: '#4CAF50' };
+    if (completenessScore >= 90) return { grade: 'A', color: SEMANTIC.departure };
     if (completenessScore >= 80) return { grade: 'B', color: '#8BC34A' };
     if (completenessScore >= 70) return { grade: 'C', color: '#FFC107' };
     if (completenessScore >= 60) return { grade: 'D', color: '#FF9800' };
-    return { grade: 'F', color: '#f44336' };
+    return { grade: 'F', color: SEMANTIC.arrival };
   };
 
   const { grade, color } = getCoverageGrade(coverageStats);
@@ -116,12 +118,12 @@ const CoverageAnalysis: React.FC = () => {
       zIndex: 1000,
       backgroundColor: 'rgba(255, 255, 255, 0.95)',
       border: '2px solid #ddd',
-      borderRadius: '8px',
-      padding: '10px',
+      borderRadius: L.r.card,
+      padding: L.sp.lg,
       minWidth: '200px',
       maxWidth: isExpanded ? '400px' : '200px',
       boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-      fontSize: '12px'
+      fontSize: FS.caption
     }}>
       <div 
         onClick={() => setIsExpanded(!isExpanded)}
@@ -133,10 +135,10 @@ const CoverageAnalysis: React.FC = () => {
           marginBottom: isExpanded ? '10px' : '0'
         }}
       >
-        <h3 style={{ margin: 0, fontSize: '14px' }}>路線カバレッジ分析</h3>
+        <h3 style={{ margin: 0, fontSize: FS.title }}>路線カバレッジ分析</h3>
         <div style={{
           backgroundColor: color,
-          color: 'white',
+          color: NEUTRAL.white,
           borderRadius: '50%',
           width: '24px',
           height: '24px',
@@ -144,7 +146,7 @@ const CoverageAnalysis: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'center',
           fontWeight: 'bold',
-          fontSize: '12px'
+          fontSize: FS.caption
         }}>
           {grade}
         </div>
@@ -152,40 +154,40 @@ const CoverageAnalysis: React.FC = () => {
 
       {isExpanded && (
         <div>
-          <div style={{ marginBottom: '15px' }}>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: '13px' }}>基本統計</h4>
+          <div style={{ marginBottom: L.sp['2xl'] }}>
+            <h4 style={{ margin: `0 0 ${L.sp.md} 0`, fontSize: FS.body }}>基本統計</h4>
             <div>登録路線数: <strong>{coverageStats.totalRoutes}</strong></div>
             <div>総駅数: <strong>{coverageStats.totalStations}</strong></div>
             <div>ユニーク駅数: <strong>{coverageStats.uniqueStations}</strong></div>
             <div>重複駅数: <strong>{coverageStats.duplicateStations}</strong></div>
           </div>
 
-          <div style={{ marginBottom: '15px' }}>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#f44336' }}>不完全な路線</h4>
+          <div style={{ marginBottom: L.sp['2xl'] }}>
+            <h4 style={{ margin: `0 0 ${L.sp.md} 0`, fontSize: FS.body, color: SEMANTIC.arrival }}>不完全な路線</h4>
             {coverageStats.incompleteRoutes.map((route, index) => (
-              <div key={index} style={{ marginBottom: '4px' }}>
+              <div key={index} style={{ marginBottom: L.sp.xs }}>
                 <strong>{route.routeName}</strong>: {route.currentStations}/{route.expectedStations}駅 
-                <span style={{ color: route.completeness < 70 ? '#f44336' : '#FF9800' }}>
+                <span style={{ color: route.completeness < 70 ? SEMANTIC.arrival : '#FF9800' }}>
                   ({route.completeness}%)
                 </span>
               </div>
             ))}
           </div>
 
-          <div style={{ marginBottom: '15px' }}>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#f44336' }}>欠落している重要路線</h4>
-            <div style={{ fontSize: '11px', color: '#666' }}>
+          <div style={{ marginBottom: L.sp['2xl'] }}>
+            <h4 style={{ margin: `0 0 ${L.sp.md} 0`, fontSize: FS.body, color: SEMANTIC.arrival }}>欠落している重要路線</h4>
+            <div style={{ fontSize: FS.caption, color: '#666' }}>
               {coverageStats.missingCriticalRoutes.join('、')}
             </div>
           </div>
 
           <div>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: '13px' }}>路線別駅数 (上位10)</h4>
+            <h4 style={{ margin: `0 0 ${L.sp.md} 0`, fontSize: FS.body }}>路線別駅数 (上位10)</h4>
             <div style={{ maxHeight: '120px', overflowY: 'auto' }}>
               {coverageStats.routeBreakdown.slice(0, 10).map((route, index) => (
                 <div key={route.routeKey} style={{ 
-                  marginBottom: '2px',
-                  fontSize: '11px',
+                  marginBottom: L.sp.xxs,
+                  fontSize: FS.caption,
                   display: 'flex',
                   justifyContent: 'space-between'
                 }}>
@@ -197,10 +199,10 @@ const CoverageAnalysis: React.FC = () => {
           </div>
 
           <div style={{ 
-            marginTop: '10px', 
-            paddingTop: '8px', 
+            marginTop: L.sp.lg, 
+            paddingTop: L.sp.md, 
             borderTop: '1px solid #eee',
-            fontSize: '10px',
+            fontSize: FS.caption,
             color: '#666'
           }}>
             <strong>改善提案:</strong><br/>

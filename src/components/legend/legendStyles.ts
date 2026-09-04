@@ -8,32 +8,66 @@
  *   </div>
  */
 import type { CSSProperties } from 'react';
+import { tintColor } from '../../utils/contrast';
+import { SEMANTIC, FS } from '../../constants/ui';
 
 // ── Design tokens ──────────────────────────────────────────────────────────
 
 export const L = {
-  /** Font sizes */
+  /**
+   * 文字サイズ。
+   *
+   * 独自の段階を持たず `FS` を指すだけにしている。
+   * 以前はここが 10/11/12/13/14px の別系統を持っていて、
+   * 凡例パネルだけ他より小さい文字になっていた。
+   */
   fs: {
-    xs:  '10px',  // muted notes, disclaimers
-    sm:  '11px',  // body text, labels, inputs
-    md:  '12px',  // section title, item label
-    lg:  '13px',  // prominent label
-    xl:  '14px',  // panel heading
+    xs:  FS.caption,
+    sm:  FS.caption,
+    md:  FS.caption,
+    lg:  FS.body,
+    xl:  FS.title,
   },
   /** Spacing (padding / margin / gap) */
   sp: {
+    /** 隣接する要素をわずかに離すだけ */
+    xxs: '2px',
     xs:  '4px',
     sm:  '6px',
     md:  '8px',
     lg:  '10px',
     xl:  '12px',
     '2xl': '16px',
+    /** パネルの外周など、ひとまわり大きい余白 */
+    '3xl': '20px',
+    /** ダイアログの内側、チェックボックス配下のインデント */
+    '4xl': '24px',
+    /** 節と節のあいだ、フッターの上 */
+    '5xl': '40px',
   },
-  /** Border radius */
+  /**
+   * 角の丸み。
+   *
+   * 「どこに使うか」で3つに分ける。値ではなく役割で選ぶこと。
+   * 以前は 1/2/3/4/5/6/8/10/12/20px の10種類が混在し、
+   * 同じ画面に違う丸みの部品が並んでいた。
+   *
+   * **基準は地図の駅ラベル（3px）。** 画面上でいちばん数が多く、
+   * いちばん目に入る部品がこの丸みなので、他をそれに合わせる。
+   * 一度 control を8pxにしたが、駅ラベルだけ丸い小判形になって
+   * 地図とパネルで別のデザインに見えたため戻した。
+   *
+   * 操作するもの（ボタン・入力欄・チップ・駅ラベル）は control、
+   * それらを載せる箱（パネル・カード・ポップアップ）は card、
+   * 丸くしたい小さな印（バッジ・件数）は pill。
+   */
   r: {
-    sm:   '3px',
-    md:   '4px',
-    pill: '8px',
+    /** ボタン・入力欄・チップ・地図の駅ラベルなど、操作する部品と小さな札 */
+    control: '3px',
+    /** パネル・カード・ポップアップなど、部品を載せる箱 */
+    card: '8px',
+    /** バッジ・件数など、完全に丸めたい小さな印 */
+    pill: '999px',
   },
   /**
    * セクション間の標準余白。
@@ -120,7 +154,7 @@ export function btn(colors: Colors): CSSProperties {
     fontSize:      L.fs.sm,
     padding:       `${L.sp.xs} ${L.sp.md}`,
     cursor:        'pointer',
-    borderRadius:  L.r.md,
+    borderRadius:  L.r.control,
     border:        `1px solid ${colors.border}`,
     background:    colors.surfaceElevated,
     color:         colors.text,
@@ -145,12 +179,24 @@ export function checkboxLabel(colors: Colors): CSSProperties {
   };
 }
 
-/** Checkbox input element (accent color = primary blue) */
+/**
+ * Checkbox input element (accent color = primary blue)
+ *
+ * 大きさは指定しない。チェックボックスは必ずクリック可能な
+ * ラベル行（実測 257×40px）の中に置く運用なので、WCAG 2.2 AA の
+ * 2.5.8「ターゲットサイズ(最小)」で測るべき対象はその行の方であり、
+ * 入力欄そのものを 24px に広げると白い四角が目立つだけで得がない。
+ *
+ * チェックボックスを単独で（クリック可能な行の外に）置く場合は、
+ * ここではなく置く側で 24px 以上の当たり判定を用意すること。
+ */
 export function checkboxInput(colors: Colors): CSSProperties {
   return {
     marginRight:  L.sp.sm,
     cursor:       'pointer',
-    accentColor:  colors.primary ?? '#2196F3',
+    accentColor:  colors.primary ?? SEMANTIC.primary,
+    // 長いラベルに押されて潰れないようにする
+    flexShrink:   0,
   };
 }
 
@@ -160,7 +206,7 @@ export function input(colors: Colors): CSSProperties {
     fontSize:      L.fs.sm,
     padding:       `${L.sp.xs} ${L.sp.xs}`,
     border:        `1px solid ${colors.border}`,
-    borderRadius:  L.r.md,
+    borderRadius:  L.r.control,
     background:    colors.surface,
     color:         colors.text,
   };
@@ -174,5 +220,39 @@ export function textarea(colors: Colors): CSSProperties {
     display:       'block',
     resize:        'vertical',
     boxSizing:     'border-box',
+  };
+}
+
+// ── 選択できるカード・行 ───────────────────────────────────────────────
+
+/**
+ * 選択状態を示す枠線の太さ。選択・非選択で変えない。
+ *
+ * 「選択時だけ枠線を太くする」書き方が3箇所にあり、box-sizing が
+ * content-box のままだと選択した瞬間に幅と高さが変わって並びがずれていた。
+ * 太さは固定し、色と背景だけを切り替える。
+ */
+export const SELECTION_BORDER_WIDTH = 2;
+
+/**
+ * 選択できるカード・行の共通スタイル。
+ *
+ * 選択は「枠線の色」だけでなく「背景を薄く塗る」ことでも示す。
+ * 枠線だけだと細くて気づきにくく、色覚特性によっては差が分かりにくいため。
+ *
+ * @param accent 選択時の色。省略時は primary（青）
+ */
+export function selectableCard(
+  colors: Colors,
+  opts: { selected: boolean; accent?: string; radius?: string },
+): CSSProperties {
+  const accent = opts.accent ?? colors.primary ?? SEMANTIC.primary;
+  return {
+    boxSizing: 'border-box',
+    borderRadius: opts.radius ?? L.r.card,
+    // 太さは常に同じ。非選択時は色を透明にして場所だけ確保する
+    border: `${SELECTION_BORDER_WIDTH}px solid ${opts.selected ? accent : 'transparent'}`,
+    backgroundColor: opts.selected ? tintColor(accent, 0.18) : colors.surface,
+    transition: 'background-color 0.15s ease, border-color 0.15s ease',
   };
 }

@@ -18,11 +18,24 @@ describe('FS（フォントサイズ規約）', () => {
     expect(px(FS.input)).toBeGreaterThanOrEqual(16);
   });
 
-  it('サイズ階層が sectionTitle > base > label > helper > tiny > micro の順になっている', () => {
-    const order = [FS.sectionTitle, FS.base, FS.label, FS.helper, FS.tiny, FS.micro].map(px);
+  it('段階が大きい順に並んでいる', () => {
+    const order = [FS.display, FS.heading, FS.title, FS.body, FS.caption].map(px);
     for (let i = 1; i < order.length; i++) {
       expect(order[i]).toBeLessThan(order[i - 1]);
     }
+  });
+
+  it('12px を下回る段階が無い', () => {
+    // Apple HIG / Material / GOV.UK のいずれも12pxを下限としている。
+    // 以前は 9/10/11px の段階があり、実測で51種の文字が12px未満だった
+    for (const [key, value] of Object.entries(FS)) {
+      expect(px(value), `FS.${key}`).toBeGreaterThanOrEqual(12);
+    }
+  });
+
+  it('段階は5つ（input は title と同値の別名）', () => {
+    const unique = new Set(Object.values(FS));
+    expect(unique.size).toBe(5);
   });
 
   it('すべてのサイズがpx単位で定義されている', () => {

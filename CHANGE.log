@@ -1110,3 +1110,595 @@
 - 「プレビュー更新 → ユーザーが実機で目視確認 → OKが出たら main にマージ」の順に統一
 - E2Eは時間がかかるため省略可とし、型・ユニット・ビルドは必須のまま
 - プレビューURLを固定する方法（NetlifyのBranch deploys）を記載
+
+## 2026-08-16 セッション
+
+### fix: 駅入力欄の文字色と、駅未選択時の乗換駅ヒントの見せ方を修正
+- `src/pages/index.astro`, `src/components/RailwayMap.tsx`
+- プレースホルダのスタイルがAstroのスコープ付きCSSとしてコンパイルされ、
+  Reactが描画した入力欄に当たっていなかった（`:global()` で修正）
+- 出発駅・到着駅ともに未選択のときのヒント表示を、通る路線が2以上から3以上に変更
+- ヒントの駅も灰色ではなくその駅の路線色で描くようにした
+
+### refactor: 駅マーカーの描画を一箇所に集約する
+- `src/components/RailwayMap.tsx`
+- 乗換駅ヒント用に別の描画処理を持っていたため、通常の駅と見た目が揃わなかった
+- `renderStationMarker` を切り出し、通常表示・ヒント表示・常時表示の3経路で共有する
+
+### feat: 5路線以上が通る主要駅を常に表示する
+- `src/components/RailwayMap.tsx`
+- 路線を絞り込んでいる最中でも位置の手がかりが残るよう、主要駅を常時表示する
+- 画面中心に近い順に上限20駅までとし、広域ズーム時に遠方の駅が並ぶのを防ぐ
+  （距離で絞ってから路線の重複を除く順序でないと遠方駅が残る）
+
+### fix: 現在地の取得と出発駅の自動設定を切り分ける
+- `src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`
+- 「自動で出発駅にしない」設定が位置情報の取得自体を止めており、
+  現在地マーカーと近くの駅の候補まで出なくなっていた
+- 設定は自動設定のみを制御し、位置情報の取得は常に行う
+- 取得に失敗したまま再試行できなかった問題も直し、失敗理由の表示と再取得を追加
+
+### perf: 外部リソースの読み込みで地図表示が待たされるのをやめる
+- `src/pages/index.astro`
+- LeafletのCSS/JSをCDNから読んでいたため、応答が遅いと地図が真っ白のままだった。
+  npmパッケージから自前配信に変更
+- Webフォントと広告スクリプトを描画をブロックしない読み込みに変更
+- 表示までの時間は13.4秒から0.61秒になった
+
+### fix: 地図をわずかに動かしただけで駅タップが無視される問題を修正
+- `src/components/RailwayMap.tsx`
+- Leafletは指が1pxでも動くと `dragstart` を発火するため、`dragstart` で一律に
+  タップを無効化していた従来の実装では、普通に駅をタップしても反応しないことが多かった
+- 実際に地図が動いたピクセル距離を測り、10pxを超えたときだけ地図移動とみなす
+- 誤タップ防止の待ち時間も300msから150msに短縮
+
+### fix: 列車種別表示の駅ラベルにタッチ余白がなくタップしづらい問題を修正
+- `src/components/RailwayMap.tsx`
+- 実際に描画されるのは `createTrainTypeStationIcon` 側だが、こちらにだけ
+  タッチ余白の処理が無く、高さ14pxのままだった
+  （WCAG 2.2 AA 2.5.8 の下限24pxを下回る）
+- 余白の計算を `withTouchPadding` に集約し、2つのアイコン生成関数で共有する
+- 駅ラベルの当たり判定は 45x14 から 61x30 になった
+
+### docs: 文字サイズとデータ欠損の調査結果を記録
+- `CLAUDE.md`
+- モバイル幅で12px未満の文字が51種（最多は駅名ラベルの9px）あることを記録
+- 駅の読み9.6%・韓国語17.7%・時刻表17.8%など、データの充足率と地域の偏りを記録
+- いずれも修正案のみ記載し、実装は未着手
+
+## 2026-08-16 セッション（第2部: 地図操作とヒートマップ）
+
+### feat: ヒートマップの指標に路線数を追加
+- `src/data/stationStats.ts`, `src/utils/translation.ts`
+- 路線数は routes.ts の定義から数えられるため全駅で値が入る。
+  Overpass API 由来の他の指標が関東の約1,500駅に偏っているのに対し、
+  この指標だけは全国で色が付き、乗換の多い駅を一目で見つけられる
+- 統計データを持たない駅にも路線数だけのエントリを作って合流させる
+- 値は路線定義の集計そのもので、推定や補完は行わない
+
+### fix: 駅ツールチップが画面を覆って次の駅を選べない問題を修正
+- `src/components/RailwayMap.tsx`
+- スマホではツールチップの高さが最大480pxあり画面の6割以上を占めていた。
+  閉じる手段も小さな✕だけで、続けて別の駅を選ぶのが難しかった
+- スマホでは高さを画面の半分までに抑え、地図側を残す
+- 地図の何もない所をタップしても閉じられるようにする
+
+### improve: 現在地に合わせる初期ズームを広域(13→11)にする
+- `src/components/RailwayMap.tsx`
+- ズーム13は駅名は読めるが隣の路線が画面外になり、自分の位置を掴みにくかった
+- 11では半径10km程度が視界に入り、近隣のターミナルと路線の広がりが見える
+
+### improve: スライド中も駅が追従して出るようにする
+- `src/components/RailwayMap.tsx`
+- 表示範囲ちょうどで駅を切っていたため、スライドすると画面の縁が空白になり、
+  指を離すまで駅が出てこなかった
+- 画面の25%外側まで先に描いておき、スライドで現れる領域を埋める
+- 表示範囲の確定をスライド中も行う。毎フレームでは重いので、
+  余白の4割を動いた時点でだけ描き直す
+- 画面外の余白ぶんが増える分、駅マーカーの上限を100から150に引き上げる
+  （中心に近い順に選ぶため、画面に見える数は従来どおり100前後）
+
+### feat: ヒートマップ表示中は路線の色も駅の平均値に応じて変える
+- `src/components/RailwayMap.tsx`
+- 駅だけ色が変わって路線が元の色のままだと、その路線が全体として
+  高いのか低いのかが読み取れなかった
+- 路線が通る駅の正規化値の平均を同じグラデーションに乗せて線の色にする
+- 色になる前の数値が要るため、`getStationDisplayColor` と同じ正規化規則で
+  0〜1 の値を返す `getStationHeatValue` を切り出して共有する
+- 路線を1つも表示していない初期状態では半透明の路線層が全路線を描くため、
+  そちらにも同じ色を適用している
+
+## 2026-08-16 セッション（第3部: 表示の統一・時刻表・常時表示の設定化）
+
+### improve: 駅ツールチップの小ラベルを塗りつぶしに統一
+- `src/components/ui/ColorChip.tsx` (新規), `src/utils/contrast.ts`, `src/components/RailwayMap.tsx`
+- 「＋表示」は枠線＋色文字、件数は色文字だけ、種別バッジは塗りつぶしと
+  箇所ごとに書き方が違い、片方を直しても他が古いまま残っていた
+- 色付きの小ラベルを `ColorChip` に集約
+- 背景と文字色の決め方（ダークは白字＋背景を暗く、ライトは明暗で白黒を選ぶ）を
+  `filledLabelColors` に切り出し、駅名ラベル・駅アイコン・チップで共有
+- 4.5:1 に届かない明るい色に縁取りを足す処理も共通化
+
+### feat: 時刻表を首都圏の未対応路線に広げ、出典と最終更新日を明記
+- `src/data/timetableData.ts`, `src/components/RailwayMap.tsx`, `src/utils/translation.ts`
+- 1都3県で時刻表が無かった34路線のうち、乗換で実際に使われる11路線を追加
+  （湘南新宿ライン / みなとみらい線 / 東武アーバンパークライン / JR相模線 /
+  JR鶴見線 / 西武多摩川線 / 京急逗子線 / 東急こどもの国線 / 西武秩父線 /
+  東武越生線 / 流鉄流山線）
+- 武蔵小杉の湘南新宿ラインのように、経路上の路線なのに「時刻データなし」と
+  出ていた駅が埋まる
+- 他の路線と同じく各社公表の運行間隔から組み立てた概算値のため、
+  出典・最終更新日・但し書きをツールチップに常時表示するようにした
+- 実在しない列車名を出さないよう行き先は「〜方面」で統一
+
+### fix: 時刻表データの誤りを修正し、整合性テストを追加
+- `src/data/timetableData.ts`, `tests/unit/data/timetableData.test.ts` (新規)
+- いずれも画面上は静かに壊れるだけで気づけない類のもの
+  - 南武線の時刻表に中央線の駅「国立」が混入していた
+  - ゆりかもめの時刻表に実在しない駅「中央広場前」が入っていた
+  - 宇都宮線の時刻表が路線データに無い「東京」を含んでいた
+  - 京成本線の下りで京成成田以降の累計時間が57分に巻き戻り、
+    成田空港などの発車時刻が約40分早く表示されていた
+- 駅名の一致・方向数・累計時間の単調増加・キー重複をテストで固定した
+
+### feat: 常に表示する主要駅のしきい値と on/off を設定できるように
+- `src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`,
+  `src/components/legend/MapConfigPanel.tsx`, `src/utils/translation.ts`
+- 何路線以上を「主要駅」とみなすかは人によって違うため、5路線固定をやめた
+- 表示設定に「主要駅を常に表示」のチェックと、2〜10路線のしきい値選択を追加
+- 設定の保存・読込にも含める（旧い設定ファイルは任意項目として無視される）
+- オフにすると乗換駅ヒントも連動して止める。そうしないと「常に出る駅を
+  消したのに駅が並んだまま」になるため。路線の線は残る
+- 起動直後の乗換駅ヒントは入口なので既定の3路線以上のまま据え置き
+
+### docs: バス・高速道路の可視化をTODOに追加
+- `TODO.md`
+- データ源の候補と、着手時に決める論点（停留所の間引き、鉄道との乗換判定、
+  路線図と混ざらない線種）まで記載
+
+## 2026-08-16 セッション（第4部: デザインの一元管理の調査）
+
+### improve: チェックボックスのスタイルを共有ヘルパに統一
+- `src/components/legend/legendStyles.ts`, `HeatmapControl.tsx`,
+  `src/components/ui/ToggleableItem.tsx`, `RouteRecommendationItem.tsx`,
+  `src/components/RailwayMap.tsx`
+- `accentColor` や `marginRight` を6箇所が各自インラインで持っていて、
+  路線一覧のものだけ余白が違うなど見た目が揃っていなかった
+- すべて `checkboxInput` 経由にした
+- 調査中に一度 24px へ拡大したが、WCAG 2.5.8 が測るのは「タップできる範囲」で
+  あり、ラベル行（実測257×40px）が既に基準を満たしていたため戻した。
+  入力欄自体を広げると白い四角が目立って見た目が悪化する
+
+### docs: デザインの一元管理を調査して文書化
+- `docs/design-system.md`（新規）, `CLAUDE.md`
+- 色・サイズ・余白・ボタンがどこで決まっているかを機械的に調査した
+  - トークン定義が3系統に分裂（`constants/ui.ts` / `legendStyles.ts` / `design/tokens.ts`）
+    し、同じ 10px が `FS.tiny` と `L.fs.xs` の2つの名前を持つ
+  - `<button>` 93個のうち91個がインラインstyle。共有ボタンコンポーネントが無い
+  - 「出発=緑」のような意味を持つ色が12ファイルに分散してベタ書き（92箇所）
+  - 余白84種・色224種・角丸11種と、定義済みの段階がほとんど機能していない
+  - テーマから色を取っていないコンポーネントが42中9
+- 「書くときの判断表」と着手順を記載した
+
+### feat: デザイン一元管理の点検スクリプトとスキルを追加
+- `scripts/audit-design-tokens.mjs`（新規）, `.claude/skills/design-tokens/`（新規）
+- `node scripts/audit-design-tokens.mjs` でベタ書きの箇所数・種類数・
+  ファイル別の偏り・意味を持つ色の分散を数え直せる。
+  `--list <fontSize|borderRadius|spacing|hexColor|rgba>` で該当箇所を列挙
+- `docs/design-system.md` の表はこのスクリプトの出力を元にする運用にした
+- UIを書く作業のときに読むスキルを `.claude/skills/design-tokens/SKILL.md` に置き、
+  CLAUDE.md から参照できるようにした
+
+## 2026-08-16 セッション（第5部: 寸法の統一と選択表現）
+
+### fix: 地図上の駅ラベルの高さと文字サイズを揃える
+- `src/components/RailwayMap.tsx`
+- 駅ラベルを作る関数が3つあり、それぞれが独自に寸法を決めていたため、
+  出発・到着駅だけ文字12px・高さ24px、他は9px・15.5px と不揃いだった
+- 寸法を `stationLabelBox` にまとめて3つとも参照させ、
+  強調は大きさではなく背景色（出発=緑 / 到着=赤）で付ける方針にした
+- 角丸・余白・ふりがなの文字サイズも同じ定義から取る
+- 修正後の実測は通常15.5px / 出発到着16px（枠線ぶんの0.5px差のみ）
+
+### fix: 選択で行の大きさが変わらないようにし、選択を背景色でも示す
+- `src/components/legend/legendStyles.ts`, `src/utils/contrast.ts`,
+  `RouteRecommendations.tsx`, `ui/RouteRecommendationItem.tsx`, `ui/ToggleableItem.tsx`
+- 選択状態を border の太さ(1px→2px)で表す書き方が3箇所にあり、
+  `box-sizing: content-box` のままなので選択した瞬間に外形が2px大きくなり
+  一覧の並びがずれていた
+- `selectableCard()` にまとめ、次を規則にした
+  1. 枠線の太さは選択・非選択で変えない（非選択時は色を透明にして場所だけ確保）
+  2. `box-sizing: border-box` で枠線を寸法に含める
+  3. 選択は枠線の色だけでなく背景も塗る（枠線だけだと気づきにくいため）
+- 路線一覧では accent にその路線の色を渡し、選択された路線が自分の色で塗られる
+- 色を薄い背景として敷く rgba 変換は `tintColor()` に切り出した
+- `tests/unit/components/legend/legendStyles.test.ts` で3点を固定（9件）
+
+### docs: 寸法の揃え方をデザイン文書とスキルに追記
+- `docs/design-system.md`, `.claude/skills/design-tokens/SKILL.md`
+- 「見た目の状態を変えるときに外形が変わってはいけない」を明文化
+- 判断表に `selectableCard` / `tintColor` / `stationLabelBox` を追加
+
+## 2026-08-16 セッション（第6部: 路線名の多言語対応漏れ）
+
+### fix: 路線をクリックしたときの路線名が日本語のままだった問題を修正
+- `src/components/RailwayMap.tsx`, `src/components/RouteRecommendations.tsx`
+- `routeTranslations` 側は全490路線そろっていたが、呼び出し側が
+  `translateRoute` を通し忘れていて日本語のまま表示されていた
+- 直した箇所
+  - 表示中の路線のツールチップ
+  - 非表示の路線のツールチップ
+  - 地図上の路線切替リスト（幅の計算も翻訳後の文字数で行う）
+  - 経路推薦の区間名とホバー時のツールチップ（乗換駅名も併せて翻訳）
+- `tests/unit/utils/routeNameI18n.test.ts`（新規）で、JSXへ翻訳前の路線名を
+  直接埋め込んでいないかを検査する。わざと戻すと落ちることを確認済み
+- **既知の制約**: `translateRoute` の辞書は英語のみで、中国語・韓国語は
+  英語表記にフォールバックする（日本語のままではなくなったが未対応）
+- `TrainTypeViewer.tsx` にも同じ抜けがあるが、どこからも import されていない
+  未使用ファイルのため対象外とした
+
+## 2026-08-19 セッション（駅ツールチップ・駅候補・所要時間）
+
+### improve: 駅ツールチップを広げ、ヒートマップの統計値を外す
+- `src/components/RailwayMap.tsx`
+- 時刻表が数本しか見えず狭かった。主役は路線一覧と時刻表なので、
+  縦幅を画面の半分から7割まで広げた（PCは480→620px）
+- 統計値の概要行はツールチップから外した。統計はヒートマップ表示に
+  切り替えたときの専用ツールチップで見る
+- 実測で 362x432px（画面の65%）、発車時刻51件が収まる
+
+### feat: 駅も路線も未指定のときは所要時間の表示を自動でオンにする
+- `src/components/RailwayMap.tsx`
+- 現在地から路線を推定して出しているだけの状態では経路が引けないので、
+  「隣の駅まで何分か」が唯一の手掛かりになる
+- 一度自動で入れたら以後は触らない（自分でオフにした判断を上書きしないため）
+- 駅を自分で指定していたら経路表示が主役なので手を出さない
+
+### improve: 駅候補をよく使う駅・大きい駅の順に出し、到着駅では近くの駅を出さない
+- `src/utils/stationHistory.ts`, `src/components/StationSelector.tsx`,
+  `tests/unit/utils/stationHistory.test.ts`
+- 毎日使う駅は現在地から遠くても真っ先に出したいので履歴を最優先にした
+- 到着駅は現在地の近くを出しても意味がないので近くの駅を外した
+- 「大きい駅」は東京・新宿…の固定リストをやめ、乗り入れ路線数の多い順に
+  路線データから求める（固定リストだと関東以外では1件も役に立たなかった）
+- 並びは 出発駅: 履歴→近くの駅→大きい駅 / 到着駅: 履歴→大きい駅
+
+### fix: 駅ラベルが路線の数だけ重なって描かれる問題を修正
+- `src/components/RailwayMap.tsx`
+- 同じ駅が複数の路線に属していると路線ごとに1枚ずつ描かれていた
+- 武蔵小杉は6路線あるため出発駅ラベルが6枚重なり、しかも横須賀線ホームは
+  他の路線と座標が約340m違うため、ずれた位置に二重に見えていた。
+  渋谷など13駅でも同じことが起きていた
+- この駅を通る表示中の路線のうち、先頭の1つだけが描くようにした
+- 座標差そのものは実態（別ホーム）なのでデータは変えていない
+- 実測で重複していた13駅がすべて1枚になった
+
+## 2026-08-25 セッション（降車駅アラーム・色の一元化）
+
+### feat: 降車駅の手前で知らせるアラームを位置ベースで実装
+- `src/utils/arrivalAlert.ts`（新規）, `src/utils/notify.ts`（新規）
+- `src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`,
+  `src/components/legend/MapConfigPanel.tsx`, `src/utils/translation.ts`
+- 遅延しているとき時刻表の「◯分後に到着」は当てにならないため、時刻表を一切参照せず
+  GPSの現在地と2点間の実測速度だけで残り時間を出し、しきい値を切ったら通知する
+- しきい値は 1/2/3/5/10分 から選択（既定5分）。距離ではなく時間で判定するのは、
+  各駅停車の私鉄と新幹線とで「5分前の距離」が大きく違うため
+- 停車中で速度が0のときは直近の走行速度、それも無ければ路線の平均速度で見積もる
+- 測位が飛んだときの異常な速度を信じると12km手前で「あと約1分」と誤通知するため、
+  速度の妥当性判定を `isPlausibleSpeed` に集約し、保存側と見積もり側の両方で通す
+  （上限は新幹線の最高速度を超える360km/h相当）
+- 同じ降車駅では一度しか鳴らさない。降車駅を変えるとリセットされる
+- 通知が使えない環境（iOSのタブ内など）では画面内バナーに切り替えて機能を止めない
+- 通知の許可はオンにした操作と結びつけて求める。既定はオフ
+- `tests/unit/utils/arrivalAlert.test.ts`（新規, 23件）: 距離・速度の計算、停車中の
+  フォールバック、遅延で減速したときに通知が後ろにずれること、文面にHH:MM形式の
+  時刻が混ざらないこと、測位の飛びに対する頑健性を固定
+
+### feat: 意味を持つ色(出発/到着/主色)を SEMANTIC に一元化
+- `src/constants/ui.ts`
+- 「出発は緑・到着は赤」という約束事を12ファイルが各自ベタ書きしており、
+  片方だけ直して色が食い違う不具合を実際に起こしていた
+- 新規コードが参照する単一の定義元を用意した（既存のベタ書きは触る箇所から置換）
+
+### improve: 出発/到着/primary の色 67箇所を SEMANTIC に置き換え
+- `src/constants/ui.ts` の `SEMANTIC` を唯一の定義元にし、14ファイルのベタ書きを置換
+- 対象: `#4CAF50`(31) / `#F44336`(24) / `#2196F3`(12)
+- 大文字小文字が混在（`#F44336` と `#f44336`）していて検索で取りこぼしていた
+- 同じ色を `rgba()` で書き直していた4箇所も `tintColor(SEMANTIC.*, alpha)` に寄せた
+- ダークモード用の値は `ThemeContext` が持ち、ライト側の値だけ `SEMANTIC` から取る
+- `tests/unit/constants/semanticColors.test.ts`（新規）: `constants/ui.ts` 以外に
+  この3色が現れたら失敗する。実際に1箇所戻して落ちることを確認済み
+- `docs/design-system.md` / `.claude/skills/design-tokens/SKILL.md` を対応済みに更新
+
+### fix: 候補ルートが設定パネルを開くまで見えない問題を修正
+- `src/components/RailwayMap.tsx`, `src/components/MobileBottomPanel.tsx`,
+  `src/components/legend/LegendRouteRecommendations.tsx`
+- 経路探索は動いていて地図に線も引かれていたが、一覧を描くコンポーネントが
+  設定パネルの中にしか置かれておらず、設定を開くまで候補の存在が分からなかった
+- スマホ全画面: 下部に「推薦ルート選択 (件数)」ボタンを追加し、設定より前に配置
+- PC・全画面(PC): 駅セレクタの直後に一覧を表示
+- 同じ一覧の組み立てを1箇所にまとめて使い回す形にした
+  （従来も設定パネル内で同じJSXが2つ重複していた）
+- 下部パネルは自前で見出しを描くため、`showTitle={false}` で中の見出しを省く
+
+### perf: 所要時間の探索を単一始点最短路に置き換え
+- `src/utils/routeFinder.ts`
+- `findStationsWithinTime` が「全駅について `findRoutes` を1回ずつ呼ぶ」実装で、
+  駅6,000に対して経路探索を6,000回まわしていた（駅ごとに `console.log` 付き）
+- 所要時間表示をONにすると画面が数分固まり、タップが返ってこない状態だった
+- 単一始点最短路1回に置き換え。コストの規則は `findRoutes` と揃えた
+  （駅間の所要時間・乗換ペナルティ・徒歩乗換・新幹線のオーバーヘッド／最低距離・乗換2回まで）
+- 東京から120分以内 3,278駅の算出が 59ms
+- 探索の実体は索引を持つ `RouteFinder` 側に移し、`TimeFilter` は委譲する
+- `tests/unit/utils/findStationsWithinTime.test.ts`（新規, 8件）で速度と結果の妥当性を固定
+
+### feat: 所要時間表示の切り替えを駅選択パネルから行えるように
+- `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`
+- 切り替えが開発用の「路線表示切替セクション」の中にしかなく、
+  そのセクションが既定で非表示のため画面から到達できなかった
+- 出発駅が決まっているときだけボタンを出す（出発駅を起点に計算するため）
+- 枠線の太さは状態で変えず、オンのときは背景ごと塗る（design-system.md の規則）
+
+### fix: 駅ラベルの2行目（所要時間・出発時刻）が表示されない問題を修正
+- `src/components/RailwayMap.tsx`
+- `trainTypeViewEnabled` が常に true のため駅アイコンは必ず
+  `createTrainTypeStationIcon` を通るが、こちらは2行目のラベルを受け取らず捨てていた
+- 所要時間オーバーレイと時刻表モードの出発時刻の両方が出ていなかった
+- ラベルを渡すようにし、幅と高さも2行目ぶん確保する
+
+### feat: 路線の切り替えを読みやすいボード表示で作り直す（従来の一覧も残す）
+- `src/components/legend/RouteSwitchBoard.tsx`（新規）, `src/components/legend/LegendRouteList.tsx`,
+  `src/utils/translation.ts`
+- 従来の一覧は1行1路線・チェックボックス・幅30pxの色線で、490路線に対して
+  「1画面に10路線しか入らない」「路線名で探せない」「オフの行は文字が薄いだけで
+  どの路線か・今どちらかが分からない」状態だった
+- チップを折り返して並べ、路線色そのものを背景に使ってオン・オフを塗りの有無で示す
+- 経路上 → 選択した駅を通る → 表示中 → 非表示 の順にグループ分けし、件数を出す
+- 路線名の絞り込みを追加。翻訳後の名前と元の日本語名の両方を見るので、
+  英語表示のまま「山手」と打っても引ける
+- 並び順は呼び出し側から渡された順（既定は画面中心から近い順）をそのまま使う。
+  490路線を名前順にすると「IGRいわて銀河鉄道」から始まって手元の路線に届かない
+- チップは枠線の太さも文字の太さも状態で変えない（外形が動いて並びがずれるため）
+- 従来の一覧は並べ替えとドラッグによる重なり順の変更ができるので残し、
+  見出しの右で切り替えられるようにした。選んだ方式は localStorage に保存する
+- `tests/unit/components/legend/RouteSwitchBoard.test.tsx`（新規, 8件）:
+  並び順を変えないこと・絞り込み・状態で外形が変わらないことを固定
+  （並べ替えを戻すと落ちることを確認済み）
+
+### fix: 駅選択パネルの所要時間ボタンを駅間の丸の切り替えに変更
+- `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`
+- 「所要時間の表示」として想定されていたのは駅と駅のあいだに出る丸（区間の所要時間）
+  だったが、駅ラベルに累積時間を出す別機能につないでいた
+- 切り替え対象を丸（`showTravelTimes`）に変更
+- 見た目は `selectableCard()` に寄せ、他の選択できる行と同じ規則にした。
+  枠線の太さは選択で変えず、選択は枠線の色と背景の両方で示す
+- アイコンは絵文字ではなく lucide の `Clock`、余白は `L.sp`、
+  文字サイズは `FS`、高さは `TARGET.touch` から取る（docs/design-system.md の判断表）
+- 丸は表示中の路線に対して出るもので出発駅を必要としないため、常に置く
+
+### improve: 白・黒の一元化とボタンのアトム化（アトミックデザイン）
+- `src/constants/ui.ts`, `src/contexts/ThemeContext.tsx`, `src/utils/contrast.ts`,
+  `src/components/ui/atoms/Button.tsx`（新規）,
+  `src/components/ui/molecules/SegmentedControl.tsx`（新規）ほか
+- `color: 'white'` `'#fff'` `'#ffffff'` が76箇所に散らばり、同じ「塗った色の上の文字」を
+  3通りの書き方で持っていた。検索で取りこぼして「直したつもりで残る」原因になっていた
+- `NEUTRAL.white` / `NEUTRAL.black` を唯一の定義元にし、半透明は
+  `alphaWhite()` / `alphaBlack()` を通す。`ThemeContext` の `onPrimary` や
+  `contrast.ts` の `LIGHT_TEXT` / `DARK_TEXT` もここから取る
+- `tests/unit/constants/semanticColors.test.ts` に白・黒の直書きを落とす検査を追加
+  （記事本文のSVG挿絵はUIのテーマと無関係なので明示的に除外）
+- `<button>` 93個中91個がインラインstyleだったので `ui/atoms/Button` を用意。
+  外から指定するのは `variant`（primary/positive/danger/outline/ghost）と `size`（sm/md）だけ
+- 「並順」「ボード/一覧」のような排他選択は `ui/molecules/SegmentedControl` にまとめた
+- 層の分け方は「何を知っているか」で決める（atoms はトークンだけ、molecules はアトムの
+  組み合わせ、organisms はアプリの概念とデータ）。`docs/design-system.md` に表を追加
+- 所要時間トグルは `selectableCard` だとライトモードで枠線も背景もほぼ見えず
+  ボタンと分からなかったため、他の操作と同じ `Button` に揃えた
+
+### improve: 何も選択していないときに出す駅の基準を3路線以上から4路線以上に
+- `src/components/RailwayMap.tsx`
+- 起動直後（駅も路線も未選択＝`isTransferHintMode`）に出る乗換駅ヒントが
+  実測45駅並んでいて画面が密すぎた
+- しきい値を `TRANSFER_HINT_BASE_MIN_ROUTES = 4` として名前付きの定数にし、
+  主要駅の常時表示（設定で変更可）とは別の基準であることを明示
+- 常時表示をオフにしたとき連動して止まる点、常時表示の基準のほうが小さい場合は
+  そちらに合わせる点は従来どおり
+- 実測: 起動時の駅ラベル 45 → 18。残るのは新宿・渋谷・品川・横浜など主要駅
+
+### improve: 所要時間トグルと「現在地から」の寸法を揃える
+- `src/components/StationSelector.tsx`
+- 同じパネルに並ぶのに、所要時間トグルは高さ44px・文字12px・横幅いっぱい、
+  「現在地から」は高さ指定なし・文字11px・内容幅で揃っていなかった
+- どちらも `Button` の `size="sm"` に寄せ、寸法の決定を1箇所にまとめた
+  （位置情報の再取得ボタンも同じ規則に含める）
+- 実測で高さ24px・文字11px・余白8px・角丸4px・枠線1px が一致
+
+### improve: 所要時間トグルを「現在地から」の右へ並べる
+- `src/components/StationSelector.tsx`
+- 「現在地から」は出発駅の列（幅110px）の中にあり、所要時間トグル（115px）を
+  横に並べられなかったため、両方をパネル幅（270px）が使える位置に出して1行にした
+- 寸法は `Button` の `size="sm"` から取るので2つの大きさは一致する
+
+### feat: 重なっている路線を線1本分ずつ垂直にずらして描く
+- `src/utils/routeOffset.ts`（新規）, `src/components/RailwayMap.tsx`
+- 山手線と京浜東北線のように同じ区間を走る路線は座標がほぼ同じで、
+  上に描いた1本しか見えず下の路線は完全に隠れていた
+- 同じ2駅を結ぶ区間を走る路線を数え、本数の中心を基準に左右へ振り分ける
+  （2本なら ±0.5、3本なら -1/0/+1。合計が0なので区間全体の位置は元からずれない）
+- 区間ごとに段数が変わるため、頂点では前後の区間の平均を使い、
+  共用区間から単独区間へ滑らかに戻す
+- ずらしは画面上の距離(px)で行う。緯度経度でずらすとズームによって
+  見た目の間隔が変わるため、投影してからずらして戻す
+- ずらし幅はその層の線の太さに合わせる（表示中は `routeLineWidth`、薄い層は3px）
+- 段数は路線データだけで決まるので全区間ぶんを一度だけ計算して使い回す。
+  段数がすべて0の路線（大半）は投影の往復をしない
+- 実測: 全6,890区間のうち504区間（7.3%）が2本以上の共用、最大4本。
+  東京〜神田は山手線・中央線・京浜東北線の3本が並ぶ
+- 判定は駅名の組が一致するかで行うため、駅が違う並走区間は対象外
+- `tests/unit/utils/routeOffset.test.ts`（新規, 23件）: 単独区間はずらさない、
+  段数の合計が0になる、ずらす向きが線と直交する、同一座標が連続しても壊れない、等
+
+### feat: アトミックデザインを規格化し、路線切り替えを組み直す
+- `src/components/ui/atoms/controlSize.ts`（新規）,
+  `src/components/ui/atoms/Chip.tsx`（新規）, `src/components/ui/atoms/TextField.tsx`（新規）,
+  `src/components/ui/atoms/Button.tsx`, `src/components/legend/RouteSwitchBoard.tsx`
+- ボタンだけが寸法規格を持っていたため、路線チップ（高さ44px・文字13px・角丸8px）と
+  隣の全表示ボタン（高さ24px・文字11px・角丸4px）が同じパネルの中で揃っていなかった
+- 高さ・文字・余白・角丸を `CONTROL_SIZE` に集約。段階は `md`(44px, 指で押すもの) と
+  `sm`(24px, 補助操作) の2つだけ
+- 路線チップを `Chip`（色・ラベル・選択状態だけを受け取り、路線を知らない）に、
+  絞り込み欄を `TextField` に置き換え、パネル内の操作をすべて md に統一
+- 入力欄だけ文字サイズを規格から外して16px固定（iOS Safari の自動ズーム対策）
+- `tests/unit/components/ui/atoms.test.tsx`（新規, 11件）: 段階は2つだけ、
+  同じ段階なら Button と Chip の高さ・角丸・枠線・文字が一致、
+  選択で外形が変わらない、入力欄は16pxを下回らない
+- 層の分け方（何を知っているか）・寸法規格・色の規格を
+  `docs/design-system.md` と `CLAUDE.md`、`.claude/skills/design-tokens/SKILL.md` に明記
+
+### improve: すべてのボタン・バーをアトミックデザインの部品に統一
+- `src/components/ui/atoms/`（`IconButton` `Select` `Switch` を追加）,
+  `src/components/ui/molecules/Stepper.tsx`（新規）ほか v1 の全コンポーネント
+- 対応前は `<button>` 93個のうち91個がインラインstyleで、padding が
+  2/3/5/6/8/10px、角丸が 3/4/6/8/10px とばらついていた
+- **v1 のコンポーネントから生の `<button>` が0になった**
+- 追加したアトム: `IconButton`（正方形。幅にも高さの規格を使い当たり判定を確保）、
+  `Select`、`Switch`（Cookie設定のトグル）
+- 追加したモレキュール: `Stepper`（−／＋の増減行。18×18pxで WCAG 2.2 AA の
+  下限24pxを下回っていたものを規格に載せ、上限・下限で押せないようにした）
+- ヒートマップの範囲調整も同じく18px相当だったので当たり判定が広がった
+- `tests/unit/components/ui/noRawControls.test.ts`（新規）で、アトム以外に
+  生の `<button>` があると落ちるようにした。`src/v2/`（本番未使用の実験UI）と
+  `src/design/`（開発用デバッグパネル）は理由を書いて除外
+- 読み上げ用の文言「選択を解除」「小さくする」「大きくする」「再生」「一時停止」と
+  折りたたみの文言を4言語に追加（折りたたみは日本語が直書きされていた）
+- 移行中に見つけた不具合: 地図上に浮かぶボタンのガラス調を `styleOverride` で
+  足す際、開いている状態で `backgroundColor: undefined` を渡すと variant の塗りを
+  消してしまう。閉じているときだけ背景を上書きするようにした
+
+### feat: ボタン以外の操作要素もアトム化し、生の要素を全面的に禁止
+- `src/components/ui/atoms/`（`Checkbox` `Radio` `ToggleMark` `TextArea` `LinkButton` `Slider` を追加）
+- 前回はボタンだけで、選択欄10・チェックボックス20・ラベル行41・テキスト/時刻入力・
+  スライダー・複数行入力・ボタン風リンクが生のまま残っていた
+- `Checkbox` / `Radio` は行そのものがタップ対象なので高さを `CONTROL_SIZE` に合わせた
+- `ToggleMark` は「行の見た目は呼び出し側が持ち、印だけ欲しい」場合用
+  （路線一覧の行のように独自の中身を並べる行）
+- `TextField` は ref を通すようにした（フォーカス制御で必要）
+- `Select` は前回作ったが未使用だったので10箇所を移行
+- `tests/unit/components/ui/noRawControls.test.ts` を全種類に拡張。
+  アトム以外で `button` / `select` / `textarea` / `input` を書くと落ちる。
+  除外は `src/v2/`・`src/design/`・`display:none` のファイル選択欄の3つだけ
+  （生の select を1つ戻すと落ちることを確認済み）
+
+### improve: 文字サイズ・余白・角丸の直書きを全廃
+- `src/constants/ui.ts`, `src/components/legend/legendStyles.ts` ほか v1 全体
+- 操作要素はアトムに載ったが、テキストとレイアウトの寸法が直書きのまま残っていた
+  （文字サイズ196箇所・余白322箇所・角丸85箇所）
+- 文字サイズ: 既存の `FS` に加えて `emphasis`(18) `heading`(20) `display`(24) を追加
+- 余白: `L.sp` を10段階に整理（2/4/6/8/10/12/16/20/24/40px）。
+  段階に無かった 1/3/5/7/14/15/18/22/26/28px は近い段階に丸めた（1〜2pxの差）
+- 角丸: 10種類あったものを `L.r` の3段階（3/4/8px）に集約
+- 複数値（`'0 0 8px 0'`）・負の値（`'-6px -8px'`）・セーフエリアの `calc()` も対応
+- `tests/unit/components/ui/noRawSizes.test.ts`（新規）で直書きを落とす。
+  除外は定義元2ファイルと `src/v2/`・`src/design/` のみ
+- 前回の入力欄アトム化で出発駅・到着駅の欄が緑・赤の塗りつぶしを失っていたのを修正
+
+### improve: 文字サイズを12px下限の5段階に、角の丸みを役割で3種類に統一
+- `src/constants/ui.ts`, `src/components/legend/legendStyles.ts`,
+  `src/components/RailwayMap.tsx` ほか v1 全体
+- 文字サイズの段階が 9/10/11/12/13/14/16/18/20/24px の10種類あり、
+  実測で画面上の文字の多くが12px未満だった（地図の駅名は9px）。
+  Apple HIG(11pt) / Material(12sp) / GOV.UK(絶対下限12px) のいずれも下回っていた
+- **12px を最小として 12/14/16/20/24 の5段階に整理**（比1.2〜1.25）。
+  名前は用途で付ける（caption / body / input・title / heading / display）
+- 駅ラベルは倍率0.8で9pxになっていたので、規格の12pxを基準に倍率1.0にした。
+  文字幅の見積もりの基準（11px固定）も規格に合わせた
+- ふりがなはルビなので本文の75%のまま。下限だけ7px→10pxに上げた
+- 凡例パネルが持っていた別系統の文字サイズ `L.fs` は `FS` を指すだけにした
+  （以前は凡例だけ他より小さい文字になっていた）
+- 角の丸みは値ではなく役割で3つに分けた。
+  `control`(8px, ボタン・入力欄・チップ) / `card`(12px, パネル・カード) /
+  `pill`(999px, バッジ)。対応前は10種類が混在していた
+- `tests/unit/constants/ui.test.ts` に12px未満の段階を禁じる検査を追加
+- 実測: 画面上の文字は 12/14/16px と Leaflet 自身の22pxだけになった。
+  駅ラベルの重なりは18ラベル中1組→3組に増えた（文字を大きくした分のトレードオフ）
+
+### improve: 固定ページ5枚の共通部分を1つのレイアウトにまとめる
+- `src/layouts/StaticPage.astro`, `src/layouts/staticPageStyles.ts`（新規）
+- `src/pages/about.astro`, `contact.astro`, `faq.astro`, `privacy.astro`, `terms.astro`
+- 5ページが `<head>` のボイラープレート・68行の `<style>`・言語切替スクリプトを
+  丸ごとコピーして持っていた。5つの `<style>` は完全に同一で、
+  同じ `#2196F3` を各ページが4箇所ずつ書いていた
+- コピーであるがゆえに片方だけ古くなる事故が実際に起きていた:
+  hreflang が about / privacy / terms の3枚だけ存在しないドメイン
+  `flex-rail-map.netlify.app` を指したままだった（正しくは flex-railway-map）
+- 色は `getThemeColors()`、余白・角丸は `L.sp` / `L.r`、
+  文字サイズは `FS`、戻るリンクの高さは `CONTROL_SIZE.md`(44px) から取る。
+  静的ページだけ違う青・違う余白になる状態を作らないため
+- あわせて直したもの:
+  - canonical を全ページに追加（従来は faq だけ）
+  - `<html lang>` を ja に統一（本文は日本語が既定なのに en になっていた）
+  - 「路線図に戻る」が padding 8px の小さなリンクで、指で押す大きさに足りなかった
+  - インライン style の見出し・囲みを `.page-title` / `.info-box` に置き換え
+- ページ側の記述は about で227行→89行になった
+
+### test: 色のベタ書き検査を .astro と .css にも広げる
+- `tests/unit/constants/semanticColors.test.ts`
+- 従来は `.ts` / `.tsx` しか見ておらず、上記の hreflang 取り残しのように
+  ページ側で同じ事故が起き続ける状態だった
+- 未対応のものは理由を書いて除外する。
+  `pages/index.astro`（Leaflet のポップアップ上書きCSSに約70箇所）と、
+  本体UIとは別の配色系統を使う `pages/articles/` `styles/`
+
+### docs: push のたびにプレビューURLを書くことを規約に追加
+- `CLAUDE.md`（プレビューデプロイルール）
+- 目視確認はこの運用の必須手順なのに、URLを書かずに「プレビューを更新しました」
+  で済ませてユーザーに毎回聞かせていた
+- push・デプロイのたびに URL をそのまま全文書く。「前と同じURL」で省略しない。
+  コミットハッシュも添える
+
+### improve: 角の丸みの基準を地図の駅ラベルに戻す
+- `src/components/legend/legendStyles.ts`（`L.r`）
+- 前回 `control` を8px・`card` を12pxにまとめたが、地図の駅ラベルまで8pxになり、
+  小さな札が丸い小判形になって地図とパネルが別のデザインに見えていた
+- **基準を地図の駅ラベルの元の丸み(3px)に戻し、それを正として他を合わせる。**
+  駅ラベルは画面上でいちばん数が多く、いちばん目に入る部品のため
+- `control` 8px→3px（ボタン・入力欄・チップ・駅ラベル）、
+  `card` 12px→8px（パネル・カード・ポップアップ）、`pill` は999pxのまま
+- 値は `L.r` の1箇所だけを変え、参照している96箇所は無修正で追従した
+- 実測（430px幅・初期表示）: 画面上の丸みは3pxが35要素・8pxが1要素で、
+  残りは Leaflet 自身のズームボタンだけ
+- `CLAUDE.md`, `docs/design-system.md`, `.claude/skills/design-tokens/SKILL.md` を更新
+
+### docs: プレビューURLは推測せず Netlify ボットのコメントから取る規約に修正
+- `CLAUDE.md`（プレビューデプロイルール）
+- 「push のたびにURLを書く」規約を入れたが、貼っていた
+  `<ブランチ名>--flex-railway-map.netlify.app` は Branch deploys が
+  無効なため存在せず、ユーザーが2回とも開けなかった
+- 開けるのはPRの Deploy Preview だけ
+  （`https://deploy-preview-<PR番号>--flex-railway-map.netlify.app`）
+- push のたびにPRの netlify[bot] コメントを読み、URL・対象コミット・
+  ビルド状態を確認してから書く手順に変更。
+  サンドボックスからNetlifyには到達できないが、ビルド完了はこのコメントで
+  確認できるので「ビルド中かもしれません」と濁さない
+- ブランチ固定URLはユーザーがダッシュボードで有効化するまで貼らない
+
+### fix: 地図の駅ラベルの大きさを main の値に戻し、調整結果を保持する
+- `src/constants/ui.ts`（`MAP_LABEL` / `ROUTE_LINE` を追加）
+- `src/utils/mapSizePersistence.ts`（新規）
+- `src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`,
+  `src/components/legend/MapConfigPanel.tsx`
+- 文字サイズを12px下限の規格に揃えた際、地図の駅ラベルも
+  11px×0.8=9px → 12px×1.0 に上がって以前と見た目が変わっていた。
+  地図は「読みやすさ」と「ラベルが重ならずに何個並ぶか」のトレードオフが
+  本文と違い、12pxではラベルの重なりが18中1組→3組に増えていた
+- **既定値を main と同じに戻す**: 駅ラベル 11px×0.8=9px、ふりがな 75%・下限7px、
+  余白 1px 3px、線の太さ 3px。文字幅の見積もりの基準も11pxに戻した
+- 数値は `MAP_LABEL` / `ROUTE_LINE` の1箇所に集約し、既定値を変えるときは
+  ここだけ直せばよいようにした。`FS` の12px下限の例外であることを明記
+- **調整結果を保持する**: これまで設定パネルで大きさを変えても
+  リロードで既定値に戻っていた。localStorage に保存し、
+  設定の保存/読み込み（MapConfig）にも含めた
+- 増減ボタンの表示を「0.8x」から実際の文字サイズ「9px」に変えた
+  （倍率だけでは何pxになるか分からなかった）
+- `tests/unit/utils/mapSizePersistence.test.ts`（新規, 9件）で既定値を数値で固定。
+  空文字の保存値が 0 と解釈されて下限に丸められる不具合をこのテストで発見・修正

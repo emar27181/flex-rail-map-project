@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { RouteKey } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation'
@@ -7,10 +7,22 @@ import RouteToggleItem from '../ui/RouteToggleItem';
 import type { StationStats } from '../../data/stationStats';
 import MapConfigPanel from './MapConfigPanel';
 import type { MapConfig } from './MapConfigPanel';
-import { checkboxLabel, checkboxInput } from './legendStyles';
-import { TARGET } from '../../constants/ui';
+import Checkbox from '../ui/atoms/Checkbox';
+import { FS, TARGET, SEMANTIC, MAP_LABEL, ROUTE_LINE } from '../../constants/ui';
+import RouteSwitchBoard from './RouteSwitchBoard';
+import Button from '../ui/atoms/Button';
+import SegmentedControl from '../ui/molecules/SegmentedControl';
+import Stepper from '../ui/molecules/Stepper';
+import { ALERT_MINUTE_OPTIONS } from '../../utils/arrivalAlert';
+import Select from '../ui/atoms/Select';
+import Radio from '../ui/atoms/Radio';
+import Slider from '../ui/atoms/Slider';
+import { L } from './legendStyles';
 
 type SortMode = 'name' | 'color' | 'default' | 'distance';
+
+/** 路線切り替えの表示方式の保存キー */
+const ROUTE_UI_MODE_KEY = 'routeSwitchUiMode';
 
 interface LegendRouteListProps {
   visibleRoutesData: Array<[string, any]>;
@@ -29,6 +41,10 @@ interface LegendRouteListProps {
   showStationNumbers: boolean;
   showTrainStatusPanel: boolean;
   autoSetDepartureFromLocation: boolean;
+  alwaysVisibleStationsEnabled: boolean;
+  alwaysVisibleMinRoutes: number;
+  arrivalAlertEnabled: boolean;
+  arrivalAlertMinutes: number;
   showFurigana: boolean;
   showOsmTiles: boolean;
   theme: 'light' | 'dark';
@@ -43,6 +59,10 @@ interface LegendRouteListProps {
   onShowTravelTimesChange: (value: boolean) => void;
   onShowStationNamesChange: (value: boolean) => void;
   onShowStationNumbersChange: (value: boolean) => void;
+  onAlwaysVisibleStationsEnabledChange: (value: boolean) => void;
+  onAlwaysVisibleMinRoutesChange: (value: number) => void;
+  onArrivalAlertEnabledChange: (value: boolean) => void;
+  onArrivalAlertMinutesChange: (value: number) => void;
   onShowTrainStatusPanelChange: (value: boolean) => void;
   onAutoSetDepartureFromLocationChange: (value: boolean) => void;
   onShowFuriganaChange: (value: boolean) => void;
@@ -103,6 +123,10 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   showStationNumbers,
   showTrainStatusPanel,
   autoSetDepartureFromLocation,
+  alwaysVisibleStationsEnabled,
+  alwaysVisibleMinRoutes,
+  arrivalAlertEnabled,
+  arrivalAlertMinutes,
   showFurigana,
   showOsmTiles,
   theme,
@@ -117,6 +141,10 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowTravelTimesChange,
   onShowStationNamesChange,
   onShowStationNumbersChange,
+  onAlwaysVisibleStationsEnabledChange,
+  onAlwaysVisibleMinRoutesChange,
+  onArrivalAlertEnabledChange,
+  onArrivalAlertMinutesChange,
   onShowTrainStatusPanelChange,
   onAutoSetDepartureFromLocationChange,
   onShowFuriganaChange,
@@ -159,6 +187,25 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onTravelTimeLabelModeChange,
 }) => {
   const colors = getThemeColors(theme);
+  /**
+   * 路線切り替えの表示方式。
+   * 従来の一覧（classic）は並べ替え・ドラッグ順の変更ができるので残し、
+   * 読みやすさを優先したボード表示（board）を既定にする。
+   * 選んだ方式は次回も同じで開けるよう保存する。
+   */
+  const [routeUiMode, setRouteUiMode] = useState<'board' | 'classic'>(() => {
+    if (typeof window === 'undefined') return 'board';
+    try {
+      return window.localStorage.getItem(ROUTE_UI_MODE_KEY) === 'classic' ? 'classic' : 'board';
+    } catch {
+      // プライベートブラウズなどで localStorage が使えなくても既定で動く
+      return 'board';
+    }
+  });
+  const changeRouteUiMode = (mode: 'board' | 'classic') => {
+    setRouteUiMode(mode);
+    try { window.localStorage.setItem(ROUTE_UI_MODE_KEY, mode); } catch { /* 保存できなくても表示は変わる */ }
+  };
   const [sortMode, setSortMode] = useState<SortMode>('distance');
   const [dragOverKey, setDragOverKey] = useState<string | null>(null);
   const [touchDragKey, setTouchDragKey] = useState<RouteKey | null>(null);
@@ -213,77 +260,106 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
     return 0;
   });
 
+  /**
+   * ボード表示に渡す並び順。
+   * 全国490路線を名前順にすると「IGRいわて銀河鉄道」から始まって
+   * 手元の路線に届かないので、画面中心から近い順で渡す。
+   */
+  const boardRouteKeys = useMemo(
+    () => [...visibleRoutesData]
+      .sort(([, a], [, b]) => routeMinDist(a) - routeMinDist(b))
+      .map(([k]) => k as RouteKey),
+    [visibleRoutesData, viewCenter],
+  );
+
   const sectionHeader = (label: string, isOpen: boolean, onToggle: () => void) => (
     <div
       onClick={onToggle}
-      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', background: colors.surfaceElevated, marginBottom: '2px' }}
+      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${L.sp.xs} ${L.sp.sm}`, cursor: 'pointer', borderRadius: L.r.control, background: colors.surfaceElevated, marginBottom: L.sp.xxs }}
     >
-      <span style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textSecondary }}>{label}</span>
-      <span style={{ fontSize: '9px', color: colors.textSecondary, transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
+      <span style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary }}>{label}</span>
+      <span style={{ fontSize: FS.caption, color: colors.textSecondary, transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
     </div>
   );
 
   return (
     <div style={{
-      marginBottom: '15px',
-      padding: '10px',
+      marginBottom: L.sp['2xl'],
+      padding: L.sp.lg,
       backgroundColor: colors.surface,
-      borderRadius: '4px',
+      borderRadius: L.r.control,
       border: `1px solid ${colors.borderLight}`
     }}>
 
       {/* ═══ セクション1: 表示路線切り替え ═══ */}
-      <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: colors.text }}>
-        {translateUI('routeDisplayToggle', language)}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: L.sp.md,
+        marginBottom: L.sp.md,
+      }}>
+        <div style={{ fontSize: FS.title, fontWeight: 'bold', color: colors.text }}>
+          {translateUI('routeDisplayToggle', language)}
+        </div>
+        {/* 表示方式の切り替え。従来の一覧も選べる形で残している */}
+        <SegmentedControl
+          theme={theme}
+          value={routeUiMode}
+          onChange={changeRouteUiMode}
+          ariaLabel={translateUI('routeDisplayToggle', language)}
+          options={[
+            { value: 'board' as const, label: translateUI('routeViewBoard', language) },
+            { value: 'classic' as const, label: translateUI('routeViewClassic', language) },
+          ]}
+        />
       </div>
 
+      {routeUiMode === 'board' && (
+        <RouteSwitchBoard
+          routeKeys={boardRouteKeys}
+          visibleRoutes={visibleRoutes}
+          highlightedRouteKeys={highlightedRouteKeys}
+          stationRouteKeys={stationRouteKeys}
+          routeColors={routeColors}
+          routeNames={routeNames}
+          theme={theme}
+          language={language}
+          onToggleRoute={onToggleRoute}
+          onSelectAllRoutes={onSelectAllRoutes}
+          onDeselectAllRoutes={onDeselectAllRoutes}
+          adjustRouteColorForTheme={adjustRouteColorForTheme}
+        />
+      )}
+
+      {routeUiMode === 'classic' && (<>
       {/* ソート選択 */}
-      <div style={{ display: 'flex', gap: '4px', marginBottom: '6px', alignItems: 'center' }}>
-        <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
+      <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.sm, alignItems: 'center' }}>
+        <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>
           {translateUI('sortLabel', language)}
         </span>
-        {(['name', 'color', 'default', 'distance'] as SortMode[]).map(mode => {
-          const label = mode === 'name'
-            ? translateUI('sortAlpha', language)
-            : mode === 'color'
-              ? translateUI('sortColor', language)
-              : mode === 'distance'
-                ? translateUI('sortNearby', language)
-                : translateUI('sortDefault', language);
-          return (
-            <button
-              key={mode}
-              onClick={() => setSortMode(mode)}
-              style={{
-                padding: '2px 6px',
-                fontSize: '10px',
-                border: `1px solid ${sortMode === mode ? colors.primary : colors.borderLight}`,
-                borderRadius: '3px',
-                backgroundColor: sortMode === mode ? colors.primary : 'transparent',
-                color: sortMode === mode ? '#fff' : colors.textSecondary,
-                cursor: 'pointer',
-                // WCAG 2.2 AA (2.5.8 ターゲットサイズ) の最小24px
-                minHeight: `${TARGET.min}px`,
-              }}
-            >{label}</button>
-          );
-        })}
+        <SegmentedControl
+          theme={theme}
+          value={sortMode}
+          onChange={setSortMode}
+          ariaLabel={translateUI('sortLabel', language)}
+          options={[
+            { value: 'name' as SortMode, label: translateUI('sortAlpha', language) },
+            { value: 'color' as SortMode, label: translateUI('sortColor', language) },
+            { value: 'default' as SortMode, label: translateUI('sortDefault', language) },
+            { value: 'distance' as SortMode, label: translateUI('sortNearby', language) },
+          ]}
+        />
       </div>
 
       {/* 全表示/全非表示 */}
-      <div style={{ display: 'flex', gap: '4px', marginBottom: '6px' }}>
-        <button
-          onClick={onSelectAllRoutes}
-          style={{ flex: 1, padding: '4px 8px', fontSize: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer', minHeight: `${TARGET.min}px` }}
-        >
+      <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.sm }}>
+        <Button theme={theme} variant="positive" size="sm" onClick={onSelectAllRoutes} styleOverride={{ flex: 1 }}>
           {translateUI('allShow', language)}
-        </button>
-        <button
-          onClick={onDeselectAllRoutes}
-          style={{ flex: 1, padding: '4px 8px', fontSize: '10px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer', minHeight: `${TARGET.min}px` }}
-        >
+        </Button>
+        <Button theme={theme} variant="danger" size="sm" onClick={onDeselectAllRoutes} styleOverride={{ flex: 1 }}>
           {translateUI('allHide', language)}
-        </button>
+        </Button>
       </div>
 
       {(() => {
@@ -313,8 +389,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
               return (
                 <React.Fragment key={routeKey}>
                 {showDivider && (
-                  <div style={{ margin: '4px 0 2px' }}>
-                    <div style={{ fontSize: '9px', color: colors.textSecondary, whiteSpace: 'nowrap', marginBottom: '2px' }}>
+                  <div style={{ margin: `${L.sp.xs} 0 ${L.sp.xxs}` }}>
+                    <div style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap', marginBottom: L.sp.xxs }}>
                       ↑ この駅を通る路線
                     </div>
                     <div style={{ borderTop: `1px dashed ${colors.borderLight}` }} />
@@ -336,7 +412,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   style={{
                     display: 'flex', alignItems: 'center',
                     outline: isDragTarget ? `2px dashed ${adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme)}` : 'none',
-                    borderRadius: '3px',
+                    borderRadius: L.r.control,
                     background: isDragTarget ? `${adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme)}18` : 'transparent',
                     userSelect: 'none',
                   }}
@@ -368,7 +444,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                       setTouchDragKey(null);
                       setDragOverKey(null);
                     }}
-                    style={{ fontSize: '13px', color: colors.textSecondary, lineHeight: 1, flexShrink: 0, padding: '2px 3px 2px 0', cursor: 'grab', opacity: 0.5, userSelect: 'none', touchAction: 'none', WebkitUserSelect: 'none' }}
+                    style={{ fontSize: FS.body, color: colors.textSecondary, lineHeight: 1, flexShrink: 0, padding: `${L.sp.xxs} ${L.sp.xs} ${L.sp.xxs} 0`, cursor: 'grab', opacity: 0.5, userSelect: 'none', touchAction: 'none', WebkitUserSelect: 'none' }}
                   >
                     ⠿
                   </span>
@@ -390,20 +466,28 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
               );
             })}
             {(hidden > 0 || routeListExpanded) && (
-              <button
+              <Button
+                theme={theme}
+                variant="outline"
+                size="sm"
+                fullWidth
                 onClick={() => setRouteListExpanded(v => !v)}
-                style={{ width: '100%', marginTop: '4px', padding: '4px', fontSize: '10px', background: 'transparent', border: `1px solid ${colors.borderLight}`, borderRadius: '3px', color: colors.textSecondary, cursor: 'pointer' }}
+                styleOverride={{ marginTop: L.sp.xs }}
               >
-                {routeListExpanded ? '▲ 折りたたむ' : `▼ 他 ${hidden} 路線を表示`}
-              </button>
+                {routeListExpanded
+                  ? translateUI('collapseList', language)
+                  : translateUI('showMoreRoutes', language, { count: String(hidden) })}
+              </Button>
             )}
           </>
         );
       })()}
 
+      </>)}
+
       {/* ═══ セクション2: 表示設定 ═══ */}
-      <div style={{ marginTop: '12px', marginBottom: '4px' }}>
-        <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: colors.text }}>
+      <div style={{ marginTop: L.sp.xl, marginBottom: L.sp.xs }}>
+        <div style={{ fontSize: FS.title, fontWeight: 'bold', marginBottom: L.sp.md, color: colors.text }}>
           {translateUI('displaySettings', language)}
         </div>
         <div>
@@ -411,52 +495,95 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {/* ── 駅ラベル ── */}
             {sectionHeader(translateUI('settingsGroupLabel', language), groupLabelOpen, () => setGroupLabelOpen(v => !v))}
             {groupLabelOpen && (
-              <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showTransferStationsOnly} onChange={e => onShowTransferStationsOnlyChange(e.target.checked)} style={checkboxInput(colors)} />
+              <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
+                <Checkbox theme={theme} checked={showTransferStationsOnly} onChange={onShowTransferStationsOnlyChange}>
                   {translateUI('showOnlyTransferStations', language)}
-                </label>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showTravelTimes} onChange={e => onShowTravelTimesChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>
+                <Checkbox theme={theme} checked={showTravelTimes} onChange={onShowTravelTimesChange}>
                   {translateUI('showTravelTimes', language)}
-                </label>
+                </Checkbox>
                 {showTravelTimes && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', paddingLeft: '22px', marginBottom: '2px' }}>
-                    <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('travelTimeLabelMode', language)}:</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, paddingLeft: L.sp['4xl'], marginBottom: L.sp.xxs }}>
+                    <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('travelTimeLabelMode', language)}:</span>
                     {(['interval', 'cumulative'] as const).map(mode => (
-                      <label key={mode} style={{ display: 'flex', alignItems: 'center', gap: '2px', fontSize: '10px', color: colors.text, cursor: 'pointer' }}>
-                        <input
-                          type="radio"
+                      <Radio
+                          theme={theme}
+                          size="sm"
                           name="travelTimeLabelMode"
                           checked={travelTimeLabelMode === mode}
                           onChange={() => onTravelTimeLabelModeChange(mode)}
-                          style={{ cursor: 'pointer' }}
-                        />
-                        {mode === 'interval' ? translateUI('travelTimeLabelInterval', language) : `${translateUI('travelTimeLabelCumulative', language)}（実装中）`}
-                      </label>
+                        >
+                          {mode === 'interval' ? translateUI('travelTimeLabelInterval', language) : `${translateUI('travelTimeLabelCumulative', language)}（実装中）`}
+                        </Radio>
                     ))}
                   </div>
                 )}
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showStationNumbers} onChange={e => onShowStationNumbersChange(e.target.checked)} style={checkboxInput(colors)} />
+                <Checkbox theme={theme} checked={showStationNumbers} onChange={onShowStationNumbersChange}>
                   {translateUI('showStationCodes', language)}
-                </label>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={autoSetDepartureFromLocation} onChange={e => onAutoSetDepartureFromLocationChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>
+                <Checkbox theme={theme} checked={autoSetDepartureFromLocation} onChange={onAutoSetDepartureFromLocationChange}>
                   {translateUI('useLocationFeatures', language)}
-                </label>                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showTrainStatusPanel} onChange={e => onShowTrainStatusPanelChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>                <Checkbox theme={theme} checked={showTrainStatusPanel} onChange={onShowTrainStatusPanelChange}>
                   {translateUI('showTrainStatusPanel', language)}
-                </label>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showStationNames} onChange={e => onShowStationNamesChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>
+                {/* 降車駅アラーム。時刻表ではなく現在地から残り時間を出して知らせる */}
+                <Checkbox theme={theme} checked={arrivalAlertEnabled} onChange={onArrivalAlertEnabledChange}>
+                  {translateUI('arrivalAlert', language)}
+                </Checkbox>
+                {arrivalAlertEnabled && (
+                  <div style={{ paddingLeft: L.sp['4xl'], paddingBottom: L.sp.xs }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm }}>
+                      <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                        {translateUI('arrivalAlertTiming', language)}
+                      </span>
+                      <Select
+                        theme={theme}
+                        size="sm"
+                        value={arrivalAlertMinutes}
+                        onChange={e => onArrivalAlertMinutesChange(Number(e.target.value))}
+                      >
+                        {ALERT_MINUTE_OPTIONS.map(n => (
+                          <option key={n} value={n}>
+                            {translateUI('arrivalAlertMinutesOption', language, { count: n })}
+                          </option>
+                        ))}
+                      </Select>
+                    </div>
+                    <div style={{ fontSize: FS.caption, color: colors.textSecondary, marginTop: L.sp.xs, lineHeight: 1.5 }}>
+                      {translateUI('arrivalAlertNote', language)}
+                    </div>
+                  </div>
+                )}
+                <Checkbox theme={theme} checked={showStationNames} onChange={onShowStationNamesChange}>
                   {translateUI('showStationNames', language)}
-                </label>
+                </Checkbox>
+                {/* 主要駅の常時表示。しきい値（何路線以上か）も変えられるようにする */}
+                <Checkbox theme={theme} checked={alwaysVisibleStationsEnabled} onChange={onAlwaysVisibleStationsEnabledChange}>
+                  {translateUI('alwaysShowMajorStations', language)}
+                </Checkbox>
+                {alwaysVisibleStationsEnabled && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, padding: `${L.sp.xxs} 0 ${L.sp.xs} ${L.sp['4xl']}` }}>
+                    <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                      {translateUI('minRouteCount', language)}
+                    </span>
+                    <Select
+                        theme={theme}
+                        size="sm"
+                        value={alwaysVisibleMinRoutes}
+                      onChange={e => onAlwaysVisibleMinRoutesChange(Number(e.target.value))}
+                      >
+                      {[2, 3, 4, 5, 6, 7, 8, 10].map(n => (
+                        <option key={n} value={n}>
+                          {translateUI('routeCountOption', language, { count: n })}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+                )}
                 {language === 'japanese' && (
-                  <label style={checkboxLabel(colors)}>
-                    <input type="checkbox" checked={showFurigana} onChange={e => onShowFuriganaChange(e.target.checked)} style={checkboxInput(colors)} />
-                    {translateUI('showFurigana', language)}
-                  </label>
+                  <Checkbox theme={theme} checked={showFurigana} onChange={onShowFuriganaChange}>
+                  {translateUI('showFurigana', language)}
+                </Checkbox>
                 )}
               </div>
             )}
@@ -464,114 +591,121 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {/* ── データ可視化 ── */}
             {sectionHeader(translateUI('settingsGroupViz', language), groupVizOpen, () => setGroupVizOpen(v => !v))}
             {groupVizOpen && (
-              <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={heatmapEnabled} onChange={e => onHeatmapEnabledChange(e.target.checked)} style={checkboxInput(colors)} />
+              <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
+                <Checkbox theme={theme} checked={heatmapEnabled} onChange={onHeatmapEnabledChange}>
                   {translateUI('stationHeatmap', language)}
-                </label>
+                </Checkbox>
                 {heatmapEnabled && (
-                  <label style={{ ...checkboxLabel(colors), paddingLeft: '18px', fontSize: '11px' }}>
-                    <input type="checkbox" checked={showEstimatedData} onChange={e => onShowEstimatedDataChange(e.target.checked)} style={checkboxInput(colors)} />
+                  <Checkbox
+                    theme={theme}
+                    size="sm"
+                    checked={showEstimatedData}
+                    onChange={onShowEstimatedDataChange}
+                    styleOverride={{ paddingLeft: L.sp['2xl'] }}
+                  >
                     <span>推定データを含める</span>
-                    {!showEstimatedData && <span style={{ marginLeft: '4px', color: '#e88', fontSize: '10px' }}>（実データのみ）</span>}
-                  </label>
+                    {!showEstimatedData && <span style={{ marginLeft: L.sp.xs, color: SEMANTIC.arrival, fontSize: FS.caption }}>（実データのみ）</span>}
+                  </Checkbox>
                 )}
                 {mapViewMode === 'realistic' && (
-                  <label style={checkboxLabel(colors)}>
-                    <input type="checkbox" checked={showTrainDemo} onChange={onTrainDemoToggle} style={checkboxInput(colors)} />
-                    {translateUI('trainDemoLabel', language)}
-                  </label>
+                  <Checkbox theme={theme} checked={showTrainDemo} onChange={onTrainDemoToggle}>
+                  {translateUI('trainDemoLabel', language)}
+                </Checkbox>
                 )}
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={mapViewMode === 'bubble'} onChange={e => onMapViewModeChange(e.target.checked ? 'bubble' : 'realistic')} style={checkboxInput(colors)} />
+                <Checkbox theme={theme} checked={mapViewMode === 'bubble'} onChange={(checked) => onMapViewModeChange(checked ? 'bubble' : 'realistic')}>
                   {translateUI('bubbleMap', language)}
-                </label>
+                </Checkbox>
                 {mapViewMode === 'bubble' && (
-                  <div style={{ marginLeft: '22px', marginTop: '4px' }}>
-                    <div style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
+                  <div style={{ marginLeft: L.sp['4xl'], marginTop: L.sp.xs }}>
+                    <div style={{ display: 'flex', gap: L.sp.sm, marginBottom: L.sp.sm }}>
                       {(['circle', 'square'] as const).map(shape => (
-                        <label key={shape} style={{ display: 'flex', alignItems: 'center', fontSize: '11px', color: colors.text, cursor: 'pointer' }}>
-                          <input type="radio" name="bubbleShape" checked={bubbleShape === shape} onChange={() => onBubbleShapeChange(shape)} style={{ marginRight: '4px', cursor: 'pointer' }} />
+                        <Radio
+                          theme={theme}
+                          size="sm"
+                          name="bubbleShape"
+                          checked={bubbleShape === shape}
+                          onChange={() => onBubbleShapeChange(shape)}
+                        >
                           {shape === 'circle' ? translateUI('bubbleCircle', language) : translateUI('bubbleSquare', language)}
-                        </label>
+                        </Radio>
                       ))}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '10px', color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('bubbleMaxRadius', language)}</span>
-                      <input
-                        type="range" min={500} max={50000} step={500}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm }}>
+                      <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('bubbleMaxRadius', language)}</span>
+                      <Slider
+                        min={500} max={50000} step={500}
                         value={bubbleMaxRadiusM}
                         onChange={e => onBubbleMaxRadiusMChange(Number(e.target.value))}
-                        style={{ flex: 1, cursor: 'pointer' }}
                       />
-                      <span style={{ fontSize: '10px', color: colors.text, minWidth: '40px', textAlign: 'right' }}>
+                      <span style={{ fontSize: FS.caption, color: colors.text, minWidth: '40px', textAlign: 'right' }}>
                         {bubbleMaxRadiusM >= 1000 ? `${(bubbleMaxRadiusM / 1000).toFixed(1)}km` : `${bubbleMaxRadiusM}m`}
                       </span>
                     </div>
                   </div>
                 )}
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={mapViewMode === 'schematic'} onChange={e => onMapViewModeChange(e.target.checked ? 'schematic' : 'realistic')} style={checkboxInput(colors)} />
+                <Checkbox theme={theme} checked={mapViewMode === 'schematic'} onChange={(checked) => onMapViewModeChange(checked ? 'schematic' : 'realistic')}>
                   {translateUI('schematicMapLabel', language)}
-                </label>
+                </Checkbox>
               </div>
             )}
 
             {/* ── 駅フィルター ── */}
             {sectionHeader(translateUI('settingsGroupFilter', language), groupFilterOpen, () => setGroupFilterOpen(v => !v))}
             {groupFilterOpen && (
-              <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showExpressStationsOnly} onChange={e => onShowExpressStationsOnlyChange(e.target.checked)} style={checkboxInput(colors)} />
+              <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
+                <Checkbox theme={theme} checked={showExpressStationsOnly} onChange={onShowExpressStationsOnlyChange}>
                   {translateUI('showOnlyExpressStations', language)}
-                </label>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showFullRouteStations} onChange={e => onShowFullRouteStationsChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>
+                <Checkbox theme={theme} checked={showFullRouteStations} onChange={onShowFullRouteStationsChange}>
                   {translateUI('showFullRouteStations', language)}
-                </label>
+                </Checkbox>
               </div>
             )}
 
             {/* ── 地図表示 ── */}
             {sectionHeader(translateUI('settingsGroupMap', language), groupMapOpen, () => setGroupMapOpen(v => !v))}
             {groupMapOpen && (
-              <div style={{ paddingLeft: '4px', marginBottom: '4px' }}>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showDimmedRoutes} onChange={e => onShowDimmedRoutesChange(e.target.checked)} style={checkboxInput(colors)} />
+              <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
+                <Checkbox theme={theme} checked={showDimmedRoutes} onChange={onShowDimmedRoutesChange}>
                   {translateUI('showOutsideSegmentRoutes', language)}
-                </label>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showRouteLine} onChange={e => onShowRouteLineChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>
+                <Checkbox theme={theme} checked={showRouteLine} onChange={onShowRouteLineChange}>
                   {translateUI('showRouteLines', language)}
-                </label>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showStationTierBadges} onChange={e => onShowStationTierBadgesChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>
+                <Checkbox theme={theme} checked={showStationTierBadges} onChange={onShowStationTierBadgesChange}>
                   {translateUI('transferHighlight', language)}
-                </label>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showStationTooltip} onChange={e => onShowStationTooltipChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>
+                <Checkbox theme={theme} checked={showStationTooltip} onChange={onShowStationTooltipChange}>
                   {translateUI('stationTooltipLabel', language)}
-                </label>
-                <label style={checkboxLabel(colors)}>
-                  <input type="checkbox" checked={showOsmTiles} onChange={e => onShowOsmTilesChange(e.target.checked)} style={checkboxInput(colors)} />
+                </Checkbox>
+                <Checkbox theme={theme} checked={showOsmTiles} onChange={onShowOsmTilesChange}>
                   {translateUI('showMapTiles', language)}
-                </label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0', marginTop: '2px' }}>
-                  <span style={{ flex: 1, color: colors.textSecondary }}>{translateUI('settingsIconSize', language)}</span>
-                  <button onClick={() => onStationSizeScaleChange(Math.max(0.5, Math.round((stationSizeScale - 0.1) * 10) / 10))}
-                    style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
-                  <span style={{ minWidth: '30px', textAlign: 'center', fontSize: '11px' }}>{stationSizeScale.toFixed(1)}x</span>
-                  <button onClick={() => onStationSizeScaleChange(Math.min(2.0, Math.round((stationSizeScale + 0.1) * 10) / 10))}
-                    style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: colors.text, padding: '2px 0' }}>
-                  <span style={{ flex: 1, color: colors.textSecondary }}>{translateUI('routeLineWidth', language)}</span>
-                  <button onClick={() => onRouteLineWidthChange(Math.max(1, routeLineWidth - 0.5))}
-                    style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
-                  <span style={{ minWidth: '30px', textAlign: 'center', fontSize: '11px' }}>{routeLineWidth.toFixed(1)}px</span>
-                  <button onClick={() => onRouteLineWidthChange(Math.min(8, routeLineWidth + 0.5))}
-                    style={{ width: '18px', height: '18px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${colors.border}`, borderRadius: '3px', background: colors.surfaceElevated, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
-                </div>
+                </Checkbox>
+                <Stepper
+                  theme={theme}
+                  label={translateUI('settingsIconSize', language)}
+                  value={stationSizeScale}
+                  min={MAP_LABEL.minScale}
+                  max={MAP_LABEL.maxScale}
+                  step={MAP_LABEL.scaleStep}
+                  onChange={onStationSizeScaleChange}
+                  // 倍率だけだと何pxになるのか分からないので実際の文字サイズも出す
+                  format={(v) => `${Math.round(MAP_LABEL.baseFontPx * v)}px`}
+                  decreaseLabel={translateUI('decrease', language)}
+                  increaseLabel={translateUI('increase', language)}
+                />
+                <Stepper
+                  theme={theme}
+                  label={translateUI('routeLineWidth', language)}
+                  value={routeLineWidth}
+                  min={ROUTE_LINE.minWidth}
+                  max={ROUTE_LINE.maxWidth}
+                  step={ROUTE_LINE.widthStep}
+                  onChange={onRouteLineWidthChange}
+                  format={(v) => `${v.toFixed(1)}px`}
+                  decreaseLabel={translateUI('decrease', language)}
+                  increaseLabel={translateUI('increase', language)}
+                />
               </div>
             )}
 

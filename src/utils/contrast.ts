@@ -6,6 +6,7 @@
  * 1.5:1 程度となり判読が困難だった。背景の明るさに応じて
  * 白と濃色を切り替えることで、どの路線色でも AA を満たすようにする。
  */
+import { NEUTRAL } from '../constants/ui';
 
 /** #RGB / #RRGGBB を [r, g, b] に変換する。解釈できない場合は null */
 export function parseHexColor(hex: string): [number, number, number] | null {
@@ -44,8 +45,8 @@ export function contrastRatio(
  * #111111 では緑系(#2E8B57 など)や赤系(#E73820)の路線色で 4.45:1 と
  * わずかに AA を下回るため、純黒を用いて全路線色で 4.5:1 以上を確保する。
  */
-export const DARK_TEXT = '#000000';
-export const LIGHT_TEXT = '#FFFFFF';
+export const DARK_TEXT = NEUTRAL.black;
+export const LIGHT_TEXT = NEUTRAL.white;
 
 /**
  * 背景色に対してコントラスト比が高くなる方の文字色を返す。
@@ -123,6 +124,40 @@ export function darkenForWhiteText(background: string, targetRatio = 4.5, minSca
   }
 
   return scaledHex(lo);
+}
+
+/**
+ * 色を「薄く敷く背景」として使うための rgba を返す。
+ *
+ * 選択状態を枠線だけで示すと分かりにくいうえ、枠線の太さを変えると
+ * 並びがずれる。背景を薄く塗って示すために使う。
+ */
+export function tintColor(hex: string, alpha: number): string {
+  const rgb = parseHexColor(hex);
+  if (!rgb) return 'transparent';
+  return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
+}
+
+/**
+ * 路線色などを「塗りつぶしのラベル」として使うときの配色。
+ *
+ * 駅名ラベル・駅アイコン・ツールチップ内のバッジがそれぞれ別々に
+ * 「ダークなら白字、ライトなら明るさで白黒を選ぶ」を書いていて、
+ * 直すたびに片方だけ変わってしまっていた。規則をここ1箇所にまとめる。
+ *
+ * - ダークモード: 文字は白に統一し、足りない分は背景を必要最小限だけ暗くする
+ * - ライトモード: 背景はそのままで、明るさに応じて白/黒の読みやすい方を選ぶ
+ * - それでも 4.5:1 に届かない明るい色（総武線の黄色など）は needsHalo が true。
+ *   呼び出し側で文字の縁取りを足して可読性を補う
+ */
+export function filledLabelColors(baseColor: string, theme: 'light' | 'dark'): {
+  background: string;
+  text: string;
+  needsHalo: boolean;
+} {
+  const background = theme === 'dark' ? darkenForWhiteText(baseColor) : baseColor;
+  const text = theme === 'dark' ? LIGHT_TEXT : readableTextColor(background);
+  return { background, text, needsHalo: !meetsContrast(background, text) };
 }
 
 /** 2色が目標コントラスト比（既定 WCAG AA の 4.5:1）を満たすか */
