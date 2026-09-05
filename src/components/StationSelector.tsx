@@ -428,7 +428,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               <div style={{ position: 'relative' }}>
                 <TextField
                   theme={theme}
-                  size="md"
+                  size="sm"
                   type="text"
                   value={departureSearch}
                   onChange={(e) => {
@@ -596,7 +596,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               <div style={{ position: 'relative' }}>
                 <TextField
                   theme={theme}
-                  size="md"
+                  size="sm"
                   type="text"
                   value={arrivalSearch}
                   onChange={(e) => {
