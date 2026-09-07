@@ -278,6 +278,19 @@ import leafletCss from "leaflet/dist/leaflet.css?url";
 				bottom: 60px !important;
 			}
 
+			/*
+				背景タイルの色反転（ダークモード用）。
+				CARTOのdark_all/light_allタイル（basemaps.cartocdn.com）が
+				APIキー必須になり、無料の匿名アクセスでは"API KEY REQUIRED"の
+				透かし入りタイルしか返らなくなった（2026-09確認）。
+				キー登録を要求せずに済むよう、キー不要のOSM標準タイル1種類だけを使い、
+				ダークモードはCSSフィルタで反転して見せる。
+				.map-base-tiles は RailwayMap.tsx の TileLayer に付けたクラス名。
+			*/
+			body.dark .map-base-tiles {
+				filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+			}
+
 			/* COMPREHENSIVE Dark mode support for ALL Leaflet popups */
 
 			/* === ROOT POPUP CONTAINER === */

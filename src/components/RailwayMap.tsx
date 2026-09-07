@@ -4644,11 +4644,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
               {showOsmTiles && mapViewMode !== 'bubble' && (
                 <TileLayer
-                  url={theme === 'dark'
-                    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                    : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                  }
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                  // CARTOのdark_all/light_allはAPIキー必須になり、無料匿名アクセスでは
+                  // "API KEY REQUIRED"の透かし入りタイルしか返らない（2026-09確認）。
+                  // キー登録なしで使えるOSM標準タイル1種類に統一し、ダークモードは
+                  // index.astro の .map-base-tiles にかけたCSSフィルタで反転して見せる
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  className="map-base-tiles"
                 />
               )}
 

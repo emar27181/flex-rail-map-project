@@ -1,5 +1,21 @@
 # CHANGE LOG
 
+## [2026-09-07] セッション（背景地図タイルのAPIキー必須化に対応）
+
+### fix: 背景地図が「API KEY REQUIRED」の透かしだけになる問題を修正
+- `src/components/RailwayMap.tsx`, `src/pages/index.astro`
+- CARTOのdark_all/light_allタイル（`basemaps.cartocdn.com`）がAPIキー必須になり、
+  無料の匿名アクセスでは全面に"API KEY REQUIRED"の透かし入りタイルしか
+  返らなくなっていた（本番・プレビュー双方で発生、ユーザー報告により発覚）
+- キー登録が不要なOSM標準タイル1種類（`tile.openstreetmap.org`、
+  `src/components/DemoMap.tsx` と同じ供給元）に統一
+- ダークモードは2種類のタイルを出し分けるのではなく、`.map-base-tiles` に
+  CSSフィルタ（色反転）をかけて表現する方式にした
+- 補足: OpenStreetMapの標準タイルサーバーは軽い個人利用を想定した無料サービスで、
+  商用・高トラフィック用途は推奨されていない。将来アクセスが増えて制限に
+  かかるようであれば、有償タイルプロバイダ（MapTiler・Mapbox等）への
+  切り替えを検討すること
+
 ## [2026-09-05] セッション（最寄り駅メモ機能）
 
 ### feat: 「誰の最寄り駅がどこか」のメモ機能を追加
