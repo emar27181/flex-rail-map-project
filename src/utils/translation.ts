@@ -7503,6 +7503,83 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "{shown} / {total} 路線を表示中",
     english: "{shown} of {total} routes shown"
   },
+  // ── 最寄り駅メモ ──────────────────────────────────────────
+  memoTitle: {
+    japanese: "最寄り駅メモ",
+    english: "Nearest station notes"
+  },
+  memoDescription: {
+    japanese: "誰の最寄り駅がどこかを控えておくと、全員が乗れる路線が分かります。この端末にだけ保存されます。",
+    english: "Note who lives near which station to see the lines everyone can use. Saved on this device only."
+  },
+  memoPersonPlaceholder: {
+    japanese: "名前",
+    english: "Name"
+  },
+  memoStationPlaceholder: {
+    japanese: "最寄り駅",
+    english: "Nearest station"
+  },
+  memoNotePlaceholder: {
+    japanese: "ひとこと（任意）",
+    english: "Note (optional)"
+  },
+  memoAdd: {
+    japanese: "追加",
+    english: "Add"
+  },
+  memoRemove: {
+    japanese: "削除",
+    english: "Remove"
+  },
+  memoSearchPlaceholder: {
+    japanese: "名前・駅・路線で絞り込む",
+    english: "Filter by name, station or line"
+  },
+  memoEmpty: {
+    japanese: "まだ誰も登録されていません",
+    english: "No one saved yet"
+  },
+  memoNoMatch: {
+    japanese: "一致する人がいません",
+    english: "No one matches"
+  },
+  memoUnknownStation: {
+    japanese: "路線データに無い駅名です",
+    english: "Not a station in the data"
+  },
+  memoCount: {
+    japanese: "{count}人",
+    english: "{count} people"
+  },
+  memoSharedRoutes: {
+    japanese: "共通の路線",
+    english: "Shared lines"
+  },
+  memoEveryone: {
+    japanese: "全員",
+    english: "Everyone"
+  },
+  memoSharedCount: {
+    japanese: "{count} / {total}人",
+    english: "{count} of {total}"
+  },
+  memoNoShared: {
+    japanese: "全員が使える路線はありません",
+    english: "No line reaches everyone"
+  },
+  memoShowEveryone: {
+    japanese: "全員の路線を地図に表示",
+    english: "Show everyone's lines"
+  },
+  memoShowShared: {
+    japanese: "この一覧の路線を地図に表示",
+    english: "Show these lines on the map"
+  },
+  memoUseAsDeparture: {
+    japanese: "出発に設定",
+    english: "Set as departure"
+  },
   showOnlyTransferStations: {
     japanese: "乗換駅のみ表示",
     english: "Show Transfer Stations Only"
@@ -8475,6 +8552,25 @@ export const uiChinese: Record<string, string> = {
   routeShowMore: "再显示{count}条",
   routeNoMatch: "没有符合的线路",
   routeVisibleSummary: "已显示 {shown} / {total} 条线路",
+  memoTitle: "最近车站备忘",
+  memoDescription: "记下每个人最近的车站，就能看出大家都能乘坐的线路。仅保存在本设备。",
+  memoPersonPlaceholder: "姓名",
+  memoStationPlaceholder: "最近车站",
+  memoNotePlaceholder: "备注（可选）",
+  memoAdd: "添加",
+  memoRemove: "删除",
+  memoSearchPlaceholder: "按姓名、车站或线路筛选",
+  memoEmpty: "还没有登记任何人",
+  memoNoMatch: "没有符合的人",
+  memoUnknownStation: "线路数据中没有这个车站",
+  memoCount: "{count}人",
+  memoSharedRoutes: "共同线路",
+  memoEveryone: "全员",
+  memoSharedCount: "{count} / {total}人",
+  memoNoShared: "没有全员都能使用的线路",
+  memoShowEveryone: "在地图上显示全员的线路",
+  memoShowShared: "在地图上显示这些线路",
+  memoUseAsDeparture: "设为出发地",
   stationSelection: "选择出发站和到达站",
   departureStation: "出发站",
   arrivalStation: "到达站",
@@ -8747,6 +8843,25 @@ export const uiKorean: Record<string, string> = {
   routeShowMore: "{count}개 더 보기",
   routeNoMatch: "일치하는 노선이 없습니다",
   routeVisibleSummary: "{total}개 중 {shown}개 노선 표시 중",
+  memoTitle: "가까운 역 메모",
+  memoDescription: "누구의 가까운 역이 어디인지 적어 두면 모두가 탈 수 있는 노선을 알 수 있습니다. 이 기기에만 저장됩니다.",
+  memoPersonPlaceholder: "이름",
+  memoStationPlaceholder: "가까운 역",
+  memoNotePlaceholder: "메모 (선택)",
+  memoAdd: "추가",
+  memoRemove: "삭제",
+  memoSearchPlaceholder: "이름·역·노선으로 검색",
+  memoEmpty: "아직 등록된 사람이 없습니다",
+  memoNoMatch: "일치하는 사람이 없습니다",
+  memoUnknownStation: "노선 데이터에 없는 역 이름입니다",
+  memoCount: "{count}명",
+  memoSharedRoutes: "공통 노선",
+  memoEveryone: "전원",
+  memoSharedCount: "{total}명 중 {count}명",
+  memoNoShared: "전원이 이용할 수 있는 노선이 없습니다",
+  memoShowEveryone: "전원의 노선을 지도에 표시",
+  memoShowShared: "이 노선들을 지도에 표시",
+  memoUseAsDeparture: "출발지로 설정",
   stationSelection: "출발역·도착역 선택",
   departureStation: "출발역",
   arrivalStation: "도착역",

@@ -13,12 +13,14 @@ import { useTheme, getThemeColors, adjustRouteColorForTheme } from '../contexts/
 import { translateStation, translateRoute, translateUI, translateTrainType, translatePlatform, translateDestination, translateStatParamLabel, translateStatUnit } from '../utils/translation';
 import type { Language } from '../utils/translation';
 import { getFurigana } from '../utils/furigana';
+import { getAllStations } from '../utils/allStations';
 import LegendStationMarkers from './legend/LegendStationMarkers';
 import LegendRouteList from './legend/LegendRouteList';
 import LegendRouteRecommendations from './legend/LegendRouteRecommendations';
 import LegendDisplayOptions from './legend/LegendDisplayOptions';
 import MultiDepartureRoutes from './MultiDepartureRoutes';
 import MobileBottomPanel from './MobileBottomPanel';
+import StationMemoPanel from './StationMemoPanel';
 import type { MapConfig } from './legend/MapConfigPanel';
 import type { StationStats } from '../data/stationStats';
 import {
@@ -1064,6 +1066,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   }, []);
   const handleFocusExtraDeparture = useCallback((station: Station) => {
     handleManualSetDeparture(station);
+  }, [handleManualSetDeparture]);
+
+  // 最寄り駅メモ: 共通の路線を地図に出す。
+  // 表示候補(availableRoutes)にも入れないと、凡例に無い路線は描かれない
+  const handleShowRoutesFromMemo = useCallback((routeKeys: RouteKey[]) => {
+    if (routeKeys.length === 0) return;
+    setAvailableRoutes(prev => new Set([...prev, ...routeKeys]));
+    setVisibleRoutes(new Set(routeKeys));
+  }, []);
+
+  // 最寄り駅メモ: 一覧の駅を出発駅にする
+  const handleUseStationAsDeparture = useCallback((stationName: string) => {
+    const station = getAllStations().find(s => s.name === stationName);
+    if (station) handleManualSetDeparture(station);
   }, [handleManualSetDeparture]);
 
   const handleSetNearestDeparture = useCallback(() => {
@@ -5413,6 +5429,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onTravelTimeLabelModeChange={setTravelTimeLabelMode}
                   />
 
+                  {/* 2.5 最寄り駅メモ (Nearest station notes) */}
+                  <StationMemoPanel
+                    theme={theme}
+                    language={currentLanguage}
+                    routeColors={routeColors}
+                    routeNames={routeNames}
+                    adjustRouteColorForTheme={adjustRouteColorForTheme}
+                    onShowRoutes={handleShowRoutesFromMemo}
+                    onUseAsDeparture={handleUseStationAsDeparture}
+                  />
+
                   {/* 3. 表示オプション (Display Options) */}
                   <LegendDisplayOptions
                     mapViewMode={mapViewMode === 'bubble' ? 'realistic' : mapViewMode}
@@ -5679,6 +5706,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onStationSizeScaleChange={setStationSizeScale}
                         travelTimeLabelMode={travelTimeLabelMode}
                         onTravelTimeLabelModeChange={setTravelTimeLabelMode}
+                      />
+                      <StationMemoPanel
+                        theme={theme}
+                        language={currentLanguage}
+                        routeColors={routeColors}
+                        routeNames={routeNames}
+                        adjustRouteColorForTheme={adjustRouteColorForTheme}
+                        onShowRoutes={handleShowRoutesFromMemo}
+                        onUseAsDeparture={handleUseStationAsDeparture}
                       />
                       {routeRecommendationsPanel}
                       <MultiDepartureRoutes
