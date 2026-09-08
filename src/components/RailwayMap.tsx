@@ -248,7 +248,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     borderWidth: 1,
   }), [stationLabelFontSize]);
   const [travelTimeLabelMode, setTravelTimeLabelMode] = useState<'interval' | 'cumulative'>('interval'); // 累積は実装中
-  const [showOsmTiles, setShowOsmTiles] = useState(true);
+  /**
+   * 仮の対応として既定をOFFにしている。
+   *
+   * 従来のCARTOタイルがAPIキー必須になり、代わりにキー不要のOSM標準タイルへ
+   * 切り替えたが、OSMの無料タイルサーバーは重い商用利用を想定しておらず、
+   * 将来的にレート制限で表示できなくなる可能性がある。安定した供給元に
+   * 差し替えるまでは、既定では路線図だけ（背景タイルなし）を表示し、
+   * 欲しい人は設定パネルから手動でONにする運用にする。
+   */
+  const [showOsmTiles, setShowOsmTiles] = useState(false);
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   const [tapToggleMode, setTapToggleMode] = useState(true);
   // 地図表示モード
@@ -5735,7 +5744,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             />
           )}
 
-          {/* 左下ボタングループ: フルスクリーン切り替え / 言語 / テーマ */}
+          {/* 左下ボタングループ: フルスクリーン切り替え / 言語 / テーマ / 記事一覧
+              指で何度も押す主要な操作なので md に揃える。
+              以前は独自の36px raw buttonで、アトム化の際に sm(24px) にしてしまい
+              アイコンがほぼ隙間なく詰まって見えるようになっていた。
+              隣接するモバイル下部パネルの操作群も md のため、それとも合わせる */}
           <div style={{
             position: 'absolute',
             ...(isFullscreen && isMobile
@@ -5752,7 +5765,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             {/* フルスクリーン切り替え */}
             <IconButton
               theme={theme}
-              size="sm"
+              size="md"
               variant="outline"
               onClick={() => setIsFullscreen(!isFullscreen)}
               label={isFullscreen
@@ -5767,7 +5780,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             {onLanguageChange && (
               <IconButton
                 theme={theme}
-                size="sm"
+                size="md"
                 variant="outline"
                 onClick={() => {
                   const langs: Language[] = ['japanese', 'english', 'chinese', 'korean'];
@@ -5776,7 +5789,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 label="Switch language"
                 icon={
                   // 文字をアイコン代わりに置くので、大きさは規格から取る
-                  <span style={{ fontSize: FS.caption, fontWeight: 'bold', fontFamily: 'monospace' }}>
+                  <span style={{ fontSize: FS.title, fontWeight: 'bold', fontFamily: 'monospace' }}>
                     {(() => { const langs: Language[] = ['japanese', 'english', 'chinese', 'korean']; const next = langs[(langs.indexOf(language) + 1) % langs.length]; return { japanese: '日', english: 'En', chinese: '中', korean: '한' }[next]; })()}
                   </span>
                 }
@@ -5789,14 +5802,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             {!isFullscreen && (
             <IconButton
               theme={theme}
-              size="sm"
+              size="md"
               variant="outline"
               onClick={toggleTheme}
               label={language === 'japanese'
                 ? `${theme === 'light' ? 'ダーク' : 'ライト'}モードに切り替え`
                 : `Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`
               }
-              icon={theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+              icon={theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
               styleOverride={{ boxShadow: `0 2px 8px ${colors.shadow}`, backdropFilter: 'blur(4px)' }}
             />
             )}
@@ -5806,11 +5819,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             <LinkButton
               href="/articles"
               theme={theme}
-              size="sm"
+              size="md"
               iconOnly
               title={language === 'japanese' ? '記事一覧を開く' : 'Open articles'}
               aria-label={language === 'japanese' ? '記事一覧を開く' : 'Open articles'}
-              icon={<Info size={18} />}
+              icon={<Info size={20} />}
               styleOverride={{ boxShadow: `0 2px 8px ${colors.shadow}`, backdropFilter: 'blur(4px)' }}
             />
             )}
