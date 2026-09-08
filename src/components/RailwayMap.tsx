@@ -4327,7 +4327,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               alignItems: 'center',
               cursor: 'pointer',
               padding: L.sp['2xl'],
-              borderRadius: '8px 8px 0 0',
+              borderRadius: `${L.r.card} ${L.r.card} 0 0`,
               borderBottom: isRouteToggleExpanded ? `1px solid ${colors.borderLight}` : 'none'
             }}
           >

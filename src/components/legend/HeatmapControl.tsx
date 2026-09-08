@@ -54,7 +54,7 @@ export default function HeatmapControl({
         {enabled && (
           <span style={{
             fontSize: L.fs.xs,
-            padding: `1px ${L.sp.sm}`,
+            padding: `${L.sp.xxs} ${L.sp.sm}`,
             borderRadius: L.r.card,
             background: '#a50026',
             color: colors.onPrimary,

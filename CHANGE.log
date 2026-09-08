@@ -1,5 +1,27 @@
 # CHANGE LOG
 
+## [2026-09-08] セッション（寸法の一元管理を再点検）
+
+### improve: 監査スクリプトで見つかった寸法のベタ書き2箇所をトークンに置き換え
+- `src/components/RailwayMap.tsx`, `src/components/legend/HeatmapControl.tsx`
+- 前回までのセッションで駅名入力欄・地図右上ボタンの寸法段階を調整したあと、
+  「サイズが色々変わっていないか」を `scripts/audit-design-tokens.mjs` と
+  実描画の計測（Playwright で全操作要素の高さ・角丸・文字サイズを収集）の
+  両方で確認した
+- 実描画側は既に規格どおり: 操作要素はすべて `sm`(24px) か `md`(44px) の
+  いずれかで、例外はいずれも既知・文書化済みのもの
+  （Leaflet自身のズームボタン、`<input type="checkbox">` の実寸13px、
+  Leaflet/OSM帰属表示リンク）。新たな崩れは無かった
+- 監査スクリプト側で見つかった、今回の作業とは無関係な旧来のベタ書き2件を
+  ついでに直した:
+  - `RailwayMap.tsx`: 路線切替セクション見出しの `borderRadius: '8px 8px 0 0'`
+    → `` `${L.r.card} ${L.r.card} 0 0` ``（角丸トークン統一前の8pxが値としては
+    そのままだったので、見た目を変えずにトークン化しただけ）
+  - `HeatmapControl.tsx`: ヒートマップ指標バッジの `padding: '1px ...'`
+    → `L.sp.xxs`（1pxは規格に無い値のため、最も近い段階に丸めた）
+- `node scripts/audit-design-tokens.mjs` のベタ書き件数: borderRadius 2→1、
+  spacing 5→4（残りは `src/design/`・`src/v2/` の対象外ディレクトリのみ）
+
 ## [2026-09-07] セッション（背景地図タイルのAPIキー必須化に対応）
 
 ### fix: 背景地図が「API KEY REQUIRED」の透かしだけになる問題を修正
