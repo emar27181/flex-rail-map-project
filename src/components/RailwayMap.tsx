@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X } from 'lucide-react';
 import type { LeafletEvent, LeafletMouseEvent, Map as LeafletMap } from 'leaflet';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
+import { JAPAN_OUTLINE } from '../data/japanOutline';
 import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
 import CoverageAnalysis from './CoverageAnalysis';
@@ -2378,6 +2379,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const MAX_MARKER_STATIONS = 150;
   /** 非表示路線を薄く描くときの線の太さ。ずらし幅もこれに合わせる */
   const DIMMED_ROUTE_WEIGHT = 3;
+  /** 日本の輪郭線の太さ。路線より目立たない細さにする */
+  const JAPAN_OUTLINE_WEIGHT = 1;
   /**
    * 路線の選択に関係なく残す主要駅のしきい値（設定から変更できる）。
    * オフのときはどの駅も満たさない値にして層ごと止める。
@@ -2637,7 +2640,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         if (typeof window === 'undefined') return;
 
         const [
-          { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Circle, useMapEvents, ZoomControl, Pane, Tooltip },
+          { MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, CircleMarker, Circle, useMapEvents, ZoomControl, Pane, Tooltip },
           leaflet
         ] = await Promise.all([
           import('react-leaflet'),
@@ -2647,7 +2650,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         const canvasRenderer = leaflet.canvas({ padding: 0.5 });
 
         if (mounted) {
-          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Circle, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip, canvasRenderer });
+          setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, CircleMarker, Circle, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip, canvasRenderer });
           setIsClient(true);
           setIsLoading(false);
           // デバッグ関数をブラウザコンソールで利用可能にする
@@ -3512,7 +3515,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // console.log('RailwayMap rendering main component');
 
-  const { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip } = MapComponents;
+  const { MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, CircleMarker, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip } = MapComponents;
 
   const MapEvents = () => {
     const map = useMapEvents({
@@ -4662,6 +4665,24 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   className="map-base-tiles"
                 />
               )}
+
+              {/* 日本の輪郭（背景タイルを消しているときだけ出す簡易シルエット）。
+                  外部タイルサーバーに依存しないので、CARTOのAPIキー問題のような
+                  形で描画できなくなることが無い。実測の海岸線データを間引いた
+                  点をそのまま直線で結んでいるため、意図的に角ばった見た目になる。
+                  出典・作成方法は src/data/japanOutline.ts 参照 */}
+              {!showOsmTiles && mapViewMode !== 'bubble' && Object.values(JAPAN_OUTLINE).map((points, i) => (
+                <Polygon
+                  key={`japan-outline-${i}`}
+                  positions={points}
+                  pathOptions={{
+                    fill: false,
+                    color: theme === 'dark' ? alphaWhite(0.35) : alphaBlack(0.25),
+                    weight: JAPAN_OUTLINE_WEIGHT,
+                    interactive: false,
+                  }}
+                />
+              ))}
 
               {/* 非表示路線（半透明・クリック可能）─ バブルモードでは非表示 */}
               {mapViewMode !== 'bubble' && showDimmedMapRoutes && Object.entries(routes)
