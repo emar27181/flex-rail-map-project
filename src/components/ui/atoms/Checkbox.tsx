@@ -9,6 +9,13 @@
  * 行そのものがクリック対象なので、高さは controlSize の規格に合わせる。
  * 入力欄の大きさは指定しない（WCAG 2.2 AA 2.5.8 が測るのは
  * 「タップできる範囲」＝この行であり、四角を大きくしても得がない）。
+ *
+ * 既定は sm（24px）。設定パネルのチェック項目は「一覧から選んで一度だけ
+ * 押す」補助操作であり、md（44px, 指で何度も押す主要操作向け）ほどの
+ * 高さは要らない。実際、呼び出し側のほとんどが明示的に size="sm" を
+ * 渡していたにもかかわらず、既定値だけが md のままだったため、
+ * 明示し忘れた箇所（設定パネルの表示切替チェックリスト20行ほど）だけ
+ * 縦に間延びして見える不整合が起きていた。
  */
 import React from 'react';
 import type { CSSProperties, ReactNode } from 'react';
@@ -33,7 +40,7 @@ const Checkbox: React.FC<CheckboxProps> = ({
   onChange,
   children,
   theme,
-  size = 'md',
+  size = 'sm',
   disabled = false,
   styleOverride,
 }) => {

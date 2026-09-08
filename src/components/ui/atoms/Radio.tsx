@@ -4,6 +4,9 @@
  * 見た目・当たり判定の規則はチェックボックスと同じ。
  * 違うのは「同じ name のうち1つだけ選べる」ところだけなので、
  * 寸法は Checkbox と同じ controlSize から取る。
+ *
+ * 既定は Checkbox と同じ理由で sm（24px）。設定・表示切替の並びで
+ * 一度だけ選ぶ用途が大半のため。
  */
 import React from 'react';
 import type { CSSProperties, ReactNode } from 'react';
@@ -31,7 +34,7 @@ const Radio: React.FC<RadioProps> = ({
   onChange,
   children,
   theme,
-  size = 'md',
+  size = 'sm',
   disabled = false,
   styleOverride,
 }) => {
