@@ -27,10 +27,10 @@ import TextField from '../ui/atoms/TextField';
 
 /**
  * このパネルの操作部品の大きさ。
- * 同じパネルに並ぶものは1つの段階に揃える（隣り合う部品で高さが違うのを防ぐ）。
- * 路線の出し入れは指で何度も押すので md（44px）。
+ * 出発駅・到着駅の入力欄と同じ sm（24px）に揃える。ここ1箇所だけで決め、
+ * 検索欄・全表示/全非表示ボタン・路線チップすべてがこの定数を参照する。
  */
-const BOARD_CONTROL_SIZE = 'md' as const;
+const BOARD_CONTROL_SIZE = 'sm' as const;
 
 /** 1グループで最初に見せる件数。全部描くと490個のチップになり操作が重くなる */
 const GROUP_INITIAL_LIMIT = 24;

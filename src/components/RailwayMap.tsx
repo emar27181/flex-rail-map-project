@@ -90,6 +90,17 @@ interface RailwayMapProps {
   onFullscreenChange?: (isFullscreen: boolean) => void;
 }
 
+/**
+ * 地図左下（全画面時は右上）に浮かぶ操作ボタン群
+ * （フルスクリーン切り替え・言語・テーマ・記事一覧）の寸法段階。
+ *
+ * 出発駅・到着駅の入力欄と同じ sm(24px) に揃える。ここ1箇所だけで決め、
+ * 4つのボタンすべてがこの定数を参照する。
+ */
+const MAP_CORNER_BUTTON_SIZE = 'sm' as const;
+/** 上のボタン群のアイコンの大きさ。sm(24px)の箱に対して詰まりすぎない大きさ */
+const MAP_CORNER_ICON_SIZE = 14;
+
 const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguageChange, onFullscreenChange }) => {
   // console.log('RailwayMap component initialized');
   const { theme, toggleTheme } = useTheme();
@@ -5766,10 +5777,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           )}
 
           {/* 左下ボタングループ: フルスクリーン切り替え / 言語 / テーマ / 記事一覧
-              指で何度も押す主要な操作なので md に揃える。
-              以前は独自の36px raw buttonで、アトム化の際に sm(24px) にしてしまい
-              アイコンがほぼ隙間なく詰まって見えるようになっていた。
-              隣接するモバイル下部パネルの操作群も md のため、それとも合わせる */}
+              出発駅・到着駅の入力欄と同じ sm(24px) に揃える。段階はここ1箇所だけで
+              決め、4つのボタンすべてがこの定数を参照する（値を個別に書かない） */}
           <div style={{
             position: 'absolute',
             ...(isFullscreen && isMobile
@@ -5786,14 +5795,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             {/* フルスクリーン切り替え */}
             <IconButton
               theme={theme}
-              size="md"
+              size={MAP_CORNER_BUTTON_SIZE}
               variant="outline"
               onClick={() => setIsFullscreen(!isFullscreen)}
               label={isFullscreen
                 ? translateUI('exitFullscreen', currentLanguage)
                 : translateUI('enterFullscreen', currentLanguage)
               }
-              icon={isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+              icon={isFullscreen ? <Minimize2 size={MAP_CORNER_ICON_SIZE} /> : <Maximize2 size={MAP_CORNER_ICON_SIZE} />}
               styleOverride={{ boxShadow: `0 2px 8px ${colors.shadow}`, backdropFilter: 'blur(4px)' }}
             />
 
@@ -5801,7 +5810,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             {onLanguageChange && (
               <IconButton
                 theme={theme}
-                size="md"
+                size={MAP_CORNER_BUTTON_SIZE}
                 variant="outline"
                 onClick={() => {
                   const langs: Language[] = ['japanese', 'english', 'chinese', 'korean'];
@@ -5810,7 +5819,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 label="Switch language"
                 icon={
                   // 文字をアイコン代わりに置くので、大きさは規格から取る
-                  <span style={{ fontSize: FS.title, fontWeight: 'bold', fontFamily: 'monospace' }}>
+                  <span style={{ fontSize: FS.caption, fontWeight: 'bold', fontFamily: 'monospace' }}>
                     {(() => { const langs: Language[] = ['japanese', 'english', 'chinese', 'korean']; const next = langs[(langs.indexOf(language) + 1) % langs.length]; return { japanese: '日', english: 'En', chinese: '中', korean: '한' }[next]; })()}
                   </span>
                 }
@@ -5823,14 +5832,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             {!isFullscreen && (
             <IconButton
               theme={theme}
-              size="md"
+              size={MAP_CORNER_BUTTON_SIZE}
               variant="outline"
               onClick={toggleTheme}
               label={language === 'japanese'
                 ? `${theme === 'light' ? 'ダーク' : 'ライト'}モードに切り替え`
                 : `Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`
               }
-              icon={theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+              icon={theme === 'light' ? <Moon size={MAP_CORNER_ICON_SIZE} /> : <Sun size={MAP_CORNER_ICON_SIZE} />}
               styleOverride={{ boxShadow: `0 2px 8px ${colors.shadow}`, backdropFilter: 'blur(4px)' }}
             />
             )}
@@ -5840,11 +5849,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             <LinkButton
               href="/articles"
               theme={theme}
-              size="md"
+              size={MAP_CORNER_BUTTON_SIZE}
               iconOnly
               title={language === 'japanese' ? '記事一覧を開く' : 'Open articles'}
               aria-label={language === 'japanese' ? '記事一覧を開く' : 'Open articles'}
-              icon={<Info size={20} />}
+              icon={<Info size={MAP_CORNER_ICON_SIZE} />}
               styleOverride={{ boxShadow: `0 2px 8px ${colors.shadow}`, backdropFilter: 'blur(4px)' }}
             />
             )}
