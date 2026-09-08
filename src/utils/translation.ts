@@ -8197,8 +8197,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Station"
   },
   detailSettings: {
-    japanese: "設定",
-    english: "Settings"
+    japanese: "表示切替",
+    english: "Display Toggles"
   },
   minutesSuffix: {
     japanese: "分",
@@ -8737,7 +8737,7 @@ export const uiChinese: Record<string, string> = {
   hideThisRoute: "隐藏该路线",
   showThisRoute: "显示该路线",
   stationSettings: "站点设置",
-  detailSettings: "详细设置",
+  detailSettings: "显示切换",
   minutesSuffix: "分钟",
   geolocationNotSupported: "此浏览器不支持定位功能。",
   aboutSiteTitle: "关于本站",
@@ -9028,7 +9028,7 @@ export const uiKorean: Record<string, string> = {
   hideThisRoute: "이 노선 숨기기",
   showThisRoute: "이 노선 표시",
   stationSettings: "역 설정",
-  detailSettings: "상세 설정",
+  detailSettings: "표시 전환",
   minutesSuffix: "분",
   geolocationNotSupported: "이 브라우저는 위치 정보를 지원하지 않습니다.",
   aboutSiteTitle: "사이트 소개",
