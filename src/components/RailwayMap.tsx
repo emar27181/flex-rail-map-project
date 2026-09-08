@@ -4216,6 +4216,35 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
 
   /**
+   * 地図左下（全画面時は右上）の丸いアイコンボタン
+   * （フルスクリーン切り替え・言語・テーマ）の共通の見た目。
+   *
+   * 地図の上に浮かせるので影とぼかしを付ける。以前はボタンごとに
+   * この2行を書き写していて、直すたびに書き忘れが起きていた
+   * （記事一覧だけ更新し忘れる、など）。ここ1箇所だけで決める。
+   */
+  const cornerButtonStyle = { boxShadow: `0 2px 8px ${colors.shadow}`, backdropFilter: 'blur(4px)' };
+
+  /**
+   * 上記3ボタン（フルスクリーン・言語・テーマ）はどれも
+   * 「アイコン・ラベル・押したときの処理」以外は完全に同じ見た目・寸法。
+   * 差分だけを渡せばよいように、組み立てをここ1箇所にまとめる。
+   * 記事一覧だけは画面遷移する a 要素（LinkButton）なので対象外
+   * （呼び出し側で cornerButtonStyle を直接参照する）。
+   */
+  const renderCornerButton = (icon: React.ReactNode, label: string, onClick: () => void) => (
+    <IconButton
+      theme={theme}
+      size={MAP_CORNER_BUTTON_SIZE}
+      variant="outline"
+      onClick={onClick}
+      label={label}
+      icon={icon}
+      styleOverride={cornerButtonStyle}
+    />
+  );
+
+  /**
    * 出発〜到着の候補ルート一覧。
    *
    * 以前は設定パネルの中にしか置いていなかったため、駅を選んでも
@@ -5777,8 +5806,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           )}
 
           {/* 左下ボタングループ: フルスクリーン切り替え / 言語 / テーマ / 記事一覧
-              出発駅・到着駅の入力欄と同じ sm(24px) に揃える。段階はここ1箇所だけで
-              決め、4つのボタンすべてがこの定数を参照する（値を個別に書かない） */}
+              出発駅・到着駅の入力欄と同じ sm(24px) に揃える。段階・見た目は
+              ここ1箇所（cornerButtonStyle・renderCornerButton）だけで決め、
+              個々のボタンは差分（アイコン・文言・処理）だけを渡す */}
           <div style={{
             position: 'absolute',
             ...(isFullscreen && isMobile
@@ -5792,70 +5822,47 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             display: 'flex',
             gap: L.sp.xs,
           }}>
-            {/* フルスクリーン切り替え */}
-            <IconButton
-              theme={theme}
-              size={MAP_CORNER_BUTTON_SIZE}
-              variant="outline"
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              label={isFullscreen
-                ? translateUI('exitFullscreen', currentLanguage)
-                : translateUI('enterFullscreen', currentLanguage)
-              }
-              icon={isFullscreen ? <Minimize2 size={MAP_CORNER_ICON_SIZE} /> : <Maximize2 size={MAP_CORNER_ICON_SIZE} />}
-              styleOverride={{ boxShadow: `0 2px 8px ${colors.shadow}`, backdropFilter: 'blur(4px)' }}
-            />
+            {renderCornerButton(
+              isFullscreen ? <Minimize2 size={MAP_CORNER_ICON_SIZE} /> : <Maximize2 size={MAP_CORNER_ICON_SIZE} />,
+              isFullscreen ? translateUI('exitFullscreen', currentLanguage) : translateUI('enterFullscreen', currentLanguage),
+              () => setIsFullscreen(!isFullscreen),
+            )}
 
-            {/* 言語切り替え */}
-            {onLanguageChange && (
-              <IconButton
-                theme={theme}
-                size={MAP_CORNER_BUTTON_SIZE}
-                variant="outline"
-                onClick={() => {
-                  const langs: Language[] = ['japanese', 'english', 'chinese', 'korean'];
-                  onLanguageChange(langs[(langs.indexOf(language) + 1) % langs.length]);
-                }}
-                label="Switch language"
-                icon={
-                  // 文字をアイコン代わりに置くので、大きさは規格から取る
-                  <span style={{ fontSize: FS.caption, fontWeight: 'bold', fontFamily: 'monospace' }}>
-                    {(() => { const langs: Language[] = ['japanese', 'english', 'chinese', 'korean']; const next = langs[(langs.indexOf(language) + 1) % langs.length]; return { japanese: '日', english: 'En', chinese: '中', korean: '한' }[next]; })()}
-                  </span>
-                }
-                styleOverride={{ boxShadow: `0 2px 8px ${colors.shadow}`, backdropFilter: 'blur(4px)' }}
-              />
+            {onLanguageChange && renderCornerButton(
+              // 文字をアイコン代わりに置くので、大きさは規格から取る
+              <span style={{ fontSize: FS.caption, fontWeight: 'bold', fontFamily: 'monospace' }}>
+                {(() => { const langs: Language[] = ['japanese', 'english', 'chinese', 'korean']; const next = langs[(langs.indexOf(language) + 1) % langs.length]; return { japanese: '日', english: 'En', chinese: '中', korean: '한' }[next]; })()}
+              </span>,
+              'Switch language',
+              () => {
+                const langs: Language[] = ['japanese', 'english', 'chinese', 'korean'];
+                onLanguageChange(langs[(langs.indexOf(language) + 1) % langs.length]);
+              },
             )}
 
             {/* テーマ切り替え・記事一覧は全画面時は地図を広く使うため隠す
                 （全画面を解除すると再表示される） */}
-            {!isFullscreen && (
-            <IconButton
-              theme={theme}
-              size={MAP_CORNER_BUTTON_SIZE}
-              variant="outline"
-              onClick={toggleTheme}
-              label={language === 'japanese'
+            {!isFullscreen && renderCornerButton(
+              theme === 'light' ? <Moon size={MAP_CORNER_ICON_SIZE} /> : <Sun size={MAP_CORNER_ICON_SIZE} />,
+              language === 'japanese'
                 ? `${theme === 'light' ? 'ダーク' : 'ライト'}モードに切り替え`
-                : `Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`
-              }
-              icon={theme === 'light' ? <Moon size={MAP_CORNER_ICON_SIZE} /> : <Sun size={MAP_CORNER_ICON_SIZE} />}
-              styleOverride={{ boxShadow: `0 2px 8px ${colors.shadow}`, backdropFilter: 'blur(4px)' }}
-            />
+                : `Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`,
+              toggleTheme,
             )}
 
-            {/* 記事一覧 */}
+            {/* 記事一覧のみ画面遷移なので a 要素の LinkButton。押す・見た目・寸法は
+                renderCornerButton と同じ規格（cornerButtonStyle）に揃える */}
             {!isFullscreen && (
-            <LinkButton
-              href="/articles"
-              theme={theme}
-              size={MAP_CORNER_BUTTON_SIZE}
-              iconOnly
-              title={language === 'japanese' ? '記事一覧を開く' : 'Open articles'}
-              aria-label={language === 'japanese' ? '記事一覧を開く' : 'Open articles'}
-              icon={<Info size={MAP_CORNER_ICON_SIZE} />}
-              styleOverride={{ boxShadow: `0 2px 8px ${colors.shadow}`, backdropFilter: 'blur(4px)' }}
-            />
+              <LinkButton
+                href="/articles"
+                theme={theme}
+                size={MAP_CORNER_BUTTON_SIZE}
+                iconOnly
+                title={language === 'japanese' ? '記事一覧を開く' : 'Open articles'}
+                aria-label={language === 'japanese' ? '記事一覧を開く' : 'Open articles'}
+                icon={<Info size={MAP_CORNER_ICON_SIZE} />}
+                styleOverride={cornerButtonStyle}
+              />
             )}
           </div>
 
