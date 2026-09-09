@@ -1,6 +1,30 @@
 # CHANGE LOG
 
-## [2026-09-08] セッション（寸法の一元管理を再点検）
+## [2026-09-09] セッション（単体アイコンボタン専用の寸法規格を追加）
+
+### feat: 単体で浮かぶアイコンボタン専用の3段階規格 `FLOATING_ICON_BUTTON_SIZE` を追加
+- `src/components/ui/atoms/controlSize.ts`, `src/components/RailwayMap.tsx`,
+  `tests/unit/components/ui/atoms.test.tsx`
+- 「縮小ボタン・言語ボタンをもう少し大きくしたい。サイズをいくつか定義して
+  その中から選べるように」という要望を受けた
+- ボタン・入力欄・チップが使う `CONTROL_SIZE` は「同じ行に並ぶ部品を
+  必ず揃える」ための規格で、意図的に2段階（sm=24 / md=44）しか持たない
+  （`tests/unit/components/ui/atoms.test.tsx` で段階数を固定済み）。
+  ここに3段階目を足すと、フォーム部品全体の「どれを使うか」の判断基準が
+  崩れるため、CONTROL_SIZE 自体は変更しない
+- 代わりに、**他の部品と行を揃える必要のない、単体で浮かぶアイコンボタン
+  専用**の新しい規格 `FLOATING_ICON_BUTTON_SIZE` を追加した:
+  - `sm`(24px): WCAG 2.2 AA 2.5.8 の絶対下限
+  - `md`(36px): 既定。地図の隅に浮かぶ操作ボタンの標準
+  - `lg`(44px): Apple HIG の推奨最小値。主要操作向け
+- 地図左下/右上のフルスクリーン・言語・テーマ・記事一覧の4ボタンを
+  `md`(36px) に変更（直前は24pxだったが、指摘のとおり込み合っていない
+  場所に置くにはやや小さかった）。アイコンサイズ・言語切替の文字サイズも
+  36pxの箱に合わせて調整
+- 値を書く場所は `MAP_CORNER_BUTTON_PX = FLOATING_ICON_BUTTON_SIZE.md`
+  の1箇所だけ。置き場所を変えて sm/lg にしたくなったときもここだけ直せばよい
+- `tests/unit/components/ui/atoms.test.tsx` に新規3件を追加し、
+  3段階であること・CONTROL_SIZEとは独立した尺度であることを固定した
 
 ### improve: モバイル下部の「設定」ボタンを「表示切替」に改称
 - `src/utils/translation.ts`（`detailSettings`キー）

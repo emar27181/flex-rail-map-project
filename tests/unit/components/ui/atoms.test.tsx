@@ -10,7 +10,7 @@ import { describe, it, expect, vi } from 'vitest';
 import Button from '../../../../src/components/ui/atoms/Button';
 import Chip from '../../../../src/components/ui/atoms/Chip';
 import TextField from '../../../../src/components/ui/atoms/TextField';
-import { CONTROL_SIZE, CONTROL_BORDER_WIDTH } from '../../../../src/components/ui/atoms/controlSize';
+import { CONTROL_SIZE, CONTROL_BORDER_WIDTH, FLOATING_ICON_BUTTON_SIZE } from '../../../../src/components/ui/atoms/controlSize';
 import { FS, TARGET } from '../../../../src/constants/ui';
 
 vi.mock('../../../../src/contexts/ThemeContext', () => ({
@@ -34,6 +34,23 @@ describe('CONTROL_SIZE（操作部品の寸法規格）', () => {
   });
 
   it('段階は2つだけ（増やすと「どれを使うか」が決まらなくなる）', () => {
+    expect(Object.keys(CONTROL_SIZE).sort()).toEqual(['md', 'sm']);
+  });
+});
+
+describe('FLOATING_ICON_BUTTON_SIZE（単体で浮かぶアイコンボタン専用の寸法）', () => {
+  it('sm は WCAG 2.2 AA の下限、lg は Apple HIG の推奨値と一致する', () => {
+    expect(FLOATING_ICON_BUTTON_SIZE.sm).toBe(TARGET.min);
+    expect(FLOATING_ICON_BUTTON_SIZE.lg).toBe(TARGET.touch);
+  });
+
+  it('sm < md < lg の順に大きくなる', () => {
+    expect(FLOATING_ICON_BUTTON_SIZE.sm).toBeLessThan(FLOATING_ICON_BUTTON_SIZE.md);
+    expect(FLOATING_ICON_BUTTON_SIZE.md).toBeLessThan(FLOATING_ICON_BUTTON_SIZE.lg);
+  });
+
+  it('CONTROL_SIZE とは別の尺度（並ぶ行専用の2段階を崩さない）', () => {
+    expect(Object.keys(FLOATING_ICON_BUTTON_SIZE).sort()).toEqual(['lg', 'md', 'sm']);
     expect(Object.keys(CONTROL_SIZE).sort()).toEqual(['md', 'sm']);
   });
 });

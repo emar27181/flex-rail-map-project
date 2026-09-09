@@ -72,6 +72,7 @@ import Select from './ui/atoms/Select';
 import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
+import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
 
 import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
@@ -94,12 +95,16 @@ interface RailwayMapProps {
  * 地図左下（全画面時は右上）に浮かぶ操作ボタン群
  * （フルスクリーン切り替え・言語・テーマ・記事一覧）の寸法段階。
  *
- * 出発駅・到着駅の入力欄と同じ sm(24px) に揃える。ここ1箇所だけで決め、
+ * ボタン・入力欄が並ぶ行の `CONTROL_SIZE` ではなく、単体で浮かぶ
+ * アイコンボタン専用の `FLOATING_ICON_BUTTON_SIZE` から選ぶ
+ * （sm=24 / md=36 / lg=44 の3段階。詳細はそちらのコメント参照）。
+ * ここは既定の md（36px）。込み合った場所に置くなら sm、より主要な
+ * 操作にするなら lg に変えるだけでよい。ここ1箇所だけで決め、
  * 4つのボタンすべてがこの定数を参照する。
  */
-const MAP_CORNER_BUTTON_SIZE = 'sm' as const;
-/** 上のボタン群のアイコンの大きさ。sm(24px)の箱に対して詰まりすぎない大きさ */
-const MAP_CORNER_ICON_SIZE = 14;
+const MAP_CORNER_BUTTON_PX = FLOATING_ICON_BUTTON_SIZE.md;
+/** 上のボタン群のアイコンの大きさ。36pxの箱に対して詰まりすぎない大きさ */
+const MAP_CORNER_ICON_SIZE = 18;
 
 const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguageChange, onFullscreenChange }) => {
   // console.log('RailwayMap component initialized');
@@ -4217,13 +4222,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   /**
    * 地図左下（全画面時は右上）の丸いアイコンボタン
-   * （フルスクリーン切り替え・言語・テーマ）の共通の見た目。
+   * （フルスクリーン切り替え・言語・テーマ・記事一覧）の共通の見た目。
    *
-   * 地図の上に浮かせるので影とぼかしを付ける。以前はボタンごとに
-   * この2行を書き写していて、直すたびに書き忘れが起きていた
-   * （記事一覧だけ更新し忘れる、など）。ここ1箇所だけで決める。
+   * 地図の上に浮かせるので影とぼかしを付ける。正方形の大きさは
+   * `IconButton`/`LinkButton` 自体の2段階(`CONTROL_SIZE`)ではなく
+   * `FLOATING_ICON_BUTTON_SIZE`（単体で浮かぶアイコンボタン専用の
+   * 3段階）から選んだ `MAP_CORNER_BUTTON_PX` を当てる。
+   * 以前はボタンごとにこの2〜3行を書き写していて、直すたびに
+   * 書き忘れが起きていた（記事一覧だけ更新し忘れる、など）。
+   * ここ1箇所だけで決める。
    */
-  const cornerButtonStyle = { boxShadow: `0 2px 8px ${colors.shadow}`, backdropFilter: 'blur(4px)' };
+  const cornerButtonStyle = {
+    width: MAP_CORNER_BUTTON_PX,
+    height: MAP_CORNER_BUTTON_PX,
+    boxShadow: `0 2px 8px ${colors.shadow}`,
+    backdropFilter: 'blur(4px)',
+  };
 
   /**
    * 上記3ボタン（フルスクリーン・言語・テーマ）はどれも
@@ -4235,7 +4249,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const renderCornerButton = (icon: React.ReactNode, label: string, onClick: () => void) => (
     <IconButton
       theme={theme}
-      size={MAP_CORNER_BUTTON_SIZE}
+      size="sm"
       variant="outline"
       onClick={onClick}
       label={label}
@@ -5830,7 +5844,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
             {onLanguageChange && renderCornerButton(
               // 文字をアイコン代わりに置くので、大きさは規格から取る
-              <span style={{ fontSize: FS.caption, fontWeight: 'bold', fontFamily: 'monospace' }}>
+              <span style={{ fontSize: FS.body, fontWeight: 'bold', fontFamily: 'monospace' }}>
                 {(() => { const langs: Language[] = ['japanese', 'english', 'chinese', 'korean']; const next = langs[(langs.indexOf(language) + 1) % langs.length]; return { japanese: '日', english: 'En', chinese: '中', korean: '한' }[next]; })()}
               </span>,
               'Switch language',
@@ -5856,7 +5870,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               <LinkButton
                 href="/articles"
                 theme={theme}
-                size={MAP_CORNER_BUTTON_SIZE}
+                size="sm"
                 iconOnly
                 title={language === 'japanese' ? '記事一覧を開く' : 'Open articles'}
                 aria-label={language === 'japanese' ? '記事一覧を開く' : 'Open articles'}
