@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Palette, X, RotateCcw } from 'lucide-react';
 import { useDesignTokens } from './DesignTokensProvider';
 import { CSS_VAR_PREFIX } from './cssVars';
+import { NEUTRAL } from '../constants/ui';
 
 const HEX_COLOR = /^#([0-9a-fA-F]{6})$/;
 
@@ -79,7 +80,7 @@ const DesignDebugPanel: React.FC = () => {
             position: 'absolute', top: '-2px', right: '-2px',
             minWidth: '16px', height: '16px', padding: '0 3px',
             borderRadius: '999px', backgroundColor: 'var(--v2-color-danger)',
-            color: '#fff', fontSize: '10px', fontWeight: 'bold',
+            color: NEUTRAL.white, fontSize: '10px', fontWeight: 'bold',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>{overrideCount}</span>
         )}

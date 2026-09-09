@@ -7435,6 +7435,151 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "表示路線切り替え",
     english: "Route Display Toggle"
   },
+  clearSelection: {
+    japanese: "選択を解除",
+    english: "Clear"
+  },
+  decrease: {
+    japanese: "小さくする",
+    english: "Decrease"
+  },
+  play: {
+    japanese: "再生",
+    english: "Play"
+  },
+  pause: {
+    japanese: "一時停止",
+    english: "Pause"
+  },
+  increase: {
+    japanese: "大きくする",
+    english: "Increase"
+  },
+  collapseList: {
+    japanese: "▲ 折りたたむ",
+    english: "▲ Collapse"
+  },
+  showMoreRoutes: {
+    japanese: "▼ 他 {count} 路線を表示",
+    english: "▼ Show {count} more routes"
+  },
+  routeViewBoard: {
+    japanese: "ボード",
+    english: "Board"
+  },
+  routeViewClassic: {
+    japanese: "一覧",
+    english: "List"
+  },
+  routeSearchPlaceholder: {
+    japanese: "路線名で絞り込む",
+    english: "Filter by route name"
+  },
+  routeGroupOnRoute: {
+    japanese: "経路上の路線",
+    english: "On your route"
+  },
+  routeGroupAtStation: {
+    japanese: "選択した駅を通る路線",
+    english: "Through selected stations"
+  },
+  routeGroupVisible: {
+    japanese: "表示中",
+    english: "Shown"
+  },
+  routeGroupHidden: {
+    japanese: "非表示",
+    english: "Hidden"
+  },
+  routeShowMore: {
+    japanese: "さらに{count}件",
+    english: "{count} more"
+  },
+  routeNoMatch: {
+    japanese: "一致する路線がありません",
+    english: "No matching routes"
+  },
+  routeVisibleSummary: {
+    japanese: "{shown} / {total} 路線を表示中",
+    english: "{shown} of {total} routes shown"
+  },
+  // ── 最寄り駅メモ ──────────────────────────────────────────
+  memoTitle: {
+    japanese: "最寄り駅メモ",
+    english: "Nearest station notes"
+  },
+  memoDescription: {
+    japanese: "誰の最寄り駅がどこかを控えておくと、全員が乗れる路線が分かります。この端末にだけ保存されます。",
+    english: "Note who lives near which station to see the lines everyone can use. Saved on this device only."
+  },
+  memoPersonPlaceholder: {
+    japanese: "名前",
+    english: "Name"
+  },
+  memoStationPlaceholder: {
+    japanese: "最寄り駅",
+    english: "Nearest station"
+  },
+  memoNotePlaceholder: {
+    japanese: "ひとこと（任意）",
+    english: "Note (optional)"
+  },
+  memoAdd: {
+    japanese: "追加",
+    english: "Add"
+  },
+  memoRemove: {
+    japanese: "削除",
+    english: "Remove"
+  },
+  memoSearchPlaceholder: {
+    japanese: "名前・駅・路線で絞り込む",
+    english: "Filter by name, station or line"
+  },
+  memoEmpty: {
+    japanese: "まだ誰も登録されていません",
+    english: "No one saved yet"
+  },
+  memoNoMatch: {
+    japanese: "一致する人がいません",
+    english: "No one matches"
+  },
+  memoUnknownStation: {
+    japanese: "路線データに無い駅名です",
+    english: "Not a station in the data"
+  },
+  memoCount: {
+    japanese: "{count}人",
+    english: "{count} people"
+  },
+  memoSharedRoutes: {
+    japanese: "共通の路線",
+    english: "Shared lines"
+  },
+  memoEveryone: {
+    japanese: "全員",
+    english: "Everyone"
+  },
+  memoSharedCount: {
+    japanese: "{count} / {total}人",
+    english: "{count} of {total}"
+  },
+  memoNoShared: {
+    japanese: "全員が使える路線はありません",
+    english: "No line reaches everyone"
+  },
+  memoShowEveryone: {
+    japanese: "全員の路線を地図に表示",
+    english: "Show everyone's lines"
+  },
+  memoShowShared: {
+    japanese: "この一覧の路線を地図に表示",
+    english: "Show these lines on the map"
+  },
+  memoUseAsDeparture: {
+    japanese: "出発に設定",
+    english: "Set as departure"
+  },
   showOnlyTransferStations: {
     japanese: "乗換駅のみ表示",
     english: "Show Transfer Stations Only"
@@ -7714,6 +7859,46 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   onboard: {
     japanese: "乗",
     english: "On"
+  },
+  show: {
+    japanese: "表示",
+    english: "Show"
+  },
+  lastUpdated: {
+    japanese: "最終更新",
+    english: "Last updated"
+  },
+  alwaysShowMajorStations: {
+    japanese: "主要駅を常に表示",
+    english: "Always show major stations"
+  },
+  arrivalAlert: {
+    japanese: "降車駅アラーム",
+    english: "Arrival alert"
+  },
+  arrivalAlertTiming: {
+    japanese: "知らせる:",
+    english: "Notify:"
+  },
+  arrivalAlertMinutesOption: {
+    japanese: "約{count}分前",
+    english: "~{count} min before"
+  },
+  arrivalAlertNote: {
+    japanese: "時刻表ではなく現在地と実際の速度から残り時間を出します。遅延していても目安になります。",
+    english: "Uses your GPS position and actual speed, not the timetable, so it still works during delays."
+  },
+  minRouteCount: {
+    japanese: "対象:",
+    english: "Threshold:"
+  },
+  routeCountOption: {
+    japanese: "{count}路線以上",
+    english: "{count}+ lines"
+  },
+  dataSource: {
+    japanese: "出典",
+    english: "Source"
   },
   afterSuffix: {
     japanese: "以降",
@@ -8012,8 +8197,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Station"
   },
   detailSettings: {
-    japanese: "設定",
-    english: "Settings"
+    japanese: "表示切替",
+    english: "Display Toggles"
   },
   minutesSuffix: {
     japanese: "分",
@@ -8350,6 +8535,42 @@ export type Language = 'japanese' | 'english' | 'chinese' | 'korean';
 
 // 中国語（簡体字）UI翻訳
 export const uiChinese: Record<string, string> = {
+  clearSelection: "清除选择",
+  decrease: "缩小",
+  play: "播放",
+  pause: "暂停",
+  increase: "放大",
+  collapseList: "▲ 折叠",
+  showMoreRoutes: "▼ 显示其他 {count} 条线路",
+  routeViewBoard: "面板",
+  routeViewClassic: "列表",
+  routeSearchPlaceholder: "按线路名称筛选",
+  routeGroupOnRoute: "路线上的线路",
+  routeGroupAtStation: "经过所选车站的线路",
+  routeGroupVisible: "显示中",
+  routeGroupHidden: "已隐藏",
+  routeShowMore: "再显示{count}条",
+  routeNoMatch: "没有符合的线路",
+  routeVisibleSummary: "已显示 {shown} / {total} 条线路",
+  memoTitle: "最近车站备忘",
+  memoDescription: "记下每个人最近的车站，就能看出大家都能乘坐的线路。仅保存在本设备。",
+  memoPersonPlaceholder: "姓名",
+  memoStationPlaceholder: "最近车站",
+  memoNotePlaceholder: "备注（可选）",
+  memoAdd: "添加",
+  memoRemove: "删除",
+  memoSearchPlaceholder: "按姓名、车站或线路筛选",
+  memoEmpty: "还没有登记任何人",
+  memoNoMatch: "没有符合的人",
+  memoUnknownStation: "线路数据中没有这个车站",
+  memoCount: "{count}人",
+  memoSharedRoutes: "共同线路",
+  memoEveryone: "全员",
+  memoSharedCount: "{count} / {total}人",
+  memoNoShared: "没有全员都能使用的线路",
+  memoShowEveryone: "在地图上显示全员的线路",
+  memoShowShared: "在地图上显示这些线路",
+  memoUseAsDeparture: "设为出发地",
   stationSelection: "选择出发站和到达站",
   departureStation: "出发站",
   arrivalStation: "到达站",
@@ -8438,6 +8659,16 @@ export const uiChinese: Record<string, string> = {
   currentTime: "当前时间",
   baseTime: "出发时间",
   onboard: "乘",
+  show: "显示",
+  lastUpdated: "最后更新",
+  alwaysShowMajorStations: "始终显示主要车站",
+  arrivalAlert: "到站提醒",
+  arrivalAlertTiming: "提醒时机:",
+  arrivalAlertMinutesOption: "约{count}分钟前",
+  arrivalAlertNote: "根据当前位置和实际速度计算剩余时间，不使用时刻表，因此延误时也可参考。",
+  minRouteCount: "对象:",
+  routeCountOption: "{count}条线路以上",
+  dataSource: "来源",
   afterSuffix: "以后",
   offRouteReference: "路线外参考",
   noData: "无数据",
@@ -8506,7 +8737,7 @@ export const uiChinese: Record<string, string> = {
   hideThisRoute: "隐藏该路线",
   showThisRoute: "显示该路线",
   stationSettings: "站点设置",
-  detailSettings: "详细设置",
+  detailSettings: "显示切换",
   minutesSuffix: "分钟",
   geolocationNotSupported: "此浏览器不支持定位功能。",
   aboutSiteTitle: "关于本站",
@@ -8595,6 +8826,42 @@ export const uiChinese: Record<string, string> = {
 
 // 韓国語UI翻訳
 export const uiKorean: Record<string, string> = {
+  clearSelection: "선택 해제",
+  decrease: "작게",
+  play: "재생",
+  pause: "일시정지",
+  increase: "크게",
+  collapseList: "▲ 접기",
+  showMoreRoutes: "▼ 다른 {count}개 노선 표시",
+  routeViewBoard: "보드",
+  routeViewClassic: "목록",
+  routeSearchPlaceholder: "노선 이름으로 검색",
+  routeGroupOnRoute: "경로상의 노선",
+  routeGroupAtStation: "선택한 역을 지나는 노선",
+  routeGroupVisible: "표시 중",
+  routeGroupHidden: "숨김",
+  routeShowMore: "{count}개 더 보기",
+  routeNoMatch: "일치하는 노선이 없습니다",
+  routeVisibleSummary: "{total}개 중 {shown}개 노선 표시 중",
+  memoTitle: "가까운 역 메모",
+  memoDescription: "누구의 가까운 역이 어디인지 적어 두면 모두가 탈 수 있는 노선을 알 수 있습니다. 이 기기에만 저장됩니다.",
+  memoPersonPlaceholder: "이름",
+  memoStationPlaceholder: "가까운 역",
+  memoNotePlaceholder: "메모 (선택)",
+  memoAdd: "추가",
+  memoRemove: "삭제",
+  memoSearchPlaceholder: "이름·역·노선으로 검색",
+  memoEmpty: "아직 등록된 사람이 없습니다",
+  memoNoMatch: "일치하는 사람이 없습니다",
+  memoUnknownStation: "노선 데이터에 없는 역 이름입니다",
+  memoCount: "{count}명",
+  memoSharedRoutes: "공통 노선",
+  memoEveryone: "전원",
+  memoSharedCount: "{total}명 중 {count}명",
+  memoNoShared: "전원이 이용할 수 있는 노선이 없습니다",
+  memoShowEveryone: "전원의 노선을 지도에 표시",
+  memoShowShared: "이 노선들을 지도에 표시",
+  memoUseAsDeparture: "출발지로 설정",
   stationSelection: "출발역·도착역 선택",
   departureStation: "출발역",
   arrivalStation: "도착역",
@@ -8683,6 +8950,16 @@ export const uiKorean: Record<string, string> = {
   currentTime: "현재 시간",
   baseTime: "출발 시간",
   onboard: "탑",
+  show: "표시",
+  lastUpdated: "최종 갱신",
+  alwaysShowMajorStations: "주요 역 항상 표시",
+  arrivalAlert: "하차역 알림",
+  arrivalAlertTiming: "알림 시점:",
+  arrivalAlertMinutesOption: "약 {count}분 전",
+  arrivalAlertNote: "시각표가 아니라 현재 위치와 실제 속도로 남은 시간을 계산하므로 지연 시에도 참고할 수 있습니다.",
+  minRouteCount: "대상:",
+  routeCountOption: "{count}개 노선 이상",
+  dataSource: "출처",
   afterSuffix: "이후",
   offRouteReference: "경로 외 참고",
   noData: "데이터 없음",
@@ -8751,7 +9028,7 @@ export const uiKorean: Record<string, string> = {
   hideThisRoute: "이 노선 숨기기",
   showThisRoute: "이 노선 표시",
   stationSettings: "역 설정",
-  detailSettings: "상세 설정",
+  detailSettings: "표시 전환",
   minutesSuffix: "분",
   geolocationNotSupported: "이 브라우저는 위치 정보를 지원하지 않습니다.",
   aboutSiteTitle: "사이트 소개",
@@ -8878,6 +9155,7 @@ export const translateUI = (key: string, language: Language, params?: { [key: st
 
 /** 駅統計パラメータラベルの翻訳マップ */
 const statParamLabelMap: Record<string, { english: string; chinese: string; korean: string }> = {
+  '路線数':       { english: 'Line count',           chinese: '线路数量',       korean: '노선 수' },
   '家賃(1K)':     { english: 'Rent (1K)',          chinese: '租金(1K)',       korean: '월세(1K)' },
   '家賃(1LDK)':   { english: 'Rent (1LDK)',         chinese: '租金(1LDK)',     korean: '월세(1LDK)' },
   '人口密度':     { english: 'Pop. density',         chinese: '人口密度',       korean: '인구밀도' },
@@ -8906,6 +9184,7 @@ const statParamLabelMap: Record<string, { english: string; chinese: string; kore
  * 「軒」「棟」はラベル側に count / 数 が含まれるため、日本語以外では単位を出さない。
  */
 const statUnitMap: { [ja: string]: { english: string; chinese: string; korean: string } } = {
+  '路線': { english: 'lines', chinese: '条', korean: '개' },
   '軒': { english: '', chinese: '家', korean: '곳' },
   '棟': { english: '', chinese: '栋', korean: '동' },
   '件/年': { english: '/yr', chinese: '件/年', korean: '건/년' },

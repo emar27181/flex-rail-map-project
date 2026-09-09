@@ -7,7 +7,7 @@
  * - stationSizeScale.toFixed(1) が undefined で呼ばれないことを確認
  */
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import LegendRouteList from '../../../src/components/legend/LegendRouteList';
 import type { RouteKey } from '../../../src/data/routes';
@@ -30,6 +30,7 @@ vi.mock('../../../src/contexts/ThemeContext', () => ({
 vi.mock('../../../src/utils/translation', () => ({
   translateUI: (key: string) => key,
   translateStation: (name: string) => name,
+  translateRoute: (name: string) => name,
 }));
 
 vi.mock('../../../src/components/ui/RouteToggleItem', () => ({
@@ -133,5 +134,47 @@ describe('LegendRouteList', () => {
     expect(() =>
       render(<LegendRouteList {...minimalProps} stationSizeScale={2.0} />)
     ).not.toThrow();
+  });
+});
+
+describe('路線一覧の表示方式（ボード / 従来の一覧）と並び順', () => {
+  const twoRouteProps = {
+    ...minimalProps,
+    visibleRoutesData: [
+      ['routeB', [{ lat: 35.0, lng: 139.0 }]],
+      ['routeA', [{ lat: 36.0, lng: 140.0 }]],
+    ] as Array<[string, any]>,
+    routeOrder: ['routeB', 'routeA'] as RouteKey[],
+    routeNames: { routeA: 'あ路線', routeB: 'ん路線' } as Record<RouteKey, string>,
+    routeColors: { routeA: '#ff0000', routeB: '#00ff00' } as Record<RouteKey, string>,
+    viewCenter: [35.0, 139.0] as [number, number], // routeB のほうが画面中心に近い
+  };
+
+  it('従来の一覧への切り替えボタンは出さず、ボード表示のみになる', () => {
+    render(<LegendRouteList {...twoRouteProps} />);
+    expect(screen.queryByText('routeViewBoard')).not.toBeInTheDocument();
+    expect(screen.queryByText('routeViewClassic')).not.toBeInTheDocument();
+  });
+
+  it('並び順の切り替えは表示方式によらず出る', () => {
+    render(<LegendRouteList {...twoRouteProps} />);
+    expect(screen.getByText('sortAlpha')).toBeInTheDocument();
+    expect(screen.getByText('sortColor')).toBeInTheDocument();
+    expect(screen.getByText('sortDefault')).toBeInTheDocument();
+    expect(screen.getByText('sortNearby')).toBeInTheDocument();
+  });
+
+  it('並び順（あいうえお順）に切り替えるとボード表示のチップ順が変わる', () => {
+    const { container } = render(<LegendRouteList {...twoRouteProps} />);
+    const chipOrder = () =>
+      Array.from(container.querySelectorAll('[data-route-chip]')).map(el => el.getAttribute('data-route-chip'));
+
+    // 既定は近い順（distance）: 画面中心に近い routeB が先
+    expect(chipOrder()).toEqual(['routeB', 'routeA']);
+
+    fireEvent.click(screen.getByText('sortAlpha'));
+
+    // あいうえお順: 「あ路線」(routeA) が「ん路線」(routeB) より先
+    expect(chipOrder()).toEqual(['routeA', 'routeB']);
   });
 });

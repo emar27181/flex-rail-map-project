@@ -3,6 +3,7 @@ import { Moon, Sun } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
+import Button from './ui/atoms/Button';
 
 interface ThemeToggleProps {
   language?: Language;
@@ -13,41 +14,17 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ language = 'japanese' }) => {
   const colors = getThemeColors(theme);
 
   return (
-    <button
+    <Button
+      theme={theme}
+      variant="outline"
+      size="md"
       onClick={toggleTheme}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '8px 12px',
-        backgroundColor: colors.surface,
-        border: `1px solid ${colors.border}`,
-        borderRadius: '6px',
-        cursor: 'pointer',
-        fontSize: '14px',
-        color: colors.text,
-        transition: 'all 0.2s ease',
-        boxShadow: `0 2px 4px ${colors.shadow}`,
-        minWidth: '120px',
-        justifyContent: 'center'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = colors.surfaceElevated;
-        e.currentTarget.style.transform = 'translateY(-1px)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = colors.surface;
-        e.currentTarget.style.transform = 'translateY(0)';
-      }}
       title={translateUI(theme === 'light' ? 'switchToDarkMode' : 'switchToLightMode', language)}
+      icon={theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+      styleOverride={{ minWidth: '120px' }}
     >
-      <span style={{ fontSize: '16px' }}>
-        {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
-      </span>
-      <span>
-        {translateUI(theme === 'light' ? 'darkMode' : 'lightMode', language)}
-      </span>
-    </button>
+      {translateUI(theme === 'light' ? 'darkMode' : 'lightMode', language)}
+    </Button>
   );
 };
 

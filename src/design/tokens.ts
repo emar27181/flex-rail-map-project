@@ -5,6 +5,7 @@
  * インラインで直書きせず、必ずこのファイル(またはCSS変数経由)を参照する。
  * v1 (src/components/*.tsx) は対象外 — 既存のThemeContext/constants/ui.tsを使い続ける。
  */
+import { NEUTRAL } from '../constants/ui';
 
 export interface ColorTokens {
   bg: string;
@@ -32,15 +33,15 @@ export interface ColorTokens {
 export const colorTokens: { light: ColorTokens; dark: ColorTokens } = {
   light: {
     bg: '#f7f8fa',
-    bgElevated: '#ffffff',
-    surface: '#ffffff',
+    bgElevated: NEUTRAL.white,
+    surface: NEUTRAL.white,
     surfaceHover: '#f0f2f5',
     border: '#e2e5ea',
     borderStrong: '#c7ccd4',
     text: '#1a1d23',
     textSecondary: '#5b6270',
     textMuted: '#8a909c',
-    textOnPrimary: '#ffffff',
+    textOnPrimary: NEUTRAL.white,
     primary: '#2563eb',
     primaryHover: '#1d4ed8',
     primaryActive: '#1e40af',
@@ -62,7 +63,7 @@ export const colorTokens: { light: ColorTokens; dark: ColorTokens } = {
     text: '#f2f3f5',
     textSecondary: '#a8adb8',
     textMuted: '#767c88',
-    textOnPrimary: '#ffffff',
+    textOnPrimary: NEUTRAL.white,
     primary: '#5b8def',
     primaryHover: '#79a2f2',
     primaryActive: '#3d6fd6',

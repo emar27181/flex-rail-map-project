@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Sun, Moon, Menu, X, Info, Sparkles } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
+import IconButton from './ui/atoms/IconButton';
+import { FS } from '../constants/ui';
 import { translateUI } from '../utils/translation';
 import type { Language } from '../utils/translation';
 import type { UiVersion } from '../utils/uiVersionPersistence';
+import { L } from './legend/legendStyles';
 
 const LANGUAGES: Language[] = ['japanese', 'english', 'chinese', 'korean'];
 const LANG_LABELS: Record<Language, string> = { japanese: '日', english: 'En', chinese: '中', korean: '한' };
@@ -16,6 +19,9 @@ interface NavigationBarProps {
   uiVersion?: UiVersion;
   onUiVersionChange?: (version: UiVersion) => void;
 }
+
+/** ヘッダーのアイコンの大きさ。ボタンの外形は IconButton の規格が決める */
+const ICON_SIZE = 20;
 
 const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChange, isFullscreen = false, uiVersion = 'v1', onUiVersionChange }) => {
   const { theme, toggleTheme } = useTheme();
@@ -34,18 +40,19 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
       // ページがステータスバーの下まで広がる。上端にそのまま置くとロゴや
       // ボタンが時刻・電池表示に隠れるため、セーフエリア分だけ下げる。
       // ブラウザ表示時は inset が 0 なので見た目は変わらない。
-      padding: 'calc(12px + env(safe-area-inset-top, 0px)) 20px 12px',
+      // 上端はノッチ（セーフエリア）ぶんを足す
+      padding: `calc(${L.sp.xl} + env(safe-area-inset-top, 0px)) ${L.sp['3xl']} ${L.sp.xl}`,
       backgroundColor: colors.surface,
       borderBottom: `1px solid ${colors.border}`,
       boxShadow: `0 2px 4px ${colors.shadow}`,
-      marginBottom: '20px',
+      marginBottom: L.sp['3xl'],
       position: 'relative',
     }}>
       {/* ロゴ・タイトル部分 */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '12px'
+        gap: L.sp.xl
       }}>
         <img
           src="/icon_flex_rail_way_map.png"
@@ -54,12 +61,12 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             width: '32px',
             height: '32px',
             flexShrink: 0,
-            borderRadius: '4px'
+            borderRadius: L.r.control
           }}
         />
         <h1 style={{
           margin: 0,
-          fontSize: '20px',
+          fontSize: FS.heading,
           fontWeight: 'bold',
           color: colors.text
         }}>
@@ -71,179 +78,60 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '8px'
+        gap: L.sp.md
       }}>
         {/* Infoボタン */}
-        <button
+        <IconButton
+          theme={theme}
+          size="sm"
           onClick={() => setIsInfoModalOpen(true)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '36px',
-            height: '36px',
-            backgroundColor: 'transparent',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            color: colors.text,
-            padding: '6px'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = colors.surfaceElevated;
-            e.currentTarget.style.transform = 'scale(1.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-          title={translateUI('aboutSiteTitle', language)}
-          aria-label={translateUI('aboutSiteTitle', language)}
-        >
-          <Info size={20} />
-        </button>
+          label={translateUI('aboutSiteTitle', language)}
+          icon={<Info size={ICON_SIZE} />}
+        />
 
-        {/* 言語切り替えボタン */}
-        <button
+        {/* 言語切り替えボタン。アイコンではなく次の言語の略称を出す */}
+        <IconButton
+          theme={theme}
+          size="sm"
           onClick={() => onLanguageChange(nextLanguage(language))}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '36px',
-            height: '36px',
-            backgroundColor: 'transparent',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            color: colors.text,
-            padding: '6px'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = colors.surfaceElevated;
-            e.currentTarget.style.transform = 'scale(1.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-          title="Switch language"
-          aria-label="Switch language"
-        >
-          <span style={{
-            fontSize: '13px',
-            fontWeight: 'bold',
-            color: colors.text,
-            fontFamily: 'monospace'
-          }}>
-            {LANG_LABELS[nextLanguage(language)]}
-          </span>
-        </button>
+          label="Switch language"
+          icon={
+            <span style={{ fontSize: FS.body, fontWeight: 'bold', fontFamily: 'monospace' }}>
+              {LANG_LABELS[nextLanguage(language)]}
+            </span>
+          }
+        />
 
         {/* テーマ切り替えボタン */}
-        <button
+        <IconButton
+          theme={theme}
+          size="sm"
           onClick={toggleTheme}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '36px',
-            height: '36px',
-            backgroundColor: 'transparent',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            color: colors.text,
-            padding: '6px'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = colors.surfaceElevated;
-            e.currentTarget.style.transform = 'scale(1.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-          title={translateUI(theme === 'light' ? 'switchToDarkMode' : 'switchToLightMode', language)}
-          aria-label={translateUI(theme === 'light' ? 'switchToDarkMode' : 'switchToLightMode', language)}
-        >
-          {theme === 'light' ? (
-            <Moon size={20} />
-          ) : (
-            <Sun size={20} />
-          )}
-        </button>
+          label={translateUI(theme === 'light' ? 'switchToDarkMode' : 'switchToLightMode', language)}
+          icon={theme === 'light' ? <Moon size={ICON_SIZE} /> : <Sun size={ICON_SIZE} />}
+        />
 
         {/* v1/v2 UI切り替えボタン */}
         {onUiVersionChange && (
-          <button
+          <IconButton
+            theme={theme}
+            size="sm"
+            variant="primary"
+            pressed={uiVersion === 'v2'}
             onClick={() => onUiVersionChange(uiVersion === 'v2' ? 'v1' : 'v2')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '36px',
-              height: '36px',
-              backgroundColor: uiVersion === 'v2' ? colors.primary : 'transparent',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              color: uiVersion === 'v2' ? colors.onPrimary : colors.text,
-              padding: '6px'
-            }}
-            onMouseEnter={(e) => {
-              if (uiVersion !== 'v2') e.currentTarget.style.backgroundColor = colors.surfaceElevated;
-              e.currentTarget.style.transform = 'scale(1.05)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = uiVersion === 'v2' ? colors.primary : 'transparent';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-            title={translateUI(uiVersion === 'v2' ? 'uiVersionBackLabel' : 'uiVersionBetaLabel', language)}
-            aria-label={translateUI(uiVersion === 'v2' ? 'uiVersionBackLabel' : 'uiVersionBetaLabel', language)}
-          >
-            <Sparkles size={20} />
-          </button>
+            label={translateUI(uiVersion === 'v2' ? 'uiVersionBackLabel' : 'uiVersionBetaLabel', language)}
+            icon={<Sparkles size={ICON_SIZE} />}
+          />
         )}
 
         {/* ハンバーガーメニューボタン */}
-        <button
+        <IconButton
+          theme={theme}
+          size="sm"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '36px',
-            height: '36px',
-            backgroundColor: 'transparent',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            color: colors.text,
-            padding: '6px'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = colors.surfaceElevated;
-            e.currentTarget.style.transform = 'scale(1.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-          title={translateUI('menuTitle', language)}
-          aria-label={translateUI('openMenuLabel', language)}
-        >
-          {isMenuOpen ? (
-            <X size={20} />
-          ) : (
-            <Menu size={20} />
-          )}
-        </button>
+          label={translateUI('openMenuLabel', language)}
+          icon={isMenuOpen ? <X size={ICON_SIZE} /> : <Menu size={ICON_SIZE} />}
+        />
       </div>
 
       {/* ドロップダウンメニュー */}
@@ -254,17 +142,17 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           right: '20px',
           backgroundColor: colors.surface,
           border: `1px solid ${colors.border}`,
-          borderRadius: '8px',
+          borderRadius: L.r.card,
           boxShadow: `0 4px 12px ${colors.shadow}`,
           zIndex: 1000,
           minWidth: '200px',
-          padding: '8px 0'
+          padding: `${L.sp.md} 0`
         }}>
           <div
             style={{
-              padding: '12px 16px',
+              padding: `${L.sp.xl} ${L.sp['2xl']}`,
               cursor: 'pointer',
-              fontSize: '14px',
+              fontSize: FS.title,
               color: colors.text,
               borderBottom: `1px solid ${colors.borderLight}`
             }}
@@ -280,9 +168,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           </div>
           <div
             style={{
-              padding: '12px 16px',
+              padding: `${L.sp.xl} ${L.sp['2xl']}`,
               cursor: 'pointer',
-              fontSize: '14px',
+              fontSize: FS.title,
               color: colors.text,
               borderBottom: `1px solid ${colors.borderLight}`
             }}
@@ -298,9 +186,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           </div>
           <div
             style={{
-              padding: '12px 16px',
+              padding: `${L.sp.xl} ${L.sp['2xl']}`,
               cursor: 'pointer',
-              fontSize: '14px',
+              fontSize: FS.title,
               color: colors.text,
               borderBottom: `1px solid ${colors.borderLight}`
             }}
@@ -316,9 +204,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           </div>
           <div
             style={{
-              padding: '12px 16px',
+              padding: `${L.sp.xl} ${L.sp['2xl']}`,
               cursor: 'pointer',
-              fontSize: '14px',
+              fontSize: FS.title,
               color: colors.text,
               borderBottom: `1px solid ${colors.borderLight}`
             }}
@@ -334,9 +222,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           </div>
           <div
             style={{
-              padding: '12px 16px',
+              padding: `${L.sp.xl} ${L.sp['2xl']}`,
               cursor: 'pointer',
-              fontSize: '14px',
+              fontSize: FS.title,
               color: colors.text
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
@@ -365,15 +253,15 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 10000,
-            padding: '20px'
+            padding: L.sp['3xl']
           }}
           onClick={() => setIsInfoModalOpen(false)}
         >
           <div
             style={{
               backgroundColor: colors.surface,
-              borderRadius: '12px',
-              padding: '24px',
+              borderRadius: L.r.card,
+              padding: L.sp['4xl'],
               maxWidth: '600px',
               width: '100%',
               maxHeight: '80vh',
@@ -385,28 +273,20 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             onClick={(e) => e.stopPropagation()}
           >
             {/* 閉じるボタン */}
-            <button
+            <IconButton
+              theme={theme}
+              size="sm"
               onClick={() => setIsInfoModalOpen(false)}
-              style={{
-                position: 'absolute',
-                top: '16px',
-                right: '16px',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                color: colors.textSecondary,
-                padding: '4px'
-              }}
-              aria-label={language === 'japanese' ? '閉じる' : 'Close'}
-            >
-              <X size={24} />
-            </button>
+              label={language === 'japanese' ? '閉じる' : 'Close'}
+              icon={<X size={ICON_SIZE} />}
+              styleOverride={{ position: 'absolute', top: '16px', right: '16px' }}
+            />
 
             {/* コンテンツ */}
-            <div style={{ paddingRight: '40px' }}>
+            <div style={{ paddingRight: L.sp['5xl'] }}>
               <h2 style={{
-                margin: '0 0 16px 0',
-                fontSize: '24px',
+                margin: `0 0 ${L.sp['2xl']} 0`,
+                fontSize: FS.display,
                 fontWeight: 'bold',
                 color: colors.text,
                 lineHeight: '1.3'
@@ -418,8 +298,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
               </h2>
 
               <p style={{
-                margin: '0 0 24px 0',
-                fontSize: '16px',
+                margin: `0 0 ${L.sp['4xl']} 0`,
+                fontSize: FS.input,
                 lineHeight: '1.6',
                 color: colors.text
               }}>
@@ -432,8 +312,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
               {/* 作者情報 */}
               <div style={{
                 borderTop: `1px solid ${colors.borderLight}`,
-                paddingTop: '16px',
-                fontSize: '14px',
+                paddingTop: L.sp['2xl'],
+                fontSize: FS.title,
                 color: colors.textSecondary
               }}>
                 Developed by{' '}

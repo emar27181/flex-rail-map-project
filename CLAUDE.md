@@ -491,6 +491,63 @@ Made with Claude Code
 
 ## 🔧 開発ガイドライン
 
+### デザインの一元管理（アトミックデザイン）
+
+UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域）を書くときは、値を直接書かず
+定義元から取ること。**同じ値・同じ規則を2箇所目に書こうとしたら、書く前に共通化する。**
+
+- 判断表と現状の調査結果: **`docs/design-system.md`**
+- 作業時に読むスキル: **`.claude/skills/design-tokens/SKILL.md`**
+- 現状を数え直す: `node scripts/audit-design-tokens.mjs`
+
+**UIコンポーネントはアトミックデザインの3層に分ける。
+どの層に置くかは「何を知っているか」で決める（見た目の複雑さではない）。**
+
+| 層 | 置き場所 | 知ってよいこと | 例 |
+|---|---|---|---|
+| atoms | `src/components/ui/atoms/` | デザイントークンだけ | `Button` `IconButton` `Chip` `TextField` `Select` `Switch` ほか |
+| molecules | `src/components/ui/molecules/` | アトムの組み合わせ方 | `SegmentedControl` `Stepper` |
+| organisms | `src/components/`, `src/components/legend/` | アプリの概念（路線・駅）とデータ | `RouteSwitchBoard` `StationSelector` |
+
+判定に迷ったら「路線」「駅」という語をその部品から消せるかを見る。消せないなら organism。
+
+**新しくボタン・入力欄・チップを書かないこと。** 既存のアトムを使う。
+**アトム以外で `<button>` `<select>` `<textarea>` `<input>` を書くとテストが落ちる**
+（`tests/unit/components/ui/noRawControls.test.ts`）。
+どのアトムを使うかの一覧は `docs/design-system.md` の「どの部品を使うか」。
+
+**寸法は `ui/atoms/controlSize.ts` の `CONTROL_SIZE` だけから取る。**
+段階は `md`(44px, 指で押すもの) と `sm`(24px, 補助操作) の2つのみ。
+**同じ行・同じグループに並ぶ操作は必ず同じ段階にする**
+（隣り合う部品で高さが違うのが「揃っていない」の主な原因だった）。
+
+**状態は塗りで示す。** 選択・非選択で枠線の太さや文字の太さを変えると、
+押すたびに外形が動いて並びがずれる。
+
+色は `SEMANTIC.*`（出発=緑 / 到着=赤 / primary=青）、白黒は `NEUTRAL.*`、
+それ以外は `getThemeColors(theme)` から取る。直書きはテストで落ちる
+（`tests/unit/constants/semanticColors.test.ts`）。
+
+**文字サイズは `FS`、余白は `L.sp`、角の丸みは `L.r` から取る。**
+`fontSize: '12px'` のような直書きはテストで落ちる
+（`tests/unit/components/ui/noRawSizes.test.ts`）。
+
+- 文字サイズは **12px が下限**。段階は caption(12) / body(14) / input・title(16) /
+  heading(20) / display(24) の5つ。12px未満の段階を足すとテストが落ちる
+- **例外は地図の駅ラベル**（`MAP_LABEL`, 既定 11px × 0.8 = 9px）とそのふりがな
+  （駅名の75%・下限7px）。地図は「読みやすさ」と「ラベルが重ならずに何個並ぶか」の
+  トレードオフが本文と違い、12pxにすると重なりが18ラベル中1組→3組に増えた。
+  大きさは設定パネルから変えられ、選んだ値は保持される
+- 角の丸みは値ではなく役割で選ぶ。control(3px, 操作部品と地図の駅ラベル) /
+  card(8px, 箱) / pill(999px, バッジ)。
+  **基準は地図の駅ラベル**（画面上でいちばん数が多く目に入る部品）
+- 段階に無い値は近い段階に丸める。新しい段階を足す前に既存で足りないか確認すること
+寸法の一致は `tests/unit/components/ui/atoms.test.tsx` が固定している。
+
+このプロジェクトは「同じ規則を2箇所に書いて片方だけ直す」不具合を繰り返しているため
+（入力欄だけ色が変わる、駅アイコンの片方だけタッチ領域が広がる等）、
+様式美ではなく再発防止として扱う。
+
 ### プレビューデプロイルール
 
 **2026-08-13更新: プレビューでの目視確認を挟む運用に変更。E2Eは省略可。**
@@ -507,19 +564,51 @@ Made with Claude Code
 - E2E（`npm run test:e2e`）は時間がかかるため省略してよい。
   代わりに `test:types` / `test:unit` / `build` は必ず通すこと
 
-**プレビューURLを固定にする:**
+#### 🔴 push したら必ずプレビューURLを書く（2026-09-02追加）
 
-PRごとの `deploy-preview-<番号>--flex-railway-map.netlify.app` はPR番号が変わると
-URLも変わってしまう。ブランチ名は固定なので、Netlifyの **Branch deploys** を
-有効にすると次のURLが常に使える。
+**push・デプロイのたびに、返答の中にプレビューURLをそのまま書くこと。**
+ユーザーに聞かれてから答えるのでは遅い。目視確認はこの運用の必須手順であり、
+URLが無ければユーザーは確認に着手できない。
+
+- 「プレビューを更新しました」だけで URL を書かないのは**不可**
+- 「前と同じURLです」で済ませるのも**不可**。毎回そのまま書く
+- リンクは省略・短縮せず、クリックできる形で全文を書く
+- あわせて push したコミットのハッシュも書く（どの版を見ているか分かるように）
+
+**貼るURLは推測せず、Netlifyボットのコメントから取ること。**
+
+現在このリポジトリで開けるのは**PRのDeploy Previewだけ**である。
+（2026-09-04: ユーザーが実機で開けることを確認済み）
 
 ```
-https://claude-project-loading-ktm7lo--flex-railway-map.netlify.app
+https://deploy-preview-<PR番号>--flex-railway-map.netlify.app
 ```
 
+`<ブランチ名>--flex-railway-map.netlify.app` 形式のURLは
+**Branch deploys が無効なので存在しない**。貼っても404になる。
+（2026-09-02: 実際にこれを貼り続けてユーザーが2回開けなかった）
+
+**手順（push のたびに毎回）:**
+1. push する
+2. `mcp__github__pull_request_read` の `get_comments` で該当PRを読む
+3. netlify[bot] のコメントから次を確認して書く
+   - Deploy Preview のURL
+   - `Latest commit` が今 push したコミットと一致しているか
+   - `✅ ready` か `🔨 building` か
+
+サンドボックスから Netlify へは到達できないが、**ビルド完了はこのコメントで
+確認できる**。「ビルド中かもしれません」と曖昧に濁さず、ボットの状態を書くこと。
+コメントのコミットが古いままならまだビルド中なので、そう書く。
+
+**将来URLを固定にしたい場合:**
+
+PRごとのURLはPR番号が変わると変わってしまう。ブランチ名は固定なので、
 Netlify管理画面の Site configuration → Build & deploy → Branch deploys で
-対象ブランチ（`claude/project-loading-ktm7lo`）を許可すると有効になる。
+対象ブランチ（`claude/project-loading-ktm7lo`）を許可すると
+`https://claude-project-loading-ktm7lo--flex-railway-map.netlify.app` が使える。
 （`/` と `_` はハイフンに置換され、小文字化されたものがサブドメインになる）
+**この設定はユーザーがダッシュボードで行う必要がある。有効化を確認するまでは
+このURLを貼らないこと。**
 
 サンドボックスから `npm run deploy:preview` は実行できない（Netlify CLI が
 未認証で `NETLIFY_AUTH_TOKEN` も無い）。push によるNetlifyの自動ビルドを使う。

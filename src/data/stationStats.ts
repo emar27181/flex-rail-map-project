@@ -24,6 +24,10 @@ export type StationStats = {
   lat: number;
   lng: number;
 
+  // --- 実データ（本アプリの路線データから算出） ---
+  /** その駅を通る路線数。routes.ts の定義から数えるため全駅で値が入る */
+  routeCount?: number;
+
   // --- 実データ（Overpass API / OpenStreetMap、半径500m以内） ---
   restaurantCount?: number;
   cafeCount?: number;
@@ -111,6 +115,11 @@ export const PARAM_DATA_SOURCES: Partial<Record<keyof StationStats, DataSource>>
     retrievedAt: '2026-06-11',
     note: '実データ収集予定。収集済みになるまで全駅灰色表示。',
   },
+  routeCount: {
+    title: '本アプリの路線データ（src/data/routes.ts）',
+    retrievedAt: '2026-08-16',
+    note: '各路線の駅リストに同名の駅が何回現れるかを数えた値。相互直通で別路線として定義されている区間はそれぞれ1路線として数える。',
+  },
   crimeIndex: {
     title: '警視庁 区市町村の町丁別認知件数 令和5年',
     retrievedAt: '2026-06-11',
@@ -129,6 +138,10 @@ export type ParamMethodology = {
 };
 
 export const PARAM_METHODOLOGY: Partial<Record<keyof StationStats, ParamMethodology>> = {
+  routeCount: {
+    collectionMethod: '本アプリの路線データ（routes.ts）の駅リストを集計。',
+    interpolationLogic: '同名の駅が現れる路線の数をそのまま使用。補完・推定は行わない。',
+  },
   restaurantCount: {
     collectionMethod: 'Overpass API（OpenStreetMap）で駅出口から半径500m以内を検索。',
     interpolationLogic: 'amenity=restaurant + amenity=fast_food のノード・ウェイ数を合算。',
@@ -181,6 +194,8 @@ export type StatCategory =
   | 'work';         // 仕事
 
 export const STAT_PARAMS: StatParamMeta[] = [
+  // 交通（実データ・本アプリの路線データから算出）
+  { key: 'routeCount',          label: '路線数',      unit: '路線',   category: 'transport',   higherIsBetter: true,  dataQuality: 'real',      description: 'その駅を通る路線数（乗り入れ路線の本数）', methodology: '本アプリの路線データ（routes.ts）から算出', period: '路線データ更新時点' },
   // 飲食（実データ）
   { key: 'restaurantCount',     label: '飲食店数',    unit: '軒',     category: 'food',        higherIsBetter: true,  dataQuality: 'real',      description: '飲食店全般数（restaurant + fast_food）', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
   { key: 'cafeCount',           label: 'カフェ数',    unit: '軒',     category: 'food',        higherIsBetter: true,  dataQuality: 'real',      description: 'カフェ・喫茶店数', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
@@ -219,8 +234,40 @@ export const STAT_PARAMS: StatParamMeta[] = [
 // 元データ: data/station-stats_v2.csv（首都圏1541駅）
 // ----------------------------------------------------------------
 import rawStatsData from './station-stats-data.json';
+import { routes } from './routes';
 const { _meta: _ignored, ...stationStatsRaw } = rawStatsData as Record<string, unknown>;
-export const stationStatsData: Record<string, StationStats> = stationStatsRaw as Record<string, StationStats>;
+const statsBase = stationStatsRaw as Record<string, StationStats>;
+
+/**
+ * 路線数を路線データから算出して統計に合流させる。
+ *
+ * 他の統計（Overpass API 由来）は関東中心の約1,500駅しか無いが、
+ * 路線数はアプリが持つ路線定義そのものから数えられるため全駅で埋まる。
+ * 統計が無い駅にも最小限のエントリを作り、路線数だけは全国で色が付くようにする。
+ */
+const withRouteCount = (): Record<string, StationStats> => {
+  const merged: Record<string, StationStats> = { ...statsBase };
+  const counts = new Map<string, number>();
+  const coords = new Map<string, { lat: number; lng: number }>();
+  for (const stationList of Object.values(routes)) {
+    for (const s of stationList as Array<{ name: string; lat: number; lng: number }>) {
+      counts.set(s.name, (counts.get(s.name) ?? 0) + 1);
+      if (!coords.has(s.name)) coords.set(s.name, { lat: s.lat, lng: s.lng });
+    }
+  }
+  for (const [name, count] of counts) {
+    const existing = merged[name];
+    if (existing) {
+      merged[name] = { ...existing, routeCount: count };
+    } else {
+      const c = coords.get(name)!;
+      merged[name] = { stationName: name, lat: c.lat, lng: c.lng, routeCount: count };
+    }
+  }
+  return merged;
+};
+
+export const stationStatsData: Record<string, StationStats> = withRouteCount();
 
 // 以下は後方互換のための旧データ（JSON で上書きされる）
 

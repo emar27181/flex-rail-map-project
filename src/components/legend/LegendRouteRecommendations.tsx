@@ -4,6 +4,9 @@ import { translateUI } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
 import ToggleableItem from '../ui/ToggleableItem';
 import RouteRecommendationItem from '../ui/RouteRecommendationItem';
+import Button from '../ui/atoms/Button';
+import { FS } from '../../constants/ui';
+import { L } from './legendStyles';
 
 interface RouteSegment {
   routeKey: string;
@@ -29,6 +32,11 @@ interface LegendRouteRecommendationsProps {
   onRouteToggle: (index: number) => void;
   onSelectAll: () => void;
   onDeselectAll: () => void;
+  /**
+   * 見出しを出すか。既定は出す。
+   * 呼び出し側（スマホの下部パネルなど）が既に同じ見出しを持つ場合だけ false にする。
+   */
+  showTitle?: boolean;
 }
 
 const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
@@ -38,7 +46,8 @@ const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
   language,
   onRouteToggle,
   onSelectAll,
-  onDeselectAll
+  onDeselectAll,
+  showTitle = true
 }) => {
   const colors = getThemeColors(theme);
 
@@ -48,59 +57,37 @@ const LegendRouteRecommendations: React.FC<LegendRouteRecommendationsProps> = ({
 
   return (
     <div style={{
-      marginBottom: '15px',
-      padding: '10px',
+      marginBottom: L.sp['2xl'],
+      padding: L.sp.lg,
       backgroundColor: colors.surface,
-      borderRadius: '4px',
+      borderRadius: L.r.control,
       border: `1px solid ${colors.borderLight}`
     }}>
-      <div style={{
-        fontSize: '14px',
-        fontWeight: 'bold',
-        marginBottom: '8px',
-        color: colors.text
-      }}>
-        {translateUI('routeSelection', language)}
-      </div>
+      {showTitle && (
+        <div style={{
+          fontSize: FS.title,
+          fontWeight: 'bold',
+          marginBottom: L.sp.md,
+          color: colors.text
+        }}>
+          {translateUI('routeSelection', language)}
+        </div>
+      )}
 
       <div style={{
         display: 'flex',
-        gap: '4px',
-        marginBottom: '8px'
+        gap: L.sp.xs,
+        marginBottom: L.sp.md
       }}>
-        <button
-          onClick={onSelectAll}
-          style={{
-            flex: 1,
-            padding: '4px 8px',
-            fontSize: '10px',
-            backgroundColor: '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer'
-          }}
-        >
+        <Button theme={theme} variant="positive" size="sm" onClick={onSelectAll} styleOverride={{ flex: 1 }}>
           {translateUI('allShow', language)}
-        </button>
-        <button
-          onClick={onDeselectAll}
-          style={{
-            flex: 1,
-            padding: '4px 8px',
-            fontSize: '10px',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer'
-          }}
-        >
+        </Button>
+        <Button theme={theme} variant="danger" size="sm" onClick={onDeselectAll} styleOverride={{ flex: 1 }}>
           {translateUI('allHide', language)}
-        </button>
+        </Button>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
         {routeRecommendations.map((route, index) => {
           const isSelected = selectedRouteIndices === null || selectedRouteIndices.has(index);
 

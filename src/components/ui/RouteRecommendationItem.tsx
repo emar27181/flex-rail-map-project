@@ -2,8 +2,11 @@ import React from 'react';
 import { MapPin, RefreshCw, CircleDot } from 'lucide-react';
 import { routeNames, routeColors } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
+import { checkboxInput, selectableCard, L} from '../legend/legendStyles';
 import { translateUI, translateRoute, translateStation } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
+import { SEMANTIC, FS} from '../../constants/ui';
+import ToggleMark from './atoms/ToggleMark';
 
 interface RouteSegment {
   routeKey: string;
@@ -47,27 +50,22 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
     <div
       onClick={() => onToggle(index)}
       style={{
-        padding: '5px 6px',
-        borderRadius: '5px',
+        padding: `${L.sp.xs} ${L.sp.sm}`,
         cursor: 'pointer',
-        marginBottom: '4px',
-        backgroundColor: isSelected ? 'rgba(33,150,243,0.12)' : 'rgba(108,117,125,0.07)',
-        border: isSelected ? '1.5px solid #2196F3' : `1px solid ${colors.borderLight}`,
-        transition: 'all 0.15s ease',
+        marginBottom: L.sp.xs,
+        ...selectableCard(colors, { selected: isSelected }),
         userSelect: 'none',
       }}
     >
       {/* 上段: チェック・カラードット・番号・時間 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <input
-          type="checkbox"
+      <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm }}>
+        <ToggleMark
           checked={isSelected}
           onChange={e => { e.stopPropagation(); onToggle(index); }}
-          style={{ cursor: 'pointer', flexShrink: 0 }}
         />
 
         {/* 路線カラードット */}
-        <div style={{ display: 'flex', gap: '2px', flexShrink: 0, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: L.sp.xxs, flexShrink: 0, alignItems: 'center' }}>
           {route.segments.map((seg, i) => {
             const color = routeColors[seg.routeKey as keyof typeof routeColors] || '#888';
             return (
@@ -83,24 +81,24 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
 
         {/* 番号 + 乗換数 */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ fontSize: '10px', color: isSelected ? colors.textSecondary : colors.textMuted, lineHeight: 1 }}>
+          <span style={{ fontSize: FS.caption, color: isSelected ? colors.textSecondary : colors.textMuted, lineHeight: 1 }}>
             {translateUI('routeNumber', language, { number: (index + 1).toString() })}
             {route.transfers > 0 && (
-              <span style={{ marginLeft: '4px' }}>{transferText}</span>
+              <span style={{ marginLeft: L.sp.xs }}>{transferText}</span>
             )}
           </span>
         </div>
 
         {/* 合計時間 */}
-        <div style={{ flexShrink: 0, display: 'flex', alignItems: 'baseline', gap: '1px' }}>
+        <div style={{ flexShrink: 0, display: 'flex', alignItems: 'baseline', gap: L.sp.xxs }}>
           <span style={{
-            fontSize: '18px', fontWeight: 'bold', lineHeight: 1,
-            color: isSelected ? '#2196F3' : colors.text,
+            fontSize: FS.heading, fontWeight: 'bold', lineHeight: 1,
+            color: isSelected ? SEMANTIC.primary : colors.text,
             opacity: isSelected ? 1 : 0.5,
           }}>
             {totalMin}
           </span>
-          <span style={{ fontSize: '11px', color: isSelected ? colors.textSecondary : colors.textMuted, opacity: isSelected ? 1 : 0.5 }}>
+          <span style={{ fontSize: FS.caption, color: isSelected ? colors.textSecondary : colors.textMuted, opacity: isSelected ? 1 : 0.5 }}>
             {translateUI('minutesSuffix', language)}
           </span>
         </div>
@@ -108,8 +106,8 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
 
       {/* 下段: セグメント詳細（出発 → 路線 → 乗換 → 路線 → 到着） */}
       <div style={{
-        marginTop: '4px', paddingLeft: '20px',
-        fontSize: '10px', color: colors.textSecondary, lineHeight: 1.5,
+        marginTop: L.sp.xs, paddingLeft: L.sp['3xl'],
+        fontSize: FS.caption, color: colors.textSecondary, lineHeight: 1.5,
         opacity: isSelected ? 1 : 0.6,
       }}>
         {route.segments.map((seg, i) => {
@@ -125,26 +123,26 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
             <div key={i}>
               {/* 出発駅（最初のセグメントのみ） */}
               {i === 0 && fromName && (
-                <div style={{ fontWeight: 'bold', color: '#4CAF50', fontSize: '10px' }}>
+                <div style={{ fontWeight: 'bold', color: SEMANTIC.departure, fontSize: FS.caption }}>
                   <CircleDot size={12} style={{ verticalAlign: 'text-bottom' }} /> {translateStation(fromName, language)}
                 </div>
               )}
               {/* 路線 */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '3px', paddingLeft: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, paddingLeft: L.sp.sm }}>
                 <span style={{ color: colors.textSecondary }}>↓</span>
                 <span style={{ width: '6px', height: '6px', background: color, borderRadius: '50%', display: 'inline-block', flexShrink: 0 }} />
                 <span style={{ color, fontWeight: 'bold' }}>{name}</span>
-                <span style={{ color: colors.textSecondary, marginLeft: '2px' }}>({segMin}{translateUI('minutesSuffix', language)})</span>
+                <span style={{ color: colors.textSecondary, marginLeft: L.sp.xxs }}>({segMin}{translateUI('minutesSuffix', language)})</span>
               </div>
               {/* 乗換駅 or 到着駅 */}
               {toName && (
                 <div style={{
                   fontWeight: 'bold',
-                  color: isLast ? '#F44336' : colors.text,
-                  fontSize: '10px',
+                  color: isLast ? SEMANTIC.arrival : colors.text,
+                  fontSize: FS.caption,
                 }}>
                   {isLast ? <MapPin size={12} style={{ verticalAlign: 'text-bottom' }} /> : <RefreshCw size={12} style={{ verticalAlign: 'text-bottom' }} />} {translateStation(toName, language)}
-                  {!isLast && <span style={{ fontSize: '9px', fontWeight: 'normal', color: colors.textSecondary, marginLeft: '3px' }}>乗換</span>}
+                  {!isLast && <span style={{ fontSize: FS.caption, fontWeight: 'normal', color: colors.textSecondary, marginLeft: L.sp.xs }}>乗換</span>}
                 </div>
               )}
             </div>

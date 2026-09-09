@@ -1,7 +1,8 @@
 /**
  * 駅選択履歴と候補構成のテスト
  *
- * 未入力時の候補は「近くの駅3件 + よく使う駅2件」で先頭5件を埋める仕様。
+ * 未入力時の候補は「よく使う駅（履歴）→ 近くの駅 → 大きい駅」の順で
+ * 先頭5件を埋める仕様。到着駅では近くの駅を出さない（nearbyCount=0）。
  * ここが崩れると、位置情報の有無やデータの欠けによって候補が
  * 5件に満たなくなったり、同じ駅が重複して並んだりする。
  *
@@ -82,7 +83,8 @@ describe('stationHistory', () => {
     const opts = { nearbyCount: 3, frequentCount: 2, total: 5 };
     const fallback = [s('東京'), s('新宿'), s('渋谷'), s('池袋'), s('品川')];
 
-    it('近くの駅3件のあとによく使う駅2件が並ぶ', () => {
+    it('よく使う駅が先に並び、そのあとに近くの駅が続く', () => {
+      // 毎日使う駅は現在地から遠くても真っ先に出したいので履歴を最優先にする
       const nearby = [s('藤沢'), s('石上'), s('柳小路'), s('本鵠沼')];
       const history = [
         { name: '大宮', count: 9, lastUsedAt: 1 },
@@ -90,7 +92,19 @@ describe('stationHistory', () => {
       ];
       const all = [...nearby, s('大宮'), s('千葉')];
       const result = buildSuggestions(nearby, history, fallback, n => all.find(x => x.name === n), opts);
-      expect(result.map(x => x.name)).toEqual(['藤沢', '石上', '柳小路', '大宮', '千葉']);
+      expect(result.map(x => x.name)).toEqual(['大宮', '千葉', '藤沢', '石上', '柳小路']);
+    });
+
+    it('到着駅向けに nearbyCount=0 を渡すと近くの駅が出ない', () => {
+      const nearby = [s('藤沢'), s('石上'), s('柳小路')];
+      const history = [{ name: '大宮', count: 9, lastUsedAt: 1 }];
+      const all = [...nearby, s('大宮')];
+      const result = buildSuggestions(nearby, history, fallback, n => all.find(x => x.name === n), {
+        ...opts, nearbyCount: 0,
+      });
+      // 履歴が先頭。残りは fallback（大きい駅）で埋まり、近隣は補充枠でしか出ない
+      expect(result[0].name).toBe('大宮');
+      expect(result.slice(0, 2).map(x => x.name)).not.toContain('石上');
     });
 
     it('近隣と履歴が重複しても同じ駅が二重に出ない', () => {

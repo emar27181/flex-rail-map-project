@@ -3,6 +3,14 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Map, MousePointerClick, CircleCheck } from 'lucide-react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
+import { SEMANTIC, NEUTRAL, FS} from '../constants/ui';
+import Button from './ui/atoms/Button';
+import Chip from './ui/atoms/Chip';
+
+/** デモ画面はテーマ切替を持たずライト固定 */
+const DEMO_THEME = 'light' as const;
+import { tintColor } from '../utils/contrast';
+import { L } from './legend/legendStyles';
 
 // Yokohama → Shinjuku corridor routes only
 const DEMO_ROUTES: RouteKey[] = [
@@ -127,85 +135,47 @@ const DemoMap: React.FC = () => {
       {!tutorialDismissed && currentStep && (
         <div style={{
           backgroundColor: '#1a1a2e',
-          color: '#fff',
-          padding: '10px 16px',
+          color: NEUTRAL.white,
+          padding: `${L.sp.lg} ${L.sp['2xl']}`,
           display: 'flex',
           alignItems: 'center',
-          gap: '10px',
+          gap: L.sp.lg,
           flexShrink: 0,
           zIndex: 1000,
           boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
         }}>
-          <span style={{ fontSize: '20px', flexShrink: 0, display: 'flex' }}>{currentStep.icon}</span>
+          <span style={{ fontSize: FS.heading, flexShrink: 0, display: 'flex' }}>{currentStep.icon}</span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 'bold', fontSize: '13px', marginBottom: '2px' }}>
+            <div style={{ fontWeight: 'bold', fontSize: FS.body, marginBottom: L.sp.xxs }}>
               <span style={{
-                backgroundColor: '#4CAF50',
-                color: '#fff',
-                borderRadius: '10px',
-                padding: '1px 7px',
-                fontSize: '11px',
-                marginRight: '6px',
+                backgroundColor: SEMANTIC.departure,
+                color: NEUTRAL.white,
+                borderRadius: L.r.card,
+                padding: `${L.sp.xxs} ${L.sp.sm}`,
+                fontSize: FS.caption,
+                marginRight: L.sp.sm,
               }}>
                 STEP {currentStep.step}/{TUTORIAL_STEPS.length}
               </span>
               {currentStep.title}
             </div>
-            <div style={{ fontSize: '12px', color: '#ccc', lineHeight: 1.4 }}>
+            <div style={{ fontSize: FS.caption, color: '#ccc', lineHeight: 1.4 }}>
               {currentStep.desc}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: L.sp.sm, flexShrink: 0 }}>
             {tutorialStep < TUTORIAL_STEPS.length ? (
-              <button
-                onClick={handleNext}
-                style={{
-                  padding: '5px 12px',
-                  backgroundColor: '#4CAF50',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  fontWeight: 'bold',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+              <Button theme={DEMO_THEME} variant="positive" size="sm" onClick={handleNext}>
                 次へ →
-              </button>
+              </Button>
             ) : (
-              <button
-                onClick={() => setTutorialDismissed(true)}
-                style={{
-                  padding: '5px 12px',
-                  backgroundColor: '#4CAF50',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  fontWeight: 'bold',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+              <Button theme={DEMO_THEME} variant="positive" size="sm" onClick={() => setTutorialDismissed(true)}>
                 完了 ✓
-              </button>
+              </Button>
             )}
-            <button
-              onClick={() => setTutorialDismissed(true)}
-              style={{
-                padding: '5px 8px',
-                backgroundColor: 'transparent',
-                color: '#aaa',
-                border: '1px solid #555',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                whiteSpace: 'nowrap',
-              }}
-            >
+            <Button theme={DEMO_THEME} variant="outline" size="sm" onClick={() => setTutorialDismissed(true)}>
               閉じる
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -224,14 +194,14 @@ const DemoMap: React.FC = () => {
           style={{
             width: '160px',
             flexShrink: 0,
-            backgroundColor: '#fff',
+            backgroundColor: NEUTRAL.white,
             borderRight: '1px solid #ddd',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
             transition: 'box-shadow 0.3s ease',
             boxShadow: isPanelHighlighted
-              ? '0 0 0 3px #4CAF50, 0 0 20px rgba(76,175,80,0.4)'
+              ? `0 0 0 3px ${SEMANTIC.departure}, 0 0 20px ${tintColor(SEMANTIC.departure, 0.4)}`
               : 'none',
             position: 'relative',
             zIndex: isPanelHighlighted ? 10 : 1,
@@ -239,10 +209,10 @@ const DemoMap: React.FC = () => {
         >
           {/* Panel header */}
           <div style={{
-            padding: '10px 12px',
+            padding: `${L.sp.lg} ${L.sp.xl}`,
             backgroundColor: '#1a1a2e',
-            color: '#fff',
-            fontSize: '11px',
+            color: NEUTRAL.white,
+            fontSize: FS.caption,
             fontWeight: 'bold',
             flexShrink: 0,
           }}>
@@ -250,9 +220,9 @@ const DemoMap: React.FC = () => {
             {isPanelHighlighted && (
               <span style={{
                 display: 'block',
-                fontSize: '10px',
-                color: '#4CAF50',
-                marginTop: '2px',
+                fontSize: FS.caption,
+                color: SEMANTIC.departure,
+                marginTop: L.sp.xxs,
                 animation: 'pulse-text 1s infinite',
               }}>
                 ← クリックしてみよう！
@@ -264,62 +234,38 @@ const DemoMap: React.FC = () => {
           <div style={{
             flex: 1,
             overflowY: 'auto',
-            padding: '8px',
+            padding: L.sp.md,
             display: 'flex',
             flexDirection: 'column',
-            gap: '4px',
+            gap: L.sp.xs,
           }}>
             {DEMO_ROUTES.map((rk) => {
               const color = getRouteColor(rk);
               const name = getRouteName(rk);
               const isVisible = visibleRoutes.has(rk);
               return (
-                <button
+                <Chip
                   key={rk}
+                  theme={DEMO_THEME}
+                  size="sm"
+                  color={color}
+                  label={name}
+                  selected={isVisible}
                   onClick={() => handleRouteToggle(rk)}
-                  title={isVisible ? '非表示にする' : '表示する'}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '7px',
-                    padding: '7px 8px',
-                    border: isVisible ? `2px solid ${color}` : '2px solid #ddd',
-                    borderRadius: '6px',
-                    backgroundColor: isVisible ? `${color}18` : '#fafafa',
-                    cursor: 'pointer',
-                    textAlign: 'left',
+                  styleOverride={{
                     width: '100%',
-                    transition: 'all 0.15s ease',
                     animation: isPanelHighlighted && !isVisible ? 'wiggle 1.5s infinite' : 'none',
                   }}
-                >
-                  <span style={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    backgroundColor: color,
-                    flexShrink: 0,
-                    opacity: isVisible ? 1 : 0.35,
-                    transition: 'opacity 0.15s',
-                  }} />
-                  <span style={{
-                    fontSize: '11px',
-                    fontWeight: isVisible ? 'bold' : 'normal',
-                    color: isVisible ? color : '#999',
-                    lineHeight: 1.3,
-                  }}>
-                    {name}
-                  </span>
-                </button>
+                />
               );
             })}
           </div>
 
           {/* Panel footer */}
           <div style={{
-            padding: '8px 10px',
+            padding: `${L.sp.md} ${L.sp.lg}`,
             borderTop: '1px solid #eee',
-            fontSize: '10px',
+            fontSize: FS.caption,
             color: '#aaa',
             flexShrink: 0,
           }}>
@@ -367,7 +313,7 @@ const DemoMap: React.FC = () => {
                   radius={st.isEndpoint ? 9 : 6}
                   pathOptions={{
                     color: st.isEndpoint ? '#1a1a2e' : '#555',
-                    fillColor: st.isEndpoint ? '#fff' : '#fff',
+                    fillColor: st.isEndpoint ? NEUTRAL.white : NEUTRAL.white,
                     fillOpacity: 1,
                     weight: st.isEndpoint ? 3 : 2,
                   }}
@@ -379,7 +325,7 @@ const DemoMap: React.FC = () => {
                     className="demo-station-label"
                   >
                     <span style={{
-                      fontSize: '11px',
+                      fontSize: FS.caption,
                       fontWeight: st.isEndpoint ? 'bold' : 'normal',
                       color: st.isEndpoint ? '#1a1a2e' : '#444',
                     }}>
@@ -396,7 +342,7 @@ const DemoMap: React.FC = () => {
               alignItems: 'center',
               justifyContent: 'center',
               color: '#888',
-              fontSize: '14px',
+              fontSize: FS.title,
             }}>
               読み込み中...
             </div>
@@ -407,11 +353,11 @@ const DemoMap: React.FC = () => {
             position: 'absolute',
             bottom: '4px',
             right: '4px',
-            fontSize: '9px',
+            fontSize: FS.caption,
             color: '#888',
             backgroundColor: 'rgba(255,255,255,0.7)',
-            padding: '1px 4px',
-            borderRadius: '2px',
+            padding: `${L.sp.xxs} ${L.sp.xs}`,
+            borderRadius: L.r.control,
             pointerEvents: 'none',
             zIndex: 500,
           }}>

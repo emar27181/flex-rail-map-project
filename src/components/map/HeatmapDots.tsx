@@ -16,6 +16,7 @@ import {
   STAT_PARAMS,
 } from '../../data/stationStats';
 import type { StationStats } from '../../data/stationStats';
+import { NEUTRAL } from '../../constants/ui';
 
 type Props = {
   paramKey: keyof StationStats;
@@ -48,7 +49,7 @@ export default function HeatmapDots({ paramKey, radius = 10 }: Props) {
             pathOptions={{
               fillColor: color,
               fillOpacity: 0.85,
-              color: '#fff',
+              color: NEUTRAL.white,
               weight: 1.5,
             }}
           >

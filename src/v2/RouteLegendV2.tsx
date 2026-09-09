@@ -5,6 +5,7 @@ import type { RouteKey } from '../data/routes';
 import { DIAGRAM_ROUTE_KEYS } from '../components/DiagramMap';
 import { translateRoute, translateUI } from '../utils/translation';
 import type { Language } from '../utils/translation';
+import { NEUTRAL } from '../constants/ui';
 
 interface RouteLegendV2Props {
   visibleRoutes: Set<RouteKey>;
@@ -76,7 +77,7 @@ const RouteLegendV2: React.FC<RouteLegendV2Props> = ({
               style={{
                 flex: 1, padding: 'var(--v2-space-1) var(--v2-space-2)', fontSize: 'var(--v2-font-size-xs)',
                 borderRadius: 'var(--v2-radius-sm)', border: 'none', cursor: 'pointer',
-                backgroundColor: 'var(--v2-color-success)', color: '#fff',
+                backgroundColor: 'var(--v2-color-success)', color: NEUTRAL.white,
               }}
             >{translateUI('allShow', language)}</button>
             <button
@@ -84,7 +85,7 @@ const RouteLegendV2: React.FC<RouteLegendV2Props> = ({
               style={{
                 flex: 1, padding: 'var(--v2-space-1) var(--v2-space-2)', fontSize: 'var(--v2-font-size-xs)',
                 borderRadius: 'var(--v2-radius-sm)', border: 'none', cursor: 'pointer',
-                backgroundColor: 'var(--v2-color-danger)', color: '#fff',
+                backgroundColor: 'var(--v2-color-danger)', color: NEUTRAL.white,
               }}
             >{translateUI('allHide', language)}</button>
           </div>
