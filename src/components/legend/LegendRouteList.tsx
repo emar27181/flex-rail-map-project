@@ -24,6 +24,15 @@ type SortMode = 'name' | 'color' | 'default' | 'distance';
 /** 路線切り替えの表示方式の保存キー */
 const ROUTE_UI_MODE_KEY = 'routeSwitchUiMode';
 
+/**
+ * 従来の一覧（classic）を選べるようにするかどうか。
+ *
+ * 一旦オフにして、ボード表示だけを出す。従来の一覧のコードは
+ * 削除せず残してあるので、この値を true に戻せばいつでも復活できる
+ * （`showRouteToggleSection` と同じ、開発者向けの一時的な切り替え）。
+ */
+const ROUTE_CLASSIC_VIEW_ENABLED = false;
+
 interface LegendRouteListProps {
   visibleRoutesData: Array<[string, any]>;
   visibleRoutes: Set<RouteKey>;
@@ -261,16 +270,22 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   });
 
   /**
-   * ボード表示に渡す並び順。
-   * 全国490路線を名前順にすると「IGRいわて銀河鉄道」から始まって
-   * 手元の路線に届かないので、画面中心から近い順で渡す。
+   * 選んだ並び順（あいうえお順・色順・登録順・近い順）を適用した路線キー一覧。
+   * 表示方式（ボード / 従来の一覧）に関わらずこの1つを共有する。
+   *
+   * 'default'（登録順）だけは `routeOrder`（ドラッグで並べ替えた順）を
+   * そのまま使う。それ以外は `sortedVisibleRoutesData` の並びを使う
+   * （全国490路線を名前順にすると「IGRいわて銀河鉄道」から始まって
+   * 手元の路線に届かないため、既定は距離順）。
    */
-  const boardRouteKeys = useMemo(
-    () => [...visibleRoutesData]
-      .sort(([, a], [, b]) => routeMinDist(a) - routeMinDist(b))
-      .map(([k]) => k as RouteKey),
-    [visibleRoutesData, viewCenter],
+  const sortedRouteKeys = useMemo(
+    () => sortMode === 'default'
+      ? [...routeOrder].filter(rk => visibleRoutesData.some(([k]) => k === rk))
+      : sortedVisibleRoutesData.map(([k]) => k as RouteKey),
+    [sortMode, routeOrder, visibleRoutesData, sortedVisibleRoutesData],
   );
+  /** ボード表示に渡す並び順。表示方式によらず sortedRouteKeys をそのまま使う */
+  const boardRouteKeys = sortedRouteKeys;
 
   const sectionHeader = (label: string, isOpen: boolean, onToggle: () => void) => (
     <div
@@ -302,38 +317,23 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         <div style={{ fontSize: FS.title, fontWeight: 'bold', color: colors.text }}>
           {translateUI('routeDisplayToggle', language)}
         </div>
-        {/* 表示方式の切り替え。従来の一覧も選べる形で残している */}
-        <SegmentedControl
-          theme={theme}
-          value={routeUiMode}
-          onChange={changeRouteUiMode}
-          ariaLabel={translateUI('routeDisplayToggle', language)}
-          options={[
-            { value: 'board' as const, label: translateUI('routeViewBoard', language) },
-            { value: 'classic' as const, label: translateUI('routeViewClassic', language) },
-          ]}
-        />
+        {/* 表示方式の切り替え。従来の一覧は一旦オフ（ROUTE_CLASSIC_VIEW_ENABLED）。
+            コードは残してあり、フラグを戻せばいつでも選べるようにできる */}
+        {ROUTE_CLASSIC_VIEW_ENABLED && (
+          <SegmentedControl
+            theme={theme}
+            value={routeUiMode}
+            onChange={changeRouteUiMode}
+            ariaLabel={translateUI('routeDisplayToggle', language)}
+            options={[
+              { value: 'board' as const, label: translateUI('routeViewBoard', language) },
+              { value: 'classic' as const, label: translateUI('routeViewClassic', language) },
+            ]}
+          />
+        )}
       </div>
 
-      {routeUiMode === 'board' && (
-        <RouteSwitchBoard
-          routeKeys={boardRouteKeys}
-          visibleRoutes={visibleRoutes}
-          highlightedRouteKeys={highlightedRouteKeys}
-          stationRouteKeys={stationRouteKeys}
-          routeColors={routeColors}
-          routeNames={routeNames}
-          theme={theme}
-          language={language}
-          onToggleRoute={onToggleRoute}
-          onSelectAllRoutes={onSelectAllRoutes}
-          onDeselectAllRoutes={onDeselectAllRoutes}
-          adjustRouteColorForTheme={adjustRouteColorForTheme}
-        />
-      )}
-
-      {routeUiMode === 'classic' && (<>
-      {/* ソート選択 */}
+      {/* 並び順。表示方式（ボード/一覧）に関わらず共通で効く */}
       <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.sm, alignItems: 'center' }}>
         <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>
           {translateUI('sortLabel', language)}
@@ -352,6 +352,25 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         />
       </div>
 
+      {(!ROUTE_CLASSIC_VIEW_ENABLED || routeUiMode === 'board') && (
+        <RouteSwitchBoard
+          routeKeys={boardRouteKeys}
+          visibleRoutes={visibleRoutes}
+          highlightedRouteKeys={highlightedRouteKeys}
+          stationRouteKeys={stationRouteKeys}
+          routeColors={routeColors}
+          routeNames={routeNames}
+          theme={theme}
+          language={language}
+          onToggleRoute={onToggleRoute}
+          onSelectAllRoutes={onSelectAllRoutes}
+          onDeselectAllRoutes={onDeselectAllRoutes}
+          adjustRouteColorForTheme={adjustRouteColorForTheme}
+        />
+      )}
+
+      {ROUTE_CLASSIC_VIEW_ENABLED && routeUiMode === 'classic' && (<>
+
       {/* 全表示/全非表示 */}
       <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.sm }}>
         <Button theme={theme} variant="positive" size="sm" onClick={onSelectAllRoutes} styleOverride={{ flex: 1 }}>
@@ -363,9 +382,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
       </div>
 
       {(() => {
-        let baseRoutes: RouteKey[] = sortMode === 'default'
-          ? [...routeOrder].filter(rk => visibleRoutesData.some(([k]) => k === rk))
-          : sortedVisibleRoutesData.map(([k]) => k as RouteKey);
+        let baseRoutes: RouteKey[] = sortedRouteKeys;
         // 出発/到着駅を通る路線を前にグループ化
         let dividerIndex = -1;
         if (stationRouteKeys && stationRouteKeys.size > 0) {

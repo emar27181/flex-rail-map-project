@@ -128,6 +128,23 @@
 - `node scripts/audit-design-tokens.mjs` のベタ書き件数: borderRadius 2→1、
   spacing 5→4（残りは `src/design/`・`src/v2/` の対象外ディレクトリのみ）
 
+### improve: 路線一覧の並び順（あいうえお順・近い順など）をボード表示にも適用し、従来の一覧表示は一旦オフに
+- `src/components/legend/LegendRouteList.tsx`, `tests/unit/components/LegendRouteList.test.tsx`
+- 「表示形式（ボード/従来の一覧）に関わらず並び順を切り替えられるように。
+  表示はボードだけでよく、一覧への切り替えは一旦オフでいい」という要望を受けた
+- これまで並び順（あいうえお順・色順・登録順・近い順）は従来の一覧表示専用の
+  ロジックで、ボード表示は常に「近い順」固定になっていた
+- ボード表示・従来の一覧のどちらに渡す路線キー一覧も `sortedRouteKeys` という
+  1つの計算に統一。並び順セレクタも表示方式の分岐の外に出し、常に効くようにした
+- 従来の一覧への切り替えは `ROUTE_CLASSIC_VIEW_ENABLED = false` という
+  真偽値1つで隠した。`showRouteToggleSection` と同じ、コードは削除せず
+  値を戻せばいつでも復活できる開発者向けの一時的な切り替え
+- あわせて「表示切替」ボタンの縦横比（100×44px、折り返しなし）を実測したが、
+  異常は見つからなかった
+- `tests/unit/components/LegendRouteList.test.tsx` に新規3件を追加:
+  従来の一覧への切り替えボタンが出ないこと、並び順セレクタは常に出ること、
+  あいうえお順に切り替えるとボード表示のチップ順が実際に変わることを固定した
+
 ## [2026-09-07] セッション（背景地図タイルのAPIキー必須化に対応）
 
 ### fix: 背景地図が「API KEY REQUIRED」の透かしだけになる問題を修正
