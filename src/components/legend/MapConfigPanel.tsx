@@ -5,6 +5,7 @@ import { translateUI } from '../../utils/translation';
 import type { Language } from '../../utils/translation';
 import Button from '../ui/atoms/Button';
 import TextArea from '../ui/atoms/TextArea';
+import type { LabelColorOverride } from '../../constants/ui';
 
 export type MapConfig = {
   version: 1;
@@ -37,6 +38,10 @@ export type MapConfig = {
   stationSizeScale?: number;
   /** 路線の線の太さ(px) */
   routeLineWidth?: number;
+  /** 所要時間ラベルの文字色・背景色・枠線色の個別カスタム（旧バージョンには無いため任意） */
+  travelTimeStyle?: LabelColorOverride;
+  /** 駅アイコンの文字色・背景色・枠線色の個別カスタム（旧バージョンには無いため任意） */
+  stationIconStyle?: LabelColorOverride;
 };
 
 type Props = {

@@ -8,7 +8,9 @@ import type { StationStats } from '../../data/stationStats';
 import MapConfigPanel from './MapConfigPanel';
 import type { MapConfig } from './MapConfigPanel';
 import Checkbox from '../ui/atoms/Checkbox';
-import { FS, TARGET, SEMANTIC, MAP_LABEL, ROUTE_LINE } from '../../constants/ui';
+import { FS, TARGET, SEMANTIC, MAP_LABEL, ROUTE_LINE, UNSET_COLOR_SWATCH } from '../../constants/ui';
+import type { LabelColorOverride } from '../../constants/ui';
+import TextField from '../ui/atoms/TextField';
 import RouteSwitchBoard from './RouteSwitchBoard';
 import Button from '../ui/atoms/Button';
 import SegmentedControl from '../ui/molecules/SegmentedControl';
@@ -113,6 +115,10 @@ interface LegendRouteListProps {
   onRouteLineWidthChange: (v: number) => void;
   travelTimeLabelMode: 'interval' | 'cumulative';
   onTravelTimeLabelModeChange: (v: 'interval' | 'cumulative') => void;
+  travelTimeStyle: LabelColorOverride;
+  onTravelTimeStyleChange: (v: LabelColorOverride) => void;
+  stationIconStyle: LabelColorOverride;
+  onStationIconStyleChange: (v: LabelColorOverride) => void;
 }
 
 const LegendRouteList: React.FC<LegendRouteListProps> = ({
@@ -194,6 +200,10 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onRouteLineWidthChange,
   travelTimeLabelMode,
   onTravelTimeLabelModeChange,
+  travelTimeStyle,
+  onTravelTimeStyleChange,
+  stationIconStyle,
+  onStationIconStyleChange,
 }) => {
   const colors = getThemeColors(theme);
   /**
@@ -224,6 +234,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   const [groupVizOpen,    setGroupVizOpen]    = useState(true);
   const [groupFilterOpen, setGroupFilterOpen] = useState(false);
   const [groupMapOpen,    setGroupMapOpen]    = useState(false);
+  const [groupDetailOpen, setGroupDetailOpen] = useState(false);
 
   useEffect(() => { if (heatmapEnabled) setGroupVizOpen(true); }, [heatmapEnabled]);
 
@@ -286,6 +297,48 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   );
   /** ボード表示に渡す並び順。表示方式によらず sortedRouteKeys をそのまま使う */
   const boardRouteKeys = sortedRouteKeys;
+
+  /**
+   * 所要時間ラベル・駅アイコンの色カスタム用の1グループ（文字色/背景色/枠線色 + リセット）。
+   * 未設定の項目はスウォッチに中立色を出すだけで、実際の描画には使わない
+   * （`UNSET_COLOR_SWATCH` は表示専用の値）。
+   */
+  const renderColorOverrideGroup = (
+    title: string,
+    style: LabelColorOverride,
+    onChange: (v: LabelColorOverride) => void,
+  ) => {
+    const hasOverride = Boolean(style.textColor || style.bgColor || style.borderColor);
+    const swatch = (label: string, value: string | undefined, onPick: (hex: string) => void) => (
+      <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: L.sp.xxs }}>
+        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{label}</span>
+        <TextField
+          theme={theme}
+          type="color"
+          value={value ?? UNSET_COLOR_SWATCH}
+          onChange={(e) => onPick(e.target.value)}
+          styleOverride={{ width: 36, height: 28, padding: L.sp.xxs, cursor: 'pointer' }}
+        />
+      </label>
+    );
+    return (
+      <div style={{ marginBottom: L.sp.md }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: L.sp.xs }}>
+          <span style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.text }}>{title}</span>
+          {hasOverride && (
+            <Button theme={theme} size="sm" variant="outline" onClick={() => onChange({})}>
+              {translateUI('styleReset', language)}
+            </Button>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: L.sp.md }}>
+          {swatch(translateUI('styleTextColor', language), style.textColor, (hex) => onChange({ ...style, textColor: hex }))}
+          {swatch(translateUI('styleBgColor', language), style.bgColor, (hex) => onChange({ ...style, bgColor: hex }))}
+          {swatch(translateUI('styleBorderColor', language), style.borderColor, (hex) => onChange({ ...style, borderColor: hex }))}
+        </div>
+      </div>
+    );
+  };
 
   const sectionHeader = (label: string, isOpen: boolean, onToggle: () => void) => (
     <div
@@ -723,6 +776,15 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   decreaseLabel={translateUI('decrease', language)}
                   increaseLabel={translateUI('increase', language)}
                 />
+              </div>
+            )}
+
+            {/* ── 詳細設定（所要時間・駅アイコンの配色） ── */}
+            {sectionHeader(translateUI('settingsGroupDetail', language), groupDetailOpen, () => setGroupDetailOpen(v => !v))}
+            {groupDetailOpen && (
+              <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
+                {renderColorOverrideGroup(translateUI('travelTimeStyleTitle', language), travelTimeStyle, onTravelTimeStyleChange)}
+                {renderColorOverrideGroup(translateUI('stationIconStyleTitle', language), stationIconStyle, onStationIconStyleChange)}
               </div>
             )}
 

@@ -8366,6 +8366,34 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "アイコンサイズ",
     english: "Icon size"
   },
+  settingsGroupDetail: {
+    japanese: "詳細設定",
+    english: "Detailed Settings"
+  },
+  travelTimeStyleTitle: {
+    japanese: "所要時間",
+    english: "Travel Time"
+  },
+  stationIconStyleTitle: {
+    japanese: "駅アイコン",
+    english: "Station Icons"
+  },
+  styleTextColor: {
+    japanese: "文字色",
+    english: "Text Color"
+  },
+  styleBgColor: {
+    japanese: "背景色",
+    english: "Background Color"
+  },
+  styleBorderColor: {
+    japanese: "枠線色",
+    english: "Border Color"
+  },
+  styleReset: {
+    japanese: "既定に戻す",
+    english: "Reset to default"
+  },
   // ── 設定保存・読込 ──
   configSaveLoad: {
     japanese: "設定の保存・読込",
@@ -8780,6 +8808,13 @@ export const uiChinese: Record<string, string> = {
   settingsGroupMap: "显示切换",
   settingsLabelSize: "标签大小",
   settingsIconSize: "图标大小",
+  settingsGroupDetail: "详细设置",
+  travelTimeStyleTitle: "所需时间",
+  stationIconStyleTitle: "车站图标",
+  styleTextColor: "文字颜色",
+  styleBgColor: "背景颜色",
+  styleBorderColor: "边框颜色",
+  styleReset: "恢复默认",
   configSaveLoad: "保存·读取设置",
   configExportDesc: "导出（当前显示设置）",
   configExportSave: "⬇ 保存JSON",
@@ -9071,6 +9106,13 @@ export const uiKorean: Record<string, string> = {
   settingsGroupMap: "표시 전환",
   settingsLabelSize: "레이블 크기",
   settingsIconSize: "아이콘 크기",
+  settingsGroupDetail: "상세 설정",
+  travelTimeStyleTitle: "소요 시간",
+  stationIconStyleTitle: "역 아이콘",
+  styleTextColor: "글자 색",
+  styleBgColor: "배경색",
+  styleBorderColor: "테두리 색",
+  styleReset: "기본값으로",
   configSaveLoad: "설정 저장·불러오기",
   configExportDesc: "내보내기（현재 표시 설정）",
   configExportSave: "⬇ JSON 저장",

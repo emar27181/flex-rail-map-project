@@ -2,6 +2,33 @@
 
 ## [2026-09-09] セッション（単体アイコンボタン専用の寸法規格を追加）
 
+### feat: 所要時間ラベル・駅アイコンの文字色/背景色/枠線色を個別カスタム可能に
+- `src/constants/ui.ts`（`LabelColorOverride` 型・`UNSET_COLOR_SWATCH` 追加）,
+  `src/utils/mapSizePersistence.ts`（保持関数追加）,
+  `src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`,
+  `src/components/legend/MapConfigPanel.tsx`, `src/utils/translation.ts`,
+  `tests/unit/utils/mapSizePersistence.test.ts`,
+  `tests/unit/components/LegendRouteList.test.tsx`
+- 「所要時間の色・駅アイコンの色を、文字/背景/枠線それぞれ個別にカスタムできるように」
+  という要望を受けた。従来は所要時間ラベルの色は常に路線色、駅アイコンの
+  背景・文字色も路線色ベースの自動計算（`filledLabelColors`）に固定されていた
+- 新設定パネルのセクション「詳細設定」（既定は閉じた状態）に、所要時間・
+  駅アイコンそれぞれ3つの色スウォッチ（文字色・背景色・枠線色）と
+  リセットボタンを追加。**すべて省略可能**で、未設定の項目はこれまでどおりの
+  自動配色（路線色ベース）のまま変わらない
+  - 色入力は新規アトムを増やさず、既存の `TextField` に `type="color"` を
+    渡すだけで対応（`noRawControls` テストが守る「アトム以外で `<input>` を
+    書かない」ルールに触れない）
+  - リセットは対象（所要時間/駅アイコン）ごとに個別。1項目でも設定していると
+    その対象だけボタンが出る
+- 保存は `stationSizeScale` 等と同じ `mapSizePersistence.ts` のパターンに
+  倣い、localStorage に永続化。設定のエクスポート/インポート（`MapConfig`）
+  にも追加した
+- Playwrightで実機確認: 駅アイコンの背景色を変更すると地図上の全駅ラベルの
+  色が即座に切り替わり、リセットボタンが該当グループにだけ表示されることを確認
+- `tests/unit/utils/mapSizePersistence.test.ts` に6件、
+  `tests/unit/components/LegendRouteList.test.tsx` に5件追加
+
 ### fix: 日本の輪郭より外（海側）に路線が見える問題を修正
 - `src/data/japanOutline.ts`, `tests/unit/data/japanOutline.test.ts`（新規）
 - 「線より外、海側に路線があることがある」という報告を受け、全路線・
