@@ -344,10 +344,10 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           onChange={setSortMode}
           ariaLabel={translateUI('sortLabel', language)}
           options={[
+            { value: 'distance' as SortMode, label: translateUI('sortNearby', language) },
             { value: 'name' as SortMode, label: translateUI('sortAlpha', language) },
             { value: 'color' as SortMode, label: translateUI('sortColor', language) },
             { value: 'default' as SortMode, label: translateUI('sortDefault', language) },
-            { value: 'distance' as SortMode, label: translateUI('sortNearby', language) },
           ]}
         />
       </div>
