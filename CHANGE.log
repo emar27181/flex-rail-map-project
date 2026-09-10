@@ -2,6 +2,16 @@
 
 ## [2026-09-10] セッション（配色カスタムを既定/黒/白の3択に変更）
 
+### fix: 配色カスタムの「既定」ラベルを「路線色」に変更
+- `src/utils/translation.ts`（`colorPresetDefault` キー）
+- 「既定というのは路線本来の色という意味で、黒が既定というわけではない」
+  という指摘を受けた。実装（内部ロジック）は元から「未設定=路線色ベースの
+  自動配色のまま」で正しく、ライト/ダーク両テーマで黒に固定されていない
+  ことをブラウザで再確認したが、ラベルが「既定」という抽象的な言葉だと
+  黒・白と並んだときに何を指すか誤解しやすかった
+- ラベルを日英中韓すべて「路線色」/"Route Color"/"线路颜色"/"노선 색" に
+  変更し、意味を直接示すようにした。内部の値・ロジックは変更なし
+
 ### improve: 所要時間・駅アイコンの配色カスタムを自由入力から既定/黒/白の3択に変更
 - `src/components/legend/LegendRouteList.tsx`, `src/constants/ui.ts`,
   `src/utils/translation.ts`, `tests/unit/components/LegendRouteList.test.tsx`

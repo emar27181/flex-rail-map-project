@@ -8395,8 +8395,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Reset to default"
   },
   colorPresetDefault: {
-    japanese: "既定",
-    english: "Default"
+    japanese: "路線色",
+    english: "Route Color"
   },
   colorPresetBlack: {
     japanese: "黒",
@@ -8827,7 +8827,7 @@ export const uiChinese: Record<string, string> = {
   styleBgColor: "背景颜色",
   styleBorderColor: "边框颜色",
   styleReset: "恢复默认",
-  colorPresetDefault: "默认",
+  colorPresetDefault: "线路颜色",
   colorPresetBlack: "黑色",
   colorPresetWhite: "白色",
   configSaveLoad: "保存·读取设置",
@@ -9128,7 +9128,7 @@ export const uiKorean: Record<string, string> = {
   styleBgColor: "배경색",
   styleBorderColor: "테두리 색",
   styleReset: "기본값으로",
-  colorPresetDefault: "기본",
+  colorPresetDefault: "노선 색",
   colorPresetBlack: "검정",
   colorPresetWhite: "흰색",
   configSaveLoad: "설정 저장·불러오기",
