@@ -138,14 +138,11 @@ export const ROUTE_LINE = {
  * 個別に上書きするための設定。すべて省略可能で、省略した項目は
  * これまでどおりの自動配色（路線色ベース）のまま変わらない。
  *
- * 「設定パネルでのカスタム色スウォッチの初期表示用」の値であって、
- * 未設定時に実際にこの色が使われるわけではない。
+ * 任意色ではなく「既定（路線色のまま）・黒・白」の3択に絞っている
+ * （設定パネル側で選択肢を作る際は `NEUTRAL.black` / `NEUTRAL.white` を使う）。
  */
 export interface LabelColorOverride {
   textColor?: string;
   bgColor?: string;
   borderColor?: string;
 }
-
-/** カスタム色が未設定のときにスウォッチへ表示する中立色（実際の描画には使わない） */
-export const UNSET_COLOR_SWATCH = '#888888';

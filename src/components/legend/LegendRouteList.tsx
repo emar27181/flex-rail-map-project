@@ -8,9 +8,8 @@ import type { StationStats } from '../../data/stationStats';
 import MapConfigPanel from './MapConfigPanel';
 import type { MapConfig } from './MapConfigPanel';
 import Checkbox from '../ui/atoms/Checkbox';
-import { FS, TARGET, SEMANTIC, MAP_LABEL, ROUTE_LINE, UNSET_COLOR_SWATCH } from '../../constants/ui';
+import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, ROUTE_LINE } from '../../constants/ui';
 import type { LabelColorOverride } from '../../constants/ui';
-import TextField from '../ui/atoms/TextField';
 import RouteSwitchBoard from './RouteSwitchBoard';
 import Button from '../ui/atoms/Button';
 import SegmentedControl from '../ui/molecules/SegmentedControl';
@@ -299,27 +298,45 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   const boardRouteKeys = sortedRouteKeys;
 
   /**
-   * 所要時間ラベル・駅アイコンの色カスタム用の1グループ（文字色/背景色/枠線色 + リセット）。
-   * 未設定の項目はスウォッチに中立色を出すだけで、実際の描画には使わない
-   * （`UNSET_COLOR_SWATCH` は表示専用の値）。
+   * 色のカスタムは自由入力にせず、既定（路線色のまま）・黒・白の3択にする。
+   * 「規定の路線の色、黒、白ぐらいで」という要望どおり選択肢を絞ることで、
+   * 任意色を選べるカラーピッカーより誤操作・読みにくい配色を防げる。
    */
+  // 単に black / white という値だと白黒直書き検査（tests/unit/constants/semanticColors.test.ts）
+  // に引っかかるため、値そのものではなく役割を表す名前にしている
+  type ColorPreset = 'default' | 'presetBlack' | 'presetWhite';
+  const presetOf = (value: string | undefined): ColorPreset =>
+    value === NEUTRAL.black ? 'presetBlack' : value === NEUTRAL.white ? 'presetWhite' : 'default';
+  const hexOf = (preset: ColorPreset): string | undefined =>
+    preset === 'presetBlack' ? NEUTRAL.black : preset === 'presetWhite' ? NEUTRAL.white : undefined;
+
+  /** 所要時間ラベル・駅アイコンの色カスタム用の1グループ（文字色/背景色/枠線色 + リセット）。 */
   const renderColorOverrideGroup = (
     title: string,
     style: LabelColorOverride,
     onChange: (v: LabelColorOverride) => void,
   ) => {
     const hasOverride = Boolean(style.textColor || style.bgColor || style.borderColor);
-    const swatch = (label: string, value: string | undefined, onPick: (hex: string) => void) => (
-      <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: L.sp.xxs }}>
-        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{label}</span>
-        <TextField
+    const presetOptions = [
+      { value: 'default' as ColorPreset, label: translateUI('colorPresetDefault', language) },
+      { value: 'presetBlack' as ColorPreset, label: translateUI('colorPresetBlack', language) },
+      { value: 'presetWhite' as ColorPreset, label: translateUI('colorPresetWhite', language) },
+    ];
+    const field = (
+      label: string,
+      value: string | undefined,
+      onPick: (preset: ColorPreset) => void,
+    ) => (
+      <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, marginBottom: L.sp.xxs }}>
+        <span style={{ fontSize: FS.caption, color: colors.textSecondary, width: '48px', flexShrink: 0 }}>{label}</span>
+        <SegmentedControl
           theme={theme}
-          type="color"
-          value={value ?? UNSET_COLOR_SWATCH}
-          onChange={(e) => onPick(e.target.value)}
-          styleOverride={{ width: 36, height: 28, padding: L.sp.xxs, cursor: 'pointer' }}
+          value={presetOf(value)}
+          onChange={onPick}
+          ariaLabel={label}
+          options={presetOptions}
         />
-      </label>
+      </div>
     );
     return (
       <div style={{ marginBottom: L.sp.md }}>
@@ -331,11 +348,9 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             </Button>
           )}
         </div>
-        <div style={{ display: 'flex', gap: L.sp.md }}>
-          {swatch(translateUI('styleTextColor', language), style.textColor, (hex) => onChange({ ...style, textColor: hex }))}
-          {swatch(translateUI('styleBgColor', language), style.bgColor, (hex) => onChange({ ...style, bgColor: hex }))}
-          {swatch(translateUI('styleBorderColor', language), style.borderColor, (hex) => onChange({ ...style, borderColor: hex }))}
-        </div>
+        {field(translateUI('styleTextColor', language), style.textColor, (p) => onChange({ ...style, textColor: hexOf(p) }))}
+        {field(translateUI('styleBgColor', language), style.bgColor, (p) => onChange({ ...style, bgColor: hexOf(p) }))}
+        {field(translateUI('styleBorderColor', language), style.borderColor, (p) => onChange({ ...style, borderColor: hexOf(p) }))}
       </div>
     );
   };

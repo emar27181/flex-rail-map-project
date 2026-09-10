@@ -8394,6 +8394,18 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "既定に戻す",
     english: "Reset to default"
   },
+  colorPresetDefault: {
+    japanese: "既定",
+    english: "Default"
+  },
+  colorPresetBlack: {
+    japanese: "黒",
+    english: "Black"
+  },
+  colorPresetWhite: {
+    japanese: "白",
+    english: "White"
+  },
   // ── 設定保存・読込 ──
   configSaveLoad: {
     japanese: "設定の保存・読込",
@@ -8815,6 +8827,9 @@ export const uiChinese: Record<string, string> = {
   styleBgColor: "背景颜色",
   styleBorderColor: "边框颜色",
   styleReset: "恢复默认",
+  colorPresetDefault: "默认",
+  colorPresetBlack: "黑色",
+  colorPresetWhite: "白色",
   configSaveLoad: "保存·读取设置",
   configExportDesc: "导出（当前显示设置）",
   configExportSave: "⬇ 保存JSON",
@@ -9113,6 +9128,9 @@ export const uiKorean: Record<string, string> = {
   styleBgColor: "배경색",
   styleBorderColor: "테두리 색",
   styleReset: "기본값으로",
+  colorPresetDefault: "기본",
+  colorPresetBlack: "검정",
+  colorPresetWhite: "흰색",
   configSaveLoad: "설정 저장·불러오기",
   configExportDesc: "내보내기（현재 표시 설정）",
   configExportSave: "⬇ JSON 저장",
