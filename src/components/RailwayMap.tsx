@@ -2327,9 +2327,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const circleSize = 13;
     const borderWidth = 1;
 
-    const bgColor = travelTimeStyle.bgColor ?? (theme === 'dark' ? 'rgba(40,40,40,0.9)' : alphaWhite(0.9));
     const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
-    const textColor = travelTimeStyle.textColor ?? color;
+    // 既定（背景色を「路線色」にしたとき）は、駅名ラベルと同じ
+    // filledLabelColors を使い、実際に路線色で塗った背景にする
+    // （以前は路線に関わらず常に中立なグレー/白の背景だったため、
+    // 「路線色を選んでも黒っぽいまま」に見えていた）
+    const { background: filledBg, text: filledText } = filledLabelColors(color, theme);
+    const bgColor = travelTimeStyle.bgColor ?? filledBg;
+    const textColor = travelTimeStyle.textColor ?? filledText;
     const borderColor = travelTimeStyle.borderColor ?? color;
     const timeNumber = Math.round(time);
 
