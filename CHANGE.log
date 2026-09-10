@@ -2,6 +2,20 @@
 
 ## [2026-09-10] セッション（配色カスタムを既定/黒/白の3択に変更）
 
+### improve: 配色プリセットのボタンに実際の色を示す丸スウォッチを追加
+- `src/components/ui/molecules/SegmentedControl.tsx`,
+  `src/components/legend/LegendRouteList.tsx`
+- 「色も軽くボタンで分かるように」という要望を受け、路線色/黒/白の
+  各ボタンにテキストだけでなく実際の色を示す小さな丸スウォッチを追加した
+- `SegmentedControl` の `label` を `string` から `React.ReactNode` に拡張
+  （既存の呼び出し箇所は文字列のままなので影響なし）。この1箇所を広げる
+  だけで済んだ
+- 「路線色」は路線ごとに変わるため単色では表せない。既存の `SEMANTIC`
+  トークン（出発=緑・primary=青・到着=赤）によるグラデーションで
+  「駅・路線ごとに変わる色」であることを示した。黒・白は
+  `NEUTRAL.black` / `NEUTRAL.white` をそのままスウォッチに使用
+- 新規の色トークンは追加せず、既存の `SEMANTIC` / `NEUTRAL` のみ使用
+
 ### fix: 配色カスタムの「既定」ラベルを「路線色」に変更
 - `src/utils/translation.ts`（`colorPresetDefault` キー）
 - 「既定というのは路線本来の色という意味で、黒が既定というわけではない」

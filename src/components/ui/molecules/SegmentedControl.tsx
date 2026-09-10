@@ -14,7 +14,8 @@ import { L } from '../../legend/legendStyles';
 
 export interface SegmentedOption<T extends string> {
   value: T;
-  label: string;
+  /** 通常は文字列。色スウォッチ付きなど装飾が要る場合だけ ReactNode を渡す */
+  label: React.ReactNode;
 }
 
 interface SegmentedControlProps<T extends string> {

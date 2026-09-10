@@ -310,6 +310,31 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   const hexOf = (preset: ColorPreset): string | undefined =>
     preset === 'presetBlack' ? NEUTRAL.black : preset === 'presetWhite' ? NEUTRAL.white : undefined;
 
+  /** ボタンにも実際の色が一目で分かるよう添える小さな丸スウォッチ */
+  const presetDot = (background: string) => (
+    <span
+      aria-hidden
+      style={{
+        display: 'inline-block',
+        width: 10,
+        height: 10,
+        borderRadius: L.r.pill,
+        background,
+        border: `1px solid ${colors.border}`,
+        flexShrink: 0,
+      }}
+    />
+  );
+  const presetLabel = (dotBackground: string, text: string) => (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: L.sp.xxs }}>
+      {presetDot(dotBackground)}
+      <span>{text}</span>
+    </span>
+  );
+  // 「路線色」は路線ごとに変わるため単色では表せない。複数色のグラデーションで
+  // 「駅・路線ごとに変わる」ことを示す（既存のSEMANTICトークンのみ使用）
+  const ROUTE_COLOR_DOT_BG = `linear-gradient(135deg, ${SEMANTIC.departure}, ${SEMANTIC.primary}, ${SEMANTIC.arrival})`;
+
   /** 所要時間ラベル・駅アイコンの色カスタム用の1グループ（文字色/背景色/枠線色 + リセット）。 */
   const renderColorOverrideGroup = (
     title: string,
@@ -318,9 +343,9 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   ) => {
     const hasOverride = Boolean(style.textColor || style.bgColor || style.borderColor);
     const presetOptions = [
-      { value: 'default' as ColorPreset, label: translateUI('colorPresetDefault', language) },
-      { value: 'presetBlack' as ColorPreset, label: translateUI('colorPresetBlack', language) },
-      { value: 'presetWhite' as ColorPreset, label: translateUI('colorPresetWhite', language) },
+      { value: 'default' as ColorPreset, label: presetLabel(ROUTE_COLOR_DOT_BG, translateUI('colorPresetDefault', language)) },
+      { value: 'presetBlack' as ColorPreset, label: presetLabel(NEUTRAL.black, translateUI('colorPresetBlack', language)) },
+      { value: 'presetWhite' as ColorPreset, label: presetLabel(NEUTRAL.white, translateUI('colorPresetWhite', language)) },
     ];
     const field = (
       label: string,
