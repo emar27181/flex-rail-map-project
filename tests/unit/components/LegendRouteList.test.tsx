@@ -7,11 +7,12 @@
  * - stationSizeScale.toFixed(1) が undefined で呼ばれないことを確認
  */
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import LegendRouteList from '../../../src/components/legend/LegendRouteList';
 import type { RouteKey } from '../../../src/data/routes';
 import type { MapConfig } from '../../../src/components/legend/MapConfigPanel';
+import { NEUTRAL } from '../../../src/constants/ui';
 
 // Leaflet 非依存コンポーネントなのでモック不要
 // ただし ThemeContext だけ必要
@@ -111,6 +112,10 @@ const minimalProps = {
   onStationSizeScaleChange: noopNum,
   travelTimeLabelMode: 'interval' as const,
   onTravelTimeLabelModeChange: noop,
+  travelTimeStyle: {},
+  onTravelTimeStyleChange: noop,
+  stationIconStyle: {},
+  onStationIconStyleChange: noop,
 };
 
 describe('LegendRouteList', () => {
@@ -176,5 +181,87 @@ describe('路線一覧の表示方式（ボード / 従来の一覧）と並び�
 
     // あいうえお順: 「あ路線」(routeA) が「ん路線」(routeB) より先
     expect(chipOrder()).toEqual(['routeA', 'routeB']);
+  });
+});
+
+describe('詳細設定（所要時間・駅アイコンの配色カスタム）', () => {
+  it('見出しを開くと文字色・背景色・枠線色の3択（既定/黒/白）が両方の対象に出る', () => {
+    render(<LegendRouteList {...minimalProps} />);
+    fireEvent.click(screen.getByText('settingsGroupDetail'));
+
+    expect(screen.getByText('travelTimeStyleTitle')).toBeInTheDocument();
+    expect(screen.getByText('stationIconStyleTitle')).toBeInTheDocument();
+    expect(screen.getAllByText('styleTextColor')).toHaveLength(2);
+    expect(screen.getAllByText('styleBgColor')).toHaveLength(2);
+    expect(screen.getAllByText('styleBorderColor')).toHaveLength(2);
+
+    // 2対象 × (文字色・背景色・枠線色) の6行、各行に既定/黒/白の3択
+    expect(screen.getAllByText('colorPresetDefault')).toHaveLength(6);
+    expect(screen.getAllByText('colorPresetBlack')).toHaveLength(6);
+    expect(screen.getAllByText('colorPresetWhite')).toHaveLength(6);
+
+    // 任意色を選べるカラーピッカーは使わない（既定/黒/白の3択に絞る要望のため）
+    expect(document.querySelectorAll('input[type="color"]')).toHaveLength(0);
+  });
+
+  it('未設定のときはリセットボタンを出さない', () => {
+    render(<LegendRouteList {...minimalProps} travelTimeStyle={{}} stationIconStyle={{}} />);
+    fireEvent.click(screen.getByText('settingsGroupDetail'));
+    expect(screen.queryByText('styleReset')).not.toBeInTheDocument();
+  });
+
+  it('1項目でも設定しているとその対象だけリセットボタンが出る', () => {
+    render(<LegendRouteList {...minimalProps} travelTimeStyle={{ textColor: '#ff0000' }} stationIconStyle={{}} />);
+    fireEvent.click(screen.getByText('settingsGroupDetail'));
+    expect(screen.getAllByText('styleReset')).toHaveLength(1);
+  });
+
+  it('「黒」を選ぶと、その項目だけを黒(NEUTRAL.black)にしたオブジェクトでコールバックが呼ばれる', () => {
+    const onTravelTimeStyleChange = vi.fn();
+    render(
+      <LegendRouteList
+        {...minimalProps}
+        travelTimeStyle={{ bgColor: '#000000' }}
+        onTravelTimeStyleChange={onTravelTimeStyleChange}
+      />
+    );
+    fireEvent.click(screen.getByText('settingsGroupDetail'));
+    // 所要時間(1つ目)の文字色の行だけを対象にする
+    const textColorGroup = screen.getAllByRole('group', { name: 'styleTextColor' })[0];
+    fireEvent.click(within(textColorGroup).getByText('colorPresetBlack'));
+    expect(onTravelTimeStyleChange).toHaveBeenCalledWith({ bgColor: '#000000', textColor: NEUTRAL.black });
+  });
+
+  it('「白」を選んでから「既定」に戻すと、その項目が未設定に戻る', () => {
+    const onStationIconStyleChange = vi.fn();
+    render(
+      <LegendRouteList
+        {...minimalProps}
+        stationIconStyle={{ borderColor: '#ff0000' }}
+        onStationIconStyleChange={onStationIconStyleChange}
+      />
+    );
+    fireEvent.click(screen.getByText('settingsGroupDetail'));
+    // 駅アイコン(2つ目)の背景色の行だけを対象にする
+    const bgColorGroup = screen.getAllByRole('group', { name: 'styleBgColor' })[1];
+    fireEvent.click(within(bgColorGroup).getByText('colorPresetWhite'));
+    expect(onStationIconStyleChange).toHaveBeenLastCalledWith({ borderColor: '#ff0000', bgColor: NEUTRAL.white });
+
+    fireEvent.click(within(bgColorGroup).getByText('colorPresetDefault'));
+    expect(onStationIconStyleChange).toHaveBeenLastCalledWith({ borderColor: '#ff0000', bgColor: undefined });
+  });
+
+  it('リセットボタンを押すと空オブジェクトでコールバックが呼ばれる（自動配色に戻る）', () => {
+    const onStationIconStyleChange = vi.fn();
+    render(
+      <LegendRouteList
+        {...minimalProps}
+        stationIconStyle={{ textColor: '#ff0000', borderColor: '#00ff00' }}
+        onStationIconStyleChange={onStationIconStyleChange}
+      />
+    );
+    fireEvent.click(screen.getByText('settingsGroupDetail'));
+    fireEvent.click(screen.getByText('styleReset'));
+    expect(onStationIconStyleChange).toHaveBeenCalledWith({});
   });
 });

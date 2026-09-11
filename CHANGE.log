@@ -1,6 +1,101 @@
 # CHANGE LOG
 
+## [2026-09-10] セッション（配色カスタムを既定/黒/白の3択に変更）
+
+### fix: 所要時間ラベルの背景を「路線色」選択時に実際の路線色にする
+- `src/components/RailwayMap.tsx`（`createTimeIcon`）
+- 「所要時間の背景で路線色を選んでも黒っぽく表示される」という報告を受けた
+- 所要時間バッジの背景は元々（今回の配色カスタム機能より前から）路線に
+  関わらず常に中立なグレー（ダーク時 `rgba(40,40,40,0.9)`）/ 白（ライト時）
+  固定で、文字・枠線だけが路線色だった。配色カスタムで「路線色」という
+  選択肢とスウォッチを追加したことで、この既定の背景が路線色を反映して
+  いないことが視覚的に目立つようになっていた
+- 駅名ラベルと同じ `filledLabelColors(routeColor, theme)` を背景・文字色の
+  既定値に使うよう変更（枠線は従来どおり路線色そのまま）。ダークモードでは
+  路線色を必要最小限だけ暗くしてコントラストを確保する、既存の駅ラベルと
+  同じ規則がそのまま適用される
+- 実データで検証（山手線緑・中央線オレンジ・銀座線黄・東急東横線赤・
+  京急線赤の5路線 × 両テーマ）: いずれも路線ごとに異なる背景色になり、
+  文字色も自動でコントラストを確保することを確認
+
+### improve: 配色プリセットのボタンに実際の色を示す丸スウォッチを追加
+- `src/components/ui/molecules/SegmentedControl.tsx`,
+  `src/components/legend/LegendRouteList.tsx`
+- 「色も軽くボタンで分かるように」という要望を受け、路線色/黒/白の
+  各ボタンにテキストだけでなく実際の色を示す小さな丸スウォッチを追加した
+- `SegmentedControl` の `label` を `string` から `React.ReactNode` に拡張
+  （既存の呼び出し箇所は文字列のままなので影響なし）。この1箇所を広げる
+  だけで済んだ
+- 「路線色」は路線ごとに変わるため単色では表せない。既存の `SEMANTIC`
+  トークン（出発=緑・primary=青・到着=赤）によるグラデーションで
+  「駅・路線ごとに変わる色」であることを示した。黒・白は
+  `NEUTRAL.black` / `NEUTRAL.white` をそのままスウォッチに使用
+- 新規の色トークンは追加せず、既存の `SEMANTIC` / `NEUTRAL` のみ使用
+
+### fix: 配色カスタムの「既定」ラベルを「路線色」に変更
+- `src/utils/translation.ts`（`colorPresetDefault` キー）
+- 「既定というのは路線本来の色という意味で、黒が既定というわけではない」
+  という指摘を受けた。実装（内部ロジック）は元から「未設定=路線色ベースの
+  自動配色のまま」で正しく、ライト/ダーク両テーマで黒に固定されていない
+  ことをブラウザで再確認したが、ラベルが「既定」という抽象的な言葉だと
+  黒・白と並んだときに何を指すか誤解しやすかった
+- ラベルを日英中韓すべて「路線色」/"Route Color"/"线路颜色"/"노선 색" に
+  変更し、意味を直接示すようにした。内部の値・ロジックは変更なし
+
+### improve: 所要時間・駅アイコンの配色カスタムを自由入力から既定/黒/白の3択に変更
+- `src/components/legend/LegendRouteList.tsx`, `src/constants/ui.ts`,
+  `src/utils/translation.ts`, `tests/unit/components/LegendRouteList.test.tsx`
+- 直前のセッションで追加した「所要時間・駅アイコンの色を個別カスタム」機能
+  （`<input type="color">` による任意色ピッカー）について、
+  「色変更は規定の路線の色、黒、白ぐらいで」という要望を受けた
+- カラーピッカーを廃止し、各項目（文字色/背景色/枠線色）を
+  `SegmentedControl`（既定/黒/白の3択）に置き換えた。既定=路線色ベースの
+  自動配色のまま、黒/白は `NEUTRAL.black` / `NEUTRAL.white` を使う
+  （任意色を廃したことで、白黒直書き検査 `tests/unit/constants/semanticColors.test.ts`
+  にも自然に適合する）
+  - 実装上の注意点として、内部の選択値そのものを `'black'` / `'white'`
+    という文字列にすると、この白黒直書き検査（クォート付きの `'black'`/`'white'`
+    をベタ書きとして検出する）に引っかかる。値の意味は保ったまま
+    `'presetBlack'` / `'presetWhite'` という名前にして回避した
+- 保存形式（`LabelColorOverride` / localStorage）・エクスポート/インポートは
+  変更なし。保存されている値がどんな色でも `presetOf()` で最も近い選択肢に
+  正規化して表示する
+- 新規アトムは増やさず、既存の `SegmentedControl`（並び順・表示方式の
+  切り替えで既に使っているもの）をそのまま再利用した
+- Playwrightで実機確認: 駅アイコンの背景色を「黒」にすると地図上の全駅
+  ラベルが黒くなり、リセットボタンが該当グループにだけ出ることを確認
+- `tests/unit/components/LegendRouteList.test.tsx` のカラーピッカー前提の
+  テストを3択UI向けに書き直し（既定/黒/白 のクリックで正しい値に切り替わる
+  ことを検証)
+
 ## [2026-09-09] セッション（単体アイコンボタン専用の寸法規格を追加）
+
+### feat: 所要時間ラベル・駅アイコンの文字色/背景色/枠線色を個別カスタム可能に
+- `src/constants/ui.ts`（`LabelColorOverride` 型・`UNSET_COLOR_SWATCH` 追加）,
+  `src/utils/mapSizePersistence.ts`（保持関数追加）,
+  `src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`,
+  `src/components/legend/MapConfigPanel.tsx`, `src/utils/translation.ts`,
+  `tests/unit/utils/mapSizePersistence.test.ts`,
+  `tests/unit/components/LegendRouteList.test.tsx`
+- 「所要時間の色・駅アイコンの色を、文字/背景/枠線それぞれ個別にカスタムできるように」
+  という要望を受けた。従来は所要時間ラベルの色は常に路線色、駅アイコンの
+  背景・文字色も路線色ベースの自動計算（`filledLabelColors`）に固定されていた
+- 新設定パネルのセクション「詳細設定」（既定は閉じた状態）に、所要時間・
+  駅アイコンそれぞれ3つの色スウォッチ（文字色・背景色・枠線色）と
+  リセットボタンを追加。**すべて省略可能**で、未設定の項目はこれまでどおりの
+  自動配色（路線色ベース）のまま変わらない
+  - 色入力は新規アトムを増やさず、既存の `TextField` に `type="color"` を
+    渡すだけで対応（`noRawControls` テストが守る「アトム以外で `<input>` を
+    書かない」ルールに触れない）
+  - リセットは対象（所要時間/駅アイコン）ごとに個別。1項目でも設定していると
+    その対象だけボタンが出る
+- 保存は `stationSizeScale` 等と同じ `mapSizePersistence.ts` のパターンに
+  倣い、localStorage に永続化。設定のエクスポート/インポート（`MapConfig`）
+  にも追加した
+- Playwrightで実機確認: 駅アイコンの背景色を変更すると地図上の全駅ラベルの
+  色が即座に切り替わり、リセットボタンが該当グループにだけ表示されることを確認
+- `tests/unit/utils/mapSizePersistence.test.ts` に6件、
+  `tests/unit/components/LegendRouteList.test.tsx` に5件追加
 
 ### fix: 日本の輪郭より外（海側）に路線が見える問題を修正
 - `src/data/japanOutline.ts`, `tests/unit/data/japanOutline.test.ts`（新規）

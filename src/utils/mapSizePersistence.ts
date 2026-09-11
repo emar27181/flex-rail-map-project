@@ -9,9 +9,12 @@
  * （プライベートブラウズや容量超過で localStorage が例外を投げる）。
  */
 import { MAP_LABEL, ROUTE_LINE } from '../constants/ui';
+import type { LabelColorOverride } from '../constants/ui';
 
 export const STATION_SIZE_SCALE_KEY = 'frm-station-size-scale';
 export const ROUTE_LINE_WIDTH_KEY = 'frm-route-line-width';
+export const TRAVEL_TIME_STYLE_KEY = 'frm-travel-time-style';
+export const STATION_ICON_STYLE_KEY = 'frm-station-icon-style';
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
@@ -50,3 +53,42 @@ export const getInitialRouteLineWidth = (): number =>
 
 export const persistRouteLineWidth = (width: number): void =>
   writeNumber(ROUTE_LINE_WIDTH_KEY, width);
+
+/** 保存値が壊れていても未設定（自動配色）で立ち上がるようにする */
+const readColorOverride = (key: string): LabelColorOverride => {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (typeof parsed !== 'object' || parsed === null) return {};
+    const out: LabelColorOverride = {};
+    if (typeof parsed.textColor === 'string') out.textColor = parsed.textColor;
+    if (typeof parsed.bgColor === 'string') out.bgColor = parsed.bgColor;
+    if (typeof parsed.borderColor === 'string') out.borderColor = parsed.borderColor;
+    return out;
+  } catch {
+    return {};
+  }
+};
+
+const writeColorOverride = (key: string, value: LabelColorOverride): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // 保存できなくても表示は続ける
+  }
+};
+
+export const getInitialTravelTimeStyle = (): LabelColorOverride =>
+  readColorOverride(TRAVEL_TIME_STYLE_KEY);
+
+export const persistTravelTimeStyle = (value: LabelColorOverride): void =>
+  writeColorOverride(TRAVEL_TIME_STYLE_KEY, value);
+
+export const getInitialStationIconStyle = (): LabelColorOverride =>
+  readColorOverride(STATION_ICON_STYLE_KEY);
+
+export const persistStationIconStyle = (value: LabelColorOverride): void =>
+  writeColorOverride(STATION_ICON_STYLE_KEY, value);
