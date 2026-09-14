@@ -2,6 +2,22 @@
 
 ## [2026-09-14] セッション（地図の2本指回転・陸の色分け・FABボタン縮小）
 
+### feat: 現在地マーカーに今向いている方向の矢印を表示
+- `src/components/RailwayMap.tsx`
+- 「今向いてる方向とかも出せるように、位置情報で」という要望を受けた
+- 新しいセンサーAPI（コンパス等）は使わず、既に取得している位置情報
+  （`GeolocationCoordinates.heading`、GPSの移動方向から求まる）だけを使う。
+  端末が静止している間や対応していない環境では `heading` が `null` になる
+  仕様のため、その場合はこれまでどおり点だけを表示し、矢印は出さない
+  （古い向きのまま表示され続けることも無いようにトラッキング停止時は
+  向きの状態もリセットする）
+- 現在地マーカーの見た目を、点(11px)だけの表示から、点の周りに向きを示す
+  半透明の矢印を重ねられるよう36pxのコンテナに変更。矢印は`transform:rotate()`
+  で向きに合わせて回転させる（0度=北を上にした地図上の向き）
+- 実機での矢印表示自体は確認できていないが、`navigator.geolocation.watchPosition`
+  をモックしてheading値を流し込み、DOM上に正しい回転角（`rotate(135deg)`等）が
+  適用され、地図上で対応する向きに矢印が表示されることをPlaywrightで確認した
+
 ### feat: ひらがな読みデータの無い駅（9割以上）もひらがな検索でヒットするように
 - `src/utils/stationReadings.ts`, `src/components/StationSelector.tsx`,
   `tests/unit/utils/stationReadings.test.ts`（新規）

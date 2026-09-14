@@ -360,6 +360,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 現在地表示
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   /**
+   * 現在向いている方向（度、0=北、時計回り）。
+   * GPSの位置情報だけから求める（`GeolocationCoordinates.heading`）。
+   * 移動していないと常に null になる仕様（ブラウザ側の制約）で、
+   * その場合は方向を示す矢印を出さず、現在地の点だけ表示する。
+   */
+  const [userHeading, setUserHeading] = useState<number | null>(null);
+  /**
    * 降車駅アラーム。
    *
    * 遅延しているとき時刻表の「◯分後に到着」は当てにならないので、
@@ -437,8 +444,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const id = navigator.geolocation.watchPosition(
       (pos) => {
         setLocationError(null);
-        const { latitude, longitude } = pos.coords;
+        const { latitude, longitude, heading } = pos.coords;
         setUserLocation([latitude, longitude]);
+        // heading は静止中や対応端末以外では null になる。前回値は保持せず、
+        // 取れなくなったら矢印も消す（古い向きのまま表示され続けるのを防ぐ）
+        setUserHeading(heading !== null && !Number.isNaN(heading) ? heading : null);
 
         const now = Date.now();
         const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: pos.timestamp };
@@ -3385,6 +3395,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       }
       setIsLocating(false);
       setUserLocation(null);
+      setUserHeading(null);
       isFirstPositionRef.current = true;
       return;
     }
@@ -3398,8 +3409,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     const id = navigator.geolocation.watchPosition(
       (position) => {
-        const { latitude, longitude } = position.coords;
+        const { latitude, longitude, heading } = position.coords;
         setUserLocation([latitude, longitude]);
+        setUserHeading(heading !== null && !Number.isNaN(heading) ? heading : null);
 
         const now = Date.now();
         const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: position.timestamp };
@@ -3454,6 +3466,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         }
         setIsLocating(false);
         setUserLocation(null);
+        setUserHeading(null);
         isFirstPositionRef.current = true;
 
         const messages: Record<string, Record<Language, string>> = {
@@ -3484,19 +3497,30 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const userLocationIcon = useMemo(() => {
     if (!MapComponents?.DivIcon || !userLocation) return null;
     const { DivIcon } = MapComponents;
+    // 向き（userHeading）が取れているときだけ、進行方向を示す矢印を点の上に重ねる。
+    // 静止中は heading が null になる仕様のため、そのときは従来どおり点だけ表示する
+    const headingCone = userHeading !== null
+      ? `<div style="position:absolute;left:0;top:0;width:36px;height:36px;transform:rotate(${userHeading}deg);">
+           <div style="position:absolute;left:13px;top:16px;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:14px solid rgba(66,133,244,0.45);"></div>
+         </div>`
+      : '';
     return new DivIcon({
-      html: `<div style="
-        width: 11px; height: 11px;
-        background: #4285F4;
-        border: 2px solid white;
-        border-radius: 50%;
-        box-shadow: 0 0 0 1px #4285F4, 0 1px 4px rgba(0,0,0,0.3);
-      "></div>`,
+      html: `<div style="position:relative;width:36px;height:36px;">
+        ${headingCone}
+        <div style="
+          position:absolute; left:12.5px; top:12.5px;
+          width: 11px; height: 11px;
+          background: #4285F4;
+          border: 2px solid white;
+          border-radius: 50%;
+          box-shadow: 0 0 0 1px #4285F4, 0 1px 4px rgba(0,0,0,0.3);
+        "></div>
+      </div>`,
       className: 'user-location-marker',
-      iconSize: [11, 11],
-      iconAnchor: [5, 5]
+      iconSize: [36, 36],
+      iconAnchor: [18, 18]
     });
-  }, [MapComponents, userLocation]);
+  }, [MapComponents, userLocation, userHeading]);
 
   /**
    * 同じ区間を走る路線の索引。
@@ -4951,6 +4975,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   position={userLocation}
                   icon={userLocationIcon}
                   zIndexOffset={10000}
+                  interactive={false}
                 />
               )}
             </MapContainer>
