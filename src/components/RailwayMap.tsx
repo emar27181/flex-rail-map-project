@@ -4781,7 +4781,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   key={`japan-outline-${i}`}
                   positions={points}
                   pathOptions={{
-                    fill: false,
+                    fill: true,
+                    // 陸を白でごく薄く塗るだけで海（地図の下地色）と見分けられるようにする。
+                    // ライトモードは下地（#ddd 相当）が既に明るくヘッドルームが小さいため、
+                    // 同じ見え方にするには濃いめの割合が必要（ダーク0.08 / ライト0.35）
+                    fillColor: NEUTRAL.white,
+                    fillOpacity: theme === 'dark' ? 0.08 : 0.35,
                     color: theme === 'dark' ? alphaWhite(0.35) : alphaBlack(0.25),
                     weight: JAPAN_OUTLINE_WEIGHT,
                     interactive: false,
