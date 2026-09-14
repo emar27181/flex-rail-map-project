@@ -16,20 +16,25 @@ import { X } from 'lucide-react';
 import { getThemeColors } from '../contexts/ThemeContext';
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
-import { CONTROL_SIZE } from './ui/atoms/controlSize';
+import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
 import { L } from './legend/legendStyles';
 
 // ── 寸法定数 ─────────────────────────────────────────────────────────
 
 /**
- * フローティングボタンの大きさ。
- * 地図の上で指で押すものなので md（44px）。
- * 高さの実値は controlSize が持つ（ここで px を書かない）。
+ * フローティングボタンの文字・余白・角丸の基準。実際の高さはこれではなく
+ * `BTN_H` を使う（地図の隅の丸ボタンと合わせて縦を詰めたため）。
  */
 const PANEL_BUTTON_SIZE = 'md' as const;
 
-/** 上のポップオーバーを置く位置の計算に使うボタンの高さ */
-const BTN_H = CONTROL_SIZE[PANEL_BUTTON_SIZE].minHeight;
+/**
+ * ボタンの実際の高さ。地図右上のフルスクリーン/言語/テーマの各ボタンと
+ * 同じ `FLOATING_ICON_BUTTON_SIZE.md`(36px) に揃える。
+ * 以前は `CONTROL_SIZE.md`(44px) を使っており、他の地図隅ボタン(36px)より
+ * 縦に大きく見えていた（他は単体で浮かぶアイコンボタン専用の尺度を使う一方、
+ * ここだけ「同じ行に並ぶ部品用」の `CONTROL_SIZE` を使っていたのが原因）。
+ */
+const BTN_H = FLOATING_ICON_BUTTON_SIZE.md;
 
 /** ボタンの最小幅（アイコンなし・テキストのみなので小さめ） */
 const BTN_MIN_W = 0;
@@ -291,6 +296,8 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
                 // 開いているときは variant の塗りをそのまま使う
                 // （ここで backgroundColor: undefined を渡すと塗りを消してしまう）
                 ...(isActive ? {} : { backgroundColor: colors.glassButton }),
+                // 地図隅の丸ボタン群と高さを揃える（BTN_H を参照）
+                minHeight: BTN_H,
                 backdropFilter: isActive ? 'none' : 'blur(8px)',
                 WebkitBackdropFilter: isActive ? 'none' : 'blur(8px)',
                 fontWeight: 'bold',
