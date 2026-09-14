@@ -4734,7 +4734,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               // leaflet-rotate が追加するオプション（react-leaflet の型定義には無いため
               // 個別にキャストする）。2本指のタッチジェスチャーで地図を回転できるようにする。
               // rotateControl は既定のUI矢印ボタンを出す設定だが、自前のUIと重複するため無効化
-              {...({ rotate: true, touchRotate: true, rotateControl: false } as any)}
+              {...({ rotate: true, touchRotate: true, rotateControl: false, zoomAnimation: false } as any)}
             >
               <ZoomControl position="bottomright" />
               <MapEvents />
