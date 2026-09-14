@@ -2702,6 +2702,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         const { DivIcon } = leaflet;
         const canvasRenderer = leaflet.canvas({ padding: 0.5 });
 
+        // leaflet-rotate はグローバルな `L`（従来のscriptタグ読み込み前提）に
+        // プロトタイプ拡張を行う昔ながらのLeafletプラグイン形式のため、
+        // バンドラー経由で読み込んだ leaflet モジュールを window.L に橋渡しする。
+        // react-leaflet も同じ leaflet モジュールの単一インスタンスを使うため、
+        // ここで拡張したクラス（L.Map・L.Marker 等）がそのまま反映される
+        if (!(window as any).L) {
+          (window as any).L = leaflet;
+        }
+        await import('leaflet-rotate');
+
         if (mounted) {
           setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, CircleMarker, Circle, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip, canvasRenderer });
           setIsClient(true);
@@ -4721,6 +4731,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               scrollWheelZoom={true}
               zoomControl={false}
               ref={mapRef}
+              // leaflet-rotate が追加するオプション（react-leaflet の型定義には無いため
+              // 個別にキャストする）。2本指のタッチジェスチャーで地図を回転できるようにする。
+              // rotateControl は既定のUI矢印ボタンを出す設定だが、自前のUIと重複するため無効化
+              {...({ rotate: true, touchRotate: true, rotateControl: false } as any)}
             >
               <ZoomControl position="bottomright" />
               <MapEvents />
