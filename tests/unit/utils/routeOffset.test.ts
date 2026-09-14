@@ -56,6 +56,43 @@ describe('buildCorridorRoutes', () => {
     expect(index.get(corridorKey('品川', '大井町'))).toEqual(['a']);
     expect(index.get(corridorKey('品川', '大崎'))).toEqual(['b']);
   });
+
+  it('停車パターンの粒度が違っても、間の駅を挟んで同じ2駅を通る区間は共用とみなす', () => {
+    // 東海道線(横浜→戸塚を直通)と横須賀線(横浜→保土ケ谷→東戸塚→戸塚)のように、
+    // 隣接する駅名の組がそのままでは一致しないケース
+    const index = buildCorridorRoutes([
+      ['tokaido', st('横浜', '戸塚', '大船')],
+      ['yokosuka', st('横浜', '保土ケ谷', '東戸塚', '戸塚', '大船')],
+    ]);
+    // 粗い側(東海道線)の区間には、細かい側(横須賀線)が共用として加わる
+    expect(index.get(corridorKey('横浜', '戸塚'))).toEqual(['tokaido', 'yokosuka']);
+    // 細かい側(横須賀線)の各区間にも、粗い側(東海道線)が共用として加わる
+    expect(index.get(corridorKey('横浜', '保土ケ谷'))).toEqual(['yokosuka', 'tokaido']);
+    expect(index.get(corridorKey('保土ケ谷', '東戸塚'))).toEqual(['yokosuka', 'tokaido']);
+    expect(index.get(corridorKey('東戸塚', '戸塚'))).toEqual(['yokosuka', 'tokaido']);
+    // 隣接一致ですでに拾える区間は重複せず1回だけ数える
+    expect(index.get(corridorKey('戸塚', '大船'))).toEqual(['tokaido', 'yokosuka']);
+  });
+
+  it('間に挟む駅数が上限を超える場合は共用とみなさない（無関係な同名駅の誤検出防止）', () => {
+    const longMiddle = Array.from({ length: 20 }, (_, i) => `中間${i}`);
+    const index = buildCorridorRoutes([
+      ['a', st('起点', '終点')],
+      ['b', st('起点', ...longMiddle, '終点')],
+    ]);
+    expect(index.get(corridorKey('起点', '終点'))).toEqual(['a']);
+  });
+
+  it('上り・下りのように並び順が逆でも、間に挟む駅を正しく共用区間とみなす', () => {
+    // bの定義がY→Z→Xの順（aとは逆向き）でも、ZはX・Yの間にある駅として扱われる
+    const index = buildCorridorRoutes([
+      ['a', st('X', 'Y')],
+      ['b', st('Y', 'Z', 'X')],
+    ]);
+    expect(index.get(corridorKey('X', 'Y'))).toEqual(['a', 'b']);
+    expect(index.get(corridorKey('Y', 'Z'))).toEqual(['b', 'a']);
+    expect(index.get(corridorKey('Z', 'X'))).toEqual(['b', 'a']);
+  });
 });
 
 describe('offsetRank', () => {
