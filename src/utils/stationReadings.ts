@@ -12,6 +12,109 @@ export function normalizeToHiragana(str: string): string {
     .toLowerCase();
 }
 
+/**
+ * ひらがな → ローマ字 の変換表（ヘボン式ベース、簡略）。
+ *
+ * `stationReadings` は約6,000駅中586駅分しか読みを持たない（残りは実際の
+ * 読みデータが無い）。かといって漢字→ひらがなの自動生成は精度が低く
+ * （我孫子=あびこ のような読み方の推測は不可能）、誤ったデータを
+ * 作ってしまうため避ける。
+ *
+ * 代わりに、既に全駅分ある英語表記（`translateStation(name, 'english')`、
+ * ローマ字）を検索の照合先として使う。ユーザーが打ったひらがなを
+ * ローマ字に変換し、英語表記と緩く比較する。英語表記は長音記号を
+ * 省略した表記（例:「東京」→"Tokyo"）のため、`normalizeRomajiForMatch`
+ * 側で長音・重子音を丸めて緩く合わせる。
+ */
+const HIRAGANA_TO_ROMAJI: Record<string, string> = {
+  'きゃ': 'kya', 'きゅ': 'kyu', 'きょ': 'kyo',
+  'しゃ': 'sha', 'しゅ': 'shu', 'しょ': 'sho',
+  'ちゃ': 'cha', 'ちゅ': 'chu', 'ちょ': 'cho',
+  'にゃ': 'nya', 'にゅ': 'nyu', 'にょ': 'nyo',
+  'ひゃ': 'hya', 'ひゅ': 'hyu', 'ひょ': 'hyo',
+  'みゃ': 'mya', 'みゅ': 'myu', 'みょ': 'myo',
+  'りゃ': 'rya', 'りゅ': 'ryu', 'りょ': 'ryo',
+  'ぎゃ': 'gya', 'ぎゅ': 'gyu', 'ぎょ': 'gyo',
+  'じゃ': 'ja', 'じゅ': 'ju', 'じょ': 'jo',
+  'びゃ': 'bya', 'びゅ': 'byu', 'びょ': 'byo',
+  'ぴゃ': 'pya', 'ぴゅ': 'pyu', 'ぴょ': 'pyo',
+  'ふぁ': 'fa', 'ふぃ': 'fi', 'ふぇ': 'fe', 'ふぉ': 'fo',
+  'うぃ': 'wi', 'うぇ': 'we', 'うぉ': 'wo',
+  'つぁ': 'tsa', 'つぃ': 'tsi', 'つぇ': 'tse', 'つぉ': 'tso',
+  'あ': 'a', 'い': 'i', 'う': 'u', 'え': 'e', 'お': 'o',
+  'か': 'ka', 'き': 'ki', 'く': 'ku', 'け': 'ke', 'こ': 'ko',
+  'さ': 'sa', 'し': 'shi', 'す': 'su', 'せ': 'se', 'そ': 'so',
+  'た': 'ta', 'ち': 'chi', 'つ': 'tsu', 'て': 'te', 'と': 'to',
+  'な': 'na', 'に': 'ni', 'ぬ': 'nu', 'ね': 'ne', 'の': 'no',
+  'は': 'ha', 'ひ': 'hi', 'ふ': 'fu', 'へ': 'he', 'ほ': 'ho',
+  'ま': 'ma', 'み': 'mi', 'む': 'mu', 'め': 'me', 'も': 'mo',
+  'や': 'ya', 'ゆ': 'yu', 'よ': 'yo',
+  'ら': 'ra', 'り': 'ri', 'る': 'ru', 'れ': 're', 'ろ': 'ro',
+  'わ': 'wa', 'を': 'o', 'ん': 'n',
+  'が': 'ga', 'ぎ': 'gi', 'ぐ': 'gu', 'げ': 'ge', 'ご': 'go',
+  'ざ': 'za', 'じ': 'ji', 'ず': 'zu', 'ぜ': 'ze', 'ぞ': 'zo',
+  'だ': 'da', 'ぢ': 'ji', 'づ': 'zu', 'で': 'de', 'ど': 'do',
+  'ば': 'ba', 'び': 'bi', 'ぶ': 'bu', 'べ': 'be', 'ぼ': 'bo',
+  'ぱ': 'pa', 'ぴ': 'pi', 'ぷ': 'pu', 'ぺ': 'pe', 'ぽ': 'po',
+  'ゔ': 'vu',
+  'ー': '',
+};
+
+/** ひらがな文字列をローマ字に変換する（促音「っ」は次の子音を重ねる） */
+export function hiraganaToRomaji(hiragana: string): string {
+  let result = '';
+  let i = 0;
+  while (i < hiragana.length) {
+    const ch = hiragana[i];
+    if (ch === 'っ' && i + 1 < hiragana.length) {
+      const twoAhead = hiragana.slice(i + 1, i + 3);
+      const nextRomaji = HIRAGANA_TO_ROMAJI[twoAhead] ?? HIRAGANA_TO_ROMAJI[hiragana[i + 1]];
+      if (nextRomaji && /^[a-z]/.test(nextRomaji)) {
+        result += nextRomaji[0];
+      }
+      i += 1;
+      continue;
+    }
+    const two = hiragana.slice(i, i + 2);
+    if (HIRAGANA_TO_ROMAJI[two] !== undefined) {
+      result += HIRAGANA_TO_ROMAJI[two];
+      i += 2;
+      continue;
+    }
+    const one = HIRAGANA_TO_ROMAJI[ch];
+    if (one !== undefined) {
+      result += one;
+      i += 1;
+      continue;
+    }
+    // 変換表に無い文字（既に英数字など）はそのまま通す
+    result += ch;
+    i += 1;
+  }
+  return result;
+}
+
+/**
+ * ローマ字表記どうしを緩く比較するための正規化。
+ *
+ * このアプリの英語駅名は長音記号を省く表記（「東京」→"Tokyo"）のため、
+ * ひらがなから機械的に変換したローマ字（"toukyou"）とは長音部分が
+ * 一致しない。連続する同じ文字（長音・促音のどちらも）を1文字に丸めて
+ * 緩く比較することで、双方の表記ゆれを吸収する。
+ */
+export function normalizeRomajiForMatch(str: string): string {
+  return str
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '') // 長音記号(ā,ō等)の合成マークを除去
+    .toLowerCase()
+    .replace(/[^a-z]/g, '')
+    // 長音「おう」「うう」は日本語の正書法上ほぼ必ずこの綴りになるため、
+    // 英語表記側で省かれる長音記号ぶんを詰めて合わせる（例: toukyou → tokyo）
+    .replace(/ou/g, 'o')
+    .replace(/uu/g, 'u')
+    .replace(/(.)\1+/g, '$1');
+}
+
 export const stationReadings: Record<string, string> = {
   // ── ア行 ──────────────────────────────────────────
   'あざみ野': 'あざみの',

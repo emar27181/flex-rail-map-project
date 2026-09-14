@@ -6,7 +6,7 @@ import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { translateStation, translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
-import { stationReadings, normalizeToHiragana } from '../utils/stationReadings';
+import { stationReadings, normalizeToHiragana, hiraganaToRomaji, normalizeRomajiForMatch } from '../utils/stationReadings';
 import { findNearestStations } from '../utils/nearestStations';
 import { loadStationHistory, recordStationSelection, buildSuggestions } from '../utils/stationHistory';
 import type { StationHistoryEntry } from '../utils/stationHistory';
@@ -217,13 +217,19 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   function filterStations(search: string, emptySearchDefault: Station[] = majorStations): Station[] {
     if (!search) return emptySearchDefault;
     const term = normalizeToHiragana(search.toLowerCase());
+    // ひらがな読みデータ(stationReadings)がある駅は1割程度のため、それ以外の駅でも
+    // ひらがな入力でヒットするよう、入力をローマ字化して英語表記（全駅分ある）とも
+    // 緩く比較する（長音表記の違いは normalizeRomajiForMatch 側で吸収する）
+    const termRomaji = normalizeRomajiForMatch(hiraganaToRomaji(term));
     return allStations
       .filter(station => {
         const reading = stationReadings[station.name] ?? '';
         const name = normalizeToHiragana(station.name.toLowerCase());
         const en = translateStation(station.name, 'english').toLowerCase();
+        const enRomaji = normalizeRomajiForMatch(en);
         return reading.startsWith(term) || reading.includes(term) ||
-               name.includes(term) || en.includes(term);
+               name.includes(term) || en.includes(term) ||
+               (termRomaji.length > 0 && enRomaji.includes(termRomaji));
       })
       .sort((a, b) => {
         // 前方一致を優先
