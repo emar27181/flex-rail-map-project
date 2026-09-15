@@ -14,6 +14,7 @@ import { FS, TARGET, SEMANTIC, alphaWhite } from '../constants/ui';
 import { L } from './legend/legendStyles';
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
+import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 import TextField from './ui/atoms/TextField';
@@ -383,11 +384,20 @@ const StationSelector: React.FC<StationSelectorProps> = ({
       onTouchEnd={stopTouchPropagation}
       style={{
         marginBottom: L.sp.md,
-        paddingTop: L.sp.md,
-        paddingBottom: isExpanded ? '8px' : '0',
+        // 畳んだ状態は上余白だけ8px・下余白0pxという非対称な指定になっており、
+        // 見出し行の高さぶんだけ下側の空きが上側より狭く見えていた。
+        // 上下とも余白を0にし、代わりにflexの縦中央揃えで高さいっぱいに
+        // センタリングすることで、中身の実際の高さに関係なく必ず揃うようにする
+        paddingTop: isExpanded ? L.sp.md : 0,
+        paddingBottom: isExpanded ? L.sp.md : 0,
         paddingLeft: L.sp.md,
         paddingRight: L.sp.md,
-        height: isExpanded ? 'auto' : '36px',
+        // 畳んだ高さは、地図隅に浮かぶ他のアイコンボタン（フルスクリーン/言語切替等）
+        // と行が揃うよう、それらと同じ一元管理された寸法から取る
+        height: isExpanded ? 'auto' : FLOATING_ICON_BUTTON_SIZE.md,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: isExpanded ? 'flex-start' : 'center',
         boxSizing: 'border-box',
         overflow: (showDepartureResults || showArrivalResults) ? 'visible' : 'hidden',
         border: `1px solid ${colors.border}`,
