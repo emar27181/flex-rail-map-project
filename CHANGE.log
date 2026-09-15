@@ -1,6 +1,23 @@
 # CHANGE LOG
 
-## [2026-09-15] セッション（ピンチズーム中のズレの根本修正）
+## [2026-09-15] セッション（乗換駅のみ表示ボタンの追加）
+
+### feat: 「所要時間を表示」の隣に「乗換駅のみ表示」ボタンを追加
+- `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`
+- 「所要時間を表示とかと同じボタンで隣か下に乗り換え駅のみ表示を追加して」
+  という要望を受けた
+- フィルター自体のロジックは既に実装済みだった（`showTransferStationsOnly`
+  state、表示設定パネルの「乗換駅のみ表示」チェックボックスから操作可能）。
+  経路を見ている最中にすぐ切り替えられる導線が無く、表示設定パネルを
+  開く必要があった
+- 駅選択パネルの「所要時間を表示」ボタンと同じ行に、同じ`Button`
+  （`size="sm"`、`variant="primary"`、押下状態は塗りで表現）で
+  「乗換駅のみ表示」ボタンを追加した。新しいstateは作らず、既存の
+  `showTransferStationsOnly` / `setShowTransferStationsOnly`をそのまま
+  渡しているため、表示設定パネルのチェックボックスとボタンのどちらで
+  操作しても状態は同期する
+- `StationSelector`は3箇所（デスクトップ/モバイル折りたたみ/モバイル展開）
+  から呼ばれているため、全箇所に同じpropsを渡した
 
 ### fix: 実機の2本指ピンチズーム中に路線・地図輪郭が駅ラベルからズレる問題を修正
 - `src/utils/leafletRotatePatch.ts`（新規）, `src/components/RailwayMap.tsx`,

@@ -4402,6 +4402,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onRetryLocation={() => setLocationRetryCount(c => c + 1)}
                 showTravelTime={showTravelTimes}
                 onShowTravelTimeChange={setShowTravelTimes}
+                showTransferStationsOnly={showTransferStationsOnly}
+                onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
               />
               {routeRecommendationsPanel}
             </div>
@@ -4429,6 +4431,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             onRetryLocation={() => setLocationRetryCount(c => c + 1)}
             showTravelTime={showTravelTimes}
             onShowTravelTimeChange={setShowTravelTimes}
+            showTransferStationsOnly={showTransferStationsOnly}
+            onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
           />
         )}
 
@@ -5760,6 +5764,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onRetryLocation={() => setLocationRetryCount(c => c + 1)}
                 showTravelTime={showTravelTimes}
                 onShowTravelTimeChange={setShowTravelTimes}
+                showTransferStationsOnly={showTransferStationsOnly}
+                onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
               />
             </div>
           )}

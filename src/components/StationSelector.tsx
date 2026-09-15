@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { ArrowLeftRight, Clock, X } from 'lucide-react';
+import { ArrowLeftRight, Clock, Waypoints, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
@@ -63,6 +63,10 @@ interface StationSelectorProps {
   showTravelTime?: boolean;
   /** 所要時間表示の切り替え。渡されたときだけボタンを出す */
   onShowTravelTimeChange?: (value: boolean) => void;
+  /** 乗換駅のみ表示するか */
+  showTransferStationsOnly?: boolean;
+  /** 乗換駅のみ表示の切り替え。渡されたときだけボタンを出す */
+  onShowTransferStationsOnlyChange?: (value: boolean) => void;
 }
 
 const StationSelector: React.FC<StationSelectorProps> = ({
@@ -87,6 +91,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   onRetryLocation,
   showTravelTime = false,
   onShowTravelTimeChange,
+  showTransferStationsOnly = false,
+  onShowTransferStationsOnlyChange,
 }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -742,7 +748,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
             寸法は Button の size="sm" に揃えてあるので2つの大きさは一致する。
           */}
-          {(onSetNearestDeparture || onShowTravelTimeChange) && (
+          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange) && (
             <div style={{
               marginTop: L.sp.xs,
               display: 'flex',
@@ -771,6 +777,18 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   icon={<Clock size={14} aria-hidden />}
                 >
                   {translateUI('showTravelTimes', language)}
+                </Button>
+              )}
+              {onShowTransferStationsOnlyChange && (
+                <Button
+                  theme={theme}
+                  variant="primary"
+                  size="sm"
+                  pressed={!!showTransferStationsOnly}
+                  onClick={() => onShowTransferStationsOnlyChange(!showTransferStationsOnly)}
+                  icon={<Waypoints size={14} aria-hidden />}
+                >
+                  {translateUI('showOnlyTransferStations', language)}
                 </Button>
               )}
             </div>
