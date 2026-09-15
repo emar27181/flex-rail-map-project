@@ -1,6 +1,45 @@
 # CHANGE LOG
 
+## [2026-09-15] セッション（所要時間ラベルの重なり修正の再修正・間隔の統一）
+
+### fix: 所要時間ラベルが駅アイコンより前面に出る問題が直っていなかったのを修正
+- `src/components/RailwayMap.tsx`
+- 前回のセッションで専用Pane（`travelTimePane`、z-index 550）を追加し
+  markerPane（600）より後面にしたと報告したが、「まだ所要時間の方が
+  前に表示されてしまっているように見える」との再報告を受けた
+- 原因はPaneの親要素の指定漏れだった。`leaflet-rotate`は`mapPane`の下に
+  `rotatePane`（タイル・路線、回転する）と`norotatePane`（マーカー類、
+  回転しない）という2つの子を作り、`markerPane`はさらにその
+  `norotatePane`の子になっている。作成した`travelTimePane`に親を
+  指定しなかったため、既定で`mapPane`直下（`rotatePane`/`norotatePane`と
+  同じ階層）に作られてしまっていた
+- CSSのスタッキングコンテキストは兄弟要素同士でしかz-indexを比較しない。
+  `rotatePane`/`norotatePane`自体にはz-indexが設定されておらず、
+  そこに明示的なz-index（550）を持つ`travelTimePane`が兄弟として
+  加わったため、`travelTimePane`が`norotatePane`全体（＝`markerPane`を
+  含むすべてのマーカー）より上に来てしまっていた。550 vs 600の比較は
+  同じ親を持つ兄弟同士でなければ意味を持たない
+- `<Pane name="travelTimePane" pane="norotatePane" ...>`のように
+  親Paneを明示し、`markerPane`と同じ`norotatePane`の子として作るように
+  修正した。これでようやく550 vs 600の比較が正しく機能する
+- 検証方法を、Paneのz-index設定値を読むだけの確認（前回の不十分だった
+  検証）から、実際に駅アイコンと所要時間ラベルの画面上の矩形が
+  重なる組み合わせを総当たりで洗い出し、その重なり中心点で
+  `elementsFromPoint`により実際に最前面にあるDOM要素を判定する方式に
+  改めた。修正前はこの方式で「所要時間ラベルが最前面」の組み合わせが
+  複数見つかったが、修正後は26件の重なりすべてで所要時間ラベルが
+  最前面になることはないことを確認した
+
 ## [2026-09-15] セッション（ボタン間隔・所要時間ラベルの重なり修正）
+
+### fix: 駅選択パネル内の余白の不揃いを解消（ボタン行の上マージンをボタン間隔に合わせる）
+- `src/components/StationSelector.tsx`
+- 「出発駅とかと所要時間のボタンの間隔とその下の下の間隔を統一して、
+  下の間隔の方に合わせる」という指摘を受けた
+- 直前の修正でボタン同士の`gap`を`L.sp.xs`(4px)→`L.sp.md`(8px)に広げた際、
+  出発駅・到着駅欄とボタン行そのものの間隔（`marginTop`）は`L.sp.xs`(4px)の
+  ままにしていたため、「行の外側は4px・行の中は8px」という不揃いが生まれていた
+- `marginTop`も`L.sp.md`(8px)に揃え、大きい方（ボタン間隔）に統一した
 
 ### fix: 駅選択パネルのボタン同士の間隔を広げ、押し間違いを防止
 - `src/components/StationSelector.tsx`

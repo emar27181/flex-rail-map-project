@@ -750,7 +750,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           */}
           {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange) && (
             <div style={{
-              marginTop: L.sp.xs,
+              // 出発駅・到着駅欄とこの行の間隔も、ボタン同士の間隔（下記gap）と
+              // 揃える。片方だけ広げるとリズムが不揃いに見えるため統一する。
+              marginTop: L.sp.md,
               display: 'flex',
               alignItems: 'center',
               // タッチ操作での押し間違いを防ぐため、隣接ボタン間はタップ領域が
