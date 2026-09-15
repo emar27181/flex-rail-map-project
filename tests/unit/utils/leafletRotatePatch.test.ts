@@ -21,16 +21,24 @@ function makeFakeLeaflet() {
 }
 
 describe('patchRotatedRendererDrift', () => {
-  it('回転が有効なときは _update() を呼び、元の _updateTransform は呼ばない', () => {
+  it('回転が有効なときは _update() に加え各レイヤーの _reset() も呼び、元の _updateTransform は呼ばない', () => {
     const leaflet = makeFakeLeaflet();
     const original = leaflet.Renderer.prototype._updateTransform;
     patchRotatedRendererDrift(leaflet);
 
     const update = vi.fn();
-    const ctx = { _map: { _rotate: true }, _update: update };
+    const layerAReset = vi.fn();
+    const layerBReset = vi.fn();
+    const ctx = {
+      _map: { _rotate: true },
+      _update: update,
+      _layers: { a: { _reset: layerAReset }, b: { _reset: layerBReset } },
+    };
     leaflet.Renderer.prototype._updateTransform.call(ctx, 'center', 5);
 
     expect(update).toHaveBeenCalledTimes(1);
+    expect(layerAReset).toHaveBeenCalledTimes(1);
+    expect(layerBReset).toHaveBeenCalledTimes(1);
     expect(original).not.toHaveBeenCalled();
   });
 
