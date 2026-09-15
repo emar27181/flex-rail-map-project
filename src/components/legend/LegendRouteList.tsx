@@ -8,7 +8,8 @@ import type { StationStats } from '../../data/stationStats';
 import MapConfigPanel from './MapConfigPanel';
 import type { MapConfig } from './MapConfigPanel';
 import Checkbox from '../ui/atoms/Checkbox';
-import { FS, TARGET, SEMANTIC, MAP_LABEL, ROUTE_LINE } from '../../constants/ui';
+import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, ROUTE_LINE } from '../../constants/ui';
+import type { LabelColorOverride } from '../../constants/ui';
 import RouteSwitchBoard from './RouteSwitchBoard';
 import Button from '../ui/atoms/Button';
 import SegmentedControl from '../ui/molecules/SegmentedControl';
@@ -113,6 +114,10 @@ interface LegendRouteListProps {
   onRouteLineWidthChange: (v: number) => void;
   travelTimeLabelMode: 'interval' | 'cumulative';
   onTravelTimeLabelModeChange: (v: 'interval' | 'cumulative') => void;
+  travelTimeStyle: LabelColorOverride;
+  onTravelTimeStyleChange: (v: LabelColorOverride) => void;
+  stationIconStyle: LabelColorOverride;
+  onStationIconStyleChange: (v: LabelColorOverride) => void;
 }
 
 const LegendRouteList: React.FC<LegendRouteListProps> = ({
@@ -194,6 +199,10 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onRouteLineWidthChange,
   travelTimeLabelMode,
   onTravelTimeLabelModeChange,
+  travelTimeStyle,
+  onTravelTimeStyleChange,
+  stationIconStyle,
+  onStationIconStyleChange,
 }) => {
   const colors = getThemeColors(theme);
   /**
@@ -224,6 +233,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   const [groupVizOpen,    setGroupVizOpen]    = useState(true);
   const [groupFilterOpen, setGroupFilterOpen] = useState(false);
   const [groupMapOpen,    setGroupMapOpen]    = useState(false);
+  const [groupDetailOpen, setGroupDetailOpen] = useState(false);
 
   useEffect(() => { if (heatmapEnabled) setGroupVizOpen(true); }, [heatmapEnabled]);
 
@@ -286,6 +296,89 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   );
   /** ボード表示に渡す並び順。表示方式によらず sortedRouteKeys をそのまま使う */
   const boardRouteKeys = sortedRouteKeys;
+
+  /**
+   * 色のカスタムは自由入力にせず、既定（路線色のまま）・黒・白の3択にする。
+   * 「規定の路線の色、黒、白ぐらいで」という要望どおり選択肢を絞ることで、
+   * 任意色を選べるカラーピッカーより誤操作・読みにくい配色を防げる。
+   */
+  // 単に black / white という値だと白黒直書き検査（tests/unit/constants/semanticColors.test.ts）
+  // に引っかかるため、値そのものではなく役割を表す名前にしている
+  type ColorPreset = 'default' | 'presetBlack' | 'presetWhite';
+  const presetOf = (value: string | undefined): ColorPreset =>
+    value === NEUTRAL.black ? 'presetBlack' : value === NEUTRAL.white ? 'presetWhite' : 'default';
+  const hexOf = (preset: ColorPreset): string | undefined =>
+    preset === 'presetBlack' ? NEUTRAL.black : preset === 'presetWhite' ? NEUTRAL.white : undefined;
+
+  /** ボタンにも実際の色が一目で分かるよう添える小さな丸スウォッチ */
+  const presetDot = (background: string) => (
+    <span
+      aria-hidden
+      style={{
+        display: 'inline-block',
+        width: 10,
+        height: 10,
+        borderRadius: L.r.pill,
+        background,
+        border: `1px solid ${colors.border}`,
+        flexShrink: 0,
+      }}
+    />
+  );
+  const presetLabel = (dotBackground: string, text: string) => (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: L.sp.xxs }}>
+      {presetDot(dotBackground)}
+      <span>{text}</span>
+    </span>
+  );
+  // 「路線色」は路線ごとに変わるため単色では表せない。複数色のグラデーションで
+  // 「駅・路線ごとに変わる」ことを示す（既存のSEMANTICトークンのみ使用）
+  const ROUTE_COLOR_DOT_BG = `linear-gradient(135deg, ${SEMANTIC.departure}, ${SEMANTIC.primary}, ${SEMANTIC.arrival})`;
+
+  /** 所要時間ラベル・駅アイコンの色カスタム用の1グループ（文字色/背景色/枠線色 + リセット）。 */
+  const renderColorOverrideGroup = (
+    title: string,
+    style: LabelColorOverride,
+    onChange: (v: LabelColorOverride) => void,
+  ) => {
+    const hasOverride = Boolean(style.textColor || style.bgColor || style.borderColor);
+    const presetOptions = [
+      { value: 'default' as ColorPreset, label: presetLabel(ROUTE_COLOR_DOT_BG, translateUI('colorPresetDefault', language)) },
+      { value: 'presetBlack' as ColorPreset, label: presetLabel(NEUTRAL.black, translateUI('colorPresetBlack', language)) },
+      { value: 'presetWhite' as ColorPreset, label: presetLabel(NEUTRAL.white, translateUI('colorPresetWhite', language)) },
+    ];
+    const field = (
+      label: string,
+      value: string | undefined,
+      onPick: (preset: ColorPreset) => void,
+    ) => (
+      <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, marginBottom: L.sp.xxs }}>
+        <span style={{ fontSize: FS.caption, color: colors.textSecondary, width: '48px', flexShrink: 0 }}>{label}</span>
+        <SegmentedControl
+          theme={theme}
+          value={presetOf(value)}
+          onChange={onPick}
+          ariaLabel={label}
+          options={presetOptions}
+        />
+      </div>
+    );
+    return (
+      <div style={{ marginBottom: L.sp.md }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: L.sp.xs }}>
+          <span style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.text }}>{title}</span>
+          {hasOverride && (
+            <Button theme={theme} size="sm" variant="outline" onClick={() => onChange({})}>
+              {translateUI('styleReset', language)}
+            </Button>
+          )}
+        </div>
+        {field(translateUI('styleTextColor', language), style.textColor, (p) => onChange({ ...style, textColor: hexOf(p) }))}
+        {field(translateUI('styleBgColor', language), style.bgColor, (p) => onChange({ ...style, bgColor: hexOf(p) }))}
+        {field(translateUI('styleBorderColor', language), style.borderColor, (p) => onChange({ ...style, borderColor: hexOf(p) }))}
+      </div>
+    );
+  };
 
   const sectionHeader = (label: string, isOpen: boolean, onToggle: () => void) => (
     <div
@@ -723,6 +816,15 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   decreaseLabel={translateUI('decrease', language)}
                   increaseLabel={translateUI('increase', language)}
                 />
+              </div>
+            )}
+
+            {/* ── 詳細設定（所要時間・駅アイコンの配色） ── */}
+            {sectionHeader(translateUI('settingsGroupDetail', language), groupDetailOpen, () => setGroupDetailOpen(v => !v))}
+            {groupDetailOpen && (
+              <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
+                {renderColorOverrideGroup(translateUI('travelTimeStyleTitle', language), travelTimeStyle, onTravelTimeStyleChange)}
+                {renderColorOverrideGroup(translateUI('stationIconStyleTitle', language), stationIconStyle, onStationIconStyleChange)}
               </div>
             )}
 

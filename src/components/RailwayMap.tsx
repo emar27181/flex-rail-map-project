@@ -54,12 +54,18 @@ import {
   type Departure,
 } from '../data/timetableData';
 import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, alphaWhite, alphaBlack } from '../constants/ui';
+import type { LabelColorOverride } from '../constants/ui';
 import {
   getInitialStationSizeScale,
   persistStationSizeScale,
   getInitialRouteLineWidth,
   persistRouteLineWidth,
+  getInitialTravelTimeStyle,
+  persistTravelTimeStyle,
+  getInitialStationIconStyle,
+  persistStationIconStyle,
 } from '../utils/mapSizePersistence';
+import { patchRotatedRendererDrift } from '../utils/leafletRotatePatch';
 import ColorChip from './ui/ColorChip';
 import { checkboxInput, L} from './legend/legendStyles';
 import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, tintColor, LIGHT_TEXT } from '../utils/contrast';
@@ -234,6 +240,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [routeLineWidth, setRouteLineWidth] = useState(getInitialRouteLineWidth);
   useEffect(() => { persistStationSizeScale(stationSizeScale); }, [stationSizeScale]);
   useEffect(() => { persistRouteLineWidth(routeLineWidth); }, [routeLineWidth]);
+  /**
+   * 所要時間ラベル・駅アイコンの文字色/背景色/枠線色の個別カスタム。
+   * 何も設定していなければ（空オブジェクト）これまでどおりの自動配色のまま。
+   */
+  const [travelTimeStyle, setTravelTimeStyle] = useState<LabelColorOverride>(getInitialTravelTimeStyle);
+  const [stationIconStyle, setStationIconStyle] = useState<LabelColorOverride>(getInitialStationIconStyle);
+  useEffect(() => { persistTravelTimeStyle(travelTimeStyle); }, [travelTimeStyle]);
+  useEffect(() => { persistStationIconStyle(stationIconStyle); }, [stationIconStyle]);
   // 派生値（レンダリング内で都度計算）
   /** 駅ラベルの文字サイズ。基準サイズに倍率をかける */
   const stationLabelFontSize = Math.round(MAP_LABEL.baseFontPx * stationSizeScale);
@@ -347,6 +361,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 現在地表示
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   /**
+   * 現在向いている方向（度、0=北、時計回り）。
+   * GPSの位置情報だけから求める（`GeolocationCoordinates.heading`）。
+   * 移動していないと常に null になる仕様（ブラウザ側の制約）で、
+   * その場合は方向を示す矢印を出さず、現在地の点だけ表示する。
+   */
+  const [userHeading, setUserHeading] = useState<number | null>(null);
+  /**
    * 降車駅アラーム。
    *
    * 遅延しているとき時刻表の「◯分後に到着」は当てにならないので、
@@ -424,8 +445,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const id = navigator.geolocation.watchPosition(
       (pos) => {
         setLocationError(null);
-        const { latitude, longitude } = pos.coords;
+        const { latitude, longitude, heading } = pos.coords;
         setUserLocation([latitude, longitude]);
+        // heading は静止中や対応端末以外では null になる。前回値は保持せず、
+        // 取れなくなったら矢印も消す（古い向きのまま表示され続けるのを防ぐ）
+        setUserHeading(heading !== null && !Number.isNaN(heading) ? heading : null);
 
         const now = Date.now();
         const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: pos.timestamp };
@@ -780,6 +804,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     arrivalAlertMinutes,
     stationSizeScale,
     routeLineWidth,
+    travelTimeStyle,
+    stationIconStyle,
   }), [heatmapEnabled, heatmapParam, heatmapCustomRange, visibleRoutes,
       showTransferStationsOnly, showExpressStationsOnly, showTravelTimes,
       showStationNames, showFurigana, showStationNumbers, showOsmTiles,
@@ -787,7 +813,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       showStationTooltip, showFullRouteStations,
       alwaysVisibleStationsEnabled, alwaysVisibleMinRoutes,
       arrivalAlertEnabled, arrivalAlertMinutes,
-      stationSizeScale, routeLineWidth]);
+      stationSizeScale, routeLineWidth, travelTimeStyle, stationIconStyle]);
 
   // インポートされた設定を一括適用
   const handleImportConfig = useCallback((cfg: MapConfig) => {
@@ -814,6 +840,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (cfg.arrivalAlertMinutes !== undefined) setArrivalAlertMinutes(cfg.arrivalAlertMinutes);
     if (cfg.stationSizeScale !== undefined) setStationSizeScale(cfg.stationSizeScale);
     if (cfg.routeLineWidth !== undefined) setRouteLineWidth(cfg.routeLineWidth);
+    if (cfg.travelTimeStyle !== undefined) setTravelTimeStyle(cfg.travelTimeStyle);
+    if (cfg.stationIconStyle !== undefined) setStationIconStyle(cfg.stationIconStyle);
   }, []);
 
   const routeFinder = useMemo(() => {
@@ -1946,7 +1974,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (isDetailed) {
       const borderColor = theme === 'dark' ? alphaWhite(0.8) : NEUTRAL.white;
       const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
-      const borderCss = overrideColor ? 'border:none;' : `border:1px solid ${borderColor};`;
+      // 枠線色を個別カスタムしている場合は、ヒートマップ等の「枠線なし」より優先する
+      const borderCss = stationIconStyle.borderColor
+        ? `border:1px solid ${stationIconStyle.borderColor};`
+        : (overrideColor ? 'border:none;' : `border:1px solid ${borderColor};`);
       const shadowCss = overrideColor ? '' : `box-shadow:0 1px 3px ${shadowColor};`;
       const translatedStationName = translateStation(station.name, currentLanguage);
       const furigana = (showFurigana && currentLanguage === 'japanese') ? getFurigana(station.name) : '';
@@ -1979,11 +2010,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       // 地図ラベルで一般的な文字ハロー（暗い縁取り）を重ねて可読性を担保する。
       // ライトモードは従来どおり背景に応じて白/黒を選ぶ。
       const {
-        background: labelBgColor,
-        text: labelTextColor,
+        background: filledBg,
+        text: filledText,
         needsHalo,
       } = filledLabelColors(displayColor, theme);
-      const haloCss = needsHalo
+      const labelBgColor = stationIconStyle.bgColor ?? filledBg;
+      const labelTextColor = stationIconStyle.textColor ?? filledText;
+      // カスタム背景色のときは自動配色向けのハロー判定は当てにならないため出さない
+      const haloCss = (needsHalo && !stationIconStyle.bgColor)
         ? 'text-shadow:0 0 2px rgba(0,0,0,0.95),0 1px 2px rgba(0,0,0,0.9);'
         : '';
       const htmlContent = hasFurigana || hasTime
@@ -2001,7 +2035,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const stationSize = Math.round(Math.max(4, Math.min(24, zoomLevel - 8)) * stationIconScale);
       const borderColor = theme === 'dark' ? alphaWhite(0.8) : NEUTRAL.white;
       const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)';
-      const dotBorder = overrideColor ? 'none' : `1px solid ${borderColor}`;
+      const dotBorder = stationIconStyle.borderColor
+        ? `1px solid ${stationIconStyle.borderColor}`
+        : (overrideColor ? 'none' : `1px solid ${borderColor}`);
+      const dotFill = stationIconStyle.bgColor ?? displayColor;
       // ティアあり → tierShadow を使用、なし → デフォルトの drop shadow
       const dotShadow = tierShadow ?? (overrideColor ? 'none' : `0 1px 2px ${shadowColor}`);
       // ティアあり時は icon サイズを影が見えるよう大きめに確保（4リング=12px、3リング以下=10px）
@@ -2011,13 +2048,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const iconTotal = stationSize + paddingForShadow;
       const touchTarget = isMobile ? Math.max(iconTotal, TARGET.touch) : iconTotal;
       return new DivIcon({
-        html: `<div style="width:${touchTarget}px;height:${touchTarget}px;display:flex;align-items:center;justify-content:center;"><div style="background:${displayColor};width:${stationSize}px;height:${stationSize}px;border:${dotBorder};box-shadow:${dotShadow};opacity:${opacity};border-radius:50%;flex-shrink:0;"></div></div>`,
+        html: `<div style="width:${touchTarget}px;height:${touchTarget}px;display:flex;align-items:center;justify-content:center;"><div style="background:${dotFill};width:${stationSize}px;height:${stationSize}px;border:${dotBorder};box-shadow:${dotShadow};opacity:${opacity};border-radius:50%;flex-shrink:0;"></div></div>`,
         className: 'station-marker',
         iconSize: [touchTarget, touchTarget],
         iconAnchor: [touchTarget / 2, touchTarget / 2]
       });
     }
-  }, [MapComponents, currentLanguage, theme, showFurigana, showStationNumbers, stationLabelFontSize, stationIconScale, isMobile, stationLabelOffsets, withTouchPadding, stationLabelBox]);
+  }, [MapComponents, currentLanguage, theme, showFurigana, showStationNumbers, stationLabelFontSize, stationIconScale, isMobile, stationLabelOffsets, withTouchPadding, stationLabelBox, stationIconStyle]);
 
   // 列車種別停車パターンの取得（外部データソースを使用）
   const getSimplifiedStationStops = useCallback((routeKey: RouteKey, trainType: string, stationName: string): boolean => {
@@ -2179,7 +2216,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         : displayName;
 
       // 駅名ラベル・ツールチップのチップと同じ配色規則を使う
-      const { background: bgColor1, text: fgColor1 } = filledLabelColors(heatOverride ?? routeColors[routeKey], theme);
+      const { background: filledBg1, text: filledText1 } = filledLabelColors(heatOverride ?? routeColors[routeKey], theme);
+      const bgColor1 = stationIconStyle.bgColor ?? filledBg1;
+      const fgColor1 = stationIconStyle.textColor ?? filledText1;
+      const borderColor1 = stationIconStyle.borderColor ?? borderStyle.borderColor;
       const labelHtml = `<div style="
           background:${bgColor1};
           color:${fgColor1};
@@ -2187,7 +2227,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           border-radius:${stationLabelBox.radiusCss};
           ${(hasFurigana || hasTime) ? '' : `font-size:${ttFontSize}px;font-weight:bold;`}
           white-space:nowrap;
-          border:${borderStyle.borderWidth}px ${borderStyle.borderStyle} ${borderStyle.borderColor};
+          border:${borderStyle.borderWidth}px ${borderStyle.borderStyle} ${borderColor1};
           ${borderStyle.boxShadow ? `box-shadow:${borderStyle.boxShadow};` : ''}
           ${isSelectedStation ? 'box-shadow: none !important;' : ''}
           text-align:center;
@@ -2214,14 +2254,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const isSelectedStation = (departure && departure.name === station.name) || (arrival && arrival.name === station.name);
       const shadowColor = isSelectedStation ? 'transparent' : (theme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)');
 
-      const bgColor2 = heatOverride ?? routeColors[routeKey];
+      const bgColor2 = stationIconStyle.bgColor ?? heatOverride ?? routeColors[routeKey];
+      const borderColor2 = stationIconStyle.borderColor ?? borderStyle.borderColor;
       const touchTarget2 = isMobile ? Math.max(stationSize, TARGET.touch) : stationSize;
       return new DivIcon({
         html: `<div style="width:${touchTarget2}px;height:${touchTarget2}px;display:flex;align-items:center;justify-content:center;"><div style="
           background:${bgColor2};
           width:${baseStationSize}px;
           height:${baseStationSize}px;
-          border:${borderStyle.borderWidth}px ${borderStyle.borderStyle} ${borderStyle.borderColor};
+          border:${borderStyle.borderWidth}px ${borderStyle.borderStyle} ${borderColor2};
           ${borderStyle.boxShadow ? `box-shadow:${borderStyle.boxShadow};` : ''}
           ${isSelectedStation ? 'box-shadow: none !important;' : ''}
           opacity:${opacity};
@@ -2233,7 +2274,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         iconAnchor: [touchTarget2 / 2, touchTarget2 / 2]
       });
     }
-  }, [MapComponents, currentLanguage, theme, trainTypeViewEnabled, selectedTrainRoute, selectedTrainType, createStationIcon, getStationBorderStyle, showFurigana, showStationNumbers, stationIconScale, stationLabelFontSize, isMobile, withTouchPadding, stationLabelBox]);
+  }, [MapComponents, currentLanguage, theme, trainTypeViewEnabled, selectedTrainRoute, selectedTrainType, createStationIcon, getStationBorderStyle, showFurigana, showStationNumbers, stationIconScale, stationLabelFontSize, isMobile, withTouchPadding, stationLabelBox, stationIconStyle]);
 
   const getTimeMarkerSize = (zoom: number) => {
     const baseSize = 20;
@@ -2297,8 +2338,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const circleSize = 13;
     const borderWidth = 1;
 
-    const bgColor = theme === 'dark' ? 'rgba(40,40,40,0.9)' : alphaWhite(0.9);
     const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
+    // 既定（背景色を「路線色」にしたとき）は、駅名ラベルと同じ
+    // filledLabelColors を使い、実際に路線色で塗った背景にする
+    // （以前は路線に関わらず常に中立なグレー/白の背景だったため、
+    // 「路線色を選んでも黒っぽいまま」に見えていた）
+    const { background: filledBg, text: filledText } = filledLabelColors(color, theme);
+    const bgColor = travelTimeStyle.bgColor ?? filledBg;
+    const textColor = travelTimeStyle.textColor ?? filledText;
+    const borderColor = travelTimeStyle.borderColor ?? color;
     const timeNumber = Math.round(time);
 
     return new DivIcon({
@@ -2306,7 +2354,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         width:${circleSize}px;
         height:${circleSize}px;
         border-radius:50%;
-        border:${borderWidth}px solid ${color};
+        border:${borderWidth}px solid ${borderColor};
         background:${bgColor};
         display:flex;
         align-items:center;
@@ -2315,13 +2363,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         font-weight:bold;
         line-height:1;
       ">
-        <span style="font-size:${fontSize}px;color:${color};">${timeNumber}</span>
+        <span style="font-size:${fontSize}px;color:${textColor};">${timeNumber}</span>
       </div>`,
       className: isSection ? 'time-text-section' : 'time-text',
       iconSize: [circleSize, circleSize],
       iconAnchor: [circleSize / 2, circleSize / 2]
     });
-  }, [MapComponents, currentLanguage, theme, showTravelTimes, showTrainDemo]);
+  }, [MapComponents, currentLanguage, theme, showTravelTimes, showTrainDemo, travelTimeStyle]);
 
   // 出発/到着駅を通る路線キーのセット（凡例の区切り線用）
   const stationRouteKeys = useMemo<Set<RouteKey> | undefined>(() => {
@@ -2664,6 +2712,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         ]);
         const { DivIcon } = leaflet;
         const canvasRenderer = leaflet.canvas({ padding: 0.5 });
+
+        // leaflet-rotate はグローバルな `L`（従来のscriptタグ読み込み前提）に
+        // プロトタイプ拡張を行う昔ながらのLeafletプラグイン形式のため、
+        // バンドラー経由で読み込んだ leaflet モジュールを window.L に橋渡しする。
+        // react-leaflet も同じ leaflet モジュールの単一インスタンスを使うため、
+        // ここで拡張したクラス（L.Map・L.Marker 等）がそのまま反映される
+        if (!(window as any).L) {
+          (window as any).L = leaflet;
+        }
+        await import('leaflet-rotate');
+        patchRotatedRendererDrift(leaflet);
 
         if (mounted) {
           setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, CircleMarker, Circle, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip, canvasRenderer });
@@ -3338,6 +3397,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       }
       setIsLocating(false);
       setUserLocation(null);
+      setUserHeading(null);
       isFirstPositionRef.current = true;
       return;
     }
@@ -3351,8 +3411,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     const id = navigator.geolocation.watchPosition(
       (position) => {
-        const { latitude, longitude } = position.coords;
+        const { latitude, longitude, heading } = position.coords;
         setUserLocation([latitude, longitude]);
+        setUserHeading(heading !== null && !Number.isNaN(heading) ? heading : null);
 
         const now = Date.now();
         const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: position.timestamp };
@@ -3407,6 +3468,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         }
         setIsLocating(false);
         setUserLocation(null);
+        setUserHeading(null);
         isFirstPositionRef.current = true;
 
         const messages: Record<string, Record<Language, string>> = {
@@ -3437,19 +3499,30 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const userLocationIcon = useMemo(() => {
     if (!MapComponents?.DivIcon || !userLocation) return null;
     const { DivIcon } = MapComponents;
+    // 向き（userHeading）が取れているときだけ、進行方向を示す矢印を点の上に重ねる。
+    // 静止中は heading が null になる仕様のため、そのときは従来どおり点だけ表示する
+    const headingCone = userHeading !== null
+      ? `<div style="position:absolute;left:0;top:0;width:36px;height:36px;transform:rotate(${userHeading}deg);">
+           <div style="position:absolute;left:13px;top:16px;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:14px solid rgba(66,133,244,0.45);"></div>
+         </div>`
+      : '';
     return new DivIcon({
-      html: `<div style="
-        width: 11px; height: 11px;
-        background: #4285F4;
-        border: 2px solid white;
-        border-radius: 50%;
-        box-shadow: 0 0 0 1px #4285F4, 0 1px 4px rgba(0,0,0,0.3);
-      "></div>`,
+      html: `<div style="position:relative;width:36px;height:36px;">
+        ${headingCone}
+        <div style="
+          position:absolute; left:12.5px; top:12.5px;
+          width: 11px; height: 11px;
+          background: #4285F4;
+          border: 2px solid white;
+          border-radius: 50%;
+          box-shadow: 0 0 0 1px #4285F4, 0 1px 4px rgba(0,0,0,0.3);
+        "></div>
+      </div>`,
       className: 'user-location-marker',
-      iconSize: [11, 11],
-      iconAnchor: [5, 5]
+      iconSize: [36, 36],
+      iconAnchor: [18, 18]
     });
-  }, [MapComponents, userLocation]);
+  }, [MapComponents, userLocation, userHeading]);
 
   /**
    * 同じ区間を走る路線の索引。
@@ -4684,6 +4757,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               scrollWheelZoom={true}
               zoomControl={false}
               ref={mapRef}
+              // leaflet-rotate が追加するオプション（react-leaflet の型定義には無いため
+              // 個別にキャストする）。2本指のタッチジェスチャーで地図を回転できるようにする。
+              // rotateControl は既定のUI矢印ボタンを出す設定だが、自前のUIと重複するため無効化
+              {...({ rotate: true, touchRotate: true, rotateControl: false, zoomAnimation: false } as any)}
             >
               <ZoomControl position="bottomright" />
               <MapEvents />
@@ -4730,7 +4807,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   key={`japan-outline-${i}`}
                   positions={points}
                   pathOptions={{
-                    fill: false,
+                    fill: true,
+                    // 陸を白でごく薄く塗るだけで海（地図の下地色）と見分けられるようにする。
+                    // ライトモードは下地（#ddd 相当）が既に明るくヘッドルームが小さいため、
+                    // 同じ見え方にするには濃いめの割合が必要（ダーク0.08 / ライト0.35）
+                    fillColor: NEUTRAL.white,
+                    fillOpacity: theme === 'dark' ? 0.08 : 0.35,
                     color: theme === 'dark' ? alphaWhite(0.35) : alphaBlack(0.25),
                     weight: JAPAN_OUTLINE_WEIGHT,
                     interactive: false,
@@ -4895,6 +4977,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   position={userLocation}
                   icon={userLocationIcon}
                   zIndexOffset={10000}
+                  interactive={false}
                 />
               )}
             </MapContainer>
@@ -5513,6 +5596,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onStationSizeScaleChange={setStationSizeScale}
                     travelTimeLabelMode={travelTimeLabelMode}
                     onTravelTimeLabelModeChange={setTravelTimeLabelMode}
+                    travelTimeStyle={travelTimeStyle}
+                    onTravelTimeStyleChange={setTravelTimeStyle}
+                    stationIconStyle={stationIconStyle}
+                    onStationIconStyleChange={setStationIconStyle}
                   />
 
                   {/* 2.5 最寄り駅メモ (Nearest station notes) */}
@@ -5792,6 +5879,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onStationSizeScaleChange={setStationSizeScale}
                         travelTimeLabelMode={travelTimeLabelMode}
                         onTravelTimeLabelModeChange={setTravelTimeLabelMode}
+                        travelTimeStyle={travelTimeStyle}
+                        onTravelTimeStyleChange={setTravelTimeStyle}
+                        stationIconStyle={stationIconStyle}
+                        onStationIconStyleChange={setStationIconStyle}
                       />
                       <StationMemoPanel
                         theme={theme}

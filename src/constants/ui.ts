@@ -132,3 +132,17 @@ export const ROUTE_LINE = {
   maxWidth: 8,
   widthStep: 0.5,
 } as const;
+
+/**
+ * 所要時間ラベル・駅アイコンの文字色/背景色/枠線色を、ユーザーが
+ * 個別に上書きするための設定。すべて省略可能で、省略した項目は
+ * これまでどおりの自動配色（路線色ベース）のまま変わらない。
+ *
+ * 任意色ではなく「既定（路線色のまま）・黒・白」の3択に絞っている
+ * （設定パネル側で選択肢を作る際は `NEUTRAL.black` / `NEUTRAL.white` を使う）。
+ */
+export interface LabelColorOverride {
+  textColor?: string;
+  bgColor?: string;
+  borderColor?: string;
+}
