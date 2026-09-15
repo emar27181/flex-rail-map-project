@@ -4259,6 +4259,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     position={midpoint}
                     icon={timeIcon}
                     zIndexOffset={500}
+                    pane="travelTimePane"
                   />
                 );
               } else {
@@ -4274,6 +4275,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     position={midpoint}
                     icon={timeIcon}
                     zIndexOffset={500}
+                    pane="travelTimePane"
                   />
                 );
               }
@@ -4291,6 +4293,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   position={midpoint}
                   icon={timeIcon}
                   zIndexOffset={500}
+                  pane="travelTimePane"
                 />
               );
             }
@@ -4787,6 +4790,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             >
               <ZoomControl position="bottomright" />
               <MapEvents />
+
+              {/*
+                所要時間ラベル用のPane。markerPane(600)より後面に表示し、
+                駅アイコンが常に所要時間ラベルより手前に来るようにする。
+                以前はどちらもmarkerPane内で、各マーカーのY座標＋zIndexOffsetの
+                合計で前後関係が決まる仕組みだったため、画面上の位置によっては
+                所要時間ラベルが駅アイコンの上に重なって隠すことがあった
+                （zIndexOffsetの差だけではY座標の差を覆せない場合があるため）。
+                Pane自体を分けることで個々のマーカー位置に関係なく確実に
+                駅アイコンを前面にする。
+                （このPaneを使うMarkerより先にマウントされている必要があるため、
+                MapContainerの子の先頭付近で宣言している）
+              */}
+              <Pane name="travelTimePane" style={{ zIndex: 550 }} />
 
               {/* バブルマップ: 単一SVGオーバーレイで全バブルを高速描画 */}
               {mapViewMode === 'bubble' && (
