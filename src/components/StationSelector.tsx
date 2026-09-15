@@ -753,7 +753,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               marginTop: L.sp.xs,
               display: 'flex',
               alignItems: 'center',
-              gap: L.sp.xs,
+              // タッチ操作での押し間違いを防ぐため、隣接ボタン間はタップ領域が
+              // 触れ合わない程度に離す（一般的なタッチターゲット間隔の目安 8px）
+              gap: L.sp.md,
               flexWrap: 'wrap',
             }}>
               {onSetNearestDeparture && (
