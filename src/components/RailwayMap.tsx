@@ -66,6 +66,7 @@ import {
   persistStationIconStyle,
 } from '../utils/mapSizePersistence';
 import { patchRotatedRendererDrift } from '../utils/leafletRotatePatch';
+import { getInitialVisibleRoutesFromUrl, syncVisibleRoutesToUrl } from '../utils/routeUrlCodes';
 import ColorChip from './ui/ColorChip';
 import { checkboxInput, L} from './legend/legendStyles';
 import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, tintColor, LIGHT_TEXT } from '../utils/contrast';
@@ -2991,6 +2992,24 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     }
   }, [departure, arrival, isManualDeparture]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // URL共有: 初回マウント時のみ、URLの routes パラメータがあれば表示路線を復元する。
+  // 上のeffect（出発駅・到着駅に応じた初期化）の後に実行させることで、
+  // 「両方未選択なので全路線非表示」という初期化を上書きできるようにしている。
+  const urlVisibleRoutesAppliedRef = useRef(false);
+  useEffect(() => {
+    if (urlVisibleRoutesAppliedRef.current) return;
+    urlVisibleRoutesAppliedRef.current = true;
+    const fromUrl = getInitialVisibleRoutesFromUrl();
+    if (fromUrl) {
+      setVisibleRoutes(fromUrl);
+    }
+  }, []);
+
+  // URL共有: 表示路線が変わるたびにURLへ反映する（共有したURLを開くと同じ路線がONで見える）
+  useEffect(() => {
+    syncVisibleRoutesToUrl(visibleRoutes);
+  }, [visibleRoutes]);
+
   // Leafletポップアップとコントロールのテーマ対応（動的スタイル適用）
   useEffect(() => {
     const applyThemeToPopups = () => {
@@ -4240,6 +4259,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     position={midpoint}
                     icon={timeIcon}
                     zIndexOffset={500}
+                    pane="travelTimePane"
                   />
                 );
               } else {
@@ -4255,6 +4275,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     position={midpoint}
                     icon={timeIcon}
                     zIndexOffset={500}
+                    pane="travelTimePane"
                   />
                 );
               }
@@ -4272,6 +4293,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   position={midpoint}
                   icon={timeIcon}
                   zIndexOffset={500}
+                  pane="travelTimePane"
                 />
               );
             }
@@ -4402,6 +4424,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onRetryLocation={() => setLocationRetryCount(c => c + 1)}
                 showTravelTime={showTravelTimes}
                 onShowTravelTimeChange={setShowTravelTimes}
+                showTransferStationsOnly={showTransferStationsOnly}
+                onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
               />
               {routeRecommendationsPanel}
             </div>
@@ -4429,6 +4453,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             onRetryLocation={() => setLocationRetryCount(c => c + 1)}
             showTravelTime={showTravelTimes}
             onShowTravelTimeChange={setShowTravelTimes}
+            showTransferStationsOnly={showTransferStationsOnly}
+            onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
           />
         )}
 
@@ -4764,6 +4790,30 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             >
               <ZoomControl position="bottomright" />
               <MapEvents />
+
+              {/*
+                所要時間ラベル用のPane。markerPane(600)より後面に表示し、
+                駅アイコンが常に所要時間ラベルより手前に来るようにする。
+                以前はどちらもmarkerPane内で、各マーカーのY座標＋zIndexOffsetの
+                合計で前後関係が決まる仕組みだったため、画面上の位置によっては
+                所要時間ラベルが駅アイコンの上に重なって隠すことがあった
+                （zIndexOffsetの差だけではY座標の差を覆せない場合があるため）。
+                Pane自体を分けることで個々のマーカー位置に関係なく確実に
+                駅アイコンを前面にする。
+                （このPaneを使うMarkerより先にマウントされている必要があるため、
+                MapContainerの子の先頭付近で宣言している）
+
+                重要: `pane="norotatePane"` を明示して、markerPaneと同じ親
+                （leaflet-rotateが作る`norotatePane`）の子として作る必要がある。
+                指定しないと既定で`mapPane`の直下に作られてしまい、
+                markerPaneを含む`norotatePane`全体（z-indexを持たない）に対して
+                このPane（z-index:550という明示値を持つ）が丸ごと勝ってしまい、
+                駅アイコン側が逆に隠れるという、最初の実装時の不具合の原因になった
+                （CSSのスタッキングコンテキストは兄弟要素同士でしか
+                z-indexを比較しないため、親が違うと550と600の大小関係が
+                意味を持たない）。
+              */}
+              <Pane name="travelTimePane" pane="norotatePane" style={{ zIndex: 550 }} />
 
               {/* バブルマップ: 単一SVGオーバーレイで全バブルを高速描画 */}
               {mapViewMode === 'bubble' && (
@@ -5760,6 +5810,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onRetryLocation={() => setLocationRetryCount(c => c + 1)}
                 showTravelTime={showTravelTimes}
                 onShowTravelTimeChange={setShowTravelTimes}
+                showTransferStationsOnly={showTransferStationsOnly}
+                onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
               />
             </div>
           )}
