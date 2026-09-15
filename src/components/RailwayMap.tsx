@@ -66,6 +66,7 @@ import {
   persistStationIconStyle,
 } from '../utils/mapSizePersistence';
 import { patchRotatedRendererDrift } from '../utils/leafletRotatePatch';
+import { getInitialVisibleRoutesFromUrl, syncVisibleRoutesToUrl } from '../utils/routeUrlCodes';
 import ColorChip from './ui/ColorChip';
 import { checkboxInput, L} from './legend/legendStyles';
 import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, tintColor, LIGHT_TEXT } from '../utils/contrast';
@@ -2990,6 +2991,24 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       setVisibleRoutes(new Set());
     }
   }, [departure, arrival, isManualDeparture]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // URL共有: 初回マウント時のみ、URLの routes パラメータがあれば表示路線を復元する。
+  // 上のeffect（出発駅・到着駅に応じた初期化）の後に実行させることで、
+  // 「両方未選択なので全路線非表示」という初期化を上書きできるようにしている。
+  const urlVisibleRoutesAppliedRef = useRef(false);
+  useEffect(() => {
+    if (urlVisibleRoutesAppliedRef.current) return;
+    urlVisibleRoutesAppliedRef.current = true;
+    const fromUrl = getInitialVisibleRoutesFromUrl();
+    if (fromUrl) {
+      setVisibleRoutes(fromUrl);
+    }
+  }, []);
+
+  // URL共有: 表示路線が変わるたびにURLへ反映する（共有したURLを開くと同じ路線がONで見える）
+  useEffect(() => {
+    syncVisibleRoutesToUrl(visibleRoutes);
+  }, [visibleRoutes]);
 
   // Leafletポップアップとコントロールのテーマ対応（動的スタイル適用）
   useEffect(() => {
