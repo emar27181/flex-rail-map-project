@@ -4802,8 +4802,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 駅アイコンを前面にする。
                 （このPaneを使うMarkerより先にマウントされている必要があるため、
                 MapContainerの子の先頭付近で宣言している）
+
+                重要: `pane="norotatePane"` を明示して、markerPaneと同じ親
+                （leaflet-rotateが作る`norotatePane`）の子として作る必要がある。
+                指定しないと既定で`mapPane`の直下に作られてしまい、
+                markerPaneを含む`norotatePane`全体（z-indexを持たない）に対して
+                このPane（z-index:550という明示値を持つ）が丸ごと勝ってしまい、
+                駅アイコン側が逆に隠れるという、最初の実装時の不具合の原因になった
+                （CSSのスタッキングコンテキストは兄弟要素同士でしか
+                z-indexを比較しないため、親が違うと550と600の大小関係が
+                意味を持たない）。
               */}
-              <Pane name="travelTimePane" style={{ zIndex: 550 }} />
+              <Pane name="travelTimePane" pane="norotatePane" style={{ zIndex: 550 }} />
 
               {/* バブルマップ: 単一SVGオーバーレイで全バブルを高速描画 */}
               {mapViewMode === 'bubble' && (
