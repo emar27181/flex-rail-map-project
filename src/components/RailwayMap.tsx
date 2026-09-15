@@ -65,6 +65,7 @@ import {
   getInitialStationIconStyle,
   persistStationIconStyle,
 } from '../utils/mapSizePersistence';
+import { patchRotatedRendererDrift } from '../utils/leafletRotatePatch';
 import ColorChip from './ui/ColorChip';
 import { checkboxInput, L} from './legend/legendStyles';
 import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, tintColor, LIGHT_TEXT } from '../utils/contrast';
@@ -2721,6 +2722,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           (window as any).L = leaflet;
         }
         await import('leaflet-rotate');
+        patchRotatedRendererDrift(leaflet);
 
         if (mounted) {
           setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, CircleMarker, Circle, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip, canvasRenderer });
