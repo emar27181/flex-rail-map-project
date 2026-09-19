@@ -1,9 +1,10 @@
 /**
  * MobileBottomPanel
  * Mobile fullscreen app footer + contextual bottom sheet.
+ * Only real, connected actions are rendered: no disabled placeholder tabs.
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { LocateFixed, Search, SlidersHorizontal, TrainFront, X } from 'lucide-react';
+import { SlidersHorizontal, TrainFront, X } from 'lucide-react';
 import { getThemeColors } from '../contexts/ThemeContext';
 import IconButton from './ui/atoms/IconButton';
 import { L } from './legend/legendStyles';
@@ -20,20 +21,14 @@ export type PopoverKey = 'station' | 'location' | 'routes' | 'settings';
 export interface FloatingButtonDef { key: PopoverKey; icon?: React.ReactNode; label: string; content: React.ReactNode; onPress?: () => void; }
 export interface MobileBottomPanelProps { buttons: FloatingButtonDef[]; theme: 'light' | 'dark'; safeAreaBottom?: number; }
 
-const NAV_ITEMS: Array<{ key: PopoverKey; label: string }> = [
-  { key: 'station', label: '検索' },
-  { key: 'location', label: '現在地' },
-  { key: 'routes', label: '路線' },
-  { key: 'settings', label: '表示' },
-];
+const defaultIcon = (key: PopoverKey) => key === 'routes'
+  ? <TrainFront size={21} />
+  : <SlidersHorizontal size={21} />;
 
-const defaultIcon = (key: PopoverKey) => {
-  switch (key) {
-    case 'station': return <Search size={21} />;
-    case 'location': return <LocateFixed size={21} />;
-    case 'routes': return <TrainFront size={21} />;
-    default: return <SlidersHorizontal size={21} />;
-  }
+const shortLabel = (button: FloatingButtonDef) => {
+  if (button.key === 'routes') return '経路';
+  if (button.key === 'settings') return '表示';
+  return button.label;
 };
 
 const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({ buttons, theme }) => {
@@ -46,8 +41,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({ buttons, theme })
 
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = 0; }, [openKey]);
   const close = useCallback(() => setOpenKey(null), []);
-  const press = useCallback((button?: FloatingButtonDef) => {
-    if (!button) return;
+  const press = useCallback((button: FloatingButtonDef) => {
     if (button.onPress) { button.onPress(); setOpenKey(null); return; }
     setPanelHeight(null);
     setOpenKey(prev => prev === button.key ? null : button.key);
@@ -63,6 +57,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({ buttons, theme })
   }, []);
 
   const active = buttons.find(b => b.key === openKey);
+  const columns = Math.max(buttons.length, 1);
 
   return <>
     {openKey && <div onClick={close} style={{ position:'fixed', inset:0, zIndex:Z_BACKDROP, background:'rgba(0,0,0,.10)' }} />}
@@ -87,24 +82,22 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({ buttons, theme })
 
     <nav aria-label="メイン操作" style={{
       position:'fixed',left:0,right:0,bottom:0,minHeight:NAV_H,zIndex:Z_NAV,
-      display:'grid',gridTemplateColumns:'repeat(4, 1fr)',
-      padding:`4px 8px calc(4px + env(safe-area-inset-bottom, 0px))`,
+      display:'grid',gridTemplateColumns:`repeat(${columns}, minmax(0, 1fr))`,
+      padding:`4px max(16px, env(safe-area-inset-left, 0px)) calc(4px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-right, 0px))`,
       borderTop:`1px solid ${colors.border}`,backgroundColor:colors.glassOpen,
-      backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',boxShadow:`0 -4px 18px ${colors.shadow}`
+      backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',boxShadow:`0 -3px 14px ${colors.shadow}`
     }}>
-      {NAV_ITEMS.map(item => {
-        const button = buttons.find(b => b.key === item.key);
-        const selected = openKey === item.key;
-        const available = Boolean(button);
-        return <button key={item.key} type="button" onClick={()=>press(button)} disabled={!available}
-          aria-label={item.label} aria-expanded={selected} style={{
+      {buttons.map(button => {
+        const selected = openKey === button.key;
+        return <button key={button.key} type="button" onClick={()=>press(button)}
+          aria-label={button.label} aria-expanded={selected} style={{
           minHeight:50,border:0,borderRadius:12,background:selected?'rgba(33,150,243,.12)':'transparent',
-          color:selected?'#2196f3':colors.textSecondary,opacity:available?1:.48,
+          color:selected?'#2196f3':colors.textSecondary,
           display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:2,
-          font:'inherit',fontSize:10,fontWeight:selected?700:600,cursor:available?'pointer':'default',WebkitTapHighlightColor:'transparent'
+          font:'inherit',fontSize:10,fontWeight:selected?700:600,cursor:'pointer',WebkitTapHighlightColor:'transparent'
         }}>
-          <span style={{height:22,display:'flex',alignItems:'center'}}>{button?.icon || defaultIcon(item.key)}</span>
-          <span>{item.label}</span>
+          <span style={{height:22,display:'flex',alignItems:'center'}}>{button.icon || defaultIcon(button.key)}</span>
+          <span>{shortLabel(button)}</span>
         </button>;
       })}
     </nav>
