@@ -1,77 +1,30 @@
 /**
  * MobileBottomPanel
  *
- * スマホフルスクリーン用の左下フローティングボタン UI。
- *
- * ■ 設計方針
- * - 底部に張り付かず、左下にアイコン＋名前のボタンを縦に配置。
- * - ボタンをタップするとツールチップ（ポップオーバー）が展開。
- * - 別ボタンをタップ or 背景をタップで閉じる。
- * - ポップオーバー上端のドラッグハンドルで高さ調整可能。
- * - 寸法はすべて名前付き定数で管理（マジックナンバー禁止）。
+ * モバイルフルスクリーン用のボトムナビゲーション。
+ * 地図を主役にするため、常時表示する操作は画面下部のタブに集約し、
+ * 詳細はボトムシートとして必要なときだけ展開する。
  */
-
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { getThemeColors } from '../contexts/ThemeContext';
-import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
-import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
 import { L } from './legend/legendStyles';
 
-// ── 寸法定数 ─────────────────────────────────────────────────────────
-
-/**
- * フローティングボタンの文字・余白・角丸の基準。実際の高さはこれではなく
- * `BTN_H` を使う（地図の隅の丸ボタンと合わせて縦を詰めたため）。
- */
-const PANEL_BUTTON_SIZE = 'md' as const;
-
-/**
- * ボタンの実際の高さ。地図右上のフルスクリーン/言語/テーマの各ボタンと
- * 同じ `FLOATING_ICON_BUTTON_SIZE.md`(36px) に揃える。
- * 以前は `CONTROL_SIZE.md`(44px) を使っており、他の地図隅ボタン(36px)より
- * 縦に大きく見えていた（他は単体で浮かぶアイコンボタン専用の尺度を使う一方、
- * ここだけ「同じ行に並ぶ部品用」の `CONTROL_SIZE` を使っていたのが原因）。
- */
-const BTN_H = FLOATING_ICON_BUTTON_SIZE.md;
-
-/** ボタンの最小幅（アイコンなし・テキストのみなので小さめ） */
-const BTN_MIN_W = 0;
-
-/** ボタン間のギャップ */
-const BTN_GAP = 6;
-
-/** ボタングループの左オフセット */
-const GROUP_LEFT = 10;
-
-/** ポップオーバーの最大幅 */
-const POPOVER_MAX_W = 320;
-
-/** ポップオーバーのデフォルト最大高さ */
-const POPOVER_MAX_H = '65dvh';
-
-/** ポップオーバーの最小高さ（px） */
-const POPOVER_MIN_H = 120;
-
-/**
- * position: fixed + high z-index で確実に最前面に出す。
- * 外側の position:fixed コンテナ (z-index:9999) より高くする必要がある。
- */
-const Z_BTN = 10001;
-const Z_POPOVER = 10002;
+const NAV_H = 64;
+const NAV_MARGIN = 10;
+const POPOVER_MAX_W = 420;
+const POPOVER_MAX_H = '68dvh';
+const POPOVER_MIN_H = 140;
 const Z_BACKDROP = 10000;
-
-/** CSS 注入用 ID */
-const STYLE_ID = 'mbp-styles-v2';
-
-// ─────────────────────────────────────────────────────────────────────
+const Z_NAV = 10001;
+const Z_POPOVER = 10002;
+const STYLE_ID = 'mbp-bottom-nav-v3';
 
 export type PopoverKey = 'station' | 'settings' | 'routes';
 
 export interface FloatingButtonDef {
   key: PopoverKey;
-  /** アイコン要素。絵文字ではなく lucide-react のアイコンコンポーネントを渡す */
   icon: React.ReactNode;
   label: string;
   content: React.ReactNode;
@@ -80,7 +33,6 @@ export interface FloatingButtonDef {
 export interface MobileBottomPanelProps {
   buttons: FloatingButtonDef[];
   theme: 'light' | 'dark';
-  /** セーフエリア下部の余白（px）。デフォルト 0。 */
   safeAreaBottom?: number;
 }
 
@@ -92,225 +44,153 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
   const colors = getThemeColors(theme);
   const [openKey, setOpenKey] = useState<PopoverKey | null>(null);
   const [panelHeight, setPanelHeight] = useState<number | null>(null);
-  const groupRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const dragStartRef = useRef<{ startY: number; startH: number } | null>(null);
 
-  // CSS を一度だけ注入
   useEffect(() => {
     if (document.getElementById(STYLE_ID)) return;
     const el = document.createElement('style');
     el.id = STYLE_ID;
     el.textContent = `
-      .mbp-scroll {
-        overflow-y: auto;
-        /* overflow-y だけ指定すると x 軸は auto 扱いになり、
-           内容がはみ出したときに横スライドできてしまうため明示的に止める */
-        overflow-x: hidden;
-        overscroll-behavior: contain;
-        -webkit-overflow-scrolling: touch;
-        touch-action: pan-y;
-      }
-      .mbp-scroll::-webkit-scrollbar { width: 3px; }
-      .mbp-scroll::-webkit-scrollbar-thumb {
-        background: rgba(128,128,128,0.35);
-        border-radius: 2px;
-      }
-      .mbp-drag-handle {
-        touch-action: none;
-        user-select: none;
-        -webkit-user-select: none;
-      }
+      .mbp-scroll { overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; touch-action:pan-y; }
+      .mbp-scroll::-webkit-scrollbar { width:3px; }
+      .mbp-scroll::-webkit-scrollbar-thumb { background:rgba(128,128,128,.35); border-radius:2px; }
+      .mbp-drag-handle { touch-action:none; user-select:none; -webkit-user-select:none; }
     `;
     document.head.appendChild(el);
   }, []);
 
-  // ポップオーバーが変わったらスクロールをリセット
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
   }, [openKey]);
 
   const toggle = useCallback((key: PopoverKey) => {
+    setPanelHeight(null);
     setOpenKey(prev => (prev === key ? null : key));
   }, []);
-
   const close = useCallback(() => setOpenKey(null), []);
 
-  // ── ドラッグハンドルのタッチ操作 ──────────────────────────────────
   const handleDragStart = useCallback((e: React.TouchEvent) => {
     e.stopPropagation();
-    const touch = e.touches[0];
     const el = popoverRef.current;
     if (!el) return;
-    dragStartRef.current = {
-      startY: touch.clientY,
-      startH: el.getBoundingClientRect().height,
-    };
+    dragStartRef.current = { startY: e.touches[0].clientY, startH: el.getBoundingClientRect().height };
   }, []);
-
   const handleDragMove = useCallback((e: React.TouchEvent) => {
     if (!dragStartRef.current) return;
     e.stopPropagation();
-    const touch = e.touches[0];
-    const delta = dragStartRef.current.startY - touch.clientY;
-    const maxH = window.innerHeight * 0.9;
-    const newH = Math.max(POPOVER_MIN_H, Math.min(maxH, dragStartRef.current.startH + delta));
-    setPanelHeight(newH);
+    const delta = dragStartRef.current.startY - e.touches[0].clientY;
+    setPanelHeight(Math.max(POPOVER_MIN_H, Math.min(window.innerHeight * .9, dragStartRef.current.startH + delta)));
   }, []);
+  const handleDragEnd = useCallback(() => { dragStartRef.current = null; }, []);
 
-  const handleDragEnd = useCallback(() => {
-    dragStartRef.current = null;
-  }, []);
-  // ─────────────────────────────────────────────────────────────────
-
-  const safeBottom = safeAreaBottom + 10; // ボタンを少し上に浮かせる
-
-  const activeButton = buttons.find(b => b.key === openKey);
+  const safeBottom = safeAreaBottom + NAV_MARGIN;
+  const activeButton = buttons.find(button => button.key === openKey);
 
   return (
     <>
-      {/* 背景クリックで閉じる透明レイヤー */}
       {openKey !== null && (
-        <div
-          aria-hidden="true"
-          onClick={close}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: Z_BACKDROP,
-          }}
-        />
+        <div aria-hidden="true" onClick={close} style={{ position: 'fixed', inset: 0, zIndex: Z_BACKDROP, background: 'rgba(0,0,0,.08)' }} />
       )}
 
-      {/* ポップオーバー */}
-      {openKey !== null && activeButton && (
+      {activeButton && (
         <div
           ref={popoverRef}
           role="dialog"
           aria-label={activeButton.label}
           style={{
             position: 'fixed',
-            bottom: safeBottom + BTN_H * buttons.length + BTN_GAP * (buttons.length - 1) + 8,
-            left: GROUP_LEFT,
-            width: `min(${POPOVER_MAX_W}px, calc(100vw - ${GROUP_LEFT * 2}px))`,
-            ...(panelHeight !== null
-              ? { height: panelHeight }
-              : { maxHeight: POPOVER_MAX_H }),
+            left: NAV_MARGIN,
+            right: NAV_MARGIN,
+            bottom: safeBottom + NAV_H + 8,
+            width: `min(${POPOVER_MAX_W}px, calc(100vw - ${NAV_MARGIN * 2}px))`,
+            margin: '0 auto',
+            ...(panelHeight !== null ? { height: panelHeight } : { maxHeight: POPOVER_MAX_H }),
             zIndex: Z_POPOVER,
             backgroundColor: colors.glassOpen,
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
             border: `1px solid ${colors.border}`,
-            borderRadius: 12,
-            boxShadow: `0 4px 24px ${colors.shadow}`,
+            borderRadius: 18,
+            boxShadow: `0 12px 40px ${colors.shadow}`,
             display: 'flex',
             flexDirection: 'column',
+            overflow: 'hidden',
           }}
         >
-          {/* ドラッグハンドル（タップ判定を広く） */}
-          <div
-            className="mbp-drag-handle"
-            onTouchStart={handleDragStart}
-            onTouchMove={handleDragMove}
-            onTouchEnd={handleDragEnd}
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              padding: `${L.sp.xl} 0 ${L.sp.md}`,
-              flexShrink: 0,
-              cursor: 'ns-resize',
-            }}
-          >
-            <div style={{
-              width: 48,
-              height: 5,
-              borderRadius: 3,
-              backgroundColor: colors.border,
-            }} />
+          <div className="mbp-drag-handle" onTouchStart={handleDragStart} onTouchMove={handleDragMove} onTouchEnd={handleDragEnd}
+            style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: `${L.sp.md} 0 ${L.sp.sm}`, flexShrink: 0 }}>
+            <div style={{ width: 40, height: 4, borderRadius: 999, backgroundColor: colors.border }} />
           </div>
-
-          {/* ポップオーバーヘッダー */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: `${L.sp.sm} ${L.sp['2xl']} ${L.sp.md}`,
-            borderBottom: `1px solid ${colors.border}`,
-            flexShrink: 0,
-          }}>
-            <span style={{ fontSize: 14, fontWeight: 'bold', color: colors.text, display: 'flex', alignItems: 'center', gap: 6 }}>
-              {activeButton.icon}
-              {activeButton.label}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: `${L.sp.sm} ${L.sp['2xl']} ${L.sp.md}`, borderBottom: `1px solid ${colors.border}`, flexShrink: 0 }}>
+            <span style={{ fontSize: 15, fontWeight: 700, color: colors.text, display: 'flex', alignItems: 'center', gap: 8 }}>
+              {activeButton.icon}{activeButton.label}
             </span>
-            <IconButton
-              theme={theme}
-              size="sm"
-              onClick={close}
-              label="閉じる"
-              icon={<X size={18} />}
-            />
+            <IconButton theme={theme} size="sm" onClick={close} label="閉じる" icon={<X size={18} />} />
           </div>
-
-          {/* スクロール可能コンテンツ */}
-          <div
-            ref={scrollRef}
-            className="mbp-scroll"
-            style={{ flex: 1, minHeight: 0, padding: `${L.sp.lg} ${L.sp['2xl']}` }}
-          >
+          <div ref={scrollRef} className="mbp-scroll" style={{ flex: 1, minHeight: 0, padding: `${L.sp.lg} ${L.sp['2xl']}` }}>
             {activeButton.content}
           </div>
         </div>
       )}
 
-      {/* フローティングボタングループ（左下） */}
-      <div
-        ref={groupRef}
+      <nav
+        aria-label="地図表示メニュー"
         style={{
           position: 'fixed',
+          left: NAV_MARGIN,
+          right: NAV_MARGIN,
           bottom: safeBottom,
-          left: GROUP_LEFT,
-          zIndex: Z_BTN,
+          height: NAV_H,
+          zIndex: Z_NAV,
           display: 'flex',
-          flexDirection: 'column',
-          gap: BTN_GAP,
-          alignItems: 'flex-start',
+          alignItems: 'stretch',
+          maxWidth: 420,
+          margin: '0 auto',
+          padding: 4,
+          borderRadius: 18,
+          border: `1px solid ${colors.border}`,
+          backgroundColor: colors.glassOpen,
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          boxShadow: `0 6px 24px ${colors.shadow}`,
         }}
       >
-        {buttons.map(btn => {
-          const isActive = openKey === btn.key;
+        {buttons.map(button => {
+          const active = openKey === button.key;
           return (
-            <Button
-              key={btn.key}
-              theme={theme}
-              variant="primary"
-              size={PANEL_BUTTON_SIZE}
-              pressed={isActive}
-              onClick={() => toggle(btn.key)}
-              aria-expanded={isActive}
-              aria-controls={`mbp-popover-${btn.key}`}
-              icon={btn.icon}
-              styleOverride={{
-                // 地図の上に浮かせるので、開いていないときは下の地図が透けるガラス調にする。
-                // 開いているときは variant の塗りをそのまま使う
-                // （ここで backgroundColor: undefined を渡すと塗りを消してしまう）
-                ...(isActive ? {} : { backgroundColor: colors.glassButton }),
-                // 地図隅の丸ボタン群と高さを揃える（BTN_H を参照）
-                minHeight: BTN_H,
-                backdropFilter: isActive ? 'none' : 'blur(8px)',
-                WebkitBackdropFilter: isActive ? 'none' : 'blur(8px)',
-                fontWeight: 'bold',
-                boxShadow: `0 2px 8px ${colors.shadow}`,
-                userSelect: 'none',
+            <button
+              key={button.key}
+              type="button"
+              onClick={() => toggle(button.key)}
+              aria-expanded={active}
+              aria-controls={`mbp-popover-${button.key}`}
+              style={{
+                flex: 1,
+                minWidth: 0,
+                border: 0,
+                borderRadius: 14,
+                background: active ? 'rgba(33,150,243,.14)' : 'transparent',
+                color: active ? '#2196f3' : colors.textSecondary,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 3,
+                font: 'inherit',
+                cursor: 'pointer',
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
-              {btn.label}
-            </Button>
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 22 }}>{button.icon}</span>
+              <span style={{ fontSize: 11, lineHeight: 1.1, fontWeight: active ? 700 : 600, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {button.label}
+              </span>
+            </button>
           );
         })}
-      </div>
+      </nav>
     </>
   );
 };
