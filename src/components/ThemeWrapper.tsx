@@ -9,6 +9,7 @@ import StickyBottomAd from './StickyBottomAd';
 import type { Language } from '../utils/translation';
 import { getInitialLanguage, persistLanguage } from '../utils/languagePersistence';
 import { getInitialUiVersion, persistUiVersion, type UiVersion } from '../utils/uiVersionPersistence';
+import '../styles/mapControls.css';
 
 /**
  * v2 UI切り替えボタンの表示フラグ。
