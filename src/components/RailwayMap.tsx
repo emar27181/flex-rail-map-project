@@ -4819,6 +4819,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               */}
               <Pane name="travelTimePane" pane="norotatePane" style={{ zIndex: 550 }} />
 
+              {/*
+                現在地マーカー用のPane。markerPane(600)より後面にし、
+                駅アイコンが常に現在地アイコンより手前に来るようにする。
+                以前は`zIndexOffset`（6000/10000）だけで前面に出そうとしていたが、
+                `zIndexOffset`は同じmarkerPane内での「画面Y座標＋offset」の
+                比較にしかならず、画面上の位置によっては駅アイコン
+                （routeCount次第で最大5000）より現在地アイコンが上に来て
+                駅を隠すことがあった。travelTimePaneと同じ理由・同じ対処法
+                （専用Pane化）で確実に後面固定する
+              */}
+              <Pane name="userLocationPane" pane="norotatePane" style={{ zIndex: 590 }} />
+
               {/* バブルマップ: 単一SVGオーバーレイで全バブルを高速描画 */}
               {mapViewMode === 'bubble' && (
                 <BubbleSVGOverlay
@@ -4990,6 +5002,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   icon={userLocationIcon}
                   zIndexOffset={6000}
                   interactive={false}
+                  pane="userLocationPane"
                 />
               )}
 
@@ -5032,6 +5045,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   icon={userLocationIcon}
                   zIndexOffset={10000}
                   interactive={false}
+                  pane="userLocationPane"
                 />
               )}
             </MapContainer>
