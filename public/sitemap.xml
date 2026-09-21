@@ -24,6 +24,17 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/about"/>
   </url>
 
+  <!-- Guide page -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/guide</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/guide?lang=ja"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flex-railway-map.netlify.app/guide?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/guide"/>
+  </url>
+
   <!-- FAQ page -->
   <url>
     <loc>https://flex-railway-map.netlify.app/faq</loc>

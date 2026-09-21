@@ -8240,6 +8240,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "フレックス路線図",
     english: "Flex Railway Map"
   },
+  appTagline: {
+    japanese: "必要な路線だけを表示するシンプルな路線図",
+    english: "Show only the lines you need"
+  },
   aboutLink: {
     japanese: "このサイトについて",
     english: "About"
@@ -8804,6 +8808,7 @@ export const uiChinese: Record<string, string> = {
   menuTitle: "菜单",
   openMenuLabel: "打开菜单",
   appTitle: "弹性路线图",
+  appTagline: "只显示所需路线的简洁路线图",
   aboutLink: "关于本站",
   faqLink: "常见问题",
   privacyLink: "隐私政策",
@@ -9109,6 +9114,7 @@ export const uiKorean: Record<string, string> = {
   menuTitle: "메뉴",
   openMenuLabel: "메뉴 열기",
   appTitle: "플렉스 노선도",
+  appTagline: "필요한 노선만 표시하는 심플한 노선도",
   aboutLink: "사이트 소개",
   faqLink: "자주 묻는 질문",
   privacyLink: "개인정보처리방침",
