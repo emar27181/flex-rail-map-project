@@ -12,9 +12,7 @@
  */
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import { staticPageCss } from './staticPageStyles';
-
-/** 公開URL。hreflang と canonical はここだけを見る */
-const SITE_URL = 'https://flex-railway-map.netlify.app';
+import { SITE_URL, GOOGLE_SITE_VERIFICATION } from '../config/seo';
 
 interface Props {
   /** <title> にそのまま入る */
@@ -47,10 +45,9 @@ const {
 <html lang={htmlLang}>
 	<head>
 		<meta charset="utf-8" />
-		<meta
-			name="google-site-verification"
-			content="uyjBT9z6vOnpxn6lM6YnxbI6R4jLSDIAboC8zo1slhM"
-		/>
+		{GOOGLE_SITE_VERIFICATION && (
+			<meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />
+		)}
 		<meta name="google-adsense-account" content="ca-pub-2444529114040977" />
 		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2444529114040977" crossorigin="anonymous"></script>
 		<link rel="icon" type="image/png" sizes="32x32" href="/icon_flex_rail_way_map.png" />

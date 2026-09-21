@@ -1,15 +1,93 @@
 ---
 import ThemeWrapper from "../components/ThemeWrapper.tsx";
 import leafletCss from "leaflet/dist/leaflet.css?url";
+import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION, GA_MEASUREMENT_ID } from "../config/seo";
+
+// JSON-LD はプレーンな<script>タグの中身をAstroが解釈しないため、
+// SITE_URL等の変数を埋め込むにはここでオブジェクトを組み立てて
+// set:html={JSON.stringify(...)} で出力する（文字列埋め込みだと壊れたJSONになる）。
+const webApplicationSchema = {
+	"@context": "https://schema.org",
+	"@type": "WebApplication",
+	"name": "フレックス路線図",
+	"alternateName": SITE_NAME,
+	"url": `${SITE_URL}/`,
+	"description": "路線図が見にくい・複雑すぎるを解決するシンプルなインタラクティブ路線図サービス。必要な路線だけ選んで表示でき、遅延・運休時も自分で乗り換えを判断できます。",
+	"applicationCategory": "TravelApplication",
+	"operatingSystem": "Any",
+	"inLanguage": ["ja", "en"],
+	"offers": {
+		"@type": "Offer",
+		"price": "0",
+		"priceCurrency": "JPY"
+	},
+	"featureList": [
+		"インタラクティブ路線図表示",
+		"路線の絞り込み表示",
+		"駅間経路検索",
+		"39路線対応",
+		"乗換駅フィルター",
+		"現在地表示（30秒自動更新）"
+	]
+};
+
+const faqSchema = {
+	"@context": "https://schema.org",
+	"@type": "FAQPage",
+	"mainEntity": [
+		{
+			"@type": "Question",
+			"name": "路線図が見にくい・複雑すぎるのはなぜですか？",
+			"acceptedAnswer": {
+				"@type": "Answer",
+				"text": "一般的な路線図はすべての路線・駅情報を一度に表示するため、情報量が多すぎて見にくくなります。フレックス路線図では必要な路線だけを選んで表示できるので、シンプルで見やすくなります。"
+			}
+		},
+		{
+			"@type": "Question",
+			"name": "遅延・運休時に路線図を自分で確認したい",
+			"acceptedAnswer": {
+				"@type": "Answer",
+				"text": "フレックス路線図は、乗り換えアプリの案内が役に立たないイレギュラー時に、出発駅〜到着駅に関係する路線だけを絞り込んで表示できます。乗り換え駅や経路を自分で判断するのに役立ちます。"
+			}
+		},
+		{
+			"@type": "Question",
+			"name": "どの路線が対応していますか？",
+			"acceptedAnswer": {
+				"@type": "Answer",
+				"text": "山手線・中央線・東海道線などJR線、東京メトロ全9路線、都営地下鉄全4路線、小田急・東急・京急・西武など主要私鉄を含む39路線以上に対応しています。"
+			}
+		},
+		{
+			"@type": "Question",
+			"name": "スマートフォンでも使えますか？",
+			"acceptedAnswer": {
+				"@type": "Answer",
+				"text": "はい、スマートフォン・タブレット・PCいずれのブラウザでもご利用いただけます。アプリのインストール不要で、ブラウザから無料でアクセスできます。"
+			}
+		}
+	]
+};
+
+// WebApplicationとは別に、サイト全体（検索・ナビゲーション対象としての「サイト」）を表す。
+// 実在しない検索機能(SearchAction)やレビュー・評価は含めない。
+const webSiteSchema = {
+	"@context": "https://schema.org",
+	"@type": "WebSite",
+	"name": "フレックス路線図",
+	"alternateName": SITE_NAME,
+	"url": `${SITE_URL}/`,
+	"inLanguage": ["ja", "en"]
+};
 ---
 
 <html lang="ja">
 	<head>
 		<meta charset="utf-8" />
-		<meta
-			name="google-site-verification"
-			content="uyjBT9z6vOnpxn6lM6YnxbI6R4jLSDIAboC8zo1slhM"
-		/>
+		{GOOGLE_SITE_VERIFICATION && (
+			<meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />
+		)}
 		<meta name="google-adsense-account" content="ca-pub-2444529114040977" />
 		<script is:inline>
 			// 広告スクリプトは head で読むとアプリのJSと帯域・実行時間を奪い合い、
@@ -26,6 +104,37 @@ import leafletCss from "leaflet/dist/leaflet.css?url";
 				else window.addEventListener('load', load, { once: true });
 			})();
 		</script>
+		{GA_MEASUREMENT_ID && (
+			<script is:inline define:vars={{ GA_MEASUREMENT_ID }}>
+				// GA4も広告スクリプトと同じ理由で、表示に必要なものが揃ってから読み込む。
+				// Consent Mode: 既定は「同意なし」。CookieBannerで既にanalyticsを
+				// 許可済み（localStorageに記録済み）なら即座にgrantedへ更新する。
+				// 新規訪問者にはCookieBanner側の操作でgtagConsent.tsから更新される。
+				(function () {
+					window.dataLayer = window.dataLayer || [];
+					function gtag() { window.dataLayer.push(arguments); }
+					window.gtag = gtag;
+					gtag('consent', 'default', { analytics_storage: 'denied' });
+					try {
+						var stored = JSON.parse(localStorage.getItem('cookieConsent') || 'null');
+						if (stored && stored.analytics) {
+							gtag('consent', 'update', { analytics_storage: 'granted' });
+						}
+					} catch (e) { /* localStorage不可なら既定のdeniedのまま */ }
+
+					var load = function () {
+						var s = document.createElement('script');
+						s.async = true;
+						s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
+						document.head.appendChild(s);
+						gtag('js', new Date());
+						gtag('config', GA_MEASUREMENT_ID);
+					};
+					if (document.readyState === 'complete') load();
+					else window.addEventListener('load', load, { once: true });
+				})();
+			</script>
+		)}
 		<link
 			rel="icon"
 			type="image/png"
@@ -80,7 +189,7 @@ import leafletCss from "leaflet/dist/leaflet.css?url";
 		<title>フレックス路線図 | 路線図が見にくい・複雑すぎる？を解決するシンプルな乗り換え路線図</title>
 
 		<!-- Canonical URL -->
-		<link rel="canonical" href="https://flex-railway-map.netlify.app/" />
+		<link rel="canonical" href={`${SITE_URL}/`} />
 
 		<!-- SEO Meta Description -->
 		<meta name="description" content="路線図が見にくい・複雑すぎると感じていませんか？フレックス路線図は、必要な路線だけ選んで表示できるシンプルなインタラクティブ路線図です。情報を絞り込んで見やすくし、遅延・運休時も自分で乗り換えを判断できます。" />
@@ -90,10 +199,10 @@ import leafletCss from "leaflet/dist/leaflet.css?url";
 
 		<!-- Open Graph / SNS シェア用 -->
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://flex-railway-map.netlify.app/" />
+		<meta property="og:url" content={`${SITE_URL}/`} />
 		<meta property="og:title" content="路線図が見にくい・複雑すぎる？フレックス路線図で解決" />
 		<meta property="og:description" content="必要な路線だけ選んで表示できるシンプルなインタラクティブ路線図。路線図が見にくい・分かりにくいを解決し、遅延・運休時も自分で判断できます。" />
-		<meta property="og:image" content="https://flex-railway-map.netlify.app/icon_flex_rail_way_map.png" />
+		<meta property="og:image" content={DEFAULT_OG_IMAGE} />
 		<meta property="og:locale" content="ja_JP" />
 		<meta property="og:site_name" content="フレックス路線図" />
 
@@ -101,82 +210,21 @@ import leafletCss from "leaflet/dist/leaflet.css?url";
 		<meta name="twitter:card" content="summary" />
 		<meta name="twitter:title" content="路線図が見にくい？フレックス路線図で解決" />
 		<meta name="twitter:description" content="必要な路線だけ絞り込める！路線図が見にくい・複雑すぎるを解決するシンプルなインタラクティブ路線図サービス。" />
-		<meta name="twitter:image" content="https://flex-railway-map.netlify.app/icon_flex_rail_way_map.png" />
+		<meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
 
 		<!-- JSON-LD 構造化データ: WebApplication -->
-		<script type="application/ld+json">
-		{
-			"@context": "https://schema.org",
-			"@type": "WebApplication",
-			"name": "フレックス路線図",
-			"alternateName": "Flex Railway Map",
-			"url": "https://flex-railway-map.netlify.app/",
-			"description": "路線図が見にくい・複雑すぎるを解決するシンプルなインタラクティブ路線図サービス。必要な路線だけ選んで表示でき、遅延・運休時も自分で乗り換えを判断できます。",
-			"applicationCategory": "TravelApplication",
-			"operatingSystem": "Any",
-			"inLanguage": ["ja", "en"],
-			"offers": {
-				"@type": "Offer",
-				"price": "0",
-				"priceCurrency": "JPY"
-			},
-			"featureList": [
-				"インタラクティブ路線図表示",
-				"路線の絞り込み表示",
-				"駅間経路検索",
-				"39路線対応",
-				"乗換駅フィルター",
-				"現在地表示（30秒自動更新）"
-			]
-		}
-		</script>
+		<script type="application/ld+json" set:html={JSON.stringify(webApplicationSchema)} />
 
 		<!-- JSON-LD 構造化データ: FAQ -->
-		<script type="application/ld+json">
-		{
-			"@context": "https://schema.org",
-			"@type": "FAQPage",
-			"mainEntity": [
-				{
-					"@type": "Question",
-					"name": "路線図が見にくい・複雑すぎるのはなぜですか？",
-					"acceptedAnswer": {
-						"@type": "Answer",
-						"text": "一般的な路線図はすべての路線・駅情報を一度に表示するため、情報量が多すぎて見にくくなります。フレックス路線図では必要な路線だけを選んで表示できるので、シンプルで見やすくなります。"
-					}
-				},
-				{
-					"@type": "Question",
-					"name": "遅延・運休時に路線図を自分で確認したい",
-					"acceptedAnswer": {
-						"@type": "Answer",
-						"text": "フレックス路線図は、乗り換えアプリの案内が役に立たないイレギュラー時に、出発駅〜到着駅に関係する路線だけを絞り込んで表示できます。乗り換え駅や経路を自分で判断するのに役立ちます。"
-					}
-				},
-				{
-					"@type": "Question",
-					"name": "どの路線が対応していますか？",
-					"acceptedAnswer": {
-						"@type": "Answer",
-						"text": "山手線・中央線・東海道線などJR線、東京メトロ全9路線、都営地下鉄全4路線、小田急・東急・京急・西武など主要私鉄を含む39路線以上に対応しています。"
-					}
-				},
-				{
-					"@type": "Question",
-					"name": "スマートフォンでも使えますか？",
-					"acceptedAnswer": {
-						"@type": "Answer",
-						"text": "はい、スマートフォン・タブレット・PCいずれのブラウザでもご利用いただけます。アプリのインストール不要で、ブラウザから無料でアクセスできます。"
-					}
-				}
-			]
-		}
-		</script>
+		<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+		<!-- JSON-LD 構造化データ: WebSite -->
+		<script type="application/ld+json" set:html={JSON.stringify(webSiteSchema)} />
 
 		<!-- hreflang for multilingual SEO -->
-		<link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/" />
-		<link rel="alternate" hreflang="en" href="https://flex-railway-map.netlify.app/" />
-		<link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/" />
+		<link rel="alternate" hreflang="ja" href={`${SITE_URL}/`} />
+		<link rel="alternate" hreflang="en" href={`${SITE_URL}/`} />
+		<link rel="alternate" hreflang="x-default" href={`${SITE_URL}/`} />
 		<!--
 			Leaflet の CSS は CDN ではなく依存パッケージから読む。
 			CDN 経由だと unpkg に到達できないときにスタイルが当たらず、

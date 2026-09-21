@@ -1,5 +1,54 @@
 # CHANGE LOG
 
+## [2026-09-21] セッション（集客のための最低限のSEO・計測基盤）
+
+外部アクセスがほぼ無い状態から検索流入を得るための土台作り。大規模な機能追加や
+大量ページ生成はせず、既存UI・地図機能を壊さない小さな変更を優先した。
+
+### feat: SEOメタデータの一元管理化とSearch Console/GA4のハードコード解除
+- `src/config/seo.ts`（新規）, `src/layouts/StaticPage.astro`, `src/pages/index.astro`,
+  `src/utils/gtagConsent.ts`（新規）, `src/components/CookieBanner.tsx`
+- サイト名(`Flex Railway Map`)・公開URL・OGP画像・Search Console確認コード・
+  GA4測定IDを`src/config/seo.ts`に一元化。`index.astro`と`StaticPage.astro`に
+  別々にハードコードされていたcanonical/OGP/hreflangのURLをここから参照するよう変更
+- Search ConsoleのHTMLタグ確認コードは`content="uyjBT9z..."`が直書きされていたのを、
+  `GOOGLE_SITE_VERIFICATION`環境変数から読むように変更（未設定ならタグ自体を出さない）。
+  **本番で有効にするにはNetlifyの環境変数にこれまでの値を設定する必要がある**
+  （READMEに設定方法を追記）
+- GA4は未導入だった（`analytics`同意Cookieの選択UIだけ存在し、実際の計測コードは
+  どこにも無かった）。`VITE_GA_MEASUREMENT_ID`環境変数が設定されている場合のみ、
+  広告スクリプトと同じ「表示に必要なものが揃ってから読み込む」パターンで
+  `gtag.js`を読み込むようにした。既定は[Consent Mode](https://developers.google.com/tag-platform/security/guides/consent)で
+  「同意なし」、CookieBannerの分析Cookie許可と連動して同意状態を更新する
+  （`src/utils/gtagConsent.ts`）
+- JSON-LDの`WebApplication`/`FAQPage`はプレーンな`<script>`タグ内に文字列で
+  URLを埋め込んでいたため変数化できていなかった。frontmatterでオブジェクトを
+  組み立て`set:html={JSON.stringify(...)}`で出力する形に変更し、`WebSite`を追加
+  （実在しない検索機能・レビュー・評価・価格は含めない）
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build` すべて通過を確認
+
+### feat: 使い方ガイドページ(/guide)を新規追加、トップページに一行の説明を追加
+- `src/pages/guide.astro`（新規）, `public/sitemap.xml`, `src/components/NavigationBar.tsx`,
+  `src/utils/translation.ts`
+- `/guide`を`StaticPage.astro`パターン（`/about`と同じ構成）で新規作成。
+  実装済み機能のみを説明（路線表示切替・出発/到着駅・所要時間・経由駅・
+  表示設定・スマートフォンでの基本操作）。存在しない機能は書いていない
+- ヘッダーのハンバーガーメニューに「使い方ガイド」リンクを追加（他の固定ページと
+  同じ位置づけ）。`sitemap.xml`にも`/guide`を追加
+- ヘッダーのタイトル直下に、検索エンジン・初めて見る人向けの一行キャッチコピー
+  （`appTagline`、4言語対応）を追加。地図を主役にした構成を崩さないよう、
+  1行に収まりきらない場合は折り返さず省略（`text-overflow: ellipsis`）にした
+  （最初はそのまま折り返しさせたところ、モバイル幅でヘッダーが3行になり
+  ヘッダーの高さが目に見えて伸びてしまったため、テキスト自体も短縮した上で対応）
+- Playwrightでデスクトップ幅(1280px)・モバイル幅(390px)の両方を確認。
+  地図はデフォルトでフルスクリーン表示（既存仕様）のため、このヘッダーは
+  ユーザーが縮小表示に切り替えたときに見える。地図自体・既存UIへの影響なし
+
+### docs: SEO関連の環境変数の設定方法をREADMEに追記
+- `README.md`
+- `VITE_GA_MEASUREMENT_ID` / `GOOGLE_SITE_VERIFICATION` の2つの環境変数について、
+  用途・入手元・ローカル/Netlifyでの設定方法を追記
+
 ## [2026-09-21] セッション（駅アイコン下の時刻表示トグル・出発/到着基準の切替）
 
 ### feat: 「時刻を表示」トグルを追加、出発時刻/到着時刻の基準を切り替えられるように

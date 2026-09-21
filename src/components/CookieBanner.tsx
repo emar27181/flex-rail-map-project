@@ -7,6 +7,7 @@ import { translateUI } from '../utils/translation';
 import type { Language } from '../utils/translation';
 import { FS } from '../constants/ui';
 import { L } from './legend/legendStyles';
+import { updateAnalyticsConsent } from '../utils/gtagConsent';
 
 interface CookieBannerProps {
   language: Language;
@@ -42,6 +43,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
     localStorage.setItem('cookieConsent', JSON.stringify(preferences));
     localStorage.setItem('cookieConsentDate', new Date().toISOString());
     setCookiePreferences(preferences);
+    updateAnalyticsConsent(preferences.analytics);
     setIsVisible(false);
     setShowSettings(false);
   };
@@ -49,6 +51,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
   const handleSaveSettings = () => {
     localStorage.setItem('cookieConsent', JSON.stringify(cookiePreferences));
     localStorage.setItem('cookieConsentDate', new Date().toISOString());
+    updateAnalyticsConsent(cookiePreferences.analytics);
     setIsVisible(false);
     setShowSettings(false);
   };
@@ -62,6 +65,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
     localStorage.setItem('cookieConsent', JSON.stringify(preferences));
     localStorage.setItem('cookieConsentDate', new Date().toISOString());
     setCookiePreferences(preferences);
+    updateAnalyticsConsent(preferences.analytics);
     setIsVisible(false);
     setShowSettings(false);
   };
