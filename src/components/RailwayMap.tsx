@@ -1774,7 +1774,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     <span style={{ fontSize: FS.caption, color: colors.primary, flexShrink: 0 }}>{translateUI('onboard', currentLanguage)}</span>
                   )}
                   {!isShowing && (
-                    <ColorChip color={routeColor} theme={theme} fontSize={FS.caption}>
+                    <ColorChip color={routeColor} theme={theme} fontSize={FS.caption} shadow={false}>
                       ＋{translateUI('show', currentLanguage)}
                     </ColorChip>
                   )}

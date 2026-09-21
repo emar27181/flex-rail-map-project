@@ -1,5 +1,23 @@
 # CHANGE LOG
 
+## [2026-09-21] セッション（駅ツールチップ「＋表示」チップの縁取り(shadow)をオフに）
+
+### improve: ColorChipにshadow propを追加し、「＋表示」チップだけ縁取りを止める
+- `src/components/ui/ColorChip.tsx`, `src/components/RailwayMap.tsx`
+- 「＋表示のシャドウをオフに、これも一元管理対象にね。アトミックデザイン
+  で」という要望を受けた
+- `ColorChip`（色付きチップのアトム）は、背景色が明るくコントラスト
+  不足の場合に読みやすさ確保のため`textShadow`で縁取りを足す仕組みが
+  元々あった（WCAG対策、`needsHalo`）。駅ツールチップの左カラムにある
+  「＋表示」チップ（経路外の路線を地図に追加表示するボタン）でこの
+  縁取りが目立っていたため、個別にスタイルを上書きするのではなく
+  `ColorChip`に`shadow`プロパティ（既定`true`）を追加し、この呼び出し
+  箇所だけ`shadow={false}`を渡してオフにした。他のColorChip利用箇所
+  （時刻表の列車種別バッジ）は既定のまま変更していない
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで「＋表示」チップの`textShadow`が`none`に
+  なっていることを実測確認
+
 ## [2026-09-21] セッション（CookieBannerをコンパクト化: カテゴリ横並び・ボタンサイズ統一）
 
 ### improve: Cookie設定パネルを横並びレイアウトに、ボタンをsm規格に統一してコンパクト化

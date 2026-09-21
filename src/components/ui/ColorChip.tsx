@@ -21,6 +21,14 @@ export type ColorChipProps = {
   fontSize?: string;
   /** 太字にするか */
   bold?: boolean;
+  /**
+   * 明るい色でコントラスト不足のとき縁取り(textShadow)を足す既定の
+   * 読みやすさ対策を使うか。既定はtrue。false にすると縁取りを出さない
+   * （地図上の小さな「＋表示」チップなど、縁取りがかえって滲んで見える
+   * 場面向け。使う場所ごとに個別のtextShadowを書かず、ここ1箇所で
+   * on/offを切り替える）。
+   */
+  shadow?: boolean;
   title?: string;
   style?: CSSProperties;
   onClick?: (e: React.MouseEvent) => void;
@@ -32,6 +40,7 @@ export default function ColorChip({
   children,
   fontSize = FS.caption,
   bold = false,
+  shadow = true,
   title,
   style,
   onClick,
@@ -46,7 +55,7 @@ export default function ColorChip({
         backgroundColor: background,
         color: text,
         // 4.5:1 に届かない明るい色は縁取りで読めるようにする
-        textShadow: needsHalo ? '0 0 2px rgba(0,0,0,0.95),0 1px 2px rgba(0,0,0,0.9)' : undefined,
+        textShadow: shadow && needsHalo ? '0 0 2px rgba(0,0,0,0.95),0 1px 2px rgba(0,0,0,0.9)' : undefined,
         fontSize,
         fontWeight: bold ? 'bold' : 'normal',
         borderRadius: L.r.control,
