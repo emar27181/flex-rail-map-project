@@ -1,5 +1,24 @@
 # CHANGE LOG
 
+## [2026-09-21] セッション（経由駅チップをアトム化: RemovableTagを新設）
+
+### improve: 経由駅の選択済みチップをアトムのRemovableTagに切り出し
+- `src/components/ui/atoms/RemovableTag.tsx`（新規）,
+  `src/components/StationSelector.tsx`
+- 「経由駅を追加のデザインもアトミックデザインで。一元管理で」という
+  要望を受けた。「経由駅を追加」ボタン自体は既に`Button`アトムを
+  使っていたが、選択済みの経由駅チップ（「1. 新宿 ×」のような表示）は
+  padding・角丸・枠線・背景色をStationSelector.tsx側で直接手書きしており、
+  既存のアトム（Button/Chip等）のどれにも当てはまらなかった
+  （Chipアトムは「路線色を持つ選択トグル」用で、単純な削除可能タグとは
+  用途が違う）
+- 「選んだものを一覧で見せて、個別に外せる」ための新しいアトム
+  `RemovableTag`を`ui/atoms/`に追加。寸法は他の操作部品と同じ
+  `CONTROL_SIZE`から取り、削除ボタンは既存の`IconButton`アトムを
+  そのまま使う。経由駅チップをこのアトムに置き換えた
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで経由駅チップの表示・削除ボタンの動作を確認
+
 ## [2026-09-21] セッション（出発/到着の基準切替を「現在時刻」ボタンの右に詰めて配置）
 
 ### improve: 時刻基準(出発/到着)の切替を現在時刻ボタンと同じ行に移動

@@ -14,7 +14,8 @@ import { FS, TARGET, SEMANTIC, alphaWhite } from '../constants/ui';
 import { L } from './legend/legendStyles';
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
-import { FLOATING_ICON_BUTTON_SIZE, CONTROL_SIZE } from './ui/atoms/controlSize';
+import RemovableTag from './ui/atoms/RemovableTag';
+import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 import TextField from './ui/atoms/TextField';
@@ -897,31 +898,14 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               {(waypoints ?? []).length > 0 && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.xs, marginBottom: showWaypointInput ? L.sp.xs : 0 }}>
                   {(waypoints ?? []).map((wp, index) => (
-                    <div
+                    <RemovableTag
                       key={`${wp.name}-${index}`}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: L.sp.xxs,
-                        paddingLeft: L.sp.sm,
-                        paddingRight: L.sp.xxs,
-                        minHeight: `${CONTROL_SIZE.sm.minHeight}px`,
-                        borderRadius: L.r.pill,
-                        border: `1px solid ${colors.border}`,
-                        backgroundColor: colors.surfaceElevated,
-                        fontSize: FS.caption,
-                        color: colors.text,
-                      }}
-                    >
-                      <span>{index + 1}. {translateStation(wp.name, language)}</span>
-                      <IconButton
-                        theme={theme}
-                        size="sm"
-                        onClick={() => onRemoveWaypoint?.(index)}
-                        label={translateUI('clearSelection', language)}
-                        icon={<X size={12} />}
-                      />
-                    </div>
+                      theme={theme}
+                      size="sm"
+                      label={`${index + 1}. ${translateStation(wp.name, language)}`}
+                      onRemove={() => onRemoveWaypoint?.(index)}
+                      removeLabel={translateUI('clearSelection', language)}
+                    />
                   ))}
                 </div>
               )}
