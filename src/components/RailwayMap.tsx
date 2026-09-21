@@ -1595,19 +1595,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onClick={() => { setArrival(stationTooltip.station); closeTooltip(); }}
               >{translateUI('setArrivalStation', currentLanguage)}</Button>
             </div>
-            <div style={{ marginBottom: L.sp.xs }}>
-              <SegmentedControl
-                theme={theme}
-                size="sm"
-                ariaLabel={translateUI('baseTime', currentLanguage)}
-                value={timeMode}
-                onChange={setTimeMode}
-                options={[
-                  { value: 'departure', label: translateUI('timeBasisDeparture', currentLanguage) },
-                  { value: 'arrival', label: translateUI('timeBasisArrival', currentLanguage) },
-                ]}
-              />
-            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs }}>
               <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
                 {translateUI(timeMode === 'arrival' ? 'arrivalTimeLabel' : 'baseTime', currentLanguage)}
@@ -1631,6 +1618,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   setTimetableBaseTime(`${hh}:${mm}`);
                 }}
               >{translateUI('currentTime', currentLanguage)}</Button>
+            </div>
+            <div style={{ marginTop: L.sp.xs }}>
+              <SegmentedControl
+                theme={theme}
+                size="sm"
+                ariaLabel={translateUI('baseTime', currentLanguage)}
+                value={timeMode}
+                onChange={setTimeMode}
+                options={[
+                  { value: 'departure', label: translateUI('timeBasisDeparture', currentLanguage) },
+                  { value: 'arrival', label: translateUI('timeBasisArrival', currentLanguage) },
+                ]}
+              />
             </div>
           </div>
         </div>

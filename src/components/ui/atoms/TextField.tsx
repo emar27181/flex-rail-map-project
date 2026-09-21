@@ -45,7 +45,11 @@ const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(({
       style={{
         width: fullWidth ? '100%' : undefined,
         boxSizing: 'border-box',
+        // type="time"/"date"/"number" はブラウザ既定のUI部品(スピナー等)の
+        // 都合でminHeightだけだと規格より高くなることがあるため、
+        // heightも明示してテキスト欄と確実に揃える
         minHeight: `${dims.minHeight}px`,
+        height: `${dims.minHeight}px`,
         padding: dims.padding,
         border: `${CONTROL_BORDER_WIDTH}px solid ${colors.border}`,
         borderRadius: dims.radius,

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { ArrowLeftRight, Clock, Timer, Waypoints, X } from 'lucide-react';
+import { ArrowLeftRight, Clock, LocateFixed, Timer, Waypoints, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
@@ -813,10 +813,11 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               {onSetNearestDeparture && (
                 <Button
                   theme={theme}
-                  // 出発駅欄と同じ緑の塗りつぶしで、出発側の操作だと分かるようにする
-                  variant="positive"
+                  // 他の行内ボタン（乗換駅のみ表示など）と同じ見た目に揃える
+                  variant="primary"
                   size="sm"
                   onClick={onSetNearestDeparture}
+                  icon={<LocateFixed size={14} aria-hidden />}
                 >
                   {translateUI('currentLocationFrom', language)}
                 </Button>
@@ -877,9 +878,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           */}
           {onAddWaypoint && (
             <div style={{ marginTop: L.sp.md }}>
-              <label style={{ display: 'block', marginBottom: L.sp.xs, fontWeight: 'bold', color: colors.textSecondary, fontSize: FS.caption }}>
-                {translateUI('viaStations', language)}
-              </label>
               {(waypoints ?? []).length > 0 && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.xs, marginBottom: L.sp.xs }}>
                   {(waypoints ?? []).map((wp, index) => (
@@ -998,24 +996,11 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             駅選択パネルからも直接変更できるようにしている。
             timeMode（出発/到着）で、この時刻を「出発時刻」として使うか
             「到着時刻」として使うかを切り替えられる（ラベルも連動して変わる）。
+            「時刻を表示」ボタンと同様、経路が無いと意味を持たないため
+            出発駅・到着駅の両方が決まってから表示する。
           */}
-          {SHOW_DEPARTURE_TIME_ROW && onDepartureTimeChange && (
+          {SHOW_DEPARTURE_TIME_ROW && onDepartureTimeChange && departure && arrival && (
             <div style={{ marginTop: L.sp.sm }}>
-              {onTimeModeChange && (
-                <div style={{ marginBottom: L.sp.xs }}>
-                  <SegmentedControl
-                    theme={theme}
-                    size="sm"
-                    ariaLabel={translateUI('baseTime', language)}
-                    value={timeMode}
-                    onChange={onTimeModeChange}
-                    options={[
-                      { value: 'departure', label: translateUI('timeBasisDeparture', language) },
-                      { value: 'arrival', label: translateUI('timeBasisArrival', language) },
-                    ]}
-                  />
-                </div>
-              )}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1048,6 +1033,21 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   {translateUI('currentTime', language)}
                 </Button>
               </div>
+              {onTimeModeChange && (
+                <div style={{ marginTop: L.sp.xs }}>
+                  <SegmentedControl
+                    theme={theme}
+                    size="sm"
+                    ariaLabel={translateUI('baseTime', language)}
+                    value={timeMode}
+                    onChange={onTimeModeChange}
+                    options={[
+                      { value: 'departure', label: translateUI('timeBasisDeparture', language) },
+                      { value: 'arrival', label: translateUI('timeBasisArrival', language) },
+                    ]}
+                  />
+                </div>
+              )}
             </div>
           )}
 
