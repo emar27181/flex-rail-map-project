@@ -127,6 +127,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const [showArrivalResults, setShowArrivalResults] = useState(false);
   const [waypointSearch, setWaypointSearch] = useState('');
   const [showWaypointResults, setShowWaypointResults] = useState(false);
+  const [showWaypointInput, setShowWaypointInput] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [departureDropdownPos, setDepartureDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
@@ -336,6 +337,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     onAddWaypoint?.(station);
     setWaypointSearch('');
     setShowWaypointResults(false);
+    setShowWaypointInput(false);
   };
 
   const handleDepartureSelect = (station: Station) => {
@@ -864,6 +866,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             と同じ検索候補ロジック（filterStations）を使うが、ドロップダウンは
             createPortal を使わない簡易版にしている（経由駅は補助的な操作で、
             出発駅・到着駅ほど頻繁に開閉しないため）。
+            入力欄は常時出しておくと使わない人にも余白を占有するため、
+            「経由駅を追加」ボタンを押したときだけ出す（アトムのButtonを使用）。
           */}
           {onAddWaypoint && (
             <div style={{ marginTop: L.sp.md }}>
@@ -901,69 +905,84 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   ))}
                 </div>
               )}
-              <div style={{ position: 'relative' }}>
-                <TextField
+              {!showWaypointInput ? (
+                <Button
                   theme={theme}
                   size="sm"
-                  type="text"
-                  value={waypointSearch}
-                  onChange={(e) => {
-                    setWaypointSearch(e.target.value);
-                    setShowWaypointResults(true);
-                  }}
-                  onFocus={(e) => {
-                    focusedInputRef.current = e.currentTarget;
-                    setShowWaypointResults(true);
-                  }}
-                  onBlur={() => {
-                    focusedInputRef.current = null;
-                    setShowWaypointResults(false);
-                  }}
-                  placeholder={translateUI('addWaypoint', language)}
-                />
-                {showWaypointResults && (
-                  <div
-                    // input の blur より先に効かせて、候補クリックが確実に通るようにする
-                    onMouseDown={(e) => e.preventDefault()}
-                    style={{
-                      position: 'absolute',
-                      top: '100%',
-                      left: 0,
-                      right: 0,
-                      zIndex: 20,
-                      marginTop: L.sp.xxs,
-                      maxHeight: '160px',
-                      overflowY: 'auto',
-                      backgroundColor: colors.surfaceElevated,
-                      border: `1px solid ${colors.border}`,
-                      borderRadius: L.r.control,
-                      boxShadow: `0 2px 8px ${colors.shadow}`,
+                  variant="outline"
+                  icon={<Waypoints size={14} />}
+                  onClick={() => setShowWaypointInput(true)}
+                >
+                  {translateUI('addWaypoint', language)}
+                </Button>
+              ) : (
+                <div style={{ position: 'relative' }}>
+                  <TextField
+                    theme={theme}
+                    size="sm"
+                    type="text"
+                    autoFocus
+                    value={waypointSearch}
+                    onChange={(e) => {
+                      setWaypointSearch(e.target.value);
+                      setShowWaypointResults(true);
                     }}
-                  >
-                    {filteredWaypointStations.map((station, index) => (
-                      <div
-                        key={`${station.name}-${index}`}
-                        onClick={() => handleWaypointSelect(station)}
-                        style={{
-                          padding: `${L.sp.sm} ${L.sp.md}`,
-                          cursor: 'pointer',
-                          fontSize: FS.body,
-                          borderBottom: index < filteredWaypointStations.length - 1 ? `1px solid ${colors.borderLight}` : 'none',
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surface}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
-                      >
-                        {translateStation(station.name, language)}
-                      </div>
-                    ))}
-                    {filteredWaypointStations.length === 0 && (
-                      <div style={{ padding: `${L.sp.sm} ${L.sp.md}`, fontSize: FS.caption, color: colors.textSecondary }}>
-                        {translateUI('noStationFound', language)}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+                    onFocus={(e) => {
+                      focusedInputRef.current = e.currentTarget;
+                      setShowWaypointResults(true);
+                    }}
+                    onBlur={() => {
+                      focusedInputRef.current = null;
+                      setShowWaypointResults(false);
+                      setShowWaypointInput(false);
+                      setWaypointSearch('');
+                    }}
+                    placeholder={translateUI('addWaypoint', language)}
+                  />
+                  {showWaypointResults && (
+                    <div
+                      // input の blur より先に効かせて、候補クリックが確実に通るようにする
+                      onMouseDown={(e) => e.preventDefault()}
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        right: 0,
+                        zIndex: 20,
+                        marginTop: L.sp.xxs,
+                        maxHeight: '160px',
+                        overflowY: 'auto',
+                        backgroundColor: colors.surfaceElevated,
+                        border: `1px solid ${colors.border}`,
+                        borderRadius: L.r.control,
+                        boxShadow: `0 2px 8px ${colors.shadow}`,
+                      }}
+                    >
+                      {filteredWaypointStations.map((station, index) => (
+                        <div
+                          key={`${station.name}-${index}`}
+                          onClick={() => handleWaypointSelect(station)}
+                          style={{
+                            padding: `${L.sp.sm} ${L.sp.md}`,
+                            cursor: 'pointer',
+                            fontSize: FS.body,
+                            borderBottom: index < filteredWaypointStations.length - 1 ? `1px solid ${colors.borderLight}` : 'none',
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surface}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
+                        >
+                          {translateStation(station.name, language)}
+                        </div>
+                      ))}
+                      {filteredWaypointStations.length === 0 && (
+                        <div style={{ padding: `${L.sp.sm} ${L.sp.md}`, fontSize: FS.caption, color: colors.textSecondary }}>
+                          {translateUI('noStationFound', language)}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
