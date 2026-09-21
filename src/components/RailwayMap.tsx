@@ -8,7 +8,7 @@ import StationSelector from './StationSelector';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
-import { RouteFinder, TimeFilter, type RouteResult, type StationWithTime } from '../utils/routeFinder';
+import { RouteFinder, TimeFilter, findRoutesViaWaypoints, type RouteResult, type StationWithTime } from '../utils/routeFinder';
 import { getRouteDestination, getRouteDisplayText, getDirectionText, commonDirections } from '../data/routeDestinations';
 import { useTheme, getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
 import { translateStation, translateRoute, translateUI, translateTrainType, translatePlatform, translateDestination, translateStatParamLabel, translateStatUnit } from '../utils/translation';
@@ -181,6 +181,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 出発・到着ともに未選択状態でスタート（出発は現在地から自動設定される）
   const [departure, setDeparture] = useState<Station | null>(null);
   const [arrival, setArrival] = useState<Station | null>(null);
+  /** 経由駅（順序どおりに経由する） */
+  const [waypoints, setWaypoints] = useState<Station[]>([]);
+  const handleAddWaypoint = useCallback((station: Station) => {
+    setWaypoints(prev => (prev.some(s => s.name === station.name) ? prev : [...prev, station]));
+  }, []);
+  const handleRemoveWaypoint = useCallback((index: number) => {
+    setWaypoints(prev => prev.filter((_, i) => i !== index));
+  }, []);
   const [routeRecommendations, setRouteRecommendations] = useState<RouteResult[]>([]);
   const [selectedRouteIndices, setSelectedRouteIndices] = useState<Set<number> | null>(null);
   // メインの出発駅とは別に、同じゴール駅への経路を比較したい追加出発駅（例: 藤沢・大磯・平塚から新橋）
@@ -2786,10 +2794,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 出発駅と到着駅が設定された時にルート検索を実行
   useEffect(() => {
     if (departure && arrival) {
-      const routeResults = routeFinder.findRoutes(departure, arrival, maxRouteRecommendations * 2); // 多めに取得
-
-      // 表示レベルでの最終重複除去
-      const finalUniqueRoutes = removeFinalDuplicates(routeResults).slice(0, maxRouteRecommendations);
+      // 経由駅が指定されているときは、区間ごとに分割して検索した結果をつなげた
+      // 1本のルートだけを提示する（既存の複数候補探索アルゴリズムは経由駅に
+      // 対応していないため、既存ロジックには手を入れず結果の作り方だけ分ける。
+      // 以降の「使用路線の自動表示」等の処理は経由駅の有無に関わらず共通）
+      const finalUniqueRoutes = waypoints.length > 0
+        ? (() => {
+            const viaRoute = findRoutesViaWaypoints(routeFinder, departure, waypoints, arrival);
+            return viaRoute ? [viaRoute] : [];
+          })()
+        : removeFinalDuplicates(
+            routeFinder.findRoutes(departure, arrival, maxRouteRecommendations * 2) // 多めに取得
+          ).slice(0, maxRouteRecommendations);
 
       setRouteRecommendations(finalUniqueRoutes);
       setSelectedRouteIndices(null);
@@ -2864,7 +2880,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       setRouteRecommendations([]);
       setSelectedRouteIndices(null);
     }
-  }, [departure, arrival, routeFinder, maxRouteRecommendations, removeFinalDuplicates]);
+  }, [departure, arrival, waypoints, routeFinder, maxRouteRecommendations, removeFinalDuplicates]);
 
   // 時間フィルターが有効な時の駅フィルタリング（出発駅ベース）
   useEffect(() => {
@@ -4435,6 +4451,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onShowTravelTimeChange={setShowTravelTimes}
                 showTransferStationsOnly={showTransferStationsOnly}
                 onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
+                waypoints={waypoints}
+                onAddWaypoint={handleAddWaypoint}
+                onRemoveWaypoint={handleRemoveWaypoint}
               />
               {routeRecommendationsPanel}
             </div>
@@ -4464,6 +4483,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             onShowTravelTimeChange={setShowTravelTimes}
             showTransferStationsOnly={showTransferStationsOnly}
             onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
+            waypoints={waypoints}
+            onAddWaypoint={handleAddWaypoint}
+            onRemoveWaypoint={handleRemoveWaypoint}
           />
         )}
 
@@ -5835,6 +5857,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onShowTravelTimeChange={setShowTravelTimes}
                 showTransferStationsOnly={showTransferStationsOnly}
                 onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
+                waypoints={waypoints}
+                onAddWaypoint={handleAddWaypoint}
+                onRemoveWaypoint={handleRemoveWaypoint}
               />
             </div>
           )}

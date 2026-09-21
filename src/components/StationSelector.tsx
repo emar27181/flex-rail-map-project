@@ -14,7 +14,7 @@ import { FS, TARGET, SEMANTIC, alphaWhite } from '../constants/ui';
 import { L } from './legend/legendStyles';
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
-import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
+import { FLOATING_ICON_BUTTON_SIZE, CONTROL_SIZE } from './ui/atoms/controlSize';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 import TextField from './ui/atoms/TextField';
@@ -31,9 +31,11 @@ const SUGGESTION_NEARBY_COUNT = 2;
 const SUGGESTION_HEAD_COUNT = SUGGESTION_NEARBY_COUNT + SUGGESTION_FREQUENT_COUNT;
 /**
  * 駅選択パネル内の「出発時刻」行を出すか。
- * 同じ設定が駅ツールチップ側にもあるため既定では出さない。
+ * 同じ設定は駅ツールチップ側にもある（timetableBaseTime を共有）が、
+ * 「経由駅の設定と、時刻の設定も出発駅とかの入力の下でできるように」との
+ * 要望を受け、駅選択パネルからも直接操作できるようにした
  */
-const SHOW_DEPARTURE_TIME_ROW: boolean = false;
+const SHOW_DEPARTURE_TIME_ROW: boolean = true;
 /** 近隣駅は候補の補充にも使うため、先頭3件より多めに求めておく */
 const NEARBY_STATION_COUNT = STATION_SUGGESTION_LIMIT;
 
@@ -68,6 +70,12 @@ interface StationSelectorProps {
   showTransferStationsOnly?: boolean;
   /** 乗換駅のみ表示の切り替え。渡されたときだけボタンを出す */
   onShowTransferStationsOnlyChange?: (value: boolean) => void;
+  /** 経由駅（順序付き）。渡されたときだけ経由駅の設定UIを出す */
+  waypoints?: Station[];
+  /** 経由駅を追加する */
+  onAddWaypoint?: (station: Station) => void;
+  /** 経由駅を削除する（配列インデックス指定） */
+  onRemoveWaypoint?: (index: number) => void;
 }
 
 const StationSelector: React.FC<StationSelectorProps> = ({
@@ -94,6 +102,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   onShowTravelTimeChange,
   showTransferStationsOnly = false,
   onShowTransferStationsOnlyChange,
+  waypoints,
+  onAddWaypoint,
+  onRemoveWaypoint,
 }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -101,6 +112,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const [arrivalSearch, setArrivalSearch] = useState('');
   const [showDepartureResults, setShowDepartureResults] = useState(false);
   const [showArrivalResults, setShowArrivalResults] = useState(false);
+  const [waypointSearch, setWaypointSearch] = useState('');
+  const [showWaypointResults, setShowWaypointResults] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [departureDropdownPos, setDepartureDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
@@ -299,6 +312,18 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     () => filterStations(arrivalSearch, arrivalSuggestions),
     [allStations, arrivalSearch, arrivalSuggestions]
   );
+
+  // 経由駅の候補は、まだ経由駅に入っていない駅だけに絞る（同じ駅を二重に選べないように）
+  const filteredWaypointStations = useMemo(() => {
+    const already = new Set((waypoints ?? []).map(s => s.name));
+    return filterStations(waypointSearch, majorStations).filter(s => !already.has(s.name));
+  }, [allStations, waypointSearch, majorStations, waypoints]);
+
+  const handleWaypointSelect = (station: Station) => {
+    onAddWaypoint?.(station);
+    setWaypointSearch('');
+    setShowWaypointResults(false);
+  };
 
   const handleDepartureSelect = (station: Station) => {
     departureClickedRef.current = true;
@@ -809,9 +834,118 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           )}
 
           {/*
-            出発時刻の行はここでは表示しない。
-            駅ツールチップ側に同じ設定（timetableBaseTime を共有）があり、
-            駅選択パネルでは駅の指定に集中させたいため。
+            経由駅の設定。「経由駅の設定と、時刻の設定も出発駅とかの入力の下で
+            できるように」という要望を受けて追加した。出発駅・到着駅の入力欄
+            と同じ検索候補ロジック（filterStations）を使うが、ドロップダウンは
+            createPortal を使わない簡易版にしている（経由駅は補助的な操作で、
+            出発駅・到着駅ほど頻繁に開閉しないため）。
+          */}
+          {onAddWaypoint && (
+            <div style={{ marginTop: L.sp.md }}>
+              <label style={{ display: 'block', marginBottom: L.sp.xs, fontWeight: 'bold', color: colors.textSecondary, fontSize: FS.caption }}>
+                {translateUI('viaStations', language)}
+              </label>
+              {(waypoints ?? []).length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.xs, marginBottom: L.sp.xs }}>
+                  {(waypoints ?? []).map((wp, index) => (
+                    <div
+                      key={`${wp.name}-${index}`}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: L.sp.xxs,
+                        paddingLeft: L.sp.sm,
+                        paddingRight: L.sp.xxs,
+                        minHeight: `${CONTROL_SIZE.sm.minHeight}px`,
+                        borderRadius: L.r.pill,
+                        border: `1px solid ${colors.border}`,
+                        backgroundColor: colors.surfaceElevated,
+                        fontSize: FS.caption,
+                        color: colors.text,
+                      }}
+                    >
+                      <span>{index + 1}. {translateStation(wp.name, language)}</span>
+                      <IconButton
+                        theme={theme}
+                        size="sm"
+                        onClick={() => onRemoveWaypoint?.(index)}
+                        label={translateUI('clearSelection', language)}
+                        icon={<X size={12} />}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div style={{ position: 'relative' }}>
+                <TextField
+                  theme={theme}
+                  size="sm"
+                  type="text"
+                  value={waypointSearch}
+                  onChange={(e) => {
+                    setWaypointSearch(e.target.value);
+                    setShowWaypointResults(true);
+                  }}
+                  onFocus={(e) => {
+                    focusedInputRef.current = e.currentTarget;
+                    setShowWaypointResults(true);
+                  }}
+                  onBlur={() => {
+                    focusedInputRef.current = null;
+                    setShowWaypointResults(false);
+                  }}
+                  placeholder={translateUI('addWaypoint', language)}
+                />
+                {showWaypointResults && (
+                  <div
+                    // input の blur より先に効かせて、候補クリックが確実に通るようにする
+                    onMouseDown={(e) => e.preventDefault()}
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      zIndex: 20,
+                      marginTop: L.sp.xxs,
+                      maxHeight: '160px',
+                      overflowY: 'auto',
+                      backgroundColor: colors.surfaceElevated,
+                      border: `1px solid ${colors.border}`,
+                      borderRadius: L.r.control,
+                      boxShadow: `0 2px 8px ${colors.shadow}`,
+                    }}
+                  >
+                    {filteredWaypointStations.map((station, index) => (
+                      <div
+                        key={`${station.name}-${index}`}
+                        onClick={() => handleWaypointSelect(station)}
+                        style={{
+                          padding: `${L.sp.sm} ${L.sp.md}`,
+                          cursor: 'pointer',
+                          fontSize: FS.body,
+                          borderBottom: index < filteredWaypointStations.length - 1 ? `1px solid ${colors.borderLight}` : 'none',
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surface}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
+                      >
+                        {translateStation(station.name, language)}
+                      </div>
+                    ))}
+                    {filteredWaypointStations.length === 0 && (
+                      <div style={{ padding: `${L.sp.sm} ${L.sp.md}`, fontSize: FS.caption, color: colors.textSecondary }}>
+                        {translateUI('noStationFound', language)}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/*
+            出発時刻の行。駅ツールチップ側にも同じ設定（timetableBaseTime を
+            共有）があるが、経路を選ぶ前に時刻を決めたい操作にも対応できるよう
+            駅選択パネルからも直接変更できるようにしている。
           */}
           {SHOW_DEPARTURE_TIME_ROW && onDepartureTimeChange && (
             <div style={{

@@ -7664,6 +7664,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "経由",
     english: "via"
   },
+  addWaypoint: {
+    japanese: "経由駅を追加",
+    english: "Add via station"
+  },
   otherStations: {
     japanese: "他{count}駅",
     english: "{count} more stations"
@@ -8653,6 +8657,7 @@ export const uiChinese: Record<string, string> = {
   direction: "前往{destination}",
   directionArea: "前往{destination}方向",
   viaStations: "经由",
+  addWaypoint: "添加途经站",
   otherStations: "其他{count}站",
   noRoutesFound: "未找到路线",
   routeCount: "{count}条路线",
@@ -8954,6 +8959,7 @@ export const uiKorean: Record<string, string> = {
   direction: "{destination}행",
   directionArea: "{destination} 방면",
   viaStations: "경유",
+  addWaypoint: "경유역 추가",
   otherStations: "외 {count}역",
   noRoutesFound: "경로를 찾을 수 없습니다",
   routeCount: "{count}개 경로",
