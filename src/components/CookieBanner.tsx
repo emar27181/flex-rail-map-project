@@ -114,10 +114,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
               lineHeight: '1.5',
               color: colors.textSecondary
             }}>
-              {language === 'japanese'
-                ? 'このサイトでは、サービス向上および広告配信のため、利用状況に基づくCookieを使用しています。詳細は'
-                : 'This site uses cookies for ads and analytics based on usage data to improve our services. For details, see our'
-              }
+              {translateUI('cookieBannerIntro', language)}
               <a
                 href="/privacy"
                 style={{
@@ -128,9 +125,9 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                 onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
                 onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
               >
-                {language === 'japanese' ? 'プライバシーポリシー' : 'Privacy Policy'}
+                {translateUI('privacyLink', language)}
               </a>
-              {language === 'japanese' ? 'をご覧ください。' : '.'}
+              {translateUI('cookieBannerIntroSuffix', language)}
             </p>
 
             <div style={{
@@ -140,7 +137,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
               alignItems: 'center'
             }}>
               <Button theme={theme} variant="primary" size="md" onClick={handleAcceptAll}>
-                {language === 'japanese' ? 'すべて同意' : 'Accept All'}
+                {translateUI('cookieAcceptAll', language)}
               </Button>
 
               <Button
@@ -150,11 +147,11 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                 onClick={() => setShowSettings(!showSettings)}
                 icon={<Settings size={16} />}
               >
-                {language === 'japanese' ? '設定管理' : 'Manage Settings'}
+                {translateUI('cookieManageSettings', language)}
               </Button>
 
               <Button theme={theme} variant="ghost" size="md" onClick={handleReject}>
-                {language === 'japanese' ? '必要なもののみ' : 'Essential Only'}
+                {translateUI('cookieEssentialOnly', language)}
               </Button>
             </div>
           </div>
@@ -175,7 +172,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
               fontWeight: 'bold',
               color: colors.text
             }}>
-              {language === 'japanese' ? 'Cookie設定' : 'Cookie Settings'}
+              {translateUI('cookieSettingsTitle', language)}
             </h4>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp['2xl'] }}>
@@ -193,7 +190,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                     fontWeight: '600',
                     color: colors.text
                   }}>
-                    {language === 'japanese' ? '必要なCookie' : 'Necessary Cookies'}
+                    {translateUI('cookieNecessaryTitle', language)}
                   </h5>
                   <p style={{
                     margin: 0,
@@ -201,42 +198,18 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                     color: colors.textSecondary,
                     lineHeight: '1.4'
                   }}>
-                    {language === 'japanese'
-                      ? 'サイトの基本機能に必要なCookieです（テーマ設定、言語設定など）'
-                      : 'Essential cookies for basic site functionality (theme settings, language preferences, etc.)'
-                    }
+                    {translateUI('cookieNecessaryDesc', language)}
                   </p>
                 </div>
-                <div style={{
-                  backgroundColor: colors.textSecondary,
-                  borderRadius: L.r.card,
-                  padding: L.sp.xxs,
-                  width: '44px',
-                  height: '24px',
-                  position: 'relative',
-                  opacity: 0.5
-                }}>
-                  <div style={{
-                    backgroundColor: colors.onPrimary,
-                    borderRadius: L.r.card,
-                    width: '20px',
-                    height: '20px',
-                    position: 'absolute',
-                    right: '2px',
-                    top: '2px'
-                  }} />
-                  <span style={{
-                    position: 'absolute',
-                    right: '28px',
-                    top: '0',
-                    fontSize: FS.caption,
-                    color: colors.background,
-                    lineHeight: '24px',
-                    fontWeight: 'bold'
-                  }}>
-                    ON
-                  </span>
-                </div>
+                {/* 常時ONで変更不可。分析/広告Cookieと同じSwitchアトムをdisabledで使う
+                    （以前は専用の塗りつぶしdivを手書きしていた） */}
+                <Switch
+                  theme={theme}
+                  checked={true}
+                  disabled
+                  onChange={() => {}}
+                  label={translateUI('cookieNecessaryTitle', language)}
+                />
               </div>
 
               {/* Analytics Cookies */}
@@ -253,7 +226,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                     fontWeight: '600',
                     color: colors.text
                   }}>
-                    {language === 'japanese' ? '分析Cookie' : 'Analytics Cookies'}
+                    {translateUI('cookieAnalyticsTitle', language)}
                   </h5>
                   <p style={{
                     margin: 0,
@@ -261,17 +234,14 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                     color: colors.textSecondary,
                     lineHeight: '1.4'
                   }}>
-                    {language === 'japanese'
-                      ? 'Google Analyticsによるサイト利用状況の分析に使用されます'
-                      : 'Used by Google Analytics to analyze site usage patterns'
-                    }
+                    {translateUI('cookieAnalyticsDesc', language)}
                   </p>
                 </div>
                 <Switch
                   theme={theme}
                   checked={cookiePreferences.analytics}
                   onChange={(v) => setCookiePreferences(prev => ({ ...prev, analytics: v }))}
-                  label={language === 'japanese' ? '分析Cookie' : 'Analytics cookies'}
+                  label={translateUI('cookieAnalyticsTitle', language)}
                 />
               </div>
 
@@ -289,7 +259,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                     fontWeight: '600',
                     color: colors.text
                   }}>
-                    {language === 'japanese' ? '広告Cookie' : 'Advertising Cookies'}
+                    {translateUI('cookieAdvertisingTitle', language)}
                   </h5>
                   <p style={{
                     margin: 0,
@@ -297,17 +267,14 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                     color: colors.textSecondary,
                     lineHeight: '1.4'
                   }}>
-                    {language === 'japanese'
-                      ? 'Google AdSenseによる適切な広告配信に使用されます'
-                      : 'Used by Google AdSense for appropriate ad delivery'
-                    }
+                    {translateUI('cookieAdvertisingDesc', language)}
                   </p>
                 </div>
                 <Switch
                   theme={theme}
                   checked={cookiePreferences.advertising}
                   onChange={(v) => setCookiePreferences(prev => ({ ...prev, advertising: v }))}
-                  label={language === 'japanese' ? '広告Cookie' : 'Advertising cookies'}
+                  label={translateUI('cookieAdvertisingTitle', language)}
                 />
               </div>
             </div>
@@ -319,10 +286,10 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
               justifyContent: 'flex-end'
             }}>
               <Button theme={theme} variant="outline" size="md" onClick={() => setShowSettings(false)}>
-                {language === 'japanese' ? 'キャンセル' : 'Cancel'}
+                {translateUI('cookieCancel', language)}
               </Button>
               <Button theme={theme} variant="primary" size="md" onClick={handleSaveSettings}>
-                {language === 'japanese' ? '設定を保存' : 'Save Settings'}
+                {translateUI('cookieSaveSettings', language)}
               </Button>
             </div>
           </div>

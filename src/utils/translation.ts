@@ -8276,6 +8276,62 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "Cookieの使用について",
     english: "Cookie Usage"
   },
+  cookieBannerIntro: {
+    japanese: "このサイトでは、サービス向上および広告配信のため、利用状況に基づくCookieを使用しています。詳細は",
+    english: "This site uses cookies for ads and analytics based on usage data to improve our services. For details, see our"
+  },
+  cookieBannerIntroSuffix: {
+    japanese: "をご覧ください。",
+    english: "."
+  },
+  cookieAcceptAll: {
+    japanese: "すべて同意",
+    english: "Accept All"
+  },
+  cookieManageSettings: {
+    japanese: "設定管理",
+    english: "Manage Settings"
+  },
+  cookieEssentialOnly: {
+    japanese: "必要なもののみ",
+    english: "Essential Only"
+  },
+  cookieSettingsTitle: {
+    japanese: "Cookie設定",
+    english: "Cookie Settings"
+  },
+  cookieNecessaryTitle: {
+    japanese: "必要なCookie",
+    english: "Necessary Cookies"
+  },
+  cookieNecessaryDesc: {
+    japanese: "サイトの基本機能に必要なCookieです（テーマ設定、言語設定など）",
+    english: "Essential cookies for basic site functionality (theme settings, language preferences, etc.)"
+  },
+  cookieAnalyticsTitle: {
+    japanese: "分析Cookie",
+    english: "Analytics Cookies"
+  },
+  cookieAnalyticsDesc: {
+    japanese: "Google Analyticsによるサイト利用状況の分析に使用されます",
+    english: "Used by Google Analytics to analyze site usage patterns"
+  },
+  cookieAdvertisingTitle: {
+    japanese: "広告Cookie",
+    english: "Advertising Cookies"
+  },
+  cookieAdvertisingDesc: {
+    japanese: "Google AdSenseによる適切な広告配信に使用されます",
+    english: "Used by Google AdSense for appropriate ad delivery"
+  },
+  cookieCancel: {
+    japanese: "キャンセル",
+    english: "Cancel"
+  },
+  cookieSaveSettings: {
+    japanese: "設定を保存",
+    english: "Save Settings"
+  },
   allRoutesOn: {
     japanese: "全路線: 表示",
     english: "All routes: ON"
@@ -8821,6 +8877,20 @@ export const uiChinese: Record<string, string> = {
   contactLink: "联系我们",
   approxNote: "（概算值·参考用）",
   cookieUsage: "Cookie 使用说明",
+  cookieBannerIntro: "本网站为提升服务并投放广告，会使用基于使用情况的Cookie。详情请查看",
+  cookieBannerIntroSuffix: "。",
+  cookieAcceptAll: "全部同意",
+  cookieManageSettings: "管理设置",
+  cookieEssentialOnly: "仅必要项",
+  cookieSettingsTitle: "Cookie 设置",
+  cookieNecessaryTitle: "必要 Cookie",
+  cookieNecessaryDesc: "网站基本功能所需的Cookie（主题设置、语言设置等）",
+  cookieAnalyticsTitle: "分析 Cookie",
+  cookieAnalyticsDesc: "用于Google Analytics分析网站使用情况",
+  cookieAdvertisingTitle: "广告 Cookie",
+  cookieAdvertisingDesc: "用于Google AdSense投放合适的广告",
+  cookieCancel: "取消",
+  cookieSaveSettings: "保存设置",
   allRoutesOn: "全路线: 显示",
   allRoutesOff: "全路线: 隐藏",
   travelTimeOverlay: "在站点显示所需时间",
@@ -9128,6 +9198,20 @@ export const uiKorean: Record<string, string> = {
   contactLink: "문의하기",
   approxNote: "（개산값·참고용）",
   cookieUsage: "쿠키 사용 안내",
+  cookieBannerIntro: "이 사이트는 서비스 개선 및 광고 게재를 위해 이용 현황 기반 쿠키를 사용합니다. 자세한 내용은",
+  cookieBannerIntroSuffix: "를 확인해 주세요.",
+  cookieAcceptAll: "모두 동의",
+  cookieManageSettings: "설정 관리",
+  cookieEssentialOnly: "필수만 허용",
+  cookieSettingsTitle: "쿠키 설정",
+  cookieNecessaryTitle: "필수 쿠키",
+  cookieNecessaryDesc: "사이트 기본 기능에 필요한 쿠키입니다 (테마 설정, 언어 설정 등)",
+  cookieAnalyticsTitle: "분석 쿠키",
+  cookieAnalyticsDesc: "Google Analytics의 사이트 이용 현황 분석에 사용됩니다",
+  cookieAdvertisingTitle: "광고 쿠키",
+  cookieAdvertisingDesc: "Google AdSense의 적절한 광고 게재에 사용됩니다",
+  cookieCancel: "취소",
+  cookieSaveSettings: "설정 저장",
   allRoutesOn: "전체 노선: 표시",
   allRoutesOff: "전체 노선: 숨기기",
   travelTimeOverlay: "역에 소요 시간 표시",

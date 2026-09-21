@@ -1,5 +1,30 @@
 # CHANGE LOG
 
+## [2026-09-21] セッション（CookieBannerの文言を一元管理化、必要なCookieトグルをSwitchアトムに統一）
+
+### improve: CookieBannerのハードコード文言をtranslateUIに一元化、手書きトグルをSwitchアトムに置換
+- `src/components/CookieBanner.tsx`, `src/utils/translation.ts`
+- 「全て同意とかのボタンもアトミックデザインで、ハードコーディングせずに
+  一元管理で」という要望を受けた。ボタン自体は元々`Button`アトムを
+  使っていたが、文言が`language === 'japanese' ? '...' : '...'`という
+  日英2択のインラインハードコードで、中国語・韓国語ユーザーには英語が
+  出てしまっていた（アプリは4言語対応のはず）
+- `すべて同意`/`設定管理`/`必要なもののみ`/`Cookie設定`/`必要なCookie`/
+  `分析Cookie`/`広告Cookie`の見出し・説明文・`キャンセル`/`設定を保存`
+  など、CookieBanner内の全ての文言を`src/utils/translation.ts`の
+  `translateUI`キーに切り出し、4言語（日本語・英語・中国語・韓国語）を
+  追加。プライバシーポリシーのリンク文言は既存の`privacyLink`キーを
+  再利用し、同じ文言を2箇所に持たないようにした
+- 「必要なCookie」の常時ONトグルは、分析/広告Cookieと違って
+  `div`を手書きした専用実装（塗り・つまみ・"ON"文字を個別に配置）に
+  なっていた。同じ`Switch`アトムに統一し、`disabled`props で
+  常時ON・操作不可を表現するように変更（この3つのトグルの見た目が
+  今後も確実に揃うようにするため）
+- `npm run test:types` / `npm run test:unit`(363件、`i18nCoverage`
+  含む) / `npm run build`すべて通過。Playwrightで日本語・英語表示と、
+  3つのCookieトグルが同じSwitchコンポーネントで描画され「必要な
+  Cookie」だけ操作不可になっていることを実機確認
+
 ## [2026-09-21] セッション（駅選択パネルの細部調整: 経由ラベル削除・現在地からボタン統一・時刻設定の表示条件と並び順・入力欄の高さ統一）
 
 ### improve: 経由駅ラベルの削除、現在地からボタンのデザイン統一、時刻設定の表示条件・並び順、入力欄の高さ統一
