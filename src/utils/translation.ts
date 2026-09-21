@@ -8066,6 +8066,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "時刻表",
     english: "Timetable"
   },
+  showStationTimeLabelsButton: {
+    japanese: "時刻を表示",
+    english: "Show Times"
+  },
   departsAfterLabel: {
     japanese: "{station} {time}以降の発車（{route}）",
     english: "Deps. from {station} after {time} ({route})"
@@ -8767,6 +8771,7 @@ export const uiChinese: Record<string, string> = {
   approxMinutes: "约{time}分钟",
   close: "关闭",
   timetableButton: "时刻表",
+  showStationTimeLabelsButton: "显示时刻",
   departsAfterLabel: "{station} {time}以后出发（{route}）",
   noTimetableDataFound: "未找到时刻数据",
   timetableUpdatedAt: "更新日: {date}",
@@ -9073,6 +9078,7 @@ export const uiKorean: Record<string, string> = {
   approxMinutes: "약 {time}분",
   close: "닫기",
   timetableButton: "시간표",
+  showStationTimeLabelsButton: "시간 표시",
   departsAfterLabel: "{station} {time} 이후 출발（{route}）",
   noTimetableDataFound: "시간표 데이터를 찾을 수 없습니다",
   timetableUpdatedAt: "업데이트: {date}",

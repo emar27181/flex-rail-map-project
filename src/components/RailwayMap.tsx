@@ -328,6 +328,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // 時刻表モード
   const [timetableModeEnabled, setTimetableModeEnabled] = useState(true);
+  // 「時刻を表示」ボタンは出発駅・到着駅が両方揃ったときだけ表示する
+  // （StationSelector.tsx側）。揃った瞬間は必ずONから始まるようにする
+  // （揃った状態のまま何度も再評価してユーザーが手動でOFFにした分を
+  // 上書きしないよう、not-both→both の切り替わりの瞬間だけ反応させる）。
+  const hadBothStationsRef = useRef(false);
+  useEffect(() => {
+    const hasBoth = !!(departure && arrival);
+    if (hasBoth && !hadBothStationsRef.current) {
+      setTimetableModeEnabled(true);
+    }
+    hadBothStationsRef.current = hasBoth;
+  }, [departure, arrival]);
   const [timetableBaseTime, setTimetableBaseTime] = useState(() => {
     const now = new Date();
     return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;

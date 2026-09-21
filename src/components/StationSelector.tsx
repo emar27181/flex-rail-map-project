@@ -845,7 +845,13 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   {translateUI('showOnlyTransferStations', language)}
                 </Button>
               )}
-              {onShowStationTimeLabelsChange && (
+              {/*
+                出発駅・到着駅の両方が決まって初めて経路上の時刻が意味を持つため、
+                「経路が無いのに時刻を表示するかを聞かれる」状態を避け、
+                両方揃ったときだけボタンを出す（そのときは既定でON。
+                RailwayMap.tsx側で両方揃った瞬間にONへ戻す処理を入れている）。
+              */}
+              {onShowStationTimeLabelsChange && departure && arrival && (
                 <Button
                   theme={theme}
                   variant="primary"
@@ -854,7 +860,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   onClick={() => onShowStationTimeLabelsChange(!showStationTimeLabels)}
                   icon={<Timer size={14} aria-hidden />}
                 >
-                  {translateUI('timetableButton', language)}
+                  {translateUI('showStationTimeLabelsButton', language)}
                 </Button>
               )}
             </div>
