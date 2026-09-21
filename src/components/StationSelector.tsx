@@ -798,7 +798,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
             寸法は Button の size="sm" に揃えてあるので2つの大きさは一致する。
           */}
-          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange || onShowStationTimeLabelsChange) && (
+          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange || onAddWaypoint || onShowStationTimeLabelsChange) && (
             <div style={{
               // 出発駅・到着駅欄とこの行の間隔も、ボタン同士の間隔（下記gap）と
               // 揃える。片方だけ広げるとリズムが不揃いに見えるため統一する。
@@ -847,6 +847,21 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 </Button>
               )}
               {/*
+                「経由駅を追加」は乗換駅のみ表示の右に詰めて置く。入力欄を
+                開いている間は下に検索欄が出るのでボタン自体は隠す。
+              */}
+              {onAddWaypoint && !showWaypointInput && (
+                <Button
+                  theme={theme}
+                  size="sm"
+                  variant="outline"
+                  icon={<Waypoints size={14} aria-hidden />}
+                  onClick={() => setShowWaypointInput(true)}
+                >
+                  {translateUI('addWaypoint', language)}
+                </Button>
+              )}
+              {/*
                 出発駅・到着駅の両方が決まって初めて経路上の時刻が意味を持つため、
                 「経路が無いのに時刻を表示するかを聞かれる」状態を避け、
                 両方揃ったときだけボタンを出す（そのときは既定でON。
@@ -873,13 +888,14 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             と同じ検索候補ロジック（filterStations）を使うが、ドロップダウンは
             createPortal を使わない簡易版にしている（経由駅は補助的な操作で、
             出発駅・到着駅ほど頻繁に開閉しないため）。
-            入力欄は常時出しておくと使わない人にも余白を占有するため、
-            「経由駅を追加」ボタンを押したときだけ出す（アトムのButtonを使用）。
+            「経由駅を追加」ボタン自体は上のボタン行（乗換駅のみ表示の右）に
+            詰めて配置してあるので、ここには選択済みチップと検索欄（開いて
+            いるときだけ）を出す。どちらも無ければ何も描画せず余白を使わない。
           */}
-          {onAddWaypoint && (
+          {onAddWaypoint && ((waypoints ?? []).length > 0 || showWaypointInput) && (
             <div style={{ marginTop: L.sp.md }}>
               {(waypoints ?? []).length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.xs, marginBottom: L.sp.xs }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.xs, marginBottom: showWaypointInput ? L.sp.xs : 0 }}>
                   {(waypoints ?? []).map((wp, index) => (
                     <div
                       key={`${wp.name}-${index}`}
@@ -909,17 +925,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   ))}
                 </div>
               )}
-              {!showWaypointInput ? (
-                <Button
-                  theme={theme}
-                  size="sm"
-                  variant="outline"
-                  icon={<Waypoints size={14} />}
-                  onClick={() => setShowWaypointInput(true)}
-                >
-                  {translateUI('addWaypoint', language)}
-                </Button>
-              ) : (
+              {showWaypointInput && (
                 <div style={{ position: 'relative' }}>
                   <TextField
                     theme={theme}
