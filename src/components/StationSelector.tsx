@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { ArrowLeftRight, Clock, Waypoints, X } from 'lucide-react';
+import { ArrowLeftRight, Clock, Timer, Waypoints, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
@@ -18,6 +18,7 @@ import { FLOATING_ICON_BUTTON_SIZE, CONTROL_SIZE } from './ui/atoms/controlSize'
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 import TextField from './ui/atoms/TextField';
+import SegmentedControl from './ui/molecules/SegmentedControl';
 
 /** 駅名検索の結果として出す最大件数 */
 const STATION_SUGGESTION_LIMIT = 10;
@@ -76,6 +77,14 @@ interface StationSelectorProps {
   onAddWaypoint?: (station: Station) => void;
   /** 経由駅を削除する（配列インデックス指定） */
   onRemoveWaypoint?: (index: number) => void;
+  /** 駅アイコンの下に時刻表の発車時刻を表示するか */
+  showStationTimeLabels?: boolean;
+  /** 時刻表示の切り替え。渡されたときだけボタンを出す */
+  onShowStationTimeLabelsChange?: (value: boolean) => void;
+  /** 出発時刻欄を「出発時刻」「到着時刻」どちらとして扱うか */
+  timeMode?: 'departure' | 'arrival';
+  /** 出発/到着基準の切り替え。渡されたときだけ切替UIを出す */
+  onTimeModeChange?: (mode: 'departure' | 'arrival') => void;
 }
 
 const StationSelector: React.FC<StationSelectorProps> = ({
@@ -105,6 +114,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   waypoints,
   onAddWaypoint,
   onRemoveWaypoint,
+  showStationTimeLabels = false,
+  onShowStationTimeLabelsChange,
+  timeMode = 'departure',
+  onTimeModeChange,
 }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -783,7 +796,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
             寸法は Button の size="sm" に揃えてあるので2つの大きさは一致する。
           */}
-          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange) && (
+          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange || onShowStationTimeLabelsChange) && (
             <div style={{
               // 出発駅・到着駅欄とこの行の間隔も、ボタン同士の間隔（下記gap）と
               // 揃える。片方だけ広げるとリズムが不揃いに見えるため統一する。
@@ -828,6 +841,18 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   icon={<Waypoints size={14} aria-hidden />}
                 >
                   {translateUI('showOnlyTransferStations', language)}
+                </Button>
+              )}
+              {onShowStationTimeLabelsChange && (
+                <Button
+                  theme={theme}
+                  variant="primary"
+                  size="sm"
+                  pressed={!!showStationTimeLabels}
+                  onClick={() => onShowStationTimeLabelsChange(!showStationTimeLabels)}
+                  icon={<Timer size={14} aria-hidden />}
+                >
+                  {translateUI('timetableButton', language)}
                 </Button>
               )}
             </div>
@@ -946,40 +971,58 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             出発時刻の行。駅ツールチップ側にも同じ設定（timetableBaseTime を
             共有）があるが、経路を選ぶ前に時刻を決めたい操作にも対応できるよう
             駅選択パネルからも直接変更できるようにしている。
+            timeMode（出発/到着）で、この時刻を「出発時刻」として使うか
+            「到着時刻」として使うかを切り替えられる（ラベルも連動して変わる）。
           */}
           {SHOW_DEPARTURE_TIME_ROW && onDepartureTimeChange && (
-            <div style={{
-              marginTop: L.sp.sm,
-              display: 'flex',
-              alignItems: 'center',
-              gap: L.sp.xs,
-            }}>
-              <label style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
-                {translateUI('departureTime', language)}
-              </label>
-              <TextField
-                theme={theme}
-                size="sm"
-                type="time"
-                value={departureTime ?? ''}
-                onChange={e => onDepartureTimeChange(e.target.value)}
-                onFocus={(e) => { focusedInputRef.current = e.currentTarget; }}
-                onBlur={() => { focusedInputRef.current = null; }}
-                fullWidth={false}
-              />
-              <Button
-                theme={theme}
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const now = new Date();
-                  const hh = String(now.getHours()).padStart(2, '0');
-                  const mm = String(now.getMinutes()).padStart(2, '0');
-                  onDepartureTimeChange(`${hh}:${mm}`);
-                }}
-              >
-                {translateUI('currentTime', language)}
-              </Button>
+            <div style={{ marginTop: L.sp.sm }}>
+              {onTimeModeChange && (
+                <div style={{ marginBottom: L.sp.xs }}>
+                  <SegmentedControl
+                    theme={theme}
+                    size="sm"
+                    ariaLabel={translateUI('baseTime', language)}
+                    value={timeMode}
+                    onChange={onTimeModeChange}
+                    options={[
+                      { value: 'departure', label: translateUI('timeBasisDeparture', language) },
+                      { value: 'arrival', label: translateUI('timeBasisArrival', language) },
+                    ]}
+                  />
+                </div>
+              )}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: L.sp.xs,
+              }}>
+                <label style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
+                  {translateUI(timeMode === 'arrival' ? 'arrivalTimeLabel' : 'departureTime', language)}
+                </label>
+                <TextField
+                  theme={theme}
+                  size="sm"
+                  type="time"
+                  value={departureTime ?? ''}
+                  onChange={e => onDepartureTimeChange(e.target.value)}
+                  onFocus={(e) => { focusedInputRef.current = e.currentTarget; }}
+                  onBlur={() => { focusedInputRef.current = null; }}
+                  fullWidth={false}
+                />
+                <Button
+                  theme={theme}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const now = new Date();
+                    const hh = String(now.getHours()).padStart(2, '0');
+                    const mm = String(now.getMinutes()).padStart(2, '0');
+                    onDepartureTimeChange(`${hh}:${mm}`);
+                  }}
+                >
+                  {translateUI('currentTime', language)}
+                </Button>
+              </div>
             </div>
           )}
 

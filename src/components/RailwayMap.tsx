@@ -51,6 +51,7 @@ import {
   getLineTimetable,
   TIMETABLE_SOURCE,
   addMinutes,
+  computeEffectiveBaseTime,
   type Departure,
 } from '../data/timetableData';
 import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, alphaWhite, alphaBlack } from '../constants/ui';
@@ -76,6 +77,7 @@ import { buildCorridorRoutes, vertexRanks, offsetPoints } from '../utils/routeOf
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import Select from './ui/atoms/Select';
+import SegmentedControl from './ui/molecules/SegmentedControl';
 import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
@@ -330,6 +332,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const now = new Date();
     return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   });
+  /**
+   * timetableBaseTime を「出発時刻（この時刻に出発）」として使うか
+   * 「到着時刻（この時刻に到着したい）」として使うかの切り替え。
+   * 到着時刻モードでは、選択中経路の合計所要時間ぶん遡った時刻を
+   * 実際の出発基準時刻（effectiveBaseTime）として使う。
+   */
+  const [timeMode, setTimeMode] = useState<'departure' | 'arrival'>('departure');
 
   // 列車位置デモ
   const [showTrainDemo, setShowTrainDemo] = useState(false);
@@ -1175,6 +1184,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const route = routeRecommendations[selectedIdx];
     if (!route) return map;
 
+    const effectiveBaseTime = computeEffectiveBaseTime(timetableBaseTime, timeMode, route.totalTime);
+
     let cumTime = 0;
     for (const seg of route.segments) {
       if (seg.isWalkingTransfer) {
@@ -1186,7 +1197,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const toName   = seg.stations[n - 1]?.name ?? '';
       const dirIdx   = getTimetableDirectionIndex(seg.routeKey, fromName, toName);
       seg.stations.forEach((st, i) => {
-        const stTime = addMinutes(timetableBaseTime, cumTime + Math.round(seg.time * i / Math.max(n - 1, 1)));
+        const stTime = addMinutes(effectiveBaseTime, cumTime + Math.round(seg.time * i / Math.max(n - 1, 1)));
         const existing = map.get(st.name) ?? [];
         // 同じ routeKey が既に登録済みの場合は追加しない
         if (!existing.some(e => e.routeKey === seg.routeKey)) {
@@ -1197,7 +1208,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       cumTime += seg.time;
     }
     return map;
-  }, [timetableModeEnabled, routeRecommendations, selectedRouteIndices, timetableBaseTime]);
+  }, [timetableModeEnabled, routeRecommendations, selectedRouteIndices, timetableBaseTime, timeMode]);
 
   const TRAIN_TYPE_COLOR: Record<string, string> = {
     '各停': '#2980b9', '普通': '#2980b9',
@@ -1572,8 +1583,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onClick={() => { setArrival(stationTooltip.station); closeTooltip(); }}
               >{translateUI('setArrivalStation', currentLanguage)}</Button>
             </div>
+            <div style={{ marginBottom: L.sp.xs }}>
+              <SegmentedControl
+                theme={theme}
+                size="sm"
+                ariaLabel={translateUI('baseTime', currentLanguage)}
+                value={timeMode}
+                onChange={setTimeMode}
+                options={[
+                  { value: 'departure', label: translateUI('timeBasisDeparture', currentLanguage) },
+                  { value: 'arrival', label: translateUI('timeBasisArrival', currentLanguage) },
+                ]}
+              />
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs }}>
-              <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('baseTime', currentLanguage)}</span>
+              <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                {translateUI(timeMode === 'arrival' ? 'arrivalTimeLabel' : 'baseTime', currentLanguage)}
+              </span>
               <TextField
                 theme={theme}
                 size="sm"
@@ -4454,6 +4480,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 waypoints={waypoints}
                 onAddWaypoint={handleAddWaypoint}
                 onRemoveWaypoint={handleRemoveWaypoint}
+                showStationTimeLabels={timetableModeEnabled}
+                onShowStationTimeLabelsChange={setTimetableModeEnabled}
+                timeMode={timeMode}
+                onTimeModeChange={setTimeMode}
               />
               {routeRecommendationsPanel}
             </div>
@@ -4486,6 +4516,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             waypoints={waypoints}
             onAddWaypoint={handleAddWaypoint}
             onRemoveWaypoint={handleRemoveWaypoint}
+            showStationTimeLabels={timetableModeEnabled}
+            onShowStationTimeLabelsChange={setTimetableModeEnabled}
+            timeMode={timeMode}
+            onTimeModeChange={setTimeMode}
           />
         )}
 
@@ -5860,6 +5894,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 waypoints={waypoints}
                 onAddWaypoint={handleAddWaypoint}
                 onRemoveWaypoint={handleRemoveWaypoint}
+                showStationTimeLabels={timetableModeEnabled}
+                onShowStationTimeLabelsChange={setTimetableModeEnabled}
+                timeMode={timeMode}
+                onTimeModeChange={setTimeMode}
               />
             </div>
           )}

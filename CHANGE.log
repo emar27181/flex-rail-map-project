@@ -1,5 +1,37 @@
 # CHANGE LOG
 
+## [2026-09-21] セッション（駅アイコン下の時刻表示トグル・出発/到着基準の切替）
+
+### feat: 「時刻を表示」トグルを追加、出発時刻/到着時刻の基準を切り替えられるように
+- `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`,
+  `src/data/timetableData.ts`, `src/utils/translation.ts`,
+  `tests/unit/data/timetableData.test.ts`
+- 「時刻を表示(駅アイコンの下)の切り替えを乗換駅とかと同じデザインで実装と
+  時刻(出発時刻と到着時刻を切り替えできるUIも)を設定できるデザインも追加して」
+  という要望を受けた
+- **時刻を表示トグル**: 駅アイコンの下に経路上の発車時刻を表示する
+  `timetableModeEnabled`は既に実装済み（既定ON）だったが、切り替えるUIが
+  どこにも無かった（`setTimetableModeEnabled`を呼ぶ箇所が皆無だった）。
+  「乗換駅のみ表示」と同じ`Button`（`pressed`状態で塗る）を駅選択パネルの
+  ボタン行に追加した。翻訳キーは既に用意されていた`timetableButton`
+  （"時刻表"）を再利用
+- **出発/到着基準の切り替え**: `timetableBaseTime`は常に「出発時刻」として
+  扱われ、到着時刻から逆算する手段が無かった。`timeMode`
+  （'departure'|'arrival'）を追加し、到着モードでは入力した時刻を
+  「到着したい時刻」として扱い、選択中経路の合計所要時間ぶん遡った時刻を
+  実際の出発基準時刻として使うようにした（`computeEffectiveBaseTime`、
+  `src/data/timetableData.ts`に切り出してユニットテスト可能にした）
+  - UIは既存の「排他選択のボタン列」モレキュール`SegmentedControl`を
+    そのまま使用（出発/到着の2択）。駅選択パネルの出発時刻行、および
+    駅ツールチップの基準時刻行の両方に追加し、ラベルもモードに応じて
+    「出発時刻」⇔「到着時刻」に切り替わるようにした
+- `tests/unit/data/timetableData.test.ts`に`addMinutes`(5件)・
+  `computeEffectiveBaseTime`(4件)のテストを追加
+- Playwrightで実機確認: 到着モードで09:00を入力すると、経路上の各駅の
+  表示時刻が出発モード時より早い時刻（到着から逆算した時刻）になることを
+  確認。最速の推薦ルートが停車しない駅には時刻が表示されないことも確認
+  （経路上に無い駅に架空の時刻を出さない、という既存の正しい挙動）
+
 ## [2026-09-21] セッション（経由駅・出発時刻の設定を駅選択パネル内に追加）
 
 ### feat: 経由駅を指定できるように、出発時刻設定を駅選択パネルからも操作可能に
