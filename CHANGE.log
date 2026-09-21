@@ -1,5 +1,27 @@
 # CHANGE LOG
 
+## [2026-09-21] セッション（現在地アイコンの向きの精度改善）
+
+### improve: 現在地アイコンの向き（矢印）の精度を改善
+- `src/utils/trainDetector.ts`, `src/components/RailwayMap.tsx`,
+  `tests/unit/utils/trainDetector.test.ts`
+- 「位置情報の向きの精度がまだ悪いな」という指摘を受けた
+- これまではブラウザ/OS側の`GeolocationCoordinates.heading`をそのまま
+  使っていたが、この値は端末・ブラウザによって精度も対応状況もまちまち
+  （iOS Safariでは常に`null`など）で、単発の値をそのまま矢印に反映すると
+  歩行速度ではブレが大きく出ていた
+- 列車検出用に既にあった「GPS履歴の時間窓から進行方向を求める」ロジック
+  （`estimateMotion`、`MIN_SPEED_MS=4m/s`と電車の速度域向け）とは別に、
+  徒歩速度でも方向が求まるよう`estimateHeadingFromHistory`を新設した。
+  直近4秒の変位から自前で方向を計算し、GPSノイズ対策として正味の
+  移動距離が4m未満（ほぼ静止中相当）ならnull（矢印を出さず点だけ表示、
+  という既存の扱いのまま）を返す
+- 自前計算に統一することで、`coords.heading`が常に`null`を返す端末でも
+  矢印が機能するようになる副次的な効果もある
+- `tests/unit/utils/trainDetector.test.ts`に7件追加
+  （北・東・南への移動で正しい角度になること、静止中はnullになること、
+  時間窓より古い点を無視すること）
+
 ## [2026-09-21] セッション（駅アイコンを現在地アイコンより前面に表示）
 
 ### fix: 駅アイコンが現在地アイコンに隠れることがある問題を修正

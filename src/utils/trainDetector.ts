@@ -43,6 +43,47 @@ export function haversineDistance(lat1: number, lng1: number, lat2: number, lng2
   return EARTH_R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(Math.max(0, 1 - a)));
 }
 
+/** 現在地アイコンの向き矢印用に、進行方向を求める時間窓 */
+export const HEADING_WINDOW_MS = 4000;
+/** 時間窓内の正味移動距離がこれ未満なら方向を出さない（静止中のGPSノイズ対策） */
+export const HEADING_MIN_DISTANCE_M = 4;
+
+/**
+ * GPS履歴から進行方向（度、0=北・時計回り）を推定する。
+ *
+ * `GeolocationCoordinates.heading`（ブラウザ/OS側の実装）は精度・対応状況が
+ * 端末やブラウザによってまちまちで（iOS Safariは常にnullを返す等）、
+ * 単発の値をそのまま使うと歩行速度ではブレが大きく出ることがある。
+ * 代わりに直近の実移動（直近 `HEADING_WINDOW_MS` の変位）から自前で計算する。
+ *
+ * `estimateMotion`（列車検出用。電車の速度域向けに `MIN_SPEED_MS` が高く、
+ * 徒歩では方向が出ない）とは別物。こちらは徒歩速度でも方向が出るよう、
+ * 移動「距離」（速度ではなく）を閾値にしている。ほぼ静止中はGPSノイズで
+ * 数mの見かけ上の移動が生じるだけなので、`HEADING_MIN_DISTANCE_M` 未満の
+ * 正味移動なら null を返す（矢印を出さず点だけ表示、という既存の扱いのまま）。
+ */
+export function estimateHeadingFromHistory(gpsHistory: GpsPoint[], nowTimestamp: number): number | null {
+  if (gpsHistory.length < 2) return null;
+  const cur = gpsHistory[gpsHistory.length - 1];
+
+  let base = gpsHistory[0];
+  for (const p of gpsHistory) {
+    if (nowTimestamp - p.timestamp <= HEADING_WINDOW_MS) {
+      base = p;
+      break;
+    }
+  }
+  if (base === cur) return null;
+
+  const dist = haversineDistance(base.lat, base.lng, cur.lat, cur.lng);
+  if (dist < HEADING_MIN_DISTANCE_M) return null;
+
+  const dLat = cur.lat - base.lat;
+  const dLng = (cur.lng - base.lng) * Math.cos(toRad((cur.lat + base.lat) / 2));
+  const rad = Math.atan2(dLng, dLat);
+  return (rad * 180 / Math.PI + 360) % 360;
+}
+
 function pointToSegmentDistance(
   lat: number, lng: number,
   aLat: number, aLng: number,

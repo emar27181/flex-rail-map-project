@@ -12,6 +12,9 @@ import {
   detectCurrentRoute,
   DETECTION_WARMUP_MS,
   GPS_HISTORY_SIZE,
+  estimateHeadingFromHistory,
+  HEADING_WINDOW_MS,
+  HEADING_MIN_DISTANCE_M,
   type GpsPoint,
 } from '../../../src/utils/trainDetector';
 import { routes } from '../../../src/data/routes';
@@ -107,5 +110,70 @@ describe('進行方向の安定性', () => {
     expect(noisy).not.toBeNull();
     // 直近2点だけで計算していた頃はここで方向が反転していた
     expect(noisy!.directionIndex).toBe(clean!.directionIndex);
+  });
+});
+
+describe('現在地アイコンの向き推定（estimateHeadingFromHistory）', () => {
+  const t0 = 1_700_000_000_000;
+  const baseLat = 35.6909;
+  const baseLng = 139.7003;
+
+  it('履歴が1点以下ならnull', () => {
+    expect(estimateHeadingFromHistory([], t0)).toBeNull();
+    expect(estimateHeadingFromHistory([{ lat: baseLat, lng: baseLng, timestamp: t0 }], t0)).toBeNull();
+  });
+
+  it('真北へ十分な距離を移動していれば0度に近い値を返す', () => {
+    const history: GpsPoint[] = [
+      { lat: baseLat, lng: baseLng, timestamp: t0 },
+      { lat: baseLat + 0.002, lng: baseLng, timestamp: t0 + HEADING_WINDOW_MS },
+    ];
+    const heading = estimateHeadingFromHistory(history, t0 + HEADING_WINDOW_MS);
+    expect(heading).not.toBeNull();
+    expect(heading!).toBeCloseTo(0, 0);
+  });
+
+  it('真東へ十分な距離を移動していれば90度に近い値を返す', () => {
+    const history: GpsPoint[] = [
+      { lat: baseLat, lng: baseLng, timestamp: t0 },
+      { lat: baseLat, lng: baseLng + 0.002, timestamp: t0 + HEADING_WINDOW_MS },
+    ];
+    const heading = estimateHeadingFromHistory(history, t0 + HEADING_WINDOW_MS);
+    expect(heading).not.toBeNull();
+    expect(heading!).toBeCloseTo(90, 0);
+  });
+
+  it('真南へ十分な距離を移動していれば180度に近い値を返す', () => {
+    const history: GpsPoint[] = [
+      { lat: baseLat, lng: baseLng, timestamp: t0 },
+      { lat: baseLat - 0.002, lng: baseLng, timestamp: t0 + HEADING_WINDOW_MS },
+    ];
+    const heading = estimateHeadingFromHistory(history, t0 + HEADING_WINDOW_MS);
+    expect(heading).not.toBeNull();
+    expect(heading!).toBeCloseTo(180, 0);
+  });
+
+  it('ほぼ静止中（移動距離が閾値未満）はnull（矢印を出さない）', () => {
+    // 閾値(HEADING_MIN_DISTANCE_M)未満の、GPSノイズ程度の見かけ上の移動
+    const tinyDegree = (HEADING_MIN_DISTANCE_M * 0.3) / 111_000; // ゆとりを持って閾値の3割程度の距離
+    const history: GpsPoint[] = [
+      { lat: baseLat, lng: baseLng, timestamp: t0 },
+      { lat: baseLat + tinyDegree, lng: baseLng, timestamp: t0 + HEADING_WINDOW_MS },
+    ];
+    expect(estimateHeadingFromHistory(history, t0 + HEADING_WINDOW_MS)).toBeNull();
+  });
+
+  it('時間窓より古い点は無視し、窓内の変位だけで方向を求める', () => {
+    const history: GpsPoint[] = [
+      // 窓の外（大昔）: 東へ大きく動いた点。これが混入すると方向が変わってしまう
+      { lat: baseLat, lng: baseLng, timestamp: t0 },
+      { lat: baseLat, lng: baseLng + 0.05, timestamp: t0 + 1000 },
+      // 窓内: ここから真北へ移動
+      { lat: baseLat, lng: baseLng + 0.05, timestamp: t0 + 20_000 },
+      { lat: baseLat + 0.002, lng: baseLng + 0.05, timestamp: t0 + 20_000 + HEADING_WINDOW_MS },
+    ];
+    const heading = estimateHeadingFromHistory(history, t0 + 20_000 + HEADING_WINDOW_MS);
+    expect(heading).not.toBeNull();
+    expect(heading!).toBeCloseTo(0, 0);
   });
 });

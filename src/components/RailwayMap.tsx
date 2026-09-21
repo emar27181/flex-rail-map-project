@@ -70,7 +70,7 @@ import { getInitialVisibleRoutesFromUrl, syncVisibleRoutesToUrl } from '../utils
 import ColorChip from './ui/ColorChip';
 import { checkboxInput, L} from './legend/legendStyles';
 import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, tintColor, LIGHT_TEXT } from '../utils/contrast';
-import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE, haversineDistance } from '../utils/trainDetector';
+import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE, haversineDistance, estimateHeadingFromHistory } from '../utils/trainDetector';
 import { estimateArrival, shouldNotifyArrival, buildArrivalMessage, isPlausibleSpeed, DEFAULT_ALERT_MINUTES } from '../utils/arrivalAlert';
 import { buildCorridorRoutes, vertexRanks, offsetPoints } from '../utils/routeOffset';
 import Button from './ui/atoms/Button';
@@ -446,15 +446,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const id = navigator.geolocation.watchPosition(
       (pos) => {
         setLocationError(null);
-        const { latitude, longitude, heading } = pos.coords;
+        const { latitude, longitude } = pos.coords;
         setUserLocation([latitude, longitude]);
-        // heading は静止中や対応端末以外では null になる。前回値は保持せず、
-        // 取れなくなったら矢印も消す（古い向きのまま表示され続けるのを防ぐ）
-        setUserHeading(heading !== null && !Number.isNaN(heading) ? heading : null);
 
         const now = Date.now();
         const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: pos.timestamp };
         gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-GPS_HISTORY_SIZE);
+
+        // 向きはブラウザ/OS側の GeolocationCoordinates.heading（端末差が大きく
+        // 精度が低い）ではなく、直近の実移動から自前で計算する。十分な移動が
+        // 無ければ null（矢印を出さず点だけ表示、取れなくなったら消す）
+        setUserHeading(estimateHeadingFromHistory(gpsHistoryRef.current, pos.timestamp));
 
         if (gpsHistoryRef.current.length >= 2) {
           try {
@@ -3435,13 +3437,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     const id = navigator.geolocation.watchPosition(
       (position) => {
-        const { latitude, longitude, heading } = position.coords;
+        const { latitude, longitude } = position.coords;
         setUserLocation([latitude, longitude]);
-        setUserHeading(heading !== null && !Number.isNaN(heading) ? heading : null);
 
         const now = Date.now();
         const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: position.timestamp };
         gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-GPS_HISTORY_SIZE);
+
+        // 向きはブラウザ/OS側の GeolocationCoordinates.heading ではなく、
+        // 直近の実移動から自前で計算する（詳細は estimateHeadingFromHistory 参照）
+        setUserHeading(estimateHeadingFromHistory(gpsHistoryRef.current, position.timestamp));
 
         if (gpsHistoryRef.current.length >= 2) {
           try {
