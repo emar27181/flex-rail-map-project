@@ -2636,6 +2636,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     }
 
     const shouldShow = (station: Station): boolean => {
+      // 出発駅・到着駅はどのフィルターよりも優先して必ず表示する（最優先条件）
+      if ((departure && station.name === departure.name) || (arrival && station.name === arrival.name)) {
+        return true;
+      }
       // 乗換駅のみ
       if (showTransferStationsOnly && !transferStations.has(station.name)) return false;
       // 急行駅のみ（急行データがある路線のみ適用）
@@ -2668,6 +2672,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     visibleRoutesData, showTransferStationsOnly, showExpressStationsOnly,
     timeFilterEnabled, stationsWithinTime, transferStations, allowedStationNames,
     heatmapRangeFilterEnabled, heatmapEnabled, heatmapParam, heatmapCustomRange,
+    departure, arrival,
   ]);
 
   // バブルマップ用: stationVisibilityFilter を通過した駅 + 中心から近い順 最大50件
@@ -4100,9 +4105,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             if (!showStationNames) {
               return null;
             }
-            // 特別駅も共有フィルター適用（allowedStationNames は免除済みなので除く）
-            if (showTransferStationsOnly && !transferStations.has(station.name)) return null;
-            if (showExpressStationsOnly && routeHasExpressMark && !station.isExpress && !transferStations.has(station.name)) return null;
+            // 出発駅・到着駅は「乗換駅のみ表示」「急行駅のみ表示」より優先して
+            // 必ず表示する（最優先条件）。時間フィルターのみ従来どおり適用する
             if (timeFilterEnabled && stationsWithinTime.length > 0) {
               const stationWithTime = stationsWithinTime.find(sWithTime => sWithTime.station.name === station.name);
               if (!stationWithTime) return null;
