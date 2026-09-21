@@ -45,6 +45,24 @@ npm run dev      # 開発サーバー起動 (localhost:8080)
 npm run build    # プロダクションビルド
 ```
 
+### SEO関連の環境変数
+
+Search ConsoleのHTMLタグ確認とGA4（Google Analytics 4）は、値をソースコードに
+直接書かず、ビルド環境の環境変数（`.env`、またはNetlifyのSite configuration →
+Environment variables）から読み込む。未設定の場合はそれぞれのタグ/スクリプトが
+出力されないだけで、ビルド自体は失敗しない。
+
+| 変数名 | 用途 | 値の入手方法 |
+|---|---|---|
+| `VITE_GA_MEASUREMENT_ID` | GA4の測定ID（例: `G-XXXXXXXXXX`） | Google Analyticsの管理画面 → データストリーム |
+| `GOOGLE_SITE_VERIFICATION` | Search ConsoleのHTMLタグ確認用コード（`content`属性の値のみ、`<meta ...>`は不要） | Search Console → 所有権の確認 → HTMLタグ |
+
+ローカルでは `.env` にこの2つを書けば `npm run build` に反映される。
+本番（Netlify）で有効にするには、Netlifyのビルド環境変数に同名で設定すること。
+GA4は [Consent Mode](https://developers.google.com/tag-platform/security/guides/consent)
+で既定「同意なし」で読み込まれ、サイト内のCookieバナーで分析Cookieを許可した
+場合のみ収集を開始する（`src/utils/gtagConsent.ts`）。
+
 ## 利用規約
 
 - 駅・路線データは独自作成またはオープンデータを利用しています
