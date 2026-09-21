@@ -1595,7 +1595,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onClick={() => { setArrival(stationTooltip.station); closeTooltip(); }}
               >{translateUI('setArrivalStation', currentLanguage)}</Button>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, flexWrap: 'wrap' }}>
               <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
                 {translateUI(timeMode === 'arrival' ? 'arrivalTimeLabel' : 'baseTime', currentLanguage)}
               </span>
@@ -1618,8 +1618,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   setTimetableBaseTime(`${hh}:${mm}`);
                 }}
               >{translateUI('currentTime', currentLanguage)}</Button>
-            </div>
-            <div style={{ marginTop: L.sp.xs }}>
+              {/* 現在時刻ボタンの右に詰め、時刻と同じ操作列に見せる（駅選択パネル側と統一） */}
               <SegmentedControl
                 theme={theme}
                 size="sm"

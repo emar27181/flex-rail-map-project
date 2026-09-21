@@ -1011,6 +1011,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: L.sp.xs,
+                flexWrap: 'wrap',
               }}>
                 <label style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
                   {translateUI(timeMode === 'arrival' ? 'arrivalTimeLabel' : 'departureTime', language)}
@@ -1038,9 +1039,14 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 >
                   {translateUI('currentTime', language)}
                 </Button>
-              </div>
-              {onTimeModeChange && (
-                <div style={{ marginTop: L.sp.xs }}>
+                {/*
+                  出発/到着どちらの基準かは、時刻そのものの隣に置いて初めて
+                  「この時刻が何を意味するか」が一目でわかる。以前は下の行に
+                  分けていたが、現在時刻ボタンのすぐ右に詰めて1つの操作列に見せる。
+                  選択中はButton(variant="primary", pressed)で塗りつぶす
+                  （このアプリの他のトグルと共通の「押されている＝塗り」の規約）。
+                */}
+                {onTimeModeChange && (
                   <SegmentedControl
                     theme={theme}
                     size="sm"
@@ -1052,8 +1058,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       { value: 'arrival', label: translateUI('timeBasisArrival', language) },
                     ]}
                   />
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
 
