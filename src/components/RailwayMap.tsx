@@ -2846,7 +2846,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           ).slice(0, maxRouteRecommendations);
 
       setRouteRecommendations(finalUniqueRoutes);
-      setSelectedRouteIndices(null);
+      // 推薦ルート選択は一旦オフ（=候補全部を同時にハイライトしない）。
+      // 全候補を同時表示すると、時刻表示は先頭候補(index 0)の駅にしか
+      // 出ないため「時刻が出る路線と出ない路線がある」ように見えて混乱を
+      // 招いていた。既定は先頭候補だけを選択状態にし、他候補は
+      // 「推薦ルート選択」パネルから手動で追加できるようにする。
+      setSelectedRouteIndices(finalUniqueRoutes.length > 0 ? new Set([0]) : new Set());
 
       // 推薦ルートの最初のセグメントをTrainStatusPanelに反映
       const topRoute = finalUniqueRoutes[0];
@@ -2884,14 +2889,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         console.log(`   乗り換え駅: ${transferStations.join(', ') || 'なし'}`);
       });
 
-      // 推薦されたルートで使用される路線を自動的に表示状態にする
+      // 推薦されたルートで使用される路線を自動的に表示状態にする。
+      // 全候補(最大10件)ぶんの路線をまとめて表示すると、選択していない
+      // 候補の路線まで（トリミングされない全区間で）地図に残ってしまう。
+      // 既定で選択状態にしたのは先頭候補だけなので、自動表示もそれに合わせる
+      // （topRouteは直前でTrainStatusPanel用に定義済みのものを再利用）。
       const routesUsedInRecommendations = new Set<RouteKey>();
-      finalUniqueRoutes.forEach(route => {
-        route.segments.forEach(segment => {
-          if (segment.routeKey !== 'walking' && segment.routeKey) {
-            routesUsedInRecommendations.add(segment.routeKey as RouteKey);
-          }
-        });
+      topRoute?.segments.forEach(segment => {
+        if (segment.routeKey !== 'walking' && segment.routeKey) {
+          routesUsedInRecommendations.add(segment.routeKey as RouteKey);
+        }
       });
 
       if (routesUsedInRecommendations.size > 0) {
