@@ -130,27 +130,33 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
               {translateUI('cookieBannerIntroSuffix', language)}
             </p>
 
+            {/*
+              バナー自体が地図の下端に重なる補助UIのため、サイズは
+              sm(24px)に統一する（md=44pxは主要操作向け、CONTROL_SIZEの規約）。
+              以前はmdを使っており、後述の「設定を保存」等との比較で
+              浮いて見えていた。
+            */}
             <div style={{
               display: 'flex',
               gap: L.sp.xl,
               flexWrap: 'wrap',
               alignItems: 'center'
             }}>
-              <Button theme={theme} variant="primary" size="md" onClick={handleAcceptAll}>
+              <Button theme={theme} variant="primary" size="sm" onClick={handleAcceptAll}>
                 {translateUI('cookieAcceptAll', language)}
               </Button>
 
               <Button
                 theme={theme}
                 variant="outline"
-                size="md"
+                size="sm"
                 onClick={() => setShowSettings(!showSettings)}
-                icon={<Settings size={16} />}
+                icon={<Settings size={14} />}
               >
                 {translateUI('cookieManageSettings', language)}
               </Button>
 
-              <Button theme={theme} variant="ghost" size="md" onClick={handleReject}>
+              <Button theme={theme} variant="ghost" size="sm" onClick={handleReject}>
                 {translateUI('cookieEssentialOnly', language)}
               </Button>
             </div>
@@ -175,108 +181,74 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
               {translateUI('cookieSettingsTitle', language)}
             </h4>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp['2xl'] }}>
-              {/* Necessary Cookies */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                gap: L.sp['2xl']
-              }}>
-                <div style={{ flex: 1 }}>
-                  <h5 style={{
-                    margin: `0 0 ${L.sp.xs} 0`,
-                    fontSize: FS.title,
-                    fontWeight: '600',
-                    color: colors.text
+            {/*
+              3カテゴリを縦積みにすると項目ごとに見出し・説明・スイッチの
+              3段になり、パネルの縦幅がかなり伸びていた。横に並べて
+              画面の余白を使う方向に倒し、縦幅をコンパクトにする
+              （狭い画面ではflexWrapで自然に折り返す）。
+              3カテゴリはタイトル・説明・スイッチの状態が違うだけで
+              構造は同一なので、配列にしてまとめて描画する。
+            */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp['2xl'] }}>
+              {[
+                {
+                  key: 'necessary',
+                  title: translateUI('cookieNecessaryTitle', language),
+                  desc: translateUI('cookieNecessaryDesc', language),
+                  checked: true,
+                  disabled: true,
+                  onChange: () => {},
+                },
+                {
+                  key: 'analytics',
+                  title: translateUI('cookieAnalyticsTitle', language),
+                  desc: translateUI('cookieAnalyticsDesc', language),
+                  checked: cookiePreferences.analytics,
+                  disabled: false,
+                  onChange: (v: boolean) => setCookiePreferences(prev => ({ ...prev, analytics: v })),
+                },
+                {
+                  key: 'advertising',
+                  title: translateUI('cookieAdvertisingTitle', language),
+                  desc: translateUI('cookieAdvertisingDesc', language),
+                  checked: cookiePreferences.advertising,
+                  disabled: false,
+                  onChange: (v: boolean) => setCookiePreferences(prev => ({ ...prev, advertising: v })),
+                },
+              ].map(cat => (
+                <div key={cat.key} style={{ flex: '1 1 220px', minWidth: '220px' }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: L.sp.xs
                   }}>
-                    {translateUI('cookieNecessaryTitle', language)}
-                  </h5>
+                    <h5 style={{
+                      margin: 0,
+                      fontSize: FS.title,
+                      fontWeight: '600',
+                      color: colors.text
+                    }}>
+                      {cat.title}
+                    </h5>
+                    <Switch
+                      theme={theme}
+                      checked={cat.checked}
+                      disabled={cat.disabled}
+                      onChange={cat.onChange}
+                      label={cat.title}
+                    />
+                  </div>
                   <p style={{
-                    margin: 0,
+                    margin: `${L.sp.xs} 0 0 0`,
                     fontSize: FS.caption,
                     color: colors.textSecondary,
                     lineHeight: '1.4'
                   }}>
-                    {translateUI('cookieNecessaryDesc', language)}
+                    {cat.desc}
                   </p>
                 </div>
-                {/* 常時ONで変更不可。分析/広告Cookieと同じSwitchアトムをdisabledで使う
-                    （以前は専用の塗りつぶしdivを手書きしていた） */}
-                <Switch
-                  theme={theme}
-                  checked={true}
-                  disabled
-                  onChange={() => {}}
-                  label={translateUI('cookieNecessaryTitle', language)}
-                />
-              </div>
-
-              {/* Analytics Cookies */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                gap: L.sp['2xl']
-              }}>
-                <div style={{ flex: 1 }}>
-                  <h5 style={{
-                    margin: `0 0 ${L.sp.xs} 0`,
-                    fontSize: FS.title,
-                    fontWeight: '600',
-                    color: colors.text
-                  }}>
-                    {translateUI('cookieAnalyticsTitle', language)}
-                  </h5>
-                  <p style={{
-                    margin: 0,
-                    fontSize: FS.caption,
-                    color: colors.textSecondary,
-                    lineHeight: '1.4'
-                  }}>
-                    {translateUI('cookieAnalyticsDesc', language)}
-                  </p>
-                </div>
-                <Switch
-                  theme={theme}
-                  checked={cookiePreferences.analytics}
-                  onChange={(v) => setCookiePreferences(prev => ({ ...prev, analytics: v }))}
-                  label={translateUI('cookieAnalyticsTitle', language)}
-                />
-              </div>
-
-              {/* Advertising Cookies */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                gap: L.sp['2xl']
-              }}>
-                <div style={{ flex: 1 }}>
-                  <h5 style={{
-                    margin: `0 0 ${L.sp.xs} 0`,
-                    fontSize: FS.title,
-                    fontWeight: '600',
-                    color: colors.text
-                  }}>
-                    {translateUI('cookieAdvertisingTitle', language)}
-                  </h5>
-                  <p style={{
-                    margin: 0,
-                    fontSize: FS.caption,
-                    color: colors.textSecondary,
-                    lineHeight: '1.4'
-                  }}>
-                    {translateUI('cookieAdvertisingDesc', language)}
-                  </p>
-                </div>
-                <Switch
-                  theme={theme}
-                  checked={cookiePreferences.advertising}
-                  onChange={(v) => setCookiePreferences(prev => ({ ...prev, advertising: v }))}
-                  label={translateUI('cookieAdvertisingTitle', language)}
-                />
-              </div>
+              ))}
             </div>
 
             <div style={{
@@ -285,10 +257,10 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
               gap: L.sp.xl,
               justifyContent: 'flex-end'
             }}>
-              <Button theme={theme} variant="outline" size="md" onClick={() => setShowSettings(false)}>
+              <Button theme={theme} variant="outline" size="sm" onClick={() => setShowSettings(false)}>
                 {translateUI('cookieCancel', language)}
               </Button>
-              <Button theme={theme} variant="primary" size="md" onClick={handleSaveSettings}>
+              <Button theme={theme} variant="primary" size="sm" onClick={handleSaveSettings}>
                 {translateUI('cookieSaveSettings', language)}
               </Button>
             </div>
