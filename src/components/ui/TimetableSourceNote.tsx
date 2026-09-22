@@ -5,6 +5,11 @@
  * 利用者が実時刻と取り違えないよう、リストの一番上（読む前）に
  * 更新日と出典への軽いリンクを出す。以前はリストの一番下にだけ
  * あり、スクロールしないと目に入らなかった。
+ *
+ * 出典の詳しい文章（TIMETABLE_SOURCE.title 等）はリンクのtitle属性
+ * （ホバーで見える）とリスト最下部の但し書きに任せ、ここでは
+ * 「出典」の一語だけにする。以前は出典の説明文をそのまま表示していて、
+ * 狭い右カラムでは2〜3行に折り返し、時刻を読む前の領域を取りすぎていた。
  */
 import { translateUI } from '../../utils/translation';
 import type { Language } from '../../utils/translation';
@@ -28,19 +33,26 @@ export default function TimetableSourceNote({ updatedAt, source, theme, language
       borderBottom: `1px solid ${colors.borderLight}`,
       fontSize: FS.caption,
       color: colors.textSecondary,
-      opacity: 0.75,
-      lineHeight: 1.4,
+      opacity: 0.6,
+      lineHeight: 1.3,
       display: 'flex',
-      gap: L.sp.xs,
-      flexWrap: 'wrap',
+      alignItems: 'baseline',
+      gap: L.sp.xxs,
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
     }}>
-      <span>{translateUI('lastUpdated', language)}: {updatedAt}</span>
+      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {translateUI('lastUpdated', language)}: {updatedAt}
+      </span>
+      <span aria-hidden>・</span>
+      {/* 出典の詳しい文章はホバーのtitleに任せ、リンク自体は「出典」の一語だけにする */}
       <a
         href="/about"
-        style={{ color: 'inherit', textDecoration: 'underline' }}
+        title={source}
+        style={{ color: 'inherit', textDecoration: 'underline', flexShrink: 0 }}
         onClick={(e) => e.stopPropagation()}
       >
-        {translateUI('dataSource', language)}: {source}
+        {translateUI('dataSource', language)}
       </a>
     </div>
   );
