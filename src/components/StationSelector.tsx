@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { ArrowLeftRight, Clock, Waypoints, X } from 'lucide-react';
-import { createPortal } from 'react-dom';
+import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Timer, Waypoints, X } from 'lucide-react';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
@@ -14,10 +13,13 @@ import { FS, TARGET, SEMANTIC, alphaWhite } from '../constants/ui';
 import { L } from './legend/legendStyles';
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
+import RemovableTag from './ui/atoms/RemovableTag';
+import StationSearchDropdown from './ui/StationSearchDropdown';
 import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 import TextField from './ui/atoms/TextField';
+import SegmentedControl from './ui/molecules/SegmentedControl';
 
 /** 駅名検索の結果として出す最大件数 */
 const STATION_SUGGESTION_LIMIT = 10;
@@ -31,9 +33,11 @@ const SUGGESTION_NEARBY_COUNT = 2;
 const SUGGESTION_HEAD_COUNT = SUGGESTION_NEARBY_COUNT + SUGGESTION_FREQUENT_COUNT;
 /**
  * 駅選択パネル内の「出発時刻」行を出すか。
- * 同じ設定が駅ツールチップ側にもあるため既定では出さない。
+ * 同じ設定は駅ツールチップ側にもある（timetableBaseTime を共有）が、
+ * 「経由駅の設定と、時刻の設定も出発駅とかの入力の下でできるように」との
+ * 要望を受け、駅選択パネルからも直接操作できるようにした
  */
-const SHOW_DEPARTURE_TIME_ROW: boolean = false;
+const SHOW_DEPARTURE_TIME_ROW: boolean = true;
 /** 近隣駅は候補の補充にも使うため、先頭3件より多めに求めておく */
 const NEARBY_STATION_COUNT = STATION_SUGGESTION_LIMIT;
 
@@ -68,6 +72,20 @@ interface StationSelectorProps {
   showTransferStationsOnly?: boolean;
   /** 乗換駅のみ表示の切り替え。渡されたときだけボタンを出す */
   onShowTransferStationsOnlyChange?: (value: boolean) => void;
+  /** 経由駅（順序付き）。渡されたときだけ経由駅の設定UIを出す */
+  waypoints?: Station[];
+  /** 経由駅を追加する */
+  onAddWaypoint?: (station: Station) => void;
+  /** 経由駅を削除する（配列インデックス指定） */
+  onRemoveWaypoint?: (index: number) => void;
+  /** 駅アイコンの下に時刻表の発車時刻を表示するか */
+  showStationTimeLabels?: boolean;
+  /** 時刻表示の切り替え。渡されたときだけボタンを出す */
+  onShowStationTimeLabelsChange?: (value: boolean) => void;
+  /** 出発時刻欄を「出発時刻」「到着時刻」どちらとして扱うか */
+  timeMode?: 'departure' | 'arrival';
+  /** 出発/到着基準の切り替え。渡されたときだけ切替UIを出す */
+  onTimeModeChange?: (mode: 'departure' | 'arrival') => void;
 }
 
 const StationSelector: React.FC<StationSelectorProps> = ({
@@ -94,6 +112,13 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   onShowTravelTimeChange,
   showTransferStationsOnly = false,
   onShowTransferStationsOnlyChange,
+  waypoints,
+  onAddWaypoint,
+  onRemoveWaypoint,
+  showStationTimeLabels = false,
+  onShowStationTimeLabelsChange,
+  timeMode = 'departure',
+  onTimeModeChange,
 }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -101,11 +126,21 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const [arrivalSearch, setArrivalSearch] = useState('');
   const [showDepartureResults, setShowDepartureResults] = useState(false);
   const [showArrivalResults, setShowArrivalResults] = useState(false);
+  const [waypointSearch, setWaypointSearch] = useState('');
+  const [showWaypointResults, setShowWaypointResults] = useState(false);
+  const [showWaypointInput, setShowWaypointInput] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [departureDropdownPos, setDepartureDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
   const [arrivalDropdownPos, setArrivalDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [waypointDropdownPos, setWaypointDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
+  /**
+   * 経由駅入力欄の横幅を出発駅欄と同じにするため、実際に描画された
+   * 出発駅欄（departureRef）の横幅を測って使う（値をハードコードしない）。
+   */
+  const [waypointFieldWidth, setWaypointFieldWidth] = useState<number | null>(null);
 
+  const panelRef = useRef<HTMLDivElement>(null);
   const departureRef = useRef<HTMLDivElement>(null);
   const arrivalRef = useRef<HTMLDivElement>(null);
   const departurePortalRef = useRef<HTMLDivElement>(null);
@@ -300,6 +335,44 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     [allStations, arrivalSearch, arrivalSuggestions]
   );
 
+  // 経由駅の候補は、まだ経由駅に入っていない駅だけに絞る（同じ駅を二重に選べないように）
+  const filteredWaypointStations = useMemo(() => {
+    const already = new Set((waypoints ?? []).map(s => s.name));
+    return filterStations(waypointSearch, majorStations).filter(s => !already.has(s.name));
+  }, [allStations, waypointSearch, majorStations, waypoints]);
+
+  const handleWaypointSelect = (station: Station) => {
+    onAddWaypoint?.(station);
+    setWaypointSearch('');
+    setShowWaypointResults(false);
+    setShowWaypointInput(false);
+  };
+
+  /**
+   * 出発駅・到着駅の候補ドロップダウンの位置・横幅を、入力欄自身の幅ではなく
+   * パネル全体の中身の幅に合わせて計算する。
+   *
+   * 出発駅・到着駅は横に並ぶ2カラムのため、入力欄自身の幅はパネルの半分ほど
+   * しかない。候補の横幅もそれに合わせていたため、候補を出すと隣の到着駅欄の
+   * ぶんだけ余白ができ、しかも候補が下のボタン行に重なって隠れていた。
+   * パネルの余白（padding）はデザイントークン(L.sp.md)から決まるが、
+   * ここでは実際に描画された値を`getComputedStyle`で読み取ることで、
+   * トークンの値が変わっても計算式を書き換えずに済むようにしている。
+   */
+  const getFullWidthDropdownPosition = (inputRect: DOMRect) => {
+    const panelEl = panelRef.current;
+    if (!panelEl) return { top: inputRect.bottom + 2, left: inputRect.left, width: inputRect.width };
+    const panelRect = panelEl.getBoundingClientRect();
+    const style = getComputedStyle(panelEl);
+    const padLeft = parseFloat(style.paddingLeft) || 0;
+    const padRight = parseFloat(style.paddingRight) || 0;
+    return {
+      top: inputRect.bottom + 2,
+      left: panelRect.left + padLeft,
+      width: panelRect.width - padLeft - padRight,
+    };
+  };
+
   const handleDepartureSelect = (station: Station) => {
     departureClickedRef.current = true;
     onDepartureChange(station);
@@ -379,6 +452,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
   return (
     <div
+      ref={panelRef}
       onTouchStart={stopTouchPropagation}
       onTouchMove={stopTouchPropagation}
       onTouchEnd={stopTouchPropagation}
@@ -459,8 +533,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                   onFocus={(e) => {
                     focusedInputRef.current = e.currentTarget;
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    setDepartureDropdownPos({ top: rect.bottom + 2, left: rect.left, width: rect.width });
+                    setDepartureDropdownPos(getFullWidthDropdownPosition(e.currentTarget.getBoundingClientRect()));
                     setShowDepartureResults(true);
                     handleSearchFocus();
                   }}
@@ -525,57 +598,19 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   )}
                 </div>
               )}
-              {showDepartureResults && departureDropdownPos && createPortal(
-                <div
+              {showDepartureResults && departureDropdownPos && (
+                <StationSearchDropdown
                   ref={departurePortalRef}
+                  position={departureDropdownPos}
+                  stations={filteredDepartureStations}
+                  onSelect={handleDepartureSelect}
+                  theme={theme}
+                  language={language}
+                  hasQuery={!!departureSearch}
                   onMouseDown={(e) => { e.preventDefault(); departureClickedRef.current = true; }}
                   onTouchStart={(e) => { e.stopPropagation(); departureClickedRef.current = true; }}
                   onTouchMove={(e) => e.stopPropagation()}
-                  style={{
-                  position: 'fixed',
-                  top: departureDropdownPos.top,
-                  left: departureDropdownPos.left,
-                  width: departureDropdownPos.width,
-                  backgroundColor: colors.surfaceElevated,
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: L.r.control,
-                  boxShadow: `0 4px 12px ${colors.shadow}`,
-                  maxHeight: '240px',
-                  overflowY: 'auto',
-                  // iOSで候補内をスクロールしたとき、端に達しても地図やページ側へ
-                  // スクロールが伝播しないようにする
-                  overscrollBehavior: 'contain',
-                  WebkitOverflowScrolling: 'touch',
-                  // body に touch-action: manipulation が掛かっており、
-                  // 指定しないと縦スワイプがスクロールとして扱われない端末がある
-                  touchAction: 'pan-y',
-                  zIndex: 99999
-                }}>
-                  {filteredDepartureStations.map((station, index) => (
-                    <div
-                      key={`${station.name}-${index}`}
-                      onClick={() => handleDepartureSelect(station)}
-                      style={{
-                        padding: `${L.sp.md} ${L.sp.xl}`,
-                        cursor: 'pointer',
-                        borderBottom: index < filteredDepartureStations.length - 1 ? `1px solid ${colors.borderLight}` : 'none',
-                        fontSize: FS.body,
-                        wordBreak: language === 'english' ? 'break-word' : 'normal',
-                        lineHeight: '1.3'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surface}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
-                    >
-                      {translateStation(station.name, language)}
-                    </div>
-                  ))}
-                  {filteredDepartureStations.length === 0 && (
-                    <div style={{ padding: `${L.sp.md} ${L.sp.xl}`, color: colors.textSecondary, fontSize: FS.body }}>
-                      {departureSearch ? translateUI('noStationFound', language) : translateUI('majorStationsHint', language)}
-                    </div>
-                  )}
-                </div>,
-                document.body
+                />
               )}
             </div>
 
@@ -627,8 +662,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                   onFocus={(e) => {
                     focusedInputRef.current = e.currentTarget;
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    setArrivalDropdownPos({ top: rect.bottom + 2, left: rect.left, width: rect.width });
+                    setArrivalDropdownPos(getFullWidthDropdownPosition(e.currentTarget.getBoundingClientRect()));
                     setShowArrivalResults(true);
                     handleSearchFocus();
                   }}
@@ -678,57 +712,19 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 )}
               </div>
               
-              {showArrivalResults && arrivalDropdownPos && createPortal(
-                <div
+              {showArrivalResults && arrivalDropdownPos && (
+                <StationSearchDropdown
                   ref={arrivalPortalRef}
+                  position={arrivalDropdownPos}
+                  stations={filteredArrivalStations}
+                  onSelect={handleArrivalSelect}
+                  theme={theme}
+                  language={language}
+                  hasQuery={!!arrivalSearch}
                   onMouseDown={(e) => { e.preventDefault(); arrivalClickedRef.current = true; }}
                   onTouchStart={(e) => { e.stopPropagation(); arrivalClickedRef.current = true; }}
                   onTouchMove={(e) => e.stopPropagation()}
-                  style={{
-                  position: 'fixed',
-                  top: arrivalDropdownPos.top,
-                  left: arrivalDropdownPos.left,
-                  width: arrivalDropdownPos.width,
-                  backgroundColor: colors.surfaceElevated,
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: L.r.control,
-                  boxShadow: `0 4px 12px ${colors.shadow}`,
-                  maxHeight: '240px',
-                  overflowY: 'auto',
-                  // iOSで候補内をスクロールしたとき、端に達しても地図やページ側へ
-                  // スクロールが伝播しないようにする
-                  overscrollBehavior: 'contain',
-                  WebkitOverflowScrolling: 'touch',
-                  // body に touch-action: manipulation が掛かっており、
-                  // 指定しないと縦スワイプがスクロールとして扱われない端末がある
-                  touchAction: 'pan-y',
-                  zIndex: 99999
-                }}>
-                  {filteredArrivalStations.map((station, index) => (
-                    <div
-                      key={`${station.name}-${index}`}
-                      onClick={() => handleArrivalSelect(station)}
-                      style={{
-                        padding: `${L.sp.md} ${L.sp.xl}`,
-                        cursor: 'pointer',
-                        borderBottom: index < filteredArrivalStations.length - 1 ? `1px solid ${colors.borderLight}` : 'none',
-                        fontSize: FS.body,
-                        wordBreak: language === 'english' ? 'break-word' : 'normal',
-                        lineHeight: '1.3'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surface}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
-                    >
-                      {translateStation(station.name, language)}
-                    </div>
-                  ))}
-                  {filteredArrivalStations.length === 0 && (
-                    <div style={{ padding: `${L.sp.md} ${L.sp.xl}`, color: colors.textSecondary, fontSize: FS.body }}>
-                      {arrivalSearch ? translateUI('noStationFound', language) : translateUI('majorStationsHint', language)}
-                    </div>
-                  )}
-                </div>,
-                document.body
+                />
               )}
             </div>
           </div>
@@ -758,7 +754,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
             寸法は Button の size="sm" に揃えてあるので2つの大きさは一致する。
           */}
-          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange) && (
+          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange || onAddWaypoint || onShowStationTimeLabelsChange) && (
             <div style={{
               // 出発駅・到着駅欄とこの行の間隔も、ボタン同士の間隔（下記gap）と
               // 揃える。片方だけ広げるとリズムが不揃いに見えるため統一する。
@@ -773,10 +769,23 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               {onSetNearestDeparture && (
                 <Button
                   theme={theme}
-                  // 出発駅欄と同じ緑の塗りつぶしで、出発側の操作だと分かるようにする
-                  variant="positive"
+                  variant="primary"
                   size="sm"
                   onClick={onSetNearestDeparture}
+                  icon={<LocateFixed />}
+                  /*
+                    現在地（userLocation）が取れるまでは押しても意味が無いため、
+                    ボタン自体を消すのではなく非活性で存在だけ示す
+                    （消えたり現れたりすると隣のボタンの位置が動いてしまうため）。
+                    このボタンは「出発駅にする」という1回限りの操作であり、
+                    on/offの状態を持つトグルではないため、`pressed`は渡さない
+                    （渡すと未確定時に枠線だけの見た目になり、同じくdisabledで
+                    出し分ける他のアクションボタン——StationMemoPanel.tsxの
+                    「＋」追加ボタンなど——と見た目の規則が食い違う）。
+                    disabledだけで出し分け、他の非活性ボタンと同じ
+                    「塗りは変えず不透明度だけ下げる」見た目に揃える。
+                  */
+                  disabled={!userLocation}
                 >
                   {translateUI('currentLocationFrom', language)}
                 </Button>
@@ -788,7 +797,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   size="sm"
                   pressed={!!showTravelTime}
                   onClick={() => onShowTravelTimeChange(!showTravelTime)}
-                  icon={<Clock size={14} aria-hidden />}
+                  icon={<Clock />}
                 >
                   {translateUI('showTravelTimes', language)}
                 </Button>
@@ -800,52 +809,244 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   size="sm"
                   pressed={!!showTransferStationsOnly}
                   onClick={() => onShowTransferStationsOnlyChange(!showTransferStationsOnly)}
-                  icon={<Waypoints size={14} aria-hidden />}
+                  icon={<Waypoints />}
                 >
                   {translateUI('showOnlyTransferStations', language)}
+                </Button>
+              )}
+              {/*
+                「経由駅を追加」は乗換駅のみ表示の右に詰めて置く。入力欄を
+                開いている間は下に検索欄が出るのでボタン自体は隠す。
+              */}
+              {onAddWaypoint && !showWaypointInput && (
+                <Button
+                  theme={theme}
+                  size="sm"
+                  variant="outline"
+                  icon={<MapPinPlus />}
+                  onClick={() => {
+                    setWaypointFieldWidth(departureRef.current?.getBoundingClientRect().width ?? null);
+                    setShowWaypointInput(true);
+                  }}
+                >
+                  {translateUI('addWaypoint', language)}
+                </Button>
+              )}
+              {/*
+                出発駅・到着駅の両方が決まって初めて経路上の時刻が意味を持つため、
+                「経路が無いのに時刻を表示するかを聞かれる」状態を避け、
+                両方揃ったときだけボタンを出す（そのときは既定でON。
+                RailwayMap.tsx側で両方揃った瞬間にONへ戻す処理を入れている）。
+              */}
+              {onShowStationTimeLabelsChange && departure && arrival && (
+                <Button
+                  theme={theme}
+                  variant="primary"
+                  size="sm"
+                  pressed={!!showStationTimeLabels}
+                  onClick={() => onShowStationTimeLabelsChange(!showStationTimeLabels)}
+                  icon={<Timer />}
+                >
+                  {translateUI('showStationTimeLabelsButton', language)}
                 </Button>
               )}
             </div>
           )}
 
           {/*
-            出発時刻の行はここでは表示しない。
-            駅ツールチップ側に同じ設定（timetableBaseTime を共有）があり、
-            駅選択パネルでは駅の指定に集中させたいため。
+            経由駅の設定。「経由駅の設定と、時刻の設定も出発駅とかの入力の下で
+            できるように」という要望を受けて追加した。出発駅・到着駅の入力欄
+            と同じ検索候補ロジック（filterStations）・同じ候補ドロップダウン
+            （StationSearchDropdown、出発駅・到着駅と共通）を使う。
+            以前はパネル内`position: absolute`の簡易版で、パネルのスクロール
+            領域からはみ出す分が見切れていたため、出発駅・到着駅と同じ
+            portal＋固定位置の仕組みに揃えた。
+            「経由駅を追加」ボタン自体は上のボタン行（乗換駅のみ表示の右）に
+            詰めて配置してあるので、ここには選択済みチップと検索欄（開いて
+            いるときだけ）を出す。どちらも無ければ何も描画せず余白を使わない。
           */}
-          {SHOW_DEPARTURE_TIME_ROW && onDepartureTimeChange && (
-            <div style={{
-              marginTop: L.sp.sm,
-              display: 'flex',
-              alignItems: 'center',
-              gap: L.sp.xs,
-            }}>
-              <label style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
-                {translateUI('departureTime', language)}
-              </label>
-              <TextField
-                theme={theme}
-                size="sm"
-                type="time"
-                value={departureTime ?? ''}
-                onChange={e => onDepartureTimeChange(e.target.value)}
-                onFocus={(e) => { focusedInputRef.current = e.currentTarget; }}
-                onBlur={() => { focusedInputRef.current = null; }}
-                fullWidth={false}
-              />
-              <Button
-                theme={theme}
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const now = new Date();
-                  const hh = String(now.getHours()).padStart(2, '0');
-                  const mm = String(now.getMinutes()).padStart(2, '0');
-                  onDepartureTimeChange(`${hh}:${mm}`);
-                }}
-              >
-                {translateUI('currentTime', language)}
-              </Button>
+          {onAddWaypoint && ((waypoints ?? []).length > 0 || showWaypointInput) && (
+            <div style={{ marginTop: L.sp.md }}>
+              {/*
+                入力欄を開いていないときは、選択済みチップだけを独立した行で表示。
+                開いているときは、入力欄を出発駅欄と同じ横幅に絞った分だけ
+                右側が空くため、チップは入力欄と同じ行に詰めて表示し
+                空きスペースを使う（無ければ何も出ない）。
+              */}
+              {(waypoints ?? []).length > 0 && !showWaypointInput && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.xs }}>
+                  {(waypoints ?? []).map((wp, index) => (
+                    <RemovableTag
+                      key={`${wp.name}-${index}`}
+                      theme={theme}
+                      size="sm"
+                      label={`${index + 1}. ${translateStation(wp.name, language)}`}
+                      onRemove={() => onRemoveWaypoint?.(index)}
+                      removeLabel={translateUI('clearSelection', language)}
+                    />
+                  ))}
+                </div>
+              )}
+              {showWaypointInput && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.xs }}>
+                  {/*
+                    入力欄自体の横幅は出発駅欄と同じにする（以前はここだけ
+                    `fullWidth`のままパネル全幅＝出発駅欄の2倍以上の横幅に
+                    なっていた）。出発駅・到着駅は「flex: 1 1 0」の2カラムで
+                    横幅が決まるが、経由駅は隣にもう1つ入力欄が無いぶん
+                    flexだけでは合わせられないため、実測した出発駅欄の
+                    横幅（waypointFieldWidth）をそのまま使う。
+                    右側に空いた分は、入力を閉じる×ボタンと、既存の
+                    経由駅チップ（折り返して表示）に詰めて使う。
+                    候補ドロップダウンの横幅は出発駅・到着駅と同じ
+                    `getFullWidthDropdownPosition`（同じ表示関数）を使い、
+                    入力欄より狭くならないようにする。
+                  */}
+                  <div style={{
+                    flex: waypointFieldWidth ? `0 0 ${waypointFieldWidth}px` : '1 1 0',
+                    minWidth: '0',
+                    position: 'relative',
+                  }}>
+                    <TextField
+                      theme={theme}
+                      size="sm"
+                      type="text"
+                      autoFocus
+                      fullWidth
+                      value={waypointSearch}
+                      onChange={(e) => {
+                        setWaypointSearch(e.target.value);
+                        setShowWaypointResults(true);
+                      }}
+                      onFocus={(e) => {
+                        focusedInputRef.current = e.currentTarget;
+                        setWaypointDropdownPos(getFullWidthDropdownPosition(e.currentTarget.getBoundingClientRect()));
+                        setShowWaypointResults(true);
+                      }}
+                      onBlur={() => {
+                        focusedInputRef.current = null;
+                        setShowWaypointResults(false);
+                        setShowWaypointInput(false);
+                        setWaypointSearch('');
+                      }}
+                      placeholder={translateUI('addWaypoint', language)}
+                    />
+                    {showWaypointResults && waypointDropdownPos && (
+                      <StationSearchDropdown
+                        position={waypointDropdownPos}
+                        stations={filteredWaypointStations}
+                        onSelect={handleWaypointSelect}
+                        theme={theme}
+                        language={language}
+                        hasQuery={!!waypointSearch}
+                        // input の blur より先に効かせて、候補クリックが確実に通るようにする
+                        onMouseDown={(e) => e.preventDefault()}
+                      />
+                    )}
+                  </div>
+                  <IconButton
+                    theme={theme}
+                    size="sm"
+                    // onBlurより先にクリックを通す（blurで閉じる処理と競合させない）
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
+                      setShowWaypointResults(false);
+                      setShowWaypointInput(false);
+                      setWaypointSearch('');
+                    }}
+                    label={translateUI('close', language)}
+                    icon={<X size={14} />}
+                    styleOverride={{ flexShrink: 0 }}
+                  />
+                  {(waypoints ?? []).map((wp, index) => (
+                    // input の blur（クリックで閉じる処理）より先に mousedown を
+                    // 止めないと、削除ボタンを押した瞬間に入力欄ごと閉じてしまう
+                    <span key={`${wp.name}-${index}`} onMouseDown={(e) => e.preventDefault()}>
+                      <RemovableTag
+                        theme={theme}
+                        size="sm"
+                        label={`${index + 1}. ${translateStation(wp.name, language)}`}
+                        onRemove={() => onRemoveWaypoint?.(index)}
+                        removeLabel={translateUI('clearSelection', language)}
+                      />
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/*
+            出発時刻の行。駅ツールチップ側にも同じ設定（timetableBaseTime を
+            共有）があるが、経路を選ぶ前に時刻を決めたい操作にも対応できるよう
+            駅選択パネルからも直接変更できるようにしている。
+            timeMode（出発/到着）で、この時刻を「出発時刻」として使うか
+            「到着時刻」として使うかを切り替えられる（ラベルも連動して変わる）。
+            「時刻を表示」ボタンと同様、経路が無いと意味を持たないため
+            出発駅・到着駅の両方が決まってから表示する。
+          */}
+          {SHOW_DEPARTURE_TIME_ROW && onDepartureTimeChange && departure && arrival && (
+            <div style={{ marginTop: L.sp.sm }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: L.sp.xs,
+                flexWrap: 'wrap',
+              }}>
+                <label style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
+                  {translateUI(timeMode === 'arrival' ? 'arrivalTimeLabel' : 'departureTime', language)}
+                </label>
+                <TextField
+                  theme={theme}
+                  size="sm"
+                  type="time"
+                  value={departureTime ?? ''}
+                  onChange={e => onDepartureTimeChange(e.target.value)}
+                  onFocus={(e) => { focusedInputRef.current = e.currentTarget; }}
+                  onBlur={() => { focusedInputRef.current = null; }}
+                  fullWidth={false}
+                />
+                {/*
+                  出発/到着どちらの基準かは、時刻そのものの隣に置いて初めて
+                  「この時刻が何を意味するか」が一目でわかる。以前は下の行に
+                  分けていたが、現在時刻ボタンのすぐ右に詰めて1つの操作列に見せる。
+                  行が折り返される狭い画面（スマホ・PWA）では、この2つが
+                  親のflexWrapでバラバラの行に千切れると「現在時刻の右」が
+                  保証できなくなるため、2つをまとめて1つのflexアイテムにし、
+                  折り返す時は必ずセットのまま次の行へ落ちるようにする。
+                  選択中はButton(variant="primary", pressed)で塗りつぶす
+                  （このアプリの他のトグルと共通の「押されている＝塗り」の規約）。
+                */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, flexShrink: 0 }}>
+                  <Button
+                    theme={theme}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const now = new Date();
+                      const hh = String(now.getHours()).padStart(2, '0');
+                      const mm = String(now.getMinutes()).padStart(2, '0');
+                      onDepartureTimeChange(`${hh}:${mm}`);
+                    }}
+                  >
+                    {translateUI('currentTime', language)}
+                  </Button>
+                  {onTimeModeChange && (
+                    <SegmentedControl
+                      theme={theme}
+                      size="sm"
+                      variant="slide"
+                      ariaLabel={translateUI('baseTime', language)}
+                      value={timeMode}
+                      onChange={onTimeModeChange}
+                      options={[
+                        { value: 'departure', label: translateUI('timeBasisDeparture', language) },
+                        { value: 'arrival', label: translateUI('timeBasisArrival', language) },
+                      ]}
+                    />
+                  )}
+                </div>
+              </div>
             </div>
           )}
 

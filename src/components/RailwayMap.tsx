@@ -8,7 +8,7 @@ import StationSelector from './StationSelector';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
-import { RouteFinder, TimeFilter, type RouteResult, type StationWithTime } from '../utils/routeFinder';
+import { RouteFinder, TimeFilter, findRoutesViaWaypoints, type RouteResult, type StationWithTime } from '../utils/routeFinder';
 import { getRouteDestination, getRouteDisplayText, getDirectionText, commonDirections } from '../data/routeDestinations';
 import { useTheme, getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
 import { translateStation, translateRoute, translateUI, translateTrainType, translatePlatform, translateDestination, translateStatParamLabel, translateStatUnit } from '../utils/translation';
@@ -51,6 +51,7 @@ import {
   getLineTimetable,
   TIMETABLE_SOURCE,
   addMinutes,
+  computeEffectiveBaseTime,
   type Departure,
 } from '../data/timetableData';
 import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, alphaWhite, alphaBlack } from '../constants/ui';
@@ -68,14 +69,16 @@ import {
 import { patchRotatedRendererDrift } from '../utils/leafletRotatePatch';
 import { getInitialVisibleRoutesFromUrl, syncVisibleRoutesToUrl } from '../utils/routeUrlCodes';
 import ColorChip from './ui/ColorChip';
+import TimetableSourceNote from './ui/TimetableSourceNote';
 import { checkboxInput, L} from './legend/legendStyles';
 import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, tintColor, LIGHT_TEXT } from '../utils/contrast';
-import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE, haversineDistance } from '../utils/trainDetector';
+import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE, haversineDistance, estimateHeadingFromHistory } from '../utils/trainDetector';
 import { estimateArrival, shouldNotifyArrival, buildArrivalMessage, isPlausibleSpeed, DEFAULT_ALERT_MINUTES } from '../utils/arrivalAlert';
 import { buildCorridorRoutes, vertexRanks, offsetPoints } from '../utils/routeOffset';
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import Select from './ui/atoms/Select';
+import SegmentedControl from './ui/molecules/SegmentedControl';
 import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
@@ -181,6 +184,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 出発・到着ともに未選択状態でスタート（出発は現在地から自動設定される）
   const [departure, setDeparture] = useState<Station | null>(null);
   const [arrival, setArrival] = useState<Station | null>(null);
+  /** 経由駅（順序どおりに経由する） */
+  const [waypoints, setWaypoints] = useState<Station[]>([]);
+  const handleAddWaypoint = useCallback((station: Station) => {
+    setWaypoints(prev => (prev.some(s => s.name === station.name) ? prev : [...prev, station]));
+  }, []);
+  const handleRemoveWaypoint = useCallback((index: number) => {
+    setWaypoints(prev => prev.filter((_, i) => i !== index));
+  }, []);
   const [routeRecommendations, setRouteRecommendations] = useState<RouteResult[]>([]);
   const [selectedRouteIndices, setSelectedRouteIndices] = useState<Set<number> | null>(null);
   // メインの出発駅とは別に、同じゴール駅への経路を比較したい追加出発駅（例: 藤沢・大磯・平塚から新橋）
@@ -318,10 +329,29 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // 時刻表モード
   const [timetableModeEnabled, setTimetableModeEnabled] = useState(true);
+  // 「時刻を表示」ボタンは出発駅・到着駅が両方揃ったときだけ表示する
+  // （StationSelector.tsx側）。揃った瞬間は必ずONから始まるようにする
+  // （揃った状態のまま何度も再評価してユーザーが手動でOFFにした分を
+  // 上書きしないよう、not-both→both の切り替わりの瞬間だけ反応させる）。
+  const hadBothStationsRef = useRef(false);
+  useEffect(() => {
+    const hasBoth = !!(departure && arrival);
+    if (hasBoth && !hadBothStationsRef.current) {
+      setTimetableModeEnabled(true);
+    }
+    hadBothStationsRef.current = hasBoth;
+  }, [departure, arrival]);
   const [timetableBaseTime, setTimetableBaseTime] = useState(() => {
     const now = new Date();
     return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   });
+  /**
+   * timetableBaseTime を「出発時刻（この時刻に出発）」として使うか
+   * 「到着時刻（この時刻に到着したい）」として使うかの切り替え。
+   * 到着時刻モードでは、選択中経路の合計所要時間ぶん遡った時刻を
+   * 実際の出発基準時刻（effectiveBaseTime）として使う。
+   */
+  const [timeMode, setTimeMode] = useState<'departure' | 'arrival'>('departure');
 
   // 列車位置デモ
   const [showTrainDemo, setShowTrainDemo] = useState(false);
@@ -446,15 +476,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const id = navigator.geolocation.watchPosition(
       (pos) => {
         setLocationError(null);
-        const { latitude, longitude, heading } = pos.coords;
+        const { latitude, longitude } = pos.coords;
         setUserLocation([latitude, longitude]);
-        // heading は静止中や対応端末以外では null になる。前回値は保持せず、
-        // 取れなくなったら矢印も消す（古い向きのまま表示され続けるのを防ぐ）
-        setUserHeading(heading !== null && !Number.isNaN(heading) ? heading : null);
 
         const now = Date.now();
         const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: pos.timestamp };
         gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-GPS_HISTORY_SIZE);
+
+        // 向きはブラウザ/OS側の GeolocationCoordinates.heading（端末差が大きく
+        // 精度が低い）ではなく、直近の実移動から自前で計算する。十分な移動が
+        // 無ければ null（矢印を出さず点だけ表示、取れなくなったら消す）
+        setUserHeading(estimateHeadingFromHistory(gpsHistoryRef.current, pos.timestamp));
 
         if (gpsHistoryRef.current.length >= 2) {
           try {
@@ -1165,6 +1197,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const route = routeRecommendations[selectedIdx];
     if (!route) return map;
 
+    const effectiveBaseTime = computeEffectiveBaseTime(timetableBaseTime, timeMode, route.totalTime);
+
     let cumTime = 0;
     for (const seg of route.segments) {
       if (seg.isWalkingTransfer) {
@@ -1176,7 +1210,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const toName   = seg.stations[n - 1]?.name ?? '';
       const dirIdx   = getTimetableDirectionIndex(seg.routeKey, fromName, toName);
       seg.stations.forEach((st, i) => {
-        const stTime = addMinutes(timetableBaseTime, cumTime + Math.round(seg.time * i / Math.max(n - 1, 1)));
+        const stTime = addMinutes(effectiveBaseTime, cumTime + Math.round(seg.time * i / Math.max(n - 1, 1)));
         const existing = map.get(st.name) ?? [];
         // 同じ routeKey が既に登録済みの場合は追加しない
         if (!existing.some(e => e.routeKey === seg.routeKey)) {
@@ -1187,7 +1221,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       cumTime += seg.time;
     }
     return map;
-  }, [timetableModeEnabled, routeRecommendations, selectedRouteIndices, timetableBaseTime]);
+  }, [timetableModeEnabled, routeRecommendations, selectedRouteIndices, timetableBaseTime, timeMode]);
 
   const TRAIN_TYPE_COLOR: Record<string, string> = {
     '各停': '#2980b9', '普通': '#2980b9',
@@ -1562,8 +1596,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onClick={() => { setArrival(stationTooltip.station); closeTooltip(); }}
               >{translateUI('setArrivalStation', currentLanguage)}</Button>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs }}>
-              <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('baseTime', currentLanguage)}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                {translateUI(timeMode === 'arrival' ? 'arrivalTimeLabel' : 'baseTime', currentLanguage)}
+              </span>
               <TextField
                 theme={theme}
                 size="sm"
@@ -1572,17 +1608,37 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onChange={e => setTimetableBaseTime(e.target.value)}
                 fullWidth={false}
               />
-              <Button
-                theme={theme}
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const now = new Date();
-                  const hh = String(now.getHours()).padStart(2, '0');
-                  const mm = String(now.getMinutes()).padStart(2, '0');
-                  setTimetableBaseTime(`${hh}:${mm}`);
-                }}
-              >{translateUI('currentTime', currentLanguage)}</Button>
+              {/*
+                現在時刻ボタンの右に詰め、時刻と同じ操作列に見せる
+                （駅選択パネル側と統一）。狭い画面で親のflexWrapがこの2つを
+                バラバラの行に千切ると「現在時刻の右」が保証できないため、
+                2つをまとめて1つのflexアイテムにする（駅選択パネル側と同じ対策）。
+              */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, flexShrink: 0 }}>
+                <Button
+                  theme={theme}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const now = new Date();
+                    const hh = String(now.getHours()).padStart(2, '0');
+                    const mm = String(now.getMinutes()).padStart(2, '0');
+                    setTimetableBaseTime(`${hh}:${mm}`);
+                  }}
+                >{translateUI('currentTime', currentLanguage)}</Button>
+                <SegmentedControl
+                  theme={theme}
+                  size="sm"
+                  variant="slide"
+                  ariaLabel={translateUI('baseTime', currentLanguage)}
+                  value={timeMode}
+                  onChange={setTimeMode}
+                  options={[
+                    { value: 'departure', label: translateUI('timeBasisDeparture', currentLanguage) },
+                    { value: 'arrival', label: translateUI('timeBasisArrival', currentLanguage) },
+                  ]}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -1726,8 +1782,28 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     <span style={{ fontSize: FS.caption, color: colors.primary, flexShrink: 0 }}>{translateUI('onboard', currentLanguage)}</span>
                   )}
                   {!isShowing && (
-                    <ColorChip color={routeColor} theme={theme} fontSize={FS.caption}>
+                    <ColorChip color={routeColor} theme={theme} fontSize={FS.caption} shadow={false}>
                       ＋{translateUI('show', currentLanguage)}
+                    </ColorChip>
+                  )}
+                  {/*
+                    表示中の路線をここから非表示にできるようにする
+                    （以前は「＋表示」で表示に切り替えることしかできず、
+                    片方向のトグルだった）。右カラムの時刻表は isShowing に
+                    関係なく activeRouteKey だけで決まるため、選択中
+                    （isActive）の路線を非表示にしても時刻表は消えない。
+                    通る路線が1つしかない駅では選択中の路線しか無いため、
+                    ここを除外すると非表示ボタンが一切出せなくなっていた。
+                  */}
+                  {isShowing && (
+                    <ColorChip
+                      color={routeColor}
+                      theme={theme}
+                      fontSize={FS.caption}
+                      shadow={false}
+                      onClick={(e) => { e.stopPropagation(); toggleRoute(rk as RouteKey); }}
+                    >
+                      －{translateUI('hide', currentLanguage)}
                     </ColorChip>
                   )}
                 </div>
@@ -1739,6 +1815,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           <div style={{ flex: 1, minWidth: '120px', overflowY: 'auto' }}>
             {activeRouteKey && hasTimetableData(activeRouteKey) ? (
               <>
+                {/*
+                  最終更新日・出典は概算値であることの但し書きなので、
+                  時刻を読む前に目に入るよう一番上に出す
+                  （以前はリストの一番下にあり、スクロールしないと見えなかった）。
+                */}
+                {(() => {
+                  const line = getLineTimetable(activeRouteKey);
+                  if (!line) return null;
+                  return (
+                    <TimetableSourceNote
+                      updatedAt={line.updatedAt}
+                      source={line.source ?? TIMETABLE_SOURCE.title}
+                      theme={theme}
+                      language={currentLanguage}
+                    />
+                  );
+                })()}
                 <div style={{
                   padding: `${L.sp.xs} ${L.sp.md}`,
                   fontSize: FS.caption, color: colors.textSecondary,
@@ -1787,22 +1880,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     ))}
                   </>
                 )}
-                {/* 出典と最終更新日。概算値であることが分かるようにここで明記する */}
-                {(() => {
-                  const line = getLineTimetable(activeRouteKey);
-                  if (!line) return null;
-                  return (
-                    <div style={{
-                      padding: `${L.sp.xs} ${L.sp.md}`,
-                      borderTop: `1px solid ${colors.borderLight}`,
-                      fontSize: FS.caption, color: colors.textSecondary, lineHeight: 1.5,
-                    }}>
-                      <div>{translateUI('lastUpdated', currentLanguage)}: {line.updatedAt}</div>
-                      <div>{translateUI('dataSource', currentLanguage)}: {line.source ?? TIMETABLE_SOURCE.title}</div>
-                      <div style={{ opacity: 0.75 }}>{TIMETABLE_SOURCE.note}</div>
-                    </div>
-                  );
-                })()}
+                {/* 概算値であることの詳しい但し書き。更新日・出典自体は上に移したので、
+                    ここは補足の一文だけ軽く添える */}
+                <div style={{
+                  padding: `${L.sp.xs} ${L.sp.md}`,
+                  borderTop: `1px solid ${colors.borderLight}`,
+                  fontSize: FS.caption, color: colors.textSecondary, opacity: 0.75, lineHeight: 1.5,
+                }}>
+                  {TIMETABLE_SOURCE.note}
+                </div>
               </>
             ) : (
               <div style={{ padding: `${L.sp.lg} ${L.sp.md}`, fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'pre-line' }}>
@@ -2636,6 +2722,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     }
 
     const shouldShow = (station: Station): boolean => {
+      // 出発駅・到着駅はどのフィルターよりも優先して必ず表示する（最優先条件）
+      if ((departure && station.name === departure.name) || (arrival && station.name === arrival.name)) {
+        return true;
+      }
       // 乗換駅のみ
       if (showTransferStationsOnly && !transferStations.has(station.name)) return false;
       // 急行駅のみ（急行データがある路線のみ適用）
@@ -2668,6 +2758,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     visibleRoutesData, showTransferStationsOnly, showExpressStationsOnly,
     timeFilterEnabled, stationsWithinTime, transferStations, allowedStationNames,
     heatmapRangeFilterEnabled, heatmapEnabled, heatmapParam, heatmapCustomRange,
+    departure, arrival,
   ]);
 
   // バブルマップ用: stationVisibilityFilter を通過した駅 + 中心から近い順 最大50件
@@ -2779,13 +2870,26 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 出発駅と到着駅が設定された時にルート検索を実行
   useEffect(() => {
     if (departure && arrival) {
-      const routeResults = routeFinder.findRoutes(departure, arrival, maxRouteRecommendations * 2); // 多めに取得
-
-      // 表示レベルでの最終重複除去
-      const finalUniqueRoutes = removeFinalDuplicates(routeResults).slice(0, maxRouteRecommendations);
+      // 経由駅が指定されているときは、区間ごとに分割して検索した結果をつなげた
+      // 1本のルートだけを提示する（既存の複数候補探索アルゴリズムは経由駅に
+      // 対応していないため、既存ロジックには手を入れず結果の作り方だけ分ける。
+      // 以降の「使用路線の自動表示」等の処理は経由駅の有無に関わらず共通）
+      const finalUniqueRoutes = waypoints.length > 0
+        ? (() => {
+            const viaRoute = findRoutesViaWaypoints(routeFinder, departure, waypoints, arrival);
+            return viaRoute ? [viaRoute] : [];
+          })()
+        : removeFinalDuplicates(
+            routeFinder.findRoutes(departure, arrival, maxRouteRecommendations * 2) // 多めに取得
+          ).slice(0, maxRouteRecommendations);
 
       setRouteRecommendations(finalUniqueRoutes);
-      setSelectedRouteIndices(null);
+      // 推薦ルート選択は一旦オフ（=候補全部を同時にハイライトしない）。
+      // 全候補を同時表示すると、時刻表示は先頭候補(index 0)の駅にしか
+      // 出ないため「時刻が出る路線と出ない路線がある」ように見えて混乱を
+      // 招いていた。既定は先頭候補だけを選択状態にし、他候補は
+      // 「推薦ルート選択」パネルから手動で追加できるようにする。
+      setSelectedRouteIndices(finalUniqueRoutes.length > 0 ? new Set([0]) : new Set());
 
       // 推薦ルートの最初のセグメントをTrainStatusPanelに反映
       const topRoute = finalUniqueRoutes[0];
@@ -2823,14 +2927,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         console.log(`   乗り換え駅: ${transferStations.join(', ') || 'なし'}`);
       });
 
-      // 推薦されたルートで使用される路線を自動的に表示状態にする
+      // 推薦されたルートで使用される路線を自動的に表示状態にする。
+      // 全候補(最大10件)ぶんの路線をまとめて表示すると、選択していない
+      // 候補の路線まで（トリミングされない全区間で）地図に残ってしまう。
+      // 既定で選択状態にしたのは先頭候補だけなので、自動表示もそれに合わせる
+      // （topRouteは直前でTrainStatusPanel用に定義済みのものを再利用）。
       const routesUsedInRecommendations = new Set<RouteKey>();
-      finalUniqueRoutes.forEach(route => {
-        route.segments.forEach(segment => {
-          if (segment.routeKey !== 'walking' && segment.routeKey) {
-            routesUsedInRecommendations.add(segment.routeKey as RouteKey);
-          }
-        });
+      topRoute?.segments.forEach(segment => {
+        if (segment.routeKey !== 'walking' && segment.routeKey) {
+          routesUsedInRecommendations.add(segment.routeKey as RouteKey);
+        }
       });
 
       if (routesUsedInRecommendations.size > 0) {
@@ -2857,7 +2963,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       setRouteRecommendations([]);
       setSelectedRouteIndices(null);
     }
-  }, [departure, arrival, routeFinder, maxRouteRecommendations, removeFinalDuplicates]);
+  }, [departure, arrival, waypoints, routeFinder, maxRouteRecommendations, removeFinalDuplicates]);
 
   // 時間フィルターが有効な時の駅フィルタリング（出発駅ベース）
   useEffect(() => {
@@ -2976,11 +3082,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       setAvailableRoutes(new Set(allRouteKeys));
       setVisibleRoutes(routeSet);
     } else if (arrival && !departure) {
-      // 到着駅だけ決まっている状態では、経路がまだ確定しないので
-      // 出発駅未選択時と同じく全路線を非表示にし、乗換駅ヒントから
-      // 出発側の路線を選べるようにする
+      // 到着駅を設定した場合も、出発駅だけ設定したときと対称に
+      // その駅を通る路線を表示する（「到着駅を設定してもその駅の路線が
+      // 表示されるように、出発駅と同様にね」との要望を受けた）。
+      // 以前はここで全路線を非表示にしていたため、到着駅を選んでも
+      // 何も地図に出ず、出発駅を選ぶまで反応が無いように見えていた。
+      const arrRoutes = getRoutesForStation(arrival.name) as RouteKey[];
       setAvailableRoutes(new Set(allRouteKeys));
-      setVisibleRoutes(new Set());
+      setVisibleRoutes(new Set(arrRoutes));
     } else {
       // 出発駅・到着駅が両方未選択のときは全路線を非表示にする。
       // 代わりに乗換駅だけをヒントとして出し（下の transferHintStations）、
@@ -3430,13 +3539,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     const id = navigator.geolocation.watchPosition(
       (position) => {
-        const { latitude, longitude, heading } = position.coords;
+        const { latitude, longitude } = position.coords;
         setUserLocation([latitude, longitude]);
-        setUserHeading(heading !== null && !Number.isNaN(heading) ? heading : null);
 
         const now = Date.now();
         const pt: GpsPoint = { lat: latitude, lng: longitude, timestamp: position.timestamp };
         gpsHistoryRef.current = [...gpsHistoryRef.current, pt].slice(-GPS_HISTORY_SIZE);
+
+        // 向きはブラウザ/OS側の GeolocationCoordinates.heading ではなく、
+        // 直近の実移動から自前で計算する（詳細は estimateHeadingFromHistory 参照）
+        setUserHeading(estimateHeadingFromHistory(gpsHistoryRef.current, position.timestamp));
 
         if (gpsHistoryRef.current.length >= 2) {
           try {
@@ -4100,9 +4212,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             if (!showStationNames) {
               return null;
             }
-            // 特別駅も共有フィルター適用（allowedStationNames は免除済みなので除く）
-            if (showTransferStationsOnly && !transferStations.has(station.name)) return null;
-            if (showExpressStationsOnly && routeHasExpressMark && !station.isExpress && !transferStations.has(station.name)) return null;
+            // 出発駅・到着駅は「乗換駅のみ表示」「急行駅のみ表示」より優先して
+            // 必ず表示する（最優先条件）。時間フィルターのみ従来どおり適用する
             if (timeFilterEnabled && stationsWithinTime.length > 0) {
               const stationWithTime = stationsWithinTime.find(sWithTime => sWithTime.station.name === station.name);
               if (!stationWithTime) return null;
@@ -4412,7 +4523,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 language={currentLanguage}
                 departureTime={timetableBaseTime}
                 onDepartureTimeChange={setTimetableBaseTime}
-                onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
+                onSetNearestDeparture={handleSetNearestDeparture}
                 onSearchingChange={handleSearchingChange}
                 detectedRoute={showTrainStatusPanel ? detectedRoute : null}
                 manualTrainRoute={manualTrainRoute}
@@ -4426,6 +4537,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onShowTravelTimeChange={setShowTravelTimes}
                 showTransferStationsOnly={showTransferStationsOnly}
                 onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
+                waypoints={waypoints}
+                onAddWaypoint={handleAddWaypoint}
+                onRemoveWaypoint={handleRemoveWaypoint}
+                showStationTimeLabels={timetableModeEnabled}
+                onShowStationTimeLabelsChange={setTimetableModeEnabled}
+                timeMode={timeMode}
+                onTimeModeChange={setTimeMode}
               />
               {routeRecommendationsPanel}
             </div>
@@ -4441,7 +4559,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             departureTime={timetableBaseTime}
             onDepartureTimeChange={setTimetableBaseTime}
             language={currentLanguage}
-            onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
+            onSetNearestDeparture={handleSetNearestDeparture}
             onSearchingChange={handleSearchingChange}
             detectedRoute={showTrainStatusPanel ? detectedRoute : null}
             manualTrainRoute={manualTrainRoute}
@@ -4455,6 +4573,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             onShowTravelTimeChange={setShowTravelTimes}
             showTransferStationsOnly={showTransferStationsOnly}
             onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
+            waypoints={waypoints}
+            onAddWaypoint={handleAddWaypoint}
+            onRemoveWaypoint={handleRemoveWaypoint}
+            showStationTimeLabels={timetableModeEnabled}
+            onShowStationTimeLabelsChange={setTimetableModeEnabled}
+            timeMode={timeMode}
+            onTimeModeChange={setTimeMode}
           />
         )}
 
@@ -4788,7 +4913,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               // rotateControl は既定のUI矢印ボタンを出す設定だが、自前のUIと重複するため無効化
               {...({ rotate: true, touchRotate: true, rotateControl: false, zoomAnimation: false } as any)}
             >
-              <ZoomControl position="bottomright" />
               <MapEvents />
 
               {/*
@@ -4814,6 +4938,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 意味を持たない）。
               */}
               <Pane name="travelTimePane" pane="norotatePane" style={{ zIndex: 550 }} />
+
+              {/*
+                現在地マーカー用のPane。markerPane(600)より後面にし、
+                駅アイコンが常に現在地アイコンより手前に来るようにする。
+                以前は`zIndexOffset`（6000/10000）だけで前面に出そうとしていたが、
+                `zIndexOffset`は同じmarkerPane内での「画面Y座標＋offset」の
+                比較にしかならず、画面上の位置によっては駅アイコン
+                （routeCount次第で最大5000）より現在地アイコンが上に来て
+                駅を隠すことがあった。travelTimePaneと同じ理由・同じ対処法
+                （専用Pane化）で確実に後面固定する
+              */}
+              <Pane name="userLocationPane" pane="norotatePane" style={{ zIndex: 590 }} />
 
               {/* バブルマップ: 単一SVGオーバーレイで全バブルを高速描画 */}
               {mapViewMode === 'bubble' && (
@@ -4986,6 +5122,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   icon={userLocationIcon}
                   zIndexOffset={6000}
                   interactive={false}
+                  pane="userLocationPane"
                 />
               )}
 
@@ -5028,6 +5165,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   icon={userLocationIcon}
                   zIndexOffset={10000}
                   interactive={false}
+                  pane="userLocationPane"
                 />
               )}
             </MapContainer>
@@ -5798,7 +5936,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 language={currentLanguage}
                 departureTime={timetableBaseTime}
                 onDepartureTimeChange={setTimetableBaseTime}
-                onSetNearestDeparture={userLocation ? handleSetNearestDeparture : undefined}
+                onSetNearestDeparture={handleSetNearestDeparture}
                 onSearchingChange={handleSearchingChange}
                 detectedRoute={showTrainStatusPanel ? detectedRoute : null}
                 manualTrainRoute={manualTrainRoute}
@@ -5812,6 +5950,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onShowTravelTimeChange={setShowTravelTimes}
                 showTransferStationsOnly={showTransferStationsOnly}
                 onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
+                waypoints={waypoints}
+                onAddWaypoint={handleAddWaypoint}
+                onRemoveWaypoint={handleRemoveWaypoint}
+                showStationTimeLabels={timetableModeEnabled}
+                onShowStationTimeLabelsChange={setTimetableModeEnabled}
+                timeMode={timeMode}
+                onTimeModeChange={setTimeMode}
               />
             </div>
           )}

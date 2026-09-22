@@ -52,7 +52,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: L.sp.xl
+        gap: L.sp.xl,
+        minWidth: 0,
+        flex: '1 1 auto'
       }}>
         <img
           src="/icon_flex_rail_way_map.png"
@@ -64,14 +66,29 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             borderRadius: L.r.control
           }}
         />
-        <h1 style={{
-          margin: 0,
-          fontSize: FS.heading,
-          fontWeight: 'bold',
-          color: colors.text
-        }}>
-          {translateUI('appTitle', language)}
-        </h1>
+        <div style={{ minWidth: 0 }}>
+          <h1 style={{
+            margin: 0,
+            fontSize: FS.heading,
+            fontWeight: 'bold',
+            color: colors.text
+          }}>
+            {translateUI('appTitle', language)}
+          </h1>
+          {/* 初めて見る人・検索エンジンにもサイトの中身が伝わるよう、
+              地図を主役にしたまま一行だけ短い説明を添える。
+              狭い画面で折り返して背が伸びないよう1行に収め、はみ出しは省略する */}
+          <p style={{
+            margin: 0,
+            fontSize: FS.caption,
+            color: colors.textSecondary,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}>
+            {translateUI('appTagline', language)}
+          </p>
+        </div>
       </div>
 
       {/* ナビゲーション項目 */}
@@ -165,6 +182,41 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             }}
           >
             {{ japanese: 'このサイトについて', english: 'About', chinese: '关于本站', korean: '사이트 소개' }[language]}
+          </div>
+          <div
+            style={{
+              padding: `${L.sp.xl} ${L.sp['2xl']}`,
+              cursor: 'pointer',
+              fontSize: FS.title,
+              color: colors.text,
+              borderBottom: `1px solid ${colors.borderLight}`
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            onClick={() => {
+              const lp = { japanese: 'ja', english: 'en', chinese: 'zh', korean: 'ko' }[language];
+              window.location.href = `/guide?lang=${lp}`;
+              setIsMenuOpen(false);
+            }}
+          >
+            {{ japanese: '使い方ガイド', english: 'User Guide', chinese: '使用指南', korean: '사용 가이드' }[language]}
+          </div>
+          <div
+            style={{
+              padding: `${L.sp.xl} ${L.sp['2xl']}`,
+              cursor: 'pointer',
+              fontSize: FS.title,
+              color: colors.text,
+              borderBottom: `1px solid ${colors.borderLight}`
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            onClick={() => {
+              window.location.href = language === 'english' ? '/en/guides' : '/guides';
+              setIsMenuOpen(false);
+            }}
+          >
+            {{ japanese: 'ガイド一覧', english: 'Guides', chinese: '指南列表', korean: '가이드 목록' }[language]}
           </div>
           <div
             style={{

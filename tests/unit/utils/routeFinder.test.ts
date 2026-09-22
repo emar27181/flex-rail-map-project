@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { RouteFinder, RouteResult } from '../../../src/utils/routeFinder';
+import { RouteFinder, RouteResult, findRoutesViaWaypoints } from '../../../src/utils/routeFinder';
 import { routes } from '../../../src/data/routes';
 
 describe('RouteFinder', () => {
@@ -296,5 +296,83 @@ describe('データ整合性', () => {
         });
       }
     });
+  });
+});
+
+describe('findRoutesViaWaypoints（経由駅指定の経路検索）', () => {
+  let routeFinder: RouteFinder;
+
+  beforeAll(() => {
+    routeFinder = new RouteFinder();
+  });
+
+  const stationByName = (name: string) => {
+    const s = routes.yamanote.find(st => st.name === name);
+    if (!s) throw new Error(`駅が見つからない: ${name}`);
+    return s;
+  };
+
+  it('経由駅1つ: 各区間の最有力ルートをつなげた1本の経路を返す', () => {
+    const shibuya = stationByName('渋谷');
+    const shinjuku = stationByName('新宿');
+    const ikebukuro = stationByName('池袋');
+
+    const leg1 = routeFinder.findRoutes(shibuya, shinjuku, 1)[0];
+    const leg2 = routeFinder.findRoutes(shinjuku, ikebukuro, 1)[0];
+    expect(leg1).toBeDefined();
+    expect(leg2).toBeDefined();
+
+    const via = findRoutesViaWaypoints(routeFinder, shibuya, [shinjuku], ikebukuro);
+    expect(via).not.toBeNull();
+    // 区間ごとのセグメントがすべて連結されていること
+    expect(via!.segments.length).toBe(leg1.segments.length + leg2.segments.length);
+    // 所要時間は区間の合計
+    expect(via!.totalTime).toBeCloseTo(leg1.totalTime + leg2.totalTime, 5);
+    // 乗換回数は区間ごとの乗換 + 経由駅をまたぐ分(+1)
+    expect(via!.transfers).toBe(leg1.transfers + leg2.transfers + 1);
+  });
+
+  it('経由駅が無いときは単一区間の検索結果とほぼ同じになる（+1の乗換は付かない）', () => {
+    const shibuya = stationByName('渋谷');
+    const shinjuku = stationByName('新宿');
+
+    const direct = routeFinder.findRoutes(shibuya, shinjuku, 1)[0];
+    const via = findRoutesViaWaypoints(routeFinder, shibuya, [], shinjuku);
+
+    expect(via).not.toBeNull();
+    expect(via!.totalTime).toBeCloseTo(direct.totalTime, 5);
+    expect(via!.transfers).toBe(direct.transfers);
+  });
+
+  it('経由駅を複数指定しても順番どおりに連結する', () => {
+    const shibuya = stationByName('渋谷');
+    const shinjuku = stationByName('新宿');
+    const ikebukuro = stationByName('池袋');
+    const ueno = stationByName('上野');
+
+    const via = findRoutesViaWaypoints(routeFinder, shibuya, [shinjuku, ikebukuro], ueno);
+    expect(via).not.toBeNull();
+
+    // 連結後の駅並びが 渋谷 → ... → 新宿 → ... → 池袋 → ... → 上野 の順になっていること
+    const allStationNames = via!.segments.flatMap(seg => seg.stations.map(s => s.name));
+    const idxShibuya = allStationNames.indexOf('渋谷');
+    const idxShinjuku = allStationNames.indexOf('新宿');
+    const idxIkebukuro = allStationNames.indexOf('池袋');
+    const idxUeno = allStationNames.lastIndexOf('上野');
+    expect(idxShibuya).toBeGreaterThanOrEqual(0);
+    expect(idxShinjuku).toBeGreaterThan(idxShibuya);
+    expect(idxIkebukuro).toBeGreaterThan(idxShinjuku);
+    expect(idxUeno).toBeGreaterThan(idxIkebukuro);
+    // 経由駅2つ + 各区間の乗換ぶん
+    expect(via!.transfers).toBeGreaterThanOrEqual(2);
+  });
+
+  it('存在しない経由駅を指定すると null を返す', () => {
+    const shibuya = stationByName('渋谷');
+    const shinjuku = stationByName('新宿');
+    const fakeStation = { name: '存在しない駅', lat: 0, lng: 0 };
+
+    const via = findRoutesViaWaypoints(routeFinder, shibuya, [fakeStation], shinjuku);
+    expect(via).toBeNull();
   });
 });

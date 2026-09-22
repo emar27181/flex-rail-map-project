@@ -13,7 +13,7 @@
  *   molecules  … アトムを組み合わせた部品（SegmentedControl など）
  *   organisms  … 画面の一区画（RouteSwitchBoard、LegendRouteList など）
  */
-import React from 'react';
+import React, { isValidElement, cloneElement } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { getThemeColors } from '../../../contexts/ThemeContext';
 import { SEMANTIC } from '../../../constants/ui';
@@ -74,6 +74,19 @@ const Button: React.FC<ButtonProps> = ({
   // トグルとして使う場合、押されていない間は塗らない
   const isFilled = fill !== undefined && (pressed === undefined || pressed);
 
+  /*
+   * アイコンの大きさ・aria-hidden は呼び出し側で毎回 `size={14} aria-hidden`
+   * と書かれていて、値がボタンごとにばらついていた（12/13/14/16px が混在）。
+   * ここで size 段階（sm/md）の `CONTROL_SIZE.iconSize` を既定値として注入し、
+   * 呼び出し側が明示的に指定した場合はそちらを優先する。
+   */
+  const sizedIcon = isValidElement<{ size?: number; 'aria-hidden'?: boolean }>(icon)
+    ? cloneElement(icon, {
+        size: icon.props.size ?? dims.iconSize,
+        'aria-hidden': icon.props['aria-hidden'] ?? true,
+      })
+    : icon;
+
   return (
     <button
       {...rest}
@@ -103,7 +116,7 @@ const Button: React.FC<ButtonProps> = ({
         ...styleOverride,
       }}
     >
-      {icon}
+      {sizedIcon}
       {children}
     </button>
   );

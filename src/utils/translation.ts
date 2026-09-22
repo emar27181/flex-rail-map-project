@@ -7664,6 +7664,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "経由",
     english: "via"
   },
+  addWaypoint: {
+    japanese: "経由駅を追加",
+    english: "Add via station"
+  },
   otherStations: {
     japanese: "他{count}駅",
     english: "{count} more stations"
@@ -7856,6 +7860,18 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "出発時刻",
     english: "Departure Time"
   },
+  arrivalTimeLabel: {
+    japanese: "到着時刻",
+    english: "Arrival Time"
+  },
+  timeBasisDeparture: {
+    japanese: "出発",
+    english: "Depart"
+  },
+  timeBasisArrival: {
+    japanese: "到着",
+    english: "Arrive"
+  },
   onboard: {
     japanese: "乗",
     english: "On"
@@ -7863,6 +7879,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   show: {
     japanese: "表示",
     english: "Show"
+  },
+  hide: {
+    japanese: "非表示",
+    english: "Hide"
   },
   lastUpdated: {
     japanese: "最終更新",
@@ -8050,6 +8070,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "時刻表",
     english: "Timetable"
   },
+  showStationTimeLabelsButton: {
+    japanese: "時刻を表示",
+    english: "Show Times"
+  },
   departsAfterLabel: {
     japanese: "{station} {time}以降の発車（{route}）",
     english: "Deps. from {station} after {time} ({route})"
@@ -8224,6 +8248,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "フレックス路線図",
     english: "Flex Railway Map"
   },
+  appTagline: {
+    japanese: "必要な路線だけを表示するシンプルな路線図",
+    english: "Show only the lines you need"
+  },
   aboutLink: {
     japanese: "このサイトについて",
     english: "About"
@@ -8251,6 +8279,62 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   cookieUsage: {
     japanese: "Cookieの使用について",
     english: "Cookie Usage"
+  },
+  cookieBannerIntro: {
+    japanese: "このサイトでは、サービス向上および広告配信のため、利用状況に基づくCookieを使用しています。詳細は",
+    english: "This site uses cookies for ads and analytics based on usage data to improve our services. For details, see our"
+  },
+  cookieBannerIntroSuffix: {
+    japanese: "をご覧ください。",
+    english: "."
+  },
+  cookieAcceptAll: {
+    japanese: "すべて同意",
+    english: "Accept All"
+  },
+  cookieManageSettings: {
+    japanese: "設定管理",
+    english: "Manage Settings"
+  },
+  cookieEssentialOnly: {
+    japanese: "必要なもののみ",
+    english: "Essential Only"
+  },
+  cookieSettingsTitle: {
+    japanese: "Cookie設定",
+    english: "Cookie Settings"
+  },
+  cookieNecessaryTitle: {
+    japanese: "必要なCookie",
+    english: "Necessary Cookies"
+  },
+  cookieNecessaryDesc: {
+    japanese: "サイトの基本機能に必要なCookieです（テーマ設定、言語設定など）",
+    english: "Essential cookies for basic site functionality (theme settings, language preferences, etc.)"
+  },
+  cookieAnalyticsTitle: {
+    japanese: "分析Cookie",
+    english: "Analytics Cookies"
+  },
+  cookieAnalyticsDesc: {
+    japanese: "Google Analyticsによるサイト利用状況の分析に使用されます",
+    english: "Used by Google Analytics to analyze site usage patterns"
+  },
+  cookieAdvertisingTitle: {
+    japanese: "広告Cookie",
+    english: "Advertising Cookies"
+  },
+  cookieAdvertisingDesc: {
+    japanese: "Google AdSenseによる適切な広告配信に使用されます",
+    english: "Used by Google AdSense for appropriate ad delivery"
+  },
+  cookieCancel: {
+    japanese: "キャンセル",
+    english: "Cancel"
+  },
+  cookieSaveSettings: {
+    japanese: "設定を保存",
+    english: "Save Settings"
   },
   allRoutesOn: {
     japanese: "全路線: 表示",
@@ -8653,6 +8737,7 @@ export const uiChinese: Record<string, string> = {
   direction: "前往{destination}",
   directionArea: "前往{destination}方向",
   viaStations: "经由",
+  addWaypoint: "添加途经站",
   otherStations: "其他{count}站",
   noRoutesFound: "未找到路线",
   routeCount: "{count}条路线",
@@ -8698,8 +8783,12 @@ export const uiChinese: Record<string, string> = {
   departureTime: "出发时间",
   currentTime: "当前时间",
   baseTime: "出发时间",
+  arrivalTimeLabel: "到达时间",
+  timeBasisDeparture: "出发",
+  timeBasisArrival: "到达",
   onboard: "乘",
   show: "显示",
+  hide: "隐藏",
   lastUpdated: "最后更新",
   alwaysShowMajorStations: "始终显示主要车站",
   arrivalAlert: "到站提醒",
@@ -8743,6 +8832,7 @@ export const uiChinese: Record<string, string> = {
   approxMinutes: "约{time}分钟",
   close: "关闭",
   timetableButton: "时刻表",
+  showStationTimeLabelsButton: "显示时刻",
   departsAfterLabel: "{station} {time}以后出发（{route}）",
   noTimetableDataFound: "未找到时刻数据",
   timetableUpdatedAt: "更新日: {date}",
@@ -8784,6 +8874,7 @@ export const uiChinese: Record<string, string> = {
   menuTitle: "菜单",
   openMenuLabel: "打开菜单",
   appTitle: "弹性路线图",
+  appTagline: "只显示所需路线的简洁路线图",
   aboutLink: "关于本站",
   faqLink: "常见问题",
   privacyLink: "隐私政策",
@@ -8791,6 +8882,20 @@ export const uiChinese: Record<string, string> = {
   contactLink: "联系我们",
   approxNote: "（概算值·参考用）",
   cookieUsage: "Cookie 使用说明",
+  cookieBannerIntro: "本网站为提升服务并投放广告，会使用基于使用情况的Cookie。详情请查看",
+  cookieBannerIntroSuffix: "。",
+  cookieAcceptAll: "全部同意",
+  cookieManageSettings: "管理设置",
+  cookieEssentialOnly: "仅必要项",
+  cookieSettingsTitle: "Cookie 设置",
+  cookieNecessaryTitle: "必要 Cookie",
+  cookieNecessaryDesc: "网站基本功能所需的Cookie（主题设置、语言设置等）",
+  cookieAnalyticsTitle: "分析 Cookie",
+  cookieAnalyticsDesc: "用于Google Analytics分析网站使用情况",
+  cookieAdvertisingTitle: "广告 Cookie",
+  cookieAdvertisingDesc: "用于Google AdSense投放合适的广告",
+  cookieCancel: "取消",
+  cookieSaveSettings: "保存设置",
   allRoutesOn: "全路线: 显示",
   allRoutesOff: "全路线: 隐藏",
   travelTimeOverlay: "在站点显示所需时间",
@@ -8954,6 +9059,7 @@ export const uiKorean: Record<string, string> = {
   direction: "{destination}행",
   directionArea: "{destination} 방면",
   viaStations: "경유",
+  addWaypoint: "경유역 추가",
   otherStations: "외 {count}역",
   noRoutesFound: "경로를 찾을 수 없습니다",
   routeCount: "{count}개 경로",
@@ -8999,8 +9105,12 @@ export const uiKorean: Record<string, string> = {
   departureTime: "출발 시간",
   currentTime: "현재 시간",
   baseTime: "출발 시간",
+  arrivalTimeLabel: "도착 시간",
+  timeBasisDeparture: "출발",
+  timeBasisArrival: "도착",
   onboard: "탑",
   show: "표시",
+  hide: "숨기기",
   lastUpdated: "최종 갱신",
   alwaysShowMajorStations: "주요 역 항상 표시",
   arrivalAlert: "하차역 알림",
@@ -9044,6 +9154,7 @@ export const uiKorean: Record<string, string> = {
   approxMinutes: "약 {time}분",
   close: "닫기",
   timetableButton: "시간표",
+  showStationTimeLabelsButton: "시간 표시",
   departsAfterLabel: "{station} {time} 이후 출발（{route}）",
   noTimetableDataFound: "시간표 데이터를 찾을 수 없습니다",
   timetableUpdatedAt: "업데이트: {date}",
@@ -9085,6 +9196,7 @@ export const uiKorean: Record<string, string> = {
   menuTitle: "메뉴",
   openMenuLabel: "메뉴 열기",
   appTitle: "플렉스 노선도",
+  appTagline: "필요한 노선만 표시하는 심플한 노선도",
   aboutLink: "사이트 소개",
   faqLink: "자주 묻는 질문",
   privacyLink: "개인정보처리방침",
@@ -9092,6 +9204,20 @@ export const uiKorean: Record<string, string> = {
   contactLink: "문의하기",
   approxNote: "（개산값·참고용）",
   cookieUsage: "쿠키 사용 안내",
+  cookieBannerIntro: "이 사이트는 서비스 개선 및 광고 게재를 위해 이용 현황 기반 쿠키를 사용합니다. 자세한 내용은",
+  cookieBannerIntroSuffix: "를 확인해 주세요.",
+  cookieAcceptAll: "모두 동의",
+  cookieManageSettings: "설정 관리",
+  cookieEssentialOnly: "필수만 허용",
+  cookieSettingsTitle: "쿠키 설정",
+  cookieNecessaryTitle: "필수 쿠키",
+  cookieNecessaryDesc: "사이트 기본 기능에 필요한 쿠키입니다 (테마 설정, 언어 설정 등)",
+  cookieAnalyticsTitle: "분석 쿠키",
+  cookieAnalyticsDesc: "Google Analytics의 사이트 이용 현황 분석에 사용됩니다",
+  cookieAdvertisingTitle: "광고 쿠키",
+  cookieAdvertisingDesc: "Google AdSense의 적절한 광고 게재에 사용됩니다",
+  cookieCancel: "취소",
+  cookieSaveSettings: "설정 저장",
   allRoutesOn: "전체 노선: 표시",
   allRoutesOff: "전체 노선: 숨기기",
   travelTimeOverlay: "역에 소요 시간 표시",

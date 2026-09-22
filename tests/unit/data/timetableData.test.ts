@@ -8,7 +8,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { routes } from '../../../src/data/routes';
-import { timetableLines, TIMETABLE_SOURCE, getNextDepartures } from '../../../src/data/timetableData';
+import { timetableLines, TIMETABLE_SOURCE, getNextDepartures, addMinutes, computeEffectiveBaseTime } from '../../../src/data/timetableData';
 
 describe('時刻表データ', () => {
   it('時刻表の駅名はすべて路線データに存在する', () => {
@@ -90,5 +90,48 @@ describe('時刻表データ', () => {
       expect(getNextDepartures('minatomirai', 'みなとみらい', 0, '10:00', 2).length).toBe(2);
       expect(getNextDepartures('minatomirai', 'みなとみらい', 1, '10:00', 2).length).toBe(2);
     });
+  });
+});
+
+describe('addMinutes', () => {
+  it('通常の加算', () => {
+    expect(addMinutes('10:00', 30)).toBe('10:30');
+  });
+
+  it('時をまたぐ加算', () => {
+    expect(addMinutes('10:45', 30)).toBe('11:15');
+  });
+
+  it('日をまたぐ加算（24時を超えたら0時に戻る）', () => {
+    expect(addMinutes('23:50', 20)).toBe('00:10');
+  });
+
+  it('負の値で減算できる', () => {
+    expect(addMinutes('10:30', -45)).toBe('09:45');
+  });
+
+  it('負の値で日をまたぐ減算（0時より前は前日23時台に戻る）', () => {
+    expect(addMinutes('00:10', -20)).toBe('23:50');
+  });
+});
+
+describe('computeEffectiveBaseTime（出発/到着モードの基準時刻計算）', () => {
+  it('出発モードでは基準時刻をそのまま返す', () => {
+    expect(computeEffectiveBaseTime('09:00', 'departure', 45)).toBe('09:00');
+  });
+
+  it('到着モードでは所要時間ぶん遡った時刻を返す', () => {
+    // 9:45に到着したい・所要45分 → 9:00に出発すればよい
+    expect(computeEffectiveBaseTime('09:45', 'arrival', 45)).toBe('09:00');
+  });
+
+  it('到着モードで日をまたいで遡る場合も正しく計算する', () => {
+    // 0:20に到着したい・所要40分 → 前日23:40に出発すればよい
+    expect(computeEffectiveBaseTime('00:20', 'arrival', 40)).toBe('23:40');
+  });
+
+  it('所要時間0分なら出発・到着モードで結果が一致する', () => {
+    expect(computeEffectiveBaseTime('12:00', 'departure', 0)).toBe('12:00');
+    expect(computeEffectiveBaseTime('12:00', 'arrival', 0)).toBe('12:00');
   });
 });

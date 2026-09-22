@@ -1,5 +1,726 @@
 # CHANGE LOG
 
+## [2026-09-22] セッション（「現在地から」ボタンの非活性表示を、他の非活性ボタンと同じ見た目に統一）
+
+### fix: 「現在地から」ボタンの非活性時の見た目が、他の非活性ボタンと違っていたのを統一
+- `src/components/StationSelector.tsx`
+- 「まだセットされていなくても色ついてるよ、デフォルトの色がほかのUIと
+  違うかも？不活性活性でどうなるかしっかり調査して。ほかと統一してね」
+  との指摘を受けた
+- 直前の修正で`pressed={!!userLocation}`を足したことで、非活性時は
+  枠線だけ（塗りなし）の見た目になっていた。これは`disabled`だけで
+  出し分けている他の非活性ボタン
+  （例: `StationMemoPanel.tsx`の駅メモ「＋」追加ボタン、`disabled={!canAdd}`）
+  とは異なる規則で、アプリ全体では「非活性でも塗りの色は変えず、
+  不透明度だけ下げる」という統一された見た目になっている
+- `pressed`を外し、`disabled`だけで出し分けるようにした。このボタンは
+  「出発駅にする」という1回限りの操作でありon/offの状態を持つ
+  トグルではないため、そもそも`pressed`（塗りで選択状態を示す規約）の
+  対象ではなかった
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで非活性時・活性時ともに背景色が同じ青
+  （`rgb(33, 150, 243)`）で、不透明度だけ0.5→1に変わることを実測確認
+  （StationMemoPanelの追加ボタンと同じ規則になったことを確認）
+
+## [2026-09-22] セッション（到着駅のみ選択時も、出発駅と同様にその駅の路線を表示）
+
+### fix: 到着駅だけ設定しても路線が地図に表示されなかった問題を修正（出発駅と対称に）
+- `src/components/RailwayMap.tsx`
+- 「到着駅を設定してもその駅の路線が表示されるように、出発駅と同様にね」
+  との指摘を受けた
+- 出発駅だけ設定したときはその駅を通る路線が表示される一方、到着駅だけ
+  設定したときは「経路がまだ確定しないため」という理由で全路線を
+  意図的に非表示にしていた。出発駅を選ぶまで到着駅を選んでも地図に
+  何の反応も無いように見えていた
+- 到着駅だけ設定した場合も、出発駅と対称にその駅を通る路線を表示する
+  ようにした（出発駅側にある「自動設定時に近隣路線へ拡張する」処理は
+  GPS自動設定専用のため、到着駅側には追加していない）
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで到着駅だけを設定した際にその駅の路線
+  （南新宿→小田急小田原線）が地図に表示されることを実機確認
+
+## [2026-09-22] セッション（「現在地から」ボタン: 活性時に塗りで示すように）
+
+### improve: 「現在地から」ボタンが活性化しても見た目が変わらなかったのを、状態を塗りで示すように修正
+- `src/components/StationSelector.tsx`
+- 「現在地からは現在地の駅がセットされてる時に活性化？色が着くように」
+  との指摘を受けた
+- 直前の修正で`disabled`は正しく切り替わっていたが、`variant="primary"`
+  のButtonは`pressed`を渡さない限り常に塗りつぶし表示になる仕様のため、
+  非活性時も活性時も「同じ青、不透明度だけ違う」に見えてしまっていた
+- `pressed={!!userLocation}`を追加。位置情報が無い間は枠線だけの
+  非活性表示、取れると塗りつぶしの活性表示に切り替わるようにした
+  （CLAUDE.mdの「状態は塗りで示す」規約に合わせた）
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightでgeolocation許可なし/ありの両方の見た目
+  （枠線のみ⇔塗りつぶし）を実機確認
+
+## [2026-09-22] セッション（「現在地から」ボタンを、位置情報が無いときは非表示ではなく非活性に）
+
+### improve: 現在地の駅が決まっていないとき「現在地から」ボタンを消すのではなく非活性表示にする
+- `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`
+- 「現在地の駅がセットされていない時は現在地からのボタンは活性化
+  されていないように」との指摘を受けた
+- 従来は位置情報（`userLocation`）が取れるまで`onSetNearestDeparture`
+  自体を`undefined`にしてボタンごと非表示にしていた。これだと
+  GPS取得のタイミングでボタンが急に現れ、隣のボタンの位置がずれる
+  うえ、「押せない理由」も見えなかった
+- 親（RailwayMap.tsx）からは常にハンドラを渡すようにし
+  （ハンドラ自体は元々`userLocation`が無ければ何もしないガード済み）、
+  StationSelector側で`userLocation`が無い間はButtonの`disabled`を
+  trueにして非活性表示にした。ボタンは常に同じ場所にあり、位置情報が
+  取れた瞬間に押せるようになる
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。PlaywrightでGPS権限なしの状態で「現在地から」ボタンが
+  表示はされたまま非活性（クリック不可・薄い表示）になることを実機確認
+
+## [2026-09-22] セッション（現在時刻ボタン＋出発/到着トグルを1つのflexアイテムにまとめて折り返しでも分離しないように）
+
+### fix: 狭い画面（スマホ・PWA）で「現在時刻」ボタンと出発/到着トグルが別の行に千切れる問題を修正
+- `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`
+- 「まだ現在時刻の右に配置できていない、スマホPWAな環境は」との
+  指摘を受けた
+- 「現在時刻」ボタンと出発/到着トグルは親の`flexWrap: 'wrap'`の中で
+  独立した2つのflexアイテムとして並んでいたため、画面が狭いと
+  親の折り返し判定がこの2つの間で起きることがあり、「現在時刻の右」
+  という配置が保証されていなかった
+- 2つを1つの`<div style={{ display: 'flex', flexShrink: 0 }}>`にまとめ、
+  折り返しが起きる場合も必ずセットのまま次の行に落ちるようにした。
+  駅選択パネル・駅ツールチップの両方に適用
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。PlaywrightでiPhone相当のビューポート・geolocation拒否
+  状態でも「現在時刻」とトグルが常に同じ行に収まることを実機確認
+
+## [2026-09-22] セッション（出発/到着切り替えをスライド式UIに変更）
+
+### improve: 出発/到着の基準切り替えを、ボタン2個並びからスライド式トグルに変更
+- 新規: `src/components/ui/atoms/SlideSegmentedControl.tsx`
+- 変更: `src/components/ui/molecules/SegmentedControl.tsx`（`variant="slide"`追加）,
+  `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`
+- 「まだ現在時刻の右に出発到着が配置できていない、スライドタイプの
+  切り替えにUI変えてデザインはいまとおなじシンプルので」との指摘を受けた
+- 従来の`SegmentedControl`は「出発」「到着」を別々のButtonとして並べており、
+  ボタン2個分の隙間・二重の枠線ぶん横幅を取っていたため、「現在時刻」
+  ボタンの右に詰めると行が折り返されやすかった
+- `SegmentedControl`に`variant="slide"`を追加。1本の枠の中に両方の
+  ラベルを常に表示したまま、選択位置を背景のスライドで示す形にし、
+  二重の枠線・ボタン間の隙間を無くして横幅を圧縮した。実体は新規アトム
+  `SlideSegmentedControl`に置き（生のbutton要素はアトムでしか書けない
+  規約のため）、molecules側はvariantに応じて委譲するだけにした。色・
+  角丸・高さはButtonと同じCONTROL_SIZE/SEMANTIC/getThemeColorsから
+  取り、新しい規格は増やしていない。既定（`variant`省略）は従来どおり
+  ボタン列のままなので、他のSegmentedControl利用箇所の見た目は不変
+- 駅選択パネル・駅ツールチップ両方の出発/到着切り替えに適用
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightでデスクトップ幅では「出発時刻・時刻入力・
+  現在時刻・出発/到着スライド」が1行に収まること、モバイル幅（390px）
+  でも「現在時刻」と同じ行に収まること、駅ツールチップ側でも切り替えが
+  スライドして「出発時刻」⇔「到着時刻」ラベルと連動することを実機確認
+
+## [2026-09-22] セッション（Button/IconButtonのアイコン大きさをCONTROL_SIZEへ一元化）
+
+### improve: アイコンの大きさ・aria-hiddenをButton/IconButtonアトムの既定値として一元管理
+- `src/components/ui/atoms/controlSize.ts`（`iconSize`追加）,
+  `src/components/ui/atoms/Button.tsx`, `src/components/ui/atoms/IconButton.tsx`,
+  `src/components/StationSelector.tsx`
+- 「アトミックデザインで」との指摘を受けた。直前の「経由駅を追加」アイコン
+  変更を含め、`icon={<Xxx size={14} aria-hidden />}`という同じ書き方が
+  呼び出し側で何十箇所も繰り返されており、値も12/13/14/16/18pxとばらばら
+  だった（`CONTROL_SIZE`から取る、という規約に反していた）
+- `CONTROL_SIZE`（sm/md）に`iconSize`（14px/16px）を追加し、
+  Button・IconButtonがアイコン要素に`size`・`aria-hidden`を
+  自動で注入するようにした（呼び出し側が明示的に指定した場合はそちらを
+  優先するため、既存の異なるサイズを使っている箇所も見た目は変わらない）。
+  `StationSelector.tsx`内の今回触った5箇所（所要時間を表示・乗換駅のみ
+  表示・経由駅を追加など）から冗長な`size={14} aria-hidden`を削除した
+- `npm run test:types` / `npm run test:unit`(363件、`atoms.test.tsx`の
+  寸法固定テスト含む) / `npm run build` すべて通過。Playwrightで
+  アイコンの見た目（大きさ）に変化がないこと、svgのwidth/height/
+  aria-hiddenが正しく注入されることを実機確認
+
+## [2026-09-22] セッション（経由駅を追加ボタンのアイコンを変更）
+
+### improve: 「経由駅を追加」ボタンのアイコンを、隣の「乗換駅のみ表示」と別のものに変更
+- `src/components/StationSelector.tsx`
+- 「経由駅を追加のアイコンを変えて」との指摘を受けた
+- 「乗換駅のみ表示」「経由駅を追加」が同じ行に並んでいるのに、
+  どちらも`Waypoints`アイコンを使っていて見分けがつきにくかった。
+  「経由駅を追加」だけ`MapPinPlus`（駅を1つ足すイメージ）に変更し、
+  「乗換駅のみ表示」は元の`Waypoints`のままにした
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで2つのボタンのアイコンが見分けられることを
+  実機確認
+
+## [2026-09-22] セッション（時刻表の出典表示を1行に圧縮）
+
+### improve: 時刻表ツールチップ上部の出典表示が目立ちすぎ・場所を取りすぎていたのを1行に圧縮
+- `src/components/ui/TimetableSourceNote.tsx`
+- 「出典はもう少し目立たないように？領域確保しすぎかも」との指摘を受けた
+- 出典の長い説明文（`TIMETABLE_SOURCE.title`＝「各鉄道会社が公表する運行
+  間隔をもとにした概算」）をリンク文字列にそのまま表示していたため、
+  狭い右カラムでは2〜3行に折り返し、時刻を読む前の領域を取りすぎていた
+- リンクの文言を「出典」の一語だけにし、詳しい説明文はリンクの
+  `title`属性（ホバーで見える）に移した。詳しい但し書き自体は元々
+  リスト最下部にも残っており、情報は失っていない。あわせて
+  不透明度を0.75→0.6に下げて主張を弱め、常に1行に収まるようにした
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで表示行が1行（高さ約21px、以前は3行分）に
+  収まることを実機確認
+
+## [2026-09-22] セッション（駅ツールチップの非表示ボタン・ズームボタン非表示・経由駅入力欄の横幅）
+
+### fix: 通る路線が1つしかない駅では時刻表ツールチップの非表示ボタンが出せなかった問題を修正
+- `src/components/RailwayMap.tsx`
+- 「駅のツールチップで非表示ボタンが無い」との報告を受けた
+- 選択中（isActive）の路線を非表示チップの対象から除外していたため、
+  駅を通る路線が1つ（＝選択中の路線しかない）ケースでは非表示ボタンが
+  一切出せなかった。右カラムの時刻表は isShowing と無関係に
+  activeRouteKey だけで決まるため、選択中の路線を非表示にしても
+  時刻表は消えないことを確認し、対象外にする理由を無くした
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで通過路線が1つだけの駅（新宿三丁目・丸ノ内線）
+  でも「－非表示」チップが表示されることを実機確認
+
+### improve: 地図の拡大縮小ボタンを非表示にする
+- `src/components/RailwayMap.tsx`
+- 「拡大縮小ボタンを表示をオフで」との要望を受けた
+- `<ZoomControl position="bottomright" />` を削除。ピンチ操作・
+  スクロールホイールでのズームは引き続き使える
+- 同上の品質チェック通過。Playwrightで`.leaflet-control-zoom`が
+  存在しないことを確認
+
+### fix: 経由駅入力欄の横幅を出発駅欄と揃え、空いた分にチップと閉じるボタンを詰めて配置
+- `src/components/StationSelector.tsx`
+- 「経由駅の入力フォームの横幅がまだ大きい、出発駅とかと同じ横幅で」
+  との指摘を受けた。前回の修正は候補ドロップダウンの横幅だけを
+  出発駅・到着駅と揃えたもので、入力欄自体は`fullWidth`のまま
+  パネル全幅（出発駅欄のほぼ2倍）に広がっていた
+- 出発駅・到着駅は横並び2カラムの「flex: 1 1 0」で横幅が決まるが、
+  経由駅は隣に同種の入力欄が無いためflexだけでは合わせられない。
+  実際に描画された出発駅欄の横幅を測って（ハードコードせず）経由駅
+  入力欄に適用し、空いた右側には入力を閉じるボタンと、既存の経由駅
+  チップ（選択済み駅の一覧）を同じ行に詰めて表示するようにした。
+  候補ドロップダウンの横幅は既存の`getFullWidthDropdownPosition`
+  （出発駅・到着駅と同じ関数）を使う
+- 同上の品質チェック通過。Playwrightで入力欄の横幅が出発駅欄と
+  一致すること（175px同士）、チップが入力欄と同じ行に収まること、
+  入力を開いたままチップの削除ボタンが正しく動作する
+  （誤ってblurで入力欄ごと閉じない）ことを実機確認
+
+## [2026-09-22] セッション（SEOコンテンツ第一弾: /guides ガイドページ・地図への導線）
+
+### feat: 検索流入用の最初のSEOコンテンツ（/guides, /en/guides）とFlex Railway Mapへの導線を実装
+- 新規: `src/data/guides.ts`, `src/layouts/GuideLayout.astro`,
+  `src/layouts/GuidesIndexLayout.astro`, `src/layouts/guideStyles.ts`,
+  `src/components/MapOpenCta.astro`,
+  `src/pages/guides/index.astro`, `src/pages/guides/simple-tokyo-railway-map.astro`,
+  `src/pages/en/guides/index.astro`, `src/pages/en/guides/tokyo-train-map.astro`,
+  `src/pages/en/guides/tokyo-train-network.astro`
+- 変更: `src/utils/gtagConsent.ts`（`trackEvent`追加）, `public/sitemap.xml`,
+  `src/components/NavigationBar.tsx`（メニューに「ガイド一覧」を追加）,
+  `src/pages/guide.astro`（末尾に`/guides`への導線を追加）, `README.md`
+- 「実際に検索流入を獲得するための最初のSEOコンテンツを実装してほしい、
+  ただし普通の鉄道ブログにはせず、Flex Railway Mapの強み（必要な路線だけ
+  表示できる・複雑な鉄道網をシンプルに理解できる）と結びつけ、地図を
+  実際に開くところまでを1つの体験にしてほしい」という要望を受けた
+- 既存実装（`/guide`, `/about`, sitemap, `src/config/seo.ts`, GA4/Search
+  Console連携）を監査し、重複させないことを確認。既存の地図deep link
+  機構は `?routes=...`（表示路線）と `?lang=...`（言語）の2つのみで、
+  `origin=`/`destination=`（出発・到着駅）の深いリンクは存在しないため、
+  ガイドのCTAはこの2つだけを使い、存在しない機能は案内しない設計にした
+- 候補5テーマのうち、路線図の見にくさ／シンプルさ（テーマA・B相当）を
+  1本の日本語ガイド `simple-tokyo-railway-map` に統合し、英語の観光客
+  向けテーマ（テーマD・E相当）を `tokyo-train-map` / `tokyo-train-network`
+  の2本にした。「東京の電車・路線図の見方」（テーマC）は既存の
+  `/articles/tokyo-train-map-beginner` と、「Flex Railway Mapの強み」の
+  訴求は既存の `/articles/flex-rail-map-introduction` と内容が重複する
+  ため新規ページ化せず、`/guides` 一覧からその2本へリンクして
+  5テーマぶんの導線を確保した（薄い重複ページの量産を避けるため）
+- 各ガイドはH1→検索意図への短い回答→「Flex Railway Mapで見る」CTA
+  （本文の早い位置、装飾で下に追いやらない）→補足セクション→関連
+  ガイドの順の短い構成。CTAは`MapOpenCta.astro`として共通化し、
+  ガイドごとの`routes`（表示したい路線）と`language`から実際に
+  `/?routes=...`（＋英語なら`&lang=en`）を組み立てて地図を直接開く
+- 日本語ガイド（`/guides/*`）と英語ガイド（`/en/guides/*`）は対訳ではなく
+  別内容のため、`StaticPage.astro`の「1URL+?lang=切替、hreflang常時
+  ja/en両方」という前提には乗せず、`GuideLayout.astro`/
+  `GuidesIndexLayout.astro`は自己参照のみのhreflang（無理な対訳付けを
+  しない）にした。BreadcrumbList・WebPageの構造化データも追加（FAQ等の
+  捏造はしない）
+- CTAクリックは`trackEvent('seo_map_open', { guide_slug, language })`
+  （`src/utils/gtagConsent.ts`に追加、GA4未設定でもエラーにならない）
+  として計測。sitemap.xmlに5ページぶんを追加し、`NavigationBar.tsx`の
+  メニューと`/guide`ページ末尾から`/guides`への導線も追加し、孤立
+  ページにならないようにした
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで日英4ガイド＋2つの一覧ページ（デスクトップ・
+  モバイル）の表示、CTAリンクのURL、GA4イベント発火、実際に
+  `?routes=...`付きで地図が正常に開くこと、存在しないガイドslugが
+  404になることを確認。README にSearch Console公開後の確認項目
+  （インデックス登録・sitemap認識・impressions/clicks/CTR/掲載順位・
+  `seo_map_open`イベント）を追記
+
+## [2026-09-22] セッション（駅ツールチップ: 路線の非表示トグル追加・時刻表の出典を上部に移動）
+
+### improve: 駅ツールチップの路線一覧から非表示にできるように、時刻表の最終更新日・出典を上部へ軽く表示
+- `src/components/ui/TimetableSourceNote.tsx`（新規）,
+  `src/components/RailwayMap.tsx`, `src/utils/translation.ts`
+- 「前の駅のツールチップ表示の路線で表示切り替えできるように、時刻表の
+  表示の1番上に最終更新日と引用元リンクを書くように軽く、アトミック
+  デザインで」という要望を受けた
+- 駅ツールチップ左カラムの路線一覧は、非表示の路線を「＋表示」で表示に
+  切り替えることしかできず、いったん表示した路線を同じ場所から
+  非表示に戻す手段が無かった（片方向のトグルだった）。表示中かつ
+  現在選択中でない路線には「－非表示」チップを追加し、既存の
+  `toggleRoute`（路線表示切替パネルと共通のハンドラ）を呼ぶようにした。
+  今クリックして時刻表を見ている路線（選択中）は対象外にしている
+  （消すと右カラムが空になり紛らわしいため）
+- 時刻表（右カラム）の最終更新日・出典は、これまでリストの一番下に
+  あり、スクロールしないと見えなかった。新しいアトム
+  `TimetableSourceNote` に切り出し、一番上（時刻を読む前）に表示する
+  ように変更。出典部分は`/about`へのリンクにした（概算値である旨の
+  詳しい説明は引き続きリストの一番下に軽く残す）
+- `hide`翻訳キーを4言語ぶん追加（既存の`show`と対になる形）
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで最終更新日・出典リンクが上部に表示される
+  こと、路線を表示→非表示チップで再び非表示にできることを実機確認
+
+## [2026-09-22] セッション（出発駅・到着駅の候補ドロップダウンをパネル全幅に拡大）
+
+### fix: 出発駅・到着駅の検索候補が自分の入力欄幅（パネルの半分）に狭められ、下のボタン行に重なっていた問題を修正
+- `src/components/StationSelector.tsx`
+- 「候補駅の横幅も出発駅と同じでその右側のスペースは活用して、
+  アトミックデザインでハードコーディングしないで」という要望を受けた
+- 出発駅・到着駅は横に並ぶ2カラムのため、候補ドロップダウンの横幅も
+  入力欄自身の幅（パネルの約半分、175px程度）に合わせていた。結果、
+  候補を出すと隣の到着駅欄ぶんの余白が無駄になるうえ、候補リストが
+  下の「乗換駅のみ表示」「経由駅を追加」ボタンに重なって文字が切れて
+  見えていた
+- `getFullWidthDropdownPosition`というヘルパーを追加し、入力欄自身の
+  幅ではなくパネル全体の中身の幅（`padding`を除いた実測値）を使って
+  候補の横幅・左端を計算するように変更。パネルの余白は`getComputedStyle`
+  で実際に描画された値を読み取るため、デザイントークン(`L.sp.md`)の
+  値が変わっても計算式を書き換える必要がない
+- 出発駅・到着駅で共通のヘルパーを使うことで、同じ計算を2箇所に
+  書かないようにした
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで候補ドロップダウンの横幅が386px（従来の
+  175pxから拡大）になり下のボタン行と重ならないこと、選択が正しく
+  動作することを実測確認
+
+## [2026-09-22] セッション（経由駅の検索候補を出発/到着駅と共通のドロップダウンに統一）
+
+### fix: 経由駅の検索候補が見切れる問題を修正、出発/到着駅と共通コンポーネント化
+- `src/components/ui/StationSearchDropdown.tsx`（新規）,
+  `src/components/StationSelector.tsx`
+- 「経由駅を追加の入力欄をほかと同じようなデザインで、サイズとか、
+  候補の出方とか、今見切れてる。一元管理で」という要望を受けた
+- 出発駅・到着駅の検索候補は`createPortal`で`document.body`直下に
+  `position: fixed`で描画するのに対し、経由駅だけパネル内で
+  `position: absolute`の簡易版になっていた。駅選択パネル自体が
+  スクロール領域（高さ制限＋`overflow`）を持つため、経由駅の候補は
+  パネルからはみ出す分が見切れていた
+- 出発駅・到着駅・経由駅の3箇所でほぼ同一だった候補ドロップダウンの
+  実装（portal・固定位置・寸法・枠線・影・スクロール挙動）を
+  `StationSearchDropdown`（新規）に一本化。経由駅もフォーカス時に
+  `getBoundingClientRect()`で位置を計算し、出発駅・到着駅と同じ
+  `document.body`直下・`position: fixed`のドロップダウンを使うように
+  変更した。これにより見た目（サイズ・枠線・影・候補の出方）も完全に
+  統一され、見切れなくなった
+- `npm run test:types` / `npm run test:unit`(363件、既存の出発駅
+  選択フローのテスト含む) / `npm run build`すべて通過。Playwrightで
+  ドロップダウンが`document.body`直下に`position: fixed`で描画される
+  こと、出発駅・到着駅・経由駅いずれも選択が正しく動作することを確認
+
+## [2026-09-21] セッション（経由駅チップをアトム化: RemovableTagを新設）
+
+### improve: 経由駅の選択済みチップをアトムのRemovableTagに切り出し
+- `src/components/ui/atoms/RemovableTag.tsx`（新規）,
+  `src/components/StationSelector.tsx`
+- 「経由駅を追加のデザインもアトミックデザインで。一元管理で」という
+  要望を受けた。「経由駅を追加」ボタン自体は既に`Button`アトムを
+  使っていたが、選択済みの経由駅チップ（「1. 新宿 ×」のような表示）は
+  padding・角丸・枠線・背景色をStationSelector.tsx側で直接手書きしており、
+  既存のアトム（Button/Chip等）のどれにも当てはまらなかった
+  （Chipアトムは「路線色を持つ選択トグル」用で、単純な削除可能タグとは
+  用途が違う）
+- 「選んだものを一覧で見せて、個別に外せる」ための新しいアトム
+  `RemovableTag`を`ui/atoms/`に追加。寸法は他の操作部品と同じ
+  `CONTROL_SIZE`から取り、削除ボタンは既存の`IconButton`アトムを
+  そのまま使う。経由駅チップをこのアトムに置き換えた
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで経由駅チップの表示・削除ボタンの動作を確認
+
+## [2026-09-21] セッション（出発/到着の基準切替を「現在時刻」ボタンの右に詰めて配置）
+
+### improve: 時刻基準(出発/到着)の切替を現在時刻ボタンと同じ行に移動
+- `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`
+- 「出発到着切り替えを現在時刻の右で、切り替えてるのがわかるデザインで」
+  という要望を受けた。これまで出発/到着の基準切替（`SegmentedControl`）
+  は時刻入力行の下に別行として配置されており、「この時刻が出発基準か
+  到着基準か」を時刻そのものと関連付けて読みづらかった
+- 「出発時刻」ラベル・時刻入力欄・「現在時刻」ボタンと同じ行の末尾に
+  `SegmentedControl`を移動し、1つの操作列に見えるようにした（狭い画面では
+  flexWrapで折り返す）。選択状態は既存どおり`Button(variant="primary",
+  pressed)`の塗りつぶしで表現（このアプリの他のトグルと共通の規約）
+- 駅選択パネル側・駅ツールチップ側の両方に同じ変更を適用し、表記を統一
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで「現在時刻」ボタンと出発/到着切替が同じ行の
+  隣接位置にあることを実測確認
+
+## [2026-09-21] セッション（推薦ルートの既定表示を先頭候補1件だけに変更）
+
+### fix: 出発・到着駅を設定した際、推薦ルート10件が同時にハイライトされ、時刻表示が先頭候補にしか出ないため路線ごとに時刻の有無が食い違っていた問題を修正
+- `src/components/RailwayMap.tsx`
+- 「時刻が表示される路線とされない路線がある／推薦ルート選択は一旦
+  表示をオフで」という報告・要望を受けた
+- 出発駅・到着駅を設定すると`selectedRouteIndices`が既定で`null`
+  （＝推薦ルート10件すべて選択扱い）になっており、該当する路線が
+  トリミングされた区間で同時に地図へハイライトされていた。一方、駅の
+  時刻表示（`stationTimelineMap`）は仕様上つねに先頭候補
+  (`routeRecommendations[0]`)だけを見て計算するため、先頭候補以外の
+  路線の駅には時刻が出ず、「路線によって時刻の有無が違う」ように
+  見えていた
+- 出発・到着駅の設定時に既定で選択状態にする推薦ルートを、全件では
+  なく先頭候補（最有力ルート）1件だけに変更。これにより地図には
+  常に「時刻表示と一致する1本のルート」だけがハイライトされる。
+  他候補を見たい場合は「推薦ルート選択」パネルから引き続き手動で
+  チェックを追加できる（パネル自体・全表示/全非表示ボタンは変更なし）
+- あわせて、推薦ルートで使う路線を自動的に「表示路線」へ加える処理
+  （`routesUsedInRecommendations`）も、10件全部ではなく先頭候補だけを
+  対象にするよう変更。これをしないと未選択の候補の路線が全区間表示
+  （トリミングなし）のまま地図に残ってしまうため
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで藤沢本町→高輪ゲートウェイの実データを使い、
+  推薦ルート1件目だけがチェック状態・地図上のハイライトも1本のみ・
+  経路上の全駅に時刻が一貫して表示されることを実機確認
+
+## [2026-09-21] セッション（「経由駅を追加」ボタンを「乗換駅のみ表示」の右に詰めて配置）
+
+### improve: 「経由駅を追加」ボタンをボタン行に移動し、独立した行を廃止
+- `src/components/StationSelector.tsx`
+- 「経由駅〜を乗換駅〜の右に配置して詰めるように極力」という要望を
+  受けた。これまで「経由駅を追加」ボタンは他のボタン（所要時間を表示・
+  乗換駅のみ表示など）とは別の行に単独で配置されており、縦方向の
+  余白を余分に使っていた
+- ボタン自体を上のボタン行（乗換駅のみ表示の右）に移動。入力欄を
+  開いている間はボタンを隠し、代わりに検索欄が下に出る（従来通り）
+- 経由駅の選択済みチップ・検索欄は、必要なとき（経由駅が1件以上ある、
+  または検索欄を開いている）だけ描画するように変更。ボタンが上の行に
+  移ったことで、何も無いときは完全に非表示になり余白を使わない
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで「経由駅を追加」が「乗換駅のみ表示」と同じ行の
+  すぐ右に並ぶこと、クリックすると入力欄がその下に開き、ボタン自体は
+  隠れることを実測確認
+
+## [2026-09-21] セッション（駅ツールチップ「＋表示」チップの縁取り(shadow)をオフに）
+
+### improve: ColorChipにshadow propを追加し、「＋表示」チップだけ縁取りを止める
+- `src/components/ui/ColorChip.tsx`, `src/components/RailwayMap.tsx`
+- 「＋表示のシャドウをオフに、これも一元管理対象にね。アトミックデザイン
+  で」という要望を受けた
+- `ColorChip`（色付きチップのアトム）は、背景色が明るくコントラスト
+  不足の場合に読みやすさ確保のため`textShadow`で縁取りを足す仕組みが
+  元々あった（WCAG対策、`needsHalo`）。駅ツールチップの左カラムにある
+  「＋表示」チップ（経路外の路線を地図に追加表示するボタン）でこの
+  縁取りが目立っていたため、個別にスタイルを上書きするのではなく
+  `ColorChip`に`shadow`プロパティ（既定`true`）を追加し、この呼び出し
+  箇所だけ`shadow={false}`を渡してオフにした。他のColorChip利用箇所
+  （時刻表の列車種別バッジ）は既定のまま変更していない
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで「＋表示」チップの`textShadow`が`none`に
+  なっていることを実測確認
+
+## [2026-09-21] セッション（CookieBannerをコンパクト化: カテゴリ横並び・ボタンサイズ統一）
+
+### improve: Cookie設定パネルを横並びレイアウトに、ボタンをsm規格に統一してコンパクト化
+- `src/components/CookieBanner.tsx`
+- 「極力縦の表示幅をコンパクトにするために横で表示するように／設定を
+  保存ってやつの縦幅が違うのでは他のボタンとかのデザインと。もっと
+  コンパクトにできるような。一元管理で」という要望を受けた
+- 必要なCookie／分析Cookie／広告Cookieの3項目を縦積み（見出し→説明→
+  スイッチを3段、3項目分）から横並び（flexWrapで3カラム、狭い画面では
+  自然に折り返し）に変更。Cookie設定パネル全体の高さが実測で
+  約300px→168px（デスクトップ幅）に縮小した。3項目は構造が同一だった
+  ため、配列にまとめてmapで描画するように変更（同じJSXを3回手書きして
+  いたのを解消）
+- ボタン（すべて同意・設定管理・必要なもののみ・キャンセル・設定を
+  保存）をすべて`size="md"`(44px)から`size="sm"`(24px)に変更。
+  CookieBannerは地図の下端に重なる補助的なUIであり、アプリの他の
+  行内ボタン（乗換駅のみ表示など）と同じ規格に揃えることでコンパクトに
+  した。サイズは`CONTROL_SIZE`（アトムのButtonが内部で参照）から取る
+  ため、個別に高さを指定するハードコードは元々していない
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightでデスクトップ幅・モバイル幅それぞれのレイアウト
+  崩れが無いこと、ボタンの高さが揃ったことを実測確認
+
+## [2026-09-21] セッション（CookieBannerの文言を一元管理化、必要なCookieトグルをSwitchアトムに統一）
+
+### improve: CookieBannerのハードコード文言をtranslateUIに一元化、手書きトグルをSwitchアトムに置換
+- `src/components/CookieBanner.tsx`, `src/utils/translation.ts`
+- 「全て同意とかのボタンもアトミックデザインで、ハードコーディングせずに
+  一元管理で」という要望を受けた。ボタン自体は元々`Button`アトムを
+  使っていたが、文言が`language === 'japanese' ? '...' : '...'`という
+  日英2択のインラインハードコードで、中国語・韓国語ユーザーには英語が
+  出てしまっていた（アプリは4言語対応のはず）
+- `すべて同意`/`設定管理`/`必要なもののみ`/`Cookie設定`/`必要なCookie`/
+  `分析Cookie`/`広告Cookie`の見出し・説明文・`キャンセル`/`設定を保存`
+  など、CookieBanner内の全ての文言を`src/utils/translation.ts`の
+  `translateUI`キーに切り出し、4言語（日本語・英語・中国語・韓国語）を
+  追加。プライバシーポリシーのリンク文言は既存の`privacyLink`キーを
+  再利用し、同じ文言を2箇所に持たないようにした
+- 「必要なCookie」の常時ONトグルは、分析/広告Cookieと違って
+  `div`を手書きした専用実装（塗り・つまみ・"ON"文字を個別に配置）に
+  なっていた。同じ`Switch`アトムに統一し、`disabled`props で
+  常時ON・操作不可を表現するように変更（この3つのトグルの見た目が
+  今後も確実に揃うようにするため）
+- `npm run test:types` / `npm run test:unit`(363件、`i18nCoverage`
+  含む) / `npm run build`すべて通過。Playwrightで日本語・英語表示と、
+  3つのCookieトグルが同じSwitchコンポーネントで描画され「必要な
+  Cookie」だけ操作不可になっていることを実機確認
+
+## [2026-09-21] セッション（駅選択パネルの細部調整: 経由ラベル削除・現在地からボタン統一・時刻設定の表示条件と並び順・入力欄の高さ統一）
+
+### improve: 経由駅ラベルの削除、現在地からボタンのデザイン統一、時刻設定の表示条件・並び順、入力欄の高さ統一
+- `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`,
+  `src/components/ui/atoms/TextField.tsx`
+- 「"経由"ってサブタイトルはいらない／現在地からボタンもほかの乗換駅のみ
+  表示と同じデザインで、色とかアイコンとか／時刻を表示するボタンが出て
+  からすなわち出発駅到着駅が設定されたら出るように／出発到着の切り替え
+  は時刻の次の表示で／出発時刻の入力フォームの縦幅もアトミックデザイン
+  でほかと統一するように」という要望を受けた
+- 経由駅チップ・検索ボタンの上にあった「経由」ラベルを削除（チップと
+  ボタン自体で用途が分かるため冗長だった）
+- 「現在地から」ボタンを`variant="positive"`（緑塗り、アイコン無し）から
+  `variant="primary"`+`LocateFixed`アイコンに変更し、同じ行の「所要時間を
+  表示」「乗換駅のみ表示」と見た目を揃えた
+- 出発時刻の行（入力欄・現在時刻ボタン・出発/到着基準の切替）を、
+  「時刻を表示」ボタンと同じ条件（出発駅・到着駅が両方揃ったとき）で
+  だけ表示するように変更。経路が無いのに時刻設定だけ先に出る状態を無くした
+- 出発/到着の基準切替（SegmentedControl）を時刻入力行の下に移動
+  （これまでは時刻入力行より上にあった）。駅ツールチップ側の同じUIも
+  一貫性のため同様に並び替えた
+- `TextField`（アトム）が`minHeight`だけを指定していたため、
+  `type="time"`はブラウザ既定のUI部品の都合で規格より高く描画されて
+  いた。`height`も明示することで、同じ`size`の他の部品（ボタン等）と
+  確実に高さを揃えた（Playwrightで実測: 時刻入力欄と「現在時刻」ボタンが
+  24pxで一致することを確認）
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで各条件（未設定時は非表示、両方揃うと表示・
+  既定ON、ボタンの配色・アイコン、入力欄の高さ）を実機確認
+
+## [2026-09-21] セッション（「時刻表」ボタンを「時刻を表示」に改名、出発/到着駅が揃うまで非表示に）
+
+### improve: 「時刻を表示」ボタンの文言変更と表示条件の変更
+- `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`,
+  `src/utils/translation.ts`
+- 「時刻表のボタンは時刻を表示って文言に変えて、そのボタン自体出発駅
+  到着駅が設定されたら出てくるように、その時はデフォルトオンで」という
+  要望を受けた
+- ボタンの文言を「時刻表」→「時刻を表示」に変更。既存の`timetableButton`
+  キー（"時刻表"）は`TimetablePanel.tsx`の別の見出し（時刻表パネルの
+  開閉ボタン）でも使い回されていたため、共有キーの値は変えず、
+  このボタン専用の`showStationTimeLabelsButton`キーを新規追加した
+- ボタンは出発駅・到着駅の両方が決まるまで表示しないように変更
+  （経路が無いのに時刻表示を聞かれる状態を避ける）。両方揃った瞬間に
+  `timetableModeEnabled`を必ずONに戻す処理を追加（`hadBothStationsRef`で
+  「揃っていない→揃った」への切り替わりだけを検知し、揃ったまま
+  ユーザーが手動でOFFにした分を上書きしないようにした）
+- Playwrightで「未設定→非表示」「出発のみ→非表示」「両方設定→表示・
+  ON状態」の一連の流れを実機確認。`npm run test:types` /
+  `npm run test:unit`(363件) / `npm run build` すべて通過
+
+## [2026-09-21] セッション（経由駅の入力欄をボタン押下で開くように）
+
+### improve: 経由駅の入力欄を常時表示から「経由駅を追加」ボタン押下時のみ表示に変更
+- `src/components/StationSelector.tsx`
+- 「経由駅を追加の入力欄は、経由駅を追加のUIを押したら出るように」という
+  要望を受けた。これまでは駅選択パネルを開くと経由駅の検索欄が常に
+  表示されており、経由駅を使わない人にも余白を占有していた
+- `showWaypointInput`状態を追加し、既定はボタン（アトムの`Button`、
+  `Waypoints`アイコン + 「経由駅を追加」ラベル）だけを表示。押すと
+  検索欄（`autoFocus`）に切り替わり、駅を選択するか、選ばずに
+  フォーカスを外すと再びボタン表示に戻る
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過を確認。Playwrightで「ボタンのみ表示→クリックで検索欄が出る
+  →入力して候補から選択できる」までの一連の流れを実機確認
+
+## [2026-09-21] セッション（集客のための最低限のSEO・計測基盤）
+
+外部アクセスがほぼ無い状態から検索流入を得るための土台作り。大規模な機能追加や
+大量ページ生成はせず、既存UI・地図機能を壊さない小さな変更を優先した。
+
+### feat: SEOメタデータの一元管理化とSearch Console/GA4のハードコード解除
+- `src/config/seo.ts`（新規）, `src/layouts/StaticPage.astro`, `src/pages/index.astro`,
+  `src/utils/gtagConsent.ts`（新規）, `src/components/CookieBanner.tsx`
+- サイト名(`Flex Railway Map`)・公開URL・OGP画像・Search Console確認コード・
+  GA4測定IDを`src/config/seo.ts`に一元化。`index.astro`と`StaticPage.astro`に
+  別々にハードコードされていたcanonical/OGP/hreflangのURLをここから参照するよう変更
+- Search ConsoleのHTMLタグ確認コードは`content="uyjBT9z..."`が直書きされていたのを、
+  `GOOGLE_SITE_VERIFICATION`環境変数から読むように変更（未設定ならタグ自体を出さない）。
+  **本番で有効にするにはNetlifyの環境変数にこれまでの値を設定する必要がある**
+  （READMEに設定方法を追記）
+- GA4は未導入だった（`analytics`同意Cookieの選択UIだけ存在し、実際の計測コードは
+  どこにも無かった）。`VITE_GA_MEASUREMENT_ID`環境変数が設定されている場合のみ、
+  広告スクリプトと同じ「表示に必要なものが揃ってから読み込む」パターンで
+  `gtag.js`を読み込むようにした。既定は[Consent Mode](https://developers.google.com/tag-platform/security/guides/consent)で
+  「同意なし」、CookieBannerの分析Cookie許可と連動して同意状態を更新する
+  （`src/utils/gtagConsent.ts`）
+- JSON-LDの`WebApplication`/`FAQPage`はプレーンな`<script>`タグ内に文字列で
+  URLを埋め込んでいたため変数化できていなかった。frontmatterでオブジェクトを
+  組み立て`set:html={JSON.stringify(...)}`で出力する形に変更し、`WebSite`を追加
+  （実在しない検索機能・レビュー・評価・価格は含めない）
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build` すべて通過を確認
+
+### feat: 使い方ガイドページ(/guide)を新規追加、トップページに一行の説明を追加
+- `src/pages/guide.astro`（新規）, `public/sitemap.xml`, `src/components/NavigationBar.tsx`,
+  `src/utils/translation.ts`
+- `/guide`を`StaticPage.astro`パターン（`/about`と同じ構成）で新規作成。
+  実装済み機能のみを説明（路線表示切替・出発/到着駅・所要時間・経由駅・
+  表示設定・スマートフォンでの基本操作）。存在しない機能は書いていない
+- ヘッダーのハンバーガーメニューに「使い方ガイド」リンクを追加（他の固定ページと
+  同じ位置づけ）。`sitemap.xml`にも`/guide`を追加
+- ヘッダーのタイトル直下に、検索エンジン・初めて見る人向けの一行キャッチコピー
+  （`appTagline`、4言語対応）を追加。地図を主役にした構成を崩さないよう、
+  1行に収まりきらない場合は折り返さず省略（`text-overflow: ellipsis`）にした
+  （最初はそのまま折り返しさせたところ、モバイル幅でヘッダーが3行になり
+  ヘッダーの高さが目に見えて伸びてしまったため、テキスト自体も短縮した上で対応）
+- Playwrightでデスクトップ幅(1280px)・モバイル幅(390px)の両方を確認。
+  地図はデフォルトでフルスクリーン表示（既存仕様）のため、このヘッダーは
+  ユーザーが縮小表示に切り替えたときに見える。地図自体・既存UIへの影響なし
+
+### docs: SEO関連の環境変数の設定方法をREADMEに追記
+- `README.md`
+- `VITE_GA_MEASUREMENT_ID` / `GOOGLE_SITE_VERIFICATION` の2つの環境変数について、
+  用途・入手元・ローカル/Netlifyでの設定方法を追記
+
+## [2026-09-21] セッション（駅アイコン下の時刻表示トグル・出発/到着基準の切替）
+
+### feat: 「時刻を表示」トグルを追加、出発時刻/到着時刻の基準を切り替えられるように
+- `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`,
+  `src/data/timetableData.ts`, `src/utils/translation.ts`,
+  `tests/unit/data/timetableData.test.ts`
+- 「時刻を表示(駅アイコンの下)の切り替えを乗換駅とかと同じデザインで実装と
+  時刻(出発時刻と到着時刻を切り替えできるUIも)を設定できるデザインも追加して」
+  という要望を受けた
+- **時刻を表示トグル**: 駅アイコンの下に経路上の発車時刻を表示する
+  `timetableModeEnabled`は既に実装済み（既定ON）だったが、切り替えるUIが
+  どこにも無かった（`setTimetableModeEnabled`を呼ぶ箇所が皆無だった）。
+  「乗換駅のみ表示」と同じ`Button`（`pressed`状態で塗る）を駅選択パネルの
+  ボタン行に追加した。翻訳キーは既に用意されていた`timetableButton`
+  （"時刻表"）を再利用
+- **出発/到着基準の切り替え**: `timetableBaseTime`は常に「出発時刻」として
+  扱われ、到着時刻から逆算する手段が無かった。`timeMode`
+  （'departure'|'arrival'）を追加し、到着モードでは入力した時刻を
+  「到着したい時刻」として扱い、選択中経路の合計所要時間ぶん遡った時刻を
+  実際の出発基準時刻として使うようにした（`computeEffectiveBaseTime`、
+  `src/data/timetableData.ts`に切り出してユニットテスト可能にした）
+  - UIは既存の「排他選択のボタン列」モレキュール`SegmentedControl`を
+    そのまま使用（出発/到着の2択）。駅選択パネルの出発時刻行、および
+    駅ツールチップの基準時刻行の両方に追加し、ラベルもモードに応じて
+    「出発時刻」⇔「到着時刻」に切り替わるようにした
+- `tests/unit/data/timetableData.test.ts`に`addMinutes`(5件)・
+  `computeEffectiveBaseTime`(4件)のテストを追加
+- Playwrightで実機確認: 到着モードで09:00を入力すると、経路上の各駅の
+  表示時刻が出発モード時より早い時刻（到着から逆算した時刻）になることを
+  確認。最速の推薦ルートが停車しない駅には時刻が表示されないことも確認
+  （経路上に無い駅に架空の時刻を出さない、という既存の正しい挙動）
+
+## [2026-09-21] セッション（経由駅・出発時刻の設定を駅選択パネル内に追加）
+
+### feat: 経由駅を指定できるように、出発時刻設定を駅選択パネルからも操作可能に
+- `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`,
+  `src/utils/routeFinder.ts`, `src/utils/translation.ts`,
+  `tests/unit/utils/routeFinder.test.ts`
+- 「経由駅の設定と、時刻の設定も出発駅とかの入力の下でできるように」
+  という要望を受けた
+- **出発時刻**: 駅選択パネル内に既に実装済みだったが
+  `SHOW_DEPARTURE_TIME_ROW = false` で意図的に隠されていた（駅ツールチップ
+  側に同じ設定があり、パネルは駅選択に集中させる方針だったため）。
+  今回の要望を受けて`true`に変更し、出発駅・到着駅の入力欄の下で
+  直接操作できるようにした
+- **経由駅**: この機能自体が未実装だったため新規に追加した
+  - `RouteFinder`本体の経路探索アルゴリズム（出発〜到着2点間の最短経路）
+    には手を入れず、`findRoutesViaWaypoints`という新しい関数を追加。
+    出発→経由駅1→経由駅2→...→到着、と区間ごとに分割して既存の
+    `findRoutes`を呼び、結果を連結する方式にした（既存の複雑な探索
+    ロジックを変更するリスクを避けつつ実現）
+  - 経由駅が1つ以上指定されているときは、連結した1本の経路だけを
+    推薦ルートとして表示する（区間ごとに最有力ルートをつなげるだけなので、
+    複数候補の比較機能は経由駅指定時は対象外）
+  - UI: 出発駅・到着駅と同じ検索候補ロジック（`filterStations`、
+    ひらがな/ローマ字対応済み）を使う経由駅検索欄を追加。選択した駅は
+    順序付きチップとして表示し、×で削除できる。ドロップダウンは
+    出発駅・到着駅ほど頻繁に開閉しないため、`createPortal`を使わない
+    簡易版にした
+  - 翻訳キー`addWaypoint`を4言語（日本語・英語・中国語・韓国語）に追加。
+    既存の`viaStations`（"経由"）キーをセクション見出しに再利用した
+- `tests/unit/utils/routeFinder.test.ts`に`findRoutesViaWaypoints`のテストを
+  4件追加（区間連結・経由駅なし・複数経由駅・存在しない経由駅）
+- Playwrightで実機確認: 渋谷→新宿(経由)→上野を設定すると、新宿を通る
+  1本の経路が地図上に表示されること、チップの×で経由駅を削除できることを確認
+
+## [2026-09-21] セッション（現在地アイコンの向きの精度改善）
+
+### improve: 現在地アイコンの向き（矢印）の精度を改善
+- `src/utils/trainDetector.ts`, `src/components/RailwayMap.tsx`,
+  `tests/unit/utils/trainDetector.test.ts`
+- 「位置情報の向きの精度がまだ悪いな」という指摘を受けた
+- これまではブラウザ/OS側の`GeolocationCoordinates.heading`をそのまま
+  使っていたが、この値は端末・ブラウザによって精度も対応状況もまちまち
+  （iOS Safariでは常に`null`など）で、単発の値をそのまま矢印に反映すると
+  歩行速度ではブレが大きく出ていた
+- 列車検出用に既にあった「GPS履歴の時間窓から進行方向を求める」ロジック
+  （`estimateMotion`、`MIN_SPEED_MS=4m/s`と電車の速度域向け）とは別に、
+  徒歩速度でも方向が求まるよう`estimateHeadingFromHistory`を新設した。
+  直近4秒の変位から自前で方向を計算し、GPSノイズ対策として正味の
+  移動距離が4m未満（ほぼ静止中相当）ならnull（矢印を出さず点だけ表示、
+  という既存の扱いのまま）を返す
+- 自前計算に統一することで、`coords.heading`が常に`null`を返す端末でも
+  矢印が機能するようになる副次的な効果もある
+- `tests/unit/utils/trainDetector.test.ts`に7件追加
+  （北・東・南への移動で正しい角度になること、静止中はnullになること、
+  時間窓より古い点を無視すること）
+
+## [2026-09-21] セッション（駅アイコンを現在地アイコンより前面に表示）
+
+### fix: 駅アイコンが現在地アイコンに隠れることがある問題を修正
+- `src/components/RailwayMap.tsx`
+- 「駅のアイコンは位置情報のアイコンよりも上に表示されるように」
+  という要望を受けた
+- 現在地マーカーは`zIndexOffset`（6000/10000）だけで駅アイコンより
+  前面に出そうとしていたが、`zIndexOffset`は同じ`markerPane`内での
+  「画面Y座標＋offset」の比較にしかならず、画面上の位置によっては
+  駅アイコン（通過路線数に応じて最大5000）より現在地アイコンが上に
+  来て駅を隠すことがあった（所要時間ラベルと同種の問題）
+- 所要時間ラベルの修正と同じ対処法（専用Pane化）で解決した。
+  `userLocationPane`（z-index 590）を`norotatePane`配下に
+  `markerPane`（600）の兄弟として作り、現在地マーカー2箇所
+  （デスクトップ/モバイル）に`pane="userLocationPane"`を指定
+- Paneの親子関係とz-indexの大小を実機で確認（`travelTime-pane`:550
+  <`userLocation-pane`:590 <`marker-pane`:600、いずれも`norotatePane`
+  の直接の子であることを確認）。所要時間ラベルの修正時に発覚した
+  「親Paneを指定し忘れると兄弟関係が崩れてz-indexが意味を持たなくなる」
+  不具合と同じ轍を踏まないよう、最初から`pane="norotatePane"`を指定した
+
+## [2026-09-21] セッション（乗換駅のみ表示でも出発・到着駅は必ず表示）
+
+### fix: 「乗換駅のみ表示」を有効にしても出発駅・到着駅は必ず表示するように
+- `src/components/RailwayMap.tsx`
+- 「乗り換え駅のみ表示でも出発駅到着駅はぜったいに表示するように、
+  いちばん強い条件でそこは」という要望を受けた
+- 出発駅・到着駅（`isSpecialStation`）は`allowedStationNames`（ビューポート
+  上限）の対象外にする特別扱いは既にあったが、「乗換駅のみ表示」
+  「急行駅のみ表示」フィルターは特別駅にもそのまま適用されており、
+  非乗換駅・非急行停車駅を出発/到着に選んだ場合は結局隠れてしまっていた
+- 共有フィルターロジック（`stationVisibilityFilter.shouldShow`）の先頭に、
+  出発駅・到着駅なら他のどの条件より先に`true`を返す分岐を追加。
+  あわせて特別駅向けの重複チェック（乗換駅のみ/急行駅のみ）を削除した
+  （時間フィルターのみ従来どおり適用）
+- 実機で、山手線のみを通る非乗換駅どうし（鶯谷・目白）を出発駅・到着駅に
+  設定し「乗換駅のみ表示」を有効化。両駅は表示されたまま他の非乗換駅
+  （18駅→14駅）だけが消えることを確認した
+
 ## [2026-09-15] セッション（駅選択パネルを畳んだときの余白の不揃いを修正）
 
 ### fix: 駅選択パネルを畳んだとき、見出しの上下の余白が不揃いだったのを修正

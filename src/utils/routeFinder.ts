@@ -583,3 +583,40 @@ export class RouteFinder {
     });
   }
 }
+
+/**
+ * 経由駅を指定した経路検索。
+ *
+ * `RouteFinder` 本体の探索（乗換込みの最短経路）は出発〜到着の2点間しか
+ * 扱えないため、既存のアルゴリズムには手を入れず、区間ごとに分割して
+ * 順番に検索した結果をつなぎ合わせる方式にした
+ * （出発→経由駅1→経由駅2→...→到着、各区間の最有力ルートを連結する）。
+ *
+ * いずれかの区間で経路が見つからなければ null を返す。
+ * 経由駅をまたぐ地点は、同じ路線が続いていても一旦区切れる形になるため、
+ * 乗換回数に+1する（実際に乗り換えるとは限らないが、経由駅を指定した
+ * 時点で「その駅を通る」という制約が入るため、多くの場合は乗換が発生する）。
+ */
+export function findRoutesViaWaypoints(
+  finder: RouteFinder,
+  departure: Station,
+  waypoints: Station[],
+  arrival: Station
+): RouteResult | null {
+  const stops = [departure, ...waypoints, arrival];
+  const segments: RouteSegment[] = [];
+  let totalTime = 0;
+  let transfers = 0;
+
+  for (let i = 0; i < stops.length - 1; i++) {
+    const legResults = finder.findRoutes(stops[i], stops[i + 1], 1);
+    if (legResults.length === 0) return null;
+    const leg = legResults[0];
+    segments.push(...leg.segments);
+    totalTime += leg.totalTime;
+    transfers += leg.transfers;
+    if (i > 0) transfers += 1;
+  }
+
+  return { segments, totalTime, transfers };
+}

@@ -1,0 +1,32 @@
+---
+import GuidesIndexLayout from "../../../layouts/GuidesIndexLayout.astro";
+import { getGuidesByLang } from "../../../data/guides";
+
+const enGuides = getGuidesByLang('en');
+---
+
+<GuidesIndexLayout
+	title="Guides - Flex Railway Map | Understanding Tokyo's Train Network"
+	description="Guides for understanding Tokyo's train network, from Flex Railway Map. Each guide links directly to the interactive map for the topic."
+	path="/en/guides"
+	htmlLang="en"
+	backLabel="← Back to Flex Railway Map"
+>
+	<h1 class="page-title">Guides</h1>
+	<p class="lede">
+	Topic guides for visitors and residents navigating Tokyo's train network. Each guide opens the matching view on the interactive map.
+	</p>
+	<ul class="related-list">
+		{enGuides.map(g => (
+			<li><a href={`/en/guides/${g.slug}`}>{g.breadcrumbLabel}</a></li>
+		))}
+	</ul>
+	<h2>Want to learn how to use the app itself?</h2>
+	<p>
+	For how to toggle lines, search routes, and other Flex Railway Map features, see the <a href="/guide?lang=en">usage guide</a>.
+	</p>
+	<h2>日本語</h2>
+	<p>
+	<a href="/guides">日本語のガイド</a>もあります。
+	</p>
+</GuidesIndexLayout>

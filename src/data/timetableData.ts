@@ -22,6 +22,23 @@ export function addMinutes(timeStr: string, minutes: number): string {
   return `${String(Math.floor(norm / 60)).padStart(2, '0')}:${String(norm % 60).padStart(2, '0')}`;
 }
 
+/**
+ * 入力された基準時刻（baseTime）を、実際に経路計算の出発基準として使う
+ * 時刻に変換する。
+ *
+ * - 出発モード（'departure'）: baseTime をそのまま「その時刻に出発する」
+ *   基準として使う
+ * - 到着モード（'arrival'）: baseTime を「その時刻に到着したい」基準として
+ *   扱い、経路の合計所要時間（totalRouteMinutes）ぶん遡った時刻を返す
+ */
+export function computeEffectiveBaseTime(
+  baseTime: string,
+  mode: 'departure' | 'arrival',
+  totalRouteMinutes: number
+): string {
+  return mode === 'arrival' ? addMinutes(baseTime, -totalRouteMinutes) : baseTime;
+}
+
 interface StationEntry {
   name: string;
   offset: number; // 始発駅からの累計所要時間（分）

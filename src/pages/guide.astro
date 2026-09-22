@@ -1,0 +1,96 @@
+---
+import StaticPage from "../layouts/StaticPage.astro";
+---
+
+<StaticPage
+	title="使い方ガイド - フレックス路線図 | 路線の絞り込み・経路検索・所要時間表示"
+	description="フレックス路線図の使い方を紹介します。路線の表示/非表示の切り替え、出発駅・到着駅の指定、経路検索と所要時間の見方、表示設定、スマートフォンでの基本操作を説明します。"
+	keywords="使い方,ガイド,路線図,操作方法,経路検索,出発駅,到着駅,所要時間,フレックス路線図"
+	path="/guide"
+	langPrefix="guide"
+>
+
+	<!-- Japanese Guide -->
+	<div id="guide-ja">
+		<h2>使い方ガイド</h2>
+
+		<h3>1. 路線の表示・非表示を切り替える</h3>
+		<p>
+		地図の右側や下部にある路線一覧から、表示したい路線だけを選んでオン/オフを切り替えられます。
+		必要な路線だけに絞り込むことで、情報量の多い路線図をシンプルに見やすくできます。
+		</p>
+
+		<h3>2. 出発駅・到着駅を指定する</h3>
+		<p>
+		駅選択パネルに出発駅と到着駅を入力すると、関連する路線だけが地図上に表示され、
+		候補となる経路が一覧で表示されます。経由駅を追加して、指定したい駅を通る経路を探すこともできます。
+		</p>
+
+		<h3>3. 所要時間を確認する</h3>
+		<p>
+		経路の候補には、乗り換え回数や所要時間の目安が表示されます。出発時刻・到着時刻のどちらを
+		基準にするかを切り替えることもでき、駅をクリックすると次に発車する電車の時刻も確認できます。
+		</p>
+
+		<h3>4. 表示設定を変更する</h3>
+		<p>
+		乗換駅のみを表示するフィルターや、地図の文字サイズ・配色（ライト/ダーク）など、
+		見やすさに関わる表示設定を変更できます。設定は次回アクセス時にも保持されます。
+		</p>
+
+		<h3>5. スマートフォンでの基本操作</h3>
+		<p>
+		スマートフォンやタブレットのブラウザからもそのままご利用いただけます。地図はピンチ操作で拡大・縮小、
+		ドラッグで表示位置を移動できます。パネル類は折りたたんで地図を広く表示することもできます。
+		</p>
+
+		<h3>目的別のガイドを見る</h3>
+		<p>
+		「東京の路線図をシンプルに見る」など、目的別のガイドから、そのままFlex Railway Mapの地図を開けます。
+		<a href="/guides">ガイド一覧はこちら</a>。
+		</p>
+	</div>
+
+	<!-- English Guide -->
+	<div id="guide-en" style="display: none;">
+		<h2>User Guide</h2>
+
+		<h3>1. Toggle Which Lines Are Shown</h3>
+		<p>
+		Use the line list on the map to turn individual railway lines on or off.
+		Showing only the lines you need makes a busy railway map much easier to read.
+		</p>
+
+		<h3>2. Set a Departure and Arrival Station</h3>
+		<p>
+		Enter a departure and arrival station in the station panel to see only the related lines
+		on the map, along with a list of candidate routes. You can also add a via station to find
+		routes that pass through a specific stop.
+		</p>
+
+		<h3>3. Check Travel Time</h3>
+		<p>
+		Each candidate route shows the number of transfers and an estimated travel time. You can
+		switch between using the departure time or the arrival time as the basis for the calculation,
+		and clicking a station shows the next scheduled departures.
+		</p>
+
+		<h3>4. Change Display Settings</h3>
+		<p>
+		You can filter the map to show only transfer stations, and adjust display options such as
+		map label size and light/dark color theme. Your settings are kept for your next visit.
+		</p>
+
+		<h3>5. Basic Smartphone Operation</h3>
+		<p>
+		The site works directly in your phone or tablet browser. Pinch to zoom the map and drag to
+		pan around it. Panels can be collapsed to give the map more room on smaller screens.
+		</p>
+
+		<h3>Browse Guides by Topic</h3>
+		<p>
+		Topic guides, such as an introduction to Tokyo's train map, open directly into the matching
+		view of Flex Railway Map. <a href="/en/guides">See all guides</a>.
+		</p>
+	</div>
+</StaticPage>
