@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ArrowLeftRight, Clock, LocateFixed, Timer, Waypoints, X } from 'lucide-react';
-import { createPortal } from 'react-dom';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
@@ -15,6 +14,7 @@ import { L } from './legend/legendStyles';
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import RemovableTag from './ui/atoms/RemovableTag';
+import StationSearchDropdown from './ui/StationSearchDropdown';
 import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
@@ -133,6 +133,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const [isSearching, setIsSearching] = useState(false);
   const [departureDropdownPos, setDepartureDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
   const [arrivalDropdownPos, setArrivalDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [waypointDropdownPos, setWaypointDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
 
   const departureRef = useRef<HTMLDivElement>(null);
   const arrivalRef = useRef<HTMLDivElement>(null);
@@ -566,57 +567,19 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   )}
                 </div>
               )}
-              {showDepartureResults && departureDropdownPos && createPortal(
-                <div
+              {showDepartureResults && departureDropdownPos && (
+                <StationSearchDropdown
                   ref={departurePortalRef}
+                  position={departureDropdownPos}
+                  stations={filteredDepartureStations}
+                  onSelect={handleDepartureSelect}
+                  theme={theme}
+                  language={language}
+                  hasQuery={!!departureSearch}
                   onMouseDown={(e) => { e.preventDefault(); departureClickedRef.current = true; }}
                   onTouchStart={(e) => { e.stopPropagation(); departureClickedRef.current = true; }}
                   onTouchMove={(e) => e.stopPropagation()}
-                  style={{
-                  position: 'fixed',
-                  top: departureDropdownPos.top,
-                  left: departureDropdownPos.left,
-                  width: departureDropdownPos.width,
-                  backgroundColor: colors.surfaceElevated,
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: L.r.control,
-                  boxShadow: `0 4px 12px ${colors.shadow}`,
-                  maxHeight: '240px',
-                  overflowY: 'auto',
-                  // iOSで候補内をスクロールしたとき、端に達しても地図やページ側へ
-                  // スクロールが伝播しないようにする
-                  overscrollBehavior: 'contain',
-                  WebkitOverflowScrolling: 'touch',
-                  // body に touch-action: manipulation が掛かっており、
-                  // 指定しないと縦スワイプがスクロールとして扱われない端末がある
-                  touchAction: 'pan-y',
-                  zIndex: 99999
-                }}>
-                  {filteredDepartureStations.map((station, index) => (
-                    <div
-                      key={`${station.name}-${index}`}
-                      onClick={() => handleDepartureSelect(station)}
-                      style={{
-                        padding: `${L.sp.md} ${L.sp.xl}`,
-                        cursor: 'pointer',
-                        borderBottom: index < filteredDepartureStations.length - 1 ? `1px solid ${colors.borderLight}` : 'none',
-                        fontSize: FS.body,
-                        wordBreak: language === 'english' ? 'break-word' : 'normal',
-                        lineHeight: '1.3'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surface}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
-                    >
-                      {translateStation(station.name, language)}
-                    </div>
-                  ))}
-                  {filteredDepartureStations.length === 0 && (
-                    <div style={{ padding: `${L.sp.md} ${L.sp.xl}`, color: colors.textSecondary, fontSize: FS.body }}>
-                      {departureSearch ? translateUI('noStationFound', language) : translateUI('majorStationsHint', language)}
-                    </div>
-                  )}
-                </div>,
-                document.body
+                />
               )}
             </div>
 
@@ -719,57 +682,19 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 )}
               </div>
               
-              {showArrivalResults && arrivalDropdownPos && createPortal(
-                <div
+              {showArrivalResults && arrivalDropdownPos && (
+                <StationSearchDropdown
                   ref={arrivalPortalRef}
+                  position={arrivalDropdownPos}
+                  stations={filteredArrivalStations}
+                  onSelect={handleArrivalSelect}
+                  theme={theme}
+                  language={language}
+                  hasQuery={!!arrivalSearch}
                   onMouseDown={(e) => { e.preventDefault(); arrivalClickedRef.current = true; }}
                   onTouchStart={(e) => { e.stopPropagation(); arrivalClickedRef.current = true; }}
                   onTouchMove={(e) => e.stopPropagation()}
-                  style={{
-                  position: 'fixed',
-                  top: arrivalDropdownPos.top,
-                  left: arrivalDropdownPos.left,
-                  width: arrivalDropdownPos.width,
-                  backgroundColor: colors.surfaceElevated,
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: L.r.control,
-                  boxShadow: `0 4px 12px ${colors.shadow}`,
-                  maxHeight: '240px',
-                  overflowY: 'auto',
-                  // iOSで候補内をスクロールしたとき、端に達しても地図やページ側へ
-                  // スクロールが伝播しないようにする
-                  overscrollBehavior: 'contain',
-                  WebkitOverflowScrolling: 'touch',
-                  // body に touch-action: manipulation が掛かっており、
-                  // 指定しないと縦スワイプがスクロールとして扱われない端末がある
-                  touchAction: 'pan-y',
-                  zIndex: 99999
-                }}>
-                  {filteredArrivalStations.map((station, index) => (
-                    <div
-                      key={`${station.name}-${index}`}
-                      onClick={() => handleArrivalSelect(station)}
-                      style={{
-                        padding: `${L.sp.md} ${L.sp.xl}`,
-                        cursor: 'pointer',
-                        borderBottom: index < filteredArrivalStations.length - 1 ? `1px solid ${colors.borderLight}` : 'none',
-                        fontSize: FS.body,
-                        wordBreak: language === 'english' ? 'break-word' : 'normal',
-                        lineHeight: '1.3'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surface}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
-                    >
-                      {translateStation(station.name, language)}
-                    </div>
-                  ))}
-                  {filteredArrivalStations.length === 0 && (
-                    <div style={{ padding: `${L.sp.md} ${L.sp.xl}`, color: colors.textSecondary, fontSize: FS.body }}>
-                      {arrivalSearch ? translateUI('noStationFound', language) : translateUI('majorStationsHint', language)}
-                    </div>
-                  )}
-                </div>,
-                document.body
+                />
               )}
             </div>
           </div>
@@ -886,9 +811,11 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           {/*
             経由駅の設定。「経由駅の設定と、時刻の設定も出発駅とかの入力の下で
             できるように」という要望を受けて追加した。出発駅・到着駅の入力欄
-            と同じ検索候補ロジック（filterStations）を使うが、ドロップダウンは
-            createPortal を使わない簡易版にしている（経由駅は補助的な操作で、
-            出発駅・到着駅ほど頻繁に開閉しないため）。
+            と同じ検索候補ロジック（filterStations）・同じ候補ドロップダウン
+            （StationSearchDropdown、出発駅・到着駅と共通）を使う。
+            以前はパネル内`position: absolute`の簡易版で、パネルのスクロール
+            領域からはみ出す分が見切れていたため、出発駅・到着駅と同じ
+            portal＋固定位置の仕組みに揃えた。
             「経由駅を追加」ボタン自体は上のボタン行（乗換駅のみ表示の右）に
             詰めて配置してあるので、ここには選択済みチップと検索欄（開いて
             いるときだけ）を出す。どちらも無ければ何も描画せず余白を使わない。
@@ -923,6 +850,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     }}
                     onFocus={(e) => {
                       focusedInputRef.current = e.currentTarget;
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setWaypointDropdownPos({ top: rect.bottom + 2, left: rect.left, width: rect.width });
                       setShowWaypointResults(true);
                     }}
                     onBlur={() => {
@@ -933,47 +862,17 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     }}
                     placeholder={translateUI('addWaypoint', language)}
                   />
-                  {showWaypointResults && (
-                    <div
+                  {showWaypointResults && waypointDropdownPos && (
+                    <StationSearchDropdown
+                      position={waypointDropdownPos}
+                      stations={filteredWaypointStations}
+                      onSelect={handleWaypointSelect}
+                      theme={theme}
+                      language={language}
+                      hasQuery={!!waypointSearch}
                       // input の blur より先に効かせて、候補クリックが確実に通るようにする
                       onMouseDown={(e) => e.preventDefault()}
-                      style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: 0,
-                        right: 0,
-                        zIndex: 20,
-                        marginTop: L.sp.xxs,
-                        maxHeight: '160px',
-                        overflowY: 'auto',
-                        backgroundColor: colors.surfaceElevated,
-                        border: `1px solid ${colors.border}`,
-                        borderRadius: L.r.control,
-                        boxShadow: `0 2px 8px ${colors.shadow}`,
-                      }}
-                    >
-                      {filteredWaypointStations.map((station, index) => (
-                        <div
-                          key={`${station.name}-${index}`}
-                          onClick={() => handleWaypointSelect(station)}
-                          style={{
-                            padding: `${L.sp.sm} ${L.sp.md}`,
-                            cursor: 'pointer',
-                            fontSize: FS.body,
-                            borderBottom: index < filteredWaypointStations.length - 1 ? `1px solid ${colors.borderLight}` : 'none',
-                          }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surface}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
-                        >
-                          {translateStation(station.name, language)}
-                        </div>
-                      ))}
-                      {filteredWaypointStations.length === 0 && (
-                        <div style={{ padding: `${L.sp.sm} ${L.sp.md}`, fontSize: FS.caption, color: colors.textSecondary }}>
-                          {translateUI('noStationFound', language)}
-                        </div>
-                      )}
-                    </div>
+                    />
                   )}
                 </div>
               )}
