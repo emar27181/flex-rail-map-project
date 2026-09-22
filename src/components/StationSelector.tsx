@@ -774,6 +774,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   size="sm"
                   onClick={onSetNearestDeparture}
                   icon={<LocateFixed />}
+                  // 現在地（userLocation）が取れるまでは押しても意味が無いため、
+                  // ボタン自体を消すのではなく非活性で存在だけ示す
+                  // （消えたり現れたりすると隣のボタンの位置が動いてしまうため）
+                  disabled={!userLocation}
                 >
                   {translateUI('currentLocationFrom', language)}
                 </Button>

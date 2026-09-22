@@ -1,5 +1,24 @@
 # CHANGE LOG
 
+## [2026-09-22] セッション（「現在地から」ボタンを、位置情報が無いときは非表示ではなく非活性に）
+
+### improve: 現在地の駅が決まっていないとき「現在地から」ボタンを消すのではなく非活性表示にする
+- `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`
+- 「現在地の駅がセットされていない時は現在地からのボタンは活性化
+  されていないように」との指摘を受けた
+- 従来は位置情報（`userLocation`）が取れるまで`onSetNearestDeparture`
+  自体を`undefined`にしてボタンごと非表示にしていた。これだと
+  GPS取得のタイミングでボタンが急に現れ、隣のボタンの位置がずれる
+  うえ、「押せない理由」も見えなかった
+- 親（RailwayMap.tsx）からは常にハンドラを渡すようにし
+  （ハンドラ自体は元々`userLocation`が無ければ何もしないガード済み）、
+  StationSelector側で`userLocation`が無い間はButtonの`disabled`を
+  trueにして非活性表示にした。ボタンは常に同じ場所にあり、位置情報が
+  取れた瞬間に押せるようになる
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。PlaywrightでGPS権限なしの状態で「現在地から」ボタンが
+  表示はされたまま非活性（クリック不可・薄い表示）になることを実機確認
+
 ## [2026-09-22] セッション（現在時刻ボタン＋出発/到着トグルを1つのflexアイテムにまとめて折り返しでも分離しないように）
 
 ### fix: 狭い画面（スマホ・PWA）で「現在時刻」ボタンと出発/到着トグルが別の行に千切れる問題を修正
