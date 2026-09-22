@@ -1175,6 +1175,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (nearest) setDeparture(nearest);
   }, [userLocation, findNearestStation]);
 
+  /**
+   * 「現在地から」ボタンを塗りつぶしにするかどうかの条件。
+   *
+   * 「今だったら藤沢本町が最寄り駅でそれが出発駅にセットされていたら
+   * 活性化ってのが条件ね」との指摘どおり、GPSが取得できただけでは
+   * 塗らない（＝ボタンは押せるが色は変わらない）。実際に出発駅が
+   * 現在地の最寄り駅と一致しているときだけ塗る、という「今この状態が
+   * 適用されている」の確認表示にする。
+   */
+  const isDepartureNearestStation = useMemo(() => {
+    if (!userLocation || !departure) return false;
+    const nearest = findNearestStation(userLocation[0], userLocation[1]);
+    return nearest?.name === departure.name;
+  }, [userLocation, departure, findNearestStation]);
+
   // 使用する乗換駅セットを決定
   const transferStations = useMemo(() => {
     // 推薦ルートがある場合は推薦ベースの乗換駅、ない場合は全乗換駅
@@ -4524,6 +4539,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 departureTime={timetableBaseTime}
                 onDepartureTimeChange={setTimetableBaseTime}
                 onSetNearestDeparture={handleSetNearestDeparture}
+                isNearestDeparture={isDepartureNearestStation}
                 onSearchingChange={handleSearchingChange}
                 detectedRoute={showTrainStatusPanel ? detectedRoute : null}
                 manualTrainRoute={manualTrainRoute}
@@ -4560,6 +4576,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             onDepartureTimeChange={setTimetableBaseTime}
             language={currentLanguage}
             onSetNearestDeparture={handleSetNearestDeparture}
+            isNearestDeparture={isDepartureNearestStation}
             onSearchingChange={handleSearchingChange}
             detectedRoute={showTrainStatusPanel ? detectedRoute : null}
             manualTrainRoute={manualTrainRoute}
@@ -5937,6 +5954,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 departureTime={timetableBaseTime}
                 onDepartureTimeChange={setTimetableBaseTime}
                 onSetNearestDeparture={handleSetNearestDeparture}
+                isNearestDeparture={isDepartureNearestStation}
                 onSearchingChange={handleSearchingChange}
                 detectedRoute={showTrainStatusPanel ? detectedRoute : null}
                 manualTrainRoute={manualTrainRoute}

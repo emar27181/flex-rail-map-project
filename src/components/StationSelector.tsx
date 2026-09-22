@@ -52,6 +52,12 @@ interface StationSelectorProps {
   departureTime?: string;
   onDepartureTimeChange?: (time: string) => void;
   onSetNearestDeparture?: () => void;
+  /**
+   * 出発駅が「現在地の最寄り駅」と一致しているか。
+   * 「現在地から」ボタンを塗りつぶすかどうかに使う（GPSが取れただけでは
+   * 塗らず、実際に出発駅として適用されているときだけ塗る）
+   */
+  isNearestDeparture?: boolean;
   onSearchingChange?: (isSearching: boolean) => void;
   detectedRoute?: DetectedRoute | null;
   manualTrainRoute?: DetectedRoute | null;
@@ -99,6 +105,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   departureTime,
   onDepartureTimeChange,
   onSetNearestDeparture,
+  isNearestDeparture = false,
   onSearchingChange,
   detectedRoute = null,
   manualTrainRoute = null,
@@ -770,25 +777,25 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 <Button
                   theme={theme}
                   /*
-                    「現在地から」は「出発駅にする」を1回実行するアクション
-                    ボタンであり、on/offの状態を持つトグルではない。
-                    同じ行の「現在時刻」「経由駅を追加」（どちらもアクション、
-                    variant="outline"）と役割は同じなのに、以前はこれだけ
-                    variant="primary"を使っており、GPSが取れた瞬間に
-                    勝手に塗りつぶし色へ変わって見えていた。「現在地だけ
-                    違う色・違う管理になっているように見える」との指摘は
-                    ここが原因で、色の値ではなくvariantの選び方がずれていた。
-                    同じ役割のボタンは同じvariantに揃える（アトム自体は
-                    そのまま、呼び出し側の指定だけを他の2つに合わせる）。
+                    「現在地から」の塗り分けは何度か迷走した経緯があるので
+                    最終的な条件をここに書いておく:
+                    - disabled: 位置情報（userLocation）が取れていない間。
+                      押しても意味が無いため非活性にする（消すと隣のボタンの
+                      位置が動くので、消さずに非活性で存在だけ示す）
+                    - pressed(塗りつぶし): 出発駅が「今の現在地の最寄り駅」と
+                      一致しているときだけ。「今だったら藤沢本町が最寄り駅で
+                      それが出発駅にセットされていたら活性化」との指定どおり、
+                      GPSが取れただけでは塗らない（＝押せるが色はまだ変わらない）。
+                      実際に出発駅へ適用された状態を確認できる表示にする
+                    isNearestDeparture の計算は RailwayMap.tsx 側（呼び出し元）
+                    で行っている
                   */
-                  variant="outline"
+                  variant="primary"
                   size="sm"
                   onClick={onSetNearestDeparture}
                   icon={<LocateFixed />}
-                  // 現在地（userLocation）が取れるまでは押しても意味が無いため、
-                  // ボタン自体を消すのではなく非活性で存在だけ示す
-                  // （消えたり現れたりすると隣のボタンの位置が動いてしまうため）
                   disabled={!userLocation}
+                  pressed={isNearestDeparture}
                 >
                   {translateUI('currentLocationFrom', language)}
                 </Button>

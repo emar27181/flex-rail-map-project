@@ -1,5 +1,29 @@
 # CHANGE LOG
 
+## [2026-09-22] セッション（「現在地から」: 出発駅が実際に最寄り駅と一致したときだけ塗りつぶす）
+
+### fix: 「現在地から」ボタンを、出発駅が現在地の最寄り駅と一致しているときだけ塗りつぶすように変更
+- `src/components/RailwayMap.tsx`（`isDepartureNearestStation`追加）,
+  `src/components/StationSelector.tsx`
+- 直前の修正で「役割が同じアクションボタンと同じvariant="outline"に
+  揃える」形にしたところ、「今度は現在地を出発駅にセットしても色が
+  変わらなくなった」との指摘を受けた。あわせて「今だったら藤沢本町が
+  最寄り駅でそれが出発駅にセットされていたら活性化ってのが条件ね」と、
+  最終的な条件を明確にいただいた
+- 条件を実装: 位置情報（userLocation）が無い間は非活性（押せない）、
+  位置情報はあるが出発駅がまだ最寄り駅と一致していない間は「押せるが
+  塗らない」枠線のみ、実際に出発駅が現在地の最寄り駅と一致した
+  ときだけ塗りつぶす。GPSが取れただけの背景的な条件ではなく、
+  「今この状態が実際に適用されているか」を示す表示にした
+- 判定は`RailwayMap.tsx`側で`findNearestStation`の結果と`departure`を
+  比較する`isDepartureNearestStation`（useMemo）として計算し、
+  `StationSelector`へ`isNearestDeparture`propとして渡す。Buttonアトムは
+  既存の`pressed`をそのまま使うだけで変更していない
+- `npm run test:types` / `npm run test:unit`(371件) / `npm run build`
+  すべて通過。Playwrightで藤沢本町の座標を現在地に設定し、クリック前は
+  枠線のみ・出発駅を「藤沢本町」に設定した直後は塗りつぶしに変わる
+  ことを実機確認
+
 ## [2026-09-22] セッション（「現在地から」を、同じ役割のボタンと同じvariantに統一）
 
 ### fix: 「現在地から」だけ他のアクションボタンと違う色・違う管理に見えていた問題を修正
