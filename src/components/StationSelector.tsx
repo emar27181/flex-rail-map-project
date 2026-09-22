@@ -1018,6 +1018,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   <SegmentedControl
                     theme={theme}
                     size="sm"
+                    variant="slide"
                     ariaLabel={translateUI('baseTime', language)}
                     value={timeMode}
                     onChange={onTimeModeChange}

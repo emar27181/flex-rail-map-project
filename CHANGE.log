@@ -1,5 +1,31 @@
 # CHANGE LOG
 
+## [2026-09-22] セッション（出発/到着切り替えをスライド式UIに変更）
+
+### improve: 出発/到着の基準切り替えを、ボタン2個並びからスライド式トグルに変更
+- 新規: `src/components/ui/atoms/SlideSegmentedControl.tsx`
+- 変更: `src/components/ui/molecules/SegmentedControl.tsx`（`variant="slide"`追加）,
+  `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`
+- 「まだ現在時刻の右に出発到着が配置できていない、スライドタイプの
+  切り替えにUI変えてデザインはいまとおなじシンプルので」との指摘を受けた
+- 従来の`SegmentedControl`は「出発」「到着」を別々のButtonとして並べており、
+  ボタン2個分の隙間・二重の枠線ぶん横幅を取っていたため、「現在時刻」
+  ボタンの右に詰めると行が折り返されやすかった
+- `SegmentedControl`に`variant="slide"`を追加。1本の枠の中に両方の
+  ラベルを常に表示したまま、選択位置を背景のスライドで示す形にし、
+  二重の枠線・ボタン間の隙間を無くして横幅を圧縮した。実体は新規アトム
+  `SlideSegmentedControl`に置き（生のbutton要素はアトムでしか書けない
+  規約のため）、molecules側はvariantに応じて委譲するだけにした。色・
+  角丸・高さはButtonと同じCONTROL_SIZE/SEMANTIC/getThemeColorsから
+  取り、新しい規格は増やしていない。既定（`variant`省略）は従来どおり
+  ボタン列のままなので、他のSegmentedControl利用箇所の見た目は不変
+- 駅選択パネル・駅ツールチップ両方の出発/到着切り替えに適用
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightでデスクトップ幅では「出発時刻・時刻入力・
+  現在時刻・出発/到着スライド」が1行に収まること、モバイル幅（390px）
+  でも「現在時刻」と同じ行に収まること、駅ツールチップ側でも切り替えが
+  スライドして「出発時刻」⇔「到着時刻」ラベルと連動することを実機確認
+
 ## [2026-09-22] セッション（Button/IconButtonのアイコン大きさをCONTROL_SIZEへ一元化）
 
 ### improve: アイコンの大きさ・aria-hiddenをButton/IconButtonアトムの既定値として一元管理

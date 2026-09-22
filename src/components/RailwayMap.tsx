@@ -1623,6 +1623,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               <SegmentedControl
                 theme={theme}
                 size="sm"
+                variant="slide"
                 ariaLabel={translateUI('baseTime', currentLanguage)}
                 value={timeMode}
                 onChange={setTimeMode}
