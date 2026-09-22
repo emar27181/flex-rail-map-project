@@ -769,23 +769,26 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               {onSetNearestDeparture && (
                 <Button
                   theme={theme}
-                  variant="primary"
+                  /*
+                    「現在地から」は「出発駅にする」を1回実行するアクション
+                    ボタンであり、on/offの状態を持つトグルではない。
+                    同じ行の「現在時刻」「経由駅を追加」（どちらもアクション、
+                    variant="outline"）と役割は同じなのに、以前はこれだけ
+                    variant="primary"を使っており、GPSが取れた瞬間に
+                    勝手に塗りつぶし色へ変わって見えていた。「現在地だけ
+                    違う色・違う管理になっているように見える」との指摘は
+                    ここが原因で、色の値ではなくvariantの選び方がずれていた。
+                    同じ役割のボタンは同じvariantに揃える（アトム自体は
+                    そのまま、呼び出し側の指定だけを他の2つに合わせる）。
+                  */
+                  variant="outline"
                   size="sm"
                   onClick={onSetNearestDeparture}
                   icon={<LocateFixed />}
-                  /*
-                    現在地（userLocation）が取れるまでは押しても意味が無いため、
-                    ボタン自体を消すのではなく非活性で存在だけ示す
-                    （消えたり現れたりすると隣のボタンの位置が動いてしまうため）。
-                    「初期状態（何もセットされていない）で青くならないように」
-                    という指摘を受け、`disabled`だけ（塗りは変えず不透明度だけ
-                    下げる）ではなく`pressed`も渡し、状態を塗りそのもので示す
-                    （CLAUDE.mdの規約、Buttonアトムの既存の仕組みをそのまま
-                    使うだけなので新しい部品は増やさない）。位置情報が
-                    取れるまでは枠線だけ、取れたら塗りつぶしに切り替わる。
-                  */
+                  // 現在地（userLocation）が取れるまでは押しても意味が無いため、
+                  // ボタン自体を消すのではなく非活性で存在だけ示す
+                  // （消えたり現れたりすると隣のボタンの位置が動いてしまうため）
                   disabled={!userLocation}
-                  pressed={!!userLocation}
                 >
                   {translateUI('currentLocationFrom', language)}
                 </Button>
