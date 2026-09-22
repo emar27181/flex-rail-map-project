@@ -1,0 +1,8 @@
+---
+import GuideLayout from "../../layouts/GuideLayout.astro";
+import { getGuide } from "../../data/guides";
+
+const guide = getGuide('ja', 'simple-tokyo-railway-map')!;
+---
+
+<GuideLayout guide={guide} indexHref="/guides" indexLabel="ガイド一覧" backLabel="← Flex Railway Map トップへ" />

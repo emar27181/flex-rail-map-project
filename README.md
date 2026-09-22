@@ -63,6 +63,33 @@ GA4は [Consent Mode](https://developers.google.com/tag-platform/security/guides
 で既定「同意なし」で読み込まれ、サイト内のCookieバナーで分析Cookieを許可した
 場合のみ収集を開始する（`src/utils/gtagConsent.ts`）。
 
+### 検索流入用ガイドページ（/guides, /en/guides）
+
+「検索される → ガイドページへ流入する → Flex Railway Mapを実際に触る → 別ページ・
+地図へ回遊する」という導線を作るための、検索流入向けコンテンツページ。
+
+- ページ本体: `/guides/{slug}`（日本語）、`/en/guides/{slug}`（英語） — `src/data/guides.ts` に
+  コンテンツを追加すると `GuideLayout.astro` 経由で自動的にページが増える構造
+- 各ガイドには「Flex Railway Mapで見る」CTA（`MapOpenCta.astro`）があり、既存の
+  `?routes=...`（表示路線）・`?lang=...`（言語）のURL状態管理でそのテーマに対応した
+  地図を直接開く。存在しない路線・駅・機能はガイドからハードコードして案内しない
+- CTAクリックは GA4 イベント `seo_map_open`（`guide_slug`, `language`）として計測される
+  （GA4未設定の環境ではエラーにならず何もしない）
+
+公開後、Search Console・GA4で以下を確認する:
+
+- [ ] Search Console にプロパティが登録され、`https://flex-railway-map.netlify.app/sitemap.xml` が
+      認識されている（新規ページ分を含め再送信が必要な場合は手動でリクエスト）
+- [ ] `/guides`, `/guides/simple-tokyo-railway-map`, `/en/guides`,
+      `/en/guides/tokyo-train-map`, `/en/guides/tokyo-train-network` がインデックス登録されている
+      （Search Console → ページ、またはURL検査ツール）
+- [ ] 上記ページで impressions（表示回数）・clicks（クリック数）・CTR・average position が
+      発生し始めているか（Search Console → 検索パフォーマンス、ページ別にフィルタ）
+- [ ] GA4で `seo_map_open` イベントが記録されているか（GA4 → イベント、または探索レポートで
+      `guide_slug` / `language` パラメータ別に内訳を見る）
+- [ ] （最終的な成功指標）AdSense収益ではなく、GA4のユーザー・セッションが
+      自分以外の実ユーザーの検索流入から発生し始めているか
+
 ## 利用規約
 
 - 駅・路線データは独自作成またはオープンデータを利用しています

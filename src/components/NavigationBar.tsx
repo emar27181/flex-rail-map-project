@@ -212,6 +212,23 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             onClick={() => {
+              window.location.href = language === 'english' ? '/en/guides' : '/guides';
+              setIsMenuOpen(false);
+            }}
+          >
+            {{ japanese: 'ガイド一覧', english: 'Guides', chinese: '指南列表', korean: '가이드 목록' }[language]}
+          </div>
+          <div
+            style={{
+              padding: `${L.sp.xl} ${L.sp['2xl']}`,
+              cursor: 'pointer',
+              fontSize: FS.title,
+              color: colors.text,
+              borderBottom: `1px solid ${colors.borderLight}`
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            onClick={() => {
               const lp = { japanese: 'ja', english: 'en', chinese: 'zh', korean: 'ko' }[language];
               window.location.href = `/faq?lang=${lp}`;
               setIsMenuOpen(false);

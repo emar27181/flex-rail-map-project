@@ -79,6 +79,56 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/contact"/>
   </url>
 
+  <!-- Guides index (ja) -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/guides</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/guides"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/guides"/>
+  </url>
+
+  <!-- Guide: 東京の路線図をシンプルに見る -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/guides/simple-tokyo-railway-map</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/guides/simple-tokyo-railway-map"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/guides/simple-tokyo-railway-map"/>
+  </url>
+
+  <!-- Guides index (en) -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/en/guides</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flex-railway-map.netlify.app/en/guides"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/en/guides"/>
+  </url>
+
+  <!-- Guide: Tokyo Train Map -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/en/guides/tokyo-train-map</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flex-railway-map.netlify.app/en/guides/tokyo-train-map"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/en/guides/tokyo-train-map"/>
+  </url>
+
+  <!-- Guide: How to Understand Tokyo's Train Network -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/en/guides/tokyo-train-network</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flex-railway-map.netlify.app/en/guides/tokyo-train-network"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/en/guides/tokyo-train-network"/>
+  </url>
+
   <!-- Articles index -->
   <url>
     <loc>https://flex-railway-map.netlify.app/articles</loc>

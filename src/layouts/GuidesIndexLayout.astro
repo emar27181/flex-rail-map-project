@@ -1,0 +1,79 @@
+---
+/**
+ * ガイド一覧ページ（/guides, /en/guides）の共通レイアウト。
+ *
+ * 個別ガイド（GuideLayout.astro）と同じく、日本語版・英語版は別URLで
+ * 実体が違う（内容の対訳ではなく、それぞれ言語別に実在するガイドの一覧）。
+ * そのためStaticPage.astroの「1URL+?lang=切替、hreflangは常にja/en両方」
+ * という前提には乗せず、canonical/hreflangは自己参照のみにする
+ * （存在しない対訳ページを無理にalternateとして紐付けない）。
+ */
+import { staticPageCss } from './staticPageStyles';
+import { guideCss } from './guideStyles';
+import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
+import { SITE_URL, SITE_NAME, GOOGLE_SITE_VERIFICATION } from '../config/seo';
+
+export interface Props {
+  title: string;
+  description: string;
+  path: string;
+  htmlLang: 'ja' | 'en';
+  backLabel: string;
+}
+
+const { title, description, path, htmlLang, backLabel } = Astro.props;
+const canonical = `${SITE_URL}${path}`;
+---
+
+<html lang={htmlLang}>
+	<head>
+		<meta charset="utf-8" />
+		{GOOGLE_SITE_VERIFICATION && (
+			<meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />
+		)}
+		<link rel="icon" type="image/png" sizes="32x32" href="/icon_flex_rail_way_map.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="/icon_flex_rail_way_map.png" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/icon_flex_rail_way_map.png" />
+		<link rel="shortcut icon" href="/icon_flex_rail_way_map.png" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<meta name="robots" content="index, follow" />
+
+		<link rel="canonical" href={canonical} />
+		<link rel="alternate" hreflang={htmlLang} href={canonical} />
+		<link rel="alternate" hreflang="x-default" href={canonical} />
+
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={`${SITE_URL}/icon_flex_rail_way_map.png`} />
+		<meta property="og:locale" content={htmlLang === 'en' ? 'en_US' : 'ja_JP'} />
+		<meta property="og:site_name" content={SITE_NAME} />
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+
+		<style set:html={staticPageCss}></style>
+		<style set:html={guideCss}></style>
+	</head>
+	<body>
+		<script is:inline>
+			(function () {
+				try {
+					var saved = localStorage.getItem('theme');
+					document.body.className = saved === 'light' || saved === 'dark' ? saved : 'dark';
+				} catch (e) { document.body.className = 'dark'; }
+			})();
+		</script>
+		<div class="container">
+			<a href="/" class="back-link" style="margin-bottom: 24px;">{backLabel}</a>
+			<slot />
+		</div>
+
+		<SimpleThemeWrapper client:only="react" />
+	</body>
+</html>

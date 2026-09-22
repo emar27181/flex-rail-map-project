@@ -1,5 +1,58 @@
 # CHANGE LOG
 
+## [2026-09-22] セッション（SEOコンテンツ第一弾: /guides ガイドページ・地図への導線）
+
+### feat: 検索流入用の最初のSEOコンテンツ（/guides, /en/guides）とFlex Railway Mapへの導線を実装
+- 新規: `src/data/guides.ts`, `src/layouts/GuideLayout.astro`,
+  `src/layouts/GuidesIndexLayout.astro`, `src/layouts/guideStyles.ts`,
+  `src/components/MapOpenCta.astro`,
+  `src/pages/guides/index.astro`, `src/pages/guides/simple-tokyo-railway-map.astro`,
+  `src/pages/en/guides/index.astro`, `src/pages/en/guides/tokyo-train-map.astro`,
+  `src/pages/en/guides/tokyo-train-network.astro`
+- 変更: `src/utils/gtagConsent.ts`（`trackEvent`追加）, `public/sitemap.xml`,
+  `src/components/NavigationBar.tsx`（メニューに「ガイド一覧」を追加）,
+  `src/pages/guide.astro`（末尾に`/guides`への導線を追加）, `README.md`
+- 「実際に検索流入を獲得するための最初のSEOコンテンツを実装してほしい、
+  ただし普通の鉄道ブログにはせず、Flex Railway Mapの強み（必要な路線だけ
+  表示できる・複雑な鉄道網をシンプルに理解できる）と結びつけ、地図を
+  実際に開くところまでを1つの体験にしてほしい」という要望を受けた
+- 既存実装（`/guide`, `/about`, sitemap, `src/config/seo.ts`, GA4/Search
+  Console連携）を監査し、重複させないことを確認。既存の地図deep link
+  機構は `?routes=...`（表示路線）と `?lang=...`（言語）の2つのみで、
+  `origin=`/`destination=`（出発・到着駅）の深いリンクは存在しないため、
+  ガイドのCTAはこの2つだけを使い、存在しない機能は案内しない設計にした
+- 候補5テーマのうち、路線図の見にくさ／シンプルさ（テーマA・B相当）を
+  1本の日本語ガイド `simple-tokyo-railway-map` に統合し、英語の観光客
+  向けテーマ（テーマD・E相当）を `tokyo-train-map` / `tokyo-train-network`
+  の2本にした。「東京の電車・路線図の見方」（テーマC）は既存の
+  `/articles/tokyo-train-map-beginner` と、「Flex Railway Mapの強み」の
+  訴求は既存の `/articles/flex-rail-map-introduction` と内容が重複する
+  ため新規ページ化せず、`/guides` 一覧からその2本へリンクして
+  5テーマぶんの導線を確保した（薄い重複ページの量産を避けるため）
+- 各ガイドはH1→検索意図への短い回答→「Flex Railway Mapで見る」CTA
+  （本文の早い位置、装飾で下に追いやらない）→補足セクション→関連
+  ガイドの順の短い構成。CTAは`MapOpenCta.astro`として共通化し、
+  ガイドごとの`routes`（表示したい路線）と`language`から実際に
+  `/?routes=...`（＋英語なら`&lang=en`）を組み立てて地図を直接開く
+- 日本語ガイド（`/guides/*`）と英語ガイド（`/en/guides/*`）は対訳ではなく
+  別内容のため、`StaticPage.astro`の「1URL+?lang=切替、hreflang常時
+  ja/en両方」という前提には乗せず、`GuideLayout.astro`/
+  `GuidesIndexLayout.astro`は自己参照のみのhreflang（無理な対訳付けを
+  しない）にした。BreadcrumbList・WebPageの構造化データも追加（FAQ等の
+  捏造はしない）
+- CTAクリックは`trackEvent('seo_map_open', { guide_slug, language })`
+  （`src/utils/gtagConsent.ts`に追加、GA4未設定でもエラーにならない）
+  として計測。sitemap.xmlに5ページぶんを追加し、`NavigationBar.tsx`の
+  メニューと`/guide`ページ末尾から`/guides`への導線も追加し、孤立
+  ページにならないようにした
+- `npm run test:types` / `npm run test:unit`(363件) / `npm run build`
+  すべて通過。Playwrightで日英4ガイド＋2つの一覧ページ（デスクトップ・
+  モバイル）の表示、CTAリンクのURL、GA4イベント発火、実際に
+  `?routes=...`付きで地図が正常に開くこと、存在しないガイドslugが
+  404になることを確認。README にSearch Console公開後の確認項目
+  （インデックス登録・sitemap認識・impressions/clicks/CTR/掲載順位・
+  `seo_map_open`イベント）を追記
+
 ## [2026-09-22] セッション（駅ツールチップ: 路線の非表示トグル追加・時刻表の出典を上部に移動）
 
 ### improve: 駅ツールチップの路線一覧から非表示にできるように、時刻表の最終更新日・出典を上部へ軽く表示

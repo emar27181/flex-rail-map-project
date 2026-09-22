@@ -1,0 +1,63 @@
+---
+/**
+ * 「Flex Railway Mapで見る」CTA（ガイドページ共通）。
+ *
+ * 可能な範囲で、そのガイドの内容に対応した地図状態（表示路線）を
+ * 直接開く。出発駅・到着駅を直接指定するURLパラメータは現時点の
+ * アプリに存在しないため、ここでは実装しない（将来 `origin`/
+ * `destination` パラメータができたら `href` の組み立てにそのまま足せる
+ * よう、propsはguide単位のデータをそのまま受け取る形にしてある）。
+ *
+ * クリックはGA4の `seo_map_open` イベントとして計測する
+ * （`src/utils/gtagConsent.ts` の既存の仕組みを再利用。GA4未設定でも
+ * エラーにはならない）。
+ */
+import { getRouteCode } from '../utils/routeUrlCodes';
+import type { RouteKey } from '../data/routes';
+
+export interface Props {
+  label: string;
+  note: string;
+  guideSlug: string;
+  language: 'ja' | 'en';
+  /** 地図で先に表示しておきたい路線 */
+  routes?: RouteKey[];
+}
+
+const { label, note, guideSlug, language, routes } = Astro.props;
+
+const params = new URLSearchParams();
+if (routes && routes.length > 0) {
+  const codes = routes.map(getRouteCode).filter((c): c is string => !!c);
+  if (codes.length > 0) params.set('routes', codes.join(','));
+}
+if (language === 'en') params.set('lang', 'en');
+const query = params.toString();
+const href = `/${query ? `?${query}` : ''}`;
+---
+
+<div class="cta-block">
+  <a
+    href={href}
+    class="back-link"
+    data-seo-map-open
+    data-guide-slug={guideSlug}
+    data-guide-lang={language}
+  >
+    {label}
+  </a>
+  <p class="cta-note">{note}</p>
+</div>
+
+<script>
+  import { trackEvent } from '../utils/gtagConsent';
+
+  document.addEventListener('click', (e) => {
+    const target = (e.target as HTMLElement)?.closest<HTMLElement>('[data-seo-map-open]');
+    if (!target) return;
+    trackEvent('seo_map_open', {
+      guide_slug: target.getAttribute('data-guide-slug') ?? '',
+      language: target.getAttribute('data-guide-lang') ?? '',
+    });
+  });
+</script>
