@@ -1,0 +1,6 @@
+/* Map interaction remains available via wheel, pinch, and gestures.
+ * The legacy Leaflet +/- control is intentionally hidden in the primary UI.
+ * Keep this policy centralized instead of scattering display overrides in map components. */
+.leaflet-control-zoom {
+  display: none !important;
+}
