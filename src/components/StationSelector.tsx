@@ -134,6 +134,11 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const [departureDropdownPos, setDepartureDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
   const [arrivalDropdownPos, setArrivalDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
   const [waypointDropdownPos, setWaypointDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
+  /**
+   * 経由駅入力欄の横幅を出発駅欄と同じにするため、実際に描画された
+   * 出発駅欄（departureRef）の横幅を測って使う（値をハードコードしない）。
+   */
+  const [waypointFieldWidth, setWaypointFieldWidth] = useState<number | null>(null);
 
   const panelRef = useRef<HTMLDivElement>(null);
   const departureRef = useRef<HTMLDivElement>(null);
@@ -807,7 +812,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   size="sm"
                   variant="outline"
                   icon={<Waypoints size={14} aria-hidden />}
-                  onClick={() => setShowWaypointInput(true)}
+                  onClick={() => {
+                    setWaypointFieldWidth(departureRef.current?.getBoundingClientRect().width ?? null);
+                    setShowWaypointInput(true);
+                  }}
                 >
                   {translateUI('addWaypoint', language)}
                 </Button>
@@ -847,8 +855,14 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           */}
           {onAddWaypoint && ((waypoints ?? []).length > 0 || showWaypointInput) && (
             <div style={{ marginTop: L.sp.md }}>
-              {(waypoints ?? []).length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.xs, marginBottom: showWaypointInput ? L.sp.xs : 0 }}>
+              {/*
+                入力欄を開いていないときは、選択済みチップだけを独立した行で表示。
+                開いているときは、入力欄を出発駅欄と同じ横幅に絞った分だけ
+                右側が空くため、チップは入力欄と同じ行に詰めて表示し
+                空きスペースを使う（無ければ何も出ない）。
+              */}
+              {(waypoints ?? []).length > 0 && !showWaypointInput && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.xs }}>
                   {(waypoints ?? []).map((wp, index) => (
                     <RemovableTag
                       key={`${wp.name}-${index}`}
@@ -862,43 +876,89 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 </div>
               )}
               {showWaypointInput && (
-                <div style={{ position: 'relative' }}>
-                  <TextField
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.xs }}>
+                  {/*
+                    入力欄自体の横幅は出発駅欄と同じにする（以前はここだけ
+                    `fullWidth`のままパネル全幅＝出発駅欄の2倍以上の横幅に
+                    なっていた）。出発駅・到着駅は「flex: 1 1 0」の2カラムで
+                    横幅が決まるが、経由駅は隣にもう1つ入力欄が無いぶん
+                    flexだけでは合わせられないため、実測した出発駅欄の
+                    横幅（waypointFieldWidth）をそのまま使う。
+                    右側に空いた分は、入力を閉じる×ボタンと、既存の
+                    経由駅チップ（折り返して表示）に詰めて使う。
+                    候補ドロップダウンの横幅は出発駅・到着駅と同じ
+                    `getFullWidthDropdownPosition`（同じ表示関数）を使い、
+                    入力欄より狭くならないようにする。
+                  */}
+                  <div style={{
+                    flex: waypointFieldWidth ? `0 0 ${waypointFieldWidth}px` : '1 1 0',
+                    minWidth: '0',
+                    position: 'relative',
+                  }}>
+                    <TextField
+                      theme={theme}
+                      size="sm"
+                      type="text"
+                      autoFocus
+                      fullWidth
+                      value={waypointSearch}
+                      onChange={(e) => {
+                        setWaypointSearch(e.target.value);
+                        setShowWaypointResults(true);
+                      }}
+                      onFocus={(e) => {
+                        focusedInputRef.current = e.currentTarget;
+                        setWaypointDropdownPos(getFullWidthDropdownPosition(e.currentTarget.getBoundingClientRect()));
+                        setShowWaypointResults(true);
+                      }}
+                      onBlur={() => {
+                        focusedInputRef.current = null;
+                        setShowWaypointResults(false);
+                        setShowWaypointInput(false);
+                        setWaypointSearch('');
+                      }}
+                      placeholder={translateUI('addWaypoint', language)}
+                    />
+                    {showWaypointResults && waypointDropdownPos && (
+                      <StationSearchDropdown
+                        position={waypointDropdownPos}
+                        stations={filteredWaypointStations}
+                        onSelect={handleWaypointSelect}
+                        theme={theme}
+                        language={language}
+                        hasQuery={!!waypointSearch}
+                        // input の blur より先に効かせて、候補クリックが確実に通るようにする
+                        onMouseDown={(e) => e.preventDefault()}
+                      />
+                    )}
+                  </div>
+                  <IconButton
                     theme={theme}
                     size="sm"
-                    type="text"
-                    autoFocus
-                    value={waypointSearch}
-                    onChange={(e) => {
-                      setWaypointSearch(e.target.value);
-                      setShowWaypointResults(true);
-                    }}
-                    onFocus={(e) => {
-                      focusedInputRef.current = e.currentTarget;
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      setWaypointDropdownPos({ top: rect.bottom + 2, left: rect.left, width: rect.width });
-                      setShowWaypointResults(true);
-                    }}
-                    onBlur={() => {
-                      focusedInputRef.current = null;
+                    // onBlurより先にクリックを通す（blurで閉じる処理と競合させない）
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
                       setShowWaypointResults(false);
                       setShowWaypointInput(false);
                       setWaypointSearch('');
                     }}
-                    placeholder={translateUI('addWaypoint', language)}
+                    label={translateUI('close', language)}
+                    icon={<X size={14} />}
+                    styleOverride={{ flexShrink: 0 }}
                   />
-                  {showWaypointResults && waypointDropdownPos && (
-                    <StationSearchDropdown
-                      position={waypointDropdownPos}
-                      stations={filteredWaypointStations}
-                      onSelect={handleWaypointSelect}
-                      theme={theme}
-                      language={language}
-                      hasQuery={!!waypointSearch}
-                      // input の blur より先に効かせて、候補クリックが確実に通るようにする
-                      onMouseDown={(e) => e.preventDefault()}
-                    />
-                  )}
+                  {(waypoints ?? []).map((wp, index) => (
+                    // input の blur（クリックで閉じる処理）より先に mousedown を
+                    // 止めないと、削除ボタンを押した瞬間に入力欄ごと閉じてしまう
+                    <span key={`${wp.name}-${index}`} onMouseDown={(e) => e.preventDefault()}>
+                      <RemovableTag
+                        theme={theme}
+                        size="sm"
+                        label={`${index + 1}. ${translateStation(wp.name, language)}`}
+                        onRemove={() => onRemoveWaypoint?.(index)}
+                        removeLabel={translateUI('clearSelection', language)}
+                      />
+                    </span>
+                  ))}
                 </div>
               )}
             </div>
