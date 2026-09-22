@@ -1781,10 +1781,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   {/*
                     表示中の路線をここから非表示にできるようにする
                     （以前は「＋表示」で表示に切り替えることしかできず、
-                    片方向のトグルだった）。今クリックして選んでいる路線
-                    （isActive）を消すと右カラムが空になり紛らわしいため対象外にする。
+                    片方向のトグルだった）。右カラムの時刻表は isShowing に
+                    関係なく activeRouteKey だけで決まるため、選択中
+                    （isActive）の路線を非表示にしても時刻表は消えない。
+                    通る路線が1つしかない駅では選択中の路線しか無いため、
+                    ここを除外すると非表示ボタンが一切出せなくなっていた。
                   */}
-                  {isShowing && !isActive && (
+                  {isShowing && (
                     <ColorChip
                       color={routeColor}
                       theme={theme}
