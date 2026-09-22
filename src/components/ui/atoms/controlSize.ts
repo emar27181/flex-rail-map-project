@@ -28,6 +28,8 @@ export interface ControlSizeSpec {
   radius: string;
   /** アイコンと文字のあいだ */
   gap: string;
+  /** lucide-react アイコンの大きさ(px)。Button/IconButtonが既定値として使う */
+  iconSize: number;
 }
 
 export const CONTROL_SIZE: Record<ControlSize, ControlSizeSpec> = {
@@ -37,6 +39,7 @@ export const CONTROL_SIZE: Record<ControlSize, ControlSizeSpec> = {
     fontSize: FS.caption,
     radius: L.r.control,
     gap: L.sp.xs,
+    iconSize: 14,
   },
   md: {
     minHeight: TARGET.touch,
@@ -45,6 +48,7 @@ export const CONTROL_SIZE: Record<ControlSize, ControlSizeSpec> = {
     fontSize: FS.body,
     radius: L.r.control,
     gap: L.sp.sm,
+    iconSize: 16,
   },
 };
 

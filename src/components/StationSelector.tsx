@@ -773,7 +773,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   variant="primary"
                   size="sm"
                   onClick={onSetNearestDeparture}
-                  icon={<LocateFixed size={14} aria-hidden />}
+                  icon={<LocateFixed />}
                 >
                   {translateUI('currentLocationFrom', language)}
                 </Button>
@@ -785,7 +785,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   size="sm"
                   pressed={!!showTravelTime}
                   onClick={() => onShowTravelTimeChange(!showTravelTime)}
-                  icon={<Clock size={14} aria-hidden />}
+                  icon={<Clock />}
                 >
                   {translateUI('showTravelTimes', language)}
                 </Button>
@@ -797,7 +797,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   size="sm"
                   pressed={!!showTransferStationsOnly}
                   onClick={() => onShowTransferStationsOnlyChange(!showTransferStationsOnly)}
-                  icon={<Waypoints size={14} aria-hidden />}
+                  icon={<Waypoints />}
                 >
                   {translateUI('showOnlyTransferStations', language)}
                 </Button>
@@ -811,7 +811,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   theme={theme}
                   size="sm"
                   variant="outline"
-                  icon={<MapPinPlus size={14} aria-hidden />}
+                  icon={<MapPinPlus />}
                   onClick={() => {
                     setWaypointFieldWidth(departureRef.current?.getBoundingClientRect().width ?? null);
                     setShowWaypointInput(true);
@@ -833,7 +833,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   size="sm"
                   pressed={!!showStationTimeLabels}
                   onClick={() => onShowStationTimeLabelsChange(!showStationTimeLabels)}
-                  icon={<Timer size={14} aria-hidden />}
+                  icon={<Timer />}
                 >
                   {translateUI('showStationTimeLabelsButton', language)}
                 </Button>

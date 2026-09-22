@@ -1,5 +1,26 @@
 # CHANGE LOG
 
+## [2026-09-22] セッション（Button/IconButtonのアイコン大きさをCONTROL_SIZEへ一元化）
+
+### improve: アイコンの大きさ・aria-hiddenをButton/IconButtonアトムの既定値として一元管理
+- `src/components/ui/atoms/controlSize.ts`（`iconSize`追加）,
+  `src/components/ui/atoms/Button.tsx`, `src/components/ui/atoms/IconButton.tsx`,
+  `src/components/StationSelector.tsx`
+- 「アトミックデザインで」との指摘を受けた。直前の「経由駅を追加」アイコン
+  変更を含め、`icon={<Xxx size={14} aria-hidden />}`という同じ書き方が
+  呼び出し側で何十箇所も繰り返されており、値も12/13/14/16/18pxとばらばら
+  だった（`CONTROL_SIZE`から取る、という規約に反していた）
+- `CONTROL_SIZE`（sm/md）に`iconSize`（14px/16px）を追加し、
+  Button・IconButtonがアイコン要素に`size`・`aria-hidden`を
+  自動で注入するようにした（呼び出し側が明示的に指定した場合はそちらを
+  優先するため、既存の異なるサイズを使っている箇所も見た目は変わらない）。
+  `StationSelector.tsx`内の今回触った5箇所（所要時間を表示・乗換駅のみ
+  表示・経由駅を追加など）から冗長な`size={14} aria-hidden`を削除した
+- `npm run test:types` / `npm run test:unit`(363件、`atoms.test.tsx`の
+  寸法固定テスト含む) / `npm run build` すべて通過。Playwrightで
+  アイコンの見た目（大きさ）に変化がないこと、svgのwidth/height/
+  aria-hiddenが正しく注入されることを実機確認
+
 ## [2026-09-22] セッション（経由駅を追加ボタンのアイコンを変更）
 
 ### improve: 「経由駅を追加」ボタンのアイコンを、隣の「乗換駅のみ表示」と別のものに変更

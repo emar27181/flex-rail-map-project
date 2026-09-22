@@ -8,7 +8,7 @@
  * 大きさは Button と同じ controlSize の段階を使う。正方形なので
  * 高さと同じ値を幅にも使い、タッチ領域が縦横とも規格を満たす。
  */
-import React from 'react';
+import React, { isValidElement, cloneElement } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { getThemeColors } from '../../../contexts/ThemeContext';
 import { SEMANTIC } from '../../../constants/ui';
@@ -52,6 +52,18 @@ const IconButton: React.FC<IconButtonProps> = ({
   const fill = variant === 'primary' ? SEMANTIC.primary : undefined;
   const isFilled = fill !== undefined && (pressed === undefined || pressed);
 
+  /*
+   * Button と同じ理由で、アイコンの大きさ・aria-hidden を
+   * CONTROL_SIZE.iconSize から既定注入する（呼び出し側の明示指定を優先）。
+   * ボタン自体に aria-label があるので、アイコンSVGは装飾扱いでよい。
+   */
+  const sizedIcon = isValidElement<{ size?: number; 'aria-hidden'?: boolean }>(icon)
+    ? cloneElement(icon, {
+        size: icon.props.size ?? dims.iconSize,
+        'aria-hidden': icon.props['aria-hidden'] ?? true,
+      })
+    : icon;
+
   return (
     <button
       {...rest}
@@ -82,7 +94,7 @@ const IconButton: React.FC<IconButtonProps> = ({
         ...styleOverride,
       }}
     >
-      {icon}
+      {sizedIcon}
     </button>
   );
 };
