@@ -135,6 +135,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const [arrivalDropdownPos, setArrivalDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
   const [waypointDropdownPos, setWaypointDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
 
+  const panelRef = useRef<HTMLDivElement>(null);
   const departureRef = useRef<HTMLDivElement>(null);
   const arrivalRef = useRef<HTMLDivElement>(null);
   const departurePortalRef = useRef<HTMLDivElement>(null);
@@ -342,6 +343,31 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     setShowWaypointInput(false);
   };
 
+  /**
+   * 出発駅・到着駅の候補ドロップダウンの位置・横幅を、入力欄自身の幅ではなく
+   * パネル全体の中身の幅に合わせて計算する。
+   *
+   * 出発駅・到着駅は横に並ぶ2カラムのため、入力欄自身の幅はパネルの半分ほど
+   * しかない。候補の横幅もそれに合わせていたため、候補を出すと隣の到着駅欄の
+   * ぶんだけ余白ができ、しかも候補が下のボタン行に重なって隠れていた。
+   * パネルの余白（padding）はデザイントークン(L.sp.md)から決まるが、
+   * ここでは実際に描画された値を`getComputedStyle`で読み取ることで、
+   * トークンの値が変わっても計算式を書き換えずに済むようにしている。
+   */
+  const getFullWidthDropdownPosition = (inputRect: DOMRect) => {
+    const panelEl = panelRef.current;
+    if (!panelEl) return { top: inputRect.bottom + 2, left: inputRect.left, width: inputRect.width };
+    const panelRect = panelEl.getBoundingClientRect();
+    const style = getComputedStyle(panelEl);
+    const padLeft = parseFloat(style.paddingLeft) || 0;
+    const padRight = parseFloat(style.paddingRight) || 0;
+    return {
+      top: inputRect.bottom + 2,
+      left: panelRect.left + padLeft,
+      width: panelRect.width - padLeft - padRight,
+    };
+  };
+
   const handleDepartureSelect = (station: Station) => {
     departureClickedRef.current = true;
     onDepartureChange(station);
@@ -421,6 +447,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
   return (
     <div
+      ref={panelRef}
       onTouchStart={stopTouchPropagation}
       onTouchMove={stopTouchPropagation}
       onTouchEnd={stopTouchPropagation}
@@ -501,8 +528,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                   onFocus={(e) => {
                     focusedInputRef.current = e.currentTarget;
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    setDepartureDropdownPos({ top: rect.bottom + 2, left: rect.left, width: rect.width });
+                    setDepartureDropdownPos(getFullWidthDropdownPosition(e.currentTarget.getBoundingClientRect()));
                     setShowDepartureResults(true);
                     handleSearchFocus();
                   }}
@@ -631,8 +657,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                   onFocus={(e) => {
                     focusedInputRef.current = e.currentTarget;
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    setArrivalDropdownPos({ top: rect.bottom + 2, left: rect.left, width: rect.width });
+                    setArrivalDropdownPos(getFullWidthDropdownPosition(e.currentTarget.getBoundingClientRect()));
                     setShowArrivalResults(true);
                     handleSearchFocus();
                   }}
