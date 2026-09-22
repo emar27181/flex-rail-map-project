@@ -69,6 +69,7 @@ import {
 import { patchRotatedRendererDrift } from '../utils/leafletRotatePatch';
 import { getInitialVisibleRoutesFromUrl, syncVisibleRoutesToUrl } from '../utils/routeUrlCodes';
 import ColorChip from './ui/ColorChip';
+import TimetableSourceNote from './ui/TimetableSourceNote';
 import { checkboxInput, L} from './legend/legendStyles';
 import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, tintColor, LIGHT_TEXT } from '../utils/contrast';
 import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE, haversineDistance, estimateHeadingFromHistory } from '../utils/trainDetector';
@@ -1777,6 +1778,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       ＋{translateUI('show', currentLanguage)}
                     </ColorChip>
                   )}
+                  {/*
+                    表示中の路線をここから非表示にできるようにする
+                    （以前は「＋表示」で表示に切り替えることしかできず、
+                    片方向のトグルだった）。今クリックして選んでいる路線
+                    （isActive）を消すと右カラムが空になり紛らわしいため対象外にする。
+                  */}
+                  {isShowing && !isActive && (
+                    <ColorChip
+                      color={routeColor}
+                      theme={theme}
+                      fontSize={FS.caption}
+                      shadow={false}
+                      onClick={(e) => { e.stopPropagation(); toggleRoute(rk as RouteKey); }}
+                    >
+                      －{translateUI('hide', currentLanguage)}
+                    </ColorChip>
+                  )}
                 </div>
               );
             })}
@@ -1786,6 +1804,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           <div style={{ flex: 1, minWidth: '120px', overflowY: 'auto' }}>
             {activeRouteKey && hasTimetableData(activeRouteKey) ? (
               <>
+                {/*
+                  最終更新日・出典は概算値であることの但し書きなので、
+                  時刻を読む前に目に入るよう一番上に出す
+                  （以前はリストの一番下にあり、スクロールしないと見えなかった）。
+                */}
+                {(() => {
+                  const line = getLineTimetable(activeRouteKey);
+                  if (!line) return null;
+                  return (
+                    <TimetableSourceNote
+                      updatedAt={line.updatedAt}
+                      source={line.source ?? TIMETABLE_SOURCE.title}
+                      theme={theme}
+                      language={currentLanguage}
+                    />
+                  );
+                })()}
                 <div style={{
                   padding: `${L.sp.xs} ${L.sp.md}`,
                   fontSize: FS.caption, color: colors.textSecondary,
@@ -1834,22 +1869,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     ))}
                   </>
                 )}
-                {/* 出典と最終更新日。概算値であることが分かるようにここで明記する */}
-                {(() => {
-                  const line = getLineTimetable(activeRouteKey);
-                  if (!line) return null;
-                  return (
-                    <div style={{
-                      padding: `${L.sp.xs} ${L.sp.md}`,
-                      borderTop: `1px solid ${colors.borderLight}`,
-                      fontSize: FS.caption, color: colors.textSecondary, lineHeight: 1.5,
-                    }}>
-                      <div>{translateUI('lastUpdated', currentLanguage)}: {line.updatedAt}</div>
-                      <div>{translateUI('dataSource', currentLanguage)}: {line.source ?? TIMETABLE_SOURCE.title}</div>
-                      <div style={{ opacity: 0.75 }}>{TIMETABLE_SOURCE.note}</div>
-                    </div>
-                  );
-                })()}
+                {/* 概算値であることの詳しい但し書き。更新日・出典自体は上に移したので、
+                    ここは補足の一文だけ軽く添える */}
+                <div style={{
+                  padding: `${L.sp.xs} ${L.sp.md}`,
+                  borderTop: `1px solid ${colors.borderLight}`,
+                  fontSize: FS.caption, color: colors.textSecondary, opacity: 0.75, lineHeight: 1.5,
+                }}>
+                  {TIMETABLE_SOURCE.note}
+                </div>
               </>
             ) : (
               <div style={{ padding: `${L.sp.lg} ${L.sp.md}`, fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'pre-line' }}>

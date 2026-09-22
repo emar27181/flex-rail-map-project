@@ -7880,6 +7880,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "表示",
     english: "Show"
   },
+  hide: {
+    japanese: "非表示",
+    english: "Hide"
+  },
   lastUpdated: {
     japanese: "最終更新",
     english: "Last updated"
@@ -8784,6 +8788,7 @@ export const uiChinese: Record<string, string> = {
   timeBasisArrival: "到达",
   onboard: "乘",
   show: "显示",
+  hide: "隐藏",
   lastUpdated: "最后更新",
   alwaysShowMajorStations: "始终显示主要车站",
   arrivalAlert: "到站提醒",
@@ -9105,6 +9110,7 @@ export const uiKorean: Record<string, string> = {
   timeBasisArrival: "도착",
   onboard: "탑",
   show: "표시",
+  hide: "숨기기",
   lastUpdated: "최종 갱신",
   alwaysShowMajorStations: "주요 역 항상 표시",
   arrivalAlert: "하차역 알림",
