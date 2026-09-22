@@ -994,40 +994,46 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   onBlur={() => { focusedInputRef.current = null; }}
                   fullWidth={false}
                 />
-                <Button
-                  theme={theme}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const now = new Date();
-                    const hh = String(now.getHours()).padStart(2, '0');
-                    const mm = String(now.getMinutes()).padStart(2, '0');
-                    onDepartureTimeChange(`${hh}:${mm}`);
-                  }}
-                >
-                  {translateUI('currentTime', language)}
-                </Button>
                 {/*
                   出発/到着どちらの基準かは、時刻そのものの隣に置いて初めて
                   「この時刻が何を意味するか」が一目でわかる。以前は下の行に
                   分けていたが、現在時刻ボタンのすぐ右に詰めて1つの操作列に見せる。
+                  行が折り返される狭い画面（スマホ・PWA）では、この2つが
+                  親のflexWrapでバラバラの行に千切れると「現在時刻の右」が
+                  保証できなくなるため、2つをまとめて1つのflexアイテムにし、
+                  折り返す時は必ずセットのまま次の行へ落ちるようにする。
                   選択中はButton(variant="primary", pressed)で塗りつぶす
                   （このアプリの他のトグルと共通の「押されている＝塗り」の規約）。
                 */}
-                {onTimeModeChange && (
-                  <SegmentedControl
+                <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, flexShrink: 0 }}>
+                  <Button
                     theme={theme}
+                    variant="outline"
                     size="sm"
-                    variant="slide"
-                    ariaLabel={translateUI('baseTime', language)}
-                    value={timeMode}
-                    onChange={onTimeModeChange}
-                    options={[
-                      { value: 'departure', label: translateUI('timeBasisDeparture', language) },
-                      { value: 'arrival', label: translateUI('timeBasisArrival', language) },
-                    ]}
-                  />
-                )}
+                    onClick={() => {
+                      const now = new Date();
+                      const hh = String(now.getHours()).padStart(2, '0');
+                      const mm = String(now.getMinutes()).padStart(2, '0');
+                      onDepartureTimeChange(`${hh}:${mm}`);
+                    }}
+                  >
+                    {translateUI('currentTime', language)}
+                  </Button>
+                  {onTimeModeChange && (
+                    <SegmentedControl
+                      theme={theme}
+                      size="sm"
+                      variant="slide"
+                      ariaLabel={translateUI('baseTime', language)}
+                      value={timeMode}
+                      onChange={onTimeModeChange}
+                      options={[
+                        { value: 'departure', label: translateUI('timeBasisDeparture', language) },
+                        { value: 'arrival', label: translateUI('timeBasisArrival', language) },
+                      ]}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           )}

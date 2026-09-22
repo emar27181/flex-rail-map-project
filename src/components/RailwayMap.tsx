@@ -1608,30 +1608,37 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onChange={e => setTimetableBaseTime(e.target.value)}
                 fullWidth={false}
               />
-              <Button
-                theme={theme}
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const now = new Date();
-                  const hh = String(now.getHours()).padStart(2, '0');
-                  const mm = String(now.getMinutes()).padStart(2, '0');
-                  setTimetableBaseTime(`${hh}:${mm}`);
-                }}
-              >{translateUI('currentTime', currentLanguage)}</Button>
-              {/* 現在時刻ボタンの右に詰め、時刻と同じ操作列に見せる（駅選択パネル側と統一） */}
-              <SegmentedControl
-                theme={theme}
-                size="sm"
-                variant="slide"
-                ariaLabel={translateUI('baseTime', currentLanguage)}
-                value={timeMode}
-                onChange={setTimeMode}
-                options={[
-                  { value: 'departure', label: translateUI('timeBasisDeparture', currentLanguage) },
-                  { value: 'arrival', label: translateUI('timeBasisArrival', currentLanguage) },
-                ]}
-              />
+              {/*
+                現在時刻ボタンの右に詰め、時刻と同じ操作列に見せる
+                （駅選択パネル側と統一）。狭い画面で親のflexWrapがこの2つを
+                バラバラの行に千切ると「現在時刻の右」が保証できないため、
+                2つをまとめて1つのflexアイテムにする（駅選択パネル側と同じ対策）。
+              */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, flexShrink: 0 }}>
+                <Button
+                  theme={theme}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const now = new Date();
+                    const hh = String(now.getHours()).padStart(2, '0');
+                    const mm = String(now.getMinutes()).padStart(2, '0');
+                    setTimetableBaseTime(`${hh}:${mm}`);
+                  }}
+                >{translateUI('currentTime', currentLanguage)}</Button>
+                <SegmentedControl
+                  theme={theme}
+                  size="sm"
+                  variant="slide"
+                  ariaLabel={translateUI('baseTime', currentLanguage)}
+                  value={timeMode}
+                  onChange={setTimeMode}
+                  options={[
+                    { value: 'departure', label: translateUI('timeBasisDeparture', currentLanguage) },
+                    { value: 'arrival', label: translateUI('timeBasisArrival', currentLanguage) },
+                  ]}
+                />
+              </div>
             </div>
           </div>
         </div>
