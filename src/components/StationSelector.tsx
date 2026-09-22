@@ -777,15 +777,15 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     現在地（userLocation）が取れるまでは押しても意味が無いため、
                     ボタン自体を消すのではなく非活性で存在だけ示す
                     （消えたり現れたりすると隣のボタンの位置が動いてしまうため）。
-                    このボタンは「出発駅にする」という1回限りの操作であり、
-                    on/offの状態を持つトグルではないため、`pressed`は渡さない
-                    （渡すと未確定時に枠線だけの見た目になり、同じくdisabledで
-                    出し分ける他のアクションボタン——StationMemoPanel.tsxの
-                    「＋」追加ボタンなど——と見た目の規則が食い違う）。
-                    disabledだけで出し分け、他の非活性ボタンと同じ
-                    「塗りは変えず不透明度だけ下げる」見た目に揃える。
+                    「初期状態（何もセットされていない）で青くならないように」
+                    という指摘を受け、`disabled`だけ（塗りは変えず不透明度だけ
+                    下げる）ではなく`pressed`も渡し、状態を塗りそのもので示す
+                    （CLAUDE.mdの規約、Buttonアトムの既存の仕組みをそのまま
+                    使うだけなので新しい部品は増やさない）。位置情報が
+                    取れるまでは枠線だけ、取れたら塗りつぶしに切り替わる。
                   */
                   disabled={!userLocation}
+                  pressed={!!userLocation}
                 >
                   {translateUI('currentLocationFrom', language)}
                 </Button>
