@@ -1,5 +1,44 @@
 # CHANGE LOG
 
+## [2026-09-22] セッション（並び順の選択を詳細設定に折りたたみ、デザイントークンの網羅調査）
+
+### improve: 路線一覧の「並び順」選択を、他の詳細設定と同じ折りたたみ表示にする
+- `src/components/legend/LegendRouteList.tsx`, `src/utils/translation.ts`,
+  `tests/unit/components/LegendRouteList.test.tsx`
+- 「並び替えの選択、あいうえおとかは表示を下の詳細設定でデフォルトは
+  近い順で」との指摘を受けた
+- 既定値（`sortMode`の初期値）は元々`'distance'`（近い順）で、要望のうち
+  この部分は変更前から満たしていた。実際に直したのは表示方法の方で、
+  並び順のボタン列が「表示路線切り替え」パネルの一番上に常時表示されて
+  いたのを、他の詳細設定（`groupFilterOpen`/`groupMapOpen`/
+  `groupDetailOpen`など、既存の`sectionHeader`パターン）と同じ折りたたみ
+  表示にした。新しい部品は増やさず既存の仕組みを再利用している
+- 新規翻訳キー`settingsGroupSort`（「並び順」）を4言語ぶん追加
+- `npm run test:types` / `npm run test:unit`(363件、折りたたみを開いてから
+  並び順ボタンを操作するようテスト2件を更新) / `npm run build`
+  すべて通過。Playwrightで初期状態では並び順の選択肢が非表示、見出しを
+  開くと表示され「近い順」が選択済みであることを実機確認
+
+### docs: フォントサイズ・枠サイズ・ボタン背景色の一元管理状況を再調査
+- 「フォントサイズ、枠のサイズを網羅的に調査して設定管理下に」
+  「最寄り駅メモ」「各種ボタンの背景色をメインで調査で」との指摘を受けて
+  `node scripts/audit-design-tokens.mjs` を実行し調査した
+- **フォントサイズ・角丸・余白**: 本番コード（`src/v2/`・`src/design/`の
+  実験/デバッグ用ファイルを除く）ではベタ書きが実質0件で、
+  `tests/unit/components/ui/noRawSizes.test.ts` 等が既に強制している。
+  残っていた4件はすべて除外対象ディレクトリ内
+- **最寄り駅メモ（`StationMemoPanel.tsx`）**: 調査の結果、色・サイズとも
+  ベタ書きなし。`getThemeColors` / `SEMANTIC` を正しく使用済みで対応不要
+- **ボタンの背景色**: `Button` / `IconButton` アトムを使う実際のUIボタンは
+  すべて `SEMANTIC.primary` 等を経由しており、ベタ書きは無かった。
+  検出された16進色のベタ書きは、地図の現在地マーカー（Google Maps風の
+  青丸、Leafletの生HTML文字列でReactのテーマ機構が届かない）、未使用の
+  `Leaflet .leaflet-popup button` 向けダークモードCSS、デモ/デバッグ専用
+  ページ（`DemoMap.tsx`等）など、いずれも自作の`Button`アトムを使う
+  ボタンではなかった
+- 上記より、今回の網羅調査で追加のコード修正が必要な箇所は見つからず、
+  既存の一元管理（トークン＋テストによる強制）が機能していることを確認した
+
 ## [2026-09-22] セッション（「現在地から」ボタン: 初期状態で青くならないように再修正）
 
 ### fix: 「現在地から」ボタンが初期状態（位置情報未取得）でも塗りつぶし色になっていたのを修正
