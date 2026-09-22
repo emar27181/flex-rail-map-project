@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { ArrowLeftRight, Clock, LocateFixed, Timer, Waypoints, X } from 'lucide-react';
+import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Timer, Waypoints, X } from 'lucide-react';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
@@ -811,7 +811,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   theme={theme}
                   size="sm"
                   variant="outline"
-                  icon={<Waypoints size={14} aria-hidden />}
+                  icon={<MapPinPlus size={14} aria-hidden />}
                   onClick={() => {
                     setWaypointFieldWidth(departureRef.current?.getBoundingClientRect().width ?? null);
                     setShowWaypointInput(true);
