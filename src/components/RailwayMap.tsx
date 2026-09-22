@@ -3082,11 +3082,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       setAvailableRoutes(new Set(allRouteKeys));
       setVisibleRoutes(routeSet);
     } else if (arrival && !departure) {
-      // 到着駅だけ決まっている状態では、経路がまだ確定しないので
-      // 出発駅未選択時と同じく全路線を非表示にし、乗換駅ヒントから
-      // 出発側の路線を選べるようにする
+      // 到着駅を設定した場合も、出発駅だけ設定したときと対称に
+      // その駅を通る路線を表示する（「到着駅を設定してもその駅の路線が
+      // 表示されるように、出発駅と同様にね」との要望を受けた）。
+      // 以前はここで全路線を非表示にしていたため、到着駅を選んでも
+      // 何も地図に出ず、出発駅を選ぶまで反応が無いように見えていた。
+      const arrRoutes = getRoutesForStation(arrival.name) as RouteKey[];
       setAvailableRoutes(new Set(allRouteKeys));
-      setVisibleRoutes(new Set());
+      setVisibleRoutes(new Set(arrRoutes));
     } else {
       // 出発駅・到着駅が両方未選択のときは全路線を非表示にする。
       // 代わりに乗換駅だけをヒントとして出し（下の transferHintStations）、
