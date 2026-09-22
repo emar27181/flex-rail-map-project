@@ -769,15 +769,17 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               {onSetNearestDeparture && (
                 <Button
                   theme={theme}
-                  // 他の行内ボタン（乗換駅のみ表示など）と同じ見た目に揃える
                   variant="primary"
                   size="sm"
                   onClick={onSetNearestDeparture}
                   icon={<LocateFixed />}
                   // 現在地（userLocation）が取れるまでは押しても意味が無いため、
                   // ボタン自体を消すのではなく非活性で存在だけ示す
-                  // （消えたり現れたりすると隣のボタンの位置が動いてしまうため）
+                  // （消えたり現れたりすると隣のボタンの位置が動いてしまうため）。
+                  // 状態は塗りで示す規約（CLAUDE.md）に合わせ、位置情報が
+                  // 取れて実際に押せるようになったときだけ塗りつぶす
                   disabled={!userLocation}
+                  pressed={!!userLocation}
                 >
                   {translateUI('currentLocationFrom', language)}
                 </Button>
