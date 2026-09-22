@@ -4902,7 +4902,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               // rotateControl は既定のUI矢印ボタンを出す設定だが、自前のUIと重複するため無効化
               {...({ rotate: true, touchRotate: true, rotateControl: false, zoomAnimation: false } as any)}
             >
-              <ZoomControl position="bottomright" />
               <MapEvents />
 
               {/*
