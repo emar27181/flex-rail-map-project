@@ -10,7 +10,10 @@
  *
  * クリックはGA4の `seo_map_open` イベントとして計測する
  * （`src/utils/gtagConsent.ts` の既存の仕組みを再利用。GA4未設定でも
- * エラーにはならない）。
+ * エラーにはならない）。どのSEOページから地図へ移動したかを判別できるよう
+ * `guide_slug` / `language` に加えて `source_page`（クリック時点の
+ * location.pathname）も送る。個人を特定する情報ではなく、このサイト内の
+ * パスのみ。
  */
 import { getRouteCode } from '../utils/routeUrlCodes';
 import type { RouteKey } from '../data/routes';
@@ -58,6 +61,7 @@ const href = `/${query ? `?${query}` : ''}`;
     trackEvent('seo_map_open', {
       guide_slug: target.getAttribute('data-guide-slug') ?? '',
       language: target.getAttribute('data-guide-lang') ?? '',
+      source_page: window.location.pathname,
     });
   });
 </script>

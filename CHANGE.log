@@ -1,5 +1,61 @@
 # CHANGE LOG
 
+## [2026-09-23] セッション（SEO検索実験: 3テーマのガイドページ）
+
+### fix: /guides・/en/guides 系ページでGA4が一切読み込まれておらず、CTAのseo_map_openイベントが送信されていなかった不具合を修正
+- `src/components/GA4Loader.astro`（新規）, `src/pages/index.astro`,
+  `src/layouts/GuideLayout.astro`, `src/layouts/GuidesIndexLayout.astro`
+- SEO検索実験（下記）のCTAクリック計測を確認する過程で発覚。GA4の
+  読み込みスクリプトが`index.astro`にしかインラインで書かれておらず、
+  `/guides/*`・`/en/guides/*`にはgtag自体が存在しなかったため、
+  `MapOpenCta.astro`の`trackEvent('seo_map_open', ...)`は
+  実質何も送信していなかった
+- `index.astro`のインラインスクリプトをそのまま`GA4Loader.astro`へ
+  切り出し（Consent Mode対応込みで挙動は変更なし）、ガイド系レイアウト
+  2つにも同じコンポーネントを追加した
+- `npm run test:types` / `npm run test:unit`(384件) / `npm run build`
+  すべて通過
+
+### feat: 検索意図が異なる3テーマの実験ページを用意（Search Consoleでのimpression比較用）
+- `src/data/guides.ts`, `src/layouts/GuideLayout.astro`,
+  `src/layouts/guideStyles.ts`, `src/components/MapOpenCta.astro`,
+  `src/pages/guides/odakyu-line-map.astro`（新規）,
+  `src/pages/guides/simple-tokyo-railway-map.astro`,
+  `src/pages/en/guides/tokyo-train-map.astro`, `public/sitemap.xml`
+- 「SEO記事の量産ではなく、A: シンプルな東京路線図 / B: 小田急線の
+  分岐理解 / C: 訪日外国人向け英語コンテンツ、の3テーマのどこに検索
+  需要があるかをSearch Consoleで検証したい」との依頼を受けた
+- 調査の結果、テーマAとCは`/guides/simple-tokyo-railway-map`と
+  `/en/guides/tokyo-train-map`としてすでに存在し、Search Consoleの
+  21件にも含まれていた。「重複ページを作らず既存ページの改善を優先」
+  の方針に沿い、この2ページは新規作成せず改善し、テーマB（小田急線）
+  だけを新規ページ`/guides/odakyu-line-map`として作成した
+  （結果的にA・Cは公開済みなのでSearch Console側にすでにベースライン
+  データがあり、Bとの比較がしやすい）
+- 小田急線ページの駅名・分岐駅・路線構成は`src/data/odakyu-line.ts` /
+  `odakyu-tama-line.ts` / `odakyu-enoshima-line.ts`の実データのみを
+  参照（新百合ヶ丘で多摩線、相模大野で江ノ島線が分かれる構造）。
+  運賃・時刻表など正確なデータが無いものは記載していない
+- 3ページ共通で追加した改善:
+  - FAQセクション（2〜4問）とFAQPage構造化データ（表示内容と完全一致）
+  - CTAをファーストビュー付近と記事末尾の2箇所に設置
+  - `GuideLayout`に`slot="visual"`を追加し、各ページに実データ
+    （`routeColors`・実際の駅名）だけを使った簡易図解を追加
+    （A/Cは実際の路線色チップ、Bは新百合ヶ丘・相模大野の分岐図）
+  - `seo_map_open`イベントに`source_page`（クリック時のパス）を追加し、
+    `guide_slug`・`language`と合わせてどのページ発かを判別可能に
+  - `sitemap.xml`に`/guides/odakyu-line-map`を追加（21→22 URL、
+    既存21件は変更なし）。改善した2ページは`lastmod`のみ更新
+- `npm run test:types` / `npm run test:unit`(384件) / `npm run build`
+  すべて通過。Playwrightで5ページ（/guides, /en/guides, 3テーマページ）
+  の200応答・title/canonical/OGP・CTA導線（クリック→`?routes=...`で
+  地図が該当路線表示状態になること）・モバイル390px幅での横スクロール
+  無し・CTAがファーストビュー内にあることを確認。地図側は既存の
+  `?routes=`短縮コード機構をそのまま利用し、新しいURL状態管理は
+  追加していない
+- 本番マージはユーザーの目視確認後に行う方針のため、`main`へは
+  マージしていない
+
 ## [2026-09-23] セッション（時刻表ツールチップ「前の時刻を表示」が始発まで遡れるように）
 
 ### fix: 時刻表データの深夜帯の便が「始発より前」に丸め込まれる不具合を修正
