@@ -294,6 +294,29 @@ export class RouteFinder {
             const nextStation = route[currentIndex];
             const visitKey = `${nextStation.name}-${current.node.routeKey}`;
 
+            // 到着駅に着いたかどうかは visited 状態より先に必ず判定する。
+            // `visited` は「この駅×路線の組み合わせを、乗り換え候補として
+            // 既に見つけている」ことも表す（別の、多くは遠回りな経路が先に
+            // 同じ駅×路線を発見していただけで、実際にそこを歩いたわけでは
+            // ない）。到着駅の到達判定をこの visited チェックより後に置くと、
+            // 遠回りな経路が同じ駅×路線を先に「発見」しているだけで、
+            // 直接的な経路が到着駅に着いたという事実そのものが握りつぶされ、
+            // 経路候補が0件になることがあった（藤沢本町→東京で発生を確認）。
+            if (nextStation.name === arrival.name) {
+              const arrivalSegment = this.createRouteSegment(
+                current.node.routeKey,
+                route,
+                current.node.index,
+                currentIndex
+              );
+              results.push({
+                segments: [...current.path, arrivalSegment],
+                totalTime: current.totalTime + segmentTime,
+                transfers: current.transfers
+              });
+              continue;
+            }
+
             if (visited.has(visitKey)) continue;
 
             // 迂回率チェック: 現在地が出発地から大きく外れているものを枝刈り
@@ -320,16 +343,6 @@ export class RouteFinder {
 
             const newPath = [...current.path, newSegment];
             const newTotalTime = current.totalTime + segmentTime;
-
-            // Check if we've reached the destination
-            if (nextStation.name === arrival.name) {
-              results.push({
-                segments: newPath,
-                totalTime: newTotalTime,
-                transfers: current.transfers
-              });
-              continue;
-            }
 
             // Look for transfer opportunities
             if (current.transfers < 2) {
