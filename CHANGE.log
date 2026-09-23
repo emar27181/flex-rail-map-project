@@ -1,5 +1,50 @@
 # CHANGE LOG
 
+## [2026-09-23] セッション（並び順プルダウンの常時表示化・検索欄の文言修正）
+
+### improve: 路線の並び順を折りたたみ式ボタン列から常時表示のプルダウンに変更
+- `src/components/legend/LegendRouteList.tsx`, `src/utils/translation.ts`,
+  `tests/unit/components/LegendRouteList.test.tsx`
+- モバイルの表示切替パネルのスクリーンショット付きで「並びかえで今
+  選択されてるのが表示されてプルダウンとかで切り替えるように」との
+  指摘を受けた。従来は`SegmentedControl`（あいうえお/色/登録順/近い順の
+  4ボタン）を折りたたみセクションの中に入れており、開くまで今の並び順が
+  見えなかった
+- 他の設定項目（対象: N路線以上、など）と同じ`Select`（プルダウン）に
+  統一。常に今の並び順がラベルとして見え、ボタン4つ分よりも省スペース
+  になる。折りたたみが不要になったため、使われなくなった
+  `groupSortOpen`状態と`settingsGroupSort`翻訳キー（ja/en/zh/ko）を削除
+- 検証中に`sortLabel`の日本語訳が「並順:」（「び」が抜けている）に
+  なっていたのを発見。折りたたみの中に隠れていたため気付かれていな
+  かったが、常時表示にしたことで目立つようになったため「並び順:」に
+  修正
+- テストは折りたたみ式UIを前提にしていた2件を、プルダウンの選択肢
+  確認・`fireEvent.change`での並び替え確認に書き換え
+- `npm run test:types` / `npm run test:unit`(371件) / `npm run build`
+  すべて通過。Playwrightで並び順プルダウンの初期値・選択肢・切替後の
+  一覧の並び替えを実機確認
+
+### fix: 路線名フィルター欄のプレースホルダーの文言を「絞り込む」から「検索」に統一
+- `src/utils/translation.ts`
+- 「路線名で絞り込むって表現違うかな、路線名を検索とか、？」との指摘を
+  受け、ja/en/zhを検索寄りの表現に変更（koは元から「検索」表現だった
+  ため変更なし）
+- `npm run test:types` / `npm run test:unit` / `npm run build` すべて通過
+
+## [2026-09-23] セッション（MobileBottomPanelのフォントサイズのハードコーディング解消）
+
+### fix: ポップオーバーヘッダーのフォントサイズ・間隔が直書きになっていたのを定数に置き換え
+- `src/components/MobileBottomPanel.tsx`
+- 上記の並び順プルダウンの指摘と同じスクリーンショットで「そこの
+  フォントサイズもアトミックデザインで一元管理で」との指摘を受けた
+- ファイル冒頭に「寸法はすべて名前付き定数で管理（マジックナンバー
+  禁止）」という方針コメントが既にあったが、ポップオーバーヘッダーの
+  `span`だけ`fontSize: 14`・`gap: 6`と直書きされていた。それぞれ
+  `FS.body`・`L.sp.sm`と同じ値のため、そのまま定数参照に置き換え
+- `node scripts/audit-design-tokens.mjs --list fontSize` / `--list spacing`
+  でこのファイルと`LegendRouteList.tsx`の両方が違反ゼロになったことを確認
+- `npm run test:types` / `npm run test:unit` / `npm run build` すべて通過
+
 ## [2026-09-22] セッション（「現在地から」: 出発駅が実際に最寄り駅と一致したときだけ塗りつぶす）
 
 ### fix: 「現在地から」ボタンを、出発駅が現在地の最寄り駅と一致しているときだけ塗りつぶすように変更

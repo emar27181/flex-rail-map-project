@@ -18,6 +18,7 @@ import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
 import { L } from './legend/legendStyles';
+import { FS } from '../constants/ui';
 
 // ── 寸法定数 ─────────────────────────────────────────────────────────
 
@@ -240,7 +241,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
             borderBottom: `1px solid ${colors.border}`,
             flexShrink: 0,
           }}>
-            <span style={{ fontSize: 14, fontWeight: 'bold', color: colors.text, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: FS.body, fontWeight: 'bold', color: colors.text, display: 'flex', alignItems: 'center', gap: L.sp.sm }}>
               {activeButton.icon}
               {activeButton.label}
             </span>
