@@ -29,9 +29,20 @@ export interface Props {
 }
 
 const { guide, indexHref, indexLabel, backLabel } = Astro.props;
-const path = `/${guide.lang === 'en' ? 'en/guides' : 'guides'}/${guide.slug}`;
+const langPrefix = guide.lang === 'ja' ? 'guides' : `${guide.lang}/guides`;
+const path = `/${langPrefix}/${guide.slug}`;
 const canonical = `${SITE_URL}${path}`;
 const htmlLang = guide.lang;
+const OG_LOCALE: Record<GuideDefinition['lang'], string> = {
+  ja: 'ja_JP',
+  en: 'en_US',
+  zh: 'zh_CN',
+};
+const RELATED_HEADING: Record<GuideDefinition['lang'], string> = {
+  ja: '関連ガイド',
+  en: 'Related Guides',
+  zh: '相关指南',
+};
 
 const breadcrumbJsonLd = {
   '@context': 'https://schema.org',
@@ -82,7 +93,7 @@ const webPageJsonLd = {
 		<meta property="og:title" content={guide.title} />
 		<meta property="og:description" content={guide.description} />
 		<meta property="og:image" content={`${SITE_URL}/icon_flex_rail_way_map.png`} />
-		<meta property="og:locale" content={guide.lang === 'en' ? 'en_US' : 'ja_JP'} />
+		<meta property="og:locale" content={OG_LOCALE[guide.lang]} />
 		<meta property="og:site_name" content={SITE_NAME} />
 		<meta name="twitter:card" content="summary" />
 		<meta name="twitter:title" content={guide.title} />
@@ -131,7 +142,7 @@ const webPageJsonLd = {
 
 			{guide.related.length > 0 && (
 				<section>
-					<h2>{guide.lang === 'en' ? 'Related Guides' : '関連ガイド'}</h2>
+					<h2>{RELATED_HEADING[guide.lang]}</h2>
 					<ul class="related-list">
 						{guide.related.map(r => (
 							<li><a href={r.href}>{r.label}</a></li>

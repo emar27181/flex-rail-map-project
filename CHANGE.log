@@ -1,5 +1,35 @@
 # CHANGE LOG
 
+## [2026-09-23] セッション（中国語版ガイドページを追加、英語・中国語での検索流入を強化）
+
+### feat: 中国語ガイド「东京地铁线路图简化查看方法」を追加（/zh/guides/tokyo-train-map）
+- `src/data/guides.ts`, `src/layouts/GuideLayout.astro`,
+  `src/layouts/GuidesIndexLayout.astro`, `src/components/MapOpenCta.astro`,
+  `src/pages/zh/guides/index.astro`（新規）,
+  `src/pages/zh/guides/tokyo-train-map.astro`（新規）, `public/sitemap.xml`
+- 「英語とか中国語でも検索でヒットするように、路線図 見にくい 日本 とかで」
+  との指摘を受けた。既存のガイド基盤（`GuideDefinition`/`GuideLayout`/
+  `MapOpenCta`）は日本語(`/guides/*`)・英語(`/en/guides/*`)の2言語専用に
+  型が固定されていたため、まず`'ja' | 'en'`だった言語の型を
+  `'ja' | 'en' | 'zh'`に拡張してから、日本語版「東京の路線図をシンプルに
+  見る」・英語版「Tokyo Train Map for Tourists」と同じテーマ（路線図が
+  見にくい・複雑すぎる問題の解決）を中国語話者向けに書き起こした新規
+  ガイドを追加した
+- CTAは`?lang=zh`でFlex Railway Map本体を中国語UIのまま開く（本体の
+  `translateUI`は既に4言語対応済みなのでそのまま機能する）。
+  og:locale・「関連ガイド」見出し・URLパス生成（`/zh/guides/...`）も
+  ja/en/zhの3言語に対応する形に一般化した（従来はen/ja固定の三項演算子
+  だった）
+- 日本語・英語ガイドの関連リンクと各ガイド一覧ページに中国語版への
+  相互リンクを追加し、`public/sitemap.xml`にも新ページ2件
+  （`/zh/guides`, `/zh/guides/tokyo-train-map`）を追加
+- `npm run test:types` / `npm run test:unit`(371件) / `npm run build`
+  すべて通過。Playwrightで`/zh/guides/tokyo-train-map`のメタ情報
+  （title/description/keywords/hreflang/JSON-LD/og:locale=zh_CN）と、
+  CTAクリックで地図が`?lang=zh&routes=ya,gl`で中国語UIのまま開くことを
+  実機確認
+
+## [2026-09-23] セッション（駅ツールチップの時刻表で基準時刻より前の発車も見られるように）
 ## [2026-09-23] セッション（駅ツールチップの時刻表で基準時刻より前の発車も見られるように）
 
 ### feat: 駅クリック時刻表ツールチップに「前の時刻を表示」ボタンを追加

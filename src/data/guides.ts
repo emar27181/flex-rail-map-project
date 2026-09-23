@@ -23,9 +23,9 @@ export interface GuideRelated {
 }
 
 export interface GuideDefinition {
-  /** URLの末尾（/guides/{slug} または /en/guides/{slug}） */
+  /** URLの末尾（/guides/{slug}, /en/guides/{slug}, /zh/guides/{slug}） */
   slug: string;
-  lang: 'ja' | 'en';
+  lang: 'ja' | 'en' | 'zh';
   /** パンくず・一覧での短い表記 */
   breadcrumbLabel: string;
   /** <title>・OGPタイトル */
@@ -83,6 +83,7 @@ export const guides: GuideDefinition[] = [
       { href: '/articles/tokyo-train-map-beginner', label: '東京の路線図の読み方・乗り換え方【完全初心者ガイド】' },
       { href: '/articles/flex-rail-map-introduction', label: 'Flex Railway Mapを作っている理由' },
       { href: '/guide', label: 'Flex Railway Mapの使い方ガイド' },
+      { href: '/zh/guides/tokyo-train-map', label: '东京地铁线路图简化查看方法（中文）' },
     ],
     keywords: '東京 路線図,東京 電車 路線図,東京 路線図 わかりやすい,東京 鉄道 地図,路線図 見にくい,路線図 シンプル',
   },
@@ -117,6 +118,7 @@ export const guides: GuideDefinition[] = [
     related: [
       { href: '/en/guides/tokyo-train-network', label: "How to Understand Tokyo's Train Network" },
       { href: '/guides/simple-tokyo-railway-map', label: '東京の路線図をシンプルに見る（日本語）' },
+      { href: '/zh/guides/tokyo-train-map', label: '东京地铁线路图简化查看方法（中文）' },
       { href: '/guide?lang=en', label: 'How to use Flex Railway Map' },
     ],
     keywords: 'Tokyo train map,Tokyo railway map,Tokyo train map tourist,Tokyo train map English,Tokyo subway map simple',
@@ -154,12 +156,45 @@ export const guides: GuideDefinition[] = [
     ],
     keywords: 'Tokyo trains confusing,how to use Tokyo trains,Tokyo railway lines explained',
   },
+  {
+    slug: 'tokyo-train-map',
+    lang: 'zh',
+    breadcrumbLabel: '东京地铁线路图简化查看方法',
+    title: '东京地铁线路图太复杂看不懂怎么办 | Flex Railway Map',
+    description: '觉得东京地铁线路图太复杂、看不懂？用Flex Railway Map可以只显示你需要的线路，马上打开一张只有必要路线的简洁地图。',
+    h1: '如何简化查看东京地铁线路图',
+    searchIntentAnswer:
+      '东京的地铁线路图之所以看起来复杂，是因为运营公司多、线路密集地画在同一张图上。Flex Railway Map可以让你自己选择要显示的线路，只保留需要的路线，地图会立刻变得清晰易读。',
+    sections: [
+      {
+        heading: '为什么东京的地铁图这么复杂',
+        paragraphs: [
+          '东京由JR、东京Metro、都营地下铁、多家私铁公司共同运营，同一个车站常常有好几条线路经过。标准地铁图为了把所有线路都画在一张图上，线条非常密集，第一次看的人很难判断自己该看哪一条线。',
+        ],
+      },
+      {
+        heading: '只显示你需要的线路',
+        paragraphs: [
+          'Flex Railway Map可以自由开关每条线路的显示。例如只显示"JR山手线"和"东京Metro银座线"这两条线，就能覆盖东京市中心的大部分主要区域，地图上的线条数量会大幅减少，车站名称也更容易看清楚。',
+          '点击下面的按钮，可以直接打开只显示这两条线路的地图。',
+        ],
+      },
+    ],
+    ctaLabel: '在Flex Railway Map中打开这张简化地图',
+    ctaRoutes: ['yamanote', 'ginzaLine'],
+    ctaNote: '地图会以中文界面打开，只显示JR山手线和东京Metro银座线。其他线路可以随时从地图上的列表中添加或隐藏。',
+    related: [
+      { href: '/en/guides/tokyo-train-map', label: 'Tokyo Train Map for Tourists（英语版）' },
+      { href: '/guides/simple-tokyo-railway-map', label: '东京路线图简化查看方法（日语版）' },
+    ],
+    keywords: '东京地铁线路图,东京地铁图看不懂,东京地铁图太复杂,东京电车路线图,东京地铁图简化',
+  },
 ];
 
-export function getGuide(lang: 'ja' | 'en', slug: string): GuideDefinition | undefined {
+export function getGuide(lang: 'ja' | 'en' | 'zh', slug: string): GuideDefinition | undefined {
   return guides.find(g => g.lang === lang && g.slug === slug);
 }
 
-export function getGuidesByLang(lang: 'ja' | 'en'): GuideDefinition[] {
+export function getGuidesByLang(lang: 'ja' | 'en' | 'zh'): GuideDefinition[] {
   return guides.filter(g => g.lang === lang);
 }
