@@ -1,8 +1,24 @@
 ---
 import GuideLayout from "../../layouts/GuideLayout.astro";
 import { getGuide } from "../../data/guides";
+import { routeColors, routeNames } from "../../data/routes";
 
 const guide = getGuide('ja', 'simple-tokyo-railway-map')!;
+// CTAで実際に表示される3路線と同じキー。色・路線名は実データからそのまま取る
+const previewRoutes = ['yamanote', 'chuo', 'marunouchiLine'] as const;
 ---
 
-<GuideLayout guide={guide} indexHref="/guides" indexLabel="ガイド一覧" backLabel="← Flex Railway Map トップへ" />
+<GuideLayout guide={guide} indexHref="/guides" indexLabel="ガイド一覧" backLabel="← Flex Railway Map トップへ">
+	<Fragment slot="visual">
+		<div class="guide-visual">
+			<div class="route-chip-row">
+				{previewRoutes.map(key => (
+					<span class="route-chip" style={`background-color: ${routeColors[key]}`}>
+						<span class="route-chip-dot"></span>{routeNames[key]}
+					</span>
+				))}
+			</div>
+			<p class="guide-visual-caption">下のボタンを押すと、この3路線だけを表示した地図が開きます</p>
+		</div>
+	</Fragment>
+</GuideLayout>

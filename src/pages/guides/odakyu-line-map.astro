@@ -1,0 +1,40 @@
+---
+import GuideLayout from "../../layouts/GuideLayout.astro";
+import { getGuide } from "../../data/guides";
+import { routeColors } from "../../data/routes";
+
+const guide = getGuide('ja', 'odakyu-line-map')!;
+const odakyuColor = routeColors.odakyuLine;
+---
+
+<GuideLayout guide={guide} indexHref="/guides" indexLabel="ガイド一覧" backLabel="← Flex Railway Map トップへ">
+	<Fragment slot="visual">
+		{/*
+			「駅名・路線・分岐・接続関係について推測で書かない」との指示のため、
+			ここに出す駅名・分岐駅・順序は src/data/odakyu-line.ts /
+			odakyu-tama-line.ts / odakyu-enoshima-line.ts の実データそのまま。
+			全駅（小田原線だけで46駅）を出すと分岐の構造が埋もれるため、
+			主要駅と2つの分岐駅だけに絞った簡略図にしている。
+		*/}
+		<div class="guide-visual" style={`--branch-color: ${odakyuColor}`}>
+			<div class="branch-diagram">
+				<div class="branch-diagram-station"><span class="branch-diagram-dot"></span>新宿</div>
+				<div class="branch-diagram-line"></div>
+				<div class="branch-diagram-station"><span class="branch-diagram-dot"></span>下北沢</div>
+				<div class="branch-diagram-line"></div>
+				<div class="branch-diagram-station"><span class="branch-diagram-dot"></span><strong>新百合ヶ丘</strong></div>
+				<div class="branch-diagram-branch-label">↳ 多摩線: 小田急永山 → 唐木田</div>
+				<div class="branch-diagram-line"></div>
+				<div class="branch-diagram-station"><span class="branch-diagram-dot"></span>町田</div>
+				<div class="branch-diagram-line"></div>
+				<div class="branch-diagram-station"><span class="branch-diagram-dot"></span><strong>相模大野</strong></div>
+				<div class="branch-diagram-branch-label">↳ 江ノ島線: 大和 → 藤沢 → 片瀬江ノ島</div>
+				<div class="branch-diagram-line"></div>
+				<div class="branch-diagram-station"><span class="branch-diagram-dot"></span>本厚木</div>
+				<div class="branch-diagram-line"></div>
+				<div class="branch-diagram-station"><span class="branch-diagram-dot"></span>小田原</div>
+			</div>
+			<p class="guide-visual-caption">小田原線（新宿〜小田原）と、新百合ヶ丘で分かれる多摩線、相模大野で分かれる江ノ島線</p>
+		</div>
+	</Fragment>
+</GuideLayout>

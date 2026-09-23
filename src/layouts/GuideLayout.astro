@@ -16,6 +16,7 @@ import { staticPageCss } from './staticPageStyles';
 import { guideCss } from './guideStyles';
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import MapOpenCta from '../components/MapOpenCta.astro';
+import GA4Loader from '../components/GA4Loader.astro';
 import { SITE_URL, SITE_NAME, GOOGLE_SITE_VERIFICATION } from '../config/seo';
 import type { GuideDefinition } from '../data/guides';
 
@@ -43,6 +44,23 @@ const RELATED_HEADING: Record<GuideDefinition['lang'], string> = {
   en: 'Related Guides',
   zh: '相关指南',
 };
+const FAQ_HEADING: Record<GuideDefinition['lang'], string> = {
+  ja: 'よくある質問',
+  en: 'Frequently Asked Questions',
+  zh: '常见问题',
+};
+
+// FAQPage構造化データは、ページ上に実際に表示するFAQ（下のsection）と
+// 完全に一致させる（見えているFAQと違う内容を構造化データにだけ書かない）。
+const faqJsonLd = guide.faq && guide.faq.length > 0 ? {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: guide.faq.map(item => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: { '@type': 'Answer', text: item.answer },
+  })),
+} : null;
 
 const breadcrumbJsonLd = {
   '@context': 'https://schema.org',
@@ -101,6 +119,11 @@ const webPageJsonLd = {
 
 		<script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
 		<script type="application/ld+json" set:html={JSON.stringify(webPageJsonLd)} />
+		{guide.faq && guide.faq.length > 0 && (
+			<script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+		)}
+
+		<GA4Loader />
 
 		<style set:html={staticPageCss}></style>
 		<style set:html={guideCss}></style>
@@ -133,12 +156,45 @@ const webPageJsonLd = {
 				routes={guide.ctaRoutes}
 			/>
 
+			{/*
+				「実際のMap Preview / Screenshot / Visual」枠。CTAより前に置くと
+				モバイルでCTAがファーストビューから押し出されてしまうため
+				（CTAは意図的に早い位置に固定してある、上のコメント参照）、
+				あえてCTAの直後に置いている。各ガイドページ側で
+				<Fragment slot="visual"> を渡した場合だけ表示される。
+			*/}
+			<slot name="visual" />
+
 			{guide.sections.map(section => (
 				<section>
 					<h2>{section.heading}</h2>
 					{section.paragraphs.map(p => <p>{p}</p>)}
 				</section>
 			))}
+
+			{/* 記事末尾にも同じCTAをもう一度置く（ファーストビュー付近だけでなく、
+			   本文を読んだ後にも迷わず地図へ行けるように） */}
+			<MapOpenCta
+				label={guide.ctaLabel}
+				note={guide.ctaNote}
+				guideSlug={guide.slug}
+				language={guide.lang}
+				routes={guide.ctaRoutes}
+			/>
+
+			{guide.faq && guide.faq.length > 0 && (
+				<section>
+					<h2>{FAQ_HEADING[guide.lang]}</h2>
+					<dl class="faq-list">
+						{guide.faq.map(item => (
+							<div class="faq-item">
+								<dt class="faq-question">{item.question}</dt>
+								<dd class="faq-answer">{item.answer}</dd>
+							</div>
+						))}
+					</dl>
+				</section>
+			)}
 
 			{guide.related.length > 0 && (
 				<section>

@@ -1,0 +1,46 @@
+---
+/**
+ * GA4読み込み（Consent Mode対応）の共通化。
+ *
+ * 元々 index.astro にだけインラインで書かれており、/guides/* 等の
+ * ガイドページ群にはこのスクリプト自体が無かった。そのため
+ * MapOpenCta.astro の `trackEvent('seo_map_open', ...)` は gtag が
+ * 未読み込みで実質何も送信していなかった（SEOガイド実験のCTA計測が
+ * 機能しない状態だった）。同じ読み込みロジックをガイド系レイアウト
+ * （GuideLayout.astro, GuidesIndexLayout.astro）でも使うため、
+ * index.astro から中身を変えずにコンポーネントへ切り出した。
+ *
+ * Consent Mode: 既定は「同意なし」。CookieBannerで既にanalyticsを
+ * 許可済み（localStorageに記録済み）なら即座にgrantedへ更新する。
+ * 新規訪問者にはCookieBanner側の操作でgtagConsent.tsから更新される。
+ */
+import { GA_MEASUREMENT_ID } from '../config/seo';
+---
+
+{GA_MEASUREMENT_ID && (
+	<script is:inline define:vars={{ GA_MEASUREMENT_ID }}>
+		(function () {
+			window.dataLayer = window.dataLayer || [];
+			function gtag() { window.dataLayer.push(arguments); }
+			window.gtag = gtag;
+			gtag('consent', 'default', { analytics_storage: 'denied' });
+			try {
+				var stored = JSON.parse(localStorage.getItem('cookieConsent') || 'null');
+				if (stored && stored.analytics) {
+					gtag('consent', 'update', { analytics_storage: 'granted' });
+				}
+			} catch (e) { /* localStorage不可なら既定のdeniedのまま */ }
+
+			var load = function () {
+				var s = document.createElement('script');
+				s.async = true;
+				s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
+				document.head.appendChild(s);
+				gtag('js', new Date());
+				gtag('config', GA_MEASUREMENT_ID);
+			};
+			if (document.readyState === 'complete') load();
+			else window.addEventListener('load', load, { once: true });
+		})();
+	</script>
+)}

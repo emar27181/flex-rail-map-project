@@ -102,7 +102,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
           <div style={{ flex: 1, minWidth: '300px' }}>
             <h3 style={{
               margin: `0 0 ${L.sp.md} 0`,
-              fontSize: FS.heading,
+              fontSize: FS.title,
               fontWeight: 'bold',
               color: colors.text
             }}>
@@ -110,7 +110,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
             </h3>
             <p style={{
               margin: `0 0 ${L.sp['2xl']} 0`,
-              fontSize: FS.title,
+              fontSize: FS.body,
               lineHeight: '1.5',
               color: colors.textSecondary
             }}>

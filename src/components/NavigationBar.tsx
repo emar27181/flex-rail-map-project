@@ -46,7 +46,11 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
       borderBottom: `1px solid ${colors.border}`,
       boxShadow: `0 2px 4px ${colors.shadow}`,
       marginBottom: L.sp['3xl'],
-      position: 'relative',
+      // スクロールしても常に見えるよう追従させる。地図側の浮遊ボタン等の
+      // z-index(最大1003程度)より確実に上、モーダル類(9999〜)より下にする
+      position: 'sticky',
+      top: 0,
+      zIndex: 1050,
     }}>
       {/* ロゴ・タイトル部分 */}
       <div style={{
@@ -75,19 +79,12 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           }}>
             {translateUI('appTitle', language)}
           </h1>
-          {/* 初めて見る人・検索エンジンにもサイトの中身が伝わるよう、
-              地図を主役にしたまま一行だけ短い説明を添える。
-              狭い画面で折り返して背が伸びないよう1行に収め、はみ出しは省略する */}
-          <p style={{
-            margin: 0,
-            fontSize: FS.caption,
-            color: colors.textSecondary,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
-          }}>
-            {translateUI('appTagline', language)}
-          </p>
+          {/*
+            以前は初めて見る人・検索エンジン向けに一行だけ短い説明を
+            ヘッダーに出していたが、「ヘッダーで必要な路線だけとかの
+            文章は表示をオフで」との指摘を受けて非表示にした。
+            SEO向けの説明は各ページの<meta description>等で別途担保している
+          */}
         </div>
       </div>
 
