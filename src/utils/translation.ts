@@ -7472,8 +7472,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "List"
   },
   routeSearchPlaceholder: {
-    japanese: "路線名で絞り込む",
-    english: "Filter by route name"
+    japanese: "路線名を検索",
+    english: "Search route name"
   },
   routeGroupOnRoute: {
     japanese: "経路上の路線",
@@ -8189,7 +8189,7 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Train Demo"
   },
   sortLabel: {
-    japanese: "並順:",
+    japanese: "並び順:",
     english: "Sort:"
   },
   sortAlpha: {
@@ -8454,10 +8454,6 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "詳細設定",
     english: "Detailed Settings"
   },
-  settingsGroupSort: {
-    japanese: "並び順",
-    english: "Sort Order"
-  },
   travelTimeStyleTitle: {
     japanese: "所要時間",
     english: "Travel Time"
@@ -8672,7 +8668,7 @@ export const uiChinese: Record<string, string> = {
   showMoreRoutes: "▼ 显示其他 {count} 条线路",
   routeViewBoard: "面板",
   routeViewClassic: "列表",
-  routeSearchPlaceholder: "按线路名称筛选",
+  routeSearchPlaceholder: "搜索线路名称",
   routeGroupOnRoute: "路线上的线路",
   routeGroupAtStation: "经过所选车站的线路",
   routeGroupVisible: "显示中",
@@ -8930,7 +8926,6 @@ export const uiChinese: Record<string, string> = {
   settingsLabelSize: "标签大小",
   settingsIconSize: "图标大小",
   settingsGroupDetail: "详细设置",
-  settingsGroupSort: "排序方式",
   travelTimeStyleTitle: "所需时间",
   stationIconStyleTitle: "车站图标",
   styleTextColor: "文字颜色",
@@ -9253,7 +9248,6 @@ export const uiKorean: Record<string, string> = {
   settingsLabelSize: "레이블 크기",
   settingsIconSize: "아이콘 크기",
   settingsGroupDetail: "상세 설정",
-  settingsGroupSort: "정렬 순서",
   travelTimeStyleTitle: "소요 시간",
   stationIconStyleTitle: "역 아이콘",
   styleTextColor: "글자 색",

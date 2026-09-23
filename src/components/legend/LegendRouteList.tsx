@@ -234,13 +234,6 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   const [groupFilterOpen, setGroupFilterOpen] = useState(false);
   const [groupMapOpen,    setGroupMapOpen]    = useState(false);
   const [groupDetailOpen, setGroupDetailOpen] = useState(false);
-  /**
-   * 並び順は「並び替えの選択は表示を下の詳細設定で」という要望を受けて、
-   * 他の詳細設定（groupFilterOpen/groupMapOpen/groupDetailOpenなど）と
-   * 同じ折りたたみ表示にした。既定は近い順（sortMode初期値）で足りる
-   * ケースが大半のため、この設定自体も他の詳細設定と同様に既定は閉じる。
-   */
-  const [groupSortOpen,   setGroupSortOpen]   = useState(false);
 
   useEffect(() => { if (heatmapEnabled) setGroupVizOpen(true); }, [heatmapEnabled]);
 
@@ -435,30 +428,29 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
       {/*
         並び順。表示方式（ボード/一覧）に関わらず共通で効く。
-        「並び替えの選択は表示を下の詳細設定で」という要望を受けて、
-        他の詳細設定（groupFilterOpen等）と同じ折りたたみ表示にした
-        （既定は近い順のため、常時表示しておく必要が無い）。
+        「並びかえで今選択されてるのが表示されてプルダウンとかで
+        切り替えるように」という要望を受けて、折りたたみ式のボタン列
+        （SegmentedControl）ではなく、他の設定（対象: N路線以上など）と
+        同じSelect（プルダウン）にした。常に今の並び順がラベルとして
+        見え、かつボタン4つ分よりも省スペースになる。
       */}
-      {sectionHeader(translateUI('settingsGroupSort', language), groupSortOpen, () => setGroupSortOpen(v => !v))}
-      {groupSortOpen && (
-        <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.sm, alignItems: 'center', paddingLeft: L.sp.xs }}>
-          <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>
-            {translateUI('sortLabel', language)}
-          </span>
-          <SegmentedControl
-            theme={theme}
-            value={sortMode}
-            onChange={setSortMode}
-            ariaLabel={translateUI('sortLabel', language)}
-            options={[
-              { value: 'distance' as SortMode, label: translateUI('sortNearby', language) },
-              { value: 'name' as SortMode, label: translateUI('sortAlpha', language) },
-              { value: 'color' as SortMode, label: translateUI('sortColor', language) },
-              { value: 'default' as SortMode, label: translateUI('sortDefault', language) },
-            ]}
-          />
-        </div>
-      )}
+      <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.sm, alignItems: 'center' }}>
+        <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>
+          {translateUI('sortLabel', language)}
+        </span>
+        <Select
+          theme={theme}
+          size="sm"
+          value={sortMode}
+          onChange={e => setSortMode(e.target.value as SortMode)}
+          aria-label={translateUI('sortLabel', language)}
+        >
+          <option value="distance">{translateUI('sortNearby', language)}</option>
+          <option value="name">{translateUI('sortAlpha', language)}</option>
+          <option value="color">{translateUI('sortColor', language)}</option>
+          <option value="default">{translateUI('sortDefault', language)}</option>
+        </Select>
+      </div>
 
       {(!ROUTE_CLASSIC_VIEW_ENABLED || routeUiMode === 'board') && (
         <RouteSwitchBoard
