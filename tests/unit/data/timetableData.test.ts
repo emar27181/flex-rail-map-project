@@ -8,7 +8,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { routes } from '../../../src/data/routes';
-import { timetableLines, TIMETABLE_SOURCE, getNextDepartures, addMinutes, computeEffectiveBaseTime } from '../../../src/data/timetableData';
+import { timetableLines, TIMETABLE_SOURCE, getNextDepartures, getDeparturesAround, addMinutes, computeEffectiveBaseTime } from '../../../src/data/timetableData';
 
 describe('時刻表データ', () => {
   it('時刻表の駅名はすべて路線データに存在する', () => {
@@ -90,6 +90,51 @@ describe('時刻表データ', () => {
       expect(getNextDepartures('minatomirai', 'みなとみらい', 0, '10:00', 2).length).toBe(2);
       expect(getNextDepartures('minatomirai', 'みなとみらい', 1, '10:00', 2).length).toBe(2);
     });
+  });
+});
+
+describe('getDeparturesAround（「前の時刻を表示」の始発までの遡り）', () => {
+  // 山手線・内回り・東京駅（offset 0）の始発は 04:45（patterns定義より）
+  it('prevCountに大きな値を渡しても、始発より前には遡らない（重複もしない）', () => {
+    const { prev } = getDeparturesAround('yamanote', '東京', 0, '05:00', Infinity, 0);
+    expect(prev.length).toBeGreaterThan(0);
+    expect(prev[0].time).toBe('04:45');
+    // 始発の時刻が重複して並んでいないこと（旧実装は前日・翌日ぶんを
+    // 生成して連結していたため、始発付近で同じ便が重複していた）
+    const times = prev.map(d => d.time);
+    expect(new Set(times).size).toBe(times.length);
+  });
+
+  it('centerTimeが始発と同時刻なら、それより前の便は無い', () => {
+    const { prev } = getDeparturesAround('yamanote', '東京', 0, '04:45', Infinity, 0);
+    expect(prev).toEqual([]);
+  });
+
+  it('centerTimeが始発直後でも、始発の便を1件だけ返す（重複しない）', () => {
+    const { prev } = getDeparturesAround('yamanote', '東京', 0, '04:50', Infinity, 0);
+    expect(prev.length).toBe(1);
+    expect(prev[0].time).toBe('04:45');
+  });
+
+  it('prevは発車時刻の昇順（始発が先頭、centerTimeに近いほど末尾）', () => {
+    const { prev } = getDeparturesAround('yamanote', '東京', 0, '06:00', Infinity, 0);
+    for (let i = 1; i < prev.length; i++) {
+      expect(prev[i - 1].time <= prev[i].time).toBe(true);
+    }
+  });
+
+  it('終電後（始発より前の深夜帯）に見ると、翌日の始発から補われる', () => {
+    // 山手線・内回り・東京駅の終電は深夜1時台。2時はその後にあたるので
+    // 「まだ今日」ではなく「これから始発を待つだけ」として扱われる必要がある
+    const { next } = getDeparturesAround('yamanote', '東京', 0, '02:00', 0, 3);
+    expect(next.length).toBe(3);
+    expect(next[0].time).toBe('04:45');
+  });
+
+  it('終電後の深夜帯をafterTimeに指定しても、getNextDeparturesは翌日始発から補う', () => {
+    const deps = getNextDepartures('yamanote', '東京', 0, '02:00', 2);
+    expect(deps.length).toBe(2);
+    expect(deps[0].time).toBe('04:45');
   });
 });
 

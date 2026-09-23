@@ -384,23 +384,32 @@ function toTime(totalMin: number): string {
   return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
 }
 
-function genBase(patterns: Pattern[]): Departure[] {
-  const deps: Departure[] = [];
+/**
+ * 生成中だけ使う内部表現。`rawMin` は日をまたぐ丸め（mod 1440）をしていない
+ * 実際の経過分（例: 終電後の 25:30 は 1530 のまま保持する）。
+ *
+ * 深夜帯のパターン（23:30〜25:30 など）を `toTime` で丸めると "00:xx"〜"01:xx"
+ * になり、これを文字列としてソートすると始発（04:45等）より前に来てしまう
+ * ＝実際には前日の終電なのに、見かけ上は当日の始発より早い便に見えてしまう。
+ * `rawMin` を保持したまま並べ替えることで、始発から終電までの本来の順序
+ * （＝サービス日としての時系列）を保ったまま扱えるようにしている。
+ */
+type RawDeparture = Departure & { rawMin: number };
+
+function genBase(patterns: Pattern[]): RawDeparture[] {
+  const deps: RawDeparture[] = [];
   for (const p of patterns) {
     for (let t = p.fromMin; t < p.toMin; t += p.intervalMin) {
-      deps.push({ time: toTime(t), type: p.type, destination: p.destination, toward: p.toward });
+      deps.push({ time: toTime(t), type: p.type, destination: p.destination, toward: p.toward, rawMin: t });
     }
   }
-  return deps.sort((a, b) => a.time.localeCompare(b.time));
+  return deps.sort((a, b) => a.rawMin - b.rawMin);
 }
 
-function shiftDeps(base: Departure[], offsetMin: number): Departure[] {
+function shiftDeps(base: RawDeparture[], offsetMin: number): RawDeparture[] {
   return base
-    .map(d => {
-      const [h, mm] = d.time.split(':').map(Number);
-      return { ...d, time: toTime(h * 60 + mm + offsetMin) };
-    })
-    .sort((a, b) => a.time.localeCompare(b.time));
+    .map(d => ({ ...d, time: toTime(d.rawMin + offsetMin), rawMin: d.rawMin + offsetMin }))
+    .sort((a, b) => a.rawMin - b.rawMin);
 }
 
 // ── 路線データ ────────────────────────────────────────
@@ -4975,6 +4984,24 @@ export function hasTimetableData(lineKey: string): boolean {
  * @param afterTime  "HH:MM" 形式の時刻
  * @param count   取得件数
  */
+/**
+ * 壁時計の "HH:MM"（0:00〜23:59）を、`stationDepartures`（rawMinでソート済み、
+ * 始発が先頭）と同じ物差し（サービス日としての経過分）に変換する。
+ *
+ * 深夜帯の便は toTime で丸められて "00:xx"〜"02:xx" のような小さい時刻文字列に
+ * なるが、これは「翌日の始発」ではなく「当日の終電に向かう続き」なので、
+ * 先頭（＝始発）より小さい壁時計時刻は当日の続きとみなして+1440する。
+ * こうすることで、prev/nextの比較を「始発から終電までの一直線の時系列」上で
+ * 行える（例: 始発が04:45の路線で "01:00" を指定した場合、それは前日からの
+ * 続きの深夜帯として扱われ、始発より前として比較される）。
+ */
+function toServiceMin(time: string, dayStartRawMin: number): number {
+  const [h, mm] = time.split(':').map(Number);
+  const wallMin = h * 60 + mm;
+  const dayStartWrapped = ((dayStartRawMin % 1440) + 1440) % 1440;
+  return wallMin < dayStartWrapped ? wallMin + 1440 : wallMin;
+}
+
 export function getNextDepartures(
   lineKey: string,
   stationName: string,
@@ -4993,14 +5020,12 @@ export function getNextDepartures(
   const baseDepartures = genBase(direction.patterns);
   const stationDepartures = shiftDeps(baseDepartures, stationEntry.offset)
     .map(d => ({ ...d, platform }));
+  if (stationDepartures.length === 0) return [];
 
-  const [ah, am] = afterTime.split(':').map(Number);
-  const afterMin = ah * 60 + am;
+  const dayStartRawMin = stationDepartures[0].rawMin;
+  const afterMin = toServiceMin(afterTime, dayStartRawMin);
 
-  const filtered = stationDepartures.filter(d => {
-    const [h, mm] = d.time.split(':').map(Number);
-    return h * 60 + mm >= afterMin;
-  });
+  const filtered = stationDepartures.filter(d => d.rawMin >= afterMin);
 
   if (filtered.length >= count) return filtered.slice(0, count);
 
@@ -5011,8 +5036,8 @@ export function getNextDepartures(
 
 /**
  * 指定時刻の前後の列車を取得
- * @param prevCount  centerTime より前の列車数
- * @param nextCount  centerTime 以降の列車数
+ * @param prevCount  centerTime より前の列車数（始発より前は無いので、そこで自然に頭打ちになる）
+ * @param nextCount  centerTime 以降の列車数（当日ぶんで足りなければ翌日始発から補う）
  */
 export function getDeparturesAround(
   lineKey: string,
@@ -5031,32 +5056,30 @@ export function getDeparturesAround(
 
   const platform = getPlatform(lineKey, directionIndex, stationName);
   const baseDepartures = genBase(direction.patterns);
-  // 2日分生成して前後を確実に取れるようにする
-  const dayShift = 1440;
-  const allDeps = [
-    ...shiftDeps(baseDepartures, stationEntry.offset - dayShift),
-    ...shiftDeps(baseDepartures, stationEntry.offset),
-    ...shiftDeps(baseDepartures, stationEntry.offset + dayShift),
-  ].map(d => ({ ...d, platform }));
+  // 当日1日ぶんのみを使う。以前は前日・翌日ぶんも生成して連結していたが、
+  // shiftDeps/toTimeが常に mod 1440 で日内の時刻文字列に丸めるため、
+  // 前日・当日・翌日の3コピーは実際には同じ内容の重複でしかなかった。
+  // 結果、centerTimeが始発に近いと「前の時刻」に同じ便が重複して
+  // 表示される不具合があった。1日ぶんだけを使えば、prevは自然に
+  // 始発で尽きる（＝そこが「これ以上は遡れない」の境界になる）。
+  const stationDepartures = shiftDeps(baseDepartures, stationEntry.offset)
+    .map(d => ({ ...d, platform }));
+  if (stationDepartures.length === 0) return { prev: [], next: [] };
 
-  const [ch, cm] = centerTime.split(':').map(Number);
-  const centerMin = ch * 60 + cm;
+  // rawMinでソート済みなので先頭が本当の始発。深夜帯の便がtoTimeの丸めで
+  // 見かけ上「00:xx」等になっていても、rawMinで比較する限り始発より前には
+  // 来ない（後述のtoServiceMinで壁時計時刻もこの物差しに揃えている）。
+  const dayStartRawMin = stationDepartures[0].rawMin;
+  const centerMin = toServiceMin(centerTime, dayStartRawMin);
 
-  // centerTime の実際の総分数（日をまたぐ判定のため正規化しない）
-  // 全体を時刻文字列の "HH:MM" で比較するのではなく totalMin で比較
-  // allDeps は shiftDeps で生成されており時刻は 00:00〜47:59 の範囲になる場合がある
-  // そこで元の totalMin ベースで比較できるよう変換
-  const toTotalMin = (time: string): number => {
-    const [h, mm] = time.split(':').map(Number);
-    return h * 60 + mm;
-  };
-
-  const prevDeps = allDeps
-    .filter(d => toTotalMin(d.time) < centerMin)
+  const prevDeps = stationDepartures
+    .filter(d => d.rawMin < centerMin)
     .slice(-prevCount);
-  const nextDeps = allDeps
-    .filter(d => toTotalMin(d.time) >= centerMin)
-    .slice(0, nextCount);
+
+  const sameDayNext = stationDepartures.filter(d => d.rawMin >= centerMin);
+  const nextDeps = sameDayNext.length >= nextCount
+    ? sameDayNext.slice(0, nextCount)
+    : [...sameDayNext, ...stationDepartures.slice(0, nextCount - sameDayNext.length)];
 
   return { prev: prevDeps, next: nextDeps };
 }
