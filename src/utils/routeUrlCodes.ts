@@ -3,17 +3,24 @@
  *
  * 「URLを共有したら、その路線がONの状態で開ける」ようにしたい。
  * ただし490路線あるため、正式なキー名（`keihinTohoku`等）をそのまま並べると
- * URLが長くなりすぎる。各路線キーから2〜5文字程度の略称コードを機械的に
- * 生成し（例: `keihinTohoku` → `kt`）、それをURLの `routes` パラメータに
+ * URLが長くなりすぎる。各路線キーから4〜6文字程度の略称コードを機械的に
+ * 生成し（例: `keihinTohoku` → `keitoh`）、それをURLの `routes` パラメータに
  * カンマ区切りで並べる。
  *
- * 略称コードはキー名のcamelCase単語の頭文字から作り、衝突したら数字を
- * 足して一意にする（キー名をアルファベット順に処理するため、路線の
- * 追加順序が変わってもコードは変わらない。ただし、既存のキーと同じ
- * 略称になる新しいキーが「間に」追加された場合は、それより後ろの
- * 衝突コードがずれる可能性がある＝共有URLの互換性は将来にわたって
- * 完全には保証されない。壊れたコードは黙って無視する設計にしてあるので、
- * 古いURLを開いても路線が一部復元されないだけで、エラーにはならない）。
+ * 「人間にも分かりやすく、ただ長くなりすぎないように」との指摘を受け、
+ * 以前は各単語の頭文字1文字だけ（`keihinTohoku` → `kt`）だったのを、
+ * 各単語の先頭3〜4文字に増やして見た目で路線名を推測しやすくした。
+ * また「Line」「Main」のような路線名の識別に寄与しない語は、コード生成前に
+ * 除外する（以前はこれらの頭文字がコードの1枠を無駄に消費し、
+ * 例えば`ginzaLine`が`gl`のように本来の路線名が分かりにくくなっていた）。
+ *
+ * 略称コードは上記ルールで機械的に作り、衝突したら数字を足して一意にする
+ * （キー名をアルファベット順に処理するため、路線の追加順序が変わっても
+ * コードは変わらない。ただし、既存のキーと同じ略称になる新しいキーが
+ * 「間に」追加された場合は、それより後ろの衝突コードがずれる可能性がある
+ * ＝共有URLの互換性は将来にわたって完全には保証されない。壊れたコードは
+ * 黙って無視する設計にしてあるので、古いURLを開いても路線が一部復元
+ * されないだけで、エラーにはならない）。
  *
  * 選択路線数が多すぎるとURLも長くなるため、上限（15）を超える場合は
  * URLに書き出さない（＝無理に表示しない）。
@@ -23,16 +30,33 @@ import { routes, type RouteKey } from '../data/routes';
 export const VISIBLE_ROUTES_PARAM = 'routes';
 export const MAX_URL_VISIBLE_ROUTES = 15;
 
+/** コード生成上、路線名の識別に寄与しない語（頭文字だけ拾っても分かりやすさに繋がらない） */
+const GENERIC_WORDS = new Set(['line', 'main']);
+
 /** camelCaseの路線キーを単語に分割する（例: "keihinTohoku" → ["keihin","Tohoku"]） */
 const splitWords = (key: string): string[] => key.match(/[A-Z]?[a-z0-9]+/g) || [key];
 
-/** 単語の頭文字から2〜3文字程度のベースコードを作る（単語が1つのときは先頭2文字） */
-const baseCode = (key: string): string => {
+/**
+ * コード生成に使う単語列。「Line」等の識別に寄与しない語を除く
+ * （全単語が該当語だった場合のみ、除外前の単語列にフォールバックする）。
+ */
+const meaningfulWords = (key: string): string[] => {
   const words = splitWords(key);
+  const filtered = words.filter(w => !GENERIC_WORDS.has(w.toLowerCase()));
+  return filtered.length > 0 ? filtered : words;
+};
+
+/**
+ * 単語の先頭3〜4文字から人間にも読めるベースコードを作る。
+ * 単語が1つだけなら先頭4文字（例: "yamanote" → "yama"）、
+ * 複数あれば先頭2語をそれぞれ先頭3文字ずつ（例: ["keihin","Tohoku"] → "keitoh"）。
+ */
+const baseCode = (key: string): string => {
+  const words = meaningfulWords(key);
   if (words.length === 1) {
-    return words[0].slice(0, 2).toLowerCase();
+    return words[0].slice(0, 4).toLowerCase();
   }
-  return words.slice(0, 3).map(w => w[0]?.toLowerCase() ?? '').join('');
+  return words.slice(0, 2).map(w => w.slice(0, 3).toLowerCase()).join('');
 };
 
 const buildCodeMaps = (): { byKey: Record<string, string>; byCode: Record<string, string> } => {
