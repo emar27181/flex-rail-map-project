@@ -356,29 +356,22 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   };
 
   /**
-   * 出発駅・到着駅の候補ドロップダウンの位置・横幅を、入力欄自身の幅ではなく
-   * パネル全体の中身の幅に合わせて計算する。
+   * 候補ドロップダウンの位置・横幅を、それを開いた入力欄自身の枠に
+   * 揃えて計算する。「その入力欄の横枠と候補の横枠の長さと位置を統一して」
+   * との指摘どおり、出発駅・到着駅・経由駅のどの入力欄でも、候補は
+   * その入力欄とぴったり同じ左端・右端になる。
    *
-   * 出発駅・到着駅は横に並ぶ2カラムのため、入力欄自身の幅はパネルの半分ほど
-   * しかない。候補の横幅もそれに合わせていたため、候補を出すと隣の到着駅欄の
-   * ぶんだけ余白ができ、しかも候補が下のボタン行に重なって隠れていた。
-   * パネルの余白（padding）はデザイントークン(L.sp.md)から決まるが、
-   * ここでは実際に描画された値を`getComputedStyle`で読み取ることで、
-   * トークンの値が変わっても計算式を書き換えずに済むようにしている。
+   * 隙間（真下に何px離すか）だけは`L.sp.xxs`（2px）から取り、直書きしない。
+   * 以前はパネル全体の幅に広げていたが（出発駅・到着駅が横並び2カラムの
+   * ため入力欄自身は半分幅しかなく、候補が下のボタン行に重なって隠れる
+   * 問題があった）、候補側は`StationSearchDropdown`でportal化・
+   * z-index分離済みのため、幅を入力欄に戻しても再発しない。
    */
-  const getFullWidthDropdownPosition = (inputRect: DOMRect) => {
-    const panelEl = panelRef.current;
-    if (!panelEl) return { top: inputRect.bottom + 2, left: inputRect.left, width: inputRect.width };
-    const panelRect = panelEl.getBoundingClientRect();
-    const style = getComputedStyle(panelEl);
-    const padLeft = parseFloat(style.paddingLeft) || 0;
-    const padRight = parseFloat(style.paddingRight) || 0;
-    return {
-      top: inputRect.bottom + 2,
-      left: panelRect.left + padLeft,
-      width: panelRect.width - padLeft - padRight,
-    };
-  };
+  const getInputDropdownPosition = (inputRect: DOMRect) => ({
+    top: inputRect.bottom + parseFloat(L.sp.xxs),
+    left: inputRect.left,
+    width: inputRect.width,
+  });
 
   const handleDepartureSelect = (station: Station) => {
     departureClickedRef.current = true;
@@ -539,7 +532,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                   onFocus={(e) => {
                     focusedInputRef.current = e.currentTarget;
-                    setDepartureDropdownPos(getFullWidthDropdownPosition(e.currentTarget.getBoundingClientRect()));
+                    setDepartureDropdownPos(getInputDropdownPosition(e.currentTarget.getBoundingClientRect()));
                     setShowDepartureResults(true);
                     handleSearchFocus();
                   }}
@@ -668,7 +661,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                   onFocus={(e) => {
                     focusedInputRef.current = e.currentTarget;
-                    setArrivalDropdownPos(getFullWidthDropdownPosition(e.currentTarget.getBoundingClientRect()));
+                    setArrivalDropdownPos(getInputDropdownPosition(e.currentTarget.getBoundingClientRect()));
                     setShowArrivalResults(true);
                     handleSearchFocus();
                   }}
@@ -907,9 +900,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     横幅（waypointFieldWidth）をそのまま使う。
                     右側に空いた分は、入力を閉じる×ボタンと、既存の
                     経由駅チップ（折り返して表示）に詰めて使う。
-                    候補ドロップダウンの横幅は出発駅・到着駅と同じ
-                    `getFullWidthDropdownPosition`（同じ表示関数）を使い、
-                    入力欄より狭くならないようにする。
+                    候補ドロップダウンの横幅・位置は出発駅・到着駅と同じ
+                    `getInputDropdownPosition`（同じ表示関数）で、
+                    この入力欄自身の枠にぴったり揃える。
                   */}
                   <div style={{
                     flex: waypointFieldWidth ? `0 0 ${waypointFieldWidth}px` : '1 1 0',
@@ -929,7 +922,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       }}
                       onFocus={(e) => {
                         focusedInputRef.current = e.currentTarget;
-                        setWaypointDropdownPos(getFullWidthDropdownPosition(e.currentTarget.getBoundingClientRect()));
+                        setWaypointDropdownPos(getInputDropdownPosition(e.currentTarget.getBoundingClientRect()));
                         setShowWaypointResults(true);
                       }}
                       onBlur={() => {
