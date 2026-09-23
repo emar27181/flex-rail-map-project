@@ -19,7 +19,7 @@ export interface Props {
   label: string;
   note: string;
   guideSlug: string;
-  language: 'ja' | 'en';
+  language: 'ja' | 'en' | 'zh';
   /** 地図で先に表示しておきたい路線 */
   routes?: RouteKey[];
 }
@@ -31,7 +31,7 @@ if (routes && routes.length > 0) {
   const codes = routes.map(getRouteCode).filter((c): c is string => !!c);
   if (codes.length > 0) params.set('routes', codes.join(','));
 }
-if (language === 'en') params.set('lang', 'en');
+if (language !== 'ja') params.set('lang', language);
 const query = params.toString();
 const href = `/${query ? `?${query}` : ''}`;
 ---

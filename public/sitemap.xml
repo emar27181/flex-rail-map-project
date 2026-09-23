@@ -129,6 +129,26 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/en/guides/tokyo-train-network"/>
   </url>
 
+  <!-- Guides index (zh) -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/zh/guides</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flex-railway-map.netlify.app/zh/guides"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/zh/guides"/>
+  </url>
+
+  <!-- Guide: 东京地铁线路图简化查看方法 -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/zh/guides/tokyo-train-map</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flex-railway-map.netlify.app/zh/guides/tokyo-train-map"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/zh/guides/tokyo-train-map"/>
+  </url>
+
   <!-- Articles index -->
   <url>
     <loc>https://flex-railway-map.netlify.app/articles</loc>

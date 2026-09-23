@@ -161,8 +161,15 @@ describe('路線一覧の表示方式（ボード / 従来の一覧）と並び�
     expect(screen.queryByText('routeViewClassic')).not.toBeInTheDocument();
   });
 
-  it('並び順の切り替えは表示方式によらず出る', () => {
+  it('並び順の切り替えは表示方式によらず、常にプルダウンとして出る', () => {
     render(<LegendRouteList {...twoRouteProps} />);
+    // 「並びかえで今選択されてるのが表示されてプルダウンとかで切り替える
+    // ように」の要望どおり、折りたたまずに常時プルダウンで出す
+    const sortSelect = screen.getByLabelText('sortLabel') as HTMLSelectElement;
+    expect(sortSelect.tagName).toBe('SELECT');
+    // 既定は近い順（distance）が選択されている
+    expect(sortSelect.value).toBe('distance');
+
     expect(screen.getByText('sortAlpha')).toBeInTheDocument();
     expect(screen.getByText('sortColor')).toBeInTheDocument();
     expect(screen.getByText('sortDefault')).toBeInTheDocument();
@@ -177,7 +184,8 @@ describe('路線一覧の表示方式（ボード / 従来の一覧）と並び�
     // 既定は近い順（distance）: 画面中心に近い routeB が先
     expect(chipOrder()).toEqual(['routeB', 'routeA']);
 
-    fireEvent.click(screen.getByText('sortAlpha'));
+    const sortSelect = screen.getByLabelText('sortLabel') as HTMLSelectElement;
+    fireEvent.change(sortSelect, { target: { value: 'name' } });
 
     // あいうえお順: 「あ路線」(routeA) が「ん路線」(routeB) より先
     expect(chipOrder()).toEqual(['routeA', 'routeB']);

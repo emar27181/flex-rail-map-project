@@ -151,7 +151,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
                 variant="outline"
                 size="sm"
                 onClick={() => setShowSettings(!showSettings)}
-                icon={<Settings size={14} />}
+                icon={<Settings />}
               >
                 {translateUI('cookieManageSettings', language)}
               </Button>

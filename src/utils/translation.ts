@@ -7472,8 +7472,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "List"
   },
   routeSearchPlaceholder: {
-    japanese: "路線名で絞り込む",
-    english: "Filter by route name"
+    japanese: "路線名を検索",
+    english: "Search route name"
   },
   routeGroupOnRoute: {
     japanese: "経路上の路線",
@@ -7924,6 +7924,14 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "以降",
     english: "onwards"
   },
+  showPastDepartures: {
+    japanese: "前の時刻を表示",
+    english: "Show earlier departures"
+  },
+  hidePastDepartures: {
+    japanese: "前の時刻を隠す",
+    english: "Hide earlier departures"
+  },
   offRouteReference: {
     japanese: "ルート外参考",
     english: "Off-route ref"
@@ -8189,7 +8197,7 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Train Demo"
   },
   sortLabel: {
-    japanese: "並順:",
+    japanese: "並び順:",
     english: "Sort:"
   },
   sortAlpha: {
@@ -8668,7 +8676,7 @@ export const uiChinese: Record<string, string> = {
   showMoreRoutes: "▼ 显示其他 {count} 条线路",
   routeViewBoard: "面板",
   routeViewClassic: "列表",
-  routeSearchPlaceholder: "按线路名称筛选",
+  routeSearchPlaceholder: "搜索线路名称",
   routeGroupOnRoute: "路线上的线路",
   routeGroupAtStation: "经过所选车站的线路",
   routeGroupVisible: "显示中",
@@ -8799,6 +8807,8 @@ export const uiChinese: Record<string, string> = {
   routeCountOption: "{count}条线路以上",
   dataSource: "来源",
   afterSuffix: "以后",
+  showPastDepartures: "显示更早的发车",
+  hidePastDepartures: "隐藏更早的发车",
   offRouteReference: "路线外参考",
   noData: "无数据",
   showAllTimetable: "▼ 显示完整时刻表",
@@ -9121,6 +9131,8 @@ export const uiKorean: Record<string, string> = {
   routeCountOption: "{count}개 노선 이상",
   dataSource: "출처",
   afterSuffix: "이후",
+  showPastDepartures: "이전 출발 표시",
+  hidePastDepartures: "이전 출발 숨기기",
   offRouteReference: "경로 외 참고",
   noData: "데이터 없음",
   showAllTimetable: "▼ 전체 시간표 표시",

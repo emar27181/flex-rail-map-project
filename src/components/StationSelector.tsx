@@ -52,6 +52,12 @@ interface StationSelectorProps {
   departureTime?: string;
   onDepartureTimeChange?: (time: string) => void;
   onSetNearestDeparture?: () => void;
+  /**
+   * 出発駅が「現在地の最寄り駅」と一致しているか。
+   * 「現在地から」ボタンを塗りつぶすかどうかに使う（GPSが取れただけでは
+   * 塗らず、実際に出発駅として適用されているときだけ塗る）
+   */
+  isNearestDeparture?: boolean;
   onSearchingChange?: (isSearching: boolean) => void;
   detectedRoute?: DetectedRoute | null;
   manualTrainRoute?: DetectedRoute | null;
@@ -99,6 +105,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   departureTime,
   onDepartureTimeChange,
   onSetNearestDeparture,
+  isNearestDeparture = false,
   onSearchingChange,
   detectedRoute = null,
   manualTrainRoute = null,
@@ -349,29 +356,22 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   };
 
   /**
-   * 出発駅・到着駅の候補ドロップダウンの位置・横幅を、入力欄自身の幅ではなく
-   * パネル全体の中身の幅に合わせて計算する。
+   * 候補ドロップダウンの位置・横幅を、それを開いた入力欄自身の枠に
+   * 揃えて計算する。「その入力欄の横枠と候補の横枠の長さと位置を統一して」
+   * との指摘どおり、出発駅・到着駅・経由駅のどの入力欄でも、候補は
+   * その入力欄とぴったり同じ左端・右端になる。
    *
-   * 出発駅・到着駅は横に並ぶ2カラムのため、入力欄自身の幅はパネルの半分ほど
-   * しかない。候補の横幅もそれに合わせていたため、候補を出すと隣の到着駅欄の
-   * ぶんだけ余白ができ、しかも候補が下のボタン行に重なって隠れていた。
-   * パネルの余白（padding）はデザイントークン(L.sp.md)から決まるが、
-   * ここでは実際に描画された値を`getComputedStyle`で読み取ることで、
-   * トークンの値が変わっても計算式を書き換えずに済むようにしている。
+   * 隙間（真下に何px離すか）だけは`L.sp.xxs`（2px）から取り、直書きしない。
+   * 以前はパネル全体の幅に広げていたが（出発駅・到着駅が横並び2カラムの
+   * ため入力欄自身は半分幅しかなく、候補が下のボタン行に重なって隠れる
+   * 問題があった）、候補側は`StationSearchDropdown`でportal化・
+   * z-index分離済みのため、幅を入力欄に戻しても再発しない。
    */
-  const getFullWidthDropdownPosition = (inputRect: DOMRect) => {
-    const panelEl = panelRef.current;
-    if (!panelEl) return { top: inputRect.bottom + 2, left: inputRect.left, width: inputRect.width };
-    const panelRect = panelEl.getBoundingClientRect();
-    const style = getComputedStyle(panelEl);
-    const padLeft = parseFloat(style.paddingLeft) || 0;
-    const padRight = parseFloat(style.paddingRight) || 0;
-    return {
-      top: inputRect.bottom + 2,
-      left: panelRect.left + padLeft,
-      width: panelRect.width - padLeft - padRight,
-    };
-  };
+  const getInputDropdownPosition = (inputRect: DOMRect) => ({
+    top: inputRect.bottom + parseFloat(L.sp.xxs),
+    left: inputRect.left,
+    width: inputRect.width,
+  });
 
   const handleDepartureSelect = (station: Station) => {
     departureClickedRef.current = true;
@@ -477,7 +477,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         border: `1px solid ${colors.border}`,
         borderRadius: L.r.card,
         backgroundColor: isExpanded ? colors.glassOpen : colors.glassCollapsed,
-        boxShadow: `0 2px 8px ${colors.shadow}`,
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
       }}
@@ -533,7 +532,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                   onFocus={(e) => {
                     focusedInputRef.current = e.currentTarget;
-                    setDepartureDropdownPos(getFullWidthDropdownPosition(e.currentTarget.getBoundingClientRect()));
+                    setDepartureDropdownPos(getInputDropdownPosition(e.currentTarget.getBoundingClientRect()));
                     setShowDepartureResults(true);
                     handleSearchFocus();
                   }}
@@ -662,7 +661,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   }}
                   onFocus={(e) => {
                     focusedInputRef.current = e.currentTarget;
-                    setArrivalDropdownPos(getFullWidthDropdownPosition(e.currentTarget.getBoundingClientRect()));
+                    setArrivalDropdownPos(getInputDropdownPosition(e.currentTarget.getBoundingClientRect()));
                     setShowArrivalResults(true);
                     handleSearchFocus();
                   }}
@@ -769,23 +768,26 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               {onSetNearestDeparture && (
                 <Button
                   theme={theme}
+                  /*
+                    「現在地から」の塗り分けは何度か迷走した経緯があるので
+                    最終的な条件をここに書いておく:
+                    - disabled: 位置情報（userLocation）が取れていない間。
+                      押しても意味が無いため非活性にする（消すと隣のボタンの
+                      位置が動くので、消さずに非活性で存在だけ示す）
+                    - pressed(塗りつぶし): 出発駅が「今の現在地の最寄り駅」と
+                      一致しているときだけ。「今だったら藤沢本町が最寄り駅で
+                      それが出発駅にセットされていたら活性化」との指定どおり、
+                      GPSが取れただけでは塗らない（＝押せるが色はまだ変わらない）。
+                      実際に出発駅へ適用された状態を確認できる表示にする
+                    isNearestDeparture の計算は RailwayMap.tsx 側（呼び出し元）
+                    で行っている
+                  */
                   variant="primary"
                   size="sm"
                   onClick={onSetNearestDeparture}
                   icon={<LocateFixed />}
-                  /*
-                    現在地（userLocation）が取れるまでは押しても意味が無いため、
-                    ボタン自体を消すのではなく非活性で存在だけ示す
-                    （消えたり現れたりすると隣のボタンの位置が動いてしまうため）。
-                    このボタンは「出発駅にする」という1回限りの操作であり、
-                    on/offの状態を持つトグルではないため、`pressed`は渡さない
-                    （渡すと未確定時に枠線だけの見た目になり、同じくdisabledで
-                    出し分ける他のアクションボタン——StationMemoPanel.tsxの
-                    「＋」追加ボタンなど——と見た目の規則が食い違う）。
-                    disabledだけで出し分け、他の非活性ボタンと同じ
-                    「塗りは変えず不透明度だけ下げる」見た目に揃える。
-                  */
                   disabled={!userLocation}
+                  pressed={isNearestDeparture}
                 >
                   {translateUI('currentLocationFrom', language)}
                 </Button>
@@ -898,9 +900,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     横幅（waypointFieldWidth）をそのまま使う。
                     右側に空いた分は、入力を閉じる×ボタンと、既存の
                     経由駅チップ（折り返して表示）に詰めて使う。
-                    候補ドロップダウンの横幅は出発駅・到着駅と同じ
-                    `getFullWidthDropdownPosition`（同じ表示関数）を使い、
-                    入力欄より狭くならないようにする。
+                    候補ドロップダウンの横幅・位置は出発駅・到着駅と同じ
+                    `getInputDropdownPosition`（同じ表示関数）で、
+                    この入力欄自身の枠にぴったり揃える。
                   */}
                   <div style={{
                     flex: waypointFieldWidth ? `0 0 ${waypointFieldWidth}px` : '1 1 0',
@@ -920,7 +922,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       }}
                       onFocus={(e) => {
                         focusedInputRef.current = e.currentTarget;
-                        setWaypointDropdownPos(getFullWidthDropdownPosition(e.currentTarget.getBoundingClientRect()));
+                        setWaypointDropdownPos(getInputDropdownPosition(e.currentTarget.getBoundingClientRect()));
                         setShowWaypointResults(true);
                       }}
                       onBlur={() => {

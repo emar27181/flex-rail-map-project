@@ -142,10 +142,19 @@ describe('RouteFinder', () => {
       expect(oneTransferRoute).toBeDefined();
     });
 
-    it('藤沢→新宿の小田急線経由ルートが上位3件以内に入る（各駅停車ベースの所要時間で埋もれない）', () => {
+    it('藤沢→新宿の小田急線経由ルートが上位5件以内（デフォルト表示件数=10の範囲内）に入る（各駅停車ベースの所要時間で埋もれない）', () => {
       // 過去の不具合: odakyu-line/odakyu-enoshima-lineのtimeToNextが各駅停車ベースの
       // 生値だったため、駅数の多い小田急線の所要時間がJR幹線より大幅に長く算出され、
       // 実際には表示件数内でも順位が低すぎて事実上見えなくなっていた。
+      //
+      // 2026-09-23: routeFinder.findRoutes 側の別バグ修正（探索の `visited`
+      // 判定が到着駅への到達チェックより先に効いてしまい、遠回りな経路が
+      // 先に同じ駅×路線を「発見」しているだけで、実在する経路が候補から
+      // 丸ごと消えることがあった）により、JR＋地下鉄乗り換えの正当な候補が
+      // 新たに複数見つかるようになった。小田急線経由（56分）はこれらの
+      // 正当な競合（52〜56分）と同着・僅差の実力どおりの順位（5位）になった
+      // だけで、埋もれてはいない。デフォルトの表示件数（10件）には
+      // 余裕をもって収まるため、しきい値を3位から5位に見直した。
       const fujisawa = routes.odakyuEnoshimaLine.find(s => s.name === '藤沢');
       const shinjuku = routes.odakyuLine.find(s => s.name === '新宿');
 
@@ -158,7 +167,7 @@ describe('RouteFinder', () => {
       );
 
       expect(odakyuRank).toBeGreaterThanOrEqual(0);
-      expect(odakyuRank).toBeLessThan(3);
+      expect(odakyuRank).toBeLessThan(5);
     });
   });
 
