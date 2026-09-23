@@ -118,10 +118,13 @@ const MAP_CORNER_ICON_SIZE = 18;
  * スマホ・非全画面時、地図右上の「全画面表示」ボタン1個ぶんを避けて
  * 「表示路線の切替」パネルの右端を詰めるための予約幅。
  * ボタン本体の寸法（MAP_CORNER_BUTTON_PX）とボタン間の間隔トークン
- * （L.sp.xs）から計算し、値を直書きしない。右端の余白は他の地図隅要素と
- * 揃えて10px（L.sp.lg）。
+ * （L.sp.xs）から計算し、値を直書きしない。
+ * ボタン自体はこの右に page の右端（ヘッダー・出発駅欄と同じ境界）まで
+ * 隙間なく寄せる（右マージンを別途足さない）。以前はボタンにも独自の
+ * 10px マージンがあり、ヘッダーの右端・出発駅欄の右端と1本の縦線に
+ * 揃わずズレて見えていた。
  */
-const MOBILE_LEGEND_RIGHT_RESERVED = MAP_CORNER_BUTTON_PX + parseFloat(L.sp.xs) + parseFloat(L.sp.lg);
+const MOBILE_LEGEND_RIGHT_RESERVED = MAP_CORNER_BUTTON_PX + parseFloat(L.sp.xs);
 
 const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguageChange, onFullscreenChange }) => {
   // console.log('RailwayMap component initialized');
@@ -238,8 +241,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * しきい値と on/off をどちらも設定から変えられるようにする。
    */
   const [alwaysVisibleStationsEnabled, setAlwaysVisibleStationsEnabled] = useState(true);
-  /** 常時表示の対象とする最小路線数。この本数以上が乗り入れる駅を残す */
-  const [alwaysVisibleMinRoutes, setAlwaysVisibleMinRoutes] = useState(5);
+  /**
+   * 常時表示の対象とする最小路線数。この本数以上が乗り入れる駅を残す。
+   * 「路線表示オフでも表示する駅の閾値を今の+2にしてデフォルトの値を」
+   * との指摘を受け、既定値を5→7に変更（選択肢自体は変更前から2〜10で
+   * 変わらず、そのうち7は既存の選択肢に含まれている）
+   */
+  const [alwaysVisibleMinRoutes, setAlwaysVisibleMinRoutes] = useState(7);
   const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
   const [showStationTierBadges, setShowStationTierBadges] = useState(false); // 乗り入れ路線数リング表示
   const [showTravelTimes, setShowTravelTimes] = useState(false);
@@ -5713,10 +5721,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 ように」との指定どおり、幅は固定300pxではなく左右の位置
                 から自動で決まるようにする。それ以外（デスクトップ・
                 全画面）は従来どおり右上に固定幅で浮かせる。
+                右端は`0`にして地図自体の右端に揃える（＝ヘッダーの右端・
+                出発駅欄の右端と同じ境界）。以前は`10px`の余白を追加で
+                持っており、それらと縦の線が少しズレて見えていた
               */
               ...(isMobile && !isFullscreen
                 ? { left: '10px', right: `${MOBILE_LEGEND_RIGHT_RESERVED}px`, width: 'auto' }
-                : { right: '10px', width: '300px' }),
+                : { right: '0', width: '300px' }),
               maxHeight: isFullscreen ? 'calc(100% - 66px)' : 'none',
               backgroundColor: colors.surfaceElevated,
               border: `1px solid ${colors.border}`,
@@ -5727,7 +5738,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               display: isFullscreen ? 'flex' : 'block',
               flexDirection: 'column',
             }}>
-              {/* ヘッダー：スクロールコンテナの外に置き常に表示 */}
+              {/*
+                ヘッダー：スクロールコンテナの外に置き常に表示。
+                スマホ・非全画面時は、隣に並ぶ「全画面表示」ボタンと
+                縦幅を揃える（「表示路線の切替と拡大のボタンの縦幅は統一」
+                との指摘）。ボタン側の寸法（MAP_CORNER_BUTTON_PX）を
+                そのまま高さに使い、値を別途書き直さない
+              */}
               <div
                 onClick={() => setIsLegendExpanded(!isLegendExpanded)}
                 style={{
@@ -5735,9 +5752,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   cursor: 'pointer',
-                  padding: L.sp.lg,
+                  boxSizing: 'border-box',
                   flexShrink: 0,
-                  borderBottom: isLegendExpanded ? `1px solid ${colors.borderLight}` : 'none'
+                  borderBottom: isLegendExpanded ? `1px solid ${colors.borderLight}` : 'none',
+                  ...(isMobile && !isFullscreen
+                    ? { height: `${MAP_CORNER_BUTTON_PX}px`, padding: `0 ${L.sp.lg}` }
+                    : { padding: L.sp.lg }),
                 }}
               >
                 <span style={{
@@ -6209,7 +6229,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               ? { top: 'calc(env(safe-area-inset-top, 0px) + 16px)', bottom: 'auto', right: '10px', left: 'auto' }
               : !isFullscreen
                 ? isMobile
-                  ? { top: '10px', bottom: 'auto', right: '10px', left: 'auto' }
+                  // 右端は`0`で地図自体の右端に揃える（ヘッダー・出発駅欄と同じ境界）。
+                  // 以前は`10px`の余白があり、縦の線が少しズレて見えていた
+                  ? { top: '10px', bottom: 'auto', right: '0', left: 'auto' }
                   : { bottom: '10px', top: 'auto', left: '10px' }
                 : { bottom: '10px', top: 'auto', left: '10px' }),
             zIndex: 1003,
