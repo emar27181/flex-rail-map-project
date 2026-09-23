@@ -403,6 +403,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showAllTooltipDeps, setShowAllTooltipDeps] = useState(false);
   // 時刻表ツールチップ: 基準時刻より前の発車も見られるようにする開閉状態
   const [showPastDepartures, setShowPastDepartures] = useState(false);
+  // 「前の時刻を表示」で一度に見せる件数。「さらに前を表示」を押すたびに
+  // PAST_DEPARTURE_STEP ずつ増やし、始発に到達するまで遡れるようにする
+  const [pastDeparturesShownCount, setPastDeparturesShownCount] = useState(8);
 
   // 路線ホバー・ポップアップ状態
   const [hoveredRoute, setHoveredRoute] = useState<string | null>(null);
@@ -812,6 +815,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     setTooltipSelectedRoute(null);
     setShowAllTooltipDeps(false);
     setShowPastDepartures(false);
+    setPastDeparturesShownCount(8);
   }, [stationTooltip?.stationName]);
 
   // 列車種別表示: 路線変更時に列車種別をリセット
@@ -1525,14 +1529,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     // 選択路線の発車情報を取得（経路の方向・時刻を優先使用）
     // 基準時刻より前（activePastDeps）と後（activeDeps）に分けて取得し、
-    // 「前の時刻を表示」が開かれたときだけ前者を描画する
-    const PAST_DEPARTURE_COUNT = 8;
+    // 「前の時刻を表示」が開かれたときだけ前者を描画する。
+    // prevは始発まで全件まとめて取得しておき（1日ぶんなので軽い）、
+    // 画面には pastDeparturesShownCount ぶんだけ見せる。「さらに前を表示」を
+    // 押すたびにその件数を増やし、始発に到達するまで遡れるようにする
+    // （「前の時刻を表示で始発まで遡れるように」との要望を受けた）。
     const { activeDeps, activePastDeps } = (() => {
       const empty = { activeDeps: [] as Departure[], activePastDeps: [] as Departure[] };
       if (!activeRouteKey || !hasTimetableData(activeRouteKey)) return empty;
       const depTime = activeJourneyEntry?.depTime ?? timetableBaseTime;
       const dirIdx  = activeJourneyEntry?.directionIndex ?? 0;
-      const { prev, next } = getDeparturesAround(activeRouteKey, stationTooltip.stationName, dirIdx, depTime, PAST_DEPARTURE_COUNT, 50);
+      const { prev, next } = getDeparturesAround(activeRouteKey, stationTooltip.stationName, dirIdx, depTime, Infinity, 50);
       return { activeDeps: next, activePastDeps: prev };
     })();
 
@@ -1598,7 +1605,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // 画面の7割まで使う。以前は半分に抑えていたが時刻表が数本しか見えず狭かった。
     // 地図の空きタップでも閉じられるので、多少大きくても操作は詰まらない。
     const maxTooltipH = Math.min(vh - MARGIN * 2, isMobileView ? Math.round(vh * 0.7) : 620);
-    const shownDepCount = activeDeps.length + (showPastDepartures ? activePastDeps.length : 0);
+    const shownPastCount = showPastDepartures ? Math.min(activePastDeps.length, pastDeparturesShownCount) : 0;
+    const shownDepCount = activeDeps.length + shownPastCount;
     const estH = Math.min(52 + Math.max(allRoutes.length * 28, shownDepCount * 26 + 22) + 20, maxTooltipH);
     const rawY = stationTooltip.y + 14;
     const baseX = x;
@@ -1824,6 +1832,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       setVisibleRoutes(prev => new Set([...prev, rk as RouteKey]));
                     } else {
                       setTooltipSelectedRoute(rk);
+                      setPastDeparturesShownCount(8);
                     }
                   }}
                   style={{
@@ -1913,7 +1922,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   一番上に来る）。「前の時刻も見れるように」という要望を受けて、
                   ボタンで開くと基準時刻の直前の便を上に追加表示する形にした
                   （常時表示にすると、いつも見る「次の便」が毎回スクロールしないと
-                  見えなくなってしまうため）
+                  見えなくなってしまうため）。
+                  「前の時刻を表示で始発まで遡れるように」との要望を受け、
+                  開いた状態で「さらに前を表示」を押すたびに表示件数を増やし、
+                  始発（その路線・方向のいちばん早い便）に到達するまで
+                  遡れるようにした。始発まで到達したら、その旨を表示して止める
+                  （前日の便を重複して表示することはしない）。
                 */}
                 {activePastDeps.length > 0 && (
                   <div
@@ -1928,11 +1942,36 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     {showPastDepartures ? '▲' : '▼'} {translateUI(showPastDepartures ? 'hidePastDepartures' : 'showPastDepartures', currentLanguage)}
                   </div>
                 )}
-                {showPastDepartures && activePastDeps.map((dep, i) => (
-                  <div key={`past-${dep.time}-${dep.type}-${i}`} style={{ opacity: 0.55 }}>
-                    {renderDepartureRow(dep)}
-                  </div>
-                ))}
+                {showPastDepartures && (() => {
+                  const PAST_DEPARTURE_STEP = 8;
+                  const hasMorePast = pastDeparturesShownCount < activePastDeps.length;
+                  const visiblePast = activePastDeps.slice(-pastDeparturesShownCount);
+                  return (
+                    <>
+                      <div
+                        onClick={hasMorePast ? () => setPastDeparturesShownCount(c => c + PAST_DEPARTURE_STEP) : undefined}
+                        style={{
+                          padding: `${L.sp.xs} ${L.sp.md}`,
+                          fontSize: FS.caption,
+                          color: hasMorePast ? colors.primary : colors.textSecondary,
+                          borderBottom: `1px solid ${colors.borderLight}`,
+                          cursor: hasMorePast ? 'pointer' : 'default',
+                          userSelect: 'none',
+                          textAlign: 'center',
+                        }}
+                      >
+                        {hasMorePast
+                          ? translateUI('showMorePastDepartures', currentLanguage)
+                          : translateUI('firstTrainReached', currentLanguage)}
+                      </div>
+                      {visiblePast.map((dep, i) => (
+                        <div key={`past-${dep.time}-${dep.type}-${i}`} style={{ opacity: 0.55 }}>
+                          {renderDepartureRow(dep)}
+                        </div>
+                      ))}
+                    </>
+                  );
+                })()}
                 <div style={{
                   padding: `${L.sp.xs} ${L.sp.md}`,
                   fontSize: FS.caption, color: colors.textSecondary,
