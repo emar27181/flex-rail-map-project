@@ -67,6 +67,12 @@ import {
 } from '../utils/mapSizePersistence';
 import { patchRotatedRendererDrift } from '../utils/leafletRotatePatch';
 import { getInitialVisibleRoutesFromUrl, syncVisibleRoutesToUrl } from '../utils/routeUrlCodes';
+import {
+  getInitialDepartureFromUrl,
+  getInitialArrivalFromUrl,
+  getInitialWaypointsFromUrl,
+  syncStationsToUrl,
+} from '../utils/stationUrlParams';
 import ColorChip from './ui/ColorChip';
 import TimetableSourceNote from './ui/TimetableSourceNote';
 import { checkboxInput, L} from './legend/legendStyles';
@@ -3196,6 +3202,29 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   useEffect(() => {
     syncVisibleRoutesToUrl(visibleRoutes);
   }, [visibleRoutes]);
+
+  // URL共有: 初回マウント時のみ、URLの from/to/via パラメータがあれば出発・到着・経由駅を復元する。
+  // URLで指定された出発駅は「手動設定」として扱う（現在地からの自動設定で上書きされないように、
+  // handleManualSetDepartureと同じ経路でisManualDepartureを立てる）。
+  const urlStationsAppliedRef = useRef(false);
+  useEffect(() => {
+    if (urlStationsAppliedRef.current) return;
+    urlStationsAppliedRef.current = true;
+    const dep = getInitialDepartureFromUrl();
+    const arr = getInitialArrivalFromUrl();
+    const via = getInitialWaypointsFromUrl();
+    if (dep) {
+      setDeparture(dep);
+      setIsManualDeparture(true);
+    }
+    if (arr) setArrival(arr);
+    if (via.length > 0) setWaypoints(via);
+  }, []);
+
+  // URL共有: 出発駅・到着駅・経由駅が変わるたびにURLへ反映する
+  useEffect(() => {
+    syncStationsToUrl(departure, arrival, waypoints);
+  }, [departure, arrival, waypoints]);
 
   // Leafletポップアップとコントロールのテーマ対応（動的スタイル適用）
   useEffect(() => {
