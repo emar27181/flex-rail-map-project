@@ -4503,7 +4503,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const cornerButtonStyle = {
     width: MAP_CORNER_BUTTON_PX,
     height: MAP_CORNER_BUTTON_PX,
-    boxShadow: `0 2px 8px ${colors.shadow}`,
     backdropFilter: 'blur(4px)',
   };
 

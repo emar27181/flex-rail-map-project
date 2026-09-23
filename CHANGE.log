@@ -1,5 +1,20 @@
 # CHANGE LOG
 
+## [2026-09-23] セッション（出発・到着駅選択パネルと地図隅ボタンの影をオフ）
+
+### improve: 「出発駅・到着駅を選択」パネルとフルスクリーン/言語/テーマ/記事一覧ボタンの影を削除
+- `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`
+- 「出発駅到着駅選択と縮小ボタンとかのシャドウをオフにして」との指摘を
+  受けた
+- 「出発駅・到着駅を選択」パネル本体の`boxShadow`（`StationSelector.tsx`）
+  と、地図隅に浮かぶ丸ボタン（フルスクリーン切替＝縮小ボタン・言語・
+  テーマ・記事一覧）が共通で参照している`cornerButtonStyle`
+  （`RailwayMap.tsx`）の`boxShadow`をそれぞれ削除。後者は一元管理された
+  1箇所の定義のため、この4ボタンすべてに同時に反映される
+  （ぼかし`backdropFilter`はそのまま残し、影だけを外した）
+- `npm run test:types` / `npm run test:unit`(371件) / `npm run build`
+  すべて通過。Playwrightでパネルとボタンの影が無くなったことを実機確認
+
 ## [2026-09-23] セッション（経路検索: 探索済み駅の判定が到着駅への到達チェックより先に効き、実在する経路が候補ごと消えるバグを修正）
 
 ### fix: routeFinder.findRoutes が、遠回りな経路が先に同じ駅×路線を「発見」しているだけで、直接的な経路の到着を握りつぶし候補ゼロになることがあった問題を修正

@@ -484,7 +484,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         border: `1px solid ${colors.border}`,
         borderRadius: L.r.card,
         backgroundColor: isExpanded ? colors.glassOpen : colors.glassCollapsed,
-        boxShadow: `0 2px 8px ${colors.shadow}`,
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
       }}
