@@ -2983,15 +2983,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       });
 
       // 推薦されたルートで使用される路線を自動的に表示状態にする。
-      // 全候補(最大10件)ぶんの路線をまとめて表示すると、選択していない
-      // 候補の路線まで（トリミングされない全区間で）地図に残ってしまう。
-      // 既定で選択状態にしたのは先頭候補だけなので、自動表示もそれに合わせる
-      // （topRouteは直前でTrainStatusPanel用に定義済みのものを再利用）。
+      // 「その駅間にある路線はできるだけ出す。ルート候補は全部、遅延や
+      // 運休で別ルートに切り替えることを想定して」との指摘を受け、
+      // 先頭候補（topRoute）だけでなく候補ルート全部（finalUniqueRoutes）で
+      // 使われている路線をまとめて表示するようにした。以前は先頭候補だけに
+      // 絞っていた（選択していない候補の路線まで地図に残るのを避けるため）が、
+      // 実際に乗る路線が遅延・運休したとき、地図上に代替候補の路線が
+      // 最初から見えている方が有用という判断で変更している。
+      // ハイライト表示・時刻表に使う「選択中の候補」(selectedRouteIndices)は
+      // 従来どおり先頭候補のみのまま変えていない。
       const routesUsedInRecommendations = new Set<RouteKey>();
-      topRoute?.segments.forEach(segment => {
-        if (segment.routeKey !== 'walking' && segment.routeKey) {
-          routesUsedInRecommendations.add(segment.routeKey as RouteKey);
-        }
+      finalUniqueRoutes.forEach(route => {
+        route.segments.forEach(segment => {
+          if (segment.routeKey !== 'walking' && segment.routeKey) {
+            routesUsedInRecommendations.add(segment.routeKey as RouteKey);
+          }
+        });
       });
 
       if (routesUsedInRecommendations.size > 0) {
