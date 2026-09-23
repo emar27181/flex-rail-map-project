@@ -114,6 +114,14 @@ interface RailwayMapProps {
 const MAP_CORNER_BUTTON_PX = FLOATING_ICON_BUTTON_SIZE.md;
 /** 上のボタン群のアイコンの大きさ。36pxの箱に対して詰まりすぎない大きさ */
 const MAP_CORNER_ICON_SIZE = 18;
+/**
+ * スマホ・非全画面時、地図右上の「全画面表示」ボタン1個ぶんを避けて
+ * 「表示路線の切替」パネルの右端を詰めるための予約幅。
+ * ボタン本体の寸法（MAP_CORNER_BUTTON_PX）とボタン間の間隔トークン
+ * （L.sp.xs）から計算し、値を直書きしない。右端の余白は他の地図隅要素と
+ * 揃えて10px（L.sp.lg）。
+ */
+const MOBILE_LEGEND_RIGHT_RESERVED = MAP_CORNER_BUTTON_PX + parseFloat(L.sp.xs) + parseFloat(L.sp.lg);
 
 const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguageChange, onFullscreenChange }) => {
   // console.log('RailwayMap component initialized');
@@ -4616,8 +4624,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             arrival={arrival}
             onDepartureChange={handleManualSetDeparture}
             onArrivalChange={setArrival}
-            isExpanded={isStationSelectorExpanded}
-            onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
+            /*
+              スマホ（非全画面）では「折りたたみはそこではオフで良い。
+              デフォルト展開で」との指定どおり、常に展開状態にし
+              折りたたみの矢印自体も出さない（onToggleExpandedを渡さない
+              とStationSelector側で矢印が消える）。デスクトップは
+              従来どおり開閉できる
+            */
+            isExpanded={isMobile ? true : isStationSelectorExpanded}
+            onToggleExpanded={isMobile ? undefined : () => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
             departureTime={timetableBaseTime}
             onDepartureTimeChange={setTimetableBaseTime}
             language={currentLanguage}
@@ -5691,13 +5706,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             <div style={{
               position: 'absolute',
               top: '10px',
-              right: '10px',
+              /*
+                スマホ・非全画面時は、右上に単独で残す「全画面表示」ボタン
+                （下のボタン群）の分だけ右を詰め、左端は地図の隅に揃える。
+                「拡大ボタンは右上、その左の余ったところに表示切替が来る
+                ように」との指定どおり、幅は固定300pxではなく左右の位置
+                から自動で決まるようにする。それ以外（デスクトップ・
+                全画面）は従来どおり右上に固定幅で浮かせる。
+              */
+              ...(isMobile && !isFullscreen
+                ? { left: '10px', right: `${MOBILE_LEGEND_RIGHT_RESERVED}px`, width: 'auto' }
+                : { right: '10px', width: '300px' }),
               maxHeight: isFullscreen ? 'calc(100% - 66px)' : 'none',
               backgroundColor: colors.surfaceElevated,
               border: `1px solid ${colors.border}`,
               borderRadius: L.r.control,
               boxShadow: `0 2px 6px ${colors.shadow}`,
-              width: '300px',
               zIndex: 1000,
               overflowY: 'hidden',
               display: isFullscreen ? 'flex' : 'block',
@@ -6171,17 +6195,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             />
           )}
 
-          {/* 左下ボタングループ: フルスクリーン切り替え / 言語 / テーマ / 記事一覧
+          {/* 地図隅ボタングループ: フルスクリーン切り替え / 言語 / テーマ / 記事一覧
               出発駅・到着駅の入力欄と同じ sm(24px) に揃える。段階・見た目は
               ここ1箇所（cornerButtonStyle・renderCornerButton）だけで決め、
-              個々のボタンは差分（アイコン・文言・処理）だけを渡す */}
+              個々のボタンは差分（アイコン・文言・処理）だけを渡す。
+              スマホ・非全画面時だけは、言語・テーマ・記事一覧がヘッダー側
+              （index.astro側の固定ヘッダー）に既にあるためここでは省略し、
+              全画面切り替えボタン1個だけを地図右上に残す
+              （左の余白には「表示路線の切替」パネルが来る）。 */}
           <div style={{
             position: 'absolute',
             ...(isFullscreen && isMobile
               ? { top: 'calc(env(safe-area-inset-top, 0px) + 16px)', bottom: 'auto', right: '10px', left: 'auto' }
               : !isFullscreen
                 ? isMobile
-                  ? { top: '60px', bottom: 'auto', left: '10px' }
+                  ? { top: '10px', bottom: 'auto', right: '10px', left: 'auto' }
                   : { bottom: '10px', top: 'auto', left: '10px' }
                 : { bottom: '10px', top: 'auto', left: '10px' }),
             zIndex: 1003,
@@ -6194,7 +6222,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               () => setIsFullscreen(!isFullscreen),
             )}
 
-            {onLanguageChange && renderCornerButton(
+            {onLanguageChange && !(isMobile && !isFullscreen) && renderCornerButton(
               // 文字をアイコン代わりに置くので、大きさは規格から取る
               <span style={{ fontSize: FS.body, fontWeight: 'bold', fontFamily: 'monospace' }}>
                 {(() => { const langs: Language[] = ['japanese', 'english', 'chinese', 'korean']; const next = langs[(langs.indexOf(language) + 1) % langs.length]; return { japanese: '日', english: 'En', chinese: '中', korean: '한' }[next]; })()}
@@ -6207,8 +6235,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             )}
 
             {/* テーマ切り替え・記事一覧は全画面時は地図を広く使うため隠す
-                （全画面を解除すると再表示される） */}
-            {!isFullscreen && renderCornerButton(
+                （全画面を解除すると再表示される）。スマホの非全画面時も、
+                ヘッダーに同じ操作があるためここでは重ねて出さない */}
+            {!isFullscreen && !isMobile && renderCornerButton(
               theme === 'light' ? <Moon size={MAP_CORNER_ICON_SIZE} /> : <Sun size={MAP_CORNER_ICON_SIZE} />,
               language === 'japanese'
                 ? `${theme === 'light' ? 'ダーク' : 'ライト'}モードに切り替え`
@@ -6218,7 +6247,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
             {/* 記事一覧のみ画面遷移なので a 要素の LinkButton。押す・見た目・寸法は
                 renderCornerButton と同じ規格（cornerButtonStyle）に揃える */}
-            {!isFullscreen && (
+            {!isFullscreen && !isMobile && (
               <LinkButton
                 href="/articles"
                 theme={theme}
