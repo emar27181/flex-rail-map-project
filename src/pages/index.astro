@@ -1,7 +1,8 @@
 ---
 import ThemeWrapper from "../components/ThemeWrapper.tsx";
 import leafletCss from "leaflet/dist/leaflet.css?url";
-import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION, GA_MEASUREMENT_ID } from "../config/seo";
+import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION } from "../config/seo";
+import GA4Loader from "../components/GA4Loader.astro";
 
 // JSON-LD はプレーンな<script>タグの中身をAstroが解釈しないため、
 // SITE_URL等の変数を埋め込むにはここでオブジェクトを組み立てて
@@ -104,37 +105,7 @@ const webSiteSchema = {
 				else window.addEventListener('load', load, { once: true });
 			})();
 		</script>
-		{GA_MEASUREMENT_ID && (
-			<script is:inline define:vars={{ GA_MEASUREMENT_ID }}>
-				// GA4も広告スクリプトと同じ理由で、表示に必要なものが揃ってから読み込む。
-				// Consent Mode: 既定は「同意なし」。CookieBannerで既にanalyticsを
-				// 許可済み（localStorageに記録済み）なら即座にgrantedへ更新する。
-				// 新規訪問者にはCookieBanner側の操作でgtagConsent.tsから更新される。
-				(function () {
-					window.dataLayer = window.dataLayer || [];
-					function gtag() { window.dataLayer.push(arguments); }
-					window.gtag = gtag;
-					gtag('consent', 'default', { analytics_storage: 'denied' });
-					try {
-						var stored = JSON.parse(localStorage.getItem('cookieConsent') || 'null');
-						if (stored && stored.analytics) {
-							gtag('consent', 'update', { analytics_storage: 'granted' });
-						}
-					} catch (e) { /* localStorage不可なら既定のdeniedのまま */ }
-
-					var load = function () {
-						var s = document.createElement('script');
-						s.async = true;
-						s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
-						document.head.appendChild(s);
-						gtag('js', new Date());
-						gtag('config', GA_MEASUREMENT_ID);
-					};
-					if (document.readyState === 'complete') load();
-					else window.addEventListener('load', load, { once: true });
-				})();
-			</script>
-		)}
+		<GA4Loader />
 		<link
 			rel="icon"
 			type="image/png"

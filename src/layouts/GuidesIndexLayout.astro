@@ -11,6 +11,7 @@
 import { staticPageCss } from './staticPageStyles';
 import { guideCss } from './guideStyles';
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
+import GA4Loader from '../components/GA4Loader.astro';
 import { SITE_URL, SITE_NAME, GOOGLE_SITE_VERIFICATION } from '../config/seo';
 
 export interface Props {
@@ -61,6 +62,8 @@ const OG_LOCALE: Record<Props['htmlLang'], string> = {
 		<meta name="twitter:card" content="summary" />
 		<meta name="twitter:title" content={title} />
 		<meta name="twitter:description" content={description} />
+
+		<GA4Loader />
 
 		<style set:html={staticPageCss}></style>
 		<style set:html={guideCss}></style>
