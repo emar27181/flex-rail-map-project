@@ -1,5 +1,24 @@
 # CHANGE LOG
 
+## [2026-09-24] セッション（トップページのhreflangを中国語・韓国語にも対応）
+
+### fix: トップページ（/）のhreflangが日本語・英語のみで、中国語・韓国語の検索クエリと紐付いていなかった
+- `src/pages/index.astro`, `public/sitemap.xml`
+- 「未実施のSEO対策は？」との質問を受けて調査した結果、アプリ本体は
+  `Language`型（`src/utils/translation.ts`）で日本語・英語・中国語・
+  韓国語の4言語に対応しているのに、トップページの`hreflang`タグは
+  `ja`/`en`の2つしか宣言されておらず、`zh`/`ko`が抜けていた
+  （`/about`等の`StaticPage.astro`系ページは実際に日英2言語分の
+  コンテンツしか無いため、こちらは元から2言語で正しい）
+- `?lang=ja`/`?lang=en`/`?lang=zh`/`?lang=ko`の4つの`hreflang`と、
+  `og:locale:alternate`（en_US/zh_CN/ko_KR）を追加。既存の
+  `StaticPage.astro`と同じ「1URL + ?lang=切替」の設計に合わせ、
+  同一URLを複数言語に割り当てず、言語ごとに異なるURLを宣言する形にした
+- `sitemap.xml`のトップページエントリにも同じ`hreflang`を追加
+- `npm run test:types` / `npm run test:unit`(384件) / `npm run build`
+  すべて通過。ビルド後のHTMLで4言語ぶんの`hreflang`と
+  `og:locale:alternate`が出力されることを確認
+
 ## [2026-09-23] セッション（README刷新）
 
 ### docs: GitHub README を初見者向けに全面刷新

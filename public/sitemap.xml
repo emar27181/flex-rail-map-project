@@ -5,11 +5,13 @@
   <!-- Main page -->
   <url>
     <loc>https://flex-railway-map.netlify.app/</loc>
-    <lastmod>2026-06-10</lastmod>
+    <lastmod>2026-09-24</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/?lang=ja"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://flex-railway-map.netlify.app/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flex-railway-map.netlify.app/?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flex-railway-map.netlify.app/?lang=ko"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/"/>
   </url>
 
