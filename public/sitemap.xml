@@ -161,6 +161,46 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/zh/guides/tokyo-train-map"/>
   </url>
 
+  <!-- Guide: 东京地铁线路图太密集怎么看（SEOテーマA・中国語） -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/zh/guides/simple-tokyo-railway-map</loc>
+    <lastmod>2026-09-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flex-railway-map.netlify.app/zh/guides/simple-tokyo-railway-map"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/zh/guides/simple-tokyo-railway-map"/>
+  </url>
+
+  <!-- Guides index (ko) -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/ko/guides</loc>
+    <lastmod>2026-09-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flex-railway-map.netlify.app/ko/guides"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/ko/guides"/>
+  </url>
+
+  <!-- Guide: 도쿄 노선도 심플하게 보는 방법（SEOテーマA・韓国語） -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/ko/guides/simple-tokyo-railway-map</loc>
+    <lastmod>2026-09-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flex-railway-map.netlify.app/ko/guides/simple-tokyo-railway-map"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/ko/guides/simple-tokyo-railway-map"/>
+  </url>
+
+  <!-- Guide: 도쿄 노선도 심플하게 보기（SEOテーマC・韓国語） -->
+  <url>
+    <loc>https://flex-railway-map.netlify.app/ko/guides/tokyo-train-map</loc>
+    <lastmod>2026-09-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flex-railway-map.netlify.app/ko/guides/tokyo-train-map"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flex-railway-map.netlify.app/ko/guides/tokyo-train-map"/>
+  </url>
+
   <!-- Articles index -->
   <url>
     <loc>https://flex-railway-map.netlify.app/articles</loc>
