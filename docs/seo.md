@@ -56,3 +56,62 @@ SEO_LIVE_BASE_URL=https://deploy-preview-<PR番号>--flex-railway-map.netlify.ap
   `dateModified` を書かない
 - 情報の薄いページは `<meta name="robots" content="noindex, follow">` にする
   （sitemap からは自動で外れる）
+
+## 駅・路線・データのページ（/stations, /lines, /data）
+
+路線データ・駅統計・観光地データから **自動生成** する。ページのファイルは
+`src/pages/[...lang]/{stations,lines,data}/` にあり、日本語（`/stations/shinjuku`）と
+英語（`/en/stations/shinjuku`）を1つのファイルから作る。中身は `src/seo/pageModel.ts`、
+文言は `src/seo/pageText.ts`、どこまで作るかは `src/data/seoPages.ts`。
+
+| 作るもの | 範囲 | index させる基準 |
+|---|---|---|
+| 路線ページ | `SEO_LINE_KEYS` の路線（PoC: 首都圏の20路線） | 駅が2つ以上 |
+| 駅ページ | 上の路線の全駅＋観光地の最寄り駅 | **Tier A だけ** |
+| データのページ | `SEO_DATA_METRICS` のうち実データ（`dataQuality: 'real'`）の指標 | 値のある駅が20以上 |
+| 一覧（ハブ） | 駅・路線・データの3つ | 常に index |
+
+### 駅ページの Tier（`STATION_TIER_RULES`）
+
+- **A**（index）: 実データの周辺統計が5項目以上あり、かつ
+  「実質の路線数が5以上の乗換駅」または「観光地の最寄り駅」
+- **B**（noindex, follow）: 乗換駅、または周辺統計がある駅
+- **C**（noindex, follow）: それ以外
+
+B・C のページも作る（路線ページ・隣の駅からのリンク先として必要）が、
+同じ型のページを何百も検索エンジンに出さないため noindex にし、sitemap にも載せない。
+**基準を緩めるときは、1ページごとに固有の情報が増えたかを先に確かめること。**
+`tests/unit/seo/pageModel.test.ts` は index する駅ページが40を超えると落ちる（歯止め）。
+
+### 作らないもの（2026-09 時点）
+
+- `/data/passengers`（乗降客数）・`/data/rent`（家賃）: 今のデータが推定値のため作らない。
+  `stationStats.ts` で実データ（`'real'`）に置き換えれば、`SEO_DATA_METRICS` に
+  書いてあるので自動で作られる
+
+### 値の扱い
+
+- 駅は「駅名＋座標」で識別する（`src/utils/sameStation.ts`）。同名の別駅を混ぜない
+- 駅統計の座標は小数1桁に丸められているので、15km 以内なら同じ駅の統計とみなす
+- 実データ（`'real'`）以外の統計は出さない。値の無い駅は0にせず「データなし」の件数だけ示す
+- 英語ページに出す統計の範囲・時期・出典名は `pageText.ts` の `STAT_SCOPE_EN` /
+  `SOURCE_TITLE_EN` に訳が無いとテストが落ちる
+
+### 内部リンク（すべて自動）
+
+- 駅 ⇔ 路線（駅ページの路線チップ、路線ページの駅一覧）
+- 駅 → 隣の駅、近くの主要駅（index 対象の駅から10km以内の5駅）
+- 駅 ⇔ 観光地（駅ページの「最寄りの観光地」、駅一覧の観光地表）
+- データ → 駅・路線（ランキング表・路線ごとの中央値）、駅 → データ（統計の項目名）
+- ガイド ⇔ 路線（ガイドの `ctaRoutes` にある路線を相互にリンク）
+- 地図へ: `src/utils/mapDeepLink.ts`（駅は `?from=駅名`、路線は `?routes=略称`）
+
+## 観光地と最寄り駅
+
+`src/data/touristSpots.ts` に書く。
+
+- 駅は **駅名と路線キーの組** で書く（`{ name: '長谷', route: 'enoshimaElectricRailway' }`）。
+  駅名だけだと JR播但線の長谷のような同名の別駅と区別できない
+- 載せるのは「その観光地の最寄り駅として一般に案内されている駅」だけ。
+  徒歩分数・距離は確かめた出典が無いので書かない
+- 駅名・路線キーが路線データに無いと `npm run test:unit` が落ちる
