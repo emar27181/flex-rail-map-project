@@ -777,7 +777,8 @@ export const routeColors = {
   jrSobuLine: '#FED100', // JR Sobu Line yellow
   jrJobanLine: '#417036', // JR Joban Line green
   jrSaikyoLine: '#00B5AD', // JR Saikyo Line teal
-  jrTakasakiLine: '#F68B1E', // JR Takasaki Line orange
+  // 上野〜大宮で並走する宇都宮線（橙）と見分けるため金色（src/data/sharedCorridors.ts）
+  jrTakasakiLine: '#E0B000', // JR Takasaki Line gold
   jrTokaidoMainLine: '#F68B1E', // JR Tokaido Main Line orange
   odakyuLine: '#0066CC', // Odakyu Line blue
   odakyuEnoshimaLine: '#0066CC', // Odakyu Enoshima Line blue
@@ -832,7 +833,8 @@ export const routeColors = {
   jrKobeLine: '#0072BC', // JR Kobe Line blue
   tokaidoShinkansen: '#0072BC', // Tokaido Shinkansen blue
   yokosukaLine: '#0072BC', // Yokosuka Line blue
-  jrShonanShinjukuLine: '#F68B1E', // Shonan-Shinjuku Line orange
+  // 並走する東海道線・宇都宮線（橙）と見分けるため深紅（src/data/sharedCorridors.ts）
+  jrShonanShinjukuLine: '#C1272D', // Shonan-Shinjuku Line deep red
   odakyuTamaLine: '#0066CC', // Odakyu Tama Line blue
   keioSagamiharaLine: '#DD0077', // Keio Sagamihara Line magenta
   jrItoLine: '#F68B1E', // JR Ito Line orange

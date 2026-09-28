@@ -3,6 +3,7 @@
  * 時刻表データから各時刻の列車位置（緯度経度）を計算する
  */
 import { yamanote } from '../data/yamanote';
+import { routeColors } from '../data/routes';
 import { chuo } from '../data/chuo';
 import { ginzaLine } from '../data/ginza-line';
 import { marunouchiLine } from '../data/marunouchi-line';
@@ -2600,7 +2601,7 @@ const DEMO_LINES: LineDemo[] = [
   },
   {
     key: 'jrTakasakiLine',
-    color: '#F68B1E',
+    color: '#E0B000',
     directions: [
       { stations: takasakiDir0, travelMin: 62, isCircular: false, patterns: takasakiPatterns },
       { stations: takasakiDir1, travelMin: 62, isCircular: false, patterns: takasakiPatterns },
@@ -2876,7 +2877,7 @@ export function getAllTrainPositions(currentMinutes: number, allowedKeys?: Set<s
         result.push({
           id: `${line.key}_${di}_${Math.round(d * 100)}`,
           lineKey: line.key,
-          color: line.color,
+          color: demoLineColor(line),
           direction: di,
           departureMin: d,
           pos: result2.pos,
@@ -2895,8 +2896,17 @@ export function formatDemoTime(minutes: number): string {
   return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
 }
 
+/**
+ * デモ列車の色は地図の路線色（routeColors）を正とする。
+ * DEMO_LINES の color は routeColors に無い路線のための予備で、
+ * 以前はこちらだけ古い色のまま残り、路線と列車の色がずれることがあった。
+ */
+function demoLineColor(line: { key: string; color: string }): string {
+  return (routeColors as Record<string, string>)[line.key] ?? line.color;
+}
+
 export const DEMO_LINE_COLORS: Record<string, string> = Object.fromEntries(
-  DEMO_LINES.map(l => [l.key, l.color])
+  DEMO_LINES.map(l => [l.key, demoLineColor(l)])
 );
 
 /**
