@@ -1906,10 +1906,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
           {/* 右カラム: 時刻表 */}
           <div style={{ flex: 1, minWidth: '120px', overflowY: 'auto' }}>
-            {/* 選択中の路線の運行系統と主な始発・行先（時刻表の有無に関係なく出す） */}
-            {activeRouteKey && (
-              <ServiceTermini route={activeRouteKey as RouteKey} theme={theme} language={currentLanguage} variant="full" />
-            )}
+            {/*
+              主な始発・行先（ServiceTermini variant="full"）はここには出さない（2026-09-28 ユーザー指示でオフ）。
+              右カラムは時刻表を読む場所で、行先の一覧が数行を取って時刻が下に押し出されていた。
+              系統名は左の路線一覧（variant="brand"）に残している
+            */}
             {activeRouteKey && hasTimetableData(activeRouteKey) ? (
               <>
                 {/*
