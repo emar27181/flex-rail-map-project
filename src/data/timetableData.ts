@@ -66,7 +66,18 @@ export interface LineTimetableData {
   dataVersion: string;
   /** この路線の運行間隔の根拠（省略時は TIMETABLE_SOURCE.title を使う） */
   source?: string;
+  /**
+   * 'official' は公式時刻表をそのまま取り込んだ場合だけ付ける。
+   * 省略時は推定（運行間隔から組み立てた概算）として扱い、画面の冒頭に
+   * 赤字の注意書きを出す。付け忘れても「推定」側に倒れるよう既定を推定にしている。
+   */
+  dataQuality?: 'official' | 'estimated';
   directions: DirectionData[];
+}
+
+/** 公式時刻表として取り込んだ路線以外はすべて推定扱い */
+export function isEstimatedTimetable(line: LineTimetableData): boolean {
+  return line.dataQuality !== 'official';
 }
 
 /**

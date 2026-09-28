@@ -13,21 +13,43 @@
  */
 import { translateUI } from '../../utils/translation';
 import type { Language } from '../../utils/translation';
-import { FS } from '../../constants/ui';
+import { FS, SEMANTIC } from '../../constants/ui';
 import { L } from '../legend/legendStyles';
 import { getThemeColors } from '../../contexts/ThemeContext';
 
 export interface TimetableSourceNoteProps {
   updatedAt: string;
   source: string;
+  /** 公式時刻表ではなく推定値のとき true。冒頭に赤字の注意書きを出す */
+  estimated: boolean;
   theme: 'light' | 'dark';
   language: Language;
 }
 
-export default function TimetableSourceNote({ updatedAt, source, theme, language }: TimetableSourceNoteProps) {
+export default function TimetableSourceNote({ updatedAt, source, estimated, theme, language }: TimetableSourceNoteProps) {
   const colors = getThemeColors(theme);
 
   return (
+    <>
+    {/*
+      推定値を実時刻と取り違えないよう、時刻を読む前の一番上に赤字で出す。
+      下の更新日・出典行は薄く小さいので、それだけでは読み飛ばされていた。
+    */}
+    {estimated && (
+      <div
+        role="note"
+        style={{
+          padding: `${L.sp.xs} ${L.sp.md}`,
+          borderBottom: `1px solid ${colors.borderLight}`,
+          fontSize: FS.caption,
+          fontWeight: 'bold',
+          color: SEMANTIC.arrival,
+          lineHeight: 1.4,
+        }}
+      >
+        {translateUI('timetableEstimatedWarning', language)}
+      </div>
+    )}
     <div style={{
       padding: `${L.sp.xxs} ${L.sp.md}`,
       borderBottom: `1px solid ${colors.borderLight}`,
@@ -55,5 +77,6 @@ export default function TimetableSourceNote({ updatedAt, source, theme, language
         {translateUI('dataSource', language)}
       </a>
     </div>
+    </>
   );
 }

@@ -48,6 +48,7 @@ import {
   getDirectionIndex as getTimetableDirectionIndex,
   hasTimetableData,
   getLineTimetable,
+  isEstimatedTimetable,
   TIMETABLE_SOURCE,
   addMinutes,
   computeEffectiveBaseTime,
@@ -1912,6 +1913,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     <TimetableSourceNote
                       updatedAt={line.updatedAt}
                       source={line.source ?? TIMETABLE_SOURCE.title}
+                      estimated={isEstimatedTimetable(line)}
                       theme={theme}
                       language={currentLanguage}
                     />
