@@ -142,7 +142,7 @@ describe('RouteFinder', () => {
       expect(oneTransferRoute).toBeDefined();
     });
 
-    it('藤沢→新宿の小田急線経由ルートが上位5件以内（デフォルト表示件数=10の範囲内）に入る（各駅停車ベースの所要時間で埋もれない）', () => {
+    it('藤沢→新宿の小田急線経由ルートが上位6件以内（デフォルト表示件数=10の範囲内）に入る（各駅停車ベースの所要時間で埋もれない）', () => {
       // 過去の不具合: odakyu-line/odakyu-enoshima-lineのtimeToNextが各駅停車ベースの
       // 生値だったため、駅数の多い小田急線の所要時間がJR幹線より大幅に長く算出され、
       // 実際には表示件数内でも順位が低すぎて事実上見えなくなっていた。
@@ -155,6 +155,10 @@ describe('RouteFinder', () => {
       // 正当な競合（52〜56分）と同着・僅差の実力どおりの順位（5位）になった
       // だけで、埋もれてはいない。デフォルトの表示件数（10件）には
       // 余裕をもって収まるため、しきい値を3位から5位に見直した。
+      //
+      // 2026-09-28: 湘南新宿ラインの高崎線⇔東海道線系統（藤沢から新宿へ乗り換えなしで
+      // 行ける実在の列車）を路線データに追加したため、その直通（54分・乗換0回）が1位に入り、
+      // 小田急線経由は5位→6位になった。正当な競合が1本増えただけなので、しきい値を6位にした。
       const fujisawa = routes.odakyuEnoshimaLine.find(s => s.name === '藤沢');
       const shinjuku = routes.odakyuLine.find(s => s.name === '新宿');
 
@@ -167,7 +171,14 @@ describe('RouteFinder', () => {
       );
 
       expect(odakyuRank).toBeGreaterThanOrEqual(0);
-      expect(odakyuRank).toBeLessThan(5);
+      expect(odakyuRank).toBeLessThan(6);
+    });
+
+    it('藤沢→新宿は湘南新宿ライン（高崎線⇔東海道線系統）で乗り換えなしで行ける', () => {
+      const fujisawa = routes.jrTokaidoMainLine.find(s => s.name === '藤沢');
+      const shinjuku = routes.jrShonanShinjukuTakasakiTokaido.find(s => s.name === '新宿');
+      const results = routeFinder.findRoutes(fujisawa!, shinjuku!, 10);
+      expect(results.some(r => r.transfers === 0 && r.segments.every(seg => seg.routeKey === 'jrShonanShinjukuTakasakiTokaido'))).toBe(true);
     });
   });
 

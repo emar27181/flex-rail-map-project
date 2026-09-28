@@ -72,10 +72,29 @@ describe('getThroughReachableSections', () => {
     expect(names(r.get('fukutoshinLine'))).toHaveLength(1);
   });
 
-  it('区間外の駅からはその系統に乗れない（逗子からは湘南新宿ライン高崎線系統の東海道線区間に出ない）', () => {
+  it('湘南新宿ラインは系統ごとの路線で、逗子（宇都宮線⇔横須賀線系統）から高崎線系統には直通しない', () => {
     const r = getThroughReachableSections('逗子');
-    expect(r.has('jrUtsunomiyaLine')).toBe(true);
+    expect(r.has('jrShonanShinjukuTakasakiTokaido')).toBe(false);
     expect(r.has('jrTakasakiLine')).toBe(false);
+    const ssl = routes.jrShonanShinjukuLine.map(s => s.name);
+    expect(ssl[0]).toBe('宇都宮');
+    expect(ssl[ssl.length - 1]).toBe('逗子');
+  });
+
+  it('湘南新宿ラインの高崎線⇔東海道線系統は高崎〜小田原で、藤沢を通る', () => {
+    const ssl = routes.jrShonanShinjukuTakasakiTokaido.map(s => s.name);
+    expect(ssl[0]).toBe('高崎');
+    expect(ssl[ssl.length - 1]).toBe('小田原');
+    expect(ssl).toContain('藤沢');
+    expect(ssl).toContain('新宿');
+    expect(ssl).not.toContain('逗子');
+    // 大宮・大船でつないだ駅が二重になっていない
+    expect(ssl.filter(n => n === '大宮')).toHaveLength(1);
+    expect(ssl.filter(n => n === '大船')).toHaveLength(1);
+    // 途中の駅には次の駅までの所要時間があり、終点だけが無い
+    const times = routes.jrShonanShinjukuTakasakiTokaido.map(s => s.timeToNext);
+    expect(times.slice(0, -1).every(t => typeof t === 'number' && t > 0)).toBe(true);
+    expect(times[times.length - 1]).toBeUndefined();
   });
 
   it('藤沢からは上野東京ライン（東京経由）で宇都宮線に1本で行ける', () => {

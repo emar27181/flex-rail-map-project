@@ -6948,6 +6948,8 @@ export const routeTranslations: { [key: string]: string } = {
 
   // ── 路線名の多言語対応（新幹線・地下鉄・大手私鉄・路面電車）──
   "湘南新宿ライン": "Shonan-Shinjuku Line",
+  "湘南新宿ライン（宇都宮線・横須賀線）": "Shonan-Shinjuku Line (Utsunomiya–Yokosuka)",
+  "湘南新宿ライン（高崎線・東海道線）": "Shonan-Shinjuku Line (Takasaki–Tokaido)",
   "東武アーバンパークライン": "Tobu Urban Park Line",
   "JR相模線": "JR Sagami Line",
   "JR鶴見線": "JR Tsurumi Line",

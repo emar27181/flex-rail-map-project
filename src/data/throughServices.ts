@@ -240,23 +240,9 @@ export const THROUGH_SERVICES: ThroughService[] = [
       { route: 'jrTakasakiLine' },
     ],
   },
-  {
-    id: 'shonan-shinjuku-takasaki-tokaido',
-    name: '湘南新宿ライン（高崎線⇔東海道線）',
-    sections: [
-      { route: 'jrTakasakiLine', from: '大宮', to: '高崎' },
-      { route: 'jrShonanShinjukuLine', from: '大宮', to: '大船' },
-      { route: 'jrTokaidoMainLine', from: '大船', to: '小田原' },
-    ],
-  },
-  {
-    id: 'shonan-shinjuku-utsunomiya-yokosuka',
-    name: '湘南新宿ライン（宇都宮線⇔横須賀線）',
-    sections: [
-      { route: 'jrUtsunomiyaLine', from: '大宮', to: '宇都宮' },
-      { route: 'jrShonanShinjukuLine' },
-    ],
-  },
+  // 湘南新宿ラインの2系統（宇都宮線⇔横須賀線、高崎線⇔東海道線）は、
+  // 系統ごとに1本の路線データ（jrShonanShinjukuLine / jrShonanShinjukuTakasakiTokaido）に
+  // したので、直通としては書かない（路線そのものが1本で行ける範囲）
   {
     id: 'yokosuka-sobu',
     name: '横須賀線⇔総武快速線（東京で直通）',

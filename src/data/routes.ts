@@ -66,7 +66,7 @@ import { jrKyotoLine } from './jr-kyoto-line';
 import { jrKobeLine } from './jr-kobe-line';
 import { tokaidoShinkansen } from './tokaido-shinkansen';
 import { yokosukaLine } from './yokosuka-line';
-import { jrShonanShinjukuLine } from './jr-shonan-shinjuku-line';
+import { jrShonanShinjukuLine, jrShonanShinjukuTakasakiTokaido } from './jr-shonan-shinjuku-line';
 import { odakyuTamaLine } from './odakyu-tama-line';
 import { keioSagamiharaLine } from './keio-sagamihara-line';
 import { jrItoLine, izukyuLine, hakoneTozan, izuHakoneSunzu } from './izu-hakone-lines';
@@ -251,6 +251,7 @@ export const routes = {
   tokaidoShinkansen,
   yokosukaLine,
   jrShonanShinjukuLine,
+  jrShonanShinjukuTakasakiTokaido,
   odakyuTamaLine,
   keioSagamiharaLine,
   jrItoLine,
@@ -756,6 +757,13 @@ export const routes = {
 
 export type RouteKey = keyof typeof routes;
 
+/**
+ * 湘南新宿ラインの色。2つの運行系統（宇都宮線⇔横須賀線、高崎線⇔東海道線）は
+ * 案内上は同じ「湘南新宿ライン」なので同じ色にする。系統の違いは始発・行先
+ * （serviceSystems.ts）で示す。色を変えるときはここ1か所だけ直す。
+ */
+const SHONAN_SHINJUKU_COLOR = '#C1272D';
+
 export const routeColors = {
   yamanote: '#58B848', // JR Yamanote Line green
   chuo: '#F15A22', // JR Chuo Line orange
@@ -834,7 +842,8 @@ export const routeColors = {
   tokaidoShinkansen: '#0072BC', // Tokaido Shinkansen blue
   yokosukaLine: '#0072BC', // Yokosuka Line blue
   // 並走する東海道線・宇都宮線（橙）と見分けるため深紅（src/data/sharedCorridors.ts）
-  jrShonanShinjukuLine: '#C1272D', // Shonan-Shinjuku Line deep red
+  jrShonanShinjukuLine: SHONAN_SHINJUKU_COLOR, // Shonan-Shinjuku Line (Utsunomiya–Yokosuka) deep red
+  jrShonanShinjukuTakasakiTokaido: SHONAN_SHINJUKU_COLOR, // Shonan-Shinjuku Line (Takasaki–Tokaido)
   odakyuTamaLine: '#0066CC', // Odakyu Tama Line blue
   keioSagamiharaLine: '#DD0077', // Keio Sagamihara Line magenta
   jrItoLine: '#F68B1E', // JR Ito Line orange
@@ -1414,7 +1423,8 @@ export const routeNames = {
   jrKobeLine: 'JR神戸線',
   tokaidoShinkansen: '東海道新幹線',
   yokosukaLine: '横須賀線',
-  jrShonanShinjukuLine: '湘南新宿ライン',
+  jrShonanShinjukuLine: '湘南新宿ライン（宇都宮線・横須賀線）',
+  jrShonanShinjukuTakasakiTokaido: '湘南新宿ライン（高崎線・東海道線）',
   odakyuTamaLine: '小田急多摩線',
   keioSagamiharaLine: '京王相模原線',
   jrItoLine: 'JR伊東線',
