@@ -3,6 +3,7 @@ import { getThemeColors } from '../../contexts/ThemeContext';
 import { section, text, btn, btnFull, textarea, L } from './legendStyles';
 import { translateUI } from '../../utils/translation';
 import type { Language } from '../../utils/translation';
+import { Download, Copy, Check, FolderOpen, CheckCheck } from 'lucide-react';
 import Button from '../ui/atoms/Button';
 import TextArea from '../ui/atoms/TextArea';
 import type { LabelColorOverride } from '../../constants/ui';
@@ -118,7 +119,7 @@ export default function MapConfigPanel({ config, theme, language, onImport }: Pr
         <span style={section.title(colors)}>{translateUI('configSaveLoad', language)}</span>
         {importDone && (
           <span style={{ fontSize: L.fs.xs, color: '#27ae60', marginLeft: L.sp.xs }}>
-            {translateUI('configImportDone', language)}
+            <Check size={12} aria-hidden style={{ verticalAlign: 'text-bottom', marginRight: 2 }} />{translateUI('configImportDone', language)}
           </span>
         )}
       </div>
@@ -130,10 +131,10 @@ export default function MapConfigPanel({ config, theme, language, onImport }: Pr
           <div>
             <div style={text.desc(colors)}>{translateUI('configExportDesc', language)}</div>
             <div style={{ display: 'flex', gap: L.sp.xs }}>
-              <Button theme={theme} variant="outline" size="sm" onClick={handleExportDownload}>
+              <Button theme={theme} variant="outline" size="sm" onClick={handleExportDownload} icon={<Download />}>
                 {translateUI('configExportSave', language)}
               </Button>
-              <Button theme={theme} variant="outline" size="sm" onClick={handleCopy}>
+              <Button theme={theme} variant="outline" size="sm" onClick={handleCopy} icon={copied ? <Check /> : <Copy />}>
                 {copied ? translateUI('configExportCopied', language) : translateUI('configExportCopy', language)}
               </Button>
             </div>
@@ -148,7 +149,7 @@ export default function MapConfigPanel({ config, theme, language, onImport }: Pr
               */}
             <input ref={fileInputRef} type="file" accept=".json"
               onChange={handleFileImport} style={{ display: 'none' }} />
-            <Button theme={theme} variant="outline" size="sm" fullWidth onClick={() => fileInputRef.current?.click()}>
+            <Button theme={theme} variant="outline" size="sm" fullWidth onClick={() => fileInputRef.current?.click()} icon={<FolderOpen />}>
               {translateUI('configImportFile', language)}
             </Button>
             <TextArea
@@ -166,6 +167,7 @@ export default function MapConfigPanel({ config, theme, language, onImport }: Pr
               fullWidth
               onClick={handleImportText}
               disabled={!pasteText.trim()}
+              icon={<CheckCheck />}
             >
               {translateUI('configImportApply', language)}
             </Button>

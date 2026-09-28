@@ -40,7 +40,7 @@ export function logStationAnalysis(routeKey: RouteKey): void {
   // 詳細駅リスト
   console.group('📍 駅別詳細');
   analysis.stations.forEach(station => {
-    const icon = station.serviceLevel === 'high' ? '🔴' : station.serviceLevel === 'medium' ? '🟡' : '🔵';
+    const icon = station.serviceLevel === 'high' ? '[高]' : station.serviceLevel === 'medium' ? '[中]' : '[低]';
     console.log(`${icon} ${station.stationName}: ${station.description}`);
   });
   console.groupEnd();
@@ -94,7 +94,7 @@ export function logStationServiceAcrossRoutes(stationName: string): void {
 
   console.group(`🚉 ${stationName}駅 - 路線別停車状況`);
   stationData.routes.forEach(route => {
-    const icon = route.serviceLevel === 'high' ? '🔴' : route.serviceLevel === 'medium' ? '🟡' : '🔵';
+    const icon = route.serviceLevel === 'high' ? '[高]' : route.serviceLevel === 'medium' ? '[中]' : '[低]';
     console.log(`${icon} ${route.routeName}: ${route.description}`);
   });
   console.groupEnd();

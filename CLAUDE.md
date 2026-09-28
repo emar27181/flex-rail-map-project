@@ -554,6 +554,23 @@ UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域
 （入力欄だけ色が変わる、駅アイコンの片方だけタッチ領域が広がる等）、
 様式美ではなく再発防止として扱う。
 
+### 絵文字禁止・アイコンは lucide-react に統一
+
+**サイトに出るものには絵文字を使わない。** 対象はアプリのUI・翻訳文言
+（`translation.ts`）・記事（`src/pages/articles/`）・ガイド・CSSの `content` すべて。
+絵文字はOS・フォントで字形も色も変わり、サイズや色をデザイントークンで制御できないため。
+
+- アイコンが必要なら **`lucide-react`** のコンポーネントを使う
+  （例: 閉じる=`X`、注意=`TriangleAlert`、完了=`Check`、保存=`Download`、時刻=`Clock`/`Timer`）
+- `Button` / `IconButton` アトムには `icon={<Download />}` のように渡す（サイズはアトム側で揃う）
+- 翻訳文言には絵文字を入れず、アイコンは描画側のコンポーネントで付ける
+  （文言に入れると言語ごとにずれ、色も付けられない）
+- JSXが使えない場所（`.astro` の CSS 疑似要素など）は、lucide と同じSVGパスを
+  `mask` で使い `background-color: currentColor` で塗る（`article-layout.css` の `.foot-app-link` が実例）
+- 対象外: `console.*` のデバッグ出力・コメント、経路表記の矢印（→ ← ⇔）、
+  折りたたみの図形記号（▼ ▲ ▶）
+- `tests/unit/noEmojiIcons.test.ts` が `src/` 配下の .ts/.tsx/.astro/.css/.md を検査して落とす
+
 ### プレビューデプロイルール
 
 **2026-08-13更新: プレビューでの目視確認を挟む運用に変更。E2Eは省略可。**

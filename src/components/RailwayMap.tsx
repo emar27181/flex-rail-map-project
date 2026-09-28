@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X } from 'lucide-react';
+import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X, Timer, TriangleAlert } from 'lucide-react';
 import type { LeafletEvent, LeafletMouseEvent, Map as LeafletMap } from 'leaflet';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { JAPAN_OUTLINE } from '../data/japanOutline';
@@ -1348,7 +1348,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               {translateStation(stationTooltip.stationName, currentLanguage)}
             </span>
             <span onClick={closeTooltip}
-              style={{ fontSize: FS.caption, color: colors.textSecondary, cursor: 'pointer', padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, borderRadius: L.r.control }}>✕</span>
+              style={{ fontSize: FS.caption, color: colors.textSecondary, cursor: 'pointer', padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, borderRadius: L.r.control }}>
+              <X size={14} aria-hidden style={{ verticalAlign: 'middle' }} />
+            </span>
           </div>
           <div style={{ display: 'flex', gap: L.sp.xs }}>
             <Button theme={theme} variant="positive" size="sm"
@@ -1476,7 +1478,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             {meta?.unit ? ` (${meta.unit})` : ''} — 解説
           </span>
           <span onClick={() => setMethodInfoTooltip(null)}
-            style={{ cursor: 'pointer', color: colors.textSecondary, padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, fontSize: FS.title, borderRadius: L.r.control, lineHeight: 1 }}>✕</span>
+            style={{ cursor: 'pointer', color: colors.textSecondary, padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, fontSize: FS.title, borderRadius: L.r.control, lineHeight: 1 }}>
+              <X size={14} aria-hidden style={{ verticalAlign: 'middle' }} />
+            </span>
         </div>
         {methodology.collectionMethod && (
           <div style={{ marginBottom: L.sp.sm }}>
@@ -1666,7 +1670,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             <span
               onClick={closeTooltip}
               style={{ fontSize: FS.caption, color: colors.textSecondary, cursor: 'pointer', padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, borderRadius: L.r.control }}
-            >✕</span>
+            >
+              <X size={14} aria-hidden style={{ verticalAlign: 'middle' }} />
+            </span>
           </div>
           {/* 出発/到着ボタン + 基準時刻 */}
           <div
@@ -2031,7 +2037,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           borderTop: `1px solid ${colors.borderLight}`,
           fontSize: FS.caption, color: colors.textSecondary, opacity: 0.6,
         }}>
-          {translateUI('approximateNote', currentLanguage)}
+          <TriangleAlert size={12} aria-hidden style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />{translateUI('approximateNote', currentLanguage)}
         </div>
       </div>
     );
@@ -4836,7 +4842,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   backgroundColor: showTravelTimeOverlay ? tintColor(SEMANTIC.departure, 0.08) : colors.surfaceElevated
                 }}>
                   <Checkbox theme={theme} size="sm" checked={showTravelTimeOverlay} onChange={setShowTravelTimeOverlay}>
-                    ⏱ {translateUI('travelTimeOverlay', currentLanguage)}
+                    <Timer size={14} aria-hidden style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />{translateUI('travelTimeOverlay', currentLanguage)}
                   </Checkbox>
                   {showTravelTimeOverlay && travelTimeMap.size === 0 && (
                     <div style={{ marginTop: L.sp.sm, paddingLeft: L.sp['3xl'], fontSize: FS.caption, color: colors.textSecondary }}>
@@ -5743,7 +5749,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   <span
                     onClick={() => setDimmedMapTooltip(null)}
                     style={{ fontSize: FS.caption, color: colors.textSecondary, cursor: 'pointer', padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, borderRadius: L.r.control }}
-                  >✕</span>
+                  >
+              <X size={14} aria-hidden style={{ verticalAlign: 'middle' }} />
+            </span>
                 </div>
                 <div style={{ padding: `${L.sp.md} ${L.sp.lg}` }}>
                   {dimmedMapTooltip.isVisible ? (
@@ -6395,7 +6403,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       margin: `-${L.sp.md}`,
                       borderRadius: L.r.control,
                     }}
-                  >✕</span>
+                  >
+              <X size={14} aria-hidden style={{ verticalAlign: 'middle' }} />
+            </span>
 
                   <div style={{
                     display: 'flex',

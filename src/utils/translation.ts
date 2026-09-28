@@ -7961,8 +7961,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "No timetable"
   },
   approximateNote: {
-    japanese: "⚠ 概算値・参考用　左の路線名をクリックで切替",
-    english: "⚠ Approximate. Click route name to switch"
+    japanese: "概算値・参考用　左の路線名をクリックで切替",
+    english: "Approximate. Click route name to switch"
   },
   timetableEstimatedWarning: {
     japanese: "推定データです。正確な時刻は各鉄道会社の公式時刻表をご参照ください。",
@@ -8520,36 +8520,36 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Export (current display settings)"
   },
   configExportSave: {
-    japanese: "⬇ JSON保存",
-    english: "⬇ Save JSON"
+    japanese: "JSON保存",
+    english: "Save JSON"
   },
   configExportCopy: {
-    japanese: "📋 テキストコピー",
-    english: "📋 Copy Text"
+    japanese: "テキストコピー",
+    english: "Copy Text"
   },
   configExportCopied: {
-    japanese: "✓ コピー済み",
-    english: "✓ Copied"
+    japanese: "コピー済み",
+    english: "Copied"
   },
   configImportDesc: {
     japanese: "インポート（設定を読み込む）",
     english: "Import (load settings)"
   },
   configImportFile: {
-    japanese: "📂 JSONファイルを開く",
-    english: "📂 Open JSON file"
+    japanese: "JSONファイルを開く",
+    english: "Open JSON file"
   },
   configImportPaste: {
     japanese: "JSONテキストをここに貼り付け...",
     english: "Paste JSON text here..."
   },
   configImportApply: {
-    japanese: "✅ テキストから適用",
-    english: "✅ Apply from text"
+    japanese: "テキストから適用",
+    english: "Apply from text"
   },
   configImportDone: {
-    japanese: "✓ 適用済み",
-    english: "✓ Applied"
+    japanese: "適用済み",
+    english: "Applied"
   },
   configImportErrorJson: {
     japanese: "JSONの形式が正しくありません",
@@ -8828,7 +8828,7 @@ export const uiChinese: Record<string, string> = {
   showAllTimetable: "▼ 显示完整时刻表",
   onboardRouteNoData: "乘坐路线，\n无时刻数据",
   noTimetableData: "无时刻数据",
-  approximateNote: "⚠ 概算值·参考用　点击左侧路线名切换",
+  approximateNote: "概算值·参考用　点击左侧路线名切换",
   timetableEstimatedWarning: "此为推算数据。准确时刻请参阅各铁路公司的官方时刻表。",
   heatmapDataLabel: "热力图数据",
   showTrainStatusPanel: "显示乘车路线",
@@ -8962,14 +8962,14 @@ export const uiChinese: Record<string, string> = {
   colorPresetWhite: "白色",
   configSaveLoad: "保存·读取设置",
   configExportDesc: "导出（当前显示设置）",
-  configExportSave: "⬇ 保存JSON",
-  configExportCopy: "📋 复制文本",
-  configExportCopied: "✓ 已复制",
+  configExportSave: "保存JSON",
+  configExportCopy: "复制文本",
+  configExportCopied: "已复制",
   configImportDesc: "导入（读取设置）",
-  configImportFile: "📂 打开JSON文件",
+  configImportFile: "打开JSON文件",
   configImportPaste: "在此粘贴JSON文本…",
-  configImportApply: "✅ 从文本应用",
-  configImportDone: "✓ 已应用",
+  configImportApply: "从文本应用",
+  configImportDone: "已应用",
   configImportErrorJson: "JSON格式不正确",
   configImportErrorFile: "文件读取失败",
   configImportErrorApply: "设置应用失败",
@@ -9155,7 +9155,7 @@ export const uiKorean: Record<string, string> = {
   showAllTimetable: "▼ 전체 시간표 표시",
   onboardRouteNoData: "탑승 노선,\n시간표 데이터 없음",
   noTimetableData: "시간표 없음",
-  approximateNote: "⚠ 개산값·참고용　왼쪽 노선명 클릭으로 전환",
+  approximateNote: "개산값·참고용　왼쪽 노선명 클릭으로 전환",
   timetableEstimatedWarning: "추정 데이터입니다. 정확한 시각은 각 철도회사의 공식 시각표를 참고해 주세요.",
   heatmapDataLabel: "히트맵 데이터",
   showTrainStatusPanel: "탑승 노선 표시",
@@ -9289,14 +9289,14 @@ export const uiKorean: Record<string, string> = {
   colorPresetWhite: "흰색",
   configSaveLoad: "설정 저장·불러오기",
   configExportDesc: "내보내기（현재 표시 설정）",
-  configExportSave: "⬇ JSON 저장",
-  configExportCopy: "📋 텍스트 복사",
-  configExportCopied: "✓ 복사됨",
+  configExportSave: "JSON 저장",
+  configExportCopy: "텍스트 복사",
+  configExportCopied: "복사됨",
   configImportDesc: "가져오기（설정 불러오기）",
-  configImportFile: "📂 JSON 파일 열기",
+  configImportFile: "JSON 파일 열기",
   configImportPaste: "여기에 JSON 텍스트 붙여넣기…",
-  configImportApply: "✅ 텍스트에서 적용",
-  configImportDone: "✓ 적용됨",
+  configImportApply: "텍스트에서 적용",
+  configImportDone: "적용됨",
   configImportErrorJson: "JSON 형식이 올바르지 않습니다",
   configImportErrorFile: "파일 읽기 실패",
   configImportErrorApply: "설정 적용 실패",

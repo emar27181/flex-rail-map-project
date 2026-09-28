@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { TriangleAlert } from 'lucide-react';
+import { TriangleAlert, AlarmClock } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
@@ -160,7 +160,7 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
         gap: L.sp.md,
         flexWrap: 'wrap',
       }}>
-        <span style={{ fontWeight: 'bold', color: colors.text }}>⏰ {translateUI('departureTime', language)}</span>
+        <span style={{ fontWeight: 'bold', color: colors.text }}><AlarmClock size={14} aria-hidden style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />{translateUI('departureTime', language)}</span>
         <TextField
           theme={theme}
           size="sm"
