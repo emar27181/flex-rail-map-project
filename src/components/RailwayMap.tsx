@@ -3233,6 +3233,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     }
   }, [departure, arrival, isManualDeparture]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // 初回の位置情報取得時、駅が未選択なら最寄り駅を通る路線を表示ONにする。
+  // 駅が両方未選択の間は全路線非表示にしているため、現在地が分かっても
+  // 地図に何も線が無く、どこから絞り込めばよいか分からなかった。
+  // 出発駅の自動設定（autoSetDepartureFromLocation, 既定OFF）とは別で、
+  // 出発駅は設定せずに路線だけを出す。ユーザーが既に路線を選んでいる場合
+  // （URL共有で開いた・位置取得前に操作した）は上書きしない。
+  const nearestRoutesAppliedRef = useRef(false);
+  useEffect(() => {
+    if (nearestRoutesAppliedRef.current || !userLocation) return;
+    if (departure || arrival) { nearestRoutesAppliedRef.current = true; return; }
+    const nearest = findNearestStation(userLocation[0], userLocation[1]);
+    if (!nearest) return; // 駅データ準備前。次の更新で再試行する
+    nearestRoutesAppliedRef.current = true;
+    const nearestRoutes = getRoutesForStation(nearest.name) as RouteKey[];
+    setVisibleRoutes(prev => (prev.size === 0 ? new Set(nearestRoutes) : prev));
+  }, [userLocation, departure, arrival, findNearestStation]);
+
   // URL共有: 初回マウント時のみ、URLの routes パラメータがあれば表示路線を復元する。
   // 上のeffect（出発駅・到着駅に応じた初期化）の後に実行させることで、
   // 「両方未選択なので全路線非表示」という初期化を上書きできるようにしている。
