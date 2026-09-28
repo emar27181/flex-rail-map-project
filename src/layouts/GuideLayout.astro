@@ -17,8 +17,8 @@ import { guideCss } from './guideStyles';
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import MapOpenCta from '../components/MapOpenCta.astro';
 import GA4Loader from '../components/GA4Loader.astro';
-import { SITE_URL, SITE_NAME, GOOGLE_SITE_VERIFICATION } from '../config/seo';
-import type { GuideDefinition } from '../data/guides';
+import { SITE_URL, SITE_NAME, GOOGLE_SITE_VERIFICATION, buildHreflangLinks } from '../config/seo';
+import { guidePath, getGuideTranslations, type GuideDefinition } from '../data/guides';
 
 export interface Props {
   guide: GuideDefinition;
@@ -30,9 +30,14 @@ export interface Props {
 }
 
 const { guide, indexHref, indexLabel, backLabel } = Astro.props;
-const langPrefix = guide.lang === 'ja' ? 'guides' : `${guide.lang}/guides`;
-const path = `/${langPrefix}/${guide.slug}`;
+const path = guidePath(guide);
 const canonical = `${SITE_URL}${path}`;
+// 同じ slug の各言語版どうしを hreflang で結ぶ（翻訳が無いガイドは出さない）。
+// x-default は日本語版、無ければ英語版
+const hreflangLinks = buildHreflangLinks(
+  getGuideTranslations(guide).map(g => ({ lang: g.lang, path: guidePath(g) })),
+  getGuideTranslations(guide).some(g => g.lang === 'ja') ? 'ja' : 'en',
+);
 const htmlLang = guide.lang;
 const OG_LOCALE: Record<GuideDefinition['lang'], string> = {
   ja: 'ja_JP',
@@ -105,9 +110,7 @@ const webPageJsonLd = {
 		<meta name="robots" content="index, follow" />
 
 		<link rel="canonical" href={canonical} />
-		{/* このガイドに対応する翻訳版が無いため、自己参照のみ（無理な対訳付けはしない） */}
-		<link rel="alternate" hreflang={htmlLang} href={canonical} />
-		<link rel="alternate" hreflang="x-default" href={canonical} />
+		{hreflangLinks.map(l => <link rel="alternate" hreflang={l.hreflang} href={l.href} />)}
 
 		<meta property="og:type" content="article" />
 		<meta property="og:url" content={canonical} />

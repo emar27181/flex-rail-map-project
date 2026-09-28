@@ -2,17 +2,17 @@
 /**
  * ガイド一覧ページ（/guides, /en/guides）の共通レイアウト。
  *
- * 個別ガイド（GuideLayout.astro）と同じく、日本語版・英語版は別URLで
- * 実体が違う（内容の対訳ではなく、それぞれ言語別に実在するガイドの一覧）。
- * そのためStaticPage.astroの「1URL+?lang=切替、hreflangは常にja/en両方」
- * という前提には乗せず、canonical/hreflangは自己参照のみにする
- * （存在しない対訳ページを無理にalternateとして紐付けない）。
+ * 個別ガイド（GuideLayout.astro）と同じく、言語ごとに別URL。
+ * 一覧に並ぶガイドは言語ごとに違うが、「その言語のガイドの入口」という
+ * 同じ役割のページなので、ガイドがある言語の一覧どうしを hreflang で結ぶ
+ * （x-default は日本語の /guides）。
  */
 import { staticPageCss } from './staticPageStyles';
 import { guideCss } from './guideStyles';
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import GA4Loader from '../components/GA4Loader.astro';
-import { SITE_URL, SITE_NAME, GOOGLE_SITE_VERIFICATION } from '../config/seo';
+import { SITE_URL, SITE_NAME, GOOGLE_SITE_VERIFICATION, buildHreflangLinks } from '../config/seo';
+import { guideIndexPath, guideLanguages } from '../data/guides';
 
 export interface Props {
   title: string;
@@ -24,6 +24,10 @@ export interface Props {
 
 const { title, description, path, htmlLang, backLabel } = Astro.props;
 const canonical = `${SITE_URL}${path}`;
+const hreflangLinks = buildHreflangLinks(
+  guideLanguages().map(lang => ({ lang, path: guideIndexPath(lang) })),
+  'ja',
+);
 const OG_LOCALE: Record<Props['htmlLang'], string> = {
   ja: 'ja_JP',
   en: 'en_US',
@@ -50,8 +54,7 @@ const OG_LOCALE: Record<Props['htmlLang'], string> = {
 		<meta name="robots" content="index, follow" />
 
 		<link rel="canonical" href={canonical} />
-		<link rel="alternate" hreflang={htmlLang} href={canonical} />
-		<link rel="alternate" hreflang="x-default" href={canonical} />
+		{hreflangLinks.map(l => <link rel="alternate" hreflang={l.hreflang} href={l.href} />)}
 
 		<meta property="og:type" content="website" />
 		<meta property="og:url" content={canonical} />

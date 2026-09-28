@@ -437,6 +437,30 @@ export const guides: GuideDefinition[] = [
   },
 ];
 
+/** ガイド一覧ページのパス（/guides, /en/guides, /zh/guides, /ko/guides） */
+export function guideIndexPath(lang: GuideDefinition['lang']): string {
+  return lang === 'ja' ? '/guides' : `/${lang}/guides`;
+}
+
+/** ガイドのパス */
+export function guidePath(guide: Pick<GuideDefinition, 'lang' | 'slug'>): string {
+  return `${guideIndexPath(guide.lang)}/${guide.slug}`;
+}
+
+/**
+ * 同じ内容の各言語版（hreflang の相手）。
+ * **同じ slug のガイドは互いの翻訳として扱う。** 翻訳ではない別内容のガイドを
+ * 追加するときは、既存と違う slug にすること（同じ slug だと対訳として紐付く）。
+ */
+export function getGuideTranslations(guide: Pick<GuideDefinition, 'slug'>): GuideDefinition[] {
+  return guides.filter(g => g.slug === guide.slug);
+}
+
+/** ガイドがある言語（一覧ページが存在する言語） */
+export function guideLanguages(): GuideDefinition['lang'][] {
+  return [...new Set(guides.map(g => g.lang))];
+}
+
 export function getGuide(lang: 'ja' | 'en' | 'zh' | 'ko', slug: string): GuideDefinition | undefined {
   return guides.find(g => g.lang === lang && g.slug === slug);
 }
