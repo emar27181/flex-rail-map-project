@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { routes } from '../../../src/data/routes';
 import { THROUGH_SERVICES } from '../../../src/data/throughServices';
 import { getThroughReachableSections, resolveSectionRange } from '../../../src/utils/throughService';
+import { isSameStation } from '../../../src/utils/sameStation';
 
 const names = (segs: { name: string }[][] | undefined) => segs?.map(s => s.map(x => x.name));
 
@@ -75,5 +76,72 @@ describe('getThroughReachableSections', () => {
     const r = getThroughReachableSections('逗子');
     expect(r.has('jrUtsunomiyaLine')).toBe(true);
     expect(r.has('jrTakasakiLine')).toBe(false);
+  });
+
+  it('藤沢からは上野東京ライン（東京経由）で宇都宮線に1本で行ける', () => {
+    expect(getThroughReachableSections('藤沢').has('jrUtsunomiyaLine')).toBe(true);
+  });
+
+  it('唐木田（多摩線）からは千代田線に直通する（2025-03改正で復活）', () => {
+    expect(getThroughReachableSections('唐木田').has('chiyodaLine')).toBe(true);
+  });
+});
+
+/** 路線データ上の駅（座標付き）を取り出す */
+const stationOn = (route: keyof typeof routes, name: string) => {
+  const s = routes[route].find(x => x.name === name);
+  if (!s) throw new Error(`${route} に ${name} が無い`);
+  return s;
+};
+
+describe('同名の別駅を取り違えない', () => {
+  it('京都の大宮（阪急京都線）からは首都圏の湘南新宿ライン・上野東京ラインに乗れない', () => {
+    const r = getThroughReachableSections(stationOn('hankyuKyotoLine', '大宮'));
+    expect(r.has('jrShonanShinjukuLine')).toBe(false);
+    expect(r.has('jrUtsunomiyaLine')).toBe(false);
+    expect(r.has('jrTakasakiLine')).toBe(false);
+  });
+
+  it('埼玉の大宮からは湘南新宿ラインの東海道線区間に行ける', () => {
+    const r = getThroughReachableSections(stationOn('jrSaikyoLine', '大宮'));
+    expect(r.has('jrTokaidoMainLine')).toBe(true);
+    expect(r.has('rinkaiLine')).toBe(true);
+  });
+
+  it('同じ駅でも路線ごとに座標が少しずれていれば同じ駅として扱う', () => {
+    const toyoko = stationOn('tokyuToyokoLine', '渋谷');
+    expect(isSameStation(stationOn('fukutoshinLine', '渋谷'), toyoko)).toBe(true);
+    expect(isSameStation(stationOn('hankyuKyotoLine', '大宮'), stationOn('jrSaikyoLine', '大宮'))).toBe(false);
+  });
+
+  it('名前だけ渡したときは従来どおり名前で照合する', () => {
+    expect(isSameStation(stationOn('hankyuKyotoLine', '大宮'), { name: '大宮' })).toBe(true);
+  });
+});
+
+describe('全国の直通運転', () => {
+  it('神戸三宮（阪神）からは近鉄奈良線に1本で行ける', () => {
+    expect(getThroughReachableSections(stationOn('hanshinMainLine', '神戸三宮')).has('kintetsuNaraLine')).toBe(true);
+  });
+
+  it('国際会館（烏丸線）からは近鉄京都線・奈良線に行けるが、橿原線には行けない', () => {
+    const r = getThroughReachableSections(stationOn('kyotoSubwayKarasuma', '国際会館'));
+    expect(r.has('kintetsuKyotoLine')).toBe(true);
+    expect(r.has('kintetsuNaraLine')).toBe(true);
+    expect(r.has('kintetsuKasharaLine')).toBe(false);
+  });
+
+  it('姪浜以東の空港線からは筑肥線（姪浜〜唐津）に行ける', () => {
+    const r = getThroughReachableSections(stationOn('fukuokaAirportLine', '博多'));
+    const chikuhi = names(r.get('jrChikuhiLine'));
+    expect(chikuhi?.[0]).toContain('筑前前原');
+    expect(chikuhi?.[0]).not.toContain('伊万里');
+  });
+
+  it('日生中央からは阪急宝塚線の川西能勢口〜大阪梅田に行けるが宝塚方面には行けない', () => {
+    const r = getThroughReachableSections(stationOn('noseDentetsuNisshoLine', '日生中央'));
+    const hankyu = names(r.get('hankyuTakarazukaLine'));
+    expect(hankyu?.[0]).toContain('大阪梅田');
+    expect(hankyu?.[0]).not.toContain('宝塚');
   });
 });
