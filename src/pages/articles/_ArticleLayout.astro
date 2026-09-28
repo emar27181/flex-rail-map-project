@@ -16,6 +16,7 @@ export interface Props {
   category: string;
   kicker?: string;
   publishedDate?: string;
+  modifiedDate?: string;
   readTime?: string;
   tag?: string;
   ogImage?: string;
@@ -31,6 +32,7 @@ const {
   category,
   kicker = "Rail Guide",
   publishedDate = "2025-06-06",
+  modifiedDate,
   readTime = "読了 約4分",
   tag = "Article",
   ogImage = "/icon_flex_rail_way_map.png",
@@ -96,7 +98,7 @@ const bodyTranslations = ARTICLE_BODY_TRANSLATIONS[i18nKey];
     "description": description,
     "keywords": keywords ?? undefined,
     "datePublished": publishedDate,
-    "dateModified": publishedDate,
+    "dateModified": modifiedDate ?? publishedDate,
     "url": canonicalUrl,
     "author": { "@type": "Organization", "name": "Flex Rail Map Project" },
     "publisher": {
@@ -131,7 +133,7 @@ const bodyTranslations = ARTICLE_BODY_TRANSLATIONS[i18nKey];
       <h1 data-i18n-page="title">{title}</h1>
       <p class="lede" data-i18n-page="description">{description}</p>
       <div class="byline">
-        <span>{displayDate}</span><span class="sep">／</span><span data-i18n-page="category">{category}</span><span class="sep">／</span><span data-i18n-page="readTime">{readTime}</span>
+        <span>{displayDate}</span>{modifiedDate && <time datetime={modifiedDate}>（更新 / Updated: {modifiedDate}）</time>}<span class="sep">／</span><span data-i18n-page="category">{category}</span><span class="sep">／</span><span data-i18n-page="readTime">{readTime}</span>
       </div>
     </header>
     <slot name="beforeArticle" />
