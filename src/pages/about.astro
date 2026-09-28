@@ -1,5 +1,6 @@
 ---
 import StaticPage from "../layouts/StaticPage.astro";
+import { ROUTE_COUNT, STATION_COUNT, approxCount, SUPPORTED_LANGUAGES } from "../config/siteFacts";
 ---
 
 <StaticPage
@@ -29,11 +30,11 @@ import StaticPage from "../layouts/StaticPage.astro";
 
 		<h3>主な機能</h3>
 		<ul>
-		<li>39路線の東京電車路線（JR、地下鉄、私鉄、新交通システム）</li>
+		<li>全国{ROUTE_COUNT}路線・約{approxCount(STATION_COUNT)}駅の鉄道路線（JR、地下鉄、私鉄、新交通システム）</li>
 		<li>必要な路線だけの表示切り替え</li>
 		<li>駅間の経路検索と所要時間表示</li>
 		<li>列車種別による停車駅表示</li>
-		<li>日本語・英語の多言語対応</li>
+		<li>{SUPPORTED_LANGUAGES.ja}の多言語対応</li>
 		</ul>
 
 		<h3>技術情報</h3>
@@ -66,11 +67,11 @@ import StaticPage from "../layouts/StaticPage.astro";
 
 		<h3>Key Features</h3>
 		<ul>
-		<li>39 Tokyo railway lines (JR, subway, private railways, new transit systems)</li>
+		<li>{ROUTE_COUNT} railway lines and about {approxCount(STATION_COUNT, "en")} stations across Japan (JR, subway, private railways, new transit systems)</li>
 		<li>Toggle display of only needed routes</li>
 		<li>Route search and travel time display between stations</li>
 		<li>Station display by train type</li>
-		<li>Japanese and English language support</li>
+		<li>{SUPPORTED_LANGUAGES.en} language support</li>
 		</ul>
 
 		<h3>Technical Information</h3>

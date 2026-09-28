@@ -1,5 +1,58 @@
 ---
 import StaticPage from "../layouts/StaticPage.astro";
+import { ROUTE_COUNT, STATION_COUNT, approxCount } from "../config/siteFacts";
+
+// 「どの路線が対応していますか？」の回答。画面と構造化データ（FAQPage）で同じ文を使う。
+// 以前は「合計39路線以上（東京）」と手書きされたままで、実装（全国約490路線）と食い違っていた
+const linesAnswerJa = `山手線・中央線・東海道線などのJR線、東京メトロ・都営地下鉄の全線、主要な私鉄をはじめ、全国${ROUTE_COUNT}路線・約${approxCount(STATION_COUNT)}駅に対応しています。`;
+
+// JSON-LD 構造化データ: FAQ（ページ上に表示している質問と同じ内容だけを書く）
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "このサイトは何のために作られたのですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "フレックス路線図は、情報が多すぎて見にくい既存の路線図を「必要な路線だけ選んで表示できる」ようにするために開発されました。遅延や運休などで乗り換えアプリの案内が役に立たないとき、必要な路線図をすぐに確認できます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "路線図が見にくい・複雑すぎるのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "一般的な路線図はすべての路線・駅情報を同時に表示するため情報量が多くなります。フレックス路線図では出発駅・到着駅に関連する路線だけを絞り込んで表示できるので、シンプルで見やすくなります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "どんなときに便利ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "進行方向が合っているか不安なとき、乗り換えアプリの推薦ルートに乗っているが乗り換え時刻を忘れたとき、遅延・運休で乗り換えアプリが誤ったルートを案内したときなどに便利です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "どの路線が対応していますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": linesAnswerJa
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "スマートフォンでも使えますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "はい、スマートフォン・タブレット・PCのいずれのブラウザでも無料でご利用いただけます。アプリのインストールは不要です。"
+      }
+    }
+  ]
+};
 ---
 
 <StaticPage
@@ -11,55 +64,7 @@ import StaticPage from "../layouts/StaticPage.astro";
 	langPrefix="faq"
 >
 	<Fragment slot="head">
-	<!-- JSON-LD 構造化データ: FAQ -->
-	<script type="application/ld+json">
-	{
-		"@context": "https://schema.org",
-		"@type": "FAQPage",
-		"mainEntity": [
-			{
-				"@type": "Question",
-				"name": "このサイトは何のために作られたのですか？",
-				"acceptedAnswer": {
-					"@type": "Answer",
-					"text": "フレックス路線図は、情報が多すぎて見にくい既存の路線図を「必要な路線だけ選んで表示できる」ようにするために開発されました。遅延や運休などで乗り換えアプリの案内が役に立たないとき、必要な路線図をすぐに確認できます。"
-				}
-			},
-			{
-				"@type": "Question",
-				"name": "路線図が見にくい・複雑すぎるのはなぜですか？",
-				"acceptedAnswer": {
-					"@type": "Answer",
-					"text": "一般的な路線図はすべての路線・駅情報を同時に表示するため情報量が多くなります。フレックス路線図では出発駅・到着駅に関連する路線だけを絞り込んで表示できるので、シンプルで見やすくなります。"
-				}
-			},
-			{
-				"@type": "Question",
-				"name": "どんなときに便利ですか？",
-				"acceptedAnswer": {
-					"@type": "Answer",
-					"text": "進行方向が合っているか不安なとき、乗り換えアプリの推薦ルートに乗っているが乗り換え時刻を忘れたとき、遅延・運休で乗り換えアプリが誤ったルートを案内したときなどに便利です。"
-				}
-			},
-			{
-				"@type": "Question",
-				"name": "どの路線が対応していますか？",
-				"acceptedAnswer": {
-					"@type": "Answer",
-					"text": "山手線・中央線・東海道線などJR線13路線、東京メトロ全9路線、都営地下鉄全4路線、小田急・東急・京急・西武・東武など私鉄10路線以上、合計39路線以上に対応しています。"
-				}
-			},
-			{
-				"@type": "Question",
-				"name": "スマートフォンでも使えますか？",
-				"acceptedAnswer": {
-					"@type": "Answer",
-					"text": "はい、スマートフォン・タブレット・PCのいずれのブラウザでも無料でご利用いただけます。アプリのインストールは不要です。"
-				}
-			}
-		]
-	}
-	</script>
+	<script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
 	</Fragment>
 
 	<!-- Japanese FAQ -->
@@ -88,7 +93,7 @@ import StaticPage from "../layouts/StaticPage.astro";
 		</ul>
 
 		<h3>Q. どの路線が対応していますか？</h3>
-		<p>山手線・中央線・東海道線などJR線13路線、東京メトロ全9路線、都営地下鉄全4路線、小田急・東急・京急・西武・東武など私鉄10路線以上、合計39路線以上に対応しています。</p>
+		<p>{linesAnswerJa}</p>
 
 		<h3>Q. スマートフォンでも使えますか？</h3>
 		<p>はい、スマートフォン・タブレット・PCのいずれのブラウザでも無料でご利用いただけます。アプリのインストールは不要です。</p>
@@ -99,7 +104,6 @@ import StaticPage from "../layouts/StaticPage.astro";
 		</p>
 		<ul>
 		<li>各駅停車／急行／快速急行の停車駅の可視化</li>
-		<li>東京以外の路線図拡張</li>
 		<li>運休・遅延情報の取得と可視化</li>
 		</ul>
 
@@ -136,9 +140,7 @@ import StaticPage from "../layouts/StaticPage.astro";
 		The following features are on the TODO list:
 		</p>
 		<ul>
-		<li>Integration of current location information</li>
 		<li>Visualization of local/express/rapid express stop patterns</li>
-		<li>Expansion to railway maps outside Tokyo</li>
 		<li>Integration of delay and suspension information with visualization</li>
 		</ul>
 
