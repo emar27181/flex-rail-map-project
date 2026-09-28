@@ -104,8 +104,8 @@ const CoverageAnalysis: React.FC = () => {
     if (completenessScore >= 90) return { grade: 'A', color: SEMANTIC.departure };
     if (completenessScore >= 80) return { grade: 'B', color: '#8BC34A' };
     if (completenessScore >= 70) return { grade: 'C', color: '#FFC107' };
-    if (completenessScore >= 60) return { grade: 'D', color: '#FF9800' };
-    return { grade: 'F', color: SEMANTIC.arrival };
+    if (completenessScore >= 60) return { grade: 'D', color: SEMANTIC.warning };
+    return { grade: 'F', color: SEMANTIC.danger };
   };
 
   const { grade, color } = getCoverageGrade(coverageStats);
@@ -163,11 +163,11 @@ const CoverageAnalysis: React.FC = () => {
           </div>
 
           <div style={{ marginBottom: L.sp['2xl'] }}>
-            <h4 style={{ margin: `0 0 ${L.sp.md} 0`, fontSize: FS.body, color: SEMANTIC.arrival }}>不完全な路線</h4>
+            <h4 style={{ margin: `0 0 ${L.sp.md} 0`, fontSize: FS.body, color: SEMANTIC.warning }}>不完全な路線</h4>
             {coverageStats.incompleteRoutes.map((route, index) => (
               <div key={index} style={{ marginBottom: L.sp.xs }}>
                 <strong>{route.routeName}</strong>: {route.currentStations}/{route.expectedStations}駅 
-                <span style={{ color: route.completeness < 70 ? SEMANTIC.arrival : '#FF9800' }}>
+                <span style={{ color: route.completeness < 70 ? SEMANTIC.danger : SEMANTIC.warning }}>
                   ({route.completeness}%)
                 </span>
               </div>
@@ -175,7 +175,7 @@ const CoverageAnalysis: React.FC = () => {
           </div>
 
           <div style={{ marginBottom: L.sp['2xl'] }}>
-            <h4 style={{ margin: `0 0 ${L.sp.md} 0`, fontSize: FS.body, color: SEMANTIC.arrival }}>欠落している重要路線</h4>
+            <h4 style={{ margin: `0 0 ${L.sp.md} 0`, fontSize: FS.body, color: SEMANTIC.danger }}>欠落している重要路線</h4>
             <div style={{ fontSize: FS.caption, color: '#666' }}>
               {coverageStats.missingCriticalRoutes.join('、')}
             </div>

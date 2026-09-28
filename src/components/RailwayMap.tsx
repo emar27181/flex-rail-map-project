@@ -1355,11 +1355,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             </span>
           </div>
           <div style={{ display: 'flex', gap: L.sp.xs }}>
-            <Button theme={theme} variant="positive" size="sm"
+            <Button theme={theme} variant="departure" size="sm"
               onClick={() => { handleManualSetDeparture(stationTooltip.station); closeTooltip(); }}>
               {translateUI('setDepartureStation', currentLanguage)}
             </Button>
-            <Button theme={theme} variant="danger" size="sm"
+            <Button theme={theme} variant="arrival" size="sm"
               onClick={() => { setArrival(stationTooltip.station); closeTooltip(); }}>
               {translateUI('setArrivalStation', currentLanguage)}
             </Button>
@@ -1682,10 +1682,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs }}>
-              <Button theme={theme} variant="positive" size="sm"
+              <Button theme={theme} variant="departure" size="sm"
                 onClick={() => { handleManualSetDeparture(stationTooltip.station); closeTooltip(); }}
               >{translateUI('setDepartureStation', currentLanguage)}</Button>
-              <Button theme={theme} variant="danger" size="sm"
+              <Button theme={theme} variant="arrival" size="sm"
                 onClick={() => { setArrival(stationTooltip.station); closeTooltip(); }}
               >{translateUI('setArrivalStation', currentLanguage)}</Button>
             </div>

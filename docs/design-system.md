@@ -186,8 +186,10 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 用途 | 使うもの |
 |---|---|
 | 主操作 | `variant="primary"`（`SEMANTIC.primary`） |
-| 出発・肯定 | `variant="positive"`（`SEMANTIC.departure`） |
-| 到着・否定・削除 | `variant="danger"`（`SEMANTIC.arrival`） |
+| 肯定（全表示・OK・完了） | `variant="positive"`（`SEMANTIC.success`） |
+| 取り消し・削除・非表示 | `variant="danger"`（`SEMANTIC.danger`） |
+| 出発駅に設定 | `variant="departure"`（`SEMANTIC.departure`） |
+| 到着駅に設定 | `variant="arrival"`（`SEMANTIC.arrival`） |
 | 補助 | `variant="outline"`（枠線のみ） |
 | 目立たせない | `variant="ghost"`（枠線も塗りもなし。太さは確保する） |
 | それ自身の色を持つもの（路線） | `<Chip color={路線色}>` |
@@ -335,6 +337,33 @@ UIのテーマと無関係なため明示的に除外している。
 
 `SEMANTIC.departure` / `SEMANTIC.arrival` / `SEMANTIC.primary` が唯一の定義元。
 
+### 意味ごとに分ける（2026-09-28）
+
+それまで `SEMANTIC` は出発・到着・primary の3色だけで、到着駅の赤が
+「警告」「エラー」「削除ボタン」「方位磁針の北」にも流用されていた。
+推定時刻表の注意書きを到着の赤で出したところ「主張が強い」と指摘され、
+**色は見た目ではなく意味で選ぶ**ように定義を分けた。
+
+| キー | 値 | 意味 | 使う場所の例 |
+|---|---|---|---|
+| `departure` | `#4CAF50` | 出発駅 | 出発駅の入力欄・マーカー、`variant="departure"` |
+| `arrival` | `#F44336` | 到着駅 | 到着駅の入力欄・マーカー、`variant="arrival"` |
+| `primary` | `#2196F3` | 主操作・選択中 | `variant="primary"` |
+| `success` | `#2E7D32` | 肯定の操作 | 全表示・OK・完了（`variant="positive"`） |
+| `danger` | `#D32F2F` | 取り消し・削除・エラー | 全非表示・非表示（`variant="danger"`）、エラー画面 |
+| `warning` | `#FF9800` | 注意 | 推定値の注意書き、不完全なデータ、乗換あり |
+| `north` | `#E53935` | 方位磁針の北 | `CompassNeedle` |
+
+- **到着の赤を警告・エラーに使わない。** 知らせは `warning`（橙）、失敗・削除は `danger`
+- `success` / `danger` は白文字が読める濃さ（白との比 5.1 / 5.0）。
+  以前の `#4CAF50` / `#F44336` の上の白文字は 2.8 / 3.7 で基準未満だった
+- `warning` は明るく白地の文字には使えない（白との比 2.2）。文字には
+  `getThemeColors(theme).warningText`（ライト `#A85400`、`warningLight` 上で 4.9）、
+  背景には `warningLight` を使う。注意書きは「左の橙の線 + 淡い橙の背景 +
+  `TriangleAlert` アイコン + `warningText`」の組み合わせ（`TimetableSourceNote` が実例）
+- `SEMANTIC` の値は互いに異なること（テストで検証）。同じ値を2つの意味に使うと、
+  片方の意味だけ色を変えたいときに分けられなくなる
+
 ---
 
 ## 5. 一元管理できている例（この方針の実物）
@@ -433,7 +462,7 @@ UIのテーマと無関係なため明示的に除外している。
 | 操作部品の高さ・角丸 | `CONTROL_SIZE[size]` | ❌ |
 | フォントサイズ | `FS.base` など `src/constants/ui.ts` | ❌ `fontSize: '12px'` は禁止 |
 | 操作要素の最小サイズ | `TARGET.min` / `TARGET.touch` | ❌ |
-| 出発/到着/primary の色 | `SEMANTIC.*` | ❌ `#4CAF50` の直書きは禁止 |
+| 意味を持つ色（出発/到着/primary/success/danger/warning） | `SEMANTIC.*` を意味で選ぶ | ❌ 直書き禁止。到着の赤を警告に流用しない |
 | 文字色・背景・境界線 | `getThemeColors(theme)` | ❌ ダークモードが壊れる |
 | 色の上に文字を載せる | `filledLabelColors(color, theme)` | ❌ 自前でコントラスト判定しない |
 | 色付きの小ラベル | `<ColorChip>` | ❌ |

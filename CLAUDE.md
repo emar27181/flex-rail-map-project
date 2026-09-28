@@ -530,9 +530,16 @@ UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域
 **状態は塗りで示す。** 選択・非選択で枠線の太さや文字の太さを変えると、
 押すたびに外形が動いて並びがずれる。
 
-色は `SEMANTIC.*`（出発=緑 / 到着=赤 / primary=青）、白黒は `NEUTRAL.*`、
-それ以外は `getThemeColors(theme)` から取る。直書きはテストで落ちる
-（`tests/unit/constants/semanticColors.test.ts`）。
+色は `SEMANTIC.*`、白黒は `NEUTRAL.*`、それ以外は `getThemeColors(theme)` から取る。
+直書きはテストで落ちる（`tests/unit/constants/semanticColors.test.ts`）。
+
+**色は見た目ではなく意味で選ぶ（2026-09-28）。** `SEMANTIC` は意味ごとにキーを分けてある:
+出発駅=`departure`(緑) / 到着駅=`arrival`(赤) / 主操作=`primary`(青) /
+肯定=`success` / 取り消し・削除・エラー=`danger` / 注意=`warning`(橙) / 方位の北=`north`。
+**到着の赤を警告・注意書きに流用しない**（推定データの注意書きを赤で出したら
+「主張が強い」と指摘された。注意は橙の `warning`）。
+白地の文字に橙を使うときは `getThemeColors(theme).warningText`。
+一覧と使い分けは `docs/design-system.md` の「意味ごとに分ける」。
 
 **文字サイズは `FS`、余白は `L.sp`、角の丸みは `L.r` から取る。**
 `fontSize: '12px'` のような直書きはテストで落ちる

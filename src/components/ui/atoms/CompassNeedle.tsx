@@ -3,7 +3,7 @@
  *
  * lucide-react には「北が赤い磁針」が無い（Compass / Navigation は単色で、
  * どちらが北か色で判別できない）ため、この形だけ自前のSVGで描く。
- * 色はデザイントークンから取る（赤=SEMANTIC.arrival、白=NEUTRAL.white）。
+ * 色はデザイントークンから取る（赤=SEMANTIC.north、白=NEUTRAL.white）。
  * 白い半分はライトテーマの白背景に溶けるので、テーマの補助文字色で縁取る。
  */
 import { SEMANTIC, NEUTRAL } from '../../../constants/ui';
@@ -26,7 +26,7 @@ export default function CompassNeedle({ rotationDeg, size, theme }: CompassNeedl
       aria-hidden
       style={{ transform: `rotate(${rotationDeg}deg)`, transition: 'transform 0.15s linear' }}
     >
-      <polygon points="12,2 17,12 7,12" fill={SEMANTIC.arrival} stroke={outline} strokeWidth={1} strokeLinejoin="round" />
+      <polygon points="12,2 17,12 7,12" fill={SEMANTIC.north} stroke={outline} strokeWidth={1} strokeLinejoin="round" />
       <polygon points="12,22 17,12 7,12" fill={NEUTRAL.white} stroke={outline} strokeWidth={1} strokeLinejoin="round" />
     </svg>
   );
