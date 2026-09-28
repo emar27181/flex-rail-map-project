@@ -2,6 +2,12 @@
 
 ## [2026-09-28] セッション（東海道線の時刻表の行先・並行ルート・推薦ルート選択の既定オフ）
 
+### feat: 出発・到着駅にも時刻を出し、複数の路線が通る駅は路線ごとに時刻を並べる
+- `src/components/map/stationTimeLabel.ts`（新規）, `src/components/RailwayMap.tsx`,
+  `tests/unit/components/map/stationTimeLabel.test.ts`（新規）
+- 通常・種別表示・出発到着の3種類のラベルの時刻行を1か所にまとめた
+- 表示中の路線が複数ある駅は、路線色の印＋時刻を路線ごとに1行（1路線だけなら従来どおり時刻のみ）
+
 ### fix: 時刻ラベルを東海道線だけでなく、地図に描く全候補と並行ルートの駅にも出す
 - `src/components/RailwayMap.tsx`（`stationTimelineMap`）, `src/utils/parallelRoutes.ts`（`sectionMinutes`）,
   `tests/unit/utils/parallelRoutes.test.ts`
