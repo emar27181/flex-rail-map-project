@@ -100,6 +100,8 @@ interface LegendRouteListProps {
   onShowStationTooltipChange: (v: boolean) => void;
   showFullRouteStations: boolean;
   onShowFullRouteStationsChange: (v: boolean) => void;
+  showRouteRecommendationsPanel: boolean;
+  onShowRouteRecommendationsPanelChange: (v: boolean) => void;
   showRouteLine: boolean;
   onShowRouteLineChange: (v: boolean) => void;
   mapConfig: MapConfig;
@@ -185,6 +187,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowStationTooltipChange,
   showFullRouteStations,
   onShowFullRouteStationsChange,
+  showRouteRecommendationsPanel,
+  onShowRouteRecommendationsPanelChange,
   showRouteLine,
   onShowRouteLineChange,
   mapConfig,
@@ -775,6 +779,9 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 </Checkbox>
                 <Checkbox theme={theme} checked={showFullRouteStations} onChange={onShowFullRouteStationsChange}>
                   {translateUI('showFullRouteStations', language)}
+                </Checkbox>
+                <Checkbox theme={theme} checked={showRouteRecommendationsPanel} onChange={onShowRouteRecommendationsPanelChange}>
+                  {translateUI('showRouteRecommendationsPanel', language)}
                 </Checkbox>
               </div>
             )}

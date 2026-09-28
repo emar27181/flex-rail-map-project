@@ -8206,6 +8206,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "中間駅以外も表示",
     english: "Show full route stations"
   },
+  showRouteRecommendationsPanel: {
+    japanese: "推薦ルート選択を表示",
+    english: "Show route suggestions"
+  },
   showRouteLines: {
     japanese: "路線の線を表示",
     english: "Show route lines"
@@ -8905,6 +8909,7 @@ export const uiChinese: Record<string, string> = {
   showOutsideSegmentRoutes: "显示区间外路线",
   showMapTiles: "显示地图图块",
   showFullRouteStations: "显示所有途经站",
+  showRouteRecommendationsPanel: "显示推荐路线选择",
   showRouteLines: "显示路线",
   stationTooltipLabel: "显示站点提示",
   bubbleMap: "气泡地图",
@@ -9237,6 +9242,7 @@ export const uiKorean: Record<string, string> = {
   showOutsideSegmentRoutes: "구간 외 노선 표시",
   showMapTiles: "지도 타일 표시",
   showFullRouteStations: "전체 경유역 표시",
+  showRouteRecommendationsPanel: "추천 경로 선택 표시",
   showRouteLines: "노선 표시",
   stationTooltipLabel: "역 툴팁 표시",
   bubbleMap: "버블 맵",

@@ -485,6 +485,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [heatmapParamListOpen, setHeatmapParamListOpen] = useState(false);
   const [showStationTooltip, setShowStationTooltip] = useState(false);
   const [showFullRouteStations, setShowFullRouteStations] = useState(false);
+  // 推薦ルート選択パネル。既定は出さない。出発・到着の間は全候補と並行ルートの路線を描き、
+  // どの路線を見るかは「表示路線の切替」でユーザーが調整する（パネルを出したときだけ、
+  // 選んだ候補に描画を絞る）
+  const [showRouteRecommendationsPanel, setShowRouteRecommendationsPanel] = useState(false);
   const [showRouteLine, setShowRouteLine] = useState(true);
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
@@ -866,6 +870,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     showStationTooltip,
     showFullRouteStations,
     showRouteLine,
+    showRouteRecommendationsPanel,
     alwaysVisibleStationsEnabled,
     alwaysVisibleMinRoutes,
     arrivalAlertEnabled,
@@ -878,7 +883,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       showTransferStationsOnly, showExpressStationsOnly, showTravelTimes,
       showStationNames, showFurigana, showStationNumbers, showOsmTiles,
       mapViewMode, timeFilterEnabled, timeFilterMaxMinutes,
-      showStationTooltip, showFullRouteStations,
+      showStationTooltip, showFullRouteStations, showRouteRecommendationsPanel,
       alwaysVisibleStationsEnabled, alwaysVisibleMinRoutes,
       arrivalAlertEnabled, arrivalAlertMinutes,
       stationSizeScale, routeLineWidth, travelTimeStyle, stationIconStyle]);
@@ -902,6 +907,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (cfg.showStationTooltip !== undefined) setShowStationTooltip(cfg.showStationTooltip);
     if (cfg.showFullRouteStations !== undefined) setShowFullRouteStations(cfg.showFullRouteStations);
     if (cfg.showRouteLine !== undefined) setShowRouteLine(cfg.showRouteLine);
+    if (cfg.showRouteRecommendationsPanel !== undefined) setShowRouteRecommendationsPanel(cfg.showRouteRecommendationsPanel);
     if (cfg.alwaysVisibleStationsEnabled !== undefined) setAlwaysVisibleStationsEnabled(cfg.alwaysVisibleStationsEnabled);
     if (cfg.alwaysVisibleMinRoutes !== undefined) setAlwaysVisibleMinRoutes(cfg.alwaysVisibleMinRoutes);
     if (cfg.arrivalAlertEnabled !== undefined) setArrivalAlertEnabled(cfg.arrivalAlertEnabled);
@@ -2612,10 +2618,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return keys;
   }, [selectedRouteIndices, routeRecommendations]);
 
-  // 路線図モード用: dep/arr設定時は全推薦ルートの路線を表示（未選択時）
+  // 路線図モード用: dep/arr設定時は全推薦ルートの路線を表示
+  // （推薦ルート選択を出して候補を選んでいるときだけ、選んだ候補に絞る）
   const diagramHighlightedRouteKeys = useMemo(() => {
     if (!departure || !arrival) return null;
-    if (highlightedRouteKeys !== null) return highlightedRouteKeys;
+    if (showRouteRecommendationsPanel && highlightedRouteKeys !== null) return highlightedRouteKeys;
     if (routeRecommendations.length === 0) return null;
     const keys = new Set<RouteKey>();
     routeRecommendations.forEach(rec => {
@@ -2624,7 +2631,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       });
     });
     return keys.size > 0 ? keys : null;
-  }, [departure, arrival, highlightedRouteKeys, routeRecommendations]);
+  }, [departure, arrival, highlightedRouteKeys, routeRecommendations, showRouteRecommendationsPanel]);
 
   // 累積所要時間（乗り換えを跨いだ全体累積）: 選択ルートの全セグメントを走破
   const globalCumulativeTimeMap = useMemo(() => {
@@ -3206,20 +3213,26 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     [departure, arrival],
   );
 
+  // 出発・到着の間に描く経路候補。既定（推薦ルート選択を出さない）は全候補を描き、
+  // 路線ごとの表示はユーザーが「表示路線の切替」で調整する。推薦ルート選択を出したときは、
+  // そこで選んだ候補だけに絞る（選択の意味が地図に表れるように）
+  const drawnRecommendations = useMemo(() => (
+    showRouteRecommendationsPanel && selectedRouteIndices !== null
+      ? routeRecommendations.filter((_, idx) => selectedRouteIndices.has(idx))
+      : routeRecommendations
+  ), [showRouteRecommendationsPanel, selectedRouteIndices, routeRecommendations]);
+
   // 出発・到着を選んだとき、選択中の経路の区間と並行して走る別の路線の区間
   // （藤沢→東京の東海道線に対する京浜東北線・横須賀線の大船〜東京など）。
   // 遅延・運休のときに「わざと別の路線で行く」道が地図で分かるよう、
   // 経路の区間と同じく駅も描く（renderRoute / journeyStationNamesByRoute）
   const parallelSections = useMemo(() => {
-    if (!departure || !arrival || routeRecommendations.length === 0) return new Map<RouteKey, Station[][]>();
-    const shown = selectedRouteIndices === null
-      ? routeRecommendations
-      : routeRecommendations.filter((_, idx) => selectedRouteIndices.has(idx));
-    const segments = shown.flatMap(r => r.segments)
+    if (!departure || !arrival || drawnRecommendations.length === 0) return new Map<RouteKey, Station[][]>();
+    const segments = drawnRecommendations.flatMap(r => r.segments)
       .filter(seg => seg.routeKey && seg.routeKey !== 'walking' && !seg.isWalkingTransfer)
       .map(seg => ({ routeKey: seg.routeKey as RouteKey, stations: seg.stations as Station[] }));
     return findParallelSections(segments, Object.entries(routes) as Array<[RouteKey, Station[]]>) as Map<RouteKey, Station[][]>;
-  }, [departure, arrival, routeRecommendations, selectedRouteIndices]);
+  }, [departure, arrival, drawnRecommendations]);
 
   // 並行ルートの路線を表示中・一覧に加える（経路候補の路線だけを出す推薦 useEffect の後に足す）
   useEffect(() => {
@@ -4273,11 +4286,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // ※ この位置はローディング中の早期 return より後なので、フックは使わない（毎回計算する。軽い）
   const journeyStationNamesByRoute = ((): Map<string, Set<string>> | null => {
     if (!departure || !arrival || routeRecommendations.length === 0 || showFullRouteStations) return null;
-    const routesToShow = selectedRouteIndices === null
-      ? routeRecommendations
-      : routeRecommendations.filter((_, idx) => selectedRouteIndices.has(idx));
     const map = new Map<string, Set<string>>();
-    for (const r of routesToShow) {
+    for (const r of drawnRecommendations) {
       for (const seg of r.segments) {
         const set = map.get(seg.routeKey) ?? new Set<string>();
         seg.stations.forEach(st => set.add(st.name));
@@ -4318,10 +4328,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     }
 
     if (departure && arrival && routeRecommendations.length > 0) {
-      // 選択された推薦ルートのこの路線に関するセグメントを収集（重複除去）
-      const routesToShow = selectedRouteIndices === null
-        ? routeRecommendations
-        : routeRecommendations.filter((_, idx) => selectedRouteIndices.has(idx));
+      // 描く経路候補（drawnRecommendations）のこの路線に関するセグメントを収集（重複除去）
+      const routesToShow = drawnRecommendations;
 
       if (routesToShow.length === 0) return null;
 
@@ -4756,7 +4764,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       showTitle={showTitle}
     />
   );
-  const routeRecommendationsPanel = renderRouteRecommendations();
+  const routeRecommendationsPanel = showRouteRecommendationsPanel ? renderRouteRecommendations() : null;
 
   return (
     <ErrorBoundary language={currentLanguage}>
@@ -6055,6 +6063,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onShowStationTooltipChange={setShowStationTooltip}
                     showFullRouteStations={showFullRouteStations}
                     onShowFullRouteStationsChange={setShowFullRouteStations}
+                    showRouteRecommendationsPanel={showRouteRecommendationsPanel}
+                    onShowRouteRecommendationsPanelChange={setShowRouteRecommendationsPanel}
                     showRouteLine={showRouteLine}
                     onShowRouteLineChange={setShowRouteLine}
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
@@ -6272,9 +6282,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               theme={theme}
               safeAreaBottom={25}
               buttons={[
-                // 候補ルートは駅を選んだ直後に見たいものなので、設定より前に置く。
-                // 候補が無いときはボタン自体を出さない
-                ...(routeRecommendations.length > 0 ? [{
+                // 候補ルートは設定より前に置く。候補が無いとき・推薦ルート選択を
+                // 出さない設定（既定）のときはボタン自体を出さない
+                ...(showRouteRecommendationsPanel && routeRecommendations.length > 0 ? [{
                   key: 'routes' as const,
                   icon: <TrainFront size={16} />,
                   label: `${translateUI('routeSelection', currentLanguage)} (${routeRecommendations.length})`,
@@ -6348,6 +6358,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onShowStationTooltipChange={setShowStationTooltip}
                         showFullRouteStations={showFullRouteStations}
                         onShowFullRouteStationsChange={setShowFullRouteStations}
+                        showRouteRecommendationsPanel={showRouteRecommendationsPanel}
+                        onShowRouteRecommendationsPanelChange={setShowRouteRecommendationsPanel}
                         showRouteLine={showRouteLine}
                         onShowRouteLineChange={setShowRouteLine}
                         adjustRouteColorForTheme={adjustRouteColorForTheme}
