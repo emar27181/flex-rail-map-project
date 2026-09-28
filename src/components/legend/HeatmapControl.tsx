@@ -25,6 +25,8 @@ const CATEGORY_LABEL: Record<StatCategory, string> = {
   safety:      '治安',
   environment: '環境',
   work:        '仕事',
+  eduCare:     '教育・子育て',
+  leisure:     'レジャー・宿泊',
 };
 
 const GRADIENT_CSS = buildGradientCss('to right');

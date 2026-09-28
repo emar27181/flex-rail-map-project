@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getParamRange, STAT_PARAMS, PARAM_DATA_SOURCES } from '../../../src/data/stationStats';
+import { getParamRange, getStationStats, STAT_PARAMS, PARAM_DATA_SOURCES } from '../../../src/data/stationStats';
 
 // niceStep のロジックを直接テスト（RailwayMap.tsx と同じアルゴリズム）
 function niceStep(fullRange: number): number {
@@ -78,5 +78,56 @@ describe('PARAM_DATA_SOURCES', () => {
     for (const [key, src] of Object.entries(PARAM_DATA_SOURCES)) {
       expect(src?.retrievedAt, `${key} に retrievedAt が必要`).toBeTruthy();
     }
+  });
+
+  it('dataQuality:real の全パラメータに出典（PARAM_DATA_SOURCES）が設定されている', () => {
+    const missing = STAT_PARAMS
+      .filter(p => p.dataQuality === 'real' && p.key !== 'routeCount') // routeCountは本アプリの路線データが出典そのもの
+      .filter(p => !PARAM_DATA_SOURCES[p.key])
+      .map(p => String(p.key));
+    expect(missing, `出典未設定の実データ項目: ${missing.join(', ')}`).toEqual([]);
+  });
+});
+
+describe('首都圏駅データセットPoC（2026-09-24収集）由来のフィールド', () => {
+  const POC_STATIONS = ['東京', '新宿', '渋谷', '池袋', '品川', '横浜', '川崎', '藤沢', '大宮', '千葉'];
+  const POC_FIELDS = [
+    'fastFoodCount', 'mallCount', 'bankCount', 'postOfficeCount', 'pharmacyCount',
+    'nurseryCount', 'schoolCount', 'universityCount', 'libraryCount', 'clinicCount',
+    'cinemaCount', 'gymCount', 'hotelCount', 'attractionCount', 'parkCount',
+  ] as const;
+
+  it('PoC対象10駅は新規15項目すべてに値を持つ', () => {
+    for (const name of POC_STATIONS) {
+      const stats = getStationStats(name);
+      expect(stats, `${name} のデータが見つからない`).toBeTruthy();
+      for (const field of POC_FIELDS) {
+        expect(stats?.[field], `${name}.${field}`).not.toBeUndefined();
+      }
+    }
+  });
+
+  it('PoC対象外の駅は新規フィールドを持たない（灰色表示のまま。推定値で埋めない）', () => {
+    const stats = getStationStats('神田');
+    expect(stats).toBeTruthy();
+    for (const field of POC_FIELDS) {
+      expect(stats?.[field], `神田.${field} は未収集のはずが値が入っている`).toBeUndefined();
+    }
+  });
+
+  it('congestionSectionsは対象区間がある駅のみ配列を持ち、路線・区間・時間帯・値の形をしている', () => {
+    const tokyo = getStationStats('東京');
+    expect(Array.isArray(tokyo?.congestionSections)).toBe(true);
+    expect(tokyo?.congestionSections?.length).toBeGreaterThan(0);
+    for (const section of tokyo?.congestionSections ?? []) {
+      expect(section).toMatchObject({
+        line: expect.any(String),
+        section: expect.any(String),
+        timeBand: expect.any(String),
+        value: expect.any(Number),
+      });
+    }
+    // 大宮は国交省の主要区間に該当なし（PoC README記載どおりnull/未設定）
+    expect(getStationStats('大宮')?.congestionSections).toBeUndefined();
   });
 });
