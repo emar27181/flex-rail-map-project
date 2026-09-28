@@ -84,6 +84,7 @@ import { buildCorridorRoutes, vertexRanks, offsetPoints } from '../utils/routeOf
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import MapCompassButton from './map/MapCompassButton';
+import { getThroughReachableSections } from '../utils/throughService';
 import Select from './ui/atoms/Select';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import TextField from './ui/atoms/TextField';
@@ -3187,6 +3188,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return combinedRoutes;
   };
 
+  // 出発駅だけを選んだとき、直通列車1本で行ける他路線の区間（例: 藤沢→小田原線の相模大野〜新宿）。
+  // 路線データ上は別路線でも乗り換えずに行ける範囲を地図に出す。
+  // 他路線は全区間ではなくこの区間だけを描く（renderRoute）
+  const throughSections = useMemo(
+    () => (departure && !arrival ? getThroughReachableSections(departure.name) : new Map<RouteKey, Station[][]>()),
+    [departure, arrival],
+  );
+
   // 駅選択に応じた路線表示制御
   // ※ departure && arrival の場合は route recommendation useEffect が availableRoutes/visibleRoutes を管理
   useEffect(() => {
@@ -3196,7 +3205,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     if (departure && !arrival) {
       const depRoutes = getRoutesForStation(departure.name) as RouteKey[];
-      let routeSet = new Set<RouteKey>(depRoutes);
+      let routeSet = new Set<RouteKey>([...depRoutes, ...throughSections.keys()]);
       // 自動設定（現在地）時のみ近隣路線に拡張して計5路線表示
       if (!isManualDeparture && routeSet.size < 5 && allUniqueStations.length > 0) {
         const sorted = allUniqueStations
@@ -3231,7 +3240,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       setAvailableRoutes(new Set(allRouteKeys));
       setVisibleRoutes(new Set());
     }
-  }, [departure, arrival, isManualDeparture]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [departure, arrival, isManualDeparture, throughSections]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 初回の位置情報取得時、駅が未選択なら最寄り駅を通る路線を表示ONにする。
   // 駅が両方未選択の間は全路線非表示にしているため、現在地が分かっても
@@ -4277,7 +4286,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         }
       }
     } else {
-      displaySegments = [stations];
+      // 出発駅だけ選択中で、この路線が直通で届く他路線なら、届く区間だけを描く
+      const through = throughSections.get(routeKey);
+      if (through && !showFullRouteStations) {
+        displaySegments = through;
+        const allNames = new Set<string>();
+        through.forEach(seg => seg.forEach(s => allNames.add(s.name)));
+        displayStations = stations.filter(s => allNames.has(s.name));
+      } else {
+        displaySegments = [stations];
+      }
     }
 
     // 所要時間ラベルなどは常に route color を使う
