@@ -86,7 +86,7 @@ import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import MapCompassButton from './map/MapCompassButton';
 import { getThroughReachableSections } from '../utils/throughService';
-import { findParallelSections } from '../utils/parallelRoutes';
+import { findParallelSections, sectionMinutes } from '../utils/parallelRoutes';
 import { isSameStation } from '../utils/sameStation';
 import { buildEffectiveLineCounts } from '../utils/effectiveLines';
 import Select from './ui/atoms/Select';
@@ -1237,41 +1237,102 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return activeTransferStations;
   }, [routeRecommendations.length, recommendationTransferStations, allTransferStations]);
 
+  // 出発・到着の間に描く経路候補。既定（推薦ルート選択を出さない）は全候補を描き、
+  // 路線ごとの表示はユーザーが「表示路線の切替」で調整する。推薦ルート選択を出したときは、
+  // そこで選んだ候補だけに絞る（選択の意味が地図に表れるように）
+  const drawnRecommendations = useMemo(() => (
+    showRouteRecommendationsPanel && selectedRouteIndices !== null
+      ? routeRecommendations.filter((_, idx) => selectedRouteIndices.has(idx))
+      : routeRecommendations
+  ), [showRouteRecommendationsPanel, selectedRouteIndices, routeRecommendations]);
+
+  // 出発・到着を選んだとき、選択中の経路の区間と並行して走る別の路線の区間
+  // （藤沢→東京の東海道線に対する京浜東北線・横須賀線の大船〜東京など）。
+  // 遅延・運休のときに「わざと別の路線で行く」道が地図で分かるよう、
+  // 経路の区間と同じく駅も描く（renderRoute / journeyStationNamesByRoute）
+  const parallelSections = useMemo(() => {
+    if (!departure || !arrival || drawnRecommendations.length === 0) return new Map<RouteKey, Station[][]>();
+    const segments = drawnRecommendations.flatMap(r => r.segments)
+      .filter(seg => seg.routeKey && seg.routeKey !== 'walking' && !seg.isWalkingTransfer)
+      .map(seg => ({ routeKey: seg.routeKey as RouteKey, stations: seg.stations as Station[] }));
+    return findParallelSections(segments, Object.entries(routes) as Array<[RouteKey, Station[]]>) as Map<RouteKey, Station[][]>;
+  }, [departure, arrival, drawnRecommendations]);
+
+  // 並行ルートの路線を表示中・一覧に加える（経路候補の路線だけを出す推薦 useEffect の後に足す）
+  useEffect(() => {
+    if (parallelSections.size === 0) return;
+    const keys = [...parallelSections.keys()];
+    setVisibleRoutes(prev => (keys.every(k => prev.has(k)) ? prev : new Set([...prev, ...keys])));
+    setAvailableRoutes(prev => (keys.every(k => prev.has(k)) ? prev : new Set([...prev, ...keys])));
+  }, [parallelSections]);
+
   // 経路上の各駅の出発時刻マップ（時刻表モード用）
   // 同一駅が複数セグメントに登場する場合も全エントリを保持する
   type StationJourneyEntry = { depTime: string; routeKey: string; directionIndex: number };
+  // 地図に描く全候補（先頭＝最速の候補を優先）と並行ルートの駅に時刻を付ける。
+  // 以前は選択中の候補1つだけで、東海道線の駅にしか時刻が出ず、京浜東北線・横須賀線など
+  // 別の路線で行く道の駅は時刻が空だった
   const stationTimelineMap = useMemo(() => {
     const map = new Map<string, StationJourneyEntry[]>();
     if (!timetableModeEnabled) return map;
-    const selectedIdx = selectedRouteIndices ? [...selectedRouteIndices][0] : 0;
-    const route = routeRecommendations[selectedIdx];
-    if (!route) return map;
-
-    const effectiveBaseTime = computeEffectiveBaseTime(timetableBaseTime, timeMode, route.totalTime);
-
-    let cumTime = 0;
-    for (const seg of route.segments) {
-      if (seg.isWalkingTransfer) {
-        cumTime += (seg as any).walkingTime ?? 5;
-        continue;
+    const add = (name: string, entry: StationJourneyEntry) => {
+      const existing = map.get(name) ?? [];
+      // 同じ routeKey が既に登録済みの場合は追加しない（先に登録した候補を優先）
+      if (!existing.some(e => e.routeKey === entry.routeKey)) {
+        existing.push(entry);
+        map.set(name, existing);
       }
-      const n = seg.stations.length;
-      const fromName = seg.stations[0]?.name ?? '';
-      const toName   = seg.stations[n - 1]?.name ?? '';
-      const dirIdx   = getTimetableDirectionIndex(seg.routeKey, fromName, toName);
-      seg.stations.forEach((st, i) => {
-        const stTime = addMinutes(effectiveBaseTime, cumTime + Math.round(seg.time * i / Math.max(n - 1, 1)));
-        const existing = map.get(st.name) ?? [];
-        // 同じ routeKey が既に登録済みの場合は追加しない
-        if (!existing.some(e => e.routeKey === seg.routeKey)) {
-          existing.push({ depTime: stTime, routeKey: seg.routeKey, directionIndex: dirIdx });
-          map.set(st.name, existing);
+    };
+
+    for (const route of drawnRecommendations) {
+      const effectiveBaseTime = computeEffectiveBaseTime(timetableBaseTime, timeMode, route.totalTime);
+      let cumTime = 0;
+      for (const seg of route.segments) {
+        if (seg.isWalkingTransfer) {
+          cumTime += (seg as any).walkingTime ?? 5;
+          continue;
         }
-      });
-      cumTime += seg.time;
+        const n = seg.stations.length;
+        const fromName = seg.stations[0]?.name ?? '';
+        const toName   = seg.stations[n - 1]?.name ?? '';
+        const dirIdx   = getTimetableDirectionIndex(seg.routeKey, fromName, toName);
+        seg.stations.forEach((st, i) => {
+          const stTime = addMinutes(effectiveBaseTime, cumTime + Math.round(seg.time * i / Math.max(n - 1, 1)));
+          add(st.name, { depTime: stTime, routeKey: seg.routeKey, directionIndex: dirIdx });
+        });
+        cumTime += seg.time;
+      }
+    }
+
+    // 並行ルート: 分かれる駅（区間の最初の駅）の時刻から、その路線の駅間所要時間を足していく。
+    // 途中で経路と共通の駅（横浜・川崎など）では、経路の列車で先回りして乗り換えられるので
+    // 早い方の時刻に揃える（京浜東北線を大船から根岸線回りで数えると、品川の隣の大井町だけ
+    // 30分遅い時刻になっていた）
+    const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+    for (const [rk, sections] of parallelSections) {
+      const list = routes[rk] as Station[];
+      for (const sec of sections) {
+        // 先に登録した（最速の）候補の時刻を使う
+        const start = map.get(sec[0].name)?.[0]?.depTime;
+        if (!start) continue;
+        const dirIdx = getTimetableDirectionIndex(rk, sec[0].name, sec[sec.length - 1].name);
+        const mins = sectionMinutes(sec, list);
+        const offsets: number[] = [];
+        sec.forEach((st, i) => {
+          let o = i === 0 ? 0 : offsets[i - 1] + mins[i] - mins[i - 1];
+          const via = map.get(st.name)?.[0]?.depTime;
+          if (via) o = Math.min(o, (toMin(via) - toMin(start) + 1440) % 1440);
+          offsets.push(o);
+        });
+        // 逆向きにも1駅ずつ戻れる（横浜から桜木町へ戻る方が、大船から根岸線を回るより早い）
+        for (let i = sec.length - 2; i >= 0; i--) {
+          offsets[i] = Math.min(offsets[i], offsets[i + 1] + mins[i + 1] - mins[i]);
+        }
+        sec.forEach((st, i) => add(st.name, { depTime: addMinutes(start, offsets[i]), routeKey: rk, directionIndex: dirIdx }));
+      }
     }
     return map;
-  }, [timetableModeEnabled, routeRecommendations, selectedRouteIndices, timetableBaseTime, timeMode]);
+  }, [timetableModeEnabled, drawnRecommendations, parallelSections, timetableBaseTime, timeMode]);
 
   const TRAIN_TYPE_COLOR: Record<string, string> = {
     '各停': '#2980b9', '普通': '#2980b9',
@@ -3213,34 +3274,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     [departure, arrival],
   );
 
-  // 出発・到着の間に描く経路候補。既定（推薦ルート選択を出さない）は全候補を描き、
-  // 路線ごとの表示はユーザーが「表示路線の切替」で調整する。推薦ルート選択を出したときは、
-  // そこで選んだ候補だけに絞る（選択の意味が地図に表れるように）
-  const drawnRecommendations = useMemo(() => (
-    showRouteRecommendationsPanel && selectedRouteIndices !== null
-      ? routeRecommendations.filter((_, idx) => selectedRouteIndices.has(idx))
-      : routeRecommendations
-  ), [showRouteRecommendationsPanel, selectedRouteIndices, routeRecommendations]);
-
-  // 出発・到着を選んだとき、選択中の経路の区間と並行して走る別の路線の区間
-  // （藤沢→東京の東海道線に対する京浜東北線・横須賀線の大船〜東京など）。
-  // 遅延・運休のときに「わざと別の路線で行く」道が地図で分かるよう、
-  // 経路の区間と同じく駅も描く（renderRoute / journeyStationNamesByRoute）
-  const parallelSections = useMemo(() => {
-    if (!departure || !arrival || drawnRecommendations.length === 0) return new Map<RouteKey, Station[][]>();
-    const segments = drawnRecommendations.flatMap(r => r.segments)
-      .filter(seg => seg.routeKey && seg.routeKey !== 'walking' && !seg.isWalkingTransfer)
-      .map(seg => ({ routeKey: seg.routeKey as RouteKey, stations: seg.stations as Station[] }));
-    return findParallelSections(segments, Object.entries(routes) as Array<[RouteKey, Station[]]>) as Map<RouteKey, Station[][]>;
-  }, [departure, arrival, drawnRecommendations]);
-
-  // 並行ルートの路線を表示中・一覧に加える（経路候補の路線だけを出す推薦 useEffect の後に足す）
-  useEffect(() => {
-    if (parallelSections.size === 0) return;
-    const keys = [...parallelSections.keys()];
-    setVisibleRoutes(prev => (keys.every(k => prev.has(k)) ? prev : new Set([...prev, ...keys])));
-    setAvailableRoutes(prev => (keys.every(k => prev.has(k)) ? prev : new Set([...prev, ...keys])));
-  }, [parallelSections]);
 
   // 駅選択に応じた路線表示制御
   // ※ departure && arrival の場合は route recommendation useEffect が availableRoutes/visibleRoutes を管理

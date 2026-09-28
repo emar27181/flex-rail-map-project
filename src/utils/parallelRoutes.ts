@@ -92,3 +92,25 @@ export function findParallelSections<K extends string>(
   }
   return result;
 }
+
+/** 駅間の所要時間が路線データに無いときに使う分数（routeFinder と同じ既定値） */
+const DEFAULT_MINUTES_BETWEEN = 3;
+
+/**
+ * 並行ルートの区間の各駅に、区間の最初の駅から何分で着くかを返す（時刻ラベル用）。
+ * 路線データの timeToNext は「その駅から路線データ上の次の駅まで」なので、
+ * 区間が路線データと逆向きのときは1つ手前の駅の値を使う。
+ */
+export function sectionMinutes(
+  section: StationLike[],
+  routeList: Array<StationLike & { timeToNext?: number }>,
+): number[] {
+  const out = [0];
+  for (let i = 1; i < section.length; i++) {
+    const a = routeList.findIndex(s => isSameStation(s, section[i - 1]));
+    const b = routeList.findIndex(s => isSameStation(s, section[i]));
+    const first = a !== -1 && b !== -1 ? routeList[Math.min(a, b)] : undefined;
+    out.push(out[i - 1] + (first?.timeToNext ?? DEFAULT_MINUTES_BETWEEN));
+  }
+  return out;
+}
