@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { requestAd } from '../utils/adsense';
 import { L } from './legend/legendStyles';
 
 interface AdSenseAdProps {
@@ -24,21 +25,14 @@ const AdSenseAd: React.FC<AdSenseAdProps> = ({
   style = {},
   className = ''
 }) => {
-  const adRef = useRef<HTMLDivElement>(null);
+  const adRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    try {
-      if (typeof window !== 'undefined' && window.adsbygoogle) {
-        window.adsbygoogle.push({});
-      }
-    } catch (error) {
-      console.error('AdSense error:', error);
-    }
+    requestAd(adRef.current);
   }, []);
 
   return (
     <div
-      ref={adRef}
       style={{
         textAlign: 'center',
         margin: `${L.sp['3xl']} 0`,
@@ -47,6 +41,7 @@ const AdSenseAd: React.FC<AdSenseAdProps> = ({
       className={className}
     >
       <ins
+        ref={adRef}
         className="adsbygoogle"
         style={{
           display: 'block',
