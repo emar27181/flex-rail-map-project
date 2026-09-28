@@ -2793,6 +2793,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    */
   const alwaysVisibleStations = useMemo(() => {
     if (!alwaysVisibleStationsEnabled) return [] as Station[];
+    // 出発・到着の両方を選んだら、経路の区間の駅だけを出す（「路線の全区間を表示」がオフのとき・既定）。
+    // 以前はここで主要駅（乗り入れ路線の多い駅）が区間の外にも出続けていた
+    if (departure && arrival && !showFullRouteStations) return [] as Station[];
     const covered = new Set<string>();
     if (isTransferHintMode) {
       for (const s of transferHintStations) covered.add(s.name);
@@ -2831,7 +2834,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       .slice(0, MAX_ALWAYS_VISIBLE_STATIONS)
       .filter(s => !covered.has(s.name));
   }, [isTransferHintMode, transferHintStations, visibleRoutes, stationRouteCountMap, viewBounds, viewCenter,
-      alwaysVisibleStationsEnabled, ALWAYS_VISIBLE_MIN_ROUTES]);
+      alwaysVisibleStationsEnabled, ALWAYS_VISIBLE_MIN_ROUTES, departure, arrival, showFullRouteStations]);
 
   /**
    * 「どの駅を表示するか」の共有ロジック。
@@ -4234,6 +4237,37 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     );
   };
 
+  /**
+   * 出発・到着を選んで経路候補が出ているとき、路線ごとに「選択中の経路で通る駅」。
+   * renderRoute の区間の絞り込みと、同じ駅を描く路線（ラベルの持ち主）の決定の
+   * 両方でこれを使う（別々に判定すると、持ち主の路線が駅を描かずに誰も描かない
+   * 駅が出る。東海道線が横浜の持ち主になり、湘南新宿ライン経路で横浜が消えた）。
+   * 経路候補が無い、または全区間表示のときは null（どの路線も全駅を描く）。
+   */
+  // ※ この位置はローディング中の早期 return より後なので、フックは使わない（毎回計算する。軽い）
+  const journeyStationNamesByRoute = ((): Map<string, Set<string>> | null => {
+    if (!departure || !arrival || routeRecommendations.length === 0 || showFullRouteStations) return null;
+    const routesToShow = selectedRouteIndices === null
+      ? routeRecommendations
+      : routeRecommendations.filter((_, idx) => selectedRouteIndices.has(idx));
+    const map = new Map<string, Set<string>>();
+    for (const r of routesToShow) {
+      for (const seg of r.segments) {
+        const set = map.get(seg.routeKey) ?? new Set<string>();
+        seg.stations.forEach(st => set.add(st.name));
+        map.set(seg.routeKey, set);
+      }
+    }
+    return map;
+  })();
+
+  /** その路線がこの駅を描くか（経路候補の区間外の駅は、出発・到着駅以外描かない） */
+  const routeDrawsStation = (rk: RouteKey, stationName: string): boolean => {
+    if (!journeyStationNamesByRoute) return true;
+    if (stationName === departure?.name || stationName === arrival?.name) return true;
+    return journeyStationNamesByRoute.get(rk)?.has(stationName) ?? false;
+  };
+
   const renderRoute = (routeKey: RouteKey, stations: Station[]) => {
     if (!visibleRoutes.has(routeKey)) return null;
 
@@ -4274,8 +4308,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           });
       });
       if (uniqueSegments.length === 0) {
-        // 推薦ルートに含まれないが visibleRoutes に明示的に追加された路線は全区間を表示
+        // 推薦ルートに含まれないが表示中の路線（出発・到着駅を通る路線など）。
+        // 線は位置の手がかりとして全区間を描くが、駅は出発・到着駅だけにする
+        // （「路線の全区間を表示」がオフのとき・既定）。以前は全駅を出していて、
+        // 藤沢→新宿で中央線の立川方面や小田急線の相模大野より先まで駅が並んでいた
         displaySegments = [stations];
+        if (!showFullRouteStations) {
+          displayStations = stations.filter(s => s.name === departure.name || s.name === arrival.name);
+        }
       } else {
         if (showFullRouteStations) {
           // 路線の全区間（線・駅とも）を表示
@@ -4392,7 +4432,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
            * この駅を通る表示中の路線のうち、先頭の1つだけが描くようにする。
            */
           const labelOwnerRouteKey = (getRoutesForStation(station.name, station) as RouteKey[])
-            .find(rk => visibleRoutes.has(rk));
+            .find(rk => visibleRoutes.has(rk) && routeDrawsStation(rk, station.name));
           if (labelOwnerRouteKey && labelOwnerRouteKey !== routeKey) {
             return null;
           }
