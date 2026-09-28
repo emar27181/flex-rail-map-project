@@ -44,7 +44,10 @@ const path = hubPath('stations', lang);
 						<tr>
 							<td>{spot.name[lang]}</td>
 							<td>
-								{stations.filter(s => s.touristSpots.includes(spot)).map((s, i) => (
+								{spot.stations
+									.map(ts => stations.find(s => s.name === ts.name && s.touristSpots.includes(spot)))
+									.filter(s => s !== undefined)
+									.map((s, i) => (
 									<Fragment>{i > 0 && t.listSep}<a href={stationPath(s.slug, lang)}>{stationName(s, lang)}</a></Fragment>
 								))}
 							</td>
