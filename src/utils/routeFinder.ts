@@ -91,6 +91,23 @@ export interface RouteResult {
   transfers: number;
 }
 
+/**
+ * 経路が同じ駅を2回通るか（引き返す経路）。
+ * 藤沢→東京で「湘南新宿ラインで辻堂へ戻り、東海道線で藤沢を通って東京へ」のような
+ * 候補が出ることがある。乗り換え駅（前の区間の終点＝次の区間の始点）は数えない。
+ */
+export function revisitsStation(route: Pick<RouteResult, 'segments'>): boolean {
+  const seen = new Set<string>();
+  for (const [i, seg] of route.segments.entries()) {
+    for (const [j, st] of seg.stations.entries()) {
+      if (i > 0 && j === 0) continue;
+      if (seen.has(st.name)) return true;
+      seen.add(st.name);
+    }
+  }
+  return false;
+}
+
 interface StationNode {
   station: Station;
   routeKey: RouteKey;

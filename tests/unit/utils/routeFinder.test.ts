@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { RouteFinder, RouteResult, findRoutesViaWaypoints } from '../../../src/utils/routeFinder';
+import { RouteFinder, RouteResult, findRoutesViaWaypoints, revisitsStation } from '../../../src/utils/routeFinder';
 import { routes } from '../../../src/data/routes';
 
 describe('RouteFinder', () => {
@@ -394,5 +394,18 @@ describe('findRoutesViaWaypoints（経由駅指定の経路検索）', () => {
 
     const via = findRoutesViaWaypoints(routeFinder, shibuya, [fakeStation], shinjuku);
     expect(via).toBeNull();
+  });
+});
+
+describe('引き返す経路の判定', () => {
+  const st = (name: string) => ({ name, lat: 0, lng: 0 });
+  const seg = (names: string[]) => ({ stations: names.map(st) }) as unknown as RouteResult['segments'][number];
+
+  it('同じ駅を2回通る経路（藤沢→辻堂→藤沢→…→東京）は引き返しと判定する', () => {
+    expect(revisitsStation({ segments: [seg(['藤沢', '辻堂']), seg(['辻堂', '藤沢', '大船', '東京'])] })).toBe(true);
+  });
+
+  it('乗り換え駅が前後の区間に出てくるだけなら引き返しではない', () => {
+    expect(revisitsStation({ segments: [seg(['藤沢', '大船']), seg(['大船', '横浜', '東京'])] })).toBe(false);
   });
 });

@@ -8,7 +8,7 @@ import StationSelector from './StationSelector';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
-import { RouteFinder, TimeFilter, findRoutesViaWaypoints, type RouteResult, type StationWithTime } from '../utils/routeFinder';
+import { RouteFinder, TimeFilter, findRoutesViaWaypoints, revisitsStation, type RouteResult, type StationWithTime } from '../utils/routeFinder';
 import { getRouteDestination, getRouteDisplayText, getDirectionText, commonDirections } from '../data/routeDestinations';
 import { useTheme, getThemeColors, adjustRouteColorForTheme } from '../contexts/ThemeContext';
 import { translateStation, translateRoute, translateUI, translateTrainType, translatePlatform, translateDestination, translateStatParamLabel, translateStatUnit } from '../utils/translation';
@@ -3014,7 +3014,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             return viaRoute ? [viaRoute] : [];
           })()
         : removeFinalDuplicates(
-            routeFinder.findRoutes(departure, arrival, maxRouteRecommendations * 2) // 多めに取得
+            // 多めに取得し、引き返す経路（同じ駅を2回通る）は除く。全候補の区間を地図に描くので、
+            // 藤沢→辻堂→（藤沢）→東京のような候補があると藤沢の先に不要な線が出る
+            routeFinder.findRoutes(departure, arrival, maxRouteRecommendations * 2).filter(r => !revisitsStation(r))
           ).slice(0, maxRouteRecommendations);
 
       setRouteRecommendations(finalUniqueRoutes);
