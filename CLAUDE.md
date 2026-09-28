@@ -661,6 +661,15 @@ Netlify管理画面の Site configuration → Build & deploy → Branch deploys 
 
 - 本番デプロイ（`--prod`）はユーザーの明示的な指示があった場合のみ実行する
 
+### SEO（sitemap は自動生成・ビルドで検証）
+
+- `sitemap.xml` は **ビルド時に自動生成** する（`src/integrations/seoSitemap.ts`）。手で書かない。
+  ページを `src/pages/` に足せば自動で載り、`noindex`・canonical 不一致・クエリ付きURLは自動で外れる
+- canonical・hreflang・title 重複・H1 の数などの検証に失敗すると **ビルドが止まる**
+- 確認は `npm run build` の後に `npm run test:seo`。実URLの200確認は
+  `SEO_LIVE_BASE_URL=<Deploy PreviewのURL> npm run test:seo`
+- 仕組み・判断基準・ページを足すときの決まりは **`docs/seo.md`**
+
 ### CHANGE.log 記録ルール
 
 **セッション中に行った変更は必ず `CHANGE.log` に記録すること。**

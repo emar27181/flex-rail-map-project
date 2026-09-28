@@ -1,5 +1,39 @@
 # CHANGE LOG
 
+## [2026-09-28] セッション（SEO: sitemap 自動生成・hreflang/H1/canonical の整合・検証）
+
+### fix: hreflang を別URLで実在する対応ページどうしだけに張る
+- `src/config/seo.ts`（`buildHreflangLinks`）, `src/data/guides.ts`, `src/layouts/GuideLayout.astro`,
+  `src/layouts/GuidesIndexLayout.astro`, `src/layouts/StaticPage.astro`, `src/pages/index.astro`
+- `?lang=en` は同じHTMLを返し canonical がクエリ無しURLのため、hreflang の相手にすると
+  canonical と矛盾して無視される。対応ページが無いページには hreflang を出さない
+
+### fix: 固定ページにH1を1つ置き、/fullscreen を noindex に、記事の canonical・構造化データを揃える
+- `src/layouts/StaticPage.astro`（`heading`）, `src/pages/{about,contact,privacy,terms,guide,faq}.astro`,
+  `src/pages/fullscreen.astro`, `src/config/articleSeo.ts`（新規）,
+  `src/pages/articles/_ArticleLayout.astro`, `src/pages/articles/flex-rail-map-introduction.astro`
+- 記事に BreadcrumbList（ホーム > 記事一覧 > 記事）と Article を出す。
+  更新日を管理していないため `dateModified` は書かない
+
+### fix: 固定ページ・ガイド・記事に共通のフッターナビを置き、孤立ページを無くす
+- `src/config/siteNav.ts`（新規）, `src/components/SiteFooterNav.astro`（新規）ほか各レイアウト
+
+### fix: /about・/faq の「39路線・東京のみ・日英のみ」を実装に合わせる
+- `src/config/siteFacts.ts`（新規）, `src/pages/about.astro`, `src/pages/faq.astro`
+- 路線数・駅数は路線データから計算。FAQ の JSON-LD は本文と同じ文言を使う
+
+### feat: sitemap.xml をビルド時に自動生成し、SEO の整合性をビルドとテストで検証する
+- `src/seo/sitemapCore.ts`, `src/seo/gitLastModified.ts`, `src/integrations/seoSitemap.ts`（新規）,
+  `astro.config.mjs`, `package.json`（`test:seo`）,
+  `tests/unit/seo/sitemapCore.test.ts`, `tests/seo/built.test.ts`（新規）
+- index 対象（noindex でなく自己参照 canonical）のページだけを載せる。lastmod は git 履歴から
+- sitemap のURLの実在・noindex 混入・canonical 一致・重複・hreflang の相互性・
+  title 重複・H1 の数を検証し、失敗したらビルドを止める
+- 結果: 29ページ中26URL（/fullscreen・/demo・/diagram は noindex で除外）
+
+### docs: SEO の仕組みと確認方法
+- `docs/seo.md`（新規）, `CLAUDE.md`
+
 ## [2026-09-28] セッション（推定時刻表の注意書き・絵文字廃止・方位磁針・最寄り路線・直通運転・並走路線の色分け）
 
 ### feat: 推定の時刻表データには冒頭に赤字で公式時刻表参照の注意書きを出す
