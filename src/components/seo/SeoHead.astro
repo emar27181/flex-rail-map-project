@@ -1,0 +1,74 @@
+---
+/**
+ * 検索向けページ（ガイド・駅・路線・データ）共通の <head> の中身。
+ *
+ * title・description・robots・canonical・hreflang・OGP・構造化データを
+ * ここだけで出す。以前は GuideLayout / GuidesIndexLayout に同じ記述が
+ * 2つあり、ページの種類を増やすたびに3つ目・4つ目を書くことになっていた。
+ *
+ * - robots が noindex のページも canonical は自分自身を指す
+ *   （sitemap からは src/integrations/seoSitemap.ts が自動で外す）
+ * - hreflang は buildHreflangLinks（src/config/seo.ts）で作ったものだけを渡す
+ * - jsonLd には画面に実際に出している内容だけを入れる
+ */
+import GA4Loader from '../GA4Loader.astro';
+import { canonicalUrl, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION, OG_LOCALE, SITE_NAME, type HreflangLink } from '../../config/seo';
+
+export interface Props {
+  title: string;
+  description: string;
+  /** canonical にするサイト内パス（クエリ無し） */
+  path: string;
+  lang: keyof typeof OG_LOCALE;
+  /** 既定は index。情報の薄いページは 'noindex, follow' */
+  robots?: 'index, follow' | 'noindex, follow';
+  hreflang?: HreflangLink[];
+  ogType?: 'website' | 'article';
+  keywords?: string;
+  jsonLd?: object[];
+  /** ページのCSS（デザイントークンから組み立てた文字列） */
+  styles?: string[];
+}
+
+const {
+  title, description, path, lang,
+  robots = 'index, follow', hreflang = [], ogType = 'website', keywords, jsonLd = [], styles = [],
+} = Astro.props;
+const canonical = canonicalUrl(path);
+---
+
+<meta charset="utf-8" />
+{GOOGLE_SITE_VERIFICATION && (
+	<meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />
+)}
+<link rel="icon" type="image/png" sizes="32x32" href="/icon_flex_rail_way_map.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/icon_flex_rail_way_map.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/icon_flex_rail_way_map.png" />
+<link rel="shortcut icon" href="/icon_flex_rail_way_map.png" />
+<meta name="viewport" content="width=device-width" />
+<meta name="generator" content={Astro.generator} />
+
+<title>{title}</title>
+<meta name="description" content={description} />
+{keywords && <meta name="keywords" content={keywords} />}
+<meta name="robots" content={robots} />
+
+<link rel="canonical" href={canonical} />
+{hreflang.map(l => <link rel="alternate" hreflang={l.hreflang} href={l.href} />)}
+
+<meta property="og:type" content={ogType} />
+<meta property="og:url" content={canonical} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={DEFAULT_OG_IMAGE} />
+<meta property="og:locale" content={OG_LOCALE[lang]} />
+<meta property="og:site_name" content={SITE_NAME} />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+
+{jsonLd.map(j => <script type="application/ld+json" set:html={JSON.stringify(j)} />)}
+
+<GA4Loader />
+
+{styles.map(css => <style set:html={css}></style>)}

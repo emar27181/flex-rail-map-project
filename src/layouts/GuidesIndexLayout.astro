@@ -11,8 +11,9 @@ import { staticPageCss } from './staticPageStyles';
 import { guideCss } from './guideStyles';
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import SiteFooterNav from '../components/SiteFooterNav.astro';
-import GA4Loader from '../components/GA4Loader.astro';
-import { SITE_URL, SITE_NAME, GOOGLE_SITE_VERIFICATION, buildHreflangLinks } from '../config/seo';
+import SeoHead from '../components/seo/SeoHead.astro';
+import ThemeInitScript from '../components/ThemeInitScript.astro';
+import { buildHreflangLinks } from '../config/seo';
 import { guideIndexPath, guideLanguages } from '../data/guides';
 
 export interface Props {
@@ -24,64 +25,25 @@ export interface Props {
 }
 
 const { title, description, path, htmlLang, backLabel } = Astro.props;
-const canonical = `${SITE_URL}${path}`;
 const hreflangLinks = buildHreflangLinks(
   guideLanguages().map(lang => ({ lang, path: guideIndexPath(lang) })),
   'ja',
 );
-const OG_LOCALE: Record<Props['htmlLang'], string> = {
-  ja: 'ja_JP',
-  en: 'en_US',
-  zh: 'zh_CN',
-  ko: 'ko_KR',
-};
 ---
 
 <html lang={htmlLang}>
 	<head>
-		<meta charset="utf-8" />
-		{GOOGLE_SITE_VERIFICATION && (
-			<meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />
-		)}
-		<link rel="icon" type="image/png" sizes="32x32" href="/icon_flex_rail_way_map.png" />
-		<link rel="icon" type="image/png" sizes="16x16" href="/icon_flex_rail_way_map.png" />
-		<link rel="apple-touch-icon" sizes="180x180" href="/icon_flex_rail_way_map.png" />
-		<link rel="shortcut icon" href="/icon_flex_rail_way_map.png" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-
-		<title>{title}</title>
-		<meta name="description" content={description} />
-		<meta name="robots" content="index, follow" />
-
-		<link rel="canonical" href={canonical} />
-		{hreflangLinks.map(l => <link rel="alternate" hreflang={l.hreflang} href={l.href} />)}
-
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content={canonical} />
-		<meta property="og:title" content={title} />
-		<meta property="og:description" content={description} />
-		<meta property="og:image" content={`${SITE_URL}/icon_flex_rail_way_map.png`} />
-		<meta property="og:locale" content={OG_LOCALE[htmlLang]} />
-		<meta property="og:site_name" content={SITE_NAME} />
-		<meta name="twitter:card" content="summary" />
-		<meta name="twitter:title" content={title} />
-		<meta name="twitter:description" content={description} />
-
-		<GA4Loader />
-
-		<style set:html={staticPageCss}></style>
-		<style set:html={guideCss}></style>
+		<SeoHead
+			title={title}
+			description={description}
+			path={path}
+			lang={htmlLang}
+			hreflang={hreflangLinks}
+			styles={[staticPageCss, guideCss]}
+		/>
 	</head>
 	<body>
-		<script is:inline>
-			(function () {
-				try {
-					var saved = localStorage.getItem('theme');
-					document.body.className = saved === 'light' || saved === 'dark' ? saved : 'dark';
-				} catch (e) { document.body.className = 'dark'; }
-			})();
-		</script>
+		<ThemeInitScript />
 		<div class="container">
 			<a href="/" class="back-link" style="margin-bottom: 24px;">{backLabel}</a>
 			<slot />

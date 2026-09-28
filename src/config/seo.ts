@@ -67,3 +67,34 @@ export function buildHreflangLinks(
     { hreflang: 'x-default', href: canonicalUrl(def.path) },
   ];
 }
+
+/** パンくずの1段（path はサイト内のパス） */
+export interface BreadcrumbItem {
+  name: string;
+  path: string;
+}
+
+/**
+ * BreadcrumbList の構造化データ。画面に出すパンくずと同じ並びを渡すこと
+ * （見えていない階層を構造化データにだけ書かない）。
+ */
+export function buildBreadcrumbJsonLd(items: BreadcrumbItem[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((it, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: it.name,
+      item: canonicalUrl(it.path),
+    })),
+  };
+}
+
+/** Open Graph の og:locale（言語コード → ロケール） */
+export const OG_LOCALE: Record<'ja' | 'en' | 'zh' | 'ko', string> = {
+  ja: 'ja_JP',
+  en: 'en_US',
+  zh: 'zh_CN',
+  ko: 'ko_KR',
+};

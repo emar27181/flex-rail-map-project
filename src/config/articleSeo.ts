@@ -11,7 +11,7 @@
  *   そのまま入れていたが、それは「更新日」ではない
  * - 著者・発行者は実在するプロジェクト名（CLAUDE.md の著作権表記）だけを書く
  */
-import { SITE_URL, SITE_NAME } from './seo';
+import { SITE_URL, SITE_NAME, buildBreadcrumbJsonLd } from './seo';
 
 const PROJECT_NAME = 'Flex Rail Map Project';
 
@@ -47,14 +47,9 @@ export function articleJsonLd(a: ArticleSeoInput) {
 
 /** パンくず: ホーム > 記事一覧（> 記事）。記事一覧ページでは article を省略する */
 export function articleBreadcrumbJsonLd(article?: { title: string; canonicalUrl: string }) {
-  const items = [
-    { name: SITE_NAME, item: `${SITE_URL}/` },
-    { name: '記事一覧', item: `${SITE_URL}/articles` },
-    ...(article ? [{ name: article.title, item: article.canonicalUrl }] : []),
-  ];
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: it.name, item: it.item })),
-  };
+  return buildBreadcrumbJsonLd([
+    { name: SITE_NAME, path: '/' },
+    { name: '記事一覧', path: '/articles' },
+    ...(article ? [{ name: article.title, path: article.canonicalUrl.replace(SITE_URL, '') }] : []),
+  ]);
 }
