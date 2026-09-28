@@ -87,6 +87,7 @@ import IconButton from './ui/atoms/IconButton';
 import MapCompassButton from './map/MapCompassButton';
 import { getThroughReachableSections } from '../utils/throughService';
 import { findParallelSections, sectionMinutes } from '../utils/parallelRoutes';
+import { STATION_TIME_LINE_HEIGHT, stationTimeLinesHtml, timeLineWidth, toTimeLines, type StationTimeLine } from './map/stationTimeLabel';
 import { isSameStation } from '../utils/sameStation';
 import { buildEffectiveLineCounts } from '../utils/effectiveLines';
 import Select from './ui/atoms/Select';
@@ -2250,7 +2251,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     };
   }, [isMobile]);
 
-  const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean, opacity: number = 1, timeLabel?: string, routeKey?: RouteKey, overrideColor?: string, tierShadow?: string) => {
+  const createStationIcon = useCallback((station: Station, color: string, zoomLevel: number, isDetailed: boolean, opacity: number = 1, timeLabel?: string | StationTimeLine[], routeKey?: RouteKey, overrideColor?: string, tierShadow?: string) => {
     if (!MapComponents?.DivIcon) return null;
 
     const { DivIcon } = MapComponents;
@@ -2267,7 +2268,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const translatedStationName = translateStation(station.name, currentLanguage);
       const furigana = (showFurigana && currentLanguage === 'japanese') ? getFurigana(station.name) : '';
       const hasFurigana = furigana.length > 0;
-      const hasTime = !!timeLabel;
+      const timeLines = toTimeLines(timeLabel);
+      const hasTime = timeLines.length > 0;
       const stationNumber = (showStationNumbers && routeKey)
         ? (getStationNumber(routeKey, station.name) ?? getAnyStationNumber(station.name))
         : undefined;
@@ -2281,13 +2283,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         return Math.ceil(w);
       };
       const nameWidth = estimateScaledWidth(displayName);
-      const labelWidth = Math.max(nameWidth, timeLabel ? estimateScaledWidth(timeLabel) : 0);
+      const labelWidth = Math.max(nameWidth, ...timeLines.map(l => timeLineWidth(l, estimateScaledWidth)));
       const stationNameWidth = hasTime ? labelWidth : nameWidth;
       const baseH = stationLabelBox.height;
       const furiganaH = hasFurigana ? stationLabelBox.furiganaHeight : 0;
-      const timeH = hasTime ? 12 : 0;
+      const timeH = timeLines.length * STATION_TIME_LINE_HEIGHT;
       const iconHeight = baseH + furiganaH + timeH;
-      const timeLine = hasTime ? `<div style="font-size:9px;line-height:1;margin-top:1px;font-weight:normal;opacity:0.9">${timeLabel}</div>` : '';
+      const timeLine = stationTimeLinesHtml(timeLines, 9);
       // ダークモードは駅名を白字に統一する。路線色を明るく補正している関係で
       // そのままだと白字のコントラストが不足する路線があるため、色相を保ったまま
       // 必要最小限だけ背景を暗くして 4.5:1 に近づける（見た目は同じ路線色のまま）。
@@ -2449,7 +2451,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   }, []);
 
   // 列車種別表示用の駅アイコン作成関数
-  const createTrainTypeStationIcon = useCallback((station: Station, routeKey: RouteKey, zoomLevel: number, isDetailed: boolean, opacity: number = 1, heatOverride?: string, timeLabel?: string) => {
+  const createTrainTypeStationIcon = useCallback((station: Station, routeKey: RouteKey, zoomLevel: number, isDetailed: boolean, opacity: number = 1, heatOverride?: string, timeLabel?: string | StationTimeLine[]) => {
     if (!MapComponents?.DivIcon || !trainTypeViewEnabled) {
       return createStationIcon(station, routeColors[routeKey], zoomLevel, isDetailed, opacity, timeLabel, routeKey, heatOverride);
     }
@@ -2472,9 +2474,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         ? (getStationNumber(routeKey, station.name) ?? getAnyStationNumber(station.name))
         : undefined;
       const displayName = stationNumber ? `${stationNumber} ${translatedStationName}` : translatedStationName;
+      const timeLines = toTimeLines(timeLabel);
       const baseWidth = Math.max(
         estimateTextWidth(displayName),
-        timeLabel ? estimateTextWidth(timeLabel) : 0,
+        ...timeLines.map(l => timeLineWidth(l, estimateTextWidth)),
       );
       // 枠線の太さを考慮して幅を調整
       const borderAdjustment = borderStyle.borderWidth * 2; // 左右の枠線分
@@ -2483,7 +2486,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const stationNameHeight = (hasFurigana
         ? stationLabelBox.height + stationLabelBox.furiganaHeight
         : stationLabelBox.height)
-        + (timeLabel ? stationLabelBox.furiganaHeight : 0)
+        + timeLines.length * stationLabelBox.furiganaHeight
         + borderAdjustment;
       // 出発駅・到着駅は影なし、その他は通常の影
       const isSelectedStation = (departure && departure.name === station.name) || (arrival && arrival.name === station.name);
@@ -2492,10 +2495,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const ttFuriganaSize = stationLabelBox.furiganaFontSize;
 
       // 所要時間・出発時刻の2行目。通常アイコン(createStationIcon)と同じ見た目にする
-      const hasTime = !!timeLabel;
-      const timeLine = hasTime
-        ? `<div style="font-size:${stationLabelBox.furiganaFontSize}px;line-height:1;margin-top:1px;font-weight:normal;opacity:0.9">${timeLabel}</div>`
-        : '';
+      const hasTime = timeLines.length > 0;
+      const timeLine = stationTimeLinesHtml(timeLines, stationLabelBox.furiganaFontSize);
       const innerHtml = (hasFurigana || hasTime)
         ? `${hasFurigana ? `<div style="font-size:${ttFuriganaSize}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${ttFontSize}px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}`
         : displayName;
@@ -2567,7 +2568,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return Math.round(baseSize * scaleFactor);
   };
 
-  const createSpecialStationIcon = useCallback((isDeparture: boolean, zoomLevel: number, stationName: string, originalName?: string, routeKey?: RouteKey, overrideBgColor?: string) => {
+  const createSpecialStationIcon = useCallback((isDeparture: boolean, zoomLevel: number, stationName: string, originalName?: string, routeKey?: RouteKey, overrideBgColor?: string, timeLabel?: string | StationTimeLine[]) => {
     if (!MapComponents?.DivIcon) return null;
 
     const { DivIcon } = MapComponents;
@@ -2584,13 +2585,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const displayStationName = stationNumber ? `${stationNumber} ${stationName}` : stationName;
 
     // 文字種別ごとに幅を推定（ASCII約7px, 日本語約12px）
-    let textWidth = 20;
-    for (const ch of displayStationName) textWidth += ch.charCodeAt(0) > 127 ? fontSize * 1.0 : fontSize * 0.55;
+    const estimate = (text: string) => {
+      let w = 20;
+      for (const ch of text) w += ch.charCodeAt(0) > 127 ? fontSize * 1.0 : fontSize * 0.55;
+      return w;
+    };
+    // 時刻（路線が複数あるときは路線ごと）を駅名の下に出す。通常の駅ラベルと同じ組み立て
+    const timeLines = toTimeLines(timeLabel);
+    const textWidth = Math.max(estimate(displayStationName), ...timeLines.map(l => timeLineWidth(l, estimate)));
     const markerWidth = Math.min(textWidth, language === 'english' ? 130 : 160);
 
     const furigana = (showFurigana && language === 'japanese' && originalName) ? getFurigana(originalName) : '';
     const hasFurigana = furigana.length > 0;
-    const totalHeight = hasFurigana ? markerHeight + stationLabelBox.furiganaHeight : markerHeight;
+    const totalHeight = (hasFurigana ? markerHeight + stationLabelBox.furiganaHeight : markerHeight)
+      + timeLines.length * STATION_TIME_LINE_HEIGHT;
+    const timeHtml = stationTimeLinesHtml(timeLines, 9);
 
     // 出発=緑 / 到着=赤 で背景を塗りつぶし、文字は白。
     // 以前は白背景＋太い色枠だったが、駅選択欄の配色（塗りつぶし）と揃え、
@@ -2602,8 +2611,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const borderCssSpecial = overrideBgColor
       ? 'border:none;'
       : `border:${stationLabelBox.borderWidth}px solid ${alphaWhite(0.9)};`;
-    const htmlContent = hasFurigana
-      ? `<div style="background:${bgColor};${borderCssSpecial}border-radius:${stationLabelBox.radiusCss};box-sizing:border-box;width:${markerWidth}px;height:${totalHeight}px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;color:${textColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px"><div style="font-size:${stationLabelBox.furiganaFontSize}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div><div style="font-size:${fontSize}px;line-height:1">${displayStationName}</div></div>`
+    const htmlContent = hasFurigana || timeLines.length > 0
+      ? `<div style="background:${bgColor};${borderCssSpecial}border-radius:${stationLabelBox.radiusCss};box-sizing:border-box;width:${markerWidth}px;height:${totalHeight}px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;color:${textColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px">${hasFurigana ? `<div style="font-size:${stationLabelBox.furiganaFontSize}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${fontSize}px;line-height:1">${displayStationName}</div>${timeHtml}</div>`
       : `<div style="background:${bgColor};${borderCssSpecial}border-radius:${stationLabelBox.radiusCss};box-sizing:border-box;width:${markerWidth}px;height:${totalHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${textColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px">${displayStationName}</div>`;
     return new DivIcon({
       html: htmlContent,
@@ -4248,10 +4257,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const stationOpacity =
       (isTransferHintMode || isLandmarkStation || visibleRoutes.has(routeKey)) ? 1 : 0.3;
     // 時刻表モード有効かつ経路上の駅なら出発時刻を2行目に表示
-    const timelineEntry = timetableModeEnabled
-      ? stationTimelineMap.get(station.name)?.find(e => e.routeKey === routeKey)
-      : undefined;
-    const stationTimeLabel = isDetailed && timelineEntry ? timelineEntry.depTime : undefined;
+    const stationTimeLabel = isDetailed ? getStationTimeLines(station.name) : undefined;
     // 累積所要時間オーバーレイ: 所要時間を2行目ラベルとして表示（時刻表ラベルより優先）
     const travelTimeMins = showTravelTimeOverlay ? travelTimeMap.get(station.name) : undefined;
     const effectiveTimeLabel = travelTimeMins !== undefined
@@ -4334,6 +4340,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     }
     return map;
   })();
+
+  /**
+   * 駅ラベルの下に出す時刻（時刻表示モード）。この駅を通る表示中の路線ごとに1行。
+   * 路線が1つだけなら従来どおり時刻だけ、複数なら路線色の印を付けて並べる
+   * （横浜なら東海道線・京浜東北線・横須賀線それぞれの時刻）。
+   */
+  const getStationTimeLines = (stationName: string): StationTimeLine[] | undefined => {
+    if (!timetableModeEnabled) return undefined;
+    const entries = (stationTimelineMap.get(stationName) ?? [])
+      .filter(e => visibleRoutes.has(e.routeKey as RouteKey));
+    if (entries.length === 0) return undefined;
+    if (entries.length === 1) return [{ time: entries[0].depTime }];
+    return entries.map(e => ({
+      time: e.depTime,
+      color: adjustRouteColorForTheme(routeColors[e.routeKey as RouteKey], theme),
+    }));
+  };
 
   /** その路線がこの駅を描くか（経路候補の区間外の駅は、出発・到着駅以外描かない） */
   const routeDrawsStation = (rk: RouteKey, stationName: string): boolean => {
@@ -4538,7 +4561,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             }
 
             const specialHeatBg = heatmapEnabled ? getStationHeatColor(station.name, heatmapParam, heatmapCustomRange) : undefined;
-            const specialIcon = createSpecialStationIcon(isDeparture, zoomLevel, translateStation(station.name, currentLanguage), station.name, routeKey, specialHeatBg);
+            const specialIcon = createSpecialStationIcon(isDeparture, zoomLevel, translateStation(station.name, currentLanguage), station.name, routeKey, specialHeatBg, getStationTimeLines(station.name));
             if (!specialIcon) return null;
 
             // special icon も heatmap 切替で確実に再マウントするため色を key に含める
