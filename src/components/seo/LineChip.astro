@@ -1,0 +1,24 @@
+---
+/**
+ * 路線名のチップ（路線色の丸＋路線名）。路線ページがある路線はリンクにする。
+ * 色は路線データ（routeColors）の値で、デザイントークンではない（路線を識別する情報）。
+ */
+import type { RouteKey } from '../../data/routes';
+import { getSeoModel, linePath, routeName, type SeoLang } from '../../seo/pageModel';
+import { routeColors } from '../../data/routes';
+
+interface Props {
+  route: RouteKey;
+  lang: SeoLang;
+}
+
+const { route, lang } = Astro.props;
+const line = getSeoModel().lines.find(l => l.key === route);
+const color = routeColors[route as keyof typeof routeColors];
+const name = routeName(route, lang);
+---
+
+<li class="seo-chip">
+  {color && <span class="seo-swatch" style={`background-color: ${color}`} aria-hidden="true"></span>}
+  {line ? <a href={linePath(line.slug, lang)}>{name}</a> : <span>{name}</span>}
+</li>

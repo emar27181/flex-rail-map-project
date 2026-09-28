@@ -1,0 +1,110 @@
+---
+/**
+ * 路線ページ（/lines/{slug}, /en/lines/{slug}）。
+ * 駅一覧・乗換駅・直通運転・駅周辺データへのリンクを路線データから作る。
+ */
+import SeoPageLayout from '../../../layouts/SeoPageLayout.astro';
+import MapOpenCta from '../../../components/MapOpenCta.astro';
+import LineChip from '../../../components/seo/LineChip.astro';
+import {
+  SEO_LANGS, dataPath, getSeoModel, guidesForRoutes, hubPath, linePath, routeName, stationName, stationPath,
+  type SeoLang, type SeoLine,
+} from '../../../seo/pageModel';
+import { SEO_TEXT, formatNumber } from '../../../seo/pageText';
+import { translateStatParamLabel } from '../../../utils/translation';
+
+export function getStaticPaths() {
+  return SEO_LANGS.flatMap(lang =>
+    getSeoModel().lines.map(line => ({
+      params: { lang: lang === 'ja' ? undefined : lang, slug: line.slug },
+      props: { lang, line },
+    })),
+  );
+}
+
+interface Props { lang: SeoLang; line: SeoLine }
+const { lang, line } = Astro.props;
+const t = SEO_TEXT[lang];
+const name = routeName(line.key, lang);
+const path = linePath(line.slug, lang);
+const first = stationName(line.stops[0].station, lang);
+const last = stationName(line.stops[line.stops.length - 1].station, lang);
+const transferCount = line.stops.filter(s => s.station.effectiveLines >= 2).length;
+const relatedGuides = guidesForRoutes([line.key], lang);
+// 駅一覧に添える駅周辺データ（データのページがある指標の先頭1つ）
+const dataPage = getSeoModel().dataPages.find(d => d.indexable);
+const dataLabel = dataPage && (lang === 'en' ? translateStatParamLabel(dataPage.meta.label, 'english') : dataPage.meta.label);
+---
+
+<SeoPageLayout
+	lang={lang}
+	title={t.lineTitle(name, line.stops.length)}
+	description={t.lineDescription(name, line.stops.length, first, last, transferCount)}
+	path={path}
+	langPaths={{ ja: linePath(line.slug, 'ja'), en: linePath(line.slug, 'en') }}
+	breadcrumbs={[
+		{ name: t.home, path: '/' },
+		{ name: t.hubs.lines, path: hubPath('lines', lang) },
+		{ name: name, path },
+	]}
+	h1={t.lineH1(name)}
+	lede={t.lineLede(name, line.stops.length, first, last, transferCount)}
+	indexable={line.indexable}
+>
+	<MapOpenCta
+		label={t.openMapLine(name)}
+		guideSlug={`line/${line.slug}`}
+		language={lang}
+		routes={[line.key]}
+	/>
+
+	<section>
+		<h2>{t.stationList}</h2>
+		<div class="seo-table-wrap">
+			<table class="seo-table">
+				<thead>
+					<tr>
+						<th class="num">{t.colNo}</th>
+						<th>{t.colStation}</th>
+						<th>{t.colTransfers}</th>
+						{dataPage && <th class="num"><a href={dataPath(dataPage.slug, lang)}>{dataLabel}</a></th>}
+					</tr>
+				</thead>
+				<tbody>
+					{line.stops.map((stop, i) => {
+						const stat = dataPage && stop.station.stats.find(s => s.key === dataPage.key);
+						return (
+							<tr>
+								<td class="num">{i + 1}</td>
+								<td><a href={stationPath(stop.station.slug, lang)}>{stationName(stop.station, lang)}</a></td>
+								<td>{stop.transfers.map(r => routeName(r, lang)).join(t.listSep)}</td>
+								{dataPage && <td class="num">{stat ? formatNumber(stat.value, lang) : '-'}</td>}
+							</tr>
+						);
+					})}
+				</tbody>
+			</table>
+		</div>
+	</section>
+
+	<section>
+		<h2>{t.throughService}</h2>
+		{line.throughPartners.length === 0
+			? <p>{t.noThrough}</p>
+			: line.throughPartners.map(p => (
+				<Fragment>
+					<p>{t.throughLine(p.map(r => routeName(r, lang)).join(t.listSep))}</p>
+					<ul class="seo-chips">{p.map(r => <LineChip route={r} lang={lang} />)}</ul>
+				</Fragment>
+			))}
+	</section>
+
+	{relatedGuides.length > 0 && (
+		<section>
+			<h2>{t.relatedGuides}</h2>
+			<ul class="related-list">
+				{relatedGuides.map(g => <li><a href={g.path}>{g.title}</a></li>)}
+			</ul>
+		</section>
+	)}
+</SeoPageLayout>
