@@ -85,6 +85,7 @@ import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import MapCompassButton from './map/MapCompassButton';
 import { getThroughReachableSections } from '../utils/throughService';
+import { isSameStation } from '../utils/sameStation';
 import Select from './ui/atoms/Select';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import TextField from './ui/atoms/TextField';
@@ -916,11 +917,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   }, []);
   const timeFilter = useMemo(() => new TimeFilter(routeFinder), [routeFinder]);
 
-  // 駅が通っている路線を見つける関数
-  const getRoutesForStation = useCallback((stationName: string): RouteKey[] => {
+  // 駅が通っている路線を見つける関数。
+  // 座標（near）を渡すと、同名の別駅（大宮〈埼玉〉と大宮〈京都・阪急〉など）を除く。
+  // 以前は名前だけで引いていて、大宮を選ぶと阪急京都線まで通過路線に出ていた。
+  const getRoutesForStation = useCallback((stationName: string, near?: { lat: number; lng: number }): RouteKey[] => {
+    const ref = { name: stationName, lat: near?.lat, lng: near?.lng };
     const stationRoutes: RouteKey[] = [];
     Object.entries(routes).forEach(([routeKey, stationList]) => {
-      if (stationList.some(station => station.name === stationName)) {
+      if (stationList.some(station => isSameStation(station, ref))) {
         stationRoutes.push(routeKey as RouteKey);
       }
     });
@@ -1509,7 +1513,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (!stationTooltip) return null;
 
     // この駅を通る全路線
-    const allRoutes = getRoutesForStation(stationTooltip.stationName);
+    const allRoutes = getRoutesForStation(stationTooltip.stationName, stationTooltip.station);
     // 路線なし かつ ヒートマップデータもなければスキップ
     if (allRoutes.length === 0 && !heatmapEnabled) return null;
 
@@ -2588,8 +2592,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const stationRouteKeys = useMemo<Set<RouteKey> | undefined>(() => {
     if (!departure && !arrival) return undefined;
     const keys = new Set<RouteKey>();
-    if (departure) getRoutesForStation(departure.name).forEach(rk => keys.add(rk));
-    if (arrival) getRoutesForStation(arrival.name).forEach(rk => keys.add(rk));
+    if (departure) getRoutesForStation(departure.name, departure).forEach(rk => keys.add(rk));
+    if (arrival) getRoutesForStation(arrival.name, arrival).forEach(rk => keys.add(rk));
     return keys.size > 0 ? keys : undefined;
   }, [departure, arrival, getRoutesForStation]);
 
@@ -3192,7 +3196,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 路線データ上は別路線でも乗り換えずに行ける範囲を地図に出す。
   // 他路線は全区間ではなくこの区間だけを描く（renderRoute）
   const throughSections = useMemo(
-    () => (departure && !arrival ? getThroughReachableSections(departure.name) : new Map<RouteKey, Station[][]>()),
+    () => (departure && !arrival ? getThroughReachableSections(departure) : new Map<RouteKey, Station[][]>()),
     [departure, arrival],
   );
 
@@ -3204,7 +3208,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const allRouteKeys = Object.keys(routes) as RouteKey[];
 
     if (departure && !arrival) {
-      const depRoutes = getRoutesForStation(departure.name) as RouteKey[];
+      const depRoutes = getRoutesForStation(departure.name, departure) as RouteKey[];
       let routeSet = new Set<RouteKey>([...depRoutes, ...throughSections.keys()]);
       // 自動設定（現在地）時のみ近隣路線に拡張して計5路線表示
       if (!isManualDeparture && routeSet.size < 5 && allUniqueStations.length > 0) {
@@ -3214,7 +3218,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           .sort((a, b) => a.dist - b.dist);
         for (const { s } of sorted) {
           if (routeSet.size >= 5) break;
-          for (const rk of getRoutesForStation(s.name) as RouteKey[]) {
+          for (const rk of getRoutesForStation(s.name, s) as RouteKey[]) {
             routeSet.add(rk);
             if (routeSet.size >= 5) break;
           }
@@ -3228,7 +3232,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       // 表示されるように、出発駅と同様にね」との要望を受けた）。
       // 以前はここで全路線を非表示にしていたため、到着駅を選んでも
       // 何も地図に出ず、出発駅を選ぶまで反応が無いように見えていた。
-      const arrRoutes = getRoutesForStation(arrival.name) as RouteKey[];
+      const arrRoutes = getRoutesForStation(arrival.name, arrival) as RouteKey[];
       setAvailableRoutes(new Set(allRouteKeys));
       setVisibleRoutes(new Set(arrRoutes));
     } else {
@@ -3255,7 +3259,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const nearest = findNearestStation(userLocation[0], userLocation[1]);
     if (!nearest) return; // 駅データ準備前。次の更新で再試行する
     nearestRoutesAppliedRef.current = true;
-    const nearestRoutes = getRoutesForStation(nearest.name) as RouteKey[];
+    const nearestRoutes = getRoutesForStation(nearest.name, nearest) as RouteKey[];
     setVisibleRoutes(prev => (prev.size === 0 ? new Set(nearestRoutes) : prev));
   }, [userLocation, departure, arrival, findNearestStation]);
 
@@ -4387,7 +4391,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
            * 渋谷のように路線によって座標が違う駅では、ずれた位置に二重に見える。
            * この駅を通る表示中の路線のうち、先頭の1つだけが描くようにする。
            */
-          const labelOwnerRouteKey = (getRoutesForStation(station.name) as RouteKey[])
+          const labelOwnerRouteKey = (getRoutesForStation(station.name, station) as RouteKey[])
             .find(rk => visibleRoutes.has(rk));
           if (labelOwnerRouteKey && labelOwnerRouteKey !== routeKey) {
             return null;
@@ -5279,7 +5283,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 通常の路線描画と同じデザインで描かれる。
               */}
               {mapViewMode !== 'bubble' && isTransferHintMode && transferHintStations.map(station => {
-                const stationRoutes = getRoutesForStation(station.name) as RouteKey[];
+                const stationRoutes = getRoutesForStation(station.name, station) as RouteKey[];
                 const primaryRouteKey = stationRoutes[0];
                 if (!primaryRouteKey) return null;
                 const routeHasExpressMark = (routes[primaryRouteKey] as Station[] | undefined)
@@ -5297,7 +5301,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 描画は renderStationMarker に集約しているので通常の駅と同じデザイン。
               */}
               {mapViewMode !== 'bubble' && alwaysVisibleStations.map(station => {
-                const stationRoutes = getRoutesForStation(station.name) as RouteKey[];
+                const stationRoutes = getRoutesForStation(station.name, station) as RouteKey[];
                 const primaryRouteKey = stationRoutes[0];
                 if (!primaryRouteKey) return null;
                 const routeHasExpressMark = (routes[primaryRouteKey] as Station[] | undefined)
