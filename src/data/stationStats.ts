@@ -395,7 +395,45 @@ export const STAT_PARAMS: StatParamMeta[] = [
 import rawStatsData from './station-stats-data.json';
 import { routes } from './routes';
 const { _meta: _ignored, ...stationStatsRaw } = rawStatsData as Record<string, unknown>;
-const statsBase = stationStatsRaw as Record<string, StationStats>;
+
+/**
+ * Overpass の取得失敗を「0件」として保存してしまった疑いのある値を、データなしに戻す。
+ *
+ * scripts/collect-heatmap-data.py は Overpass がタイムアウト等で空の結果を返しても
+ * 成功扱いにして 0 を書き込む。そのため有明・東雲（周辺に店も公園も多い）のように、
+ * 同じ回にまとめて取得した項目がすべて 0 の駅が187駅あった。0 は「無い」という
+ * 主張になり、ヒートマップでも最低値の色で塗られてしまう（CLAUDE.md の
+ * 「ゼロで埋めない」に反する）ので、次の規則でデータなし（灰色）として扱う。
+ *
+ * - 2026-06-10 の回（飲食店・カフェ・コンビニ・スーパー・病院・公園面積）が
+ *   すべて 0 → この回の値と、公園面積から計算した緑地率を捨てる
+ * - さらに 2026-06-11 の回（居酒屋・ラーメン・書店・コワーキング）もすべて 0 →
+ *   この回の値も捨てる（同じ座標で2回とも何も取れていない）
+ * 郊外の小さな駅で本当に何も無い可能性はあるが、確かめられない値は載せない。
+ * 取り直した値で JSON を上書きすれば、自動的にそのまま使われる。
+ */
+export const OSM_BATCH_2026_06_10: Array<keyof StationStats> = [
+  'restaurantCount', 'cafeCount', 'convenienceStoreCount', 'supermarketCount', 'hospitalCount', 'parkAreaM2',
+];
+export const OSM_BATCH_2026_06_11: Array<keyof StationStats> = [
+  'izakayaCount', 'ramenCount', 'bookstoreCount', 'coworkingCount',
+];
+
+const allZero = (s: StationStats, keys: Array<keyof StationStats>) =>
+  keys.every(k => s[k] === 0);
+
+export function dropSuspectedFailedBatches(s: StationStats): StationStats {
+  if (!allZero(s, OSM_BATCH_2026_06_10)) return s;
+  const out: StationStats = { ...s };
+  for (const k of [...OSM_BATCH_2026_06_10, 'greenRatioPct' as const]) delete out[k];
+  if (allZero(s, OSM_BATCH_2026_06_11)) for (const k of OSM_BATCH_2026_06_11) delete out[k];
+  return out;
+}
+
+const statsBase: Record<string, StationStats> = Object.fromEntries(
+  Object.entries(stationStatsRaw as Record<string, StationStats>)
+    .map(([name, s]) => [name, dropSuspectedFailedBatches(s)]),
+);
 
 /**
  * 路線数を路線データから算出して統計に合流させる。
