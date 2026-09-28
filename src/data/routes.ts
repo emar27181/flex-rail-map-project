@@ -1,3 +1,7 @@
+/*
+ * 【必読】編集する前に docs/data-editing-guide.md を読むこと（共通ルール: 推測で書かない・出典を残す・
+ *   値だけを書く・編集後に npm run test:data）。
+ */
 import { yamanote } from './yamanote';
 import { chuo } from './chuo';
 import { keihinTohoku } from './keihin-tohoku';
