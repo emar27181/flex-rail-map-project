@@ -9414,6 +9414,7 @@ const statParamLabelMap: Record<string, { english: string; chinese: string; kore
   'カフェ数':     { english: 'Cafe count',           chinese: '咖啡馆数量',     korean: '카페 수' },
   'コンビニ数':   { english: 'Conv. store count',    chinese: '便利店数量',     korean: '편의점 수' },
   'ラーメン屋数': { english: 'Ramen shop count',     chinese: '拉面店数量',     korean: '라멘 가게 수' },
+  '居酒屋・バー数': { english: 'Bar/izakaya count',   chinese: '居酒屋·酒吧数量', korean: '이자카야·바 수' },
   'スーパー数':   { english: 'Supermarket count',    chinese: '超市数量',       korean: '슈퍼마켓 수' },
   '病院・医院数': { english: 'Hospital count',       chinese: '医院数量',       korean: '병원 수' },
   '書店数':       { english: 'Bookstore count',      chinese: '书店数量',       korean: '서점 수' },

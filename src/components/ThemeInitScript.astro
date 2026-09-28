@@ -1,0 +1,15 @@
+---
+/**
+ * ハイドレーション前に body のテーマclass（light/dark）を確定させ、
+ * 白背景のちらつきを防ぐ。<body> の先頭に置く。
+ */
+---
+
+<script is:inline>
+	(function () {
+		try {
+			var saved = localStorage.getItem('theme');
+			document.body.className = saved === 'light' || saved === 'dark' ? saved : 'dark';
+		} catch (e) { document.body.className = 'dark'; }
+	})();
+</script>

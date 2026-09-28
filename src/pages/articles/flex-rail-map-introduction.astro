@@ -8,6 +8,9 @@ import {
   ARTICLE_SHELL_TRANSLATIONS,
 } from "../../data/articleI18n";
 import { ARTICLE_BODY_TRANSLATIONS } from "../../data/articleBodyI18n";
+import { SITE_URL, SITE_NAME } from "../../config/seo";
+import SiteFooterNav from "../../components/SiteFooterNav.astro";
+import { articleBreadcrumbJsonLd, articleJsonLd } from "../../config/articleSeo";
 
 const i18nPayload = JSON.stringify({
   languages: ARTICLE_LANGUAGES,
@@ -19,6 +22,10 @@ const i18nPayload = JSON.stringify({
 const meta = ARTICLE_PAGE_TRANSLATIONS["flex-rail-map-introduction"].ja;
 const bodyTranslations = ARTICLE_BODY_TRANSLATIONS["flex-rail-map-introduction"];
 const keywords = ARTICLE_PAGE_KEYWORDS["flex-rail-map-introduction"];
+const canonicalUrl = `${SITE_URL}/articles/flex-rail-map-introduction`;
+const ogImage = "/icon_flex_rail_way_map.png";
+// 本文に表示している公開日（2025年6月6日）
+const publishedDate = "2025-06-06";
 ---
 
 <!DOCTYPE html>
@@ -26,12 +33,19 @@ const keywords = ARTICLE_PAGE_KEYWORDS["flex-rail-map-introduction"];
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{meta.title} | Flex Rail Map</title>
+  <title>{meta.title} | {SITE_NAME}</title>
   <meta name="description" content={meta.description} />
   <meta name="keywords" content={keywords} />
   <meta name="theme-color" content="#4CAF50" />
+  <link rel="canonical" href={canonicalUrl} />
   <meta property="og:title" content={meta.title} />
+  <meta property="og:description" content={meta.description} />
   <meta property="og:type" content="article" />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:image" content={`${SITE_URL}${ogImage}`} />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd({ title: meta.title, description: meta.description, keywords, publishedDate, canonicalUrl, ogImage }))}></script>
+  <script type="application/ld+json" set:html={JSON.stringify(articleBreadcrumbJsonLd({ title: meta.title, canonicalUrl }))}></script>
 
   <script is:inline>
     (function(){
@@ -106,6 +120,7 @@ const keywords = ARTICLE_PAGE_KEYWORDS["flex-rail-map-introduction"];
     <div class="foot">
       <a href="/" data-i18n="top">← フレックス路線図 トップへ</a> ／ <a href="/articles" data-i18n="articlesBack">記事一覧へ戻る</a>
       <div class="small" data-i18n="footerCopy">フレックス路線図 ／ 東京の鉄道を、必要な情報だけで。</div>
+      <SiteFooterNav currentPath="/articles/flex-rail-map-introduction" />
     </div>
   </div>
 

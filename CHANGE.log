@@ -1,5 +1,81 @@
 # CHANGE LOG
 
+## [2026-09-28] セッション（SEO: 駅・路線・データのページ自動生成 PoC）
+
+### feat: 駅・路線・駅周辺データのページを路線データから自動生成する（PoC）
+- `src/seo/pageModel.ts`, `src/seo/pageText.ts`, `src/data/seoPages.ts`, `src/data/touristSpots.ts`,
+  `src/layouts/SeoPageLayout.astro`, `src/layouts/seoPageStyles.ts`,
+  `src/components/seo/LineChip.astro`, `src/components/seo/StationLink.astro`,
+  `src/pages/[...lang]/{stations,lines,data}/{index,[slug]}.astro`（すべて新規）,
+  `tests/unit/seo/pageModel.test.ts`（新規）
+- 首都圏20路線の全407駅・20路線・飲食店数のページを日本語・英語で作る（計862ページ）
+- index させるのは Tier A の駅25駅（5路線以上の乗換駅＋観光地の最寄り駅）・20路線・
+  データ1指標・一覧3つ（各日英）。それ以外は noindex, follow で sitemap に載せない
+- 乗降客数・家賃は推定値のためページを作らない（実データに置き換えれば自動で作られる）
+- 観光地→最寄り駅（浅草寺・スカイツリー・東京タワー・明治神宮・鎌倉大仏・江の島・
+  横浜中華街・東京ディズニーリゾート）は駅名＋路線キーで持ち、同名の別駅を混ぜない
+
+### improve: 検索向けページの <head> とパンくず構造化データを1か所にまとめる
+- `src/components/seo/SeoHead.astro`, `src/components/ThemeInitScript.astro`（新規）,
+  `src/config/seo.ts`（`buildBreadcrumbJsonLd`, `OG_LOCALE`）, `src/config/articleSeo.ts`,
+  `src/layouts/GuideLayout.astro`, `src/layouts/GuidesIndexLayout.astro`
+- 既存ガイドの <head> と構造化データはビルド結果で変更前と同一
+
+### improve: 地図を開くリンクの組み立てを1か所にし、出発駅も指定できるようにする
+- `src/utils/mapDeepLink.ts`（新規）, `src/components/MapOpenCta.astro`
+
+### improve: 動的ルートのページにも lastmod を付ける
+- `src/seo/gitLastModified.ts`
+
+### feat: ガイド⇔路線ページ、フッター⇔駅・路線・データの一覧を相互にリンクする
+- `src/layouts/GuideLayout.astro`, `src/config/siteNav.ts`, `src/components/SiteFooterNav.astro`
+
+### fix: Overpass の取得失敗で 0 件と保存された駅周辺データをデータなし（灰色）に戻す
+- `src/data/stationStats.ts`（`dropSuspectedFailedBatches`）, `tests/unit/data/stationStats.test.ts`, `CLAUDE.md`
+- 同じ回に取得した項目がすべて 0 の駅が187駅（有明・東雲など）あり、ヒートマップで最低値の色になっていた
+
+### fix: 「居酒屋・バー数」の指標名が英語・中国語・韓国語表示で日本語のままだった
+- `src/utils/translation.ts`
+
+### feat: 同名別駅の照合と実質路線数の計算を取り込む（PR #24 と同じ内容）
+- `src/utils/sameStation.ts`, `src/utils/effectiveLines.ts`
+
+### docs: 駅・路線・データのページの基準と観光地データの書き方
+- `docs/seo.md`, `CLAUDE.md`
+
+## [2026-09-28] セッション（SEO: sitemap 自動生成・hreflang/H1/canonical の整合・検証）
+
+### fix: hreflang を別URLで実在する対応ページどうしだけに張る
+- `src/config/seo.ts`（`buildHreflangLinks`）, `src/data/guides.ts`, `src/layouts/GuideLayout.astro`,
+  `src/layouts/GuidesIndexLayout.astro`, `src/layouts/StaticPage.astro`, `src/pages/index.astro`
+- `?lang=en` は同じHTMLを返し canonical がクエリ無しURLのため、hreflang の相手にすると
+  canonical と矛盾して無視される。対応ページが無いページには hreflang を出さない
+
+### fix: 固定ページにH1を1つ置き、/fullscreen を noindex に、記事の canonical・構造化データを揃える
+- `src/layouts/StaticPage.astro`（`heading`）, `src/pages/{about,contact,privacy,terms,guide,faq}.astro`,
+  `src/pages/fullscreen.astro`, `src/config/articleSeo.ts`（新規）,
+  `src/pages/articles/_ArticleLayout.astro`, `src/pages/articles/flex-rail-map-introduction.astro`
+- 記事に BreadcrumbList（ホーム > 記事一覧 > 記事）と Article を出す。
+  更新日を管理していないため `dateModified` は書かない
+
+### fix: 固定ページ・ガイド・記事に共通のフッターナビを置き、孤立ページを無くす
+- `src/config/siteNav.ts`（新規）, `src/components/SiteFooterNav.astro`（新規）ほか各レイアウト
+
+### fix: /about・/faq の「39路線・東京のみ・日英のみ」を実装に合わせる
+- `src/config/siteFacts.ts`（新規）, `src/pages/about.astro`, `src/pages/faq.astro`
+- 路線数・駅数は路線データから計算。FAQ の JSON-LD は本文と同じ文言を使う
+
+### feat: sitemap.xml をビルド時に自動生成し、SEO の整合性をビルドとテストで検証する
+- `src/seo/sitemapCore.ts`, `src/seo/gitLastModified.ts`, `src/integrations/seoSitemap.ts`（新規）,
+  `astro.config.mjs`, `package.json`（`test:seo`）,
+  `tests/unit/seo/sitemapCore.test.ts`, `tests/seo/built.test.ts`（新規）
+- index 対象（noindex でなく自己参照 canonical）のページだけを載せる。lastmod は git 履歴から
+- sitemap のURLの実在・noindex 混入・canonical 一致・重複・hreflang の相互性・
+  title 重複・H1 の数を検証し、失敗したらビルドを止める
+- 結果: 29ページ中26URL（/fullscreen・/demo・/diagram は noindex で除外）
+
+### docs: SEO の仕組みと確認方法
+- `docs/seo.md`（新規）, `CLAUDE.md`
 ## [2026-09-28] セッション4（乗換駅の定義・経路区間だけの表示・始発行先表示オフ・データ編集の取扱説明書）
 
 ### fix: 同じ線路を走る別系統は1本と数え、実際に路線が分かれる・交わる駅だけを乗換駅にする

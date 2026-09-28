@@ -1,5 +1,6 @@
 ---
 import ThemeWrapper from "../components/ThemeWrapper.tsx";
+import SiteFooterNav from "../components/SiteFooterNav.astro";
 import leafletCss from "leaflet/dist/leaflet.css?url";
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION } from "../config/seo";
 import GA4Loader from "../components/GA4Loader.astro";
@@ -196,19 +197,13 @@ const webSiteSchema = {
 		<script type="application/ld+json" set:html={JSON.stringify(webSiteSchema)} />
 
 		<!--
-			hreflang for multilingual SEO。
-			アプリ本体は日本語・英語・中国語・韓国語の4言語（src/utils/translation.ts の
-			Language型）に対応しているが、以前はja/enの2言語しか宣言されておらず、
-			zh/koの検索クエリとこのページを紐付けられていなかった。
-			StaticPage.astro（/about等）と同じ「1URL + ?lang=切替」の設計に合わせ、
-			言語ごとに異なるURL（?lang=xx）を宣言する（同一URLをja/en/zh/ko全部に
-			割り当てると、検索エンジンが言語を判別する手がかりが弱くなるため）。
+			hreflang は出さない（2026-09-28）。
+			アプリは4言語に対応しているが、言語は ?lang=xx で同じHTMLをJSで
+			切り替えているだけで、canonical はクエリなしの / を指す。canonical が
+			別URLのページを hreflang の相手にすると検索エンジンは矛盾として無視する
+			ため、以前の ?lang=ja/en/zh/ko の hreflang は効いていなかった。
+			言語別の入口は別URLで実在するガイド一覧（/guides, /en/guides 等）が担う。
 		-->
-		<link rel="alternate" hreflang="ja" href={`${SITE_URL}/?lang=ja`} />
-		<link rel="alternate" hreflang="en" href={`${SITE_URL}/?lang=en`} />
-		<link rel="alternate" hreflang="zh" href={`${SITE_URL}/?lang=zh`} />
-		<link rel="alternate" hreflang="ko" href={`${SITE_URL}/?lang=ko`} />
-		<link rel="alternate" hreflang="x-default" href={`${SITE_URL}/`} />
 		<!--
 			Leaflet の CSS は CDN ではなく依存パッケージから読む。
 			CDN 経由だと unpkg に到達できないときにスタイルが当たらず、
@@ -573,6 +568,7 @@ const webSiteSchema = {
 				<h1>路線図が見にくい・複雑すぎる？フレックス路線図で解決</h1>
 				<p>フレックス路線図は、必要な路線だけを選んで表示できるシンプルなインタラクティブ路線図サービスです。情報が多すぎて見にくい路線図を絞り込み、遅延・運休時も自分で乗り換えを判断できます。</p>
 				<p>JavaScriptを有効にしてご利用ください。</p>
+				<SiteFooterNav currentPath="/" />
 			</div>
 		</noscript>
 		<ThemeWrapper client:only="react" />

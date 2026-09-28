@@ -13,6 +13,12 @@ import FullscreenMapWrapper from "../components/FullscreenMapWrapper.tsx";
 		/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="generator" content={Astro.generator} />
+		<!--
+			地図本体（/）と同じ内容の別表示なので検索結果には出さない。
+			以前は robots も canonical も無く、/ の重複ページとして索引され得た。
+			noindex のページは sitemap にも入らない（sitemap の自動生成が除外する）。
+		-->
+		<meta name="robots" content="noindex, follow" />
 		<title>フレックス路線図 - フルスクリーンマップ</title>
 		<meta name="description" content="フルスクリーンで東京の路線図を表示。Google マップのように地図を全画面表示し、必要な情報をオーバーレイで確認できます。" />
 		<link

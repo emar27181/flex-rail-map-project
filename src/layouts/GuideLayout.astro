@@ -14,11 +14,17 @@
  */
 import { staticPageCss } from './staticPageStyles';
 import { guideCss } from './guideStyles';
+import { seoPageCss } from './seoPageStyles';
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import MapOpenCta from '../components/MapOpenCta.astro';
-import GA4Loader from '../components/GA4Loader.astro';
-import { SITE_URL, SITE_NAME, GOOGLE_SITE_VERIFICATION } from '../config/seo';
-import type { GuideDefinition } from '../data/guides';
+import SeoHead from '../components/seo/SeoHead.astro';
+import ThemeInitScript from '../components/ThemeInitScript.astro';
+import SiteFooterNav from '../components/SiteFooterNav.astro';
+import LineChip from '../components/seo/LineChip.astro';
+import { lineByKey, SEO_LANGS, type SeoLang } from '../seo/pageModel';
+import { SEO_TEXT } from '../seo/pageText';
+import { SITE_NAME, buildHreflangLinks, buildBreadcrumbJsonLd, canonicalUrl } from '../config/seo';
+import { guidePath, getGuideTranslations, type GuideDefinition } from '../data/guides';
 
 export interface Props {
   guide: GuideDefinition;
@@ -30,16 +36,18 @@ export interface Props {
 }
 
 const { guide, indexHref, indexLabel, backLabel } = Astro.props;
-const langPrefix = guide.lang === 'ja' ? 'guides' : `${guide.lang}/guides`;
-const path = `/${langPrefix}/${guide.slug}`;
-const canonical = `${SITE_URL}${path}`;
+const path = guidePath(guide);
+const canonical = canonicalUrl(path);
+// 同じ slug の各言語版どうしを hreflang で結ぶ（翻訳が無いガイドは出さない）。
+// x-default は日本語版、無ければ英語版
+const hreflangLinks = buildHreflangLinks(
+  getGuideTranslations(guide).map(g => ({ lang: g.lang, path: guidePath(g) })),
+  getGuideTranslations(guide).some(g => g.lang === 'ja') ? 'ja' : 'en',
+);
 const htmlLang = guide.lang;
-const OG_LOCALE: Record<GuideDefinition['lang'], string> = {
-  ja: 'ja_JP',
-  en: 'en_US',
-  zh: 'zh_CN',
-  ko: 'ko_KR',
-};
+// ガイドが地図で開く路線のうち、路線ページがあるもの（駅・路線ページと相互にリンクする）
+const seoLang = (SEO_LANGS as string[]).includes(guide.lang) ? (guide.lang as SeoLang) : undefined;
+const guideLines = seoLang ? (guide.ctaRoutes ?? []).filter(r => lineByKey(r)) : [];
 const RELATED_HEADING: Record<GuideDefinition['lang'], string> = {
   ja: '関連ガイド',
   en: 'Related Guides',
@@ -65,15 +73,11 @@ const faqJsonLd = guide.faq && guide.faq.length > 0 ? {
   })),
 } : null;
 
-const breadcrumbJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [
-    { '@type': 'ListItem', position: 1, name: SITE_NAME, item: `${SITE_URL}/` },
-    { '@type': 'ListItem', position: 2, name: indexLabel, item: `${SITE_URL}${indexHref}` },
-    { '@type': 'ListItem', position: 3, name: guide.breadcrumbLabel, item: canonical },
-  ],
-};
+const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+  { name: SITE_NAME, path: '/' },
+  { name: indexLabel, path: indexHref },
+  { name: guide.breadcrumbLabel, path },
+]);
 
 const webPageJsonLd = {
   '@context': 'https://schema.org',
@@ -82,65 +86,26 @@ const webPageJsonLd = {
   description: guide.description,
   url: canonical,
   inLanguage: guide.lang,
-  isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` },
+  isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: canonicalUrl('/') },
 };
 ---
 
 <html lang={htmlLang}>
 	<head>
-		<meta charset="utf-8" />
-		{GOOGLE_SITE_VERIFICATION && (
-			<meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />
-		)}
-		<link rel="icon" type="image/png" sizes="32x32" href="/icon_flex_rail_way_map.png" />
-		<link rel="icon" type="image/png" sizes="16x16" href="/icon_flex_rail_way_map.png" />
-		<link rel="apple-touch-icon" sizes="180x180" href="/icon_flex_rail_way_map.png" />
-		<link rel="shortcut icon" href="/icon_flex_rail_way_map.png" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-
-		<title>{guide.title}</title>
-		<meta name="description" content={guide.description} />
-		{guide.keywords && <meta name="keywords" content={guide.keywords} />}
-		<meta name="robots" content="index, follow" />
-
-		<link rel="canonical" href={canonical} />
-		{/* このガイドに対応する翻訳版が無いため、自己参照のみ（無理な対訳付けはしない） */}
-		<link rel="alternate" hreflang={htmlLang} href={canonical} />
-		<link rel="alternate" hreflang="x-default" href={canonical} />
-
-		<meta property="og:type" content="article" />
-		<meta property="og:url" content={canonical} />
-		<meta property="og:title" content={guide.title} />
-		<meta property="og:description" content={guide.description} />
-		<meta property="og:image" content={`${SITE_URL}/icon_flex_rail_way_map.png`} />
-		<meta property="og:locale" content={OG_LOCALE[guide.lang]} />
-		<meta property="og:site_name" content={SITE_NAME} />
-		<meta name="twitter:card" content="summary" />
-		<meta name="twitter:title" content={guide.title} />
-		<meta name="twitter:description" content={guide.description} />
-
-		<script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
-		<script type="application/ld+json" set:html={JSON.stringify(webPageJsonLd)} />
-		{guide.faq && guide.faq.length > 0 && (
-			<script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
-		)}
-
-		<GA4Loader />
-
-		<style set:html={staticPageCss}></style>
-		<style set:html={guideCss}></style>
+		<SeoHead
+			title={guide.title}
+			description={guide.description}
+			path={path}
+			lang={guide.lang}
+			hreflang={hreflangLinks}
+			ogType="article"
+			keywords={guide.keywords}
+			jsonLd={[breadcrumbJsonLd, webPageJsonLd, ...(faqJsonLd ? [faqJsonLd] : [])]}
+			styles={[staticPageCss, guideCss, seoPageCss]}
+		/>
 	</head>
 	<body>
-		<script is:inline>
-			// ハイドレーション前にテーマclassを確定させ、白背景のちらつきを防ぐ
-			(function () {
-				try {
-					var saved = localStorage.getItem('theme');
-					document.body.className = saved === 'light' || saved === 'dark' ? saved : 'dark';
-				} catch (e) { document.body.className = 'dark'; }
-			})();
-		</script>
+		<ThemeInitScript />
 		<div class="container">
 			<nav class="breadcrumb">
 				<a href="/">{SITE_NAME}</a> / <a href={indexHref}>{indexLabel}</a> / {guide.breadcrumbLabel}
@@ -199,6 +164,13 @@ const webPageJsonLd = {
 				</section>
 			)}
 
+			{seoLang && guideLines.length > 0 && (
+				<section>
+					<h2>{SEO_TEXT[seoLang].lineDetails}</h2>
+					<ul class="seo-chips">{guideLines.map(r => <LineChip route={r} lang={seoLang} />)}</ul>
+				</section>
+			)}
+
 			{guide.related.length > 0 && (
 				<section>
 					<h2>{RELATED_HEADING[guide.lang]}</h2>
@@ -209,6 +181,7 @@ const webPageJsonLd = {
 					</ul>
 				</section>
 			)}
+			<SiteFooterNav lang={guide.lang} currentPath={path} />
 		</div>
 
 		<SimpleThemeWrapper client:only="react" />
