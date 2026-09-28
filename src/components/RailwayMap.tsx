@@ -87,6 +87,7 @@ import IconButton from './ui/atoms/IconButton';
 import MapCompassButton from './map/MapCompassButton';
 import { getThroughReachableSections } from '../utils/throughService';
 import { isSameStation } from '../utils/sameStation';
+import { buildEffectiveLineCounts } from '../utils/effectiveLines';
 import Select from './ui/atoms/Select';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import TextField from './ui/atoms/TextField';
@@ -1023,38 +1024,29 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   }, [routeRecommendations, departure, arrival]);
 
   // 全路線ベースの乗換駅を特定（推薦ルートがない場合の参考用）
+  /**
+   * 駅ごとの実質の路線数（src/utils/effectiveLines.ts）。
+   * 同じ線路を走る別系統（東海道線と湘南新宿ライン等）は1本と数える。
+   * 以前は路線データの本数をそのまま数えていて、辻堂のように乗り換えようのない
+   * 駅まで乗換駅（2路線以上）になっていた。
+   */
+  const effectiveLineCounts = useMemo(
+    () => buildEffectiveLineCounts(Object.entries(routes) as Array<[string, Station[]]>),
+    [],
+  );
+
+  // 乗換駅 = 別の方向へ分かれる・交わる路線がある駅（実質2本以上）
   const allTransferStations = useMemo(() => {
-    const stationCounts = new Map<string, Set<RouteKey>>();
-
-    Object.entries(routes).forEach(([routeKey, stationList]) => {
-      stationList.forEach(station => {
-        if (!stationCounts.has(station.name)) {
-          stationCounts.set(station.name, new Set());
-        }
-        stationCounts.get(station.name)!.add(routeKey as RouteKey);
-      });
-    });
-
     const transferStationNames = new Set<string>();
-    stationCounts.forEach((routeSet, stationName) => {
-      if (routeSet.size >= 2) {
-        transferStationNames.add(stationName);
-      }
+    effectiveLineCounts.forEach((count, stationName) => {
+      if (count >= 2) transferStationNames.add(stationName);
     });
-
     return transferStationNames;
-  }, []);
+  }, [effectiveLineCounts]);
 
   // 駅ごとの通過路線数マップ（全路線ベース・静的）
-  const stationRouteCountMap = useMemo(() => {
-    const map = new Map<string, number>();
-    Object.values(routes).forEach(stationList => {
-      stationList.forEach(station => {
-        map.set(station.name, (map.get(station.name) ?? 0) + 1);
-      });
-    });
-    return map;
-  }, []);
+  // 主要駅の常時表示・重なり順などに使う路線数も、同じ線路の別系統は1本と数える
+  const stationRouteCountMap = effectiveLineCounts;
 
   // 全駅（重複なし）
   const allUniqueStations = useMemo(() => {
