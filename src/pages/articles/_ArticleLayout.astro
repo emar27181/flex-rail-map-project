@@ -7,6 +7,8 @@ import {
   ARTICLE_SHELL_TRANSLATIONS,
 } from "../../data/articleI18n";
 import { ARTICLE_BODY_TRANSLATIONS } from "../../data/articleBodyI18n";
+import { SITE_URL, SITE_NAME } from "../../config/seo";
+import { articleBreadcrumbJsonLd, articleJsonLd } from "../../config/articleSeo";
 
 export interface Props {
   title: string;
@@ -38,7 +40,7 @@ const {
   kind = "article",
 } = Astro.props;
 
-const siteUrl = "https://flex-railway-map.netlify.app";
+const siteUrl = SITE_URL;
 const canonicalUrl = `${siteUrl}${canonicalPath ?? `/articles/${slug}`}`;
 const displayDate = publishedDate.replace(/^(\d{4})-(\d{2})-(\d{2})$/, "$1年$2月$3日");
 const isArticle = kind === "article";
@@ -58,7 +60,7 @@ const bodyTranslations = ARTICLE_BODY_TRANSLATIONS[i18nKey];
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title data-i18n-title>{title} | Flex Rail Map</title>
+  <title data-i18n-title>{title} | {SITE_NAME}</title>
   <meta name="description" content={description} data-i18n-description />
   {keywords && <meta name="keywords" content={keywords} />}
   <meta name="theme-color" content="#13171A" />
@@ -89,23 +91,8 @@ const bodyTranslations = ARTICLE_BODY_TRANSLATIONS[i18nKey];
 
   <script is:inline set:html={`window.__ARTICLE_I18N__=${i18nPayload};`}></script>
 
-  {isArticle && <script type="application/ld+json" set:html={JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": title,
-    "description": description,
-    "keywords": keywords ?? undefined,
-    "datePublished": publishedDate,
-    "dateModified": publishedDate,
-    "url": canonicalUrl,
-    "author": { "@type": "Organization", "name": "Flex Rail Map Project" },
-    "publisher": {
-      "@type": "Organization",
-      "name": "Flex Rail Map Project",
-      "logo": { "@type": "ImageObject", "url": `${siteUrl}${ogImage}` }
-    },
-    "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl }
-  })}></script>}
+  {isArticle && <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd({ title, description, keywords, publishedDate, canonicalUrl, ogImage }))}></script>}
+  <script type="application/ld+json" set:html={JSON.stringify(articleBreadcrumbJsonLd(isArticle ? { title, canonicalUrl } : undefined))}></script>
 
   <slot name="head" />
 </head>

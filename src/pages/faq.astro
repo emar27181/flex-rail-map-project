@@ -7,6 +7,7 @@ import StaticPage from "../layouts/StaticPage.astro";
 	description="路線図が見にくい・複雑すぎる・分かりにくい時の解決策。フレックス路線図の使い方やよくある質問をまとめました。必要な路線だけ絞り込んで表示するシンプルなインタラクティブ路線図。"
 	keywords="路線図 見にくい,路線図 複雑,路線図 分かりにくい,見やすい路線図,FAQ,使い方,遅延,運休,乗り換え 分かりやすい,シンプル路線図"
 	path="/faq"
+	heading={{ ja: "よくある質問（FAQ）", en: "FAQ" }}
 	langPrefix="faq"
 >
 	<Fragment slot="head">
@@ -63,7 +64,6 @@ import StaticPage from "../layouts/StaticPage.astro";
 
 	<!-- Japanese FAQ -->
 	<div id="faq-ja">
-		<h1 class="page-title">よくある質問（FAQ）</h1>
 
 		<h2>路線図について</h2>
 
@@ -117,7 +117,6 @@ import StaticPage from "../layouts/StaticPage.astro";
 
 	<!-- English FAQ -->
 	<div id="faq-en" style="display: none;">
-		<h2>FAQ</h2>
 
 		<h3>Q. What is the purpose of this site?</h3>
 		<p>

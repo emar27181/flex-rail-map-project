@@ -23,6 +23,12 @@ interface Props {
   keywords?: string;
   /** このページのパス（"/about" など）。canonical に使う */
   path: string;
+  /**
+   * ページの見出し（H1）。日本語・英語の本文ブロックそれぞれに見出しを書くと、
+   * 片方を非表示にしていても HTML 上は2つになり、以前は各ページ h2 始まりで
+   * H1 が1つも無かった。ここで1つだけ出し、言語切替で文言だけ差し替える。
+   */
+  heading: { ja: string; en: string };
   /** 言語切替する要素のid接頭辞。"about" なら about-ja / about-en を切り替える */
   langPrefix: string;
   /** <html lang>。既定は日本語 */
@@ -36,6 +42,7 @@ const {
   description,
   keywords,
   path,
+  heading,
   langPrefix,
   htmlLang = 'ja',
   backLabel = '← 路線図に戻る / Back to Map',
@@ -78,6 +85,7 @@ const {
 	<body>
 		<div class="container">
 			<a href="/" class="back-link">{backLabel}</a>
+			<h1 class="page-title" id="static-page-h1" data-ja={heading.ja} data-en={heading.en}>{heading.ja}</h1>
 			<slot />
 		</div>
 
@@ -87,6 +95,8 @@ const {
 				const lang = new URLSearchParams(window.location.search).get('lang') || 'ja';
 				const ja = document.getElementById(langPrefix + '-ja');
 				const en = document.getElementById(langPrefix + '-en');
+				const h1 = document.getElementById('static-page-h1');
+				if (h1) h1.textContent = lang === 'en' ? h1.dataset.en : h1.dataset.ja;
 				if (!ja || !en) return;
 				ja.style.display = lang === 'en' ? 'none' : 'block';
 				en.style.display = lang === 'en' ? 'block' : 'none';
