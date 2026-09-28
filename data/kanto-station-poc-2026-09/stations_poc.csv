@@ -1,0 +1,11 @@
+﻿stationName,lat,lng,routeCount,operatorCount,dailyPassengers,congestionSections,popNight800,popDensity800,popDay800,dayNightRatio,restaurantCount,fastFoodCount,cafeCount,convenienceStoreCount,supermarketCount,bookstoreCount,mallCount,bankCount,postOfficeCount,pharmacyCount,restaurantDensityPerHa,nurseryCount,schoolCount,universityCount,libraryCount,hospitalCount,clinicCount,officeCountOsm,officeWorkersMesh,coworkingCount,cinemaCount,gymCount,hotelCount,attractionCount,parkCount,parkAreaM2,greenRatioPct,crimeCount800,crimeRateCitywide,safetyScore,landPriceAvg800,rent1K,rent1LDK,noiseScore
+東京,35.680611,139.766441,,,,154|160,,,,,234,27,105,52,6,4,13,33,10,9,,0,1,2,0,0,5,,,6,3,0,25,39,19,,,,,,,,,
+新宿,35.69033,139.699785,,,,158|93|148,,,,,533,124,163,91,5,9,35,25,15,38,,1,7,7,0,6,14,,,2,8,3,44,22,9,,,,,,,,,
+渋谷,35.658713,139.701637,,,,138|124|111,,,,,449,108,163,76,10,10,18,20,10,24,,8,17,16,2,4,8,,,4,8,5,23,14,32,,,,,,,,,
+池袋,35.729955,139.710508,,,,131|153,,,,,241,77,112,97,14,13,10,22,11,21,,8,11,13,1,7,1,,,2,6,2,38,10,22,,,,,,,,,
+品川,35.628449,139.739068,,,,159|138,,,,,52,12,25,23,2,1,3,1,7,7,,6,1,5,0,2,4,,,0,1,1,13,9,29,,,,,,,,,
+横浜,35.465566,139.621649,,,,120,,,,,190,48,57,54,14,7,12,15,8,22,,4,9,7,0,1,12,,,1,2,4,17,9,27,,,,,,,,,
+川崎,35.531404,139.696893,,,,159|138,,,,,128,43,31,58,12,6,14,10,11,18,,4,3,3,1,6,7,,,0,2,4,29,7,30,,,,,,,,,
+藤沢,35.338197,139.487302,,,,,,,,,51,14,13,16,6,5,4,12,4,5,,5,1,0,2,1,2,,,1,0,2,8,1,14,,,,,,,,,
+大宮,35.907133,139.62347,,,,,,,,,120,35,22,41,4,9,7,22,6,25,,4,11,21,1,4,8,,,6,1,4,13,1,14,,,,,,,,,
+千葉,35.612919,140.113346,,,,,,,,,70,21,11,28,3,3,6,17,6,11,,6,8,5,1,4,4,,,2,2,1,15,0,22,,,,,,,,,

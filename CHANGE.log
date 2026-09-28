@@ -1,5 +1,51 @@
 # CHANGE LOG
 
+## [2026-09-24] セッション（首都圏駅データセットPoCの反映・実データ15項目追加）
+
+### feat: 首都圏駅データセットPoC（東京・新宿・渋谷・池袋・品川・横浜・川崎・藤沢・大宮・千葉の10駅）から実データ15項目を追加
+- `src/data/stationStats.ts`, `src/data/station-stats-data.json`,
+  `src/components/legend/HeatmapControl.tsx`, `src/utils/translation.ts`,
+  `tests/unit/data/stationStats.test.ts`
+- ユーザーからアップロードされた「首都圏駅周辺データセットPoC」
+  （Overpass API/OSM由来、駅代表点から半径800m円、全項目に出典・取得日・
+  未取得理由を記録した設計）を反映してほしいとの依頼を受けた
+- 既存データと重複しない新規15項目（fastFoodCount・mallCount・
+  bankCount・postOfficeCount・pharmacyCount・nurseryCount・
+  schoolCount・universityCount・libraryCount・clinicCount・
+  cinemaCount・gymCount・hotelCount・attractionCount・parkCount）を
+  `StationStats`型・`PARAM_DATA_SOURCES`・`PARAM_METHODOLOGY`・
+  `STAT_PARAMS`（すべて`dataQuality: 'real'`）に追加し、対象10駅の
+  データを`station-stats-data.json`へマージした
+- `congestionSections`（国交省令和7年度主要区間混雑率、路線・区間・
+  時間帯・値の配列）も追加。単一数値ではないためヒートマップの
+  `STAT_PARAMS`には含めず、将来の駅ツールチップ表示用に型のみ用意した
+- **重複する既存項目（restaurantCount等6項目）はあえて上書きしていない**。
+  PoCは検索半径800m、既存データは500mと方式が異なり単純な数値比較が
+  できないため（詳細と今後の判断ポイントは`TODO.md`に記録）
+- 新規カテゴリ`eduCare`（教育・子育て）・`leisure`（レジャー・宿泊）を
+  `StatCategory`に追加し、`HeatmapControl.tsx`のラベルと
+  `translation.ts`の英語・中国語・韓国語ラベル/単位翻訳も追加した
+- **副産物として発見した既存バグを修正**: `izakayaCount`・`ramenCount`・
+  `bookstoreCount`・`greenRatioPct`・`coworkingCount`が`STAT_PARAMS`で
+  `dataQuality: 'real'`なのに`PARAM_DATA_SOURCES`（出典）が未設定だった
+  （2026-06-11収集時の記録漏れ）。新規テストで検出し、`TODO.md`の
+  2026-06-11セッション記録を元に出典を追記した
+- PoCの元データ一式（README・schema・CSV・設計レポート・収集スクリプト・
+  首都圏駅マスタ1731駅等）は`data/kanto-station-poc-2026-09/`に保存した
+- `npm run test:types` / `npm run test:unit`(388件、新規4件追加) /
+  `npm run build` すべて通過。JSON差分は対象10駅のみ・既存フィールドは
+  無変更であることを直接確認（元ファイルの区切り文字形式を保って
+  再シリアライズし、無関係な整形差分が出ないようにした）
+
+### docs: CLAUDE.mdのヒートマップデータルールを実態に合わせて更新、今後の判断ポイントをTODO.mdに記録
+- `CLAUDE.md`, `TODO.md`
+- CLAUDE.mdの「実データソースは6項目のみ」という記述が古くなっており、
+  実際には`crimeIndex`等の実データ項目が未記載だったため、個別列挙を
+  やめて`STAT_PARAMS`の`dataQuality`を一次情報とする方針に変更した
+- 未解決の判断ポイント（既存項目との検索半径不一致の扱い、PoC設計が
+  提案する`crimeIndex`/`noiseScore`/`safetyScore`/`morningCongestion`の
+  廃止・再設計の要否、首都圏駅マスタ1731駅の活用方法）をTODO.mdに記録
+
 ## [2026-09-24] セッション（SEOガイドの中国語・韓国語カバレッジ拡大）
 
 ### feat: SEOテーマA（シンプル路線図）を中国語・韓国語に追加、テーマC（訪日客向け）を韓国語に追加

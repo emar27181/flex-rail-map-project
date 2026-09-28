@@ -196,18 +196,24 @@ src/
 **AIが生成・推定した値をデータとして使用することを禁止する。**
 
 - `src/data/station-stats-data.json` に保存するデータは、実測・公開データのみ
-- 現在の実データソース: **Overpass API（OpenStreetMap）** で収集した以下の6項目のみ
-  - `convenienceStoreCount`（コンビニ数）
-  - `restaurantCount`（飲食店数）
-  - `cafeCount`（カフェ数）
-  - `supermarketCount`（スーパー数）
-  - `hospitalCount`（病院・クリニック数）
-  - `parkAreaM2`（公園面積）
+- 各フィールドが実データか推定値かは `src/data/stationStats.ts` の `STAT_PARAMS` の
+  `dataQuality`（`'real'` / `'estimated'`）で管理する。**このCLAUDE.mdに個別のフィールド
+  一覧を書き出さない**（2026年9月、ここに書かれた「6項目のみ」という記述が古くなり、
+  実際には `crimeIndex`・`coworkingCount`・`izakayaCount` 等の実データ項目が
+  未記載になっていたことが判明した。一次情報は`stationStats.ts`のみに一元化する）
+- 実データ（`dataQuality: 'real'`）は必ず `PARAM_DATA_SOURCES` に出典
+  （sourceName/URL/取得日）を記録すること。推定値（`'estimated'`）は
+  既定で非表示（`showEstimatedData`トグルで明示的にONにした場合のみ表示）とし、
+  「推定値」であることが分かるラベルを付けること
 - データがない駅は **灰色（`HEATMAP_NO_DATA_COLOR = '#aaaaaa'`）で表示** する。ゼロや推定値で埋めない
 - 新しいフィールドを追加する場合は、**実際のデータソース（API・公開統計）を明記** すること
 - 「それっぽい値」「概算」「AIによる推計」は一切使用禁止
+- 収集範囲が一部の駅に限られるデータ（例: 2026-09の首都圏駅データセットPoCは
+  東京・新宿・渋谷・池袋・品川・横浜・川崎・藤沢・大宮・千葉の10駅のみ）を追加する場合は、
+  対象駅数をコメント・出典に明記すること。ソースデータは
+  `data/kanto-station-poc-2026-09/README.md` に保存してある
 
-**背景:** 2026年6月以前のデータには家賃・乗降客数・治安スコアなどAI生成の推定値が混入していたが、ユーザーが誤った情報に基づいて意思決定することを防ぐため、全て削除した。
+**背景:** 2026年6月以前のデータには家賃・乗降客数・治安スコアなどAI生成の推定値が混入していたが、ユーザーが誤った情報に基づいて意思決定することを防ぐため、多くを削除・`estimated`ラベル付けした。ただし2026年9月時点で `avgRent1K`/`avgRent1LDK`/`populationDensity`/`dailyPassengers`/`morningCongestion`/`noiseScore`/`officeCount`は依然`estimated`のままデータに残っている（既定非表示だが、`showEstimatedData`をONにすると表示される）。首都圏駅データセットPoC（2026-09-24, `data/kanto-station-poc-2026-09/`）はこれらの一部（`morningCongestion`相当）を国交省公式の`congestionSections`に置き換える設計だが、10駅のみの検証段階でありサイト全体への反映は未着手。
 
 ---
 
