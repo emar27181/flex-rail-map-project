@@ -86,6 +86,7 @@ import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import MapCompassButton from './map/MapCompassButton';
 import { getThroughReachableSections } from '../utils/throughService';
+import { findParallelSections } from '../utils/parallelRoutes';
 import { isSameStation } from '../utils/sameStation';
 import { buildEffectiveLineCounts } from '../utils/effectiveLines';
 import Select from './ui/atoms/Select';
@@ -3203,6 +3204,29 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     [departure, arrival],
   );
 
+  // 出発・到着を選んだとき、選択中の経路の区間と並行して走る別の路線の区間
+  // （藤沢→東京の東海道線に対する京浜東北線・横須賀線の大船〜東京など）。
+  // 遅延・運休のときに「わざと別の路線で行く」道が地図で分かるよう、
+  // 経路の区間と同じく駅も描く（renderRoute / journeyStationNamesByRoute）
+  const parallelSections = useMemo(() => {
+    if (!departure || !arrival || routeRecommendations.length === 0) return new Map<RouteKey, Station[][]>();
+    const shown = selectedRouteIndices === null
+      ? routeRecommendations
+      : routeRecommendations.filter((_, idx) => selectedRouteIndices.has(idx));
+    const segments = shown.flatMap(r => r.segments)
+      .filter(seg => seg.routeKey && seg.routeKey !== 'walking' && !seg.isWalkingTransfer)
+      .map(seg => ({ routeKey: seg.routeKey as RouteKey, stations: seg.stations as Station[] }));
+    return findParallelSections(segments, Object.entries(routes) as Array<[RouteKey, Station[]]>) as Map<RouteKey, Station[][]>;
+  }, [departure, arrival, routeRecommendations, selectedRouteIndices]);
+
+  // 並行ルートの路線を表示中・一覧に加える（経路候補の路線だけを出す推薦 useEffect の後に足す）
+  useEffect(() => {
+    if (parallelSections.size === 0) return;
+    const keys = [...parallelSections.keys()];
+    setVisibleRoutes(prev => (keys.every(k => prev.has(k)) ? prev : new Set([...prev, ...keys])));
+    setAvailableRoutes(prev => (keys.every(k => prev.has(k)) ? prev : new Set([...prev, ...keys])));
+  }, [parallelSections]);
+
   // 駅選択に応じた路線表示制御
   // ※ departure && arrival の場合は route recommendation useEffect が availableRoutes/visibleRoutes を管理
   useEffect(() => {
@@ -4258,6 +4282,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         map.set(seg.routeKey, set);
       }
     }
+    for (const [rk, secs] of parallelSections) {
+      const set = map.get(rk) ?? new Set<string>();
+      secs.forEach(sec => sec.forEach(st => set.add(st.name)));
+      map.set(rk, set);
+    }
     return map;
   })();
 
@@ -4306,6 +4335,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               uniqueSegments.push(seg.stations);
             }
           });
+      });
+      // 経路の区間と並行して走る区間（別の路線で行く道）も、経路の区間と同じく駅まで描く
+      (parallelSections.get(routeKey) ?? []).forEach(sec => {
+        const key = `${sec[0]?.name}-${sec[sec.length - 1]?.name}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          uniqueSegments.push(sec);
+        }
       });
       if (uniqueSegments.length === 0) {
         // 推薦ルートに含まれないが表示中の路線（出発・到着駅を通る路線など）。
