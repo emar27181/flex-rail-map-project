@@ -175,6 +175,9 @@ const webSiteSchema = {
 		<meta property="og:description" content="必要な路線だけ選んで表示できるシンプルなインタラクティブ路線図。路線図が見にくい・分かりにくいを解決し、遅延・運休時も自分で判断できます。" />
 		<meta property="og:image" content={DEFAULT_OG_IMAGE} />
 		<meta property="og:locale" content="ja_JP" />
+		<meta property="og:locale:alternate" content="en_US" />
+		<meta property="og:locale:alternate" content="zh_CN" />
+		<meta property="og:locale:alternate" content="ko_KR" />
 		<meta property="og:site_name" content="フレックス路線図" />
 
 		<!-- Twitter Card -->
@@ -192,9 +195,19 @@ const webSiteSchema = {
 		<!-- JSON-LD 構造化データ: WebSite -->
 		<script type="application/ld+json" set:html={JSON.stringify(webSiteSchema)} />
 
-		<!-- hreflang for multilingual SEO -->
-		<link rel="alternate" hreflang="ja" href={`${SITE_URL}/`} />
-		<link rel="alternate" hreflang="en" href={`${SITE_URL}/`} />
+		<!--
+			hreflang for multilingual SEO。
+			アプリ本体は日本語・英語・中国語・韓国語の4言語（src/utils/translation.ts の
+			Language型）に対応しているが、以前はja/enの2言語しか宣言されておらず、
+			zh/koの検索クエリとこのページを紐付けられていなかった。
+			StaticPage.astro（/about等）と同じ「1URL + ?lang=切替」の設計に合わせ、
+			言語ごとに異なるURL（?lang=xx）を宣言する（同一URLをja/en/zh/ko全部に
+			割り当てると、検索エンジンが言語を判別する手がかりが弱くなるため）。
+		-->
+		<link rel="alternate" hreflang="ja" href={`${SITE_URL}/?lang=ja`} />
+		<link rel="alternate" hreflang="en" href={`${SITE_URL}/?lang=en`} />
+		<link rel="alternate" hreflang="zh" href={`${SITE_URL}/?lang=zh`} />
+		<link rel="alternate" hreflang="ko" href={`${SITE_URL}/?lang=ko`} />
 		<link rel="alternate" hreflang="x-default" href={`${SITE_URL}/`} />
 		<!--
 			Leaflet の CSS は CDN ではなく依存パッケージから読む。

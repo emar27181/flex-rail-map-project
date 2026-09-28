@@ -721,7 +721,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                     styleOverride={{ paddingLeft: L.sp['2xl'] }}
                   >
                     <span>推定データを含める</span>
-                    {!showEstimatedData && <span style={{ marginLeft: L.sp.xs, color: SEMANTIC.arrival, fontSize: FS.caption }}>（実データのみ）</span>}
+                    {!showEstimatedData && <span style={{ marginLeft: L.sp.xs, color: colors.warningText, fontSize: FS.caption }}>（実データのみ）</span>}
                   </Checkbox>
                 )}
                 {mapViewMode === 'realistic' && (

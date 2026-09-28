@@ -81,8 +81,11 @@ export const getThemeColors = (theme: Theme) => {
     onSurface: theme === 'dark' ? NEUTRAL.white : '#333',
     success: theme === 'dark' ? '#5cb85c' : SEMANTIC.departure,
     successLight: theme === 'dark' ? '#2d4a2d' : '#e8f5e9',
-    warning: theme === 'dark' ? '#f0ad4e' : '#ff9800',
+    warning: theme === 'dark' ? '#f0ad4e' : SEMANTIC.warning,
     warningLight: theme === 'dark' ? '#4a3d2d' : '#fff3e0',
+    /** 注意の文字色。SEMANTIC.warning は白地でコントラスト2.2しかないため文字用に濃くした（warningLight上で4.9） */
+    warningText: theme === 'dark' ? '#f0ad4e' : '#A85400',
+    danger: theme === 'dark' ? '#ef5350' : SEMANTIC.danger,
     info: theme === 'dark' ? '#5bc0de' : SEMANTIC.primary,
     infoLight: theme === 'dark' ? '#2d3d4a' : '#e3f2fd',
     shadow: theme === 'dark' ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.15)',

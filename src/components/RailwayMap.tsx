@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X } from 'lucide-react';
+import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X, Timer, TriangleAlert } from 'lucide-react';
 import type { LeafletEvent, LeafletMouseEvent, Map as LeafletMap } from 'leaflet';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { JAPAN_OUTLINE } from '../data/japanOutline';
@@ -48,6 +48,7 @@ import {
   getDirectionIndex as getTimetableDirectionIndex,
   hasTimetableData,
   getLineTimetable,
+  isEstimatedTimetable,
   TIMETABLE_SOURCE,
   addMinutes,
   computeEffectiveBaseTime,
@@ -82,6 +83,8 @@ import { estimateArrival, shouldNotifyArrival, buildArrivalMessage, isPlausibleS
 import { buildCorridorRoutes, vertexRanks, offsetPoints } from '../utils/routeOffset';
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
+import MapCompassButton from './map/MapCompassButton';
+import { getThroughReachableSections } from '../utils/throughService';
 import Select from './ui/atoms/Select';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import TextField from './ui/atoms/TextField';
@@ -1347,14 +1350,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               {translateStation(stationTooltip.stationName, currentLanguage)}
             </span>
             <span onClick={closeTooltip}
-              style={{ fontSize: FS.caption, color: colors.textSecondary, cursor: 'pointer', padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, borderRadius: L.r.control }}>✕</span>
+              style={{ fontSize: FS.caption, color: colors.textSecondary, cursor: 'pointer', padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, borderRadius: L.r.control }}>
+              <X size={14} aria-hidden style={{ verticalAlign: 'middle' }} />
+            </span>
           </div>
           <div style={{ display: 'flex', gap: L.sp.xs }}>
-            <Button theme={theme} variant="positive" size="sm"
+            <Button theme={theme} variant="departure" size="sm"
               onClick={() => { handleManualSetDeparture(stationTooltip.station); closeTooltip(); }}>
               {translateUI('setDepartureStation', currentLanguage)}
             </Button>
-            <Button theme={theme} variant="danger" size="sm"
+            <Button theme={theme} variant="arrival" size="sm"
               onClick={() => { setArrival(stationTooltip.station); closeTooltip(); }}>
               {translateUI('setArrivalStation', currentLanguage)}
             </Button>
@@ -1475,7 +1480,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             {meta?.unit ? ` (${meta.unit})` : ''} — 解説
           </span>
           <span onClick={() => setMethodInfoTooltip(null)}
-            style={{ cursor: 'pointer', color: colors.textSecondary, padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, fontSize: FS.title, borderRadius: L.r.control, lineHeight: 1 }}>✕</span>
+            style={{ cursor: 'pointer', color: colors.textSecondary, padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, fontSize: FS.title, borderRadius: L.r.control, lineHeight: 1 }}>
+              <X size={14} aria-hidden style={{ verticalAlign: 'middle' }} />
+            </span>
         </div>
         {methodology.collectionMethod && (
           <div style={{ marginBottom: L.sp.sm }}>
@@ -1665,7 +1672,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             <span
               onClick={closeTooltip}
               style={{ fontSize: FS.caption, color: colors.textSecondary, cursor: 'pointer', padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, borderRadius: L.r.control }}
-            >✕</span>
+            >
+              <X size={14} aria-hidden style={{ verticalAlign: 'middle' }} />
+            </span>
           </div>
           {/* 出発/到着ボタン + 基準時刻 */}
           <div
@@ -1673,10 +1682,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs }}>
-              <Button theme={theme} variant="positive" size="sm"
+              <Button theme={theme} variant="departure" size="sm"
                 onClick={() => { handleManualSetDeparture(stationTooltip.station); closeTooltip(); }}
               >{translateUI('setDepartureStation', currentLanguage)}</Button>
-              <Button theme={theme} variant="danger" size="sm"
+              <Button theme={theme} variant="arrival" size="sm"
                 onClick={() => { setArrival(stationTooltip.station); closeTooltip(); }}
               >{translateUI('setArrivalStation', currentLanguage)}</Button>
             </div>
@@ -1912,6 +1921,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     <TimetableSourceNote
                       updatedAt={line.updatedAt}
                       source={line.source ?? TIMETABLE_SOURCE.title}
+                      estimated={isEstimatedTimetable(line)}
                       theme={theme}
                       language={currentLanguage}
                     />
@@ -2029,7 +2039,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           borderTop: `1px solid ${colors.borderLight}`,
           fontSize: FS.caption, color: colors.textSecondary, opacity: 0.6,
         }}>
-          {translateUI('approximateNote', currentLanguage)}
+          <TriangleAlert size={12} aria-hidden style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />{translateUI('approximateNote', currentLanguage)}
         </div>
       </div>
     );
@@ -3178,6 +3188,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return combinedRoutes;
   };
 
+  // 出発駅だけを選んだとき、直通列車1本で行ける他路線の区間（例: 藤沢→小田原線の相模大野〜新宿）。
+  // 路線データ上は別路線でも乗り換えずに行ける範囲を地図に出す。
+  // 他路線は全区間ではなくこの区間だけを描く（renderRoute）
+  const throughSections = useMemo(
+    () => (departure && !arrival ? getThroughReachableSections(departure.name) : new Map<RouteKey, Station[][]>()),
+    [departure, arrival],
+  );
+
   // 駅選択に応じた路線表示制御
   // ※ departure && arrival の場合は route recommendation useEffect が availableRoutes/visibleRoutes を管理
   useEffect(() => {
@@ -3187,7 +3205,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     if (departure && !arrival) {
       const depRoutes = getRoutesForStation(departure.name) as RouteKey[];
-      let routeSet = new Set<RouteKey>(depRoutes);
+      let routeSet = new Set<RouteKey>([...depRoutes, ...throughSections.keys()]);
       // 自動設定（現在地）時のみ近隣路線に拡張して計5路線表示
       if (!isManualDeparture && routeSet.size < 5 && allUniqueStations.length > 0) {
         const sorted = allUniqueStations
@@ -3222,7 +3240,24 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       setAvailableRoutes(new Set(allRouteKeys));
       setVisibleRoutes(new Set());
     }
-  }, [departure, arrival, isManualDeparture]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [departure, arrival, isManualDeparture, throughSections]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 初回の位置情報取得時、駅が未選択なら最寄り駅を通る路線を表示ONにする。
+  // 駅が両方未選択の間は全路線非表示にしているため、現在地が分かっても
+  // 地図に何も線が無く、どこから絞り込めばよいか分からなかった。
+  // 出発駅の自動設定（autoSetDepartureFromLocation, 既定OFF）とは別で、
+  // 出発駅は設定せずに路線だけを出す。ユーザーが既に路線を選んでいる場合
+  // （URL共有で開いた・位置取得前に操作した）は上書きしない。
+  const nearestRoutesAppliedRef = useRef(false);
+  useEffect(() => {
+    if (nearestRoutesAppliedRef.current || !userLocation) return;
+    if (departure || arrival) { nearestRoutesAppliedRef.current = true; return; }
+    const nearest = findNearestStation(userLocation[0], userLocation[1]);
+    if (!nearest) return; // 駅データ準備前。次の更新で再試行する
+    nearestRoutesAppliedRef.current = true;
+    const nearestRoutes = getRoutesForStation(nearest.name) as RouteKey[];
+    setVisibleRoutes(prev => (prev.size === 0 ? new Set(nearestRoutes) : prev));
+  }, [userLocation, departure, arrival, findNearestStation]);
 
   // URL共有: 初回マウント時のみ、URLの routes パラメータがあれば表示路線を復元する。
   // 上のeffect（出発駅・到着駅に応じた初期化）の後に実行させることで、
@@ -4251,7 +4286,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         }
       }
     } else {
-      displaySegments = [stations];
+      // 出発駅だけ選択中で、この路線が直通で届く他路線なら、届く区間だけを描く
+      const through = throughSections.get(routeKey);
+      if (through && !showFullRouteStations) {
+        displaySegments = through;
+        const allNames = new Set<string>();
+        through.forEach(seg => seg.forEach(s => allNames.add(s.name)));
+        displayStations = stations.filter(s => allNames.has(s.name));
+      } else {
+        displaySegments = [stations];
+      }
     }
 
     // 所要時間ラベルなどは常に route color を使う
@@ -4834,7 +4878,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   backgroundColor: showTravelTimeOverlay ? tintColor(SEMANTIC.departure, 0.08) : colors.surfaceElevated
                 }}>
                   <Checkbox theme={theme} size="sm" checked={showTravelTimeOverlay} onChange={setShowTravelTimeOverlay}>
-                    ⏱ {translateUI('travelTimeOverlay', currentLanguage)}
+                    <Timer size={14} aria-hidden style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />{translateUI('travelTimeOverlay', currentLanguage)}
                   </Checkbox>
                   {showTravelTimeOverlay && travelTimeMap.size === 0 && (
                     <div style={{ marginTop: L.sp.sm, paddingLeft: L.sp['3xl'], fontSize: FS.caption, color: colors.textSecondary }}>
@@ -5741,7 +5785,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   <span
                     onClick={() => setDimmedMapTooltip(null)}
                     style={{ fontSize: FS.caption, color: colors.textSecondary, cursor: 'pointer', padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, borderRadius: L.r.control }}
-                  >✕</span>
+                  >
+              <X size={14} aria-hidden style={{ verticalAlign: 'middle' }} />
+            </span>
                 </div>
                 <div style={{ padding: `${L.sp.md} ${L.sp.lg}` }}>
                   {dimmedMapTooltip.isVisible ? (
@@ -6304,6 +6350,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 : { bottom: '10px', top: 'auto', left: '10px' }),
             zIndex: 1003,
             display: 'flex',
+            // スマホ・非全画面時は左に「表示路線の切替」パネルが来て横に1個分しか
+            // 空いていないので、方位ボタンは全画面ボタンの下に縦に積む
+            flexDirection: isMobile && !isFullscreen ? 'column' : 'row',
             gap: L.sp.xs,
           }}>
             {renderCornerButton(
@@ -6311,6 +6360,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               isFullscreen ? translateUI('exitFullscreen', currentLanguage) : translateUI('enterFullscreen', currentLanguage),
               () => setIsFullscreen(!isFullscreen),
             )}
+
+            {/* 方位: 2本指回転後も北が分かるように。押すと北を上に戻す */}
+            <MapCompassButton
+              mapRef={mapRef}
+              theme={theme}
+              label={translateUI('resetNorth', currentLanguage)}
+              iconSize={MAP_CORNER_ICON_SIZE}
+              styleOverride={cornerButtonStyle}
+            />
 
             {onLanguageChange && !(isMobile && !isFullscreen) && renderCornerButton(
               // 文字をアイコン代わりに置くので、大きさは規格から取る
@@ -6393,7 +6451,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       margin: `-${L.sp.md}`,
                       borderRadius: L.r.control,
                     }}
-                  >✕</span>
+                  >
+              <X size={14} aria-hidden style={{ verticalAlign: 'middle' }} />
+            </span>
 
                   <div style={{
                     display: 'flex',

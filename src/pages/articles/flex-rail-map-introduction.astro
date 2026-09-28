@@ -139,7 +139,7 @@ const keywords = ARTICLE_PAGE_KEYWORDS["flex-rail-map-introduction"];
           clean: '必要な路線だけ',
           showing: '路線を表示中',
           arrow: '← ボタンで「必要な路線だけ」に絞れます',
-          arrowClean: '必要な3路線だけ。ぐっと見やすくなりました ✓',
+          arrowClean: '必要な3路線だけ。ぐっと見やすくなりました',
           note: '※ これは仕組みを伝えるための概念図です。実際の駅の位置・路線の形・接続とは異なります。色は各路線のイメージに合わせた参考値です。',
           caption: '体験デモ：表示する路線を絞り込むと、ごちゃごちゃした路線図が「自分のための地図」に変わる。'
         },
@@ -151,7 +151,7 @@ const keywords = ARTICLE_PAGE_KEYWORDS["flex-rail-map-introduction"];
           clean: 'Needed lines only',
           showing: 'lines shown',
           arrow: '← Use the button to narrow the map to only the needed lines',
-          arrowClean: 'Only 3 needed lines remain. Much easier to read ✓',
+          arrowClean: 'Only 3 needed lines remain. Much easier to read',
           note: 'This is a conceptual diagram for explaining the idea. Actual station positions, line shapes, and connections differ.',
           caption: 'Demo: filtering visible lines turns a crowded map into a map for your own trip.'
         },
@@ -163,7 +163,7 @@ const keywords = ARTICLE_PAGE_KEYWORDS["flex-rail-map-introduction"];
           clean: '只显示需要线路',
           showing: '条线路显示中',
           arrow: '← 使用按钮只保留需要的线路',
-          arrowClean: '只剩 3 条需要的线路，清楚多了 ✓',
+          arrowClean: '只剩 3 条需要的线路，清楚多了',
           note: '※ 这是用于说明机制的概念图。实际车站位置、线路形状和连接关系会有所不同。',
           caption: '体验演示：筛选显示线路后，拥挤的路线图会变成适合自己的地图。'
         },
@@ -175,7 +175,7 @@ const keywords = ARTICLE_PAGE_KEYWORDS["flex-rail-map-introduction"];
           clean: '필요한 노선만',
           showing: '개 노선 표시 중',
           arrow: '← 버튼으로 필요한 노선만 남길 수 있습니다',
-          arrowClean: '필요한 3개 노선만 남았습니다. 훨씬 읽기 쉬워졌습니다 ✓',
+          arrowClean: '필요한 3개 노선만 남았습니다. 훨씬 읽기 쉬워졌습니다',
           note: '※ 작동 방식을 설명하기 위한 개념도입니다. 실제 역 위치, 노선 형태, 연결과는 다릅니다.',
           caption: '체험 데모: 표시 노선을 줄이면 복잡한 노선도가 내 이동을 위한 지도로 바뀝니다.'
         }
@@ -344,7 +344,7 @@ const keywords = ARTICLE_PAGE_KEYWORDS["flex-rail-map-introduction"];
         if(bAll) bAll.setAttribute('aria-selected',clean?'false':'true');
         if(bClean) bClean.setAttribute('aria-selected',clean?'true':'false');
         if(cnt) cnt.textContent=clean?essN:LINES.length;
-        if(arrow) arrow.textContent=clean?(texts.arrowClean || '必要な3路線だけ。ぐっと見やすくなりました ✓'):(texts.arrow || '← ボタンで「必要な路線だけ」に絞れます');
+        if(arrow) arrow.textContent=clean?(texts.arrowClean || '必要な3路線だけ。ぐっと見やすくなりました'):(texts.arrow || '← ボタンで「必要な路線だけ」に絞れます');
       }
       bAll.addEventListener('click',function(){set(false);});
       bClean.addEventListener('click',function(){set(true);});

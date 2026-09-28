@@ -23,10 +23,14 @@ import type { ControlSize } from './controlSize';
 export type ButtonVariant =
   /** 主操作。青で塗る */
   | 'primary'
-  /** 肯定・出発側。緑で塗る */
+  /** 肯定の操作（全表示・OK・完了）。SEMANTIC.success で塗る */
   | 'positive'
-  /** 否定・到着側・削除。赤で塗る */
+  /** 取り消し・削除・非表示の操作。SEMANTIC.danger で塗る */
   | 'danger'
+  /** 出発駅に設定する操作。SEMANTIC.departure で塗る */
+  | 'departure'
+  /** 到着駅に設定する操作。SEMANTIC.arrival で塗る */
+  | 'arrival'
   /** 補助操作。枠線だけ */
   | 'outline'
   /** 目立たせない操作。枠線も塗りもなし */
@@ -67,8 +71,10 @@ const Button: React.FC<ButtonProps> = ({
   /** 塗りつぶす色。枠線だけの variant では undefined */
   const fill =
     variant === 'primary' ? SEMANTIC.primary
-    : variant === 'positive' ? SEMANTIC.departure
-    : variant === 'danger' ? SEMANTIC.arrival
+    : variant === 'positive' ? SEMANTIC.success
+    : variant === 'danger' ? SEMANTIC.danger
+    : variant === 'departure' ? SEMANTIC.departure
+    : variant === 'arrival' ? SEMANTIC.arrival
     : undefined;
 
   // トグルとして使う場合、押されていない間は塗らない

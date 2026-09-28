@@ -1,0 +1,25 @@
+---
+import GuideLayout from "../../../layouts/GuideLayout.astro";
+import { getGuide } from "../../../data/guides";
+import { routeColors, routeNames } from "../../../data/routes";
+import { routeTranslations } from "../../../utils/translation";
+
+const guide = getGuide('ko', 'tokyo-train-map')!;
+const previewRoutes = ['yamanote', 'ginzaLine'] as const;
+const displayName = (key: typeof previewRoutes[number]) => routeTranslations[routeNames[key]] ?? routeNames[key];
+---
+
+<GuideLayout guide={guide} indexHref="/ko/guides" indexLabel="가이드 목록" backLabel="← Flex Railway Map으로 돌아가기">
+	<Fragment slot="visual">
+		<div class="guide-visual">
+			<div class="route-chip-row">
+				{previewRoutes.map(key => (
+					<span class="route-chip" style={`background-color: ${routeColors[key]}`}>
+						<span class="route-chip-dot"></span>{displayName(key)}
+					</span>
+				))}
+			</div>
+			<p class="guide-visual-caption">아래 버튼을 누르면 이 2개 노선만 표시된 지도가 열립니다</p>
+		</div>
+	</Fragment>
+</GuideLayout>

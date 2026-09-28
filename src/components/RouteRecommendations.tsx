@@ -201,9 +201,9 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                 {/* 乗換数 */}
                 <span style={{
                   fontSize: FS.caption,
-                  color: route.transfers === 0 ? SEMANTIC.departure : '#ff9800',
+                  color: route.transfers === 0 ? SEMANTIC.success : SEMANTIC.warning,
                   padding: `${L.sp.xxs} ${L.sp.sm}`,
-                  backgroundColor: route.transfers === 0 ? tintColor(SEMANTIC.departure, 0.12) : 'rgba(255,152,0,0.12)',
+                  backgroundColor: tintColor(route.transfers === 0 ? SEMANTIC.success : SEMANTIC.warning, 0.12),
                   borderRadius: L.r.card,
                   fontWeight: '500',
                   whiteSpace: 'nowrap'
@@ -245,7 +245,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
                         <span style={{
                           fontSize: FS.caption,
                           color: colors.onPrimary,
-                          backgroundColor: segment.isWalkingTransfer ? SEMANTIC.departure : '#ff9800',
+                          backgroundColor: segment.isWalkingTransfer ? SEMANTIC.success : SEMANTIC.warning,
                           padding: `${L.sp.xxs} ${L.sp.xs}`,
                           borderRadius: L.r.control,
                           whiteSpace: 'nowrap'

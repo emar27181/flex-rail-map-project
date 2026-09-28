@@ -13,21 +13,51 @@
  */
 import { translateUI } from '../../utils/translation';
 import type { Language } from '../../utils/translation';
-import { FS } from '../../constants/ui';
+import { FS, SEMANTIC } from '../../constants/ui';
 import { L } from '../legend/legendStyles';
 import { getThemeColors } from '../../contexts/ThemeContext';
+import { TriangleAlert } from 'lucide-react';
 
 export interface TimetableSourceNoteProps {
   updatedAt: string;
   source: string;
+  /** 公式時刻表ではなく推定値のとき true。冒頭に注意（橙）の注意書きを出す */
+  estimated: boolean;
   theme: 'light' | 'dark';
   language: Language;
 }
 
-export default function TimetableSourceNote({ updatedAt, source, theme, language }: TimetableSourceNoteProps) {
+export default function TimetableSourceNote({ updatedAt, source, estimated, theme, language }: TimetableSourceNoteProps) {
   const colors = getThemeColors(theme);
 
   return (
+    <>
+    {/*
+      推定値を実時刻と取り違えないよう、時刻を読む前の一番上に出す。
+      下の更新日・出典行は薄く小さいので、それだけでは読み飛ばされていた。
+      最初は赤の太字にしたが主張が強すぎたため、「注意」の橙（SEMANTIC.warning）にした。
+      赤は到着駅・エラーの意味なので、推定値の知らせには使わない。
+    */}
+    {estimated && (
+      <div
+        role="note"
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: L.sp.xs,
+          padding: `${L.sp.xs} ${L.sp.md}`,
+          borderLeft: `3px solid ${colors.warning}`,
+          borderBottom: `1px solid ${colors.borderLight}`,
+          backgroundColor: colors.warningLight,
+          fontSize: FS.caption,
+          color: colors.warningText,
+          lineHeight: 1.4,
+        }}
+      >
+        <TriangleAlert size={14} aria-hidden style={{ flexShrink: 0, marginTop: 1, color: colors.warning }} />
+        <span>{translateUI('timetableEstimatedWarning', language)}</span>
+      </div>
+    )}
     <div style={{
       padding: `${L.sp.xxs} ${L.sp.md}`,
       borderBottom: `1px solid ${colors.borderLight}`,
@@ -55,5 +85,6 @@ export default function TimetableSourceNote({ updatedAt, source, theme, language
         {translateUI('dataSource', language)}
       </a>
     </div>
+    </>
   );
 }

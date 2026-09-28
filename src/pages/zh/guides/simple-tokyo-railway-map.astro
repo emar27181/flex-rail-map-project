@@ -1,0 +1,27 @@
+---
+import GuideLayout from "../../../layouts/GuideLayout.astro";
+import { getGuide } from "../../../data/guides";
+import { routeColors, routeNames } from "../../../data/routes";
+import { routeTranslations } from "../../../utils/translation";
+
+const guide = getGuide('zh', 'simple-tokyo-railway-map')!;
+const previewRoutes = ['yamanote', 'chuo', 'marunouchiLine'] as const;
+// 路线名的翻译目前中文/韩语都回退到与英语相同的routeTranslations，
+// 所以这里显示的名称和实际打开地图后看到的名称一致（不是编造的中文译名）
+const displayName = (key: typeof previewRoutes[number]) => routeTranslations[routeNames[key]] ?? routeNames[key];
+---
+
+<GuideLayout guide={guide} indexHref="/zh/guides" indexLabel="指南列表" backLabel="← 返回 Flex Railway Map">
+	<Fragment slot="visual">
+		<div class="guide-visual">
+			<div class="route-chip-row">
+				{previewRoutes.map(key => (
+					<span class="route-chip" style={`background-color: ${routeColors[key]}`}>
+						<span class="route-chip-dot"></span>{displayName(key)}
+					</span>
+				))}
+			</div>
+			<p class="guide-visual-caption">点击下面的按钮，即可打开只显示这3条线路的地图</p>
+		</div>
+	</Fragment>
+</GuideLayout>

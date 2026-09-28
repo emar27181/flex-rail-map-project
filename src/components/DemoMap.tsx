@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Map, MousePointerClick, CircleCheck } from 'lucide-react';
+import { Map, MousePointerClick, CircleCheck, Check } from 'lucide-react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { SEMANTIC, NEUTRAL, FS} from '../constants/ui';
 import Button from './ui/atoms/Button';
@@ -169,8 +169,8 @@ const DemoMap: React.FC = () => {
                 次へ →
               </Button>
             ) : (
-              <Button theme={DEMO_THEME} variant="positive" size="sm" onClick={() => setTutorialDismissed(true)}>
-                完了 ✓
+              <Button theme={DEMO_THEME} variant="positive" size="sm" onClick={() => setTutorialDismissed(true)} icon={<Check />}>
+                完了
               </Button>
             )}
             <Button theme={DEMO_THEME} variant="outline" size="sm" onClick={() => setTutorialDismissed(true)}>

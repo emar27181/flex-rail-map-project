@@ -1,0 +1,27 @@
+---
+import GuideLayout from "../../../layouts/GuideLayout.astro";
+import { getGuide } from "../../../data/guides";
+import { routeColors, routeNames } from "../../../data/routes";
+import { routeTranslations } from "../../../utils/translation";
+
+const guide = getGuide('ko', 'simple-tokyo-railway-map')!;
+const previewRoutes = ['yamanote', 'chuo', 'marunouchiLine'] as const;
+// 노선명 번역은 현재 중국어/한국어 모두 영어와 같은 routeTranslations로
+// 대체되므로, 여기 표시하는 이름은 실제로 지도를 열었을 때 보이는 이름과 일치한다
+const displayName = (key: typeof previewRoutes[number]) => routeTranslations[routeNames[key]] ?? routeNames[key];
+---
+
+<GuideLayout guide={guide} indexHref="/ko/guides" indexLabel="가이드 목록" backLabel="← Flex Railway Map으로 돌아가기">
+	<Fragment slot="visual">
+		<div class="guide-visual">
+			<div class="route-chip-row">
+				{previewRoutes.map(key => (
+					<span class="route-chip" style={`background-color: ${routeColors[key]}`}>
+						<span class="route-chip-dot"></span>{displayName(key)}
+					</span>
+				))}
+			</div>
+			<p class="guide-visual-caption">아래 버튼을 누르면 이 3개 노선만 표시된 지도가 열립니다</p>
+		</div>
+	</Fragment>
+</GuideLayout>

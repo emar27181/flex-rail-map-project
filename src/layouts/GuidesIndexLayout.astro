@@ -18,7 +18,7 @@ export interface Props {
   title: string;
   description: string;
   path: string;
-  htmlLang: 'ja' | 'en' | 'zh';
+  htmlLang: 'ja' | 'en' | 'zh' | 'ko';
   backLabel: string;
 }
 
@@ -28,6 +28,7 @@ const OG_LOCALE: Record<Props['htmlLang'], string> = {
   ja: 'ja_JP',
   en: 'en_US',
   zh: 'zh_CN',
+  ko: 'ko_KR',
 };
 ---
 

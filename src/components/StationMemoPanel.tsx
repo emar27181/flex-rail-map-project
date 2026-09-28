@@ -212,7 +212,7 @@ const StationMemoPanel: React.FC<StationMemoPanelProps> = ({
         </div>
       )}
       {draftStation.trim() !== '' && !isKnownStation(draftStation.trim()) && stationSuggestions.length === 0 && (
-        <div style={{ ...labelStyle, color: SEMANTIC.arrival }}>
+        <div style={{ ...labelStyle, color: colors.warningText }}>
           {translateUI('memoUnknownStation', language)}
         </div>
       )}

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<title>Flex Railway Map 駅周辺データセット設計 v2.0(PoC)</title>
+<style>
+  body{max-width:880px;margin:0 auto;padding:32px 80px;box-sizing:border-box;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",sans-serif;color:#1a1a1a;line-height:1.7;}
+  h1{font-size:26px;border-bottom:3px solid #0a6c5c;padding-bottom:8px;}
+  h2{font-size:20px;color:#0a6c5c;margin-top:2.2em;border-left:5px solid #0a6c5c;padding-left:10px;}
+  h3{font-size:16px;margin-top:1.6em;}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;margin:12px 0;}
+  th{background:#0a6c5c;color:#fff;padding:6px 8px;text-align:left;white-space:nowrap;}
+  td{border:1px solid #d7d7d7;padding:5px 8px;vertical-align:top;}
+  tr:nth-child(even) td{background:#f4f9f8;}
+  code{background:#eef3f2;padding:1px 5px;border-radius:3px;font-size:12px;}
+  .note{background:#fff8e6;border-left:4px solid #e0a800;padding:10px 14px;font-size:13px;margin:12px 0;}
+  .ok{color:#0a6c5c;font-weight:600;} .na{color:#b33;} 
+  .small{font-size:12px;color:#555;}
+  pre{background:#f5f5f5;padding:12px;border-radius:6px;font-size:11.5px;overflow-x:auto;}
+</style>
+</head>
+<body>
+
+<h1>Flex Railway Map 駅周辺データセット設計 v2.0(PoC)</h1>
+<p><span class="small">作成日: 2026-09-24 / 対象10駅: 東京・新宿・渋谷・池袋・品川・横浜・川崎・藤沢・大宮・千葉 / 本レポート+同梱データ(schema.json, stations_poc.display.json, stations_poc.meta.json, stations_poc.csv, scripts/)</span></p>
+
+<div class="note"><strong>重要な前提</strong> — 本PoCで「数値が入っている」項目は、すべてこの調査内で実際に取得した観測値のみです。取得できなかった項目は推測で埋めず <code>null</code> とし、理由と取得方法を明記しています。既存項目の <code>crimeIndex</code> / <code>noiseScore</code> / <code>safetyScore</code> / <code>morningCongestion</code> は主観スコアとして廃止または再設計しました。</div>
+
+<h2>1. 設計原則 — 値を4+1分類する</h2>
+<table>
+<tr><th>分類</th><th>定義</th><th>運用ルール</th></tr>
+<tr><td><strong>A. observed</strong></td><td>公的統計・鉄道事業者・自治体等の一次実測値</td><td>sourceName/Url/Date/retrievedAt が必須</td></tr>
+<tr><td><strong>A'. observed (community)</strong></td><td>OpenStreetMap等の実地調査ベース公開データ</td><td>「観測」だが網羅性が保証されないため、公式観測とラベルを分離。出典(ODbL)とタグ定義を必ず記録</td></tr>
+<tr><td><strong>B. derived</strong></td><td>定義済みの計算式で算出(例: 円内メッシュ人口の面積加重合計)</td><td>入力データIDと計算式をschemaに保存。元データ列を必ず併存</td></tr>
+<tr><td><strong>C. estimated</strong></td><td>直接統計がなく推定・参照で得る値</td><td>推定方法を明示。実測値として表示することを禁止</td></tr>
+<tr><td><strong>D. unavailable</strong></td><td>取得・推定不能</td><td><code>null</code> で保存し、理由(reason)を必須記録</td></tr>
+</table>
+<p>既存の単一 <code>status</code> 概念をこの5値に刷新し、「観測値を推定値として扱う」ことを構造的に不可能にしました。</p>
+
+<h2>2. 統一定義(全駅共通・駅ごとに変えない)</h2>
+<table>
+<tr><th>論点</th><th>採用する定義</th></tr>
+<tr><td>「駅周辺」</td><td><strong>駅代表点から直線距離 半径800m の円</strong>(徒歩約10分・円面積201.06ha)。ポリゴン/徒歩距離は使わない(再現性優先)。都市部の比較用に600m併記オプション</td></tr>
+<tr><td>駅代表点</td><td>本番: 国土数値情報(N02)の駅代表点。PoC: OSMの同一名称駅ノード群の重心</td></tr>
+<tr><td>店舗数の検索半径</td><td>上記800m円内。複数駅の円が重なる場合も駅ごとに独立カウント(重複は仕様)</td></tr>
+<tr><td>人口密度の地域単位</td><td>500mメッシュ国勢調査人口を円内で面積加重合計 ÷ 円内実面積</td></tr>
+<tr><td>公園面積</td><td>円内の公園・緑地ポリゴン(leisure=park/garden または国土数値情報 都市計画公園・緑地)の面積合計</td></tr>
+<tr><td>緑地率</td><td>国土数値情報「土地利用(細分)」メッシュの緑地系分類面積比率(航空写真判定値ではない)</td></tr>
+<tr><td>乗降客数</td><td><strong>「1日平均乗車人員(人/日)」を採用</strong>。乗車と降車を混在させない。複数事業者駅は「同一名称駅集合に含まれる全事業者分の合計」(乗換客の二重計上を認め、換算係数は使わない)。事業者間の集計基準差はmetaに注記</td></tr>
+<tr><td>朝混雑度</td><td><strong>駅単位の値は廃止</strong>。国交省「都市鉄道の混雑率調査」の主要区間値(最混雑時間帯1時間平均)を区間情報(路線・区間・時間帯・方向)付きで附与。時間帯は区間ごとに公表値(例: 7:30–8:30)</td></tr>
+<tr><td>犯罪件数の地域単位</td><td>警視庁CSVは<strong>町丁目単位・座標なし</strong>(確認済み)。駅円内件数=町丁目ポリゴンとの交差計算で算出。都道府県により公開形式が異なる点を明記</td></tr>
+<tr><td>家賃</td><td>対象期間=直近3か月成約ベースを推奨。平均か中央値かは<strong>中央値</strong>(外れ値に強い)を採用。ただし公的統計に駅別値は存在しないため「estimated(参照型)」— 値を恒久保存せず参照先と取得日のみ保存</td></tr>
+<tr><td>静かさ/騒音</td><td>駅別騒音の実測値は全国どの情報源にも存在しない → <strong>D. unavailable</strong>(proxy案は§5)</td></tr>
+<tr><td>安全性</td><td>スコアは廃止し、元データ(<code>crimeCount800</code>/<code>crimeRateCitywide</code>)を先に置く。safetyScoreはderivedで「全国市区町村犯罪率のp5–p95線形正規化の逆転」(式は§3)</td></tr>
+<tr><td>オフィス数</td><td>OSM <code>office=*</code> は網羅性が低い(下限値)。再現可能な代替として経済センサス事業所メッシュの特定業種従業者数(<code>officeWorkersMesh</code>)を併設</td></tr>
+</table>
+
+<h2>3. 推奨データ項目カタログ(全41項目)</h2>
+<p>group: identity/access/population/commerce/edu_care/health/work/leisure/safety/prices/environment。詳細定義は <code>schema.json</code> を参照(本項は要約)。</p>
+<table>
+<tr><th>#</th><th>id</th><th>内容</th><th>分類</th><th>主情報源</th><th>更新頻度</th></tr>
+<tr><td>1</td><td><code>stationName</code></td><td>駅名</td><td>A</td><td>国土数値情報N02</td><td>不要</td></tr>
+<tr><td>2-3</td><td><code>lat</code>, <code>lng</code></td><td>駅代表点座標</td><td>A'(PoC)</td><td>OSM(本番N02)</td><td>年次</td></tr>
+<tr><td>4-5</td><td><code>routeCount</code>, <code>operatorCount</code></td><td>乗入路線数・事業者数</td><td>B</td><td>国土数値情報N02から算出</td><td>年次</td></tr>
+<tr><td>6</td><td><code>dailyPassengers</code></td><td>1日平均乗車人員(全事業者合算)</td><td>A</td><td>各事業者公表値/国土数値情報S12(2018年値・非商用)</td><td>年次</td></tr>
+<tr><td>7</td><td><code>congestionSections</code></td><td>主要区間混雑率(区間・時間帯付き)</td><td>A</td><td>国交省 混雑率調査</td><td>年次(7月末)</td></tr>
+<tr><td>8-11</td><td><code>popNight800</code>, <code>popDensity800</code>, <code>popDay800</code>, <code>dayNightRatio</code></td><td>円内夜間人口・密度・昼間人口・昼夜間比</td><td>B</td><td>e-Stat 500mメッシュ/大都市圏メッシュ</td><td>5年</td></tr>
+<tr><td>12-23</td><td><code>restaurantCount</code>, <code>fastFoodCount</code>, <code>cafeCount</code>, <code>convenienceStoreCount</code>, <code>supermarketCount</code>, <code>bookstoreCount</code>, <code>mallCount</code>, <code>bankCount</code>, <code>postOfficeCount</code>, <code>pharmacyCount</code>, <code>izakayaTaggedCount</code>, <code>ramenTaggedCount</code></td><td>円内商業・飲食施設数(OSMタグ別)</td><td>A'</td><td>OpenStreetMap</td><td>月次可</td></tr>
+<tr><td>24</td><td><code>restaurantDensityPerHa</code></td><td>飲食店密度(÷201.06ha)</td><td>B</td><td>上記から算出</td><td>月次可</td></tr>
+<tr><td>25-28</td><td><code>nurseryCount</code>, <code>schoolCount</code>, <code>universityCount</code>, <code>libraryCount</code></td><td>保育・学校・大学・図書館数</td><td>A'</td><td>OSM/自治体OD</td><td>年次</td></tr>
+<tr><td>29-30</td><td><code>hospitalCount</code>, <code>clinicCount</code></td><td>病院・診療所数</td><td>A'</td><td>OSM/自治体OD</td><td>年次</td></tr>
+<tr><td>31-33</td><td><code>officeCountOsm</code>, <code>officeWorkersMesh</code>, <code>coworkingCount</code></td><td>オフィス(OSM)・業種別従業者数(メッシュ)・コワーキング</td><td>A'/B</td><td>OSM/経済センサス</td><td>月次可/5年</td></tr>
+<tr><td>34-38</td><td><code>cinemaCount</code>, <code>gymCount</code>, <code>hotelCount</code>, <code>attractionCount</code>, <code>parkCount</code></td><td>映画館・ジム・宿泊・観光資源・公園数</td><td>A'</td><td>OSM/国土数値情報(観光資源)</td><td>月次可</td></tr>
+<tr><td>39-40</td><td><code>parkAreaM2</code>, <code>greenRatioPct</code></td><td>円内公園面積・緑地率</td><td>A'/B</td><td>OSMポリゴン/国土数値情報土地利用</td><td>年次</td></tr>
+<tr><td>41-42</td><td><code>crimeCount800</code>, <code>crimeRateCitywide</code>, <code>safetyScore</code></td><td>円内犯罪件数・市区町村犯罪率・治安スコア(式明示)</td><td>A/B</td><td>警視庁等犯罪発生情報CSV/警察庁統計</td><td>年次</td></tr>
+<tr><td>43-45</td><td><code>landPriceAvg800</code>, <code>rent1K</code>, <code>rent1LDK</code></td><td>円内地価平均・家賃(参照型)</td><td>B/C</td><td>国土数値情報地価/民間ポータル(保存しない)</td><td>年次/月次</td></tr>
+<tr><td>46</td><td><code>noiseScore</code></td><td>廃止(D)</td><td>D</td><td>—</td><td>—</td></tr>
+</table>
+<p class="small">追加候補から見送ったもの: <code>izakayaCount</code>/<code>ramenCount</code> は専用タグ付与率が低く実態を反映しないため「タグ付き観測値」として别項目化(表示には使わない)。地価は駅円内平均の「derived」として採用。</p>
+
+<h2>4. PoC実測結果(10駅)</h2>
+<h3>4.1 駅代表点座標(OSM観測・10/10駅取得)</h3>
+<table>
+<tr><th>駅</th><th>lat</th><th>lng</th><th>駅</th><th>lat</th><th>lng</th></tr>
+<tr><td>東京</td><td>35.680611</td><td>139.766441</td><td>横浜</td><td>35.465566</td><td>139.621649</td></tr>
+<tr><td>新宿</td><td>35.690330</td><td>139.699785</td><td>川崎</td><td>35.531404</td><td>139.696893</td></tr>
+<tr><td>渋谷</td><td>35.658713</td><td>139.701637</td><td>藤沢</td><td>35.338197</td><td>139.487302</td></tr>
+<tr><td>池袋</td><td>35.729955</td><td>139.710508</td><td>大宮</td><td>35.907133</td><td>139.623470</td></tr>
+<tr><td>品川</td><td>35.628449</td><td>139.739068</td><td>千葉</td><td>35.612919</td><td>140.113346</td></tr>
+</table>
+
+<h3>4.2 円内POI観測値(OSM・4/10駅取得)</h3>
+<table>
+<tr><th>項目</th><th>池袋</th><th>藤沢</th><th>大宮</th><th>千葉</th></tr>
+<tr><td>レストラン(amenity=restaurant)</td><td>241</td><td>51</td><td>120</td><td>70</td></tr>
+<tr><td>ファストフード/フードコート</td><td>77</td><td>14</td><td>35</td><td>21</td></tr>
+<tr><td>カフェ</td><td>112</td><td>13</td><td>22</td><td>11</td></tr>
+<tr><td>コンビニ</td><td>97</td><td>16</td><td>41</td><td>28</td></tr>
+<tr><td>スーパー</td><td>14</td><td>6</td><td>4</td><td>3</td></tr>
+<tr><td>書店</td><td>13</td><td>5</td><td>9</td><td>3</td></tr>
+<tr><td>商業施設(mall/デパート)</td><td>10</td><td>4</td><td>7</td><td>6</td></tr>
+<tr><td>病院</td><td>7</td><td>1</td><td>4</td><td>4</td></tr>
+<tr><td>診療所</td><td>1</td><td>2</td><td>8</td><td>4</td></tr>
+<tr><td>薬局</td><td>21</td><td>5</td><td>25</td><td>11</td></tr>
+<tr><td>図書館</td><td>1</td><td>2</td><td>1</td><td>1</td></tr>
+<tr><td>保育所・幼稚園</td><td>8</td><td>5</td><td>4</td><td>6</td></tr>
+<tr><td>小中高</td><td>11</td><td>1</td><td>11</td><td>8</td></tr>
+<tr><td>大学・短大</td><td>13</td><td>0</td><td>21</td><td>5</td></tr>
+<tr><td>オフィス(OSM office=*)</td><td>36</td><td>10</td><td>47</td><td>13</td></tr>
+<tr><td>コワーキング</td><td>2</td><td>1</td><td>6</td><td>2</td></tr>
+<tr><td>映画館</td><td>6</td><td>0</td><td>1</td><td>2</td></tr>
+<tr><td>ジム・スポーツ施設</td><td>2</td><td>2</td><td>4</td><td>1</td></tr>
+<tr><td>宿泊施設</td><td>38</td><td>8</td><td>13</td><td>15</td></tr>
+<tr><td>観光資源</td><td>10</td><td>1</td><td>1</td><td>0</td></tr>
+<tr><td>公園</td><td>22</td><td>14</td><td>14</td><td>22</td></tr>
+<tr><td>銀行</td><td>22</td><td>12</td><td>22</td><td>17</td></tr>
+<tr><td>郵便局</td><td>11</td><td>4</td><td>6</td><td>6</td></tr>
+<tr><td>ラーメン(cuisine=ramenタグ付き)</td><td>34</td><td>1</td><td>18</td><td>9</td></tr>
+</table>
+<p class="small">残6駅(東京・新宿・渋谷・品川・横浜・川崎)はOverpassミラーの帯域制限で今回未取得 → <code>null</code> + 理由を記録。取得スクリプト(<code>scripts/osm_pipeline.py</code>)は実証済みなので再実行で埋まる。OSM値は「タグ付けされた下限値」であり、特に飲食店は網羅性が低い点をUIにも注記すること。</p>
+
+<h3>4.3 朝混雑率(国交省 令和7(2025)年度実績・観測値)</h3>
+<table>
+<tr><th>駅</th><th>附与した区間(最混雑時間帯1時間平均)</th><th>混雑率</th></tr>
+<tr><td>東京</td><td>丸ノ内線 新大塚→茗荷谷(8:00–9:00) / JR総武快速 新小岩→錦糸町(7:31–8:31)</td><td>154% / 160%</td></tr>
+<tr><td>新宿</td><td>JR中央快速 中野→新宿(7:35–8:35) / 中央緩行 代々木→千駄ヶ谷(7:49–8:49) / 西武新宿線 下落合→高田馬場(7:41–8:41)</td><td>158% / 93% / 148%</td></tr>
+<tr><td>渋谷</td><td>東急田園都市 池尻大橋→渋谷(7:50–8:50) / 東横 祐天寺→中目黒(7:50–8:50) / 半蔵門線 渋谷→表参道(8:00–9:00)</td><td>138% / 124% / 111%</td></tr>
+<tr><td>池袋</td><td>東武東上 北池袋→池袋(7:40–8:40) / 有楽町線 東池袋→護国寺(7:45–8:45)</td><td>131% / 153%</td></tr>
+<tr><td>品川</td><td>JR東海道 川崎→品川(7:39–8:39) / 横須賀 武蔵小杉→西大井(7:26–8:26)</td><td>159% / 138%</td></tr>
+<tr><td>川崎</td><td>同上(品川と共通区間)</td><td>159% / 138%</td></tr>
+<tr><td>横浜</td><td>京急本線 戸部→横浜(7:30–8:30)</td><td>120%</td></tr>
+<tr><td>藤沢 / 大宮 / 千葉</td><td>国交省主要区間(東京圏31区間)に該当区間が採録されず</td><td class="na">null</td></tr>
+</table>
+
+<h3>4.4 null項目と理由(取得不能/未実行の全リスト)</h3>
+<table>
+<tr><th>項目</th><th>理由</th><th>本番での取得方法</th></tr>
+<tr><td><code>dailyPassengers</code></td><td class="na">JR東日本の駅別乗車人員ページは列定義(年度・乗車/乗降の別)をHTML上で確定できず、誤記載の恐れがあるため未採用</td><td>国土数値情報S12(2018年値・<strong>非商用ライセンス</strong>)を基盤に、各事業者公表値で上書きする二層方式</td></tr>
+<tr><td><code>popNight800</code> 等4項目</td><td class="na">e-Statメッシュzip取得+面積加重計算を今回は未実行</td><td>統計GIS 500mメッシュ(2020国勢調査)をGeoPandasで円結合</td></tr>
+<tr><td><code>crimeCount800</code>/<code>crimeRateCitywide</code>/<code>safetyScore</code></td><td class="na">警視庁CSVは町丁目単位(座標なし)であり、ポリゴン結合が必要。未実行</td><td>警視庁犯罪発生情報CSV(年次・8月更新・確認済み)+大都市圏町丁目ポリゴンで800m集計。関東4県は各県警の公開形式に対応</td></tr>
+<tr><td><code>parkAreaM2</code>/<code>greenRatioPct</code></td><td class="na">ポリゴン面積計算・土地利用メッシュ結合を未実行</td><td>Overpassで公園ポリゴン取得→球面面積合計/国土数値情報土地利用(細分)</td></tr>
+<tr><td><code>landPriceAvg800</code></td><td class="na">国土数値情報地価ポイントの取得を未実行(ダウンロードフォーム経由)</td><td>国土数値情報 地価(公示+基準地価)ポイントを円内平均</td></tr>
+<tr><td><code>rent1K</code>/<code>rent1LDK</code></td><td class="na">公的統計に駅別値が存在しない+民間ポータル相場は恒久保存が規約上困難</td><td>「estimated(参照型)」— 値は保存せず参照先と取得日のみ記録</td></tr>
+<tr><td><code>noiseScore</code></td><td class="na">駅別騒音の実測値は存在しない(環境基準点は地点単位)</td><td>廃止。proxy(幹線道路からの距離等)はestimatedで別枠提案</td></tr>
+<tr><td><code>routeCount</code>/<code>operatorCount</code></td><td class="na">国土数値情報N02の取得を未実行</td><td>N02一括取得後に自動算出</td></tr>
+<tr><td><code>officeWorkersMesh</code></td><td class="na">経済センサス事業所メッシュ結合を未実行</td><td>e-Stat 500m事業所メッシュ(業種大分類L/M/J等)</td></tr>
+</table>
+
+<h2>5. 全国約5,200駅への拡張設計</h2>
+<table>
+<tr><th>レイヤ</th><th>情報源</th><th>自動収集手段</th><th>ライセンス</th></tr>
+<tr><td>駅座標・路線網</td><td>国土数値情報(鉄道N02)</td><td>ダウンロードサービス(zip・年1回)</td><td>CC BY 4.0(商用可)</td></tr>
+<tr><td>乗車人員</td><td>国土数値情報S12(2018年値) + 各事業者公表値</td><td>zip一括 + 事業者ページの年次巡回</td><td><strong>S12は非商用</strong> — 商用サービスは事業者公表値ベースにする</td></tr>
+<tr><td>POI・施設数</td><td>OpenStreetMap</td><td>Overpass API(駅ごと、ミラー複数・rate limit対策必須)</td><td>ODbL(表示必須)</td></tr>
+<tr><td>人口・昼間人口</td><td>e-Stat 統計GIS(500mメッシュ/大都市圏メッシュ)</td><td>zip取得+GeoPandas結合</td><td>利用規約準拠</td></tr>
+<tr><td>地価</td><td>国土数値情報 地価(公示・基準)</td><td>zip取得→円内平均</td><td>出典表示</td></tr>
+<tr><td>犯罪</td><td>警視庁(町丁目CSV)/大阪・千葉等の府県警OD/警察庁統計</td><td>年次CSV巡回+ポリゴン結合</td><td>出典表示</td></tr>
+<tr><td>混雑率</td><td>国交省 混雑率調査(毎年7月末)</td><td>PDF→表抽出(区間マスタを保守)</td><td>出典表示</td></tr>
+<tr><td>事業所(オフィス)</td><td>経済センサス-活動(次回2026年10月調査)</td><td>5年周期・メッシュ結合</td><td>出典表示</td></tr>
+</table>
+<p><strong>実行順序</strong>: ①N02+座標マスタ(全駅) → ②Overpass POI(約5,200駅×1クエリ、レート制御で1〜2日) → ③S12乗車人員 → ④メッシュ統計(人口・昼間・事業所・地価) → ⑤犯罪・混雑率(年次差分更新)。推定値を実測扱いにしないため、各値のstatusをパイプラインが自動付与する。</p>
+
+<h2>6. JSONデータ構造提案(表示用とメタの分離)</h2>
+<p>全国展開時は表示用(軽量・キャッシュ可)と出典メタ(重い・年次更新)を別ファイルにします。今回の納品物がそのまま実例です。</p>
+<pre>
+stations_poc.display.json  … { "池袋": { "lat":…, "restaurantCount":241, "congestionSections":[131,153], … } }   表示・描画専用
+stations_poc.meta.json     … { "池袋": { "restaurantCount": { "value":241, "status":"observed_community",
+                                 "sourceName":"OpenStreetMap (Overpass API…)", "sourceUrl":"…",
+                                 "sourceDate":"取得日 2026-09-24", "retrievedAt":"2026-09-24" }, … } }   出典・分類・理由
+stations_poc.csv           … 全駅×全項目のフラット表(分析用)
+schema.json                … 項目定義・分類・情報源・更新頻度のマスタ
+</pre>
+<p>各値の必須メタ: <code>value</code>, <code>status</code>(observed/observed_community/derived/estimated/unavailable), <code>sourceName</code>, <code>sourceUrl</code>, <code>sourceDate</code>, <code>retrievedAt</code>, 不可の場合<code>reason</code>。</p>
+
+<h2>7. 出典一覧</h2>
+<ul>
+<li>国土交通省「都市鉄道の混雑率調査」資料2-1 東京圏 主要区間の混雑率(令和7年度実績, 2026-07-28公表) — <a href="https://www.mlit.go.jp/report/press/content/002015141.pdf">002015141.pdf</a>(令和6年度版: <a href="https://www.mlit.go.jp/report/press/content/001902900.pdf">001902900.pdf</a> / <a href="https://www.mlit.go.jp/report/press/tetsudo04_hh_000139.html">報道発表</a>)</li>
+<li>JR東日本「各駅の乗車人員 2024年度」(<a href="https://www.jreast.co.jp/company/data/passenger/">会社データ</a>、2025-09-12公開・列定義要確認) / 駅情報ページ(<a href="http://www.jreast.co.jp/estation/station/info.aspx?StationCD=866">駅情報</a>)</li>
+<li>国土数値情報「駅別乗降客数データ」仕様(2011〜2018年度値・非商用) — <a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-S12-v2_6.html">S12 データ詳細</a></li>
+<li>警視庁「犯罪発生情報(年計)」CSV(2025年/令和7年版・2026-08-17更新、町丁目単位) — <a href="https://www.keishicho.metro.tokyo.lg.jp/about_mpd/jokyo_tokei/jokyo/hanzaihasseijyouhou.html">犯罪発生情報</a></li>
+<li>OpenStreetMap(ODbL) — Overpass API(mapsmail/private.coffeeミラー経由で観測) <a href="https://www.openstreetmap.org/copyright">Copyright and license</a></li>
+<li>e-Stat 統計GIS(jSTAT MAP/メッシュ・境界データ) — <a href="https://www.e-stat.go.jp/gis">統計GIS</a></li>
+</ul>
+
+<h2>8. 今後の次の一手</h2>
+<ul>
+<li>残6駅のPOI取得再実行(<code>scripts/osm_pipeline.py</code> — ミラーを分散・夜間実行)</li>
+<li>警視庁CSV×町丁目ポリゴンの800m集計を試験実装(東京5駅でsafetyScoreの式を検証)</li>
+<li>国土数値情報(N02/S12/地価/土地利用)のzip取得を自動化し、routeCount・地価・緑地率をderivedで一括生成</li>
+</ul>
+
+</body>
+</html>

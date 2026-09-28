@@ -1,0 +1,3097 @@
+{
+ "東京": {
+  "lat": {
+   "value": 35.680611,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "本番は国土数値情報N02の駅代表点を推奨"
+  },
+  "lng": {
+   "value": 139.766441,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "同上"
+  },
+  "routeCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "operatorCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "dailyPassengers": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "JR東日本の駅別乗車人員ページ(https://www.jreast.co.jp/company/data/passenger/)は列定義(年度・乗車/乗降の別)がHTML上で確定できず誤記載の恐れがあるため今回未採用。本番は国土数値情報S12(2018年値・非商用)または各事業者公表値の手収集で埋める",
+   "reference": "https://www.jreast.co.jp/company/data/passenger/"
+  },
+  "congestionSections": {
+   "value": [
+    {
+     "line": "東京メトロ丸ノ内線",
+     "section": "新大塚→茗荷谷",
+     "timeBand": "8:00-9:00",
+     "value": 154
+    },
+    {
+     "line": "JR総武線(快速)",
+     "section": "新小岩→錦糸町",
+     "timeBand": "7:31-8:31",
+     "value": 160
+    }
+   ],
+   "status": "observed_official",
+   "sourceName": "国土交通省「都市鉄道の混雑率調査」資料2-1 東京圏における主要区間の混雑率(令和7(2025)年度実績)",
+   "sourceUrl": "https://www.mlit.go.jp/report/press/content/002015141.pdf",
+   "sourceDate": "2025年度実績(2026-07-28公表)",
+   "retrievedAt": "2026-09-24",
+   "note": "駅単位ではなく国交省主要区間の値を附与。該当区間のない駅(大宮/千葉/藤沢等)はnull"
+  },
+  "popNight800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDensity800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDay800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "dayNightRatio": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "restaurantCount": {
+   "value": 234,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "fastFoodCount": {
+   "value": 27,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cafeCount": {
+   "value": 105,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "convenienceStoreCount": {
+   "value": 52,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "supermarketCount": {
+   "value": 6,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bookstoreCount": {
+   "value": 4,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "mallCount": {
+   "value": 13,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bankCount": {
+   "value": 33,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "postOfficeCount": {
+   "value": 10,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "pharmacyCount": {
+   "value": 9,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "restaurantDensityPerHa": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "nurseryCount": {
+   "value": 0,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "schoolCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "universityCount": {
+   "value": 2,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "libraryCount": {
+   "value": 0,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hospitalCount": {
+   "value": 0,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "clinicCount": {
+   "value": 5,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "officeCountOsm": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "officeWorkersMesh": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "経済センサス事業所メッシュ(次回2026年10月調査)の結合計算をPoCでは実行せず"
+  },
+  "coworkingCount": {
+   "value": 6,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cinemaCount": {
+   "value": 3,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "gymCount": {
+   "value": 0,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hotelCount": {
+   "value": 25,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "attractionCount": {
+   "value": 39,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkCount": {
+   "value": 19,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkAreaM2": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "ポリゴン面積計算ジョブをPoCでは実行せず(方法は確立済み: OSM公園ポリゴン面積合計または国土数値情報都市計画公園)"
+  },
+  "greenRatioPct": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報土地利用(細分)メッシュの結合計算をPoCでは実行せず(全国展開時にderivedで算出)"
+  },
+  "crimeCount800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "crimeRateCitywide": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "safetyScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "landPriceAvg800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報地価ポイントデータの取得をPoCでは実行せず(取得はダウンロードフォーム経由のため手動/スクリプト化要)"
+  },
+  "rent1K": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "rent1LDK": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "noiseScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "駅別の騒音実測値は全国どの情報源にも存在しない(環境基準点は地点単位)。proxy案はschema参照"
+  }
+ },
+ "新宿": {
+  "lat": {
+   "value": 35.69033,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "本番は国土数値情報N02の駅代表点を推奨"
+  },
+  "lng": {
+   "value": 139.699785,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "同上"
+  },
+  "routeCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "operatorCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "dailyPassengers": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "JR東日本の駅別乗車人員ページ(https://www.jreast.co.jp/company/data/passenger/)は列定義(年度・乗車/乗降の別)がHTML上で確定できず誤記載の恐れがあるため今回未採用。本番は国土数値情報S12(2018年値・非商用)または各事業者公表値の手収集で埋める",
+   "reference": "https://www.jreast.co.jp/company/data/passenger/"
+  },
+  "congestionSections": {
+   "value": [
+    {
+     "line": "JR中央線(快速)",
+     "section": "中野→新宿",
+     "timeBand": "7:35-8:35",
+     "value": 158
+    },
+    {
+     "line": "JR中央・総武線(各停)",
+     "section": "代々木→千駄ヶ谷",
+     "timeBand": "7:49-8:49",
+     "value": 93
+    },
+    {
+     "line": "西武新宿線",
+     "section": "下落合→高田馬場",
+     "timeBand": "7:41-8:41",
+     "value": 148
+    }
+   ],
+   "status": "observed_official",
+   "sourceName": "国土交通省「都市鉄道の混雑率調査」資料2-1 東京圏における主要区間の混雑率(令和7(2025)年度実績)",
+   "sourceUrl": "https://www.mlit.go.jp/report/press/content/002015141.pdf",
+   "sourceDate": "2025年度実績(2026-07-28公表)",
+   "retrievedAt": "2026-09-24",
+   "note": "駅単位ではなく国交省主要区間の値を附与。該当区間のない駅(大宮/千葉/藤沢等)はnull"
+  },
+  "popNight800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDensity800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDay800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "dayNightRatio": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "restaurantCount": {
+   "value": 533,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "fastFoodCount": {
+   "value": 124,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cafeCount": {
+   "value": 163,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "convenienceStoreCount": {
+   "value": 91,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "supermarketCount": {
+   "value": 5,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bookstoreCount": {
+   "value": 9,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "mallCount": {
+   "value": 35,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bankCount": {
+   "value": 25,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "postOfficeCount": {
+   "value": 15,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "pharmacyCount": {
+   "value": 38,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "restaurantDensityPerHa": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "nurseryCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "schoolCount": {
+   "value": 7,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "universityCount": {
+   "value": 7,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "libraryCount": {
+   "value": 0,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hospitalCount": {
+   "value": 6,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "clinicCount": {
+   "value": 14,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "officeCountOsm": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "officeWorkersMesh": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "経済センサス事業所メッシュ(次回2026年10月調査)の結合計算をPoCでは実行せず"
+  },
+  "coworkingCount": {
+   "value": 2,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cinemaCount": {
+   "value": 8,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "gymCount": {
+   "value": 3,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hotelCount": {
+   "value": 44,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "attractionCount": {
+   "value": 22,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkCount": {
+   "value": 9,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkAreaM2": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "ポリゴン面積計算ジョブをPoCでは実行せず(方法は確立済み: OSM公園ポリゴン面積合計または国土数値情報都市計画公園)"
+  },
+  "greenRatioPct": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報土地利用(細分)メッシュの結合計算をPoCでは実行せず(全国展開時にderivedで算出)"
+  },
+  "crimeCount800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "crimeRateCitywide": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "safetyScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "landPriceAvg800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報地価ポイントデータの取得をPoCでは実行せず(取得はダウンロードフォーム経由のため手動/スクリプト化要)"
+  },
+  "rent1K": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "rent1LDK": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "noiseScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "駅別の騒音実測値は全国どの情報源にも存在しない(環境基準点は地点単位)。proxy案はschema参照"
+  }
+ },
+ "渋谷": {
+  "lat": {
+   "value": 35.658713,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "本番は国土数値情報N02の駅代表点を推奨"
+  },
+  "lng": {
+   "value": 139.701637,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "同上"
+  },
+  "routeCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "operatorCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "dailyPassengers": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "JR東日本の駅別乗車人員ページ(https://www.jreast.co.jp/company/data/passenger/)は列定義(年度・乗車/乗降の別)がHTML上で確定できず誤記載の恐れがあるため今回未採用。本番は国土数値情報S12(2018年値・非商用)または各事業者公表値の手収集で埋める",
+   "reference": "https://www.jreast.co.jp/company/data/passenger/"
+  },
+  "congestionSections": {
+   "value": [
+    {
+     "line": "東急田園都市線",
+     "section": "池尻大橋→渋谷",
+     "timeBand": "7:50-8:50",
+     "value": 138
+    },
+    {
+     "line": "東急東横線",
+     "section": "祐天寺→中目黒",
+     "timeBand": "7:50-8:50",
+     "value": 124
+    },
+    {
+     "line": "東京メトロ半蔵門線",
+     "section": "渋谷→表参道",
+     "timeBand": "8:00-9:00",
+     "value": 111
+    }
+   ],
+   "status": "observed_official",
+   "sourceName": "国土交通省「都市鉄道の混雑率調査」資料2-1 東京圏における主要区間の混雑率(令和7(2025)年度実績)",
+   "sourceUrl": "https://www.mlit.go.jp/report/press/content/002015141.pdf",
+   "sourceDate": "2025年度実績(2026-07-28公表)",
+   "retrievedAt": "2026-09-24",
+   "note": "駅単位ではなく国交省主要区間の値を附与。該当区間のない駅(大宮/千葉/藤沢等)はnull"
+  },
+  "popNight800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDensity800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDay800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "dayNightRatio": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "restaurantCount": {
+   "value": 449,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "fastFoodCount": {
+   "value": 108,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cafeCount": {
+   "value": 163,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "convenienceStoreCount": {
+   "value": 76,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "supermarketCount": {
+   "value": 10,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bookstoreCount": {
+   "value": 10,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "mallCount": {
+   "value": 18,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bankCount": {
+   "value": 20,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "postOfficeCount": {
+   "value": 10,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "pharmacyCount": {
+   "value": 24,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "restaurantDensityPerHa": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "nurseryCount": {
+   "value": 8,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "schoolCount": {
+   "value": 17,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "universityCount": {
+   "value": 16,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "libraryCount": {
+   "value": 2,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hospitalCount": {
+   "value": 4,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "clinicCount": {
+   "value": 8,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "officeCountOsm": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "officeWorkersMesh": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "経済センサス事業所メッシュ(次回2026年10月調査)の結合計算をPoCでは実行せず"
+  },
+  "coworkingCount": {
+   "value": 4,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cinemaCount": {
+   "value": 8,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "gymCount": {
+   "value": 5,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hotelCount": {
+   "value": 23,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "attractionCount": {
+   "value": 14,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkCount": {
+   "value": 32,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkAreaM2": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "ポリゴン面積計算ジョブをPoCでは実行せず(方法は確立済み: OSM公園ポリゴン面積合計または国土数値情報都市計画公園)"
+  },
+  "greenRatioPct": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報土地利用(細分)メッシュの結合計算をPoCでは実行せず(全国展開時にderivedで算出)"
+  },
+  "crimeCount800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "crimeRateCitywide": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "safetyScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "landPriceAvg800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報地価ポイントデータの取得をPoCでは実行せず(取得はダウンロードフォーム経由のため手動/スクリプト化要)"
+  },
+  "rent1K": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "rent1LDK": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "noiseScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "駅別の騒音実測値は全国どの情報源にも存在しない(環境基準点は地点単位)。proxy案はschema参照"
+  }
+ },
+ "池袋": {
+  "lat": {
+   "value": 35.729955,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "本番は国土数値情報N02の駅代表点を推奨"
+  },
+  "lng": {
+   "value": 139.710508,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "同上"
+  },
+  "routeCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "operatorCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "dailyPassengers": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "JR東日本の駅別乗車人員ページ(https://www.jreast.co.jp/company/data/passenger/)は列定義(年度・乗車/乗降の別)がHTML上で確定できず誤記載の恐れがあるため今回未採用。本番は国土数値情報S12(2018年値・非商用)または各事業者公表値の手収集で埋める",
+   "reference": "https://www.jreast.co.jp/company/data/passenger/"
+  },
+  "congestionSections": {
+   "value": [
+    {
+     "line": "東武東上本線",
+     "section": "北池袋→池袋",
+     "timeBand": "7:40-8:40",
+     "value": 131
+    },
+    {
+     "line": "東京メトロ有楽町線",
+     "section": "東池袋→護国寺",
+     "timeBand": "7:45-8:45",
+     "value": 153
+    }
+   ],
+   "status": "observed_official",
+   "sourceName": "国土交通省「都市鉄道の混雑率調査」資料2-1 東京圏における主要区間の混雑率(令和7(2025)年度実績)",
+   "sourceUrl": "https://www.mlit.go.jp/report/press/content/002015141.pdf",
+   "sourceDate": "2025年度実績(2026-07-28公表)",
+   "retrievedAt": "2026-09-24",
+   "note": "駅単位ではなく国交省主要区間の値を附与。該当区間のない駅(大宮/千葉/藤沢等)はnull"
+  },
+  "popNight800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDensity800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDay800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "dayNightRatio": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "restaurantCount": {
+   "value": 241,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "fastFoodCount": {
+   "value": 77,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cafeCount": {
+   "value": 112,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "convenienceStoreCount": {
+   "value": 97,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "supermarketCount": {
+   "value": 14,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bookstoreCount": {
+   "value": 13,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "mallCount": {
+   "value": 10,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bankCount": {
+   "value": 22,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "postOfficeCount": {
+   "value": 11,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "pharmacyCount": {
+   "value": 21,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "restaurantDensityPerHa": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "nurseryCount": {
+   "value": 8,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "schoolCount": {
+   "value": 11,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "universityCount": {
+   "value": 13,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "libraryCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hospitalCount": {
+   "value": 7,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "clinicCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "officeCountOsm": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "officeWorkersMesh": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "経済センサス事業所メッシュ(次回2026年10月調査)の結合計算をPoCでは実行せず"
+  },
+  "coworkingCount": {
+   "value": 2,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cinemaCount": {
+   "value": 6,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "gymCount": {
+   "value": 2,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hotelCount": {
+   "value": 38,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "attractionCount": {
+   "value": 10,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkCount": {
+   "value": 22,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkAreaM2": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "ポリゴン面積計算ジョブをPoCでは実行せず(方法は確立済み: OSM公園ポリゴン面積合計または国土数値情報都市計画公園)"
+  },
+  "greenRatioPct": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報土地利用(細分)メッシュの結合計算をPoCでは実行せず(全国展開時にderivedで算出)"
+  },
+  "crimeCount800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "crimeRateCitywide": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "safetyScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "landPriceAvg800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報地価ポイントデータの取得をPoCでは実行せず(取得はダウンロードフォーム経由のため手動/スクリプト化要)"
+  },
+  "rent1K": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "rent1LDK": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "noiseScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "駅別の騒音実測値は全国どの情報源にも存在しない(環境基準点は地点単位)。proxy案はschema参照"
+  }
+ },
+ "品川": {
+  "lat": {
+   "value": 35.628449,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "本番は国土数値情報N02の駅代表点を推奨"
+  },
+  "lng": {
+   "value": 139.739068,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "同上"
+  },
+  "routeCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "operatorCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "dailyPassengers": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "JR東日本の駅別乗車人員ページ(https://www.jreast.co.jp/company/data/passenger/)は列定義(年度・乗車/乗降の別)がHTML上で確定できず誤記載の恐れがあるため今回未採用。本番は国土数値情報S12(2018年値・非商用)または各事業者公表値の手収集で埋める",
+   "reference": "https://www.jreast.co.jp/company/data/passenger/"
+  },
+  "congestionSections": {
+   "value": [
+    {
+     "line": "JR東海道線",
+     "section": "川崎→品川",
+     "timeBand": "7:39-8:39",
+     "value": 159
+    },
+    {
+     "line": "JR横須賀線",
+     "section": "武蔵小杉→西大井",
+     "timeBand": "7:26-8:26",
+     "value": 138
+    }
+   ],
+   "status": "observed_official",
+   "sourceName": "国土交通省「都市鉄道の混雑率調査」資料2-1 東京圏における主要区間の混雑率(令和7(2025)年度実績)",
+   "sourceUrl": "https://www.mlit.go.jp/report/press/content/002015141.pdf",
+   "sourceDate": "2025年度実績(2026-07-28公表)",
+   "retrievedAt": "2026-09-24",
+   "note": "駅単位ではなく国交省主要区間の値を附与。該当区間のない駅(大宮/千葉/藤沢等)はnull"
+  },
+  "popNight800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDensity800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDay800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "dayNightRatio": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "restaurantCount": {
+   "value": 52,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "fastFoodCount": {
+   "value": 12,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cafeCount": {
+   "value": 25,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "convenienceStoreCount": {
+   "value": 23,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "supermarketCount": {
+   "value": 2,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bookstoreCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "mallCount": {
+   "value": 3,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bankCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "postOfficeCount": {
+   "value": 7,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "pharmacyCount": {
+   "value": 7,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "restaurantDensityPerHa": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "nurseryCount": {
+   "value": 6,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "schoolCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "universityCount": {
+   "value": 5,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "libraryCount": {
+   "value": 0,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hospitalCount": {
+   "value": 2,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "clinicCount": {
+   "value": 4,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "officeCountOsm": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "officeWorkersMesh": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "経済センサス事業所メッシュ(次回2026年10月調査)の結合計算をPoCでは実行せず"
+  },
+  "coworkingCount": {
+   "value": 0,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cinemaCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "gymCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hotelCount": {
+   "value": 13,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "attractionCount": {
+   "value": 9,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkCount": {
+   "value": 29,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkAreaM2": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "ポリゴン面積計算ジョブをPoCでは実行せず(方法は確立済み: OSM公園ポリゴン面積合計または国土数値情報都市計画公園)"
+  },
+  "greenRatioPct": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報土地利用(細分)メッシュの結合計算をPoCでは実行せず(全国展開時にderivedで算出)"
+  },
+  "crimeCount800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "crimeRateCitywide": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "safetyScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "landPriceAvg800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報地価ポイントデータの取得をPoCでは実行せず(取得はダウンロードフォーム経由のため手動/スクリプト化要)"
+  },
+  "rent1K": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "rent1LDK": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "noiseScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "駅別の騒音実測値は全国どの情報源にも存在しない(環境基準点は地点単位)。proxy案はschema参照"
+  }
+ },
+ "横浜": {
+  "lat": {
+   "value": 35.465566,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "本番は国土数値情報N02の駅代表点を推奨"
+  },
+  "lng": {
+   "value": 139.621649,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "同上"
+  },
+  "routeCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "operatorCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "dailyPassengers": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "JR東日本の駅別乗車人員ページ(https://www.jreast.co.jp/company/data/passenger/)は列定義(年度・乗車/乗降の別)がHTML上で確定できず誤記載の恐れがあるため今回未採用。本番は国土数値情報S12(2018年値・非商用)または各事業者公表値の手収集で埋める",
+   "reference": "https://www.jreast.co.jp/company/data/passenger/"
+  },
+  "congestionSections": {
+   "value": [
+    {
+     "line": "京急本線",
+     "section": "戸部→横浜",
+     "timeBand": "7:30-8:30",
+     "value": 120
+    }
+   ],
+   "status": "observed_official",
+   "sourceName": "国土交通省「都市鉄道の混雑率調査」資料2-1 東京圏における主要区間の混雑率(令和7(2025)年度実績)",
+   "sourceUrl": "https://www.mlit.go.jp/report/press/content/002015141.pdf",
+   "sourceDate": "2025年度実績(2026-07-28公表)",
+   "retrievedAt": "2026-09-24",
+   "note": "駅単位ではなく国交省主要区間の値を附与。該当区間のない駅(大宮/千葉/藤沢等)はnull"
+  },
+  "popNight800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDensity800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDay800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "dayNightRatio": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "restaurantCount": {
+   "value": 190,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "fastFoodCount": {
+   "value": 48,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cafeCount": {
+   "value": 57,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "convenienceStoreCount": {
+   "value": 54,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "supermarketCount": {
+   "value": 14,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bookstoreCount": {
+   "value": 7,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "mallCount": {
+   "value": 12,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bankCount": {
+   "value": 15,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "postOfficeCount": {
+   "value": 8,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "pharmacyCount": {
+   "value": 22,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "restaurantDensityPerHa": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "nurseryCount": {
+   "value": 4,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "schoolCount": {
+   "value": 9,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "universityCount": {
+   "value": 7,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "libraryCount": {
+   "value": 0,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hospitalCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "clinicCount": {
+   "value": 12,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "officeCountOsm": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "officeWorkersMesh": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "経済センサス事業所メッシュ(次回2026年10月調査)の結合計算をPoCでは実行せず"
+  },
+  "coworkingCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cinemaCount": {
+   "value": 2,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "gymCount": {
+   "value": 4,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hotelCount": {
+   "value": 17,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "attractionCount": {
+   "value": 9,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkCount": {
+   "value": 27,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkAreaM2": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "ポリゴン面積計算ジョブをPoCでは実行せず(方法は確立済み: OSM公園ポリゴン面積合計または国土数値情報都市計画公園)"
+  },
+  "greenRatioPct": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報土地利用(細分)メッシュの結合計算をPoCでは実行せず(全国展開時にderivedで算出)"
+  },
+  "crimeCount800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "crimeRateCitywide": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "safetyScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "landPriceAvg800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報地価ポイントデータの取得をPoCでは実行せず(取得はダウンロードフォーム経由のため手動/スクリプト化要)"
+  },
+  "rent1K": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "rent1LDK": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "noiseScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "駅別の騒音実測値は全国どの情報源にも存在しない(環境基準点は地点単位)。proxy案はschema参照"
+  }
+ },
+ "川崎": {
+  "lat": {
+   "value": 35.531404,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "本番は国土数値情報N02の駅代表点を推奨"
+  },
+  "lng": {
+   "value": 139.696893,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "同上"
+  },
+  "routeCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "operatorCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "dailyPassengers": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "JR東日本の駅別乗車人員ページ(https://www.jreast.co.jp/company/data/passenger/)は列定義(年度・乗車/乗降の別)がHTML上で確定できず誤記載の恐れがあるため今回未採用。本番は国土数値情報S12(2018年値・非商用)または各事業者公表値の手収集で埋める",
+   "reference": "https://www.jreast.co.jp/company/data/passenger/"
+  },
+  "congestionSections": {
+   "value": [
+    {
+     "line": "JR東海道線",
+     "section": "川崎→品川",
+     "timeBand": "7:39-8:39",
+     "value": 159
+    },
+    {
+     "line": "JR横須賀線",
+     "section": "武蔵小杉→西大井",
+     "timeBand": "7:26-8:26",
+     "value": 138
+    }
+   ],
+   "status": "observed_official",
+   "sourceName": "国土交通省「都市鉄道の混雑率調査」資料2-1 東京圏における主要区間の混雑率(令和7(2025)年度実績)",
+   "sourceUrl": "https://www.mlit.go.jp/report/press/content/002015141.pdf",
+   "sourceDate": "2025年度実績(2026-07-28公表)",
+   "retrievedAt": "2026-09-24",
+   "note": "駅単位ではなく国交省主要区間の値を附与。該当区間のない駅(大宮/千葉/藤沢等)はnull"
+  },
+  "popNight800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDensity800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDay800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "dayNightRatio": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "restaurantCount": {
+   "value": 128,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "fastFoodCount": {
+   "value": 43,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cafeCount": {
+   "value": 31,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "convenienceStoreCount": {
+   "value": 58,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "supermarketCount": {
+   "value": 12,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bookstoreCount": {
+   "value": 6,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "mallCount": {
+   "value": 14,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bankCount": {
+   "value": 10,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "postOfficeCount": {
+   "value": 11,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "pharmacyCount": {
+   "value": 18,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "restaurantDensityPerHa": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "nurseryCount": {
+   "value": 4,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "schoolCount": {
+   "value": 3,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "universityCount": {
+   "value": 3,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "libraryCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hospitalCount": {
+   "value": 6,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "clinicCount": {
+   "value": 7,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "officeCountOsm": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "officeWorkersMesh": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "経済センサス事業所メッシュ(次回2026年10月調査)の結合計算をPoCでは実行せず"
+  },
+  "coworkingCount": {
+   "value": 0,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cinemaCount": {
+   "value": 2,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "gymCount": {
+   "value": 4,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hotelCount": {
+   "value": 29,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "attractionCount": {
+   "value": 7,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkCount": {
+   "value": 30,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkAreaM2": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "ポリゴン面積計算ジョブをPoCでは実行せず(方法は確立済み: OSM公園ポリゴン面積合計または国土数値情報都市計画公園)"
+  },
+  "greenRatioPct": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報土地利用(細分)メッシュの結合計算をPoCでは実行せず(全国展開時にderivedで算出)"
+  },
+  "crimeCount800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "crimeRateCitywide": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "safetyScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "landPriceAvg800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報地価ポイントデータの取得をPoCでは実行せず(取得はダウンロードフォーム経由のため手動/スクリプト化要)"
+  },
+  "rent1K": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "rent1LDK": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "noiseScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "駅別の騒音実測値は全国どの情報源にも存在しない(環境基準点は地点単位)。proxy案はschema参照"
+  }
+ },
+ "藤沢": {
+  "lat": {
+   "value": 35.338197,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "本番は国土数値情報N02の駅代表点を推奨"
+  },
+  "lng": {
+   "value": 139.487302,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "同上"
+  },
+  "routeCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "operatorCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "dailyPassengers": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "JR東日本の駅別乗車人員ページ(https://www.jreast.co.jp/company/data/passenger/)は列定義(年度・乗車/乗降の別)がHTML上で確定できず誤記載の恐れがあるため今回未採用。本番は国土数値情報S12(2018年値・非商用)または各事業者公表値の手収集で埋める",
+   "reference": "https://www.jreast.co.jp/company/data/passenger/"
+  },
+  "congestionSections": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土交通省主要区間(東京圏31区間)に当駅に関係する区間が採録されていないため"
+  },
+  "popNight800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDensity800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDay800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "dayNightRatio": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "restaurantCount": {
+   "value": 51,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "fastFoodCount": {
+   "value": 14,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cafeCount": {
+   "value": 13,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "convenienceStoreCount": {
+   "value": 16,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "supermarketCount": {
+   "value": 6,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bookstoreCount": {
+   "value": 5,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "mallCount": {
+   "value": 4,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bankCount": {
+   "value": 12,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "postOfficeCount": {
+   "value": 4,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "pharmacyCount": {
+   "value": 5,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "restaurantDensityPerHa": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "nurseryCount": {
+   "value": 5,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "schoolCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "universityCount": {
+   "value": 0,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "libraryCount": {
+   "value": 2,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hospitalCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "clinicCount": {
+   "value": 2,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "officeCountOsm": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "officeWorkersMesh": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "経済センサス事業所メッシュ(次回2026年10月調査)の結合計算をPoCでは実行せず"
+  },
+  "coworkingCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cinemaCount": {
+   "value": 0,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "gymCount": {
+   "value": 2,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hotelCount": {
+   "value": 8,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "attractionCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkCount": {
+   "value": 14,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkAreaM2": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "ポリゴン面積計算ジョブをPoCでは実行せず(方法は確立済み: OSM公園ポリゴン面積合計または国土数値情報都市計画公園)"
+  },
+  "greenRatioPct": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報土地利用(細分)メッシュの結合計算をPoCでは実行せず(全国展開時にderivedで算出)"
+  },
+  "crimeCount800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "crimeRateCitywide": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "safetyScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "landPriceAvg800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報地価ポイントデータの取得をPoCでは実行せず(取得はダウンロードフォーム経由のため手動/スクリプト化要)"
+  },
+  "rent1K": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "rent1LDK": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "noiseScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "駅別の騒音実測値は全国どの情報源にも存在しない(環境基準点は地点単位)。proxy案はschema参照"
+  }
+ },
+ "大宮": {
+  "lat": {
+   "value": 35.907133,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "本番は国土数値情報N02の駅代表点を推奨"
+  },
+  "lng": {
+   "value": 139.62347,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "同上"
+  },
+  "routeCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "operatorCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "dailyPassengers": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "JR東日本の駅別乗車人員ページ(https://www.jreast.co.jp/company/data/passenger/)は列定義(年度・乗車/乗降の別)がHTML上で確定できず誤記載の恐れがあるため今回未採用。本番は国土数値情報S12(2018年値・非商用)または各事業者公表値の手収集で埋める",
+   "reference": "https://www.jreast.co.jp/company/data/passenger/"
+  },
+  "congestionSections": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土交通省主要区間(東京圏31区間)に当駅に関係する区間が採録されていないため"
+  },
+  "popNight800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDensity800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDay800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "dayNightRatio": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "restaurantCount": {
+   "value": 120,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "fastFoodCount": {
+   "value": 35,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cafeCount": {
+   "value": 22,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "convenienceStoreCount": {
+   "value": 41,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "supermarketCount": {
+   "value": 4,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bookstoreCount": {
+   "value": 9,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "mallCount": {
+   "value": 7,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bankCount": {
+   "value": 22,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "postOfficeCount": {
+   "value": 6,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "pharmacyCount": {
+   "value": 25,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "restaurantDensityPerHa": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "nurseryCount": {
+   "value": 4,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "schoolCount": {
+   "value": 11,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "universityCount": {
+   "value": 21,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "libraryCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hospitalCount": {
+   "value": 4,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "clinicCount": {
+   "value": 8,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "officeCountOsm": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "officeWorkersMesh": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "経済センサス事業所メッシュ(次回2026年10月調査)の結合計算をPoCでは実行せず"
+  },
+  "coworkingCount": {
+   "value": 6,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cinemaCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "gymCount": {
+   "value": 4,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hotelCount": {
+   "value": 13,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "attractionCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkCount": {
+   "value": 14,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkAreaM2": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "ポリゴン面積計算ジョブをPoCでは実行せず(方法は確立済み: OSM公園ポリゴン面積合計または国土数値情報都市計画公園)"
+  },
+  "greenRatioPct": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報土地利用(細分)メッシュの結合計算をPoCでは実行せず(全国展開時にderivedで算出)"
+  },
+  "crimeCount800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "crimeRateCitywide": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "safetyScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "landPriceAvg800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報地価ポイントデータの取得をPoCでは実行せず(取得はダウンロードフォーム経由のため手動/スクリプト化要)"
+  },
+  "rent1K": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "rent1LDK": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "noiseScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "駅別の騒音実測値は全国どの情報源にも存在しない(環境基準点は地点単位)。proxy案はschema参照"
+  }
+ },
+ "千葉": {
+  "lat": {
+   "value": 35.612919,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "本番は国土数値情報N02の駅代表点を推奨"
+  },
+  "lng": {
+   "value": 140.113346,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24",
+   "note": "同上"
+  },
+  "routeCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "operatorCount": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報N02のダウンロードをPoCでは実行せず。N02取得後は自動算出可能"
+  },
+  "dailyPassengers": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "JR東日本の駅別乗車人員ページ(https://www.jreast.co.jp/company/data/passenger/)は列定義(年度・乗車/乗降の別)がHTML上で確定できず誤記載の恐れがあるため今回未採用。本番は国土数値情報S12(2018年値・非商用)または各事業者公表値の手収集で埋める",
+   "reference": "https://www.jreast.co.jp/company/data/passenger/"
+  },
+  "congestionSections": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土交通省主要区間(東京圏31区間)に当駅に関係する区間が採録されていないため"
+  },
+  "popNight800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDensity800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "popDay800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "dayNightRatio": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "e-Stat統計GISのメッシュzip取得・面積加重計算をPoCでは実行せず(方法はschema.jsonのdefinition参照)"
+  },
+  "restaurantCount": {
+   "value": 70,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "fastFoodCount": {
+   "value": 21,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cafeCount": {
+   "value": 11,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "convenienceStoreCount": {
+   "value": 28,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "supermarketCount": {
+   "value": 3,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bookstoreCount": {
+   "value": 3,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "mallCount": {
+   "value": 6,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "bankCount": {
+   "value": 17,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "postOfficeCount": {
+   "value": 6,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "pharmacyCount": {
+   "value": 11,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "restaurantDensityPerHa": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "nurseryCount": {
+   "value": 6,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "schoolCount": {
+   "value": 8,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "universityCount": {
+   "value": 5,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "libraryCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hospitalCount": {
+   "value": 4,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "clinicCount": {
+   "value": 4,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "officeCountOsm": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "Overpass APIミラーの帯域制限により今回のPoCでは未取得(取得スクリプト scripts/osm_pipeline.py は実証済み。4駅は取得済み)"
+  },
+  "officeWorkersMesh": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "経済センサス事業所メッシュ(次回2026年10月調査)の結合計算をPoCでは実行せず"
+  },
+  "coworkingCount": {
+   "value": 2,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "cinemaCount": {
+   "value": 2,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "gymCount": {
+   "value": 1,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "hotelCount": {
+   "value": 15,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "attractionCount": {
+   "value": 0,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkCount": {
+   "value": 22,
+   "status": "observed_community",
+   "sourceName": "OpenStreetMap (Overpass API, overpass.private.coffee ミラー)",
+   "sourceUrl": "https://www.openstreetmap.org/copyright",
+   "sourceDate": "取得日 2026-09-24 (OSMデータ基準日はミラー依存)",
+   "retrievedAt": "2026-09-24"
+  },
+  "parkAreaM2": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "ポリゴン面積計算ジョブをPoCでは実行せず(方法は確立済み: OSM公園ポリゴン面積合計または国土数値情報都市計画公園)"
+  },
+  "greenRatioPct": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報土地利用(細分)メッシュの結合計算をPoCでは実行せず(全国展開時にderivedで算出)"
+  },
+  "crimeCount800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "crimeRateCitywide": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "safetyScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "PoC対象5駅(東京/新宿/渋谷/池袋/品川)は警視庁CSV(町丁目単位・座標なし)で算出可能だが町丁目ポリゴン結合が必要。他5駅は対応する府県警オープンデータの確認が必要。今回は未実行"
+  },
+  "landPriceAvg800": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "国土数値情報地価ポイントデータの取得をPoCでは実行せず(取得はダウンロードフォーム経由のため手動/スクリプト化要)"
+  },
+  "rent1K": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "rent1LDK": {
+   "value": null,
+   "status": "estimated(参照型)",
+   "reason": "公的統計に駅別家賃は存在しない。民間ポータル相場は規約上データセットへの恒久保存が困難なため値を保存しない。運用はschema参照"
+  },
+  "noiseScore": {
+   "value": null,
+   "status": "unavailable",
+   "reason": "駅別の騒音実測値は全国どの情報源にも存在しない(環境基準点は地点単位)。proxy案はschema参照"
+  }
+ }
+}

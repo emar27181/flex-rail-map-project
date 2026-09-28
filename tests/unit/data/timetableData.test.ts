@@ -8,7 +8,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { routes } from '../../../src/data/routes';
-import { timetableLines, TIMETABLE_SOURCE, getNextDepartures, getDeparturesAround, addMinutes, computeEffectiveBaseTime } from '../../../src/data/timetableData';
+import { timetableLines, TIMETABLE_SOURCE, getNextDepartures, getDeparturesAround, isEstimatedTimetable, addMinutes, computeEffectiveBaseTime } from '../../../src/data/timetableData';
 
 describe('時刻表データ', () => {
   it('時刻表の駅名はすべて路線データに存在する', () => {
@@ -135,6 +135,23 @@ describe('getDeparturesAround（「前の時刻を表示」の始発までの遡
     const deps = getNextDepartures('yamanote', '東京', 0, '02:00', 2);
     expect(deps.length).toBe(2);
     expect(deps[0].time).toBe('04:45');
+  });
+});
+
+describe('推定データの注意書き（isEstimatedTimetable）', () => {
+  it('dataQuality未指定の路線は推定扱い（画面冒頭に赤字の注意書きが出る）', () => {
+    const line = timetableLines[0];
+    expect(isEstimatedTimetable({ ...line, dataQuality: undefined })).toBe(true);
+  });
+
+  it("dataQuality:'official' を明示した路線だけ推定扱いを外れる", () => {
+    const line = timetableLines[0];
+    expect(isEstimatedTimetable({ ...line, dataQuality: 'official' })).toBe(false);
+  });
+
+  it('現状の時刻表は全路線が運行間隔からの概算なので、すべて推定扱い', () => {
+    const notEstimated = timetableLines.filter(l => !isEstimatedTimetable(l)).map(l => l.key);
+    expect(notEstimated).toEqual([]);
   });
 });
 

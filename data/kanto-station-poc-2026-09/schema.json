@@ -1,0 +1,433 @@
+{
+ "dataset": "Flex Railway Map - 駅周辺データセット(設計v2 PoC)",
+ "version": "2.0-poc",
+ "generatedAt": "2026-09-24",
+ "classification": {
+  "observed_official": "公的統計・鉄道事業者・自治体等の一次実測値",
+  "observed_community": "OpenStreetMap等の実地調査ベース公開データ(網羅性の注記必須)",
+  "derived": "定義済みの計算式で入力データから算出(式と入力を必ず保存)",
+  "estimated": "直接統計がなく推定・参照による値(方法を必ず明示。実測として扱うことを禁止)",
+  "unavailable": "取得・推定不能(nullで保存し理由を記録)"
+ },
+ "geometryRule": {
+  "stationCircle": "駅代表点から直線距離半径800m(徒歩約10分)の円。円面積201.06ha。すべての駅で共通",
+  "stationRepPoint": "国土数値情報N02駅代表点(本番)/OSM駅ノード群の重心(PoC)"
+ },
+ "provenanceRule": {
+  "requiredFields": [
+   "status",
+   "sourceName",
+   "sourceUrl",
+   "sourceDate",
+   "retrievedAt"
+  ],
+  "displayMetaSeparation": "表示用JSON(display)と出典・メタ(meta)を分離。全国展開時はmetaを別ファイル/別DBテーブルにする"
+ },
+ "fields": [
+  {
+   "id": "stationName",
+   "nameJa": "駅名",
+   "definition": "駅名",
+   "group": "identity",
+   "classification": "A. observed(一次)",
+   "source": "国土数値情報N02/OSM",
+   "updateFrequency": "不要(名称変更時のみ)"
+  },
+  {
+   "id": "lat",
+   "nameJa": "駅代表点緯度(度). PoC: OSM駅ノード群の重心. 本番: 国土数値情報N02の駅代表点",
+   "definition": "駅代表点緯度(度). PoC: OSM駅ノード群の重心. 本番: 国土数値情報N02の駅代表点",
+   "group": "identity",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OSM/国土数値情報N02",
+   "updateFrequency": "年次"
+  },
+  {
+   "id": "lng",
+   "nameJa": "駅代表点経度(度). 同上",
+   "definition": "駅代表点経度(度). 同上",
+   "group": "identity",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OSM/国土数値情報N02",
+   "updateFrequency": "年次"
+  },
+  {
+   "id": "routeCount",
+   "nameJa": "当該駅(同一名称駅集合)に乗り入れる鉄道路線数. 路線=N02の路線区分に従い,新幹線/在来線/地下鉄を区別なく計上. 徒歩連絡(別名称駅)は含めない",
+   "definition": "当該駅(同一名称駅集合)に乗り入れる鉄道路線数. 路線=N02の路線区分に従い,新幹線/在来線/地下鉄を区別なく計上. 徒歩連絡(別名称駅)は含めない",
+   "group": "access",
+   "classification": "B. derived(定義済み計算式)",
+   "source": "国土数値情報N02(鉄道)から算出",
+   "updateFrequency": "年次"
+  },
+  {
+   "id": "operatorCount",
+   "nameJa": "乗り入れ鉄道事業者数(N02の事業者区分)",
+   "definition": "乗り入れ鉄道事業者数(N02の事業者区分)",
+   "group": "access",
+   "classification": "B. derived(定義済み計算式)",
+   "source": "国土数値情報N02",
+   "updateFrequency": "年次"
+  },
+  {
+   "id": "dailyPassengers",
+   "nameJa": "駅圏1日平均乗車人員(人/日). 同一名称駅集合に含まれる全事業者分の合計. 乗降客数には換算しない. 事業者により集計基準が異なる点をmetaに注記",
+   "definition": "駅圏1日平均乗車人員(人/日). 同一名称駅集合に含まれる全事業者分の合計. 乗降客数には換算しない. 事業者により集計基準が異なる点をmetaに注記",
+   "group": "access",
+   "classification": "A. observed(公的一次)",
+   "source": "各鉄道事業者公表値(例: JR東日本 各駅の乗車人員)/全国一律基準の代替として国土数値情報S12(2018年値,非商用ライセンス)",
+   "updateFrequency": "年次(事業者公表は例年7-10月)"
+  },
+  {
+   "id": "congestionSections",
+   "nameJa": "国交省主要区間混雑率の附与. 駅を含む/直通する最混雑区間ごとに{路線,区間,時間帯,値}. 駅単位の値ではない(区間単位)",
+   "definition": "国交省主要区間混雑率の附与. 駅を含む/直通する最混雑区間ごとに{路線,区間,時間帯,値}. 駅単位の値ではない(区間単位)",
+   "group": "access",
+   "classification": "A. observed(公的一次)",
+   "source": "国土交通省 都市鉄道の混雑率調査(毎年7月末公表)",
+   "updateFrequency": "年次"
+  },
+  {
+   "id": "popNight800",
+   "nameJa": "駅中心から半径800m円内の夜間人口(人). 500mメッシュ国勢調査人口の円内面積加重合計",
+   "definition": "駅中心から半径800m円内の夜間人口(人). 500mメッシュ国勢調査人口の円内面積加重合計",
+   "group": "population",
+   "classification": "B. derived(定義済み計算式)",
+   "source": "e-Stat統計GIS 500mメッシュ(国勢調査)",
+   "updateFrequency": "5年(国勢調査)"
+  },
+  {
+   "id": "popDensity800",
+   "nameJa": "popNight800 ÷ 円内実面積(メッシュ欠損を除いた実際の面積,人/km2)",
+   "definition": "popNight800 ÷ 円内実面積(メッシュ欠損を除いた実際の面積,人/km2)",
+   "group": "population",
+   "classification": "B. derived(定義済み計算式)",
+   "source": "同上",
+   "updateFrequency": "5年"
+  },
+  {
+   "id": "popDay800",
+   "nameJa": "駅圏の昼間人口(人). 従業地・通学地付き大都市圏メッシュから算出(東京圏/大阪圏等のみ提供)",
+   "definition": "駅圏の昼間人口(人). 従業地・通学地付き大都市圏メッシュから算出(東京圏/大阪圏等のみ提供)",
+   "group": "population",
+   "classification": "B. derived(定義済み計算式)",
+   "source": "e-Stat 大都市圏メッシュ(国勢調査昼間人口)",
+   "updateFrequency": "5年"
+  },
+  {
+   "id": "dayNightRatio",
+   "nameJa": "popDay800 ÷ popNight800(昼夜間人口比). 0-1. 就労商店街/ベッドタウンの判別に有効",
+   "definition": "popDay800 ÷ popNight800(昼夜間人口比). 0-1. 就労商店街/ベッドタウンの判別に有効",
+   "group": "population",
+   "classification": "B. derived(定義済み計算式)",
+   "source": "同上",
+   "updateFrequency": "5年"
+  },
+  {
+   "id": "restaurantCount",
+   "nameJa": "半径800m円内の レストラン(座席型)数. OSMタグ amenity=restaurant. fast_food/food_courtは別項目",
+   "definition": "半径800m円内の レストラン(座席型)数. OSMタグ amenity=restaurant. fast_food/food_courtは別項目",
+   "group": "commerce",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "月次可(OSM随時更新)"
+  },
+  {
+   "id": "fastFoodCount",
+   "nameJa": "円内 fast_food/food_court 数",
+   "definition": "円内 fast_food/food_court 数",
+   "group": "commerce",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "cafeCount",
+   "nameJa": "円内 カフェ数. amenity=cafe",
+   "definition": "円内 カフェ数. amenity=cafe",
+   "group": "commerce",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "convenienceStoreCount",
+   "nameJa": "円内 コンビニ数. shop=convenience",
+   "definition": "円内 コンビニ数. shop=convenience",
+   "group": "commerce",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "supermarketCount",
+   "nameJa": "円内 スーパー数. shop=supermarket",
+   "definition": "円内 スーパー数. shop=supermarket",
+   "group": "commerce",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "bookstoreCount",
+   "nameJa": "円内 書店数. shop=books",
+   "definition": "円内 書店数. shop=books",
+   "group": "commerce",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "mallCount",
+   "nameJa": "円内 商業施設数. shop=mall / shop=department_store",
+   "definition": "円内 商業施設数. shop=mall / shop=department_store",
+   "group": "commerce",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "bankCount",
+   "nameJa": "円内 銀行窓口数. amenity=bank",
+   "definition": "円内 銀行窓口数. amenity=bank",
+   "group": "commerce",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "postOfficeCount",
+   "nameJa": "円内 郵便局数. amenity=post_office",
+   "definition": "円内 郵便局数. amenity=post_office",
+   "group": "commerce",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "pharmacyCount",
+   "nameJa": "円内 調剤薬局数. amenity=pharmacy",
+   "definition": "円内 調剤薬局数. amenity=pharmacy",
+   "group": "commerce",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "restaurantDensityPerHa",
+   "nameJa": "restaurantCount ÷ 円面積201.06ha. 飲食街としての密度比較用(derived例)",
+   "definition": "restaurantCount ÷ 円面積201.06ha. 飲食街としての密度比較用(derived例)",
+   "group": "commerce",
+   "classification": "B. derived(定義済み計算式)",
+   "source": "OpenStreetMap値から算出",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "nurseryCount",
+   "nameJa": "円内 保育所・幼稚園数. amenity=nursery / kindergarten. OSMは自治体ODに比べ網羅性が低い点に注意",
+   "definition": "円内 保育所・幼稚園数. amenity=nursery / kindergarten. OSMは自治体ODに比べ網羅性が低い点に注意",
+   "group": "edu_care",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap/自治体オープンデータ(保育所等一覧)",
+   "updateFrequency": "年次"
+  },
+  {
+   "id": "schoolCount",
+   "nameJa": "円内 小中高等学校数. amenity=school",
+   "definition": "円内 小中高等学校数. amenity=school",
+   "group": "edu_care",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "年次"
+  },
+  {
+   "id": "universityCount",
+   "nameJa": "円内 大学・短大数. amenity=university / college",
+   "definition": "円内 大学・短大数. amenity=university / college",
+   "group": "edu_care",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "年次"
+  },
+  {
+   "id": "libraryCount",
+   "nameJa": "円内 図書館数. amenity=library",
+   "definition": "円内 図書館数. amenity=library",
+   "group": "edu_care",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "年次"
+  },
+  {
+   "id": "hospitalCount",
+   "nameJa": "円内 病院数. amenity=hospital(入院設備を持つ施設の定義)",
+   "definition": "円内 病院数. amenity=hospital(入院設備を持つ施設の定義)",
+   "group": "health",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap/自治体OD(医療施設一覧)",
+   "updateFrequency": "年次"
+  },
+  {
+   "id": "clinicCount",
+   "nameJa": "円内 診療所数. amenity=clinic",
+   "definition": "円内 診療所数. amenity=clinic",
+   "group": "health",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "年次"
+  },
+  {
+   "id": "officeCountOsm",
+   "nameJa": "円内 オフィス数(OSM観測). office=*(coworking除く). OSMの事業所網羅性は低く下限値とみなす",
+   "definition": "円内 オフィス数(OSM観測). office=*(coworking除く). OSMの事業所網羅性は低く下限値とみなす",
+   "group": "work",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "officeWorkersMesh",
+   "nameJa": "円内の従業 std者数(業種大分類: 情報通信業・学術研究専門技術サービス業・金融業等の合計). 「オフィス量」の再現可能な代替指標",
+   "definition": "円内の従業 std者数(業種大分類: 情報通信業・学術研究専門技術サービス業・金融業等の合計). 「オフィス量」の再現可能な代替指標",
+   "group": "work",
+   "classification": "B. derived(定義済み計算式)",
+   "source": "e-Stat 経済センサス-活動調査 事業所メッシュ(500m)",
+   "updateFrequency": "5年"
+  },
+  {
+   "id": "coworkingCount",
+   "nameJa": "円内 コワーキング数. amenity=coworking_space / office=coworking",
+   "definition": "円内 コワーキング数. amenity=coworking_space / office=coworking",
+   "group": "work",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "cinemaCount",
+   "nameJa": "円内 映画館数. amenity=cinema",
+   "definition": "円内 映画館数. amenity=cinema",
+   "group": "leisure",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "gymCount",
+   "nameJa": "円内 フィットネス・スポーツ施設数. leisure=fitness_centre / sports_centre",
+   "definition": "円内 フィットネス・スポーツ施設数. leisure=fitness_centre / sports_centre",
+   "group": "leisure",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "hotelCount",
+   "nameJa": "円内 宿泊施設数. tourism=hotel / hostel / guest_house",
+   "definition": "円内 宿泊施設数. tourism=hotel / hostel / guest_house",
+   "group": "leisure",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "attractionCount",
+   "nameJa": "円内 観光資源数. tourism=attraction / museum / gallery / zoo / aquarium / theme_park",
+   "definition": "円内 観光資源数. tourism=attraction / museum / gallery / zoo / aquarium / theme_park",
+   "group": "leisure",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap/国土数値情報(観光資源)",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "parkCount",
+   "nameJa": "円内 公園数(面積1ha以上の集計を推奨). leisure=park / garden",
+   "definition": "円内 公園数(面積1ha以上の集計を推奨). leisure=park / garden",
+   "group": "leisure",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMap",
+   "updateFrequency": "月次可"
+  },
+  {
+   "id": "parkAreaM2",
+   "nameJa": "円内の公園・緑地ポリゴン面積合計(m2). PoCでは未取得(ポリゴン面積計算はスクリプト準備済み・次回実行)",
+   "definition": "円内の公園・緑地ポリゴン面積合計(m2). PoCでは未取得(ポリゴン面積計算はスクリプト準備済み・次回実行)",
+   "group": "leisure",
+   "classification": "A. observed(OSM等コミュニティ観測・網羅性注記)",
+   "source": "OpenStreetMapポリゴン面積/本番は国土数値情報(都市計画公園・緑地)",
+   "updateFrequency": "年次"
+  },
+  {
+   "id": "greenRatioPct",
+   "nameJa": "円内の緑地系土地利用(森林・草地・公園)面積比率(%). 土地利用細分メッシュの分類別面積から算出",
+   "definition": "円内の緑地系土地利用(森林・草地・公園)面積比率(%). 土地利用細分メッシュの分類別面積から算出",
+   "group": "leisure",
+   "classification": "B. derived(定義済み計算式)",
+   "source": "国土数値情報 土地利用(細分)メッシュ",
+   "updateFrequency": "年次(3年周期更新)"
+  },
+  {
+   "id": "crimeCount800",
+   "nameJa": "駅円内の犯罪発生件数(件/年). 警視庁は窃盗系7罪種の発生情報CSV(町丁目単位,座標なし)を公開. 800m集計には町丁目ポリゴンの交差計算が必要",
+   "definition": "駅円内の犯罪発生件数(件/年). 警視庁は窃盗系7罪種の発生情報CSV(町丁目単位,座標なし)を公開. 800m集計には町丁目ポリゴンの交差計算が必要",
+   "group": "safety",
+   "classification": "A. observed(公的一次)",
+   "source": "警視庁 犯罪発生情報CSV/大阪府警・千葉県警等の犯罪オープンデータ",
+   "updateFrequency": "年次(8月頃更新)"
+  },
+  {
+   "id": "crimeRateCitywide",
+   "nameJa": "駅所在地市区町村の人口千人当たり刑法犯認知件数(件/千人・年). 駅円内の値ではない点を必ず注記",
+   "definition": "駅所在地市区町村の人口千人当たり刑法犯認知件数(件/千人・年). 駅円内の値ではない点を必ず注記",
+   "group": "safety",
+   "classification": "B. derived(定義済み計算式)",
+   "source": "警察庁犯罪統計+市区町村別公表値/e-Stat",
+   "updateFrequency": "年次"
+  },
+  {
+   "id": "safetyScore",
+   "nameJa": "治安スコア(0-100,高いほど安全). 計算式: 全国市区町村の crimeRateCitywide 分布の p5-p95 で線形正規化し逆転 (100 - 100*(rate-p5)/(p95-p5), 下限0上限100). 入力=crimeRateCitywide. 駅固有の治安ではない点を注記",
+   "definition": "治安スコア(0-100,高いほど安全). 計算式: 全国市区町村の crimeRateCitywide 分布の p5-p95 で線形正規化し逆転 (100 - 100*(rate-p5)/(p95-p5), 下限0上限100). 入力=crimeRateCitywide. 駅固有の治安ではない点を注記",
+   "group": "safety",
+   "classification": "B. derived(定義済み計算式)",
+   "source": "crimeRateCitywideから算出",
+   "updateFrequency": "年次"
+  },
+  {
+   "id": "landPriceAvg800",
+   "nameJa": "円内地価調査点(公示地価・基準地価)の平均(円/m2). 調査点0点の駅はnull",
+   "definition": "円内地価調査点(公示地価・基準地価)の平均(円/m2). 調査点0点の駅はnull",
+   "group": "prices",
+   "classification": "B. derived(定義済み計算式)",
+   "source": "国土数値情報 地価(公示地価・基準地価)ポイント",
+   "updateFrequency": "年次(公示3月/基準9月)"
+  },
+  {
+   "id": "rent1K",
+   "nameJa": "駅圏賃貸物件の1K/1R平均家賃(円/月). 公的統計は駅別に存在しない. 民間ポータル相場は恒久保存が規約上難しいため値をデータセットに保存せず、参照先URLと取得日のみ記録する運用を推奨",
+   "definition": "駅圏賃貸物件の1K/1R平均家賃(円/月). 公的統計は駅別に存在しない. 民間ポータル相場は恒久保存が規約上難しいため値をデータセットに保存せず、参照先URLと取得日のみ記録する運用を推奨",
+   "group": "prices",
+   "classification": "C. estimated(推定・参照型)",
+   "source": "民間不動産ポータル公開相場(規約確認必須)",
+   "updateFrequency": "月次"
+  },
+  {
+   "id": "rent1LDK",
+   "nameJa": "同上(1LDK/2LDK)",
+   "definition": "同上(1LDK/2LDK)",
+   "group": "prices",
+   "classification": "C. estimated(推定・参照型)",
+   "source": "同上",
+   "updateFrequency": "月次"
+  },
+  {
+   "id": "noiseScore",
+   "nameJa": "騒音スコア. 全国一律の駅別騒音実測値は存在しない. 代替: 環境省・自治体の道路交通騒音測定結果(地点単位)や幹線道路距離等のproxyをestimatedで別枠化する案のみ提示(本番でも値を直接保存しない)",
+   "definition": "騒音スコア. 全国一律の駅別騒音実測値は存在しない. 代替: 環境省・自治体の道路交通騒音測定結果(地点単位)や幹線道路距離等のproxyをestimatedで別枠化する案のみ提示(本番でも値を直接保存しない)",
+   "group": "environment",
+   "classification": "D. unavailable",
+   "source": "環境省騒音測定結果(地域単位)",
+   "updateFrequency": "-"
+  }
+ ]
+}

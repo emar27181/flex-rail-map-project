@@ -196,18 +196,24 @@ src/
 **AIが生成・推定した値をデータとして使用することを禁止する。**
 
 - `src/data/station-stats-data.json` に保存するデータは、実測・公開データのみ
-- 現在の実データソース: **Overpass API（OpenStreetMap）** で収集した以下の6項目のみ
-  - `convenienceStoreCount`（コンビニ数）
-  - `restaurantCount`（飲食店数）
-  - `cafeCount`（カフェ数）
-  - `supermarketCount`（スーパー数）
-  - `hospitalCount`（病院・クリニック数）
-  - `parkAreaM2`（公園面積）
+- 各フィールドが実データか推定値かは `src/data/stationStats.ts` の `STAT_PARAMS` の
+  `dataQuality`（`'real'` / `'estimated'`）で管理する。**このCLAUDE.mdに個別のフィールド
+  一覧を書き出さない**（2026年9月、ここに書かれた「6項目のみ」という記述が古くなり、
+  実際には `crimeIndex`・`coworkingCount`・`izakayaCount` 等の実データ項目が
+  未記載になっていたことが判明した。一次情報は`stationStats.ts`のみに一元化する）
+- 実データ（`dataQuality: 'real'`）は必ず `PARAM_DATA_SOURCES` に出典
+  （sourceName/URL/取得日）を記録すること。推定値（`'estimated'`）は
+  既定で非表示（`showEstimatedData`トグルで明示的にONにした場合のみ表示）とし、
+  「推定値」であることが分かるラベルを付けること
 - データがない駅は **灰色（`HEATMAP_NO_DATA_COLOR = '#aaaaaa'`）で表示** する。ゼロや推定値で埋めない
 - 新しいフィールドを追加する場合は、**実際のデータソース（API・公開統計）を明記** すること
 - 「それっぽい値」「概算」「AIによる推計」は一切使用禁止
+- 収集範囲が一部の駅に限られるデータ（例: 2026-09の首都圏駅データセットPoCは
+  東京・新宿・渋谷・池袋・品川・横浜・川崎・藤沢・大宮・千葉の10駅のみ）を追加する場合は、
+  対象駅数をコメント・出典に明記すること。ソースデータは
+  `data/kanto-station-poc-2026-09/README.md` に保存してある
 
-**背景:** 2026年6月以前のデータには家賃・乗降客数・治安スコアなどAI生成の推定値が混入していたが、ユーザーが誤った情報に基づいて意思決定することを防ぐため、全て削除した。
+**背景:** 2026年6月以前のデータには家賃・乗降客数・治安スコアなどAI生成の推定値が混入していたが、ユーザーが誤った情報に基づいて意思決定することを防ぐため、多くを削除・`estimated`ラベル付けした。ただし2026年9月時点で `avgRent1K`/`avgRent1LDK`/`populationDensity`/`dailyPassengers`/`morningCongestion`/`noiseScore`/`officeCount`は依然`estimated`のままデータに残っている（既定非表示だが、`showEstimatedData`をONにすると表示される）。首都圏駅データセットPoC（2026-09-24, `data/kanto-station-poc-2026-09/`）はこれらの一部（`morningCongestion`相当）を国交省公式の`congestionSections`に置き換える設計だが、10駅のみの検証段階でありサイト全体への反映は未着手。
 
 ---
 
@@ -524,9 +530,16 @@ UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域
 **状態は塗りで示す。** 選択・非選択で枠線の太さや文字の太さを変えると、
 押すたびに外形が動いて並びがずれる。
 
-色は `SEMANTIC.*`（出発=緑 / 到着=赤 / primary=青）、白黒は `NEUTRAL.*`、
-それ以外は `getThemeColors(theme)` から取る。直書きはテストで落ちる
-（`tests/unit/constants/semanticColors.test.ts`）。
+色は `SEMANTIC.*`、白黒は `NEUTRAL.*`、それ以外は `getThemeColors(theme)` から取る。
+直書きはテストで落ちる（`tests/unit/constants/semanticColors.test.ts`）。
+
+**色は見た目ではなく意味で選ぶ（2026-09-28）。** `SEMANTIC` は意味ごとにキーを分けてある:
+出発駅=`departure`(緑) / 到着駅=`arrival`(赤) / 主操作=`primary`(青) /
+肯定=`success` / 取り消し・削除・エラー=`danger` / 注意=`warning`(橙) / 方位の北=`north`。
+**到着の赤を警告・注意書きに流用しない**（推定データの注意書きを赤で出したら
+「主張が強い」と指摘された。注意は橙の `warning`）。
+白地の文字に橙を使うときは `getThemeColors(theme).warningText`。
+一覧と使い分けは `docs/design-system.md` の「意味ごとに分ける」。
 
 **文字サイズは `FS`、余白は `L.sp`、角の丸みは `L.r` から取る。**
 `fontSize: '12px'` のような直書きはテストで落ちる
@@ -547,6 +560,23 @@ UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域
 このプロジェクトは「同じ規則を2箇所に書いて片方だけ直す」不具合を繰り返しているため
 （入力欄だけ色が変わる、駅アイコンの片方だけタッチ領域が広がる等）、
 様式美ではなく再発防止として扱う。
+
+### 絵文字禁止・アイコンは lucide-react に統一
+
+**サイトに出るものには絵文字を使わない。** 対象はアプリのUI・翻訳文言
+（`translation.ts`）・記事（`src/pages/articles/`）・ガイド・CSSの `content` すべて。
+絵文字はOS・フォントで字形も色も変わり、サイズや色をデザイントークンで制御できないため。
+
+- アイコンが必要なら **`lucide-react`** のコンポーネントを使う
+  （例: 閉じる=`X`、注意=`TriangleAlert`、完了=`Check`、保存=`Download`、時刻=`Clock`/`Timer`）
+- `Button` / `IconButton` アトムには `icon={<Download />}` のように渡す（サイズはアトム側で揃う）
+- 翻訳文言には絵文字を入れず、アイコンは描画側のコンポーネントで付ける
+  （文言に入れると言語ごとにずれ、色も付けられない）
+- JSXが使えない場所（`.astro` の CSS 疑似要素など）は、lucide と同じSVGパスを
+  `mask` で使い `background-color: currentColor` で塗る（`article-layout.css` の `.foot-app-link` が実例）
+- 対象外: `console.*` のデバッグ出力・コメント、経路表記の矢印（→ ← ⇔）、
+  折りたたみの図形記号（▼ ▲ ▶）
+- `tests/unit/noEmojiIcons.test.ts` が `src/` 配下の .ts/.tsx/.astro/.css/.md を検査して落とす
 
 ### プレビューデプロイルール
 
@@ -574,6 +604,22 @@ URLが無ければユーザーは確認に着手できない。
 - 「前と同じURLです」で済ませるのも**不可**。毎回そのまま書く
 - リンクは省略・短縮せず、クリックできる形で全文を書く
 - あわせて push したコミットのハッシュも書く（どの版を見ているか分かるように）
+
+**2026-09-28追加: 作業報告の最後には必ずプレビューリンクを置く。**
+（ユーザー指示「プレビューリンクを作業後に必ず出すように」）
+
+- push の有無にかかわらず、作業をひと区切りして報告する返答では
+  **末尾に「プレビュー」欄を置き、URL・コミットハッシュ・ボットの状態を書く**
+- 報告の途中に一度書いただけで末尾に無いのは**不可**（長い報告だと埋もれて見つからない）
+- まだビルド中（ボットの `Latest commit` が古い）なら、その時点のURLと
+  「`<hash>` はビルド中、表示中は `<古いhash>`」と書いたうえで、
+  ビルド完了を確認したら改めてURLを書いて知らせる
+- 書式（毎回この形）:
+
+  ```
+  プレビュー: https://deploy-preview-<PR番号>--flex-railway-map.netlify.app
+  コミット: <hash>（netlify[bot]: ✅ ready / 🔨 building）
+  ```
 
 **貼るURLは推測せず、Netlifyボットのコメントから取ること。**
 
