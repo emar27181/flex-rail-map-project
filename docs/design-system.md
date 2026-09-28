@@ -466,6 +466,7 @@ UIのテーマと無関係なため明示的に除外している。
 | 文字色・背景・境界線 | `getThemeColors(theme)` | ❌ ダークモードが壊れる |
 | 色の上に文字を載せる | `filledLabelColors(color, theme)` | ❌ 自前でコントラスト判定しない |
 | 色付きの小ラベル | `<ColorChip>` | ❌ |
+| 路線の運行系統名・主な始発・行先 | `<ServiceTermini route variant>`（データは `src/data/serviceSystems.ts`） | ❌ 系統名や行先を画面側に直書きしない |
 | 選択できるカード・行 | `selectableCard(colors, {selected, accent})` | ❌ 枠線の太さを選択で変えない |
 | 色を薄く背景に敷く | `tintColor(color, alpha)` | ❌ |
 | 地図上の駅ラベルの寸法 | `stationLabelBox` | ❌ 生成関数ごとに決めない |

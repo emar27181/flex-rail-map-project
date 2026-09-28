@@ -34,6 +34,7 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 | 文字色・背景・境界線 | `getThemeColors(theme)` | `src/contexts/ThemeContext.tsx` |
 | 色の上に文字を載せる | `filledLabelColors(color, theme)` | `src/utils/contrast.ts` |
 | 色付きの小ラベル | `<ColorChip color=... theme=... />` | `src/components/ui/ColorChip.tsx` |
+| 路線の運行系統名・主な始発・行先 | `<ServiceTermini route theme language variant />`（データは `serviceSystems.ts`） | `src/components/ServiceTermini.tsx` |
 | 選択できるカード・行 | `selectableCard(colors, { selected, accent })` | `src/components/legend/legendStyles.ts` |
 | 色を薄く背景に敷く | `tintColor(color, alpha)` | `src/utils/contrast.ts` |
 | 地図上の駅ラベルの寸法 | `stationLabelBox` | `src/components/RailwayMap.tsx` |
