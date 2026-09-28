@@ -1,6 +1,16 @@
 # CHANGE LOG
 
-## [2026-09-28] セッション（東海道線の時刻表の行先・並行ルートの表示）
+## [2026-09-28] セッション（東海道線の時刻表の行先・並行ルート・推薦ルート選択の既定オフ）
+
+### improve: 推薦ルート選択を既定で出さず、出発・到着の間は全候補の路線を描いて表示切替で調整する
+- `src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`,
+  `src/components/legend/MapConfigPanel.tsx`（`showRouteRecommendationsPanel`）, `src/utils/translation.ts`
+- 既定は推薦ルート選択パネル（PC・全画面・スマホの下部タブ）を出さず、全候補と並行ルートの区間を駅まで描く
+- 設定「駅フィルター」の「推薦ルート選択を表示」で出せる。出したときだけ選んだ候補に描画を絞る
+
+### fix: 経路候補から引き返す経路（同じ駅を2回通る）を除く
+- `src/utils/routeFinder.ts`（`revisitsStation`）, `src/components/RailwayMap.tsx`, `tests/unit/utils/routeFinder.test.ts`
+- 藤沢→辻堂→（藤沢）→東京のような候補で、藤沢の先に使わない線が伸びていた
 
 ### feat: 出発・到着の間を表示するとき、別の路線で行ける並行ルートの駅も描く
 - `src/utils/parallelRoutes.ts`（新規）, `src/components/RailwayMap.tsx`, `tests/unit/utils/parallelRoutes.test.ts`（新規）
