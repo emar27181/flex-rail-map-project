@@ -1,8 +1,9 @@
 /**
  * ページの最終更新日（sitemap の lastmod）を git の履歴から求める。ビルド時だけ使う（Node）。
  *
- * - ページのソース（src/pages/*.astro）と、そのページ（とレイアウト・設定を経由して）が
- *   import している src/data のファイルのうち、最も新しいコミット日を使う
+ * - ページのソース（src/pages/*.astro、動的ルートは [slug].astro など）と、そのページが
+ *   （レイアウト・設定・src/seo を経由して）import している src/data のファイルのうち、
+ *   最も新しいコミット日を使う
  *   （ガイドや記事の本文はデータファイルにあるため、ページファイルだけでは足りない）
  * - レイアウト・設定（src/layouts, src/config）の変更は数えない。見た目や共通設定を
  *   直すたびに全ページの日付が進み、lastmod が「内容の更新日」でなくなるため
@@ -13,7 +14,7 @@
  *   少なくとも「内容が古いのに新しい日付」にはならない側（変更があった日）に寄せている
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
 const git = (root: string, args: string[]): string | undefined => {
@@ -48,7 +49,7 @@ function resolveImport(fromFile: string, spec: string): string | undefined {
 }
 
 /** import をたどるディレクトリ（データファイルを見つけるために通る） */
-const TRAVERSE_DIRS = ['src/data/', 'src/config/', 'src/layouts/', 'src/pages/'];
+const TRAVERSE_DIRS = ['src/data/', 'src/config/', 'src/layouts/', 'src/pages/', 'src/seo/'];
 /** 更新日として数えるディレクトリ（内容そのもの） */
 const COUNTED_DIRS = ['src/data/'];
 
@@ -76,14 +77,45 @@ export function contentSourcesOf(root: string, pageFile: string): string[] {
   return [...out];
 }
 
-/** "/about" → src/pages/about.astro など（見つからなければ undefined） */
+/** src/pages 以下の .astro（_ で始まるものを除く）をサイト内のルートとして列挙 */
+function listPageFiles(root: string): string[] {
+  const out: string[] = [];
+  const walk = (dir: string) => {
+    for (const name of readdirSync(dir)) {
+      if (name.startsWith('_')) continue;
+      const abs = join(dir, name);
+      if (statSync(abs).isDirectory()) walk(abs);
+      else if (name.endsWith('.astro')) out.push(abs);
+    }
+  };
+  walk(join(root, 'src/pages'));
+  return out;
+}
+
+/** "src/pages/[...lang]/stations/[slug].astro" → /stations/x・/en/stations/x に一致する正規表現 */
+function routePattern(root: string, file: string): RegExp {
+  const rel = relative(join(root, 'src/pages'), file).replace(/\\/g, '/').replace(/\.astro$/, '');
+  const segs = rel.split('/').filter(s => s !== 'index');
+  const body = segs.map(seg => {
+    if (/^\[\.\.\.[^\]]+\]$/.test(seg)) return '(?:/.+)?';
+    if (/^\[[^\]]+\]$/.test(seg)) return '/[^/]+';
+    return '/' + seg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }).join('');
+  return new RegExp(`^${body || '/'}$`);
+}
+
+/**
+ * "/about" → src/pages/about.astro など。静的なファイルを優先し、
+ * 無ければ動的ルート（[slug].astro など）から探す（見つからなければ undefined）
+ */
 export function pageSourceFile(root: string, path: string): string | undefined {
   const rel = path === '/' ? 'index' : path.replace(/^\//, '');
   for (const c of [`src/pages/${rel}.astro`, `src/pages/${rel}/index.astro`]) {
     const abs = join(root, c);
     if (existsSync(abs)) return abs;
   }
-  return undefined;
+  const dynamic = listPageFiles(root).filter(f => f.includes('['));
+  return dynamic.find(f => routePattern(root, f).test(path));
 }
 
 export function createLastModified(root: string): (path: string) => string | undefined {
