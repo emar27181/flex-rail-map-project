@@ -58,6 +58,25 @@
 - 路線データ側の制約（上野東京ラインの独立キーが無い、湘南新宿ラインの東海道系統が無い等）と
   次の段階は `docs/through-services.md` と `TODO.md` に記録
 
+### improve: 意味を持つ色を役割ごとに分け、到着の赤を警告・削除・方位に流用しない
+- `src/constants/ui.ts`, `src/contexts/ThemeContext.tsx`, `src/components/ui/atoms/Button.tsx`,
+  `src/components/RailwayMap.tsx`, `ErrorBoundary.tsx`, `CoverageAnalysis.tsx`,
+  `StationMemoPanel.tsx`, `RouteRecommendations.tsx`, `legend/LegendRouteList.tsx`,
+  `ui/atoms/CompassNeedle.tsx`, `docs/design-system.md`, `CLAUDE.md`
+- 「赤字は主張強いからオレンジぐらいの警告色で、色は意味ごとに設定で分けて」との指示を受けた
+- `SEMANTIC` に `success`(#2E7D32) / `danger`(#D32F2F) / `warning`(#FF9800) / `north`(#E53935) を追加。
+  テーマ側に `warningText`（白地で読める濃い橙）と `danger` を追加
+- `Button` に `departure` / `arrival` variant を追加し、「出発に設定」「到着に設定」を
+  「全表示」「全非表示」（`positive`=success / `danger`=danger）と別の意味として扱う
+- エラー画面・カバレッジF評価は `danger`、不完全データ・不明な駅・「実データのみ」表記は
+  `warning`、方位磁針は `north` に振り分けた
+- `success` / `danger` は白文字のコントラストが 5.1 / 5.0（旧 `#4CAF50` / `#F44336` は 2.8 / 3.7 で基準未満）
+
+### improve: 推定時刻表の注意書きを赤の太字から橙の注意表示に変える
+- `src/components/ui/TimetableSourceNote.tsx`
+- 左の橙の線・淡い橙の背景・`TriangleAlert` アイコン・`warningText` の文字色。
+  ライト/ダーク両方で表示を確認（文字と背景のコントラスト 4.9 / 5.4）
+
 ### docs: 同名別駅の取り違え（大宮→阪急京都線）をTODOに記録
 - 検証中に、大宮（埼玉）を出発駅にすると京都の阪急京都線「大宮」も通過路線に出ることを発見。
   駅名だけで路線を引いているのが原因。今回は修正せず記録のみ
