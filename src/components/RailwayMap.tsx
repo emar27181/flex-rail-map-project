@@ -83,6 +83,7 @@ import { estimateArrival, shouldNotifyArrival, buildArrivalMessage, isPlausibleS
 import { buildCorridorRoutes, vertexRanks, offsetPoints } from '../utils/routeOffset';
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
+import MapCompassButton from './map/MapCompassButton';
 import Select from './ui/atoms/Select';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import TextField from './ui/atoms/TextField';
@@ -6314,6 +6315,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 : { bottom: '10px', top: 'auto', left: '10px' }),
             zIndex: 1003,
             display: 'flex',
+            // スマホ・非全画面時は左に「表示路線の切替」パネルが来て横に1個分しか
+            // 空いていないので、方位ボタンは全画面ボタンの下に縦に積む
+            flexDirection: isMobile && !isFullscreen ? 'column' : 'row',
             gap: L.sp.xs,
           }}>
             {renderCornerButton(
@@ -6321,6 +6325,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               isFullscreen ? translateUI('exitFullscreen', currentLanguage) : translateUI('enterFullscreen', currentLanguage),
               () => setIsFullscreen(!isFullscreen),
             )}
+
+            {/* 方位: 2本指回転後も北が分かるように。押すと北を上に戻す */}
+            <MapCompassButton
+              mapRef={mapRef}
+              theme={theme}
+              label={translateUI('resetNorth', currentLanguage)}
+              iconSize={MAP_CORNER_ICON_SIZE}
+              styleOverride={cornerButtonStyle}
+            />
 
             {onLanguageChange && !(isMobile && !isFullscreen) && renderCornerButton(
               // 文字をアイコン代わりに置くので、大きさは規格から取る

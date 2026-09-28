@@ -8022,6 +8022,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "時刻表モードをON",
     english: "Timetable Mode ON"
   },
+  resetNorth: {
+    japanese: "北を上にする",
+    english: "Reset to north"
+  },
   exitFullscreen: {
     japanese: "縮小表示",
     english: "Exit Fullscreen"
@@ -8830,6 +8834,7 @@ export const uiChinese: Record<string, string> = {
   noTimetableData: "无时刻数据",
   approximateNote: "概算值·参考用　点击左侧路线名切换",
   timetableEstimatedWarning: "此为推算数据。准确时刻请参阅各铁路公司的官方时刻表。",
+  resetNorth: "将北方朝上",
   heatmapDataLabel: "热力图数据",
   showTrainStatusPanel: "显示乘车路线",
   locationDenied: "未允许获取位置信息",
@@ -9157,6 +9162,7 @@ export const uiKorean: Record<string, string> = {
   noTimetableData: "시간표 없음",
   approximateNote: "개산값·참고용　왼쪽 노선명 클릭으로 전환",
   timetableEstimatedWarning: "추정 데이터입니다. 정확한 시각은 각 철도회사의 공식 시각표를 참고해 주세요.",
+  resetNorth: "북쪽을 위로",
   heatmapDataLabel: "히트맵 데이터",
   showTrainStatusPanel: "탑승 노선 표시",
   locationDenied: "위치 정보가 허용되지 않았습니다",
