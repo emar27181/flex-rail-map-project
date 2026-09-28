@@ -8024,6 +8024,22 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "時刻表モードをON",
     english: "Timetable Mode ON"
   },
+  serviceBrandUenoTokyoLine: {
+    japanese: "上野東京ライン",
+    english: "Ueno-Tokyo Line"
+  },
+  serviceBrandShonanShinjukuLine: {
+    japanese: "湘南新宿ライン",
+    english: "Shonan-Shinjuku Line"
+  },
+  serviceBrandYokosukaSobuRapid: {
+    japanese: "横須賀・総武快速線",
+    english: "Yokosuka / Sobu Rapid Line"
+  },
+  serviceTerminiLabel: {
+    japanese: "主な始発・行先",
+    english: "Main terminals"
+  },
   resetNorth: {
     japanese: "北を上にする",
     english: "Reset to north"
@@ -8837,6 +8853,10 @@ export const uiChinese: Record<string, string> = {
   approximateNote: "概算值·参考用　点击左侧路线名切换",
   timetableEstimatedWarning: "此为推算数据。准确时刻请参阅各铁路公司的官方时刻表。",
   resetNorth: "将北方朝上",
+  serviceBrandUenoTokyoLine: "上野东京线",
+  serviceBrandShonanShinjukuLine: "湘南新宿线",
+  serviceBrandYokosukaSobuRapid: "横须贺・总武快速线",
+  serviceTerminiLabel: "主要始发・终点",
   heatmapDataLabel: "热力图数据",
   showTrainStatusPanel: "显示乘车路线",
   locationDenied: "未允许获取位置信息",
@@ -9165,6 +9185,10 @@ export const uiKorean: Record<string, string> = {
   approximateNote: "개산값·참고용　왼쪽 노선명 클릭으로 전환",
   timetableEstimatedWarning: "추정 데이터입니다. 정확한 시각은 각 철도회사의 공식 시각표를 참고해 주세요.",
   resetNorth: "북쪽을 위로",
+  serviceBrandUenoTokyoLine: "우에노도쿄 라인",
+  serviceBrandShonanShinjukuLine: "쇼난신주쿠 라인",
+  serviceBrandYokosukaSobuRapid: "요코스카・소부 쾌속선",
+  serviceTerminiLabel: "주요 시발・행선지",
   heatmapDataLabel: "히트맵 데이터",
   showTrainStatusPanel: "탑승 노선 표시",
   locationDenied: "위치 정보가 허용되지 않았습니다",

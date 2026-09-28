@@ -76,6 +76,7 @@ import {
 } from '../utils/stationUrlParams';
 import ColorChip from './ui/ColorChip';
 import TimetableSourceNote from './ui/TimetableSourceNote';
+import ServiceTermini from './ServiceTermini';
 import { checkboxInput, L} from './legend/legendStyles';
 import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, tintColor, LIGHT_TEXT } from '../utils/contrast';
 import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE, haversineDistance, estimateHeadingFromHistory } from '../utils/trainDetector';
@@ -1875,6 +1876,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     lineHeight: 1.3,
                   }}>
                     {translateRoute(routeNames[rk as RouteKey] ?? rk, currentLanguage)}
+                    {/* 同じ線路を別系統が走る駅（藤沢の東海道線＝上野東京ラインなど）で系統名を添える */}
+                    <ServiceTermini route={rk as RouteKey} theme={theme} language={currentLanguage} variant="brand" />
                   </span>
                   {isJourney && (
                     <span style={{ fontSize: FS.caption, color: colors.primary, flexShrink: 0 }}>{translateUI('onboard', currentLanguage)}</span>
@@ -1911,6 +1914,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
           {/* 右カラム: 時刻表 */}
           <div style={{ flex: 1, minWidth: '120px', overflowY: 'auto' }}>
+            {/* 選択中の路線の運行系統と主な始発・行先（時刻表の有無に関係なく出す） */}
+            {activeRouteKey && (
+              <ServiceTermini route={activeRouteKey as RouteKey} theme={theme} language={currentLanguage} variant="full" />
+            )}
             {activeRouteKey && hasTimetableData(activeRouteKey) ? (
               <>
                 {/*
