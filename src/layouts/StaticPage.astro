@@ -11,6 +11,7 @@
  * 英語版を `-en` で囲むと、?lang= に応じてどちらかが表示される。
  */
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
+import SiteFooterNav from '../components/SiteFooterNav.astro';
 import { staticPageCss } from './staticPageStyles';
 import { SITE_URL, GOOGLE_SITE_VERIFICATION } from '../config/seo';
 
@@ -87,6 +88,7 @@ const {
 			<a href="/" class="back-link">{backLabel}</a>
 			<h1 class="page-title" id="static-page-h1" data-ja={heading.ja} data-en={heading.en}>{heading.ja}</h1>
 			<slot />
+			<SiteFooterNav currentPath={path} />
 		</div>
 
 		<script is:inline define:vars={{ langPrefix }}>

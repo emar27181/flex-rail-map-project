@@ -1,0 +1,40 @@
+---
+/**
+ * サイト共通のフッターナビ。リンクの中身は src/config/siteNav.ts だけで決める。
+ * 静的HTMLの内部リンクとして、孤立ページ（/faq, /contact 等）を無くすためのもの。
+ * 見た目は各レイアウトの文字色を引き継ぎ、文字サイズは FS.caption。
+ */
+import { SITE_FOOTER_LINKS, type NavLang } from '../config/siteNav';
+import { FS } from '../constants/ui';
+
+interface Props {
+  lang?: NavLang;
+  /** 今いるページのパス（自分自身へのリンクは出さない） */
+  currentPath?: string;
+}
+
+const { lang = 'ja', currentPath } = Astro.props;
+const links = SITE_FOOTER_LINKS.filter(l => l.path !== currentPath);
+const fs = FS.caption;
+---
+
+<nav class="site-footer-nav" aria-label={lang === 'ja' ? 'サイト内リンク' : 'Site links'}>
+  {links.map(l => <a href={l.path}>{l.label[lang]}</a>)}
+</nav>
+
+<style define:vars={{ fs }}>
+  .site-footer-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25em 1em;
+    margin-top: 2em;
+    padding-top: 1em;
+    border-top: 1px solid currentColor;
+    border-top-color: color-mix(in srgb, currentColor 20%, transparent);
+    font-size: var(--fs);
+  }
+  .site-footer-nav a {
+    color: inherit;
+    opacity: 0.8;
+  }
+</style>

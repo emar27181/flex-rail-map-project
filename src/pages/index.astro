@@ -1,5 +1,6 @@
 ---
 import ThemeWrapper from "../components/ThemeWrapper.tsx";
+import SiteFooterNav from "../components/SiteFooterNav.astro";
 import leafletCss from "leaflet/dist/leaflet.css?url";
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION } from "../config/seo";
 import GA4Loader from "../components/GA4Loader.astro";
@@ -567,6 +568,7 @@ const webSiteSchema = {
 				<h1>路線図が見にくい・複雑すぎる？フレックス路線図で解決</h1>
 				<p>フレックス路線図は、必要な路線だけを選んで表示できるシンプルなインタラクティブ路線図サービスです。情報が多すぎて見にくい路線図を絞り込み、遅延・運休時も自分で乗り換えを判断できます。</p>
 				<p>JavaScriptを有効にしてご利用ください。</p>
+				<SiteFooterNav currentPath="/" />
 			</div>
 		</noscript>
 		<ThemeWrapper client:only="react" />

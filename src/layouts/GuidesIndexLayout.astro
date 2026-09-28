@@ -10,6 +10,7 @@
 import { staticPageCss } from './staticPageStyles';
 import { guideCss } from './guideStyles';
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
+import SiteFooterNav from '../components/SiteFooterNav.astro';
 import GA4Loader from '../components/GA4Loader.astro';
 import { SITE_URL, SITE_NAME, GOOGLE_SITE_VERIFICATION, buildHreflangLinks } from '../config/seo';
 import { guideIndexPath, guideLanguages } from '../data/guides';
@@ -84,6 +85,7 @@ const OG_LOCALE: Record<Props['htmlLang'], string> = {
 		<div class="container">
 			<a href="/" class="back-link" style="margin-bottom: 24px;">{backLabel}</a>
 			<slot />
+			<SiteFooterNav lang={htmlLang} currentPath={path} />
 		</div>
 
 		<SimpleThemeWrapper client:only="react" />

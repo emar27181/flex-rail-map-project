@@ -9,6 +9,7 @@ import {
 } from "../../data/articleI18n";
 import { ARTICLE_BODY_TRANSLATIONS } from "../../data/articleBodyI18n";
 import { SITE_URL, SITE_NAME } from "../../config/seo";
+import SiteFooterNav from "../../components/SiteFooterNav.astro";
 import { articleBreadcrumbJsonLd, articleJsonLd } from "../../config/articleSeo";
 
 const i18nPayload = JSON.stringify({
@@ -119,6 +120,7 @@ const publishedDate = "2025-06-06";
     <div class="foot">
       <a href="/" data-i18n="top">← フレックス路線図 トップへ</a> ／ <a href="/articles" data-i18n="articlesBack">記事一覧へ戻る</a>
       <div class="small" data-i18n="footerCopy">フレックス路線図 ／ 東京の鉄道を、必要な情報だけで。</div>
+      <SiteFooterNav currentPath="/articles/flex-rail-map-introduction" />
     </div>
   </div>
 

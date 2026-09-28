@@ -17,6 +17,7 @@ import { guideCss } from './guideStyles';
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import MapOpenCta from '../components/MapOpenCta.astro';
 import GA4Loader from '../components/GA4Loader.astro';
+import SiteFooterNav from '../components/SiteFooterNav.astro';
 import { SITE_URL, SITE_NAME, GOOGLE_SITE_VERIFICATION, buildHreflangLinks } from '../config/seo';
 import { guidePath, getGuideTranslations, type GuideDefinition } from '../data/guides';
 
@@ -212,6 +213,7 @@ const webPageJsonLd = {
 					</ul>
 				</section>
 			)}
+			<SiteFooterNav lang={guide.lang} currentPath={path} />
 		</div>
 
 		<SimpleThemeWrapper client:only="react" />
