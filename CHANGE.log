@@ -2,6 +2,12 @@
 
 ## [2026-09-28] セッション（東海道線の時刻表の行先・並行ルート・推薦ルート選択の既定オフ）
 
+### fix: 時刻ラベルを東海道線だけでなく、地図に描く全候補と並行ルートの駅にも出す
+- `src/components/RailwayMap.tsx`（`stationTimelineMap`）, `src/utils/parallelRoutes.ts`（`sectionMinutes`）,
+  `tests/unit/utils/parallelRoutes.test.ts`
+- 全候補の区間に時刻を付け、並行ルートは分かれる駅の時刻＋路線の駅間所要時間で求める
+- 経路と共通の駅では早い方に揃え、逆向きにも戻れるとして計算（大井町が品川より30分遅い、などを防ぐ）
+
 ### improve: 推薦ルート選択を既定で出さず、出発・到着の間は全候補の路線を描いて表示切替で調整する
 - `src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`,
   `src/components/legend/MapConfigPanel.tsx`（`showRouteRecommendationsPanel`）, `src/utils/translation.ts`
