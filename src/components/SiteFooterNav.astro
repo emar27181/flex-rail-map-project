@@ -14,12 +14,14 @@ interface Props {
 }
 
 const { lang = 'ja', currentPath } = Astro.props;
-const links = SITE_FOOTER_LINKS.filter(l => l.path !== currentPath);
+const links = SITE_FOOTER_LINKS
+  .map(l => ({ ...l, href: lang === 'en' && l.pathEn ? l.pathEn : l.path }))
+  .filter(l => l.href !== currentPath);
 const fs = FS.caption;
 ---
 
 <nav class="site-footer-nav" aria-label={lang === 'ja' ? 'サイト内リンク' : 'Site links'}>
-  {links.map(l => <a href={l.path}>{l.label[lang]}</a>)}
+  {links.map(l => <a href={l.href}>{l.label[lang]}</a>)}
 </nav>
 
 <style define:vars={{ fs }}>

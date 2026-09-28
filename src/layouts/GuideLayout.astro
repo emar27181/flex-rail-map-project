@@ -14,11 +14,15 @@
  */
 import { staticPageCss } from './staticPageStyles';
 import { guideCss } from './guideStyles';
+import { seoPageCss } from './seoPageStyles';
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import MapOpenCta from '../components/MapOpenCta.astro';
 import SeoHead from '../components/seo/SeoHead.astro';
 import ThemeInitScript from '../components/ThemeInitScript.astro';
 import SiteFooterNav from '../components/SiteFooterNav.astro';
+import LineChip from '../components/seo/LineChip.astro';
+import { lineByKey, SEO_LANGS, type SeoLang } from '../seo/pageModel';
+import { SEO_TEXT } from '../seo/pageText';
 import { SITE_NAME, buildHreflangLinks, buildBreadcrumbJsonLd, canonicalUrl } from '../config/seo';
 import { guidePath, getGuideTranslations, type GuideDefinition } from '../data/guides';
 
@@ -41,6 +45,9 @@ const hreflangLinks = buildHreflangLinks(
   getGuideTranslations(guide).some(g => g.lang === 'ja') ? 'ja' : 'en',
 );
 const htmlLang = guide.lang;
+// ガイドが地図で開く路線のうち、路線ページがあるもの（駅・路線ページと相互にリンクする）
+const seoLang = (SEO_LANGS as string[]).includes(guide.lang) ? (guide.lang as SeoLang) : undefined;
+const guideLines = seoLang ? (guide.ctaRoutes ?? []).filter(r => lineByKey(r)) : [];
 const RELATED_HEADING: Record<GuideDefinition['lang'], string> = {
   ja: '関連ガイド',
   en: 'Related Guides',
@@ -94,7 +101,7 @@ const webPageJsonLd = {
 			ogType="article"
 			keywords={guide.keywords}
 			jsonLd={[breadcrumbJsonLd, webPageJsonLd, ...(faqJsonLd ? [faqJsonLd] : [])]}
-			styles={[staticPageCss, guideCss]}
+			styles={[staticPageCss, guideCss, seoPageCss]}
 		/>
 	</head>
 	<body>
@@ -154,6 +161,13 @@ const webPageJsonLd = {
 							</div>
 						))}
 					</dl>
+				</section>
+			)}
+
+			{seoLang && guideLines.length > 0 && (
+				<section>
+					<h2>{SEO_TEXT[seoLang].lineDetails}</h2>
+					<ul class="seo-chips">{guideLines.map(r => <LineChip route={r} lang={seoLang} />)}</ul>
 				</section>
 			)}
 
