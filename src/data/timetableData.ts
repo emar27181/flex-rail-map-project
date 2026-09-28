@@ -487,11 +487,16 @@ const yamanoteData: LineTimetableData = {
 const tokaidoData: LineTimetableData = {
   key: 'jrTokaidoMainLine',
   name: '東海道線',
-  updatedAt: '2025-03-15',
-  dataVersion: '2025年3月ダイヤ改正版（概算）',
+  updatedAt: '2026-09-28',
+  dataVersion: '運行間隔からの概算（行先は方面のみ）',
+  // 上りの大半は上野東京ラインとして宇都宮線・高崎線へ直通し、東京止まりではない。
+  // 概算データでは列車ごとの行先は分からないため、行先は「方面」だけを書く。
+  // 方面の駅は serviceSystems.ts の上野東京ライン（jrTokaidoMainLine）の始発・行先と
+  // 一致させること（tests/unit/data/timetableData.test.ts が照合する）。
+  // 快速アクティーは2023年3月のダイヤ改正で廃止されたため載せない。
   directions: [
     {
-      label: '下り（横浜・小田原方面）',
+      label: '下り（横浜・小田原・熱海方面）',
       stations: [
         { name: '東京', offset: 0 },   { name: '新橋', offset: 3 },   { name: '品川', offset: 6 },
         { name: '川崎', offset: 10 },  { name: '横浜', offset: 14 },
@@ -501,19 +506,15 @@ const tokaidoData: LineTimetableData = {
         { name: '国府津', offset: 59 }, { name: '鴨宮', offset: 63 },  { name: '小田原', offset: 66 },
       ],
       patterns: [
-        { fromMin: m(5,20),  toMin: m(7),    intervalMin: 20, type: '普通',       destination: '小田原行き', toward: '熱海' },
-        { fromMin: m(5,30),  toMin: m(7),    intervalMin: 30, type: '快速アクティー', destination: '小田原行き', toward: '熱海' },
-        { fromMin: m(7),     toMin: m(9,30), intervalMin: 10, type: '普通',       destination: '小田原行き', toward: '熱海' },
-        { fromMin: m(7,5),   toMin: m(9,30), intervalMin: 20, type: '快速アクティー', destination: '小田原行き', toward: '熱海' },
-        { fromMin: m(9,30),  toMin: m(17),   intervalMin: 15, type: '普通',       destination: '小田原行き', toward: '熱海' },
-        { fromMin: m(9,40),  toMin: m(17),   intervalMin: 30, type: '快速アクティー', destination: '小田原行き', toward: '熱海' },
-        { fromMin: m(17),    toMin: m(21),   intervalMin: 10, type: '普通',       destination: '小田原行き', toward: '熱海' },
-        { fromMin: m(17,5),  toMin: m(21),   intervalMin: 20, type: '快速アクティー', destination: '小田原行き', toward: '熱海' },
-        { fromMin: m(21),    toMin: m(24,30),intervalMin: 20, type: '普通',       destination: '小田原行き', toward: '熱海' },
+        { fromMin: m(5,20),  toMin: m(7),    intervalMin: 20, type: '普通', destination: '熱海・沼津方面' },
+        { fromMin: m(7),     toMin: m(9,30), intervalMin: 10, type: '普通', destination: '熱海・沼津方面' },
+        { fromMin: m(9,30),  toMin: m(17),   intervalMin: 15, type: '普通', destination: '熱海・沼津方面' },
+        { fromMin: m(17),    toMin: m(21),   intervalMin: 10, type: '普通', destination: '熱海・沼津方面' },
+        { fromMin: m(21),    toMin: m(24,30),intervalMin: 20, type: '普通', destination: '熱海・沼津方面' },
       ],
     },
     {
-      label: '上り（品川・東京方面）',
+      label: '上り（東京・上野方面、宇都宮線・高崎線へ直通）',
       stations: [
         { name: '小田原', offset: 0 },  { name: '鴨宮', offset: 3 },   { name: '国府津', offset: 7 },
         { name: '二宮', offset: 10 },   { name: '大磯', offset: 13 },  { name: '平塚', offset: 17 },
@@ -523,14 +524,11 @@ const tokaidoData: LineTimetableData = {
         { name: '品川', offset: 60 },   { name: '新橋', offset: 63 },  { name: '東京', offset: 66 },
       ],
       patterns: [
-        { fromMin: m(4,30),  toMin: m(7),    intervalMin: 20, type: '普通',       destination: '東京行き', toward: '上野' },
-        { fromMin: m(5),     toMin: m(7),    intervalMin: 30, type: '快速アクティー', destination: '東京行き', toward: '上野' },
-        { fromMin: m(7),     toMin: m(9,30), intervalMin: 10, type: '普通',       destination: '東京行き', toward: '上野' },
-        { fromMin: m(7,10),  toMin: m(9,30), intervalMin: 20, type: '快速アクティー', destination: '東京行き', toward: '上野' },
-        { fromMin: m(9,30),  toMin: m(17),   intervalMin: 15, type: '普通',       destination: '東京行き', toward: '上野' },
-        { fromMin: m(17),    toMin: m(21),   intervalMin: 10, type: '普通',       destination: '東京行き', toward: '上野' },
-        { fromMin: m(17,10), toMin: m(21),   intervalMin: 20, type: '快速アクティー', destination: '東京行き', toward: '上野' },
-        { fromMin: m(21),    toMin: m(24,30),intervalMin: 20, type: '普通',       destination: '東京行き', toward: '上野' },
+        { fromMin: m(4,30),  toMin: m(7),    intervalMin: 20, type: '普通', destination: '宇都宮・高崎方面' },
+        { fromMin: m(7),     toMin: m(9,30), intervalMin: 10, type: '普通', destination: '宇都宮・高崎方面' },
+        { fromMin: m(9,30),  toMin: m(17),   intervalMin: 15, type: '普通', destination: '宇都宮・高崎方面' },
+        { fromMin: m(17),    toMin: m(21),   intervalMin: 10, type: '普通', destination: '宇都宮・高崎方面' },
+        { fromMin: m(21),    toMin: m(24,30),intervalMin: 20, type: '普通', destination: '宇都宮・高崎方面' },
       ],
     },
   ],

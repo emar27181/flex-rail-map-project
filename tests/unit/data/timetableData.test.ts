@@ -9,6 +9,7 @@
 import { describe, it, expect } from 'vitest';
 import { routes } from '../../../src/data/routes';
 import { timetableLines, TIMETABLE_SOURCE, getNextDepartures, getDeparturesAround, isEstimatedTimetable, addMinutes, computeEffectiveBaseTime } from '../../../src/data/timetableData';
+import { getServiceSystem } from '../../../src/data/serviceSystems';
 
 describe('時刻表データ', () => {
   it('時刻表の駅名はすべて路線データに存在する', () => {
@@ -195,5 +196,29 @@ describe('computeEffectiveBaseTime（出発/到着モードの基準時刻計算
   it('所要時間0分なら出発・到着モードで結果が一致する', () => {
     expect(computeEffectiveBaseTime('12:00', 'departure', 0)).toBe('12:00');
     expect(computeEffectiveBaseTime('12:00', 'arrival', 0)).toBe('12:00');
+  });
+});
+
+describe('東海道線（上野東京ライン）の行先', () => {
+  const tokaido = timetableLines.find(l => l.key === 'jrTokaidoMainLine')!;
+  const system = getServiceSystem('jrTokaidoMainLine')!;
+  const stationsOf = (dest: string) => dest.replace(/方面$/, '').split('・');
+  const termini = (side: 'head' | 'tail') => new Set(system[side].flatMap(e => e.stations));
+
+  it('上りは東京止まりとせず、上野東京ラインの宇都宮線・高崎線側の行先を方面として出す', () => {
+    for (const p of tokaido.directions[1].patterns) {
+      expect(p.destination).not.toBe('東京行き');
+      for (const st of stationsOf(p.destination)) expect(termini('head').has(st), st).toBe(true);
+    }
+  });
+
+  it('下りの方面は上野東京ラインの東海道線側の行先', () => {
+    for (const p of tokaido.directions[0].patterns) {
+      for (const st of stationsOf(p.destination)) expect(termini('tail').has(st), st).toBe(true);
+    }
+  });
+
+  it('2023年3月に廃止された快速アクティーを載せない', () => {
+    for (const d of tokaido.directions) for (const p of d.patterns) expect(p.type).not.toBe('快速アクティー');
   });
 });
