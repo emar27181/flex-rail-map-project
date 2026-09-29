@@ -89,7 +89,7 @@ import MapCompassButton from './map/MapCompassButton';
 import VisibleRoutesLegend from './legend/VisibleRoutesLegend';
 import { getThroughReachableSections } from '../utils/throughService';
 import { findParallelSections, sectionMinutes } from '../utils/parallelRoutes';
-import { STATION_TIME_LINE_HEIGHT, stationTimeLinesHtml, timeLineWidth, toTimeLines, type StationTimeLine } from './map/stationTimeLabel';
+import { STATION_TIME_LINE_HEIGHT, averageTime, stationTimeLinesHtml, timeLineWidth, toTimeLines, type StationTimeLine } from './map/stationTimeLabel';
 import { isSameStation } from '../utils/sameStation';
 import { buildEffectiveLineCounts } from '../utils/effectiveLines';
 import Select from './ui/atoms/Select';
@@ -492,6 +492,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // どの路線を見るかは「表示路線の切替」でユーザーが調整する（パネルを出したときだけ、
   // 選んだ候補に描画を絞る）
   const [showRouteRecommendationsPanel, setShowRouteRecommendationsPanel] = useState(false);
+  // 駅ラベルの時刻。既定は通る路線の時刻の平均で1つにまとめる（路線ごとに並べると行数が多すぎる）。
+  // 設定で路線ごとの表示に切り替えられる
+  const [showPerRouteStationTimes, setShowPerRouteStationTimes] = useState(false);
   const [showRouteLine, setShowRouteLine] = useState(true);
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
@@ -872,6 +875,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     showFullRouteStations,
     showRouteLine,
     showRouteRecommendationsPanel,
+    showPerRouteStationTimes,
     alwaysVisibleStationsEnabled,
     alwaysVisibleMinRoutes,
     arrivalAlertEnabled,
@@ -884,7 +888,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       showTransferStationsOnly, showExpressStationsOnly, showTravelTimes,
       showStationNames, showFurigana, showStationNumbers, showOsmTiles,
       mapViewMode, timeFilterEnabled, timeFilterMaxMinutes,
-      showStationTooltip, showFullRouteStations, showRouteRecommendationsPanel,
+      showStationTooltip, showFullRouteStations, showRouteRecommendationsPanel, showPerRouteStationTimes,
       alwaysVisibleStationsEnabled, alwaysVisibleMinRoutes,
       arrivalAlertEnabled, arrivalAlertMinutes,
       stationSizeScale, routeLineWidth, travelTimeStyle, stationIconStyle]);
@@ -909,6 +913,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (cfg.showFullRouteStations !== undefined) setShowFullRouteStations(cfg.showFullRouteStations);
     if (cfg.showRouteLine !== undefined) setShowRouteLine(cfg.showRouteLine);
     if (cfg.showRouteRecommendationsPanel !== undefined) setShowRouteRecommendationsPanel(cfg.showRouteRecommendationsPanel);
+    if (cfg.showPerRouteStationTimes !== undefined) setShowPerRouteStationTimes(cfg.showPerRouteStationTimes);
     if (cfg.alwaysVisibleStationsEnabled !== undefined) setAlwaysVisibleStationsEnabled(cfg.alwaysVisibleStationsEnabled);
     if (cfg.alwaysVisibleMinRoutes !== undefined) setAlwaysVisibleMinRoutes(cfg.alwaysVisibleMinRoutes);
     if (cfg.arrivalAlertEnabled !== undefined) setArrivalAlertEnabled(cfg.arrivalAlertEnabled);
@@ -4353,9 +4358,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   })();
 
   /**
-   * 駅ラベルの下に出す時刻（時刻表示モード）。この駅を通る表示中の路線ごとに1行。
-   * 路線が1つだけなら従来どおり時刻だけ、複数なら路線色の印を付けて並べる
-   * （横浜なら東海道線・京浜東北線・横須賀線それぞれの時刻）。
+   * 駅ラベルの下に出す時刻（時刻表示モード）。
+   * 既定は、この駅を通る表示中の路線の時刻の平均を1行だけ出す（路線ごとだと行数が多すぎる）。
+   * 設定「時刻を路線ごとに表示」がオンのときは、路線色の印を付けて路線ごとに1行ずつ並べる
+   * （横浜なら東海道線・京浜東北線・横須賀線それぞれの時刻）。路線が1つだけなら時刻だけ。
    */
   const getStationTimeLines = (stationName: string): StationTimeLine[] | undefined => {
     if (!timetableModeEnabled) return undefined;
@@ -4363,6 +4369,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       .filter(e => visibleRoutes.has(e.routeKey as RouteKey));
     if (entries.length === 0) return undefined;
     if (entries.length === 1) return [{ time: entries[0].depTime }];
+    if (!showPerRouteStationTimes) {
+      const avg = averageTime(entries.map(e => e.depTime));
+      return avg ? [{ time: avg }] : undefined;
+    }
     return entries.map(e => ({
       time: e.depTime,
       color: adjustRouteColorForTheme(routeColors[e.routeKey as RouteKey], theme),
@@ -6132,6 +6142,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onShowFullRouteStationsChange={setShowFullRouteStations}
                     showRouteRecommendationsPanel={showRouteRecommendationsPanel}
                     onShowRouteRecommendationsPanelChange={setShowRouteRecommendationsPanel}
+                    showPerRouteStationTimes={showPerRouteStationTimes}
+                    onShowPerRouteStationTimesChange={setShowPerRouteStationTimes}
                     showRouteLine={showRouteLine}
                     onShowRouteLineChange={setShowRouteLine}
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
@@ -6427,6 +6439,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onShowFullRouteStationsChange={setShowFullRouteStations}
                         showRouteRecommendationsPanel={showRouteRecommendationsPanel}
                         onShowRouteRecommendationsPanelChange={setShowRouteRecommendationsPanel}
+                        showPerRouteStationTimes={showPerRouteStationTimes}
+                        onShowPerRouteStationTimesChange={setShowPerRouteStationTimes}
                         showRouteLine={showRouteLine}
                         onShowRouteLineChange={setShowRouteLine}
                         adjustRouteColorForTheme={adjustRouteColorForTheme}

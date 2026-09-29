@@ -102,6 +102,8 @@ interface LegendRouteListProps {
   onShowFullRouteStationsChange: (v: boolean) => void;
   showRouteRecommendationsPanel: boolean;
   onShowRouteRecommendationsPanelChange: (v: boolean) => void;
+  showPerRouteStationTimes: boolean;
+  onShowPerRouteStationTimesChange: (v: boolean) => void;
   showRouteLine: boolean;
   onShowRouteLineChange: (v: boolean) => void;
   mapConfig: MapConfig;
@@ -189,6 +191,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowFullRouteStationsChange,
   showRouteRecommendationsPanel,
   onShowRouteRecommendationsPanelChange,
+  showPerRouteStationTimes,
+  onShowPerRouteStationTimesChange,
   showRouteLine,
   onShowRouteLineChange,
   mapConfig,
@@ -706,6 +710,9 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   {translateUI('showFurigana', language)}
                 </Checkbox>
                 )}
+                <Checkbox theme={theme} checked={showPerRouteStationTimes} onChange={onShowPerRouteStationTimesChange}>
+                  {translateUI('showPerRouteStationTimes', language)}
+                </Checkbox>
               </div>
             )}
 

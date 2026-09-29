@@ -7929,6 +7929,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "始発",
     english: "First train"
   },
+  showPerRouteStationTimes: {
+    japanese: "時刻を路線ごとに表示",
+    english: "Show times per line"
+  },
   visibleRoutesLegendTitle: {
     japanese: "表示中の路線",
     english: "Lines shown"
@@ -8848,6 +8852,7 @@ export const uiChinese: Record<string, string> = {
   dataSource: "来源",
   afterSuffix: "以后",
   firstTrainReached: "首班车",
+  showPerRouteStationTimes: "按线路显示时刻",
   visibleRoutesLegendTitle: "显示中的线路",
   moreRoutesCount: "…另外{count}条线路",
   reverseDirection: "切换方向",
@@ -9181,6 +9186,7 @@ export const uiKorean: Record<string, string> = {
   dataSource: "출처",
   afterSuffix: "이후",
   firstTrainReached: "첫차",
+  showPerRouteStationTimes: "노선별 시각 표시",
   visibleRoutesLegendTitle: "표시 중인 노선",
   moreRoutesCount: "…외 {count}개 노선",
   reverseDirection: "방향 전환",
