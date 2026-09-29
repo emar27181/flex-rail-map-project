@@ -7929,18 +7929,6 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "以降",
     english: "onwards"
   },
-  showPastDepartures: {
-    japanese: "前の時刻を表示",
-    english: "Show earlier departures"
-  },
-  hidePastDepartures: {
-    japanese: "前の時刻を隠す",
-    english: "Hide earlier departures"
-  },
-  showMorePastDepartures: {
-    japanese: "▲ さらに前を表示",
-    english: "▲ Show more earlier departures"
-  },
   firstTrainReached: {
     japanese: "始発",
     english: "First train"
@@ -8856,9 +8844,6 @@ export const uiChinese: Record<string, string> = {
   routeCountOption: "{count}条线路以上",
   dataSource: "来源",
   afterSuffix: "以后",
-  showPastDepartures: "显示更早的发车",
-  hidePastDepartures: "隐藏更早的发车",
-  showMorePastDepartures: "▲ 显示更多更早的发车",
   firstTrainReached: "首班车",
   reverseDirection: "切换方向",
   reverseDirectionReference: "反方向（参考）",
@@ -9191,9 +9176,6 @@ export const uiKorean: Record<string, string> = {
   routeCountOption: "{count}개 노선 이상",
   dataSource: "출처",
   afterSuffix: "이후",
-  showPastDepartures: "이전 출발 표시",
-  hidePastDepartures: "이전 출발 숨기기",
-  showMorePastDepartures: "▲ 더 이전 출발 표시",
   firstTrainReached: "첫차",
   reverseDirection: "방향 전환",
   reverseDirectionReference: "반대 방향(참고)",

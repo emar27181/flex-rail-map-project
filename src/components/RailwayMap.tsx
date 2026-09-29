@@ -412,11 +412,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 時刻表ツールチップで利用者が選んだ方向（駅・路線ごと。別の駅・路線を開くと経路の進行方向に戻る）
   const [tooltipDirectionPick, setTooltipDirectionPick] = useState<{ station: string; route: string; dir: number } | null>(null);
   const [showAllTooltipDeps, setShowAllTooltipDeps] = useState(false);
-  // 時刻表ツールチップ: 基準時刻より前の発車も見られるようにする開閉状態
-  const [showPastDepartures, setShowPastDepartures] = useState(false);
-  // 「前の時刻を表示」で一度に見せる件数。「さらに前を表示」を押すたびに
-  // PAST_DEPARTURE_STEP ずつ増やし、始発に到達するまで遡れるようにする
-  const [pastDeparturesShownCount, setPastDeparturesShownCount] = useState(8);
+  // 時刻表ツールチップの一覧を「基準時刻以降」の位置へスクロールした対象（駅・路線・方向・時刻）。
+  // 同じ対象のあいだは利用者のスクロール位置を保ち、対象が変わったときだけ戻す
+  const timetableScrollKeyRef = useRef('');
 
   // 路線ホバー・ポップアップ状態
   const [hoveredRoute, setHoveredRoute] = useState<string | null>(null);
@@ -829,8 +827,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   useEffect(() => {
     setTooltipSelectedRoute(null);
     setShowAllTooltipDeps(false);
-    setShowPastDepartures(false);
-    setPastDeparturesShownCount(8);
   }, [stationTooltip?.stationName]);
 
   // 列車種別表示: 路線変更時に列車種別をリセット
@@ -1604,12 +1600,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const activeJourneyEntry = journeyEntries.find(e => e.routeKey === activeRouteKey);
 
     // 選択路線の発車情報を取得（経路の方向・時刻を優先使用）
-    // 基準時刻より前（activePastDeps）と後（activeDeps）に分けて取得し、
-    // 「前の時刻を表示」が開かれたときだけ前者を描画する。
-    // prevは始発まで全件まとめて取得しておき（1日ぶんなので軽い）、
-    // 画面には pastDeparturesShownCount ぶんだけ見せる。「さらに前を表示」を
-    // 押すたびにその件数を増やし、始発に到達するまで遡れるようにする
-    // （「前の時刻を表示で始発まで遡れるように」との要望を受けた）。
+    // 基準時刻より前（activePastDeps、始発まで全件）と後（activeDeps）に分けて取得する。
+    // 一覧には両方を最初から並べ、開いたときは基準時刻以降が先頭に来る位置へスクロールする
+    // （以前は「前の時刻を表示」ボタンで開閉していた）。
     // 方向: 既定は経路の進行方向（経路外の路線は最初の方向）。利用者が切り替えたらそちら
     const journeyDirIdx = activeJourneyEntry?.directionIndex ?? 0;
     const activeDirIdx = (tooltipDirectionPick
@@ -1692,8 +1685,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // 画面の7割まで使う。以前は半分に抑えていたが時刻表が数本しか見えず狭かった。
     // 地図の空きタップでも閉じられるので、多少大きくても操作は詰まらない。
     const maxTooltipH = Math.min(vh - MARGIN * 2, isMobileView ? Math.round(vh * 0.7) : 620);
-    const shownPastCount = showPastDepartures ? Math.min(activePastDeps.length, pastDeparturesShownCount) : 0;
-    const shownDepCount = activeDeps.length + shownPastCount;
+    // 位置の見積もりは基準時刻以降の便だけで数える（前の便は上にスクロールして見る）
+    const shownDepCount = activeDeps.length;
     const estH = Math.min(52 + Math.max(allRoutes.length * 28, shownDepCount * 26 + 22) + 20, maxTooltipH);
     const rawY = stationTooltip.y + 14;
     const baseX = x;
@@ -1921,7 +1914,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       setVisibleRoutes(prev => new Set([...prev, rk as RouteKey]));
                     } else {
                       setTooltipSelectedRoute(rk);
-                      setPastDeparturesShownCount(8);
                     }
                   }}
                   style={{
@@ -1988,7 +1980,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           </div>
 
           {/* 右カラム: 時刻表 */}
-          <div style={{ flex: 1, minWidth: '120px', overflowY: 'auto' }}>
+          <div style={{ flex: 1, minWidth: '120px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/*
               主な始発・行先（ServiceTermini variant="full"）はここには出さない（2026-09-28 ユーザー指示でオフ）。
               右カラムは時刻表を読む場所で、行先の一覧が数行を取って時刻が下に押し出されていた。
@@ -2041,101 +2033,70 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           route: activeRouteKey,
                           dir: (activeDirIdx + 1) % directionLabels.length,
                         });
-                        setShowPastDepartures(false);
-                        setPastDeparturesShownCount(8);
                       }}
                     />
                   </div>
                 )}
                 {/*
-                  基準時刻より前の発車は既定では非表示（従来どおり、未来の便が
-                  一番上に来る）。「前の時刻も見れるように」という要望を受けて、
-                  ボタンで開くと基準時刻の直前の便を上に追加表示する形にした
-                  （常時表示にすると、いつも見る「次の便」が毎回スクロールしないと
-                  見えなくなってしまうため）。
-                  「前の時刻を表示で始発まで遡れるように」との要望を受け、
-                  開いた状態で「さらに前を表示」を押すたびに表示件数を増やし、
-                  始発（その路線・方向のいちばん早い便）に到達するまで
-                  遡れるようにした。始発まで到達したら、その旨を表示して止める
-                  （前日の便を重複して表示することはしない）。
+                  発車一覧。始発から終電まで並べ、開いたときは基準時刻以降の先頭（「HH:MM 以降」の行）が
+                  一覧の一番上に来るようにスクロールしておく。前の便は上にスクロールすれば見える
+                  （以前は「前の時刻を表示」ボタンで開閉していた）。出典・方向の行はスクロールさせない
                 */}
-                {activePastDeps.length > 0 && (
+                <div className="thin-scrollbar" style={{ flex: 1, minHeight: 0, overflowY: 'auto', position: 'relative' }}>
+                  {activePastDeps.length > 0 && (
+                    <div style={{
+                      padding: `${L.sp.xs} ${L.sp.md}`, fontSize: FS.caption, color: colors.textSecondary,
+                      borderBottom: `1px solid ${colors.borderLight}`, textAlign: 'center',
+                    }}>
+                      {translateUI('firstTrainReached', currentLanguage)}
+                    </div>
+                  )}
+                  {activePastDeps.map((dep, i) => (
+                    <div key={`past-${dep.time}-${dep.type}-${i}`} style={{ opacity: 0.55 }}>
+                      {renderDepartureRow(dep)}
+                    </div>
+                  ))}
                   <div
-                    onClick={() => setShowPastDepartures(v => !v)}
+                    ref={el => {
+                      const key = `${stationTooltip.stationName}|${stationTooltip.x},${stationTooltip.y}|${activeRouteKey}|${activeDirIdx}|${activeDepTime}`;
+                      if (!el || timetableScrollKeyRef.current === key) return;
+                      timetableScrollKeyRef.current = key;
+                      if (el.parentElement) el.parentElement.scrollTop = el.offsetTop;
+                    }}
                     style={{
                       padding: `${L.sp.xs} ${L.sp.md}`,
-                      fontSize: FS.caption, color: colors.primary,
+                      fontSize: FS.caption, color: colors.textSecondary,
                       borderBottom: `1px solid ${colors.borderLight}`,
-                      cursor: 'pointer', userSelect: 'none',
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     }}
                   >
-                    {showPastDepartures ? '▲' : '▼'} {translateUI(showPastDepartures ? 'hidePastDepartures' : 'showPastDepartures', currentLanguage)}
+                    <span>{activeDepTime} {translateUI('afterSuffix', currentLanguage)}</span>
+                    {(!isJourneyRoute || isReversedFromJourney) && (
+                      <span style={{ color: colors.textSecondary, opacity: 0.7, fontSize: FS.caption }}>
+                        {translateUI(isReversedFromJourney ? 'reverseDirectionReference' : 'offRouteReference', currentLanguage)}
+                      </span>
+                    )}
                   </div>
-                )}
-                {showPastDepartures && (() => {
-                  const PAST_DEPARTURE_STEP = 8;
-                  const hasMorePast = pastDeparturesShownCount < activePastDeps.length;
-                  const visiblePast = activePastDeps.slice(-pastDeparturesShownCount);
-                  return (
-                    <>
-                      <div
-                        onClick={hasMorePast ? () => setPastDeparturesShownCount(c => c + PAST_DEPARTURE_STEP) : undefined}
-                        style={{
-                          padding: `${L.sp.xs} ${L.sp.md}`,
-                          fontSize: FS.caption,
-                          color: hasMorePast ? colors.primary : colors.textSecondary,
-                          borderBottom: `1px solid ${colors.borderLight}`,
-                          cursor: hasMorePast ? 'pointer' : 'default',
-                          userSelect: 'none',
-                          textAlign: 'center',
-                        }}
-                      >
-                        {hasMorePast
-                          ? translateUI('showMorePastDepartures', currentLanguage)
-                          : translateUI('firstTrainReached', currentLanguage)}
-                      </div>
-                      {visiblePast.map((dep, i) => (
-                        <div key={`past-${dep.time}-${dep.type}-${i}`} style={{ opacity: 0.55 }}>
-                          {renderDepartureRow(dep)}
-                        </div>
-                      ))}
-                    </>
-                  );
-                })()}
-                <div style={{
-                  padding: `${L.sp.xs} ${L.sp.md}`,
-                  fontSize: FS.caption, color: colors.textSecondary,
-                  borderBottom: `1px solid ${colors.borderLight}`,
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                }}>
-                  <span>{activeDepTime} {translateUI('afterSuffix', currentLanguage)}</span>
-                  {(!isJourneyRoute || isReversedFromJourney) && (
-                    <span style={{ color: colors.textSecondary, opacity: 0.7, fontSize: FS.caption }}>
-                      {translateUI(isReversedFromJourney ? 'reverseDirectionReference' : 'offRouteReference', currentLanguage)}
-                    </span>
-                  )}
-                </div>
-                {activeDeps.length === 0 ? (
-                  <div style={{ padding: L.sp.md, fontSize: FS.caption, color: colors.textSecondary }}>
-                    {translateUI('noData', currentLanguage)}
-                  </div>
-                ) : (
-                  <>
-                    {activeDeps.map((dep, i) => (
+                  {activeDeps.length === 0 ? (
+                    <div style={{ padding: L.sp.md, fontSize: FS.caption, color: colors.textSecondary }}>
+                      {translateUI('noData', currentLanguage)}
+                    </div>
+                  ) : (
+                    activeDeps.map((dep, i) => (
                       <div key={`${dep.time}-${dep.type}-${i}`}>
                         {renderDepartureRow(dep)}
                       </div>
-                    ))}
-                  </>
-                )}
-                {/* 概算値であることの詳しい但し書き。更新日・出典自体は上に移したので、
-                    ここは補足の一文だけ軽く添える */}
-                <div style={{
-                  padding: `${L.sp.xs} ${L.sp.md}`,
-                  borderTop: `1px solid ${colors.borderLight}`,
-                  fontSize: FS.caption, color: colors.textSecondary, opacity: 0.75, lineHeight: 1.5,
-                }}>
-                  {TIMETABLE_SOURCE.note}
+                    ))
+                  )}
+                  {/* 概算値であることの詳しい但し書き。更新日・出典自体は上に移したので、
+                      ここは補足の一文だけ軽く添える */}
+                  <div style={{
+                    padding: `${L.sp.xs} ${L.sp.md}`,
+                    borderTop: `1px solid ${colors.borderLight}`,
+                    fontSize: FS.caption, color: colors.textSecondary, opacity: 0.75, lineHeight: 1.5,
+                  }}>
+                    {TIMETABLE_SOURCE.note}
+                  </div>
                 </div>
               </>
             ) : (
