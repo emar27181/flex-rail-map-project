@@ -1,6 +1,6 @@
 {
-  "name": "フレックス路線図",
-  "short_name": "路線図",
+  "name": "Flex Railway Map",
+  "short_name": "Flex Railway Map",
   "description": "必要な路線だけ選んで表示できるシンプルなインタラクティブ路線図",
   "start_url": "/",
   "display": "standalone",

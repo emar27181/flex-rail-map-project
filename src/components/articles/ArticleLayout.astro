@@ -21,7 +21,7 @@ import {
   type ArticleLanguage,
 } from "../../data/articleI18n";
 import { ARTICLE_BODY_TRANSLATIONS } from "../../data/articleBodyI18n";
-import { APP_ICON_PATH, SITE_URL, SITE_NAME, OG_LOCALE, buildHreflangLinks, hreflangCode } from "../../config/seo";
+import { APP_ICON_PATH, SITE_URL, SITE_NAME, OG_LOCALE, buildHreflangLinks, hreflangCode, withSiteName } from "../../config/seo";
 import FaviconLinks from "../seo/FaviconLinks.astro";
 import { CONTROL_CSS, HEADER_LOGO_PX } from "../ui/atoms/controlCss";
 import { L } from "../legend/legendStyles";
@@ -54,11 +54,12 @@ const {
 } = Astro.props;
 
 const isArticle = kind === "article";
-const shell = ARTICLE_SHELL_TRANSLATIONS[lang];
-const meta = ARTICLE_PAGE_TRANSLATIONS[pageKey][lang];
-const body = ARTICLE_BODY_TRANSLATIONS[pageKey]?.[lang];
+// 文章中の {siteName} は正式なサービス名（src/config/seo.ts）に置き換える
+const shell = withSiteName(ARTICLE_SHELL_TRANSLATIONS[lang]);
+const meta = withSiteName(ARTICLE_PAGE_TRANSLATIONS[pageKey][lang]);
+const body = withSiteName(ARTICLE_BODY_TRANSLATIONS[pageKey]?.[lang]);
 // 日本語のキーワードだけ用意してある（他の言語は meta keywords を出さない）
-const keywords = lang === "ja" ? ARTICLE_PAGE_KEYWORDS[pageKey] : undefined;
+const keywords = lang === "ja" ? withSiteName(ARTICLE_PAGE_KEYWORDS[pageKey]) : undefined;
 const pathOf = (l: ArticleLanguage) => (isArticle ? articlePath(pageKey, l) : articleIndexPath(l));
 const path = pathOf(lang);
 const canonicalUrl = `${SITE_URL}${path}`;

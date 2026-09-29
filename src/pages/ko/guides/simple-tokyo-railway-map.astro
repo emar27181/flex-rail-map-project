@@ -3,6 +3,7 @@ import GuideLayout from "../../../layouts/GuideLayout.astro";
 import { getGuide } from "../../../data/guides";
 import { routeColors, routeNames } from "../../../data/routes";
 import { routeTranslations } from "../../../utils/translation";
+import { SITE_NAME } from '../../../config/seo';
 
 const guide = getGuide('ko', 'simple-tokyo-railway-map')!;
 const previewRoutes = ['yamanote', 'chuo', 'marunouchiLine'] as const;
@@ -11,7 +12,7 @@ const previewRoutes = ['yamanote', 'chuo', 'marunouchiLine'] as const;
 const displayName = (key: typeof previewRoutes[number]) => routeTranslations[routeNames[key]] ?? routeNames[key];
 ---
 
-<GuideLayout guide={guide} indexHref="/ko/guides" indexLabel="가이드 목록" backLabel="← Flex Railway Map으로 돌아가기">
+<GuideLayout guide={guide} indexHref="/ko/guides" indexLabel="가이드 목록" backLabel={`← ${SITE_NAME}으로 돌아가기`}>
 	<Fragment slot="visual">
 		<div class="guide-visual">
 			<div class="route-chip-row">

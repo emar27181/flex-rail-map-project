@@ -1,6 +1,7 @@
 ---
 import StaticPage from "../layouts/StaticPage.astro";
 import { ROUTE_COUNT, STATION_COUNT, approxCount } from "../config/siteFacts";
+import { SITE_NAME } from '../config/seo';
 
 // 「どの路線が対応していますか？」の回答。画面と構造化データ（FAQPage）で同じ文を使う。
 // 以前は「合計39路線以上（東京）」と手書きされたままで、実装（全国約490路線）と食い違っていた
@@ -16,7 +17,7 @@ const faqJsonLd = {
       "name": "このサイトは何のために作られたのですか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "フレックス路線図は、情報が多すぎて見にくい既存の路線図を「必要な路線だけ選んで表示できる」ようにするために開発されました。遅延や運休などで乗り換えアプリの案内が役に立たないとき、必要な路線図をすぐに確認できます。"
+        "text": `${SITE_NAME}は、情報が多すぎて見にくい既存の路線図を「必要な路線だけ選んで表示できる」ようにするために開発されました。遅延や運休などで乗り換えアプリの案内が役に立たないとき、必要な路線図をすぐに確認できます。`
       }
     },
     {
@@ -24,7 +25,7 @@ const faqJsonLd = {
       "name": "路線図が見にくい・複雑すぎるのはなぜですか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "一般的な路線図はすべての路線・駅情報を同時に表示するため情報量が多くなります。フレックス路線図では出発駅・到着駅に関連する路線だけを絞り込んで表示できるので、シンプルで見やすくなります。"
+        "text": `一般的な路線図はすべての路線・駅情報を同時に表示するため情報量が多くなります。${SITE_NAME}では出発駅・到着駅に関連する路線だけを絞り込んで表示できるので、シンプルで見やすくなります。`
       }
     },
     {
@@ -56,8 +57,8 @@ const faqJsonLd = {
 ---
 
 <StaticPage
-	title="路線図が見にくい時の解決策 | FAQ - フレックス路線図"
-	description="路線図が見にくい・複雑すぎる・分かりにくい時の解決策。フレックス路線図の使い方やよくある質問をまとめました。必要な路線だけ絞り込んで表示するシンプルなインタラクティブ路線図。"
+	title={`路線図が見にくい時の解決策 | FAQ - ${SITE_NAME}`}
+	description={`路線図が見にくい・複雑すぎる・分かりにくい時の解決策。${SITE_NAME}の使い方やよくある質問をまとめました。必要な路線だけ絞り込んで表示するシンプルなインタラクティブ路線図。`}
 	keywords="路線図 見にくい,路線図 複雑,路線図 分かりにくい,見やすい路線図,FAQ,使い方,遅延,運休,乗り換え 分かりやすい,シンプル路線図"
 	path="/faq"
 	heading={{ ja: "よくある質問（FAQ）", en: "FAQ" }}
@@ -75,12 +76,12 @@ const faqJsonLd = {
 		<h3>Q. 路線図が見にくい・複雑すぎると感じるのはなぜですか？</h3>
 		<p>
 		一般的な路線図は首都圏の全路線・全駅を同時に表示するため、情報量が多く見にくくなります。
-		フレックス路線図では、出発駅・到着駅に関連する路線だけを絞り込んで表示できるため、シンプルで見やすい路線図になります。
+		{SITE_NAME}では、出発駅・到着駅に関連する路線だけを絞り込んで表示できるため、シンプルで見やすい路線図になります。
 		</p>
 
 		<h3>Q. このサイトは何のために作られたのですか？</h3>
 		<p>
-		フレックス路線図は、情報が多すぎて見にくい既存の路線図を「必要な路線だけ選んで表示できる」ようにするために開発されました。
+		{SITE_NAME}は、情報が多すぎて見にくい既存の路線図を「必要な路線だけ選んで表示できる」ようにするために開発されました。
 		遅延や運休などで乗り換えアプリの案内が役に立たないとき、必要な路線図をすぐに確認できるのが特徴です。
 		</p>
 
@@ -124,7 +125,7 @@ const faqJsonLd = {
 
 		<h3>Q. What is the purpose of this site?</h3>
 		<p>
-		Flex Railway Map was developed to make railway maps easier to read by allowing users to "select only the routes they need."
+		{SITE_NAME} was developed to make railway maps easier to read by allowing users to "select only the routes they need."
 		It is especially useful when route planner apps fail due to delays or suspensions, letting you quickly check the routes that actually matter.
 		</p>
 

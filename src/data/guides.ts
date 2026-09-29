@@ -5,6 +5,9 @@
 /**
  * 検索流入向けガイドページ（/guides/*, /en/guides/*）のコンテンツデータ。
  *
+ * サービス名は `{siteName}` と書く（src/config/seo.ts の SITE_NAME に置き換えて表示する）。
+ * 表示には getGuide / getGuidesByLang / getGuideTranslations を使うこと（置き換え済みを返す）。
+ *
  * 「検索される→ページへ流入→Flex Railway Mapを実際に触る→地図へ回遊する」
  * という導線を作るための最初のSEOコンテンツ。ページ数を増やすことが目的
  * ではないため、今回は数ページに限定している。
@@ -16,6 +19,7 @@
  */
 import type { RouteKey } from './routes';
 import type { SeoCityId } from './seoPages';
+import { withSiteName } from '../config/seo';
 
 export interface GuideSection {
   heading: string;
@@ -76,11 +80,11 @@ export const guides: GuideDefinition[] = [
     slug: 'simple-tokyo-railway-map',
     lang: 'ja',
     breadcrumbLabel: '東京の路線図をシンプルに見る',
-    title: '東京の路線図をシンプルに見る方法 | Flex Railway Map',
-    description: '東京の路線図が見にくい・複雑すぎると感じたら、必要な路線だけを選んで表示できます。Flex Railway Mapで、自分に必要な路線だけのシンプルな路線図を実際に開いて確認できます。',
+    title: '東京の路線図をシンプルに見る方法 | {siteName}',
+    description: '東京の路線図が見にくい・複雑すぎると感じたら、必要な路線だけを選んで表示できます。{siteName}で、自分に必要な路線だけのシンプルな路線図を実際に開いて確認できます。',
     h1: '東京の路線図をシンプルに見る',
     searchIntentAnswer:
-      '東京の路線図は路線数・駅数が多く、全部を一度に見ようとすると情報量で迷いやすくなります。Flex Railway Mapでは、表示する路線を自分で選べるため、必要な路線だけに絞った見やすい路線図をその場で作れます。',
+      '東京の路線図は路線数・駅数が多く、全部を一度に見ようとすると情報量で迷いやすくなります。{siteName}では、表示する路線を自分で選べるため、必要な路線だけに絞った見やすい路線図をその場で作れます。',
     sections: [
       {
         heading: 'なぜ東京の路線図は見にくいのか',
@@ -91,19 +95,19 @@ export const guides: GuideDefinition[] = [
       {
         heading: '必要な路線だけを選んで表示する',
         paragraphs: [
-          'Flex Railway Mapでは、路線の一覧から表示したい路線だけをオン/オフできます。例えば「JR山手線・中央線・東京メトロ丸ノ内線」のように、自分が使う路線だけに絞り込めば、地図上の線が一気に減り、駅名も読みやすくなります。',
+          '{siteName}では、路線の一覧から表示したい路線だけをオン/オフできます。例えば「JR山手線・中央線・東京メトロ丸ノ内線」のように、自分が使う路線だけに絞り込めば、地図上の線が一気に減り、駅名も読みやすくなります。',
           '下のボタンから、実際にこの3路線だけを表示した地図をそのまま開けます。',
         ],
       },
     ],
-    ctaLabel: 'この3路線だけの地図をFlex Railway Mapで開く',
+    ctaLabel: 'この3路線だけの地図を{siteName}で開く',
     ctaRoutes: ['yamanote', 'chuo', 'marunouchiLine'],
     ctaNote: '山手線・中央線・東京メトロ丸ノ内線だけを表示した状態で地図が開きます。ほかの路線は地図上の一覧からいつでも追加・非表示にできます。',
     related: [
       { href: '/guides/odakyu-line-map', label: '小田急線の分岐・行き先をわかりやすく見る' },
       { href: '/articles/tokyo-train-map-beginner', label: '東京の路線図の読み方・乗り換え方【完全初心者ガイド】' },
-      { href: '/articles/flex-rail-map-introduction', label: 'Flex Railway Mapを作っている理由' },
-      { href: '/guide', label: 'Flex Railway Mapの使い方ガイド' },
+      { href: '/articles/flex-rail-map-introduction', label: '{siteName}を作っている理由' },
+      { href: '/guide', label: '{siteName}の使い方ガイド' },
     ],
     faq: [
       {
@@ -125,11 +129,11 @@ export const guides: GuideDefinition[] = [
     slug: 'tokyo-train-map',
     lang: 'en',
     breadcrumbLabel: 'Tokyo Train Map for Tourists',
-    title: 'Tokyo Train Map for Tourists (Simple, Interactive) | Flex Railway Map',
-    description: "Tokyo's train map looks overwhelming at first. Flex Railway Map lets you show only the lines you need, so you can open a simple map for your trip in seconds.",
+    title: 'Tokyo Train Map for Tourists (Simple, Interactive) | {siteName}',
+    description: "Tokyo's train map looks overwhelming at first. {siteName} lets you show only the lines you need, so you can open a simple map for your trip in seconds.",
     h1: 'A Simple Tokyo Train Map for Tourists',
     searchIntentAnswer:
-      "Tokyo's full railway map covers JR lines, Tokyo Metro, Toei Subway, and several private railways on one crowded diagram. Flex Railway Map lets you turn off the lines you don't need, so you can look at a map that only shows what matters for your trip.",
+      "Tokyo's full railway map covers JR lines, Tokyo Metro, Toei Subway, and several private railways on one crowded diagram. {siteName} lets you turn off the lines you don't need, so you can look at a map that only shows what matters for your trip.",
     sections: [
       {
         heading: "Why Tokyo's train map looks so complicated",
@@ -140,24 +144,24 @@ export const guides: GuideDefinition[] = [
       {
         heading: 'Show only the lines you actually need',
         paragraphs: [
-          "With Flex Railway Map, you choose which lines are visible. For a typical sightseeing trip, the JR Yamanote Line (the loop line connecting most major areas) and the Tokyo Metro Ginza Line (one of the oldest and most central subway lines) already cover a lot of ground.",
+          "With {siteName}, you choose which lines are visible. For a typical sightseeing trip, the JR Yamanote Line (the loop line connecting most major areas) and the Tokyo Metro Ginza Line (one of the oldest and most central subway lines) already cover a lot of ground.",
           'Use the button below to open a map with just those two lines shown.',
         ],
       },
       {
         heading: 'A map for understanding the network, not for step-by-step directions',
         paragraphs: [
-          "Flex Railway Map isn't trying to replace a route-finding app that tells you which platform to stand on. It's built for a different moment: when you want to actually see how the lines relevant to your trip connect, before you start moving.",
+          "{siteName} isn't trying to replace a route-finding app that tells you which platform to stand on. It's built for a different moment: when you want to actually see how the lines relevant to your trip connect, before you start moving.",
         ],
       },
     ],
-    ctaLabel: 'Open this simplified map in Flex Railway Map',
+    ctaLabel: 'Open this simplified map in {siteName}',
     ctaRoutes: ['yamanote', 'ginzaLine'],
     ctaOpensEnglish: true,
     ctaNote: 'Opens with only the JR Yamanote Line and Tokyo Metro Ginza Line shown, in English. You can add or hide other lines from the list on the map.',
     related: [
       { href: '/en/guides/tokyo-train-network', label: "How to Understand Tokyo's Train Network" },
-      { href: '/guide?lang=en', label: 'How to use Flex Railway Map' },
+      { href: '/guide?lang=en', label: 'How to use {siteName}' },
     ],
     faq: [
       {
@@ -166,11 +170,11 @@ export const guides: GuideDefinition[] = [
       },
       {
         question: 'Can I choose which lines are shown?',
-        answer: "Yes. You can toggle each line on or off individually, or enter a departure and destination station and Flex Railway Map will select the lines relevant to that trip for you.",
+        answer: "Yes. You can toggle each line on or off individually, or enter a departure and destination station and {siteName} will select the lines relevant to that trip for you.",
       },
       {
         question: 'Does this work on my phone?',
-        answer: 'Yes, Flex Railway Map works in any modern browser on phone, tablet, or desktop. No app install is required.',
+        answer: 'Yes, {siteName} works in any modern browser on phone, tablet, or desktop. No app install is required.',
       },
     ],
     keywords: 'Tokyo train map,Tokyo railway map,Tokyo train map tourist,Tokyo train map English,Tokyo subway map simple',
@@ -179,7 +183,7 @@ export const guides: GuideDefinition[] = [
     slug: 'tokyo-train-network',
     lang: 'en',
     breadcrumbLabel: "How to Understand Tokyo's Train Network",
-    title: "How to Understand Tokyo's Train Network | Flex Railway Map",
+    title: "How to Understand Tokyo's Train Network | {siteName}",
     description: "Tokyo trains confusing? Here's how to make sense of the network by focusing on one route at a time, and how to check your travel time between two stations.",
     h1: "How to Understand Tokyo's Confusing Train Network",
     searchIntentAnswer:
@@ -194,17 +198,17 @@ export const guides: GuideDefinition[] = [
       {
         heading: 'Pick a departure and destination, see just that route',
         paragraphs: [
-          'Flex Railway Map lets you enter a departure and destination station and see the relevant lines and transfer stations for that specific trip, along with an estimated travel time, instead of the entire network at once.',
+          '{siteName} lets you enter a departure and destination station and see the relevant lines and transfer stations for that specific trip, along with an estimated travel time, instead of the entire network at once.',
         ],
       },
     ],
-    ctaLabel: 'Open Flex Railway Map',
+    ctaLabel: 'Open {siteName}',
     ctaOpensEnglish: true,
-    ctaNote: 'Opens Flex Railway Map in English. Enter your departure and destination station to see the route for your trip.',
+    ctaNote: 'Opens {siteName} in English. Enter your departure and destination station to see the route for your trip.',
     related: [
       { href: '/en/guides/tokyo-train-map', label: 'Tokyo Train Map for Tourists' },
-      { href: '/guide?lang=en', label: 'How to use Flex Railway Map' },
-      { href: '/about?lang=en', label: 'About Flex Railway Map' },
+      { href: '/guide?lang=en', label: 'How to use {siteName}' },
+      { href: '/about?lang=en', label: 'About {siteName}' },
     ],
     keywords: 'Tokyo trains confusing,how to use Tokyo trains,Tokyo railway lines explained',
   },
@@ -212,11 +216,11 @@ export const guides: GuideDefinition[] = [
     slug: 'tokyo-train-map',
     lang: 'zh',
     breadcrumbLabel: '东京地铁线路图简化查看方法',
-    title: '东京地铁线路图太复杂看不懂怎么办 | Flex Railway Map',
-    description: '觉得东京地铁线路图太复杂、看不懂？用Flex Railway Map可以只显示你需要的线路，马上打开一张只有必要路线的简洁地图。',
+    title: '东京地铁线路图太复杂看不懂怎么办 | {siteName}',
+    description: '觉得东京地铁线路图太复杂、看不懂？用{siteName}可以只显示你需要的线路，马上打开一张只有必要路线的简洁地图。',
     h1: '如何简化查看东京地铁线路图',
     searchIntentAnswer:
-      '东京的地铁线路图之所以看起来复杂，是因为运营公司多、线路密集地画在同一张图上。Flex Railway Map可以让你自己选择要显示的线路，只保留需要的路线，地图会立刻变得清晰易读。',
+      '东京的地铁线路图之所以看起来复杂，是因为运营公司多、线路密集地画在同一张图上。{siteName}可以让你自己选择要显示的线路，只保留需要的路线，地图会立刻变得清晰易读。',
     sections: [
       {
         heading: '为什么东京的地铁图这么复杂',
@@ -227,12 +231,12 @@ export const guides: GuideDefinition[] = [
       {
         heading: '只显示你需要的线路',
         paragraphs: [
-          'Flex Railway Map可以自由开关每条线路的显示。例如只显示"JR山手线"和"东京Metro银座线"这两条线，就能覆盖东京市中心的大部分主要区域，地图上的线条数量会大幅减少，车站名称也更容易看清楚。',
+          '{siteName}可以自由开关每条线路的显示。例如只显示"JR山手线"和"东京Metro银座线"这两条线，就能覆盖东京市中心的大部分主要区域，地图上的线条数量会大幅减少，车站名称也更容易看清楚。',
           '点击下面的按钮，可以直接打开只显示这两条线路的地图。',
         ],
       },
     ],
-    ctaLabel: '在Flex Railway Map中打开这张简化地图',
+    ctaLabel: '在{siteName}中打开这张简化地图',
     ctaRoutes: ['yamanote', 'ginzaLine'],
     ctaNote: '地图会以中文界面打开，只显示JR山手线和东京Metro银座线。其他线路可以随时从地图上的列表中添加或隐藏。',
     related: [
@@ -244,11 +248,11 @@ export const guides: GuideDefinition[] = [
     slug: 'odakyu-line-map',
     lang: 'ja',
     breadcrumbLabel: '小田急線の分岐・行き先をわかりやすく見る',
-    title: '小田急線の分岐・行き先をわかりやすく見る方法 | Flex Railway Map',
-    description: '小田急線は新百合ヶ丘で多摩線、相模大野で江ノ島線に分かれるため、行き先が分かりにくいことがあります。Flex Railway Mapで、小田原線・多摩線・江ノ島線の分岐をまとめて地図に表示して確認できます。',
+    title: '小田急線の分岐・行き先をわかりやすく見る方法 | {siteName}',
+    description: '小田急線は新百合ヶ丘で多摩線、相模大野で江ノ島線に分かれるため、行き先が分かりにくいことがあります。{siteName}で、小田原線・多摩線・江ノ島線の分岐をまとめて地図に表示して確認できます。',
     h1: '小田急線の分岐・行き先をわかりやすく見る',
     searchIntentAnswer:
-      '小田急線は新宿から小田原まで1本の路線に見えて、実際には新百合ヶ丘で多摩線、相模大野で江ノ島線が分かれる構造になっています。Flex Railway Mapでは、この3路線をまとめて地図に表示し、どこで分岐しているかをそのまま確認できます。',
+      '小田急線は新宿から小田原まで1本の路線に見えて、実際には新百合ヶ丘で多摩線、相模大野で江ノ島線が分かれる構造になっています。{siteName}では、この3路線をまとめて地図に表示し、どこで分岐しているかをそのまま確認できます。',
     sections: [
       {
         heading: 'なぜ小田急線は行き先が分かりにくいのか',
@@ -264,12 +268,12 @@ export const guides: GuideDefinition[] = [
         ],
       },
     ],
-    ctaLabel: '小田原線・多摩線・江ノ島線をまとめてFlex Railway Mapで開く',
+    ctaLabel: '小田原線・多摩線・江ノ島線をまとめて{siteName}で開く',
     ctaRoutes: ['odakyuLine', 'odakyuTamaLine', 'odakyuEnoshimaLine'],
     ctaNote: '小田急小田原線・多摩線・江ノ島線の3路線を表示した状態で地図が開きます。新百合ヶ丘・相模大野の分岐がどちらも地図上で確認できます。',
     related: [
       { href: '/guides/simple-tokyo-railway-map', label: '東京の路線図をシンプルに見る' },
-      { href: '/guide', label: 'Flex Railway Mapの使い方ガイド' },
+      { href: '/guide', label: '{siteName}の使い方ガイド' },
     ],
     faq: [
       {
@@ -282,7 +286,7 @@ export const guides: GuideDefinition[] = [
       },
       {
         question: '3路線をまとめて地図で見られますか？',
-        answer: 'はい。このページのボタンから、小田原線・多摩線・江ノ島線の3路線をまとめて表示した状態でFlex Railway Mapを開けます。',
+        answer: 'はい。このページのボタンから、小田原線・多摩線・江ノ島線の3路線をまとめて表示した状態で{siteName}を開けます。',
       },
       {
         question: 'スマートフォンでも使えますか？',
@@ -295,11 +299,11 @@ export const guides: GuideDefinition[] = [
     slug: 'simple-tokyo-railway-map',
     lang: 'zh',
     breadcrumbLabel: '东京地铁线路图太密集怎么办',
-    title: '东京地铁线路图太密集怎么看 | Flex Railway Map',
-    description: '东京的地铁线路图运营公司多、线路密集，想看懂并不容易。Flex Railway Map可以只勾选自己会用到的线路，实际打开一张只有3条线的简洁地图看看。',
+    title: '东京地铁线路图太密集怎么看 | {siteName}',
+    description: '东京的地铁线路图运营公司多、线路密集，想看懂并不容易。{siteName}可以只勾选自己会用到的线路，实际打开一张只有3条线的简洁地图看看。',
     h1: '东京地铁线路图太密集怎么看',
     searchIntentAnswer:
-      '东京的地铁线路图线路多、车站多，想一次看懂全部很容易看花眼。Flex Railway Map可以自己选择要显示的线路，只留下自己需要的部分，地图立刻变得清晰。',
+      '东京的地铁线路图线路多、车站多，想一次看懂全部很容易看花眼。{siteName}可以自己选择要显示的线路，只留下自己需要的部分，地图立刻变得清晰。',
     sections: [
       {
         heading: '为什么东京的地铁图线路那么密集',
@@ -310,12 +314,12 @@ export const guides: GuideDefinition[] = [
       {
         heading: '只勾选自己会用到的线路',
         paragraphs: [
-          'Flex Railway Map可以对每条线路单独开关显示。例如只显示"JR山手线・中央线・东京Metro丸之内线"这3条线，地图上的线条数量会一下子减少，车站名称也更容易看清楚。',
+          '{siteName}可以对每条线路单独开关显示。例如只显示"JR山手线・中央线・东京Metro丸之内线"这3条线，地图上的线条数量会一下子减少，车站名称也更容易看清楚。',
           '点击下面的按钮，可以直接打开只显示这3条线的地图。',
         ],
       },
     ],
-    ctaLabel: '在Flex Railway Map中打开只有这3条线的地图',
+    ctaLabel: '在{siteName}中打开只有这3条线的地图',
     ctaRoutes: ['yamanote', 'chuo', 'marunouchiLine'],
     ctaNote: '地图会以中文界面打开，只显示JR山手线・中央线・东京Metro丸之内线。其他线路可以随时从地图上的列表中添加或隐藏。',
     related: [
@@ -328,7 +332,7 @@ export const guides: GuideDefinition[] = [
       },
       {
         question: '可以自己选择显示哪些线路吗？',
-        answer: '可以。既可以对每条线路单独开关，也可以输入出发站和到达站，让Flex Railway Map自动选出与这次出行相关的线路。',
+        answer: '可以。既可以对每条线路单独开关，也可以输入出发站和到达站，让{siteName}自动选出与这次出行相关的线路。',
       },
       {
         question: '手机上也能用吗？',
@@ -341,11 +345,11 @@ export const guides: GuideDefinition[] = [
     slug: 'simple-tokyo-railway-map',
     lang: 'ko',
     breadcrumbLabel: '도쿄 노선도 심플하게 보는 방법',
-    title: '도쿄 노선도 심플하게 보는 방법 | Flex Railway Map',
-    description: '도쿄 노선도는 운영 회사가 많고 노선이 빽빽해서 보기 어려울 때가 있습니다. Flex Railway Map에서는 필요한 노선만 골라서 표시할 수 있습니다. 3개 노선만 표시한 지도를 직접 열어 확인해보세요.',
+    title: '도쿄 노선도 심플하게 보는 방법 | {siteName}',
+    description: '도쿄 노선도는 운영 회사가 많고 노선이 빽빽해서 보기 어려울 때가 있습니다. {siteName}에서는 필요한 노선만 골라서 표시할 수 있습니다. 3개 노선만 표시한 지도를 직접 열어 확인해보세요.',
     h1: '도쿄 노선도를 심플하게 보는 방법',
     searchIntentAnswer:
-      '도쿄 노선도는 노선 수・역 수가 많아서 한 번에 다 보려고 하면 정보량 때문에 헷갈리기 쉽습니다. Flex Railway Map에서는 표시할 노선을 직접 선택할 수 있어서, 필요한 노선만 남긴 심플한 노선도를 바로 만들 수 있습니다.',
+      '도쿄 노선도는 노선 수・역 수가 많아서 한 번에 다 보려고 하면 정보량 때문에 헷갈리기 쉽습니다. {siteName}에서는 표시할 노선을 직접 선택할 수 있어서, 필요한 노선만 남긴 심플한 노선도를 바로 만들 수 있습니다.',
     sections: [
       {
         heading: '도쿄 노선도가 복잡해 보이는 이유',
@@ -356,12 +360,12 @@ export const guides: GuideDefinition[] = [
       {
         heading: '필요한 노선만 골라서 표시하기',
         paragraphs: [
-          'Flex Railway Map에서는 노선 목록에서 표시하고 싶은 노선만 켜고 끌 수 있습니다. 예를 들어 "JR야마노테선・주오선・도쿄메트로 마루노우치선"처럼 자신이 이용하는 노선만 남기면, 지도 위 선의 개수가 확 줄어들고 역 이름도 훨씬 읽기 쉬워집니다.',
+          '{siteName}에서는 노선 목록에서 표시하고 싶은 노선만 켜고 끌 수 있습니다. 예를 들어 "JR야마노테선・주오선・도쿄메트로 마루노우치선"처럼 자신이 이용하는 노선만 남기면, 지도 위 선의 개수가 확 줄어들고 역 이름도 훨씬 읽기 쉬워집니다.',
           '아래 버튼을 누르면 실제로 이 3개 노선만 표시된 지도를 바로 열 수 있습니다.',
         ],
       },
     ],
-    ctaLabel: '이 3개 노선만 표시된 지도를 Flex Railway Map에서 열기',
+    ctaLabel: '이 3개 노선만 표시된 지도를 {siteName}에서 열기',
     ctaRoutes: ['yamanote', 'chuo', 'marunouchiLine'],
     ctaNote: '야마노테선・주오선・도쿄메트로 마루노우치선만 표시된 상태로 지도가 열립니다. 다른 노선은 지도 위 목록에서 언제든 추가・숨김할 수 있습니다.',
     related: [
@@ -374,7 +378,7 @@ export const guides: GuideDefinition[] = [
       },
       {
         question: '표시할 노선을 직접 선택할 수 있나요?',
-        answer: '네. 노선별로 표시・숨김을 전환할 수 있고, 출발역과 도착역을 입력하면 해당 이동에 관련된 노선을 Flex Railway Map이 자동으로 선택해줍니다.',
+        answer: '네. 노선별로 표시・숨김을 전환할 수 있고, 출발역과 도착역을 입력하면 해당 이동에 관련된 노선을 {siteName}이 자동으로 선택해줍니다.',
       },
       {
         question: '스마트폰에서도 사용할 수 있나요?',
@@ -387,11 +391,11 @@ export const guides: GuideDefinition[] = [
     slug: 'tokyo-train-map',
     lang: 'ko',
     breadcrumbLabel: '도쿄 노선도 심플하게 보기 (여행자용)',
-    title: '도쿄 노선도 심플하게 보는 방법 (여행자용) | Flex Railway Map',
-    description: '도쿄 노선도가 복잡해서 보기 힘드셨나요? Flex Railway Map에서는 필요한 노선만 표시할 수 있어서, 여행 일정에 맞는 심플한 지도를 몇 초 만에 열 수 있습니다.',
+    title: '도쿄 노선도 심플하게 보는 방법 (여행자용) | {siteName}',
+    description: '도쿄 노선도가 복잡해서 보기 힘드셨나요? {siteName}에서는 필요한 노선만 표시할 수 있어서, 여행 일정에 맞는 심플한 지도를 몇 초 만에 열 수 있습니다.',
     h1: '여행자를 위한 심플한 도쿄 노선도',
     searchIntentAnswer:
-      '도쿄의 전체 노선도에는 JR・도쿄메트로・도영지하철・여러 사철 노선이 한 장에 빽빽하게 그려져 있습니다. Flex Railway Map에서는 필요 없는 노선을 꺼둘 수 있어서, 이번 여행에 필요한 부분만 남긴 지도를 볼 수 있습니다.',
+      '도쿄의 전체 노선도에는 JR・도쿄메트로・도영지하철・여러 사철 노선이 한 장에 빽빽하게 그려져 있습니다. {siteName}에서는 필요 없는 노선을 꺼둘 수 있어서, 이번 여행에 필요한 부분만 남긴 지도를 볼 수 있습니다.',
     sections: [
       {
         heading: '도쿄 노선도가 이렇게 복잡한 이유',
@@ -402,18 +406,18 @@ export const guides: GuideDefinition[] = [
       {
         heading: '실제로 필요한 노선만 표시하기',
         paragraphs: [
-          'Flex Railway Map에서는 어떤 노선을 표시할지 직접 선택할 수 있습니다. 일반적인 관광 일정이라면, 주요 지역을 순환하는 JR야마노테선과 가장 오래되고 중심가를 지나는 도쿄메트로 긴자선만으로도 상당 부분을 커버할 수 있습니다.',
+          '{siteName}에서는 어떤 노선을 표시할지 직접 선택할 수 있습니다. 일반적인 관광 일정이라면, 주요 지역을 순환하는 JR야마노테선과 가장 오래되고 중심가를 지나는 도쿄메트로 긴자선만으로도 상당 부분을 커버할 수 있습니다.',
           '아래 버튼을 누르면 이 2개 노선만 표시된 지도를 바로 열 수 있습니다.',
         ],
       },
       {
         heading: '경로 안내가 아닌, 노선 전체를 이해하기 위한 지도',
         paragraphs: [
-          'Flex Railway Map은 몇 번 플랫폼으로 가야 하는지 알려주는 경로 안내 앱을 대신하려는 것이 아닙니다. 이동을 시작하기 전에, 이번 여행과 관련된 노선들이 어떻게 연결되어 있는지 직접 눈으로 확인하고 싶을 때를 위한 지도입니다.',
+          '{siteName}은 몇 번 플랫폼으로 가야 하는지 알려주는 경로 안내 앱을 대신하려는 것이 아닙니다. 이동을 시작하기 전에, 이번 여행과 관련된 노선들이 어떻게 연결되어 있는지 직접 눈으로 확인하고 싶을 때를 위한 지도입니다.',
         ],
       },
     ],
-    ctaLabel: '이 심플한 지도를 Flex Railway Map에서 열기',
+    ctaLabel: '이 심플한 지도를 {siteName}에서 열기',
     ctaRoutes: ['yamanote', 'ginzaLine'],
     ctaNote: '지도가 한국어 화면으로 열리며, JR야마노테선과 도쿄메트로 긴자선만 표시됩니다. 다른 노선은 지도 위 목록에서 언제든 추가・숨김할 수 있습니다.',
     related: [
@@ -441,11 +445,11 @@ export const guides: GuideDefinition[] = [
     city: 'osaka',
     lang: 'ja',
     breadcrumbLabel: '大阪の路線図をシンプルに見る',
-    title: '大阪の路線図をシンプルに見る方法（環状線・御堂筋線・観光地の最寄り駅）| Flex Railway Map',
-    description: '大阪の路線図はJR・Osaka Metro・私鉄が重なって見にくくなりがちです。大阪環状線と御堂筋線を軸に、必要な路線だけを表示した路線図をFlex Railway Mapで開けます。',
+    title: '大阪の路線図をシンプルに見る方法（環状線・御堂筋線・観光地の最寄り駅）| {siteName}',
+    description: '大阪の路線図はJR・Osaka Metro・私鉄が重なって見にくくなりがちです。大阪環状線と御堂筋線を軸に、必要な路線だけを表示した路線図を{siteName}で開けます。',
     h1: '大阪の路線図をシンプルに見る',
     searchIntentAnswer:
-      '大阪の鉄道は、市内をぐるりと回るJR大阪環状線と、新大阪・梅田・なんば・天王寺を南北に結ぶOsaka Metro御堂筋線の2本を軸にすると全体像がつかみやすくなります。Flex Railway Mapでは、この2路線だけを表示した地図から始めて、必要な路線を足していけます。',
+      '大阪の鉄道は、市内をぐるりと回るJR大阪環状線と、新大阪・梅田・なんば・天王寺を南北に結ぶOsaka Metro御堂筋線の2本を軸にすると全体像がつかみやすくなります。{siteName}では、この2路線だけを表示した地図から始めて、必要な路線を足していけます。',
     sections: [
       {
         heading: '大阪環状線と御堂筋線を軸にする',
@@ -478,7 +482,7 @@ export const guides: GuideDefinition[] = [
         cta: { label: '関西空港からなんばまでの南海線の地図を開く', routes: ['nankaAirportLine', 'nankaMainLine', 'midosujiLine'] },
       },
     ],
-    ctaLabel: '大阪環状線と御堂筋線だけの地図をFlex Railway Mapで開く',
+    ctaLabel: '大阪環状線と御堂筋線だけの地図を{siteName}で開く',
     ctaRoutes: ['osakaLoopLine', 'midosujiLine'],
     ctaNote: 'JR大阪環状線とOsaka Metro御堂筋線だけを表示した状態で地図が開きます。ほかの路線は地図上の一覧からいつでも追加・非表示にできます。',
     related: [
@@ -506,11 +510,11 @@ export const guides: GuideDefinition[] = [
     city: 'osaka',
     lang: 'en',
     breadcrumbLabel: 'A Simple Osaka Train Map',
-    title: 'Osaka Train Map Made Simple (Loop Line, Midosuji Line, Sights) | Flex Railway Map',
+    title: 'Osaka Train Map Made Simple (Loop Line, Midosuji Line, Sights) | {siteName}',
     description: "Osaka's rail map mixes JR, Osaka Metro and private railways. Start from the JR Osaka Loop Line and the Midosuji Line, and open a map with only the lines you need.",
     h1: 'A Simple Osaka Train Map',
     searchIntentAnswer:
-      "Osaka's rail network is easier to read if you start with two lines: the JR Osaka Loop Line, which circles central Osaka, and the Osaka Metro Midosuji Line, which runs north to south through Shin-Osaka, Umeda, Namba and Tennoji. Flex Railway Map lets you open a map with just these two lines and add others as you need them.",
+      "Osaka's rail network is easier to read if you start with two lines: the JR Osaka Loop Line, which circles central Osaka, and the Osaka Metro Midosuji Line, which runs north to south through Shin-Osaka, Umeda, Namba and Tennoji. {siteName} lets you open a map with just these two lines and add others as you need them.",
     sections: [
       {
         heading: 'Start with the Loop Line and the Midosuji Line',
@@ -543,7 +547,7 @@ export const guides: GuideDefinition[] = [
         cta: { label: 'Open the Nankai lines from Kansai Airport to Namba', routes: ['nankaAirportLine', 'nankaMainLine', 'midosujiLine'] },
       },
     ],
-    ctaLabel: 'Open the Loop Line and Midosuji Line in Flex Railway Map',
+    ctaLabel: 'Open the Loop Line and Midosuji Line in {siteName}',
     ctaRoutes: ['osakaLoopLine', 'midosujiLine'],
     ctaNote: 'Opens in English with only the JR Osaka Loop Line and the Osaka Metro Midosuji Line shown. You can add or hide other lines from the list on the map.',
     related: [
@@ -561,7 +565,7 @@ export const guides: GuideDefinition[] = [
       },
       {
         question: 'Does this work on my phone?',
-        answer: 'Yes, Flex Railway Map works in any modern browser on phone, tablet, or desktop. No app install is required.',
+        answer: 'Yes, {siteName} works in any modern browser on phone, tablet, or desktop. No app install is required.',
       },
     ],
     keywords: 'Osaka train map,Osaka subway map,Osaka Loop Line map,Midosuji Line map,Osaka train map English',
@@ -571,11 +575,11 @@ export const guides: GuideDefinition[] = [
     city: 'osaka',
     lang: 'zh',
     breadcrumbLabel: '大阪线路图简化查看方法',
-    title: '大阪地铁线路图太复杂怎么办（环状线・御堂筋线・景点最近车站）| Flex Railway Map',
-    description: '大阪的线路图由JR、大阪Metro和多家私铁重叠在一起，不容易看懂。以JR大阪环状线和御堂筋线为主轴，用Flex Railway Map打开只显示必要线路的地图。',
+    title: '大阪地铁线路图太复杂怎么办（环状线・御堂筋线・景点最近车站）| {siteName}',
+    description: '大阪的线路图由JR、大阪Metro和多家私铁重叠在一起，不容易看懂。以JR大阪环状线和御堂筋线为主轴，用{siteName}打开只显示必要线路的地图。',
     h1: '如何简化查看大阪线路图',
     searchIntentAnswer:
-      '大阪的铁路，只要先抓住环绕市中心的JR大阪环状线，以及南北贯穿新大阪、梅田、难波、天王寺的大阪Metro御堂筋线这两条线，就能掌握整体结构。在Flex Railway Map中，可以先打开只显示这两条线路的地图，再按需要添加其他线路。',
+      '大阪的铁路，只要先抓住环绕市中心的JR大阪环状线，以及南北贯穿新大阪、梅田、难波、天王寺的大阪Metro御堂筋线这两条线，就能掌握整体结构。在{siteName}中，可以先打开只显示这两条线路的地图，再按需要添加其他线路。',
     sections: [
       {
         heading: '以大阪环状线和御堂筋线为主轴',
@@ -608,7 +612,7 @@ export const guides: GuideDefinition[] = [
         cta: { label: '打开从关西机场到难波的南海线路地图', routes: ['nankaAirportLine', 'nankaMainLine', 'midosujiLine'] },
       },
     ],
-    ctaLabel: '在Flex Railway Map中打开大阪环状线和御堂筋线',
+    ctaLabel: '在{siteName}中打开大阪环状线和御堂筋线',
     ctaRoutes: ['osakaLoopLine', 'midosujiLine'],
     ctaNote: '地图会以中文界面打开，只显示JR大阪环状线和大阪Metro御堂筋线。其他线路可以随时从地图上的列表中添加或隐藏。',
     related: [
@@ -636,11 +640,11 @@ export const guides: GuideDefinition[] = [
     city: 'osaka',
     lang: 'ko',
     breadcrumbLabel: '오사카 노선도 심플하게 보기',
-    title: '오사카 노선도 심플하게 보는 방법 (순환선・미도스지선・관광지 최근접 역) | Flex Railway Map',
-    description: '오사카 노선도는 JR・오사카 메트로・사철이 겹쳐 있어 보기 어렵습니다. JR 오사카 순환선과 미도스지선을 중심으로, 필요한 노선만 표시한 지도를 Flex Railway Map에서 열 수 있습니다.',
+    title: '오사카 노선도 심플하게 보는 방법 (순환선・미도스지선・관광지 최근접 역) | {siteName}',
+    description: '오사카 노선도는 JR・오사카 메트로・사철이 겹쳐 있어 보기 어렵습니다. JR 오사카 순환선과 미도스지선을 중심으로, 필요한 노선만 표시한 지도를 {siteName}에서 열 수 있습니다.',
     h1: '오사카 노선도 심플하게 보기',
     searchIntentAnswer:
-      '오사카의 철도는 도심을 한 바퀴 도는 JR 오사카 순환선(Osaka Loop Line)과, 신오사카・우메다・난바・덴노지를 남북으로 잇는 오사카 메트로 미도스지선(Midosuji Line) 두 노선을 기준으로 보면 전체 구조를 파악하기 쉽습니다. Flex Railway Map에서는 이 두 노선만 표시한 지도에서 시작해 필요한 노선을 더해 갈 수 있습니다.',
+      '오사카의 철도는 도심을 한 바퀴 도는 JR 오사카 순환선(Osaka Loop Line)과, 신오사카・우메다・난바・덴노지를 남북으로 잇는 오사카 메트로 미도스지선(Midosuji Line) 두 노선을 기준으로 보면 전체 구조를 파악하기 쉽습니다. {siteName}에서는 이 두 노선만 표시한 지도에서 시작해 필요한 노선을 더해 갈 수 있습니다.',
     sections: [
       {
         heading: '오사카 순환선과 미도스지선을 기준으로',
@@ -673,7 +677,7 @@ export const guides: GuideDefinition[] = [
         cta: { label: '간사이 국제공항에서 난바까지 난카이선 지도 열기', routes: ['nankaAirportLine', 'nankaMainLine', 'midosujiLine'] },
       },
     ],
-    ctaLabel: '오사카 순환선과 미도스지선을 Flex Railway Map에서 열기',
+    ctaLabel: '오사카 순환선과 미도스지선을 {siteName}에서 열기',
     ctaRoutes: ['osakaLoopLine', 'midosujiLine'],
     ctaNote: '지도가 한국어 화면으로 열리며, JR 오사카 순환선과 오사카 메트로 미도스지선만 표시됩니다. 다른 노선은 지도 위 목록에서 언제든 추가・숨김할 수 있습니다.',
     related: [
@@ -702,8 +706,8 @@ export const guides: GuideDefinition[] = [
     city: 'kyoto',
     lang: 'ja',
     breadcrumbLabel: '京都の路線図をシンプルに見る',
-    title: '京都の路線図をシンプルに見る方法（地下鉄・京阪・嵐山・伏見稲荷）| Flex Railway Map',
-    description: '京都は地下鉄2路線にJR・京阪・阪急・嵐電が組み合わさります。観光地の最寄り駅を通る路線だけを表示した路線図をFlex Railway Mapで開けます。',
+    title: '京都の路線図をシンプルに見る方法（地下鉄・京阪・嵐山・伏見稲荷）| {siteName}',
+    description: '京都は地下鉄2路線にJR・京阪・阪急・嵐電が組み合わさります。観光地の最寄り駅を通る路線だけを表示した路線図を{siteName}で開けます。',
     h1: '京都の路線図をシンプルに見る',
     searchIntentAnswer:
       '京都の鉄道は、京都駅から北へ延びる地下鉄烏丸線、東西に走る地下鉄東西線、鴨川沿いを走る京阪本線の3本を軸にすると分かりやすくなります。嵐山・伏見稲荷など少し離れた観光地へは、嵐電・阪急・JRの路線を足していきます。',
@@ -732,11 +736,11 @@ export const guides: GuideDefinition[] = [
       {
         heading: '鉄道の駅から離れた観光地もある',
         paragraphs: [
-          '金閣寺や銀閣寺のように、近くに鉄道の駅が無く、バスで向かうのが一般的な観光地もあります。清水寺も、最寄りの京阪 清水五条駅からは歩いて距離があります。Flex Railway Mapは鉄道の路線図のため、バスの路線は表示しません。',
+          '金閣寺や銀閣寺のように、近くに鉄道の駅が無く、バスで向かうのが一般的な観光地もあります。清水寺も、最寄りの京阪 清水五条駅からは歩いて距離があります。{siteName}は鉄道の路線図のため、バスの路線は表示しません。',
         ],
       },
     ],
-    ctaLabel: '京都の地下鉄・京阪・JR奈良線だけの地図をFlex Railway Mapで開く',
+    ctaLabel: '京都の地下鉄・京阪・JR奈良線だけの地図を{siteName}で開く',
     ctaRoutes: ['kyotoSubwayKarasuma', 'kyotoSubwayTozai', 'keihanMainLine', 'jrNaraLine'],
     ctaNote: '京都市営地下鉄の烏丸線・東西線、京阪本線、JR奈良線だけを表示した状態で地図が開きます。ほかの路線は地図上の一覧からいつでも追加・非表示にできます。',
     related: [
@@ -754,7 +758,7 @@ export const guides: GuideDefinition[] = [
       },
       {
         question: 'バスの路線も表示できますか？',
-        answer: 'いいえ。Flex Railway Mapは鉄道の路線図で、バスの路線は表示しません。',
+        answer: 'いいえ。{siteName}は鉄道の路線図で、バスの路線は表示しません。',
       },
     ],
     keywords: '京都 路線図,京都 路線図 わかりやすい,京都 地下鉄 路線図,京都 観光 電車,嵐山 行き方 電車,伏見稲荷 最寄り駅',
@@ -764,7 +768,7 @@ export const guides: GuideDefinition[] = [
     city: 'kyoto',
     lang: 'en',
     breadcrumbLabel: 'A Simple Kyoto Train Map',
-    title: 'Kyoto Train Map Made Simple (Subway, Keihan, Arashiyama, Fushimi Inari) | Flex Railway Map',
+    title: 'Kyoto Train Map Made Simple (Subway, Keihan, Arashiyama, Fushimi Inari) | {siteName}',
     description: "Kyoto combines two subway lines with JR, Keihan, Hankyu and Randen. Open a map with only the lines that serve the sights you want to visit.",
     h1: 'A Simple Kyoto Train Map',
     searchIntentAnswer:
@@ -794,11 +798,11 @@ export const guides: GuideDefinition[] = [
       {
         heading: 'Some sights are far from any station',
         paragraphs: [
-          'Some sights, such as Kinkaku-ji and Ginkaku-ji, have no railway station nearby and are usually reached by bus. Kiyomizu-dera is also a fair walk from the nearest station, Kiyomizu-Gojo on the Keihan Main Line. Flex Railway Map is a railway map and does not show bus routes.',
+          'Some sights, such as Kinkaku-ji and Ginkaku-ji, have no railway station nearby and are usually reached by bus. Kiyomizu-dera is also a fair walk from the nearest station, Kiyomizu-Gojo on the Keihan Main Line. {siteName} is a railway map and does not show bus routes.',
         ],
       },
     ],
-    ctaLabel: "Open Kyoto's subway, Keihan and JR Nara Line in Flex Railway Map",
+    ctaLabel: "Open Kyoto's subway, Keihan and JR Nara Line in {siteName}",
     ctaRoutes: ['kyotoSubwayKarasuma', 'kyotoSubwayTozai', 'keihanMainLine', 'jrNaraLine'],
     ctaNote: 'Opens in English with only the Kyoto Subway Karasuma and Tozai Lines, the Keihan Main Line and the JR Nara Line shown. You can add or hide other lines from the list on the map.',
     related: [
@@ -816,7 +820,7 @@ export const guides: GuideDefinition[] = [
       },
       {
         question: 'Can I see bus routes?',
-        answer: 'No. Flex Railway Map is a railway map and does not show bus routes.',
+        answer: 'No. {siteName} is a railway map and does not show bus routes.',
       },
     ],
     keywords: 'Kyoto train map,Kyoto subway map,Kyoto train map English,Arashiyama by train,Fushimi Inari nearest station',
@@ -826,8 +830,8 @@ export const guides: GuideDefinition[] = [
     city: 'kyoto',
     lang: 'zh',
     breadcrumbLabel: '京都线路图简化查看方法',
-    title: '京都电车线路图怎么看（地铁・京阪・岚山・伏见稻荷）| Flex Railway Map',
-    description: '京都的铁路由两条地铁线加上JR、京阪、阪急、岚电组成。用Flex Railway Map打开只显示前往景点所需线路的地图。',
+    title: '京都电车线路图怎么看（地铁・京阪・岚山・伏见稻荷）| {siteName}',
+    description: '京都的铁路由两条地铁线加上JR、京阪、阪急、岚电组成。用{siteName}打开只显示前往景点所需线路的地图。',
     h1: '如何简化查看京都线路图',
     searchIntentAnswer:
       '京都的铁路，可以先以三条线为主轴：从京都站向北延伸的地铁乌丸线、东西向的地铁东西线，以及沿鸭川行驶的京阪本线。前往岚山、伏见稻荷大社等稍远的景点时，再加上岚电、阪急和JR的线路即可。',
@@ -856,11 +860,11 @@ export const guides: GuideDefinition[] = [
       {
         heading: '有些景点离铁路车站较远',
         paragraphs: [
-          '像金阁寺、银阁寺这样的景点，附近没有铁路车站，一般乘坐巴士前往。清水寺离最近的京阪清水五条站也有一段步行距离。Flex Railway Map是铁路线路图，不显示巴士路线。',
+          '像金阁寺、银阁寺这样的景点，附近没有铁路车站，一般乘坐巴士前往。清水寺离最近的京阪清水五条站也有一段步行距离。{siteName}是铁路线路图，不显示巴士路线。',
         ],
       },
     ],
-    ctaLabel: '在Flex Railway Map中打开京都的地铁・京阪・JR奈良线',
+    ctaLabel: '在{siteName}中打开京都的地铁・京阪・JR奈良线',
     ctaRoutes: ['kyotoSubwayKarasuma', 'kyotoSubwayTozai', 'keihanMainLine', 'jrNaraLine'],
     ctaNote: '地图会以中文界面打开，只显示京都市营地铁乌丸线・东西线、京阪本线和JR奈良线。其他线路可以随时从地图上的列表中添加或隐藏。',
     related: [
@@ -878,7 +882,7 @@ export const guides: GuideDefinition[] = [
       },
       {
         question: '可以显示巴士路线吗？',
-        answer: '不可以。Flex Railway Map是铁路线路图，不显示巴士路线。',
+        answer: '不可以。{siteName}是铁路线路图，不显示巴士路线。',
       },
     ],
     keywords: '京都地铁线路图,京都电车路线图,京都旅游交通,岚山怎么去,伏见稻荷大社最近车站',
@@ -888,8 +892,8 @@ export const guides: GuideDefinition[] = [
     city: 'kyoto',
     lang: 'ko',
     breadcrumbLabel: '교토 노선도 심플하게 보기',
-    title: '교토 노선도 심플하게 보는 방법 (지하철・게이한・아라시야마・후시미 이나리) | Flex Railway Map',
-    description: '교토는 지하철 2개 노선에 JR・게이한・한큐・란덴이 더해집니다. 가고 싶은 관광지로 가는 노선만 표시한 지도를 Flex Railway Map에서 열 수 있습니다.',
+    title: '교토 노선도 심플하게 보는 방법 (지하철・게이한・아라시야마・후시미 이나리) | {siteName}',
+    description: '교토는 지하철 2개 노선에 JR・게이한・한큐・란덴이 더해집니다. 가고 싶은 관광지로 가는 노선만 표시한 지도를 {siteName}에서 열 수 있습니다.',
     h1: '교토 노선도 심플하게 보기',
     searchIntentAnswer:
       '교토의 철도는 교토역에서 북쪽으로 뻗는 지하철 가라스마선(Karasuma Line), 동서로 달리는 지하철 도자이선(Tozai Line), 가모강을 따라 달리는 게이한 본선(Keihan Main Line) 세 노선을 기준으로 보면 이해하기 쉽습니다. 아라시야마・후시미 이나리 타이샤처럼 조금 떨어진 관광지는 란덴・한큐・JR 노선을 더해서 봅니다.',
@@ -918,11 +922,11 @@ export const guides: GuideDefinition[] = [
       {
         heading: '철도역에서 떨어진 관광지도 있습니다',
         paragraphs: [
-          '금각사・은각사처럼 근처에 철도역이 없어 버스로 가는 것이 일반적인 관광지도 있습니다. 기요미즈데라도 가장 가까운 게이한 Kiyomizu-Gojo역에서 걸어서 꽤 거리가 있습니다. Flex Railway Map은 철도 노선도이므로 버스 노선은 표시하지 않습니다.',
+          '금각사・은각사처럼 근처에 철도역이 없어 버스로 가는 것이 일반적인 관광지도 있습니다. 기요미즈데라도 가장 가까운 게이한 Kiyomizu-Gojo역에서 걸어서 꽤 거리가 있습니다. {siteName}은 철도 노선도이므로 버스 노선은 표시하지 않습니다.',
         ],
       },
     ],
-    ctaLabel: '교토 지하철・게이한・JR 나라선을 Flex Railway Map에서 열기',
+    ctaLabel: '교토 지하철・게이한・JR 나라선을 {siteName}에서 열기',
     ctaRoutes: ['kyotoSubwayKarasuma', 'kyotoSubwayTozai', 'keihanMainLine', 'jrNaraLine'],
     ctaNote: '지도가 한국어 화면으로 열리며, 교토 시영 지하철 가라스마선・도자이선, 게이한 본선, JR 나라선만 표시됩니다. 다른 노선은 지도 위 목록에서 언제든 추가・숨김할 수 있습니다.',
     related: [
@@ -938,7 +942,7 @@ export const guides: GuideDefinition[] = [
       },
       {
         question: '버스 노선도 표시할 수 있나요?',
-        answer: '아니요. Flex Railway Map은 철도 노선도이며 버스 노선은 표시하지 않습니다.',
+        answer: '아니요. {siteName}은 철도 노선도이며 버스 노선은 표시하지 않습니다.',
       },
     ],
     keywords: '교토 노선도,교토 지하철 노선도,교토 여행 전철,아라시야마 가는 법,후시미 이나리 가는 법',
@@ -949,8 +953,8 @@ export const guides: GuideDefinition[] = [
     city: 'hokkaido',
     lang: 'ja',
     breadcrumbLabel: '札幌の路線図をシンプルに見る',
-    title: '札幌の地下鉄・路線図をシンプルに見る方法（大通・すすきの・新千歳空港）| Flex Railway Map',
-    description: '札幌の地下鉄は南北線・東西線・東豊線の3路線で、3路線とも大通駅で乗り換えられます。新千歳空港・小樽へのJRも含め、必要な路線だけの路線図をFlex Railway Mapで開けます。',
+    title: '札幌の地下鉄・路線図をシンプルに見る方法（大通・すすきの・新千歳空港）| {siteName}',
+    description: '札幌の地下鉄は南北線・東西線・東豊線の3路線で、3路線とも大通駅で乗り換えられます。新千歳空港・小樽へのJRも含め、必要な路線だけの路線図を{siteName}で開けます。',
     h1: '札幌の路線図をシンプルに見る',
     searchIntentAnswer:
       '札幌の地下鉄は南北線・東西線・東豊線の3路線で、3路線とも大通駅で乗り換えられます。まず大通を中心に3路線の向きをつかみ、新千歳空港や小樽へ向かうときはJRの路線を足すと、全体が分かりやすくなります。',
@@ -977,7 +981,7 @@ export const guides: GuideDefinition[] = [
         cta: { label: 'JR千歳線・函館本線の地図を開く', routes: ['jrChitoseLine', 'jrHakodateMainLine'] },
       },
     ],
-    ctaLabel: '札幌の地下鉄3路線とJR千歳線をFlex Railway Mapで開く',
+    ctaLabel: '札幌の地下鉄3路線とJR千歳線を{siteName}で開く',
     ctaRoutes: ['sapporoNambokuLine', 'sapporoTozaiLine', 'sapporoTohoLine', 'jrChitoseLine'],
     ctaNote: '札幌市営地下鉄の南北線・東西線・東豊線とJR千歳線だけを表示した状態で地図が開きます。ほかの路線は地図上の一覧からいつでも追加・非表示にできます。',
     related: [
@@ -1005,7 +1009,7 @@ export const guides: GuideDefinition[] = [
     city: 'hokkaido',
     lang: 'en',
     breadcrumbLabel: 'A Simple Sapporo Train Map',
-    title: 'Sapporo Subway and Train Map Made Simple (Odori, Susukino, New Chitose Airport) | Flex Railway Map',
+    title: 'Sapporo Subway and Train Map Made Simple (Odori, Susukino, New Chitose Airport) | {siteName}',
     description: "Sapporo's subway has three lines, the Namboku, Tozai and Toho Lines, and all three meet at Odori. Open a map with only the lines you need, including JR to New Chitose Airport and Otaru.",
     h1: 'A Simple Sapporo Train Map',
     searchIntentAnswer:
@@ -1033,7 +1037,7 @@ export const guides: GuideDefinition[] = [
         cta: { label: 'Open the JR Chitose Line and Hakodate Main Line', routes: ['jrChitoseLine', 'jrHakodateMainLine'] },
       },
     ],
-    ctaLabel: "Open Sapporo's subway and the JR Chitose Line in Flex Railway Map",
+    ctaLabel: "Open Sapporo's subway and the JR Chitose Line in {siteName}",
     ctaRoutes: ['sapporoNambokuLine', 'sapporoTozaiLine', 'sapporoTohoLine', 'jrChitoseLine'],
     ctaNote: 'Opens in English with only the Sapporo Subway Namboku, Tozai and Toho Lines and the JR Chitose Line shown. You can add or hide other lines from the list on the map.',
     related: [
@@ -1061,8 +1065,8 @@ export const guides: GuideDefinition[] = [
     city: 'hokkaido',
     lang: 'zh',
     breadcrumbLabel: '札幌线路图简化查看方法',
-    title: '札幌地铁线路图怎么看（大通・薄野・新千岁机场）| Flex Railway Map',
-    description: '札幌地铁有南北线、东西线、东丰线三条线路，三条线都可以在大通站换乘。包括前往新千岁机场和小樽的JR在内，用Flex Railway Map打开只显示必要线路的地图。',
+    title: '札幌地铁线路图怎么看（大通・薄野・新千岁机场）| {siteName}',
+    description: '札幌地铁有南北线、东西线、东丰线三条线路，三条线都可以在大通站换乘。包括前往新千岁机场和小樽的JR在内，用{siteName}打开只显示必要线路的地图。',
     h1: '如何简化查看札幌线路图',
     searchIntentAnswer:
       '札幌地铁共有南北线、东西线、东丰线三条线路，三条线都可以在大通站换乘。先以大通为中心弄清三条线的走向，前往新千岁机场或小樽时再加上JR线路，整体就一目了然了。',
@@ -1089,7 +1093,7 @@ export const guides: GuideDefinition[] = [
         cta: { label: '打开JR千岁线・函馆本线的地图', routes: ['jrChitoseLine', 'jrHakodateMainLine'] },
       },
     ],
-    ctaLabel: '在Flex Railway Map中打开札幌地铁和JR千岁线',
+    ctaLabel: '在{siteName}中打开札幌地铁和JR千岁线',
     ctaRoutes: ['sapporoNambokuLine', 'sapporoTozaiLine', 'sapporoTohoLine', 'jrChitoseLine'],
     ctaNote: '地图会以中文界面打开，只显示札幌市营地铁南北线・东西线・东丰线和JR千岁线。其他线路可以随时从地图上的列表中添加或隐藏。',
     related: [
@@ -1117,8 +1121,8 @@ export const guides: GuideDefinition[] = [
     city: 'hokkaido',
     lang: 'ko',
     breadcrumbLabel: '삿포로 노선도 심플하게 보기',
-    title: '삿포로 지하철 노선도 심플하게 보는 방법 (오도리・스스키노・신치토세 공항) | Flex Railway Map',
-    description: '삿포로 지하철은 난보쿠선・도자이선・도호선 3개 노선이며, 세 노선 모두 오도리역에서 갈아탈 수 있습니다. 신치토세 공항・오타루로 가는 JR까지, 필요한 노선만 표시한 지도를 Flex Railway Map에서 열 수 있습니다.',
+    title: '삿포로 지하철 노선도 심플하게 보는 방법 (오도리・스스키노・신치토세 공항) | {siteName}',
+    description: '삿포로 지하철은 난보쿠선・도자이선・도호선 3개 노선이며, 세 노선 모두 오도리역에서 갈아탈 수 있습니다. 신치토세 공항・오타루로 가는 JR까지, 필요한 노선만 표시한 지도를 {siteName}에서 열 수 있습니다.',
     h1: '삿포로 노선도 심플하게 보기',
     searchIntentAnswer:
       '삿포로 지하철은 난보쿠선(Namboku Line)・도자이선(Tozai Line)・도호선(Toho Line) 3개 노선이며, 세 노선 모두 Odori역에서 갈아탈 수 있습니다. 먼저 Odori역을 중심으로 세 노선의 방향을 파악하고, 신치토세 공항이나 오타루로 갈 때는 JR 노선을 더하면 전체를 이해하기 쉽습니다.',
@@ -1145,7 +1149,7 @@ export const guides: GuideDefinition[] = [
         cta: { label: 'JR 지토세선・하코다테 본선 지도 열기', routes: ['jrChitoseLine', 'jrHakodateMainLine'] },
       },
     ],
-    ctaLabel: '삿포로 지하철과 JR 지토세선을 Flex Railway Map에서 열기',
+    ctaLabel: '삿포로 지하철과 JR 지토세선을 {siteName}에서 열기',
     ctaRoutes: ['sapporoNambokuLine', 'sapporoTozaiLine', 'sapporoTohoLine', 'jrChitoseLine'],
     ctaNote: '지도가 한국어 화면으로 열리며, 삿포로 시영 지하철 난보쿠선・도자이선・도호선과 JR 지토세선만 표시됩니다. 다른 노선은 지도 위 목록에서 언제든 추가・숨김할 수 있습니다.',
     related: [
@@ -1184,7 +1188,7 @@ export function guidePath(guide: Pick<GuideDefinition, 'lang' | 'slug'>): string
  * 追加するときは、既存と違う slug にすること（同じ slug だと対訳として紐付く）。
  */
 export function getGuideTranslations(guide: Pick<GuideDefinition, 'slug'>): GuideDefinition[] {
-  return guides.filter(g => g.slug === guide.slug);
+  return withSiteName(guides.filter(g => g.slug === guide.slug));
 }
 
 /** ガイドがある言語（一覧ページが存在する言語） */
@@ -1193,9 +1197,9 @@ export function guideLanguages(): GuideDefinition['lang'][] {
 }
 
 export function getGuide(lang: 'ja' | 'en' | 'zh' | 'ko', slug: string): GuideDefinition | undefined {
-  return guides.find(g => g.lang === lang && g.slug === slug);
+  return withSiteName(guides.find(g => g.lang === lang && g.slug === slug));
 }
 
 export function getGuidesByLang(lang: 'ja' | 'en' | 'zh' | 'ko'): GuideDefinition[] {
-  return guides.filter(g => g.lang === lang);
+  return withSiteName(guides.filter(g => g.lang === lang));
 }

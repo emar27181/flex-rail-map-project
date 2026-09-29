@@ -1,6 +1,7 @@
 ---
 import DemoMap from "../components/DemoMap.tsx";
 import FaviconLinks from '../components/seo/FaviconLinks.astro';
+import { SITE_NAME } from '../config/seo';
 ---
 
 <html lang="ja">
@@ -8,8 +9,8 @@ import FaviconLinks from '../components/seo/FaviconLinks.astro';
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="generator" content={Astro.generator} />
-		<title>フレックス路線図 デモ | 横浜→新宿</title>
-		<meta name="description" content="フレックス路線図のインタラクティブデモ。横浜→新宿の路線を自分でカスタマイズできます。" />
+		<title>{SITE_NAME} デモ | 横浜→新宿</title>
+		<meta name="description" content={`${SITE_NAME}のインタラクティブデモ。横浜→新宿の路線を自分でカスタマイズできます。`} />
 		<meta name="robots" content="noindex" />
 		<FaviconLinks />
 		<link

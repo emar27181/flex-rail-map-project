@@ -3,6 +3,7 @@
 import ArticleLayout from "../../../components/articles/ArticleLayout.astro";
 import { ARTICLES, ARTICLE_LANGUAGES, ARTICLE_PAGE_TRANSLATIONS, type ArticleLanguage } from "../../../data/articleI18n";
 import { articlePath } from "../../../config/articleSeo";
+import { withSiteName } from "../../../config/seo";
 
 export function getStaticPaths() {
   return ARTICLE_LANGUAGES.filter(lang => lang !== "ja").map(lang => ({ params: { lang }, props: { lang } }));
@@ -20,7 +21,7 @@ const meta = ARTICLE_PAGE_TRANSLATIONS.articles[lang];
   <section class="article-index" aria-label={meta.title}>
     <ul class="article-list">
       {ARTICLES.map(article => {
-        const t = ARTICLE_PAGE_TRANSLATIONS[article.slug][lang];
+        const t = withSiteName(ARTICLE_PAGE_TRANSLATIONS[article.slug][lang]);
         return (
           <li>
             <a href={articlePath(article.slug, lang)}>

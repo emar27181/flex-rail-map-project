@@ -12,8 +12,33 @@
  * ソースにハードコードせず .env の環境変数から読む。
  */
 
-/** 正式なサービス名。旧名 "Tokyo Flex Railway Map" は使わない */
+/**
+ * 正式なサービス名（全言語共通）。サイト名はここだけに書く。
+ * 旧名・別表記（"Tokyo Flex Railway Map" / "Flex Rail Map" / 「フレックス路線図」）は使わない
+ * （tests/unit/config/siteName.test.ts が src 内の直書きを検出する）。
+ * データファイル（ガイド・記事の文章）には `{siteName}` と書き、表示するときに
+ * withSiteName() で置き換える（データファイルは値だけにする決まりのため）。
+ */
 export const SITE_NAME = 'Flex Railway Map';
+
+/** 著作権者・構造化データの著者名 */
+export const PROJECT_NAME = `${SITE_NAME} Project`;
+
+/** 著作権表記 */
+export const COPYRIGHT_TEXT = `© 2025 ${PROJECT_NAME}`;
+
+/** データファイルの文章に書くサービス名の置き場所 */
+export const SITE_NAME_PLACEHOLDER = '{siteName}';
+
+/** 文章中の `{siteName}` を正式なサービス名に置き換える（文字列以外はそのまま中まで見る） */
+export function withSiteName<T>(value: T): T {
+  if (typeof value === 'string') return value.split(SITE_NAME_PLACEHOLDER).join(SITE_NAME) as T;
+  if (Array.isArray(value)) return value.map(v => withSiteName(v)) as T;
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, withSiteName(v)])) as T;
+  }
+  return value;
+}
 
 /** 公開URL。末尾スラッシュなし */
 export const SITE_URL = 'https://flex-railway-map.netlify.app';

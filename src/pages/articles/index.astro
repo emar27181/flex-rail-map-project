@@ -5,6 +5,7 @@
 import ArticleLayout from "./_ArticleLayout.astro";
 import { ARTICLES, ARTICLE_PAGE_TRANSLATIONS } from "../../data/articleI18n";
 import { articlePath } from "../../config/articleSeo";
+import { withSiteName } from "../../config/seo";
 
 const month = (iso: string) => iso.slice(0, 7).replace("-", "年") + "月";
 ---
@@ -13,7 +14,7 @@ const month = (iso: string) => iso.slice(0, 7).replace("-", "年") + "月";
   <section class="article-index" aria-label={ARTICLE_PAGE_TRANSLATIONS.articles.ja.title}>
     <ul class="article-list">
       {ARTICLES.map(article => {
-        const t = ARTICLE_PAGE_TRANSLATIONS[article.slug].ja;
+        const t = withSiteName(ARTICLE_PAGE_TRANSLATIONS[article.slug].ja);
         return (
           <li>
             <a href={articlePath(article.slug, "ja")}>

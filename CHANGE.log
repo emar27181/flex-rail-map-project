@@ -71,6 +71,13 @@
 - `src/data/articleI18n.ts`, `src/data/articleBodyI18n.ts`, `tests/unit/data/articleI18n.test.ts`
 - 日本語・中国語・韓国語の記事に英語のタグ（Safety Guide など）と CTA の飾り文字が残っていた
 
+### improve: サービス名を正式名称「Flex Railway Map」に統一し、1か所で管理する
+- `src/config/seo.ts`（`SITE_NAME`, `PROJECT_NAME`, `COPYRIGHT_TEXT`, `withSiteName`）, `src/data/{guides,articleI18n,articleBodyI18n}.ts`（`{siteName}`）,
+  `src/seo/{pageText,pageModel}.ts`, `src/utils/translation.ts`, `src/config/articleSeo.ts`, `src/components/{NavigationBar,DemoMap}.tsx`,
+  `src/components/articles/ArticleLayout.astro`, `src/pages/**/*.astro`, `public/manifest.json`, `tests/unit/config/siteName.test.ts`（新規）, `CLAUDE.md`
+- 「Flex Rail Map」「フレックス路線図」が混在していたのを、全言語で「Flex Railway Map」に（検索語としての「フレックス路線図」は keywords に残す）
+- 著作権表記・著者名を「Flex Railway Map Project」に。PWA のアプリ名も正式名称に
+
 ### feat: 記事を言語ごとの別URLにし、検索した言語の記事が出るようにする
 - `src/components/articles/{ArticleLayout,BeginnerLineChips,IntroductionDemo}.astro`（新規）,
   `src/pages/[...lang]/articles/`（新規）, `src/pages/articles/*.astro`（共通レイアウトを使う薄いファイルに）,

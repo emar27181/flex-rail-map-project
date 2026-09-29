@@ -1,6 +1,7 @@
 ---
 import FullscreenMapWrapper from "../components/FullscreenMapWrapper.tsx";
 import FaviconLinks from '../components/seo/FaviconLinks.astro';
+import { SITE_NAME } from '../config/seo';
 ---
 
 <html lang="ja">
@@ -15,7 +16,7 @@ import FaviconLinks from '../components/seo/FaviconLinks.astro';
 			noindex のページは sitemap にも入らない（sitemap の自動生成が除外する）。
 		-->
 		<meta name="robots" content="noindex, follow" />
-		<title>フレックス路線図 - フルスクリーンマップ</title>
+		<title>{SITE_NAME} - フルスクリーンマップ</title>
 		<meta name="description" content="フルスクリーンで東京の路線図を表示。Google マップのように地図を全画面表示し、必要な情報をオーバーレイで確認できます。" />
 		<link
 			rel="stylesheet"

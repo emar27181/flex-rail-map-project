@@ -22,6 +22,7 @@ import {
 import { TOURIST_SPOTS, type TouristSpot } from '../data/touristSpots';
 import { THROUGH_SERVICES } from '../data/throughServices';
 import { guides, guidePath, type GuideDefinition } from '../data/guides';
+import { withSiteName } from '../config/seo';
 import { routeTranslations, stationTranslations } from '../utils/translation';
 import { stationTranslationsChinese, stationTranslationsKorean } from '../utils/stationTranslationsCJK';
 import { approxDistanceKm, isSameStation } from '../utils/sameStation';
@@ -432,7 +433,7 @@ export function guidesForRoutes(keys: RouteKey[], lang: SeoLang): Array<{ title:
   const opens = (g: GuideDefinition) => [...(g.ctaRoutes ?? []), ...g.sections.flatMap(sec => sec.cta?.routes ?? [])];
   return guides
     .filter((g: GuideDefinition) => g.lang === lang && opens(g).some(r => keys.includes(r)))
-    .map(g => ({ title: g.breadcrumbLabel, path: guidePath(g) }));
+    .map(g => ({ title: withSiteName(g.breadcrumbLabel), path: guidePath(g) }));
 }
 
 /** 駅ページの統計のうち、データのページがある指標 */

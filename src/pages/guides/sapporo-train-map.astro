@@ -1,8 +1,9 @@
 ---
 import GuideLayout from "../../layouts/GuideLayout.astro";
 import { getGuide } from "../../data/guides";
+import { SITE_NAME } from '../../config/seo';
 
 const guide = getGuide('ja', 'sapporo-train-map')!;
 ---
 
-<GuideLayout guide={guide} indexHref="/guides" indexLabel="ガイド一覧" backLabel="← Flex Railway Map トップへ" />
+<GuideLayout guide={guide} indexHref="/guides" indexLabel="ガイド一覧" backLabel={`← ${SITE_NAME} トップへ`} />

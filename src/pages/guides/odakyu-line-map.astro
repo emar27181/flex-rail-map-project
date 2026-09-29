@@ -2,12 +2,13 @@
 import GuideLayout from "../../layouts/GuideLayout.astro";
 import { getGuide } from "../../data/guides";
 import { routeColors } from "../../data/routes";
+import { SITE_NAME } from '../../config/seo';
 
 const guide = getGuide('ja', 'odakyu-line-map')!;
 const odakyuColor = routeColors.odakyuLine;
 ---
 
-<GuideLayout guide={guide} indexHref="/guides" indexLabel="ガイド一覧" backLabel="← Flex Railway Map トップへ">
+<GuideLayout guide={guide} indexHref="/guides" indexLabel="ガイド一覧" backLabel={`← ${SITE_NAME} トップへ`}>
 	<Fragment slot="visual">
 		{/*
 			「駅名・路線・分岐・接続関係について推測で書かない」との指示のため、

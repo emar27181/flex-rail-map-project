@@ -11,7 +11,7 @@
  *   そのまま入れていたが、それは「更新日」ではない
  * - 著者・発行者は実在するプロジェクト名（CLAUDE.md の著作権表記）だけを書く
  */
-import { SITE_URL, SITE_NAME, buildBreadcrumbJsonLd, hreflangCode } from './seo';
+import { PROJECT_NAME, SITE_URL, SITE_NAME, buildBreadcrumbJsonLd, hreflangCode } from './seo';
 import type { ArticleLanguage } from '../data/articleI18n';
 
 /** 記事一覧のパス（日本語は /articles、他の言語は /{lang}/articles） */
@@ -24,7 +24,6 @@ export function articlePath(slug: string, lang: ArticleLanguage): string {
   return `${articleIndexPath(lang)}/${slug}`;
 }
 
-const PROJECT_NAME = 'Flex Rail Map Project';
 
 export interface ArticleSeoInput {
   title: string;
