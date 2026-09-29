@@ -21,6 +21,8 @@ export interface ArticleSeoInput {
   keywords?: string;
   /** 本文に表示している公開日（YYYY-MM-DD） */
   publishedDate: string;
+  /** 本文に表示している更新日（記事ごとに明示したときだけ。無ければ dateModified を出さない） */
+  modifiedDate?: string;
   canonicalUrl: string;
   /** サイト内パス（/icon_...png など） */
   ogImage: string;
@@ -34,6 +36,7 @@ export function articleJsonLd(a: ArticleSeoInput) {
     description: a.description,
     keywords: a.keywords ?? undefined,
     datePublished: a.publishedDate,
+    ...(a.modifiedDate ? { dateModified: a.modifiedDate } : {}),
     url: a.canonicalUrl,
     author: { '@type': 'Organization', name: PROJECT_NAME },
     publisher: {

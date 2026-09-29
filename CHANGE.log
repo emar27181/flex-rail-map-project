@@ -359,6 +359,25 @@
 - `npm run test:types` / `npm run test:unit`(384件) / `npm run build`
   すべて通過。ビルド後のHTMLで4言語ぶんの`hreflang`と
   `og:locale:alternate`が出力されることを確認
+## [2026-09-28] セッション（集客記事の説明を実際の機能に整合）
+
+### improve: 根拠のないランキングを候補駅の比較手順に置き換える
+- `src/data/articleBodyI18n.ts`, `src/data/articleI18n.ts`: 住まい記事3本を4言語で更新。
+- 未提供の家賃・治安ヒートマップの案内と根拠のない数値表を撤去し、地図と実際の募集情報の役割を明確化。
+- 地図へのCTA・関連記事リンクを各言語に追加。記事一覧に家賃比較記事を追加。
+- `src/pages/articles/_ArticleLayout.astro`, 対象記事3ページ, `public/sitemap.xml`: 公開日を保持して更新日を表示・構造化データに反映。
+- `docs/revenue-growth-2026-09.md`: 施策の優先順位、仮定の収益試算、必要な計測、未確認事項を記録。
+- 型チェック・389テスト・25ページのビルド成功。生成HTMLの4言語・リンク・更新日を確認。
+
+## [2026-09-28] セッション（広告の遅延読み込み修正）
+
+### fix: 広告スクリプトの遅延によるリクエストの取りこぼしを防ぐ
+- `src/utils/adsense.ts`, `src/components/AdSenseAd.tsx`, `src/components/StickyBottomAd.tsx`
+- スクリプト未読込時もキューに登録し、DOM要素ごとに重複要求を防止。
+- 固定広告の監視を5秒で打ち切らず、配信状態が確定するまで監視。閉じた広告と配信なしは非表示。
+- localStorageが利用できない場合も閉じる操作を妨げない。
+- `tests/unit/components/adsense-lifecycle.test.tsx`: 遅延・重複・配信なし・保存済みの非表示・ストレージ不可の5件。
+- 型チェック・ユニットテスト389件・ビルド成功。実広告配信と収益は未検証。
 
 ## [2026-09-23] セッション（README刷新）
 
