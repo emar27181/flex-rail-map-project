@@ -68,6 +68,7 @@ import {
 } from '../utils/mapSizePersistence';
 import { patchRotatedRendererDrift } from '../utils/leafletRotatePatch';
 import { getInitialVisibleRoutesFromUrl, syncVisibleRoutesToUrl } from '../utils/routeUrlCodes';
+import { getInitialHeatmapMetricFromUrl, syncHeatmapMetricToUrl } from '../utils/heatmapUrlParam';
 import {
   getInitialDepartureFromUrl,
   getInitialArrivalFromUrl,
@@ -3387,6 +3388,25 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   useEffect(() => {
     syncStationsToUrl(departure, arrival, waypoints);
   }, [departure, arrival, waypoints]);
+
+  // URL共有: 初回マウント時のみ、URLの metric パラメータがあればその指標のヒートマップを表示する
+  // （駅周辺データのページ /data/* から開いたとき）
+  const urlHeatmapAppliedRef = useRef(false);
+  useEffect(() => {
+    if (urlHeatmapAppliedRef.current) return;
+    urlHeatmapAppliedRef.current = true;
+    const metric = getInitialHeatmapMetricFromUrl();
+    if (metric) {
+      handleHeatmapParamChange(metric);
+      setHeatmapEnabled(true);
+    }
+  }, [handleHeatmapParamChange]);
+
+  // URL共有: ヒートマップの表示・指標が変わるたびにURLへ反映する
+  useEffect(() => {
+    if (!urlHeatmapAppliedRef.current) return;
+    syncHeatmapMetricToUrl(heatmapEnabled, heatmapParam);
+  }, [heatmapEnabled, heatmapParam]);
 
   // Leafletポップアップとコントロールのテーマ対応（動的スタイル適用）
   useEffect(() => {
