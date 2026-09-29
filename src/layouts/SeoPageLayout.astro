@@ -4,19 +4,20 @@
  *
  * 構成: パンくず → H1 → 要約（lede）→ 本文（slot）→ 別言語版へのリンク → フッター。
  * <head> は SeoHead、パンくずの構造化データは画面のパンくずと同じ並びから作る。
- * hreflang と言語の切り替えリンクは、langPaths に渡した（実際に作っている）言語版だけに張る。
+ * hreflang と右上の言語切り替え（LanguageSwitcher）は、langPaths に渡した（実際に作っている）言語版だけに張る。
  * 中国語・韓国語版は一部のページにしか無いため、ページごとに渡すこと。
  */
 import SeoHead from '../components/seo/SeoHead.astro';
 import ThemeInitScript from '../components/ThemeInitScript.astro';
 import SiteFooterNav from '../components/SiteFooterNav.astro';
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import LanguageSuggestion from '../components/LanguageSuggestion.astro';
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import { staticPageCss } from './staticPageStyles';
 import { guideCss } from './guideStyles';
 import { seoPageCss } from './seoPageStyles';
 import { buildBreadcrumbJsonLd, buildHreflangLinks, hreflangCode, type BreadcrumbItem } from '../config/seo';
 import type { SeoLang } from '../seo/pageModel';
-import { LANG_LABEL, SEO_TEXT } from '../seo/pageText';
 import { SEO_LANGS } from '../seo/pageModel';
 
 export interface Props {
@@ -34,10 +35,8 @@ export interface Props {
 }
 
 const { lang, title, description, path, langPaths, breadcrumbs, h1, lede, indexable } = Astro.props;
-const t = SEO_TEXT[lang];
 const versions = SEO_LANGS.filter(l => langPaths[l]).map(l => ({ lang: l, path: langPaths[l]! }));
 const hreflang = buildHreflangLinks(versions, 'ja');
-const others = versions.filter(v => v.lang !== lang);
 ---
 
 <html lang={hreflangCode(lang)}>
@@ -56,6 +55,10 @@ const others = versions.filter(v => v.lang !== lang);
 	<body>
 		<ThemeInitScript />
 		<div class="container">
+			<div class="page-lang-bar">
+				<LanguageSwitcher current={lang} versions={langPaths} />
+			</div>
+			<LanguageSuggestion current={lang} versions={langPaths} />
 			<nav class="breadcrumb">
 				{breadcrumbs.map((b, i) => (
 					i < breadcrumbs.length - 1
@@ -69,13 +72,6 @@ const others = versions.filter(v => v.lang !== lang);
 
 			<slot />
 
-			{others.length > 0 && (
-				<p class="seo-lang-switch">
-					{others.map((v, i) => (
-						<Fragment>{i > 0 && ' / '}<a href={v.path} hreflang={hreflangCode(v.lang)} lang={hreflangCode(v.lang)}>{LANG_LABEL[v.lang]}</a></Fragment>
-					))}
-				</p>
-			)}
 			<SiteFooterNav lang={lang} currentPath={path} />
 		</div>
 		<SimpleThemeWrapper client:only="react" />

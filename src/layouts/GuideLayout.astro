@@ -20,6 +20,8 @@ import MapOpenCta from '../components/MapOpenCta.astro';
 import SeoHead from '../components/seo/SeoHead.astro';
 import ThemeInitScript from '../components/ThemeInitScript.astro';
 import SiteFooterNav from '../components/SiteFooterNav.astro';
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import LanguageSuggestion from '../components/LanguageSuggestion.astro';
 import LineChip from '../components/seo/LineChip.astro';
 import { lineByKey, SEO_LANGS, type SeoLang } from '../seo/pageModel';
 import { SEO_TEXT } from '../seo/pageText';
@@ -107,6 +109,10 @@ const webPageJsonLd = {
 	<body>
 		<ThemeInitScript />
 		<div class="container">
+			<div class="page-lang-bar">
+				<LanguageSwitcher current={guide.lang} versions={Object.fromEntries(getGuideTranslations(guide).map(g => [g.lang, guidePath(g)]))} />
+			</div>
+			<LanguageSuggestion current={guide.lang} versions={Object.fromEntries(getGuideTranslations(guide).map(g => [g.lang, guidePath(g)]))} />
 			<nav class="breadcrumb">
 				<a href="/">{SITE_NAME}</a> / <a href={indexHref}>{indexLabel}</a> / {guide.breadcrumbLabel}
 			</nav>

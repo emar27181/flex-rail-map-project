@@ -14,6 +14,11 @@ const light = getThemeColors('light');
 const dark = getThemeColors('dark');
 
 export const guideCss = `
+/* 右上の言語切り替え（src/components/LanguageSwitcher.astro）。メニューの背景をテーマに合わせる */
+body.light { --lang-switch-bg: ${light.surface}; }
+body.dark { --lang-switch-bg: ${dark.surface}; }
+.page-lang-bar { display: flex; justify-content: flex-end; margin-bottom: ${L.sp.md}; }
+
 .breadcrumb {
   font-size: ${FS.caption};
   color: ${light.textSecondary};

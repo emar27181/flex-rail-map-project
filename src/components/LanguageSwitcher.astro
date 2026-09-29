@@ -1,0 +1,103 @@
+---
+/**
+ * ページ右上の言語切り替え（記事・ガイド・駅/路線/データのページ共通）。
+ *
+ * 多言語サイトの定石どおり、言語は「別URLの別ページ」として持ち、ここはその
+ * ページへのリンクを並べるだけにする（1つのURLの中で文字をJSで差し替えると、
+ * 検索エンジンには最初の言語しか見えない）。
+ *
+ * - その言語版が無いときはリンクにせず、押せない表示にする（黙って別の言語へ飛ばさない）
+ * - 閲覧者の言語による自動リダイレクトはしない（LanguageSuggestion.astro の案内だけ）
+ * - リンクには hreflang / lang を付ける（読み上げ・検索エンジン向け）
+ *
+ * 色は各レイアウトの文字色（currentColor）を引き継ぎ、メニューの背景だけ
+ * `--lang-switch-bg` で受け取る（未指定なら透明）。
+ */
+import { FS } from '../constants/ui';
+import { L } from './legend/legendStyles';
+import { hreflangCode } from '../config/seo';
+
+type Lang = 'ja' | 'en' | 'zh' | 'ko';
+
+export interface Props {
+  current: Lang;
+  /** 各言語版のパス（作っている言語だけ） */
+  versions: Partial<Record<Lang, string>>;
+}
+
+const { current, versions } = Astro.props;
+const ORDER: Lang[] = ['ja', 'en', 'zh', 'ko'];
+/** その言語自身での名前 */
+const NATIVE: Record<Lang, string> = { ja: '日本語', en: 'English', zh: '简体中文', ko: '한국어' };
+/** ボタンに出す短い表記（狭いヘッダーでも折り返さない） */
+const SHORT: Record<Lang, string> = { ja: '日', en: 'EN', zh: '中', ko: '한' };
+const MENU_LABEL: Record<Lang, string> = { ja: '言語', en: 'Language', zh: '语言', ko: '언어' };
+const UNAVAILABLE: Record<Lang, string> = {
+  ja: 'このページの翻訳はありません',
+  en: 'Not available for this page',
+  zh: '本页面暂无此语言版本',
+  ko: '이 페이지는 이 언어로 제공되지 않습니다',
+};
+const fs = FS.caption;
+const fsBody = FS.body;
+const gap = L.sp.xs;
+const pad = L.sp.md;
+const radius = L.r.card;
+const control = L.r.control;
+---
+
+<nav class="lang-switch" aria-label={MENU_LABEL[current]}>
+  <details>
+    <summary aria-label={`${MENU_LABEL[current]}: ${NATIVE[current]}`}>
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+      <span>{SHORT[current]}</span>
+    </summary>
+    <ul>
+      {ORDER.map(l => (
+        <li>
+          {l === current
+            ? <span class="current" aria-current="page" lang={hreflangCode(l)}>{NATIVE[l]}</span>
+            : versions[l]
+              ? <a href={versions[l]} hreflang={hreflangCode(l)} lang={hreflangCode(l)} data-lang-link={l}>{NATIVE[l]}</a>
+              : <span class="unavailable" lang={hreflangCode(l)} title={UNAVAILABLE[current]} aria-disabled="true">{NATIVE[l]}</span>}
+        </li>
+      ))}
+    </ul>
+  </details>
+</nav>
+
+<script is:inline>
+  (function () {
+    // 選んだ言語を覚える（地図アプリ src/utils/languagePersistence.ts と同じキー・同じ値）。
+    // 次に別のページを開いたとき、LanguageSuggestion がこの言語の版を案内する
+    var APP = { ja: 'japanese', en: 'english', zh: 'chinese', ko: 'korean' };
+    document.addEventListener('click', function (e) {
+      var link = e.target && e.target.closest ? e.target.closest('[data-lang-link]') : null;
+      if (!link) return;
+      try { localStorage.setItem('frm-language', APP[link.getAttribute('data-lang-link')]); } catch (err) {}
+    });
+  })();
+</script>
+
+<style define:vars={{ fs, fsBody, gap, pad, radius, control }}>
+  .lang-switch { position: relative; font-size: var(--fs); }
+  .lang-switch summary {
+    display: inline-flex; align-items: center; gap: var(--gap);
+    padding: var(--gap) var(--pad);
+    border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+    border-radius: var(--control);
+    cursor: pointer; list-style: none; user-select: none; white-space: nowrap;
+  }
+  .lang-switch summary::-webkit-details-marker { display: none; }
+  .lang-switch ul {
+    position: absolute; right: 0; z-index: 10;
+    margin: var(--gap) 0 0; padding: var(--gap) 0; list-style: none; min-width: 9em;
+    background: var(--lang-switch-bg, transparent);
+    border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+    border-radius: var(--radius);
+  }
+  .lang-switch li > * { display: block; padding: var(--gap) var(--pad); font-size: var(--fsBody); color: inherit; text-decoration: none; }
+  .lang-switch a:hover { background: color-mix(in srgb, currentColor 10%, transparent); }
+  .lang-switch .current { font-weight: bold; }
+  .lang-switch .unavailable { opacity: 0.45; cursor: not-allowed; }
+</style>
