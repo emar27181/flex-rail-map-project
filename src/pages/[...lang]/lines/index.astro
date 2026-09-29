@@ -21,7 +21,7 @@ const path = hubPath('lines', lang);
 	title={t.linesHubTitle}
 	description={t.linesHubLede(lines.length)}
 	path={path}
-	langPaths={Object.fromEntries(SEO_LANGS.map(l => [l, hubPath('lines', l)])) as Record<SeoLang, string>}
+	langPaths={Object.fromEntries(SEO_LANGS.map(l => [l, hubPath('lines', l)]))}
 	breadcrumbs={[{ name: t.home, path: '/' }, { name: t.hubs.lines, path }]}
 	h1={t.linesHubH1}
 	lede={t.linesHubLede(lines.length)}

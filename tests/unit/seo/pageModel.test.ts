@@ -3,8 +3,9 @@ import { routes } from '../../../src/data/routes';
 import { PARAM_DATA_SOURCES, STAT_PARAMS } from '../../../src/data/stationStats';
 import { TOURIST_SPOTS } from '../../../src/data/touristSpots';
 import { SEO_CITIES, SEO_DATA_CITIES } from '../../../src/data/seoPages';
-import { SEO_LINE_KEYS, getSeoModel, nearbyMajorStations, toSlug } from '../../../src/seo/pageModel';
-import { SOURCE_TITLE_EN, STAT_SCOPE_EN } from '../../../src/seo/pageText';
+import { SEO_LINE_KEYS, getSeoModel, nearbyMajorStations, stationName, toSlug } from '../../../src/seo/pageModel';
+import { SOURCE_TITLE_EN, STAT_SCOPE_EN, STAT_SCOPE_KO, STAT_SCOPE_ZH } from '../../../src/seo/pageText';
+import { stationTranslationsKorean } from '../../../src/utils/stationTranslationsCJK';
 import { buildMapHref } from '../../../src/utils/mapDeepLink';
 import { decodeVisibleRoutesParam } from '../../../src/utils/routeUrlCodes';
 
@@ -83,6 +84,22 @@ describe('index させるページの範囲', () => {
   });
 });
 
+describe('ページを作る言語', () => {
+  it('日本語・英語はすべての駅、中国語・韓国語は index する駅のうち駅名の訳がある駅だけ', () => {
+    for (const s of model.stations) {
+      expect(s.langs).toContain('ja');
+      expect(s.langs).toContain('en');
+      if (s.langs.includes('zh') || s.langs.includes('ko')) expect(s.indexable, s.name).toBe(true);
+      expect(s.langs.includes('ko'), s.name).toBe(s.indexable && !!stationTranslationsKorean[s.name]);
+    }
+  });
+
+  it('韓国語の駅名の訳が無い駅は、推測で訳さず英語名を出す', () => {
+    const s = model.stations.find(x => !stationTranslationsKorean[x.name])!;
+    expect(stationName(s, 'ko')).toBe(s.nameEn);
+  });
+});
+
 describe('実データだけを使う', () => {
   it('駅ページの統計はすべて dataQuality: real', () => {
     for (const s of model.stations) {
@@ -107,9 +124,12 @@ describe('実データだけを使う', () => {
     }
   });
 
-  it('英語ページに出す統計の範囲・時期に訳がある', () => {
+  it('英語・中国語・韓国語ページに出す統計の範囲・時期に訳がある', () => {
     for (const p of STAT_PARAMS.filter(p => p.dataQuality === 'real')) {
-      for (const x of [p.radius, p.period]) if (x) expect(STAT_SCOPE_EN[x], x).toBeDefined();
+      for (const x of [p.radius, p.period]) {
+        if (!x) continue;
+        for (const map of [STAT_SCOPE_EN, STAT_SCOPE_ZH, STAT_SCOPE_KO]) expect(map[x], x).toBeDefined();
+      }
       const src = PARAM_DATA_SOURCES[p.key];
       if (src && p.key !== 'routeCount') expect(SOURCE_TITLE_EN[src.title], src.title).toBeDefined();
     }
@@ -129,6 +149,7 @@ describe('内部リンク', () => {
   it('近くの主要駅は index 対象の駅だけ', () => {
     for (const s of model.stations.slice(0, 50)) {
       for (const n of nearbyMajorStations(s)) expect(n.indexable).toBe(true);
+      for (const n of nearbyMajorStations(s, 'ko')) expect(n.langs).toContain('ko');
     }
   });
 });

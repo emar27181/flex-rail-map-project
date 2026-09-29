@@ -9,15 +9,14 @@ import MapOpenCta from '../../../components/MapOpenCta.astro';
 import LineChip from '../../../components/seo/LineChip.astro';
 import StationLink from '../../../components/seo/StationLink.astro';
 import {
-  SEO_LANGS, dataPageFor, dataPath, getSeoModel, guidesForRoutes, hubPath, nearbyMajorStations,
+  DATA_LANGS, SEO_LANGS, dataPageFor, dataPath, getSeoModel, guidesForRoutes, hubPath, nearbyMajorStations,
   routeName, stationName, stationPath, type SeoLang, type SeoStation,
 } from '../../../seo/pageModel';
-import { SEO_TEXT, formatNumber } from '../../../seo/pageText';
-import { translateStatParamLabel, translateStatUnit } from '../../../utils/translation';
+import { SEO_TEXT, statLabel, statValue } from '../../../seo/pageText';
 
 export function getStaticPaths() {
   return SEO_LANGS.flatMap(lang =>
-    getSeoModel().stations.map(station => ({
+    getSeoModel().stations.filter(station => station.langs.includes(lang)).map(station => ({
       params: { lang: lang === 'ja' ? undefined : lang, slug: station.slug },
       props: { lang, station },
     })),
@@ -27,15 +26,12 @@ export function getStaticPaths() {
 interface Props { lang: SeoLang; station: SeoStation }
 const { lang, station } = Astro.props;
 const t = SEO_TEXT[lang];
-const en = lang === 'en';
 const name = stationName(station, lang);
 const path = stationPath(station.slug, lang);
 const lineNames = station.routes.map(r => routeName(r, lang));
 const spotNames = station.touristSpots.map(spot => t.spotName(spot));
-const nearby = nearbyMajorStations(station);
+const nearby = nearbyMajorStations(station, lang);
 const relatedGuides = guidesForRoutes(station.routes, lang);
-const statLabel = (label: string) => (en ? translateStatParamLabel(label, 'english') : label);
-const statUnit = (unit: string) => (en ? translateStatUnit(unit, 'english') : unit);
 // 地図を開くCTA（出発駅に指定できる駅は出発駅、できない駅は通る路線を表示して開く）
 const stationCta = {
   label: station.mapFrom ? t.openMapFrom(name) : t.openMapRoutes(name),
@@ -55,7 +51,7 @@ const sources = [...new Map(station.stats.filter(s => s.source).map(s => [s.sour
 	title={t.stationTitle(name, station.effectiveLines, station.stats.length, spotNames)}
 	description={t.stationDescription(name, lineNames, station.stats.length, spotNames)}
 	path={path}
-	langPaths={{ ja: stationPath(station.slug, 'ja'), en: stationPath(station.slug, 'en') }}
+	langPaths={Object.fromEntries(station.langs.map(l => [l, stationPath(station.slug, l)]))}
 	breadcrumbs={[
 		{ name: t.home, path: '/' },
 		{ name: t.hubs.stations, path: hubPath('stations', lang) },
@@ -124,12 +120,12 @@ const sources = [...new Map(station.stats.filter(s => s.source).map(s => [s.sour
 					<thead><tr><th>{t.colItem}</th><th class="num">{t.colValue}</th><th>{t.colScope}</th></tr></thead>
 					<tbody>
 						{station.stats.map(s => {
-							const page = dataPageFor(s.key);
-							const label = statLabel(s.meta.label);
+							const page = DATA_LANGS.includes(lang) ? dataPageFor(s.key) : undefined;
+							const label = statLabel(s.meta.label, lang);
 							return (
 								<tr>
 									<td>{page ? <a href={dataPath(page.slug, lang)}>{label}</a> : label}</td>
-									<td class="num">{formatNumber(s.value, lang)}{en ? ' ' : ''}{statUnit(s.meta.unit)}</td>
+									<td class="num">{statValue(s.value, s.meta.unit, lang)}</td>
 									<td class="seo-note">{t.scope(s.meta.radius, s.meta.period)}</td>
 								</tr>
 							);

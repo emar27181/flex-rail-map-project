@@ -16,7 +16,9 @@ export function getStaticPaths() {
 interface Props { lang: SeoLang }
 const { lang } = Astro.props;
 const t = SEO_TEXT[lang];
-const { stations, lines } = getSeoModel();
+const { lines } = getSeoModel();
+// この言語の駅ページがある駅だけを並べる（中国語・韓国語は Tier A の一部だけ）
+const stations = getSeoModel().stations.filter(s => s.langs.includes(lang));
 const path = hubPath('stations', lang);
 const cities = SEO_CITIES.map(city => ({
   city,
@@ -31,7 +33,7 @@ const cities = SEO_CITIES.map(city => ({
 	title={t.stationsHubTitle}
 	description={t.stationsHubLede(stations.length)}
 	path={path}
-	langPaths={Object.fromEntries(SEO_LANGS.map(l => [l, hubPath('stations', l)])) as Record<SeoLang, string>}
+	langPaths={Object.fromEntries(SEO_LANGS.map(l => [l, hubPath('stations', l)]))}
 	breadcrumbs={[{ name: t.home, path: '/' }, { name: t.hubs.stations, path }]}
 	h1={t.stationsHubH1}
 	lede={t.stationsHubLede(stations.length)}

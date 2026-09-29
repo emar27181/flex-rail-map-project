@@ -6,14 +6,13 @@
 import SeoPageLayout from '../../../layouts/SeoPageLayout.astro';
 import MapOpenCta from '../../../components/MapOpenCta.astro';
 import {
-  SEO_LANGS, dataPath, getSeoModel, hubPath, linePath, routeName, stationName, stationPath,
+  DATA_LANGS, dataPath, getSeoModel, hubPath, linePath, routeName, stationName, stationPath,
   type SeoDataPage, type SeoLang,
 } from '../../../seo/pageModel';
-import { SEO_TEXT, formatNumber } from '../../../seo/pageText';
-import { translateStatParamLabel, translateStatUnit } from '../../../utils/translation';
+import { SEO_TEXT, statLabel, statValue } from '../../../seo/pageText';
 
 export function getStaticPaths() {
-  return SEO_LANGS.flatMap(lang =>
+  return DATA_LANGS.flatMap(lang =>
     getSeoModel().dataPages.map(page => ({
       params: { lang: lang === 'ja' ? undefined : lang, slug: page.slug },
       props: { lang, page },
@@ -24,10 +23,8 @@ export function getStaticPaths() {
 interface Props { lang: SeoLang; page: SeoDataPage }
 const { lang, page } = Astro.props;
 const t = SEO_TEXT[lang];
-const en = lang === 'en';
-const label = en ? translateStatParamLabel(page.meta.label, 'english') : page.meta.label;
-const unit = en ? translateStatUnit(page.meta.unit, 'english') : page.meta.unit;
-const withUnit = (v: number) => `${formatNumber(v, lang)}${en && unit ? ' ' : ''}${unit}`;
+const label = statLabel(page.meta.label, lang);
+const withUnit = (v: number) => statValue(v, page.meta.unit, lang);
 const path = dataPath(page.slug, lang);
 const scope = t.scope(page.meta.radius, page.meta.period);
 const top = page.rows[0];
@@ -47,7 +44,7 @@ const dataCta = {
 	title={t.dataTitle(label)}
 	description={t.dataDescription(label, page.rows.length, scope)}
 	path={path}
-	langPaths={{ ja: dataPath(page.slug, 'ja'), en: dataPath(page.slug, 'en') }}
+	langPaths={Object.fromEntries(DATA_LANGS.map(l => [l, dataPath(page.slug, l)]))}
 	breadcrumbs={[
 		{ name: t.home, path: '/' },
 		{ name: t.hubs.data, path: hubPath('data', lang) },

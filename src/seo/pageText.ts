@@ -1,14 +1,32 @@
 /**
- * 駅・路線・データのページの文言（日本語・英語）。
+ * 駅・路線・データのページの文言（日本語・英語・中国語〈簡体字〉・韓国語）。
  *
  * 値（駅名・路線数・統計値など）は pageModel.ts から受け取り、ここでは
  * 文の形だけを持つ。言語を足すときはこのオブジェクトに1言語分を足し、
  * SEO_LANGS（pageModel.ts）に加える。
+ *
+ * 固有名詞（駅名・路線名・観光地名）はここで訳さない。駅名は translation.ts /
+ * stationTranslationsCJK.ts、観光地名は touristSpots.ts にある表記だけを使う。
  */
 import type { SeoLang } from './pageModel';
 import type { TouristSpot } from '../data/touristSpots';
+import { translateStatParamLabel, translateStatUnit, type Language } from '../utils/translation';
 
-const fmt = (n: number, lang: SeoLang) => n.toLocaleString(lang === 'ja' ? 'ja-JP' : 'en-US');
+const LOCALE: Record<SeoLang, string> = { ja: 'ja-JP', en: 'en-US', zh: 'zh-CN', ko: 'ko-KR' };
+const fmt = (n: number, lang: SeoLang) => n.toLocaleString(LOCALE[lang]);
+
+/** 言語の切り替えリンクに出す名前（その言語自身での表記） */
+export const LANG_LABEL: Record<SeoLang, string> = { ja: '日本語', en: 'English', zh: '简体中文', ko: '한국어' };
+
+/** 地図アプリの翻訳関数（translation.ts）の言語名 */
+export const APP_LANGUAGE: Record<SeoLang, Language> = { ja: 'japanese', en: 'english', zh: 'chinese', ko: 'korean' };
+
+/** 駅統計の項目名・単位（translation.ts の対訳を使う） */
+export const statLabel = (label: string, lang: SeoLang) => translateStatParamLabel(label, APP_LANGUAGE[lang]);
+export const statValue = (n: number, unit: string, lang: SeoLang) => {
+  const u = translateStatUnit(unit, APP_LANGUAGE[lang]);
+  return `${fmt(n, lang)}${lang === 'en' && u ? ' ' : ''}${u}`;
+};
 
 /**
  * 駅統計の範囲・時期（stationStats.ts の STAT_PARAMS の radius / period）の英語。
@@ -22,6 +40,26 @@ export const STAT_SCOPE_EN: Record<string, string> = {
   '2026年9月収集（首都圏10駅のみ）': 'collected September 2026 (10 stations only)',
   '令和5年（2023年）': '2023',
   '路線データ更新時点': 'as of the current line data',
+};
+
+/** 駅統計の範囲・時期の中国語（簡体字）。実データの指標の分はすべて必要（テストで確かめる） */
+export const STAT_SCOPE_ZH: Record<string, string> = {
+  '駅出口から半径500m以内': '车站出口半径500米以内',
+  '駅代表点から半径800m以内': '车站代表点半径800米以内',
+  '2026年6月収集': '2026年6月收集',
+  '2026年9月収集（首都圏10駅のみ）': '2026年9月收集（仅东京都市圈10个车站）',
+  '令和5年（2023年）': '2023年',
+  '路線データ更新時点': '截至线路数据更新时',
+};
+
+/** 駅統計の範囲・時期の韓国語。実データの指標の分はすべて必要（テストで確かめる） */
+export const STAT_SCOPE_KO: Record<string, string> = {
+  '駅出口から半径500m以内': '역 출구 반경 500m 이내',
+  '駅代表点から半径800m以内': '역 대표 지점 반경 800m 이내',
+  '2026年6月収集': '2026년 6월 수집',
+  '2026年9月収集（首都圏10駅のみ）': '2026년 9월 수집(수도권 10개 역만)',
+  '令和5年（2023年）': '2023년',
+  '路線データ更新時点': '노선 데이터 갱신 시점',
 };
 
 /**
@@ -40,7 +78,6 @@ export const SEO_TEXT = {
   ja: {
     home: 'Flex Railway Map',
     hubs: { stations: '駅', lines: '路線', data: '駅周辺データ' },
-    otherLang: { label: 'English', lang: 'en' as SeoLang },
     openMap: '路線図で見る',
 
     stationsHubTitle: '駅の一覧（東京・横浜・大阪・京都・札幌などの主要路線）| Flex Railway Map',
@@ -127,7 +164,6 @@ export const SEO_TEXT = {
   en: {
     home: 'Flex Railway Map',
     hubs: { stations: 'Stations', lines: 'Lines', data: 'Station Area Data' },
-    otherLang: { label: '日本語', lang: 'ja' as SeoLang },
     openMap: 'View on the map',
 
     stationsHubTitle: 'Stations in Tokyo, Yokohama, Osaka, Kyoto, Sapporo and More | Flex Railway Map',
@@ -211,6 +247,180 @@ export const SEO_TEXT = {
     missing: (n: number) => `${n} of the stations covered have no data (not counted as zero).`,
     scope: (radius?: string, period?: string) =>
       [radius, period].filter((x): x is string => !!x).map(x => STAT_SCOPE_EN[x] ?? x).join(', '),
+  },
+  zh: {
+    home: 'Flex Railway Map',
+    hubs: { stations: '车站', lines: '线路', data: '车站周边数据' },
+    openMap: '在线路图中查看',
+
+    stationsHubTitle: '车站一览（东京・横滨・大阪・京都・札幌等主要线路）| Flex Railway Map',
+    stationsHubH1: '车站一览',
+    stationsHubLede: (n: number) => `整理了东京、横滨、大阪、京都、札幌等城市主要线路上${fmt(n, 'zh')}个车站的途经线路、相邻车站和附近景点。`,
+    cities: '城市',
+    spotName: (spot: TouristSpot) => spot.name.zh ?? spot.name.en,
+    majorStations: '主要车站',
+    touristSpots: '景点与最近车站',
+    stationsByLine: '按线路查看车站',
+
+    stationTitle: (name: string, lines: number, stats: number, spots: string[]) =>
+      `${name}站${spots.length > 0 ? `（${spots[0]}最近车站）` : ''}：` +
+      `${lines >= 2 ? `${lines}条线路与换乘` : '线路与相邻车站'}` +
+      `${stats > 0 && spots.length === 0 ? '及周边数据' : ''} | Flex Railway Map`,
+    stationDescription: (name: string, lineNames: string[], stats: number, spots: string[]) =>
+      `汇总经过${name}站的线路（${lineNames.slice(0, 3).join('、')}${lineNames.length > 3 ? '等' : ''}）、相邻车站` +
+      `${spots.length > 0 ? `、附近景点（${spots.join('、')}）` : ''}` +
+      `${stats > 0 ? `，以及餐饮店数量等${stats}项周边统计（附出处）` : ''}。`,
+    stationH1: (name: string) => `${name}站`,
+    stationLede: (name: string, routes: number, effective: number) =>
+      effective >= 2
+        ? `${name}站有${routes}个运行系统停靠，将同一轨道上的系统合并计算，实际上是${effective}条线路的换乘站。`
+        : `经过${name}站的运行系统有${routes}个（无法换乘其他线路）。`,
+    linesAtStation: '经过本站的线路',
+    adjacent: '相邻车站',
+    prev: '上一站',
+    next: '下一站',
+    terminal: '（终点）',
+    nearbySpots: '附近景点',
+    nearbySpotLine: (spot: string) => `本站是${spot}的最近车站之一。`,
+    nearbyStations: '附近的主要车站',
+    aroundStats: '车站周边数据',
+    statsNote: '数值根据公开数据和 OpenStreetMap 统计得出，不含估算值。',
+    colItem: '项目', colValue: '数值', colScope: '范围・时期',
+    sources: '出处',
+    retrievedAt: (d: string) => `（获取日期 ${d}）`,
+    paren: (x: string) => `（${x}）`,
+    sourceTitle: (title: string) => SOURCE_TITLE_EN[title] ?? title,
+    relatedGuides: '相关指南',
+    lineDetails: '本指南涉及线路的车站一览',
+    openMapFrom: (name: string) => `以${name}站为出发站打开线路图`,
+    openMapRoutes: (name: string) => `在线路图中显示经过${name}站的线路`,
+    openMapSpot: (spot: string, station: string) => `以${spot}的最近车站（${station}站）为出发站打开线路图`,
+
+    linesHubTitle: '线路一览（东京・大阪・京都・札幌等主要线路）| Flex Railway Map',
+    linesHubH1: '线路一览',
+    linesHubLede: (n: number) => `按城市整理东京、横滨、大阪、京都、札幌等地${n}条主要线路的车站一览、换乘站和直通运行。`,
+
+    lineTitle: (name: string, n: number) => `${name}全${n}站一览・换乘站・直通运行 | Flex Railway Map`,
+    lineDescription: (name: string, n: number, from: string, to: string, transfers: number) =>
+      `按顺序列出${name}（${from}～${to}）的全部${n}个车站，以及${transfers}个换乘站和直通运行的线路。`,
+    lineH1: (name: string) => `${name}车站一览`,
+    lineLede: (name: string, n: number, from: string, to: string, transfers: number) =>
+      `${name}从${from}到${to}共有${n}个车站，其中${transfers}个车站可以换乘其他线路。`,
+    stationList: '车站一览',
+    colNo: '序号', colStation: '车站', colTransfers: '换乘',
+    section: (from: string, to: string) => `${from}～${to}`,
+    listSep: '、',
+    throughService: '直通运行',
+    throughLine: (partners: string) => `与${partners}直通运行。`,
+    noThrough: '线路数据中没有登记直通运行。',
+    openMapLine: (name: string) => `只显示${name}并打开线路图`,
+
+    openMapData: (label: string) => `以${label}热力图打开线路图`,
+    dataHubTitle: '车站周边数据一览 | Flex Railway Map',
+    dataHubH1: '车站周边数据',
+    dataHubLede: '只列出有实测数据的车站周边统计指标。',
+    excluded: '未刊载的指标',
+    excludedEstimated: (label: string) => `${label}：目前的数据是估算值，因此不予刊载。`,
+
+    dataTitle: (label: string) => `车站周边${label}排名（东京都市圈主要车站）| Flex Railway Map`,
+    dataDescription: (label: string, n: number, scope: string) =>
+      `按数量排列东京都市圈主要线路${n}个车站的${label}（${scope}），并比较各线路的中位数。附出处。`,
+    dataH1: (label: string) => `车站周边的${label}`,
+    dataLede: (label: string, n: number, top: string, topValue: string) =>
+      `在${n}个对象车站中，${label}最多的是${top}站（${topValue}）。`,
+    ranking: '各车站数值',
+    byLine: '按线路比较',
+    colRank: '排名', colLine: '线路', colMedian: '中位数', colMax: '最高车站', colCount: '车站数',
+    missing: (n: number) => `对象车站中有${n}个车站没有数据（未按0计算）。`,
+    scope: (radius?: string, period?: string) =>
+      [radius, period].filter((x): x is string => !!x).map(x => STAT_SCOPE_ZH[x] ?? x).join('・'),
+  },
+  ko: {
+    home: 'Flex Railway Map',
+    hubs: { stations: '역', lines: '노선', data: '역 주변 데이터' },
+    openMap: '노선도에서 보기',
+
+    stationsHubTitle: '역 목록 (도쿄・요코하마・오사카・교토・삿포로 등 주요 노선) | Flex Railway Map',
+    stationsHubH1: '역 목록',
+    stationsHubLede: (n: number) => `도쿄, 요코하마, 오사카, 교토, 삿포로 등 주요 노선의 역 ${fmt(n, 'ko')}곳에 대해 지나는 노선, 인접역, 주변 관광지를 정리했습니다.`,
+    cities: '도시',
+    spotName: (spot: TouristSpot) => spot.name.ko ?? spot.name.en,
+    majorStations: '주요 역',
+    touristSpots: '관광지와 가장 가까운 역',
+    stationsByLine: '노선별 역',
+
+    stationTitle: (name: string, lines: number, stats: number, spots: string[]) =>
+      `${name}역${spots.length > 0 ? ` (${spots[0]} 최근접 역)` : ''}: ` +
+      `${lines >= 2 ? `${lines}개 노선과 환승` : '노선과 인접역'}` +
+      `${stats > 0 && spots.length === 0 ? ' 및 주변 데이터' : ''} | Flex Railway Map`,
+    stationDescription: (name: string, lineNames: string[], stats: number, spots: string[]) =>
+      `${name}역을 지나는 노선(${lineNames.slice(0, 3).join(', ')}${lineNames.length > 3 ? ' 등' : ''}), 인접역` +
+      `${spots.length > 0 ? `, 주변 관광지(${spots.join(', ')})` : ''}` +
+      `${stats > 0 ? `, 음식점 수 등 주변 통계 ${stats}개 항목(출처 포함)` : ''} 정보를 정리했습니다.`,
+    stationH1: (name: string) => `${name}역`,
+    stationLede: (name: string, routes: number, effective: number) =>
+      effective >= 2
+        ? `${name}역에는 ${routes}개 운행 계통이 정차하며, 같은 선로를 달리는 계통을 하나로 세면 실질적으로 ${effective}개 노선이 지나는 환승역입니다.`
+        : `${name}역을 지나는 운행 계통은 ${routes}개입니다(다른 노선으로 환승할 수 없습니다).`,
+    linesAtStation: '이 역을 지나는 노선',
+    adjacent: '인접역',
+    prev: '이전 역',
+    next: '다음 역',
+    terminal: '(종점)',
+    nearbySpots: '주변 관광지',
+    nearbySpotLine: (spot: string) => `${spot}에서 가장 가까운 역 중 하나입니다.`,
+    nearbyStations: '근처의 주요 역',
+    aroundStats: '역 주변 데이터',
+    statsNote: '값은 공개 데이터와 OpenStreetMap에서 집계한 실측값입니다. 추정값은 싣지 않았습니다.',
+    colItem: '항목', colValue: '값', colScope: '범위・시기',
+    sources: '출처',
+    retrievedAt: (d: string) => ` (취득일 ${d})`,
+    paren: (x: string) => ` (${x})`,
+    sourceTitle: (title: string) => SOURCE_TITLE_EN[title] ?? title,
+    relatedGuides: '관련 가이드',
+    lineDetails: '이 가이드에 나오는 노선의 역 목록',
+    openMapFrom: (name: string) => `${name}역을 출발역으로 노선도 열기`,
+    openMapRoutes: (name: string) => `${name}역을 지나는 노선을 노선도에서 열기`,
+    openMapSpot: (spot: string, station: string) => `${spot}에서 가장 가까운 ${station}역을 출발역으로 노선도 열기`,
+
+    linesHubTitle: '노선 목록 (도쿄・오사카・교토・삿포로 등 주요 노선) | Flex Railway Map',
+    linesHubH1: '노선 목록',
+    linesHubLede: (n: number) => `도쿄, 요코하마, 오사카, 교토, 삿포로 등 주요 노선 ${n}개의 역 목록, 환승역, 직통 운행을 도시별로 정리했습니다.`,
+
+    lineTitle: (name: string, n: number) => `${name} 전체 ${n}개 역・환승역・직통 운행 | Flex Railway Map`,
+    lineDescription: (name: string, n: number, from: string, to: string, transfers: number) =>
+      `${name}(${from}~${to})의 전체 ${n}개 역을 순서대로 정리하고, 환승할 수 있는 역 ${transfers}곳과 직통 운행 노선을 소개합니다.`,
+    lineH1: (name: string) => `${name} 역 목록`,
+    lineLede: (name: string, n: number, from: string, to: string, transfers: number) =>
+      `${name}: ${from}부터 ${to}까지 ${n}개 역이 있으며, 그중 ${transfers}개 역에서 다른 노선으로 환승할 수 있습니다.`,
+    stationList: '역 목록',
+    colNo: '순서', colStation: '역', colTransfers: '환승',
+    section: (from: string, to: string) => `${from}~${to}`,
+    listSep: ', ',
+    throughService: '직통 운행',
+    throughLine: (partners: string) => `직통 운행 노선: ${partners}`,
+    noThrough: '노선 데이터에 직통 운행이 등록되어 있지 않습니다.',
+    openMapLine: (name: string) => `${name}만 표시해 노선도 열기`,
+
+    openMapData: (label: string) => `${label} 히트맵으로 노선도 열기`,
+    dataHubTitle: '역 주변 데이터 목록 | Flex Railway Map',
+    dataHubH1: '역 주변 데이터',
+    dataHubLede: '실측 데이터가 있는 지표만 역 주변 통계를 정리했습니다.',
+    excluded: '싣지 않은 지표',
+    excludedEstimated: (label: string) => `${label}: 현재 데이터가 추정값이라 싣지 않았습니다.`,
+
+    dataTitle: (label: string) => `역 주변 ${label} 순위 (도쿄 수도권 주요 역) | Flex Railway Map`,
+    dataDescription: (label: string, n: number, scope: string) =>
+      `도쿄 수도권 주요 노선 ${n}개 역의 ${label}(${scope}) 순위와 노선별 중앙값을 출처와 함께 정리했습니다.`,
+    dataH1: (label: string) => `역 주변 ${label}`,
+    dataLede: (label: string, n: number, top: string, topValue: string) =>
+      `대상 ${n}개 역 중 ${label} 1위는 ${top}역(${topValue})입니다.`,
+    ranking: '역별 값',
+    byLine: '노선별 비교',
+    colRank: '순위', colLine: '노선', colMedian: '중앙값', colMax: '가장 높은 역', colCount: '역 수',
+    missing: (n: number) => `대상 중 ${n}개 역은 데이터가 없습니다(0으로 계산하지 않았습니다).`,
+    scope: (radius?: string, period?: string) =>
+      [radius, period].filter((x): x is string => !!x).map(x => STAT_SCOPE_KO[x] ?? x).join('・'),
   },
 } satisfies Record<SeoLang, unknown>;
 

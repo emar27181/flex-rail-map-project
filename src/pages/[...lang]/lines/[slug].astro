@@ -7,11 +7,10 @@ import SeoPageLayout from '../../../layouts/SeoPageLayout.astro';
 import MapOpenCta from '../../../components/MapOpenCta.astro';
 import LineChip from '../../../components/seo/LineChip.astro';
 import {
-  SEO_LANGS, dataPath, getSeoModel, guidesForRoutes, hubPath, linePath, routeName, stationName, stationPath,
-  type SeoLang, type SeoLine,
+  DATA_LANGS, SEO_LANGS, dataPath, getSeoModel, guidesForRoutes, hasStationPage, hubPath, linePath, routeName,
+  stationName, stationPath, type SeoLang, type SeoLine,
 } from '../../../seo/pageModel';
-import { SEO_TEXT, formatNumber } from '../../../seo/pageText';
-import { translateStatParamLabel } from '../../../utils/translation';
+import { SEO_TEXT, formatNumber, statLabel } from '../../../seo/pageText';
 
 export function getStaticPaths() {
   return SEO_LANGS.flatMap(lang =>
@@ -31,9 +30,10 @@ const first = stationName(line.stops[0].station, lang);
 const last = stationName(line.stops[line.stops.length - 1].station, lang);
 const transferCount = line.stops.filter(s => s.station.effectiveLines >= 2).length;
 const relatedGuides = guidesForRoutes([line.key], lang);
-// 駅一覧に添える駅周辺データ（データのページがある指標の先頭1つ）
-const dataPage = getSeoModel().dataPages.find(d => d.indexable);
-const dataLabel = dataPage && (lang === 'en' ? translateStatParamLabel(dataPage.meta.label, 'english') : dataPage.meta.label);
+// 駅一覧に添える駅周辺データ（データのページがある指標の先頭1つ。統計を集めている都市の路線だけ）
+const dataPage = line.stops.some(s => s.station.stats.length > 0) ? getSeoModel().dataPages.find(d => d.indexable) : undefined;
+const dataLabel = dataPage && statLabel(dataPage.meta.label, lang);
+const dataHref = dataPage && DATA_LANGS.includes(lang) ? dataPath(dataPage.slug, lang) : undefined;
 const lineCta = {
   label: t.openMapLine(name),
   kind: 'line' as const,
@@ -49,7 +49,7 @@ const lineCta = {
 	title={t.lineTitle(name, line.stops.length)}
 	description={t.lineDescription(name, line.stops.length, first, last, transferCount)}
 	path={path}
-	langPaths={{ ja: linePath(line.slug, 'ja'), en: linePath(line.slug, 'en') }}
+	langPaths={Object.fromEntries(SEO_LANGS.map(l => [l, linePath(line.slug, l)]))}
 	breadcrumbs={[
 		{ name: t.home, path: '/' },
 		{ name: t.hubs.lines, path: hubPath('lines', lang) },
@@ -70,7 +70,7 @@ const lineCta = {
 						<th class="num">{t.colNo}</th>
 						<th>{t.colStation}</th>
 						<th>{t.colTransfers}</th>
-						{dataPage && <th class="num"><a href={dataPath(dataPage.slug, lang)}>{dataLabel}</a></th>}
+						{dataPage && <th class="num">{dataHref ? <a href={dataHref}>{dataLabel}</a> : dataLabel}</th>}
 					</tr>
 				</thead>
 				<tbody>
@@ -79,7 +79,9 @@ const lineCta = {
 						return (
 							<tr>
 								<td class="num">{i + 1}</td>
-								<td><a href={stationPath(stop.station.slug, lang)}>{stationName(stop.station, lang)}</a></td>
+								<td>{hasStationPage(stop.station, lang)
+									? <a href={stationPath(stop.station.slug, lang)}>{stationName(stop.station, lang)}</a>
+									: stationName(stop.station, lang)}</td>
 								<td>{stop.transfers.map(r => routeName(r, lang)).join(t.listSep)}</td>
 								{dataPage && <td class="num">{stat ? formatNumber(stat.value, lang) : '-'}</td>}
 							</tr>

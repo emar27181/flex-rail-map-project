@@ -23,12 +23,21 @@ import { TOURIST_SPOTS, type TouristSpot } from '../data/touristSpots';
 import { THROUGH_SERVICES } from '../data/throughServices';
 import { guides, guidePath, type GuideDefinition } from '../data/guides';
 import { routeTranslations, stationTranslations } from '../utils/translation';
+import { stationTranslationsChinese, stationTranslationsKorean } from '../utils/stationTranslationsCJK';
 import { approxDistanceKm, isSameStation } from '../utils/sameStation';
 import { countDistinctLines } from '../utils/effectiveLines';
 import { getAllStations } from '../utils/allStations';
 
-export type SeoLang = 'ja' | 'en';
-export const SEO_LANGS: SeoLang[] = ['ja', 'en'];
+export type SeoLang = 'ja' | 'en' | 'zh' | 'ko';
+/**
+ * 駅・路線のページを作る言語。URL は既存のガイドと同じ /en/, /zh/, /ko/ の接頭辞。
+ * - 日本語・英語: すべてのページ
+ * - 中国語・韓国語: 路線ページ・一覧ページと、index する駅（Tier A）のうち
+ *   その言語の駅名が翻訳データにある駅だけ（駅名を推測で訳さない）
+ */
+export const SEO_LANGS: SeoLang[] = ['ja', 'en', 'zh', 'ko'];
+/** 駅周辺データのページを作る言語（首都圏だけの統計のため日本語・英語のみ） */
+export const DATA_LANGS: SeoLang[] = ['ja', 'en'];
 
 /**
  * 駅統計の座標は小数1桁（約10km四方）に丸められているため、駅の座標と
@@ -72,6 +81,8 @@ export interface StationRefLink {
   nameEn: string;
   /** 駅ページがあるときだけ */
   slug?: string;
+  /** 駅ページがある言語 */
+  langs?: SeoLang[];
 }
 
 export interface AdjacentOnRoute {
@@ -99,6 +110,8 @@ export interface SeoStation {
   cities: SeoCityId[];
   tier: StationTier;
   indexable: boolean;
+  /** 駅ページを作る言語 */
+  langs: SeoLang[];
   /** 地図でこの駅を出発駅にして開けるか（地図側が駅名で同じ駅を引けるときだけ） */
   mapFrom?: string;
 }
@@ -163,13 +176,31 @@ export interface SeoModel {
 
 // ── 路線名 ────────────────────────────────────────────
 
+/** 路線名。中国語・韓国語の路線名の翻訳データは無いため、英語名（各社の公式の英語表記）を出す */
 export function routeName(key: RouteKey, lang: SeoLang): string {
   const ja = routeNames[key as keyof typeof routeNames] ?? key;
   return lang === 'ja' ? ja : (routeTranslations[ja] ?? ja);
 }
 
+/** 駅名の翻訳（無ければ undefined。推測で補わない） */
+function translatedStationName(name: string, lang: SeoLang): string | undefined {
+  if (lang === 'zh') return stationTranslationsChinese[name];
+  if (lang === 'ko') return stationTranslationsKorean[name];
+  return undefined;
+}
+
+/**
+ * 駅名。中国語は翻訳が無ければ日本語の表記、韓国語は英語の表記（地図アプリの translateStation と同じ）
+ */
 export function stationName(s: { name: string; nameEn: string }, lang: SeoLang): string {
-  return lang === 'ja' ? s.name : s.nameEn;
+  if (lang === 'ja') return s.name;
+  if (lang === 'en') return s.nameEn;
+  return translatedStationName(s.name, lang) ?? (lang === 'zh' ? s.name : s.nameEn);
+}
+
+/** その言語の駅ページがあるか */
+export function hasStationPage(s: { slug?: string; langs?: SeoLang[] }, lang: SeoLang): boolean {
+  return !!s.slug && !!s.langs?.includes(lang);
 }
 
 // ── 組み立て ──────────────────────────────────────────
@@ -281,6 +312,8 @@ function buildModel(): SeoModel {
         .filter(c => c.lines.some(l => routeKeys.includes(l)) || touristSpots.some(t => t.city === c.id))
         .map(c => c.id),
       indexable: tier === 'A',
+      langs: (['ja', 'en', 'zh', 'ko'] as SeoLang[]).filter(l =>
+        l === 'ja' || l === 'en' || (tier === 'A' && translatedStationName(ref.name, l) !== undefined)),
       mapFrom: appStation && isSameStation(appStation, ref) ? ref.name : undefined,
     };
     return { station, hits };
@@ -293,6 +326,7 @@ function buildModel(): SeoModel {
     name: s.name,
     nameEn: stationTranslations[s.name] ?? s.name,
     slug: findStation(s)?.slug,
+    langs: findStation(s)?.langs,
   });
   for (const { station, hits } of drafts) {
     station.adjacent = station.routes.map(rk => {
@@ -379,9 +413,9 @@ export function getSeoModel(): SeoModel {
 // ── 内部リンク ────────────────────────────────────────
 
 /** 近くの主要駅（index 対象の駅から距離順） */
-export function nearbyMajorStations(station: SeoStation): SeoStation[] {
+export function nearbyMajorStations(station: SeoStation, lang: SeoLang = 'ja'): SeoStation[] {
   return getSeoModel().stations
-    .filter(s => s !== station && s.indexable)
+    .filter(s => s !== station && s.indexable && s.langs.includes(lang))
     .map(s => ({ s, d: approxDistanceKm(s.lat, s.lng, station.lat, station.lng) }))
     .filter(x => x.d <= NEARBY_MAX_KM)
     .sort((a, b) => a.d - b.d)
