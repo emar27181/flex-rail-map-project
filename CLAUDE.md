@@ -710,6 +710,13 @@ Netlify管理画面の Site configuration → Build & deploy → Branch deploys 
   クリックは GA4 の `seo_map_open` と `{guide,station,line,tourist,data}_map_open` で計測する
 - 仕組み・判断基準・ページを足すときの決まりは **`docs/seo.md`**
 
+### 記事（/articles）の書き方
+
+- **1記事1テーマ・結論を先に・起承転結の4見出し・1セクション1枚の実際の画面**。
+  ほかのテーマは本文に書かず、`ARTICLES` の `related`（3本）で記事の最後に案内する
+- 画像は `scripts/capture-article-screenshots.mts` で4言語分撮る（作り物の図を載せない）
+- 決まり・構成・参考資料は **`docs/article-writing.md`**
+
 ### CHANGE.log 記録ルール
 
 **セッション中に行った変更は必ず `CHANGE.log` に記録すること。**

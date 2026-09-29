@@ -2,6 +2,32 @@
 
 ## [2026-09-29] セッション（SEO: 都市・観光地・多言語・設定済み地図CTA・GA4）
 
+### improve: 記事6本を「1記事1テーマ・結論先出し・起承転結・実際の画面つき」に書き直す
+- `src/data/articleBodyI18n.ts`, `src/data/articleI18n.ts`（タイトル・説明、`related`, `relatedArticles`）,
+  `src/components/articles/ArticleLayout.astro`（関連記事）, `src/styles/article-layout.css`（`figure.shot`, `.related`）,
+  `tests/unit/data/articleI18n.test.ts`
+- 1記事に複数のテーマ（家賃・治安・通勤）が混ざり、図も無かった。各記事を1つの問いに絞り、冒頭に結論3行、
+  見出し4つ（起承転結）、セクションごとにこのサイトの実際の画面（4言語それぞれ）を置いた
+- 地図を開くボタンは記事の内容をそのまま再現した状態で開く（例: 観光は4路線だけ、治安は犯罪件数の色分け）
+- 本文末の関連リンクをやめ、記事ごとに3本の関連記事をレイアウト側で出す
+- 治安の記事で「犯罪件数のヒートマップは無い」と書いていたが、実データ（警視庁・令和5年・都内438駅）があるため、
+  その読み方と限界（繁華街ほど多い・都外はデータなし）を書いた
+
+### feat: 記事のスクリーンショットを撮り直せるスクリプトを置く
+- `scripts/capture-article-screenshots.mts`（新規）, `public/images/articles/**`（13枚×4言語）
+- 地図の状態を URL で作り、4言語・ライトテーマ・時刻固定で撮る。開発サーバーのツールバーは写さない
+
+### fix: 路線・データのページで駅名が途中で折り返さないようにする
+- `src/layouts/seoPageStyles.ts`（`td.name`）, `src/pages/[...lang]/{lines,data}/[slug].astro`
+- 駅一覧の表で「代官/山」のように駅名が2行に割れ、別の駅名に見えていた
+
+### docs: 記事の書き方をまとめる
+- `docs/article-writing.md`（新規）, `CLAUDE.md`, `docs/article-generation-prompt.md`（古い旨を追記）
+
+### feat: 地図の中心と拡大率を URL（center/zoom）で指定できるようにする
+- `src/utils/mapViewUrlParam.ts`（新規）, `src/utils/mapDeepLink.ts`（`to` `center` `zoom`）, `src/components/RailwayMap.tsx`,
+  `tests/unit/utils/heatmapUrlParam.test.ts`
+
 ### fix: 中国語版の hreflang と html lang を zh-CN にする
 - `src/config/seo.ts`（`HREFLANG_CODE`, `hreflangCode`）, `src/layouts/GuideLayout.astro`,
   `src/layouts/GuidesIndexLayout.astro`, `tests/unit/seo/hreflang.test.ts`（新規）
