@@ -1,0 +1,8 @@
+---
+import GuideLayout from "../../../layouts/GuideLayout.astro";
+import { getGuide } from "../../../data/guides";
+
+const guide = getGuide('ko', 'kyoto-train-map')!;
+---
+
+<GuideLayout guide={guide} indexHref="/ko/guides" indexLabel="가이드 목록" backLabel="← Flex Railway Map으로 돌아가기" />

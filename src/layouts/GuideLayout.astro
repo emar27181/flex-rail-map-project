@@ -121,6 +121,7 @@ const webPageJsonLd = {
 				note={guide.ctaNote}
 				kind="guide"
 				guideSlug={guide.slug}
+				city={guide.city}
 				language={guide.lang}
 				routes={guide.ctaRoutes}
 			/>
@@ -138,6 +139,16 @@ const webPageJsonLd = {
 				<section>
 					<h2>{section.heading}</h2>
 					{section.paragraphs.map(p => <p>{p}</p>)}
+					{section.cta && (
+						<MapOpenCta
+							label={section.cta.label}
+							kind="guide"
+							guideSlug={guide.slug}
+							city={guide.city}
+							language={guide.lang}
+							routes={section.cta.routes}
+						/>
+					)}
 				</section>
 			))}
 
@@ -148,6 +159,7 @@ const webPageJsonLd = {
 				note={guide.ctaNote}
 				kind="guide"
 				guideSlug={guide.slug}
+				city={guide.city}
 				language={guide.lang}
 				routes={guide.ctaRoutes}
 			/>
