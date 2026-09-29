@@ -5,6 +5,7 @@
 import { routes, type RouteKey } from '../data/routes';
 import { THROUGH_SERVICES, type ThroughSection, type ThroughService } from '../data/throughServices';
 import type { Station } from '../data/yamanote';
+import { isSameStation, type StationRef } from './sameStation';
 
 type RouteStations = Partial<Record<RouteKey, Station[]>>;
 
@@ -34,20 +35,25 @@ function mergeRanges(ranges: [number, number][]): [number, number][] {
 }
 
 /**
- * stationName から直通列車1本で行ける、他路線の区間。
+ * origin から直通列車1本で行ける、他路線の区間。
  *
- * stationName 自体が通る路線は地図上で全区間を出すので結果に含めない。
+ * origin 自体が通る路線は地図上で全区間を出すので結果に含めない。
  * 返り値は路線ごとの駅列（連続しない区間は別要素）。
+ *
+ * origin は座標付きで渡すこと。全国の系統を登録しているため、名前だけだと
+ * 京都の「大宮」から首都圏の湘南新宿ラインに乗れることになってしまう
+ * （名前だけの文字列も受け付けるが、そのときは同名別駅を区別できない）。
  */
 export function getThroughReachableSections(
-  stationName: string,
+  origin: StationRef | string,
   services: ThroughService[] = THROUGH_SERVICES,
   routeStations: RouteStations = routes,
 ): Map<RouteKey, Station[][]> {
+  const ref: StationRef = typeof origin === 'string' ? { name: origin } : origin;
+  const isOrigin = (s: Station) => isSameStation(s, ref);
+
   const ownRoutes = new Set(
-    (Object.keys(routeStations) as RouteKey[]).filter(rk =>
-      routeStations[rk]?.some(s => s.name === stationName),
-    ),
+    (Object.keys(routeStations) as RouteKey[]).filter(rk => routeStations[rk]?.some(isOrigin)),
   );
 
   const rangesByRoute = new Map<RouteKey, [number, number][]>();
@@ -55,7 +61,7 @@ export function getThroughReachableSections(
     const resolved = service.sections.map(sec => ({ sec, range: resolveSectionRange(sec, routeStations) }));
     const boards = resolved.some(({ sec, range }) =>
       range !== null &&
-      routeStations[sec.route]!.slice(range[0], range[1] + 1).some(s => s.name === stationName),
+      routeStations[sec.route]!.slice(range[0], range[1] + 1).some(isOrigin),
     );
     if (!boards) continue;
     for (const { sec, range } of resolved) {

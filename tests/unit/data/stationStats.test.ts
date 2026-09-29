@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getParamRange, getStationStats, STAT_PARAMS, PARAM_DATA_SOURCES } from '../../../src/data/stationStats';
+import { dropSuspectedFailedBatches, getParamRange, getStationStats, STAT_PARAMS, PARAM_DATA_SOURCES } from '../../../src/data/stationStats';
 
 // niceStep のロジックを直接テスト（RailwayMap.tsx と同じアルゴリズム）
 function niceStep(fullRange: number): number {
@@ -129,5 +129,33 @@ describe('首都圏駅データセットPoC（2026-09-24収集）由来のフィ
     }
     // 大宮は国交省の主要区間に該当なし（PoC README記載どおりnull/未設定）
     expect(getStationStats('大宮')?.congestionSections).toBeUndefined();
+  });
+});
+
+describe('取得失敗の疑いのある 0 件はデータなしとして扱う', () => {
+  it('同じ回の項目がすべて 0 の駅（有明）は、その回の値を持たない', () => {
+    const s = getStationStats('有明')!;
+    expect(s.restaurantCount).toBeUndefined();
+    expect(s.parkAreaM2).toBeUndefined();
+    expect(s.greenRatioPct).toBeUndefined();
+    // 2回目の取得もすべて 0 だったので捨てる
+    expect(s.izakayaCount).toBeUndefined();
+  });
+
+  it('1回目だけ 0 の駅（長谷）は、値の取れている2回目の項目は残す', () => {
+    const s = getStationStats('長谷')!;
+    expect(s.restaurantCount).toBeUndefined();
+    expect(s.izakayaCount).toBe(1);
+  });
+
+  it('値のある駅（新宿）はそのまま', () => {
+    expect(getStationStats('新宿')!.restaurantCount).toBeGreaterThan(0);
+  });
+
+  it('一部だけ 0 の駅は 0 をそのまま残す（本当に無い可能性がある）', () => {
+    expect(dropSuspectedFailedBatches({
+      stationName: 'x', lat: 0, lng: 0,
+      restaurantCount: 0, cafeCount: 0, convenienceStoreCount: 1, supermarketCount: 0, hospitalCount: 0, parkAreaM2: 0,
+    }).restaurantCount).toBe(0);
   });
 });

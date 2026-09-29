@@ -1,0 +1,143 @@
+---
+/**
+ * 駅ページ（/stations/{slug}, /en/stations/{slug}）。
+ * 中身はすべて src/seo/pageModel.ts が路線データ・駅統計・観光地データから作る。
+ * Tier A だけ index、それ以外は noindex, follow（src/data/seoPages.ts の基準）。
+ */
+import SeoPageLayout from '../../../layouts/SeoPageLayout.astro';
+import MapOpenCta from '../../../components/MapOpenCta.astro';
+import LineChip from '../../../components/seo/LineChip.astro';
+import StationLink from '../../../components/seo/StationLink.astro';
+import {
+  SEO_LANGS, dataPageFor, dataPath, getSeoModel, guidesForRoutes, hubPath, nearbyMajorStations,
+  routeName, stationName, stationPath, type SeoLang, type SeoStation,
+} from '../../../seo/pageModel';
+import { SEO_TEXT, formatNumber } from '../../../seo/pageText';
+import { translateStatParamLabel, translateStatUnit } from '../../../utils/translation';
+
+export function getStaticPaths() {
+  return SEO_LANGS.flatMap(lang =>
+    getSeoModel().stations.map(station => ({
+      params: { lang: lang === 'ja' ? undefined : lang, slug: station.slug },
+      props: { lang, station },
+    })),
+  );
+}
+
+interface Props { lang: SeoLang; station: SeoStation }
+const { lang, station } = Astro.props;
+const t = SEO_TEXT[lang];
+const en = lang === 'en';
+const name = stationName(station, lang);
+const path = stationPath(station.slug, lang);
+const lineNames = station.routes.map(r => routeName(r, lang));
+const nearby = nearbyMajorStations(station);
+const relatedGuides = guidesForRoutes(station.routes, lang);
+const statLabel = (label: string) => (en ? translateStatParamLabel(label, 'english') : label);
+const statUnit = (unit: string) => (en ? translateStatUnit(unit, 'english') : unit);
+const sources = [...new Map(station.stats.filter(s => s.source).map(s => [s.source!.title + s.source!.retrievedAt, s.source!])).values()];
+---
+
+<SeoPageLayout
+	lang={lang}
+	title={t.stationTitle(name, station.effectiveLines)}
+	description={t.stationDescription(name, lineNames, station.stats.length)}
+	path={path}
+	langPaths={{ ja: stationPath(station.slug, 'ja'), en: stationPath(station.slug, 'en') }}
+	breadcrumbs={[
+		{ name: t.home, path: '/' },
+		{ name: t.hubs.stations, path: hubPath('stations', lang) },
+		{ name: t.stationH1(name), path },
+	]}
+	h1={t.stationH1(name)}
+	lede={t.stationLede(name, station.routes.length, station.effectiveLines)}
+	indexable={station.indexable}
+>
+	<MapOpenCta
+		label={station.mapFrom ? t.openMapFrom(name) : t.openMapRoutes(name)}
+		guideSlug={`station/${station.slug}`}
+		language={lang}
+		from={station.mapFrom}
+		routes={station.mapFrom ? undefined : station.routes}
+	/>
+
+	<section>
+		<h2>{t.linesAtStation}</h2>
+		<ul class="seo-chips">
+			{station.routes.map(r => <LineChip route={r} lang={lang} />)}
+		</ul>
+	</section>
+
+	<section>
+		<h2>{t.adjacent}</h2>
+		<div class="seo-table-wrap">
+			<table class="seo-table">
+				<thead><tr><th>{t.colLine}</th><th>{t.prev}</th><th>{t.next}</th></tr></thead>
+				<tbody>
+					{station.adjacent.map(a => (
+						<tr>
+							<td>{routeName(a.route, lang)}</td>
+							<td>{a.prev ? <StationLink station={a.prev} lang={lang} /> : t.terminal}</td>
+							<td>{a.next ? <StationLink station={a.next} lang={lang} /> : t.terminal}</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
+	</section>
+
+	{station.touristSpots.length > 0 && (
+		<section>
+			<h2>{t.nearbySpots}</h2>
+			{station.touristSpots.map(spot => <p>{t.nearbySpotLine(spot.name[lang])}</p>)}
+		</section>
+	)}
+
+	{station.stats.length > 0 && (
+		<section>
+			<h2>{t.aroundStats}</h2>
+			<p class="seo-note">{t.statsNote}</p>
+			<div class="seo-table-wrap">
+				<table class="seo-table">
+					<thead><tr><th>{t.colItem}</th><th class="num">{t.colValue}</th><th>{t.colScope}</th></tr></thead>
+					<tbody>
+						{station.stats.map(s => {
+							const page = dataPageFor(s.key);
+							const label = statLabel(s.meta.label);
+							return (
+								<tr>
+									<td>{page ? <a href={dataPath(page.slug, lang)}>{label}</a> : label}</td>
+									<td class="num">{formatNumber(s.value, lang)}{en ? ' ' : ''}{statUnit(s.meta.unit)}</td>
+									<td class="seo-note">{t.scope(s.meta.radius, s.meta.period)}</td>
+								</tr>
+							);
+						})}
+					</tbody>
+				</table>
+			</div>
+			<p class="seo-note">
+				{t.sources}: {sources.map((src, i) => (
+					<Fragment>{i > 0 && ' / '}{src.url && !src.dead ? <a href={src.url} rel="nofollow noopener">{t.sourceTitle(src.title)}</a> : t.sourceTitle(src.title)}{t.retrievedAt(src.retrievedAt)}</Fragment>
+				))}
+			</p>
+		</section>
+	)}
+
+	{nearby.length > 0 && (
+		<section>
+			<h2>{t.nearbyStations}</h2>
+			<ul class="seo-chips">
+				{nearby.map(s => <li class="seo-chip"><a href={stationPath(s.slug, lang)}>{stationName(s, lang)}</a></li>)}
+			</ul>
+		</section>
+	)}
+
+	{relatedGuides.length > 0 && (
+		<section>
+			<h2>{t.relatedGuides}</h2>
+			<ul class="related-list">
+				{relatedGuides.map(g => <li><a href={g.path}>{g.title}</a></li>)}
+			</ul>
+		</section>
+	)}
+</SeoPageLayout>

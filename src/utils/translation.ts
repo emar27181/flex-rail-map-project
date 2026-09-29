@@ -6948,6 +6948,8 @@ export const routeTranslations: { [key: string]: string } = {
 
   // ── 路線名の多言語対応（新幹線・地下鉄・大手私鉄・路面電車）──
   "湘南新宿ライン": "Shonan-Shinjuku Line",
+  "湘南新宿ライン（宇都宮線・横須賀線）": "Shonan-Shinjuku Line (Utsunomiya–Yokosuka)",
+  "湘南新宿ライン（高崎線・東海道線）": "Shonan-Shinjuku Line (Takasaki–Tokaido)",
   "東武アーバンパークライン": "Tobu Urban Park Line",
   "JR相模線": "JR Sagami Line",
   "JR鶴見線": "JR Tsurumi Line",
@@ -8022,6 +8024,22 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "時刻表モードをON",
     english: "Timetable Mode ON"
   },
+  serviceBrandUenoTokyoLine: {
+    japanese: "上野東京ライン",
+    english: "Ueno-Tokyo Line"
+  },
+  serviceBrandShonanShinjukuLine: {
+    japanese: "湘南新宿ライン",
+    english: "Shonan-Shinjuku Line"
+  },
+  serviceBrandYokosukaSobuRapid: {
+    japanese: "横須賀・総武快速線",
+    english: "Yokosuka / Sobu Rapid Line"
+  },
+  serviceTerminiLabel: {
+    japanese: "主な始発・行先",
+    english: "Main terminals"
+  },
   resetNorth: {
     japanese: "北を上にする",
     english: "Reset to north"
@@ -8187,6 +8205,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   showFullRouteStations: {
     japanese: "中間駅以外も表示",
     english: "Show full route stations"
+  },
+  showRouteRecommendationsPanel: {
+    japanese: "推薦ルート選択を表示",
+    english: "Show route suggestions"
   },
   showRouteLines: {
     japanese: "路線の線を表示",
@@ -8835,6 +8857,10 @@ export const uiChinese: Record<string, string> = {
   approximateNote: "概算值·参考用　点击左侧路线名切换",
   timetableEstimatedWarning: "此为推算数据。准确时刻请参阅各铁路公司的官方时刻表。",
   resetNorth: "将北方朝上",
+  serviceBrandUenoTokyoLine: "上野东京线",
+  serviceBrandShonanShinjukuLine: "湘南新宿线",
+  serviceBrandYokosukaSobuRapid: "横须贺・总武快速线",
+  serviceTerminiLabel: "主要始发・终点",
   heatmapDataLabel: "热力图数据",
   showTrainStatusPanel: "显示乘车路线",
   locationDenied: "未允许获取位置信息",
@@ -8883,6 +8909,7 @@ export const uiChinese: Record<string, string> = {
   showOutsideSegmentRoutes: "显示区间外路线",
   showMapTiles: "显示地图图块",
   showFullRouteStations: "显示所有途经站",
+  showRouteRecommendationsPanel: "显示推荐路线选择",
   showRouteLines: "显示路线",
   stationTooltipLabel: "显示站点提示",
   bubbleMap: "气泡地图",
@@ -9163,6 +9190,10 @@ export const uiKorean: Record<string, string> = {
   approximateNote: "개산값·참고용　왼쪽 노선명 클릭으로 전환",
   timetableEstimatedWarning: "추정 데이터입니다. 정확한 시각은 각 철도회사의 공식 시각표를 참고해 주세요.",
   resetNorth: "북쪽을 위로",
+  serviceBrandUenoTokyoLine: "우에노도쿄 라인",
+  serviceBrandShonanShinjukuLine: "쇼난신주쿠 라인",
+  serviceBrandYokosukaSobuRapid: "요코스카・소부 쾌속선",
+  serviceTerminiLabel: "주요 시발・행선지",
   heatmapDataLabel: "히트맵 데이터",
   showTrainStatusPanel: "탑승 노선 표시",
   locationDenied: "위치 정보가 허용되지 않았습니다",
@@ -9211,6 +9242,7 @@ export const uiKorean: Record<string, string> = {
   showOutsideSegmentRoutes: "구간 외 노선 표시",
   showMapTiles: "지도 타일 표시",
   showFullRouteStations: "전체 경유역 표시",
+  showRouteRecommendationsPanel: "추천 경로 선택 표시",
   showRouteLines: "노선 표시",
   stationTooltipLabel: "역 툴팁 표시",
   bubbleMap: "버블 맵",
@@ -9388,6 +9420,7 @@ const statParamLabelMap: Record<string, { english: string; chinese: string; kore
   'カフェ数':     { english: 'Cafe count',           chinese: '咖啡馆数量',     korean: '카페 수' },
   'コンビニ数':   { english: 'Conv. store count',    chinese: '便利店数量',     korean: '편의점 수' },
   'ラーメン屋数': { english: 'Ramen shop count',     chinese: '拉面店数量',     korean: '라멘 가게 수' },
+  '居酒屋・バー数': { english: 'Bar/izakaya count',   chinese: '居酒屋·酒吧数量', korean: '이자카야·바 수' },
   'スーパー数':   { english: 'Supermarket count',    chinese: '超市数量',       korean: '슈퍼마켓 수' },
   '病院・医院数': { english: 'Hospital count',       chinese: '医院数量',       korean: '병원 수' },
   '書店数':       { english: 'Bookstore count',      chinese: '书店数量',       korean: '서점 수' },

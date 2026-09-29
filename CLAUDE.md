@@ -189,6 +189,20 @@ src/
 - テスト・ビルドが失敗したままのコミット
 - CIが赤いままのマージ、または無許可でのforce push
 
+## データ更新の規約（取扱説明書）
+
+**データ（路線・駅・直通運転・運行系統・並走区間・駅統計・時刻表・ガイド）を編集する前に、
+必ず `docs/data-editing-guide.md` を読むこと。** 他のAI（ChatGPT / Genspark 等）が編集する
+場合も同じ（入口は `AGENTS.md`）。主要なデータファイルの冒頭にも同じ案内を書いてある。
+
+- 推測で書かない・出典を残す・分からないものは空けておく（下の「データに関する絶対ルール」）
+- データファイルには値だけを書く（定数参照や `.map` などの計算で組み立てない）
+- 駅名は既存の路線データの表記に合わせる（表記ゆれは別駅扱いになる）
+- 編集後は `npm run test:data`（データ整合性テスト）→ `test:types` → `test:unit` → `build`
+- テストの期待値を書き換えて通さない。値を直す
+- 新しい種類のデータを追加したら、`docs/data-editing-guide.md` に節を足し、
+  データファイルの冒頭に案内コメントを書く
+
 ## 🚫 データに関する絶対ルール
 
 ### ヒートマップ・駅統計データは実データのみ使用すること
@@ -206,6 +220,9 @@ src/
   既定で非表示（`showEstimatedData`トグルで明示的にONにした場合のみ表示）とし、
   「推定値」であることが分かるラベルを付けること
 - データがない駅は **灰色（`HEATMAP_NO_DATA_COLOR = '#aaaaaa'`）で表示** する。ゼロや推定値で埋めない
+- 取得に失敗して 0 が書き込まれた疑いのある値（同じ回に取得した項目がすべて 0）は、
+  `stationStats.ts` の `dropSuspectedFailedBatches` がデータなしに戻す（2026-09: 有明・東雲など187駅）。
+  収集スクリプトを直すときは、Overpass の空応答・タイムアウトを 0 件として保存しないこと
 - 新しいフィールドを追加する場合は、**実際のデータソース（API・公開統計）を明記** すること
 - 「それっぽい値」「概算」「AIによる推計」は一切使用禁止
 - 収集範囲が一部の駅に限られるデータ（例: 2026-09の首都圏駅データセットPoCは
@@ -660,6 +677,18 @@ Netlify管理画面の Site configuration → Build & deploy → Branch deploys 
 未認証で `NETLIFY_AUTH_TOKEN` も無い）。push によるNetlifyの自動ビルドを使う。
 
 - 本番デプロイ（`--prod`）はユーザーの明示的な指示があった場合のみ実行する
+
+### SEO（sitemap は自動生成・ビルドで検証）
+
+- `sitemap.xml` は **ビルド時に自動生成** する（`src/integrations/seoSitemap.ts`）。手で書かない。
+  ページを `src/pages/` に足せば自動で載り、`noindex`・canonical 不一致・クエリ付きURLは自動で外れる
+- canonical・hreflang・title 重複・H1 の数などの検証に失敗すると **ビルドが止まる**
+- 確認は `npm run build` の後に `npm run test:seo`。実URLの200確認は
+  `SEO_LIVE_BASE_URL=<Deploy PreviewのURL> npm run test:seo`
+- 駅・路線・データのページ（`/stations/*`, `/lines/*`, `/data/*` と英語版）は路線データ・駅統計から
+  **自動生成** する。index させるのは情報量の基準（Tier A）を満たすページだけで、
+  それ以外は noindex。範囲と基準は `src/data/seoPages.ts`、観光地→最寄り駅は `src/data/touristSpots.ts`
+- 仕組み・判断基準・ページを足すときの決まりは **`docs/seo.md`**
 
 ### CHANGE.log 記録ルール
 

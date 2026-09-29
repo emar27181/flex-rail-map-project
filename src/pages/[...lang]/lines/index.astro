@@ -1,0 +1,46 @@
+---
+/** 路線の一覧（/lines, /en/lines） */
+import SeoPageLayout from '../../../layouts/SeoPageLayout.astro';
+import { SEO_LANGS, getSeoModel, hubPath, linePath, routeName, stationName, type SeoLang } from '../../../seo/pageModel';
+import { SEO_TEXT } from '../../../seo/pageText';
+
+export function getStaticPaths() {
+  return SEO_LANGS.map(lang => ({ params: { lang: lang === 'ja' ? undefined : lang }, props: { lang } }));
+}
+
+interface Props { lang: SeoLang }
+const { lang } = Astro.props;
+const t = SEO_TEXT[lang];
+const { lines } = getSeoModel();
+const path = hubPath('lines', lang);
+---
+
+<SeoPageLayout
+	lang={lang}
+	title={t.linesHubTitle}
+	description={t.linesHubLede(lines.length)}
+	path={path}
+	langPaths={{ ja: hubPath('lines', 'ja'), en: hubPath('lines', 'en') }}
+	breadcrumbs={[{ name: t.home, path: '/' }, { name: t.hubs.lines, path }]}
+	h1={t.linesHubH1}
+	lede={t.linesHubLede(lines.length)}
+	indexable={true}
+>
+	<div class="seo-table-wrap">
+		<table class="seo-table">
+			<thead><tr><th>{t.colLine}</th><th>{t.colStation}</th><th class="num">{t.colCount}</th></tr></thead>
+			<tbody>
+				{lines.map(line => (
+					<tr>
+						<td>
+							{line.color && <span class="seo-swatch" style={`background-color: ${line.color}`} aria-hidden="true"></span>}{' '}
+							<a href={linePath(line.slug, lang)}>{routeName(line.key, lang)}</a>
+						</td>
+						<td>{t.section(stationName(line.stops[0].station, lang), stationName(line.stops[line.stops.length - 1].station, lang))}</td>
+						<td class="num">{line.stops.length}</td>
+					</tr>
+				))}
+			</tbody>
+		</table>
+	</div>
+</SeoPageLayout>

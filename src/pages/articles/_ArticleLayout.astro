@@ -7,6 +7,9 @@ import {
   ARTICLE_SHELL_TRANSLATIONS,
 } from "../../data/articleI18n";
 import { ARTICLE_BODY_TRANSLATIONS } from "../../data/articleBodyI18n";
+import { SITE_URL, SITE_NAME } from "../../config/seo";
+import SiteFooterNav from "../../components/SiteFooterNav.astro";
+import { articleBreadcrumbJsonLd, articleJsonLd } from "../../config/articleSeo";
 
 export interface Props {
   title: string;
@@ -16,6 +19,7 @@ export interface Props {
   category: string;
   kicker?: string;
   publishedDate?: string;
+  modifiedDate?: string;
   readTime?: string;
   tag?: string;
   ogImage?: string;
@@ -31,6 +35,7 @@ const {
   category,
   kicker = "Rail Guide",
   publishedDate = "2025-06-06",
+  modifiedDate,
   readTime = "読了 約4分",
   tag = "Article",
   ogImage = "/icon_flex_rail_way_map.png",
@@ -38,7 +43,7 @@ const {
   kind = "article",
 } = Astro.props;
 
-const siteUrl = "https://flex-railway-map.netlify.app";
+const siteUrl = SITE_URL;
 const canonicalUrl = `${siteUrl}${canonicalPath ?? `/articles/${slug}`}`;
 const displayDate = publishedDate.replace(/^(\d{4})-(\d{2})-(\d{2})$/, "$1年$2月$3日");
 const isArticle = kind === "article";
@@ -58,7 +63,7 @@ const bodyTranslations = ARTICLE_BODY_TRANSLATIONS[i18nKey];
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title data-i18n-title>{title} | Flex Rail Map</title>
+  <title data-i18n-title>{title} | {SITE_NAME}</title>
   <meta name="description" content={description} data-i18n-description />
   {keywords && <meta name="keywords" content={keywords} />}
   <meta name="theme-color" content="#13171A" />
@@ -89,23 +94,8 @@ const bodyTranslations = ARTICLE_BODY_TRANSLATIONS[i18nKey];
 
   <script is:inline set:html={`window.__ARTICLE_I18N__=${i18nPayload};`}></script>
 
-  {isArticle && <script type="application/ld+json" set:html={JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": title,
-    "description": description,
-    "keywords": keywords ?? undefined,
-    "datePublished": publishedDate,
-    "dateModified": publishedDate,
-    "url": canonicalUrl,
-    "author": { "@type": "Organization", "name": "Flex Rail Map Project" },
-    "publisher": {
-      "@type": "Organization",
-      "name": "Flex Rail Map Project",
-      "logo": { "@type": "ImageObject", "url": `${siteUrl}${ogImage}` }
-    },
-    "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl }
-  })}></script>}
+  {isArticle && <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd({ title, description, keywords, publishedDate, modifiedDate, canonicalUrl, ogImage }))}></script>}
+  <script type="application/ld+json" set:html={JSON.stringify(articleBreadcrumbJsonLd(isArticle ? { title, canonicalUrl } : undefined))}></script>
 
   <slot name="head" />
 </head>
@@ -131,7 +121,7 @@ const bodyTranslations = ARTICLE_BODY_TRANSLATIONS[i18nKey];
       <h1 data-i18n-page="title">{title}</h1>
       <p class="lede" data-i18n-page="description">{description}</p>
       <div class="byline">
-        <span>{displayDate}</span><span class="sep">／</span><span data-i18n-page="category">{category}</span><span class="sep">／</span><span data-i18n-page="readTime">{readTime}</span>
+        <span>{displayDate}</span>{modifiedDate && <time datetime={modifiedDate}>（更新 / Updated: {modifiedDate}）</time>}<span class="sep">／</span><span data-i18n-page="category">{category}</span><span class="sep">／</span><span data-i18n-page="readTime">{readTime}</span>
       </div>
     </header>
     <slot name="beforeArticle" />
@@ -149,6 +139,7 @@ const bodyTranslations = ARTICLE_BODY_TRANSLATIONS[i18nKey];
       <a href="/" data-i18n="top">← フレックス路線図 トップへ</a> ／ <a href="/articles" data-i18n="articlesBack">記事一覧へ戻る</a>
       <div><a href="/" class="foot-app-link" data-i18n="openApp">インタラクティブ路線図を開く →</a></div>
       <div class="small" data-i18n="footerCopy">フレックス路線図 ／ 東京の鉄道を、必要な情報だけで。</div>
+      <SiteFooterNav currentPath={canonicalPath ?? `/articles/${slug}`} />
     </div>
   </div>
 

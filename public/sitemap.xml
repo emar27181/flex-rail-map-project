@@ -214,7 +214,7 @@
   <!-- Article: 東京家賃が安い路線ランキング -->
   <url>
     <loc>https://flex-railway-map.netlify.app/articles/tokyo-rent-by-route</loc>
-    <lastmod>2026-06-06</lastmod>
+    <lastmod>2026-09-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/articles/tokyo-rent-by-route"/>
@@ -244,7 +244,7 @@
   <!-- Article: 通勤30分以内で家賃が安い駅 -->
   <url>
     <loc>https://flex-railway-map.netlify.app/articles/commute-30min-cheap-rent</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-09-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/articles/commute-30min-cheap-rent"/>
@@ -254,7 +254,7 @@
   <!-- Article: 治安が良い沿線 -->
   <url>
     <loc>https://flex-railway-map.netlify.app/articles/tokyo-safe-area-by-route</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-09-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="ja" href="https://flex-railway-map.netlify.app/articles/tokyo-safe-area-by-route"/>

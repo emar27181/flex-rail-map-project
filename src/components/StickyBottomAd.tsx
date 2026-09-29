@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { requestAd } from '../utils/adsense';
 import { X } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import IconButton from './ui/atoms/IconButton';
@@ -19,50 +20,50 @@ const StickyBottomAd: React.FC<StickyBottomAdProps> = ({ adSlot }) => {
   const colors = getThemeColors(theme);
   const [isVisible, setIsVisible] = useState(false); // 広告が実際に配信されるまで非表示
   const insRef = useRef<HTMLElement>(null);
+  const dismissedRef = useRef(false);
 
   useEffect(() => {
-    const adDismissed = localStorage.getItem('stickyAdDismissed');
-    if (adDismissed) return;
-
     try {
-      if (typeof window !== 'undefined' && window.adsbygoogle) {
-        window.adsbygoogle.push({});
-      }
-    } catch (error) {
-      console.error('Sticky AdSense error:', error);
-      return;
+      dismissedRef.current = !!localStorage.getItem('stickyAdDismissed');
+    } catch {
+      // Storage may be blocked; dismissal still works for this mount.
     }
+    if (dismissedRef.current) return;
 
     // data-ad-status が "filled" になったら表示、"unfilled" なら非表示のまま
     const ins = insRef.current;
     if (!ins) return;
 
-    const observer = new MutationObserver(() => {
+    const updateStatus = () => {
       const status = ins.getAttribute('data-ad-status');
       if (status === 'filled') {
-        setIsVisible(true);
+        setIsVisible(!dismissedRef.current);
         observer.disconnect();
       } else if (status === 'unfilled') {
+        setIsVisible(false);
         observer.disconnect(); // 非表示のまま
       }
-    });
+    };
+    const observer = new MutationObserver(updateStatus);
 
     observer.observe(ins, { attributes: true, attributeFilter: ['data-ad-status'] });
 
-    // 5秒後に広告ステータスが確定しない場合もフォールバックで非表示のまま
-    const timeout = setTimeout(() => {
-      observer.disconnect();
-    }, 5000);
+    updateStatus();
+    requestAd(ins);
 
     return () => {
       observer.disconnect();
-      clearTimeout(timeout);
     };
   }, []);
 
   const handleClose = () => {
+    dismissedRef.current = true;
     setIsVisible(false);
-    localStorage.setItem('stickyAdDismissed', 'true');
+    try {
+      localStorage.setItem('stickyAdDismissed', 'true');
+    } catch {
+      // Do not let unavailable storage prevent closing the ad.
+    }
   };
 
   return (
@@ -118,7 +119,7 @@ const StickyBottomAd: React.FC<StickyBottomAdProps> = ({ adSlot }) => {
           }}
         >
           <ins
-            ref={insRef as any}
+            ref={insRef}
             className="adsbygoogle"
             style={{
               display: 'block',

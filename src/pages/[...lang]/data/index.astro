@@ -1,0 +1,48 @@
+---
+/** 駅周辺データの一覧（/data, /en/data）。推定値のため載せていない指標も理由付きで示す */
+import SeoPageLayout from '../../../layouts/SeoPageLayout.astro';
+import { SEO_LANGS, dataPath, getSeoModel, hubPath, type SeoLang } from '../../../seo/pageModel';
+import { SEO_TEXT } from '../../../seo/pageText';
+import { translateStatParamLabel } from '../../../utils/translation';
+
+export function getStaticPaths() {
+  return SEO_LANGS.map(lang => ({ params: { lang: lang === 'ja' ? undefined : lang }, props: { lang } }));
+}
+
+interface Props { lang: SeoLang }
+const { lang } = Astro.props;
+const t = SEO_TEXT[lang];
+const { dataPages, excludedDataMetrics } = getSeoModel();
+const label = (l: string) => (lang === 'en' ? translateStatParamLabel(l, 'english') : l);
+const path = hubPath('data', lang);
+---
+
+<SeoPageLayout
+	lang={lang}
+	title={t.dataHubTitle}
+	description={t.dataHubLede}
+	path={path}
+	langPaths={{ ja: hubPath('data', 'ja'), en: hubPath('data', 'en') }}
+	breadcrumbs={[{ name: t.home, path: '/' }, { name: t.hubs.data, path }]}
+	h1={t.dataHubH1}
+	lede={t.dataHubLede}
+	indexable={true}
+>
+	<ul class="related-list">
+		{dataPages.map(p => (
+			<li>
+				<a href={dataPath(p.slug, lang)}>{t.dataH1(label(p.meta.label))}</a>
+				<span class="seo-note">{t.scope(p.meta.radius, p.meta.period)}</span>
+			</li>
+		))}
+	</ul>
+
+	{excludedDataMetrics.length > 0 && (
+		<section>
+			<h2>{t.excluded}</h2>
+			<ul>
+				{excludedDataMetrics.map(e => <li class="seo-note">{t.excludedEstimated(label(e.meta.label))}</li>)}
+			</ul>
+		</section>
+	)}
+</SeoPageLayout>

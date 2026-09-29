@@ -1,0 +1,79 @@
+---
+/**
+ * 駅・路線・データのページ（/stations, /lines, /data と各言語版）の共通レイアウト。
+ *
+ * 構成: パンくず → H1 → 要約（lede）→ 本文（slot）→ 別言語版へのリンク → フッター。
+ * <head> は SeoHead、パンくずの構造化データは画面のパンくずと同じ並びから作る。
+ * 日本語版・英語版は必ず両方作るので、hreflang は常に相互に張る。
+ */
+import SeoHead from '../components/seo/SeoHead.astro';
+import ThemeInitScript from '../components/ThemeInitScript.astro';
+import SiteFooterNav from '../components/SiteFooterNav.astro';
+import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
+import { staticPageCss } from './staticPageStyles';
+import { guideCss } from './guideStyles';
+import { seoPageCss } from './seoPageStyles';
+import { buildBreadcrumbJsonLd, buildHreflangLinks, type BreadcrumbItem } from '../config/seo';
+import type { SeoLang } from '../seo/pageModel';
+import { SEO_TEXT } from '../seo/pageText';
+
+export interface Props {
+  lang: SeoLang;
+  title: string;
+  description: string;
+  path: string;
+  /** 同じページの各言語版のパス */
+  langPaths: Record<SeoLang, string>;
+  /** ホームから今のページまで（最後が今のページ） */
+  breadcrumbs: BreadcrumbItem[];
+  h1: string;
+  lede?: string;
+  indexable: boolean;
+}
+
+const { lang, title, description, path, langPaths, breadcrumbs, h1, lede, indexable } = Astro.props;
+const t = SEO_TEXT[lang];
+const hreflang = buildHreflangLinks(
+  (Object.keys(langPaths) as SeoLang[]).map(l => ({ lang: l, path: langPaths[l] })),
+  'ja',
+);
+const other = t.otherLang;
+---
+
+<html lang={lang}>
+	<head>
+		<SeoHead
+			title={title}
+			description={description}
+			path={path}
+			lang={lang}
+			robots={indexable ? 'index, follow' : 'noindex, follow'}
+			hreflang={hreflang}
+			jsonLd={[buildBreadcrumbJsonLd(breadcrumbs)]}
+			styles={[staticPageCss, guideCss, seoPageCss]}
+		/>
+	</head>
+	<body>
+		<ThemeInitScript />
+		<div class="container">
+			<nav class="breadcrumb">
+				{breadcrumbs.map((b, i) => (
+					i < breadcrumbs.length - 1
+						? <Fragment><a href={b.path}>{b.name}</a> / </Fragment>
+						: <span>{b.name}</span>
+				))}
+			</nav>
+
+			<h1 class="page-title">{h1}</h1>
+			{lede && <p class="lede">{lede}</p>}
+
+			<slot />
+
+			<p class="seo-lang-switch">
+				<a href={langPaths[other.lang]} hreflang={other.lang} lang={other.lang}>{other.label}</a>
+			</p>
+			<SiteFooterNav lang={lang} currentPath={path} />
+		</div>
+		<SimpleThemeWrapper client:only="react" />
+	</body>
+</html>

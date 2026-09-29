@@ -1,42 +1,33 @@
 ---
 /**
- * 「Flex Railway Mapで見る」CTA（ガイドページ共通）。
+ * 「Flex Railway Mapで見る」CTA（ガイド・駅・路線・データのページ共通）。
  *
- * 可能な範囲で、そのガイドの内容に対応した地図状態（表示路線）を
- * 直接開く。出発駅・到着駅を直接指定するURLパラメータは現時点の
- * アプリに存在しないため、ここでは実装しない（将来 `origin`/
- * `destination` パラメータができたら `href` の組み立てにそのまま足せる
- * よう、propsはguide単位のデータをそのまま受け取る形にしてある）。
+ * ページの内容に対応した地図状態（表示路線・出発駅）を直接開く。
+ * URLの組み立ては src/utils/mapDeepLink.ts（地図側が読むパラメータと同じ定数）。
  *
  * クリックはGA4の `seo_map_open` イベントとして計測する
  * （`src/utils/gtagConsent.ts` の既存の仕組みを再利用。GA4未設定でも
  * エラーにはならない）。どのSEOページから地図へ移動したかを判別できるよう
- * `guide_slug` / `language` に加えて `source_page`（クリック時点の
- * location.pathname）も送る。個人を特定する情報ではなく、このサイト内の
- * パスのみ。
+ * `guide_slug`（ガイドの slug、駅・路線ページでは "station/shinjuku" など）/
+ * `language` に加えて `source_page`（クリック時点の location.pathname）も送る。
+ * 個人を特定する情報ではなく、このサイト内のパスのみ。
  */
-import { getRouteCode } from '../utils/routeUrlCodes';
+import { buildMapHref } from '../utils/mapDeepLink';
 import type { RouteKey } from '../data/routes';
 
 export interface Props {
   label: string;
-  note: string;
+  note?: string;
   guideSlug: string;
-  language: 'ja' | 'en' | 'zh';
+  language: 'ja' | 'en' | 'zh' | 'ko';
   /** 地図で先に表示しておきたい路線 */
   routes?: RouteKey[];
+  /** 出発駅にする駅名 */
+  from?: string;
 }
 
-const { label, note, guideSlug, language, routes } = Astro.props;
-
-const params = new URLSearchParams();
-if (routes && routes.length > 0) {
-  const codes = routes.map(getRouteCode).filter((c): c is string => !!c);
-  if (codes.length > 0) params.set('routes', codes.join(','));
-}
-if (language !== 'ja') params.set('lang', language);
-const query = params.toString();
-const href = `/${query ? `?${query}` : ''}`;
+const { label, note, guideSlug, language, routes, from } = Astro.props;
+const href = buildMapHref({ routes, from, lang: language });
 ---
 
 <div class="cta-block">
@@ -49,7 +40,7 @@ const href = `/${query ? `?${query}` : ''}`;
   >
     {label}
   </a>
-  <p class="cta-note">{note}</p>
+  {note && <p class="cta-note">{note}</p>}
 </div>
 
 <script>

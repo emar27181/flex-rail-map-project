@@ -1,5 +1,190 @@
 # CHANGE LOG
 
+## [2026-09-28] セッション（東海道線の時刻表の行先・並行ルート・推薦ルート選択の既定オフ）
+
+### feat: 出発・到着駅にも時刻を出し、複数の路線が通る駅は路線ごとに時刻を並べる
+- `src/components/map/stationTimeLabel.ts`（新規）, `src/components/RailwayMap.tsx`,
+  `tests/unit/components/map/stationTimeLabel.test.ts`（新規）
+- 通常・種別表示・出発到着の3種類のラベルの時刻行を1か所にまとめた
+- 表示中の路線が複数ある駅は、路線色の印＋時刻を路線ごとに1行（1路線だけなら従来どおり時刻のみ）
+
+### fix: 時刻ラベルを東海道線だけでなく、地図に描く全候補と並行ルートの駅にも出す
+- `src/components/RailwayMap.tsx`（`stationTimelineMap`）, `src/utils/parallelRoutes.ts`（`sectionMinutes`）,
+  `tests/unit/utils/parallelRoutes.test.ts`
+- 全候補の区間に時刻を付け、並行ルートは分かれる駅の時刻＋路線の駅間所要時間で求める
+- 経路と共通の駅では早い方に揃え、逆向きにも戻れるとして計算（大井町が品川より30分遅い、などを防ぐ）
+
+### improve: 推薦ルート選択を既定で出さず、出発・到着の間は全候補の路線を描いて表示切替で調整する
+- `src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`,
+  `src/components/legend/MapConfigPanel.tsx`（`showRouteRecommendationsPanel`）, `src/utils/translation.ts`
+- 既定は推薦ルート選択パネル（PC・全画面・スマホの下部タブ）を出さず、全候補と並行ルートの区間を駅まで描く
+- 設定「駅フィルター」の「推薦ルート選択を表示」で出せる。出したときだけ選んだ候補に描画を絞る
+
+### fix: 経路候補から引き返す経路（同じ駅を2回通る）を除く
+- `src/utils/routeFinder.ts`（`revisitsStation`）, `src/components/RailwayMap.tsx`, `tests/unit/utils/routeFinder.test.ts`
+- 藤沢→辻堂→（藤沢）→東京のような候補で、藤沢の先に使わない線が伸びていた
+
+### feat: 出発・到着の間を表示するとき、別の路線で行ける並行ルートの駅も描く
+- `src/utils/parallelRoutes.ts`（新規）, `src/components/RailwayMap.tsx`, `tests/unit/utils/parallelRoutes.test.ts`（新規）
+- 選択中の経路の区間と3駅以上共通で、区間に無い駅を通り、遠回りしすぎない（2倍以内）別路線の区間を描く
+- 藤沢→東京: 東海道線に加えて京浜東北線（大船〜根岸線回り〜東京）・横須賀線（大船〜武蔵小杉〜東京）
+- 新宿→東京: 丸ノ内線に加えて中央線、横浜→渋谷: 湘南新宿ラインに加えて東急東横線
+
+### fix: 東海道線の上りが全列車「東京行き」になっていたのを「宇都宮・高崎方面」にする
+- `src/data/timetableData.ts`, `tests/unit/data/timetableData.test.ts`
+- 上りの大半は上野東京ラインとして宇都宮線・高崎線へ直通するのに、概算の時刻表では
+  全列車が東京止まりになっていた。概算では列車ごとの行先は分からないため「方面」だけを出す
+  （上り: 宇都宮・高崎方面、下り: 熱海・沼津方面。serviceSystems.ts の始発・行先とテストで照合）
+- 2023年3月に廃止された快速アクティーを時刻表から除いた
+
+## [2026-09-28] セッション（SEO: 駅・路線・データのページ自動生成 PoC）
+
+### feat: 駅・路線・駅周辺データのページを路線データから自動生成する（PoC）
+- `src/seo/pageModel.ts`, `src/seo/pageText.ts`, `src/data/seoPages.ts`, `src/data/touristSpots.ts`,
+  `src/layouts/SeoPageLayout.astro`, `src/layouts/seoPageStyles.ts`,
+  `src/components/seo/LineChip.astro`, `src/components/seo/StationLink.astro`,
+  `src/pages/[...lang]/{stations,lines,data}/{index,[slug]}.astro`（すべて新規）,
+  `tests/unit/seo/pageModel.test.ts`（新規）
+- 首都圏20路線の全407駅・20路線・飲食店数のページを日本語・英語で作る（計862ページ）
+- index させるのは Tier A の駅25駅（5路線以上の乗換駅＋観光地の最寄り駅）・20路線・
+  データ1指標・一覧3つ（各日英）。それ以外は noindex, follow で sitemap に載せない
+- 乗降客数・家賃は推定値のためページを作らない（実データに置き換えれば自動で作られる）
+- 観光地→最寄り駅（浅草寺・スカイツリー・東京タワー・明治神宮・鎌倉大仏・江の島・
+  横浜中華街・東京ディズニーリゾート）は駅名＋路線キーで持ち、同名の別駅を混ぜない
+
+### improve: 検索向けページの <head> とパンくず構造化データを1か所にまとめる
+- `src/components/seo/SeoHead.astro`, `src/components/ThemeInitScript.astro`（新規）,
+  `src/config/seo.ts`（`buildBreadcrumbJsonLd`, `OG_LOCALE`）, `src/config/articleSeo.ts`,
+  `src/layouts/GuideLayout.astro`, `src/layouts/GuidesIndexLayout.astro`
+- 既存ガイドの <head> と構造化データはビルド結果で変更前と同一
+
+### improve: 地図を開くリンクの組み立てを1か所にし、出発駅も指定できるようにする
+- `src/utils/mapDeepLink.ts`（新規）, `src/components/MapOpenCta.astro`
+
+### improve: 動的ルートのページにも lastmod を付ける
+- `src/seo/gitLastModified.ts`
+
+### feat: ガイド⇔路線ページ、フッター⇔駅・路線・データの一覧を相互にリンクする
+- `src/layouts/GuideLayout.astro`, `src/config/siteNav.ts`, `src/components/SiteFooterNav.astro`
+
+### fix: Overpass の取得失敗で 0 件と保存された駅周辺データをデータなし（灰色）に戻す
+- `src/data/stationStats.ts`（`dropSuspectedFailedBatches`）, `tests/unit/data/stationStats.test.ts`, `CLAUDE.md`
+- 同じ回に取得した項目がすべて 0 の駅が187駅（有明・東雲など）あり、ヒートマップで最低値の色になっていた
+
+### fix: 「居酒屋・バー数」の指標名が英語・中国語・韓国語表示で日本語のままだった
+- `src/utils/translation.ts`
+
+### feat: 同名別駅の照合と実質路線数の計算を取り込む（PR #24 と同じ内容）
+- `src/utils/sameStation.ts`, `src/utils/effectiveLines.ts`
+
+### docs: 駅・路線・データのページの基準と観光地データの書き方
+- `docs/seo.md`, `CLAUDE.md`
+
+## [2026-09-28] セッション（SEO: sitemap 自動生成・hreflang/H1/canonical の整合・検証）
+
+### fix: hreflang を別URLで実在する対応ページどうしだけに張る
+- `src/config/seo.ts`（`buildHreflangLinks`）, `src/data/guides.ts`, `src/layouts/GuideLayout.astro`,
+  `src/layouts/GuidesIndexLayout.astro`, `src/layouts/StaticPage.astro`, `src/pages/index.astro`
+- `?lang=en` は同じHTMLを返し canonical がクエリ無しURLのため、hreflang の相手にすると
+  canonical と矛盾して無視される。対応ページが無いページには hreflang を出さない
+
+### fix: 固定ページにH1を1つ置き、/fullscreen を noindex に、記事の canonical・構造化データを揃える
+- `src/layouts/StaticPage.astro`（`heading`）, `src/pages/{about,contact,privacy,terms,guide,faq}.astro`,
+  `src/pages/fullscreen.astro`, `src/config/articleSeo.ts`（新規）,
+  `src/pages/articles/_ArticleLayout.astro`, `src/pages/articles/flex-rail-map-introduction.astro`
+- 記事に BreadcrumbList（ホーム > 記事一覧 > 記事）と Article を出す。
+  更新日を管理していないため `dateModified` は書かない
+
+### fix: 固定ページ・ガイド・記事に共通のフッターナビを置き、孤立ページを無くす
+- `src/config/siteNav.ts`（新規）, `src/components/SiteFooterNav.astro`（新規）ほか各レイアウト
+
+### fix: /about・/faq の「39路線・東京のみ・日英のみ」を実装に合わせる
+- `src/config/siteFacts.ts`（新規）, `src/pages/about.astro`, `src/pages/faq.astro`
+- 路線数・駅数は路線データから計算。FAQ の JSON-LD は本文と同じ文言を使う
+
+### feat: sitemap.xml をビルド時に自動生成し、SEO の整合性をビルドとテストで検証する
+- `src/seo/sitemapCore.ts`, `src/seo/gitLastModified.ts`, `src/integrations/seoSitemap.ts`（新規）,
+  `astro.config.mjs`, `package.json`（`test:seo`）,
+  `tests/unit/seo/sitemapCore.test.ts`, `tests/seo/built.test.ts`（新規）
+- index 対象（noindex でなく自己参照 canonical）のページだけを載せる。lastmod は git 履歴から
+- sitemap のURLの実在・noindex 混入・canonical 一致・重複・hreflang の相互性・
+  title 重複・H1 の数を検証し、失敗したらビルドを止める
+- 結果: 29ページ中26URL（/fullscreen・/demo・/diagram は noindex で除外）
+
+### docs: SEO の仕組みと確認方法
+- `docs/seo.md`（新規）, `CLAUDE.md`
+## [2026-09-28] セッション4（乗換駅の定義・経路区間だけの表示・始発行先表示オフ・データ編集の取扱説明書）
+
+### fix: 同じ線路を走る別系統は1本と数え、実際に路線が分かれる・交わる駅だけを乗換駅にする
+- `src/utils/effectiveLines.ts`（新規）, `src/components/RailwayMap.tsx`, `tests/unit/utils/effectiveLines.test.ts`（新規）
+- 「上野東京ラインと湘南新宿ラインみたいな同じ路線で2以上になってる駅は実質カウントを1に。
+  交差する・乗り換えとして違う路線がある駅を乗換駅に」との指示
+- 駅ごとに各路線の隣の駅を比べ、同じ（または一方がその駅で終わる）路線を1本にまとめて数える。
+  辻堂は1本（乗換駅でない）、藤沢は3本、戸塚は乗換駅のまま。主要駅の常時表示の本数も同じ数え方
+
+### fix: 出発・到着を選んだら経路の区間の駅だけを出し、区間外の駅を隠す
+- `src/components/RailwayMap.tsx`
+- 「路線の全区間を表示」は既定オフだったが、主要駅の常時表示と、経路に含まれない表示中路線
+  （出発・到着駅を通る中央線・小田急線など）が区間外の駅を出していた。どちらも止めた（線は残す）
+- 同じ駅を描く路線の選び方も合わせ、藤沢→新宿（湘南新宿ライン）で横浜などが消える不具合を防いだ
+
+### improve: 駅ツールチップの右カラムから主な始発・行先の表示を外す
+- `src/components/RailwayMap.tsx`（ユーザー指示でオフ。系統名は左の路線一覧に残す）
+
+### docs: データ編集の取扱説明書を追加し、他のAIでもデータを安全に更新できるようにする
+- `docs/data-editing-guide.md`（新規）, `AGENTS.md`（新規）, `CLAUDE.md`, `package.json`（`test:data`）,
+  主要データファイル7つの冒頭に案内, `src/data/serviceSystems.ts`（値をそのまま書く形に整理）
+
+## [2026-09-28] セッション3（湘南新宿ラインの2系統分割・運行系統の始発・行先表示）
+
+### feat: 湘南新宿ラインを2系統の路線に分け、藤沢など東海道線の駅でも上野東京ラインと色で見分けられるようにする
+- `src/data/jr-shonan-shinjuku-line.ts`, `src/data/routes.ts`, `src/utils/translation.ts`,
+  `src/data/sharedCorridors.ts`, `src/data/throughServices.ts`, テスト3ファイル
+- ユーザーの乗換アプリのスクリーンショット（藤沢16:58発 湘南新宿ライン快速 籠原行）を受けて、
+  「藤沢には湘南新宿ラインと上野東京ラインの2種類が来るので色分けして始点・終点を表示し、
+  分岐先の始点・終点も調べて出すように。アトミックデザインでハードコーディングせず一元管理で」との依頼
+- 宇都宮線⇔横須賀線系統を宇都宮〜逗子に延長し、高崎線⇔東海道線系統（高崎〜小田原）を新規追加。
+  駅の座標・所要時間は各路線データを組み合わせて使い、書き写さない
+- 2系統の色は1つの定数を共有。並走区間の色差テストでは同じ案内名の組として除外
+- 経路検索で藤沢→新宿の直通（乗換0回）が1位に出るようになった。小田急線経由が5位→6位になったため
+  回帰テストのしきい値を6位に見直し（正当な競合が1本増えただけで埋もれてはいない）
+
+### feat: 路線の運行系統名と主な始発・行先（分岐先ごと）を駅ツールチップに出す
+- `src/data/serviceSystems.ts`（新規）, `src/components/ServiceTermini.tsx`（新規, organism）,
+  `src/components/RailwayMap.tsx`, `src/utils/translation.ts`, `tests/unit/data/serviceSystems.test.ts`（新規）
+- 系統名（上野東京ライン・湘南新宿ライン・横須賀・総武快速線）と、分岐して直通する先ごとの主な始発・行先を
+  1か所に定義（出典付き）。表示は FS / L / getThemeColors / 路線色のトークンだけを使う
+- 駅ツールチップの路線一覧に系統名（東海道本線の下に「上野東京ライン」）、右カラムの先頭に始発・行先を表示
+- 行先の駅が路線データにあることをテストで検証（籠原・成田空港は路線データ欠落のため理由付きで除外）
+
+### docs: 直通運転・系統の記録、デザインシステムの部品一覧を更新
+- `docs/through-services.md`（3章追加）, `docs/design-system.md`, `.claude/skills/design-tokens/SKILL.md`, `TODO.md`
+
+## [2026-09-28] セッション2（同名別駅の取り違え修正・直通運転を全国に拡大）
+
+### fix: 同名の別駅を同じ駅として扱い、大宮を選ぶと京都の阪急京都線まで出ていた不具合を修正
+- `src/utils/sameStation.ts`（新規）, `src/utils/throughService.ts`, `src/components/RailwayMap.tsx`
+- 駅を通る路線を駅名だけで探していたため、大宮（埼玉）で京都の阪急京都線「大宮」も通過路線に出ていた
+- 名前が同じでも座標が5km以上離れていれば別の駅とする。`getRoutesForStation` に座標を渡し、
+  直通判定も座標付きで照合する
+- `?from=大宮` で阪急京都線が出ないことをブラウザで確認
+
+### feat: 直通運転を全国（関西・中京・九州・東北・北陸・四国）に広げ、首都圏の漏れを追加
+- `src/data/throughServices.ts`, `tests/unit/data/throughServices.test.ts`, `docs/through-services.md`
+- 「藤沢から宇都宮行きの湘南新宿ライン乗ったことあるけどなくね？こういう路線を調査して追加して、全国で」との依頼
+- 全国28系統を追加: 新快速、JR東西線⇔学研都市線、大和路快速、関空・紀州路快速、おおさか東線直通快速、
+  堺筋線⇔阪急、御堂筋線⇔北大阪急行、中央線⇔けいはんな線、阪神⇔近鉄奈良線、烏丸線⇔近鉄京都線、
+  近鉄京都線⇔奈良線・橿原線、南大阪線⇔長野線、京阪本線・中之島線⇔鴨東線、日生エクスプレス、南海空港線、
+  鶴舞線⇔名鉄犬山線・豊田線、名鉄犬山線⇔常滑線、名鉄河和線・知多新線、近鉄名古屋線⇔山田線、
+  空港線⇔筑肥線、仙台空港アクセス線、IGR⇔青い森、あいの風⇔IR、マリンライナー
+- 首都圏に3系統追加: 千代田線⇔小田急多摩線（2025-03改正で復活）、横浜線⇔根岸線、武蔵野線⇔京葉線。
+  千代田線⇔小田原線の直通範囲を本厚木→伊勢原に延長
+- 湘南新宿ラインは検索で確認できた範囲では高崎線⇔東海道線・宇都宮線⇔横須賀線の2系統で、既存データのまま。
+  藤沢→宇都宮の1本は上野東京ライン（登録済み）。例外列車の有無は時刻表を直接見られず未確認
+- 各社サイト・Wikipediaはネットワーク制限で開けず、Web検索の結果で確認した。出典URLは `docs/through-services.md`
+- 根拠が不十分なもの（箱崎線⇔空港線、近鉄大阪線⇔山田線の急行など）は収録していない
+- テスト10件追加（同名別駅、全国の直通、全区間の駅名が路線データに存在すること）
+
 ## [2026-09-28] セッション（推定時刻表の注意書き・絵文字廃止・方位磁針・最寄り路線・直通運転・並走路線の色分け）
 
 ### feat: 推定の時刻表データには冒頭に赤字で公式時刻表参照の注意書きを出す
@@ -174,6 +359,25 @@
 - `npm run test:types` / `npm run test:unit`(384件) / `npm run build`
   すべて通過。ビルド後のHTMLで4言語ぶんの`hreflang`と
   `og:locale:alternate`が出力されることを確認
+## [2026-09-28] セッション（集客記事の説明を実際の機能に整合）
+
+### improve: 根拠のないランキングを候補駅の比較手順に置き換える
+- `src/data/articleBodyI18n.ts`, `src/data/articleI18n.ts`: 住まい記事3本を4言語で更新。
+- 未提供の家賃・治安ヒートマップの案内と根拠のない数値表を撤去し、地図と実際の募集情報の役割を明確化。
+- 地図へのCTA・関連記事リンクを各言語に追加。記事一覧に家賃比較記事を追加。
+- `src/pages/articles/_ArticleLayout.astro`, 対象記事3ページ, `public/sitemap.xml`: 公開日を保持して更新日を表示・構造化データに反映。
+- `docs/revenue-growth-2026-09.md`: 施策の優先順位、仮定の収益試算、必要な計測、未確認事項を記録。
+- 型チェック・389テスト・25ページのビルド成功。生成HTMLの4言語・リンク・更新日を確認。
+
+## [2026-09-28] セッション（広告の遅延読み込み修正）
+
+### fix: 広告スクリプトの遅延によるリクエストの取りこぼしを防ぐ
+- `src/utils/adsense.ts`, `src/components/AdSenseAd.tsx`, `src/components/StickyBottomAd.tsx`
+- スクリプト未読込時もキューに登録し、DOM要素ごとに重複要求を防止。
+- 固定広告の監視を5秒で打ち切らず、配信状態が確定するまで監視。閉じた広告と配信なしは非表示。
+- localStorageが利用できない場合も閉じる操作を妨げない。
+- `tests/unit/components/adsense-lifecycle.test.tsx`: 遅延・重複・配信なし・保存済みの非表示・ストレージ不可の5件。
+- 型チェック・ユニットテスト389件・ビルド成功。実広告配信と収益は未検証。
 
 ## [2026-09-23] セッション（README刷新）
 

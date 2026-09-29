@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { routes, routeColors } from '../../../src/data/routes';
-import { SHARED_CORRIDORS, MIN_CORRIDOR_COLOR_DISTANCE } from '../../../src/data/sharedCorridors';
+import { SHARED_CORRIDORS, MIN_CORRIDOR_COLOR_DISTANCE, SAME_BRAND_ROUTES } from '../../../src/data/sharedCorridors';
 import { colorDistance } from '../../../src/utils/colorDistance';
 
 describe('並走区間の路線色', () => {
@@ -16,6 +16,7 @@ describe('並走区間の路線色', () => {
       for (let i = 0; i < c.routes.length; i++) {
         for (let j = i + 1; j < c.routes.length; j++) {
           const a = c.routes[i], b = c.routes[j];
+          if (SAME_BRAND_ROUTES.some(g => g.includes(a) && g.includes(b))) continue;
           const d = colorDistance(routeColors[a], routeColors[b]);
           if (d < MIN_CORRIDOR_COLOR_DISTANCE) {
             tooClose.push(`${c.id}: ${a}(${routeColors[a]}) / ${b}(${routeColors[b]}) ΔE=${d.toFixed(1)}`);
@@ -25,6 +26,12 @@ describe('並走区間の路線色', () => {
     }
     expect(tooClose).toEqual([]);
   });
+});
+
+it('同じ案内名で同じ色にしている系統の組は、色がそろっている', () => {
+  for (const group of SAME_BRAND_ROUTES) {
+    expect(new Set(group.map(rk => routeColors[rk])).size, group.join(',')).toBe(1);
+  }
 });
 
 describe('colorDistance', () => {

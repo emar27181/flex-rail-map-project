@@ -1,0 +1,100 @@
+---
+/**
+ * 駅周辺データのページ（/data/{slug}, /en/data/{slug}）。
+ * 実データ（dataQuality: 'real'）の指標だけ作る。値の無い駅は0にせず件数だけ示す。
+ */
+import SeoPageLayout from '../../../layouts/SeoPageLayout.astro';
+import {
+  SEO_LANGS, dataPath, getSeoModel, hubPath, linePath, routeName, stationName, stationPath,
+  type SeoDataPage, type SeoLang,
+} from '../../../seo/pageModel';
+import { SEO_TEXT, formatNumber } from '../../../seo/pageText';
+import { translateStatParamLabel, translateStatUnit } from '../../../utils/translation';
+
+export function getStaticPaths() {
+  return SEO_LANGS.flatMap(lang =>
+    getSeoModel().dataPages.map(page => ({
+      params: { lang: lang === 'ja' ? undefined : lang, slug: page.slug },
+      props: { lang, page },
+    })),
+  );
+}
+
+interface Props { lang: SeoLang; page: SeoDataPage }
+const { lang, page } = Astro.props;
+const t = SEO_TEXT[lang];
+const en = lang === 'en';
+const label = en ? translateStatParamLabel(page.meta.label, 'english') : page.meta.label;
+const unit = en ? translateStatUnit(page.meta.unit, 'english') : page.meta.unit;
+const withUnit = (v: number) => `${formatNumber(v, lang)}${en && unit ? ' ' : ''}${unit}`;
+const path = dataPath(page.slug, lang);
+const scope = t.scope(page.meta.radius, page.meta.period);
+const top = page.rows[0];
+---
+
+<SeoPageLayout
+	lang={lang}
+	title={t.dataTitle(label)}
+	description={t.dataDescription(label, page.rows.length, scope)}
+	path={path}
+	langPaths={{ ja: dataPath(page.slug, 'ja'), en: dataPath(page.slug, 'en') }}
+	breadcrumbs={[
+		{ name: t.home, path: '/' },
+		{ name: t.hubs.data, path: hubPath('data', lang) },
+		{ name: label, path },
+	]}
+	h1={t.dataH1(label)}
+	lede={top && t.dataLede(label, page.rows.length, stationName(top.station, lang), withUnit(top.value))}
+	indexable={page.indexable}
+>
+	<p class="seo-note">
+		{scope}
+		{page.source && (
+			<Fragment>
+				{' / '}{t.sources}: {page.source.url && !page.source.dead
+					? <a href={page.source.url} rel="nofollow noopener">{t.sourceTitle(page.source.title)}</a>
+					: t.sourceTitle(page.source.title)}{t.retrievedAt(page.source.retrievedAt)}
+			</Fragment>
+		)}
+	</p>
+	{page.missingCount > 0 && <p class="seo-note">{t.missing(page.missingCount)}</p>}
+
+	<section>
+		<h2>{t.byLine}</h2>
+		<div class="seo-table-wrap">
+			<table class="seo-table">
+				<thead>
+					<tr><th>{t.colLine}</th><th class="num">{t.colMedian}</th><th>{t.colMax}</th><th class="num">{t.colCount}</th></tr>
+				</thead>
+				<tbody>
+					{page.byLine.map(s => (
+						<tr>
+							<td><a href={linePath(s.line.slug, lang)}>{routeName(s.line.key, lang)}</a></td>
+							<td class="num">{withUnit(s.median)}</td>
+							<td><a href={stationPath(s.max.station.slug, lang)}>{stationName(s.max.station, lang)}</a>{t.paren(withUnit(s.max.value))}</td>
+							<td class="num">{s.count}</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
+	</section>
+
+	<section>
+		<h2>{t.ranking}</h2>
+		<div class="seo-table-wrap">
+			<table class="seo-table">
+				<thead><tr><th class="num">{t.colRank}</th><th>{t.colStation}</th><th class="num">{label}</th></tr></thead>
+				<tbody>
+					{page.rows.map((r, i) => (
+						<tr>
+							<td class="num">{i + 1}</td>
+							<td><a href={stationPath(r.station.slug, lang)}>{stationName(r.station, lang)}</a></td>
+							<td class="num">{withUnit(r.value)}</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
+	</section>
+</SeoPageLayout>
