@@ -14,6 +14,7 @@
  */
 import "../../styles/article-layout.css";
 import {
+  ARTICLES,
   ARTICLE_LANGUAGES,
   ARTICLE_PAGE_KEYWORDS,
   ARTICLE_PAGE_TRANSLATIONS,
@@ -71,6 +72,9 @@ const formatDate = (iso: string) =>
 const UPDATED: Record<ArticleLanguage, string> = { ja: "更新", en: "Updated", zh: "更新", ko: "수정" };
 const home = lang === "ja" ? "/" : `/?lang=${lang}`;
 const indexCrumb = { name: shell.articles, path: articleIndexPath(lang) };
+// 関連記事（1記事1テーマにしているので、ほかのテーマはここから案内する）
+const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? [] : [])
+  .map(slug => ({ slug, meta: withSiteName(ARTICLE_PAGE_TRANSLATIONS[slug][lang]) }));
 ---
 
 <!DOCTYPE html>
@@ -159,6 +163,21 @@ const indexCrumb = { name: shell.articles, path: articleIndexPath(lang) };
       {body && <div class="article-body" set:html={body} />}
       <slot />
     </article>
+    {related.length > 0 && (
+      <section class="related" aria-labelledby="related-heading">
+        <h2 id="related-heading">{shell.relatedArticles}</h2>
+        <ul class="article-list">
+          {related.map(r => (
+            <li>
+              <a href={articlePath(r.slug, lang)}>
+                <span class="article-card-title">{r.meta.title}</span>
+                <span class="meta">{r.meta.description}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
     <div class="foot">
       <a href={home}>{shell.top}</a> ／ <a href={articleIndexPath(lang)}>{shell.articlesBack}</a>
       <div><a href={home} class="foot-app-link">{shell.openApp}</a></div>

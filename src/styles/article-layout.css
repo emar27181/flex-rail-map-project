@@ -139,6 +139,18 @@ figure.map{ margin:34px 0; padding:0; background:var(--surface); border:1px soli
 .readout{ padding:0 22px 16px; font-size:13px; color:var(--ink-soft); }
 .readout b{ color:var(--accent-strong); font-weight:800; }
 
+/* 記事のスクリーンショット（scripts/capture-article-screenshots.mts で撮った実際の画面）。
+   説明している段落のすぐ下に置き、何を見る図かを figcaption に書く */
+figure.shot{ margin:26px 0 30px; padding:0; }
+figure.shot img{ display:block; width:100%; height:auto; border:1px solid var(--border); border-radius:var(--r-card); box-shadow:var(--shadow); background:var(--surface); }
+/* 狭い画面では画像が小さいので、押すと原寸で開く */
+figure.shot a{ display:block; cursor:zoom-in; }
+figure.shot figcaption{ margin-top:10px; font-size:13.5px; line-height:1.7; color:var(--ink-soft); }
+
+.related{ margin:10px 0 36px; }
+.related .article-list{ margin-top:1em; }
+.related .meta{ line-height:1.7; }
+
 .article-list{ list-style:none; padding:0; margin:2em 0 0; display:grid; gap:14px; }
 .article-index{ margin-top:8px; }
 .article-list li{ margin:0; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card); box-shadow:var(--shadow); overflow:hidden; }

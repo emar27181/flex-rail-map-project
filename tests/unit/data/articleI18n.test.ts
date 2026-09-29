@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { existsSync } from 'fs';
+import { join } from 'path';
 import { ARTICLES, ARTICLE_LANGUAGES, ARTICLE_PAGE_TRANSLATIONS } from '../../../src/data/articleI18n';
 import { ARTICLE_BODY_TRANSLATIONS } from '../../../src/data/articleBodyI18n';
 
@@ -19,16 +21,18 @@ describe('記事の多言語版', () => {
     for (const [slug, bodies] of Object.entries(ARTICLE_BODY_TRANSLATIONS)) {
       for (const lang of ARTICLE_LANGUAGES) {
         const hrefs = [...(bodies[lang] ?? '').matchAll(/href="([^"]+)"/g)].map(m => m[1]);
-        for (const href of hrefs.filter(h => h.includes('/articles'))) {
+        for (const href of hrefs.filter(h => h.includes('/articles') && !h.startsWith('/images/'))) {
           expect(href, `${slug} ${lang}`).not.toContain('?lang=');
           const prefix = lang === 'ja' ? '/articles/' : `/${lang}/articles/`;
           expect(href.startsWith(prefix), `${slug} ${lang}: ${href}`).toBe(true);
           const target = href.slice(prefix.length).split(/[?#]/)[0];
           expect(ARTICLES.some(a => a.slug === target), `${slug} ${lang}: ${href}`).toBe(true);
         }
-        // 地図へのリンクはその言語で開く（日本語は既定なので付けない）
+        // 地図へのリンクはその言語で開く（日本語は既定なので付けない）。
+        // 駅・路線を指定したリンク（/?from=...&lang=en）も同じ
         for (const href of hrefs.filter(h => h === '/' || h.startsWith('/?'))) {
-          expect(href, `${slug} ${lang}`).toBe(lang === 'ja' ? '/' : `/?lang=${lang}`);
+          const langParam = new URLSearchParams(href.split('?')[1] ?? '').get('lang');
+          expect(langParam, `${slug} ${lang}: ${href}`).toBe(lang === 'ja' ? null : lang);
         }
       }
     }
@@ -54,6 +58,31 @@ describe('記事の多言語版', () => {
     }
     for (const [slug, bodies] of Object.entries(ARTICLE_BODY_TRANSLATIONS)) {
       for (const lang of ['ja', 'zh', 'ko'] as const) expect(bodies[lang], `${slug} ${lang}`).not.toContain('Try it now');
+    }
+  });
+
+  it('本文の画像は実在し、代替テキストがあり、その言語で撮った画面を使う', () => {
+    for (const [slug, bodies] of Object.entries(ARTICLE_BODY_TRANSLATIONS)) {
+      for (const lang of ARTICLE_LANGUAGES) {
+        for (const m of (bodies[lang] ?? '').matchAll(/<img\b[^>]*>/g)) {
+          const tag = m[0];
+          const src = /src="([^"]+)"/.exec(tag)?.[1] ?? '';
+          expect(existsSync(join('public', src)), `${slug} ${lang}: ${src}`).toBe(true);
+          expect(/alt="[^"]+"/.test(tag), `${slug} ${lang}: alt ${src}`).toBe(true);
+          expect(src.endsWith(`-${lang}.webp`), `${slug} ${lang}: ${src}`).toBe(true);
+        }
+      }
+    }
+  });
+
+  it('関連記事は3本で、実在する別の記事を指す', () => {
+    for (const a of ARTICLES) {
+      expect(a.related, a.slug).toHaveLength(3);
+      expect(new Set(a.related).size, a.slug).toBe(3);
+      for (const r of a.related) {
+        expect(r, a.slug).not.toBe(a.slug);
+        expect(ARTICLES.some(x => x.slug === r), `${a.slug} -> ${r}`).toBe(true);
+      }
     }
   });
 });
