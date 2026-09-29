@@ -486,7 +486,7 @@ const yamanoteData: LineTimetableData = {
 
 const tokaidoData: LineTimetableData = {
   key: 'jrTokaidoMainLine',
-  name: '東海道線',
+  name: '上野東京ライン（東海道線）',
   updatedAt: '2026-09-28',
   dataVersion: '運行間隔からの概算（行先は方面のみ）',
   // 上りの大半は上野東京ラインとして宇都宮線・高崎線へ直通し、東京止まりではない。
@@ -1860,7 +1860,7 @@ const meguroData: LineTimetableData = {
 
 const jrUtsunomiyaData: LineTimetableData = {
   key: 'jrUtsunomiyaLine',
-  name: '宇都宮線',
+  name: '上野東京ライン（宇都宮線）',
   updatedAt: '2025-03-15',
   dataVersion: '2025年版（概算）',
   directions: [
@@ -2735,7 +2735,7 @@ const jrSobuLineData: LineTimetableData = {
 
 const jrTakasakiLineData: LineTimetableData = {
   key: 'jrTakasakiLine',
-  name: '高崎線',
+  name: '上野東京ライン（高崎線）',
   updatedAt: '2025-03-15',
   dataVersion: '2025年版（概算）',
   directions: [
@@ -4457,7 +4457,7 @@ const tokaidoShinkansenData: LineTimetableData = {
 const KANTO_ADD = { updatedAt: '2026-08-16', dataVersion: '2026年8月追加（概算）' };
 
 const shonanShinjukuData: LineTimetableData = {
-  key: 'jrShonanShinjukuLine', name: '湘南新宿ライン', ...KANTO_ADD,
+  key: 'jrShonanShinjukuLine', name: '湘南新宿ライン（宇都宮線・横須賀線）', ...KANTO_ADD,
   directions: [
     {
       label: '大宮→逗子',

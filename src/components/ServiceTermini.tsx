@@ -26,9 +26,16 @@ export interface ServiceTerminiProps {
   variant: 'brand' | 'full';
 }
 
-/** 直通先の路線名。「JR東海道本線（静岡〜浜松）」のような区間の注記は長いので外す */
+/**
+ * 直通先の路線名。「JR東海道本線（静岡〜浜松）」のような区間の注記は長いので外す。
+ * 運行系統の路線は「上野東京ライン（宇都宮線）」の形なので、括弧の中（路線名）を使う
+ */
 function viaLineName(via: RouteKey, language: Language): string {
-  return translateRoute(routeNames[via] ?? via, language).replace(/\s*[（(][^（()）]*[）)]\s*$/, '');
+  const name = translateRoute(routeNames[via] ?? via, language);
+  const m = name.match(/^(.*?)\s*[（(]([^（()）]*)[）)]\s*$/);
+  if (!m) return name;
+  const brands = Object.values(SERVICE_BRAND_LABEL_KEY).map(k => translateUI(k, language));
+  return brands.includes(m[1]) ? m[2] : m[1];
 }
 
 function formatEnd(end: ServiceEnd, language: Language): string {
