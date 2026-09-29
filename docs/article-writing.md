@@ -1,7 +1,33 @@
 # 記事の書き方（/articles）
 
 記事（`/articles/*` と `/{en,zh,ko}/articles/*`）を書く・直すときの決まり。
-2026-09-29 に6記事×4言語をこの形に書き直した。
+2026-09-29 に6記事×4言語をこの形に書き直し、1記事1ファイルで量産できる仕組みにした。
+ほかの AI（ChatGPT / Genspark など）に書いてもらうときは `docs/templates/article-prompt.md` を渡す。
+
+## 仕組み（1記事1ファイル）
+
+| 置き場所 | 中身 |
+|---|---|
+| `src/data/articles/{slug}.ts` | 記事1本の全部（4言語のタイトル・説明・本文ブロック、地図の状態、スクリーンショットの撮り方、関連記事）。値だけ |
+| `src/data/articles/index.ts` | 記事の一覧（並び順＝記事一覧ページの順）。記事を足したら1行足す |
+| `src/data/articles/types.ts` | 記事データの形（使えるブロックの種類） |
+| `src/utils/articleRender.ts` | ブロック → HTML。部品の HTML はここだけで作る |
+| `src/styles/article-layout.css` | 見た目（角丸・ボタンはデザイントークンの CSS 変数だけ） |
+| `scripts/capture-article-screenshots.mts` | 記事データの `shots` を読んで、4言語の画面を撮る |
+| `docs/templates/article-template.ts` | ひな形 |
+
+ページのファイル（`.astro`）は作らなくてよい。記事データを足せば日本語・英語・中国語・韓国語のページ、
+記事一覧、sitemap、関連記事が自動でできる。
+
+## 記事を足す手順
+
+1. `docs/templates/article-template.ts` を `src/data/articles/{slug}.ts` にコピーして書く（4言語）
+2. `src/data/articles/index.ts` に1行足す
+3. 開発サーバーを起動し（`npm run dev`）、画像を撮る:
+   `npx tsx scripts/capture-article-screenshots.mts --only {slug}`
+4. 撮れた画像を開いて、説明文と画面が合っているか目で確かめる
+5. `npm run test:types` → `npm run test:unit` → `npm run build`
+   （形の決まりは `tests/unit/data/articleSources.test.ts` が確かめる）
 
 ## 何を書くか
 
@@ -31,25 +57,29 @@
 ## 画像（1セクション1枚が目安）
 
 - 画像は作り物の図ではなく、**このサイトの実際の画面**にする。
-  `scripts/capture-article-screenshots.mts` の `SHOTS` に地図の状態（`routes` `from` `to` `metric` `center` `zoom`）を書き、
+  記事データの `shots` に撮り方（地図の状態 `routes` `from` `to` `metric` `center` `zoom`、または地図以外のページ `page`）を書き、
   開発サーバーを起動して `npx tsx scripts/capture-article-screenshots.mts [--only <slug>] [--id <shot>]` で4言語分撮る
 - 出力は `public/images/articles/{slug}/{shot}-{lang}.webp`（幅1200px）。その言語の画面をその言語の記事に使う
-- 画像は説明している段落のすぐ下に置き、`figcaption` に「何を見る図か」を1文で書く。`alt` には画面に写っているものを書く
-- 本文では `<figure class="shot"><a href="画像"><img ... width="1200" height="768" loading="lazy" decoding="async" alt="..."></a><figcaption>...</figcaption></figure>`
-  （狭い画面では押すと原寸で開く）
-- 地図や UI を変えたら撮り直す
+- 本文では `{ type: 'shot', shot: 'キー', alt, caption }`。説明している段落のすぐ下に置く。
+  `caption` に「何を見る図か」を1文、`alt` に画面に写っているものを書く（狭い画面では押すと原寸で開く）
+- 地図や UI を変えたら全記事を撮り直す（`--only` を付けずに実行）
 
-## 地図を開くボタン
+## 実際の地図の埋め込みと、地図を開くボタン
 
-- 記事の内容をそのまま再現した状態で開くリンクにする（例: 観光の記事は4路線だけ表示、治安の記事は犯罪件数の色分け）
-- URL は `mapDeepLink.ts` と同じパラメータ（`routes` `from` `to` `metric`）。日本語以外は `lang=xx` を付ける（テストで確認）
+- `{ type: 'embed', map: 'main', view: { center, zoom } }` で、記事の内容の状態の地図を iframe で見せる
+  （地図ページの `?embed=1`。ナビ・広告・Cookie の案内を出さず、パネルを閉じて始まる。
+  記事側では押すまで地図に触れない＝スクロールの指で地図が動かない）
+- `{ type: 'cta', map: 'main' }` は同じ状態の地図を全画面で開くボタン。記事の最後に置く
+- 地図の状態は `maps` に名前を付けて1回だけ書く。URL は `mapDeepLink.ts` が作る（パラメータ名を書かない）
 
-## テスト（`tests/unit/data/articleI18n.test.ts`）
+## テスト（`tests/unit/data/articleSources.test.ts`, `articleI18n.test.ts`）
 
-- 4言語すべてにタイトル・説明・本文がある
-- 図（`<figure`）と見出し（`<h2`）の数が言語ごとにそろっている
-- 画像が実在し、`alt` があり、その言語の画面を使っている
-- 関連記事が3本で、実在する別の記事を指す
+- 4言語とも結論3行で始まり、見出しは3〜5個、埋め込みがあり、最後が地図を開くボタン
+- ブロックの並び（種類）が4言語で同じ
+- 参照している地図の状態・画像が実在し、画像に `alt` と説明がある
+- 地図の状態の路線・指標が地図側で読めるもの
+- 関連記事が3本で、実在する別の記事
+- サービス名を直書きしていない（`{siteName}`）
 - 地図へのリンクの `lang` がその記事の言語と一致する
 
 ## 参考にした資料

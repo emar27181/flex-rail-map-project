@@ -2,6 +2,31 @@
 
 ## [2026-09-29] セッション（SEO: 都市・観光地・多言語・設定済み地図CTA・GA4）
 
+### merge: PR #28（駅ラベルの時刻を平均1つに・時刻表の方向切替・路線の凡例ほか）を取り込む
+- PR #28 にだけあった「駅ラベルの時刻は既定で平均1つ、設定で路線ごと」がこのブランチに無く、
+  出発・到着駅を設定すると駅名の下に時刻が複数並んでいた。同じプレビューで確認できるように取り込んだ
+- `src/components/map/stationTimeLabel.ts`: 路線色の印の角丸・縁取りの直書きをトークン（`L.r.pill`, `alphaWhite`）に
+
+### feat: 記事の中に、その記事の内容の状態の地図を埋め込む（`?embed=1`）
+- `src/utils/embedMode.ts`（新規）, `src/utils/mapDeepLink.ts`（`embed`）, `src/components/{ThemeWrapper,RailwayMap}.tsx`,
+  `src/pages/index.astro`（広告を読まない）, `src/components/articles/ArticleLayout.astro`, `src/styles/article-layout.css`（`figure.embed`）
+- 地図ページを URL の指定だけで埋め込み向けにする（ナビ・フッター・広告・Cookie の案内なし、パネルを閉じて始める、
+  言語を閲覧者の設定に保存しない）。別ページを作らないので地図ページの CSS・設定を2か所で持たない
+- 記事側では押すまで地図に触れない（スマホでスクロールの指が地図を動かさないように）
+
+### improve: 記事を1記事1ファイルのデータにし、量産できるようにする
+- `src/data/articles/{types,index}.ts`・`{slug}.ts`×6（新規）, `src/utils/articleRender.ts`（新規）,
+  `src/data/{articleI18n,articleBodyI18n}.ts`（記事データから作る）, `src/pages/articles/[slug].astro`（新規）,
+  `scripts/capture-article-screenshots.mts`（撮るものを記事データから読む）, `tsconfig.check.json`,
+  `tests/unit/data/articleSources.test.ts`（新規）
+- 記事1本の全部（4言語の文章・地図の状態・スクリーンショットの撮り方・関連記事）を1ファイルに値だけで書く。
+  記事を足すとページ・一覧・sitemap・関連記事が自動でできる。形の決まりはテストで確認する
+- 記事データも型チェックの対象にした（`test:types` が3ファイルしか見ていなかった）
+
+### docs: 記事のひな形・他AI向け指示文・担当範囲
+- `docs/templates/article-template.ts`, `docs/templates/article-prompt.md`, `docs/article-writing.md`,
+  `docs/operating-scope.md`（新規）, `docs/growth-progress-ledger.md`, `AGENTS.md`, `CLAUDE.md`
+
 ### improve: 記事6本を「1記事1テーマ・結論先出し・起承転結・実際の画面つき」に書き直す
 - `src/data/articleBodyI18n.ts`, `src/data/articleI18n.ts`（タイトル・説明、`related`, `relatedArticles`）,
   `src/components/articles/ArticleLayout.astro`（関連記事）, `src/styles/article-layout.css`（`figure.shot`, `.related`）,

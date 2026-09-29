@@ -16,3 +16,6 @@
 
 4. 推測した値・出典の無い値をデータに書かない。分からないものは空けておく。
 5. `main` に直接マージしない（ユーザーがプレビューで目視確認してからマージする）。
+6. **記事（/articles）を書く・足すときは `docs/article-writing.md` を読むこと。**
+   記事は `src/data/articles/{slug}.ts` に1記事1ファイル（ひな形 `docs/templates/article-template.ts`、
+   指示文 `docs/templates/article-prompt.md`）。
