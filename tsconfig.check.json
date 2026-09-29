@@ -3,7 +3,10 @@
   "include": [
     "src/data/stationNumbers.ts",
     "src/data/stationStats.ts",
-    "src/data/routes.ts"
+    "src/data/routes.ts",
+    "src/utils/trackGeometry.ts",
+    "src/data/trackGeometry/index.ts",
+    "scripts/track-geometry/collect-osm.mts"
   ],
   "exclude": ["dist"],
   "compilerOptions": {

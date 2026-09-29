@@ -82,6 +82,8 @@ import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors
 import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE, haversineDistance, estimateHeadingFromHistory } from '../utils/trainDetector';
 import { estimateArrival, shouldNotifyArrival, buildArrivalMessage, isPlausibleSpeed, DEFAULT_ALERT_MINUTES } from '../utils/arrivalAlert';
 import { buildCorridorRoutes, vertexRanks, offsetPoints } from '../utils/routeOffset';
+import { TRACK_GEOMETRY } from '../data/trackGeometry';
+import { expandWithGeometry } from '../utils/trackGeometry';
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import MapCompassButton from './map/MapCompassButton';
@@ -3964,6 +3966,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     spacingPx: number,
     precomputedRanks?: number[],
   ): [number, number][] => {
+    // 線形（実際の線路に沿った座標列, src/data/trackGeometry/）がある路線は、駅の間を線路の形で描く。
+    // 線形は実際の位置なので、重なり回避のずらしはしない
+    const geometry = TRACK_GEOMETRY[routeKey];
+    if (geometry) return expandWithGeometry(stationList, geometry);
     const raw = stationList.map(s => [s.lat, s.lng] as [number, number]);
     const map = mapRef.current;
     if (!map || raw.length < 2) return raw;
