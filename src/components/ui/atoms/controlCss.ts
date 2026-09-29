@@ -20,6 +20,7 @@
 import {
   CONTROL_BORDER_WIDTH, CONTROL_SIZE, FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE,
 } from './controlSize';
+import { L } from '../../legend/legendStyles';
 
 /** ヘッダーに並ぶ操作の高さ(px)。同じ行の部品は必ずこれにそろえる */
 export const HEADER_CONTROL_PX = FLOATING_ICON_BUTTON_SIZE.md;
@@ -28,7 +29,29 @@ export const HEADER_LOGO_PX = FLOATING_ICON_BUTTON_SIZE.sm;
 
 const md = CONTROL_SIZE.md;
 
-export const CONTROL_CSS = `
+/**
+ * デザイントークンの CSS 変数。手書きの CSS（記事の src/styles/article-*.css）は TS の
+ * トークンを import できないため、角の丸み・操作部品の寸法はこの変数だけを使う
+ * （tests/unit/styles/articleCssTokens.test.ts が直書きを検出する）。
+ *
+ * - 角の丸みは役割で選ぶ: --r-control（ボタン・チップ・入力など操作部品）/
+ *   --r-card（表・囲み・カードなど部品を載せる箱）/ --r-pill（件数・タグなどのバッジ）
+ * - 操作部品の寸法は React のアトムと同じ CONTROL_SIZE の md（指で押すもの）
+ */
+export const TOKEN_VARS_CSS = `
+:root {
+  --r-control: ${L.r.control};
+  --r-card: ${L.r.card};
+  --r-pill: ${L.r.pill};
+  --ctl-md-h: ${CONTROL_SIZE.md.minHeight}px;
+  --ctl-md-pad: ${CONTROL_SIZE.md.padding};
+  --ctl-md-fs: ${CONTROL_SIZE.md.fontSize};
+  --ctl-md-gap: ${CONTROL_SIZE.md.gap};
+  --ctl-border-w: ${CONTROL_BORDER_WIDTH}px;
+}
+`;
+
+export const CONTROL_CSS = TOKEN_VARS_CSS + `
 .ctl {
   box-sizing: border-box;
   display: inline-flex; align-items: center; justify-content: center; gap: ${md.gap};

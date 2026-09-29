@@ -71,6 +71,15 @@
 - `src/data/articleI18n.ts`, `src/data/articleBodyI18n.ts`, `tests/unit/data/articleI18n.test.ts`
 - 日本語・中国語・韓国語の記事に英語のタグ（Safety Guide など）と CTA の飾り文字が残っていた
 
+### improve: 記事の角の丸み・ボタンの寸法・CTA の色をデザイントークンにそろえる
+- `src/components/ui/atoms/controlCss.ts`（`TOKEN_VARS_CSS`）, `src/styles/article-layout.css`, `src/styles/article-introduction.css`,
+  `src/components/articles/IntroductionDemo.astro`, `src/layouts/guideStyles.ts`, `tests/unit/styles/articleCssTokens.test.ts`（新規）, `docs/design-system.md`
+- 記事の CSS だけ角の丸みが7種類（2〜14px・999px）、ボタンの高さ・文字もばらばらで、アトム（角丸 3px・CONTROL_SIZE）と違っていた。
+  トークンの CSS 変数（--r-control/card/pill, --ctl-md-*）だけを使うようにし、直書きをテストで検出する
+- チップを小判形から control の角丸に、CTA を緑のグラデーションから「箱＋青の主要ボタン」に（主操作は primary）
+- ガイドの地図ボタンだけ文字が 16px だったのを、ボタンの規格（14px）に戻す
+- 紹介記事のデモのボタンが「必要な路線だ／け」と語の途中で折り返していたのを、語の区切りでだけ折り返すようにした
+
 ### improve: 地図を開くボタンを灰色の箱で囲まない
 - `src/layouts/guideStyles.ts`（`.cta-block`）
 - ボタンと箱が二重の枠に見え、注記の無いボタンでは箱が何も伝えていなかった。注記はボタンの下に小さく置き、

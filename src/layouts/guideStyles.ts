@@ -49,7 +49,7 @@ body.dark .breadcrumb { color: ${dark.textSecondary}; }
   margin: ${L.sp['4xl']} 0;
   text-align: center;
 }
-.cta-block .back-link { margin-bottom: 0; font-size: ${FS.input}; text-wrap: balance; }
+.cta-block .back-link { margin-bottom: 0; text-wrap: balance; }
 .cta-block .cta-note {
   margin: ${L.sp.md} 0 0;
   font-size: ${FS.caption};

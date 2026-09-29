@@ -14,8 +14,8 @@ const TEXTS: Record<ArticleLanguage, Record<string, string>> = {
     "ey": "まずは触ってみてください",
     "question": "路線が全部出ていると、どこを見ればいいか分かりにくい。<br />でも——必要な路線だけにすると？",
     "hint": "下のボタンを切り替えると、表示する路線が変わります。情報を「減らす」だけで、どれだけ見やすくなるかを体験してみてください。",
-    "all": "ぜんぶ表示",
-    "clean": "必要な路線だけ",
+    "all": "ぜんぶ<wbr>表示",
+    "clean": "必要な<wbr>路線だけ",
     "showing": "路線を表示中",
     "arrow": "← ボタンで「必要な路線だけ」に絞れます",
     "arrowClean": "必要な3路線だけ。ぐっと見やすくなりました",
@@ -38,8 +38,8 @@ const TEXTS: Record<ArticleLanguage, Record<string, string>> = {
     "ey": "先试试看",
     "question": "所有线路都显示时，很难知道该看哪里。<br />如果只留下需要的线路呢？",
     "hint": "切换下面的按钮即可改变显示线路。试试看减少信息后路线图会变得多容易读。",
-    "all": "全部显示",
-    "clean": "只显示需要线路",
+    "all": "全部<wbr>显示",
+    "clean": "只显示<wbr>需要线路",
     "showing": "条线路显示中",
     "arrow": "← 使用按钮只保留需要的线路",
     "arrowClean": "只剩 3 条需要的线路，清楚多了",
@@ -60,6 +60,8 @@ const TEXTS: Record<ArticleLanguage, Record<string, string>> = {
   }
 };
 const texts = TEXTS[lang];
+// ボタンの文言の <wbr>（日本語・中国語で語の途中で折り返さないための区切り）を除いたもの
+const plain = (html: string) => html.replace(/<wbr>/g, "");
 const STATIONS = ["池袋", "上野", "東京", "品川", "渋谷", "新宿", "中野", "四ツ谷", "御茶ノ水", "後楽園", "大手町", "銀座"];
 const names = Object.fromEntries(STATIONS.map(s => [s, translateStation(s, APP_LANGUAGE[lang])]));
 ---
@@ -70,9 +72,9 @@ const names = Object.fromEntries(STATIONS.map(s => [s, translateStation(s, APP_L
     <p class="demo-q" set:html={texts.question} />
     <p class="demo-hint">{texts.hint}</p>
   </div>
-  <div class="seg" role="tablist" aria-label={texts.all + " / " + texts.clean}>
-    <button id="modeAll" role="tab" aria-selected="true"><span>{texts.all}</span> <span class="n" id="nAll">(20)</span></button>
-    <button id="modeClean" role="tab" aria-selected="false"><span>{texts.clean}</span> <span class="n">(3)</span></button>
+  <div class="seg" role="tablist" aria-label={plain(texts.all) + " / " + plain(texts.clean)}>
+    <button id="modeAll" role="tab" aria-selected="true"><span class="lbl" set:html={texts.all} /> <span class="n" id="nAll">(20)</span></button>
+    <button id="modeClean" role="tab" aria-selected="false"><span class="lbl" set:html={texts.clean} /> <span class="n">(3)</span></button>
   </div>
   <div class="stage-wrap" id="stage">
     <svg id="map" viewBox="0 0 720 480" role="img" aria-label={texts.caption}></svg>
