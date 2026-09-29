@@ -99,7 +99,7 @@ const dataCta = {
 					{page.rows.map((r, i) => (
 						<tr>
 							<td class="num">{i + 1}</td>
-							<td><a href={stationPath(r.station.slug, lang)}>{stationName(r.station, lang)}</a></td>
+							<td class="name"><a href={stationPath(r.station.slug, lang)}>{stationName(r.station, lang)}</a></td>
 							<td class="num">{withUnit(r.value)}</td>
 						</tr>
 					))}

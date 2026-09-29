@@ -79,7 +79,7 @@ const lineCta = {
 						return (
 							<tr>
 								<td class="num">{i + 1}</td>
-								<td>{hasStationPage(stop.station, lang)
+								<td class="name">{hasStationPage(stop.station, lang)
 									? <a href={stationPath(stop.station.slug, lang)}>{stationName(stop.station, lang)}</a>
 									: stationName(stop.station, lang)}</td>
 								<td>{stop.transfers.map(r => routeName(r, lang)).join(t.listSep)}</td>
