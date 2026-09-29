@@ -2,6 +2,16 @@
 
 ## [2026-09-29] セッション（上野東京ライン・湘南新宿ラインの表記統一・時刻表の方向切替・前の便の常時表示・ツールチップの高さ・路線の凡例）
 
+### fix: スマホで路線の凡例が表示されなかった
+- `src/components/RailwayMap.tsx`
+- スマホ全画面ではパネルが右端に来ないのに「パネルが開いている」扱いで消していた。パネルを避けるのはPCだけにした
+
+### improve: 駅ラベルの時刻は既定で路線の平均1つにまとめ、路線ごとの表示は設定で切り替える
+- `src/components/map/stationTimeLabel.ts`（`averageTime`）, `src/components/RailwayMap.tsx`,
+  `src/components/legend/LegendRouteList.tsx`, `src/components/legend/MapConfigPanel.tsx`（`showPerRouteStationTimes`）,
+  `src/utils/translation.ts`, `tests/unit/components/map/stationTimeLabel.test.ts`
+- 設定「駅ラベル」の「時刻を路線ごとに表示」（既定オフ＝平均で1つ）
+
 ### improve: 駅ツールチップの路線一覧から青い「乗」の文字をなくす
 - `src/components/RailwayMap.tsx`, `src/utils/translation.ts`, `CLAUDE.md`
 - 経路上の路線は太字＋左の路線色の線で示す
