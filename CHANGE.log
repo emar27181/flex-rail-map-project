@@ -1,5 +1,18 @@
 # CHANGE LOG
 
+## [2026-09-29] セッション（データ: 線形の仕組み・最初の1路線は小田急小田原線）
+
+### feat: 路線の線形（実際の線路に沿った座標列）を持てるようにし、地図で線路の形に描く
+- `src/data/trackGeometry/{types,index}.ts`（新規）, `src/utils/trackGeometry.ts`（新規）, `src/components/RailwayMap.tsx`（`offsetPositions`）,
+  `scripts/track-geometry/collect-osm.mts`（新規）, `tests/unit/{utils,data}/trackGeometry.test.ts`（新規）, `tsconfig.check.json`
+- 駅と駅を直線で結んでいたのを、線形のある路線だけ実際の線路の形で描く。線形の無い路線は今までどおり
+- OSM の route リレーションの way をつなぎ、駅で区切り、間引き、検証（駅と線の距離・順番・途切れ・飛び）に通ったものだけを書き出す。
+  bridge / tunnel / layer は構造・上下関係として残し、高さには変換しない。標高は出典が無いので持たない
+- 最初の1路線は小田急小田原線。サンドボックスから Overpass 等に接続できず、線形のデータ自体はまだ無い
+
+### docs: 線形のデータの形・高さの決まり・データソースの比較・手順
+- `docs/track-geometry.md`（新規）, `docs/data-editing-guide.md`
+
 ## [2026-09-28] セッション（東海道線の時刻表の行先・並行ルート・推薦ルート選択の既定オフ）
 
 ### feat: 出発・到着駅にも時刻を出し、複数の路線が通る駅は路線ごとに時刻を並べる
