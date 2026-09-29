@@ -5048,6 +5048,30 @@ export function getNextDepartures(
 }
 
 /**
+ * 時刻表の方向ごとの短い名前（例: 「熱海・沼津方面」「宇都宮・高崎方面」）。時刻表の方向切替に使う。
+ *
+ * 方向の label は路線ごとに「上り（…）」「〜方面」「A→B」と書き方がばらばらで、
+ * 上り・下りは直通先で逆になる（上野東京ラインの上りは宇都宮線に入ると下り）ため、
+ * その方向でいちばん多い行先を「〜方面」の形にして使う（「〜行き」は「〜方面」に直す）。
+ * 行先が無ければ、駅の並びの最後の駅を使う。
+ */
+export function getDirectionShortLabels(lineKey: string): string[] {
+  const line = getLineTimetable(lineKey);
+  if (!line) return [];
+  return line.directions.map(d => {
+    const counts = new Map<string, number>();
+    for (const p of d.patterns) {
+      const dest = p.destination.replace(/行き$/, '方面');
+      counts.set(dest, (counts.get(dest) ?? 0) + 1);
+    }
+    const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+    if (top) return top.endsWith('方面') ? top : `${top}方面`;
+    const last = d.stations[d.stations.length - 1]?.name;
+    return last ? `${last}方面` : d.label;
+  });
+}
+
+/**
  * 指定時刻の前後の列車を取得
  * @param prevCount  centerTime より前の列車数（始発より前は無いので、そこで自然に頭打ちになる）
  * @param nextCount  centerTime 以降の列車数（当日ぶんで足りなければ翌日始発から補う）

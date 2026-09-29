@@ -7945,6 +7945,14 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "始発",
     english: "First train"
   },
+  reverseDirection: {
+    japanese: "方向を切り替え",
+    english: "Switch direction"
+  },
+  reverseDirectionReference: {
+    japanese: "逆方向（参考）",
+    english: "Opposite direction (reference)"
+  },
   offRouteReference: {
     japanese: "ルート外参考",
     english: "Off-route ref"
@@ -8852,6 +8860,8 @@ export const uiChinese: Record<string, string> = {
   hidePastDepartures: "隐藏更早的发车",
   showMorePastDepartures: "▲ 显示更多更早的发车",
   firstTrainReached: "首班车",
+  reverseDirection: "切换方向",
+  reverseDirectionReference: "反方向（参考）",
   offRouteReference: "路线外参考",
   noData: "无数据",
   showAllTimetable: "▼ 显示完整时刻表",
@@ -9185,6 +9195,8 @@ export const uiKorean: Record<string, string> = {
   hidePastDepartures: "이전 출발 숨기기",
   showMorePastDepartures: "▲ 더 이전 출발 표시",
   firstTrainReached: "첫차",
+  reverseDirection: "방향 전환",
+  reverseDirectionReference: "반대 방향(참고)",
   offRouteReference: "경로 외 참고",
   noData: "데이터 없음",
   showAllTimetable: "▼ 전체 시간표 표시",

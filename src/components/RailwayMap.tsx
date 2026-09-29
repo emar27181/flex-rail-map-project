@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X, Timer, TriangleAlert } from 'lucide-react';
+import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X, Timer, TriangleAlert, ArrowUpDown } from 'lucide-react';
 import type { LeafletEvent, LeafletMouseEvent, Map as LeafletMap } from 'leaflet';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { JAPAN_OUTLINE } from '../data/japanOutline';
@@ -48,6 +48,7 @@ import {
   getDirectionIndex as getTimetableDirectionIndex,
   hasTimetableData,
   getLineTimetable,
+  getDirectionShortLabels,
   isEstimatedTimetable,
   TIMETABLE_SOURCE,
   addMinutes,
@@ -408,6 +409,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [methodInfoTooltip, setMethodInfoTooltip] = useState<{ key: keyof StationStats; x: number; y: number } | null>(null);
   // ツールチップ内で選択中の路線
   const [tooltipSelectedRoute, setTooltipSelectedRoute] = useState<string | null>(null);
+  // 時刻表ツールチップで利用者が選んだ方向（駅・路線ごと。別の駅・路線を開くと経路の進行方向に戻る）
+  const [tooltipDirectionPick, setTooltipDirectionPick] = useState<{ station: string; route: string; dir: number } | null>(null);
   const [showAllTooltipDeps, setShowAllTooltipDeps] = useState(false);
   // 時刻表ツールチップ: 基準時刻より前の発車も見られるようにする開閉状態
   const [showPastDepartures, setShowPastDepartures] = useState(false);
@@ -1607,11 +1610,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // 画面には pastDeparturesShownCount ぶんだけ見せる。「さらに前を表示」を
     // 押すたびにその件数を増やし、始発に到達するまで遡れるようにする
     // （「前の時刻を表示で始発まで遡れるように」との要望を受けた）。
+    // 方向: 既定は経路の進行方向（経路外の路線は最初の方向）。利用者が切り替えたらそちら
+    const journeyDirIdx = activeJourneyEntry?.directionIndex ?? 0;
+    const activeDirIdx = (tooltipDirectionPick
+      && tooltipDirectionPick.station === stationTooltip.stationName
+      && tooltipDirectionPick.route === activeRouteKey)
+      ? tooltipDirectionPick.dir
+      : journeyDirIdx;
+    // 経路の路線を進行方向と逆に見ているとき（遅延時の引き返しなど、参考として見る）
+    const isReversedFromJourney = !!activeJourneyEntry && activeDirIdx !== activeJourneyEntry.directionIndex;
+    const directionLabels = activeRouteKey ? getDirectionShortLabels(activeRouteKey) : [];
+
     const { activeDeps, activePastDeps } = (() => {
       const empty = { activeDeps: [] as Departure[], activePastDeps: [] as Departure[] };
       if (!activeRouteKey || !hasTimetableData(activeRouteKey)) return empty;
       const depTime = activeJourneyEntry?.depTime ?? timetableBaseTime;
-      const dirIdx  = activeJourneyEntry?.directionIndex ?? 0;
+      const dirIdx  = activeDirIdx;
       const { prev, next } = getDeparturesAround(activeRouteKey, stationTooltip.stationName, dirIdx, depTime, Infinity, 50);
       return { activeDeps: next, activePastDeps: prev };
     })();
@@ -2001,6 +2015,39 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   );
                 })()}
                 {/*
+                  方向の切替。「藤沢から熱海・沼津方面／宇都宮・高崎方面」のように行先の方面で示す
+                  （上り・下りは直通先で逆になり、地下鉄・山手線では使われないため）。
+                  既定は経路の進行方向で、切り替えると逆方向を参考として表示する
+                */}
+                {directionLabels.length >= 2 && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: L.sp.xs,
+                    padding: `${L.sp.xs} ${L.sp.md}`,
+                    borderBottom: `1px solid ${colors.borderLight}`,
+                  }}>
+                    <span style={{ fontSize: FS.body, fontWeight: 'bold', color: colors.text, minWidth: 0 }}>
+                      {translateDestination(directionLabels[activeDirIdx] ?? '', currentLanguage)}
+                    </span>
+                    <IconButton
+                      theme={theme}
+                      size="sm"
+                      variant="outline"
+                      icon={<ArrowUpDown />}
+                      label={translateUI('reverseDirection', currentLanguage)}
+                      onClick={() => {
+                        if (!activeRouteKey) return;
+                        setTooltipDirectionPick({
+                          station: stationTooltip.stationName,
+                          route: activeRouteKey,
+                          dir: (activeDirIdx + 1) % directionLabels.length,
+                        });
+                        setShowPastDepartures(false);
+                        setPastDeparturesShownCount(8);
+                      }}
+                    />
+                  </div>
+                )}
+                {/*
                   基準時刻より前の発車は既定では非表示（従来どおり、未来の便が
                   一番上に来る）。「前の時刻も見れるように」という要望を受けて、
                   ボタンで開くと基準時刻の直前の便を上に追加表示する形にした
@@ -2062,8 +2109,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 }}>
                   <span>{activeDepTime} {translateUI('afterSuffix', currentLanguage)}</span>
-                  {!isJourneyRoute && (
-                    <span style={{ color: colors.textSecondary, opacity: 0.7, fontSize: FS.caption }}>{translateUI('offRouteReference', currentLanguage)}</span>
+                  {(!isJourneyRoute || isReversedFromJourney) && (
+                    <span style={{ color: colors.textSecondary, opacity: 0.7, fontSize: FS.caption }}>
+                      {translateUI(isReversedFromJourney ? 'reverseDirectionReference' : 'offRouteReference', currentLanguage)}
+                    </span>
                   )}
                 </div>
                 {activeDeps.length === 0 ? (
