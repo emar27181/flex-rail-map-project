@@ -2,7 +2,7 @@
  * 地図アプリ（/）を特定の状態で開くURLを組み立てる。
  *
  * 地図側が読むURLパラメータ（routes: routeUrlCodes.ts, from: stationUrlParams.ts,
- * metric: heatmapUrlParam.ts, center/zoom: mapViewUrlParam.ts）と
+ * metric: heatmapUrlParam.ts, center/zoom: mapViewUrlParam.ts, embed: embedMode.ts）と
  * 同じ定数・同じ変換を使う。ガイドのCTA・駅/路線/データのページから地図へ
  * 飛ぶリンクは、すべてここで作る（パラメータ名を各所に書かない）。
  */
@@ -11,6 +11,7 @@ import { getRouteCode, MAX_URL_VISIBLE_ROUTES, VISIBLE_ROUTES_PARAM } from './ro
 import { ARRIVAL_PARAM, DEPARTURE_PARAM } from './stationUrlParams';
 import { HEATMAP_METRIC_PARAM, isUrlHeatmapMetric } from './heatmapUrlParam';
 import { MAP_CENTER_PARAM, MAP_ZOOM_PARAM } from './mapViewUrlParam';
+import { EMBED_PARAM } from './embedMode';
 import type { StationStats } from '../data/stationStats';
 
 export interface MapLinkOptions {
@@ -27,9 +28,11 @@ export interface MapLinkOptions {
   zoom?: number;
   /** 地図の表示言語。日本語は既定なので付けない */
   lang?: 'ja' | 'en' | 'zh' | 'ko';
+  /** 記事などに iframe で埋め込む表示（embedMode.ts） */
+  embed?: boolean;
 }
 
-export function buildMapHref({ routes, from, to, metric, center, zoom, lang = 'ja' }: MapLinkOptions): string {
+export function buildMapHref({ routes, from, to, metric, center, zoom, lang = 'ja', embed = false }: MapLinkOptions): string {
   const params = new URLSearchParams();
   if (from) params.set(DEPARTURE_PARAM, from);
   if (to) params.set(ARRIVAL_PARAM, to);
@@ -42,7 +45,9 @@ export function buildMapHref({ routes, from, to, metric, center, zoom, lang = 'j
     params.set(MAP_CENTER_PARAM, center.join(','));
     if (zoom !== undefined) params.set(MAP_ZOOM_PARAM, String(zoom));
   }
-  if (lang !== 'ja') params.set('lang', lang);
+  // 日本語は既定なので付けない。ただし埋め込みは閲覧者のブラウザの言語で開かないよう、記事の言語を必ず付ける
+  if (lang !== 'ja' || embed) params.set('lang', lang);
+  if (embed) params.set(EMBED_PARAM, '1');
   const query = params.toString();
   return `/${query ? `?${query}` : ''}`;
 }

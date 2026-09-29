@@ -104,6 +104,8 @@ const webSiteSchema = {
 					s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2444529114040977';
 					document.head.appendChild(s);
 				};
+				// 記事に埋め込む表示（?embed=1, src/utils/embedMode.ts）では広告を読まない
+				if (/[?&]embed=1(?:&|$)/.test(window.location.search)) return;
 				if (document.readyState === 'complete') load();
 				else window.addEventListener('load', load, { once: true });
 			})();

@@ -73,6 +73,7 @@ import { getInitialHeatmapMetricFromUrl, syncHeatmapMetricToUrl } from '../utils
 import { toArticleLanguage } from '../utils/languagePersistence';
 import { defaultRoutesNear } from '../utils/defaultRoutesNear';
 import { getInitialMapViewFromUrl } from '../utils/mapViewUrlParam';
+import { isEmbedMode } from '../utils/embedMode';
 import {
   getInitialDepartureFromUrl,
   getInitialArrivalFromUrl,
@@ -237,10 +238,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // console.log removed
 
   // 折りたたみ状態の管理
-  const [isStationSelectorExpanded, setIsStationSelectorExpanded] = useState(true);
-  const [mobileStationExpanded, setMobileStationExpanded] = useState(true);
+  // 記事に埋め込む表示（?embed=1）では、小さな枠で地図を広く見せるためにパネルを閉じて始める
+  const embedded = useMemo(() => isEmbedMode(), []);
+  const [isStationSelectorExpanded, setIsStationSelectorExpanded] = useState(!embedded);
+  const [mobileStationExpanded, setMobileStationExpanded] = useState(!embedded);
   const [isRouteToggleExpanded, setIsRouteToggleExpanded] = useState(false);
-  const [isLegendExpanded, setIsLegendExpanded] = useState(true);
+  const [isLegendExpanded, setIsLegendExpanded] = useState(!embedded);
 
   // 表示モードの管理
   const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
@@ -6802,7 +6805,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           })()}
         </div>
       </div>
-      <CookieBanner language={currentLanguage} />
+      {!embedded && <CookieBanner language={currentLanguage} />}
     </ErrorBoundary>
   );
 };

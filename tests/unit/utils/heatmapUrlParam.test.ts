@@ -33,3 +33,19 @@ describe('地図の表示位置のURLパラメータ', () => {
     expect(buildMapHref({ center: [35.68, 139.76], zoom: 13 })).toBe('/?center=35.68%2C139.76&zoom=13');
   });
 });
+
+describe('埋め込み表示（?embed=1）', () => {
+  it('embed を付けると地図の状態に embed=1 が足される', async () => {
+    const { buildMapHref } = await import('../../../src/utils/mapDeepLink');
+    expect(buildMapHref({ routes: ['yamanote'], lang: 'en', embed: true })).toBe('/?routes=yama&lang=en&embed=1');
+    expect(buildMapHref({ routes: ['yamanote'] })).toBe('/?routes=yama');
+    // 日本語の埋め込みも言語を付ける（閲覧者のブラウザの言語で開かない）
+    expect(buildMapHref({ routes: ['yamanote'], embed: true })).toBe('/?routes=yama&lang=ja&embed=1');
+  });
+  it('1 のときだけ埋め込み表示にする', async () => {
+    const { isEmbedValue } = await import('../../../src/utils/embedMode');
+    expect(isEmbedValue('1')).toBe(true);
+    expect(isEmbedValue('true')).toBe(false);
+    expect(isEmbedValue(null)).toBe(false);
+  });
+});
