@@ -2,6 +2,14 @@
 
 ## [2026-09-29] セッション（上野東京ライン・湘南新宿ラインの表記統一・時刻表の方向切替・前の便の常時表示・ツールチップの高さ・路線の凡例）
 
+### feat: 「表示中の路線」の凡例を見出しで折りためるようにする
+- `src/components/legend/VisibleRoutesLegend.tsx`, `src/utils/legendPersistence.ts`（新規）, `src/components/RailwayMap.tsx`
+- 折りたたみ中は「表示中の路線（N）」の1行。開閉状態は保存して持ち越す
+
+### fix: スマホ全画面で地図右上のボタンが駅選択パネルに重なっていた
+- `src/components/RailwayMap.tsx`
+- 2列にし [縮小][言語] の下に [方位] を置く
+
 ### fix: スマホで路線の凡例が表示されなかった
 - `src/components/RailwayMap.tsx`
 - スマホ全画面ではパネルが右端に来ないのに「パネルが開いている」扱いで消していた。パネルを避けるのはPCだけにした
