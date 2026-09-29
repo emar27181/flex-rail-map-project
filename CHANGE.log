@@ -1,6 +1,13 @@
 # CHANGE LOG
 
-## [2026-09-29] セッション（上野東京ライン・湘南新宿ラインの表記統一）
+## [2026-09-29] セッション（上野東京ライン・湘南新宿ラインの表記統一・時刻表の方向切替）
+
+### feat: 駅の時刻表で方向を切り替えられるようにし、方向は「〜方面」で示す
+- `src/data/timetableData.ts`（`getDirectionShortLabels`）, `src/components/RailwayMap.tsx`,
+  `src/utils/translation.ts`, `tests/unit/data/timetableData.test.ts`
+- 時刻表ツールチップの右列に「熱海・沼津方面」などの方向名と切替ボタン（ArrowUpDown）を置く
+- 方向名はその方向でいちばん多い行先（〜行き→〜方面）。上り・下りは直通先で逆になるため使わない
+- 既定は経路の進行方向。経路の路線を逆向きに見ているときは「逆方向（参考）」
 
 ### fix: 上野東京ライン・湘南新宿ラインの路線名を「系統名（路線名）」に揃える
 - `src/data/routes.ts`, `src/utils/translation.ts`, `src/data/timetableData.ts`,
