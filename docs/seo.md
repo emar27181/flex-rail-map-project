@@ -131,6 +131,27 @@ B・C のページも作る（路線ページ・隣の駅からのリンク先�
 - 中国語・韓国語ページからは、その言語版がある駅ページにだけリンクする（無い駅は文字だけ）
 - ガイドの関連リンク先が実在するか（その言語版があるか）は `tests/unit/seo/guideLinks.test.ts` が確かめる
 
+## 多言語（言語ごとの別URL・言語の切り替え）
+
+記事・ガイド・駅/路線/データのページは、**言語ごとに別URL** で書き出す（検索エンジンが
+各言語版を別々に見られるように。1つのURLの中でJSで文字を差し替えると最初の言語しか見えない）。
+
+| ページ | 日本語 | 英語・中国語・韓国語 | 実装 |
+|---|---|---|---|
+| 記事 | `/articles/{slug}` | `/{en,zh,ko}/articles/{slug}` | `src/components/articles/ArticleLayout.astro`（日本語は `src/pages/articles/`、他は `src/pages/[...lang]/articles/`） |
+| ガイド | `/guides/{slug}` | `/{en,zh,ko}/guides/{slug}` | `GuideLayout.astro`（同じ slug が各言語版） |
+| 駅・路線・データ | `/stations/...` など | `/{en,zh,ko}/stations/...` | `SeoPageLayout.astro` |
+
+- canonical は各言語の自分自身、hreflang は実在する言語版すべて＋x-default（日本語）
+- 右上の言語切り替えは `src/components/LanguageSwitcher.astro`。その言語版が無いときは押せない表示にする
+- **閲覧者の言語で自動リダイレクトしない。** `LanguageSuggestion.astro` が、以前選んだ言語
+  （地図アプリと共通の `frm-language`）かブラウザの言語にこのページの版があるときだけ、閉じられる案内を出す
+- 記事の旧URL（`/articles/...?lang=en`）は `netlify.toml` で新URLへ301転送する（ページ側にも同じ移動の保険がある）
+- 記事を足すときは `articleI18n.ts` の `ARTICLES` に1行足し、4言語のタイトル（`ARTICLE_PAGE_TRANSLATIONS`）と
+  本文（`articleBodyI18n.ts`）を書く。そろっていないと `tests/unit/data/articleI18n.test.ts` が落ちる
+  （日本語版のページファイル `src/pages/articles/{slug}.astro` も1つ作る）
+- 本文の記事リンクは同じ言語の記事URL、地図へのリンクは `/?lang=xx` にする（テストで確かめる）
+
 ## 地図を開くCTA（設定済みの地図へのリンク）
 
 `src/components/MapOpenCta.astro` だけで作る。URL は `src/utils/mapDeepLink.ts`

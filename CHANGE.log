@@ -45,6 +45,20 @@
 ### docs: SEO の仕組みに都市・多言語・CTA・GA4 を追記
 - `docs/seo.md`, `CLAUDE.md`
 
+### feat: 記事・ガイド・駅/路線ページの右上に共通の言語切り替えと言語の案内を置く
+- `src/components/LanguageSwitcher.astro`（新規）, `src/components/LanguageSuggestion.astro`（新規）,
+  `src/layouts/{GuideLayout,GuidesIndexLayout,SeoPageLayout}.astro`, `src/layouts/guideStyles.ts`
+- 自動リダイレクトはせず、以前選んだ言語かブラウザの言語に版があるときだけ閉じられる案内を出す
+
+### feat: 記事を言語ごとの別URLにし、検索した言語の記事が出るようにする
+- `src/components/articles/{ArticleLayout,BeginnerLineChips,IntroductionDemo}.astro`（新規）,
+  `src/pages/[...lang]/articles/`（新規）, `src/pages/articles/*.astro`（共通レイアウトを使う薄いファイルに）,
+  `src/data/articleI18n.ts`（`ARTICLES`）, `src/data/articleBodyI18n.ts`, `src/config/articleSeo.ts`,
+  `src/config/siteNav.ts`, `src/components/RailwayMap.tsx`, `src/styles/article-layout.css`, `netlify.toml`,
+  `tests/unit/data/articleI18n.test.ts`（新規）
+- 英語・中国語・韓国語版を /en/articles/... などで書き出し、canonical・hreflang・html lang・inLanguage を各言語に
+- 旧URL（?lang=）は301転送、初心者向け記事の図を全言語に、紹介記事のデモを各言語で書き出す
+
 ## [2026-09-28] セッション（東海道線の時刻表の行先・並行ルート・推薦ルート選択の既定オフ）
 
 ### feat: 出発・到着駅にも時刻を出し、複数の路線が通る駅は路線ごとに時刻を並べる

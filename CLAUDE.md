@@ -691,6 +691,8 @@ Netlify管理画面の Site configuration → Build & deploy → Branch deploys 
   観光地→最寄り駅は `src/data/touristSpots.ts`
 - **中国語・韓国語ページで駅名・路線名・観光地名を推測で訳さない。** 駅名の訳が翻訳データに無い駅は
   その言語の駅ページを作らない。hreflang の中国語は `zh-CN`（URL は `/zh/` のまま）
+- **記事・ガイド・駅/路線ページは言語ごとに別URL**（`/en/articles/...` など）。1つのURLの中でJSで言語を
+  差し替えない。言語の切り替えは `LanguageSwitcher.astro`、自動リダイレクトはしない（`docs/seo.md` の「多言語」）
 - 地図を開くリンクは `MapOpenCta.astro` / `mapDeepLink.ts` だけで作る（`routes` `from` `metric` `lang`）。
   クリックは GA4 の `seo_map_open` と `{guide,station,line,tourist,data}_map_open` で計測する
 - 仕組み・判断基準・ページを足すときの決まりは **`docs/seo.md`**
