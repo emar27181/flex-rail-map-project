@@ -7933,6 +7933,14 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "始発",
     english: "First train"
   },
+  visibleRoutesLegendTitle: {
+    japanese: "表示中の路線",
+    english: "Lines shown"
+  },
+  moreRoutesCount: {
+    japanese: "…ほか{count}路線",
+    english: "…and {count} more"
+  },
   reverseDirection: {
     japanese: "方向を切り替え",
     english: "Switch direction"
@@ -8845,6 +8853,8 @@ export const uiChinese: Record<string, string> = {
   dataSource: "来源",
   afterSuffix: "以后",
   firstTrainReached: "首班车",
+  visibleRoutesLegendTitle: "显示中的线路",
+  moreRoutesCount: "…另外{count}条线路",
   reverseDirection: "切换方向",
   reverseDirectionReference: "反方向（参考）",
   offRouteReference: "路线外参考",
@@ -9177,6 +9187,8 @@ export const uiKorean: Record<string, string> = {
   dataSource: "출처",
   afterSuffix: "이후",
   firstTrainReached: "첫차",
+  visibleRoutesLegendTitle: "표시 중인 노선",
+  moreRoutesCount: "…외 {count}개 노선",
   reverseDirection: "방향 전환",
   reverseDirectionReference: "반대 방향(참고)",
   offRouteReference: "경로 외 참고",

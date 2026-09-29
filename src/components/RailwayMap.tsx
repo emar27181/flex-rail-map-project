@@ -86,6 +86,7 @@ import { buildCorridorRoutes, vertexRanks, offsetPoints } from '../utils/routeOf
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import MapCompassButton from './map/MapCompassButton';
+import VisibleRoutesLegend from './legend/VisibleRoutesLegend';
 import { getThroughReachableSections } from '../utils/throughService';
 import { findParallelSections, sectionMinutes } from '../utils/parallelRoutes';
 import { STATION_TIME_LINE_HEIGHT, stationTimeLinesHtml, timeLineWidth, toTimeLines, type StationTimeLine } from './map/stationTimeLabel';
@@ -6500,6 +6501,33 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               （index.astro側の固定ヘッダー）に既にあるためここでは省略し、
               全画面切り替えボタン1個だけを地図右上に残す
               （左の余白には「表示路線の切替」パネルが来る）。 */}
+          {/* 表示中の路線の凡例（右下）。どの色がどの路線かを、表示切替を開かずに確かめる。
+              全路線表示・0路線のときは意味が無いので出さない。スマホは下部のナビに重ならない高さに置き、
+              スマホ全画面でヒートマップの凡例が右下に来るときは譲る */}
+          {mapViewMode === 'realistic' && !(isFullscreen && isMobile && heatmapEnabled) && (() => {
+            const total = Object.keys(routes).length;
+            if (visibleRoutes.size === 0 || visibleRoutes.size >= total) return null;
+            // PC・全画面では「表示路線の切替」パネルが右端に幅300pxで浮くので、開いている間はその左に置く。
+            // スマホ全画面で開いているときは横に並ぶ余地が無いので出さない
+            const panelOnRight = (!isMobile || isFullscreen) && isLegendExpanded;
+            if (panelOnRight && isMobile) return null;
+            const order = [...(highlightedRouteKeys ?? []), ...visibleRoutes]
+              .filter((k, i, a) => visibleRoutes.has(k) && a.indexOf(k) === i);
+            return (
+              <VisibleRoutesLegend
+                items={order.map(k => ({
+                  key: k,
+                  name: translateRoute(routeNames[k] ?? k, currentLanguage),
+                  color: adjustRouteColorForTheme(routeColors[k], theme),
+                }))}
+                theme={theme}
+                language={currentLanguage}
+                maxItems={10}
+                style={{ position: 'absolute', right: panelOnRight ? `calc(300px + ${L.sp.lg})` : L.sp.lg, bottom: isMobile ? '64px' : L.sp['4xl'], zIndex: 1002 }}
+              />
+            );
+          })()}
+
           <div style={{
             position: 'absolute',
             ...(isFullscreen && isMobile
