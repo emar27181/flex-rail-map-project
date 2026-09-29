@@ -427,10 +427,11 @@ export function lineByKey(key: RouteKey): SeoLine | undefined {
   return getSeoModel().lines.find(l => l.key === key);
 }
 
-/** その言語のガイドのうち、地図CTAでこれらの路線を開くもの */
+/** その言語のガイドのうち、地図CTA（冒頭・節ごと）でこれらの路線を開くもの */
 export function guidesForRoutes(keys: RouteKey[], lang: SeoLang): Array<{ title: string; path: string }> {
+  const opens = (g: GuideDefinition) => [...(g.ctaRoutes ?? []), ...g.sections.flatMap(sec => sec.cta?.routes ?? [])];
   return guides
-    .filter((g: GuideDefinition) => g.lang === lang && g.ctaRoutes?.some(r => keys.includes(r)))
+    .filter((g: GuideDefinition) => g.lang === lang && opens(g).some(r => keys.includes(r)))
     .map(g => ({ title: g.breadcrumbLabel, path: guidePath(g) }));
 }
 

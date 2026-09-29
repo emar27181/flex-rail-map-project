@@ -46,3 +46,12 @@ describe('ガイドのリンクと地図CTA', () => {
     }
   });
 });
+
+describe('駅・路線ページからガイドへのリンク', () => {
+  it('節ごとのCTAで開く路線の駅ページからも、そのガイドへリンクする', async () => {
+    const { guidesForRoutes } = await import('../../../src/seo/pageModel');
+    // 嵐電は京都ガイドの節（嵐山）のCTAでだけ開く
+    expect(guidesForRoutes(['keifukuArashiyama'], 'ja').map(g => g.path)).toContain('/guides/kyoto-train-map');
+    expect(guidesForRoutes(['keifukuArashiyama'], 'zh').map(g => g.path)).toContain('/zh/guides/kyoto-train-map');
+  });
+});
