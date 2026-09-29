@@ -1925,20 +1925,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     borderLeft: isActive
                       ? `3px solid ${colors.primary}`
                       : isJourney ? `3px solid ${routeColor}` : '3px solid transparent',
-                    opacity: isShowing ? 1 : 0.5,
                   }}
                 >
+                  {/* 非表示の路線は名前と色の丸だけ控えめにし、「＋表示」は通常の濃さで出す
+                      （以前は行ごと半透明で、ボタンの色まで沈んで見分けにくかった） */}
                   <div style={{
                     width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0,
                     backgroundColor: routeColor,
-                    opacity: hasData ? 1 : 0.4,
+                    opacity: hasData && isShowing ? 1 : 0.45,
                   }} />
                   <span style={{
                     fontSize: FS.caption,
-                    color: isActive ? colors.text : isJourney ? colors.text : colors.textSecondary,
+                    color: !isShowing ? colors.textMuted : (isActive || isJourney) ? colors.text : colors.textSecondary,
                     fontWeight: isJourney ? 'bold' : 'normal',
                     whiteSpace: 'normal', wordBreak: 'keep-all', overflowWrap: 'break-word',
-                    opacity: hasData ? 1 : 0.5,
+                    opacity: hasData ? 1 : 0.6,
                     flex: 1,
                     minWidth: 0,
                     lineHeight: 1.3,
