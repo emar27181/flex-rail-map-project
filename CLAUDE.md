@@ -229,6 +229,8 @@ src/
   東京・新宿・渋谷・池袋・品川・横浜・川崎・藤沢・大宮・千葉の10駅のみ）を追加する場合は、
   対象駅数をコメント・出典に明記すること。ソースデータは
   `data/kanto-station-poc-2026-09/README.md` に保存してある
+- 2026-09-29: 800m系の施設数を首都圏277駅に拡張（検証して取り込み、同名駅が各地にある28駅は保留）。
+  新しい版を取り込む手順は `docs/data-editing-guide.md` の「駅周辺の施設数（800m）を新しいデータで更新する」
 
 **背景:** 2026年6月以前のデータには家賃・乗降客数・治安スコアなどAI生成の推定値が混入していたが、ユーザーが誤った情報に基づいて意思決定することを防ぐため、多くを削除・`estimated`ラベル付けした。ただし2026年9月時点で `avgRent1K`/`avgRent1LDK`/`populationDensity`/`dailyPassengers`/`morningCongestion`/`noiseScore`/`officeCount`は依然`estimated`のままデータに残っている（既定非表示だが、`showEstimatedData`をONにすると表示される）。首都圏駅データセットPoC（2026-09-24, `data/kanto-station-poc-2026-09/`）はこれらの一部（`morningCongestion`相当）を国交省公式の`congestionSections`に置き換える設計だが、10駅のみの検証段階でありサイト全体への反映は未着手。
 

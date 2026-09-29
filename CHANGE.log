@@ -1,5 +1,21 @@
 # CHANGE LOG
 
+## [2026-09-29] セッション（データ: 首都圏駅周辺の施設数800mを277駅へ）
+
+### feat: 首都圏駅周辺の施設数（半径800m, OSM）を267駅に広げる
+- `data/kanto-poi-800m-2026-09/`（新規: 受け取ったデータ・`validation.json`）, `scripts/merge-kanto-poi-800m.mts`（新規）,
+  `src/data/station-stats-data.json`, `src/data/stationStats.ts`（出典・対象駅数）, `src/seo/pageText.ts`,
+  `tests/unit/data/{kantoPoi800m,stationStats}.test.ts`
+- PoC の10駅だけだった800m系15項目を、首都圏の267駅に取り込んだ（計277駅）。既存の値は1つも変えていない
+- 受け取ったマージスクリプトは駅名だけで取り込むため使わず、数えた位置とアプリの駅の距離（最大0.25km）を照合してから取り込む。
+  同じ名前の駅がアプリの別の地域にもある28駅（春日・赤坂など）は、別の駅に値が出るため保留
+- 収集スクリプトが Overpass のタイムアウト応答（elements が空）を 0 件として保存し得たのを直した
+
+### docs: 駅周辺データを新しい版で更新する手順と、データ整備の進捗台帳
+- `docs/data-editing-guide.md`, `docs/data-maintenance-ledger.md`（新規）, `data/kanto-poi-800m-2026-09/README.md`,
+  `data/kanto-station-poc-2026-09/STATUS.md`, `CLAUDE.md`
+- ほかの AI が新しい版を受け取ったときに、同じ検証を通して取り込めるようにした。変更前後の画面は `docs/data-maintenance/images/`
+
 ## [2026-09-28] セッション（東海道線の時刻表の行先・並行ルート・推薦ルート選択の既定オフ）
 
 ### feat: 出発・到着駅にも時刻を出し、複数の路線が通る駅は路線ごとに時刻を並べる

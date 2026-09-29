@@ -127,6 +127,28 @@ export const jrExampleLine: Station[] = [
   Python なら `json.dump(data, f, ensure_ascii=False, separators=(',', ':'))`
 - 一部の駅にしか無いデータは、対象駅数を出典に書く
 
+### 駅周辺の施設数（800m）を新しいデータで更新する
+
+外部（ChatGPT / Genspark など）で集めた「駅から半径800mの施設数」の新しい版を受け取ったときの手順。
+2026-09-29 の首都圏拡張（`data/kanto-poi-800m-2026-09/`）がこの手順の実例。
+
+1. 受け取ったフォルダを `data/<名前>-<年>-<月>/` に置く。中身は次の2つが要る
+   - 駅名 → 値の JSON（`station-stats-data.json` と同じフィールド名。**既存の 500m 系フィールドと同じ名前の値は入れない**）
+   - 各駅を数えた位置（駅名・緯度・経度）の CSV（`coverage.csv` と同じ列名）
+2. 出典・収集日・半径・ライセンス・対象駅数を、そのフォルダの `README.md` に書く
+3. 取り込みスクリプトで検証して取り込む（何度実行しても同じ結果になる）:
+   `npx tsx scripts/merge-kanto-poi-800m.mts`
+   （別のフォルダなら、スクリプト冒頭の `DIR` を変えたコピーを作る）
+   - 取り込まない（保留にする）のは、(a) 数えた位置がアプリの同じ名前の駅から 800m より離れている、
+     (b) 同じ名前の駅がアプリに 2km 以上離れて複数ある（駅統計は駅名だけで引くので別の駅にも値が出る）、
+     (c) 全項目が 0（取得失敗の疑い）の駅
+   - 結果は `validation.json` に残る。保留の駅は推測で直さず、理由と一緒に報告する
+4. `src/data/stationStats.ts` の `KANTO_POC_SOURCE`（出典）に、収集日と対象駅数を書き足す
+5. `npm run test:data` → `test:types` → `test:unit` → `build`
+
+**収集スクリプトを直すとき**: Overpass はタイムアウトでも `elements: []` と `remark` を返す。
+これを 0 件として保存しない（`data/kanto-station-poc-2026-09/scripts/kanto_poi_scale.py` の `fetch_cell` が実例）。
+
 ### 時刻表（`src/data/timetableData.ts`）
 
 - 各路線の `directions` は `[下り（片方向）, 上り（逆方向）]` の2要素
