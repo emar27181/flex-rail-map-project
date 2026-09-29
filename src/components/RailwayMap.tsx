@@ -6505,10 +6505,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           {mapViewMode === 'realistic' && !(isFullscreen && isMobile && heatmapEnabled) && (() => {
             const total = Object.keys(routes).length;
             if (visibleRoutes.size === 0 || visibleRoutes.size >= total) return null;
-            // PC・全画面では「表示路線の切替」パネルが右端に幅300pxで浮くので、開いている間はその左に置く。
-            // スマホ全画面で開いているときは横に並ぶ余地が無いので出さない
-            const panelOnRight = (!isMobile || isFullscreen) && isLegendExpanded;
-            if (panelOnRight && isMobile) return null;
+            // PCでは「表示路線の切替」パネルが右端に幅300pxで浮くので、開いている間はその左に置く。
+            // スマホではパネルは右端に来ない（全画面では下の「表示切替」ボタンから開く）ので常に右下に出す。
+            // 以前はスマホ全画面でも「パネルが開いている」扱いで凡例を消してしまい、見えなかった
+            const panelOnRight = !isMobile && isLegendExpanded;
             const order = [...(highlightedRouteKeys ?? []), ...visibleRoutes]
               .filter((k, i, a) => visibleRoutes.has(k) && a.indexOf(k) === i);
             return (
