@@ -23,7 +23,7 @@ import SiteFooterNav from '../components/SiteFooterNav.astro';
 import LineChip from '../components/seo/LineChip.astro';
 import { lineByKey, SEO_LANGS, type SeoLang } from '../seo/pageModel';
 import { SEO_TEXT } from '../seo/pageText';
-import { SITE_NAME, buildHreflangLinks, buildBreadcrumbJsonLd, canonicalUrl } from '../config/seo';
+import { SITE_NAME, buildHreflangLinks, buildBreadcrumbJsonLd, canonicalUrl, hreflangCode } from '../config/seo';
 import { guidePath, getGuideTranslations, type GuideDefinition } from '../data/guides';
 
 export interface Props {
@@ -90,7 +90,7 @@ const webPageJsonLd = {
 };
 ---
 
-<html lang={htmlLang}>
+<html lang={hreflangCode(htmlLang)}>
 	<head>
 		<SeoHead
 			title={guide.title}

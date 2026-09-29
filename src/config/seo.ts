@@ -47,6 +47,18 @@ export interface HreflangLink {
 }
 
 /**
+ * サイト内の言語（URLの接頭辞 /zh/ など）→ hreflang・<html lang> に書く言語コード。
+ * 中国語の文章は簡体字なので zh-CN と明示する。URL は既存どおり /zh/ のまま変えない。
+ */
+export const HREFLANG_CODE: Record<string, string> = {
+  zh: 'zh-CN',
+};
+
+export function hreflangCode(lang: string): string {
+  return HREFLANG_CODE[lang] ?? lang;
+}
+
+/**
  * 対応する各言語版のページ（別URLで実在するもの）から hreflang を組み立てる。
  *
  * - 対応ページが自分だけ（1言語しか無い）なら何も出さない
@@ -63,7 +75,7 @@ export function buildHreflangLinks(
   if (versions.length < 2) return [];
   const def = versions.find(v => v.lang === defaultLang) ?? versions[0];
   return [
-    ...versions.map(v => ({ hreflang: v.lang, href: canonicalUrl(v.path) })),
+    ...versions.map(v => ({ hreflang: hreflangCode(v.lang), href: canonicalUrl(v.path) })),
     { hreflang: 'x-default', href: canonicalUrl(def.path) },
   ];
 }

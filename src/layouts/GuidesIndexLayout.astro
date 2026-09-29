@@ -13,7 +13,7 @@ import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import SiteFooterNav from '../components/SiteFooterNav.astro';
 import SeoHead from '../components/seo/SeoHead.astro';
 import ThemeInitScript from '../components/ThemeInitScript.astro';
-import { buildHreflangLinks } from '../config/seo';
+import { buildHreflangLinks, hreflangCode } from '../config/seo';
 import { guideIndexPath, guideLanguages } from '../data/guides';
 
 export interface Props {
@@ -31,7 +31,7 @@ const hreflangLinks = buildHreflangLinks(
 );
 ---
 
-<html lang={htmlLang}>
+<html lang={hreflangCode(htmlLang)}>
 	<head>
 		<SeoHead
 			title={title}
