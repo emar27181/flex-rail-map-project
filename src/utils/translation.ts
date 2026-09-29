@@ -7877,10 +7877,6 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "到着",
     english: "Arrive"
   },
-  onboard: {
-    japanese: "乗",
-    english: "On"
-  },
   show: {
     japanese: "表示",
     english: "Show"
@@ -8839,7 +8835,6 @@ export const uiChinese: Record<string, string> = {
   arrivalTimeLabel: "到达时间",
   timeBasisDeparture: "出发",
   timeBasisArrival: "到达",
-  onboard: "乘",
   show: "显示",
   hide: "隐藏",
   lastUpdated: "最后更新",
@@ -9173,7 +9168,6 @@ export const uiKorean: Record<string, string> = {
   arrivalTimeLabel: "도착 시간",
   timeBasisDeparture: "출발",
   timeBasisArrival: "도착",
-  onboard: "탑",
   show: "표시",
   hide: "숨기기",
   lastUpdated: "최종 갱신",

@@ -1949,9 +1949,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     {/* 同じ線路を別系統が走る駅（藤沢の東海道線＝上野東京ラインなど）で系統名を添える */}
                     <ServiceTermini route={rk as RouteKey} theme={theme} language={currentLanguage} variant="brand" />
                   </span>
-                  {isJourney && (
-                    <span style={{ fontSize: FS.caption, color: colors.primary, flexShrink: 0 }}>{translateUI('onboard', currentLanguage)}</span>
-                  )}
+                  {/* 経路上の路線は太字と左の路線色の線で示す（以前あった青い「乗」の文字は不要との指摘で削除） */}
                   {!isShowing && (
                     <ColorChip color={routeColor} theme={theme} fontSize={FS.caption} shadow={false}>
                       ＋{translateUI('show', currentLanguage)}
