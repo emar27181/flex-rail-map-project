@@ -87,6 +87,7 @@ import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import MapCompassButton from './map/MapCompassButton';
 import VisibleRoutesLegend from './legend/VisibleRoutesLegend';
+import { getInitialLegendCollapsed, persistLegendCollapsed } from '../utils/legendPersistence';
 import { getThroughReachableSections } from '../utils/throughService';
 import { findParallelSections, sectionMinutes } from '../utils/parallelRoutes';
 import { STATION_TIME_LINE_HEIGHT, averageTime, stationTimeLinesHtml, timeLineWidth, toTimeLines, type StationTimeLine } from './map/stationTimeLabel';
@@ -495,6 +496,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 駅ラベルの時刻。既定は通る路線の時刻の平均で1つにまとめる（路線ごとに並べると行数が多すぎる）。
   // 設定で路線ごとの表示に切り替えられる
   const [showPerRouteStationTimes, setShowPerRouteStationTimes] = useState(false);
+  // 地図右下の「表示中の路線」の凡例を折りたたんでいるか（保存して持ち越す）
+  const [visibleRoutesLegendCollapsed, setVisibleRoutesLegendCollapsed] = useState(false);
+  useEffect(() => { setVisibleRoutesLegendCollapsed(getInitialLegendCollapsed()); }, []);
   const [showRouteLine, setShowRouteLine] = useState(true);
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
@@ -6535,6 +6539,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 theme={theme}
                 language={currentLanguage}
                 maxItems={10}
+                collapsed={visibleRoutesLegendCollapsed}
+                onToggleCollapsed={() => setVisibleRoutesLegendCollapsed(v => { persistLegendCollapsed(!v); return !v; })}
                 style={{ position: 'absolute', right: panelOnRight ? `calc(300px + ${L.sp.lg})` : L.sp.lg, bottom: isMobile ? '64px' : L.sp['4xl'], zIndex: 1002 }}
               />
             );
