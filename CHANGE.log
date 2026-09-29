@@ -1,6 +1,16 @@
 # CHANGE LOG
 
-## [2026-09-29] セッション（上野東京ライン・湘南新宿ラインの表記統一・時刻表の方向切替・前の便の常時表示・ツールチップの高さ）
+## [2026-09-29] セッション（上野東京ライン・湘南新宿ラインの表記統一・時刻表の方向切替・前の便の常時表示・ツールチップの高さ・路線の凡例）
+
+### improve: 駅ツールチップの非表示の路線を行ごと半透明にせず、「＋表示」ボタンを通常の濃さで出す
+- `src/components/RailwayMap.tsx`
+- 控えめにするのは路線名（textMuted）と色の丸だけ。以前は行ごと50%でボタンの色まで沈んでいた
+
+### feat: 地図の右下に表示中の路線の凡例を出す
+- `src/components/legend/VisibleRoutesLegend.tsx`（新規）, `src/components/RailwayMap.tsx`,
+  `src/utils/translation.ts`, `tests/unit/components/legend/VisibleRoutesLegend.test.tsx`（新規）
+- 経路上の路線を先頭に10路線まで並べ、残りは「…ほかN路線」。全路線・0路線のときは出さない
+- PCで表示路線の切替パネルが開いているときはその左、スマホは下部ナビに重ならない高さ
 
 ### improve: 駅の時刻表ツールチップの高さの上限を広げる
 - `src/components/RailwayMap.tsx`
