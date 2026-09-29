@@ -71,6 +71,11 @@
 - `src/data/articleI18n.ts`, `src/data/articleBodyI18n.ts`, `tests/unit/data/articleI18n.test.ts`
 - 日本語・中国語・韓国語の記事に英語のタグ（Safety Guide など）と CTA の飾り文字が残っていた
 
+### improve: 地図を開くボタンを灰色の箱で囲まない
+- `src/layouts/guideStyles.ts`（`.cta-block`）
+- ボタンと箱が二重の枠に見え、注記の無いボタンでは箱が何も伝えていなかった。注記はボタンの下に小さく置き、
+  2行に折り返すボタンの文字は行の長さをそろえる（1文字だけ次の行に落ちないように）
+
 ### improve: サービス名を正式名称「Flex Railway Map」に統一し、1か所で管理する
 - `src/config/seo.ts`（`SITE_NAME`, `PROJECT_NAME`, `COPYRIGHT_TEXT`, `withSiteName`）, `src/data/{guides,articleI18n,articleBodyI18n}.ts`（`{siteName}`）,
   `src/seo/{pageText,pageModel}.ts`, `src/utils/translation.ts`, `src/config/articleSeo.ts`, `src/components/{NavigationBar,DemoMap}.tsx`,

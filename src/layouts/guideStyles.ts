@@ -40,19 +40,18 @@ body.dark .breadcrumb { color: ${dark.textSecondary}; }
   margin-bottom: ${L.sp['3xl']};
 }
 
-/* CTAは.back-linkと同じ「塗りの主要ボタン」を使い、ここでは配置だけ足す */
+/*
+ * 地図を開くボタン（MapOpenCta）。ボタンを灰色の箱で囲まない（ボタンと箱が二重の
+ * 枠に見え、注記の無いボタンでは箱が何も伝えない）。ボタンは .back-link と同じ塗りの
+ * 主要ボタンで、注記はボタンのすぐ下に小さく置く
+ */
 .cta-block {
   margin: ${L.sp['4xl']} 0;
-  padding: ${L.sp['3xl']};
-  border-radius: ${L.r.card};
-  background-color: ${light.surface};
-  border: 1px solid ${light.border};
   text-align: center;
 }
-body.dark .cta-block { background-color: ${dark.surface}; border-color: ${dark.border}; }
-.cta-block .back-link { margin-bottom: ${L.sp.md}; font-size: ${FS.input}; }
+.cta-block .back-link { margin-bottom: 0; font-size: ${FS.input}; text-wrap: balance; }
 .cta-block .cta-note {
-  margin: 0;
+  margin: ${L.sp.md} 0 0;
   font-size: ${FS.caption};
   color: ${light.textSecondary};
 }
