@@ -104,8 +104,6 @@ export const guides: GuideDefinition[] = [
       { href: '/articles/tokyo-train-map-beginner', label: '東京の路線図の読み方・乗り換え方【完全初心者ガイド】' },
       { href: '/articles/flex-rail-map-introduction', label: 'Flex Railway Mapを作っている理由' },
       { href: '/guide', label: 'Flex Railway Mapの使い方ガイド' },
-      { href: '/zh/guides/simple-tokyo-railway-map', label: '东京地铁线路图太密集怎么看（中文）' },
-      { href: '/ko/guides/simple-tokyo-railway-map', label: '도쿄 노선도 심플하게 보는 방법 (한국어)' },
     ],
     faq: [
       {
@@ -159,9 +157,6 @@ export const guides: GuideDefinition[] = [
     ctaNote: 'Opens with only the JR Yamanote Line and Tokyo Metro Ginza Line shown, in English. You can add or hide other lines from the list on the map.',
     related: [
       { href: '/en/guides/tokyo-train-network', label: "How to Understand Tokyo's Train Network" },
-      { href: '/guides/simple-tokyo-railway-map', label: '東京の路線図をシンプルに見る（日本語）' },
-      { href: '/zh/guides/tokyo-train-map', label: '东京地铁线路图简化查看方法（中文）' },
-      { href: '/ko/guides/tokyo-train-map', label: '도쿄 노선도 심플하게 보기 (한국어)' },
       { href: '/guide?lang=en', label: 'How to use Flex Railway Map' },
     ],
     faq: [
@@ -241,9 +236,6 @@ export const guides: GuideDefinition[] = [
     ctaRoutes: ['yamanote', 'ginzaLine'],
     ctaNote: '地图会以中文界面打开，只显示JR山手线和东京Metro银座线。其他线路可以随时从地图上的列表中添加或隐藏。',
     related: [
-      { href: '/en/guides/tokyo-train-map', label: 'Tokyo Train Map for Tourists（英语版）' },
-      { href: '/guides/simple-tokyo-railway-map', label: '东京路线图简化查看方法（日语版）' },
-      { href: '/ko/guides/tokyo-train-map', label: '도쿄 노선도 심플하게 보기（韩语版）' },
       { href: '/zh/guides/simple-tokyo-railway-map', label: '东京地铁线路图太密集怎么看（3条线路版）' },
     ],
     keywords: '东京地铁线路图,东京地铁图看不懂,东京地铁图太复杂,东京电车路线图,东京地铁图简化',
@@ -328,8 +320,6 @@ export const guides: GuideDefinition[] = [
     ctaNote: '地图会以中文界面打开，只显示JR山手线・中央线・东京Metro丸之内线。其他线路可以随时从地图上的列表中添加或隐藏。',
     related: [
       { href: '/zh/guides/tokyo-train-map', label: '东京地铁线路图简化查看方法（面向游客）' },
-      { href: '/guides/simple-tokyo-railway-map', label: '东京路线图简化查看方法（日语版）' },
-      { href: '/ko/guides/simple-tokyo-railway-map', label: '도쿄 노선도 심플하게 보는 방법（韩语版）' },
     ],
     faq: [
       {
@@ -376,8 +366,6 @@ export const guides: GuideDefinition[] = [
     ctaNote: '야마노테선・주오선・도쿄메트로 마루노우치선만 표시된 상태로 지도가 열립니다. 다른 노선은 지도 위 목록에서 언제든 추가・숨김할 수 있습니다.',
     related: [
       { href: '/ko/guides/tokyo-train-map', label: '도쿄 노선도 심플하게 보기 (여행자용)' },
-      { href: '/guides/simple-tokyo-railway-map', label: '도쿄 노선도 심플하게 보는 방법 (일본어판)' },
-      { href: '/zh/guides/simple-tokyo-railway-map', label: '东京地铁线路图太密集怎么看 (중국어판)' },
     ],
     faq: [
       {
@@ -429,8 +417,6 @@ export const guides: GuideDefinition[] = [
     ctaRoutes: ['yamanote', 'ginzaLine'],
     ctaNote: '지도가 한국어 화면으로 열리며, JR야마노테선과 도쿄메트로 긴자선만 표시됩니다. 다른 노선은 지도 위 목록에서 언제든 추가・숨김할 수 있습니다.',
     related: [
-      { href: '/en/guides/tokyo-train-map', label: 'Tokyo Train Map for Tourists (English)' },
-      { href: '/zh/guides/tokyo-train-map', label: '东京地铁线路图简化查看方法（中文）' },
       { href: '/ko/guides/simple-tokyo-railway-map', label: '도쿄 노선도 심플하게 보는 방법 (3개 노선)' },
     ],
     faq: [
@@ -502,9 +488,6 @@ export const guides: GuideDefinition[] = [
       { href: '/stations/tennoji', label: '天王寺駅の路線・乗り換え' },
       { href: '/guides/kyoto-train-map', label: '京都の路線図をシンプルに見る' },
       { href: '/guides/simple-tokyo-railway-map', label: '東京の路線図をシンプルに見る' },
-      { href: '/en/guides/osaka-train-map', label: 'A Simple Osaka Train Map (English)' },
-      { href: '/zh/guides/osaka-train-map', label: '大阪线路图简化查看方法（中文）' },
-      { href: '/ko/guides/osaka-train-map', label: '오사카 노선도 심플하게 보기 (한국어)' },
     ],
     faq: [
       {
@@ -570,9 +553,6 @@ export const guides: GuideDefinition[] = [
       { href: '/en/stations/tennoji', label: 'Tennoji Station: lines and transfers' },
       { href: '/en/guides/kyoto-train-map', label: 'A Simple Kyoto Train Map' },
       { href: '/en/guides/tokyo-train-map', label: 'Tokyo Train Map for Tourists' },
-      { href: '/guides/osaka-train-map', label: '大阪の路線図をシンプルに見る（日本語）' },
-      { href: '/zh/guides/osaka-train-map', label: '大阪线路图简化查看方法（中文）' },
-      { href: '/ko/guides/osaka-train-map', label: '오사카 노선도 심플하게 보기 (한국어)' },
     ],
     faq: [
       {
@@ -638,9 +618,6 @@ export const guides: GuideDefinition[] = [
       { href: '/zh/stations/tennoji', label: '天王寺站的线路与换乘' },
       { href: '/zh/guides/kyoto-train-map', label: '京都线路图简化查看方法' },
       { href: '/zh/guides/tokyo-train-map', label: '东京地铁线路图简化查看方法' },
-      { href: '/en/guides/osaka-train-map', label: 'A Simple Osaka Train Map（英语版）' },
-      { href: '/guides/osaka-train-map', label: '大阪の路線図をシンプルに見る（日语版）' },
-      { href: '/ko/guides/osaka-train-map', label: '오사카 노선도 심플하게 보기（韩语版）' },
     ],
     faq: [
       {
@@ -706,9 +683,6 @@ export const guides: GuideDefinition[] = [
       { href: '/ko/stations/tennoji', label: '덴노지역 노선・환승' },
       { href: '/ko/guides/kyoto-train-map', label: '교토 노선도 심플하게 보기' },
       { href: '/ko/guides/tokyo-train-map', label: '도쿄 노선도 심플하게 보기 (여행자용)' },
-      { href: '/en/guides/osaka-train-map', label: 'A Simple Osaka Train Map (English)' },
-      { href: '/guides/osaka-train-map', label: '大阪の路線図をシンプルに見る (일본어)' },
-      { href: '/zh/guides/osaka-train-map', label: '大阪线路图简化查看方法 (중국어)' },
     ],
     faq: [
       {
@@ -772,9 +746,6 @@ export const guides: GuideDefinition[] = [
       { href: '/stations/inari', label: '稲荷駅（伏見稲荷大社の最寄り駅）' },
       { href: '/stations/arashiyama', label: '嵐山駅' },
       { href: '/guides/osaka-train-map', label: '大阪の路線図をシンプルに見る' },
-      { href: '/en/guides/kyoto-train-map', label: 'A Simple Kyoto Train Map (English)' },
-      { href: '/zh/guides/kyoto-train-map', label: '京都线路图简化查看方法（中文）' },
-      { href: '/ko/guides/kyoto-train-map', label: '교토 노선도 심플하게 보기 (한국어)' },
     ],
     faq: [
       {
@@ -837,9 +808,6 @@ export const guides: GuideDefinition[] = [
       { href: '/en/stations/inari', label: 'Inari Station (for Fushimi Inari Taisha)' },
       { href: '/en/stations/arashiyama', label: 'Arashiyama Station' },
       { href: '/en/guides/osaka-train-map', label: 'A Simple Osaka Train Map' },
-      { href: '/guides/kyoto-train-map', label: '京都の路線図をシンプルに見る（日本語）' },
-      { href: '/zh/guides/kyoto-train-map', label: '京都线路图简化查看方法（中文）' },
-      { href: '/ko/guides/kyoto-train-map', label: '교토 노선도 심플하게 보기 (한국어)' },
     ],
     faq: [
       {
@@ -902,9 +870,6 @@ export const guides: GuideDefinition[] = [
       { href: '/zh/stations/inari', label: '稻荷站（伏见稻荷大社最近车站）' },
       { href: '/zh/stations/arashiyama', label: '岚山站' },
       { href: '/zh/guides/osaka-train-map', label: '大阪线路图简化查看方法' },
-      { href: '/en/guides/kyoto-train-map', label: 'A Simple Kyoto Train Map（英语版）' },
-      { href: '/guides/kyoto-train-map', label: '京都の路線図をシンプルに見る（日语版）' },
-      { href: '/ko/guides/kyoto-train-map', label: '교토 노선도 심플하게 보기（韩语版）' },
     ],
     faq: [
       {
@@ -965,9 +930,6 @@ export const guides: GuideDefinition[] = [
       { href: '/ko/lines/keihan-main-line', label: '게이한 본선 역 목록' },
       { href: '/ko/stations/kyoto', label: '교토역 노선・환승' },
       { href: '/ko/guides/osaka-train-map', label: '오사카 노선도 심플하게 보기' },
-      { href: '/en/guides/kyoto-train-map', label: 'A Simple Kyoto Train Map (English)' },
-      { href: '/guides/kyoto-train-map', label: '京都の路線図をシンプルに見る (일본어)' },
-      { href: '/zh/guides/kyoto-train-map', label: '京都线路图简化查看方法 (중국어)' },
     ],
     faq: [
       {
@@ -1025,9 +987,6 @@ export const guides: GuideDefinition[] = [
       { href: '/stations/odori', label: '大通駅の路線・乗り換え' },
       { href: '/stations/new-chitose-airport', label: '新千歳空港駅' },
       { href: '/guides/simple-tokyo-railway-map', label: '東京の路線図をシンプルに見る' },
-      { href: '/en/guides/sapporo-train-map', label: 'A Simple Sapporo Train Map (English)' },
-      { href: '/zh/guides/sapporo-train-map', label: '札幌线路图简化查看方法（中文）' },
-      { href: '/ko/guides/sapporo-train-map', label: '삿포로 노선도 심플하게 보기 (한국어)' },
     ],
     faq: [
       {
@@ -1084,9 +1043,6 @@ export const guides: GuideDefinition[] = [
       { href: '/en/stations/odori', label: 'Odori Station: lines and transfers' },
       { href: '/en/stations/new-chitose-airport', label: 'New Chitose Airport Station' },
       { href: '/en/guides/tokyo-train-map', label: 'Tokyo Train Map for Tourists' },
-      { href: '/guides/sapporo-train-map', label: '札幌の路線図をシンプルに見る（日本語）' },
-      { href: '/zh/guides/sapporo-train-map', label: '札幌线路图简化查看方法（中文）' },
-      { href: '/ko/guides/sapporo-train-map', label: '삿포로 노선도 심플하게 보기 (한국어)' },
     ],
     faq: [
       {
@@ -1143,9 +1099,6 @@ export const guides: GuideDefinition[] = [
       { href: '/zh/stations/odori', label: '大通站的线路与换乘' },
       { href: '/zh/stations/new-chitose-airport', label: '新千岁空港站' },
       { href: '/zh/guides/tokyo-train-map', label: '东京地铁线路图简化查看方法' },
-      { href: '/en/guides/sapporo-train-map', label: 'A Simple Sapporo Train Map（英语版）' },
-      { href: '/guides/sapporo-train-map', label: '札幌の路線図をシンプルに見る（日语版）' },
-      { href: '/ko/guides/sapporo-train-map', label: '삿포로 노선도 심플하게 보기（韩语版）' },
     ],
     faq: [
       {
@@ -1200,9 +1153,6 @@ export const guides: GuideDefinition[] = [
       { href: '/ko/lines/sapporo-subway-tozai-line', label: '삿포로 지하철 도자이선 역 목록' },
       { href: '/ko/lines/jr-chitose-line', label: 'JR 지토세선 역 목록' },
       { href: '/ko/guides/tokyo-train-map', label: '도쿄 노선도 심플하게 보기 (여행자용)' },
-      { href: '/en/guides/sapporo-train-map', label: 'A Simple Sapporo Train Map (English)' },
-      { href: '/guides/sapporo-train-map', label: '札幌の路線図をシンプルに見る (일본어)' },
-      { href: '/zh/guides/sapporo-train-map', label: '札幌线路图简化查看方法 (중국어)' },
     ],
     faq: [
       {

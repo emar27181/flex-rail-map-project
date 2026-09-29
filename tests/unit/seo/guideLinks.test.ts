@@ -36,13 +36,12 @@ describe('ガイドのリンクと地図CTA', () => {
     }
   });
 
-  it('同じ slug のガイドは4言語そろっているか、そろっていなくても相互にリンクしている', () => {
+  it('関連リンクはそのページと同じ言語のページだけ（他の言語版へは右上の言語切り替えで移る）', () => {
+    // 韓国語のガイドの関連リンクに英語・日本語・中国語の見出しが混ざっていた（2026-09）
+    const langOf = (href: string) =>
+      href.match(/^\/(en|zh|ko)(\/|$)/)?.[1] ?? href.match(/[?&]lang=(en|zh|ko)/)?.[1] ?? 'ja';
     for (const g of guides) {
-      const others = guides.filter(x => x.slug === g.slug && x.lang !== g.lang);
-      for (const o of others) {
-        const target = o.lang === 'ja' ? `/guides/${o.slug}` : `/${o.lang}/guides/${o.slug}`;
-        expect(g.related.some(r => r.href === target), `${g.lang}/${g.slug} → ${target}`).toBe(true);
-      }
+      for (const r of g.related) expect(langOf(r.href), `${g.lang}/${g.slug} → ${r.href}`).toBe(g.lang);
     }
   });
 });
