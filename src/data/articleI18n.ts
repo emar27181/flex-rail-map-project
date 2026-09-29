@@ -8,6 +8,21 @@ export const ARTICLE_LANG_LABELS: Record<ArticleLanguage, string> = {
   ko: "한",
 };
 
+/**
+ * 記事の一覧（並び順＝記事一覧ページの順）。
+ * 各記事は日本語 /articles/{slug} と、英語・中国語・韓国語 /{lang}/articles/{slug} の別URLで出す。
+ * 翻訳（ARTICLE_PAGE_TRANSLATIONS / articleBodyI18n.ts）が4言語そろっていないとテストが落ちる。
+ * modifiedDate は本文を実際に直した日だけ書く（無ければ構造化データの dateModified を出さない）。
+ */
+export const ARTICLES: Array<{ slug: string; publishedDate: string; modifiedDate?: string }> = [
+  { slug: "tokyo-rent-by-route", publishedDate: "2025-06-06", modifiedDate: "2026-09-28" },
+  { slug: "flex-rail-map-introduction", publishedDate: "2025-06-06" },
+  { slug: "tokyo-train-map-beginner", publishedDate: "2025-06-06" },
+  { slug: "tokyo-sightseeing-routes", publishedDate: "2025-06-06" },
+  { slug: "commute-30min-cheap-rent", publishedDate: "2025-06-06", modifiedDate: "2026-09-28" },
+  { slug: "tokyo-safe-area-by-route", publishedDate: "2025-06-06", modifiedDate: "2026-09-28" },
+];
+
 export const ARTICLE_SHELL_TRANSLATIONS = {
   ja: {
     brand: "フレックス路線図",

@@ -1,15 +1,12 @@
 ---
+/**
+ * 記事の日本語版（/articles/tokyo-sightseeing-routes）。英語・中国語・韓国語版は src/pages/[...lang]/articles/。
+ * タイトル・本文は articleI18n.ts / articleBodyI18n.ts にあり、ここでは記事を指定するだけ。
+ */
 import ArticleLayout from "./_ArticleLayout.astro";
-import { ARTICLE_PAGE_KEYWORDS, ARTICLE_PAGE_TRANSLATIONS } from "../../data/articleI18n";
+import { ARTICLES } from "../../data/articleI18n";
 
-const slug = "tokyo-sightseeing-routes";
-const meta = ARTICLE_PAGE_TRANSLATIONS[slug].ja;
-const title = meta.title;
-const description = meta.description;
-const publishedDate = "2025-06-06";
-const category = meta.category;
-const keywords = ARTICLE_PAGE_KEYWORDS[slug];
+const article = ARTICLES.find(a => a.slug === "tokyo-sightseeing-routes")!;
 ---
 
-<ArticleLayout title={title} description={description} keywords={keywords} slug={slug} category={category} publishedDate={publishedDate} kicker={meta.kicker} readTime={meta.readTime} tag={meta.tag}>
-</ArticleLayout>
+<ArticleLayout pageKey={article.slug} publishedDate={article.publishedDate} modifiedDate={article.modifiedDate} />

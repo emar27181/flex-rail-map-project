@@ -11,7 +11,18 @@
  *   そのまま入れていたが、それは「更新日」ではない
  * - 著者・発行者は実在するプロジェクト名（CLAUDE.md の著作権表記）だけを書く
  */
-import { SITE_URL, SITE_NAME, buildBreadcrumbJsonLd } from './seo';
+import { SITE_URL, SITE_NAME, buildBreadcrumbJsonLd, hreflangCode } from './seo';
+import type { ArticleLanguage } from '../data/articleI18n';
+
+/** 記事一覧のパス（日本語は /articles、他の言語は /{lang}/articles） */
+export function articleIndexPath(lang: ArticleLanguage): string {
+  return lang === 'ja' ? '/articles' : `/${lang}/articles`;
+}
+
+/** 記事のパス */
+export function articlePath(slug: string, lang: ArticleLanguage): string {
+  return `${articleIndexPath(lang)}/${slug}`;
+}
 
 const PROJECT_NAME = 'Flex Rail Map Project';
 
@@ -26,6 +37,8 @@ export interface ArticleSeoInput {
   canonicalUrl: string;
   /** サイト内パス（/icon_...png など） */
   ogImage: string;
+  /** 記事の言語 */
+  lang?: ArticleLanguage;
 }
 
 export function articleJsonLd(a: ArticleSeoInput) {
@@ -38,6 +51,7 @@ export function articleJsonLd(a: ArticleSeoInput) {
     datePublished: a.publishedDate,
     ...(a.modifiedDate ? { dateModified: a.modifiedDate } : {}),
     url: a.canonicalUrl,
+    ...(a.lang ? { inLanguage: hreflangCode(a.lang) } : {}),
     author: { '@type': 'Organization', name: PROJECT_NAME },
     publisher: {
       '@type': 'Organization',
@@ -49,10 +63,13 @@ export function articleJsonLd(a: ArticleSeoInput) {
 }
 
 /** パンくず: ホーム > 記事一覧（> 記事）。記事一覧ページでは article を省略する */
-export function articleBreadcrumbJsonLd(article?: { title: string; canonicalUrl: string }) {
+export function articleBreadcrumbJsonLd(
+  article?: { title: string; canonicalUrl: string },
+  index: { name: string; path: string } = { name: '記事一覧', path: '/articles' },
+) {
   return buildBreadcrumbJsonLd([
     { name: SITE_NAME, path: '/' },
-    { name: '記事一覧', path: '/articles' },
+    index,
     ...(article ? [{ name: article.title, path: article.canonicalUrl.replace(SITE_URL, '') }] : []),
   ]);
 }

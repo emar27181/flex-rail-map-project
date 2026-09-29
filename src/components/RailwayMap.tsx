@@ -69,6 +69,7 @@ import {
 import { patchRotatedRendererDrift } from '../utils/leafletRotatePatch';
 import { getInitialVisibleRoutesFromUrl, syncVisibleRoutesToUrl } from '../utils/routeUrlCodes';
 import { getInitialHeatmapMetricFromUrl, syncHeatmapMetricToUrl } from '../utils/heatmapUrlParam';
+import { toArticleLanguage } from '../utils/languagePersistence';
 import {
   getInitialDepartureFromUrl,
   getInitialArrivalFromUrl,
@@ -6568,7 +6569,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 renderCornerButton と同じ規格（cornerButtonStyle）に揃える */}
             {!isFullscreen && !isMobile && (
               <LinkButton
-                href="/articles"
+                href={toArticleLanguage(language) === 'ja' ? '/articles' : `/${toArticleLanguage(language)}/articles`}
                 theme={theme}
                 size="sm"
                 iconOnly

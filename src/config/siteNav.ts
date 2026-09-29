@@ -23,7 +23,7 @@ export const SITE_FOOTER_LINKS: SiteNavLink[] = [
   { path: '/stations', localized: { en: '/en/stations', zh: '/zh/stations', ko: '/ko/stations' }, label: { ja: '駅', en: 'Stations', zh: '车站', ko: '역' } },
   { path: '/lines', localized: { en: '/en/lines', zh: '/zh/lines', ko: '/ko/lines' }, label: { ja: '路線', en: 'Lines', zh: '线路', ko: '노선' } },
   { path: '/data', localized: { en: '/en/data' }, label: { ja: '駅周辺データ', en: 'Station area data', zh: '车站周边数据（日文）', ko: '역 주변 데이터(일본어)' } },
-  { path: '/articles', label: { ja: '記事一覧', en: 'Articles (JA)', zh: '文章（日文）', ko: '기사（일본어）' } },
+  { path: '/articles', localized: { en: '/en/articles', zh: '/zh/articles', ko: '/ko/articles' }, label: { ja: '記事一覧', en: 'Articles', zh: '文章', ko: '기사' } },
   { path: '/faq', label: { ja: 'よくある質問', en: 'FAQ', zh: '常见问题', ko: '자주 묻는 질문' } },
   { path: '/about', label: { ja: 'このサイトについて', en: 'About', zh: '关于本站', ko: '사이트 소개' } },
   { path: '/contact', label: { ja: 'お問い合わせ', en: 'Contact', zh: '联系我们', ko: '문의' } },
