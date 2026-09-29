@@ -71,6 +71,11 @@
 - `src/data/articleI18n.ts`, `src/data/articleBodyI18n.ts`, `tests/unit/data/articleI18n.test.ts`
 - 日本語・中国語・韓国語の記事に英語のタグ（Safety Guide など）と CTA の飾り文字が残っていた
 
+### feat: 最寄り駅が1路線だけのときは、近くの駅の路線も足して3路線を初期表示する
+- `src/utils/defaultRoutesNear.ts`（新規）, `src/components/RailwayMap.tsx`, `tests/unit/utils/defaultRoutesNear.test.ts`（新規）
+- 最寄り駅が乗換駅ならその路線をすべて、1路線だけなら5km以内の近い駅から別の路線を足して3路線にする
+  （長谷付近: 江ノ電＋横須賀線＋湘南新宿ライン）。1本だけだとどこへ乗り換えられるか分からなかった
+
 ### improve: 記事の角の丸み・ボタンの寸法・CTA の色をデザイントークンにそろえる
 - `src/components/ui/atoms/controlCss.ts`（`TOKEN_VARS_CSS`）, `src/styles/article-layout.css`, `src/styles/article-introduction.css`,
   `src/components/articles/IntroductionDemo.astro`, `src/layouts/guideStyles.ts`, `tests/unit/styles/articleCssTokens.test.ts`（新規）, `docs/design-system.md`

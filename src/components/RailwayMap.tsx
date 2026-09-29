@@ -70,6 +70,7 @@ import { patchRotatedRendererDrift } from '../utils/leafletRotatePatch';
 import { getInitialVisibleRoutesFromUrl, syncVisibleRoutesToUrl } from '../utils/routeUrlCodes';
 import { getInitialHeatmapMetricFromUrl, syncHeatmapMetricToUrl } from '../utils/heatmapUrlParam';
 import { toArticleLanguage } from '../utils/languagePersistence';
+import { defaultRoutesNear } from '../utils/defaultRoutesNear';
 import {
   getInitialDepartureFromUrl,
   getInitialArrivalFromUrl,
@@ -3332,7 +3333,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     }
   }, [departure, arrival, isManualDeparture, throughSections]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 初回の位置情報取得時、駅が未選択なら最寄り駅を通る路線を表示ONにする。
+  // 初回の位置情報取得時、駅が未選択なら最寄り駅を通る路線を表示ONにする
+  // （最寄り駅が1路線だけなら近くの駅の路線も足して3路線）。
   // 駅が両方未選択の間は全路線非表示にしているため、現在地が分かっても
   // 地図に何も線が無く、どこから絞り込めばよいか分からなかった。
   // 出発駅の自動設定（autoSetDepartureFromLocation, 既定OFF）とは別で、
@@ -3342,12 +3344,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   useEffect(() => {
     if (nearestRoutesAppliedRef.current || !userLocation) return;
     if (departure || arrival) { nearestRoutesAppliedRef.current = true; return; }
-    const nearest = findNearestStation(userLocation[0], userLocation[1]);
-    if (!nearest) return; // 駅データ準備前。次の更新で再試行する
+    if (allUniqueStations.length === 0) return; // 駅データ準備前。次の更新で再試行する
     nearestRoutesAppliedRef.current = true;
-    const nearestRoutes = getRoutesForStation(nearest.name, nearest) as RouteKey[];
-    setVisibleRoutes(prev => (prev.size === 0 ? new Set(nearestRoutes) : prev));
-  }, [userLocation, departure, arrival, findNearestStation]);
+    // 最寄り駅が1路線だけなら、近くの駅の路線も足して3路線にする（defaultRoutesNear.ts）
+    const nearbyRoutes = defaultRoutesNear(
+      userLocation[0], userLocation[1], allUniqueStations, s => getRoutesForStation(s.name, s),
+    );
+    setVisibleRoutes(prev => (prev.size === 0 ? new Set(nearbyRoutes) : prev));
+  }, [userLocation, departure, arrival, allUniqueStations, getRoutesForStation]);
 
   // URL共有: 初回マウント時のみ、URLの routes パラメータがあれば表示路線を復元する。
   // 上のeffect（出発駅・到着駅に応じた初期化）の後に実行させることで、
