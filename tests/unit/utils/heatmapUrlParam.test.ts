@@ -18,3 +18,18 @@ describe('ヒートマップの指標のURLパラメータ', () => {
     expect(buildMapHref({ metric: estimated.key })).toBe('/');
   });
 });
+
+import { parseMapView } from '../../../src/utils/mapViewUrlParam';
+
+describe('地図の表示位置のURLパラメータ', () => {
+  it('中心と拡大率を読み、範囲外・不正な値は無視する', () => {
+    expect(parseMapView('35.68,139.76', '13')).toEqual({ center: [35.68, 139.76], zoom: 13 });
+    expect(parseMapView('35.68,139.76', '40')).toEqual({ center: [35.68, 139.76], zoom: undefined });
+    expect(parseMapView('abc', '13')).toBeNull();
+    expect(parseMapView(null, '13')).toBeNull();
+  });
+
+  it('地図へのリンクに center / zoom を付けられる', () => {
+    expect(buildMapHref({ center: [35.68, 139.76], zoom: 13 })).toBe('/?center=35.68%2C139.76&zoom=13');
+  });
+});

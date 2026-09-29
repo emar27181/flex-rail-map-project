@@ -71,6 +71,7 @@ import { getInitialVisibleRoutesFromUrl, syncVisibleRoutesToUrl } from '../utils
 import { getInitialHeatmapMetricFromUrl, syncHeatmapMetricToUrl } from '../utils/heatmapUrlParam';
 import { toArticleLanguage } from '../utils/languagePersistence';
 import { defaultRoutesNear } from '../utils/defaultRoutesNear';
+import { getInitialMapViewFromUrl } from '../utils/mapViewUrlParam';
 import {
   getInitialDepartureFromUrl,
   getInitialArrivalFromUrl,
@@ -194,8 +195,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    */
   const INITIAL_LOCATION_ZOOM = 11;
 
-  const [mapCenter, setMapCenter] = useState<[number, number]>([35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
-  const [mapZoom, setMapZoom] = useState(12);
+  // URL（?center=&zoom=）で表示位置が指定されていればそれを使う（mapViewUrlParam.ts）
+  const urlMapView = useMemo(() => getInitialMapViewFromUrl(), []);
+  const [mapCenter, setMapCenter] = useState<[number, number]>(urlMapView?.center ?? [35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
+  const [mapZoom, setMapZoom] = useState(urlMapView?.zoom ?? 12);
   const [viewCenter, setViewCenter] = useState<[number, number]>([35.57765, 139.66165]); // Updates on moveend/zoomend
   const [viewBounds, setViewBounds] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
   const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
@@ -637,6 +640,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   useEffect(() => {
     if (!userLocation || hasCenteredOnUserRef.current) return;
     hasCenteredOnUserRef.current = true;
+    if (urlMapView) return; // URL で表示位置を指定して開いたときは、その範囲を見せる
     setMapCenter(userLocation);
     setMapZoom(INITIAL_LOCATION_ZOOM);
     // マウント前(mapRef.current が null)は上の state 更新が初期表示に反映される。

@@ -58,14 +58,14 @@ export const DEFAULT_OG_IMAGE = `${SITE_URL}${APP_ICON_PATH}`;
  * 未設定ならGA4は一切読み込まない（開発環境・プレビューでは通常未設定）。
  */
 export const GA_MEASUREMENT_ID: string | undefined =
-  import.meta.env.VITE_GA_MEASUREMENT_ID || undefined;
+  import.meta.env?.VITE_GA_MEASUREMENT_ID || undefined;
 
 /**
  * Google Search Console のHTMLタグ確認用コード（content属性の値のみ）。
  * 未設定ならmetaタグ自体を出力しない。
  */
 export const GOOGLE_SITE_VERIFICATION: string | undefined =
-  import.meta.env.GOOGLE_SITE_VERIFICATION || undefined;
+  import.meta.env?.GOOGLE_SITE_VERIFICATION || undefined;
 
 /** ページ単位のcanonical URLを組み立てる */
 export function canonicalUrl(path: string): string {
