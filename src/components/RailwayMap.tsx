@@ -1680,14 +1680,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       x = rawX + TW > vw - MARGIN ? stationTooltip.x - TW - 6 : rawX;
       x = Math.max(MARGIN, Math.min(x, vw - TW - MARGIN));
     }
-    // スマホでは高さ480pxが画面の6割を占め、地図がほとんど隠れて
-    // 次の駅を選べなくなる。画面の半分までに抑えて地図側を残す。
-    // 画面の7割まで使う。以前は半分に抑えていたが時刻表が数本しか見えず狭かった。
-    // 地図の空きタップでも閉じられるので、多少大きくても操作は詰まらない。
-    const maxTooltipH = Math.min(vh - MARGIN * 2, isMobileView ? Math.round(vh * 0.7) : 620);
-    // 位置の見積もりは基準時刻以降の便だけで数える（前の便は上にスクロールして見る）
-    const shownDepCount = activeDeps.length;
-    const estH = Math.min(52 + Math.max(allRoutes.length * 28, shownDepCount * 26 + 22) + 20, maxTooltipH);
+    // 高さの上限。スマホは画面の85%、PCは760pxまで使う。
+    // 以前はスマホ7割・PC 620pxで、時刻表が数本しか見えず狭かった（2026-09-29 指摘で拡大）。
+    // 地図の空きタップでも閉じられるので、大きくても操作は詰まらない。
+    const maxTooltipH = Math.min(vh - MARGIN * 2, isMobileView ? Math.round(vh * 0.85) : 760);
+    // 前の便も一覧に並ぶので、時刻表がある路線では実際の高さはほぼ上限になる。
+    // 上下どちらに出すかの判定がずれないよう、そのときは上限をそのまま見積もりに使う
+    const estH = activePastDeps.length > 0
+      ? maxTooltipH
+      : Math.min(52 + Math.max(allRoutes.length * 28, activeDeps.length * 26 + 22) + 20, maxTooltipH);
     const rawY = stationTooltip.y + 14;
     const baseX = x;
     const baseY = Math.max(MARGIN, Math.min(
