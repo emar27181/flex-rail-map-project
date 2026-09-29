@@ -685,9 +685,14 @@ Netlify管理画面の Site configuration → Build & deploy → Branch deploys 
 - canonical・hreflang・title 重複・H1 の数などの検証に失敗すると **ビルドが止まる**
 - 確認は `npm run build` の後に `npm run test:seo`。実URLの200確認は
   `SEO_LIVE_BASE_URL=<Deploy PreviewのURL> npm run test:seo`
-- 駅・路線・データのページ（`/stations/*`, `/lines/*`, `/data/*` と英語版）は路線データ・駅統計から
-  **自動生成** する。index させるのは情報量の基準（Tier A）を満たすページだけで、
-  それ以外は noindex。範囲と基準は `src/data/seoPages.ts`、観光地→最寄り駅は `src/data/touristSpots.ts`
+- 駅・路線・データのページ（`/stations/*`, `/lines/*`, `/data/*` と `/en/` `/zh/` `/ko/` 版）は
+  路線データ・駅統計から **自動生成** する。index させるのは情報量の基準（Tier A）を満たすページだけで、
+  それ以外は noindex。範囲（都市ごとの路線 `SEO_CITIES`）と基準は `src/data/seoPages.ts`、
+  観光地→最寄り駅は `src/data/touristSpots.ts`
+- **中国語・韓国語ページで駅名・路線名・観光地名を推測で訳さない。** 駅名の訳が翻訳データに無い駅は
+  その言語の駅ページを作らない。hreflang の中国語は `zh-CN`（URL は `/zh/` のまま）
+- 地図を開くリンクは `MapOpenCta.astro` / `mapDeepLink.ts` だけで作る（`routes` `from` `metric` `lang`）。
+  クリックは GA4 の `seo_map_open` と `{guide,station,line,tourist,data}_map_open` で計測する
 - 仕組み・判断基準・ページを足すときの決まりは **`docs/seo.md`**
 
 ### CHANGE.log 記録ルール

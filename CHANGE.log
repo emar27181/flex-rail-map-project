@@ -1,5 +1,50 @@
 # CHANGE LOG
 
+## [2026-09-29] セッション（SEO: 都市・観光地・多言語・設定済み地図CTA・GA4）
+
+### fix: 中国語版の hreflang と html lang を zh-CN にする
+- `src/config/seo.ts`（`HREFLANG_CODE`, `hreflangCode`）, `src/layouts/GuideLayout.astro`,
+  `src/layouts/GuidesIndexLayout.astro`, `tests/unit/seo/hreflang.test.ts`（新規）
+- URL は既存の `/zh/` のまま、出力する言語コードだけ zh-CN に
+
+### feat: 駅・路線ページを大阪・京都・札幌など9都市と観光地38か所に広げる
+- `src/data/seoPages.ts`（`SEO_CITIES`, `SEO_ROUTE_ALIASES`, `SEO_DATA_CITIES`, Tier 基準）,
+  `src/data/touristSpots.ts`（`city`, zh/ko 名）, `src/seo/pageModel.ts`, `src/seo/pageText.ts`,
+  `src/pages/[...lang]/{stations,lines}/index.astro`, `tests/unit/seo/pageModel.test.ts`
+- 路線ページ 20→66 路線、index する駅ページ 約25→73駅。一覧は都市ごとに並べる
+- 周辺統計を集めていない地域の駅も、乗換駅・観光地の駅なら Tier A にできるようにした
+- 路線データで重複登録された同じ路線（大阪環状線など）は駅ページで1本にまとめる
+- データのページは統計を集めている東京・神奈川の駅だけを対象にする
+
+### feat: ヒートマップの指標を URL（?metric=）で開けるようにする
+- `src/utils/heatmapUrlParam.ts`（新規）, `src/utils/mapDeepLink.ts`, `src/components/RailwayMap.tsx`,
+  `tests/unit/utils/heatmapUrlParam.test.ts`（新規）
+- 実データの指標だけ受け付け、ヒートマップの表示・指標の変更も URL に反映する
+
+### feat: 地図を開くCTAを種類別のGA4イベントにし、観光地・データのページにも置く
+- `src/components/MapOpenCta.astro`, `src/layouts/GuideLayout.astro`, `src/pages/[...lang]/{stations,lines,data}/[slug].astro`
+- `seo_map_open` に加えて `guide/station/line/tourist/data_map_open`。source_page・locale・station・
+  routes・city・tourist_spot・metric を送る
+- 観光地ごと・データの指標ごとのCTA、説明の直後のCTAを追加
+
+### feat: 駅・路線ページの中国語（簡体字）・韓国語版を作る
+- `src/seo/pageModel.ts`（`SEO_LANGS`, `DATA_LANGS`, `langs`, `hasStationPage`）, `src/seo/pageText.ts`（zh/ko）,
+  `src/layouts/SeoPageLayout.astro`, `src/components/seo/StationLink.astro`, `src/config/siteNav.ts`,
+  `src/components/SiteFooterNav.astro`
+- 路線・一覧ページは4言語、駅ページの zh/ko は Tier A のうち駅名の訳がある駅だけ（ko は45駅）
+- hreflang・言語切替は実在する言語版だけに張る。sitemap 312→566 URL
+
+### feat: 大阪・京都・札幌の路線図ガイドを4言語で追加し、説明の直後に地図CTAを置く
+- `src/data/guides.ts`（`GuideSection.cta`, `city`）, `src/layouts/GuideLayout.astro`,
+  `src/pages/{,en/,zh/,ko/}guides/{osaka,kyoto,sapporo}-train-map.astro`（新規12ページ）,
+  `tests/unit/seo/guideLinks.test.ts`（新規）
+
+### improve: 駅・路線ページの関連ガイドに、節ごとのCTAで開く路線も含める
+- `src/seo/pageModel.ts`（`guidesForRoutes`）
+
+### docs: SEO の仕組みに都市・多言語・CTA・GA4 を追記
+- `docs/seo.md`, `CLAUDE.md`
+
 ## [2026-09-28] セッション（東海道線の時刻表の行先・並行ルート・推薦ルート選択の既定オフ）
 
 ### feat: 出発・到着駅にも時刻を出し、複数の路線が通る駅は路線ごとに時刻を並べる
