@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs';
+import stationStatsRaw from '../../../src/data/station-stats-data.json';
 import { describe, it, expect } from 'vitest';
 import { dropSuspectedFailedBatches, getParamRange, getStationStats, STAT_PARAMS, PARAM_DATA_SOURCES } from '../../../src/data/stationStats';
 
@@ -107,12 +109,16 @@ describe('首都圏駅データセットPoC（2026-09-24収集）由来のフィ
     }
   });
 
-  it('PoC対象外の駅は新規フィールドを持たない（灰色表示のまま。推定値で埋めない）', () => {
-    const stats = getStationStats('神田');
-    expect(stats).toBeTruthy();
-    for (const field of POC_FIELDS) {
-      expect(stats?.[field], `神田.${field} は未収集のはずが値が入っている`).toBeUndefined();
-    }
+  it('値を持つのはPoC10駅と、検証して取り込んだ首都圏の駅だけ（ほかは灰色表示のまま。推定値で埋めない）', () => {
+    // 首都圏拡張（2026-09-29）で検証を通った駅: data/kanto-poi-800m-2026-09/validation.json
+    const imported = (JSON.parse(readFileSync('data/kanto-poi-800m-2026-09/validation.json', 'utf-8')) as { applied: string[] }).applied;
+    const allowed = new Set([...POC_STATIONS, ...imported]);
+    const withValues = Object.entries(stationStatsRaw as Record<string, Record<string, unknown>>)
+      .filter(([, s]) => POC_FIELDS.some(f => s[f] !== undefined))
+      .map(([name]) => name);
+    expect(withValues.filter(n => !allowed.has(n))).toEqual([]);
+    // 未収集の駅の例（首都圏外）
+    for (const field of POC_FIELDS) expect(getStationStats('京都')?.[field], `京都.${field}`).toBeUndefined();
   });
 
   it('congestionSectionsは対象区間がある駅のみ配列を持ち、路線・区間・時間帯・値の形をしている', () => {

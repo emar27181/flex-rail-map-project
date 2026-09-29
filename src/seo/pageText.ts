@@ -18,7 +18,7 @@ export const STAT_SCOPE_EN: Record<string, string> = {
   '駅出口から半径500m以内': 'within 500 m of station exits',
   '駅代表点から半径800m以内': 'within 800 m of the station center point',
   '2026年6月収集': 'collected June 2026',
-  '2026年9月収集（首都圏10駅のみ）': 'collected September 2026 (10 stations only)',
+  '2026年9月収集（首都圏277駅のみ）': 'collected September 2026 (277 Greater Tokyo stations only)',
   '令和5年（2023年）': '2023',
   '路線データ更新時点': 'as of the current line data',
 };
@@ -30,7 +30,7 @@ export const STAT_SCOPE_EN: Record<string, string> = {
 export const SOURCE_TITLE_EN: Record<string, string> = {
   'OpenStreetMap / Overpass API': 'OpenStreetMap / Overpass API',
   'OpenStreetMap / Overpass API（maps.mail.ru ミラー）': 'OpenStreetMap / Overpass API (maps.mail.ru mirror)',
-  'OpenStreetMap / Overpass API（首都圏駅周辺データセットPoC）': 'OpenStreetMap / Overpass API (Tokyo-area station dataset PoC)',
+  'OpenStreetMap / Overpass API（首都圏駅周辺データセット）': 'OpenStreetMap / Overpass API (Greater Tokyo station dataset)',
   'OpenStreetMap（parkAreaM2から算出）': 'OpenStreetMap (derived from park area)',
   '警視庁 区市町村の町丁別認知件数 令和5年': 'Tokyo Metropolitan Police Department, reported crimes by town block, 2023',
 };
