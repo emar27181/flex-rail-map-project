@@ -6,6 +6,7 @@
  * SEO_LANGS（pageModel.ts）に加える。
  */
 import type { SeoLang } from './pageModel';
+import type { TouristSpot } from '../data/touristSpots';
 
 const fmt = (n: number, lang: SeoLang) => n.toLocaleString(lang === 'ja' ? 'ja-JP' : 'en-US');
 
@@ -42,18 +43,23 @@ export const SEO_TEXT = {
     otherLang: { label: 'English', lang: 'en' as SeoLang },
     openMap: '路線図で見る',
 
-    stationsHubTitle: '駅の一覧（首都圏の主要路線）| Flex Railway Map',
+    stationsHubTitle: '駅の一覧（東京・横浜・大阪・京都・札幌などの主要路線）| Flex Railway Map',
     stationsHubH1: '駅の一覧',
-    stationsHubLede: (n: number) => `首都圏の主要路線の${fmt(n, 'ja')}駅について、通る路線・隣の駅・周辺の統計をまとめています。`,
+    stationsHubLede: (n: number) => `東京・横浜・大阪・京都・札幌などの主要路線の${fmt(n, 'ja')}駅について、通る路線・隣の駅・観光地の最寄り駅をまとめています。`,
+    cities: '都市',
+    spotName: (spot: TouristSpot) => spot.name.ja,
     majorStations: '主な駅',
     touristSpots: '観光地と最寄り駅',
     stationsByLine: '路線ごとの駅',
 
-    stationTitle: (name: string, lines: number) =>
-      `${name}駅の路線・乗り換え（${lines}路線）と周辺データ | Flex Railway Map`,
-    stationDescription: (name: string, lineNames: string[], stats: number) =>
-      `${name}駅を通る${lineNames.slice(0, 4).join('・')}${lineNames.length > 4 ? 'など' : ''}の路線、隣の駅、` +
-      `周辺の飲食店数など${stats}項目の統計を出典付きでまとめています。`,
+    stationTitle: (name: string, lines: number, stats: number, spots: string[]) =>
+      `${name}駅${spots.length > 0 ? `（${spots[0]}の最寄り駅）` : ''}の` +
+      `${lines >= 2 ? `路線・乗り換え（${lines}路線）` : '路線と隣の駅'}` +
+      `${stats > 0 && spots.length === 0 ? 'と周辺データ' : ''} | Flex Railway Map`,
+    stationDescription: (name: string, lineNames: string[], stats: number, spots: string[]) =>
+      `${name}駅を通る${lineNames.slice(0, 4).join('・')}${lineNames.length > 4 ? 'など' : ''}の路線、隣の駅` +
+      `${spots.length > 0 ? `、最寄りの観光地（${spots.join('・')}）` : ''}` +
+      `${stats > 0 ? `、周辺の飲食店数など${stats}項目の統計（出典付き）` : ''}をまとめています。`,
     stationH1: (name: string) => `${name}駅`,
     stationLede: (name: string, routes: number, effective: number) =>
       effective >= 2
@@ -79,9 +85,9 @@ export const SEO_TEXT = {
     openMapFrom: (name: string) => `${name}駅を出発駅にして路線図を開く`,
     openMapRoutes: (name: string) => `${name}駅を通る路線を路線図で開く`,
 
-    linesHubTitle: '路線の一覧（首都圏の主要路線）| Flex Railway Map',
+    linesHubTitle: '路線の一覧（東京・大阪・京都・札幌などの主要路線）| Flex Railway Map',
     linesHubH1: '路線の一覧',
-    linesHubLede: (n: number) => `首都圏の主要${n}路線の駅一覧・乗換駅・直通運転をまとめています。`,
+    linesHubLede: (n: number) => `東京・横浜・大阪・京都・札幌などの主要${n}路線の駅一覧・乗換駅・直通運転を、都市ごとにまとめています。`,
 
     lineTitle: (name: string, n: number) => `${name}の駅一覧（${n}駅）・乗換駅・直通運転 | Flex Railway Map`,
     lineDescription: (name: string, n: number, from: string, to: string, transfers: number) =>
@@ -122,18 +128,23 @@ export const SEO_TEXT = {
     otherLang: { label: '日本語', lang: 'ja' as SeoLang },
     openMap: 'View on the map',
 
-    stationsHubTitle: 'Stations on Major Tokyo-Area Lines | Flex Railway Map',
+    stationsHubTitle: 'Stations in Tokyo, Yokohama, Osaka, Kyoto, Sapporo and More | Flex Railway Map',
     stationsHubH1: 'Stations',
-    stationsHubLede: (n: number) => `Lines, neighboring stations and area statistics for ${fmt(n, 'en')} stations on major lines in the Tokyo area.`,
+    stationsHubLede: (n: number) => `Lines, neighboring stations and nearby sights for ${fmt(n, 'en')} stations on major lines in Tokyo, Yokohama, Osaka, Kyoto, Sapporo and other cities.`,
+    cities: 'Cities',
+    spotName: (spot: TouristSpot) => spot.name.en,
     majorStations: 'Major stations',
     touristSpots: 'Sights and their nearest stations',
     stationsByLine: 'Stations by line',
 
-    stationTitle: (name: string, lines: number) =>
-      `${name} Station: ${lines} Lines, Transfers and Area Data | Flex Railway Map`,
-    stationDescription: (name: string, lineNames: string[], stats: number) =>
+    stationTitle: (name: string, lines: number, stats: number, spots: string[]) =>
+      `${name} Station${spots.length > 0 ? ` (for ${spots[0]})` : ''}: ` +
+      `${lines >= 2 ? `${lines} Lines and Transfers` : 'Lines and Neighboring Stations'}` +
+      `${stats > 0 && spots.length === 0 ? ' and Area Data' : ''} | Flex Railway Map`,
+    stationDescription: (name: string, lineNames: string[], stats: number, spots: string[]) =>
       `Lines serving ${name} Station (${lineNames.slice(0, 3).join(', ')}${lineNames.length > 3 ? ' and more' : ''}), ` +
-      `neighboring stations, and ${stats} area statistics such as restaurant counts, with sources.`,
+      `neighboring stations${spots.length > 0 ? `, nearby sights (${spots.join(', ')})` : ''}` +
+      `${stats > 0 ? `, and ${stats} area statistics such as restaurant counts, with sources` : ''}.`,
     stationH1: (name: string) => `${name} Station`,
     stationLede: (name: string, routes: number, effective: number) =>
       effective >= 2
@@ -159,9 +170,9 @@ export const SEO_TEXT = {
     openMapFrom: (name: string) => `Open the map from ${name} Station`,
     openMapRoutes: (name: string) => `Open the lines of ${name} Station on the map`,
 
-    linesHubTitle: 'Major Tokyo-Area Train Lines | Flex Railway Map',
+    linesHubTitle: 'Train Lines in Tokyo, Osaka, Kyoto, Sapporo and More | Flex Railway Map',
     linesHubH1: 'Lines',
-    linesHubLede: (n: number) => `Station lists, transfer stations and through services for ${n} major lines in the Tokyo area.`,
+    linesHubLede: (n: number) => `Station lists, transfer stations and through services for ${n} major lines in Tokyo, Yokohama, Osaka, Kyoto, Sapporo and other cities, grouped by city.`,
 
     lineTitle: (name: string, n: number) => `${name}: All ${n} Stations, Transfers and Through Services | Flex Railway Map`,
     lineDescription: (name: string, n: number, from: string, to: string, transfers: number) =>

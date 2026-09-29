@@ -17,7 +17,7 @@ import {
   type DataSource, type StatParamMeta, type StationStats,
 } from '../data/stationStats';
 import {
-  MIN_STATIONS_FOR_DATA_PAGE, SEO_DATA_METRICS, SEO_LINE_KEYS, STATION_TIER_RULES,
+  MIN_STATIONS_FOR_DATA_PAGE, SEO_CITIES, SEO_DATA_CITIES, SEO_DATA_METRICS, SEO_ROUTE_ALIASES, STATION_TIER_RULES, type SeoCityId,
 } from '../data/seoPages';
 import { TOURIST_SPOTS, type TouristSpot } from '../data/touristSpots';
 import { THROUGH_SERVICES } from '../data/throughServices';
@@ -95,6 +95,8 @@ export interface SeoStation {
   adjacent: AdjacentOnRoute[];
   stats: RealStat[];
   touristSpots: TouristSpot[];
+  /** この駅が属する都市（路線ページの路線・観光地から。一覧ページのまとまりに使う） */
+  cities: SeoCityId[];
   tier: StationTier;
   indexable: boolean;
   /** 地図でこの駅を出発駅にして開けるか（地図側が駅名で同じ駅を引けるときだけ） */
@@ -109,6 +111,7 @@ export interface SeoLineStop {
 
 export interface SeoLine {
   key: RouteKey;
+  city: SeoCityId;
   slug: string;
   name: string;
   nameEn: string;
@@ -173,6 +176,10 @@ export function stationName(s: { name: string; nameEn: string }, lang: SeoLang):
 
 const ROUTE_ENTRIES = Object.entries(routes) as Array<[RouteKey, Station[]]>;
 
+/** 路線ページを作る路線（都市の順） */
+export const SEO_LINE_KEYS: RouteKey[] = SEO_CITIES.flatMap(c => c.lines);
+const cityOfLine = (key: RouteKey): SeoCityId => SEO_CITIES.find(c => c.lines.includes(key))!.id;
+
 /** 駅名 → その名前の駅が出てくる [路線, 駅列内の位置] */
 function buildNameIndex(): Map<string, Array<{ route: RouteKey; index: number; station: Station }>> {
   const map = new Map<string, Array<{ route: RouteKey; index: number; station: Station }>>();
@@ -202,7 +209,9 @@ function realStatsOf(ref: { name: string; lat: number; lng: number }): RealStat[
 
 function tierOf(effectiveLines: number, realStats: number, isTouristStation: boolean): StationTier {
   const { minLines, minRealStats } = STATION_TIER_RULES;
-  if (realStats >= minRealStats && (effectiveLines >= minLines || isTouristStation)) return 'A';
+  // 統計が0項目＝その地域では集めていない。一部だけ＝取得に失敗した疑い
+  const statsOk = realStats >= minRealStats || realStats === 0;
+  if (isTouristStation || (effectiveLines >= minLines && statsOk)) return 'A';
   if (effectiveLines >= 2 || realStats > 0) return 'B';
   return 'C';
 }
@@ -230,7 +239,8 @@ function buildModel(): SeoModel {
       addRef(s);
       const ref = refs.find(r => isSameStation(s, r))!;
       const k = `${ref.name}@${ref.lat},${ref.lng}`;
-      touristByRef.set(k, [...(touristByRef.get(k) ?? []), spot]);
+      const spots = touristByRef.get(k) ?? [];
+      if (!spots.includes(spot)) touristByRef.set(k, [...spots, spot]);
     }
   }
 
@@ -239,7 +249,12 @@ function buildModel(): SeoModel {
   const usedSlugs = new Set<string>();
   const drafts = refs.map(ref => {
     const hits = (nameIndex.get(ref.name) ?? []).filter(h => isSameStation(h.station, ref));
-    const routeKeys = [...new Set(hits.map(h => h.route))];
+    // 路線データの重複（SEO_ROUTE_ALIASES）は、まとめ先の路線もこの駅を通るときだけまとめる
+    const hitRoutes = new Set(hits.map(h => h.route));
+    const routeKeys = [...new Set(hits.map(h => {
+      const alias = SEO_ROUTE_ALIASES[h.route];
+      return alias && hitRoutes.has(alias) ? alias : h.route;
+    }))];
     const neighborSets = routeKeys.map(rk => {
       const set = new Set<string>();
       for (const h of hits.filter(x => x.route === rk)) {
@@ -262,6 +277,9 @@ function buildModel(): SeoModel {
     const station: SeoStation = {
       slug, name: ref.name, nameEn, lat: ref.lat, lng: ref.lng,
       routes: routeKeys, effectiveLines, adjacent: [], stats, touristSpots, tier,
+      cities: SEO_CITIES
+        .filter(c => c.lines.some(l => routeKeys.includes(l)) || touristSpots.some(t => t.city === c.id))
+        .map(c => c.id),
       indexable: tier === 'A',
       mapFrom: appStation && isSameStation(appStation, ref) ? ref.name : undefined,
     };
@@ -307,6 +325,7 @@ function buildModel(): SeoModel {
     const nameEn = routeName(key, 'en');
     return {
       key,
+      city: cityOfLine(key),
       slug: toSlug(nameEn),
       name: routeName(key, 'ja'),
       nameEn,
@@ -328,13 +347,14 @@ function buildModel(): SeoModel {
       continue;
     }
     const rows: SeoDataRow[] = [];
-    for (const station of stations) {
+    const scope = stations.filter(s => s.cities.some(c => SEO_DATA_CITIES.includes(c)));
+    for (const station of scope) {
       const stat = station.stats.find(s => s.key === m.statKey);
       if (stat) rows.push({ station, value: stat.value });
     }
     rows.sort((a, b) => (meta.higherIsBetter ? b.value - a.value : a.value - b.value));
     const byLine: SeoLineSummary[] = [];
-    for (const line of lines) {
+    for (const line of lines.filter(l => SEO_DATA_CITIES.includes(l.city))) {
       const lineRows = rows.filter(r => line.stops.some(s => s.station === r.station));
       if (lineRows.length === 0) continue;
       byLine.push({ line, count: lineRows.length, median: median(lineRows.map(r => r.value)), max: lineRows[0] });
@@ -342,7 +362,7 @@ function buildModel(): SeoModel {
     byLine.sort((a, b) => (meta.higherIsBetter ? b.median - a.median : a.median - b.median));
     dataPages.push({
       slug: m.slug, key: m.statKey, meta, source: PARAM_DATA_SOURCES[m.statKey],
-      rows, missingCount: stations.length - rows.length, byLine,
+      rows, missingCount: scope.length - rows.length, byLine,
       indexable: rows.length >= MIN_STATIONS_FOR_DATA_PAGE,
     });
   }

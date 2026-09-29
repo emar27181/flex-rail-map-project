@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { routes } from '../../../src/data/routes';
 import { PARAM_DATA_SOURCES, STAT_PARAMS } from '../../../src/data/stationStats';
 import { TOURIST_SPOTS } from '../../../src/data/touristSpots';
-import { SEO_LINE_KEYS } from '../../../src/data/seoPages';
-import { getSeoModel, nearbyMajorStations, toSlug } from '../../../src/seo/pageModel';
+import { SEO_CITIES, SEO_DATA_CITIES } from '../../../src/data/seoPages';
+import { SEO_LINE_KEYS, getSeoModel, nearbyMajorStations, toSlug } from '../../../src/seo/pageModel';
 import { SOURCE_TITLE_EN, STAT_SCOPE_EN } from '../../../src/seo/pageText';
 import { buildMapHref } from '../../../src/utils/mapDeepLink';
 import { decodeVisibleRoutesParam } from '../../../src/utils/routeUrlCodes';
@@ -30,6 +30,17 @@ describe('観光地と最寄り駅のデータ', () => {
     }
   });
 
+  it('路線データで重複登録された同じ路線は、駅ページで1本にまとめる', () => {
+    expect(byName('天王寺').routes).toContain('osakaLoopLine');
+    expect(byName('天王寺').routes).not.toContain('jrOsakaLoop');
+    expect(byName('箱根湯本').routes).toEqual(['hakoneTozan']);
+  });
+
+  it('観光地はすべて都市の一覧に含まれる都市に属する', () => {
+    const ids = new Set(SEO_CITIES.map(c => c.id));
+    for (const spot of TOURIST_SPOTS) expect(ids.has(spot.city), spot.id).toBe(true);
+  });
+
   it('同名の別駅を混ぜない（長谷〈江ノ電〉に JR播但線の長谷を含めない）', () => {
     const hase = byName('長谷');
     expect(hase.routes).toContain('enoshimaElectricRailway');
@@ -53,12 +64,16 @@ describe('ページのURL', () => {
 });
 
 describe('index させるページの範囲', () => {
-  it('index する駅ページは Tier A だけで、PoC の想定（20〜30駅程度）を大きく超えない', () => {
+  it('index する駅ページは Tier A だけで、主要都市の大きな駅と観光地の駅（100駅以内）に限る', () => {
     const indexable = model.stations.filter(s => s.indexable);
     expect(indexable.every(s => s.tier === 'A')).toBe(true);
     // 基準（src/data/seoPages.ts）を緩めて数百ページを一度に index させないための歯止め
-    expect(indexable.length).toBeGreaterThanOrEqual(15);
-    expect(indexable.length).toBeLessThanOrEqual(40);
+    expect(indexable.length).toBeGreaterThanOrEqual(40);
+    expect(indexable.length).toBeLessThanOrEqual(100);
+  });
+
+  it('周辺統計を集めていない地域（関西・札幌など）の主要駅・観光地の駅も index する', () => {
+    for (const name of ['天王寺', 'なんば', '京都', '稲荷', '大通', '博多']) expect(byName(name).indexable, name).toBe(true);
   });
 
   it('大きな乗換駅と観光地の最寄り駅は index、郊外の単線の駅は noindex', () => {
@@ -86,7 +101,8 @@ describe('実データだけを使う', () => {
 
   it('データのページは値のある駅だけを並べ、無い駅は0にしない', () => {
     for (const page of model.dataPages) {
-      expect(page.rows.length + page.missingCount).toBe(model.stations.length);
+      const scope = model.stations.filter(s => s.cities.some(c => SEO_DATA_CITIES.includes(c)));
+      expect(page.rows.length + page.missingCount).toBe(scope.length);
       for (const r of page.rows) expect(r.station.stats.some(s => s.key === page.key && s.value === r.value)).toBe(true);
     }
   });

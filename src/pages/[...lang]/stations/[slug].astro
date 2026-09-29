@@ -31,6 +31,7 @@ const en = lang === 'en';
 const name = stationName(station, lang);
 const path = stationPath(station.slug, lang);
 const lineNames = station.routes.map(r => routeName(r, lang));
+const spotNames = station.touristSpots.map(spot => t.spotName(spot));
 const nearby = nearbyMajorStations(station);
 const relatedGuides = guidesForRoutes(station.routes, lang);
 const statLabel = (label: string) => (en ? translateStatParamLabel(label, 'english') : label);
@@ -40,8 +41,8 @@ const sources = [...new Map(station.stats.filter(s => s.source).map(s => [s.sour
 
 <SeoPageLayout
 	lang={lang}
-	title={t.stationTitle(name, station.effectiveLines)}
-	description={t.stationDescription(name, lineNames, station.stats.length)}
+	title={t.stationTitle(name, station.effectiveLines, station.stats.length, spotNames)}
+	description={t.stationDescription(name, lineNames, station.stats.length, spotNames)}
 	path={path}
 	langPaths={{ ja: stationPath(station.slug, 'ja'), en: stationPath(station.slug, 'en') }}
 	breadcrumbs={[
@@ -89,7 +90,7 @@ const sources = [...new Map(station.stats.filter(s => s.source).map(s => [s.sour
 	{station.touristSpots.length > 0 && (
 		<section>
 			<h2>{t.nearbySpots}</h2>
-			{station.touristSpots.map(spot => <p>{t.nearbySpotLine(spot.name[lang])}</p>)}
+			{station.touristSpots.map(spot => <p>{t.nearbySpotLine(t.spotName(spot))}</p>)}
 		</section>
 	)}
 
