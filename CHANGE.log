@@ -63,6 +63,14 @@
   `APP_ICON_PATH` だけに書き、manifest と一致すること・他に書かれていないことをテストで確かめる
 - ヘッダーを1行に収める（サイト名は省略記号、狭い画面ではタグを隠す）
 
+### fix: ガイドの関連リンク・一覧・フッターに他の言語のページを混ぜない
+- `src/data/guides.ts`, `src/pages/{,en/,zh/,ko/}guides/index.astro`, `src/config/siteNav.ts`, `tests/unit/seo/guideLinks.test.ts`
+- 韓国語ガイドの関連ガイドに英語・日本語・中国語の見出しが並んでいた。他の言語版へは右上の言語切り替えで移る
+
+### fix: 記事のタグ・「Try it now」を各言語の表記にする
+- `src/data/articleI18n.ts`, `src/data/articleBodyI18n.ts`, `tests/unit/data/articleI18n.test.ts`
+- 日本語・中国語・韓国語の記事に英語のタグ（Safety Guide など）と CTA の飾り文字が残っていた
+
 ### feat: 記事を言語ごとの別URLにし、検索した言語の記事が出るようにする
 - `src/components/articles/{ArticleLayout,BeginnerLineChips,IntroductionDemo}.astro`（新規）,
   `src/pages/[...lang]/articles/`（新規）, `src/pages/articles/*.astro`（共通レイアウトを使う薄いファイルに）,

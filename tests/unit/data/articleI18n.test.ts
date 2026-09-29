@@ -42,4 +42,18 @@ describe('記事の多言語版', () => {
       expect(new Set(headings).size, `${slug} h2 ${headings}`).toBe(1);
     }
   });
+
+  it('日本語・中国語・韓国語版の見出し・タグに英語の飾り文字を残さない（言語が混ざって見える）', () => {
+    for (const [key, byLang] of Object.entries(ARTICLE_PAGE_TRANSLATIONS)) {
+      for (const lang of ['ja', 'zh', 'ko'] as const) {
+        const meta = byLang[lang];
+        for (const field of ['tag', 'kicker', 'category', 'title'] as const) {
+          expect(meta[field], `${key} ${lang} ${field}`).not.toMatch(/^[A-Za-z][A-Za-z /]+$/);
+        }
+      }
+    }
+    for (const [slug, bodies] of Object.entries(ARTICLE_BODY_TRANSLATIONS)) {
+      for (const lang of ['ja', 'zh', 'ko'] as const) expect(bodies[lang], `${slug} ${lang}`).not.toContain('Try it now');
+    }
+  });
 });

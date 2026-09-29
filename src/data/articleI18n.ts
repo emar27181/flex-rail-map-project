@@ -96,7 +96,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "記事一覧",
       kicker: "記事一覧",
       readTime: "全記事",
-      tag: "Articles",
+      tag: "記事",
     },
     en: {
       title: "Articles",
@@ -112,7 +112,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "文章列表",
       kicker: "文章列表",
       readTime: "全部文章",
-      tag: "Articles",
+      tag: "文章",
     },
     ko: {
       title: "기사 목록",
@@ -120,7 +120,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "기사 목록",
       kicker: "기사 목록",
       readTime: "전체 기사",
-      tag: "Articles",
+      tag: "기사",
     },
   },
   "flex-rail-map-introduction": {
@@ -130,7 +130,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "開発ノート・サービス紹介",
       kicker: "開発ノート",
       readTime: "読了 約5分",
-      tag: "Dev Notes",
+      tag: "開発ノート",
     },
     en: {
       title: "Building a Rail Map UI That Makes Tokyo Easier to Understand",
@@ -146,7 +146,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "开发笔记・服务介绍",
       kicker: "开发笔记",
       readTime: "约 5 分钟阅读",
-      tag: "Dev Notes",
+      tag: "开发笔记",
     },
     ko: {
       title: "도쿄 노선도를 더 쉽게 이해하기 위한 UI를 만들고 있습니다",
@@ -154,7 +154,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "개발 노트・서비스 소개",
       kicker: "개발 노트",
       readTime: "약 5분 읽기",
-      tag: "Dev Notes",
+      tag: "개발 노트",
     },
   },
   "tokyo-train-map-beginner": {
@@ -164,7 +164,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "初心者ガイド",
       kicker: "はじめての東京の電車",
       readTime: "読了 約6分",
-      tag: "Beginner Guide",
+      tag: "初心者ガイド",
     },
     en: {
       title: "How to Read Tokyo Train Maps and Transfer Lines: Beginner Guide",
@@ -180,7 +180,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "新手指南",
       kicker: "第一次坐东京电车",
       readTime: "约 6 分钟阅读",
-      tag: "Beginner Guide",
+      tag: "新手指南",
     },
     ko: {
       title: "도쿄 노선도 읽는 법과 환승 방법: 초보자 가이드",
@@ -188,7 +188,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "초보자 가이드",
       kicker: "처음 만나는 도쿄 전철",
       readTime: "약 6분 읽기",
-      tag: "Beginner Guide",
+      tag: "초보자 가이드",
     },
   },
   "tokyo-sightseeing-routes": {
@@ -198,7 +198,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "観光ガイド",
       kicker: "観光ガイド",
       readTime: "読了 約4分",
-      tag: "Travel Guide",
+      tag: "観光ガイド",
     },
     en: {
       title: "Tokyo Sightseeing Route Guide: Asakusa, Akihabara, Harajuku, and Odaiba",
@@ -214,7 +214,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "观光指南",
       kicker: "观光指南",
       readTime: "约 4 分钟阅读",
-      tag: "Travel Guide",
+      tag: "观光指南",
     },
     ko: {
       title: "도쿄 관광 노선 가이드: 아사쿠사, 아키하바라, 하라주쿠, 오다이바",
@@ -222,7 +222,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "관광 가이드",
       kicker: "관광 가이드",
       readTime: "약 4분 읽기",
-      tag: "Travel Guide",
+      tag: "관광 가이드",
     },
   },
   "commute-30min-cheap-rent": {
@@ -232,7 +232,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "引っ越し・住まい",
       kicker: "住まいガイド",
       readTime: "読了 約4分",
-      tag: "Living Guide",
+      tag: "住まいガイド",
     },
     en: {
       title: "Find Stations for a 30-Minute Commute: Compare Routes and Rent",
@@ -248,7 +248,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "搬家・居住",
       kicker: "居住指南",
       readTime: "约 4 分钟阅读",
-      tag: "Living Guide",
+      tag: "居住指南",
     },
     ko: {
       title: "통근 30분을 목표로 역 찾기: 노선과 월세 비교 순서",
@@ -256,7 +256,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "이사・주거",
       kicker: "주거 가이드",
       readTime: "약 4분 읽기",
-      tag: "Living Guide",
+      tag: "주거 가이드",
     },
   },
   "tokyo-safe-area-by-route": {
@@ -266,7 +266,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "引っ越し・住まい",
       kicker: "住まいガイド",
       readTime: "読了 約4分",
-      tag: "Safety Guide",
+      tag: "治安ガイド",
     },
     en: {
       title: "Choosing Where to Live in Tokyo: Check the Streets Around the Station",
@@ -282,7 +282,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "搬家・居住",
       kicker: "居住指南",
       readTime: "约 4 分钟阅读",
-      tag: "Safety Guide",
+      tag: "治安指南",
     },
     ko: {
       title: "도쿄에서 살 노선 고르기: 역 주변 환경 확인 방법",
@@ -290,7 +290,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "이사・주거",
       kicker: "주거 가이드",
       readTime: "약 4분 읽기",
-      tag: "Safety Guide",
+      tag: "치안 가이드",
     },
   },
   "tokyo-rent-by-route": {
@@ -300,7 +300,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "引っ越し・沿線比較",
       kicker: "住まいガイド",
       readTime: "読了 約4分",
-      tag: "Rent Guide",
+      tag: "家賃ガイド",
     },
     en: {
       title: "Compare Rent and Rail Lines in Greater Tokyo: A Station Shortlisting Guide",
@@ -316,7 +316,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "搬家・沿线比较",
       kicker: "居住指南",
       readTime: "约 4 分钟阅读",
-      tag: "Rent Guide",
+      tag: "租金指南",
     },
     ko: {
       title: "도쿄·수도권 월세와 노선 비교: 후보 역 고르는 순서",
@@ -324,7 +324,7 @@ export const ARTICLE_PAGE_TRANSLATIONS: Record<string, Record<ArticleLanguage, A
       category: "이사・노선 비교",
       kicker: "주거 가이드",
       readTime: "약 4분 읽기",
-      tag: "Rent Guide",
+      tag: "월세 가이드",
     },
   },
 };
