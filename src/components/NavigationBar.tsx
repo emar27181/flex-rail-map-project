@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { APP_ICON_PATH } from '../config/seo';
 import { Sun, Moon, Menu, X, Info, Sparkles } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import IconButton from './ui/atoms/IconButton';
@@ -61,7 +62,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
         flex: '1 1 auto'
       }}>
         <img
-          src="/icon_flex_rail_way_map.png"
+          src={APP_ICON_PATH}
           alt="Flex Railway Map Logo"
           style={{
             width: '32px',

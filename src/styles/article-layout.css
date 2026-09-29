@@ -3,6 +3,11 @@
 :root{
   /* 言語切り替えのメニューの背景（src/components/LanguageSwitcher.astro） */
   --lang-switch-bg: var(--surface);
+  /* 操作部品（src/components/ui/atoms/controlCss.ts の .ctl）の色 */
+  --ctl-fg: var(--ink-soft);
+  --ctl-bg: var(--surface);
+  --ctl-border: var(--border);
+  --ctl-accent: var(--accent);
   --bg:#F6F7F8;
   --surface:#FFFFFF;
   --surface-2:#F1F3F4;
@@ -52,15 +57,12 @@ body{
 .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 22px; }
 .masthead{ position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:saturate(180%) blur(10px); border-bottom:1px solid var(--border); }
 .masthead .row{ max-width:var(--maxw); margin:0 auto; padding:11px 22px; display:flex; align-items:center; justify-content:space-between; gap:14px; }
-.brand{ display:inline-flex; align-items:center; gap:9px; font-weight:800; font-size:15.5px; letter-spacing:.01em; color:var(--ink); text-decoration:none; }
-.brand .mk{ width:18px; height:18px; border-radius:5px; background:var(--accent); display:inline-block; position:relative; }
-.brand .mk::after{ content:""; position:absolute; inset:5px 3px; border-left:2px solid #fff; transform:rotate(0); }
-.brand .mk::before{ content:""; position:absolute; left:4px; right:4px; top:8px; height:2px; background:#fff; border-radius:2px; }
-.mh-actions{ display:flex; align-items:center; gap:10px; }
-.tagpill{ font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint); border:1px solid var(--border); padding:3px 9px; border-radius:999px; }
-.theme-btn{ display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--ink-soft); cursor:pointer; transition:background .2s, color .2s, border-color .2s; }
-.theme-btn:hover{ color:var(--accent); border-color:var(--accent); }
-.theme-btn svg{ width:18px; height:18px; }
+.brand{ display:inline-flex; align-items:center; gap:9px; min-width:0; font-weight:800; font-size:15.5px; letter-spacing:.01em; color:var(--ink); text-decoration:none; }
+/* ヘッダーは1行に収める（狭い画面ではサイト名を省略記号で切り、タグを隠す） */
+.brand-logo{ flex:none; }
+.brand-name{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mh-actions{ display:flex; align-items:center; gap:10px; flex:none; }
+.tagpill{ white-space:nowrap; font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint); border:1px solid var(--border); padding:3px 9px; border-radius:999px; }
 html[data-theme="dark"] .sun{ display:block; }
 html[data-theme="dark"] .moon{ display:none; }
 html[data-theme="light"] .sun{ display:none; }
@@ -174,4 +176,8 @@ html[data-theme="dark"] .cta-box, html[data-theme="dark"] .cta{ background:linea
 @media (max-width:560px){
   body{ font-size:15.5px; }
   table{ display:block; overflow-x:auto; white-space:nowrap; }
+}
+
+@media (max-width: 480px){
+  .tagpill{ display:none; }
 }

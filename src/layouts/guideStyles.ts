@@ -14,9 +14,15 @@ const light = getThemeColors('light');
 const dark = getThemeColors('dark');
 
 export const guideCss = `
-/* 右上の言語切り替え（src/components/LanguageSwitcher.astro）。メニューの背景をテーマに合わせる */
-body.light { --lang-switch-bg: ${light.surface}; }
-body.dark { --lang-switch-bg: ${dark.surface}; }
+/* 右上の言語切り替え（LanguageSwitcher）と操作部品（ui/atoms/controlCss.ts の .ctl）の色をテーマに合わせる */
+body.light {
+  --lang-switch-bg: ${light.surface};
+  --ctl-fg: ${light.text}; --ctl-bg: ${light.surface}; --ctl-border: ${light.border}; --ctl-accent: ${light.primary};
+}
+body.dark {
+  --lang-switch-bg: ${dark.surface};
+  --ctl-fg: ${dark.text}; --ctl-bg: ${dark.surface}; --ctl-border: ${dark.border}; --ctl-accent: ${dark.primary};
+}
 .page-lang-bar { display: flex; justify-content: flex-end; margin-bottom: ${L.sp.md}; }
 
 .breadcrumb {

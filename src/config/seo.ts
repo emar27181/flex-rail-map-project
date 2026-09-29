@@ -18,8 +18,15 @@ export const SITE_NAME = 'Flex Railway Map';
 /** 公開URL。末尾スラッシュなし */
 export const SITE_URL = 'https://flex-railway-map.netlify.app';
 
+/**
+ * アプリのアイコン（サイト内パス）。PWA の manifest（public/manifest.json の icons）・
+ * ファビコン・ヘッダーのロゴ・OGP画像はすべてこれを使う。ページごとに書かないこと
+ * （manifest と一致しているかは tests/unit/config/appIcon.test.ts が確かめる）
+ */
+export const APP_ICON_PATH = '/icon_flex_rail_way_map.png';
+
 /** OGP/Twitterカード用の既定画像 */
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/icon_flex_rail_way_map.png`;
+export const DEFAULT_OG_IMAGE = `${SITE_URL}${APP_ICON_PATH}`;
 
 /**
  * GA4測定ID（例: "G-XXXXXXXXXX"）。

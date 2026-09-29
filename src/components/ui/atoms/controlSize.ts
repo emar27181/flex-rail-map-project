@@ -85,3 +85,9 @@ export const FLOATING_ICON_BUTTON_SIZE = {
 } as const;
 
 export type FloatingIconButtonSize = keyof typeof FLOATING_ICON_BUTTON_SIZE;
+
+/**
+ * 浮かせたアイコンボタン（地図の隅・記事ヘッダー）の中のアイコンの大きさ(px)。
+ * FLOATING_ICON_BUTTON_SIZE.md（36px）の箱に対して詰まりすぎない大きさ。
+ */
+export const FLOATING_ICON_GLYPH_SIZE = 18;

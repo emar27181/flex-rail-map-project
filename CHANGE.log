@@ -50,6 +50,19 @@
   `src/layouts/{GuideLayout,GuidesIndexLayout,SeoPageLayout}.astro`, `src/layouts/guideStyles.ts`
 - 自動リダイレクトはせず、以前選んだ言語かブラウザの言語に版があるときだけ閉じられる案内を出す
 
+### improve: 記事ヘッダーのボタンをアトムの規格にそろえ、アイコンを PWA と同じファイルに一元化する
+- `src/components/ui/atoms/controlCss.ts`（新規, `.ctl`）, `src/components/ui/atoms/controlSize.ts`（`FLOATING_ICON_GLYPH_SIZE`）,
+  `src/components/seo/FaviconLinks.astro`（新規）, `src/config/seo.ts`（`APP_ICON_PATH`）,
+  `src/components/articles/ArticleLayout.astro`, `src/components/LanguageSwitcher.astro`, `src/components/seo/SeoHead.astro`,
+  `src/layouts/{StaticPage.astro,guideStyles.ts}`, `src/pages/{index,diagram,demo,fullscreen}.astro`,
+  `src/components/NavigationBar.tsx`, `src/components/RailwayMap.tsx`, `src/styles/article-layout.css`,
+  `tests/unit/config/appIcon.test.ts`（新規）, `tests/unit/components/ui/controlCss.test.ts`（新規）
+- テーマ切り替え（34px・角丸8px）と言語切り替え（別の枠・余白）の形が違っていたので、地図の隅のボタンと
+  同じ規格（36px・角丸 control・アイコン18px）の `.ctl` クラスにそろえた
+- ヘッダーのロゴを CSS で描いた印から、PWA の manifest と同じアイコン画像にした。アイコンのパスは
+  `APP_ICON_PATH` だけに書き、manifest と一致すること・他に書かれていないことをテストで確かめる
+- ヘッダーを1行に収める（サイト名は省略記号、狭い画面ではタグを隠す）
+
 ### feat: 記事を言語ごとの別URLにし、検索した言語の記事が出るようにする
 - `src/components/articles/{ArticleLayout,BeginnerLineChips,IntroductionDemo}.astro`（新規）,
   `src/pages/[...lang]/articles/`（新規）, `src/pages/articles/*.astro`（共通レイアウトを使う薄いファイルに）,

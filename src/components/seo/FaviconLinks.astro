@@ -1,0 +1,12 @@
+---
+/**
+ * ファビコン・ホーム画面アイコンの <link>。アイコンは PWA の manifest と同じ APP_ICON_PATH。
+ * 全ページの <head> はこれを置くだけにする（以前は各ページが同じ4行を個別に書いていた）。
+ */
+import { APP_ICON_PATH } from '../../config/seo';
+---
+
+<link rel="icon" type="image/png" sizes="32x32" href={APP_ICON_PATH} />
+<link rel="icon" type="image/png" sizes="16x16" href={APP_ICON_PATH} />
+<link rel="apple-touch-icon" sizes="180x180" href={APP_ICON_PATH} />
+<link rel="shortcut icon" href={APP_ICON_PATH} />

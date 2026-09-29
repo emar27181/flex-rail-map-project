@@ -4,6 +4,7 @@ import SiteFooterNav from "../components/SiteFooterNav.astro";
 import leafletCss from "leaflet/dist/leaflet.css?url";
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION } from "../config/seo";
 import GA4Loader from "../components/GA4Loader.astro";
+import FaviconLinks from '../components/seo/FaviconLinks.astro';
 
 // JSON-LD はプレーンな<script>タグの中身をAstroが解釈しないため、
 // SITE_URL等の変数を埋め込むにはここでオブジェクトを組み立てて
@@ -107,24 +108,7 @@ const webSiteSchema = {
 			})();
 		</script>
 		<GA4Loader />
-		<link
-			rel="icon"
-			type="image/png"
-			sizes="32x32"
-			href="/icon_flex_rail_way_map.png"
-		/>
-		<link
-			rel="icon"
-			type="image/png"
-			sizes="16x16"
-			href="/icon_flex_rail_way_map.png"
-		/>
-		<link
-			rel="apple-touch-icon"
-			sizes="180x180"
-			href="/icon_flex_rail_way_map.png"
-		/>
-		<link rel="shortcut icon" href="/icon_flex_rail_way_map.png" />
+		<FaviconLinks />
 		<link rel="manifest" href="/manifest.json" />
 		<!--
 			iOS Safari はステータスバー背後の領域を theme-color とキャンバス背景で塗る。

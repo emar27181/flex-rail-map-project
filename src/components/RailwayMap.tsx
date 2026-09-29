@@ -97,7 +97,7 @@ import SegmentedControl from './ui/molecules/SegmentedControl';
 import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
-import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
+import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE } from './ui/atoms/controlSize';
 
 import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
@@ -128,8 +128,8 @@ interface RailwayMapProps {
  * 4つのボタンすべてがこの定数を参照する。
  */
 const MAP_CORNER_BUTTON_PX = FLOATING_ICON_BUTTON_SIZE.md;
-/** 上のボタン群のアイコンの大きさ。36pxの箱に対して詰まりすぎない大きさ */
-const MAP_CORNER_ICON_SIZE = 18;
+/** 上のボタン群のアイコンの大きさ（記事ヘッダーのボタンと共通の値） */
+const MAP_CORNER_ICON_SIZE = FLOATING_ICON_GLYPH_SIZE;
 /**
  * スマホ・非全画面時、地図右上の「全画面表示」ボタン1個ぶんを避けて
  * 「表示路線の切替」パネルの右端を詰めるための予約幅。
