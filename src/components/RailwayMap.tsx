@@ -6558,28 +6558,35 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   : { bottom: '10px', top: 'auto', left: '10px' }
                 : { bottom: '10px', top: 'auto', left: '10px' }),
             zIndex: 1003,
-            display: 'flex',
+            // スマホ全画面では横一列に3つ並べると左の駅選択パネルの角に重なるので、
+            // 2列にして [縮小][言語] の下に [方位] を置く（グリッドの位置は下の各ボタンで指定）。
             // スマホ・非全画面時は左に「表示路線の切替」パネルが来て横に1個分しか
             // 空いていないので、方位ボタンは全画面ボタンの下に縦に積む
-            flexDirection: isMobile && !isFullscreen ? 'column' : 'row',
+            ...(isFullscreen && isMobile
+              ? { display: 'grid', gridTemplateColumns: 'auto auto' }
+              : { display: 'flex', flexDirection: isMobile && !isFullscreen ? 'column' as const : 'row' as const }),
             gap: L.sp.xs,
           }}>
-            {renderCornerButton(
-              isFullscreen ? <Minimize2 size={MAP_CORNER_ICON_SIZE} /> : <Maximize2 size={MAP_CORNER_ICON_SIZE} />,
-              isFullscreen ? translateUI('exitFullscreen', currentLanguage) : translateUI('enterFullscreen', currentLanguage),
-              () => setIsFullscreen(!isFullscreen),
-            )}
+            <div style={isFullscreen && isMobile ? { gridColumn: 1, gridRow: 1 } : undefined}>
+              {renderCornerButton(
+                isFullscreen ? <Minimize2 size={MAP_CORNER_ICON_SIZE} /> : <Maximize2 size={MAP_CORNER_ICON_SIZE} />,
+                isFullscreen ? translateUI('exitFullscreen', currentLanguage) : translateUI('enterFullscreen', currentLanguage),
+                () => setIsFullscreen(!isFullscreen),
+              )}
+            </div>
 
             {/* 方位: 2本指回転後も北が分かるように。押すと北を上に戻す */}
-            <MapCompassButton
-              mapRef={mapRef}
-              theme={theme}
-              label={translateUI('resetNorth', currentLanguage)}
-              iconSize={MAP_CORNER_ICON_SIZE}
-              styleOverride={cornerButtonStyle}
-            />
+            <div style={isFullscreen && isMobile ? { gridColumn: 2, gridRow: onLanguageChange ? 2 : 1 } : undefined}>
+              <MapCompassButton
+                mapRef={mapRef}
+                theme={theme}
+                label={translateUI('resetNorth', currentLanguage)}
+                iconSize={MAP_CORNER_ICON_SIZE}
+                styleOverride={cornerButtonStyle}
+              />
+            </div>
 
-            {onLanguageChange && !(isMobile && !isFullscreen) && renderCornerButton(
+            {onLanguageChange && !(isMobile && !isFullscreen) && <div style={isFullscreen && isMobile ? { gridColumn: 2, gridRow: 1 } : undefined}>{renderCornerButton(
               // 文字をアイコン代わりに置くので、大きさは規格から取る
               <span style={{ fontSize: FS.body, fontWeight: 'bold', fontFamily: 'monospace' }}>
                 {(() => { const langs: Language[] = ['japanese', 'english', 'chinese', 'korean']; const next = langs[(langs.indexOf(language) + 1) % langs.length]; return { japanese: '日', english: 'En', chinese: '中', korean: '한' }[next]; })()}
@@ -6589,7 +6596,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 const langs: Language[] = ['japanese', 'english', 'chinese', 'korean'];
                 onLanguageChange(langs[(langs.indexOf(language) + 1) % langs.length]);
               },
-            )}
+            )}</div>}
 
             {/* テーマ切り替え・記事一覧は全画面時は地図を広く使うため隠す
                 （全画面を解除すると再表示される）。スマホの非全画面時も、
