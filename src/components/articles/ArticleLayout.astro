@@ -198,6 +198,20 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
       });
     })();
   </script>
+  <script is:inline>
+    // 本文に埋め込んだ地図（articleRender.ts の embed）。そのままだと、スマホで記事を
+    // スクロールしようとした指が地図を動かしてしまうので、押すまでは地図に触れないようにする
+    (function(){
+      document.querySelectorAll('.embed-frame').forEach(function (frame) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'ctl embed-activate';
+        btn.textContent = frame.getAttribute('data-activate-label') || '';
+        btn.addEventListener('click', function () { frame.classList.add('active'); btn.remove(); });
+        frame.appendChild(btn);
+      });
+    })();
+  </script>
   <slot name="scripts" />
 </body>
 </html>

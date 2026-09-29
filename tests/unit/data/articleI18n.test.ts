@@ -20,7 +20,7 @@ describe('記事の多言語版', () => {
   it('本文の記事リンクは同じ言語の記事URLを指し、旧URL（?lang=）を使わない', () => {
     for (const [slug, bodies] of Object.entries(ARTICLE_BODY_TRANSLATIONS)) {
       for (const lang of ARTICLE_LANGUAGES) {
-        const hrefs = [...(bodies[lang] ?? '').matchAll(/href="([^"]+)"/g)].map(m => m[1]);
+        const hrefs = [...(bodies[lang] ?? '').matchAll(/href="([^"]+)"/g)].map(m => m[1].replace(/&amp;/g, '&'));
         for (const href of hrefs.filter(h => h.includes('/articles') && !h.startsWith('/images/'))) {
           expect(href, `${slug} ${lang}`).not.toContain('?lang=');
           const prefix = lang === 'ja' ? '/articles/' : `/${lang}/articles/`;

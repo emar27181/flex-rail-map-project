@@ -147,6 +147,15 @@ figure.shot img{ display:block; width:100%; height:auto; border:1px solid var(--
 figure.shot a{ display:block; cursor:zoom-in; }
 figure.shot figcaption{ margin-top:10px; font-size:13.5px; line-height:1.7; color:var(--ink-soft); }
 
+/* 実際の地図の埋め込み（articleRender.ts の embed, 地図ページの ?embed=1）。
+   押すまでは地図に触れない（スクロールの指で地図が動かないように） */
+figure.embed{ margin:26px 0 30px; padding:0; }
+.embed-frame{ position:relative; height:clamp(360px, 62vh, 520px); border:1px solid var(--border); border-radius:var(--r-card); overflow:hidden; box-shadow:var(--shadow); background:var(--surface); }
+.embed-frame iframe{ display:block; width:100%; height:100%; border:0; pointer-events:none; }
+.embed-frame.active iframe{ pointer-events:auto; }
+.embed-activate{ position:absolute; left:50%; bottom:var(--ctl-md-gap); transform:translateX(-50%); z-index:1; }
+figure.embed figcaption{ margin-top:10px; font-size:13.5px; line-height:1.7; color:var(--ink-soft); }
+
 .related{ margin:10px 0 36px; }
 .related .article-list{ margin-top:1em; }
 .related .meta{ line-height:1.7; }

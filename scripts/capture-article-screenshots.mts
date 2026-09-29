@@ -2,7 +2,8 @@
  * 記事に載せる「実際の画面」のスクリーンショットを撮る（4言語分）。
  *
  * 記事の画像は作り物の図ではなく、このサイトを実際に操作した画面にする。
- * 地図の状態は URL（mapDeepLink.ts の routes / from / to / metric / lang）で作るので、
+ * 撮るものは記事のデータ（src/data/articles/{slug}.ts の shots）に書く。地図の状態は URL
+ * （mapDeepLink.ts の routes / from / to / metric / center / zoom / lang）で作るので、
  * 同じ手順で何度でも撮り直せる。地図や UI を変えたらこのスクリプトで撮り直すこと。
  *
  * 使い方（開発サーバーを起動した状態で）:
@@ -19,8 +20,8 @@ import { mkdirSync } from 'fs';
 import { join } from 'path';
 import { buildMapHref } from '../src/utils/mapDeepLink';
 import { translateUI, type Language } from '../src/utils/translation';
-import type { RouteKey } from '../src/data/routes';
-import type { StationStats } from '../src/data/stationStats';
+import { ARTICLE_SOURCES } from '../src/data/articles';
+import type { ArticleMapState, ArticleShotSpec } from '../src/data/articles/types';
 import { SEO_TEXT } from '../src/seo/pageText';
 
 type Lang = 'ja' | 'en' | 'zh' | 'ko';
@@ -31,54 +32,22 @@ const LOCALE: Record<Lang, string> = { ja: 'ja-JP', en: 'en-US', zh: 'zh-CN', ko
 interface Shot {
   slug: string;
   id: string;
-  /** 地図の状態 */
-  map?: { routes?: RouteKey[]; from?: string; to?: string; metric?: keyof StationStats; center?: [number, number]; zoom?: number };
-  /** 地図以外のページ（言語ごとのパス） */
-  page?: Record<Lang, string>;
-  /** 駅選択・路線切替のパネルを畳んで地図を広く見せる */
-  collapsePanels?: boolean;
-  /** 押すボタン（UI 文言のキー） */
-  clickUi?: string[];
-  /** ページ内で見せる要素（CSS セレクタ）までスクロール */
-  scrollTo?: string;
-  /** ページ内で見せる見出し（言語ごとの文言）までスクロール */
-  scrollToHeading?: Record<Lang, string>;
+  spec: ArticleShotSpec;
+  maps: Record<string, ArticleMapState>;
 }
 
-/** 都心の主要15路線（「全部出ていると分かりにくい」ことを見せる） */
-const CENTRAL: RouteKey[] = [
-  'yamanote', 'chuo', 'keihinTohoku', 'jrSobuLine', 'ginzaLine', 'marunouchiLine', 'hibiyaLine', 'tozaiLine',
-  'chiyodaLine', 'yurakuchoLine', 'hanzomonLine', 'nambokuLine', 'fukutoshinLine', 'toeiAsakusaLine', 'toeiOedoLine',
-];
+/** 撮るものは記事のデータ（src/data/articles/{slug}.ts の shots）から読む。ここに書き足さない */
+const SHOTS: Shot[] = ARTICLE_SOURCES.flatMap(a =>
+  Object.entries(a.shots).map(([id, spec]) => ({ slug: a.slug, id, spec, maps: a.maps })),
+);
 
-export const SHOTS: Shot[] = [
-  { slug: 'flex-rail-map-introduction', id: 'all-lines', map: { routes: CENTRAL, center: [35.683, 139.745], zoom: 13 }, collapsePanels: true },
-  { slug: 'flex-rail-map-introduction', id: 'route-only', map: { from: '新宿', to: '東京', center: [35.684, 139.735], zoom: 13 } },
-  { slug: 'flex-rail-map-introduction', id: 'parallel', map: { from: '藤沢', to: '東京', center: [35.52, 139.6], zoom: 11 }, collapsePanels: true },
-
-  { slug: 'tokyo-train-map-beginner', id: 'one-line', map: { routes: ['yamanote'], center: [35.69, 139.735], zoom: 12 }, collapsePanels: true },
-  { slug: 'tokyo-train-map-beginner', id: 'three-lines', map: { routes: ['yamanote', 'chuo', 'marunouchiLine'], center: [35.69, 139.72], zoom: 12 }, collapsePanels: true },
-
-  { slug: 'tokyo-sightseeing-routes', id: 'yamanote-ginza', map: { routes: ['yamanote', 'ginzaLine'], center: [35.69, 139.745], zoom: 12 }, collapsePanels: true },
-  { slug: 'tokyo-sightseeing-routes', id: 'odaiba', map: { routes: ['yamanote', 'yurikamomeLine', 'rinkaiLine'], center: [35.645, 139.765], zoom: 13 }, collapsePanels: true },
-
-  { slug: 'commute-30min-cheap-rent', id: 'from-work', map: { from: '東京', center: [35.68, 139.7], zoom: 11 } },
-  { slug: 'commute-30min-cheap-rent', id: 'travel-times', map: { from: '東京', center: [35.68, 139.7], zoom: 11 }, clickUi: ['showTravelTimes'] },
-
-  { slug: 'tokyo-safe-area-by-route', id: 'crime-heatmap', map: { routes: ['yamanote', 'chuo'], metric: 'crimeIndex', center: [35.69, 139.72], zoom: 12 }, collapsePanels: true },
-  {
-    slug: 'tokyo-safe-area-by-route', id: 'station-data',
-    page: { ja: '/stations/shibuya', en: '/en/stations/shibuya', zh: '/zh/stations/shibuya', ko: '/ko/stations/shibuya' },
-    scrollToHeading: { ja: SEO_TEXT.ja.aroundStats, en: SEO_TEXT.en.aroundStats, zh: SEO_TEXT.zh.aroundStats, ko: SEO_TEXT.ko.aroundStats },
-  },
-
-  { slug: 'tokyo-rent-by-route', id: 'from-shibuya', map: { from: '渋谷', center: [35.62, 139.67], zoom: 12 } },
-  {
-    slug: 'tokyo-rent-by-route', id: 'line-stations',
-    page: { ja: '/lines/tokyu-toyoko-line', en: '/en/lines/tokyu-toyoko-line', zh: '/zh/lines/tokyu-toyoko-line', ko: '/ko/lines/tokyu-toyoko-line' },
-    scrollToHeading: { ja: SEO_TEXT.ja.stationList, en: SEO_TEXT.en.stationList, zh: SEO_TEXT.zh.stationList, ko: SEO_TEXT.ko.stationList },
-  },
-];
+function shotUrl(shot: Shot, lang: Lang): string {
+  const { spec } = shot;
+  if (spec.page) return lang === 'ja' ? spec.page : `/${lang}${spec.page}`;
+  const map = typeof spec.map === 'string' ? shot.maps[spec.map] : spec.map;
+  if (!map) throw new Error(`${shot.slug}/${shot.id}: map も page も無い`);
+  return buildMapHref({ ...map, lang });
+}
 
 async function collapse(page: Page, lang: Lang) {
   for (const key of ['stationSelection', 'displayedRoutes']) {
@@ -113,16 +82,17 @@ async function main() {
         });
       });
       const page = await ctx.newPage();
-      const url = shot.page ? shot.page[lang] : buildMapHref({ ...shot.map, lang });
+      const url = shotUrl(shot, lang);
       await page.goto(base + url, { waitUntil: 'networkidle' });
       await page.waitForTimeout(2500);
-      if (shot.collapsePanels) await collapse(page, lang);
-      for (const key of shot.clickUi ?? []) {
+      if (shot.spec.collapsePanels) await collapse(page, lang);
+      for (const key of shot.spec.clickUi ?? []) {
         await page.getByText(translateUI(key, APP_LANG[lang]), { exact: true }).first().click({ timeout: 3000 }).catch(() => {});
       }
-      if (shot.scrollTo) await page.locator(shot.scrollTo).first().scrollIntoViewIfNeeded().catch(() => {});
-      if (shot.scrollToHeading) {
-        await page.getByRole('heading', { name: shot.scrollToHeading[lang] }).first()
+      if (shot.spec.scrollToHeading) {
+        const heading = (SEO_TEXT[lang] as Record<string, unknown>)[shot.spec.scrollToHeading];
+        if (typeof heading !== 'string') throw new Error(`${shot.slug}/${shot.id}: SEO_TEXT に ${shot.spec.scrollToHeading} が無い`);
+        await page.getByRole('heading', { name: heading }).first()
           .evaluate(el => el.scrollIntoView({ block: 'start' })).catch(() => {});
       }
       await page.waitForTimeout(1200);
