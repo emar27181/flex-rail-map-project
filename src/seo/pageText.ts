@@ -84,6 +84,7 @@ export const SEO_TEXT = {
     lineDetails: 'このガイドの路線の駅一覧',
     openMapFrom: (name: string) => `${name}駅を出発駅にして路線図を開く`,
     openMapRoutes: (name: string) => `${name}駅を通る路線を路線図で開く`,
+    openMapSpot: (spot: string, station: string) => `${spot}の最寄り駅（${station}駅）を出発駅にして路線図を開く`,
 
     linesHubTitle: '路線の一覧（東京・大阪・京都・札幌などの主要路線）| Flex Railway Map',
     linesHubH1: '路線の一覧',
@@ -104,6 +105,7 @@ export const SEO_TEXT = {
     noThrough: '路線データ上、直通運転の登録はありません。',
     openMapLine: (name: string) => `${name}だけを表示して路線図を開く`,
 
+    openMapData: (label: string) => `${label}のヒートマップで路線図を開く`,
     dataHubTitle: '駅周辺データの一覧 | Flex Railway Map',
     dataHubH1: '駅周辺データ',
     dataHubLede: '駅ごとの周辺統計を、実データがある指標だけ一覧にしています。',
@@ -169,6 +171,7 @@ export const SEO_TEXT = {
     lineDetails: 'Stations of the lines in this guide',
     openMapFrom: (name: string) => `Open the map from ${name} Station`,
     openMapRoutes: (name: string) => `Open the lines of ${name} Station on the map`,
+    openMapSpot: (spot: string, station: string) => `Open the map from ${station} Station, nearest to ${spot}`,
 
     linesHubTitle: 'Train Lines in Tokyo, Osaka, Kyoto, Sapporo and More | Flex Railway Map',
     linesHubH1: 'Lines',
@@ -189,6 +192,7 @@ export const SEO_TEXT = {
     noThrough: 'No through services are registered in the line data.',
     openMapLine: (name: string) => `Open the map with only the ${name}`,
 
+    openMapData: (label: string) => `Open the map with a ${label.toLowerCase()} heatmap`,
     dataHubTitle: 'Station Area Data | Flex Railway Map',
     dataHubH1: 'Station Area Data',
     dataHubLede: 'Statistics around stations, listed only for metrics backed by real data.',

@@ -34,6 +34,14 @@ const relatedGuides = guidesForRoutes([line.key], lang);
 // 駅一覧に添える駅周辺データ（データのページがある指標の先頭1つ）
 const dataPage = getSeoModel().dataPages.find(d => d.indexable);
 const dataLabel = dataPage && (lang === 'en' ? translateStatParamLabel(dataPage.meta.label, 'english') : dataPage.meta.label);
+const lineCta = {
+  label: t.openMapLine(name),
+  kind: 'line' as const,
+  guideSlug: `line/${line.slug}`,
+  language: lang,
+  routes: [line.key],
+  city: line.city,
+};
 ---
 
 <SeoPageLayout
@@ -51,12 +59,7 @@ const dataLabel = dataPage && (lang === 'en' ? translateStatParamLabel(dataPage.
 	lede={t.lineLede(name, line.stops.length, first, last, transferCount)}
 	indexable={line.indexable}
 >
-	<MapOpenCta
-		label={t.openMapLine(name)}
-		guideSlug={`line/${line.slug}`}
-		language={lang}
-		routes={[line.key]}
-	/>
+	<MapOpenCta {...lineCta} />
 
 	<section>
 		<h2>{t.stationList}</h2>
@@ -86,6 +89,8 @@ const dataLabel = dataPage && (lang === 'en' ? translateStatParamLabel(dataPage.
 			</table>
 		</div>
 	</section>
+
+	<MapOpenCta {...lineCta} />
 
 	<section>
 		<h2>{t.throughService}</h2>

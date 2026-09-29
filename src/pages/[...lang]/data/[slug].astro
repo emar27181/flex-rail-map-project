@@ -4,6 +4,7 @@
  * 実データ（dataQuality: 'real'）の指標だけ作る。値の無い駅は0にせず件数だけ示す。
  */
 import SeoPageLayout from '../../../layouts/SeoPageLayout.astro';
+import MapOpenCta from '../../../components/MapOpenCta.astro';
 import {
   SEO_LANGS, dataPath, getSeoModel, hubPath, linePath, routeName, stationName, stationPath,
   type SeoDataPage, type SeoLang,
@@ -30,6 +31,15 @@ const withUnit = (v: number) => `${formatNumber(v, lang)}${en && unit ? ' ' : ''
 const path = dataPath(page.slug, lang);
 const scope = t.scope(page.meta.radius, page.meta.period);
 const top = page.rows[0];
+// 地図は中央値の高い路線（上位5路線）を表示し、この指標のヒートマップで開く
+const dataCta = {
+  label: t.openMapData(label),
+  kind: 'data' as const,
+  guideSlug: `data/${page.slug}`,
+  language: lang,
+  routes: page.byLine.slice(0, 5).map(s => s.line.key),
+  metric: page.key,
+};
 ---
 
 <SeoPageLayout
@@ -59,6 +69,8 @@ const top = page.rows[0];
 	</p>
 	{page.missingCount > 0 && <p class="seo-note">{t.missing(page.missingCount)}</p>}
 
+	<MapOpenCta {...dataCta} />
+
 	<section>
 		<h2>{t.byLine}</h2>
 		<div class="seo-table-wrap">
@@ -78,6 +90,7 @@ const top = page.rows[0];
 				</tbody>
 			</table>
 		</div>
+		<MapOpenCta {...dataCta} />
 	</section>
 
 	<section>

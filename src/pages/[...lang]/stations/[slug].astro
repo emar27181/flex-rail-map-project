@@ -36,6 +36,17 @@ const nearby = nearbyMajorStations(station);
 const relatedGuides = guidesForRoutes(station.routes, lang);
 const statLabel = (label: string) => (en ? translateStatParamLabel(label, 'english') : label);
 const statUnit = (unit: string) => (en ? translateStatUnit(unit, 'english') : unit);
+// 地図を開くCTA（出発駅に指定できる駅は出発駅、できない駅は通る路線を表示して開く）
+const stationCta = {
+  label: station.mapFrom ? t.openMapFrom(name) : t.openMapRoutes(name),
+  kind: 'station' as const,
+  guideSlug: `station/${station.slug}`,
+  language: lang,
+  from: station.mapFrom,
+  routes: station.mapFrom ? undefined : station.routes,
+  station: station.name,
+  city: station.cities[0],
+};
 const sources = [...new Map(station.stats.filter(s => s.source).map(s => [s.source!.title + s.source!.retrievedAt, s.source!])).values()];
 ---
 
@@ -54,19 +65,14 @@ const sources = [...new Map(station.stats.filter(s => s.source).map(s => [s.sour
 	lede={t.stationLede(name, station.routes.length, station.effectiveLines)}
 	indexable={station.indexable}
 >
-	<MapOpenCta
-		label={station.mapFrom ? t.openMapFrom(name) : t.openMapRoutes(name)}
-		guideSlug={`station/${station.slug}`}
-		language={lang}
-		from={station.mapFrom}
-		routes={station.mapFrom ? undefined : station.routes}
-	/>
+	<MapOpenCta {...stationCta} />
 
 	<section>
 		<h2>{t.linesAtStation}</h2>
 		<ul class="seo-chips">
 			{station.routes.map(r => <LineChip route={r} lang={lang} />)}
 		</ul>
+		<MapOpenCta {...stationCta} label={t.openMapRoutes(name)} from={undefined} routes={station.routes} />
 	</section>
 
 	<section>
@@ -90,7 +96,22 @@ const sources = [...new Map(station.stats.filter(s => s.source).map(s => [s.sour
 	{station.touristSpots.length > 0 && (
 		<section>
 			<h2>{t.nearbySpots}</h2>
-			{station.touristSpots.map(spot => <p>{t.nearbySpotLine(t.spotName(spot))}</p>)}
+			{station.touristSpots.map(spot => (
+				<Fragment>
+					<p>{t.nearbySpotLine(t.spotName(spot))}</p>
+					<MapOpenCta
+						label={t.openMapSpot(t.spotName(spot), name)}
+						kind="tourist"
+						guideSlug={`tourist/${spot.id}`}
+						language={lang}
+						from={station.mapFrom}
+						routes={station.routes}
+						station={station.name}
+						city={spot.city}
+						touristSpot={spot.id}
+					/>
+				</Fragment>
+			))}
 		</section>
 	)}
 
