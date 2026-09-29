@@ -132,6 +132,64 @@
 - 英語・中国語・韓国語版を /en/articles/... などで書き出し、canonical・hreflang・html lang・inLanguage を各言語に
 - 旧URL（?lang=）は301転送、初心者向け記事の図を全言語に、紹介記事のデモを各言語で書き出す
 
+## [2026-09-29] セッション（上野東京ライン・湘南新宿ラインの表記統一・時刻表の方向切替・前の便の常時表示・ツールチップの高さ・路線の凡例）
+
+### feat: 「表示中の路線」の凡例を見出しで折りためるようにする
+- `src/components/legend/VisibleRoutesLegend.tsx`, `src/utils/legendPersistence.ts`（新規）, `src/components/RailwayMap.tsx`
+- 折りたたみ中は「表示中の路線（N）」の1行。開閉状態は保存して持ち越す
+
+### fix: スマホ全画面で地図右上のボタンが駅選択パネルに重なっていた
+- `src/components/RailwayMap.tsx`
+- 2列にし [縮小][言語] の下に [方位] を置く
+
+### fix: スマホで路線の凡例が表示されなかった
+- `src/components/RailwayMap.tsx`
+- スマホ全画面ではパネルが右端に来ないのに「パネルが開いている」扱いで消していた。パネルを避けるのはPCだけにした
+
+### improve: 駅ラベルの時刻は既定で路線の平均1つにまとめ、路線ごとの表示は設定で切り替える
+- `src/components/map/stationTimeLabel.ts`（`averageTime`）, `src/components/RailwayMap.tsx`,
+  `src/components/legend/LegendRouteList.tsx`, `src/components/legend/MapConfigPanel.tsx`（`showPerRouteStationTimes`）,
+  `src/utils/translation.ts`, `tests/unit/components/map/stationTimeLabel.test.ts`
+- 設定「駅ラベル」の「時刻を路線ごとに表示」（既定オフ＝平均で1つ）
+
+### improve: 駅ツールチップの路線一覧から青い「乗」の文字をなくす
+- `src/components/RailwayMap.tsx`, `src/utils/translation.ts`, `CLAUDE.md`
+- 経路上の路線は太字＋左の路線色の線で示す
+
+### improve: 駅ツールチップの非表示の路線を行ごと半透明にせず、「＋表示」ボタンを通常の濃さで出す
+- `src/components/RailwayMap.tsx`
+- 控えめにするのは路線名（textMuted）と色の丸だけ。以前は行ごと50%でボタンの色まで沈んでいた
+
+### feat: 地図の右下に表示中の路線の凡例を出す
+- `src/components/legend/VisibleRoutesLegend.tsx`（新規）, `src/components/RailwayMap.tsx`,
+  `src/utils/translation.ts`, `tests/unit/components/legend/VisibleRoutesLegend.test.tsx`（新規）
+- 経路上の路線を先頭に10路線まで並べ、残りは「…ほかN路線」。全路線・0路線のときは出さない
+- PCで表示路線の切替パネルが開いているときはその左、スマホは下部ナビに重ならない高さ
+
+### improve: 駅の時刻表ツールチップの高さの上限を広げる
+- `src/components/RailwayMap.tsx`
+- スマホ 画面の70%→85%、PC 620px→760px（390×844 で 677px、時刻表が約8本見える）
+- 時刻表のある駅では実際の高さがほぼ上限になるので、上下の出し分けの見積もりにも上限を使う
+
+### improve: 時刻表の「前の時刻を表示」ボタンをやめ、前の便も最初から並べて基準時刻の位置から見せる
+- `src/components/RailwayMap.tsx`, `src/utils/translation.ts`（不要になった文言を削除）
+- 始発〜終電を最初から並べ、開いたときは「HH:MM 以降」の行が一覧の先頭に来るようスクロール
+- 駅・路線・方向・時刻が変わったときだけ位置を戻す。出典・方向の行は固定
+
+### feat: 駅の時刻表で方向を切り替えられるようにし、方向は「〜方面」で示す
+- `src/data/timetableData.ts`（`getDirectionShortLabels`）, `src/components/RailwayMap.tsx`,
+  `src/utils/translation.ts`, `tests/unit/data/timetableData.test.ts`
+- 時刻表ツールチップの右列に「熱海・沼津方面」などの方向名と切替ボタン（ArrowUpDown）を置く
+- 方向名はその方向でいちばん多い行先（〜行き→〜方面）。上り・下りは直通先で逆になるため使わない
+- 既定は経路の進行方向。経路の路線を逆向きに見ているときは「逆方向（参考）」
+
+### fix: 上野東京ライン・湘南新宿ラインの路線名を「系統名（路線名）」に揃える
+- `src/data/routes.ts`, `src/utils/translation.ts`, `src/data/timetableData.ts`,
+  `src/components/ServiceTermini.tsx`, `tests/unit/data/serviceSystems.test.ts`, `docs/data-editing-guide.md`
+- 東海道本線→上野東京ライン（東海道線）、JR宇都宮線→上野東京ライン（宇都宮線）、高崎線→上野東京ライン（高崎線）
+- 湘南新宿ラインは複数路線にまたがるので「路線名（系統名）」にできず、系統名を主にする形に統一
+- 時刻表の名前（湘南新宿ラインの片方も）を同じ文字列にし、英語名を追加。書き方をテストで固定
+
 ## [2026-09-28] セッション（東海道線の時刻表の行先・並行ルート・推薦ルート選択の既定オフ）
 
 ### feat: 出発・到着駅にも時刻を出し、複数の路線が通る駅は路線ごとに時刻を並べる

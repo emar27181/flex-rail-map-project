@@ -8,7 +8,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { routes } from '../../../src/data/routes';
-import { timetableLines, TIMETABLE_SOURCE, getNextDepartures, getDeparturesAround, isEstimatedTimetable, addMinutes, computeEffectiveBaseTime } from '../../../src/data/timetableData';
+import { timetableLines, TIMETABLE_SOURCE, getNextDepartures, getDeparturesAround, getDirectionShortLabels, isEstimatedTimetable, addMinutes, computeEffectiveBaseTime } from '../../../src/data/timetableData';
 import { getServiceSystem } from '../../../src/data/serviceSystems';
 
 describe('時刻表データ', () => {
@@ -220,5 +220,23 @@ describe('東海道線（上野東京ライン）の行先', () => {
 
   it('2023年3月に廃止された快速アクティーを載せない', () => {
     for (const d of tokaido.directions) for (const p of d.patterns) expect(p.type).not.toBe('快速アクティー');
+  });
+});
+
+describe('時刻表の方向の短い名前（方向切替用）', () => {
+  it('上野東京ライン（東海道線）は藤沢から見て「熱海・沼津方面」と「宇都宮・高崎方面」', () => {
+    expect(getDirectionShortLabels('jrTokaidoMainLine')).toEqual(['熱海・沼津方面', '宇都宮・高崎方面']);
+  });
+
+  it('「〜行き」の行先は「〜方面」に直す', () => {
+    expect(getDirectionShortLabels('hibiyaLine')).toEqual(['中目黒方面', '北千住方面']);
+  });
+
+  it('全路線で方向の数だけ名前があり、すべて「〜方面」', () => {
+    for (const line of timetableLines) {
+      const labels = getDirectionShortLabels(line.key);
+      expect(labels, line.key).toHaveLength(line.directions.length);
+      for (const l of labels) expect(l, line.key).toMatch(/方面$/);
+    }
   });
 });

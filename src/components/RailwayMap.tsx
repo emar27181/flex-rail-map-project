@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X, Timer, TriangleAlert } from 'lucide-react';
+import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X, Timer, TriangleAlert, ArrowUpDown } from 'lucide-react';
 import type { LeafletEvent, LeafletMouseEvent, Map as LeafletMap } from 'leaflet';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { JAPAN_OUTLINE } from '../data/japanOutline';
@@ -48,6 +48,7 @@ import {
   getDirectionIndex as getTimetableDirectionIndex,
   hasTimetableData,
   getLineTimetable,
+  getDirectionShortLabels,
   isEstimatedTimetable,
   TIMETABLE_SOURCE,
   addMinutes,
@@ -89,9 +90,11 @@ import { buildCorridorRoutes, vertexRanks, offsetPoints } from '../utils/routeOf
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import MapCompassButton from './map/MapCompassButton';
+import VisibleRoutesLegend from './legend/VisibleRoutesLegend';
+import { getInitialLegendCollapsed, persistLegendCollapsed } from '../utils/legendPersistence';
 import { getThroughReachableSections } from '../utils/throughService';
 import { findParallelSections, sectionMinutes } from '../utils/parallelRoutes';
-import { STATION_TIME_LINE_HEIGHT, stationTimeLinesHtml, timeLineWidth, toTimeLines, type StationTimeLine } from './map/stationTimeLabel';
+import { STATION_TIME_LINE_HEIGHT, averageTime, stationTimeLinesHtml, timeLineWidth, toTimeLines, type StationTimeLine } from './map/stationTimeLabel';
 import { isSameStation } from '../utils/sameStation';
 import { buildEffectiveLineCounts } from '../utils/effectiveLines';
 import Select from './ui/atoms/Select';
@@ -414,12 +417,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [methodInfoTooltip, setMethodInfoTooltip] = useState<{ key: keyof StationStats; x: number; y: number } | null>(null);
   // ツールチップ内で選択中の路線
   const [tooltipSelectedRoute, setTooltipSelectedRoute] = useState<string | null>(null);
+  // 時刻表ツールチップで利用者が選んだ方向（駅・路線ごと。別の駅・路線を開くと経路の進行方向に戻る）
+  const [tooltipDirectionPick, setTooltipDirectionPick] = useState<{ station: string; route: string; dir: number } | null>(null);
   const [showAllTooltipDeps, setShowAllTooltipDeps] = useState(false);
-  // 時刻表ツールチップ: 基準時刻より前の発車も見られるようにする開閉状態
-  const [showPastDepartures, setShowPastDepartures] = useState(false);
-  // 「前の時刻を表示」で一度に見せる件数。「さらに前を表示」を押すたびに
-  // PAST_DEPARTURE_STEP ずつ増やし、始発に到達するまで遡れるようにする
-  const [pastDeparturesShownCount, setPastDeparturesShownCount] = useState(8);
+  // 時刻表ツールチップの一覧を「基準時刻以降」の位置へスクロールした対象（駅・路線・方向・時刻）。
+  // 同じ対象のあいだは利用者のスクロール位置を保ち、対象が変わったときだけ戻す
+  const timetableScrollKeyRef = useRef('');
 
   // 路線ホバー・ポップアップ状態
   const [hoveredRoute, setHoveredRoute] = useState<string | null>(null);
@@ -496,6 +499,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // どの路線を見るかは「表示路線の切替」でユーザーが調整する（パネルを出したときだけ、
   // 選んだ候補に描画を絞る）
   const [showRouteRecommendationsPanel, setShowRouteRecommendationsPanel] = useState(false);
+  // 駅ラベルの時刻。既定は通る路線の時刻の平均で1つにまとめる（路線ごとに並べると行数が多すぎる）。
+  // 設定で路線ごとの表示に切り替えられる
+  const [showPerRouteStationTimes, setShowPerRouteStationTimes] = useState(false);
+  // 地図右下の「表示中の路線」の凡例を折りたたんでいるか（保存して持ち越す）
+  const [visibleRoutesLegendCollapsed, setVisibleRoutesLegendCollapsed] = useState(false);
+  useEffect(() => { setVisibleRoutesLegendCollapsed(getInitialLegendCollapsed()); }, []);
   const [showRouteLine, setShowRouteLine] = useState(true);
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
@@ -833,8 +842,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   useEffect(() => {
     setTooltipSelectedRoute(null);
     setShowAllTooltipDeps(false);
-    setShowPastDepartures(false);
-    setPastDeparturesShownCount(8);
   }, [stationTooltip?.stationName]);
 
   // 列車種別表示: 路線変更時に列車種別をリセット
@@ -879,6 +886,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     showFullRouteStations,
     showRouteLine,
     showRouteRecommendationsPanel,
+    showPerRouteStationTimes,
     alwaysVisibleStationsEnabled,
     alwaysVisibleMinRoutes,
     arrivalAlertEnabled,
@@ -891,7 +899,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       showTransferStationsOnly, showExpressStationsOnly, showTravelTimes,
       showStationNames, showFurigana, showStationNumbers, showOsmTiles,
       mapViewMode, timeFilterEnabled, timeFilterMaxMinutes,
-      showStationTooltip, showFullRouteStations, showRouteRecommendationsPanel,
+      showStationTooltip, showFullRouteStations, showRouteRecommendationsPanel, showPerRouteStationTimes,
       alwaysVisibleStationsEnabled, alwaysVisibleMinRoutes,
       arrivalAlertEnabled, arrivalAlertMinutes,
       stationSizeScale, routeLineWidth, travelTimeStyle, stationIconStyle]);
@@ -916,6 +924,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (cfg.showFullRouteStations !== undefined) setShowFullRouteStations(cfg.showFullRouteStations);
     if (cfg.showRouteLine !== undefined) setShowRouteLine(cfg.showRouteLine);
     if (cfg.showRouteRecommendationsPanel !== undefined) setShowRouteRecommendationsPanel(cfg.showRouteRecommendationsPanel);
+    if (cfg.showPerRouteStationTimes !== undefined) setShowPerRouteStationTimes(cfg.showPerRouteStationTimes);
     if (cfg.alwaysVisibleStationsEnabled !== undefined) setAlwaysVisibleStationsEnabled(cfg.alwaysVisibleStationsEnabled);
     if (cfg.alwaysVisibleMinRoutes !== undefined) setAlwaysVisibleMinRoutes(cfg.alwaysVisibleMinRoutes);
     if (cfg.arrivalAlertEnabled !== undefined) setArrivalAlertEnabled(cfg.arrivalAlertEnabled);
@@ -1608,17 +1617,25 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const activeJourneyEntry = journeyEntries.find(e => e.routeKey === activeRouteKey);
 
     // 選択路線の発車情報を取得（経路の方向・時刻を優先使用）
-    // 基準時刻より前（activePastDeps）と後（activeDeps）に分けて取得し、
-    // 「前の時刻を表示」が開かれたときだけ前者を描画する。
-    // prevは始発まで全件まとめて取得しておき（1日ぶんなので軽い）、
-    // 画面には pastDeparturesShownCount ぶんだけ見せる。「さらに前を表示」を
-    // 押すたびにその件数を増やし、始発に到達するまで遡れるようにする
-    // （「前の時刻を表示で始発まで遡れるように」との要望を受けた）。
+    // 基準時刻より前（activePastDeps、始発まで全件）と後（activeDeps）に分けて取得する。
+    // 一覧には両方を最初から並べ、開いたときは基準時刻以降が先頭に来る位置へスクロールする
+    // （以前は「前の時刻を表示」ボタンで開閉していた）。
+    // 方向: 既定は経路の進行方向（経路外の路線は最初の方向）。利用者が切り替えたらそちら
+    const journeyDirIdx = activeJourneyEntry?.directionIndex ?? 0;
+    const activeDirIdx = (tooltipDirectionPick
+      && tooltipDirectionPick.station === stationTooltip.stationName
+      && tooltipDirectionPick.route === activeRouteKey)
+      ? tooltipDirectionPick.dir
+      : journeyDirIdx;
+    // 経路の路線を進行方向と逆に見ているとき（遅延時の引き返しなど、参考として見る）
+    const isReversedFromJourney = !!activeJourneyEntry && activeDirIdx !== activeJourneyEntry.directionIndex;
+    const directionLabels = activeRouteKey ? getDirectionShortLabels(activeRouteKey) : [];
+
     const { activeDeps, activePastDeps } = (() => {
       const empty = { activeDeps: [] as Departure[], activePastDeps: [] as Departure[] };
       if (!activeRouteKey || !hasTimetableData(activeRouteKey)) return empty;
       const depTime = activeJourneyEntry?.depTime ?? timetableBaseTime;
-      const dirIdx  = activeJourneyEntry?.directionIndex ?? 0;
+      const dirIdx  = activeDirIdx;
       const { prev, next } = getDeparturesAround(activeRouteKey, stationTooltip.stationName, dirIdx, depTime, Infinity, 50);
       return { activeDeps: next, activePastDeps: prev };
     })();
@@ -1680,14 +1697,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       x = rawX + TW > vw - MARGIN ? stationTooltip.x - TW - 6 : rawX;
       x = Math.max(MARGIN, Math.min(x, vw - TW - MARGIN));
     }
-    // スマホでは高さ480pxが画面の6割を占め、地図がほとんど隠れて
-    // 次の駅を選べなくなる。画面の半分までに抑えて地図側を残す。
-    // 画面の7割まで使う。以前は半分に抑えていたが時刻表が数本しか見えず狭かった。
-    // 地図の空きタップでも閉じられるので、多少大きくても操作は詰まらない。
-    const maxTooltipH = Math.min(vh - MARGIN * 2, isMobileView ? Math.round(vh * 0.7) : 620);
-    const shownPastCount = showPastDepartures ? Math.min(activePastDeps.length, pastDeparturesShownCount) : 0;
-    const shownDepCount = activeDeps.length + shownPastCount;
-    const estH = Math.min(52 + Math.max(allRoutes.length * 28, shownDepCount * 26 + 22) + 20, maxTooltipH);
+    // 高さの上限。スマホは画面の85%、PCは760pxまで使う。
+    // 以前はスマホ7割・PC 620pxで、時刻表が数本しか見えず狭かった（2026-09-29 指摘で拡大）。
+    // 地図の空きタップでも閉じられるので、大きくても操作は詰まらない。
+    const maxTooltipH = Math.min(vh - MARGIN * 2, isMobileView ? Math.round(vh * 0.85) : 760);
+    // 前の便も一覧に並ぶので、時刻表がある路線では実際の高さはほぼ上限になる。
+    // 上下どちらに出すかの判定がずれないよう、そのときは上限をそのまま見積もりに使う
+    const estH = activePastDeps.length > 0
+      ? maxTooltipH
+      : Math.min(52 + Math.max(allRoutes.length * 28, activeDeps.length * 26 + 22) + 20, maxTooltipH);
     const rawY = stationTooltip.y + 14;
     const baseX = x;
     const baseY = Math.max(MARGIN, Math.min(
@@ -1914,7 +1932,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       setVisibleRoutes(prev => new Set([...prev, rk as RouteKey]));
                     } else {
                       setTooltipSelectedRoute(rk);
-                      setPastDeparturesShownCount(8);
                     }
                   }}
                   style={{
@@ -1925,20 +1942,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     borderLeft: isActive
                       ? `3px solid ${colors.primary}`
                       : isJourney ? `3px solid ${routeColor}` : '3px solid transparent',
-                    opacity: isShowing ? 1 : 0.5,
                   }}
                 >
+                  {/* 非表示の路線は名前と色の丸だけ控えめにし、「＋表示」は通常の濃さで出す
+                      （以前は行ごと半透明で、ボタンの色まで沈んで見分けにくかった） */}
                   <div style={{
                     width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0,
                     backgroundColor: routeColor,
-                    opacity: hasData ? 1 : 0.4,
+                    opacity: hasData && isShowing ? 1 : 0.45,
                   }} />
                   <span style={{
                     fontSize: FS.caption,
-                    color: isActive ? colors.text : isJourney ? colors.text : colors.textSecondary,
+                    color: !isShowing ? colors.textMuted : (isActive || isJourney) ? colors.text : colors.textSecondary,
                     fontWeight: isJourney ? 'bold' : 'normal',
                     whiteSpace: 'normal', wordBreak: 'keep-all', overflowWrap: 'break-word',
-                    opacity: hasData ? 1 : 0.5,
+                    opacity: hasData ? 1 : 0.6,
                     flex: 1,
                     minWidth: 0,
                     lineHeight: 1.3,
@@ -1947,9 +1965,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     {/* 同じ線路を別系統が走る駅（藤沢の東海道線＝上野東京ラインなど）で系統名を添える */}
                     <ServiceTermini route={rk as RouteKey} theme={theme} language={currentLanguage} variant="brand" />
                   </span>
-                  {isJourney && (
-                    <span style={{ fontSize: FS.caption, color: colors.primary, flexShrink: 0 }}>{translateUI('onboard', currentLanguage)}</span>
-                  )}
+                  {/* 経路上の路線は太字と左の路線色の線で示す（以前あった青い「乗」の文字は不要との指摘で削除） */}
                   {!isShowing && (
                     <ColorChip color={routeColor} theme={theme} fontSize={FS.caption} shadow={false}>
                       ＋{translateUI('show', currentLanguage)}
@@ -1981,7 +1997,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           </div>
 
           {/* 右カラム: 時刻表 */}
-          <div style={{ flex: 1, minWidth: '120px', overflowY: 'auto' }}>
+          <div style={{ flex: 1, minWidth: '120px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/*
               主な始発・行先（ServiceTermini variant="full"）はここには出さない（2026-09-28 ユーザー指示でオフ）。
               右カラムは時刻表を読む場所で、行先の一覧が数行を取って時刻が下に押し出されていた。
@@ -2008,92 +2024,96 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   );
                 })()}
                 {/*
-                  基準時刻より前の発車は既定では非表示（従来どおり、未来の便が
-                  一番上に来る）。「前の時刻も見れるように」という要望を受けて、
-                  ボタンで開くと基準時刻の直前の便を上に追加表示する形にした
-                  （常時表示にすると、いつも見る「次の便」が毎回スクロールしないと
-                  見えなくなってしまうため）。
-                  「前の時刻を表示で始発まで遡れるように」との要望を受け、
-                  開いた状態で「さらに前を表示」を押すたびに表示件数を増やし、
-                  始発（その路線・方向のいちばん早い便）に到達するまで
-                  遡れるようにした。始発まで到達したら、その旨を表示して止める
-                  （前日の便を重複して表示することはしない）。
+                  方向の切替。「藤沢から熱海・沼津方面／宇都宮・高崎方面」のように行先の方面で示す
+                  （上り・下りは直通先で逆になり、地下鉄・山手線では使われないため）。
+                  既定は経路の進行方向で、切り替えると逆方向を参考として表示する
                 */}
-                {activePastDeps.length > 0 && (
-                  <div
-                    onClick={() => setShowPastDepartures(v => !v)}
-                    style={{
-                      padding: `${L.sp.xs} ${L.sp.md}`,
-                      fontSize: FS.caption, color: colors.primary,
-                      borderBottom: `1px solid ${colors.borderLight}`,
-                      cursor: 'pointer', userSelect: 'none',
-                    }}
-                  >
-                    {showPastDepartures ? '▲' : '▼'} {translateUI(showPastDepartures ? 'hidePastDepartures' : 'showPastDepartures', currentLanguage)}
+                {directionLabels.length >= 2 && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: L.sp.xs,
+                    padding: `${L.sp.xs} ${L.sp.md}`,
+                    borderBottom: `1px solid ${colors.borderLight}`,
+                  }}>
+                    <span style={{ fontSize: FS.body, fontWeight: 'bold', color: colors.text, minWidth: 0 }}>
+                      {translateDestination(directionLabels[activeDirIdx] ?? '', currentLanguage)}
+                    </span>
+                    <IconButton
+                      theme={theme}
+                      size="sm"
+                      variant="outline"
+                      icon={<ArrowUpDown />}
+                      label={translateUI('reverseDirection', currentLanguage)}
+                      onClick={() => {
+                        if (!activeRouteKey) return;
+                        setTooltipDirectionPick({
+                          station: stationTooltip.stationName,
+                          route: activeRouteKey,
+                          dir: (activeDirIdx + 1) % directionLabels.length,
+                        });
+                      }}
+                    />
                   </div>
                 )}
-                {showPastDepartures && (() => {
-                  const PAST_DEPARTURE_STEP = 8;
-                  const hasMorePast = pastDeparturesShownCount < activePastDeps.length;
-                  const visiblePast = activePastDeps.slice(-pastDeparturesShownCount);
-                  return (
-                    <>
-                      <div
-                        onClick={hasMorePast ? () => setPastDeparturesShownCount(c => c + PAST_DEPARTURE_STEP) : undefined}
-                        style={{
-                          padding: `${L.sp.xs} ${L.sp.md}`,
-                          fontSize: FS.caption,
-                          color: hasMorePast ? colors.primary : colors.textSecondary,
-                          borderBottom: `1px solid ${colors.borderLight}`,
-                          cursor: hasMorePast ? 'pointer' : 'default',
-                          userSelect: 'none',
-                          textAlign: 'center',
-                        }}
-                      >
-                        {hasMorePast
-                          ? translateUI('showMorePastDepartures', currentLanguage)
-                          : translateUI('firstTrainReached', currentLanguage)}
-                      </div>
-                      {visiblePast.map((dep, i) => (
-                        <div key={`past-${dep.time}-${dep.type}-${i}`} style={{ opacity: 0.55 }}>
-                          {renderDepartureRow(dep)}
-                        </div>
-                      ))}
-                    </>
-                  );
-                })()}
-                <div style={{
-                  padding: `${L.sp.xs} ${L.sp.md}`,
-                  fontSize: FS.caption, color: colors.textSecondary,
-                  borderBottom: `1px solid ${colors.borderLight}`,
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                }}>
-                  <span>{activeDepTime} {translateUI('afterSuffix', currentLanguage)}</span>
-                  {!isJourneyRoute && (
-                    <span style={{ color: colors.textSecondary, opacity: 0.7, fontSize: FS.caption }}>{translateUI('offRouteReference', currentLanguage)}</span>
+                {/*
+                  発車一覧。始発から終電まで並べ、開いたときは基準時刻以降の先頭（「HH:MM 以降」の行）が
+                  一覧の一番上に来るようにスクロールしておく。前の便は上にスクロールすれば見える
+                  （以前は「前の時刻を表示」ボタンで開閉していた）。出典・方向の行はスクロールさせない
+                */}
+                <div className="thin-scrollbar" style={{ flex: 1, minHeight: 0, overflowY: 'auto', position: 'relative' }}>
+                  {activePastDeps.length > 0 && (
+                    <div style={{
+                      padding: `${L.sp.xs} ${L.sp.md}`, fontSize: FS.caption, color: colors.textSecondary,
+                      borderBottom: `1px solid ${colors.borderLight}`, textAlign: 'center',
+                    }}>
+                      {translateUI('firstTrainReached', currentLanguage)}
+                    </div>
                   )}
-                </div>
-                {activeDeps.length === 0 ? (
-                  <div style={{ padding: L.sp.md, fontSize: FS.caption, color: colors.textSecondary }}>
-                    {translateUI('noData', currentLanguage)}
+                  {activePastDeps.map((dep, i) => (
+                    <div key={`past-${dep.time}-${dep.type}-${i}`} style={{ opacity: 0.55 }}>
+                      {renderDepartureRow(dep)}
+                    </div>
+                  ))}
+                  <div
+                    ref={el => {
+                      const key = `${stationTooltip.stationName}|${stationTooltip.x},${stationTooltip.y}|${activeRouteKey}|${activeDirIdx}|${activeDepTime}`;
+                      if (!el || timetableScrollKeyRef.current === key) return;
+                      timetableScrollKeyRef.current = key;
+                      if (el.parentElement) el.parentElement.scrollTop = el.offsetTop;
+                    }}
+                    style={{
+                      padding: `${L.sp.xs} ${L.sp.md}`,
+                      fontSize: FS.caption, color: colors.textSecondary,
+                      borderBottom: `1px solid ${colors.borderLight}`,
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    }}
+                  >
+                    <span>{activeDepTime} {translateUI('afterSuffix', currentLanguage)}</span>
+                    {(!isJourneyRoute || isReversedFromJourney) && (
+                      <span style={{ color: colors.textSecondary, opacity: 0.7, fontSize: FS.caption }}>
+                        {translateUI(isReversedFromJourney ? 'reverseDirectionReference' : 'offRouteReference', currentLanguage)}
+                      </span>
+                    )}
                   </div>
-                ) : (
-                  <>
-                    {activeDeps.map((dep, i) => (
+                  {activeDeps.length === 0 ? (
+                    <div style={{ padding: L.sp.md, fontSize: FS.caption, color: colors.textSecondary }}>
+                      {translateUI('noData', currentLanguage)}
+                    </div>
+                  ) : (
+                    activeDeps.map((dep, i) => (
                       <div key={`${dep.time}-${dep.type}-${i}`}>
                         {renderDepartureRow(dep)}
                       </div>
-                    ))}
-                  </>
-                )}
-                {/* 概算値であることの詳しい但し書き。更新日・出典自体は上に移したので、
-                    ここは補足の一文だけ軽く添える */}
-                <div style={{
-                  padding: `${L.sp.xs} ${L.sp.md}`,
-                  borderTop: `1px solid ${colors.borderLight}`,
-                  fontSize: FS.caption, color: colors.textSecondary, opacity: 0.75, lineHeight: 1.5,
-                }}>
-                  {TIMETABLE_SOURCE.note}
+                    ))
+                  )}
+                  {/* 概算値であることの詳しい但し書き。更新日・出典自体は上に移したので、
+                      ここは補足の一文だけ軽く添える */}
+                  <div style={{
+                    padding: `${L.sp.xs} ${L.sp.md}`,
+                    borderTop: `1px solid ${colors.borderLight}`,
+                    fontSize: FS.caption, color: colors.textSecondary, opacity: 0.75, lineHeight: 1.5,
+                  }}>
+                    {TIMETABLE_SOURCE.note}
+                  </div>
                 </div>
               </>
             ) : (
@@ -4371,9 +4391,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   })();
 
   /**
-   * 駅ラベルの下に出す時刻（時刻表示モード）。この駅を通る表示中の路線ごとに1行。
-   * 路線が1つだけなら従来どおり時刻だけ、複数なら路線色の印を付けて並べる
-   * （横浜なら東海道線・京浜東北線・横須賀線それぞれの時刻）。
+   * 駅ラベルの下に出す時刻（時刻表示モード）。
+   * 既定は、この駅を通る表示中の路線の時刻の平均を1行だけ出す（路線ごとだと行数が多すぎる）。
+   * 設定「時刻を路線ごとに表示」がオンのときは、路線色の印を付けて路線ごとに1行ずつ並べる
+   * （横浜なら東海道線・京浜東北線・横須賀線それぞれの時刻）。路線が1つだけなら時刻だけ。
    */
   const getStationTimeLines = (stationName: string): StationTimeLine[] | undefined => {
     if (!timetableModeEnabled) return undefined;
@@ -4381,6 +4402,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       .filter(e => visibleRoutes.has(e.routeKey as RouteKey));
     if (entries.length === 0) return undefined;
     if (entries.length === 1) return [{ time: entries[0].depTime }];
+    if (!showPerRouteStationTimes) {
+      const avg = averageTime(entries.map(e => e.depTime));
+      return avg ? [{ time: avg }] : undefined;
+    }
     return entries.map(e => ({
       time: e.depTime,
       color: adjustRouteColorForTheme(routeColors[e.routeKey as RouteKey], theme),
@@ -6150,6 +6175,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onShowFullRouteStationsChange={setShowFullRouteStations}
                     showRouteRecommendationsPanel={showRouteRecommendationsPanel}
                     onShowRouteRecommendationsPanelChange={setShowRouteRecommendationsPanel}
+                    showPerRouteStationTimes={showPerRouteStationTimes}
+                    onShowPerRouteStationTimesChange={setShowPerRouteStationTimes}
                     showRouteLine={showRouteLine}
                     onShowRouteLineChange={setShowRouteLine}
                     adjustRouteColorForTheme={adjustRouteColorForTheme}
@@ -6445,6 +6472,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onShowFullRouteStationsChange={setShowFullRouteStations}
                         showRouteRecommendationsPanel={showRouteRecommendationsPanel}
                         onShowRouteRecommendationsPanelChange={setShowRouteRecommendationsPanel}
+                        showPerRouteStationTimes={showPerRouteStationTimes}
+                        onShowPerRouteStationTimesChange={setShowPerRouteStationTimes}
                         showRouteLine={showRouteLine}
                         onShowRouteLineChange={setShowRouteLine}
                         adjustRouteColorForTheme={adjustRouteColorForTheme}
@@ -6517,6 +6546,35 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               （index.astro側の固定ヘッダー）に既にあるためここでは省略し、
               全画面切り替えボタン1個だけを地図右上に残す
               （左の余白には「表示路線の切替」パネルが来る）。 */}
+          {/* 表示中の路線の凡例（右下）。どの色がどの路線かを、表示切替を開かずに確かめる。
+              全路線表示・0路線のときは意味が無いので出さない。スマホは下部のナビに重ならない高さに置き、
+              スマホ全画面でヒートマップの凡例が右下に来るときは譲る */}
+          {mapViewMode === 'realistic' && !(isFullscreen && isMobile && heatmapEnabled) && (() => {
+            const total = Object.keys(routes).length;
+            if (visibleRoutes.size === 0 || visibleRoutes.size >= total) return null;
+            // PCでは「表示路線の切替」パネルが右端に幅300pxで浮くので、開いている間はその左に置く。
+            // スマホではパネルは右端に来ない（全画面では下の「表示切替」ボタンから開く）ので常に右下に出す。
+            // 以前はスマホ全画面でも「パネルが開いている」扱いで凡例を消してしまい、見えなかった
+            const panelOnRight = !isMobile && isLegendExpanded;
+            const order = [...(highlightedRouteKeys ?? []), ...visibleRoutes]
+              .filter((k, i, a) => visibleRoutes.has(k) && a.indexOf(k) === i);
+            return (
+              <VisibleRoutesLegend
+                items={order.map(k => ({
+                  key: k,
+                  name: translateRoute(routeNames[k] ?? k, currentLanguage),
+                  color: adjustRouteColorForTheme(routeColors[k], theme),
+                }))}
+                theme={theme}
+                language={currentLanguage}
+                maxItems={10}
+                collapsed={visibleRoutesLegendCollapsed}
+                onToggleCollapsed={() => setVisibleRoutesLegendCollapsed(v => { persistLegendCollapsed(!v); return !v; })}
+                style={{ position: 'absolute', right: panelOnRight ? `calc(300px + ${L.sp.lg})` : L.sp.lg, bottom: isMobile ? '64px' : L.sp['4xl'], zIndex: 1002 }}
+              />
+            );
+          })()}
+
           <div style={{
             position: 'absolute',
             ...(isFullscreen && isMobile
@@ -6529,28 +6587,35 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   : { bottom: '10px', top: 'auto', left: '10px' }
                 : { bottom: '10px', top: 'auto', left: '10px' }),
             zIndex: 1003,
-            display: 'flex',
+            // スマホ全画面では横一列に3つ並べると左の駅選択パネルの角に重なるので、
+            // 2列にして [縮小][言語] の下に [方位] を置く（グリッドの位置は下の各ボタンで指定）。
             // スマホ・非全画面時は左に「表示路線の切替」パネルが来て横に1個分しか
             // 空いていないので、方位ボタンは全画面ボタンの下に縦に積む
-            flexDirection: isMobile && !isFullscreen ? 'column' : 'row',
+            ...(isFullscreen && isMobile
+              ? { display: 'grid', gridTemplateColumns: 'auto auto' }
+              : { display: 'flex', flexDirection: isMobile && !isFullscreen ? 'column' as const : 'row' as const }),
             gap: L.sp.xs,
           }}>
-            {renderCornerButton(
-              isFullscreen ? <Minimize2 size={MAP_CORNER_ICON_SIZE} /> : <Maximize2 size={MAP_CORNER_ICON_SIZE} />,
-              isFullscreen ? translateUI('exitFullscreen', currentLanguage) : translateUI('enterFullscreen', currentLanguage),
-              () => setIsFullscreen(!isFullscreen),
-            )}
+            <div style={isFullscreen && isMobile ? { gridColumn: 1, gridRow: 1 } : undefined}>
+              {renderCornerButton(
+                isFullscreen ? <Minimize2 size={MAP_CORNER_ICON_SIZE} /> : <Maximize2 size={MAP_CORNER_ICON_SIZE} />,
+                isFullscreen ? translateUI('exitFullscreen', currentLanguage) : translateUI('enterFullscreen', currentLanguage),
+                () => setIsFullscreen(!isFullscreen),
+              )}
+            </div>
 
             {/* 方位: 2本指回転後も北が分かるように。押すと北を上に戻す */}
-            <MapCompassButton
-              mapRef={mapRef}
-              theme={theme}
-              label={translateUI('resetNorth', currentLanguage)}
-              iconSize={MAP_CORNER_ICON_SIZE}
-              styleOverride={cornerButtonStyle}
-            />
+            <div style={isFullscreen && isMobile ? { gridColumn: 2, gridRow: onLanguageChange ? 2 : 1 } : undefined}>
+              <MapCompassButton
+                mapRef={mapRef}
+                theme={theme}
+                label={translateUI('resetNorth', currentLanguage)}
+                iconSize={MAP_CORNER_ICON_SIZE}
+                styleOverride={cornerButtonStyle}
+              />
+            </div>
 
-            {onLanguageChange && !(isMobile && !isFullscreen) && renderCornerButton(
+            {onLanguageChange && !(isMobile && !isFullscreen) && <div style={isFullscreen && isMobile ? { gridColumn: 2, gridRow: 1 } : undefined}>{renderCornerButton(
               // 文字をアイコン代わりに置くので、大きさは規格から取る
               <span style={{ fontSize: FS.body, fontWeight: 'bold', fontFamily: 'monospace' }}>
                 {(() => { const langs: Language[] = ['japanese', 'english', 'chinese', 'korean']; const next = langs[(langs.indexOf(language) + 1) % langs.length]; return { japanese: '日', english: 'En', chinese: '中', korean: '한' }[next]; })()}
@@ -6560,7 +6625,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 const langs: Language[] = ['japanese', 'english', 'chinese', 'korean'];
                 onLanguageChange(langs[(langs.indexOf(language) + 1) % langs.length]);
               },
-            )}
+            )}</div>}
 
             {/* テーマ切り替え・記事一覧は全画面時は地図を広く使うため隠す
                 （全画面を解除すると再表示される）。スマホの非全画面時も、
