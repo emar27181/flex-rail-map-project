@@ -58,7 +58,7 @@ export type StationStats = {
   officeCount?: number;
   coworkingCount?: number;
 
-  // --- 実データ（首都圏駅周辺データセットPoC、2026-09-24収集、10駅のみ） ---
+  // --- 実データ（首都圏駅周辺データセット、2026-09収集、首都圏277駅のみ） ---
   // Overpass API（OSM）、駅代表点から半径800m円内。既存の500m円データとは
   // 検索半径が異なるため、既存フィールド（restaurantCount等）とは別に持つ
   // （値を上書きしない。詳細は data/kanto-station-poc-2026-09/README.md）
@@ -99,15 +99,17 @@ export type DataSource = {
 };
 
 /**
- * 首都圏駅周辺データセットPoC（2026-09-24収集）由来のフィールド共通の出典。
- * 東京・新宿・渋谷・池袋・品川・横浜・川崎・藤沢・大宮・千葉の10駅のみ収集済み
- * （他の駅はデータなし＝灰色表示）。詳細は data/kanto-station-poc-2026-09/README.md。
+ * 首都圏駅周辺データセット由来（半径800m）のフィールド共通の出典。
+ * - PoC（2026-09-24収集）: 東京・新宿・渋谷・池袋・品川・横浜・川崎・藤沢・大宮・千葉の10駅
+ * - 首都圏拡張（2026-09-29収集）: 267駅（検証を通った駅だけ。同名駅が各地にある28駅は保留）
+ * それ以外の駅はデータなし＝灰色表示。詳細は data/kanto-station-poc-2026-09/README.md、
+ * data/kanto-poi-800m-2026-09/README.md、取り込みの検証結果は同じフォルダの validation.json。
  */
 const KANTO_POC_SOURCE: DataSource = {
-  title: 'OpenStreetMap / Overpass API（首都圏駅周辺データセットPoC）',
+  title: 'OpenStreetMap / Overpass API（首都圏駅周辺データセット）',
   url: 'https://www.openstreetmap.org/copyright',
-  retrievedAt: '2026-09-24',
-  note: '駅代表点（OSM同一名称駅ノード群の重心）から半径800m円内。PoCのため対象10駅のみ。既存の500m円データとは検索半径が異なる。',
+  retrievedAt: '2026-09-29',
+  note: '駅代表点から半径800m円内（PoC10駅は2026-09-24収集・OSM同一名称駅ノード群の重心、首都圏拡張267駅は2026-09-29収集・OSM railway=station ノード）。対象は首都圏の277駅のみ。既存の500m円データとは検索半径が異なる。ODbL (c) OpenStreetMap contributors。',
 };
 
 /** 各パラメータがどのデータソースを参照しているか */
@@ -250,63 +252,63 @@ export const PARAM_METHODOLOGY: Partial<Record<keyof StationStats, ParamMethodol
     interpolationLogic: 'leisure=park のウェイ・リレーションの面積をShoelace法で合算（m²）。',
   },
   fastFoodCount: {
-    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏PoC、10駅のみ）。',
+    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏277駅のみ。2026-09-24のPoC10駅＋2026-09-29の拡張267駅）。',
     interpolationLogic: 'amenity=fast_food + amenity=food_court のノード・ウェイ数。',
   },
   mallCount: {
-    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏PoC、10駅のみ）。',
+    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏277駅のみ。2026-09-24のPoC10駅＋2026-09-29の拡張267駅）。',
     interpolationLogic: 'shop=mall + shop=department_store のノード・ウェイ数。',
   },
   bankCount: {
-    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏PoC、10駅のみ）。',
+    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏277駅のみ。2026-09-24のPoC10駅＋2026-09-29の拡張267駅）。',
     interpolationLogic: 'amenity=bank のノード・ウェイ数。',
   },
   postOfficeCount: {
-    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏PoC、10駅のみ）。',
+    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏277駅のみ。2026-09-24のPoC10駅＋2026-09-29の拡張267駅）。',
     interpolationLogic: 'amenity=post_office のノード・ウェイ数。',
   },
   pharmacyCount: {
-    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏PoC、10駅のみ）。',
+    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏277駅のみ。2026-09-24のPoC10駅＋2026-09-29の拡張267駅）。',
     interpolationLogic: 'amenity=pharmacy のノード・ウェイ数。',
   },
   nurseryCount: {
-    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏PoC、10駅のみ）。',
+    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏277駅のみ。2026-09-24のPoC10駅＋2026-09-29の拡張267駅）。',
     interpolationLogic: 'amenity=nursery + amenity=kindergarten のノード・ウェイ数。OSMは自治体公開データに比べ網羅性が低い点に注意。',
   },
   schoolCount: {
-    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏PoC、10駅のみ）。',
+    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏277駅のみ。2026-09-24のPoC10駅＋2026-09-29の拡張267駅）。',
     interpolationLogic: 'amenity=school のノード・ウェイ数。',
   },
   universityCount: {
-    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏PoC、10駅のみ）。',
+    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏277駅のみ。2026-09-24のPoC10駅＋2026-09-29の拡張267駅）。',
     interpolationLogic: 'amenity=university + amenity=college のノード・ウェイ数。',
   },
   libraryCount: {
-    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏PoC、10駅のみ）。',
+    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏277駅のみ。2026-09-24のPoC10駅＋2026-09-29の拡張267駅）。',
     interpolationLogic: 'amenity=library のノード・ウェイ数。',
   },
   clinicCount: {
-    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏PoC、10駅のみ）。',
+    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏277駅のみ。2026-09-24のPoC10駅＋2026-09-29の拡張267駅）。',
     interpolationLogic: 'amenity=clinic のノード・ウェイ数（既存のhospitalCountはhospital+clinic+doctorsの合算だが、こちらはclinicのみを別集計）。',
   },
   cinemaCount: {
-    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏PoC、10駅のみ）。',
+    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏277駅のみ。2026-09-24のPoC10駅＋2026-09-29の拡張267駅）。',
     interpolationLogic: 'amenity=cinema のノード・ウェイ数。',
   },
   gymCount: {
-    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏PoC、10駅のみ）。',
+    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏277駅のみ。2026-09-24のPoC10駅＋2026-09-29の拡張267駅）。',
     interpolationLogic: 'leisure=fitness_centre + leisure=sports_centre のノード・ウェイ数。',
   },
   hotelCount: {
-    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏PoC、10駅のみ）。',
+    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏277駅のみ。2026-09-24のPoC10駅＋2026-09-29の拡張267駅）。',
     interpolationLogic: 'tourism=hotel + hostel + guest_house のノード・ウェイ数。',
   },
   attractionCount: {
-    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏PoC、10駅のみ）。',
+    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏277駅のみ。2026-09-24のPoC10駅＋2026-09-29の拡張267駅）。',
     interpolationLogic: 'tourism=attraction + museum + gallery + zoo + aquarium + theme_park のノード・ウェイ数。',
   },
   parkCount: {
-    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏PoC、10駅のみ）。',
+    collectionMethod: 'Overpass API（OpenStreetMap）で駅代表点から半径800m以内を検索（首都圏277駅のみ。2026-09-24のPoC10駅＋2026-09-29の拡張267駅）。',
     interpolationLogic: 'leisure=park + garden のウェイ・リレーション数（面積ではなく件数。面積は既存のparkAreaM2）。',
   },
 };
@@ -372,23 +374,23 @@ export const STAT_PARAMS: StatParamMeta[] = [
   { key: 'officeCount',         label: 'オフィス数',  unit: '棟',     category: 'work',        higherIsBetter: true,  dataQuality: 'estimated', description: 'オフィスビル棟数（推定値）', radius: '駅出口から半径500m以内', methodology: '都心ビジネス街分布から推計', period: '2025年頃推計' },
   { key: 'coworkingCount',      label: 'コワーキング数', unit: '軒',  category: 'work',        higherIsBetter: true,  dataQuality: 'real',      description: 'コワーキングスペース数（amenity=coworking_space + office=coworking）', radius: '駅出口から半径500m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年6月収集' },
 
-  // 以下、首都圏駅周辺データセットPoC由来（2026-09-24収集、東京・新宿・渋谷・
-  // 池袋・品川・横浜・川崎・藤沢・大宮・千葉の10駅のみ。他の駅は灰色表示）
-  { key: 'fastFoodCount',   label: 'ファストフード数', unit: '軒', category: 'food',        higherIsBetter: true, dataQuality: 'real', description: 'ファストフード・フードコート数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏10駅のみ）' },
-  { key: 'mallCount',       label: '商業施設数',      unit: '軒', category: 'convenience', higherIsBetter: true, dataQuality: 'real', description: 'ショッピングモール・百貨店数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏10駅のみ）' },
-  { key: 'bankCount',       label: '銀行数',          unit: '軒', category: 'convenience', higherIsBetter: true, dataQuality: 'real', description: '銀行窓口数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏10駅のみ）' },
-  { key: 'postOfficeCount', label: '郵便局数',        unit: '軒', category: 'convenience', higherIsBetter: true, dataQuality: 'real', description: '郵便局数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏10駅のみ）' },
-  { key: 'pharmacyCount',   label: '薬局数',          unit: '軒', category: 'convenience', higherIsBetter: true, dataQuality: 'real', description: '調剤薬局数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏10駅のみ）' },
-  { key: 'clinicCount',     label: '診療所数',        unit: '軒', category: 'convenience', higherIsBetter: true, dataQuality: 'real', description: '診療所数（既存の病院・医院数とは別集計）', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏10駅のみ）' },
-  { key: 'nurseryCount',    label: '保育所・幼稚園数', unit: '軒', category: 'eduCare',     higherIsBetter: true, dataQuality: 'real', description: '保育所・幼稚園数（OSMは自治体公開データより網羅性が低い点に注意）', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏10駅のみ）' },
-  { key: 'schoolCount',     label: '小中高等学校数',  unit: '校', category: 'eduCare',     higherIsBetter: true, dataQuality: 'real', description: '小中高等学校数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏10駅のみ）' },
-  { key: 'universityCount', label: '大学・短大数',    unit: '校', category: 'eduCare',     higherIsBetter: true, dataQuality: 'real', description: '大学・短大数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏10駅のみ）' },
-  { key: 'libraryCount',    label: '図書館数',        unit: '軒', category: 'eduCare',     higherIsBetter: true, dataQuality: 'real', description: '図書館数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏10駅のみ）' },
-  { key: 'cinemaCount',     label: '映画館数',        unit: '軒', category: 'leisure',     higherIsBetter: true, dataQuality: 'real', description: '映画館数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏10駅のみ）' },
-  { key: 'gymCount',        label: 'フィットネス施設数', unit: '軒', category: 'leisure',  higherIsBetter: true, dataQuality: 'real', description: 'フィットネス・スポーツ施設数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏10駅のみ）' },
-  { key: 'hotelCount',      label: '宿泊施設数',      unit: '軒', category: 'leisure',     higherIsBetter: true, dataQuality: 'real', description: 'ホテル・ゲストハウス数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏10駅のみ）' },
-  { key: 'attractionCount', label: '観光資源数',      unit: '件', category: 'leisure',     higherIsBetter: true, dataQuality: 'real', description: '観光名所・博物館・美術館・動植物園数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏10駅のみ）' },
-  { key: 'parkCount',       label: '公園数',          unit: '件', category: 'leisure',     higherIsBetter: true, dataQuality: 'real', description: '公園・庭園の件数（面積は既存の公園面積を参照）', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏10駅のみ）' },
+  // 以下、首都圏駅周辺データセット由来（PoC 2026-09-24収集の10駅＋首都圏拡張 2026-09-29収集の267駅。
+  // 他の駅は灰色表示。取り込みの検証結果は data/kanto-poi-800m-2026-09/validation.json）
+  { key: 'fastFoodCount',   label: 'ファストフード数', unit: '軒', category: 'food',        higherIsBetter: true, dataQuality: 'real', description: 'ファストフード・フードコート数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏277駅のみ）' },
+  { key: 'mallCount',       label: '商業施設数',      unit: '軒', category: 'convenience', higherIsBetter: true, dataQuality: 'real', description: 'ショッピングモール・百貨店数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏277駅のみ）' },
+  { key: 'bankCount',       label: '銀行数',          unit: '軒', category: 'convenience', higherIsBetter: true, dataQuality: 'real', description: '銀行窓口数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏277駅のみ）' },
+  { key: 'postOfficeCount', label: '郵便局数',        unit: '軒', category: 'convenience', higherIsBetter: true, dataQuality: 'real', description: '郵便局数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏277駅のみ）' },
+  { key: 'pharmacyCount',   label: '薬局数',          unit: '軒', category: 'convenience', higherIsBetter: true, dataQuality: 'real', description: '調剤薬局数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏277駅のみ）' },
+  { key: 'clinicCount',     label: '診療所数',        unit: '軒', category: 'convenience', higherIsBetter: true, dataQuality: 'real', description: '診療所数（既存の病院・医院数とは別集計）', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏277駅のみ）' },
+  { key: 'nurseryCount',    label: '保育所・幼稚園数', unit: '軒', category: 'eduCare',     higherIsBetter: true, dataQuality: 'real', description: '保育所・幼稚園数（OSMは自治体公開データより網羅性が低い点に注意）', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏277駅のみ）' },
+  { key: 'schoolCount',     label: '小中高等学校数',  unit: '校', category: 'eduCare',     higherIsBetter: true, dataQuality: 'real', description: '小中高等学校数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏277駅のみ）' },
+  { key: 'universityCount', label: '大学・短大数',    unit: '校', category: 'eduCare',     higherIsBetter: true, dataQuality: 'real', description: '大学・短大数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏277駅のみ）' },
+  { key: 'libraryCount',    label: '図書館数',        unit: '軒', category: 'eduCare',     higherIsBetter: true, dataQuality: 'real', description: '図書館数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏277駅のみ）' },
+  { key: 'cinemaCount',     label: '映画館数',        unit: '軒', category: 'leisure',     higherIsBetter: true, dataQuality: 'real', description: '映画館数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏277駅のみ）' },
+  { key: 'gymCount',        label: 'フィットネス施設数', unit: '軒', category: 'leisure',  higherIsBetter: true, dataQuality: 'real', description: 'フィットネス・スポーツ施設数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏277駅のみ）' },
+  { key: 'hotelCount',      label: '宿泊施設数',      unit: '軒', category: 'leisure',     higherIsBetter: true, dataQuality: 'real', description: 'ホテル・ゲストハウス数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏277駅のみ）' },
+  { key: 'attractionCount', label: '観光資源数',      unit: '件', category: 'leisure',     higherIsBetter: true, dataQuality: 'real', description: '観光名所・博物館・美術館・動植物園数', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏277駅のみ）' },
+  { key: 'parkCount',       label: '公園数',          unit: '件', category: 'leisure',     higherIsBetter: true, dataQuality: 'real', description: '公園・庭園の件数（面積は既存の公園面積を参照）', radius: '駅代表点から半径800m以内', methodology: 'OpenStreetMap / Overpass API', period: '2026年9月収集（首都圏277駅のみ）' },
 ];
 
 
