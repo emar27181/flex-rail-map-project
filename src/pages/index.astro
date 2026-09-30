@@ -407,10 +407,8 @@ const webSiteSchema = {
 				color: #ffffff !important;
 			}
 
-			/* === LEAFLET CONTAINER DARK MODE === */
-			body.dark .leaflet-container {
-				background: #1a1a1a !important;
-			}
+			/* 地図の下地（海）の色は RailwayMap.tsx が getThemeColors の mapSea で塗る。
+			   ここで !important を付けると上書きされて陸と海の色分けが消えるので書かない */
 
 			body.dark .leaflet-control-container {
 				background: transparent !important;
