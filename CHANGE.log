@@ -1,5 +1,162 @@
 # CHANGE LOG
 
+## [2026-09-29] セッション（SEO: 都市・観光地・多言語・設定済み地図CTA・GA4）
+
+### merge: PR #28（駅ラベルの時刻を平均1つに・時刻表の方向切替・路線の凡例ほか）を取り込む
+- PR #28 にだけあった「駅ラベルの時刻は既定で平均1つ、設定で路線ごと」がこのブランチに無く、
+  出発・到着駅を設定すると駅名の下に時刻が複数並んでいた。同じプレビューで確認できるように取り込んだ
+- `src/components/map/stationTimeLabel.ts`: 路線色の印の角丸・縁取りの直書きをトークン（`L.r.pill`, `alphaWhite`）に
+
+### feat: 記事の中に、その記事の内容の状態の地図を埋め込む（`?embed=1`）
+- `src/utils/embedMode.ts`（新規）, `src/utils/mapDeepLink.ts`（`embed`）, `src/components/{ThemeWrapper,RailwayMap}.tsx`,
+  `src/pages/index.astro`（広告を読まない）, `src/components/articles/ArticleLayout.astro`, `src/styles/article-layout.css`（`figure.embed`）
+- 地図ページを URL の指定だけで埋め込み向けにする（ナビ・フッター・広告・Cookie の案内なし、パネルを閉じて始める、
+  言語を閲覧者の設定に保存しない）。別ページを作らないので地図ページの CSS・設定を2か所で持たない
+- 記事側では押すまで地図に触れない（スマホでスクロールの指が地図を動かさないように）
+
+### improve: 記事を1記事1ファイルのデータにし、量産できるようにする
+- `src/data/articles/{types,index}.ts`・`{slug}.ts`×6（新規）, `src/utils/articleRender.ts`（新規）,
+  `src/data/{articleI18n,articleBodyI18n}.ts`（記事データから作る）, `src/pages/articles/[slug].astro`（新規）,
+  `scripts/capture-article-screenshots.mts`（撮るものを記事データから読む）, `tsconfig.check.json`,
+  `tests/unit/data/articleSources.test.ts`（新規）
+- 記事1本の全部（4言語の文章・地図の状態・スクリーンショットの撮り方・関連記事）を1ファイルに値だけで書く。
+  記事を足すとページ・一覧・sitemap・関連記事が自動でできる。形の決まりはテストで確認する
+- 記事データも型チェックの対象にした（`test:types` が3ファイルしか見ていなかった）
+
+### docs: 記事のひな形・他AI向け指示文・担当範囲
+- `docs/templates/article-template.ts`, `docs/templates/article-prompt.md`, `docs/article-writing.md`,
+  `docs/operating-scope.md`（新規）, `docs/growth-progress-ledger.md`, `AGENTS.md`, `CLAUDE.md`
+
+### improve: 記事6本を「1記事1テーマ・結論先出し・起承転結・実際の画面つき」に書き直す
+- `src/data/articleBodyI18n.ts`, `src/data/articleI18n.ts`（タイトル・説明、`related`, `relatedArticles`）,
+  `src/components/articles/ArticleLayout.astro`（関連記事）, `src/styles/article-layout.css`（`figure.shot`, `.related`）,
+  `tests/unit/data/articleI18n.test.ts`
+- 1記事に複数のテーマ（家賃・治安・通勤）が混ざり、図も無かった。各記事を1つの問いに絞り、冒頭に結論3行、
+  見出し4つ（起承転結）、セクションごとにこのサイトの実際の画面（4言語それぞれ）を置いた
+- 地図を開くボタンは記事の内容をそのまま再現した状態で開く（例: 観光は4路線だけ、治安は犯罪件数の色分け）
+- 本文末の関連リンクをやめ、記事ごとに3本の関連記事をレイアウト側で出す
+- 治安の記事で「犯罪件数のヒートマップは無い」と書いていたが、実データ（警視庁・令和5年・都内438駅）があるため、
+  その読み方と限界（繁華街ほど多い・都外はデータなし）を書いた
+
+### feat: 記事のスクリーンショットを撮り直せるスクリプトを置く
+- `scripts/capture-article-screenshots.mts`（新規）, `public/images/articles/**`（13枚×4言語）
+- 地図の状態を URL で作り、4言語・ライトテーマ・時刻固定で撮る。開発サーバーのツールバーは写さない
+
+### fix: 路線・データのページで駅名が途中で折り返さないようにする
+- `src/layouts/seoPageStyles.ts`（`td.name`）, `src/pages/[...lang]/{lines,data}/[slug].astro`
+- 駅一覧の表で「代官/山」のように駅名が2行に割れ、別の駅名に見えていた
+
+### docs: 記事の書き方をまとめる
+- `docs/article-writing.md`（新規）, `CLAUDE.md`, `docs/article-generation-prompt.md`（古い旨を追記）
+
+### feat: 地図の中心と拡大率を URL（center/zoom）で指定できるようにする
+- `src/utils/mapViewUrlParam.ts`（新規）, `src/utils/mapDeepLink.ts`（`to` `center` `zoom`）, `src/components/RailwayMap.tsx`,
+  `tests/unit/utils/heatmapUrlParam.test.ts`
+
+### fix: 中国語版の hreflang と html lang を zh-CN にする
+- `src/config/seo.ts`（`HREFLANG_CODE`, `hreflangCode`）, `src/layouts/GuideLayout.astro`,
+  `src/layouts/GuidesIndexLayout.astro`, `tests/unit/seo/hreflang.test.ts`（新規）
+- URL は既存の `/zh/` のまま、出力する言語コードだけ zh-CN に
+
+### feat: 駅・路線ページを大阪・京都・札幌など9都市と観光地38か所に広げる
+- `src/data/seoPages.ts`（`SEO_CITIES`, `SEO_ROUTE_ALIASES`, `SEO_DATA_CITIES`, Tier 基準）,
+  `src/data/touristSpots.ts`（`city`, zh/ko 名）, `src/seo/pageModel.ts`, `src/seo/pageText.ts`,
+  `src/pages/[...lang]/{stations,lines}/index.astro`, `tests/unit/seo/pageModel.test.ts`
+- 路線ページ 20→66 路線、index する駅ページ 約25→73駅。一覧は都市ごとに並べる
+- 周辺統計を集めていない地域の駅も、乗換駅・観光地の駅なら Tier A にできるようにした
+- 路線データで重複登録された同じ路線（大阪環状線など）は駅ページで1本にまとめる
+- データのページは統計を集めている東京・神奈川の駅だけを対象にする
+
+### feat: ヒートマップの指標を URL（?metric=）で開けるようにする
+- `src/utils/heatmapUrlParam.ts`（新規）, `src/utils/mapDeepLink.ts`, `src/components/RailwayMap.tsx`,
+  `tests/unit/utils/heatmapUrlParam.test.ts`（新規）
+- 実データの指標だけ受け付け、ヒートマップの表示・指標の変更も URL に反映する
+
+### feat: 地図を開くCTAを種類別のGA4イベントにし、観光地・データのページにも置く
+- `src/components/MapOpenCta.astro`, `src/layouts/GuideLayout.astro`, `src/pages/[...lang]/{stations,lines,data}/[slug].astro`
+- `seo_map_open` に加えて `guide/station/line/tourist/data_map_open`。source_page・locale・station・
+  routes・city・tourist_spot・metric を送る
+- 観光地ごと・データの指標ごとのCTA、説明の直後のCTAを追加
+
+### feat: 駅・路線ページの中国語（簡体字）・韓国語版を作る
+- `src/seo/pageModel.ts`（`SEO_LANGS`, `DATA_LANGS`, `langs`, `hasStationPage`）, `src/seo/pageText.ts`（zh/ko）,
+  `src/layouts/SeoPageLayout.astro`, `src/components/seo/StationLink.astro`, `src/config/siteNav.ts`,
+  `src/components/SiteFooterNav.astro`
+- 路線・一覧ページは4言語、駅ページの zh/ko は Tier A のうち駅名の訳がある駅だけ（ko は45駅）
+- hreflang・言語切替は実在する言語版だけに張る。sitemap 312→566 URL
+
+### feat: 大阪・京都・札幌の路線図ガイドを4言語で追加し、説明の直後に地図CTAを置く
+- `src/data/guides.ts`（`GuideSection.cta`, `city`）, `src/layouts/GuideLayout.astro`,
+  `src/pages/{,en/,zh/,ko/}guides/{osaka,kyoto,sapporo}-train-map.astro`（新規12ページ）,
+  `tests/unit/seo/guideLinks.test.ts`（新規）
+
+### improve: 駅・路線ページの関連ガイドに、節ごとのCTAで開く路線も含める
+- `src/seo/pageModel.ts`（`guidesForRoutes`）
+
+### docs: SEO の仕組みに都市・多言語・CTA・GA4 を追記
+- `docs/seo.md`, `CLAUDE.md`
+
+### feat: 記事・ガイド・駅/路線ページの右上に共通の言語切り替えと言語の案内を置く
+- `src/components/LanguageSwitcher.astro`（新規）, `src/components/LanguageSuggestion.astro`（新規）,
+  `src/layouts/{GuideLayout,GuidesIndexLayout,SeoPageLayout}.astro`, `src/layouts/guideStyles.ts`
+- 自動リダイレクトはせず、以前選んだ言語かブラウザの言語に版があるときだけ閉じられる案内を出す
+
+### improve: 記事ヘッダーのボタンをアトムの規格にそろえ、アイコンを PWA と同じファイルに一元化する
+- `src/components/ui/atoms/controlCss.ts`（新規, `.ctl`）, `src/components/ui/atoms/controlSize.ts`（`FLOATING_ICON_GLYPH_SIZE`）,
+  `src/components/seo/FaviconLinks.astro`（新規）, `src/config/seo.ts`（`APP_ICON_PATH`）,
+  `src/components/articles/ArticleLayout.astro`, `src/components/LanguageSwitcher.astro`, `src/components/seo/SeoHead.astro`,
+  `src/layouts/{StaticPage.astro,guideStyles.ts}`, `src/pages/{index,diagram,demo,fullscreen}.astro`,
+  `src/components/NavigationBar.tsx`, `src/components/RailwayMap.tsx`, `src/styles/article-layout.css`,
+  `tests/unit/config/appIcon.test.ts`（新規）, `tests/unit/components/ui/controlCss.test.ts`（新規）
+- テーマ切り替え（34px・角丸8px）と言語切り替え（別の枠・余白）の形が違っていたので、地図の隅のボタンと
+  同じ規格（36px・角丸 control・アイコン18px）の `.ctl` クラスにそろえた
+- ヘッダーのロゴを CSS で描いた印から、PWA の manifest と同じアイコン画像にした。アイコンのパスは
+  `APP_ICON_PATH` だけに書き、manifest と一致すること・他に書かれていないことをテストで確かめる
+- ヘッダーを1行に収める（サイト名は省略記号、狭い画面ではタグを隠す）
+
+### fix: ガイドの関連リンク・一覧・フッターに他の言語のページを混ぜない
+- `src/data/guides.ts`, `src/pages/{,en/,zh/,ko/}guides/index.astro`, `src/config/siteNav.ts`, `tests/unit/seo/guideLinks.test.ts`
+- 韓国語ガイドの関連ガイドに英語・日本語・中国語の見出しが並んでいた。他の言語版へは右上の言語切り替えで移る
+
+### fix: 記事のタグ・「Try it now」を各言語の表記にする
+- `src/data/articleI18n.ts`, `src/data/articleBodyI18n.ts`, `tests/unit/data/articleI18n.test.ts`
+- 日本語・中国語・韓国語の記事に英語のタグ（Safety Guide など）と CTA の飾り文字が残っていた
+
+### feat: 最寄り駅が1路線だけのときは、近くの駅の路線も足して3路線を初期表示する
+- `src/utils/defaultRoutesNear.ts`（新規）, `src/components/RailwayMap.tsx`, `tests/unit/utils/defaultRoutesNear.test.ts`（新規）
+- 最寄り駅が乗換駅ならその路線をすべて、1路線だけなら5km以内の近い駅から別の路線を足して3路線にする
+  （長谷付近: 江ノ電＋横須賀線＋湘南新宿ライン）。1本だけだとどこへ乗り換えられるか分からなかった
+
+### improve: 記事の角の丸み・ボタンの寸法・CTA の色をデザイントークンにそろえる
+- `src/components/ui/atoms/controlCss.ts`（`TOKEN_VARS_CSS`）, `src/styles/article-layout.css`, `src/styles/article-introduction.css`,
+  `src/components/articles/IntroductionDemo.astro`, `src/layouts/guideStyles.ts`, `tests/unit/styles/articleCssTokens.test.ts`（新規）, `docs/design-system.md`
+- 記事の CSS だけ角の丸みが7種類（2〜14px・999px）、ボタンの高さ・文字もばらばらで、アトム（角丸 3px・CONTROL_SIZE）と違っていた。
+  トークンの CSS 変数（--r-control/card/pill, --ctl-md-*）だけを使うようにし、直書きをテストで検出する
+- チップを小判形から control の角丸に、CTA を緑のグラデーションから「箱＋青の主要ボタン」に（主操作は primary）
+- ガイドの地図ボタンだけ文字が 16px だったのを、ボタンの規格（14px）に戻す
+- 紹介記事のデモのボタンが「必要な路線だ／け」と語の途中で折り返していたのを、語の区切りでだけ折り返すようにした
+
+### improve: 地図を開くボタンを灰色の箱で囲まない
+- `src/layouts/guideStyles.ts`（`.cta-block`）
+- ボタンと箱が二重の枠に見え、注記の無いボタンでは箱が何も伝えていなかった。注記はボタンの下に小さく置き、
+  2行に折り返すボタンの文字は行の長さをそろえる（1文字だけ次の行に落ちないように）
+
+### improve: サービス名を正式名称「Flex Railway Map」に統一し、1か所で管理する
+- `src/config/seo.ts`（`SITE_NAME`, `PROJECT_NAME`, `COPYRIGHT_TEXT`, `withSiteName`）, `src/data/{guides,articleI18n,articleBodyI18n}.ts`（`{siteName}`）,
+  `src/seo/{pageText,pageModel}.ts`, `src/utils/translation.ts`, `src/config/articleSeo.ts`, `src/components/{NavigationBar,DemoMap}.tsx`,
+  `src/components/articles/ArticleLayout.astro`, `src/pages/**/*.astro`, `public/manifest.json`, `tests/unit/config/siteName.test.ts`（新規）, `CLAUDE.md`
+- 「Flex Rail Map」「フレックス路線図」が混在していたのを、全言語で「Flex Railway Map」に（検索語としての「フレックス路線図」は keywords に残す）
+- 著作権表記・著者名を「Flex Railway Map Project」に。PWA のアプリ名も正式名称に
+
+### feat: 記事を言語ごとの別URLにし、検索した言語の記事が出るようにする
+- `src/components/articles/{ArticleLayout,BeginnerLineChips,IntroductionDemo}.astro`（新規）,
+  `src/pages/[...lang]/articles/`（新規）, `src/pages/articles/*.astro`（共通レイアウトを使う薄いファイルに）,
+  `src/data/articleI18n.ts`（`ARTICLES`）, `src/data/articleBodyI18n.ts`, `src/config/articleSeo.ts`,
+  `src/config/siteNav.ts`, `src/components/RailwayMap.tsx`, `src/styles/article-layout.css`, `netlify.toml`,
+  `tests/unit/data/articleI18n.test.ts`（新規）
+- 英語・中国語・韓国語版を /en/articles/... などで書き出し、canonical・hreflang・html lang・inLanguage を各言語に
+- 旧URL（?lang=）は301転送、初心者向け記事の図を全言語に、紹介記事のデモを各言語で書き出す
+
 ## [2026-09-29] セッション（上野東京ライン・湘南新宿ラインの表記統一・時刻表の方向切替・前の便の常時表示・ツールチップの高さ・路線の凡例）
 
 ### feat: 「表示中の路線」の凡例を見出しで折りためるようにする

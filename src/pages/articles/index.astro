@@ -1,56 +1,29 @@
 ---
+/**
+ * 記事一覧の日本語版（/articles）。英語・中国語・韓国語版は src/pages/[...lang]/articles/index.astro。
+ */
 import ArticleLayout from "./_ArticleLayout.astro";
-import { ARTICLE_PAGE_TRANSLATIONS } from "../../data/articleI18n";
+import { ARTICLES, ARTICLE_PAGE_TRANSLATIONS } from "../../data/articleI18n";
+import { articlePath } from "../../config/articleSeo";
+import { withSiteName } from "../../config/seo";
 
-const articles = [
-  {
-    slug: "tokyo-rent-by-route",
-    publishedDate: "2025-06-06",
-  },
-  {
-    slug: "flex-rail-map-introduction",
-    publishedDate: "2025-06-06",
-  },
-  {
-    slug: "tokyo-train-map-beginner",
-    publishedDate: "2025-06-06",
-  },
-  {
-    slug: "tokyo-sightseeing-routes",
-    publishedDate: "2025-06-06",
-  },
-  {
-    slug: "commute-30min-cheap-rent",
-    publishedDate: "2025-06-06",
-  },
-  {
-    slug: "tokyo-safe-area-by-route",
-    publishedDate: "2025-06-06",
-  }
-].map((article) => ({
-  ...article,
-  title: ARTICLE_PAGE_TRANSLATIONS[article.slug].ja.title,
-  category: ARTICLE_PAGE_TRANSLATIONS[article.slug].ja.category,
-}));
-
-const meta = ARTICLE_PAGE_TRANSLATIONS.articles.ja;
-const title = meta.title;
-const description = meta.description;
+const month = (iso: string) => iso.slice(0, 7).replace("-", "年") + "月";
 ---
 
-<ArticleLayout title={title} description={description} slug="" category={meta.category} kicker={meta.kicker} tag={meta.tag} readTime={meta.readTime} canonicalPath="/articles" kind="index">
-  <section class="article-index" aria-label="記事一覧">
+<ArticleLayout pageKey="articles" kind="index">
+  <section class="article-index" aria-label={ARTICLE_PAGE_TRANSLATIONS.articles.ja.title}>
     <ul class="article-list">
-    {articles.map(article => (
-      <li data-article-card={article.slug}>
-        <a href={`/articles/${article.slug}`}>
-          <span class="article-card-title" data-article-title>{article.title}</span>
-          <span class="meta">
-            {article.publishedDate.slice(0, 7).replace('-', '年')}月 ｜ <span data-article-meta>{article.category}</span>
-          </span>
-        </a>
-      </li>
-    ))}
+      {ARTICLES.map(article => {
+        const t = withSiteName(ARTICLE_PAGE_TRANSLATIONS[article.slug].ja);
+        return (
+          <li>
+            <a href={articlePath(article.slug, "ja")}>
+              <span class="article-card-title">{t.title}</span>
+              <span class="meta">{month(article.publishedDate)} ｜ <span>{t.category}</span></span>
+            </a>
+          </li>
+        );
+      })}
     </ul>
   </section>
 </ArticleLayout>

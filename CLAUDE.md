@@ -139,6 +139,15 @@ src/
 - **乗換最適化**: 主要ターミナル駅での効率的な接続
 - **総駅数**: 約400駅以上をカバー
 
+## 担当範囲（集客・路線データ整備・自律運用）
+
+**2026-09-29更新: 担当範囲は `docs/operating-scope.md` にまとめてある。作業を始める前に読むこと。**
+
+- 集客: 調査〜記事・動画台本・計測計画まで自律で進める。公開・SNS投稿・営業連絡・有料広告はまだ行わない
+- 路線データ整備: 収集・検証・実装・PR作成まで進める。1路線ずつ、検証できた範囲を順次PRにする
+- 集客とデータ整備は別PR。`main` への直接変更・自動マージはしない
+- 進捗台帳: 集客 `docs/growth-progress-ledger.md`、データ `docs/data-maintenance-ledger.md`
+
 ## コミットに関する重要な規則
 
 **2026-07-30更新: ユーザー承認により、事前確認不要の運用に変更。ただし品質チェック（テスト・ビルド）を必ず通すことで安全性を担保する。**
@@ -499,14 +508,14 @@ setShowRouteToggleSection(false);
 - 提供する情報は目安であり、運行状況や正確な所要時間は必ず公式の時刻表・運行情報をご確認ください
 
 ### 📝 著作権・利用規約
-- **© 2025 Flex Rail Map Project**
+- **© 2025 Flex Railway Map Project**（`src/config/seo.ts` の `COPYRIGHT_TEXT`）
 - 無断転載禁止。研究・教育目的での利用は歓迎しますが、再配布の際は出典を明記してください
 - 広告収益化を行う場合も、データのライセンス条件に従い出典をフッター等に表記してください
 - **このサイトはClaude Codeを用いて作られました**
 
 ### 🔗 推奨フッター例
 ```
-© 2025 Flex Rail Map Project
+© 2025 Flex Railway Map Project
 駅データは独自作成またはオープンデータを利用しています。
 本サービスは非公式であり、各鉄道事業者とは関係ありません。
 Made with Claude Code
@@ -577,6 +586,19 @@ UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域
 このプロジェクトは「同じ規則を2箇所に書いて片方だけ直す」不具合を繰り返しているため
 （入力欄だけ色が変わる、駅アイコンの片方だけタッチ領域が広がる等）、
 様式美ではなく再発防止として扱う。
+
+### サービス名は「Flex Railway Map」（正式名称・一元管理）
+
+**正式名称は全言語で `Flex Railway Map`。** 「Flex Rail Map」「フレックス路線図」「Tokyo Flex Railway Map」
+などの別表記は使わない（2026-09-29 ユーザー決定）。著作権者は `Flex Railway Map Project`。
+
+- 名前は `src/config/seo.ts` の `SITE_NAME` / `PROJECT_NAME` / `COPYRIGHT_TEXT` だけに書く。
+  TS・Astro はこれを import する
+- データファイル（ガイド・記事の文章）には `{siteName}` と書く。表示するときに `withSiteName()` で置き換わる
+  （ガイドは `getGuide` などの取得関数が置き換え済みを返す）
+- 「フレックス路線図」は検索語（meta keywords）にだけ残してよい
+- PWA の `public/manifest.json` の name / short_name も正式名称（テストで確認）
+- 直書きは `tests/unit/config/siteName.test.ts` が検出して落とす
 
 ### 絵文字禁止・アイコンは lucide-react に統一
 
@@ -685,10 +707,24 @@ Netlify管理画面の Site configuration → Build & deploy → Branch deploys 
 - canonical・hreflang・title 重複・H1 の数などの検証に失敗すると **ビルドが止まる**
 - 確認は `npm run build` の後に `npm run test:seo`。実URLの200確認は
   `SEO_LIVE_BASE_URL=<Deploy PreviewのURL> npm run test:seo`
-- 駅・路線・データのページ（`/stations/*`, `/lines/*`, `/data/*` と英語版）は路線データ・駅統計から
-  **自動生成** する。index させるのは情報量の基準（Tier A）を満たすページだけで、
-  それ以外は noindex。範囲と基準は `src/data/seoPages.ts`、観光地→最寄り駅は `src/data/touristSpots.ts`
+- 駅・路線・データのページ（`/stations/*`, `/lines/*`, `/data/*` と `/en/` `/zh/` `/ko/` 版）は
+  路線データ・駅統計から **自動生成** する。index させるのは情報量の基準（Tier A）を満たすページだけで、
+  それ以外は noindex。範囲（都市ごとの路線 `SEO_CITIES`）と基準は `src/data/seoPages.ts`、
+  観光地→最寄り駅は `src/data/touristSpots.ts`
+- **中国語・韓国語ページで駅名・路線名・観光地名を推測で訳さない。** 駅名の訳が翻訳データに無い駅は
+  その言語の駅ページを作らない。hreflang の中国語は `zh-CN`（URL は `/zh/` のまま）
+- **記事・ガイド・駅/路線ページは言語ごとに別URL**（`/en/articles/...` など）。1つのURLの中でJSで言語を
+  差し替えない。言語の切り替えは `LanguageSwitcher.astro`、自動リダイレクトはしない（`docs/seo.md` の「多言語」）
+- 地図を開くリンクは `MapOpenCta.astro` / `mapDeepLink.ts` だけで作る（`routes` `from` `metric` `lang`）。
+  クリックは GA4 の `seo_map_open` と `{guide,station,line,tourist,data}_map_open` で計測する
 - 仕組み・判断基準・ページを足すときの決まりは **`docs/seo.md`**
+
+### 記事（/articles）の書き方
+
+- **1記事1テーマ・結論を先に・起承転結の4見出し・1セクション1枚の実際の画面**。
+  ほかのテーマは本文に書かず、`ARTICLES` の `related`（3本）で記事の最後に案内する
+- 画像は `scripts/capture-article-screenshots.mts` で4言語分撮る（作り物の図を載せない）
+- 決まり・構成・参考資料は **`docs/article-writing.md`**
 
 ### CHANGE.log 記録ルール
 

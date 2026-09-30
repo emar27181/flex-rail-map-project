@@ -1,0 +1,67 @@
+---
+/**
+ * 「東京の路線図の読み方」記事の図（必要な路線だけ表示してみる）のチップ。
+ * 図の SVG は本文（articleBodyI18n.ts）にあり、ここはチップと件数表示を言語に合わせて作る。
+ */
+import type { ArticleLanguage } from "../../data/articleI18n";
+
+interface Props { lang: ArticleLanguage }
+const { lang } = Astro.props;
+const NAMES: Record<ArticleLanguage, Record<string, string>> = {
+  ja: { yamanote: "JR山手線", chuo: "JR中央線", marunouchi: "メトロ丸ノ内線", ginza: "メトロ銀座線", tozai: "メトロ東西線", odakyu: "小田急線" },
+  en: { yamanote: "JR Yamanote Line", chuo: "JR Chuo Line", marunouchi: "Marunouchi Line", ginza: "Ginza Line", tozai: "Tozai Line", odakyu: "Odakyu Line" },
+  zh: { yamanote: "JR山手线", chuo: "JR中央线", marunouchi: "东京Metro丸之内线", ginza: "东京Metro银座线", tozai: "东京Metro东西线", odakyu: "小田急线" },
+  ko: { yamanote: "JR야마노테선", chuo: "JR주오선", marunouchi: "도쿄메트로 마루노우치선", ginza: "도쿄메트로 긴자선", tozai: "도쿄메트로 도자이선", odakyu: "오다큐선" },
+};
+const READOUT: Record<ArticleLanguage, string> = { ja: "表示中の路線：", en: "Lines shown: ", zh: "显示中的线路：", ko: "표시 중인 노선: " };
+const COLORS: Record<string, string> = {
+  yamanote: "#7FBF3F", chuo: "#E8542A", marunouchi: "#D9362C", ginza: "#F5A623", tozai: "#16A7CE", odakyu: "#1F7FC4",
+};
+const lines = Object.keys(COLORS).map(key => ({ key, name: NAMES[lang][key], color: COLORS[key] }));
+const readout = READOUT[lang];
+---
+
+<script is:inline define:vars={{ lines, readout }}>
+  (function(){
+    var chips = document.getElementById('chips');
+    var out = document.getElementById('readout');
+    if (!chips || !out) return;
+    var state = {};
+    lines.forEach(function(l){ state[l.key] = true; });
+
+    function update(){
+      var on = 0;
+      lines.forEach(function(l){
+        var g = document.getElementById('g-' + l.key);
+        if (!g) return;
+        if (state[l.key]) { g.classList.remove('off'); on++; }
+        else { g.classList.add('off'); }
+      });
+      out.textContent = '';
+      out.appendChild(document.createTextNode(readout));
+      var b = document.createElement('b');
+      b.textContent = String(on);
+      out.appendChild(b);
+      out.appendChild(document.createTextNode(' / ' + lines.length));
+    }
+
+    lines.forEach(function(l){
+      var b = document.createElement('button');
+      b.className = 'chip';
+      b.type = 'button';
+      b.setAttribute('aria-pressed', 'true');
+      var sw = document.createElement('span');
+      sw.className = 'sw';
+      sw.style.background = l.color;
+      b.appendChild(sw);
+      b.appendChild(document.createTextNode(l.name));
+      b.addEventListener('click', function(){
+        state[l.key] = !state[l.key];
+        b.setAttribute('aria-pressed', state[l.key] ? 'true' : 'false');
+        update();
+      });
+      chips.appendChild(b);
+    });
+    update();
+  })();
+</script>

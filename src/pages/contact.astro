@@ -1,10 +1,11 @@
 ---
 import StaticPage from "../layouts/StaticPage.astro";
+import { SITE_NAME } from '../config/seo';
 ---
 
 <StaticPage
-	title="Contact - フレックス路線図 / Flex Railway Map"
-	description="お問い合わせ - フレックス路線図へのご連絡はこちらから。Contact - Reach out to Flex Railway Map team."
+	title={`Contact - ${SITE_NAME}`}
+	description={`お問い合わせ - ${SITE_NAME}へのご連絡はこちらから。Contact - Reach out to ${SITE_NAME} team.`}
 	path="/contact"
 	heading={{ ja: "お問い合わせ", en: "Contact" }}
 	langPrefix="contact"
@@ -15,7 +16,7 @@ import StaticPage from "../layouts/StaticPage.astro";
 
 		<h3>ご連絡方法</h3>
 		<p>
-		Flex Railway Map に関するお問い合わせは、以下の方法でご連絡ください。
+		{SITE_NAME} に関するお問い合わせは、以下の方法でご連絡ください。
 		</p>
 
 		<div class="info-box">
@@ -53,7 +54,7 @@ import StaticPage from "../layouts/StaticPage.astro";
 
 		<h3>How to Reach Us</h3>
 		<p>
-		For inquiries regarding Flex Railway Map, please contact us through the following methods:
+		For inquiries regarding {SITE_NAME}, please contact us through the following methods:
 		</p>
 
 		<div class="info-box">

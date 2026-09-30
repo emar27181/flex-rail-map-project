@@ -1,3 +1,4 @@
+import { COPYRIGHT_TEXT, SITE_NAME } from '../config/seo';
 // 駅名翻訳辞書
 export const stationTranslations: { [key: string]: string } = {
   "東京": "Tokyo",
@@ -7792,8 +7793,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
 
   // Footer text
   copyrightText: {
-    japanese: "© 2025 Flex Rail Map Project",
-    english: "© 2025 Flex Rail Map Project"
+    japanese: COPYRIGHT_TEXT,
+    english: COPYRIGHT_TEXT
   },
   dataSourceText: {
     japanese: "駅データは独自作成またはオープンデータを利用しています。",
@@ -8298,8 +8299,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Open menu"
   },
   appTitle: {
-    japanese: "フレックス路線図",
-    english: "Flex Railway Map"
+    japanese: SITE_NAME,
+    english: SITE_NAME
   },
   appTagline: {
     japanese: "必要な路線だけを表示するシンプルな路線図",
@@ -8819,7 +8820,7 @@ export const uiChinese: Record<string, string> = {
   addDepartureButton: "添加出发站",
   removeDepartureLabel: "删除此出发站",
   focusThisDeparture: "设为主出发站",
-  copyrightText: "© 2025 Flex Rail Map Project",
+  copyrightText: COPYRIGHT_TEXT,
   dataSourceText: "站点数据为原创或使用开放数据。",
   disclaimerText: "本服务为非官方服务，与各铁路公司无关。",
   accuracyText: "提供的信息仅供参考。请查看官方网站获取准确的运行信息。",
@@ -9153,7 +9154,7 @@ export const uiKorean: Record<string, string> = {
   addDepartureButton: "출발역 추가",
   removeDepartureLabel: "이 출발역 삭제",
   focusThisDeparture: "메인 출발역으로 설정",
-  copyrightText: "© 2025 Flex Rail Map Project",
+  copyrightText: COPYRIGHT_TEXT,
   dataSourceText: "역 데이터는 독자적으로 제작하거나 오픈 데이터를 이용합니다.",
   disclaimerText: "본 서비스는 비공식이며 각 철도 회사와 관계없습니다.",
   accuracyText: "제공하는 정보는 참고용입니다. 정확한 운행 정보는 공식 사이트를 확인하세요.",

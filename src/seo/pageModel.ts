@@ -17,18 +17,28 @@ import {
   type DataSource, type StatParamMeta, type StationStats,
 } from '../data/stationStats';
 import {
-  MIN_STATIONS_FOR_DATA_PAGE, SEO_DATA_METRICS, SEO_LINE_KEYS, STATION_TIER_RULES,
+  MIN_STATIONS_FOR_DATA_PAGE, SEO_CITIES, SEO_DATA_CITIES, SEO_DATA_METRICS, SEO_ROUTE_ALIASES, STATION_TIER_RULES, type SeoCityId,
 } from '../data/seoPages';
 import { TOURIST_SPOTS, type TouristSpot } from '../data/touristSpots';
 import { THROUGH_SERVICES } from '../data/throughServices';
 import { guides, guidePath, type GuideDefinition } from '../data/guides';
+import { withSiteName } from '../config/seo';
 import { routeTranslations, stationTranslations } from '../utils/translation';
+import { stationTranslationsChinese, stationTranslationsKorean } from '../utils/stationTranslationsCJK';
 import { approxDistanceKm, isSameStation } from '../utils/sameStation';
 import { countDistinctLines } from '../utils/effectiveLines';
 import { getAllStations } from '../utils/allStations';
 
-export type SeoLang = 'ja' | 'en';
-export const SEO_LANGS: SeoLang[] = ['ja', 'en'];
+export type SeoLang = 'ja' | 'en' | 'zh' | 'ko';
+/**
+ * 駅・路線のページを作る言語。URL は既存のガイドと同じ /en/, /zh/, /ko/ の接頭辞。
+ * - 日本語・英語: すべてのページ
+ * - 中国語・韓国語: 路線ページ・一覧ページと、index する駅（Tier A）のうち
+ *   その言語の駅名が翻訳データにある駅だけ（駅名を推測で訳さない）
+ */
+export const SEO_LANGS: SeoLang[] = ['ja', 'en', 'zh', 'ko'];
+/** 駅周辺データのページを作る言語（首都圏だけの統計のため日本語・英語のみ） */
+export const DATA_LANGS: SeoLang[] = ['ja', 'en'];
 
 /**
  * 駅統計の座標は小数1桁（約10km四方）に丸められているため、駅の座標と
@@ -72,6 +82,8 @@ export interface StationRefLink {
   nameEn: string;
   /** 駅ページがあるときだけ */
   slug?: string;
+  /** 駅ページがある言語 */
+  langs?: SeoLang[];
 }
 
 export interface AdjacentOnRoute {
@@ -95,8 +107,12 @@ export interface SeoStation {
   adjacent: AdjacentOnRoute[];
   stats: RealStat[];
   touristSpots: TouristSpot[];
+  /** この駅が属する都市（路線ページの路線・観光地から。一覧ページのまとまりに使う） */
+  cities: SeoCityId[];
   tier: StationTier;
   indexable: boolean;
+  /** 駅ページを作る言語 */
+  langs: SeoLang[];
   /** 地図でこの駅を出発駅にして開けるか（地図側が駅名で同じ駅を引けるときだけ） */
   mapFrom?: string;
 }
@@ -109,6 +125,7 @@ export interface SeoLineStop {
 
 export interface SeoLine {
   key: RouteKey;
+  city: SeoCityId;
   slug: string;
   name: string;
   nameEn: string;
@@ -160,18 +177,40 @@ export interface SeoModel {
 
 // ── 路線名 ────────────────────────────────────────────
 
+/** 路線名。中国語・韓国語の路線名の翻訳データは無いため、英語名（各社の公式の英語表記）を出す */
 export function routeName(key: RouteKey, lang: SeoLang): string {
   const ja = routeNames[key as keyof typeof routeNames] ?? key;
   return lang === 'ja' ? ja : (routeTranslations[ja] ?? ja);
 }
 
+/** 駅名の翻訳（無ければ undefined。推測で補わない） */
+function translatedStationName(name: string, lang: SeoLang): string | undefined {
+  if (lang === 'zh') return stationTranslationsChinese[name];
+  if (lang === 'ko') return stationTranslationsKorean[name];
+  return undefined;
+}
+
+/**
+ * 駅名。中国語は翻訳が無ければ日本語の表記、韓国語は英語の表記（地図アプリの translateStation と同じ）
+ */
 export function stationName(s: { name: string; nameEn: string }, lang: SeoLang): string {
-  return lang === 'ja' ? s.name : s.nameEn;
+  if (lang === 'ja') return s.name;
+  if (lang === 'en') return s.nameEn;
+  return translatedStationName(s.name, lang) ?? (lang === 'zh' ? s.name : s.nameEn);
+}
+
+/** その言語の駅ページがあるか */
+export function hasStationPage(s: { slug?: string; langs?: SeoLang[] }, lang: SeoLang): boolean {
+  return !!s.slug && !!s.langs?.includes(lang);
 }
 
 // ── 組み立て ──────────────────────────────────────────
 
 const ROUTE_ENTRIES = Object.entries(routes) as Array<[RouteKey, Station[]]>;
+
+/** 路線ページを作る路線（都市の順） */
+export const SEO_LINE_KEYS: RouteKey[] = SEO_CITIES.flatMap(c => c.lines);
+const cityOfLine = (key: RouteKey): SeoCityId => SEO_CITIES.find(c => c.lines.includes(key))!.id;
 
 /** 駅名 → その名前の駅が出てくる [路線, 駅列内の位置] */
 function buildNameIndex(): Map<string, Array<{ route: RouteKey; index: number; station: Station }>> {
@@ -202,7 +241,9 @@ function realStatsOf(ref: { name: string; lat: number; lng: number }): RealStat[
 
 function tierOf(effectiveLines: number, realStats: number, isTouristStation: boolean): StationTier {
   const { minLines, minRealStats } = STATION_TIER_RULES;
-  if (realStats >= minRealStats && (effectiveLines >= minLines || isTouristStation)) return 'A';
+  // 統計が0項目＝その地域では集めていない。一部だけ＝取得に失敗した疑い
+  const statsOk = realStats >= minRealStats || realStats === 0;
+  if (isTouristStation || (effectiveLines >= minLines && statsOk)) return 'A';
   if (effectiveLines >= 2 || realStats > 0) return 'B';
   return 'C';
 }
@@ -230,7 +271,8 @@ function buildModel(): SeoModel {
       addRef(s);
       const ref = refs.find(r => isSameStation(s, r))!;
       const k = `${ref.name}@${ref.lat},${ref.lng}`;
-      touristByRef.set(k, [...(touristByRef.get(k) ?? []), spot]);
+      const spots = touristByRef.get(k) ?? [];
+      if (!spots.includes(spot)) touristByRef.set(k, [...spots, spot]);
     }
   }
 
@@ -239,7 +281,12 @@ function buildModel(): SeoModel {
   const usedSlugs = new Set<string>();
   const drafts = refs.map(ref => {
     const hits = (nameIndex.get(ref.name) ?? []).filter(h => isSameStation(h.station, ref));
-    const routeKeys = [...new Set(hits.map(h => h.route))];
+    // 路線データの重複（SEO_ROUTE_ALIASES）は、まとめ先の路線もこの駅を通るときだけまとめる
+    const hitRoutes = new Set(hits.map(h => h.route));
+    const routeKeys = [...new Set(hits.map(h => {
+      const alias = SEO_ROUTE_ALIASES[h.route];
+      return alias && hitRoutes.has(alias) ? alias : h.route;
+    }))];
     const neighborSets = routeKeys.map(rk => {
       const set = new Set<string>();
       for (const h of hits.filter(x => x.route === rk)) {
@@ -262,7 +309,12 @@ function buildModel(): SeoModel {
     const station: SeoStation = {
       slug, name: ref.name, nameEn, lat: ref.lat, lng: ref.lng,
       routes: routeKeys, effectiveLines, adjacent: [], stats, touristSpots, tier,
+      cities: SEO_CITIES
+        .filter(c => c.lines.some(l => routeKeys.includes(l)) || touristSpots.some(t => t.city === c.id))
+        .map(c => c.id),
       indexable: tier === 'A',
+      langs: (['ja', 'en', 'zh', 'ko'] as SeoLang[]).filter(l =>
+        l === 'ja' || l === 'en' || (tier === 'A' && translatedStationName(ref.name, l) !== undefined)),
       mapFrom: appStation && isSameStation(appStation, ref) ? ref.name : undefined,
     };
     return { station, hits };
@@ -275,6 +327,7 @@ function buildModel(): SeoModel {
     name: s.name,
     nameEn: stationTranslations[s.name] ?? s.name,
     slug: findStation(s)?.slug,
+    langs: findStation(s)?.langs,
   });
   for (const { station, hits } of drafts) {
     station.adjacent = station.routes.map(rk => {
@@ -307,6 +360,7 @@ function buildModel(): SeoModel {
     const nameEn = routeName(key, 'en');
     return {
       key,
+      city: cityOfLine(key),
       slug: toSlug(nameEn),
       name: routeName(key, 'ja'),
       nameEn,
@@ -328,13 +382,14 @@ function buildModel(): SeoModel {
       continue;
     }
     const rows: SeoDataRow[] = [];
-    for (const station of stations) {
+    const scope = stations.filter(s => s.cities.some(c => SEO_DATA_CITIES.includes(c)));
+    for (const station of scope) {
       const stat = station.stats.find(s => s.key === m.statKey);
       if (stat) rows.push({ station, value: stat.value });
     }
     rows.sort((a, b) => (meta.higherIsBetter ? b.value - a.value : a.value - b.value));
     const byLine: SeoLineSummary[] = [];
-    for (const line of lines) {
+    for (const line of lines.filter(l => SEO_DATA_CITIES.includes(l.city))) {
       const lineRows = rows.filter(r => line.stops.some(s => s.station === r.station));
       if (lineRows.length === 0) continue;
       byLine.push({ line, count: lineRows.length, median: median(lineRows.map(r => r.value)), max: lineRows[0] });
@@ -342,7 +397,7 @@ function buildModel(): SeoModel {
     byLine.sort((a, b) => (meta.higherIsBetter ? b.median - a.median : a.median - b.median));
     dataPages.push({
       slug: m.slug, key: m.statKey, meta, source: PARAM_DATA_SOURCES[m.statKey],
-      rows, missingCount: stations.length - rows.length, byLine,
+      rows, missingCount: scope.length - rows.length, byLine,
       indexable: rows.length >= MIN_STATIONS_FOR_DATA_PAGE,
     });
   }
@@ -359,9 +414,9 @@ export function getSeoModel(): SeoModel {
 // ── 内部リンク ────────────────────────────────────────
 
 /** 近くの主要駅（index 対象の駅から距離順） */
-export function nearbyMajorStations(station: SeoStation): SeoStation[] {
+export function nearbyMajorStations(station: SeoStation, lang: SeoLang = 'ja'): SeoStation[] {
   return getSeoModel().stations
-    .filter(s => s !== station && s.indexable)
+    .filter(s => s !== station && s.indexable && s.langs.includes(lang))
     .map(s => ({ s, d: approxDistanceKm(s.lat, s.lng, station.lat, station.lng) }))
     .filter(x => x.d <= NEARBY_MAX_KM)
     .sort((a, b) => a.d - b.d)
@@ -373,11 +428,12 @@ export function lineByKey(key: RouteKey): SeoLine | undefined {
   return getSeoModel().lines.find(l => l.key === key);
 }
 
-/** その言語のガイドのうち、地図CTAでこれらの路線を開くもの */
+/** その言語のガイドのうち、地図CTA（冒頭・節ごと）でこれらの路線を開くもの */
 export function guidesForRoutes(keys: RouteKey[], lang: SeoLang): Array<{ title: string; path: string }> {
+  const opens = (g: GuideDefinition) => [...(g.ctaRoutes ?? []), ...g.sections.flatMap(sec => sec.cta?.routes ?? [])];
   return guides
-    .filter((g: GuideDefinition) => g.lang === lang && g.ctaRoutes?.some(r => keys.includes(r)))
-    .map(g => ({ title: g.breadcrumbLabel, path: guidePath(g) }));
+    .filter((g: GuideDefinition) => g.lang === lang && opens(g).some(r => keys.includes(r)))
+    .map(g => ({ title: withSiteName(g.breadcrumbLabel), path: guidePath(g) }));
 }
 
 /** 駅ページの統計のうち、データのページがある指標 */

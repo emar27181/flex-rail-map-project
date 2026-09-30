@@ -1,0 +1,27 @@
+---
+/**
+ * 記事の英語・中国語・韓国語版（/en/articles/{slug} など）。日本語版は src/pages/articles/{slug}.astro。
+ * 中身はどちらも ArticleLayout が articleI18n.ts / articleBodyI18n.ts から作る。
+ * 独自のデモと CSS を持つ紹介記事は flex-rail-map-introduction.astro が別に作る
+ * （同じルートに入れると、紹介記事用の CSS が全記事に読み込まれるため）。
+ */
+import ArticleLayout from "../../../components/articles/ArticleLayout.astro";
+import BeginnerLineChips from "../../../components/articles/BeginnerLineChips.astro";
+import { ARTICLES, ARTICLE_LANGUAGES, type ArticleLanguage } from "../../../data/articleI18n";
+
+export function getStaticPaths() {
+  return ARTICLE_LANGUAGES.filter(lang => lang !== "ja").flatMap(lang =>
+    ARTICLES.filter(a => a.slug !== "flex-rail-map-introduction").map(article => ({
+      params: { lang, slug: article.slug },
+      props: { lang, article },
+    })),
+  );
+}
+
+interface Props { lang: ArticleLanguage; article: (typeof ARTICLES)[number] }
+const { lang, article } = Astro.props;
+---
+
+<ArticleLayout lang={lang} pageKey={article.slug} publishedDate={article.publishedDate} modifiedDate={article.modifiedDate}>
+  {article.slug === "tokyo-train-map-beginner" && <BeginnerLineChips slot="scripts" lang={lang} />}
+</ArticleLayout>

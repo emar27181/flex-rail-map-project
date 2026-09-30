@@ -69,6 +69,11 @@ import {
 } from '../utils/mapSizePersistence';
 import { patchRotatedRendererDrift } from '../utils/leafletRotatePatch';
 import { getInitialVisibleRoutesFromUrl, syncVisibleRoutesToUrl } from '../utils/routeUrlCodes';
+import { getInitialHeatmapMetricFromUrl, syncHeatmapMetricToUrl } from '../utils/heatmapUrlParam';
+import { toArticleLanguage } from '../utils/languagePersistence';
+import { defaultRoutesNear } from '../utils/defaultRoutesNear';
+import { getInitialMapViewFromUrl } from '../utils/mapViewUrlParam';
+import { isEmbedMode } from '../utils/embedMode';
 import {
   getInitialDepartureFromUrl,
   getInitialArrivalFromUrl,
@@ -98,7 +103,7 @@ import SegmentedControl from './ui/molecules/SegmentedControl';
 import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
-import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
+import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE } from './ui/atoms/controlSize';
 
 import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
@@ -129,8 +134,8 @@ interface RailwayMapProps {
  * 4つのボタンすべてがこの定数を参照する。
  */
 const MAP_CORNER_BUTTON_PX = FLOATING_ICON_BUTTON_SIZE.md;
-/** 上のボタン群のアイコンの大きさ。36pxの箱に対して詰まりすぎない大きさ */
-const MAP_CORNER_ICON_SIZE = 18;
+/** 上のボタン群のアイコンの大きさ（記事ヘッダーのボタンと共通の値） */
+const MAP_CORNER_ICON_SIZE = FLOATING_ICON_GLYPH_SIZE;
 /**
  * スマホ・非全画面時、地図右上の「全画面表示」ボタン1個ぶんを避けて
  * 「表示路線の切替」パネルの右端を詰めるための予約幅。
@@ -194,8 +199,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    */
   const INITIAL_LOCATION_ZOOM = 11;
 
-  const [mapCenter, setMapCenter] = useState<[number, number]>([35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
-  const [mapZoom, setMapZoom] = useState(12);
+  // URL（?center=&zoom=）で表示位置が指定されていればそれを使う（mapViewUrlParam.ts）
+  const urlMapView = useMemo(() => getInitialMapViewFromUrl(), []);
+  const [mapCenter, setMapCenter] = useState<[number, number]>(urlMapView?.center ?? [35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
+  const [mapZoom, setMapZoom] = useState(urlMapView?.zoom ?? 12);
   const [viewCenter, setViewCenter] = useState<[number, number]>([35.57765, 139.66165]); // Updates on moveend/zoomend
   const [viewBounds, setViewBounds] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
   const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
@@ -231,10 +238,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // console.log removed
 
   // 折りたたみ状態の管理
-  const [isStationSelectorExpanded, setIsStationSelectorExpanded] = useState(true);
-  const [mobileStationExpanded, setMobileStationExpanded] = useState(true);
+  // 記事に埋め込む表示（?embed=1）では、小さな枠で地図を広く見せるためにパネルを閉じて始める
+  const embedded = useMemo(() => isEmbedMode(), []);
+  const [isStationSelectorExpanded, setIsStationSelectorExpanded] = useState(!embedded);
+  const [mobileStationExpanded, setMobileStationExpanded] = useState(!embedded);
   const [isRouteToggleExpanded, setIsRouteToggleExpanded] = useState(false);
-  const [isLegendExpanded, setIsLegendExpanded] = useState(true);
+  const [isLegendExpanded, setIsLegendExpanded] = useState(!embedded);
 
   // 表示モードの管理
   const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
@@ -643,6 +652,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   useEffect(() => {
     if (!userLocation || hasCenteredOnUserRef.current) return;
     hasCenteredOnUserRef.current = true;
+    if (urlMapView) return; // URL で表示位置を指定して開いたときは、その範囲を見せる
     setMapCenter(userLocation);
     setMapZoom(INITIAL_LOCATION_ZOOM);
     // マウント前(mapRef.current が null)は上の state 更新が初期表示に反映される。
@@ -3350,7 +3360,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     }
   }, [departure, arrival, isManualDeparture, throughSections]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 初回の位置情報取得時、駅が未選択なら最寄り駅を通る路線を表示ONにする。
+  // 初回の位置情報取得時、駅が未選択なら最寄り駅を通る路線を表示ONにする
+  // （最寄り駅が1路線だけなら近くの駅の路線も足して3路線）。
   // 駅が両方未選択の間は全路線非表示にしているため、現在地が分かっても
   // 地図に何も線が無く、どこから絞り込めばよいか分からなかった。
   // 出発駅の自動設定（autoSetDepartureFromLocation, 既定OFF）とは別で、
@@ -3360,12 +3371,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   useEffect(() => {
     if (nearestRoutesAppliedRef.current || !userLocation) return;
     if (departure || arrival) { nearestRoutesAppliedRef.current = true; return; }
-    const nearest = findNearestStation(userLocation[0], userLocation[1]);
-    if (!nearest) return; // 駅データ準備前。次の更新で再試行する
+    if (allUniqueStations.length === 0) return; // 駅データ準備前。次の更新で再試行する
     nearestRoutesAppliedRef.current = true;
-    const nearestRoutes = getRoutesForStation(nearest.name, nearest) as RouteKey[];
-    setVisibleRoutes(prev => (prev.size === 0 ? new Set(nearestRoutes) : prev));
-  }, [userLocation, departure, arrival, findNearestStation]);
+    // 最寄り駅が1路線だけなら、近くの駅の路線も足して3路線にする（defaultRoutesNear.ts）
+    const nearbyRoutes = defaultRoutesNear(
+      userLocation[0], userLocation[1], allUniqueStations, s => getRoutesForStation(s.name, s),
+    );
+    setVisibleRoutes(prev => (prev.size === 0 ? new Set(nearbyRoutes) : prev));
+  }, [userLocation, departure, arrival, allUniqueStations, getRoutesForStation]);
 
   // URL共有: 初回マウント時のみ、URLの routes パラメータがあれば表示路線を復元する。
   // 上のeffect（出発駅・到着駅に応じた初期化）の後に実行させることで、
@@ -3407,6 +3420,25 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   useEffect(() => {
     syncStationsToUrl(departure, arrival, waypoints);
   }, [departure, arrival, waypoints]);
+
+  // URL共有: 初回マウント時のみ、URLの metric パラメータがあればその指標のヒートマップを表示する
+  // （駅周辺データのページ /data/* から開いたとき）
+  const urlHeatmapAppliedRef = useRef(false);
+  useEffect(() => {
+    if (urlHeatmapAppliedRef.current) return;
+    urlHeatmapAppliedRef.current = true;
+    const metric = getInitialHeatmapMetricFromUrl();
+    if (metric) {
+      handleHeatmapParamChange(metric);
+      setHeatmapEnabled(true);
+    }
+  }, [handleHeatmapParamChange]);
+
+  // URL共有: ヒートマップの表示・指標が変わるたびにURLへ反映する
+  useEffect(() => {
+    if (!urlHeatmapAppliedRef.current) return;
+    syncHeatmapMetricToUrl(heatmapEnabled, heatmapParam);
+  }, [heatmapEnabled, heatmapParam]);
 
   // Leafletポップアップとコントロールのテーマ対応（動的スタイル適用）
   useEffect(() => {
@@ -6613,7 +6645,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 renderCornerButton と同じ規格（cornerButtonStyle）に揃える */}
             {!isFullscreen && !isMobile && (
               <LinkButton
-                href="/articles"
+                href={toArticleLanguage(language) === 'ja' ? '/articles' : `/${toArticleLanguage(language)}/articles`}
                 theme={theme}
                 size="sm"
                 iconOnly
@@ -6773,7 +6805,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           })()}
         </div>
       </div>
-      <CookieBanner language={currentLanguage} />
+      {!embedded && <CookieBanner language={currentLanguage} />}
     </ErrorBoundary>
   );
 };

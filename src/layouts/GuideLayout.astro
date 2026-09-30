@@ -20,10 +20,12 @@ import MapOpenCta from '../components/MapOpenCta.astro';
 import SeoHead from '../components/seo/SeoHead.astro';
 import ThemeInitScript from '../components/ThemeInitScript.astro';
 import SiteFooterNav from '../components/SiteFooterNav.astro';
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import LanguageSuggestion from '../components/LanguageSuggestion.astro';
 import LineChip from '../components/seo/LineChip.astro';
 import { lineByKey, SEO_LANGS, type SeoLang } from '../seo/pageModel';
 import { SEO_TEXT } from '../seo/pageText';
-import { SITE_NAME, buildHreflangLinks, buildBreadcrumbJsonLd, canonicalUrl } from '../config/seo';
+import { SITE_NAME, buildHreflangLinks, buildBreadcrumbJsonLd, canonicalUrl, hreflangCode } from '../config/seo';
 import { guidePath, getGuideTranslations, type GuideDefinition } from '../data/guides';
 
 export interface Props {
@@ -90,7 +92,7 @@ const webPageJsonLd = {
 };
 ---
 
-<html lang={htmlLang}>
+<html lang={hreflangCode(htmlLang)}>
 	<head>
 		<SeoHead
 			title={guide.title}
@@ -107,6 +109,10 @@ const webPageJsonLd = {
 	<body>
 		<ThemeInitScript />
 		<div class="container">
+			<div class="page-lang-bar">
+				<LanguageSwitcher current={guide.lang} versions={Object.fromEntries(getGuideTranslations(guide).map(g => [g.lang, guidePath(g)]))} />
+			</div>
+			<LanguageSuggestion current={guide.lang} versions={Object.fromEntries(getGuideTranslations(guide).map(g => [g.lang, guidePath(g)]))} />
 			<nav class="breadcrumb">
 				<a href="/">{SITE_NAME}</a> / <a href={indexHref}>{indexLabel}</a> / {guide.breadcrumbLabel}
 			</nav>
@@ -119,7 +125,9 @@ const webPageJsonLd = {
 			<MapOpenCta
 				label={guide.ctaLabel}
 				note={guide.ctaNote}
+				kind="guide"
 				guideSlug={guide.slug}
+				city={guide.city}
 				language={guide.lang}
 				routes={guide.ctaRoutes}
 			/>
@@ -137,6 +145,16 @@ const webPageJsonLd = {
 				<section>
 					<h2>{section.heading}</h2>
 					{section.paragraphs.map(p => <p>{p}</p>)}
+					{section.cta && (
+						<MapOpenCta
+							label={section.cta.label}
+							kind="guide"
+							guideSlug={guide.slug}
+							city={guide.city}
+							language={guide.lang}
+							routes={section.cta.routes}
+						/>
+					)}
 				</section>
 			))}
 
@@ -145,7 +163,9 @@ const webPageJsonLd = {
 			<MapOpenCta
 				label={guide.ctaLabel}
 				note={guide.ctaNote}
+				kind="guide"
 				guideSlug={guide.slug}
+				city={guide.city}
 				language={guide.lang}
 				routes={guide.ctaRoutes}
 			/>

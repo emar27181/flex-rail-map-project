@@ -7,3 +7,48 @@
 # ローカルでは通るビルドが本番だけ失敗するため明示的に固定する。
 [build.environment]
   NODE_VERSION = "22"
+
+# 記事は2026-09から言語ごとに別URL（/en/articles/... など）。以前の ?lang= 付きURL
+# （JSで本文を差し替えていた頃のURL。共有・ブックマーク・外部リンクに残っている）を
+# 新しいURLへ恒久的に転送する。元のURL（/articles/...）にもファイルがあるため force が必要
+[[redirects]]
+  from = "/articles"
+  to = "/en/articles"
+  status = 301
+  force = true
+  query = { lang = "en" }
+
+[[redirects]]
+  from = "/articles"
+  to = "/zh/articles"
+  status = 301
+  force = true
+  query = { lang = "zh" }
+
+[[redirects]]
+  from = "/articles"
+  to = "/ko/articles"
+  status = 301
+  force = true
+  query = { lang = "ko" }
+
+[[redirects]]
+  from = "/articles/:slug"
+  to = "/en/articles/:slug"
+  status = 301
+  force = true
+  query = { lang = "en" }
+
+[[redirects]]
+  from = "/articles/:slug"
+  to = "/zh/articles/:slug"
+  status = 301
+  force = true
+  query = { lang = "zh" }
+
+[[redirects]]
+  from = "/articles/:slug"
+  to = "/ko/articles/:slug"
+  status = 301
+  force = true
+  query = { lang = "ko" }

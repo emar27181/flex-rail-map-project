@@ -15,12 +15,13 @@ interface Props {
 
 const { lang = 'ja', currentPath } = Astro.props;
 const links = SITE_FOOTER_LINKS
-  .map(l => ({ ...l, href: lang === 'en' && l.pathEn ? l.pathEn : l.path }))
-  .filter(l => l.href !== currentPath);
+  .map(l => ({ ...l, href: l.localized?.[lang] ?? l.path }))
+  .filter((l, i, arr) => l.href !== currentPath && arr.findIndex(x => x.href === l.href) === i);
 const fs = FS.caption;
+const NAV_LABEL: Record<NavLang, string> = { ja: 'サイト内リンク', en: 'Site links', zh: '站内链接', ko: '사이트 링크' };
 ---
 
-<nav class="site-footer-nav" aria-label={lang === 'ja' ? 'サイト内リンク' : 'Site links'}>
+<nav class="site-footer-nav" aria-label={NAV_LABEL[lang]}>
   {links.map(l => <a href={l.href}>{l.label[lang]}</a>)}
 </nav>
 

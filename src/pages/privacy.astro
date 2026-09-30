@@ -1,10 +1,11 @@
 ---
 import StaticPage from "../layouts/StaticPage.astro";
+import { SITE_NAME } from '../config/seo';
 ---
 
 <StaticPage
-	title="Privacy Policy - フレックス路線図 / Flex Railway Map"
-	description="プライバシーポリシー - フレックス路線図のデータ使用とプライバシー保護について。Privacy Policy - Learn about data usage and privacy protection at Flex Railway Map."
+	title={`Privacy Policy - ${SITE_NAME}`}
+	description={`プライバシーポリシー - ${SITE_NAME}のデータ使用とプライバシー保護について。Privacy Policy - Learn about data usage and privacy protection at ${SITE_NAME}.`}
 	path="/privacy"
 	heading={{ ja: "プライバシーポリシー", en: "Privacy Policy" }}
 	langPrefix="privacy"
