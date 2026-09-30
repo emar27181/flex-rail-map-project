@@ -3,6 +3,9 @@
  * 駅周辺データのページ（/data/{slug}, /en/data/{slug}）。
  * 実データ（dataQuality: 'real'）の指標だけ作る。値の無い駅は0にせず件数だけ示す。
  */
+import ResponsiveTable from '../../../components/ui/atoms/ResponsiveTable.astro';
+import TableCell from '../../../components/ui/atoms/TableCell.astro';
+import type { TableColumn } from '../../../components/ui/atoms/responsiveTable';
 import SeoPageLayout from '../../../layouts/SeoPageLayout.astro';
 import MapOpenCta from '../../../components/MapOpenCta.astro';
 import {
@@ -37,6 +40,19 @@ const dataCta = {
   routes: page.byLine.slice(0, 5).map(s => s.line.key),
   metric: page.key,
 };
+
+// 表の列（見せ方は ResponsiveTable の規格）
+const lineCols = {
+	line: { label: t.colLine, kind: 'title' },
+	median: { label: t.colMedian, kind: 'num' },
+	max: { label: t.colMax, kind: 'text' },
+	count: { label: t.colCount, kind: 'num' },
+} satisfies Record<string, TableColumn>;
+const rankCols = {
+	rank: { label: t.colRank, kind: 'index' },
+	station: { label: t.colStation, kind: 'title' },
+	value: { label, kind: 'num' },
+} satisfies Record<string, TableColumn>;
 ---
 
 <SeoPageLayout
@@ -70,41 +86,29 @@ const dataCta = {
 
 	<section>
 		<h2>{t.byLine}</h2>
-		<div class="seo-table-wrap">
-			<table class="seo-table">
-				<thead>
-					<tr><th>{t.colLine}</th><th class="num">{t.colMedian}</th><th>{t.colMax}</th><th class="num">{t.colCount}</th></tr>
-				</thead>
-				<tbody>
-					{page.byLine.map(s => (
-						<tr>
-							<td><a href={linePath(s.line.slug, lang)}>{routeName(s.line.key, lang)}</a></td>
-							<td class="num">{withUnit(s.median)}</td>
-							<td><a href={stationPath(s.max.station.slug, lang)}>{stationName(s.max.station, lang)}</a>{t.paren(withUnit(s.max.value))}</td>
-							<td class="num">{s.count}</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
-		</div>
+		<ResponsiveTable columns={[lineCols.line, lineCols.median, lineCols.max, lineCols.count]}>
+			{page.byLine.map(s => (
+				<tr>
+					<TableCell col={lineCols.line}><a href={linePath(s.line.slug, lang)}>{routeName(s.line.key, lang)}</a></TableCell>
+					<TableCell col={lineCols.median}>{withUnit(s.median)}</TableCell>
+					<TableCell col={lineCols.max}><a href={stationPath(s.max.station.slug, lang)}>{stationName(s.max.station, lang)}</a>{t.paren(withUnit(s.max.value))}</TableCell>
+					<TableCell col={lineCols.count}>{s.count}</TableCell>
+				</tr>
+			))}
+		</ResponsiveTable>
 		<MapOpenCta {...dataCta} />
 	</section>
 
 	<section>
 		<h2>{t.ranking}</h2>
-		<div class="seo-table-wrap">
-			<table class="seo-table">
-				<thead><tr><th class="num">{t.colRank}</th><th>{t.colStation}</th><th class="num">{label}</th></tr></thead>
-				<tbody>
-					{page.rows.map((r, i) => (
-						<tr>
-							<td class="num">{i + 1}</td>
-							<td class="name"><a href={stationPath(r.station.slug, lang)}>{stationName(r.station, lang)}</a></td>
-							<td class="num">{withUnit(r.value)}</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
-		</div>
+		<ResponsiveTable columns={[rankCols.rank, rankCols.station, rankCols.value]}>
+			{page.rows.map((r, i) => (
+				<tr>
+					<TableCell col={rankCols.rank}>{i + 1}</TableCell>
+					<TableCell col={rankCols.station}><a href={stationPath(r.station.slug, lang)}>{stationName(r.station, lang)}</a></TableCell>
+					<TableCell col={rankCols.value}>{withUnit(r.value)}</TableCell>
+				</tr>
+			))}
+		</ResponsiveTable>
 	</section>
 </SeoPageLayout>

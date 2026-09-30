@@ -2,11 +2,12 @@
  * 駅・路線・データのページ（SeoPageLayout）の追加スタイル。
  *
  * 固定ページの staticPageCss とガイドの guideCss（パンくず・CTA・リンク一覧）を
- * 土台にし、ここでは表と路線チップだけを足す。値はすべてデザイントークンから取る。
+ * 土台にし、ここでは表（ResponsiveTable の規格に色を渡す）と路線チップだけを足す。値はすべてデザイントークンから取る。
  */
 import { getThemeColors } from '../contexts/ThemeContext';
 import { FS } from '../constants/ui';
 import { L } from '../components/legend/legendStyles';
+import { RESPONSIVE_TABLE_CSS } from '../components/ui/atoms/responsiveTable';
 
 const light = getThemeColors('light');
 const dark = getThemeColors('dark');
@@ -15,24 +16,10 @@ const dark = getThemeColors('dark');
 const SWATCH_SIZE = '10px';
 
 export const seoPageCss = `
-.seo-table-wrap { overflow-x: auto; margin: ${L.sp.md} 0 ${L.sp['2xl']}; }
-.seo-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: ${FS.body};
-}
-.seo-table th, .seo-table td {
-  text-align: left;
-  padding: ${L.sp.sm} ${L.sp.md};
-  border-bottom: 1px solid ${light.borderLight};
-  vertical-align: top;
-}
-.seo-table th { font-weight: bold; color: ${light.textSecondary}; white-space: nowrap; }
-.seo-table td.num, .seo-table th.num { text-align: right; white-space: nowrap; }
-/* 駅名は途中で折り返さない（「代官/山」のように切れると別の駅名に見える）。狭い画面では表が横に流れる */
-.seo-table td.name { white-space: nowrap; }
-body.dark .seo-table th, body.dark .seo-table td { border-bottom-color: ${dark.borderLight}; }
-body.dark .seo-table th { color: ${dark.textSecondary}; }
+/* 表の見せ方（スマホ・タブレット・PC）は ResponsiveTable の規格（ui/atoms/responsiveTable.ts）。ここでは色だけを渡す */
+${RESPONSIVE_TABLE_CSS}
+body { --rt-border: ${light.borderLight}; --rt-muted: ${light.textSecondary}; --rt-hover: ${light.surfaceHover}; }
+body.dark { --rt-border: ${dark.borderLight}; --rt-muted: ${dark.textSecondary}; --rt-hover: ${dark.surfaceHover}; }
 
 .seo-chips { display: flex; flex-wrap: wrap; gap: ${L.sp.xs} ${L.sp.md}; margin: ${L.sp.md} 0; padding: 0; list-style: none; }
 .seo-chip {

@@ -1,0 +1,26 @@
+---
+/**
+ * 静的ページの表（規格は responsiveTable.ts）。列の見出しと種類を渡し、行は中に書く:
+ *
+ *   <ResponsiveTable columns={[cols.no, cols.station]}>
+ *     {rows.map(r => <tr><TableCell col={cols.no}>{r.no}</TableCell>...</tr>)}
+ *   </ResponsiveTable>
+ */
+import { RT_CLASS, type TableColumn } from './responsiveTable';
+
+export interface Props {
+  columns: TableColumn[];
+  /** 列見出しを出さない（1行目から意味が分かる表） */
+  hideHead?: boolean;
+}
+const { columns, hideHead = false } = Astro.props;
+---
+
+<div class={RT_CLASS.wrap}>
+  <table class={RT_CLASS.table}>
+    {!hideHead && (
+      <thead><tr>{columns.map(c => <th class={RT_CLASS.cell(c.kind)} scope="col">{c.href ? <a href={c.href}>{c.label}</a> : c.label}</th>)}</tr></thead>
+    )}
+    <tbody><slot /></tbody>
+  </table>
+</div>

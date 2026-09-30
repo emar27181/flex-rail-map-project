@@ -6,6 +6,9 @@
 import SeoPageLayout from '../../../layouts/SeoPageLayout.astro';
 import MapOpenCta from '../../../components/MapOpenCta.astro';
 import LineChip from '../../../components/seo/LineChip.astro';
+import ResponsiveTable from '../../../components/ui/atoms/ResponsiveTable.astro';
+import TableCell from '../../../components/ui/atoms/TableCell.astro';
+import type { TableColumn } from '../../../components/ui/atoms/responsiveTable';
 import {
   DATA_LANGS, SEO_LANGS, dataPath, getSeoModel, guidesForRoutes, hasStationPage, hubPath, linePath, routeName,
   stationName, stationPath, type SeoLang, type SeoLine,
@@ -42,6 +45,15 @@ const lineCta = {
   routes: [line.key],
   city: line.city,
 };
+
+// 駅一覧の表の列（見せ方は ResponsiveTable の規格）
+const cols = {
+	no: { label: t.colNo, kind: 'index' },
+	station: { label: t.colStation, kind: 'title' },
+	transfers: { label: t.colTransfers, kind: 'text' },
+	data: { label: dataLabel || '', kind: 'num', href: dataHref },
+} satisfies Record<string, TableColumn>;
+const columns: TableColumn[] = dataPage ? [cols.no, cols.station, cols.transfers, cols.data] : [cols.no, cols.station, cols.transfers];
 ---
 
 <SeoPageLayout
@@ -63,33 +75,21 @@ const lineCta = {
 
 	<section>
 		<h2>{t.stationList}</h2>
-		<div class="seo-table-wrap">
-			<table class="seo-table">
-				<thead>
+		<ResponsiveTable columns={columns}>
+			{line.stops.map((stop, i) => {
+				const stat = dataPage && stop.station.stats.find(s => s.key === dataPage.key);
+				return (
 					<tr>
-						<th class="num">{t.colNo}</th>
-						<th>{t.colStation}</th>
-						<th>{t.colTransfers}</th>
-						{dataPage && <th class="num">{dataHref ? <a href={dataHref}>{dataLabel}</a> : dataLabel}</th>}
+						<TableCell col={cols.no}>{i + 1}</TableCell>
+						<TableCell col={cols.station}>{hasStationPage(stop.station, lang)
+							? <a href={stationPath(stop.station.slug, lang)}>{stationName(stop.station, lang)}</a>
+							: stationName(stop.station, lang)}</TableCell>
+						<TableCell col={cols.transfers}>{stop.transfers.map(r => routeName(r, lang)).join(t.listSep)}</TableCell>
+						{dataPage && <TableCell col={cols.data}>{stat ? formatNumber(stat.value, lang) : '-'}</TableCell>}
 					</tr>
-				</thead>
-				<tbody>
-					{line.stops.map((stop, i) => {
-						const stat = dataPage && stop.station.stats.find(s => s.key === dataPage.key);
-						return (
-							<tr>
-								<td class="num">{i + 1}</td>
-								<td class="name">{hasStationPage(stop.station, lang)
-									? <a href={stationPath(stop.station.slug, lang)}>{stationName(stop.station, lang)}</a>
-									: stationName(stop.station, lang)}</td>
-								<td>{stop.transfers.map(r => routeName(r, lang)).join(t.listSep)}</td>
-								{dataPage && <td class="num">{stat ? formatNumber(stat.value, lang) : '-'}</td>}
-							</tr>
-						);
-					})}
-				</tbody>
-			</table>
-		</div>
+				);
+			})}
+		</ResponsiveTable>
 	</section>
 
 	<MapOpenCta {...lineCta} />

@@ -3,6 +3,9 @@
  * 駅の一覧（/stations, /en/stations）。都市ごとに、主な駅・観光地の最寄り駅・路線へのリンクを並べる。
  * 全駅の一覧は各路線ページにある（ここに全駅を並べると数千リンクになるため）。
  */
+import ResponsiveTable from '../../../components/ui/atoms/ResponsiveTable.astro';
+import TableCell from '../../../components/ui/atoms/TableCell.astro';
+import type { TableColumn } from '../../../components/ui/atoms/responsiveTable';
 import SeoPageLayout from '../../../layouts/SeoPageLayout.astro';
 import { SEO_LANGS, getSeoModel, hubPath, linePath, routeName, stationName, stationPath, type SeoLang } from '../../../seo/pageModel';
 import { SEO_TEXT } from '../../../seo/pageText';
@@ -26,6 +29,12 @@ const cities = SEO_CITIES.map(city => ({
   spots: TOURIST_SPOTS.filter(spot => spot.city === city.id),
   lines: lines.filter(l => l.city === city.id),
 }));
+
+// 観光地の表の列（見せ方は ResponsiveTable の規格）
+const spotCols = {
+	spot: { label: t.touristSpots, kind: 'title' },
+	stations: { label: t.colStation, kind: 'text' },
+} satisfies Record<string, TableColumn>;
 ---
 
 <SeoPageLayout
@@ -61,25 +70,21 @@ const cities = SEO_CITIES.map(city => ({
 			{spots.length > 0 && (
 				<Fragment>
 					<h3>{t.touristSpots}</h3>
-					<div class="seo-table-wrap">
-						<table class="seo-table">
-							<tbody>
-								{spots.map(spot => (
-									<tr>
-										<td>{t.spotName(spot)}</td>
-										<td>
-											{spot.stations
-												.map(ts => stations.find(s => s.name === ts.name && s.touristSpots.includes(spot)))
-												.filter((s, i, arr) => s !== undefined && arr.indexOf(s) === i)
-												.map((s, i) => (
-												<Fragment>{i > 0 && t.listSep}<a href={stationPath(s!.slug, lang)}>{stationName(s!, lang)}</a></Fragment>
-											))}
-										</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</div>
+					<ResponsiveTable columns={[spotCols.spot, spotCols.stations]} hideHead>
+						{spots.map(spot => (
+							<tr>
+								<TableCell col={spotCols.spot}>{t.spotName(spot)}</TableCell>
+								<TableCell col={spotCols.stations}>
+									{spot.stations
+										.map(ts => stations.find(s => s.name === ts.name && s.touristSpots.includes(spot)))
+										.filter((s, i, arr) => s !== undefined && arr.indexOf(s) === i)
+										.map((s, i) => (
+										<Fragment>{i > 0 && t.listSep}<a href={stationPath(s!.slug, lang)}>{stationName(s!, lang)}</a></Fragment>
+									))}
+								</TableCell>
+							</tr>
+						))}
+					</ResponsiveTable>
 				</Fragment>
 			)}
 

@@ -1,0 +1,16 @@
+---
+/**
+ * ResponsiveTable の1つの欄。列（見出しと種類）を渡す。
+ * スマホでは「列名: 値」で見せるので、列名を data-label に入れる。中身が空の欄はスマホで出さない。
+ */
+import { RT_CLASS, type TableColumn } from './responsiveTable';
+
+export interface Props {
+  col: TableColumn;
+}
+const { col } = Astro.props;
+const html = Astro.slots.has('default') ? await Astro.slots.render('default') : '';
+const empty = html.replace(/<!--.*?-->/gs, '').trim() === '';
+---
+
+<td class={RT_CLASS.cell(col.kind)} data-label={col.label} data-empty={empty ? '' : undefined} set:html={html} />

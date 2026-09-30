@@ -1,5 +1,8 @@
 ---
 /** 路線の一覧（/lines, /en/lines）。都市ごとにまとめる */
+import ResponsiveTable from '../../../components/ui/atoms/ResponsiveTable.astro';
+import TableCell from '../../../components/ui/atoms/TableCell.astro';
+import type { TableColumn } from '../../../components/ui/atoms/responsiveTable';
 import SeoPageLayout from '../../../layouts/SeoPageLayout.astro';
 import { SEO_LANGS, getSeoModel, hubPath, linePath, routeName, stationName, type SeoLang } from '../../../seo/pageModel';
 import { SEO_TEXT } from '../../../seo/pageText';
@@ -14,6 +17,13 @@ const { lang } = Astro.props;
 const t = SEO_TEXT[lang];
 const { lines } = getSeoModel();
 const path = hubPath('lines', lang);
+
+// 表の列（見せ方は ResponsiveTable の規格）
+const lineCols = {
+	line: { label: t.colLine, kind: 'title' },
+	section: { label: t.colStation, kind: 'text' },
+	count: { label: t.colCount, kind: 'num' },
+} satisfies Record<string, TableColumn>;
 ---
 
 <SeoPageLayout
@@ -36,23 +46,18 @@ const path = hubPath('lines', lang);
 	{SEO_CITIES.map(city => (
 		<section id={city.id}>
 			<h2>{city.name[lang]}</h2>
-			<div class="seo-table-wrap">
-				<table class="seo-table">
-					<thead><tr><th>{t.colLine}</th><th>{t.colStation}</th><th class="num">{t.colCount}</th></tr></thead>
-					<tbody>
-						{lines.filter(l => l.city === city.id).map(line => (
-							<tr>
-								<td>
-									{line.color && <span class="seo-swatch" style={`background-color: ${line.color}`} aria-hidden="true"></span>}{' '}
-									<a href={linePath(line.slug, lang)}>{routeName(line.key, lang)}</a>
-								</td>
-								<td>{t.section(stationName(line.stops[0].station, lang), stationName(line.stops[line.stops.length - 1].station, lang))}</td>
-								<td class="num">{line.stops.length}</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
-			</div>
+			<ResponsiveTable columns={[lineCols.line, lineCols.section, lineCols.count]}>
+				{lines.filter(l => l.city === city.id).map(line => (
+					<tr>
+						<TableCell col={lineCols.line}>
+							{line.color && <span class="seo-swatch" style={`background-color: ${line.color}`} aria-hidden="true"></span>}{' '}
+							<a href={linePath(line.slug, lang)}>{routeName(line.key, lang)}</a>
+						</TableCell>
+						<TableCell col={lineCols.section}>{t.section(stationName(line.stops[0].station, lang), stationName(line.stops[line.stops.length - 1].station, lang))}</TableCell>
+						<TableCell col={lineCols.count}>{line.stops.length}</TableCell>
+					</tr>
+				))}
+			</ResponsiveTable>
 		</section>
 	))}
 </SeoPageLayout>

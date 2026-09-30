@@ -25,6 +25,7 @@ import { ARTICLE_BODY_TRANSLATIONS } from "../../data/articleBodyI18n";
 import { APP_ICON_PATH, SITE_URL, SITE_NAME, OG_LOCALE, buildHreflangLinks, hreflangCode, withSiteName } from "../../config/seo";
 import FaviconLinks from "../seo/FaviconLinks.astro";
 import { CONTROL_CSS, HEADER_LOGO_PX } from "../ui/atoms/controlCss";
+import { RESPONSIVE_TABLE_CSS } from "../ui/atoms/responsiveTable";
 import { L } from "../legend/legendStyles";
 import SiteFooterNav from "../SiteFooterNav.astro";
 import LanguageSwitcher from "../LanguageSwitcher.astro";
@@ -105,7 +106,7 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
 
   <FaviconLinks />
   <link rel="manifest" href="/manifest.json" />
-  <style set:html={CONTROL_CSS}></style>
+  <style set:html={CONTROL_CSS + RESPONSIVE_TABLE_CSS}></style>
   <script is:inline>
     (function(){
       try {

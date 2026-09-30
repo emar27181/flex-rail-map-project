@@ -6,6 +6,7 @@
  * 地図へのリンク・埋め込みの URL は mapDeepLink.ts で作る（パラメータ名を書かない）。
  */
 import { buildMapHref } from './mapDeepLink';
+import { responsiveTableHtml } from '../components/ui/atoms/responsiveTable';
 import type { ArticleBlock, ArticleLang, ArticleMapState, ArticleSource } from '../data/articles/types';
 
 /** 部品に出す決まり文句 */
@@ -50,8 +51,11 @@ function renderBlock(block: ArticleBlock, source: ArticleSource, lang: ArticleLa
     case 'steps':
       return `<ol class="steps">${block.items.map(i => `<li><strong>${i}</strong></li>`).join('')}</ol>`;
     case 'table':
-      return `<div class="tbl"><table><thead><tr>${block.head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${
-        block.rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+      // 表の見せ方（スマホではカード）は静的ページと同じ規格（ui/atoms/responsiveTable.ts）
+      return responsiveTableHtml(
+        block.head.map((label, i) => ({ label, kind: block.kinds?.[i] ?? (i === 0 ? 'title' : 'text') })),
+        block.rows,
+      );
     case 'uses':
       return `<div class="uses">${block.items.map(u => `<div class="use"><div class="t"><span class="dot"></span>${u.title}</div><p>${u.text}</p></div>`).join('')}</div>`;
     case 'shot': {
