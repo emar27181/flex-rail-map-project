@@ -8,6 +8,7 @@
  */
 import type { RouteKey } from '../routes';
 import type { StationStats } from '../stationStats';
+import type { ColumnKind } from '../../components/ui/atoms/responsiveTable';
 
 export type ArticleLang = 'ja' | 'en' | 'zh' | 'ko';
 
@@ -47,7 +48,8 @@ export type ArticleBlock =
   | { type: 'ul'; items: string[] }
   /** 番号付きの手順 */
   | { type: 'steps'; items: string[] }
-  | { type: 'table'; head: string[]; rows: string[][] }
+  /** 表。kinds で列の種類（ui/atoms/responsiveTable.ts）。省略時は1列目が見出し、ほかは文章 */
+  | { type: 'table'; head: string[]; rows: string[][]; kinds?: ColumnKind[] }
   /** 使う場面のカード */
   | { type: 'uses'; items: { title: string; text: string }[] }
   /** スクリーンショット（shots のキー。別の記事の画像を使うときは article に slug） */

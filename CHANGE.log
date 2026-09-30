@@ -1,5 +1,36 @@
 # CHANGE LOG
 
+## [2026-09-30] セッション（PR #28〜#31 のマージ・地図の配色・端末ごとの設計・表の部品化）
+
+### merge: PR #28 → #29 → #30 → #31 を順に main にマージ
+- #30・#31 は main を取り込んでから（CHANGE.log・データ編集の取扱説明書・型チェックの対象・中国語/韓国語の表示範囲の訳を解消）
+
+### improve: 地図の陸と海をはっきり塗り分ける
+- `src/contexts/ThemeContext.tsx`（`mapLand` / `mapSea` / `mapCoast`）, `src/components/RailwayMap.tsx`（`mapCanvasColor`）, `src/pages/index.astro`
+- 陸は白を薄く重ねるだけで、ライトモードでは海と見分けにくかった。下地を2か所でページの背景色に塗っていて海の色が消えていたのも直した
+
+### improve: ライトモードでも駅ラベルの文字を白にする
+- `src/utils/contrast.ts`（`filledLabelColors`）, `tests/unit/utils/contrast.test.ts`
+- 明るい路線色は背景の明るさだけを下げて白字を読めるようにする（色相は変えない）。足りない色は縁取りで補う
+
+### improve: スマホ・タブレット・PCの境目を1か所で決める
+- `src/constants/breakpoints.ts`（新規）, `src/hooks/useDeviceClass.ts`（新規）, `src/components/{RailwayMap,StationSelector,DiagramMap}.tsx`,
+  `src/v2/RailwayMapV2.tsx`, `src/styles/article-{layout,introduction}.css`, `tests/unit/constants/breakpoints.test.ts`（新規）
+- 768（< と <= が混在）・500・480・560・600・620px がばらばらだったのを 768 / 1024 にまとめた
+
+### feat: 表を部品にし、スマホでは行ごとのカードにする
+- `src/components/ui/atoms/{responsiveTable.ts,ResponsiveTable.astro,TableCell.astro}`（新規）, `src/layouts/seoPageStyles.ts`,
+  `src/pages/[...lang]/{lines,stations}/{index,[slug]}.astro`, `src/pages/[...lang]/data/[slug].astro`,
+  `src/utils/articleRender.ts`, `src/data/articles/types.ts`, `src/components/articles/ArticleLayout.astro`, `src/styles/article-layout.css`
+- スマホで「乗り換え」の列に幅を取られ、駅名が1文字ずつ縦に並んでいた。列の種類（見出し・順番・数値・文章・補足）を決めるだけで、
+  PC・タブレットはふつうの表、スマホは駅名を見出しにしたカードになる。駅・路線・データのページと記事で同じ規格
+
+### docs: ブランチの更新とマージの方法を「main をマージする・PR は merge でマージ・リベースしない」に統一
+- `CLAUDE.md`（ブランチ運用）。push 済みのブランチはリベース・force push しない
+
+### docs: 端末ごとの設計と表の使い方
+- `docs/design-system.md`（8. 端末ごとの設計）, `CLAUDE.md`
+
 ## [2026-09-29] セッション（データ: 線形の仕組み・最初の1路線は小田急小田原線）
 
 ### feat: 路線の線形（実際の線路に沿った座標列）を持てるようにし、地図で線路の形に描く

@@ -4,6 +4,9 @@
  * 中身はすべて src/seo/pageModel.ts が路線データ・駅統計・観光地データから作る。
  * Tier A だけ index、それ以外は noindex, follow（src/data/seoPages.ts の基準）。
  */
+import ResponsiveTable from '../../../components/ui/atoms/ResponsiveTable.astro';
+import TableCell from '../../../components/ui/atoms/TableCell.astro';
+import type { TableColumn } from '../../../components/ui/atoms/responsiveTable';
 import SeoPageLayout from '../../../layouts/SeoPageLayout.astro';
 import MapOpenCta from '../../../components/MapOpenCta.astro';
 import LineChip from '../../../components/seo/LineChip.astro';
@@ -44,6 +47,18 @@ const stationCta = {
   city: station.cities[0],
 };
 const sources = [...new Map(station.stats.filter(s => s.source).map(s => [s.source!.title + s.source!.retrievedAt, s.source!])).values()];
+
+// 表の列（見せ方は ResponsiveTable の規格）
+const adjCols = {
+	line: { label: t.colLine, kind: 'title' },
+	prev: { label: t.prev, kind: 'text' },
+	next: { label: t.next, kind: 'text' },
+} satisfies Record<string, TableColumn>;
+const statCols = {
+	item: { label: t.colItem, kind: 'title' },
+	value: { label: t.colValue, kind: 'num' },
+	scope: { label: t.colScope, kind: 'note' },
+} satisfies Record<string, TableColumn>;
 ---
 
 <SeoPageLayout
@@ -73,20 +88,15 @@ const sources = [...new Map(station.stats.filter(s => s.source).map(s => [s.sour
 
 	<section>
 		<h2>{t.adjacent}</h2>
-		<div class="seo-table-wrap">
-			<table class="seo-table">
-				<thead><tr><th>{t.colLine}</th><th>{t.prev}</th><th>{t.next}</th></tr></thead>
-				<tbody>
-					{station.adjacent.map(a => (
-						<tr>
-							<td>{routeName(a.route, lang)}</td>
-							<td>{a.prev ? <StationLink station={a.prev} lang={lang} /> : t.terminal}</td>
-							<td>{a.next ? <StationLink station={a.next} lang={lang} /> : t.terminal}</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
-		</div>
+		<ResponsiveTable columns={[adjCols.line, adjCols.prev, adjCols.next]}>
+			{station.adjacent.map(a => (
+				<tr>
+					<TableCell col={adjCols.line}>{routeName(a.route, lang)}</TableCell>
+					<TableCell col={adjCols.prev}>{a.prev ? <StationLink station={a.prev} lang={lang} /> : t.terminal}</TableCell>
+					<TableCell col={adjCols.next}>{a.next ? <StationLink station={a.next} lang={lang} /> : t.terminal}</TableCell>
+				</tr>
+			))}
+		</ResponsiveTable>
 	</section>
 
 	{station.touristSpots.length > 0 && (
@@ -115,24 +125,19 @@ const sources = [...new Map(station.stats.filter(s => s.source).map(s => [s.sour
 		<section>
 			<h2>{t.aroundStats}</h2>
 			<p class="seo-note">{t.statsNote}</p>
-			<div class="seo-table-wrap">
-				<table class="seo-table">
-					<thead><tr><th>{t.colItem}</th><th class="num">{t.colValue}</th><th>{t.colScope}</th></tr></thead>
-					<tbody>
-						{station.stats.map(s => {
-							const page = DATA_LANGS.includes(lang) ? dataPageFor(s.key) : undefined;
-							const label = statLabel(s.meta.label, lang);
-							return (
-								<tr>
-									<td>{page ? <a href={dataPath(page.slug, lang)}>{label}</a> : label}</td>
-									<td class="num">{statValue(s.value, s.meta.unit, lang)}</td>
-									<td class="seo-note">{t.scope(s.meta.radius, s.meta.period)}</td>
-								</tr>
-							);
-						})}
-					</tbody>
-				</table>
-			</div>
+			<ResponsiveTable columns={[statCols.item, statCols.value, statCols.scope]}>
+				{station.stats.map(s => {
+					const page = DATA_LANGS.includes(lang) ? dataPageFor(s.key) : undefined;
+					const label = statLabel(s.meta.label, lang);
+					return (
+						<tr>
+							<TableCell col={statCols.item}>{page ? <a href={dataPath(page.slug, lang)}>{label}</a> : label}</TableCell>
+							<TableCell col={statCols.value}>{statValue(s.value, s.meta.unit, lang)}</TableCell>
+							<TableCell col={statCols.scope}>{t.scope(s.meta.radius, s.meta.period)}</TableCell>
+						</tr>
+					);
+				})}
+			</ResponsiveTable>
 			<p class="seo-note">
 				{t.sources}: {sources.map((src, i) => (
 					<Fragment>{i > 0 && ' / '}{src.url && !src.dead ? <a href={src.url} rel="nofollow noopener">{t.sourceTitle(src.title)}</a> : t.sourceTitle(src.title)}{t.retrievedAt(src.retrievedAt)}</Fragment>

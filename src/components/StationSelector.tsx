@@ -20,6 +20,7 @@ import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 import TextField from './ui/atoms/TextField';
 import SegmentedControl from './ui/molecules/SegmentedControl';
+import { useDeviceClass } from '../hooks/useDeviceClass';
 
 /** 駅名検索の結果として出す最大件数 */
 const STATION_SUGGESTION_LIMIT = 10;
@@ -136,7 +137,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const [waypointSearch, setWaypointSearch] = useState('');
   const [showWaypointResults, setShowWaypointResults] = useState(false);
   const [showWaypointInput, setShowWaypointInput] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  // 端末の区分は src/constants/breakpoints.ts（useDeviceClass）で決める
+  const isMobile = useDeviceClass() === 'mobile';
   const [isSearching, setIsSearching] = useState(false);
   const [departureDropdownPos, setDepartureDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
   const [arrivalDropdownPos, setArrivalDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
@@ -182,19 +184,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
-
-  // レスポンシブ対応
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    // 初期設定
-    handleResize();
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // visualViewport でキーボード表示を検知して入力欄をスクロール

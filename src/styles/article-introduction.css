@@ -62,15 +62,16 @@ html[data-theme="dark"] .seg button[aria-selected="true"]{ background:#0f1316; c
 .cta .btn .ar{ transition:transform .15s ease; }
 .cta .btn:hover .ar{ transform:translateX(3px); }
 
-@media(min-width:620px){
+/* 境目は src/constants/breakpoints.ts の BREAKPOINT（タブレット以上）と同じ値にする（テストで確認） */
+@media (min-width: 768px){
   .cards{ grid-template-columns:repeat(3,1fr); }
 }
 
-@media(min-width:560px){
+@media (min-width: 768px){
   .uses{ grid-template-columns:1fr 1fr; }
 }
 
-@media (max-width:560px){
+@media (max-width: 767.98px){
   h2{ flex-direction:column; gap:3px; }
   .seg{ width:calc(100% - 44px); }
   .seg button{ flex:1; justify-content:center; flex-direction:column; gap:0; }

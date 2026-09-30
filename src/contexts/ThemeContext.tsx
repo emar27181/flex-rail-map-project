@@ -90,6 +90,13 @@ export const getThemeColors = (theme: Theme) => {
     infoLight: theme === 'dark' ? '#2d3d4a' : '#e3f2fd',
     shadow: theme === 'dark' ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.15)',
     shadowHeavy: theme === 'dark' ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.3)',
+    /**
+     * 地図の陸と海（背景タイルを出さないときの下地）。一般的な地図と同じく、陸を明るく・海を灰色がかった青にする。
+     * 路線・駅ラベルが載る面なので、どちらも彩度を抑えて路線色の邪魔をしない
+     */
+    mapLand: theme === 'dark' ? '#2b2f33' : '#f7f6f2',
+    mapSea:  theme === 'dark' ? '#15181b' : '#cfd8df',
+    mapCoast: theme === 'dark' ? '#4a5157' : '#a9b4bd',
     // 半透明バリアント（折りたたみUIや常時表示ウィジェット向け）
     glassCollapsed: theme === 'dark' ? 'rgba(45,45,45,0.72)' : 'rgba(249,249,249,0.72)',
     glassOpen:      theme === 'dark' ? 'rgba(45,45,45,0.96)' : 'rgba(249,249,249,0.96)',

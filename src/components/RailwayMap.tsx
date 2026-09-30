@@ -109,6 +109,7 @@ import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE } from './ui/atoms/
 
 import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
+import { deviceClassOf } from '../constants/breakpoints';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -344,6 +345,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * 欲しい人は設定パネルから手動でONにする運用にする。
    */
   const [showOsmTiles, setShowOsmTiles] = useState(false);
+  /**
+   * 地図の下地の色。背景タイルを出さないときは海の色（日本の輪郭＝陸と色分けする）、
+   * タイルを出すときはタイルに任せる。下地を塗る所は必ずこれを使う（以前は2か所でページの背景色を塗っていて、
+   * 陸と海の色分けが効いていなかった）
+   */
+  const mapCanvasColor = showOsmTiles ? '' : colors.mapSea;
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   const [tapToggleMode, setTapToggleMode] = useState(true);
   // 地図表示モード
@@ -729,9 +736,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     setShowStationNumbers(language !== 'japanese');
   }, [language]);
 
-  // モバイル幅の監視
+  // モバイル幅の監視（端末の区分は src/constants/breakpoints.ts だけで決める）
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    const checkMobile = () => setIsMobile(deviceClassOf(window.innerWidth) === 'mobile');
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -1689,7 +1696,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // モバイルフルスクリーン時はタブバー分(44px)を除いた高さを使用
     const mobileBottomOffset = (isFullscreen && isMobile) ? 50 : 0;
     const vh = rawVh - mobileBottomOffset;
-    const isMobileView = vw < 500;
+    const isMobileView = deviceClassOf(vw) === 'mobile';
     // 幅はビューポートに収まるよう上限を設定
     const TW = Math.min(360, vw - MARGIN * 2);
     const LEFT_W = Math.min(160, Math.floor(TW * 0.48));
@@ -3656,12 +3663,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [isFullscreen, isMobile]);
 
-  // タイル非表示時はLeafletコンテナの背景色をテーマに合わせる
+  // タイル非表示時はLeafletコンテナの背景（＝海の色）をテーマに合わせる
   useEffect(() => {
     const container = mapRef.current?.getContainer?.() as HTMLElement | undefined;
     if (!container) return;
-    container.style.backgroundColor = showOsmTiles ? '' : colors.background;
-  }, [showOsmTiles, theme]);
+    container.style.backgroundColor = mapCanvasColor;
+  }, [mapCanvasColor]);
 
   const toggleRoute = (routeKey: RouteKey) => {
     console.log('🔄 toggleRoute called for:', routeKey);
@@ -4141,8 +4148,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // タイル非表示時の背景色をマウント直後に適用
     React.useEffect(() => {
       const container = map.getContainer() as HTMLElement;
-      container.style.backgroundColor = showOsmTiles ? '' : colors.background;
-    }, [showOsmTiles, theme, map]);
+      container.style.backgroundColor = mapCanvasColor;
+    }, [mapCanvasColor, map]);
 
     return null;
   };
@@ -5309,9 +5316,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               zoom={mapZoom}
               style={{
                 height: '100%', width: '100%',
+                // 背景タイルを出さないときは、地図の下地を海の色にして日本の輪郭（陸）と色分けする
                 backgroundColor: mapViewMode === 'bubble'
                   ? (theme === 'dark' ? '#1a1a2e' : '#f0f0f5')
-                  : undefined,
+                  : mapCanvasColor || undefined,
               }}
               scrollWheelZoom={true}
               zoomControl={false}
@@ -5402,12 +5410,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   positions={points}
                   pathOptions={{
                     fill: true,
-                    // 陸を白でごく薄く塗るだけで海（地図の下地色）と見分けられるようにする。
-                    // ライトモードは下地（#ddd 相当）が既に明るくヘッドルームが小さいため、
-                    // 同じ見え方にするには濃いめの割合が必要（ダーク0.08 / ライト0.35）
-                    fillColor: NEUTRAL.white,
-                    fillOpacity: theme === 'dark' ? 0.08 : 0.35,
-                    color: theme === 'dark' ? alphaWhite(0.35) : alphaBlack(0.25),
+                    // 陸と海をはっきり塗り分ける（陸=明るい面、海=地図の下地の灰色がかった青）。
+                    // 以前は白を薄く重ねるだけで、ライトモードでは陸と海の差がほとんど見えなかった
+                    fillColor: colors.mapLand,
+                    fillOpacity: 1,
+                    color: colors.mapCoast,
                     weight: JAPAN_OUTLINE_WEIGHT,
                     interactive: false,
                   }}
