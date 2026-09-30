@@ -15,6 +15,7 @@ import {
   LIGHT_TEXT,
   darkenForWhiteText,
   MIN_DARKEN_SCALE,
+  filledLabelColors,
 } from '../../../src/utils/contrast';
 import { routeColors } from '../../../src/data/routes';
 
@@ -148,5 +149,22 @@ describe('darkenForWhiteText（ダークモードの駅名白字統一）', () =
 
   it('解釈できない色はそのまま返す', () => {
     expect(darkenForWhiteText('rgb(1,2,3)')).toBe('rgb(1,2,3)');
+  });
+});
+
+describe('filledLabelColors（駅ラベル・路線色の塗り）', () => {
+  it('ライトモードでも文字は白で、明るい路線色は背景を少し暗くして読めるようにする', () => {
+    for (const color of ['#80C241', '#FFD400', '#F68B1E', '#00B2E5', '#0067C0']) {
+      for (const theme of ['light', 'dark'] as const) {
+        const { background, text } = filledLabelColors(color, theme);
+        expect(text, `${color} ${theme}`).toBe(LIGHT_TEXT);
+        // 暗くしても色相は同じ（明度だけを下げる）: 最大のチャンネルが同じ
+        const a = parseHexColor(color)!, b = parseHexColor(background)!;
+        expect(a.indexOf(Math.max(...a)), `${color} → ${background}`).toBe(b.indexOf(Math.max(...b)));
+      }
+    }
+  });
+  it('両テーマで同じ配色になる', () => {
+    expect(filledLabelColors('#FFD400', 'light')).toEqual(filledLabelColors('#FFD400', 'dark'));
   });
 });

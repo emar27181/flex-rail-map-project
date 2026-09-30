@@ -145,19 +145,20 @@ export function tintColor(hex: string, alpha: number): string {
  * 「ダークなら白字、ライトなら明るさで白黒を選ぶ」を書いていて、
  * 直すたびに片方だけ変わってしまっていた。規則をここ1箇所にまとめる。
  *
- * - ダークモード: 文字は白に統一し、足りない分は背景を必要最小限だけ暗くする
- * - ライトモード: 背景はそのままで、明るさに応じて白/黒の読みやすい方を選ぶ
+ * 2026-09-30: ライトモードでも文字は白に統一する（ユーザー指示「中の字を白くするのを優先」）。
+ * 明るい路線色で黒字になるとラベルごとに文字色が変わって見え、統一感が無かった。
+ * - 文字は両テーマとも白。足りない分は背景を必要最小限だけ暗くする（明度だけを下げ、色相は変えない。
+ *   下限 MIN_DARKEN_SCALE までなので、人が別の色と感じるほどは変えない）
  * - それでも 4.5:1 に届かない明るい色（総武線の黄色など）は needsHalo が true。
- *   呼び出し側で文字の縁取りを足して可読性を補う
+ *   呼び出し側で文字の縁取りを足して可読性を補う（コントラスト比が多少落ちるのは許容）
  */
-export function filledLabelColors(baseColor: string, theme: 'light' | 'dark'): {
+export function filledLabelColors(baseColor: string, _theme: 'light' | 'dark'): {
   background: string;
   text: string;
   needsHalo: boolean;
 } {
-  const background = theme === 'dark' ? darkenForWhiteText(baseColor) : baseColor;
-  const text = theme === 'dark' ? LIGHT_TEXT : readableTextColor(background);
-  return { background, text, needsHalo: !meetsContrast(background, text) };
+  const background = darkenForWhiteText(baseColor);
+  return { background, text: LIGHT_TEXT, needsHalo: !meetsContrast(background, LIGHT_TEXT) };
 }
 
 /** 2色が目標コントラスト比（既定 WCAG AA の 4.5:1）を満たすか */
