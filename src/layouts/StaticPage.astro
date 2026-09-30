@@ -14,6 +14,7 @@ import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import SiteFooterNav from '../components/SiteFooterNav.astro';
 import { staticPageCss } from './staticPageStyles';
 import { SITE_URL, GOOGLE_SITE_VERIFICATION } from '../config/seo';
+import FaviconLinks from '../components/seo/FaviconLinks.astro';
 
 interface Props {
   /** <title> にそのまま入る */
@@ -58,10 +59,7 @@ const {
 		)}
 		<meta name="google-adsense-account" content="ca-pub-2444529114040977" />
 		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2444529114040977" crossorigin="anonymous"></script>
-		<link rel="icon" type="image/png" sizes="32x32" href="/icon_flex_rail_way_map.png" />
-		<link rel="icon" type="image/png" sizes="16x16" href="/icon_flex_rail_way_map.png" />
-		<link rel="apple-touch-icon" sizes="180x180" href="/icon_flex_rail_way_map.png" />
-		<link rel="shortcut icon" href="/icon_flex_rail_way_map.png" />
+		<FaviconLinks />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
 

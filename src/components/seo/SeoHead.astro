@@ -13,6 +13,8 @@
  */
 import GA4Loader from '../GA4Loader.astro';
 import { canonicalUrl, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION, OG_LOCALE, SITE_NAME, type HreflangLink } from '../../config/seo';
+import FaviconLinks from './FaviconLinks.astro';
+import { CONTROL_CSS } from '../ui/atoms/controlCss';
 
 export interface Props {
   title: string;
@@ -41,10 +43,7 @@ const canonical = canonicalUrl(path);
 {GOOGLE_SITE_VERIFICATION && (
 	<meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />
 )}
-<link rel="icon" type="image/png" sizes="32x32" href="/icon_flex_rail_way_map.png" />
-<link rel="icon" type="image/png" sizes="16x16" href="/icon_flex_rail_way_map.png" />
-<link rel="apple-touch-icon" sizes="180x180" href="/icon_flex_rail_way_map.png" />
-<link rel="shortcut icon" href="/icon_flex_rail_way_map.png" />
+<FaviconLinks />
 <meta name="viewport" content="width=device-width" />
 <meta name="generator" content={Astro.generator} />
 
@@ -71,4 +70,4 @@ const canonical = canonicalUrl(path);
 
 <GA4Loader />
 
-{styles.map(css => <style set:html={css}></style>)}
+{[CONTROL_CSS, ...styles].map(css => <style set:html={css}></style>)}

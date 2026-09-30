@@ -486,7 +486,7 @@ const yamanoteData: LineTimetableData = {
 
 const tokaidoData: LineTimetableData = {
   key: 'jrTokaidoMainLine',
-  name: '東海道線',
+  name: '上野東京ライン（東海道線）',
   updatedAt: '2026-09-28',
   dataVersion: '運行間隔からの概算（行先は方面のみ）',
   // 上りの大半は上野東京ラインとして宇都宮線・高崎線へ直通し、東京止まりではない。
@@ -1860,7 +1860,7 @@ const meguroData: LineTimetableData = {
 
 const jrUtsunomiyaData: LineTimetableData = {
   key: 'jrUtsunomiyaLine',
-  name: '宇都宮線',
+  name: '上野東京ライン（宇都宮線）',
   updatedAt: '2025-03-15',
   dataVersion: '2025年版（概算）',
   directions: [
@@ -2735,7 +2735,7 @@ const jrSobuLineData: LineTimetableData = {
 
 const jrTakasakiLineData: LineTimetableData = {
   key: 'jrTakasakiLine',
-  name: '高崎線',
+  name: '上野東京ライン（高崎線）',
   updatedAt: '2025-03-15',
   dataVersion: '2025年版（概算）',
   directions: [
@@ -4457,7 +4457,7 @@ const tokaidoShinkansenData: LineTimetableData = {
 const KANTO_ADD = { updatedAt: '2026-08-16', dataVersion: '2026年8月追加（概算）' };
 
 const shonanShinjukuData: LineTimetableData = {
-  key: 'jrShonanShinjukuLine', name: '湘南新宿ライン', ...KANTO_ADD,
+  key: 'jrShonanShinjukuLine', name: '湘南新宿ライン（宇都宮線・横須賀線）', ...KANTO_ADD,
   directions: [
     {
       label: '大宮→逗子',
@@ -5045,6 +5045,30 @@ export function getNextDepartures(
   // 終電を過ぎた場合は翌日始発から補完
   const nextDay = stationDepartures.slice(0, count - filtered.length);
   return [...filtered, ...nextDay].slice(0, count);
+}
+
+/**
+ * 時刻表の方向ごとの短い名前（例: 「熱海・沼津方面」「宇都宮・高崎方面」）。時刻表の方向切替に使う。
+ *
+ * 方向の label は路線ごとに「上り（…）」「〜方面」「A→B」と書き方がばらばらで、
+ * 上り・下りは直通先で逆になる（上野東京ラインの上りは宇都宮線に入ると下り）ため、
+ * その方向でいちばん多い行先を「〜方面」の形にして使う（「〜行き」は「〜方面」に直す）。
+ * 行先が無ければ、駅の並びの最後の駅を使う。
+ */
+export function getDirectionShortLabels(lineKey: string): string[] {
+  const line = getLineTimetable(lineKey);
+  if (!line) return [];
+  return line.directions.map(d => {
+    const counts = new Map<string, number>();
+    for (const p of d.patterns) {
+      const dest = p.destination.replace(/行き$/, '方面');
+      counts.set(dest, (counts.get(dest) ?? 0) + 1);
+    }
+    const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+    if (top) return top.endsWith('方面') ? top : `${top}方面`;
+    const last = d.stations[d.stations.length - 1]?.name;
+    return last ? `${last}方面` : d.label;
+  });
 }
 
 /**

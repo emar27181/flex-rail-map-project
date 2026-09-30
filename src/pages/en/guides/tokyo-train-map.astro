@@ -3,6 +3,7 @@ import GuideLayout from "../../../layouts/GuideLayout.astro";
 import { getGuide } from "../../../data/guides";
 import { routeColors, routeNames } from "../../../data/routes";
 import { routeTranslations } from "../../../utils/translation";
+import { SITE_NAME } from '../../../config/seo';
 
 const guide = getGuide('en', 'tokyo-train-map')!;
 // Same 2 lines the CTA below opens the map with. Colors/names come straight from the real route data.
@@ -10,7 +11,7 @@ const previewRoutes = ['yamanote', 'ginzaLine'] as const;
 const englishName = (key: typeof previewRoutes[number]) => routeTranslations[routeNames[key]] ?? routeNames[key];
 ---
 
-<GuideLayout guide={guide} indexHref="/en/guides" indexLabel="Guides" backLabel="← Back to Flex Railway Map">
+<GuideLayout guide={guide} indexHref="/en/guides" indexLabel="Guides" backLabel={`← Back to ${SITE_NAME}`}>
 	<Fragment slot="visual">
 		<div class="guide-visual">
 			<div class="route-chip-row">

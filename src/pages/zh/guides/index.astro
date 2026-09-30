@@ -1,28 +1,25 @@
 ---
 import GuidesIndexLayout from "../../../layouts/GuidesIndexLayout.astro";
 import { getGuidesByLang } from "../../../data/guides";
+import { SITE_NAME } from '../../../config/seo';
 
 const zhGuides = getGuidesByLang('zh');
 ---
 
 <GuidesIndexLayout
-	title="指南列表 - Flex Railway Map | 东京地铁线路图使用方法"
-	description="Flex Railway Map的中文指南列表。了解如何简化查看东京地铁线路图，每篇指南都可以直接打开对应的互动地图。"
+	title={`指南列表 - ${SITE_NAME} | 东京地铁线路图使用方法`}
+	description={`${SITE_NAME}的中文指南列表。了解如何简化查看东京地铁线路图，每篇指南都可以直接打开对应的互动地图。`}
 	path="/zh/guides"
 	htmlLang="zh"
-	backLabel="← 返回 Flex Railway Map"
+	backLabel={`← 返回 ${SITE_NAME}`}
 >
 	<h1 class="page-title">指南列表</h1>
 	<p class="lede">
-	按主题分类的指南。每篇指南都可以直接打开对应内容的Flex Railway Map互动地图。
+	按主题分类的指南。每篇指南都可以直接打开对应内容的{SITE_NAME}互动地图。
 	</p>
 	<ul class="related-list">
 		{zhGuides.map(g => (
 			<li><a href={`/zh/guides/${g.slug}`}>{g.breadcrumbLabel}</a></li>
 		))}
 	</ul>
-	<h2>English / 日本語 / 한국어</h2>
-	<p>
-	<a href="/en/guides">English guides</a> · <a href="/guides">日本語のガイド</a> · <a href="/ko/guides">한국어 가이드</a>
-	</p>
 </GuidesIndexLayout>

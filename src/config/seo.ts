@@ -12,28 +12,60 @@
  * ソースにハードコードせず .env の環境変数から読む。
  */
 
-/** 正式なサービス名。旧名 "Tokyo Flex Railway Map" は使わない */
+/**
+ * 正式なサービス名（全言語共通）。サイト名はここだけに書く。
+ * 旧名・別表記（"Tokyo Flex Railway Map" / "Flex Rail Map" / 「フレックス路線図」）は使わない
+ * （tests/unit/config/siteName.test.ts が src 内の直書きを検出する）。
+ * データファイル（ガイド・記事の文章）には `{siteName}` と書き、表示するときに
+ * withSiteName() で置き換える（データファイルは値だけにする決まりのため）。
+ */
 export const SITE_NAME = 'Flex Railway Map';
+
+/** 著作権者・構造化データの著者名 */
+export const PROJECT_NAME = `${SITE_NAME} Project`;
+
+/** 著作権表記 */
+export const COPYRIGHT_TEXT = `© 2025 ${PROJECT_NAME}`;
+
+/** データファイルの文章に書くサービス名の置き場所 */
+export const SITE_NAME_PLACEHOLDER = '{siteName}';
+
+/** 文章中の `{siteName}` を正式なサービス名に置き換える（文字列以外はそのまま中まで見る） */
+export function withSiteName<T>(value: T): T {
+  if (typeof value === 'string') return value.split(SITE_NAME_PLACEHOLDER).join(SITE_NAME) as T;
+  if (Array.isArray(value)) return value.map(v => withSiteName(v)) as T;
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, withSiteName(v)])) as T;
+  }
+  return value;
+}
 
 /** 公開URL。末尾スラッシュなし */
 export const SITE_URL = 'https://flex-railway-map.netlify.app';
 
+/**
+ * アプリのアイコン（サイト内パス）。PWA の manifest（public/manifest.json の icons）・
+ * ファビコン・ヘッダーのロゴ・OGP画像はすべてこれを使う。ページごとに書かないこと
+ * （manifest と一致しているかは tests/unit/config/appIcon.test.ts が確かめる）
+ */
+export const APP_ICON_PATH = '/icon_flex_rail_way_map.png';
+
 /** OGP/Twitterカード用の既定画像 */
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/icon_flex_rail_way_map.png`;
+export const DEFAULT_OG_IMAGE = `${SITE_URL}${APP_ICON_PATH}`;
 
 /**
  * GA4測定ID（例: "G-XXXXXXXXXX"）。
  * 未設定ならGA4は一切読み込まない（開発環境・プレビューでは通常未設定）。
  */
 export const GA_MEASUREMENT_ID: string | undefined =
-  import.meta.env.VITE_GA_MEASUREMENT_ID || undefined;
+  import.meta.env?.VITE_GA_MEASUREMENT_ID || undefined;
 
 /**
  * Google Search Console のHTMLタグ確認用コード（content属性の値のみ）。
  * 未設定ならmetaタグ自体を出力しない。
  */
 export const GOOGLE_SITE_VERIFICATION: string | undefined =
-  import.meta.env.GOOGLE_SITE_VERIFICATION || undefined;
+  import.meta.env?.GOOGLE_SITE_VERIFICATION || undefined;
 
 /** ページ単位のcanonical URLを組み立てる */
 export function canonicalUrl(path: string): string {
@@ -44,6 +76,18 @@ export function canonicalUrl(path: string): string {
 export interface HreflangLink {
   hreflang: string;
   href: string;
+}
+
+/**
+ * サイト内の言語（URLの接頭辞 /zh/ など）→ hreflang・<html lang> に書く言語コード。
+ * 中国語の文章は簡体字なので zh-CN と明示する。URL は既存どおり /zh/ のまま変えない。
+ */
+export const HREFLANG_CODE: Record<string, string> = {
+  zh: 'zh-CN',
+};
+
+export function hreflangCode(lang: string): string {
+  return HREFLANG_CODE[lang] ?? lang;
 }
 
 /**
@@ -63,7 +107,7 @@ export function buildHreflangLinks(
   if (versions.length < 2) return [];
   const def = versions.find(v => v.lang === defaultLang) ?? versions[0];
   return [
-    ...versions.map(v => ({ hreflang: v.lang, href: canonicalUrl(v.path) })),
+    ...versions.map(v => ({ hreflang: hreflangCode(v.lang), href: canonicalUrl(v.path) })),
     { hreflang: 'x-default', href: canonicalUrl(def.path) },
   ];
 }

@@ -271,6 +271,23 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 除外は定義元2ファイル（`legendStyles.ts` `controlSize.ts`）と
 `src/v2/`・`src/design/` だけ。
 
+### 静的ページ（記事・ガイド・駅/路線ページ）でも同じ規格を使う（2026-09-29）
+
+記事・ガイドなどの静的ページは React を読み込まないため、アトム（`Button` など）を直接使えない。
+代わりに `src/components/ui/atoms/controlCss.ts` が同じトークンから CSS を作る。
+
+| 使うもの | 中身 | 使うところ |
+|---|---|---|
+| `.ctl` / `.ctl-icon` | 地図の隅のボタンと同じ 36px・角丸 control・アイコン18px | 記事ヘッダーのテーマ切り替え・言語切り替え |
+| `TOKEN_VARS_CSS`（CSS変数） | `--r-control` `--r-card` `--r-pill` `--ctl-md-h` `--ctl-md-pad` `--ctl-md-fs` `--ctl-md-gap` `--ctl-border-w` | 手書きの CSS（`src/styles/article-*.css`） |
+
+- 手書きの CSS には角の丸み・ボタンの寸法を直書きしない。`var(--r-*)` と `var(--ctl-md-*)` だけを使う
+  （円は `50%` のみ可）。`tests/unit/styles/articleCssTokens.test.ts` が直書きを検出する
+- 以前の記事は、ボタン 8/9px・チップ 999px（小判形）・箱 10/11/12/14px と7種類の丸みが混在し、
+  アトム（すべて 3px）と揃っていなかった。記事の CTA も緑だったが、主操作は青（`primary`、記事では
+  `--accent-strong`）なので、ガイドと同じ「箱＋塗りの主要ボタン」にした
+- 未対応: 記事 CSS の文字サイズ（13.5px・15.5px など）と配色（`--bg` `--ink` など）は記事独自の値のまま
+
 ### テストで固定していること
 
 `tests/unit/components/ui/atoms.test.tsx`

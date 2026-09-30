@@ -112,6 +112,10 @@ export const jrExampleLine: Station[] = [
   路線データに駅が無いときは、テストの `KNOWN_MISSING_TERMINI` に理由付きで足す
 - 新しい系統名を使うときは `ServiceBrand` と `SERVICE_BRAND_LABEL_KEY`、
   `translation.ts` の4言語を足す
+- **上野東京ライン・湘南新宿ラインの路線名は「系統名（路線名）」で書く**
+  （`routes.ts` の `routeNames`）。例: `上野東京ライン（東海道線）`、`湘南新宿ライン（高崎線・東海道線）`。
+  「東海道本線」＋下に系統名、のような別の書き方を混ぜない。時刻表（`timetableData.ts`）の `name` も
+  同じ文字列にし、`translation.ts` の `routeTranslations` に英語名を足す（テストで検証）
 
 ### 並走区間（`src/data/sharedCorridors.ts`）
 
@@ -132,6 +136,27 @@ export const jrExampleLine: Station[] = [
 - 座標を手で書かない。`scripts/track-geometry/collect-osm.mts` で集め、検証に通ったものだけを置く
 - OSM の bridge / tunnel / layer は構造・上下関係として残し、**高さ(m)に変換しない**。標高は出典があるときだけ
 - 手順・基準・データソースの比較は `docs/track-geometry.md`
+### 駅周辺の施設数（800m）を新しいデータで更新する
+
+外部（ChatGPT / Genspark など）で集めた「駅から半径800mの施設数」の新しい版を受け取ったときの手順。
+2026-09-29 の首都圏拡張（`data/kanto-poi-800m-2026-09/`）がこの手順の実例。
+
+1. 受け取ったフォルダを `data/<名前>-<年>-<月>/` に置く。中身は次の2つが要る
+   - 駅名 → 値の JSON（`station-stats-data.json` と同じフィールド名。**既存の 500m 系フィールドと同じ名前の値は入れない**）
+   - 各駅を数えた位置（駅名・緯度・経度）の CSV（`coverage.csv` と同じ列名）
+2. 出典・収集日・半径・ライセンス・対象駅数を、そのフォルダの `README.md` に書く
+3. 取り込みスクリプトで検証して取り込む（何度実行しても同じ結果になる）:
+   `npx tsx scripts/merge-kanto-poi-800m.mts`
+   （別のフォルダなら、スクリプト冒頭の `DIR` を変えたコピーを作る）
+   - 取り込まない（保留にする）のは、(a) 数えた位置がアプリの同じ名前の駅から 800m より離れている、
+     (b) 同じ名前の駅がアプリに 2km 以上離れて複数ある（駅統計は駅名だけで引くので別の駅にも値が出る）、
+     (c) 全項目が 0（取得失敗の疑い）の駅
+   - 結果は `validation.json` に残る。保留の駅は推測で直さず、理由と一緒に報告する
+4. `src/data/stationStats.ts` の `KANTO_POC_SOURCE`（出典）に、収集日と対象駅数を書き足す
+5. `npm run test:data` → `test:types` → `test:unit` → `build`
+
+**収集スクリプトを直すとき**: Overpass はタイムアウトでも `elements: []` と `remark` を返す。
+これを 0 件として保存しない（`data/kanto-station-poc-2026-09/scripts/kanto_poi_scale.py` の `fetch_cell` が実例）。
 
 ### 時刻表（`src/data/timetableData.ts`）
 

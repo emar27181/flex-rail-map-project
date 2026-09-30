@@ -6,7 +6,9 @@
     "src/data/routes.ts",
     "src/utils/trackGeometry.ts",
     "src/data/trackGeometry/index.ts",
-    "scripts/track-geometry/collect-osm.mts"
+    "scripts/track-geometry/collect-osm.mts",
+    "src/data/articles/index.ts",
+    "src/data/articleBodyI18n.ts"
   ],
   "exclude": ["dist"],
   "compilerOptions": {

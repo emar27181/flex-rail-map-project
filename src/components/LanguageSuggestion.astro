@@ -1,0 +1,95 @@
+---
+/**
+ * 「このページは〇〇語でも読めます」の案内（LanguageSwitcher と組で使う）。
+ *
+ * 閲覧者の言語による自動リダイレクトはしない。自動で飛ばすと、検索エンジンが
+ * 他の言語版を見られなくなり、共有したURLが人によって別のページになるため。
+ * 代わりに、以前選んだ言語（地図アプリと共通の `frm-language`）か、
+ * ブラウザの言語（navigator.languages）にこのページの版があるときだけ、
+ * 閉じられる案内を1行出す。閉じたらそのタブの間は出さない。
+ */
+import { FS } from '../constants/ui';
+import { L } from './legend/legendStyles';
+import { hreflangCode } from '../config/seo';
+
+type Lang = 'ja' | 'en' | 'zh' | 'ko';
+
+export interface Props {
+  current: Lang;
+  versions: Partial<Record<Lang, string>>;
+}
+
+const { current, versions } = Astro.props;
+const ORDER: Lang[] = ['ja', 'en', 'zh', 'ko'];
+const NATIVE: Record<Lang, string> = { ja: '日本語', en: 'English', zh: '简体中文', ko: '한국어' };
+/** 案内の文言は「案内する言語」で書く（その言語の読者に向けた案内なので） */
+const SUGGEST: Record<Lang, string> = {
+  ja: 'このページは日本語でも読めます',
+  en: 'This page is also available in English',
+  zh: '本页面也有简体中文版',
+  ko: '이 페이지는 한국어로도 볼 수 있습니다',
+};
+const CLOSE: Record<Lang, string> = { ja: '閉じる', en: 'Close', zh: '关闭', ko: '닫기' };
+const others = ORDER.filter(l => l !== current && versions[l]);
+const fsBody = FS.body;
+const pad = L.sp.md;
+const radius = L.r.card;
+---
+
+{others.length > 0 && (
+  <div class="lang-suggest" hidden data-lang-suggest data-lang-current={current}>
+    {others.map(l => (
+      <p hidden data-lang-suggest-for={l} lang={hreflangCode(l)}>
+        <span>{SUGGEST[l]}:</span>
+        <a href={versions[l]} hreflang={hreflangCode(l)} data-lang-link={l}>{NATIVE[l]}</a>
+        <a href="#" role="button" class="lang-suggest-close" data-lang-suggest-close aria-label={CLOSE[l]} title={CLOSE[l]}>
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </a>
+      </p>
+    ))}
+  </div>
+)}
+
+<script is:inline>
+  (function () {
+    var box = document.querySelector('[data-lang-suggest]');
+    if (!box) return;
+    var DISMISS = 'frm-lang-suggest-dismissed';
+    try { if (sessionStorage.getItem(DISMISS)) return; } catch (err) {}
+    var current = box.getAttribute('data-lang-current');
+    var FROM_APP = { japanese: 'ja', english: 'en', chinese: 'zh', korean: 'ko' };
+    var preferred = null;
+    try { preferred = FROM_APP[localStorage.getItem('frm-language')] || null; } catch (err) {}
+    if (!preferred) {
+      var list = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+      for (var i = 0; i < list.length && !preferred; i++) {
+        var code = String(list[i]).toLowerCase().split('-')[0];
+        if (code === 'ja' || code === 'en' || code === 'zh' || code === 'ko') preferred = code;
+      }
+    }
+    if (!preferred || preferred === current) return;
+    var line = box.querySelector('[data-lang-suggest-for="' + preferred + '"]');
+    if (!line) return;
+    line.hidden = false;
+    box.hidden = false;
+    box.addEventListener('click', function (e) {
+      var close = e.target && e.target.closest ? e.target.closest('[data-lang-suggest-close]') : null;
+      if (!close) return;
+      e.preventDefault();
+      box.hidden = true;
+      try { sessionStorage.setItem(DISMISS, '1'); } catch (err) {}
+    });
+  })();
+</script>
+
+<style define:vars={{ fsBody, pad, radius }}>
+  .lang-suggest {
+    margin: var(--pad) 0; padding: var(--pad);
+    border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+    border-radius: var(--radius); font-size: var(--fsBody);
+  }
+  .lang-suggest[hidden], .lang-suggest p[hidden] { display: none; }
+  .lang-suggest p { margin: 0; display: flex; align-items: center; gap: var(--pad); flex-wrap: wrap; }
+  .lang-suggest a { color: inherit; font-weight: bold; }
+  .lang-suggest-close { margin-left: auto; display: inline-flex; }
+</style>

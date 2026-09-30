@@ -1,16 +1,17 @@
 ---
 import GuidesIndexLayout from "../../../layouts/GuidesIndexLayout.astro";
 import { getGuidesByLang } from "../../../data/guides";
+import { SITE_NAME } from '../../../config/seo';
 
 const enGuides = getGuidesByLang('en');
 ---
 
 <GuidesIndexLayout
-	title="Guides - Flex Railway Map | Understanding Tokyo's Train Network"
-	description="Guides for understanding Tokyo's train network, from Flex Railway Map. Each guide links directly to the interactive map for the topic."
+	title={`Guides - ${SITE_NAME} | Understanding Tokyo's Train Network`}
+	description={`Guides for understanding Tokyo's train network, from ${SITE_NAME}. Each guide links directly to the interactive map for the topic.`}
 	path="/en/guides"
 	htmlLang="en"
-	backLabel="← Back to Flex Railway Map"
+	backLabel={`← Back to ${SITE_NAME}`}
 >
 	<h1 class="page-title">Guides</h1>
 	<p class="lede">
@@ -23,10 +24,6 @@ const enGuides = getGuidesByLang('en');
 	</ul>
 	<h2>Want to learn how to use the app itself?</h2>
 	<p>
-	For how to toggle lines, search routes, and other Flex Railway Map features, see the <a href="/guide?lang=en">usage guide</a>.
-	</p>
-	<h2>日本語 / 中文 / 한국어</h2>
-	<p>
-	<a href="/guides">日本語のガイド</a> · <a href="/zh/guides">中文指南</a> · <a href="/ko/guides">한국어 가이드</a>
+	For how to toggle lines, search routes, and other {SITE_NAME} features, see the <a href="/guide?lang=en">usage guide</a>.
 	</p>
 </GuidesIndexLayout>

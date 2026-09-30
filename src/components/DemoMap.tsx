@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { SITE_NAME } from '../config/seo';
 import { Map, MousePointerClick, CircleCheck, Check } from 'lucide-react';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { SEMANTIC, NEUTRAL, FS} from '../constants/ui';
@@ -361,7 +362,7 @@ const DemoMap: React.FC = () => {
             pointerEvents: 'none',
             zIndex: 500,
           }}>
-            © OpenStreetMap contributors | Flex Rail Map
+            © OpenStreetMap contributors | {SITE_NAME}
           </div>
         </div>
       </div>

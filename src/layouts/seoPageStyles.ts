@@ -29,6 +29,8 @@ export const seoPageCss = `
 }
 .seo-table th { font-weight: bold; color: ${light.textSecondary}; white-space: nowrap; }
 .seo-table td.num, .seo-table th.num { text-align: right; white-space: nowrap; }
+/* 駅名は途中で折り返さない（「代官/山」のように切れると別の駅名に見える）。狭い画面では表が横に流れる */
+.seo-table td.name { white-space: nowrap; }
 body.dark .seo-table th, body.dark .seo-table td { border-bottom-color: ${dark.borderLight}; }
 body.dark .seo-table th { color: ${dark.textSecondary}; }
 

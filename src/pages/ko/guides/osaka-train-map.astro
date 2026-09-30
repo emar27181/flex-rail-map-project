@@ -1,0 +1,9 @@
+---
+import GuideLayout from "../../../layouts/GuideLayout.astro";
+import { getGuide } from "../../../data/guides";
+import { SITE_NAME } from '../../../config/seo';
+
+const guide = getGuide('ko', 'osaka-train-map')!;
+---
+
+<GuideLayout guide={guide} indexHref="/ko/guides" indexLabel="가이드 목록" backLabel={`← ${SITE_NAME}으로 돌아가기`} />

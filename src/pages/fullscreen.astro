@@ -1,16 +1,13 @@
 ---
 import FullscreenMapWrapper from "../components/FullscreenMapWrapper.tsx";
+import FaviconLinks from '../components/seo/FaviconLinks.astro';
+import { SITE_NAME } from '../config/seo';
 ---
 
 <html lang="ja">
 	<head>
 		<meta charset="utf-8" />
-		<link
-			rel="icon"
-			type="image/png"
-			sizes="32x32"
-			href="/icon_flex_rail_way_map.png"
-		/>
+		<FaviconLinks />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="generator" content={Astro.generator} />
 		<!--
@@ -19,7 +16,7 @@ import FullscreenMapWrapper from "../components/FullscreenMapWrapper.tsx";
 			noindex のページは sitemap にも入らない（sitemap の自動生成が除外する）。
 		-->
 		<meta name="robots" content="noindex, follow" />
-		<title>フレックス路線図 - フルスクリーンマップ</title>
+		<title>{SITE_NAME} - フルスクリーンマップ</title>
 		<meta name="description" content="フルスクリーンで東京の路線図を表示。Google マップのように地図を全画面表示し、必要な情報をオーバーレイで確認できます。" />
 		<link
 			rel="stylesheet"
