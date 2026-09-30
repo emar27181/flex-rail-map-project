@@ -1,3 +1,4 @@
+import { COPYRIGHT_TEXT, SITE_NAME } from '../config/seo';
 // 駅名翻訳辞書
 export const stationTranslations: { [key: string]: string } = {
   "東京": "Tokyo",
@@ -6950,6 +6951,9 @@ export const routeTranslations: { [key: string]: string } = {
   "湘南新宿ライン": "Shonan-Shinjuku Line",
   "湘南新宿ライン（宇都宮線・横須賀線）": "Shonan-Shinjuku Line (Utsunomiya–Yokosuka)",
   "湘南新宿ライン（高崎線・東海道線）": "Shonan-Shinjuku Line (Takasaki–Tokaido)",
+  "上野東京ライン（東海道線）": "Ueno-Tokyo Line (Tokaido)",
+  "上野東京ライン（宇都宮線）": "Ueno-Tokyo Line (Utsunomiya)",
+  "上野東京ライン（高崎線）": "Ueno-Tokyo Line (Takasaki)",
   "東武アーバンパークライン": "Tobu Urban Park Line",
   "JR相模線": "JR Sagami Line",
   "JR鶴見線": "JR Tsurumi Line",
@@ -7789,8 +7793,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
 
   // Footer text
   copyrightText: {
-    japanese: "© 2025 Flex Rail Map Project",
-    english: "© 2025 Flex Rail Map Project"
+    japanese: COPYRIGHT_TEXT,
+    english: COPYRIGHT_TEXT
   },
   dataSourceText: {
     japanese: "駅データは独自作成またはオープンデータを利用しています。",
@@ -7874,10 +7878,6 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "到着",
     english: "Arrive"
   },
-  onboard: {
-    japanese: "乗",
-    english: "On"
-  },
   show: {
     japanese: "表示",
     english: "Show"
@@ -7926,21 +7926,29 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "以降",
     english: "onwards"
   },
-  showPastDepartures: {
-    japanese: "前の時刻を表示",
-    english: "Show earlier departures"
-  },
-  hidePastDepartures: {
-    japanese: "前の時刻を隠す",
-    english: "Hide earlier departures"
-  },
-  showMorePastDepartures: {
-    japanese: "▲ さらに前を表示",
-    english: "▲ Show more earlier departures"
-  },
   firstTrainReached: {
     japanese: "始発",
     english: "First train"
+  },
+  showPerRouteStationTimes: {
+    japanese: "時刻を路線ごとに表示",
+    english: "Show times per line"
+  },
+  visibleRoutesLegendTitle: {
+    japanese: "表示中の路線",
+    english: "Lines shown"
+  },
+  moreRoutesCount: {
+    japanese: "…ほか{count}路線",
+    english: "…and {count} more"
+  },
+  reverseDirection: {
+    japanese: "方向を切り替え",
+    english: "Switch direction"
+  },
+  reverseDirectionReference: {
+    japanese: "逆方向（参考）",
+    english: "Opposite direction (reference)"
   },
   offRouteReference: {
     japanese: "ルート外参考",
@@ -8291,8 +8299,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Open menu"
   },
   appTitle: {
-    japanese: "フレックス路線図",
-    english: "Flex Railway Map"
+    japanese: SITE_NAME,
+    english: SITE_NAME
   },
   appTagline: {
     japanese: "必要な路線だけを表示するシンプルな路線図",
@@ -8812,7 +8820,7 @@ export const uiChinese: Record<string, string> = {
   addDepartureButton: "添加出发站",
   removeDepartureLabel: "删除此出发站",
   focusThisDeparture: "设为主出发站",
-  copyrightText: "© 2025 Flex Rail Map Project",
+  copyrightText: COPYRIGHT_TEXT,
   dataSourceText: "站点数据为原创或使用开放数据。",
   disclaimerText: "本服务为非官方服务，与各铁路公司无关。",
   accuracyText: "提供的信息仅供参考。请查看官方网站获取准确的运行信息。",
@@ -8832,7 +8840,6 @@ export const uiChinese: Record<string, string> = {
   arrivalTimeLabel: "到达时间",
   timeBasisDeparture: "出发",
   timeBasisArrival: "到达",
-  onboard: "乘",
   show: "显示",
   hide: "隐藏",
   lastUpdated: "最后更新",
@@ -8845,10 +8852,12 @@ export const uiChinese: Record<string, string> = {
   routeCountOption: "{count}条线路以上",
   dataSource: "来源",
   afterSuffix: "以后",
-  showPastDepartures: "显示更早的发车",
-  hidePastDepartures: "隐藏更早的发车",
-  showMorePastDepartures: "▲ 显示更多更早的发车",
   firstTrainReached: "首班车",
+  showPerRouteStationTimes: "按线路显示时刻",
+  visibleRoutesLegendTitle: "显示中的线路",
+  moreRoutesCount: "…另外{count}条线路",
+  reverseDirection: "切换方向",
+  reverseDirectionReference: "反方向（参考）",
   offRouteReference: "路线外参考",
   noData: "无数据",
   showAllTimetable: "▼ 显示完整时刻表",
@@ -9145,7 +9154,7 @@ export const uiKorean: Record<string, string> = {
   addDepartureButton: "출발역 추가",
   removeDepartureLabel: "이 출발역 삭제",
   focusThisDeparture: "메인 출발역으로 설정",
-  copyrightText: "© 2025 Flex Rail Map Project",
+  copyrightText: COPYRIGHT_TEXT,
   dataSourceText: "역 데이터는 독자적으로 제작하거나 오픈 데이터를 이용합니다.",
   disclaimerText: "본 서비스는 비공식이며 각 철도 회사와 관계없습니다.",
   accuracyText: "제공하는 정보는 참고용입니다. 정확한 운행 정보는 공식 사이트를 확인하세요.",
@@ -9165,7 +9174,6 @@ export const uiKorean: Record<string, string> = {
   arrivalTimeLabel: "도착 시간",
   timeBasisDeparture: "출발",
   timeBasisArrival: "도착",
-  onboard: "탑",
   show: "표시",
   hide: "숨기기",
   lastUpdated: "최종 갱신",
@@ -9178,10 +9186,12 @@ export const uiKorean: Record<string, string> = {
   routeCountOption: "{count}개 노선 이상",
   dataSource: "출처",
   afterSuffix: "이후",
-  showPastDepartures: "이전 출발 표시",
-  hidePastDepartures: "이전 출발 숨기기",
-  showMorePastDepartures: "▲ 더 이전 출발 표시",
   firstTrainReached: "첫차",
+  showPerRouteStationTimes: "노선별 시각 표시",
+  visibleRoutesLegendTitle: "표시 중인 노선",
+  moreRoutesCount: "…외 {count}개 노선",
+  reverseDirection: "방향 전환",
+  reverseDirectionReference: "반대 방향(참고)",
   offRouteReference: "경로 외 참고",
   noData: "데이터 없음",
   showAllTimetable: "▼ 전체 시간표 표시",

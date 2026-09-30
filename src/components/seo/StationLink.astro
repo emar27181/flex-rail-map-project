@@ -1,6 +1,6 @@
 ---
-/** 駅名。駅ページがある駅はリンクにする */
-import { stationPath, stationName, type SeoLang, type StationRefLink } from '../../seo/pageModel';
+/** 駅名。その言語の駅ページがある駅はリンクにする */
+import { hasStationPage, stationPath, stationName, type SeoLang, type StationRefLink } from '../../seo/pageModel';
 
 interface Props {
   station: StationRefLink;
@@ -11,4 +11,4 @@ const { station, lang } = Astro.props;
 const name = stationName(station, lang);
 ---
 
-{station.slug ? <a href={stationPath(station.slug, lang)}>{name}</a> : <span>{name}</span>}
+{hasStationPage(station, lang) ? <a href={stationPath(station.slug!, lang)}>{name}</a> : <span>{name}</span>}

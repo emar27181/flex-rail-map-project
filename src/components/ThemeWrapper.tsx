@@ -9,6 +9,7 @@ import StickyBottomAd from './StickyBottomAd';
 import type { Language } from '../utils/translation';
 import { getInitialLanguage, persistLanguage } from '../utils/languagePersistence';
 import { getInitialUiVersion, persistUiVersion, type UiVersion } from '../utils/uiVersionPersistence';
+import { isEmbedMode } from '../utils/embedMode';
 
 /**
  * v2 UI切り替えボタンの表示フラグ。
@@ -23,10 +24,13 @@ const ThemeWrapper: React.FC = () => {
   const [language, setLanguage] = useState<Language>(getInitialLanguage);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [uiVersion, setUiVersion] = useState<UiVersion>(() => getInitialUiVersion(SHOW_UI_VERSION_TOGGLE));
+  // 記事に埋め込む表示（?embed=1, src/utils/embedMode.ts）では地図だけを出す
+  const [embedded] = useState(isEmbedMode);
 
   useEffect(() => {
-    persistLanguage(language);
-  }, [language]);
+    // 埋め込み表示の言語（記事の言語）で、閲覧者が地図ページで選んだ言語を上書きしない
+    if (!embedded) persistLanguage(language);
+  }, [language, embedded]);
 
   useEffect(() => {
     persistUiVersion(uiVersion);
@@ -45,20 +49,20 @@ const ThemeWrapper: React.FC = () => {
   return (
     <ThemeProvider>
       {/* 追従型広告: RailwayMap より先に置くことで同z-index競合時に地図が前面に来る */}
-      {!isFullscreen && <StickyBottomAd adSlot="0987654321" />}
-      <NavigationBar
+      {!isFullscreen && !embedded && <StickyBottomAd adSlot="0987654321" />}
+      {!embedded && <NavigationBar
         language={language}
         onLanguageChange={handleLanguageChange}
         isFullscreen={isFullscreen}
         uiVersion={uiVersion}
         {...(SHOW_UI_VERSION_TOGGLE ? { onUiVersionChange: setUiVersion } : {})}
-      />
+      />}
       {uiVersion === 'v2' ? (
         <RailwayMapV2 language={language} onFullscreenChange={setIsFullscreen} />
       ) : (
         <RailwayMap language={language} onLanguageChange={handleLanguageChange} onFullscreenChange={setIsFullscreen} />
       )}
-      <Footer language={language} />
+      {!embedded && <Footer language={language} />}
     </ThemeProvider>
   );
 };

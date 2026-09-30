@@ -1,10 +1,11 @@
 ---
 import StaticPage from "../layouts/StaticPage.astro";
+import { SITE_NAME } from '../config/seo';
 ---
 
 <StaticPage
-	title="使い方ガイド - フレックス路線図 | 路線の絞り込み・経路検索・所要時間表示"
-	description="フレックス路線図の使い方を紹介します。路線の表示/非表示の切り替え、出発駅・到着駅の指定、経路検索と所要時間の見方、表示設定、スマートフォンでの基本操作を説明します。"
+	title={`使い方ガイド - ${SITE_NAME} | 路線の絞り込み・経路検索・所要時間表示`}
+	description={`${SITE_NAME}の使い方を紹介します。路線の表示/非表示の切り替え、出発駅・到着駅の指定、経路検索と所要時間の見方、表示設定、スマートフォンでの基本操作を説明します。`}
 	keywords="使い方,ガイド,路線図,操作方法,経路検索,出発駅,到着駅,所要時間,フレックス路線図"
 	path="/guide"
 	heading={{ ja: "使い方ガイド", en: "User Guide" }}
@@ -46,7 +47,7 @@ import StaticPage from "../layouts/StaticPage.astro";
 
 		<h3>目的別のガイドを見る</h3>
 		<p>
-		「東京の路線図をシンプルに見る」など、目的別のガイドから、そのままFlex Railway Mapの地図を開けます。
+		「東京の路線図をシンプルに見る」など、目的別のガイドから、そのまま{SITE_NAME}の地図を開けます。
 		<a href="/guides">ガイド一覧はこちら</a>。
 		</p>
 	</div>
@@ -89,7 +90,7 @@ import StaticPage from "../layouts/StaticPage.astro";
 		<h3>Browse Guides by Topic</h3>
 		<p>
 		Topic guides, such as an introduction to Tokyo's train map, open directly into the matching
-		view of Flex Railway Map. <a href="/en/guides">See all guides</a>.
+		view of {SITE_NAME}. <a href="/en/guides">See all guides</a>.
 		</p>
 	</div>
 </StaticPage>

@@ -4,26 +4,29 @@
  *
  * 構成: パンくず → H1 → 要約（lede）→ 本文（slot）→ 別言語版へのリンク → フッター。
  * <head> は SeoHead、パンくずの構造化データは画面のパンくずと同じ並びから作る。
- * 日本語版・英語版は必ず両方作るので、hreflang は常に相互に張る。
+ * hreflang と右上の言語切り替え（LanguageSwitcher）は、langPaths に渡した（実際に作っている）言語版だけに張る。
+ * 中国語・韓国語版は一部のページにしか無いため、ページごとに渡すこと。
  */
 import SeoHead from '../components/seo/SeoHead.astro';
 import ThemeInitScript from '../components/ThemeInitScript.astro';
 import SiteFooterNav from '../components/SiteFooterNav.astro';
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import LanguageSuggestion from '../components/LanguageSuggestion.astro';
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import { staticPageCss } from './staticPageStyles';
 import { guideCss } from './guideStyles';
 import { seoPageCss } from './seoPageStyles';
-import { buildBreadcrumbJsonLd, buildHreflangLinks, type BreadcrumbItem } from '../config/seo';
+import { buildBreadcrumbJsonLd, buildHreflangLinks, hreflangCode, type BreadcrumbItem } from '../config/seo';
 import type { SeoLang } from '../seo/pageModel';
-import { SEO_TEXT } from '../seo/pageText';
+import { SEO_LANGS } from '../seo/pageModel';
 
 export interface Props {
   lang: SeoLang;
   title: string;
   description: string;
   path: string;
-  /** 同じページの各言語版のパス */
-  langPaths: Record<SeoLang, string>;
+  /** 同じページの各言語版のパス（作っている言語だけ。自分自身も含める） */
+  langPaths: Partial<Record<SeoLang, string>>;
   /** ホームから今のページまで（最後が今のページ） */
   breadcrumbs: BreadcrumbItem[];
   h1: string;
@@ -32,15 +35,11 @@ export interface Props {
 }
 
 const { lang, title, description, path, langPaths, breadcrumbs, h1, lede, indexable } = Astro.props;
-const t = SEO_TEXT[lang];
-const hreflang = buildHreflangLinks(
-  (Object.keys(langPaths) as SeoLang[]).map(l => ({ lang: l, path: langPaths[l] })),
-  'ja',
-);
-const other = t.otherLang;
+const versions = SEO_LANGS.filter(l => langPaths[l]).map(l => ({ lang: l, path: langPaths[l]! }));
+const hreflang = buildHreflangLinks(versions, 'ja');
 ---
 
-<html lang={lang}>
+<html lang={hreflangCode(lang)}>
 	<head>
 		<SeoHead
 			title={title}
@@ -56,6 +55,10 @@ const other = t.otherLang;
 	<body>
 		<ThemeInitScript />
 		<div class="container">
+			<div class="page-lang-bar">
+				<LanguageSwitcher current={lang} versions={langPaths} />
+			</div>
+			<LanguageSuggestion current={lang} versions={langPaths} />
 			<nav class="breadcrumb">
 				{breadcrumbs.map((b, i) => (
 					i < breadcrumbs.length - 1
@@ -69,9 +72,6 @@ const other = t.otherLang;
 
 			<slot />
 
-			<p class="seo-lang-switch">
-				<a href={langPaths[other.lang]} hreflang={other.lang} lang={other.lang}>{other.label}</a>
-			</p>
 			<SiteFooterNav lang={lang} currentPath={path} />
 		</div>
 		<SimpleThemeWrapper client:only="react" />

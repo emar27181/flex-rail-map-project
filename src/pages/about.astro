@@ -1,11 +1,12 @@
 ---
 import StaticPage from "../layouts/StaticPage.astro";
 import { ROUTE_COUNT, STATION_COUNT, approxCount, SUPPORTED_LANGUAGES } from "../config/siteFacts";
+import { SITE_NAME } from '../config/seo';
 ---
 
 <StaticPage
-	title="About - フレックス路線図 | 路線図が見にくい・分かりづらいを解決"
-	description="路線図が見にくい・分かりづらいと感じている方へ。フレックス路線図は必要な路線だけを選んで表示できるインタラクティブな路線図サービスです。遅延・運休時にも役立つ見やすい路線図。"
+	title={`About - ${SITE_NAME} | 路線図が見にくい・分かりづらいを解決`}
+	description={`路線図が見にくい・分かりづらいと感じている方へ。${SITE_NAME}は必要な路線だけを選んで表示できるインタラクティブな路線図サービスです。遅延・運休時にも役立つ見やすい路線図。`}
 	keywords="路線図,見にくい,分かりづらい,分かりにくい,見やすい,シンプル,乗り換え,遅延,運休,鉄道,railway map"
 	path="/about"
 	heading={{ ja: "このサイトについて", en: "About This Site" }}
@@ -17,7 +18,7 @@ import { ROUTE_COUNT, STATION_COUNT, approxCount, SUPPORTED_LANGUAGES } from "..
 
 		<h3>サービス概要</h3>
 		<p>
-		Flex Railway Map は、複雑な鉄道路線図をもっとシンプルに見やすくするためのサービスです。
+		{SITE_NAME} は、複雑な鉄道路線図をもっとシンプルに見やすくするためのサービスです。
 		通常の乗り換えアプリは便利ですが、遅延や運休があると実際には乗れない電車を案内してしまうことがあります。
 		そんなときに路線図を参考にしたくても、ネットで見つかるものは情報が多すぎて読みづらいのが現状です。
 		</p>
@@ -54,7 +55,7 @@ import { ROUTE_COUNT, STATION_COUNT, approxCount, SUPPORTED_LANGUAGES } from "..
 
 		<h3>Service Overview</h3>
 		<p>
-		Flex Railway Map is a service that makes complex railway maps simple and easy to read.
+		{SITE_NAME} is a service that makes complex railway maps simple and easy to read.
 		Regular route planner apps are useful, but they sometimes suggest trains that are delayed or not running.
 		Existing online railway maps contain too much information and are difficult to read.
 		</p>

@@ -112,6 +112,10 @@ export const jrExampleLine: Station[] = [
   路線データに駅が無いときは、テストの `KNOWN_MISSING_TERMINI` に理由付きで足す
 - 新しい系統名を使うときは `ServiceBrand` と `SERVICE_BRAND_LABEL_KEY`、
   `translation.ts` の4言語を足す
+- **上野東京ライン・湘南新宿ラインの路線名は「系統名（路線名）」で書く**
+  （`routes.ts` の `routeNames`）。例: `上野東京ライン（東海道線）`、`湘南新宿ライン（高崎線・東海道線）`。
+  「東海道本線」＋下に系統名、のような別の書き方を混ぜない。時刻表（`timetableData.ts`）の `name` も
+  同じ文字列にし、`translation.ts` の `routeTranslations` に英語名を足す（テストで検証）
 
 ### 並走区間（`src/data/sharedCorridors.ts`）
 

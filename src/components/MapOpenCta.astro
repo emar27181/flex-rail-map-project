@@ -1,42 +1,62 @@
 ---
 /**
- * 「Flex Railway Mapで見る」CTA（ガイド・駅・路線・データのページ共通）。
+ * 「Flex Railway Mapで見る」CTA（ガイド・駅・路線・観光地・データのページ共通）。
  *
- * ページの内容に対応した地図状態（表示路線・出発駅）を直接開く。
+ * ページの内容に対応した地図状態（表示路線・出発駅・ヒートマップの指標・言語）を直接開く。
  * URLの組み立ては src/utils/mapDeepLink.ts（地図側が読むパラメータと同じ定数）。
  *
- * クリックはGA4の `seo_map_open` イベントとして計測する
- * （`src/utils/gtagConsent.ts` の既存の仕組みを再利用。GA4未設定でも
- * エラーにはならない）。どのSEOページから地図へ移動したかを判別できるよう
- * `guide_slug`（ガイドの slug、駅・路線ページでは "station/shinjuku" など）/
- * `language` に加えて `source_page`（クリック時点の location.pathname）も送る。
- * 個人を特定する情報ではなく、このサイト内のパスのみ。
+ * クリックは GA4 に2つのイベントとして送る（src/utils/gtagConsent.ts の既存の仕組み。
+ * GA4未設定でもエラーにはならない）。
+ * - `seo_map_open`: 検索向けページ全体からの地図遷移（以前からある集計用。種類を問わず送る）
+ * - `{kind}_map_open`: ページの種類ごと（guide / station / line / tourist / data）
+ * パラメータ: source_page（クリック時点の location.pathname）/ locale / station / routes
+ * （地図で開く路線の URL コード）/ city / tourist_spot / metric。以前からの guide_slug・
+ * language も続けて送る（既存のレポートを壊さないため）。値はこのサイト内の情報だけで、
+ * 個人を特定する情報は送らない。
  */
 import { buildMapHref } from '../utils/mapDeepLink';
+import { getRouteCode, MAX_URL_VISIBLE_ROUTES } from '../utils/routeUrlCodes';
 import type { RouteKey } from '../data/routes';
+import type { StationStats } from '../data/stationStats';
+
+export type MapCtaKind = 'guide' | 'station' | 'line' | 'tourist' | 'data';
 
 export interface Props {
   label: string;
   note?: string;
+  kind: MapCtaKind;
+  /** GA4 の guide_slug（ガイドの slug、駅・路線ページでは "station/shinjuku" など） */
   guideSlug: string;
   language: 'ja' | 'en' | 'zh' | 'ko';
   /** 地図で先に表示しておきたい路線 */
   routes?: RouteKey[];
   /** 出発駅にする駅名 */
   from?: string;
+  /** ヒートマップで表示する指標 */
+  metric?: keyof StationStats;
+  /** 計測用（地図の状態には使わない） */
+  station?: string;
+  city?: string;
+  touristSpot?: string;
 }
 
-const { label, note, guideSlug, language, routes, from } = Astro.props;
-const href = buildMapHref({ routes, from, lang: language });
+const { label, note, kind, guideSlug, language, routes, from, metric, station, city, touristSpot } = Astro.props;
+const href = buildMapHref({ routes, from, metric, lang: language });
+const routeCodes = (routes ?? []).slice(0, MAX_URL_VISIBLE_ROUTES).map(getRouteCode).filter(Boolean).join(',');
 ---
 
 <div class="cta-block">
   <a
     href={href}
     class="back-link"
-    data-seo-map-open
+    data-seo-map-open={kind}
     data-guide-slug={guideSlug}
     data-guide-lang={language}
+    data-station={station ?? from}
+    data-routes={routeCodes || undefined}
+    data-city={city}
+    data-tourist-spot={touristSpot}
+    data-metric={metric}
   >
     {label}
   </a>
@@ -46,13 +66,27 @@ const href = buildMapHref({ routes, from, lang: language });
 <script>
   import { trackEvent } from '../utils/gtagConsent';
 
+  // GA4 のパラメータ値は100文字まで
+  const clip = (v: string | null) => (v ?? '').slice(0, 100);
+
   document.addEventListener('click', (e) => {
     const target = (e.target as HTMLElement)?.closest<HTMLElement>('[data-seo-map-open]');
     if (!target) return;
-    trackEvent('seo_map_open', {
-      guide_slug: target.getAttribute('data-guide-slug') ?? '',
-      language: target.getAttribute('data-guide-lang') ?? '',
+    const params: Record<string, string> = {
       source_page: window.location.pathname,
-    });
+      locale: clip(target.getAttribute('data-guide-lang')),
+      guide_slug: clip(target.getAttribute('data-guide-slug')),
+      language: clip(target.getAttribute('data-guide-lang')),
+    };
+    for (const [attr, key] of [
+      ['data-station', 'station'], ['data-routes', 'routes'], ['data-city', 'city'],
+      ['data-tourist-spot', 'tourist_spot'], ['data-metric', 'metric'],
+    ] as const) {
+      const v = target.getAttribute(attr);
+      if (v) params[key] = clip(v);
+    }
+    trackEvent('seo_map_open', params);
+    const kind = target.getAttribute('data-seo-map-open');
+    if (kind) trackEvent(`${kind}_map_open`, params);
   });
 </script>

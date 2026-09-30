@@ -1,8 +1,12 @@
 ---
-/** 駅の一覧（/stations, /en/stations）。主な駅・観光地の最寄り駅・路線ごとの全駅へのリンク */
+/**
+ * 駅の一覧（/stations, /en/stations）。都市ごとに、主な駅・観光地の最寄り駅・路線へのリンクを並べる。
+ * 全駅の一覧は各路線ページにある（ここに全駅を並べると数千リンクになるため）。
+ */
 import SeoPageLayout from '../../../layouts/SeoPageLayout.astro';
 import { SEO_LANGS, getSeoModel, hubPath, linePath, routeName, stationName, stationPath, type SeoLang } from '../../../seo/pageModel';
 import { SEO_TEXT } from '../../../seo/pageText';
+import { SEO_CITIES } from '../../../data/seoPages';
 import { TOURIST_SPOTS } from '../../../data/touristSpots';
 
 export function getStaticPaths() {
@@ -12,9 +16,16 @@ export function getStaticPaths() {
 interface Props { lang: SeoLang }
 const { lang } = Astro.props;
 const t = SEO_TEXT[lang];
-const { stations, lines } = getSeoModel();
-const major = stations.filter(s => s.indexable && s.touristSpots.length === 0);
+const { lines } = getSeoModel();
+// この言語の駅ページがある駅だけを並べる（中国語・韓国語は Tier A の一部だけ）
+const stations = getSeoModel().stations.filter(s => s.langs.includes(lang));
 const path = hubPath('stations', lang);
+const cities = SEO_CITIES.map(city => ({
+  city,
+  major: stations.filter(s => s.indexable && s.touristSpots.length === 0 && s.cities[0] === city.id),
+  spots: TOURIST_SPOTS.filter(spot => spot.city === city.id),
+  lines: lines.filter(l => l.city === city.id),
+}));
 ---
 
 <SeoPageLayout
@@ -22,51 +33,60 @@ const path = hubPath('stations', lang);
 	title={t.stationsHubTitle}
 	description={t.stationsHubLede(stations.length)}
 	path={path}
-	langPaths={{ ja: hubPath('stations', 'ja'), en: hubPath('stations', 'en') }}
+	langPaths={Object.fromEntries(SEO_LANGS.map(l => [l, hubPath('stations', l)]))}
 	breadcrumbs={[{ name: t.home, path: '/' }, { name: t.hubs.stations, path }]}
 	h1={t.stationsHubH1}
 	lede={t.stationsHubLede(stations.length)}
 	indexable={true}
 >
-	<section>
-		<h2>{t.majorStations}</h2>
+	<nav aria-label={t.cities}>
 		<ul class="seo-chips">
-			{major.map(s => <li class="seo-chip"><a href={stationPath(s.slug, lang)}>{stationName(s, lang)}</a></li>)}
+			{cities.map(({ city }) => <li class="seo-chip"><a href={`#${city.id}`}>{city.name[lang]}</a></li>)}
 		</ul>
-	</section>
+	</nav>
 
-	<section>
-		<h2>{t.touristSpots}</h2>
-		<div class="seo-table-wrap">
-			<table class="seo-table">
-				<tbody>
-					{TOURIST_SPOTS.map(spot => (
-						<tr>
-							<td>{spot.name[lang]}</td>
-							<td>
-								{spot.stations
-									.map(ts => stations.find(s => s.name === ts.name && s.touristSpots.includes(spot)))
-									.filter(s => s !== undefined)
-									.map((s, i) => (
-									<Fragment>{i > 0 && t.listSep}<a href={stationPath(s.slug, lang)}>{stationName(s, lang)}</a></Fragment>
+	{cities.map(({ city, major, spots, lines: cityLines }) => (
+		<section id={city.id}>
+			<h2>{city.name[lang]}</h2>
+
+			{major.length > 0 && (
+				<Fragment>
+					<h3>{t.majorStations}</h3>
+					<ul class="seo-chips">
+						{major.map(s => <li class="seo-chip"><a href={stationPath(s.slug, lang)}>{stationName(s, lang)}</a></li>)}
+					</ul>
+				</Fragment>
+			)}
+
+			{spots.length > 0 && (
+				<Fragment>
+					<h3>{t.touristSpots}</h3>
+					<div class="seo-table-wrap">
+						<table class="seo-table">
+							<tbody>
+								{spots.map(spot => (
+									<tr>
+										<td>{t.spotName(spot)}</td>
+										<td>
+											{spot.stations
+												.map(ts => stations.find(s => s.name === ts.name && s.touristSpots.includes(spot)))
+												.filter((s, i, arr) => s !== undefined && arr.indexOf(s) === i)
+												.map((s, i) => (
+												<Fragment>{i > 0 && t.listSep}<a href={stationPath(s!.slug, lang)}>{stationName(s!, lang)}</a></Fragment>
+											))}
+										</td>
+									</tr>
 								))}
-							</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
-		</div>
-	</section>
+							</tbody>
+						</table>
+					</div>
+				</Fragment>
+			)}
 
-	<section>
-		<h2>{t.stationsByLine}</h2>
-		{lines.map(line => (
-			<Fragment>
-				<h3><a href={linePath(line.slug, lang)}>{routeName(line.key, lang)}</a></h3>
-				<ul class="seo-chips">
-					{line.stops.map(stop => <li class="seo-chip"><a href={stationPath(stop.station.slug, lang)}>{stationName(stop.station, lang)}</a></li>)}
-				</ul>
-			</Fragment>
-		))}
-	</section>
+			<h3>{t.stationsByLine}</h3>
+			<ul class="seo-chips">
+				{cityLines.map(line => <li class="seo-chip"><a href={linePath(line.slug, lang)}>{routeName(line.key, lang)}</a></li>)}
+			</ul>
+		</section>
+	))}
 </SeoPageLayout>

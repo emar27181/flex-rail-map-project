@@ -1,0 +1,21 @@
+---
+/**
+ * 新しく足した記事の日本語版（/articles/{slug}）。
+ *
+ * 記事は src/data/articles/{slug}.ts を足せば、このページと英語・中国語・韓国語版
+ * （src/pages/[...lang]/articles/[slug].astro）が自動でできる。ページのファイルを作る必要は無い。
+ * このフォルダに記事ごとのファイルが既にある記事（以前からの6本）は、そちらが優先されるので除く。
+ */
+import ArticleLayout from "./_ArticleLayout.astro";
+import { ARTICLES } from "../../data/articleI18n";
+
+export function getStaticPaths() {
+  const existing = new Set(Object.keys(import.meta.glob("./*.astro")).map(p => p.replace(/^\.\/(.*)\.astro$/, "$1")));
+  return ARTICLES.filter(a => !existing.has(a.slug)).map(article => ({ params: { slug: article.slug }, props: { article } }));
+}
+
+interface Props { article: (typeof ARTICLES)[number] }
+const { article } = Astro.props;
+---
+
+<ArticleLayout pageKey={article.slug} publishedDate={article.publishedDate} modifiedDate={article.modifiedDate} />

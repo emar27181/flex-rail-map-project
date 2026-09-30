@@ -1,0 +1,24 @@
+---
+/**
+ * 紹介記事の英語・中国語・韓国語版。日本語版は src/pages/articles/flex-rail-map-introduction.astro。
+ * 冒頭の体験デモと専用の CSS があるため、他の記事（[slug].astro）とは別のルートにしている。
+ */
+import "../../../styles/article-introduction.css";
+import ArticleLayout from "../../../components/articles/ArticleLayout.astro";
+import IntroductionDemo from "../../../components/articles/IntroductionDemo.astro";
+import { ARTICLES, ARTICLE_LANGUAGES, type ArticleLanguage } from "../../../data/articleI18n";
+
+const SLUG = "flex-rail-map-introduction";
+
+export function getStaticPaths() {
+  return ARTICLE_LANGUAGES.filter(lang => lang !== "ja").map(lang => ({ params: { lang }, props: { lang } }));
+}
+
+interface Props { lang: ArticleLanguage }
+const { lang } = Astro.props;
+const article = ARTICLES.find(a => a.slug === SLUG)!;
+---
+
+<ArticleLayout lang={lang} pageKey={SLUG} publishedDate={article.publishedDate} modifiedDate={article.modifiedDate}>
+  <IntroductionDemo slot="beforeArticle" lang={lang} />
+</ArticleLayout>

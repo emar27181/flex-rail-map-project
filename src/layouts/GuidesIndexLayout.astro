@@ -13,7 +13,9 @@ import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import SiteFooterNav from '../components/SiteFooterNav.astro';
 import SeoHead from '../components/seo/SeoHead.astro';
 import ThemeInitScript from '../components/ThemeInitScript.astro';
-import { buildHreflangLinks } from '../config/seo';
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import LanguageSuggestion from '../components/LanguageSuggestion.astro';
+import { buildHreflangLinks, hreflangCode } from '../config/seo';
 import { guideIndexPath, guideLanguages } from '../data/guides';
 
 export interface Props {
@@ -31,7 +33,7 @@ const hreflangLinks = buildHreflangLinks(
 );
 ---
 
-<html lang={htmlLang}>
+<html lang={hreflangCode(htmlLang)}>
 	<head>
 		<SeoHead
 			title={title}
@@ -45,6 +47,10 @@ const hreflangLinks = buildHreflangLinks(
 	<body>
 		<ThemeInitScript />
 		<div class="container">
+			<div class="page-lang-bar">
+				<LanguageSwitcher current={htmlLang} versions={Object.fromEntries(guideLanguages().map(l => [l, guideIndexPath(l)]))} />
+			</div>
+			<LanguageSuggestion current={htmlLang} versions={Object.fromEntries(guideLanguages().map(l => [l, guideIndexPath(l)]))} />
 			<a href="/" class="back-link" style="margin-bottom: 24px;">{backLabel}</a>
 			<slot />
 			<SiteFooterNav lang={htmlLang} currentPath={path} />

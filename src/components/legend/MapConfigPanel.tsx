@@ -29,6 +29,8 @@ export type MapConfig = {
   showRouteLine: boolean;
   /** 推薦ルート選択パネルを出すか（旧バージョンの設定ファイルには無いため任意） */
   showRouteRecommendationsPanel?: boolean;
+  /** 駅ラベルの時刻を路線ごとに出すか（既定は平均で1つ） */
+  showPerRouteStationTimes?: boolean;
   /** 主要駅の常時表示（旧バージョンの設定ファイルには無いため任意） */
   alwaysVisibleStationsEnabled?: boolean;
   /** 常時表示の対象とする最小路線数 */
