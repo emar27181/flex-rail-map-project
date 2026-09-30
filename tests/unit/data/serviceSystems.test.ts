@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { routes, type RouteKey } from '../../../src/data/routes';
+import { routes, routeNames, type RouteKey } from '../../../src/data/routes';
 import { SERVICE_SYSTEMS, SERVICE_BRAND_LABEL_KEY, getServiceSystem } from '../../../src/data/serviceSystems';
-import { translateUI, type Language } from '../../../src/utils/translation';
+import { routeTranslations, translateUI, type Language } from '../../../src/utils/translation';
+import { timetableLines } from '../../../src/data/timetableData';
 
 /**
  * 路線データに駅が無いため検証できない始発・行先（理由を必ず書く）。
@@ -63,4 +64,21 @@ describe('運行系統（始発・行先）データ', () => {
     expect(stations).not.toContain('宇都宮');
     expect(stations).not.toContain('逗子');
   });
+});
+
+describe('運行系統の路線名は「系統名（路線名）」で揃える', () => {
+  // 上野東京ライン・湘南新宿ラインは、地図の1本の線が「系統のどの路線を走る部分か」を括弧で示す。
+  // 以前は「東海道本線」の下に系統名を添える形と「湘南新宿ライン（高崎線・東海道線）」が混ざっていた
+  const BRANDS_IN_NAME = ['uenoTokyoLine', 'shonanShinjukuLine'] as const;
+
+  for (const sys of SERVICE_SYSTEMS.filter(s => (BRANDS_IN_NAME as readonly string[]).includes(s.brand))) {
+    it(`${sys.route}`, () => {
+      const brand = translateUI(SERVICE_BRAND_LABEL_KEY[sys.brand], 'japanese');
+      const name = routeNames[sys.route as keyof typeof routeNames];
+      expect(name).toMatch(new RegExp(`^${brand}（.+）$`));
+      expect(routeTranslations[name], `${name} の英語名が無い`).toBeDefined();
+      const tt = timetableLines.find(l => l.key === sys.route);
+      if (tt) expect(tt.name).toBe(name);
+    });
+  }
 });

@@ -37,3 +37,21 @@ export function stationTimeLinesHtml(lines: StationTimeLine[], fontSizePx: numbe
     return `<div style="font-size:${fontSizePx}px;line-height:1;margin-top:1px;font-weight:normal;opacity:0.9;display:flex;align-items:center;justify-content:center;gap:${DOT_GAP}px">${dot}${l.time}</div>`;
   }).join('');
 }
+
+/**
+ * 複数の時刻（"HH:MM"）の平均。路線ごとの時刻を1つにまとめて表示するときに使う。
+ * 0時をまたぐ時刻（23:58 と 00:02）でも平均が 00:00 になるよう、最初の時刻からの差で数える。
+ */
+export function averageTime(times: string[]): string | undefined {
+  if (times.length === 0) return undefined;
+  const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+  const base = toMin(times[0]);
+  const offsets = times.map(t => {
+    let d = toMin(t) - base;
+    if (d > 720) d -= 1440;
+    if (d < -720) d += 1440;
+    return d;
+  });
+  const avg = ((base + Math.round(offsets.reduce((a, b) => a + b, 0) / offsets.length)) % 1440 + 1440) % 1440;
+  return `${String(Math.floor(avg / 60)).padStart(2, '0')}:${String(avg % 60).padStart(2, '0')}`;
+}
