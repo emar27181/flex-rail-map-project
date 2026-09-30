@@ -131,6 +131,11 @@ export const jrExampleLine: Station[] = [
   Python なら `json.dump(data, f, ensure_ascii=False, separators=(',', ':'))`
 - 一部の駅にしか無いデータは、対象駅数を出典に書く
 
+### 線形（実際の線路に沿った座標列, `src/data/trackGeometry/`）
+
+- 座標を手で書かない。`scripts/track-geometry/collect-osm.mts` で集め、検証に通ったものだけを置く
+- OSM の bridge / tunnel / layer は構造・上下関係として残し、**高さ(m)に変換しない**。標高は出典があるときだけ
+- 手順・基準・データソースの比較は `docs/track-geometry.md`
 ### 駅周辺の施設数（800m）を新しいデータで更新する
 
 外部（ChatGPT / Genspark など）で集めた「駅から半径800mの施設数」の新しい版を受け取ったときの手順。
