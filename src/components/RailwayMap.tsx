@@ -109,6 +109,7 @@ import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE } from './ui/atoms/
 
 import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
+import { deviceClassOf } from '../constants/breakpoints';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -735,9 +736,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     setShowStationNumbers(language !== 'japanese');
   }, [language]);
 
-  // モバイル幅の監視
+  // モバイル幅の監視（端末の区分は src/constants/breakpoints.ts だけで決める）
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    const checkMobile = () => setIsMobile(deviceClassOf(window.innerWidth) === 'mobile');
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -1695,7 +1696,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // モバイルフルスクリーン時はタブバー分(44px)を除いた高さを使用
     const mobileBottomOffset = (isFullscreen && isMobile) ? 50 : 0;
     const vh = rawVh - mobileBottomOffset;
-    const isMobileView = vw < 500;
+    const isMobileView = deviceClassOf(vw) === 'mobile';
     // 幅はビューポートに収まるよう上限を設定
     const TW = Math.min(360, vw - MARGIN * 2);
     const LEFT_W = Math.min(160, Math.floor(TW * 0.48));

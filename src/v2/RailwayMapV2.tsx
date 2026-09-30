@@ -16,13 +16,14 @@ import RouteResultsV2 from './RouteResultsV2';
 import RouteLegendV2 from './RouteLegendV2';
 import MultiDepartureRoutesV2 from './MultiDepartureRoutesV2';
 import DisplaySettingsV2 from './DisplaySettingsV2';
+import { BREAKPOINT } from '../constants/breakpoints';
 
 interface RailwayMapV2Props {
   language: Language;
   onFullscreenChange?: (isFullscreen: boolean) => void;
 }
 
-const MOBILE_BREAKPOINT = 768;
+const MOBILE_BREAKPOINT = BREAKPOINT.tablet;
 
 /**
  * v2 UI シェル。

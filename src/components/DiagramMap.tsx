@@ -8,6 +8,7 @@ import type { Language } from '../utils/translation';
 import { SEMANTIC, FS} from '../constants/ui';
 import Button from './ui/atoms/Button';
 import { L } from './legend/legendStyles';
+import { MEDIA } from '../constants/breakpoints';
 
 // ---- 表示対象路線 ----
 export const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
@@ -593,7 +594,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
         }} className="diagram-hint">
           スクロール: ズーム ｜ ドラッグ: 移動
         </div>
-        <style>{`@media (min-width: 600px) { .diagram-hint { display: block !important; } }`}</style>
+        <style>{`@media ${MEDIA.notMobile} { .diagram-hint { display: block !important; } }`}</style>
 
         <svg style={{ width: '100%', height: '100%', cursor: isPanning.current ? 'grabbing' : 'grab', display: 'block' }}>
           {/* スケール変換グループ: 路線・ドットのみ（transform非依存メモで安定） */}
