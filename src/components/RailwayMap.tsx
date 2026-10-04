@@ -98,7 +98,7 @@ import { getInitialLegendCollapsed, persistLegendCollapsed } from '../utils/lege
 import { getThroughReachableSections } from '../utils/throughService';
 import { findParallelSections, sectionMinutes } from '../utils/parallelRoutes';
 import { STATION_TIME_LINE_HEIGHT, averageTime, stationTimeLinesHtml, timeLineWidth, toTimeLines, type StationTimeLine } from './map/stationTimeLabel';
-import { isSameStation } from '../utils/sameStation';
+import { isSameStation } from '../utils/sameStation';\nimport { findDirectionalStation, type StationNavigationKey } from '../utils/stationKeyboardNavigation';
 import { buildEffectiveLineCounts } from '../utils/effectiveLines';
 import Select from './ui/atoms/Select';
 import SegmentedControl from './ui/molecules/SegmentedControl';
@@ -1094,6 +1094,60 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     });
     return Array.from(map.values());
   }, []);
+
+  // 駅ツールチップを十字キーで隣駅へ移動する。
+  // 入力欄操作中は矢印キー本来の役割を優先し、地図ナビゲーションは発火させない。
+  useEffect(() => {
+    if (!stationTooltip) return;
+
+    const handleStationArrowNavigation = (event: KeyboardEvent) => {
+      if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+
+      const target = event.target as HTMLElement | null;
+      const tagName = target?.tagName?.toLowerCase();
+      if (
+        target?.isContentEditable ||
+        tagName === 'input' ||
+        tagName === 'textarea' ||
+        tagName === 'select'
+      ) {
+        return;
+      }
+
+      const nextStation = findDirectionalStation(
+        stationTooltip.station,
+        routes as Record<string, readonly Station[]>,
+        visibleRoutes,
+        event.key as StationNavigationKey,
+      );
+      if (!nextStation) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      // 次駅の画面座標へツールチップを追従させる。
+      // Leafletのコンテナ座標→viewport座標へ変換できない場合だけ現在位置を維持する。
+      const map = mapRef.current as LeafletMap | null;
+      const point = map?.latLngToContainerPoint?.([nextStation.lat, nextStation.lng]);
+      const container = map?.getContainer?.();
+      const rect = container?.getBoundingClientRect?.();
+      const x = point && rect ? rect.left + point.x : stationTooltip.x;
+      const y = point && rect ? rect.top + point.y : stationTooltip.y;
+
+      setTooltipDragOffset({ dx: 0, dy: 0 });
+      setMethodInfoTooltip(null);
+      setStationTooltip({
+        stationName: nextStation.name,
+        station: nextStation,
+        x,
+        y,
+      });
+      pinTooltip();
+    };
+
+    window.addEventListener('keydown', handleStationArrowNavigation);
+    return () => window.removeEventListener('keydown', handleStationArrowNavigation);
+  }, [stationTooltip, visibleRoutes]);
 
   // 各駅のラベルオフセット（地理座標のみから一度だけ計算、ズーム/移動で再計算しない）
   // [dAnchorX, dAnchorY]: iconAnchor への加算値。ラベルを押し出す方向と逆の調整。
