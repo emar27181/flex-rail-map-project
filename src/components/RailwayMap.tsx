@@ -98,7 +98,8 @@ import { getInitialLegendCollapsed, persistLegendCollapsed } from '../utils/lege
 import { getThroughReachableSections } from '../utils/throughService';
 import { findParallelSections, sectionMinutes } from '../utils/parallelRoutes';
 import { STATION_TIME_LINE_HEIGHT, averageTime, stationTimeLinesHtml, timeLineWidth, toTimeLines, type StationTimeLine } from './map/stationTimeLabel';
-import { isSameStation } from '../utils/sameStation';\nimport { findDirectionalStation, type StationNavigationKey } from '../utils/stationKeyboardNavigation';
+import { isSameStation } from '../utils/sameStation';
+import { findDirectionalStation, type StationNavigationKey } from '../utils/stationKeyboardNavigation';
 import { buildEffectiveLineCounts } from '../utils/effectiveLines';
 import Select from './ui/atoms/Select';
 import SegmentedControl from './ui/molecules/SegmentedControl';
