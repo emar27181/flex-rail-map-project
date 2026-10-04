@@ -22,7 +22,7 @@ import type { Language } from '../../utils/translation';
 import { FS, SEMANTIC } from '../../constants/ui';
 import { L } from './legendStyles';
 import Button from '../ui/atoms/Button';
-import Chip from '../ui/atoms/Chip';
+import RouteToggleChip from '../ui/molecules/RouteToggleChip';
 import TextField from '../ui/atoms/TextField';
 
 /**
@@ -119,14 +119,17 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
   const totalShown = groups.onRoute.length + groups.atStation.length + groups.visible.length + groups.hidden.length;
 
   const chip = (routeKey: RouteKey) => (
-    <Chip
+    <RouteToggleChip
       key={routeKey}
-      color={adjustRouteColorForTheme(routeColors[routeKey] ?? colors.textSecondary, theme)}
-      label={labelOf(routeKey)}
-      selected={visibleRoutes.has(routeKey)}
+      routeKey={routeKey}
+      routeName={routeNames[routeKey] ?? routeKey}
+      routeColor={routeColors[routeKey] ?? colors.textSecondary}
+      isVisible={visibleRoutes.has(routeKey)}
       theme={theme}
+      language={language}
       size={BOARD_CONTROL_SIZE}
-      onClick={() => onToggleRoute(routeKey)}
+      onToggle={onToggleRoute}
+      adjustRouteColorForTheme={adjustRouteColorForTheme}
       // 表示方式の切り替えボタン等と区別する目印（E2Eでも使う）
       dataAttr={{ 'data-route-chip': routeKey }}
     />
