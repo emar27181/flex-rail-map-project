@@ -1,5 +1,32 @@
 # CHANGE LOG
 
+## [2026-10-05] セッション（記事の画面を iframe に・路線/駅ページの路線色と駅番号・テーマの保存先の統一）
+
+### feat: 地図を所要時間を表示した状態で開けるURL（`?times=1`）
+- `src/utils/mapViewUrlParam.ts`（`TRAVEL_TIMES_PARAM`）, `src/utils/mapDeepLink.ts`（`travelTimes`）, `src/components/RailwayMap.tsx`
+- 埋め込みではボタンを押した状態で始められないため、URLで指定できるようにした
+
+### feat: 記事のスクリーンショットを実際の画面の iframe に置き換える
+- `src/components/ui/atoms/mapEmbed.ts`（新規）, `src/utils/articleRender.ts`, `src/data/articles/*.ts`, `src/data/articles/types.ts`,
+  `src/components/articles/ArticleLayout.astro`, `src/styles/article-layout.css`, `tests/unit/data/article{Sources,I18n}.test.ts`,
+  `docs/article-writing.md`, `docs/templates/article-{template.ts,prompt.md}`, `CLAUDE.md`
+- 画像は小さくて読みにくかった。地図は記事の状態で、駅・路線のページは節の位置（`anchor`）で開く。埋め込みの部品は記事と駅・路線のページで共通
+- `public/images/articles/` と `scripts/capture-article-screenshots.mts` は使われなくなった（削除は未実施）
+
+### fix: 記事に埋め込んだ地図が記事と違うテーマで出る問題
+- `src/utils/themeStorage.ts`（新規）, `src/contexts/ThemeContext.tsx`, `src/components/ThemeInitScript.astro`, `src/layouts/StaticPage.astro`,
+  `src/pages/index.astro`, `src/components/articles/ArticleLayout.astro`, `src/components/ui/atoms/mapEmbed.ts`, `tests/unit/utils/themeStorage.test.ts`（新規）
+- 記事は `frm-theme`、地図は `theme` と保存先が別だった。キーを1つにまとめ、埋め込みはページのテーマに従う（保存しない）
+
+### feat: 路線・駅のページに路線色のアクセント・駅番号・冒頭の地図
+- `src/components/ui/atoms/{codeBadge.ts,CodeBadge.astro,MapEmbed.astro}`（新規）, `src/utils/fitMapView.ts`（新規）,
+  `src/layouts/{SeoPageLayout.astro,seoPageStyles.ts,staticPageStyles.ts}`, `src/pages/[...lang]/{lines,stations}/[slug].astro`, `src/seo/pageText.ts`,
+  `tests/unit/utils/fitMapView.test.ts`（新規）
+- 東急東横線なら赤を見出しの下線・地図の枠・順番に使い、駅名の前に TY01 などの札を付ける。冒頭にその路線だけの地図を埋め込む
+
+### docs: 埋め込み・駅番号の札・ページのアクセント色の規格
+- `docs/design-system.md`
+
 ## [2026-09-30] セッション（PR #28〜#31 のマージ・地図の配色・端末ごとの設計・表の部品化）
 
 ### merge: PR #28 → #29 → #30 → #31 を順に main にマージ
