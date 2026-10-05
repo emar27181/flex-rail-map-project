@@ -72,7 +72,7 @@ import { getInitialVisibleRoutesFromUrl, syncVisibleRoutesToUrl } from '../utils
 import { getInitialHeatmapMetricFromUrl, syncHeatmapMetricToUrl } from '../utils/heatmapUrlParam';
 import { toArticleLanguage } from '../utils/languagePersistence';
 import { defaultRoutesNear } from '../utils/defaultRoutesNear';
-import { getInitialMapViewFromUrl } from '../utils/mapViewUrlParam';
+import { getInitialMapViewFromUrl, getInitialTravelTimesFromUrl } from '../utils/mapViewUrlParam';
 import { isEmbedMode } from '../utils/embedMode';
 import {
   getInitialDepartureFromUrl,
@@ -279,7 +279,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [alwaysVisibleMinRoutes, setAlwaysVisibleMinRoutes] = useState(7);
   const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
   const [showStationTierBadges, setShowStationTierBadges] = useState(false); // 乗り入れ路線数リング表示
-  const [showTravelTimes, setShowTravelTimes] = useState(false);
+  const [showTravelTimes, setShowTravelTimes] = useState(getInitialTravelTimesFromUrl);
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
   const [showStationNumbers, setShowStationNumbers] = useState(language !== 'japanese');
