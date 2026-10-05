@@ -27,13 +27,11 @@ body {
   --rt-border: ${light.borderLight}; --rt-muted: ${light.textSecondary}; --rt-hover: ${light.surfaceHover};
   --me-border: ${light.border}; --me-surface: ${light.surface}; --me-shadow: 0 1px 3px ${light.shadow}; --me-muted: ${light.textSecondary};
   --page-accent: var(--page-accent-light);
-  --me-accent: var(--page-accent, ${light.primary});
 }
 body.dark {
   --rt-border: ${dark.borderLight}; --rt-muted: ${dark.textSecondary}; --rt-hover: ${dark.surfaceHover};
   --me-border: ${dark.border}; --me-surface: ${dark.surface}; --me-shadow: 0 1px 3px ${dark.shadow}; --me-muted: ${dark.textSecondary};
   --page-accent: var(--page-accent-dark);
-  --me-accent: var(--page-accent, ${dark.primary});
 }
 /* 表の順番の数字も差し色にする */
 .rtable .rt-index { color: var(--page-accent, inherit); font-weight: bold; }
