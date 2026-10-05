@@ -1,14 +1,19 @@
 ---
 /**
  * ハイドレーション前に body のテーマclass（light/dark）を確定させ、
- * 白背景のちらつきを防ぐ。<body> の先頭に置く。
+ * 白背景のちらつきを防ぐ。<body> の先頭に置く。保存先は utils/themeStorage.ts。
+ * 選び方は ThemeContext と同じ（埋め込み表示は URL のテーマ → 保存済み → dark）
  */
+import { THEME_STORAGE_KEY, LEGACY_THEME_STORAGE_KEY, THEME_PARAM } from '../utils/themeStorage';
+import { EMBED_PARAM } from '../utils/embedMode';
 ---
 
-<script is:inline>
+<script is:inline define:vars={{ themeKey: THEME_STORAGE_KEY, legacyThemeKey: LEGACY_THEME_STORAGE_KEY, themeParam: THEME_PARAM, embedParam: EMBED_PARAM }}>
 	(function () {
 		try {
-			var saved = localStorage.getItem('theme');
+			var q = new URLSearchParams(window.location.search);
+			var fromUrl = q.get(embedParam) === '1' ? q.get(themeParam) : null;
+			var saved = fromUrl === 'light' || fromUrl === 'dark' ? fromUrl : localStorage.getItem(themeKey) || localStorage.getItem(legacyThemeKey);
 			document.body.className = saved === 'light' || saved === 'dark' ? saved : 'dark';
 		} catch (e) { document.body.className = 'dark'; }
 	})();

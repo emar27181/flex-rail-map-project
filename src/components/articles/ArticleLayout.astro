@@ -27,6 +27,7 @@ import FaviconLinks from "../seo/FaviconLinks.astro";
 import { CONTROL_CSS, HEADER_LOGO_PX } from "../ui/atoms/controlCss";
 import { RESPONSIVE_TABLE_CSS } from "../ui/atoms/responsiveTable";
 import { MAP_EMBED_CSS, MAP_EMBED_SCRIPT } from "../ui/atoms/mapEmbed";
+import { THEME_STORAGE_KEY, LEGACY_THEME_STORAGE_KEY } from "../../utils/themeStorage";
 import { L } from "../legend/legendStyles";
 import SiteFooterNav from "../SiteFooterNav.astro";
 import LanguageSwitcher from "../LanguageSwitcher.astro";
@@ -108,10 +109,11 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
   <FaviconLinks />
   <link rel="manifest" href="/manifest.json" />
   <style set:html={CONTROL_CSS + RESPONSIVE_TABLE_CSS + MAP_EMBED_CSS}></style>
-  <script is:inline>
+  <script is:inline define:vars={{ themeKey: THEME_STORAGE_KEY, legacyThemeKey: LEGACY_THEME_STORAGE_KEY }}>
+    // 地図・ほかのページと同じ保存先のテーマ（utils/themeStorage.ts）
     (function(){
       try {
-        var saved = localStorage.getItem('frm-theme');
+        var saved = localStorage.getItem(themeKey) || localStorage.getItem(legacyThemeKey);
         if (saved === 'light' || saved === 'dark') {
           document.documentElement.setAttribute('data-theme', saved);
         }
@@ -188,7 +190,7 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
     </div>
   </div>
 
-  <script is:inline>
+  <script is:inline define:vars={{ themeKey: THEME_STORAGE_KEY }}>
     (function(){
       var root = document.documentElement;
       var btn = document.getElementById('themeBtn');
@@ -196,7 +198,7 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
       btn.addEventListener('click', function(){
         var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         root.setAttribute('data-theme', next);
-        try { localStorage.setItem('frm-theme', next); } catch (e) {}
+        try { localStorage.setItem(themeKey, next); } catch (e) {}
       });
     })();
   </script>

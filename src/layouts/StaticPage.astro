@@ -11,6 +11,7 @@
  * 英語版を `-en` で囲むと、?lang= に応じてどちらかが表示される。
  */
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
+import { THEME_STORAGE_KEY, LEGACY_THEME_STORAGE_KEY } from '../utils/themeStorage';
 import SiteFooterNav from '../components/SiteFooterNav.astro';
 import { staticPageCss } from './staticPageStyles';
 import { SITE_URL, GOOGLE_SITE_VERIFICATION } from '../config/seo';
@@ -89,7 +90,7 @@ const {
 			<SiteFooterNav currentPath={path} />
 		</div>
 
-		<script is:inline define:vars={{ langPrefix }}>
+		<script is:inline define:vars={{ langPrefix, themeKey: THEME_STORAGE_KEY, legacyThemeKey: LEGACY_THEME_STORAGE_KEY }}>
 			// ?lang=en なら英語版の塊だけを出す。既定は日本語
 			function switchLanguage() {
 				const lang = new URLSearchParams(window.location.search).get('lang') || 'ja';
@@ -102,9 +103,9 @@ const {
 				en.style.display = lang === 'en' ? 'block' : 'none';
 			}
 
-			// 地図側と同じ localStorage のテーマに合わせる
+			// 地図側と同じ localStorage のテーマに合わせる（保存先は utils/themeStorage.ts）
 			function applyTheme() {
-				document.body.className = localStorage.getItem('theme') || 'light';
+				document.body.className = localStorage.getItem(themeKey) || localStorage.getItem(legacyThemeKey) || 'light';
 			}
 
 			document.addEventListener('DOMContentLoaded', () => {
