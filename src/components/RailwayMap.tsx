@@ -516,7 +516,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showPerRouteStationTimes, setShowPerRouteStationTimes] = useState(false);
   // 地図右下の「表示中の路線」の凡例を折りたたんでいるか（保存して持ち越す）
   const [visibleRoutesLegendCollapsed, setVisibleRoutesLegendCollapsed] = useState(false);
-  useEffect(() => { setVisibleRoutesLegendCollapsed(getInitialLegendCollapsed()); }, []);
+  // 埋め込み表示（記事などの小さな枠）では凡例が地図を大きく隠すので畳んで始め、閲覧者の設定も上書きしない
+  useEffect(() => { setVisibleRoutesLegendCollapsed(embedded || getInitialLegendCollapsed()); }, [embedded]);
   const [showRouteLine, setShowRouteLine] = useState(true);
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
@@ -6585,7 +6586,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 language={currentLanguage}
                 maxItems={10}
                 collapsed={visibleRoutesLegendCollapsed}
-                onToggleCollapsed={() => setVisibleRoutesLegendCollapsed(v => { persistLegendCollapsed(!v); return !v; })}
+                onToggleCollapsed={() => setVisibleRoutesLegendCollapsed(v => { if (!embedded) persistLegendCollapsed(!v); return !v; })}
                 style={{ position: 'absolute', right: panelOnRight ? `calc(300px + ${L.sp.lg})` : L.sp.lg, bottom: isMobile ? '64px' : L.sp['4xl'], zIndex: 1002 }}
               />
             );

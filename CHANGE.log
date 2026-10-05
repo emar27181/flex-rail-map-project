@@ -27,6 +27,14 @@
 ### docs: 埋め込み・駅番号の札・ページのアクセント色の規格
 - `docs/design-system.md`
 
+### fix: 埋め込みの枠のどこを押しても地図を操作できるようにする
+- `src/components/ui/atoms/mapEmbed.ts`, `src/layouts/{seoPageStyles.ts,SeoPageLayout.astro}`, `src/styles/article-layout.css`, `docs/design-system.md`
+- 押せるのが下の小さなボタンだけで、地図を押しても動かなかった。枠全体を透明なボタンで覆う。枠の上の色付きの線は外した
+
+### improve: 埋め込みの地図では「表示中の路線」の凡例を畳んで始める
+- `src/components/RailwayMap.tsx`
+- 小さな枠では凡例が地図の大部分を隠していた。埋め込みでは閲覧者の開閉の設定を上書きしない
+
 ## [2026-09-30] セッション（PR #28〜#31 のマージ・地図の配色・端末ごとの設計・表の部品化）
 
 ### merge: PR #28 → #29 → #30 → #31 を順に main にマージ
