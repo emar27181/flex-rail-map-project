@@ -142,6 +142,10 @@ export const SEO_TEXT = {
     throughLine: (partners: string) => `${partners}と直通運転しています。`,
     noThrough: '路線データ上、直通運転の登録はありません。',
     openMapLine: (name: string) => `${name}だけを表示して路線図を開く`,
+    embedLineTitle: (name: string) => `${name}だけを表示した地図`,
+    embedStationTitle: (name: string) => `${name}駅を出発駅にした地図`,
+    embedCaption: '実際の地図です。枠の中で拡大・移動でき、駅を押すと時刻表が開きます。',
+    embedActivate: 'タップして地図を動かす',
 
     openMapData: (label: string) => `${label}のヒートマップで路線図を開く`,
     dataHubTitle: `駅周辺データの一覧 | ${SITE_NAME}`,
@@ -228,6 +232,10 @@ export const SEO_TEXT = {
     throughLine: (partners: string) => `Through services run to the ${partners}.`,
     noThrough: 'No through services are registered in the line data.',
     openMapLine: (name: string) => `Open the map with only the ${name}`,
+    embedLineTitle: (name: string) => `Map showing only the ${name}`,
+    embedStationTitle: (name: string) => `Map with ${name} as the departure`,
+    embedCaption: 'The live map. Zoom and pan inside the frame, and tap a station to see its timetable.',
+    embedActivate: 'Tap to use the map',
 
     openMapData: (label: string) => `Open the map with a ${label.toLowerCase()} heatmap`,
     dataHubTitle: `Station Area Data | ${SITE_NAME}`,
@@ -315,6 +323,10 @@ export const SEO_TEXT = {
     throughLine: (partners: string) => `与${partners}直通运行。`,
     noThrough: '线路数据中没有登记直通运行。',
     openMapLine: (name: string) => `只显示${name}并打开线路图`,
+    embedLineTitle: (name: string) => `只显示${name}的地图`,
+    embedStationTitle: (name: string) => `以${name}站为出发站的地图`,
+    embedCaption: '这是实际的地图。可以在框内缩放和移动，点击车站可查看时刻表。',
+    embedActivate: '点击后操作地图',
 
     openMapData: (label: string) => `以${label}热力图打开线路图`,
     dataHubTitle: `车站周边数据一览 | ${SITE_NAME}`,
@@ -402,6 +414,10 @@ export const SEO_TEXT = {
     throughLine: (partners: string) => `직통 운행 노선: ${partners}`,
     noThrough: '노선 데이터에 직통 운행이 등록되어 있지 않습니다.',
     openMapLine: (name: string) => `${name}만 표시해 노선도 열기`,
+    embedLineTitle: (name: string) => `${name}만 표시한 지도`,
+    embedStationTitle: (name: string) => `${name}역을 출발역으로 둔 지도`,
+    embedCaption: '실제 지도입니다. 틀 안에서 확대·이동할 수 있고, 역을 누르면 시간표가 열립니다.',
+    embedActivate: '눌러서 지도 움직이기',
 
     openMapData: (label: string) => `${label} 히트맵으로 노선도 열기`,
     dataHubTitle: `역 주변 데이터 목록 | ${SITE_NAME}`,

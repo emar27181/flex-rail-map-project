@@ -53,12 +53,12 @@ body.dark footer {
 
 .page-title {
   font-size: ${FS.display};
-  border-bottom: ${HEADING_RULE_WIDTH} solid ${light.primary};
+  border-bottom: ${HEADING_RULE_WIDTH} solid var(--page-accent, ${light.primary});
   padding-bottom: ${L.sp.md};
   margin-bottom: ${L.sp['4xl']};
 }
 h2 {
-  border-bottom: ${HEADING_RULE_WIDTH} solid ${light.primary};
+  border-bottom: ${HEADING_RULE_WIDTH} solid var(--page-accent, ${light.primary});
   padding-bottom: ${L.sp.md};
   margin-bottom: ${L.sp['4xl']};
 }
@@ -67,7 +67,7 @@ h3 {
   margin-top: ${L.sp['5xl']};
   margin-bottom: ${L.sp.xl};
 }
-body.dark .page-title, body.dark h2 { border-bottom-color: ${dark.primary}; }
+body.dark .page-title, body.dark h2 { border-bottom-color: var(--page-accent, ${dark.primary}); }
 body.dark a { color: ${dark.primary}; }
 
 ul { margin-left: ${L.sp['3xl']}; }

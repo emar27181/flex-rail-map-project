@@ -19,6 +19,9 @@ import { seoPageCss } from './seoPageStyles';
 import { buildBreadcrumbJsonLd, buildHreflangLinks, hreflangCode, type BreadcrumbItem } from '../config/seo';
 import type { SeoLang } from '../seo/pageModel';
 import { SEO_LANGS } from '../seo/pageModel';
+import { MAP_EMBED_SCRIPT } from '../components/ui/atoms/mapEmbed';
+import { darkenForWhiteText } from '../utils/contrast';
+import { adjustRouteColorForTheme } from '../contexts/ThemeContext';
 
 export interface Props {
   lang: SeoLang;
@@ -32,9 +35,17 @@ export interface Props {
   h1: string;
   lede?: string;
   indexable: boolean;
+  /**
+   * ページの差し色（路線のページは路線色）。見出しの線・表の番号・埋め込みの枠に使う。
+   * ライトは白地で読める濃さに、ダークは暗い地で見える明るさにそろえる（色相は変えない）
+   */
+  accent?: string;
 }
 
-const { lang, title, description, path, langPaths, breadcrumbs, h1, lede, indexable } = Astro.props;
+const { lang, title, description, path, langPaths, breadcrumbs, h1, lede, indexable, accent } = Astro.props;
+const accentVars = accent
+  ? `--page-accent-light: ${darkenForWhiteText(accent)}; --page-accent-dark: ${adjustRouteColorForTheme(accent, 'dark')};`
+  : undefined;
 const versions = SEO_LANGS.filter(l => langPaths[l]).map(l => ({ lang: l, path: langPaths[l]! }));
 const hreflang = buildHreflangLinks(versions, 'ja');
 ---
@@ -52,7 +63,7 @@ const hreflang = buildHreflangLinks(versions, 'ja');
 			styles={[staticPageCss, guideCss, seoPageCss]}
 		/>
 	</head>
-	<body>
+	<body style={accentVars}>
 		<ThemeInitScript />
 		<div class="container">
 			<div class="page-lang-bar">
@@ -75,5 +86,7 @@ const hreflang = buildHreflangLinks(versions, 'ja');
 			<SiteFooterNav lang={lang} currentPath={path} />
 		</div>
 		<SimpleThemeWrapper client:only="react" />
+		<!-- 埋め込んだ画面は押すまで触れない（ui/atoms/mapEmbed.ts） -->
+		<script is:inline set:html={MAP_EMBED_SCRIPT}></script>
 	</body>
 </html>

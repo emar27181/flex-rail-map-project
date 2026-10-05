@@ -11,6 +11,11 @@ import SeoPageLayout from '../../../layouts/SeoPageLayout.astro';
 import MapOpenCta from '../../../components/MapOpenCta.astro';
 import LineChip from '../../../components/seo/LineChip.astro';
 import StationLink from '../../../components/seo/StationLink.astro';
+import MapEmbed from '../../../components/ui/atoms/MapEmbed.astro';
+import CodeBadge from '../../../components/ui/atoms/CodeBadge.astro';
+import { buildMapHref } from '../../../utils/mapDeepLink';
+import { getStationNumber } from '../../../data/stationNumbers';
+import { routeColors } from '../../../data/routes';
 import {
   DATA_LANGS, SEO_LANGS, dataPageFor, dataPath, getSeoModel, guidesForRoutes, hubPath, nearbyMajorStations,
   routeName, stationName, stationPath, type SeoLang, type SeoStation,
@@ -59,6 +64,19 @@ const statCols = {
 	value: { label: t.colValue, kind: 'num' },
 	scope: { label: t.colScope, kind: 'note' },
 } satisfies Record<string, TableColumn>;
+
+// 冒頭のデモ: この駅を出発駅にした地図（出発駅にできない駅は通る路線を表示）。駅のまわりを開く
+const STATION_EMBED_ZOOM = 13;
+const embedSrc = buildMapHref({
+	from: station.mapFrom,
+	routes: station.mapFrom ? undefined : station.routes,
+	center: [station.lat, station.lng],
+	zoom: STATION_EMBED_ZOOM,
+	lang,
+	embed: true,
+});
+/** ページの差し色: この駅を通る最初の路線の色 */
+const accent = station.routes.map(r => routeColors[r]).find(Boolean);
 ---
 
 <SeoPageLayout
@@ -75,7 +93,9 @@ const statCols = {
 	h1={t.stationH1(name)}
 	lede={t.stationLede(name, station.routes.length, station.effectiveLines)}
 	indexable={station.indexable}
+	accent={accent}
 >
+	<MapEmbed src={embedSrc} title={station.mapFrom ? t.embedStationTitle(name) : t.embedLineTitle(lineNames.join(t.listSep))} caption={t.embedCaption} activateLabel={t.embedActivate} />
 	<MapOpenCta {...stationCta} />
 
 	<section>
@@ -91,7 +111,7 @@ const statCols = {
 		<ResponsiveTable columns={[adjCols.line, adjCols.prev, adjCols.next]}>
 			{station.adjacent.map(a => (
 				<tr>
-					<TableCell col={adjCols.line}>{routeName(a.route, lang)}</TableCell>
+					<TableCell col={adjCols.line}>{getStationNumber(a.route, station.name) && routeColors[a.route] && <CodeBadge code={getStationNumber(a.route, station.name)!} color={routeColors[a.route]} />}{routeName(a.route, lang)}</TableCell>
 					<TableCell col={adjCols.prev}>{a.prev ? <StationLink station={a.prev} lang={lang} /> : t.terminal}</TableCell>
 					<TableCell col={adjCols.next}>{a.next ? <StationLink station={a.next} lang={lang} /> : t.terminal}</TableCell>
 				</tr>
@@ -122,7 +142,7 @@ const statCols = {
 	)}
 
 	{station.stats.length > 0 && (
-		<section>
+		<section id="around-stats">
 			<h2>{t.aroundStats}</h2>
 			<p class="seo-note">{t.statsNote}</p>
 			<ResponsiveTable columns={[statCols.item, statCols.value, statCols.scope]}>
