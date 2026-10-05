@@ -8,12 +8,12 @@
 
 | 置き場所 | 中身 |
 |---|---|
-| `src/data/articles/{slug}.ts` | 記事1本の全部（4言語のタイトル・説明・本文ブロック、地図の状態、スクリーンショットの撮り方、関連記事）。値だけ |
+| `src/data/articles/{slug}.ts` | 記事1本の全部（4言語のタイトル・説明・本文ブロック、地図の状態、埋め込む画面、関連記事）。値だけ |
 | `src/data/articles/index.ts` | 記事の一覧（並び順＝記事一覧ページの順）。記事を足したら1行足す |
 | `src/data/articles/types.ts` | 記事データの形（使えるブロックの種類） |
 | `src/utils/articleRender.ts` | ブロック → HTML。部品の HTML はここだけで作る |
 | `src/styles/article-layout.css` | 見た目（角丸・ボタンはデザイントークンの CSS 変数だけ） |
-| `scripts/capture-article-screenshots.mts` | 記事データの `shots` を読んで、4言語の画面を撮る |
+| `src/components/ui/atoms/mapEmbed.ts` | 実際の画面の埋め込み（iframe）の部品。記事と駅・路線のページで共通 |
 | `docs/templates/article-template.ts` | ひな形 |
 
 ページのファイル（`.astro`）は作らなくてよい。記事データを足せば日本語・英語・中国語・韓国語のページ、
@@ -23,9 +23,8 @@
 
 1. `docs/templates/article-template.ts` を `src/data/articles/{slug}.ts` にコピーして書く（4言語）
 2. `src/data/articles/index.ts` に1行足す
-3. 開発サーバーを起動し（`npm run dev`）、画像を撮る:
-   `npx tsx scripts/capture-article-screenshots.mts --only {slug}`
-4. 撮れた画像を開いて、説明文と画面が合っているか目で確かめる
+3. 開発サーバーを起動し（`npm run dev`）、`/articles/{slug}` と英中韓の版を開く
+4. 埋め込んだ画面（iframe）が説明文と合っているか目で確かめる（ライト・ダークの両方）
 5. `npm run test:types` → `npm run test:unit` → `npm run build`
    （形の決まりは `tests/unit/data/articleSources.test.ts` が確かめる）
 
@@ -54,15 +53,20 @@
 - 見出しとタイトルには、検索する人が使う言葉（「路線図 読み方」「通勤時間」など）を入れる
 - 関連記事は本文に書かない（`ArticleLayout.astro` が `related` の3本を記事の最後に出す）
 
-## 画像（1セクション1枚が目安）
+## 実際の画面（1セクション1つが目安）
 
-- 画像は作り物の図ではなく、**このサイトの実際の画面**にする。
-  記事データの `shots` に撮り方（地図の状態 `routes` `from` `to` `metric` `center` `zoom`、または地図以外のページ `page`）を書き、
-  開発サーバーを起動して `npx tsx scripts/capture-article-screenshots.mts [--only <slug>] [--id <shot>]` で4言語分撮る
-- 出力は `public/images/articles/{slug}/{shot}-{lang}.webp`（幅1200px）。その言語の画面をその言語の記事に使う
+2026-10 にスクリーンショット（画像）をやめ、**このサイトの実際の画面を iframe で埋め込む**形にした
+（画像は小さくて読みにくく、地図や UI を変えるたびに撮り直しが要ったため）。
+
+- 記事データの `shots` に画面を書く:
+  - 地図: `map` に状態（`routes` `from` `to` `metric` `center` `zoom`、所要時間の表示は `travelTimes: true`）
+  - 駅・路線のページ: `page` に日本語版のパス、`anchor` に開く位置（ページ内の id。例: 路線の駅一覧 `station-list`、駅の周辺データ `around-stats`）
 - 本文では `{ type: 'shot', shot: 'キー', alt, caption }`。説明している段落のすぐ下に置く。
-  `caption` に「何を見る図か」を1文、`alt` に画面に写っているものを書く（狭い画面では押すと原寸で開く）
-- 地図や UI を変えたら全記事を撮り直す（`--only` を付けずに実行）
+  `alt` は iframe の title（読み上げ用に、何の画面か）、`caption` に「何を見る画面か」を1文
+- 埋め込みは記事の言語・テーマ（ライト/ダーク）で開く。ボタン（「表示路線の切替」など）は押した状態で始められないので、
+  見せたい状態は `map` の値で書き、操作が要るときは `caption` で「右上の〜を開く」と案内する
+- 押すまで中に触れない（スクロールの指で地図が動かない）。部品は `ui/atoms/mapEmbed.ts`
+- 以前の画像（`public/images/articles/`）と撮影スクリプト（`scripts/capture-article-screenshots.mts`）は使っていない
 
 ## 実際の地図の埋め込みと、地図を開くボタン
 
@@ -76,7 +80,7 @@
 
 - 4言語とも結論3行で始まり、見出しは3〜5個、埋め込みがあり、最後が地図を開くボタン
 - ブロックの並び（種類）が4言語で同じ
-- 参照している地図の状態・画像が実在し、画像に `alt` と説明がある
+- 参照している画面（`shots`）が実在し、`alt` と説明があり、記事の言語で開く
 - 地図の状態の路線・指標が地図側で読めるもの
 - 関連記事が3本で、実在する別の記事
 - サービス名を直書きしていない（`{siteName}`）

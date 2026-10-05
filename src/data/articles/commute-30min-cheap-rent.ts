@@ -1,6 +1,6 @@
 /**
  * 記事「通勤時間から住む駅を探す｜職場の駅から逆算する方法」（/articles/commute-30min-cheap-rent）。
- * 書き方: docs/article-writing.md ／ 形: ./types.ts ／ 画像を撮る: npx tsx scripts/capture-article-screenshots.mts --only commute-30min-cheap-rent
+ * 書き方: docs/article-writing.md ／ 形: ./types.ts ／ 画面はプレビューで確認する（iframe で埋め込む）
  * 値だけを書く（計算で組み立てない）。文章中のサービス名は {siteName} と書く。
  */
 import type { ArticleSource } from './types';
@@ -38,11 +38,9 @@ export const commute30minCheapRent: ArticleSource = {
           35.68,
           139.7
         ],
-        "zoom": 11
-      },
-      "clickUi": [
-        "showTravelTimes"
-      ]
+        "zoom": 11,
+        "travelTimes": true
+      }
     }
   },
   "content": {
@@ -109,7 +107,7 @@ export const commute30minCheapRent: ArticleSource = {
           "type": "shot",
           "shot": "from-work",
           "alt": "出発駅に東京を選んだ地図。東京駅を通る路線が四方に伸び、右側に13路線の一覧が出ている",
-          "caption": "東京駅を出発駅にした状態。右の一覧に、東京駅を通る13路線が並ぶ"
+          "caption": "東京駅を出発駅にした状態。東京駅を通る路線だけが四方に伸びる（右上の「表示路線の切替」を開くと一覧が出る）"
         },
         {
           "type": "h2",
@@ -226,7 +224,7 @@ export const commute30minCheapRent: ArticleSource = {
           "type": "shot",
           "shot": "from-work",
           "alt": "Map with Tokyo as the departure station. Lines through Tokyo Station spread in all directions, and a list of 13 lines appears on the right",
-          "caption": "Tokyo Station set as the departure. The list on the right shows the 13 lines through it"
+          "caption": "Tokyo Station set as the departure. Only the lines through Tokyo Station remain (open \"Route Display Toggle\" at the top right for the list)"
         },
         {
           "type": "h2",
@@ -343,7 +341,7 @@ export const commute30minCheapRent: ArticleSource = {
           "type": "shot",
           "shot": "from-work",
           "alt": "出发站选东京的地图，经过东京站的线路向四面延伸，右侧显示13条线路的列表",
-          "caption": "把东京站设为出发站。右侧列表中列出经过东京站的13条线路"
+          "caption": "把东京站设为出发站。只保留经过东京站的线路（打开右上角的“显示路线切换”可看到列表）"
         },
         {
           "type": "h2",
@@ -460,7 +458,7 @@ export const commute30minCheapRent: ArticleSource = {
           "type": "shot",
           "shot": "from-work",
           "alt": "출발역에 도쿄를 고른 지도. 도쿄역을 지나는 노선이 사방으로 뻗어 있고 오른쪽에 13개 노선 목록이 나와 있다",
-          "caption": "도쿄역을 출발역으로 둔 상태. 오른쪽 목록에 도쿄역을 지나는 13개 노선이 나온다"
+          "caption": "도쿄역을 출발역으로 둔 상태. 도쿄역을 지나는 노선만 남는다(오른쪽 위 “표시 노선 전환”을 열면 목록이 나온다)"
         },
         {
           "type": "h2",

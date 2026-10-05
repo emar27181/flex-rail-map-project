@@ -1,6 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import { existsSync } from 'fs';
-import { join } from 'path';
 import { ARTICLES, ARTICLE_LANGUAGES, ARTICLE_PAGE_TRANSLATIONS } from '../../../src/data/articleI18n';
 import { ARTICLE_BODY_TRANSLATIONS } from '../../../src/data/articleBodyI18n';
 
@@ -61,15 +59,16 @@ describe('記事の多言語版', () => {
     }
   });
 
-  it('本文の画像は実在し、代替テキストがあり、その言語で撮った画面を使う', () => {
+  it('本文の埋め込みはその言語の画面を開き、title がある（画像は使わない）', () => {
     for (const [slug, bodies] of Object.entries(ARTICLE_BODY_TRANSLATIONS)) {
       for (const lang of ARTICLE_LANGUAGES) {
-        for (const m of (bodies[lang] ?? '').matchAll(/<img\b[^>]*>/g)) {
-          const tag = m[0];
-          const src = /src="([^"]+)"/.exec(tag)?.[1] ?? '';
-          expect(existsSync(join('public', src)), `${slug} ${lang}: ${src}`).toBe(true);
-          expect(/alt="[^"]+"/.test(tag), `${slug} ${lang}: alt ${src}`).toBe(true);
-          expect(src.endsWith(`-${lang}.webp`), `${slug} ${lang}: ${src}`).toBe(true);
+        const html = bodies[lang] ?? '';
+        expect(html, `${slug} ${lang}: スクリーンショットの画像が残っている`).not.toMatch(/<img\b[^>]*\/images\/articles\//);
+        for (const m of html.matchAll(/<iframe\b[^>]*>/g)) {
+          const src = (/src="([^"]+)"/.exec(m[0])?.[1] ?? '').replace(/&amp;/g, '&');
+          expect(/title="[^"]+"/.test(m[0]), `${slug} ${lang}: title ${src}`).toBe(true);
+          if (src.startsWith('/?')) expect(new URLSearchParams(src.slice(2)).get('lang'), `${slug} ${lang}: ${src}`).toBe(lang);
+          else expect(src.startsWith(lang === 'ja' ? '/' : `/${lang}/`), `${slug} ${lang}: ${src}`).toBe(true);
         }
       }
     }

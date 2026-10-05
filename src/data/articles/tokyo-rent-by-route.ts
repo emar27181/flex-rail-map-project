@@ -1,6 +1,6 @@
 /**
  * 記事「家賃を沿線で比べる方法｜候補駅を絞って条件をそろえる」（/articles/tokyo-rent-by-route）。
- * 書き方: docs/article-writing.md ／ 形: ./types.ts ／ 画像を撮る: npx tsx scripts/capture-article-screenshots.mts --only tokyo-rent-by-route
+ * 書き方: docs/article-writing.md ／ 形: ./types.ts ／ 画面はプレビューで確認する（iframe で埋め込む）
  * 値だけを書く（計算で組み立てない）。文章中のサービス名は {siteName} と書く。
  */
 import type { ArticleSource } from './types';
@@ -33,7 +33,8 @@ export const tokyoRentByRoute: ArticleSource = {
     },
     "line-stations": {
       "page": "/lines/tokyu-toyoko-line",
-      "scrollToHeading": "stationList"
+      "scrollToHeading": "stationList",
+      "anchor": "station-list"
     }
   },
   "content": {

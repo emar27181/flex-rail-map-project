@@ -26,6 +26,7 @@ import { APP_ICON_PATH, SITE_URL, SITE_NAME, OG_LOCALE, buildHreflangLinks, href
 import FaviconLinks from "../seo/FaviconLinks.astro";
 import { CONTROL_CSS, HEADER_LOGO_PX } from "../ui/atoms/controlCss";
 import { RESPONSIVE_TABLE_CSS } from "../ui/atoms/responsiveTable";
+import { MAP_EMBED_CSS, MAP_EMBED_SCRIPT } from "../ui/atoms/mapEmbed";
 import { L } from "../legend/legendStyles";
 import SiteFooterNav from "../SiteFooterNav.astro";
 import LanguageSwitcher from "../LanguageSwitcher.astro";
@@ -106,7 +107,7 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
 
   <FaviconLinks />
   <link rel="manifest" href="/manifest.json" />
-  <style set:html={CONTROL_CSS + RESPONSIVE_TABLE_CSS}></style>
+  <style set:html={CONTROL_CSS + RESPONSIVE_TABLE_CSS + MAP_EMBED_CSS}></style>
   <script is:inline>
     (function(){
       try {
@@ -199,20 +200,8 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
       });
     })();
   </script>
-  <script is:inline>
-    // 本文に埋め込んだ地図（articleRender.ts の embed）。そのままだと、スマホで記事を
-    // スクロールしようとした指が地図を動かしてしまうので、押すまでは地図に触れないようにする
-    (function(){
-      document.querySelectorAll('.embed-frame').forEach(function (frame) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'ctl embed-activate';
-        btn.textContent = frame.getAttribute('data-activate-label') || '';
-        btn.addEventListener('click', function () { frame.classList.add('active'); btn.remove(); });
-        frame.appendChild(btn);
-      });
-    })();
-  </script>
+  <!-- 埋め込んだ画面は押すまで触れない（ui/atoms/mapEmbed.ts） -->
+  <script is:inline set:html={MAP_EMBED_SCRIPT}></script>
   <slot name="scripts" />
 </body>
 </html>
