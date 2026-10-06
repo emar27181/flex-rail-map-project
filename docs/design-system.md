@@ -198,6 +198,7 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 押すと開閉する見出しの行 | `DisclosureHeader`（見出し＋▼。行のどこを押しても開閉、開くと区切り線。`size="floating"` で高さ・文字が `FLOATING_CONTROL`） |
 | 地図の上に浮かぶ操作の高さ・文字の大きさ | `FLOATING_CONTROL`（`controlSize.ts`。36px・`FS.body`。FloatingButton・凡例の見出し・丸いボタンで共通） |
 | 地図の上に浮かぶ箱・ボタンの地（透け具合・ぼかし・枠線・影・角の丸み） | `floatingSurfaceStyle(theme, 'idle' \| 'open')`（`ui/atoms/floatingSurface.ts`）。閉じた箱・ボタンは idle（72%）、開いて中身を読む箱は open（82%）。どちらもすりガラス（ぼかし16px）。対象は隅の丸いボタン・「表示切替」・凡例・駅選択・駅名の候補一覧・表示路線の切替・下のパネル・ヒートマップの凡例・駅の時刻表/統計のツールチップ・路線のポップアップとツールチップ（Leaflet の `.leaflet-tooltip` は `floatingSurfaceCss`）。コンポーネントで `backdropFilter` / `blur(` / `glassOpen` を書くと `tests/unit/components/ui/floatingSurface.test.ts` が落ちる透け具合は `FLOATING_OPACITY`（ThemeContext）。`glassOpen` などを直接書かない |
+| 影（box-shadow / text-shadow / drop-shadow）と文字の縁取り | `shadow(role, theme)`（`ui/atoms/shadow.ts`）。役割は marker（地図の上の印: 駅ラベル・駅の点・所要時間・現在地）/ floating（浮かぶ箱・ボタン）/ raised（ナビ・広告・カード・記事の囲み。記事の CSS は `var(--shadow)`）/ overlay（メニュー・ポップアップ）。**方針は影なし（2026-10-06）**で、`SHADOW` の各役割の `enabled` を true にすればその役割だけ戻る。輪と影を重ねるときは `joinShadows`。白字の縁取りは影ではないので `textHalo()`（既定オン）。広がりだけの輪（駅の多重枠 `0 0 0 2px 色`）は枠線なので対象外。直書きは `tests/unit/components/ui/shadow.test.ts` が落とす |
 | 見出しと中身を1枚の箱にまとめた開閉パネル | `CollapsiblePanel`（molecule。凡例「N路線」が使う。見出しと中身を別の箱に分けない） |
 
 判定に迷ったら次を自問する。

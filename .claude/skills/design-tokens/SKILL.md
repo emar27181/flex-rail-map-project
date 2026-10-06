@@ -34,6 +34,7 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 | 地図の上に浮かぶ操作の高さ・文字の大きさ | `FLOATING_CONTROL`（36px / FS.body。丸いボタン・「表示切替」・凡例の見出しで共通） | `src/components/ui/atoms/controlSize.ts` |
 | 地図の上に浮かぶ文字つきボタン | `<FloatingButton>` | `src/components/ui/atoms/FloatingButton.tsx` |
 | 地図の上に浮かぶ箱・ボタンの地（透け具合・ぼかし・枠線・影・丸み） | `floatingSurfaceStyle(theme, 'idle' \| 'open')`。透け具合は `FLOATING_OPACITY` | `src/components/ui/atoms/floatingSurface.ts` |
+| 影・文字の縁取り（既定は影なし。`SHADOW` の `enabled` で役割ごとに戻せる） | `shadow(role, theme)` / `joinShadows` / `textHalo()`。記事の CSS は `var(--shadow)` | `src/components/ui/atoms/shadow.ts` |
 | 開閉する見出し・▼ | `<DisclosureHeader size>` / `<DisclosureIndicator>` | `src/components/ui/atoms/` |
 | 見出しと中身が1枚の開閉パネル | `<CollapsiblePanel size>` | `src/components/ui/molecules/CollapsiblePanel.tsx` |
 | 排他選択のボタン列 | `<SegmentedControl>` | `src/components/ui/molecules/SegmentedControl.tsx` |

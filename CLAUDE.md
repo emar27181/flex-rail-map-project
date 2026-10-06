@@ -602,6 +602,9 @@ UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域
   透け具合・ぼかし・枠線・影も含めた地は `floatingSurfaceStyle(theme, 'idle' | 'open')`
   （`ui/atoms/floatingSurface.ts`）から取り、`rgba(...)` や `blur(...)` を直書きしない
   **基準は地図の駅ラベル**（画面上でいちばん数が多く目に入る部品）
+- **影は付けない方針（2026-10-06）。** 影はすべて `ui/atoms/shadow.ts` の `shadow(role, theme)` から取る
+  （役割: marker / floating / raised / overlay。戻すときは `SHADOW` のその役割を `enabled: true` にするだけ）。
+  白字の縁取りは影ではないので `textHalo()`（既定オン）。直書きは `tests/unit/components/ui/shadow.test.ts` が落とす
 - 段階に無い値は近い段階に丸める。新しい段階を足す前に既存で足りないか確認すること
 寸法の一致は `tests/unit/components/ui/atoms.test.tsx` が固定している。
 
