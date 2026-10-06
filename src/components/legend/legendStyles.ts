@@ -116,10 +116,11 @@ export const section = {
     gap:            L.sp.md,
   } satisfies CSSProperties,
 
-  /** ▶ / ▼ toggle arrow */
-  arrow(colors: Colors): CSSProperties {
-    return { fontSize: L.fs.sm, color: colors.textSecondary, userSelect: 'none' };
-  },
+  /** 見出しの右端に寄せる開閉の印（DisclosureIndicator）の置き場所 */
+  indicator: {
+    marginLeft:     'auto',
+    display:        'flex',
+  } satisfies CSSProperties,
 
   /** Bold section title */
   title(colors: Colors): CSSProperties {

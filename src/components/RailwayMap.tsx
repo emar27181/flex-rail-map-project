@@ -5733,11 +5733,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         : (meta ? translateStatParamLabel(meta.label, currentLanguage) : String(heatmapParam)) + (meta?.unit ? ` (${meta.unit})` : '')
                       }
                     </span>
-                    <span style={{
-                      fontSize: FS.caption, color: colors.textSecondary, flexShrink: 0, marginLeft: L.sp.xs,
-                      transform: heatmapParamSelectorOpen ? 'rotate(0deg)' : 'rotate(180deg)',
-                      transition: 'transform 0.2s',
-                    }}>▲</span>
+                    {/* heatmapParamSelectorOpen は「折りたたんでいる」の意味（true で本体を隠す） */}
+                    <span style={{ marginLeft: L.sp.xs, display: 'flex' }}>
+                      <DisclosureIndicator expanded={!heatmapParamSelectorOpen} theme={theme} />
+                    </span>
                   </div>
 
                   {/* 本体（折りたたみ対象） */}
