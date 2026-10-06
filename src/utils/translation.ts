@@ -8497,9 +8497,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "駅フィルター",
     english: "Station Filter"
   },
+  // 表示設定の中の節。アイコンの大きさ・線の太さ（px）など画面の見た目を変えるので「UI設定」
   settingsGroupMap: {
-    japanese: "表示切替",
-    english: "Display Toggles"
+    japanese: "UI設定",
+    english: "UI Settings"
   },
   settingsLabelSize: {
     japanese: "ラベルサイズ",
@@ -8994,7 +8995,7 @@ export const uiChinese: Record<string, string> = {
   settingsGroupLabel: "站点标签",
   settingsGroupViz: "数据可视化",
   settingsGroupFilter: "站点筛选",
-  settingsGroupMap: "显示切换",
+  settingsGroupMap: "界面设置",
   settingsLabelSize: "标签大小",
   settingsIconSize: "图标大小",
   settingsGroupDetail: "详细设置",
@@ -9329,7 +9330,7 @@ export const uiKorean: Record<string, string> = {
   settingsGroupLabel: "역 레이블",
   settingsGroupViz: "데이터 시각화",
   settingsGroupFilter: "역 필터",
-  settingsGroupMap: "표시 전환",
+  settingsGroupMap: "UI 설정",
   settingsLabelSize: "레이블 크기",
   settingsIconSize: "아이콘 크기",
   settingsGroupDetail: "상세 설정",
