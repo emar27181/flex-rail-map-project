@@ -8,7 +8,7 @@ import type { ArticleSource } from './types';
 export const commute30minCheapRent: ArticleSource = {
   "slug": "commute-30min-cheap-rent",
   "publishedDate": "2025-06-06",
-  "modifiedDate": "2026-09-29",
+  "modifiedDate": "2026-10-06",
   "related": [
     "tokyo-rent-by-route",
     "tokyo-safe-area-by-route",
@@ -17,28 +17,28 @@ export const commute30minCheapRent: ArticleSource = {
   "keywordsJa": "通勤時間 住む駅, 通勤30分, 職場 最寄り駅, 引っ越し 駅 選び方, 所要時間",
   "maps": {
     "main": {
-      "from": "東京"
+      "from": "武蔵小杉"
     }
   },
   "shots": {
     "from-work": {
       "map": {
-        "from": "東京",
+        "from": "武蔵小杉",
         "center": [
-          35.68,
-          139.7
+          35.58,
+          139.65
         ],
         "zoom": 11
       }
     },
     "travel-times": {
       "map": {
-        "from": "東京",
+        "from": "武蔵小杉",
         "center": [
-          35.68,
-          139.7
+          35.576,
+          139.66
         ],
-        "zoom": 11,
+        "zoom": 12,
         "travelTimes": true
       }
     }
@@ -101,13 +101,13 @@ export const commute30minCheapRent: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "{siteName}で、職場の最寄り駅を「出発駅」に入れます。到着駅は空けたままで構いません。その駅を通る路線が地図に残るので、どの方向に何本の路線が伸びているかが分かります。東京駅なら、13路線が四方に伸びています（2026年9月時点の{siteName}のデータ）。"
+          "text": "{siteName}で、職場の最寄り駅を「出発駅」に入れます。到着駅は空けたままで構いません。その駅を通る路線が地図に残るので、どの方向に何本の路線が伸びているかが分かります。武蔵小杉駅なら、駅を通る7路線が渋谷・横浜・川崎・立川・海老名などの方向に伸び、そのまま乗り入れる路線（みなとみらい線・副都心線など）も合わせて16路線が残ります（2026年10月時点の{siteName}のデータ）。"
         },
         {
           "type": "shot",
           "shot": "from-work",
-          "alt": "出発駅に東京を選んだ地図。東京駅を通る路線が四方に伸び、右側に13路線の一覧が出ている",
-          "caption": "東京駅を出発駅にした状態。東京駅を通る路線だけが四方に伸びる（右上の「表示路線の切替」を開くと一覧が出る）"
+          "alt": "出発駅に武蔵小杉を選んだ地図。武蔵小杉駅を通る路線が各方向に伸びている",
+          "caption": "武蔵小杉駅を出発駅にした状態。武蔵小杉駅を通る路線だけが残る（右上の「表示路線の切替」を開くと一覧が出る）"
         },
         {
           "type": "h2",
@@ -145,18 +145,18 @@ export const commute30minCheapRent: ArticleSource = {
           "map": "main",
           "view": {
             "center": [
-              35.68,
-              139.72
+              35.58,
+              139.65
             ],
             "zoom": 11
           },
-          "title": "{siteName}の地図（東京駅を出発駅にした状態）",
-          "caption": "実際の地図（東京駅を出発駅にした状態）。枠の中で拡大・移動できます。"
+          "title": "{siteName}の地図（武蔵小杉駅を出発駅にした状態）",
+          "caption": "実際の地図（武蔵小杉駅を出発駅にした状態）。枠の中で拡大・移動できます。"
         },
         {
           "type": "cta",
           "map": "main",
-          "title": "東京駅を出発駅にした地図を開く",
+          "title": "武蔵小杉駅を出発駅にした地図を開く",
           "text": "出発駅を、自分の職場の最寄り駅に変えて使ってください。"
         }
       ]
@@ -218,13 +218,13 @@ export const commute30minCheapRent: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "In {siteName}, enter your office's nearest station as the \"Departure\". You can leave the arrival empty. The lines through that station stay on the map, showing how many lines head in which directions. From Tokyo Station, 13 lines spread out in every direction ({siteName} data as of September 2026)."
+          "text": "In {siteName}, enter your office's nearest station as the \"Departure\". You can leave the arrival empty. The lines through that station stay on the map, showing how many lines head in which directions. From Musashi-kosugi Station, the 7 lines through the station head toward Shibuya, Yokohama, Kawasaki, Tachikawa, Ebina and more, and with the lines they run through to (such as the Minatomirai Line and Fukutoshin Line), 16 lines remain ({siteName} data as of October 2026)."
         },
         {
           "type": "shot",
           "shot": "from-work",
-          "alt": "Map with Tokyo as the departure station. Lines through Tokyo Station spread in all directions, and a list of 13 lines appears on the right",
-          "caption": "Tokyo Station set as the departure. Only the lines through Tokyo Station remain (open \"Route Display Toggle\" at the top right for the list)"
+          "alt": "Map with Musashi-kosugi as the departure station. Lines through Musashi-kosugi Station head in several directions",
+          "caption": "Musashi-kosugi Station set as the departure. Only the lines through Musashi-kosugi Station remain (open \"Route Display Toggle\" at the top right for the list)"
         },
         {
           "type": "h2",
@@ -262,18 +262,18 @@ export const commute30minCheapRent: ArticleSource = {
           "map": "main",
           "view": {
             "center": [
-              35.68,
-              139.72
+              35.58,
+              139.65
             ],
             "zoom": 11
           },
-          "title": "{siteName} map (Tokyo set as the departure)",
-          "caption": "The live map (Tokyo set as the departure). You can zoom and pan inside the frame."
+          "title": "{siteName} map (Musashi-kosugi set as the departure)",
+          "caption": "The live map (Musashi-kosugi set as the departure). You can zoom and pan inside the frame."
         },
         {
           "type": "cta",
           "map": "main",
-          "title": "Open a map with Tokyo as the departure",
+          "title": "Open a map with Musashi-kosugi as the departure",
           "text": "Change the departure to the station nearest your own office."
         }
       ]
@@ -335,13 +335,13 @@ export const commute30minCheapRent: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "在{siteName}中，把公司最近的车站填入“出发站”，到达站可以空着。经过该站的线路会保留在地图上，能看出有几条线路往哪些方向延伸。以东京站为例，有13条线路向四面延伸（{siteName} 2026年9月的数据）。"
+          "text": "在{siteName}中，把公司最近的车站填入“出发站”，到达站可以空着。经过该站的线路会保留在地图上，能看出有几条线路往哪些方向延伸。以武藏小杉站为例，经过该站的7条线路向涩谷、横滨、川崎、立川、海老名等方向延伸，加上直通运行的线路，共有16条线路保留在地图上（{siteName} 2026年10月的数据）。"
         },
         {
           "type": "shot",
           "shot": "from-work",
-          "alt": "出发站选东京的地图，经过东京站的线路向四面延伸，右侧显示13条线路的列表",
-          "caption": "把东京站设为出发站。只保留经过东京站的线路（打开右上角的“显示路线切换”可看到列表）"
+          "alt": "出发站选武藏小杉的地图，经过武藏小杉站的线路向各个方向延伸",
+          "caption": "把武藏小杉站设为出发站。只保留经过武藏小杉站的线路（打开右上角的“显示路线切换”可看到列表）"
         },
         {
           "type": "h2",
@@ -379,18 +379,18 @@ export const commute30minCheapRent: ArticleSource = {
           "map": "main",
           "view": {
             "center": [
-              35.68,
-              139.72
+              35.58,
+              139.65
             ],
             "zoom": 11
           },
-          "title": "{siteName}地图（把东京站设为出发站）",
-          "caption": "实际的地图（把东京站设为出发站）。可以在框内缩放和移动。"
+          "title": "{siteName}地图（把武藏小杉站设为出发站）",
+          "caption": "实际的地图（把武藏小杉站设为出发站）。可以在框内缩放和移动。"
         },
         {
           "type": "cta",
           "map": "main",
-          "title": "打开以东京站为出发站的地图",
+          "title": "打开以武藏小杉站为出发站的地图",
           "text": "请把出发站换成自己公司最近的车站。"
         }
       ]
@@ -452,13 +452,13 @@ export const commute30minCheapRent: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "{siteName}에서 회사 가까운 역을 “출발역”에 입력합니다. 도착역은 비워 둬도 됩니다. 그 역을 지나는 노선이 지도에 남아서 어느 방향으로 몇 개의 노선이 뻗어 있는지 알 수 있습니다. 도쿄역이라면 13개 노선이 사방으로 뻗어 있습니다(2026년 9월 기준 {siteName} 데이터)."
+          "text": "{siteName}에서 회사 가까운 역을 “출발역”에 입력합니다. 도착역은 비워 둬도 됩니다. 그 역을 지나는 노선이 지도에 남아서 어느 방향으로 몇 개의 노선이 뻗어 있는지 알 수 있습니다. 무사시고스기역이라면 역을 지나는 7개 노선이 시부야·요코하마·가와사키·다치카와·에비나 등의 방향으로 뻗고, 그대로 직통 운행하는 노선까지 합쳐 16개 노선이 남습니다(2026년 10월 기준 {siteName} 데이터)."
         },
         {
           "type": "shot",
           "shot": "from-work",
-          "alt": "출발역에 도쿄를 고른 지도. 도쿄역을 지나는 노선이 사방으로 뻗어 있고 오른쪽에 13개 노선 목록이 나와 있다",
-          "caption": "도쿄역을 출발역으로 둔 상태. 도쿄역을 지나는 노선만 남는다(오른쪽 위 “표시 노선 전환”을 열면 목록이 나온다)"
+          "alt": "출발역에 무사시고스기를 고른 지도. 무사시고스기역을 지나는 노선이 여러 방향으로 뻗어 있다",
+          "caption": "무사시고스기역을 출발역으로 둔 상태. 무사시고스기역을 지나는 노선만 남는다(오른쪽 위 “표시 노선 전환”을 열면 목록이 나온다)"
         },
         {
           "type": "h2",
@@ -496,18 +496,18 @@ export const commute30minCheapRent: ArticleSource = {
           "map": "main",
           "view": {
             "center": [
-              35.68,
-              139.72
+              35.58,
+              139.65
             ],
             "zoom": 11
           },
-          "title": "{siteName} 지도(도쿄역을 출발역으로 둔 상태)",
-          "caption": "실제 지도(도쿄역을 출발역으로 둔 상태). 틀 안에서 확대·이동할 수 있습니다."
+          "title": "{siteName} 지도(무사시고스기역을 출발역으로 둔 상태)",
+          "caption": "실제 지도(무사시고스기역을 출발역으로 둔 상태). 틀 안에서 확대·이동할 수 있습니다."
         },
         {
           "type": "cta",
           "map": "main",
-          "title": "도쿄역을 출발역으로 둔 지도 열기",
+          "title": "무사시고스기역을 출발역으로 둔 지도 열기",
           "text": "출발역을 내 회사 가까운 역으로 바꿔서 쓰세요."
         }
       ]
