@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { SEMANTIC, NEUTRAL } from '../constants/ui';
+import { tintColor } from '../utils/contrast';
+import { isEmbedMode } from '../utils/embedMode';
+import { getThemeFromUrl, isThemeName, readSavedTheme, saveTheme, THEME_MESSAGE } from '../utils/themeStorage';
 
 export type Theme = 'light' | 'dark';
 
@@ -23,20 +26,26 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>('dark');
+  // 埋め込み表示（?embed=1）は埋め込んだページのテーマに合わせ、保存もしない（utils/themeStorage.ts）
+  const [embedded] = useState(isEmbedMode);
+  // 最初の描画から保存済みのテーマにする。既定の dark で描いてから切り替えると、
+  // その間に dark が保存されてしまい、同じページの別の画面（埋め込みなど）が暗くなっていた
+  const [theme, setTheme] = useState<Theme>(() =>
+    (embedded ? getThemeFromUrl() : null) ?? readSavedTheme() ?? 'dark');
 
   useEffect(() => {
-    // ローカルストレージから設定を読み込み
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme === 'light' || savedTheme === 'dark') {
-      setTheme(savedTheme);
-    }
-    // 保存済み設定がなければデフォルトのダークのまま
-  }, []);
+    if (!embedded) return;
+    // 埋め込んだページでテーマを切り替えたら合わせる（同じサイトのページからのみ受け取る）
+    const onMessage = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin) return;
+      if (e.data?.type === THEME_MESSAGE && isThemeName(e.data.theme)) setTheme(e.data.theme);
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [embedded]);
 
   useEffect(() => {
-    // テーマ変更時にローカルストレージに保存
-    localStorage.setItem('theme', theme);
+    if (!embedded) saveTheme(theme);
 
     // body要素にクラスを追加してグローバルスタイルを適用（他クラスは保持）
     document.body.classList.remove('light', 'dark');
@@ -63,11 +72,23 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   );
 };
 
+/**
+ * 地図の上に浮かぶ箱・ボタン（凡例・隅の丸いボタン・駅選択・表示路線の切替・下のパネル・
+ * ヒートマップの凡例）の不透明度。ここ1か所で決める（使うのは ui/atoms/floatingSurface.ts）。
+ * - idle: 閉じている箱とボタン。下の地図が透けて見える
+ * - open: 開いて中身（文字・一覧）を読む箱。少しだけ濃くするが、すりガラスに見える程度に透かす
+ *   （文字の読みやすさはぼかし FLOATING_SURFACE.blurPx で保つ）
+ * 以前は 0.72 / 0.82 / 0.96 と直書きの rgba が場所ごとにあり、ボタンだけ別の色・透け具合だった。
+ * 2026-10-06: open を 0.96 にしたら開いた駅選択が不透明に見え、左下のボタンだけガラスに見えたため 0.82 にした。
+ */
+export const FLOATING_OPACITY = { idle: 0.72, open: 0.82 } as const;
+
 // テーマに応じた色の定義
 export const getThemeColors = (theme: Theme) => {
+  const surface = theme === 'dark' ? '#2d2d2d' : '#f9f9f9';
   return {
     background: theme === 'dark' ? '#1a1a1a' : NEUTRAL.white,
-    surface: theme === 'dark' ? '#2d2d2d' : '#f9f9f9',
+    surface,
     surfaceElevated: theme === 'dark' ? '#3a3a3a' : NEUTRAL.white,
     surfaceHover: theme === 'dark' ? '#404040' : '#f0f0f0',
     border: theme === 'dark' ? '#404040' : '#ddd',
@@ -97,10 +118,9 @@ export const getThemeColors = (theme: Theme) => {
     mapLand: theme === 'dark' ? '#2b2f33' : '#f7f6f2',
     mapSea:  theme === 'dark' ? '#15181b' : '#cfd8df',
     mapCoast: theme === 'dark' ? '#4a5157' : '#a9b4bd',
-    // 半透明バリアント（折りたたみUIや常時表示ウィジェット向け）
-    glassCollapsed: theme === 'dark' ? 'rgba(45,45,45,0.72)' : 'rgba(249,249,249,0.72)',
-    glassOpen:      theme === 'dark' ? 'rgba(45,45,45,0.96)' : 'rgba(249,249,249,0.96)',
-    glassButton:    theme === 'dark' ? 'rgba(58,58,58,0.82)' : 'rgba(255,255,255,0.82)',
+    // 地図の上に浮かぶ箱・ボタンの半透明の地（FLOATING_OPACITY）。直接使わず floatingSurfaceStyle を使う
+    glassCollapsed: tintColor(surface, FLOATING_OPACITY.idle),
+    glassOpen:      tintColor(surface, FLOATING_OPACITY.open),
   };
 };
 

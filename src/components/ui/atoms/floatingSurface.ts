@@ -1,0 +1,62 @@
+/**
+ * 地図の上に浮かぶ箱・ボタンの「地」（背景の透け具合・ぼかし・枠線・影・角の丸み）の規格。
+ *
+ * 凡例「N路線」・隅の丸いボタン（縮小・言語・方位）・「表示切替」・駅選択・表示路線の切替・
+ * 下から開くパネル・ヒートマップの凡例は、すべてここから地を取る。
+ * 以前は場所ごとに透け具合（0.72 / 0.82 / 0.96 や直書きの rgba）・ぼかし（8 / 10 / 12px）・
+ * 影の有無がばらばらで、隣り合う部品の見た目がそろっていなかった。
+ *
+ * - 透け具合: ThemeContext の FLOATING_OPACITY（idle / open）
+ * - 角の丸み: controlSize.ts の FLOATING_CONTROL.radius
+ * - ぼかし: このファイルの FLOATING_SURFACE
+ * - 影: shadow.ts の SHADOW.floating（既定は影なし）
+ * 見た目を変えるときは、この3か所のどれか1か所だけを直す。
+ */
+import type { CSSProperties } from 'react';
+import { getThemeColors } from '../../../contexts/ThemeContext';
+import { CONTROL_BORDER_WIDTH, FLOATING_CONTROL } from './controlSize';
+import { shadow } from './shadow';
+
+/** 背景のぼかし(px)。開いた箱も透かしたまま文字を読めるよう強めにする（iOS のすりガラスと同程度） */
+export const FLOATING_SURFACE = { blurPx: 16 } as const;
+
+/**
+ * - idle: 閉じている箱・ボタン（地図が透ける）
+ * - open: 開いて中身を読む箱（少し濃いすりガラス）
+ */
+export type FloatingSurfaceState = 'idle' | 'open';
+
+export function floatingSurfaceStyle(theme: 'light' | 'dark', state: FloatingSurfaceState = 'idle'): CSSProperties {
+  const colors = getThemeColors(theme);
+  const blur = `blur(${FLOATING_SURFACE.blurPx}px)`;
+  return {
+    backgroundColor: state === 'open' ? colors.glassOpen : colors.glassCollapsed,
+    backdropFilter: blur,
+    WebkitBackdropFilter: blur,
+    border: `${CONTROL_BORDER_WIDTH}px solid ${colors.border}`,
+    borderRadius: FLOATING_CONTROL.radius,
+    boxShadow: floatingShadow(theme),
+  };
+}
+
+/** 浮かぶものの影（押している・塗っているときも同じ影）。有無と強さは shadow.ts の SHADOW.floating */
+export function floatingShadow(theme: 'light' | 'dark'): string {
+  return shadow('floating', theme);
+}
+
+/**
+ * 同じ地を CSS の文字列で返す（React の style が使えない所: Leaflet のツールチップなど）。
+ * `important` を付けると Leaflet 既定の CSS より優先させられる。
+ */
+export function floatingSurfaceCss(theme: 'light' | 'dark', state: FloatingSurfaceState = 'open', important = false): string {
+  const s = floatingSurfaceStyle(theme, state);
+  const imp = important ? ' !important' : '';
+  return [
+    `background-color: ${s.backgroundColor}${imp};`,
+    `backdrop-filter: ${s.backdropFilter}${imp};`,
+    `-webkit-backdrop-filter: ${s.WebkitBackdropFilter}${imp};`,
+    `border: ${s.border}${imp};`,
+    `border-radius: ${s.borderRadius}${imp};`,
+    `box-shadow: ${s.boxShadow}${imp};`,
+  ].join('\n');
+}

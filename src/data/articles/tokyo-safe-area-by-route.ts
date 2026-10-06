@@ -1,6 +1,6 @@
 /**
  * 記事「住む駅の周辺環境を確かめる方法｜犯罪件数データの見方と現地確認」（/articles/tokyo-safe-area-by-route）。
- * 書き方: docs/article-writing.md ／ 形: ./types.ts ／ 画像を撮る: npx tsx scripts/capture-article-screenshots.mts --only tokyo-safe-area-by-route
+ * 書き方: docs/article-writing.md ／ 形: ./types.ts ／ 画面はプレビューで確認する（iframe で埋め込む）
  * 値だけを書く（計算で組み立てない）。文章中のサービス名は {siteName} と書く。
  */
 import type { ArticleSource } from './types';
@@ -42,7 +42,8 @@ export const tokyoSafeAreaByRoute: ArticleSource = {
     },
     "station-data": {
       "page": "/stations/shibuya",
-      "scrollToHeading": "aroundStats"
+      "scrollToHeading": "aroundStats",
+      "anchor": "around-stats"
     }
   },
   "content": {

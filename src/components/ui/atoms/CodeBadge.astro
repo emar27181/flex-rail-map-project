@@ -1,0 +1,15 @@
+---
+/**
+ * 駅番号の札（規格は codeBadge.ts）。CSS はレイアウト（seoPageStyles）が入れる。
+ */
+import { CODE_BADGE_CLASS, codeBadgeStyle } from './codeBadge';
+
+export interface Props {
+  code: string;
+  /** 路線色 */
+  color: string;
+}
+const { code, color } = Astro.props;
+---
+
+<span class={CODE_BADGE_CLASS} style={codeBadgeStyle(color)}>{code}</span>

@@ -1,0 +1,37 @@
+# PR と main への push で、型・デザイン規則・ユニットテスト・ビルドを確かめる。
+# デザイン規則の一覧は docs/design-system.md の「規則一覧（CI で検査）」（npm run test:design がそこから読む）。
+# Netlify のプレビューは npm run build だけなので、テストはここで動かす。
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # E2E はここでは動かさないので、ブラウザの取得を省く
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: 依存関係
+        run: npm ci
+      - name: 型チェック
+        run: npm run test:types
+      - name: デザイン規則（docs/design-system.md の規則一覧）
+        run: npm run test:design
+      - name: ユニットテスト
+        run: npm run test:unit
+      - name: ビルド
+        run: npm run build

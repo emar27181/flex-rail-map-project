@@ -1,6 +1,6 @@
 /**
  * 記事「東京の路線図の読み方｜初めてでも迷わない3つのコツ」（/articles/tokyo-train-map-beginner）。
- * 書き方: docs/article-writing.md ／ 形: ./types.ts ／ 画像を撮る: npx tsx scripts/capture-article-screenshots.mts --only tokyo-train-map-beginner
+ * 書き方: docs/article-writing.md ／ 形: ./types.ts ／ 画面はプレビューで確認する（iframe で埋め込む）
  * 値だけを書く（計算で組み立てない）。文章中のサービス名は {siteName} と書く。
  */
 import type { ArticleSource } from './types';

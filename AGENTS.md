@@ -10,9 +10,14 @@
    ```bash
    npm run test:data
    npm run test:types
+   npm run test:design
    npm run test:unit
    npm run build
    ```
+
+   同じものを GitHub Actions（`.github/workflows/ci.yml`）が PR ごとに実行する。
+   **UI を書く・直すときは `docs/design-system.md` の「規則一覧（CI で検査）」と「どの部品を使うか」を先に読むこと**
+   （色・文字サイズ・余白・角の丸み・影・開閉の印は定義元から取り、直書きすると CI が落ちる）。
 
 4. 推測した値・出典の無い値をデータに書かない。分からないものは空けておく。
 5. `main` に直接マージしない（ユーザーがプレビューで目視確認してからマージする）。

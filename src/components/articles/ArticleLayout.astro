@@ -26,6 +26,8 @@ import { APP_ICON_PATH, SITE_URL, SITE_NAME, OG_LOCALE, buildHreflangLinks, href
 import FaviconLinks from "../seo/FaviconLinks.astro";
 import { CONTROL_CSS, HEADER_LOGO_PX } from "../ui/atoms/controlCss";
 import { RESPONSIVE_TABLE_CSS } from "../ui/atoms/responsiveTable";
+import { MAP_EMBED_CSS, MAP_EMBED_SCRIPT } from "../ui/atoms/mapEmbed";
+import { THEME_STORAGE_KEY, LEGACY_THEME_STORAGE_KEY } from "../../utils/themeStorage";
 import { L } from "../legend/legendStyles";
 import SiteFooterNav from "../SiteFooterNav.astro";
 import LanguageSwitcher from "../LanguageSwitcher.astro";
@@ -106,11 +108,12 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
 
   <FaviconLinks />
   <link rel="manifest" href="/manifest.json" />
-  <style set:html={CONTROL_CSS + RESPONSIVE_TABLE_CSS}></style>
-  <script is:inline>
+  <style set:html={CONTROL_CSS + RESPONSIVE_TABLE_CSS + MAP_EMBED_CSS}></style>
+  <script is:inline define:vars={{ themeKey: THEME_STORAGE_KEY, legacyThemeKey: LEGACY_THEME_STORAGE_KEY }}>
+    // 地図・ほかのページと同じ保存先のテーマ（utils/themeStorage.ts）
     (function(){
       try {
-        var saved = localStorage.getItem('frm-theme');
+        var saved = localStorage.getItem(themeKey) || localStorage.getItem(legacyThemeKey);
         if (saved === 'light' || saved === 'dark') {
           document.documentElement.setAttribute('data-theme', saved);
         }
@@ -187,7 +190,7 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
     </div>
   </div>
 
-  <script is:inline>
+  <script is:inline define:vars={{ themeKey: THEME_STORAGE_KEY }}>
     (function(){
       var root = document.documentElement;
       var btn = document.getElementById('themeBtn');
@@ -195,24 +198,12 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
       btn.addEventListener('click', function(){
         var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         root.setAttribute('data-theme', next);
-        try { localStorage.setItem('frm-theme', next); } catch (e) {}
+        try { localStorage.setItem(themeKey, next); } catch (e) {}
       });
     })();
   </script>
-  <script is:inline>
-    // 本文に埋め込んだ地図（articleRender.ts の embed）。そのままだと、スマホで記事を
-    // スクロールしようとした指が地図を動かしてしまうので、押すまでは地図に触れないようにする
-    (function(){
-      document.querySelectorAll('.embed-frame').forEach(function (frame) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'ctl embed-activate';
-        btn.textContent = frame.getAttribute('data-activate-label') || '';
-        btn.addEventListener('click', function () { frame.classList.add('active'); btn.remove(); });
-        frame.appendChild(btn);
-      });
-    })();
-  </script>
+  <!-- 埋め込んだ画面は押すまで触れない（ui/atoms/mapEmbed.ts） -->
+  <script is:inline set:html={MAP_EMBED_SCRIPT}></script>
   <slot name="scripts" />
 </body>
 </html>

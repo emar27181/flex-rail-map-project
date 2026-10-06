@@ -21,6 +21,7 @@ import {
   CONTROL_BORDER_WIDTH, CONTROL_SIZE, FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE,
 } from './controlSize';
 import { L } from '../../legend/legendStyles';
+import { shadow } from './shadow';
 
 /** ヘッダーに並ぶ操作の高さ(px)。同じ行の部品は必ずこれにそろえる */
 export const HEADER_CONTROL_PX = FLOATING_ICON_BUTTON_SIZE.md;
@@ -37,6 +38,7 @@ const md = CONTROL_SIZE.md;
  * - 角の丸みは役割で選ぶ: --r-control（ボタン・チップ・入力など操作部品）/
  *   --r-card（表・囲み・カードなど部品を載せる箱）/ --r-pill（件数・タグなどのバッジ）
  * - 操作部品の寸法は React のアトムと同じ CONTROL_SIZE の md（指で押すもの）
+ * - 影は --shadow（カード・囲み）。有無と強さは shadow.ts の SHADOW.raised（既定は影なし）
  */
 export const TOKEN_VARS_CSS = `
 :root {
@@ -48,6 +50,10 @@ export const TOKEN_VARS_CSS = `
   --ctl-md-fs: ${CONTROL_SIZE.md.fontSize};
   --ctl-md-gap: ${CONTROL_SIZE.md.gap};
   --ctl-border-w: ${CONTROL_BORDER_WIDTH}px;
+  --shadow: ${shadow('raised', 'light')};
+}
+html[data-theme="dark"] {
+  --shadow: ${shadow('raised', 'dark')};
 }
 `;
 

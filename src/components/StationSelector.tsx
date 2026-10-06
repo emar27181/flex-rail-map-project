@@ -16,11 +16,13 @@ import IconButton from './ui/atoms/IconButton';
 import RemovableTag from './ui/atoms/RemovableTag';
 import StationSearchDropdown from './ui/StationSearchDropdown';
 import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
+import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 import TextField from './ui/atoms/TextField';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import { useDeviceClass } from '../hooks/useDeviceClass';
+import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
 
 /** 駅名検索の結果として出す最大件数 */
 const STATION_SUGGESTION_LIMIT = 10;
@@ -463,11 +465,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         justifyContent: isExpanded ? 'flex-start' : 'center',
         boxSizing: 'border-box',
         overflow: (showDepartureResults || showArrivalResults) ? 'visible' : 'hidden',
-        border: `1px solid ${colors.border}`,
-        borderRadius: L.r.card,
-        backgroundColor: isExpanded ? colors.glassOpen : colors.glassCollapsed,
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
+        // 地（透け具合・ぼかし・枠線・影・丸み）は地図の上に浮かぶ他の箱・ボタンと共通
+        ...floatingSurfaceStyle(theme, isExpanded ? 'open' : 'idle'),
       }}
     >
       <div 
@@ -482,12 +481,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
       >
         <h3 style={{ margin: `0`, color: colors.text, fontSize: FS.title, fontWeight: 'bold' }}>{translateUI('stationSelection', language)}</h3>
         {onToggleExpanded && (
-          <span style={{
-            fontSize: FS.caption,
-            color: colors.textSecondary,
-            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.3s ease',
-          }}>▼</span>
+          <DisclosureIndicator expanded={isExpanded} theme={theme} />
         )}
       </div>
       

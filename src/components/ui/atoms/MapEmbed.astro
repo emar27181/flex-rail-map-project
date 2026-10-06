@@ -1,0 +1,12 @@
+---
+/**
+ * 実際の画面（地図など）の埋め込み。規格（HTML・CSS・押すまで触れないスクリプト）は mapEmbed.ts。
+ * CSS とスクリプトはレイアウト（SeoPageLayout / ArticleLayout）が1回だけ入れる。
+ */
+import { mapEmbedHtml, type MapEmbedProps } from './mapEmbed';
+
+export type Props = MapEmbedProps;
+const html = mapEmbedHtml(Astro.props);
+---
+
+<Fragment set:html={html} />

@@ -2,7 +2,7 @@
  * 記事のひな形。src/data/articles/{slug}.ts にコピーして使う（手順は docs/article-writing.md）。
  *
  * - 1記事1テーマ。結論（points 3行）→ 見出し4つ（起・承・転・結）→ 地図の埋め込み → 地図を開くボタン
- * - 1セクションに1枚、このサイトの実際の画面（shot）を置く。画像は撮影スクリプトが4言語ぶん撮る
+ * - 1セクションに1つ、このサイトの実際の画面（shot）を iframe で埋め込む。記事の言語の画面が開く
  * - 値だけを書く（計算で組み立てない）。サービス名は {siteName} と書く
  * - 4言語でブロックの並び（種類）を同じにする（テストで確認）
  * - 駅名・路線名の英中韓は translation.ts の訳に合わせる。訳が無い名前は出さない書き方にする
@@ -25,12 +25,13 @@ export const exampleArticle: ArticleSource = {
     main: { routes: ['yamanote', 'ginzaLine'] },
   },
 
-  // スクリーンショット（キーが画像名 → /images/articles/{slug}/{キー}-{言語}.webp）
-  // 地図: map に状態（center と zoom で写す範囲を決める）。地図以外: page に日本語版のパス
+  // 埋め込む画面（本文の { type: 'shot', shot: 'キー' } で使う）
+  // 地図: map に状態（center と zoom で見せる範囲を決める。所要時間の表示は travelTimes: true）
+  // 地図以外: page に日本語版のパス、anchor に開く位置（ページ内の id）
   shots: {
-    'overview': { map: { routes: ['yamanote', 'ginzaLine'], center: [35.69, 139.745], zoom: 12 }, collapsePanels: true },
-    // 'station-page': { page: '/stations/shibuya', scrollToHeading: 'aroundStats' },
-    // 'travel-times': { map: { from: '東京', center: [35.68, 139.7], zoom: 11 }, clickUi: ['showTravelTimes'] },
+    'overview': { map: { routes: ['yamanote', 'ginzaLine'], center: [35.69, 139.745], zoom: 12 } },
+    // 'station-page': { page: '/stations/shibuya', anchor: 'around-stats' },
+    // 'travel-times': { map: { from: '東京', center: [35.68, 139.7], zoom: 11, travelTimes: true } },
   },
 
   content: {

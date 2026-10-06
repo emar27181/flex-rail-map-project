@@ -5,6 +5,12 @@ import leafletCss from "leaflet/dist/leaflet.css?url";
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION } from "../config/seo";
 import GA4Loader from "../components/GA4Loader.astro";
 import FaviconLinks from '../components/seo/FaviconLinks.astro';
+import { translateUI, type Language } from '../utils/translation';
+import { APP_LOADING_ID, APP_LOADING_MESSAGE_ID, APP_LOADING_STAGES, APP_LOADING_MESSAGE_KEYS, APP_LOADING_FADE_MS, APP_LOADING_BAR, type AppLoadingMessages } from '../constants/appLoading';
+import { FS, SEMANTIC } from '../constants/ui';
+import { L } from '../components/legend/legendStyles';
+import { THEME_STORAGE_KEY, LEGACY_THEME_STORAGE_KEY, THEME_PARAM } from '../utils/themeStorage';
+import { EMBED_PARAM } from '../utils/embedMode';
 import { SITE_NAME, PROJECT_NAME } from '../config/seo';
 
 // JSON-LD はプレーンな<script>タグの中身をAstroが解釈しないため、
@@ -84,6 +90,13 @@ const webSiteSchema = {
 	"url": `${SITE_URL}/`,
 	"inLanguage": ["ja", "en"]
 };
+
+// 読み込み画面の段階の文言を全言語ぶん作って埋め込む（閲覧者の言語はページのスクリプトが選ぶ）
+const APP_LOADING_LANGUAGES: Language[] = ['japanese', 'english', 'chinese', 'korean'];
+const appLoadingMessages = Object.fromEntries(APP_LOADING_LANGUAGES.map(lang => [
+	lang,
+	Object.fromEntries(APP_LOADING_STAGES.map(stage => [stage, translateUI(APP_LOADING_MESSAGE_KEYS[stage], lang)])),
+])) as AppLoadingMessages;
 ---
 
 <html lang="ja">
@@ -124,15 +137,20 @@ const webSiteSchema = {
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<!-- ホーム画面起動時もステータスバーをアプリ側の背景で塗るため translucent にする -->
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-		<script is:inline>
+		<script is:inline define:vars={{ themeKey: THEME_STORAGE_KEY, legacyThemeKey: LEGACY_THEME_STORAGE_KEY, themeParam: THEME_PARAM, embedParam: EMBED_PARAM }}>
 			// ハイドレーション前に背景色を確定させる。
 			// これをやらないと、ダークモードでも初回描画からReactのマウントまでの間、
 			// html のキャンバスとローディング画面が白いままになる。
+			// 選び方は ThemeContext と同じ（埋め込み表示は URL のテーマ → 保存済み → dark。utils/themeStorage.ts）
 			(function () {
+				var ok = function (v) { return v === 'light' || v === 'dark'; };
 				var t = 'dark';
 				try {
-					var saved = localStorage.getItem('theme');
-					if (saved === 'light' || saved === 'dark') t = saved;
+					var q = new URLSearchParams(window.location.search);
+					var fromUrl = q.get(embedParam) === '1' ? q.get(themeParam) : null;
+					var saved = localStorage.getItem(themeKey) || localStorage.getItem(legacyThemeKey);
+					if (ok(fromUrl)) t = fromUrl;
+					else if (ok(saved)) t = saved;
 				} catch (e) { /* localStorage 不可でも既定のdarkで続行 */ }
 				var bg = t === 'dark' ? '#1a1a1a' : '#ffffff';
 				document.documentElement.style.backgroundColor = bg;
@@ -319,7 +337,6 @@ const webSiteSchema = {
 			body.dark .leaflet-popup-content-wrapper * {
 				background: #2d2d2d !important;
 				color: #ffffff !important;
-				box-shadow: 0 3px 14px rgba(0, 0, 0, 0.8) !important;
 				border: 1px solid #404040 !important;
 				border-radius: 4px !important;
 			}
@@ -421,7 +438,6 @@ const webSiteSchema = {
 				background-color: #2d2d2d !important;
 				border: 1px solid #404040 !important;
 				border-radius: 4px !important;
-				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important;
 			}
 
 			body.dark .leaflet-control-zoom a,
@@ -539,13 +555,53 @@ const webSiteSchema = {
 		</style>
 	</head>
 	<body>
-		<!-- JSロード中のローディング画面（ThemeWrapper がマウントしたら消える） -->
-		<div id="app-loading" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--app-bg, #1a1a1a);z-index:9999;font-family:'Noto Sans JP',sans-serif;">
-			<div style="text-align:center;color:var(--app-loading-fg, #b3b3b3);">
-				<div style="font-size:16px;font-weight:600;margin-bottom:8px;">{SITE_NAME}</div>
-				<div style="font-size:13px;color:#888;">地図を読み込み中...</div>
+		<!-- 読み込み画面（constants/appLoading.ts）。地図を最初に描くまで出し、段階ごとに文言を進める。
+		     以前は ThemeWrapper のマウントで消していて、地図ライブラリが届くまで仮表示とフッターが見えていた -->
+		<div
+			id={APP_LOADING_ID}
+			class="app-loading"
+			role="status"
+			aria-live="polite"
+			data-stage="start"
+			data-lang="japanese"
+			data-messages={JSON.stringify(appLoadingMessages)}
+		>
+			<div class="app-loading-inner">
+				<div class="app-loading-title">{SITE_NAME}</div>
+				<div class="app-loading-bar" aria-hidden="true"><span></span></div>
+				<div id={APP_LOADING_MESSAGE_ID} class="app-loading-message">{appLoadingMessages.japanese.start}</div>
 			</div>
 		</div>
+		<style define:vars={{
+			loadingTitle: FS.input,
+			loadingText: FS.caption,
+			loadingGap: L.sp.md,
+			loadingRadius: L.r.pill,
+			loadingAccent: SEMANTIC.primary,
+			loadingFade: `${APP_LOADING_FADE_MS}ms`,
+			loadingBarW: `${APP_LOADING_BAR.widthPx}px`,
+			loadingBarH: `${APP_LOADING_BAR.heightPx}px`,
+			loadingBarCycle: `${APP_LOADING_BAR.cycleMs}ms`,
+		}}>
+			.app-loading {
+				position: fixed; inset: 0; z-index: 9999;
+				display: flex; align-items: center; justify-content: center;
+				background: var(--app-bg, #1a1a1a);
+				color: var(--app-loading-fg, #b3b3b3);
+				font-family: 'Noto Sans JP', system-ui, sans-serif;
+				transition: opacity var(--loadingFade) ease;
+			}
+			.app-loading-inner { display: flex; flex-direction: column; align-items: center; gap: var(--loadingGap); text-align: center; }
+			.app-loading-title { font-size: var(--loadingTitle); font-weight: 700; }
+			.app-loading-message { font-size: var(--loadingText); min-height: 1.5em; }
+			/* 流れる帯（進み具合ではなく「動いている」ことだけを示す） */
+			.app-loading-bar { position: relative; width: var(--loadingBarW); height: var(--loadingBarH); overflow: hidden; border-radius: var(--loadingRadius); background: color-mix(in srgb, currentColor 20%, transparent); }
+			.app-loading-bar span { position: absolute; inset: 0 auto 0 0; width: 40%; border-radius: inherit; background: var(--loadingAccent); animation: app-loading-slide var(--loadingBarCycle) ease-in-out infinite; }
+			@keyframes app-loading-slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+			@media (prefers-reduced-motion: reduce) {
+				.app-loading-bar span { animation: none; width: 100%; opacity: 0.6; }
+			}
+		</style>
 
 		<!-- SEO用静的コンテンツ（検索エンジンがJS描画前にクロール可能） -->
 		<noscript>
@@ -558,6 +614,19 @@ const webSiteSchema = {
 		</noscript>
 		<ThemeWrapper client:only="react" />
 		<script>
+			// 地図ライブラリの取得をアプリ本体の JS と並行して始める（utils/leafletLoader.ts）。
+			// RailwayMap はマウント後に同じ Promise を受け取るだけになる
+			import { loadLeafletModules } from '../utils/leafletLoader';
+			import { getInitialLanguage } from '../utils/languagePersistence';
+			import { setAppLoadingStage } from '../utils/appLoading';
+
+			// 読み込み画面の文言を閲覧者の言語にする（埋め込んである全言語ぶんから選ぶ）
+			setAppLoadingStage('start', getInitialLanguage());
+			// 地図ライブラリが届いたら次の段階へ（RailwayMap 側でも進めるので、どちらが先でもよい）
+			loadLeafletModules()
+				.then(() => setAppLoadingStage('routes'))
+				.catch(() => { /* RailwayMap 側で読み込み直す */ });
+
 			if ('serviceWorker' in navigator) {
 				window.addEventListener('load', () => {
 					navigator.serviceWorker.register('/sw.js');

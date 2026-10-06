@@ -90,7 +90,8 @@ const Chip: React.FC<ChipProps> = ({
           backgroundColor: selected ? text : color,
         }}
       />
-      {label}
+      {/* 幅が足りないときは路線名を見切らせる（丸は残す） */}
+      <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
     </button>
   );
 };

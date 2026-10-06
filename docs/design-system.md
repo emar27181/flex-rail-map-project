@@ -3,7 +3,36 @@
 UI の色・サイズ・余白・ボタンが「どこで決まっているか」をまとめた文書。
 調査日: 2026-08-16 / 対象: `src/` 配下の `.ts` `.tsx` `.astro`（路線データ層を除く）
 
-新しく UI を書くときは **「### 8. 端末ごとの設計（2026-09-30）
+新しく UI を書くときは、まず下の **「規則一覧（CI で検査）」**、次に **「どの部品を使うか」** と
+**「書くときの判断表」** を読む。なぜそうなっているかを知りたいときに残りを読む。
+
+## 規則一覧（CI で検査）
+
+**規則の一次情報はこの表。** どの規則も検査テストがあり、GitHub Actions（`.github/workflows/ci.yml`）が
+PR ごとに `npm run test:design` で実行する（手元でも同じコマンド）。破るとマージ前に落ちる。
+`CLAUDE.md` には要点とこの表への案内だけを書き、規則の中身を二重に書かない。
+
+| 規則 | 使うもの（定義元） | 検査 |
+|---|---|---|
+| 操作部品はアトムで書く。アトム以外で `<button>` `<select>` `<input>` `<textarea>` を書かない | `ui/atoms/*`（下の「どの部品を使うか」） | `tests/unit/components/ui/noRawControls.test.ts` |
+| 文字サイズ・余白・角の丸みを直書きしない。文字は 12px が下限（地図の駅ラベルだけ例外） | `FS` / `L.sp` / `L.r` / `CONTROL_SIZE` | `tests/unit/components/ui/noRawSizes.test.ts` |
+| 操作部品の寸法は `sm`(24px) / `md`(44px) の2段階。同じ段階なら高さ・角丸・文字がそろい、選択しても外形が変わらない | `CONTROL_SIZE`（`ui/atoms/controlSize.ts`） | `tests/unit/components/ui/atoms.test.tsx` |
+| 押せる大きさ・入力欄の文字（16px 以上） | `TARGET` / `FS`（`constants/ui.ts`） | `tests/unit/constants/ui.test.ts` |
+| 色は意味で選び、直書きしない（出発=緑・到着=赤・注意=橙…） | `SEMANTIC` / `NEUTRAL` / `getThemeColors` | `tests/unit/constants/semanticColors.test.ts` |
+| 地図の上に浮かぶ箱・ボタンの地（透け具合・ぼかし・枠線・角の丸み）はそろえる | `floatingSurfaceStyle` / `FLOATING_OPACITY` / `FLOATING_CONTROL` | `tests/unit/components/ui/floatingSurface.test.ts` |
+| 影は付けない（2026-10-06）。影も縁取りも1か所から取り、戻すときは `SHADOW` の `enabled` だけを変える | `shadow` / `joinShadows` / `textHalo`（`ui/atoms/shadow.ts`） | `tests/unit/components/ui/shadow.test.ts` |
+| 開閉の印（▼）は手で書かない。翻訳文言にも入れない | `DisclosureIndicator` / `DisclosureHeader` / `CollapsiblePanel` | `tests/unit/components/ui/disclosure.test.ts` |
+| 端末の境目（768 / 1024px）は1か所だけに書く | `constants/breakpoints.ts`（`MEDIA` / `useDeviceClass`） | `tests/unit/constants/breakpoints.test.ts` |
+| 静的ページ（記事・駅/路線ページ）の CSS もトークンの CSS 変数を使う | `TOKEN_VARS_CSS` / `CONTROL_CSS`（`ui/atoms/controlCss.ts`） | `tests/unit/styles/articleCssTokens.test.ts`, `tests/unit/components/ui/controlCss.test.ts` |
+| 絵文字を使わない。アイコンは lucide-react | `lucide-react` | `tests/unit/noEmojiIcons.test.ts` |
+| サービス名・アプリのアイコンは1か所から取る | `SITE_NAME`（`config/seo.ts`）/ `APP_ICON_PATH` | `tests/unit/config/siteName.test.ts`, `tests/unit/config/appIcon.test.ts` |
+| 部品（atoms / molecules）を足したら「どの部品を使うか」に1行足す。この表の検査はすべて CI で動く | この文書 | `tests/unit/designRules.test.ts` |
+
+**規則を新しく決めたら:** ① 定義元（atoms / molecules / constants）を作る → ② 直書きを見つけて落とすテストを書く →
+③ この表に1行足す（`test:design` はこの表の「検査」列のテストを実行するので、足せば CI に入る）→
+④ `CLAUDE.md` の要点に1行と、`.claude/skills/design-tokens/SKILL.md` の表に1行。
+
+## 端末ごとの設計（2026-09-30）
 
 **境目は `src/constants/breakpoints.ts` だけに書く。** ほかの値の `@media` や `innerWidth < 数値` はテストで落ちる
 （`tests/unit/constants/breakpoints.test.ts`）。React では `useDeviceClass()`、CSS を TS で組み立てる所では `MEDIA.*`。
@@ -32,8 +61,29 @@ UI の色・サイズ・余白・ボタンが「どこで決まっているか�
 
 空の欄はスマホでは出さない。色はレイアウトが `--rt-border` / `--rt-muted` / `--rt-hover` で渡す。
 
-## 書くときの判断表」** だけ読めば足りる。
-なぜそうなっているかを知りたいときに残りを読む。
+### 実際の画面の埋め込み（`ui/atoms/mapEmbed.ts`, 2026-10）
+
+記事・駅/路線のページに地図やページを見せるときは、スクリーンショットではなく実際の画面を iframe で埋め込む。
+`<iframe>` を直接書かない。記事は `articleRender.ts`、Astro は `MapEmbed.astro` を使う。
+
+- 高さは `clamp(360px, 62vh, 520px)`。枠は `L.r.card`。枠の線に色は付けない
+- 最初から中を操作できる（2026-10: 押すまで触れない形にしていたが、タップしなくても地図が動くほうがよいと判断して外した）
+- 中の画面は埋め込み表示（`?embed=1`）。言語は記事の言語、テーマはページのテーマ（URL の `theme`、
+  切り替えは postMessage。`utils/themeStorage.ts`）。埋め込み表示は閲覧者の設定を保存しない
+- 色はレイアウトが `--me-border` / `--me-surface` / `--me-shadow` / `--me-muted` で渡す
+
+### 駅番号の札（`ui/atoms/codeBadge.ts`）
+
+駅名の前の駅番号（TY01 など）。地図の駅ラベルと同じ規則（`filledLabelColors`: 路線色の地に白字、
+明るい色は地を少し暗くし、足りなければ縁取り）。角は `L.r.control`、文字は `FS.caption`。Astro では `CodeBadge.astro`。
+
+### ページのアクセント色（路線色）
+
+路線のページはその路線の色、駅のページは最初の路線の色を、見出しの下線・表の順番に使う
+（`SeoPageLayout` の `accent`）。ライトは白字が読める濃さ（`darkenForWhiteText`）、ダークは
+`adjustRouteColorForTheme` の色。CSS では `var(--page-accent, 既定の primary)` で受け、色の無いページは青のまま。
+本文の文字・リンクには使わない（路線色は読みやすさを保証しないため）。
+
 
 ---
 
@@ -159,7 +209,8 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 文字のボタン | `Button` |
 | アイコンだけのボタン | `IconButton`（正方形。`label` 必須） |
 | 押すと画面遷移する | `LinkButton`（要素は `<a>` のまま） |
-| 色を持つ切り替え（路線など） | `Chip` |
+| 色を持つ切り替え（路線など） | `Chip`（「表示路線の切替」パネルと凡例「表示中の路線」で同じもの） |
+| 地図の上に浮かぶ文字つきボタン（「表示切替」「表示中の路線」） | `FloatingButton`（高さは丸いボタンと同じ36px。丸いボタンには `floatingSurfaceStyle` で同じ背景・影） |
 | 1行入力・時刻・数値 | `TextField` |
 | 複数行入力 | `TextArea` |
 | 選択欄 | `Select` |
@@ -170,6 +221,14 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | つまみで数値を選ぶ | `Slider` |
 | −／＋の増減行 | `Stepper`（molecule） |
 | 排他選択のボタン列 | `SegmentedControl`（molecule） |
+| 排他選択を1本の枠に収め、選んだ位置を背景のスライドで示す | `SlideSegmentedControl`（`SegmentedControl` の `variant="slide"` から使う実体） |
+| 選んだものを並べ、1つずつ外せるタグ（経由駅など） | `RemovableTag`（削除ボタン付き） |
+| 開閉する見出しの右端の ▼ | `DisclosureIndicator`（開くと180度回る。回す時間・色は全パネル共通。塗ったボタンの中に置くときは `tone="inherit"`。▼▲▶ を文字で書くのはこの部品だけで、翻訳文言にも入れない） |
+| 押すと開閉する見出しの行 | `DisclosureHeader`（見出し＋▼。行のどこを押しても開閉、開くと区切り線。`size="floating"` で高さ・文字が `FLOATING_CONTROL`） |
+| 地図の上に浮かぶ操作の高さ・文字の大きさ | `FLOATING_CONTROL`（`controlSize.ts`。36px・`FS.body`。FloatingButton・凡例の見出し・丸いボタンで共通） |
+| 地図の上に浮かぶ箱・ボタンの地（透け具合・ぼかし・枠線・影・角の丸み） | `floatingSurfaceStyle(theme, 'idle' \| 'open')`（`ui/atoms/floatingSurface.ts`）。閉じた箱・ボタンは idle（72%）、開いて中身を読む箱は open（82%）。どちらもすりガラス（ぼかし16px）。対象は隅の丸いボタン・「表示切替」・凡例・駅選択・駅名の候補一覧・表示路線の切替・下のパネル・ヒートマップの凡例・駅の時刻表/統計のツールチップ・路線のポップアップとツールチップ（Leaflet の `.leaflet-tooltip` は `floatingSurfaceCss`）。コンポーネントで `backdropFilter` / `blur(` / `glassOpen` を書くと `tests/unit/components/ui/floatingSurface.test.ts` が落ちる透け具合は `FLOATING_OPACITY`（ThemeContext）。`glassOpen` などを直接書かない |
+| 影（box-shadow / text-shadow / drop-shadow）と文字の縁取り | `shadow(role, theme)`（`ui/atoms/shadow.ts`）。役割は marker（地図の上の印: 駅ラベル・駅の点・所要時間・現在地）/ floating（浮かぶ箱・ボタン）/ raised（ナビ・広告・カード・記事の囲み。記事の CSS は `var(--shadow)`）/ overlay（メニュー・ポップアップ）。**方針は影なし（2026-10-06）**で、`SHADOW` の各役割の `enabled` を true にすればその役割だけ戻る。輪と影を重ねるときは `joinShadows`。白字の縁取りは影ではないので `textHalo()`（既定オン）。広がりだけの輪（駅の多重枠 `0 0 0 2px 色`）は枠線なので対象外。直書きは `tests/unit/components/ui/shadow.test.ts` が落とす |
+| 見出しと中身を1枚の箱にまとめた開閉パネル | `CollapsiblePanel`（molecule。凡例「N路線」が使う。見出しと中身を別の箱に分けない） |
 
 判定に迷ったら次を自問する。
 
@@ -282,6 +341,12 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | `control` | 3px | ボタン・入力欄・チップ・地図の駅ラベルなど、操作する部品と小さな札 |
 | `card` | 8px | パネル・カード・ポップアップなど、部品を載せる箱 |
 | `pill` | 999px | バッジ・件数など、完全に丸めたい小さな印 |
+
+**地図の上に浮かぶもの（2026-10-06）:** 隅の丸いボタン・「表示切替」・凡例「N路線」・駅選択・
+表示路線の切替・下から開くパネルは、ボタンでもパネルでも **`FLOATING_CONTROL.radius`（= card 8px）** にそろえる
+（`ui/atoms/controlSize.ts`）。隣り合って並ぶのに、ボタンは3px・凡例は8px・下のパネルは12pxとばらばらだった。
+丸みを変えるとき（もっと丸くする等）は `FLOATING_CONTROL.radius` の1か所だけ直す。
+中に並ぶチップ・駅ラベルは `control`(3px) のまま（小さな札は地図の駅ラベルに合わせる）。
 
 **基準は地図の駅ラベル。** 画面上でいちばん数が多く、いちばん目に入る部品なので、
 他の部品をそれに合わせる。

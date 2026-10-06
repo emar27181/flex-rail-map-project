@@ -20,8 +20,7 @@ import LegendRouteList from './legend/LegendRouteList';
 import LegendRouteRecommendations from './legend/LegendRouteRecommendations';
 import LegendDisplayOptions from './legend/LegendDisplayOptions';
 import MultiDepartureRoutes from './MultiDepartureRoutes';
-import MobileBottomPanel from './MobileBottomPanel';
-import StationMemoPanel from './StationMemoPanel';
+import MobileBottomPanel, { MOBILE_BOTTOM_PANEL_FLOAT } from './MobileBottomPanel';
 import type { MapConfig } from './legend/MapConfigPanel';
 import type { StationStats } from '../data/stationStats';
 import {
@@ -72,8 +71,10 @@ import { getInitialVisibleRoutesFromUrl, syncVisibleRoutesToUrl } from '../utils
 import { getInitialHeatmapMetricFromUrl, syncHeatmapMetricToUrl } from '../utils/heatmapUrlParam';
 import { toArticleLanguage } from '../utils/languagePersistence';
 import { defaultRoutesNear } from '../utils/defaultRoutesNear';
-import { getInitialMapViewFromUrl } from '../utils/mapViewUrlParam';
+import { getInitialMapViewFromUrl, getInitialTravelTimesFromUrl } from '../utils/mapViewUrlParam';
 import { isEmbedMode } from '../utils/embedMode';
+import { loadLeafletModules } from '../utils/leafletLoader';
+import { hideAppLoading, setAppLoadingStage } from '../utils/appLoading';
 import {
   getInitialDepartureFromUrl,
   getInitialArrivalFromUrl,
@@ -108,10 +109,14 @@ import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
 import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE } from './ui/atoms/controlSize';
+import { floatingSurfaceStyle, floatingSurfaceCss } from './ui/atoms/floatingSurface';
+import { shadow, dropShadowFilter, joinShadows, textHalo, textHaloCss } from './ui/atoms/shadow';
 
 import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
 import { deviceClassOf } from '../constants/breakpoints';
+import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
+import DisclosureHeader from './ui/atoms/DisclosureHeader';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -139,6 +144,10 @@ interface RailwayMapProps {
  * 4つのボタンすべてがこの定数を参照する。
  */
 const MAP_CORNER_BUTTON_PX = FLOATING_ICON_BUTTON_SIZE.md;
+/** スマホ全画面の左下ボタン群（MobileBottomPanel）に渡す画面下の余白(px) */
+const MOBILE_PANEL_SAFE_BOTTOM = 25;
+/** MobileBottomPanel がボタンを余白からさらに浮かせる量(px)。凡例を同じ高さに並べるのに使う */
+const MOBILE_PANEL_FLOAT = MOBILE_BOTTOM_PANEL_FLOAT;
 /** 上のボタン群のアイコンの大きさ（記事ヘッダーのボタンと共通の値） */
 const MAP_CORNER_ICON_SIZE = FLOATING_ICON_GLYPH_SIZE;
 /**
@@ -171,16 +180,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       .leaflet-interactive:focus {
         outline: none !important;
       }
+      /* 路線名などのツールチップも地図の上に浮かぶ他の箱と同じすりガラス（ui/atoms/floatingSurface.ts） */
       .leaflet-tooltip {
-        background-color: rgba(0,0,0,0.65) !important;
-        color: #fff !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 4px 8px !important;
-        border-radius: 4px !important;
+        ${floatingSurfaceCss(theme, 'open', true)}
+        color: ${colors.text} !important;
+        padding: ${L.sp.xs} ${L.sp.sm} !important;
       }
       .leaflet-tooltip::before {
         display: none !important;
+      }
+      /* Leaflet 既定の影（ポップアップ・ズームボタン）も shadow.ts の方針に従わせる */
+      .leaflet-popup-content-wrapper,
+      .leaflet-popup-tip {
+        box-shadow: ${shadow('overlay', theme)} !important;
+      }
+      .leaflet-bar {
+        box-shadow: ${shadow('floating', theme)} !important;
       }
       .bubble-name-label {
         background: transparent !important;
@@ -206,7 +221,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // URL（?center=&zoom=）で表示位置が指定されていればそれを使う（mapViewUrlParam.ts）
   const urlMapView = useMemo(() => getInitialMapViewFromUrl(), []);
-  const [mapCenter, setMapCenter] = useState<[number, number]>(urlMapView?.center ?? [35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
+  // 表示位置の指定が無く、出発駅（無ければ到着駅）を URL で指定して開いたときは、その駅を中心に開く。
+  // 以前は現在地へ移っていたため、記事の「武蔵小杉駅を出発駅にした地図を開く」から開いても
+  // 現在地（藤沢など）周辺の路線の端が映り、関係の無い路線が出ているように見えた
+  const urlStationCenter = useMemo<[number, number] | null>(() => {
+    if (urlMapView) return null;
+    const s = getInitialDepartureFromUrl() ?? getInitialArrivalFromUrl();
+    return s ? [s.lat, s.lng] : null;
+  }, [urlMapView]);
+  const [mapCenter, setMapCenter] = useState<[number, number]>(urlMapView?.center ?? urlStationCenter ?? [35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
   const [mapZoom, setMapZoom] = useState(urlMapView?.zoom ?? 12);
   const [viewCenter, setViewCenter] = useState<[number, number]>([35.57765, 139.66165]); // Updates on moveend/zoomend
   const [viewBounds, setViewBounds] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
@@ -248,7 +271,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [isStationSelectorExpanded, setIsStationSelectorExpanded] = useState(!embedded);
   const [mobileStationExpanded, setMobileStationExpanded] = useState(!embedded);
   const [isRouteToggleExpanded, setIsRouteToggleExpanded] = useState(false);
-  const [isLegendExpanded, setIsLegendExpanded] = useState(!embedded);
+  // 「表示路線の切替」パネル。設定は必要なときに開くものなので、PC・スマホとも閉じた状態で始める
+  // （以前は開いて始まり、地図の右側を大きく覆っていた）
+  const [isLegendExpanded, setIsLegendExpanded] = useState(false);
 
   // 表示モードの管理
   const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
@@ -281,7 +306,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [alwaysVisibleMinRoutes, setAlwaysVisibleMinRoutes] = useState(7);
   const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
   const [showStationTierBadges, setShowStationTierBadges] = useState(false); // 乗り入れ路線数リング表示
-  const [showTravelTimes, setShowTravelTimes] = useState(false);
+  const [showTravelTimes, setShowTravelTimes] = useState(getInitialTravelTimesFromUrl);
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
   const [showStationNumbers, setShowStationNumbers] = useState(language !== 'japanese');
@@ -443,7 +468,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [clickedRoute, setClickedRoute] = useState<string | null>(null);
   const [routePopupPosition, setRoutePopupPosition] = useState<{ x: number, y: number } | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
-  const [showDimmedMapRoutes, setShowDimmedMapRoutes] = useState(true);
+  // 表示していない路線を薄く描く層。埋め込み表示（記事などの小さな枠）では出さない。
+  // 記事の内容に絞った地図に関係の無い路線が薄く並んで「多い」と見えるうえ、この層は線の周り36pxを
+  // 押すとその路線を表示ONにするため、地図を動かそうとした指で鶴見線などが足されていた
+  const [showDimmedMapRoutes, setShowDimmedMapRoutes] = useState(!embedded);
   const [dimmedMapTooltip, setDimmedMapTooltip] = useState<{ routeKey: RouteKey; x: number; y: number; isVisible: boolean } | null>(null);
 
   // 現在地表示
@@ -517,8 +545,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 設定で路線ごとの表示に切り替えられる
   const [showPerRouteStationTimes, setShowPerRouteStationTimes] = useState(false);
   // 地図右下の「表示中の路線」の凡例を折りたたんでいるか（保存して持ち越す）
-  const [visibleRoutesLegendCollapsed, setVisibleRoutesLegendCollapsed] = useState(false);
-  useEffect(() => { setVisibleRoutesLegendCollapsed(getInitialLegendCollapsed()); }, []);
+  const [visibleRoutesLegendCollapsed, setVisibleRoutesLegendCollapsed] = useState(true);
+  // 埋め込み表示（記事などの小さな枠）では凡例が地図を大きく隠すので畳んで始め、閲覧者の設定も上書きしない
+  useEffect(() => { setVisibleRoutesLegendCollapsed(embedded || getInitialLegendCollapsed()); }, [embedded]);
+  // 凡例から非表示にした路線。凡例に「非表示」の見た目で残し、もう一度押せば表示に戻せるようにする。
+  // 出発駅・到着駅を選び直したら（表示する路線が選び直されるので）空にする
+  const [legendHiddenRoutes, setLegendHiddenRoutes] = useState<Set<RouteKey>>(() => new Set());
+  // 凡例の並び。押して非表示→表示に戻しても位置が動かないよう、前回の並びを引き継ぐ
+  const legendOrderRef = useRef<RouteKey[]>([]);
   const [showRouteLine, setShowRouteLine] = useState(true);
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
@@ -533,6 +567,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 取得しても出発駅を自動で埋めることはしない（下の useEffect を参照）。
   useEffect(() => {
     if (!navigator.geolocation) return;
+    // 埋め込み表示（記事の中の地図）では、開いただけで位置情報の許可を求めない。
+    // 「現在地」のボタンを押したとき（locationRetryCount が増えたとき）だけ取得する
+    if (embedded && locationRetryCount === 0) return;
     setIsLocating(true);
     setLocationError(null);
     isFirstPositionRef.current = true;
@@ -663,7 +700,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   useEffect(() => {
     if (!userLocation || hasCenteredOnUserRef.current) return;
     hasCenteredOnUserRef.current = true;
-    if (urlMapView) return; // URL で表示位置を指定して開いたときは、その範囲を見せる
+    // URL で表示位置や駅を指定して開いたときは、その範囲・その駅を見せる
+    if (urlMapView || urlStationCenter) return;
     setMapCenter(userLocation);
     setMapZoom(INITIAL_LOCATION_ZOOM);
     // マウント前(mapRef.current が null)は上の state 更新が初期表示に反映される。
@@ -1275,7 +1313,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     handleManualSetDeparture(station);
   }, [handleManualSetDeparture]);
 
-  // 最寄り駅メモ: 共通の路線を地図に出す。
+  // 複数駅の共通路線: 共通の路線を地図に出す。
   // 表示候補(availableRoutes)にも入れないと、凡例に無い路線は描かれない
   const handleShowRoutesFromMemo = useCallback((routeKeys: RouteKey[]) => {
     if (routeKeys.length === 0) return;
@@ -1283,7 +1321,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     setVisibleRoutes(new Set(routeKeys));
   }, []);
 
-  // 最寄り駅メモ: 一覧の駅を出発駅にする
+  // 複数駅の共通路線: 一覧の駅を出発駅にする
   const handleUseStationAsDeparture = useCallback((stationName: string) => {
     const station = getAllStations().find(s => s.name === stationName);
     if (station) handleManualSetDeparture(station);
@@ -1479,10 +1517,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           position: 'fixed', left: x, top: y, zIndex: 9999,
           width: `${TW}px`,
           maxHeight: '480px',
-          backgroundColor: colors.surfaceElevated,
-          border: `1px solid ${colors.border}`,
-          borderRadius: L.r.card,
-          boxShadow: `0 4px 16px ${colors.shadow}`,
+          // 地は地図の上に浮かぶ他の箱と同じすりガラス（ui/atoms/floatingSurface.ts）
+          ...floatingSurfaceStyle(theme, 'open'),
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -1572,7 +1608,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     >
                       {translatedLabel}{hasInfo ? ' ⓘ' : ''}
                     </span>
-                    <span style={{ fontSize: FS.caption, color: pColor, fontWeight: isActive ? 'bold' : 'normal', marginLeft: L.sp.xs, textShadow: '0 0 3px rgba(0,0,0,0.55), 0 0 1px rgba(0,0,0,0.4)' }}>
+                    <span style={{ fontSize: FS.caption, color: pColor, fontWeight: isActive ? 'bold' : 'normal', marginLeft: L.sp.xs, textShadow: textHalo('soft') }}>
                       {v}{translateStatUnit(p.unit, currentLanguage) ? ` ${translateStatUnit(p.unit, currentLanguage)}` : ''}
                     </span>
                   </div>
@@ -1614,10 +1650,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           width: `${TW}px`,
           maxHeight: `${maxH}px`,
           overflowY: 'auto',
-          backgroundColor: colors.surfaceElevated,
-          border: `1px solid ${colors.primary}`,
-          borderRadius: L.r.control,
-          boxShadow: `0 4px 12px ${colors.shadow}`,
+          // 地は地図の上に浮かぶ他の箱と同じすりガラス。解説だと分かるよう枠だけ主操作の色にする
+          ...floatingSurfaceStyle(theme, 'open'),
+          borderColor: colors.primary,
           padding: `${L.sp.md} ${L.sp.lg}`,
           fontSize: FS.caption,
           color: colors.text,
@@ -1804,10 +1839,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           position: 'fixed', left: finalX, top: finalY, zIndex: 9999,
           width: `${TW}px`,
           maxHeight: `${maxTooltipH}px`,
-          backgroundColor: colors.surfaceElevated,
-          border: `1px solid ${colors.border}`,
-          borderRadius: L.r.card,
-          boxShadow: `0 4px 16px ${colors.shadow}`,
+          // 地は地図の上に浮かぶ他の箱と同じすりガラス（ui/atoms/floatingSurface.ts）
+          ...floatingSurfaceStyle(theme, 'open'),
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -1955,7 +1988,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         {labelEl}
                         <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xxs, flexShrink: 0 }}>
                           <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: pColor, flexShrink: 0 }} />
-                          <span style={{ color: pColor, fontWeight: isActive ? 'bold' : 'normal', textShadow: '0 0 3px rgba(0,0,0,0.55), 0 0 1px rgba(0,0,0,0.4)' }}>
+                          <span style={{ color: pColor, fontWeight: isActive ? 'bold' : 'normal', textShadow: textHalo('soft') }}>
                             {v}{translateStatUnit(p.unit, currentLanguage) ? ` ${translateStatUnit(p.unit, currentLanguage)}` : ''}
                           </span>
                         </div>
@@ -2343,12 +2376,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     if (isDetailed) {
       const borderColor = theme === 'dark' ? alphaWhite(0.8) : NEUTRAL.white;
-      const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
       // 枠線色を個別カスタムしている場合は、ヒートマップ等の「枠線なし」より優先する
       const borderCss = stationIconStyle.borderColor
         ? `border:1px solid ${stationIconStyle.borderColor};`
         : (overrideColor ? 'border:none;' : `border:1px solid ${borderColor};`);
-      const shadowCss = overrideColor ? '' : `box-shadow:0 1px 3px ${shadowColor};`;
+      const shadowCss = overrideColor ? '' : `box-shadow:${shadow('marker', theme)};`;
       const translatedStationName = translateStation(station.name, currentLanguage);
       const furigana = (showFurigana && currentLanguage === 'japanese') ? getFurigana(station.name) : '';
       const hasFurigana = furigana.length > 0;
@@ -2388,9 +2420,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const labelBgColor = stationIconStyle.bgColor ?? filledBg;
       const labelTextColor = stationIconStyle.textColor ?? filledText;
       // カスタム背景色のときは自動配色向けのハロー判定は当てにならないため出さない
-      const haloCss = (needsHalo && !stationIconStyle.bgColor)
-        ? 'text-shadow:0 0 2px rgba(0,0,0,0.95),0 1px 2px rgba(0,0,0,0.9);'
-        : '';
+      const haloCss = (needsHalo && !stationIconStyle.bgColor) ? textHaloCss('strong') : '';
       const htmlContent = hasFurigana || hasTime
         ? `<div style="background:${labelBgColor};color:${labelTextColor};${haloCss}padding:${stationLabelBox.paddingCss};border-radius:${stationLabelBox.radiusCss};white-space:nowrap;${borderCss}${shadowCss}text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:${stationLabelBox.furiganaFontSize}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${lfs}px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
         : `<div style="background:${labelBgColor};color:${labelTextColor};${haloCss}padding:${stationLabelBox.paddingCss};border-radius:${stationLabelBox.radiusCss};font-size:${lfs}px;font-weight:bold;white-space:nowrap;${borderCss}${shadowCss}opacity:${opacity}">${displayName}</div>`;
@@ -2405,13 +2435,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     } else {
       const stationSize = Math.round(Math.max(4, Math.min(24, zoomLevel - 8)) * stationIconScale);
       const borderColor = theme === 'dark' ? alphaWhite(0.8) : NEUTRAL.white;
-      const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)';
       const dotBorder = stationIconStyle.borderColor
         ? `1px solid ${stationIconStyle.borderColor}`
         : (overrideColor ? 'none' : `1px solid ${borderColor}`);
       const dotFill = stationIconStyle.bgColor ?? displayColor;
-      // ティアあり → tierShadow を使用、なし → デフォルトの drop shadow
-      const dotShadow = tierShadow ?? (overrideColor ? 'none' : `0 1px 2px ${shadowColor}`);
+      // ティアあり → tierShadow（多重の輪）を使用、なし → 印の影（shadow.ts）
+      const dotShadow = tierShadow ?? (overrideColor ? 'none' : shadow('marker', theme));
       // ティアあり時は icon サイズを影が見えるよう大きめに確保（4リング=12px、3リング以下=10px）
       const paddingForShadow = tierShadow
         ? (tierShadow.includes('12px') ? 16 : 12)
@@ -2572,9 +2601,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         : stationLabelBox.height)
         + timeLines.length * stationLabelBox.furiganaHeight
         + borderAdjustment;
-      // 出発駅・到着駅は影なし、その他は通常の影
+      // 出発駅・到着駅は枠の輪（boxShadow）を付けない
       const isSelectedStation = (departure && departure.name === station.name) || (arrival && arrival.name === station.name);
-      const shadowColor = isSelectedStation ? 'transparent' : (theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)');
       const ttFontSize = stationLabelBox.fontSize;
       const ttFuriganaSize = stationLabelBox.furiganaFontSize;
 
@@ -2620,9 +2648,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       // 枠線の太さを考慮してサイズを調整
       const borderAdjustment = borderStyle.borderWidth * 2; // 左右・上下の枠線分
       const stationSize = baseStationSize + borderAdjustment;
-      // 出発駅・到着駅は影なし、その他は通常の影
+      // 出発駅・到着駅は枠の輪（boxShadow）を付けない
       const isSelectedStation = (departure && departure.name === station.name) || (arrival && arrival.name === station.name);
-      const shadowColor = isSelectedStation ? 'transparent' : (theme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)');
 
       const bgColor2 = stationIconStyle.bgColor ?? heatOverride ?? routeColors[routeKey];
       const borderColor2 = stationIconStyle.borderColor ?? borderStyle.borderColor;
@@ -2716,7 +2743,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const circleSize = 13;
     const borderWidth = 1;
 
-    const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
     // 既定（背景色を「路線色」にしたとき）は、駅名ラベルと同じ
     // filledLabelColors を使い、実際に路線色で塗った背景にする
     // （以前は路線に関わらず常に中立なグレー/白の背景だったため、
@@ -2737,7 +2763,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         display:flex;
         align-items:center;
         justify-content:center;
-        box-shadow:0 1px 3px ${shadowColor};
+        box-shadow:${shadow('marker', theme)};
         font-weight:bold;
         line-height:1;
       ">
@@ -2958,6 +2984,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // 出発・到着の両方を選んだら、経路の区間の駅だけを出す（「路線の全区間を表示」がオフのとき・既定）。
     // 以前はここで主要駅（乗り入れ路線の多い駅）が区間の外にも出続けていた
     if (departure && arrival && !showFullRouteStations) return [] as Station[];
+    // 出発駅か到着駅の片方だけを選んだときも出さない。その駅に関係する路線（と直通先）だけを残す画面なのに、
+    // 関係の無い主要駅（武蔵小杉を選んだときの上野など）が目印として残り、乗り換えずに行ける駅に見えていた
+    if (!!departure !== !!arrival) return [] as Station[];
     const covered = new Set<string>();
     if (isTransferHintMode) {
       for (const s of transferHintStations) covered.add(s.name);
@@ -3090,28 +3119,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       try {
         if (typeof window === 'undefined') return;
 
-        const [
-          { MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, CircleMarker, Circle, useMapEvents, ZoomControl, Pane, Tooltip },
-          leaflet
-        ] = await Promise.all([
-          import('react-leaflet'),
-          import('leaflet'),
-        ]);
+        // 取得はページのスクリプトから先に始めている（utils/leafletLoader.ts）。ここでは同じ Promise を待つだけ
+        const { reactLeaflet, leaflet } = await loadLeafletModules();
+        const { MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, CircleMarker, Circle, useMapEvents, ZoomControl, Pane, Tooltip } = reactLeaflet;
         const { DivIcon } = leaflet;
         const canvasRenderer = leaflet.canvas({ padding: 0.5 });
-
-        // leaflet-rotate はグローバルな `L`（従来のscriptタグ読み込み前提）に
-        // プロトタイプ拡張を行う昔ながらのLeafletプラグイン形式のため、
-        // バンドラー経由で読み込んだ leaflet モジュールを window.L に橋渡しする。
-        // react-leaflet も同じ leaflet モジュールの単一インスタンスを使うため、
-        // ここで拡張したクラス（L.Map・L.Marker 等）がそのまま反映される
-        if (!(window as any).L) {
-          (window as any).L = leaflet;
-        }
-        await import('leaflet-rotate');
         patchRotatedRendererDrift(leaflet);
 
         if (mounted) {
+          // 読み込み画面の文言を「地図を表示しています…」へ（消すのは地図を最初に描いた後）
+          setAppLoadingStage('map');
           setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, CircleMarker, Circle, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip, canvasRenderer });
           setIsClient(true);
           setIsLoading(false);
@@ -3120,6 +3137,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         }
       } catch (error) {
         console.error('Failed to load Leaflet:', error);
+        // 読み込みに失敗しても読み込み画面を出したままにしない（仮表示の文言で失敗が分かる）
+        hideAppLoading();
         if (mounted) {
           setIsLoading(false);
         }
@@ -3132,6 +3151,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       mounted = false;
     };
   }, []);
+
+  // 地図を最初に描いた後に読み込み画面を消す。描画が画面に出るのを待つため2フレーム後
+  useEffect(() => {
+    if (!isClient || isLoading || !MapComponents) return;
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => { raf2 = requestAnimationFrame(hideAppLoading); });
+    return () => { cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
+  }, [isClient, isLoading, MapComponents]);
 
   // 最終的な重複除去関数（表示レベル）
   const removeFinalDuplicates = useCallback((routes: RouteResult[]): RouteResult[] => {
@@ -3370,6 +3397,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // 駅選択に応じた路線表示制御
   // ※ departure && arrival の場合は route recommendation useEffect が availableRoutes/visibleRoutes を管理
+  // 出発駅・到着駅を選び直したら、凡例から非表示にした路線の記憶を捨てる
+  useEffect(() => {
+    setLegendHiddenRoutes(new Set());
+    legendOrderRef.current = [];
+  }, [departure, arrival]);
+
   useEffect(() => {
     if (departure && arrival) return; // 両駅選択時は推薦useEffectに委ねる
 
@@ -3594,7 +3627,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           (control as HTMLElement).style.setProperty('background', '#2d2d2d', 'important');
           (control as HTMLElement).style.setProperty('border', '1px solid #404040', 'important');
           (control as HTMLElement).style.setProperty('border-radius', '4px', 'important');
-          (control as HTMLElement).style.setProperty('box-shadow', '0 2px 5px rgba(0,0,0,0.3)', 'important');
+          (control as HTMLElement).style.setProperty('box-shadow', shadow('floating', 'dark'), 'important');
 
           // ズームボタン（+ と -）
           const zoomButtons = control.querySelectorAll('a');
@@ -4021,14 +4054,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           background: #4285F4;
           border: 2px solid white;
           border-radius: 50%;
-          box-shadow: 0 0 0 1px #4285F4, 0 1px 4px rgba(0,0,0,0.3);
+          box-shadow: ${joinShadows('0 0 0 1px #4285F4', shadow('marker', theme))};
         "></div>
       </div>`,
       className: 'user-location-marker',
       iconSize: [36, 36],
       iconAnchor: [18, 18]
     });
-  }, [MapComponents, userLocation, userHeading]);
+  }, [MapComponents, userLocation, userHeading, theme]);
 
   /**
    * 同じ区間を走る路線の索引。
@@ -4314,7 +4347,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               <text x={b.x} y={b.y} textAnchor="middle" dominantBaseline="middle"
                 fontSize={Math.max(7, Math.min(11, b.r * 0.55))}
                 fill={NEUTRAL.white} fontWeight="bold"
-                style={{ pointerEvents: 'none', textShadow: '0 0 3px rgba(0,0,0,0.8)' }}>
+                style={{ pointerEvents: 'none', textShadow: textHalo('strong') }}>
                 {b.displayName.length > 6 ? b.displayName.slice(0, 5) + '…' : b.displayName}
               </text>
             )}
@@ -4890,10 +4923,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * 書き忘れが起きていた（記事一覧だけ更新し忘れる、など）。
    * ここ1箇所だけで決める。
    */
+  // 背景・影は「表示切替」「表示中の路線」と同じ（ui/atoms/FloatingButton.tsx の floatingSurfaceStyle）
   const cornerButtonStyle = {
     width: MAP_CORNER_BUTTON_PX,
     height: MAP_CORNER_BUTTON_PX,
-    backdropFilter: 'blur(4px)',
+    ...floatingSurfaceStyle(theme),
   };
 
   /**
@@ -5073,14 +5107,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             }}
           >
             <h3 style={{ margin: `0`, color: colors.text, fontSize: FS.title, fontWeight: 'bold' }}>{translateUI('routeToggle', currentLanguage)}</h3>
-            <span style={{
-              fontSize: FS.caption,
-              color: colors.textSecondary,
-              transform: isRouteToggleExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.3s ease'
-            }}>
-              ▼
-            </span>
+            <DisclosureIndicator expanded={isRouteToggleExpanded} theme={theme} />
           </div>
 
           {/* コンテンツ：独立したスクロールコンテナ */}
@@ -5595,7 +5622,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   const depTime = formatDemoTime(t.departureMin);
                   const bearing = t.bearing ?? 0;
                   const icon = new MapComponents.DivIcon({
-                    html: `<div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:13px solid ${t.color};transform:rotate(${bearing}deg);filter:drop-shadow(0 1px 1px rgba(0,0,0,0.4));"></div>`,
+                    html: `<div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:13px solid ${t.color};transform:rotate(${bearing}deg);filter:${dropShadowFilter('marker', theme)};"></div>`,
                     className: '',
                     iconSize: [16, 16],
                     iconAnchor: [8, 8],
@@ -5667,7 +5694,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               fontSize: FS.caption,
               fontWeight: 'bold',
               letterSpacing: '0.05em',
-              boxShadow: '0 2px 12px rgba(102,126,234,0.5)',
+              boxShadow: shadow('overlay', theme),
               pointerEvents: 'none',
               whiteSpace: 'nowrap',
             }}>
@@ -5710,14 +5737,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             const btnS: React.CSSProperties = {
               width: '18px', height: '18px', fontSize: FS.caption, cursor: 'pointer',
               borderRadius: L.r.control, border: `1px solid ${colors.border}`, flexShrink: 0,
-              background: theme === 'dark' ? 'rgba(60,60,60,0.9)' : 'rgba(220,220,220,0.9)',
+              background: colors.surfaceHover,
               color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center',
               userSelect: 'none' as const,
             };
             const numS: React.CSSProperties = {
               width: '34px', fontSize: FS.caption, padding: `${L.sp.xxs} ${L.sp.xxs}`, textAlign: 'center',
               border: `1px solid ${colors.border}`, borderRadius: L.r.control,
-              background: theme === 'dark' ? 'rgba(50,50,50,0.9)' : 'rgba(245,245,245,0.9)',
+              background: colors.surface,
               color: colors.text,
             };
 
@@ -5726,11 +5753,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 {/* 凡例カード（パラメータ選択を下端に統合） */}
                 <div style={{
                   position: 'fixed', ...pos, zIndex: 1001,
-                  background: theme === 'dark' ? 'rgba(30,30,30,0.82)' : alphaWhite(0.82),
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                  border: `1px solid ${colors.border}`, borderRadius: L.r.card,
-                  boxShadow: `0 2px 6px ${colors.shadow}`,
+                  // 地は地図の上に浮かぶ他の箱・ボタンと共通（凡例を読む箱なので open）
+                  ...floatingSurfaceStyle(theme, 'open'),
                   width: cardW, overflow: 'hidden',
                 }}>
                   {/* ヘッダー：クリックで凡例本体を折りたたむ */}
@@ -5755,11 +5779,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         : (meta ? translateStatParamLabel(meta.label, currentLanguage) : String(heatmapParam)) + (meta?.unit ? ` (${meta.unit})` : '')
                       }
                     </span>
-                    <span style={{
-                      fontSize: FS.caption, color: colors.textSecondary, flexShrink: 0, marginLeft: L.sp.xs,
-                      transform: heatmapParamSelectorOpen ? 'rotate(0deg)' : 'rotate(180deg)',
-                      transition: 'transform 0.2s',
-                    }}>▲</span>
+                    {/* heatmapParamSelectorOpen は「折りたたんでいる」の意味（true で本体を隠す） */}
+                    <span style={{ marginLeft: L.sp.xs, display: 'flex' }}>
+                      <DisclosureIndicator expanded={!heatmapParamSelectorOpen} theme={theme} />
+                    </span>
                   </div>
 
                   {/* 本体（折りたたみ対象） */}
@@ -5832,15 +5855,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                       padding: `${L.sp.xs} ${L.sp.md}`, cursor: 'pointer',
                       borderTop: `1px solid ${colors.borderLight}`,
-                      background: theme === 'dark' ? 'rgba(40,40,40,0.6)' : 'rgba(245,245,245,0.8)',
+                      background: colors.surfaceHover,
                     }}
                   >
                     <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('heatmapShowOtherInfo', currentLanguage)}</span>
-                    <span style={{
-                      fontSize: FS.caption, color: colors.textSecondary, flexShrink: 0,
-                      transform: heatmapParamListOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.2s',
-                    }}>▼</span>
+                    <DisclosureIndicator expanded={heatmapParamListOpen} theme={theme} />
                   </div>
 
                   {/* パラメータ選択（展開時のみ表示） */}
@@ -5906,7 +5925,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               padding: `${L.sp.sm} ${L.sp.xl}`,
               display: 'flex', alignItems: 'center', gap: L.sp.md,
               fontSize: FS.body, color: colors.text,
-              boxShadow: `0 2px 8px ${colors.shadow}`,
+              boxShadow: shadow('overlay', theme),
               whiteSpace: 'nowrap',
             }}>
               <span style={{ fontWeight: 'bold', color: '#9ACD32' }}>
@@ -5999,7 +6018,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 borderRadius: L.r.card,
                 backgroundColor: SEMANTIC.arrival,
                 color: colors.onPrimary,
-                boxShadow: `0 4px 16px ${colors.shadow}`,
+                boxShadow: shadow('overlay', theme),
                 cursor: 'pointer',
               }}
             >
@@ -6025,9 +6044,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onClick={e => e.stopPropagation()}
                 style={{
                   position: 'fixed', left: tx, top: ty, zIndex: 9999,
-                  width: TW, backgroundColor: colors.surfaceElevated,
-                  border: `1px solid ${colors.border}`, borderRadius: L.r.card,
-                  boxShadow: `0 4px 16px ${colors.shadow}`, overflow: 'hidden',
+                  width: TW, overflow: 'hidden',
+                  // 地は地図の上に浮かぶ他の箱と同じすりガラス（ui/atoms/floatingSurface.ts）
+                  ...floatingSurfaceStyle(theme, 'open'),
                 }}
               >
                 <div style={{
@@ -6105,10 +6124,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 ? { left: '10px', right: `${MOBILE_LEGEND_RIGHT_RESERVED}px`, width: 'auto' }
                 : { right: '0', width: '300px' }),
               maxHeight: isFullscreen ? 'calc(100% - 66px)' : 'none',
-              backgroundColor: colors.surfaceElevated,
-              border: `1px solid ${colors.border}`,
-              borderRadius: L.r.control,
-              boxShadow: `0 2px 6px ${colors.shadow}`,
+              // 地（透け具合・ぼかし・枠線・影・丸み）は地図の上に浮かぶ他の箱・ボタンと共通
+              ...floatingSurfaceStyle(theme, isLegendExpanded ? 'open' : 'idle'),
               zIndex: 1000,
               overflowY: 'hidden',
               display: isFullscreen ? 'flex' : 'block',
@@ -6121,37 +6138,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 との指摘）。ボタン側の寸法（MAP_CORNER_BUTTON_PX）を
                 そのまま高さに使い、値を別途書き直さない
               */}
-              <div
-                onClick={() => setIsLegendExpanded(!isLegendExpanded)}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  cursor: 'pointer',
-                  boxSizing: 'border-box',
-                  flexShrink: 0,
-                  borderBottom: isLegendExpanded ? `1px solid ${colors.borderLight}` : 'none',
-                  ...(isMobile && !isFullscreen
-                    ? { height: `${MAP_CORNER_BUTTON_PX}px`, padding: `0 ${L.sp.lg}` }
-                    : { padding: L.sp.lg }),
-                }}
-              >
-                <span style={{
-                  fontSize: FS.title,
-                  fontWeight: 'bold',
-                  color: colors.text
-                }}>
-{translateUI('displayedRoutes', currentLanguage)}
-                </span>
-                <span style={{
-                  fontSize: FS.caption,
-                  color: colors.textSecondary,
-                  transform: isLegendExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.3s ease'
-                }}>
-                  ▼
-                </span>
-              </div>
+              <DisclosureHeader
+                theme={theme}
+                title={translateUI('displayedRoutes', currentLanguage)}
+                expanded={isLegendExpanded}
+                onToggle={() => setIsLegendExpanded(!isLegendExpanded)}
+                // スマホ・非全画面では隣の「全画面表示」ボタンと高さをそろえる
+                size={isMobile && !isFullscreen ? 'floating' : 'panel'}
+              />
 
               {/* コンテンツ：独立したスクロールコンテナ */}
               {isLegendExpanded && (
@@ -6174,6 +6168,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
                   {/* 2. 路線一覧 (Route List) */}
                   <LegendRouteList
+                    onShowRoutesFromMemo={handleShowRoutesFromMemo}
+                    onUseStationAsDeparture={handleUseStationAsDeparture}
                     visibleRoutesData={visibleRoutesData}
                     routeOrder={routeOrder}
                     onRouteOrderChange={setRouteOrder}
@@ -6277,16 +6273,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onStationIconStyleChange={setStationIconStyle}
                   />
 
-                  {/* 2.5 最寄り駅メモ (Nearest station notes) */}
-                  <StationMemoPanel
-                    theme={theme}
-                    language={currentLanguage}
-                    routeColors={routeColors}
-                    routeNames={routeNames}
-                    adjustRouteColorForTheme={adjustRouteColorForTheme}
-                    onShowRoutes={handleShowRoutesFromMemo}
-                    onUseAsDeparture={handleUseStationAsDeparture}
-                  />
 
                   {/* 3. 表示オプション (Display Options) */}
                   <LegendDisplayOptions
@@ -6453,7 +6439,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           {isFullscreen && isMobile && (
             <MobileBottomPanel
               theme={theme}
-              safeAreaBottom={25}
+              safeAreaBottom={MOBILE_PANEL_SAFE_BOTTOM}
               buttons={[
                 // 候補ルートは設定より前に置く。候補が無いとき・推薦ルート選択を
                 // 出さない設定（既定）のときはボタン自体を出さない
@@ -6471,6 +6457,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   content: (
                     <>
                       <LegendRouteList
+                    onShowRoutesFromMemo={handleShowRoutesFromMemo}
+                    onUseStationAsDeparture={handleUseStationAsDeparture}
                         visibleRoutesData={visibleRoutesData}
                     routeOrder={routeOrder}
                     onRouteOrderChange={setRouteOrder}
@@ -6573,15 +6561,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         stationIconStyle={stationIconStyle}
                         onStationIconStyleChange={setStationIconStyle}
                       />
-                      <StationMemoPanel
-                        theme={theme}
-                        language={currentLanguage}
-                        routeColors={routeColors}
-                        routeNames={routeNames}
-                        adjustRouteColorForTheme={adjustRouteColorForTheme}
-                        onShowRoutes={handleShowRoutesFromMemo}
-                        onUseAsDeparture={handleUseStationAsDeparture}
-                      />
                       {routeRecommendationsPanel}
                       <MultiDepartureRoutes
                         arrival={arrival}
@@ -6612,26 +6591,47 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               スマホ全画面でヒートマップの凡例が右下に来るときは譲る */}
           {mapViewMode === 'realistic' && !(isFullscreen && isMobile && heatmapEnabled) && (() => {
             const total = Object.keys(routes).length;
-            if (visibleRoutes.size === 0 || visibleRoutes.size >= total) return null;
+            if (visibleRoutes.size >= total) return null;
+            // 表示中の路線（出発・到着駅を通る路線を先頭）＋凡例から非表示にした路線。
+            // 前回の並びを引き継ぎ、新しく出た路線だけを後ろに足す
+            const wanted = [...(highlightedRouteKeys ?? []), ...visibleRoutes]
+              .filter(k => visibleRoutes.has(k));
+            const keep = legendOrderRef.current.filter(k => visibleRoutes.has(k) || legendHiddenRoutes.has(k));
+            const order = [...keep, ...wanted, ...legendHiddenRoutes].filter((k, i, a) => a.indexOf(k) === i);
+            legendOrderRef.current = order;
+            if (order.length === 0) return null;
             // PCでは「表示路線の切替」パネルが右端に幅300pxで浮くので、開いている間はその左に置く。
             // スマホではパネルは右端に来ない（全画面では下の「表示切替」ボタンから開く）ので常に右下に出す。
             // 以前はスマホ全画面でも「パネルが開いている」扱いで凡例を消してしまい、見えなかった
             const panelOnRight = !isMobile && isLegendExpanded;
-            const order = [...(highlightedRouteKeys ?? []), ...visibleRoutes]
-              .filter((k, i, a) => visibleRoutes.has(k) && a.indexOf(k) === i);
+            // スマホ全画面では左下の「表示切替」と同じ高さに並べる
+            const bottom = isMobile
+              ? (isFullscreen ? `${MOBILE_PANEL_SAFE_BOTTOM + MOBILE_PANEL_FLOAT}px` : '64px')
+              : L.sp['4xl'];
             return (
               <VisibleRoutesLegend
                 items={order.map(k => ({
                   key: k,
                   name: translateRoute(routeNames[k] ?? k, currentLanguage),
                   color: adjustRouteColorForTheme(routeColors[k], theme),
+                  visible: visibleRoutes.has(k),
                 }))}
                 theme={theme}
                 language={currentLanguage}
-                maxItems={10}
+                // 切り替えは「表示路線の切替」パネルと同じ toggleRoute を使う
+                onToggleRoute={key => {
+                  const rk = key as RouteKey;
+                  const wasVisible = visibleRoutes.has(rk);
+                  toggleRoute(rk);
+                  setLegendHiddenRoutes(prev => {
+                    const next = new Set(prev);
+                    if (wasVisible) next.add(rk); else next.delete(rk);
+                    return next;
+                  });
+                }}
                 collapsed={visibleRoutesLegendCollapsed}
-                onToggleCollapsed={() => setVisibleRoutesLegendCollapsed(v => { persistLegendCollapsed(!v); return !v; })}
-                style={{ position: 'absolute', right: panelOnRight ? `calc(300px + ${L.sp.lg})` : L.sp.lg, bottom: isMobile ? '64px' : L.sp['4xl'], zIndex: 1002 }}
+                onToggleCollapsed={() => setVisibleRoutesLegendCollapsed(v => { if (!embedded) persistLegendCollapsed(!v); return !v; })}
+                style={{ position: 'absolute', right: panelOnRight ? `calc(300px + ${L.sp.lg})` : L.sp.lg, bottom, zIndex: 1002 }}
               />
             );
           })()}
@@ -6731,11 +6731,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   position: 'fixed',
                   left: `${routePopupPosition.x}px`,
                   top: `${routePopupPosition.y}px`,
-                  backgroundColor: colors.surfaceElevated,
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: L.r.card,
+                  // 地は地図の上に浮かぶ他の箱と同じすりガラス（ui/atoms/floatingSurface.ts）
+                  ...floatingSurfaceStyle(theme, 'open'),
                   padding: `${L.sp.xl} ${L.sp['2xl']}`,
-                  boxShadow: `0 4px 16px ${colors.shadow}`,
                   zIndex: 9999,
                   minWidth: '180px',
                   transform: 'translate(-50%, -100%)',

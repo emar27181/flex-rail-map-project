@@ -10,6 +10,9 @@ import type { Language } from '../utils/translation';
 import { SEMANTIC, FS} from '../constants/ui';
 import { tintColor } from '../utils/contrast';
 import Button from './ui/atoms/Button';
+import { shadow } from './ui/atoms/shadow';
+import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
+import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
 
 interface RouteRecommendationsProps {
   routes: RouteResult[];
@@ -91,8 +94,9 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
         position: 'fixed',
         left: tooltip.x + 12,
         top: tooltip.y - 36,
-        backgroundColor: 'rgba(30,30,30,0.92)',
-        color: colors.onPrimary,
+        // 地は地図の上に浮かぶ他の箱と同じすりガラス（ui/atoms/floatingSurface.ts）
+        ...floatingSurfaceStyle(theme, 'open'),
+        color: colors.text,
         padding: `${L.sp.xs} ${L.sp.lg}`,
         borderRadius: L.r.control,
         fontSize: FS.caption,
@@ -110,7 +114,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
       backgroundColor: colors.surfaceElevated,
       border: `1px solid ${colors.border}`,
       borderRadius: L.r.control,
-      boxShadow: `0 2px 6px ${colors.shadow}`,
+      boxShadow: shadow('raised', theme),
       minWidth: '200px'
     }}>
       <div 
@@ -139,14 +143,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
             </Button>
           )}
         </div>
-        <span style={{
-          fontSize: FS.caption,
-          color: '#666',
-          transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-          transition: 'transform 0.3s ease'
-        }}>
-          ▼
-        </span>
+        <DisclosureIndicator expanded={isExpanded} theme={theme} />
       </div>
 
       {isExpanded && (
@@ -169,7 +166,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
               style={{
                 padding: `${L.sp.lg} ${L.sp.xl}`,
                 ...selectableCard(colors, { selected: isSelected, radius: '6px' }),
-                boxShadow: isSelected ? `0 2px 8px ${tintColor(SEMANTIC.primary, 0.3)}` : `0 1px 3px ${colors.shadow}`
+                boxShadow: shadow('raised', theme, isSelected ? { color: tintColor(SEMANTIC.primary, 0.3) } : undefined)
               }}
             >
             {/* ルートヘッダー: 番号・時間・乗換・ボタン */}

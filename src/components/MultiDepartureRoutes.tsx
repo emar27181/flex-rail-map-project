@@ -12,6 +12,7 @@ import RouteRecommendationItem from './ui/RouteRecommendationItem';
 import IconButton from './ui/atoms/IconButton';
 import TextField from './ui/atoms/TextField';
 import { L } from './legend/legendStyles';
+import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
 
 interface MultiDepartureRoutesProps {
   /** 全出発駅の共通ゴール */
@@ -143,8 +144,8 @@ const MultiDepartureRoutes: React.FC<MultiDepartureRoutesProps> = ({
           <div style={{
             position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20,
             marginTop: L.sp.xxs, maxHeight: '160px', overflowY: 'auto',
-            backgroundColor: colors.surfaceElevated, border: `1px solid ${colors.border}`,
-            borderRadius: L.r.control, boxShadow: `0 4px 12px ${colors.shadow}`,
+            // 地は地図の上に浮かぶ他の箱と同じすりガラス（ui/atoms/floatingSurface.ts）
+            ...floatingSurfaceStyle(theme, 'open'),
           }}>
             {filteredStations.map(station => (
               <div
