@@ -75,6 +75,7 @@ import { defaultRoutesNear } from '../utils/defaultRoutesNear';
 import { getInitialMapViewFromUrl, getInitialTravelTimesFromUrl } from '../utils/mapViewUrlParam';
 import { isEmbedMode } from '../utils/embedMode';
 import { loadLeafletModules } from '../utils/leafletLoader';
+import { hideAppLoading, setAppLoadingStage } from '../utils/appLoading';
 import {
   getInitialDepartureFromUrl,
   getInitialArrivalFromUrl,
@@ -3078,6 +3079,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         patchRotatedRendererDrift(leaflet);
 
         if (mounted) {
+          // 読み込み画面の文言を「地図を表示しています…」へ（消すのは地図を最初に描いた後）
+          setAppLoadingStage('map');
           setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, CircleMarker, Circle, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip, canvasRenderer });
           setIsClient(true);
           setIsLoading(false);
@@ -3086,6 +3089,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         }
       } catch (error) {
         console.error('Failed to load Leaflet:', error);
+        // 読み込みに失敗しても読み込み画面を出したままにしない（仮表示の文言で失敗が分かる）
+        hideAppLoading();
         if (mounted) {
           setIsLoading(false);
         }
@@ -3098,6 +3103,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       mounted = false;
     };
   }, []);
+
+  // 地図を最初に描いた後に読み込み画面を消す。描画が画面に出るのを待つため2フレーム後
+  useEffect(() => {
+    if (!isClient || isLoading || !MapComponents) return;
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => { raf2 = requestAnimationFrame(hideAppLoading); });
+    return () => { cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
+  }, [isClient, isLoading, MapComponents]);
 
   // 最終的な重複除去関数（表示レベル）
   const removeFinalDuplicates = useCallback((routes: RouteResult[]): RouteResult[] => {

@@ -1,5 +1,19 @@
 # CHANGE LOG
 
+## [2026-10-07] セッション（読み込み画面・地図ライブラリの並行取得）
+
+### improve: 地図ライブラリの取得をアプリ本体と並行して始め、地図が出るまでを短縮
+- `src/utils/leafletLoader.ts`（新規）, `src/components/RailwayMap.tsx`, `src/pages/index.astro`
+- RailwayMap のマウント後に leaflet を取得していて「本体 → leaflet → leaflet-rotate」と直列に待っていた
+
+### feat: 専用の読み込み画面（段階ごとの文言）を作り、地図を描くまで出す
+- `src/constants/appLoading.ts`（新規）, `src/utils/{appLoadingDom,appLoading}.ts`（新規）, `src/utils/translation.ts`（4言語）,
+  `src/pages/index.astro`, `src/components/{ThemeWrapper,RailwayMap}.tsx`, `tests/unit/utils/appLoading.test.ts`（新規）
+- 読み込み画面を ThemeWrapper のマウントで消していて、地図ライブラリが届くまで仮表示「マップを読み込み中...」とフッターが見えていた
+- 「読み込んでいます… → 路線図を準備しています… → 地図を表示しています…」と進め（戻らない）、地図の初回描画後に消す。失敗時・20秒経過時も必ず消す
+- 実測（Slow 4G 相当・CPU 4倍遅延・390px）: 仮表示・フッターが見える時間 0。地図表示 約8.0秒（変更前 9.1秒）
+- 残り: RailwayMap のチャンク（駅統計 JSON 約79KB gzip をヒートマップ用なのに初回に読む）
+
 ## [2026-10-06] セッション（凡例を見出しと一覧が1枚の開閉パネルに）
 
 ### improve: 開閉する見出しの部品（DisclosureIndicator / DisclosureHeader / CollapsiblePanel）を作り、▼ をそろえる
