@@ -4,9 +4,8 @@
  * 記事のスクリーンショットは小さくて読みにくかったため、画像をやめて実際の画面を埋め込む。
  * 記事（articleRender.ts）と駅・路線のページ（MapEmbed.astro）で同じ HTML・CSS・スクリプトを使う。
  *
- * - 押すまでは中に触れない（スマホでスクロールの指が地図を動かさないように）。
- *   枠のどこを押しても使えるようにする（小さなボタンだけが押せる形だと、地図を押しても動かないと感じる）。
- *   文言は枠の下に `.ctl` の見た目で出す
+ * - 最初から中を操作できる（2026-10: 以前は押すまで触れない形にしていたが、
+ *   「タップしなくても地図が動くように」との判断で外した）
  * - 画面に近づくまで読み込まない（loading="lazy"）
  * - 高さは端末に合わせて 360〜520px（画面の高さの 62%）
  * - 中の画面のテーマ（ライト/ダーク）を埋め込んだページに合わせる。開くときは URL の `theme`、
@@ -20,7 +19,7 @@ import { L } from '../../legend/legendStyles';
 import { EMBED_PARAM } from '../../../utils/embedMode';
 import { THEME_MESSAGE, THEME_PARAM } from '../../../utils/themeStorage';
 
-export const ME_CLASS = { figure: 'map-embed', frame: 'map-embed-frame', active: 'active', button: 'map-embed-activate', label: 'map-embed-label' } as const;
+export const ME_CLASS = { figure: 'map-embed', frame: 'map-embed-frame' } as const;
 
 const esc = (s: string) => s.replace(/&(?!(?:[a-z]+|#\d+);)/g, '&amp;').replace(/"/g, '&quot;');
 
@@ -31,12 +30,10 @@ export interface MapEmbedProps {
   title: string;
   /** 下に添える説明（HTML 可） */
   caption?: string;
-  /** 「押すと操作できる」ボタンの文言 */
-  activateLabel: string;
 }
 
-export function mapEmbedHtml({ src, title, caption, activateLabel }: MapEmbedProps): string {
-  return `<figure class="${ME_CLASS.figure}"><div class="${ME_CLASS.frame}" data-activate-label="${esc(activateLabel)}">`
+export function mapEmbedHtml({ src, title, caption }: MapEmbedProps): string {
+  return `<figure class="${ME_CLASS.figure}"><div class="${ME_CLASS.frame}">`
     + `<iframe src="${esc(src)}" title="${esc(title)}" loading="lazy"></iframe></div>`
     + (caption ? `<figcaption>${caption}</figcaption>` : '')
     + `</figure>`;
@@ -49,21 +46,13 @@ export const MAP_EMBED_CSS = `
   border: 1px solid var(--me-border, currentColor);
   border-radius: ${L.r.card}; background: var(--me-surface, transparent); box-shadow: var(--me-shadow, none);
 }
-.${ME_CLASS.frame} iframe { display: block; width: 100%; height: 100%; border: 0; pointer-events: none; }
-.${ME_CLASS.frame}.${ME_CLASS.active} iframe { pointer-events: auto; }
-/* 枠全体を覆う透明なボタン。押すと消えて中を操作できる */
-.${ME_CLASS.button} {
-  position: absolute; inset: 0; z-index: 1; display: flex; align-items: flex-end; justify-content: center;
-  padding: 0 0 ${L.sp.md}; margin: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer;
-}
-.${ME_CLASS.button}:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
-.${ME_CLASS.label} { pointer-events: none; }
+.${ME_CLASS.frame} iframe { display: block; width: 100%; height: 100%; border: 0; }
 .${ME_CLASS.figure} figcaption { margin-top: ${L.sp.sm}; font-size: ${FS.caption}; line-height: 1.7; color: var(--me-muted, inherit); }
 `;
 
 /**
  * 埋め込みのスクリプト（ページに1回だけ入れる）。
- * 押すまで中に触れないようにし、中の画面のテーマをページのテーマに合わせる。
+ * 中の画面のテーマをページのテーマに合わせる。
  * ページのテーマは、記事は html の data-theme、ほかのページは body の class（無ければライト）
  */
 export const MAP_EMBED_SCRIPT = `(function(){
@@ -86,16 +75,6 @@ export const MAP_EMBED_SCRIPT = `(function(){
         }
       } catch (e) {}
     }
-    if (frame.querySelector('.${ME_CLASS.button}')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = '${ME_CLASS.button}';
-    var label = document.createElement('span');
-    label.className = 'ctl ${ME_CLASS.label}';
-    label.textContent = frame.getAttribute('data-activate-label') || '';
-    btn.appendChild(label);
-    btn.addEventListener('click', function () { frame.classList.add('${ME_CLASS.active}'); btn.remove(); });
-    frame.appendChild(btn);
   });
   function sync() {
     var next = pageTheme();

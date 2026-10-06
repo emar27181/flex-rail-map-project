@@ -95,7 +95,7 @@ const accent = station.routes.map(r => routeColors[r]).find(Boolean);
 	indexable={station.indexable}
 	accent={accent}
 >
-	<MapEmbed src={embedSrc} title={station.mapFrom ? t.embedStationTitle(name) : t.embedLineTitle(lineNames.join(t.listSep))} caption={t.embedCaption} activateLabel={t.embedActivate} />
+	<MapEmbed src={embedSrc} title={station.mapFrom ? t.embedStationTitle(name) : t.embedLineTitle(lineNames.join(t.listSep))} caption={t.embedCaption} />
 	<MapOpenCta {...stationCta} />
 
 	<section>
