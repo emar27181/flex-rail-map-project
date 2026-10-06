@@ -74,6 +74,7 @@ import { toArticleLanguage } from '../utils/languagePersistence';
 import { defaultRoutesNear } from '../utils/defaultRoutesNear';
 import { getInitialMapViewFromUrl, getInitialTravelTimesFromUrl } from '../utils/mapViewUrlParam';
 import { isEmbedMode } from '../utils/embedMode';
+import { loadLeafletModules } from '../utils/leafletLoader';
 import {
   getInitialDepartureFromUrl,
   getInitialArrivalFromUrl,
@@ -3069,25 +3070,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       try {
         if (typeof window === 'undefined') return;
 
-        const [
-          { MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, CircleMarker, Circle, useMapEvents, ZoomControl, Pane, Tooltip },
-          leaflet
-        ] = await Promise.all([
-          import('react-leaflet'),
-          import('leaflet'),
-        ]);
+        // 取得はページのスクリプトから先に始めている（utils/leafletLoader.ts）。ここでは同じ Promise を待つだけ
+        const { reactLeaflet, leaflet } = await loadLeafletModules();
+        const { MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, CircleMarker, Circle, useMapEvents, ZoomControl, Pane, Tooltip } = reactLeaflet;
         const { DivIcon } = leaflet;
         const canvasRenderer = leaflet.canvas({ padding: 0.5 });
-
-        // leaflet-rotate はグローバルな `L`（従来のscriptタグ読み込み前提）に
-        // プロトタイプ拡張を行う昔ながらのLeafletプラグイン形式のため、
-        // バンドラー経由で読み込んだ leaflet モジュールを window.L に橋渡しする。
-        // react-leaflet も同じ leaflet モジュールの単一インスタンスを使うため、
-        // ここで拡張したクラス（L.Map・L.Marker 等）がそのまま反映される
-        if (!(window as any).L) {
-          (window as any).L = leaflet;
-        }
-        await import('leaflet-rotate');
         patchRotatedRendererDrift(leaflet);
 
         if (mounted) {

@@ -565,6 +565,11 @@ const webSiteSchema = {
 		</noscript>
 		<ThemeWrapper client:only="react" />
 		<script>
+			// 地図ライブラリの取得をアプリ本体の JS と並行して始める（utils/leafletLoader.ts）。
+			// RailwayMap はマウント後に同じ Promise を受け取るだけになる
+			import { loadLeafletModules } from '../utils/leafletLoader';
+			loadLeafletModules().catch(() => { /* RailwayMap 側で読み込み直す */ });
+
 			if ('serviceWorker' in navigator) {
 				window.addEventListener('load', () => {
 					navigator.serviceWorker.register('/sw.js');
