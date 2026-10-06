@@ -1,17 +1,22 @@
 /**
  * 地図の右下に出す「表示中の路線」の凡例（オーガニズム: 路線を知っている）。
  *
- * どの色の線がどの路線かを、表示路線の切替パネルを開かずに確かめられるようにする。
- * 地図を隠さないよう小さく、先頭 maxItems 件だけ並べて残りは「…ほかN路線」にまとめる。
- * 色・文字サイズ・余白・角丸はデザイントークンから取り、路線色は呼び出し側で
- * テーマに合わせて補正したものを受け取る（地図の線と同じ色になるように）。
- * 見出しを押すと折りたためる（開閉の状態は呼び出し側が持ち、保存する）。
- * 折りたたみ中は「表示中の路線（N）」の1行だけになる。
+ * どの色の線がどの路線かを、表示路線の切替パネルを開かずに確かめ、その場で出し入れできる。
+ * - 見出しは地図の上に浮かぶボタン（FloatingButton）。右上の丸いボタン・「表示切替」と同じ高さ
+ * - 路線は「表示路線の切替」パネルと同じチップ（Chip）。表示中は路線色で塗り、
+ *   押すと非表示の見た目（塗らずに丸で色を示す）になり、もう一度押すと表示に戻る
+ * - 押したときの処理は呼び出し側の既存の切り替え（toggleRoute）を使う。ここでは状態を持たない
+ *
+ * 見出しを押すと開閉する（開閉の状態は呼び出し側が持ち、保存する）。
+ * 開いた一覧は見出しの上に出し、多いときは一覧の中でスクロールする。
  */
 import React from 'react';
+import { ChevronDown, ChevronUp, Layers } from 'lucide-react';
 import { getThemeColors } from '../../contexts/ThemeContext';
-import { FS } from '../../constants/ui';
 import { translateUI, type Language } from '../../utils/translation';
+import FloatingButton from '../ui/atoms/FloatingButton';
+import Chip from '../ui/atoms/Chip';
+import { CONTROL_SIZE } from '../ui/atoms/controlSize';
 import { L } from './legendStyles';
 
 export interface LegendRouteItem {
@@ -19,82 +24,87 @@ export interface LegendRouteItem {
   name: string;
   /** 地図の線と同じ色（テーマ補正済み） */
   color: string;
+  /** いま地図に出しているか（false は凡例から非表示にしたもの） */
+  visible: boolean;
 }
 
 interface VisibleRoutesLegendProps {
   items: LegendRouteItem[];
   theme: 'light' | 'dark';
   language: Language;
-  /** これを超えた分は「…ほかN路線」にまとめる */
-  maxItems?: number;
+  /** 路線のチップを押したとき（表示・非表示の切り替え） */
+  onToggleRoute: (key: string) => void;
   collapsed?: boolean;
   onToggleCollapsed?: () => void;
   style?: React.CSSProperties;
 }
 
-/** 路線色の丸の直径 */
-const SWATCH_SIZE = '8px';
-/** 路線名が長いときに凡例が地図を覆いすぎない幅 */
-const MAX_WIDTH = '180px';
+/** チップの大きさ。「表示路線の切替」パネルのチップと同じ段階 */
+const CHIP_SIZE = 'sm' as const;
+/** 開いた一覧の高さの上限。地図を覆いすぎないよう、多いときは中でスクロールする */
+const LIST_MAX_HEIGHT = '40vh';
+/** 路線名が長いときに一覧が地図を覆いすぎない幅 */
+const LIST_MAX_WIDTH = '220px';
 
-export default function VisibleRoutesLegend({ items, theme, language, maxItems = 10, collapsed = false, onToggleCollapsed, style }: VisibleRoutesLegendProps) {
+export default function VisibleRoutesLegend({ items, theme, language, onToggleRoute, collapsed = false, onToggleCollapsed, style }: VisibleRoutesLegendProps) {
   if (items.length === 0) return null;
   const colors = getThemeColors(theme);
-  const shown = items.slice(0, maxItems);
-  const rest = items.length - shown.length;
+  const visibleCount = items.filter(i => i.visible).length;
+  const title = translateUI('visibleRoutesLegendTitle', language);
+  const count = language === 'japanese' ? `（${visibleCount}）` : ` (${visibleCount})`;
+  const glyph = CONTROL_SIZE.md.iconSize;
 
   return (
     <div
-      aria-label={translateUI('visibleRoutesLegendTitle', language)}
+      aria-label={title}
       style={{
-        maxWidth: MAX_WIDTH,
-        padding: `${L.sp.xs} ${L.sp.md}`,
-        backgroundColor: colors.surfaceElevated,
-        border: `1px solid ${colors.border}`,
-        borderRadius: L.r.card,
-        boxShadow: `0 1px 4px ${colors.shadow}`,
-        opacity: 0.94,
+        display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: L.sp.xs,
+        // 一覧と見出しの間の隙間で地図の操作を止めない
         pointerEvents: 'none',
         ...style,
       }}
     >
-      {/* 見出し（押すと開閉）。カード全体は地図の操作を邪魔しないよう pointer-events:none にし、
-          見出しだけ押せるようにする */}
-      <div
-        role="button"
-        tabIndex={0}
-        aria-expanded={!collapsed}
-        onClick={onToggleCollapsed}
-        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggleCollapsed?.(); } }}
-        style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: L.sp.md,
-          fontSize: FS.caption, color: colors.textSecondary,
-          marginBottom: collapsed ? 0 : L.sp.xxs,
-          cursor: onToggleCollapsed ? 'pointer' : 'default',
-          pointerEvents: 'auto',
-          userSelect: 'none',
-        }}
-      >
-        <span>{translateUI('visibleRoutesLegendTitle', language)}{collapsed ? (language === 'japanese' ? `（${items.length}）` : ` (${items.length})`) : ''}</span>
-        {onToggleCollapsed && <span aria-hidden>{collapsed ? '▲' : '▼'}</span>}
-      </div>
-      {!collapsed && shown.map(item => (
+      {!collapsed && (
         <div
-          key={item.key}
-          style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, fontSize: FS.caption, color: colors.text, lineHeight: 1.5 }}
+          role="group"
+          aria-label={title}
+          style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: L.sp.xs,
+            maxHeight: LIST_MAX_HEIGHT, maxWidth: LIST_MAX_WIDTH, overflowY: 'auto',
+            padding: L.sp.sm,
+            backgroundColor: colors.glassOpen,
+            border: `1px solid ${colors.border}`,
+            borderRadius: L.r.card,
+            boxShadow: `0 2px 8px ${colors.shadow}`,
+            pointerEvents: 'auto',
+          }}
         >
-          <span
-            aria-hidden
-            style={{ width: SWATCH_SIZE, height: SWATCH_SIZE, borderRadius: L.r.pill, backgroundColor: item.color, flexShrink: 0 }}
-          />
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{item.name}</span>
-        </div>
-      ))}
-      {!collapsed && rest > 0 && (
-        <div style={{ fontSize: FS.caption, color: colors.textSecondary, lineHeight: 1.5 }}>
-          {translateUI('moreRoutesCount', language, { count: rest })}
+          {items.map(item => (
+            <Chip
+              key={item.key}
+              color={item.color}
+              label={item.name}
+              selected={item.visible}
+              theme={theme}
+              size={CHIP_SIZE}
+              onClick={() => onToggleRoute(item.key)}
+              dataAttr={{ 'data-legend-route': item.key }}
+              styleOverride={{ justifyContent: 'flex-start', overflow: 'hidden', textOverflow: 'ellipsis' }}
+            />
+          ))}
         </div>
       )}
+      <div style={{ pointerEvents: 'auto' }}>
+        <FloatingButton
+          theme={theme}
+          onClick={onToggleCollapsed}
+          aria-expanded={!collapsed}
+          icon={<Layers size={glyph} />}
+          trailing={collapsed ? <ChevronUp size={glyph} aria-hidden /> : <ChevronDown size={glyph} aria-hidden />}
+        >
+          {title}{count}
+        </FloatingButton>
+      </div>
     </div>
   );
 }
