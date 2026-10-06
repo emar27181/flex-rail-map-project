@@ -1,5 +1,25 @@
 # CHANGE LOG
 
+## [2026-10-07] セッション（デザイン規則を CI で検査・規則一覧に一本化）
+
+### improve: 開閉の印（▼）をすべて DisclosureIndicator に統一し、手書きをテストで落とす
+- `src/components/legend/{HeatmapControl,MapConfigPanel,LegendRouteList,legendStyles}.tsx`, `src/components/{TimetablePanel,RailwayMap}.tsx`,
+  `src/components/ui/atoms/DisclosureIndicator.tsx`（`tone`）, `src/utils/translation.ts`, `tests/unit/components/ui/disclosure.test.ts`（新規）
+- ヒートマップ・設定の保存は閉じて ▶ / 開いて ▼、ヒートマップの指標は開いて ▼ / 閉じて ▲ と、パネルごとに向きと回す時間が違った
+- 「▼ 他 N 路線を表示」「▲ 折りたたむ」など翻訳文言に入っていた印を外し、ボタンの中に DisclosureIndicator（`tone="inherit"`）を置く
+- 時刻表の区間の間の ▼ は開閉ではなく進む向きなので lucide の `ArrowDown`
+
+### feat: GitHub Actions で型・デザイン規則・ユニットテスト・ビルドを実行する
+- `.github/workflows/ci.yml`（新規）, `scripts/design-rules.mjs`（新規）, `package.json`（`test:design`、`test:ci` に追加）
+- CI が無く、規則のテストは手元でしか動いていなかった（Netlify のプレビューは build だけ）
+- `npm run test:design` は docs/design-system.md の「規則一覧（CI で検査）」の「検査」列からテストを読む。表に1行足せば CI に入る
+
+### docs: デザインの規則を design-system.md の「規則一覧（CI で検査）」に一本化
+- `docs/design-system.md`, `CLAUDE.md`, `AGENTS.md`, `.claude/skills/design-tokens/SKILL.md`, `tests/unit/designRules.test.ts`（新規）
+- 規則・定義元・検査テストを1つの表にし、CLAUDE.md 等は要点と表への案内だけにする。規則を決めたら「定義元 → 検査 → 表に1行 → 要点」の順でそろえる
+- 表の検査ファイルの存在・部品表の網羅（`RemovableTag`・`SlideSegmentedControl` を追記）・CI の実行内容・入口の文書からの案内をテストで突き合わせる
+- 冒頭の「書くときの判断表だけ読めば足りる」の文の途中に別の節が挟まって崩れていたのを直した
+
 ## [2026-10-07] セッション（影の一元管理・影なしの方針）
 
 ### improve: 影を ui/atoms/shadow.ts に一元化し、既定で影なしにする
