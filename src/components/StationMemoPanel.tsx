@@ -1,5 +1,6 @@
 /**
- * 「誰の最寄り駅がどこか」のメモ（オーガニズム）。
+ * 複数駅の共通路線（オーガニズム。以前の名前は「最寄り駅メモ」）。
+ * 複数の駅を登録し、それぞれを通る路線と、共通して乗れる路線を地図に出す。
  *
  * 待ち合わせや幹事のとき、参加者の最寄り駅を控えておいて
  * 「全員が乗れる路線はどれか」を見るための一覧。
@@ -58,6 +59,11 @@ export interface StationMemoPanelProps {
   /** 一覧の駅を出発駅にする */
   onUseAsDeparture?: (stationName: string) => void;
   adjustRouteColorForTheme: (color: string, theme: 'light' | 'dark') => string;
+  /**
+   * 見出しと箱を付けず、中身だけを描く。設定パネルの「データ可視化」の中に置くとき、
+   * 見出しは設定パネルの節の見出し（sectionHeader）を使い、見た目を他の節とそろえる
+   */
+  bare?: boolean;
 }
 
 /**
@@ -72,6 +78,7 @@ const StationMemoPanel: React.FC<StationMemoPanelProps> = ({
   onShowRoutes,
   onUseAsDeparture,
   adjustRouteColorForTheme,
+  bare = false,
 }) => {
   const colors = getThemeColors(theme);
 
@@ -130,37 +137,9 @@ const StationMemoPanel: React.FC<StationMemoPanelProps> = ({
     marginBottom: L.sp.sm,
   } as const;
 
-  return (
-    <div style={{
-      marginBottom: L.sp['2xl'],
-      padding: L.sp.lg,
-      backgroundColor: colors.surface,
-      borderRadius: L.r.control,
-      border: `1px solid ${colors.borderLight}`,
-    }}>
-      <div
-        onClick={() => setOpen(v => !v)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: L.sp.sm,
-          cursor: 'pointer',
-          fontSize: FS.title,
-          fontWeight: 'bold',
-          color: colors.text,
-        }}
-      >
-        {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-        <span style={{ flex: 1 }}>{translateUI('memoTitle', language)}</span>
-        {memos.length > 0 && (
-          <span style={{ fontSize: FS.caption, fontWeight: 'normal', color: colors.textSecondary }}>
-            {translateUI('memoCount', language, { count: String(memos.length) })}
-          </span>
-        )}
-      </div>
-
-      {!open ? null : (
-      <div style={{ marginTop: L.sp.md }}>
+  // 中身（追加欄・一覧・共通の路線）。bare のときはこれだけを返し、見出しと箱は呼び出し側（設定パネルの節）が持つ
+  const body = (
+      <div style={{ marginTop: bare ? 0 : L.sp.md }}>
       <div style={{ ...labelStyle, lineHeight: 1.6 }}>
         {translateUI('memoDescription', language)}
       </div>
@@ -378,7 +357,40 @@ const StationMemoPanel: React.FC<StationMemoPanelProps> = ({
         </div>
       )}
       </div>
-      )}
+  );
+
+  if (bare) return body;
+
+  return (
+    <div style={{
+      marginBottom: L.sp['2xl'],
+      padding: L.sp.lg,
+      backgroundColor: colors.surface,
+      borderRadius: L.r.control,
+      border: `1px solid ${colors.borderLight}`,
+    }}>
+      <div
+        onClick={() => setOpen(v => !v)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: L.sp.sm,
+          cursor: 'pointer',
+          fontSize: FS.title,
+          fontWeight: 'bold',
+          color: colors.text,
+        }}
+      >
+        {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+        <span style={{ flex: 1 }}>{translateUI('memoTitle', language)}</span>
+        {memos.length > 0 && (
+          <span style={{ fontSize: FS.caption, fontWeight: 'normal', color: colors.textSecondary }}>
+            {translateUI('memoCount', language, { count: String(memos.length) })}
+          </span>
+        )}
+      </div>
+
+      {open && body}
     </div>
   );
 };

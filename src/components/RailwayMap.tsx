@@ -21,7 +21,6 @@ import LegendRouteRecommendations from './legend/LegendRouteRecommendations';
 import LegendDisplayOptions from './legend/LegendDisplayOptions';
 import MultiDepartureRoutes from './MultiDepartureRoutes';
 import MobileBottomPanel, { MOBILE_BOTTOM_PANEL_FLOAT } from './MobileBottomPanel';
-import StationMemoPanel from './StationMemoPanel';
 import type { MapConfig } from './legend/MapConfigPanel';
 import type { StationStats } from '../data/stationStats';
 import {
@@ -259,7 +258,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [isStationSelectorExpanded, setIsStationSelectorExpanded] = useState(!embedded);
   const [mobileStationExpanded, setMobileStationExpanded] = useState(!embedded);
   const [isRouteToggleExpanded, setIsRouteToggleExpanded] = useState(false);
-  const [isLegendExpanded, setIsLegendExpanded] = useState(!embedded);
+  // 「表示路線の切替」パネル。設定は必要なときに開くものなので、PC・スマホとも閉じた状態で始める
+  // （以前は開いて始まり、地図の右側を大きく覆っていた）
+  const [isLegendExpanded, setIsLegendExpanded] = useState(false);
 
   // 表示モードの管理
   const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
@@ -531,7 +532,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 設定で路線ごとの表示に切り替えられる
   const [showPerRouteStationTimes, setShowPerRouteStationTimes] = useState(false);
   // 地図右下の「表示中の路線」の凡例を折りたたんでいるか（保存して持ち越す）
-  const [visibleRoutesLegendCollapsed, setVisibleRoutesLegendCollapsed] = useState(false);
+  const [visibleRoutesLegendCollapsed, setVisibleRoutesLegendCollapsed] = useState(true);
   // 埋め込み表示（記事などの小さな枠）では凡例が地図を大きく隠すので畳んで始め、閲覧者の設定も上書きしない
   useEffect(() => { setVisibleRoutesLegendCollapsed(embedded || getInitialLegendCollapsed()); }, [embedded]);
   // 凡例から非表示にした路線。凡例に「非表示」の見た目で残し、もう一度押せば表示に戻せるようにする。
@@ -1245,7 +1246,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     handleManualSetDeparture(station);
   }, [handleManualSetDeparture]);
 
-  // 最寄り駅メモ: 共通の路線を地図に出す。
+  // 複数駅の共通路線: 共通の路線を地図に出す。
   // 表示候補(availableRoutes)にも入れないと、凡例に無い路線は描かれない
   const handleShowRoutesFromMemo = useCallback((routeKeys: RouteKey[]) => {
     if (routeKeys.length === 0) return;
@@ -1253,7 +1254,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     setVisibleRoutes(new Set(routeKeys));
   }, []);
 
-  // 最寄り駅メモ: 一覧の駅を出発駅にする
+  // 複数駅の共通路線: 一覧の駅を出発駅にする
   const handleUseStationAsDeparture = useCallback((stationName: string) => {
     const station = getAllStations().find(s => s.name === stationName);
     if (station) handleManualSetDeparture(station);
@@ -6121,6 +6122,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
                   {/* 2. 路線一覧 (Route List) */}
                   <LegendRouteList
+                    onShowRoutesFromMemo={handleShowRoutesFromMemo}
+                    onUseStationAsDeparture={handleUseStationAsDeparture}
                     visibleRoutesData={visibleRoutesData}
                     routeOrder={routeOrder}
                     onRouteOrderChange={setRouteOrder}
@@ -6224,16 +6227,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onStationIconStyleChange={setStationIconStyle}
                   />
 
-                  {/* 2.5 最寄り駅メモ (Nearest station notes) */}
-                  <StationMemoPanel
-                    theme={theme}
-                    language={currentLanguage}
-                    routeColors={routeColors}
-                    routeNames={routeNames}
-                    adjustRouteColorForTheme={adjustRouteColorForTheme}
-                    onShowRoutes={handleShowRoutesFromMemo}
-                    onUseAsDeparture={handleUseStationAsDeparture}
-                  />
 
                   {/* 3. 表示オプション (Display Options) */}
                   <LegendDisplayOptions
@@ -6418,6 +6411,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   content: (
                     <>
                       <LegendRouteList
+                    onShowRoutesFromMemo={handleShowRoutesFromMemo}
+                    onUseStationAsDeparture={handleUseStationAsDeparture}
                         visibleRoutesData={visibleRoutesData}
                     routeOrder={routeOrder}
                     onRouteOrderChange={setRouteOrder}
@@ -6519,15 +6514,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onTravelTimeStyleChange={setTravelTimeStyle}
                         stationIconStyle={stationIconStyle}
                         onStationIconStyleChange={setStationIconStyle}
-                      />
-                      <StationMemoPanel
-                        theme={theme}
-                        language={currentLanguage}
-                        routeColors={routeColors}
-                        routeNames={routeNames}
-                        adjustRouteColorForTheme={adjustRouteColorForTheme}
-                        onShowRoutes={handleShowRoutesFromMemo}
-                        onUseAsDeparture={handleUseStationAsDeparture}
                       />
                       {routeRecommendationsPanel}
                       <MultiDepartureRoutes

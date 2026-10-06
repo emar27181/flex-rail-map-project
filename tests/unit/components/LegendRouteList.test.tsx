@@ -103,6 +103,7 @@ const minimalProps = {
   onShowRouteLineChange: noopBool,
   mapConfig: {} as MapConfig,
   onImportConfig: noop,
+  onShowRoutesFromMemo: noop,
   stationLabelFontSize: 11,
   onStationLabelFontSizeChange: noopNum,
   stationIconScale: 1.0,
@@ -271,5 +272,44 @@ describe('詳細設定（所要時間・駅アイコンの配色カスタム）'
     fireEvent.click(screen.getByText('settingsGroupDetail'));
     fireEvent.click(screen.getByText('styleReset'));
     expect(onStationIconStyleChange).toHaveBeenCalledWith({});
+  });
+});
+
+describe('表示設定の並びと名前', () => {
+  // このファイルでは translateUI をキーをそのまま返すモックにしているので、キーの並びで確かめる
+  it('「複数駅の共通路線」はデータ可視化の中（駅フィルターより前）、UI設定の後の一番下が詳細設定', () => {
+    const { container } = render(<LegendRouteList {...minimalProps} />);
+    // 「複数駅の共通路線」はデータ可視化の中なので、データ可視化を開いてから並びを見る
+    fireEvent.click(screen.getByText('settingsGroupViz'));
+    const text = container.textContent ?? '';
+    const pos = (key: string) => text.indexOf(key);
+    expect(pos('settingsGroupViz')).toBeGreaterThan(-1);
+    expect(pos('memoTitle')).toBeGreaterThan(pos('settingsGroupViz'));
+    expect(pos('memoTitle')).toBeLessThan(pos('settingsGroupFilter'));
+    expect(pos('settingsGroupMap')).toBeGreaterThan(pos('settingsGroupFilter'));
+    expect(pos('settingsGroupDetail')).toBeGreaterThan(pos('settingsGroupMap'));
+  });
+});
+
+describe('表示設定のグループは既定で閉じている', () => {
+  const GROUPS = ['settingsGroupLabel', 'settingsGroupViz', 'settingsGroupFilter', 'settingsGroupMap', 'settingsGroupDetail'];
+
+  it('開いた直後はどのグループも閉じていて、中身（駅ラベル・データ可視化の項目）を出さない', () => {
+    const { container } = render(<LegendRouteList {...minimalProps} />);
+    for (const key of GROUPS) {
+      const header = container.querySelector(`[data-settings-group="${key}"]`);
+      expect(header, key).not.toBeNull();
+      expect(header!.getAttribute('aria-expanded'), key).toBe('false');
+    }
+    expect(container.textContent).not.toContain('showOnlyTransferStations');
+    expect(container.textContent).not.toContain('stationHeatmap');
+  });
+
+  it('見出しを押すとそのグループだけが開く', () => {
+    const { container } = render(<LegendRouteList {...minimalProps} />);
+    fireEvent.click(container.querySelector('[data-settings-group="settingsGroupLabel"]')!);
+    expect(container.querySelector('[data-settings-group="settingsGroupLabel"]')!.getAttribute('aria-expanded')).toBe('true');
+    expect(container.querySelector('[data-settings-group="settingsGroupViz"]')!.getAttribute('aria-expanded')).toBe('false');
+    expect(container.textContent).toContain('showOnlyTransferStations');
   });
 });
