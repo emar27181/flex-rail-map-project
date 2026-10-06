@@ -24,7 +24,8 @@ export default function CompassNeedle({ rotationDeg, size, theme }: CompassNeedl
       height={size}
       viewBox="0 0 24 24"
       aria-hidden
-      style={{ transform: `rotate(${rotationDeg}deg)`, transition: 'transform 0.15s linear' }}
+      // 回転中は毎フレーム角度が届くので transition は付けない（始まり直して針が遅れ、震えて見える）
+      style={{ transform: `rotate(${rotationDeg}deg)` }}
     >
       <polygon points="12,2 17,12 7,12" fill={SEMANTIC.north} stroke={outline} strokeWidth={1} strokeLinejoin="round" />
       <polygon points="12,22 17,12 7,12" fill={NEUTRAL.white} stroke={outline} strokeWidth={1} strokeLinejoin="round" />
