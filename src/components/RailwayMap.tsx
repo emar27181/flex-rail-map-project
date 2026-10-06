@@ -204,7 +204,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // URL（?center=&zoom=）で表示位置が指定されていればそれを使う（mapViewUrlParam.ts）
   const urlMapView = useMemo(() => getInitialMapViewFromUrl(), []);
-  const [mapCenter, setMapCenter] = useState<[number, number]>(urlMapView?.center ?? [35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
+  // 表示位置の指定が無く、出発駅（無ければ到着駅）を URL で指定して開いたときは、その駅を中心に開く。
+  // 以前は現在地へ移っていたため、記事の「武蔵小杉駅を出発駅にした地図を開く」から開いても
+  // 現在地（藤沢など）周辺の路線の端が映り、関係の無い路線が出ているように見えた
+  const urlStationCenter = useMemo<[number, number] | null>(() => {
+    if (urlMapView) return null;
+    const s = getInitialDepartureFromUrl() ?? getInitialArrivalFromUrl();
+    return s ? [s.lat, s.lng] : null;
+  }, [urlMapView]);
+  const [mapCenter, setMapCenter] = useState<[number, number]>(urlMapView?.center ?? urlStationCenter ?? [35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
   const [mapZoom, setMapZoom] = useState(urlMapView?.zoom ?? 12);
   const [viewCenter, setViewCenter] = useState<[number, number]>([35.57765, 139.66165]); // Updates on moveend/zoomend
   const [viewBounds, setViewBounds] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
@@ -662,7 +670,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   useEffect(() => {
     if (!userLocation || hasCenteredOnUserRef.current) return;
     hasCenteredOnUserRef.current = true;
-    if (urlMapView) return; // URL で表示位置を指定して開いたときは、その範囲を見せる
+    // URL で表示位置や駅を指定して開いたときは、その範囲・その駅を見せる
+    if (urlMapView || urlStationCenter) return;
     setMapCenter(userLocation);
     setMapZoom(INITIAL_LOCATION_ZOOM);
     // マウント前(mapRef.current が null)は上の state 更新が初期表示に反映される。
