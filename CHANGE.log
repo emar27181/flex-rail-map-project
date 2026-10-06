@@ -19,6 +19,11 @@
 - 複数の駅の路線を地図に出す機能なので、独立した箱から表示設定の「データ可視化」の中へ移した。見出しは他の節と同じ sectionHeader、中身は StationMemoPanel をそのまま使う（bare で箱と見出しを外す）
 - 「詳細設定」は表示設定の一番下のまま
 
+### improve: 表示設定の「駅ラベル」「データ可視化」も閉じた状態で始める
+- `src/components/legend/LegendRouteList.tsx`（`groupLabelOpen` / `groupVizOpen`、見出しに `aria-expanded`）, `tests/unit/components/LegendRouteList.test.tsx`
+- ほかのグループ（駅フィルター・UI設定・詳細設定）は閉じて始まるのに、この2つだけ開いていて縦に長かった。ヒートマップをオンにしたときはデータ可視化を開く（従来どおり）
+- 見出しを読み上げ・キーボードでも開閉できるよう role=button / aria-expanded を付けた
+
 ## [2026-10-06] セッション（凡例を見出しと一覧が1枚の開閉パネルに）
 
 ### improve: 開閉する見出しの部品（DisclosureIndicator / DisclosureHeader / CollapsiblePanel）を作り、▼ をそろえる

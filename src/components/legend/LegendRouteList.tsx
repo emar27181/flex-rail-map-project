@@ -245,8 +245,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   const [touchDragKey, setTouchDragKey] = useState<RouteKey | null>(null);
   const ROUTE_LIST_LIMIT = 10;
   const [routeListExpanded, setRouteListExpanded] = useState(false);
-  const [groupLabelOpen,  setGroupLabelOpen]  = useState(true);
-  const [groupVizOpen,    setGroupVizOpen]    = useState(true);
+  const [groupLabelOpen,  setGroupLabelOpen]  = useState(false);
+  const [groupVizOpen,    setGroupVizOpen]    = useState(false);
   const [groupFilterOpen, setGroupFilterOpen] = useState(false);
   const [groupMapOpen,    setGroupMapOpen]    = useState(false);
   const [groupDetailOpen, setGroupDetailOpen] = useState(false);
@@ -399,7 +399,12 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
   const sectionHeader = (label: string, isOpen: boolean, onToggle: () => void) => (
     <div
+      role="button"
+      tabIndex={0}
+      aria-expanded={isOpen}
+      data-settings-group={label}
       onClick={onToggle}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle(); } }}
       style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${L.sp.xs} ${L.sp.sm}`, cursor: 'pointer', borderRadius: L.r.control, background: colors.surfaceElevated, marginBottom: L.sp.xxs }}
     >
       <span style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary }}>{label}</span>
