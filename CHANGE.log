@@ -7,6 +7,9 @@
   `src/components/{StationSelector,RouteRecommendations,TrainTypeViewer}.tsx`, `src/components/legend/LegendRouteList.tsx`, `src/components/RailwayMap.tsx`, `docs/design-system.md`
 - 駅選択・表示路線の切替・候補ルート・列車種別などで ▼ を個別に書いていて、回す時間（0.2s/0.3s）や色がばらばらだった。「表示路線の切替」の見出しの行も部品にした
 
+### improve: 凡例の見出しと一覧を1枚の箱にまとめる
+- `src/components/legend/VisibleRoutesLegend.tsx`
+- 見出しのボタンと一覧が別々の箱で離れて見えていた。駅選択・表示路線の切替と同じ「見出し＋区切り線＋中身」の開閉パネルにした。閉じたときの高さは「表示切替」と同じ36px
 
 ## [2026-10-05] セッション（記事の画面を iframe に・路線/駅ページの路線色と駅番号・テーマの保存先の統一）
 
