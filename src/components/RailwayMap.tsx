@@ -449,7 +449,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [clickedRoute, setClickedRoute] = useState<string | null>(null);
   const [routePopupPosition, setRoutePopupPosition] = useState<{ x: number, y: number } | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
-  const [showDimmedMapRoutes, setShowDimmedMapRoutes] = useState(true);
+  // 表示していない路線を薄く描く層。埋め込み表示（記事などの小さな枠）では出さない。
+  // 記事の内容に絞った地図に関係の無い路線が薄く並んで「多い」と見えるうえ、この層は線の周り36pxを
+  // 押すとその路線を表示ONにするため、地図を動かそうとした指で鶴見線などが足されていた
+  const [showDimmedMapRoutes, setShowDimmedMapRoutes] = useState(!embedded);
   const [dimmedMapTooltip, setDimmedMapTooltip] = useState<{ routeKey: RouteKey; x: number; y: number; isVisible: boolean } | null>(null);
 
   // 現在地表示
