@@ -106,6 +106,7 @@ import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
 import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE } from './ui/atoms/controlSize';
+import { floatingSurfaceStyle } from './ui/atoms/FloatingButton';
 
 import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
@@ -4864,10 +4865,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * 書き忘れが起きていた（記事一覧だけ更新し忘れる、など）。
    * ここ1箇所だけで決める。
    */
+  // 背景・影は「表示切替」「表示中の路線」と同じ（ui/atoms/FloatingButton.tsx の floatingSurfaceStyle）
   const cornerButtonStyle = {
     width: MAP_CORNER_BUTTON_PX,
     height: MAP_CORNER_BUTTON_PX,
-    backdropFilter: 'blur(4px)',
+    ...floatingSurfaceStyle(theme),
   };
 
   /**
