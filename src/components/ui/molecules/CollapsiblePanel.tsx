@@ -6,13 +6,14 @@
  * （凡例で見出しと一覧が離れていたのを、駅選択・表示路線の切替と同じ形にそろえた）。
  *
  * 地図の上に浮かせるので、背景は下の地図が透けるガラス調（駅選択パネルと同じ）。
- * 閉じているときは見出しの行だけになり、高さは `headerHeight` になる。
+ * 閉じているときは見出しの行だけになる。size="floating" なら高さ・文字は FLOATING_CONTROL。
  */
 import React, { useId } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { getThemeColors } from '../../../contexts/ThemeContext';
 import { L } from '../../legend/legendStyles';
 import DisclosureHeader from '../atoms/DisclosureHeader';
+import type { DisclosureHeaderSize } from '../atoms/DisclosureHeader';
 import { CONTROL_BORDER_WIDTH } from '../atoms/controlSize';
 
 export interface CollapsiblePanelProps {
@@ -20,8 +21,8 @@ export interface CollapsiblePanelProps {
   expanded: boolean;
   onToggle?: () => void;
   theme: 'light' | 'dark';
-  /** 見出しの行の高さ(px)。地図の上では丸いボタンと同じ高さを渡す */
-  headerHeight?: number;
+  /** 見出しの大きさ（DisclosureHeader の size）。地図の上に浮かべるときは floating */
+  size?: DisclosureHeaderSize;
   /** 読み上げ用の名前（見出しが件数入りなど短いとき） */
   ariaLabel?: string;
   /** 中身の箱の指定（高さの上限・スクロールなど） */
@@ -32,7 +33,7 @@ export interface CollapsiblePanelProps {
 }
 
 const CollapsiblePanel: React.FC<CollapsiblePanelProps> = ({
-  title, expanded, onToggle, theme, headerHeight, ariaLabel, bodyStyle, style, children,
+  title, expanded, onToggle, theme, size = 'panel', ariaLabel, bodyStyle, style, children,
 }) => {
   const colors = getThemeColors(theme);
   const bodyId = useId();
@@ -57,8 +58,9 @@ const CollapsiblePanel: React.FC<CollapsiblePanelProps> = ({
         expanded={expanded}
         onToggle={onToggle}
         theme={theme}
-        // 上下の枠線の分を引いて、箱全体の高さを丸いボタンとそろえる
-        height={headerHeight !== undefined ? headerHeight - CONTROL_BORDER_WIDTH * 2 : undefined}
+        size={size}
+        // 上下の枠線の分を引いて、閉じた箱全体の高さを丸いボタンとそろえる
+        frameInset={CONTROL_BORDER_WIDTH * 2}
         controlsId={bodyId}
       />
       {expanded && (

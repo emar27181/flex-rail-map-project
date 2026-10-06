@@ -6,7 +6,7 @@
  * 以前はボタンごとに高さ・背景・影を書いていて、右上の丸いボタン（36px）と
  * 「表示切替」「表示中の路線」の高さがそろっていなかった。
  *
- * - 高さは地図の隅の丸いボタンと同じ `FLOATING_ICON_BUTTON_SIZE.md`
+ * - 高さ・文字の大きさは `FLOATING_CONTROL`（丸いボタン・凡例の見出しと共通）
  * - 背景は下の地図が透けるガラス調。押している（開いている）間は Button の塗り
  * - 文字・余白・角丸は Button（`CONTROL_SIZE.md`）のまま
  *
@@ -18,10 +18,10 @@ import type { CSSProperties, ReactNode } from 'react';
 import { getThemeColors } from '../../../contexts/ThemeContext';
 import Button from './Button';
 import type { ButtonProps } from './Button';
-import { FLOATING_ICON_BUTTON_SIZE } from './controlSize';
+import { FLOATING_CONTROL } from './controlSize';
 
 /** 地図の上に浮かぶボタンの高さ(px)。丸いアイコンボタンと同じ */
-export const FLOATING_BUTTON_HEIGHT = FLOATING_ICON_BUTTON_SIZE.md;
+export const FLOATING_BUTTON_HEIGHT = FLOATING_CONTROL.height;
 
 /** 地図の上に浮かぶ操作部品の共通の背景・影（押していないとき） */
 export function floatingSurfaceStyle(theme: 'light' | 'dark'): CSSProperties {
@@ -54,6 +54,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ theme, pressed, trailin
         ...(pressed ? { boxShadow: `0 2px 8px ${colors.shadow}` } : floatingSurfaceStyle(theme)),
         minHeight: FLOATING_BUTTON_HEIGHT,
         height: FLOATING_BUTTON_HEIGHT,
+        fontSize: FLOATING_CONTROL.fontSize,
         fontWeight: 'bold',
         userSelect: 'none',
         WebkitTapHighlightColor: 'transparent',

@@ -87,6 +87,16 @@ export const FLOATING_ICON_BUTTON_SIZE = {
 export type FloatingIconButtonSize = keyof typeof FLOATING_ICON_BUTTON_SIZE;
 
 /**
+ * 地図の上に浮かぶ操作（丸いボタン・「表示切替」・凡例「N路線」の見出し）の高さと文字の大きさ。
+ * 隣り合って並ぶので、高さも文字の大きさもここ1か所で決める。
+ * 以前は凡例の見出しだけパネルの見出しの大きさ（FS.title）で、「表示切替」より文字が大きかった。
+ */
+export const FLOATING_CONTROL = {
+  height: FLOATING_ICON_BUTTON_SIZE.md,
+  fontSize: CONTROL_SIZE.md.fontSize,
+} as const;
+
+/**
  * 浮かせたアイコンボタン（地図の隅・記事ヘッダー）の中のアイコンの大きさ(px)。
  * FLOATING_ICON_BUTTON_SIZE.md（36px）の箱に対して詰まりすぎない大きさ。
  */

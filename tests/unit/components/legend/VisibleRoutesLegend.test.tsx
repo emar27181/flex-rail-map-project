@@ -40,7 +40,7 @@ describe('凡例の折りたたみ', () => {
   it('折りたたむと見出しと表示中の件数だけになり、路線は出さない', () => {
     const withHidden = items.map(i => (i.key === 'r0' ? { ...i, visible: false } : i));
     const { container } = render(<VisibleRoutesLegend items={withHidden} theme="dark" language="japanese" onToggleRoute={noop} collapsed onToggleCollapsed={noop} />);
-    expect(container.textContent).toContain('表示路線11件');
+    expect(container.textContent).toContain('11路線');
     expect(container.querySelectorAll('[data-legend-route]')).toHaveLength(0);
   });
 

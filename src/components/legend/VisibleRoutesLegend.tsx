@@ -9,13 +9,12 @@
  * - 押したときの処理は呼び出し側の既存の切り替え（toggleRoute）を使う。ここでは状態を持たない
  *
  * 見出しを押すと開閉する（開閉の状態は呼び出し側が持ち、保存する）。
- * 見出し「表示路線N件」の下に一覧を出し、5件を超える分は一覧の中でスクロールする。
+ * 見出し「N路線」の下に一覧を出し、5件を超える分は一覧の中でスクロールする。
  * 地図を覆いすぎないよう幅は狭く固定し、長い路線名・見出しは見切らせる（開閉の印は必ず見せる）。
  */
 import React from 'react';
 import { translateUI, type Language } from '../../utils/translation';
 import CollapsiblePanel from '../ui/molecules/CollapsiblePanel';
-import { FLOATING_BUTTON_HEIGHT } from '../ui/atoms/FloatingButton';
 import Chip from '../ui/atoms/Chip';
 import { CONTROL_SIZE } from '../ui/atoms/controlSize';
 import { L } from './legendStyles';
@@ -60,7 +59,7 @@ export default function VisibleRoutesLegend({ items, theme, language, onToggleRo
       ariaLabel={translateUI('visibleRoutesLegendTitle', language)}
       expanded={!collapsed}
       onToggle={onToggleCollapsed}
-      headerHeight={FLOATING_BUTTON_HEIGHT}
+      size="floating"
       style={{ width: LEGEND_WIDTH, ...style }}
       bodyStyle={{
         display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: L.sp.xs,

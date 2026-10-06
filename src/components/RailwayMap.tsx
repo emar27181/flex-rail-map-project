@@ -6108,7 +6108,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 title={translateUI('displayedRoutes', currentLanguage)}
                 expanded={isLegendExpanded}
                 onToggle={() => setIsLegendExpanded(!isLegendExpanded)}
-                height={isMobile && !isFullscreen ? MAP_CORNER_BUTTON_PX : undefined}
+                // スマホ・非全画面では隣の「全画面表示」ボタンと高さをそろえる
+                size={isMobile && !isFullscreen ? 'floating' : 'panel'}
               />
 
               {/* コンテンツ：独立したスクロールコンテナ */}

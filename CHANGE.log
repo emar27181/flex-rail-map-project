@@ -11,6 +11,11 @@
 - `src/components/legend/VisibleRoutesLegend.tsx`
 - 見出しのボタンと一覧が別々の箱で離れて見えていた。駅選択・表示路線の切替と同じ「見出し＋区切り線＋中身」の開閉パネルにした。閉じたときの高さは「表示切替」と同じ36px
 
+### improve: 地図の上に浮かぶ操作の文字の大きさを FLOATING_CONTROL に一元化し、凡例の見出しを「N路線」に
+- `src/components/ui/atoms/{controlSize.ts,FloatingButton.tsx,DisclosureHeader.tsx}`, `src/components/ui/molecules/CollapsiblePanel.tsx`, `src/components/legend/VisibleRoutesLegend.tsx`, `src/components/RailwayMap.tsx`, `src/utils/translation.ts`
+- 凡例の見出しだけパネルの見出しの大きさ（16px）で「表示切替」（14px）より大きかった
+
+
 ## [2026-10-05] セッション（記事の画面を iframe に・路線/駅ページの路線色と駅番号・テーマの保存先の統一）
 
 ### feat: 地図を所要時間を表示した状態で開けるURL（`?times=1`）

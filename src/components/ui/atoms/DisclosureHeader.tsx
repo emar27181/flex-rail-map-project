@@ -13,22 +13,32 @@ import { getThemeColors } from '../../../contexts/ThemeContext';
 import { FS } from '../../../constants/ui';
 import { L } from '../../legend/legendStyles';
 import DisclosureIndicator from './DisclosureIndicator';
+import { FLOATING_CONTROL } from './controlSize';
+
+export type DisclosureHeaderSize = 'panel' | 'floating';
 
 export interface DisclosureHeaderProps {
   title: ReactNode;
   expanded: boolean;
   onToggle?: () => void;
   theme: 'light' | 'dark';
-  /** 行の高さ(px)。地図の上に浮かぶ箱では丸いボタンと同じ高さを渡す。省略時は中身に合わせる */
-  height?: number;
+  /**
+   * 見出しの大きさ。
+   * - panel（既定）: パネルの見出し。文字は FS.title、高さは中身に合わせる
+   * - floating: 地図の上に浮かぶ箱。高さ・文字は FLOATING_CONTROL（「表示切替」・丸いボタンと同じ）
+   */
+  size?: DisclosureHeaderSize;
+  /** 行の外側の枠線の太さの合計(px)。箱全体の高さを FLOATING_CONTROL.height にそろえるために引く */
+  frameInset?: number;
   /** 開いているとき、中身との間に区切り線を引く */
   divider?: boolean;
   /** 開いた中身の id（aria-controls） */
   controlsId?: string;
 }
 
-const DisclosureHeader: React.FC<DisclosureHeaderProps> = ({ title, expanded, onToggle, theme, height, divider = true, controlsId }) => {
+const DisclosureHeader: React.FC<DisclosureHeaderProps> = ({ title, expanded, onToggle, theme, size = 'panel', frameInset = 0, divider = true, controlsId }) => {
   const colors = getThemeColors(theme);
+  const floating = size === 'floating';
   return (
     <div
       role="button"
@@ -41,7 +51,7 @@ const DisclosureHeader: React.FC<DisclosureHeaderProps> = ({ title, expanded, on
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: L.sp.sm,
         boxSizing: 'border-box',
         flexShrink: 0,
-        ...(height !== undefined ? { height: `${height}px` } : { paddingTop: L.sp.md, paddingBottom: L.sp.md }),
+        ...(floating ? { height: `${FLOATING_CONTROL.height - frameInset}px` } : { paddingTop: L.sp.md, paddingBottom: L.sp.md }),
         paddingLeft: L.sp.md, paddingRight: L.sp.md,
         borderBottom: expanded && divider ? `1px solid ${colors.borderLight}` : 'none',
         cursor: onToggle ? 'pointer' : 'default',
@@ -51,7 +61,7 @@ const DisclosureHeader: React.FC<DisclosureHeaderProps> = ({ title, expanded, on
     >
       <span style={{
         flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        fontSize: FS.title, fontWeight: 'bold', color: colors.text,
+        fontSize: floating ? FLOATING_CONTROL.fontSize : FS.title, fontWeight: 'bold', color: colors.text,
       }}>
         {title}
       </span>
