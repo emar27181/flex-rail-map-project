@@ -10,6 +10,7 @@ import Button from './ui/atoms/Button';
 import { L } from './legend/legendStyles';
 import { MEDIA } from '../constants/breakpoints';
 import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
+import { shadow } from './ui/atoms/shadow';
 
 // ---- 表示対象路線 ----
 export const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
@@ -646,7 +647,7 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
           size="sm"
           pressed={showDimmedRoutes}
           onClick={e => { e.stopPropagation(); setInternalShowDimmed(v => !v); }}
-          styleOverride={{ position: 'absolute', bottom: 8, left: 8, zIndex: 20, boxShadow: `0 1px 4px ${colors.shadow}` }}
+          styleOverride={{ position: 'absolute', bottom: 8, left: 8, zIndex: 20, boxShadow: shadow('floating', theme) }}
         >
           {translateUI(showDimmedRoutes ? 'allRoutesOn' : 'allRoutesOff', language)}
         </Button>

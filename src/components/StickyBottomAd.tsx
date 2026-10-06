@@ -3,6 +3,7 @@ import { requestAd } from '../utils/adsense';
 import { X } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import IconButton from './ui/atoms/IconButton';
+import { shadow } from './ui/atoms/shadow';
 import { L } from './legend/legendStyles';
 
 interface StickyBottomAdProps {
@@ -78,7 +79,7 @@ const StickyBottomAd: React.FC<StickyBottomAdProps> = ({ adSlot }) => {
           backgroundColor: colors.surface,
           border: `1px solid ${colors.border}`,
           borderBottom: 'none',
-          boxShadow: `0 -2px 8px ${colors.shadow}`,
+          boxShadow: shadow('raised', theme, { upward: true }),
           zIndex: 9999,
           padding: L.sp.md,
           height: '90px',
@@ -106,7 +107,7 @@ const StickyBottomAd: React.FC<StickyBottomAdProps> = ({ adSlot }) => {
             top: '8px',
             right: '8px',
             zIndex: 10000,
-            boxShadow: `0 2px 4px ${colors.shadow}`,
+            boxShadow: shadow('floating', theme),
           }}
         />
 

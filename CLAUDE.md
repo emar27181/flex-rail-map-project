@@ -544,6 +544,17 @@ UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域
 - 判断表と現状の調査結果: **`docs/design-system.md`**
 - 作業時に読むスキル: **`.claude/skills/design-tokens/SKILL.md`**
 
+**デザインの規則は `docs/design-system.md` の「規則一覧（CI で検査）」が一次情報（2026-10-06）。**
+規則ごとに検査テストがあり、GitHub Actions（`.github/workflows/ci.yml`）が PR ごとに
+`npm run test:design`（表の「検査」列のテストを実行）→ `test:unit` → `build` を動かす。破るとマージ前に落ちる。
+このファイルには要点だけを書き、規則の中身・検査ファイルの一覧は表に一本化する。
+
+- **規則を新しく決めたら（ユーザーの指示で決まったものも含む）、その場で次の4つをそろえる。**
+  ① 定義元（atoms / molecules / constants）を作る → ② 直書きを見つけて落とすテストを書く →
+  ③ 「規則一覧（CI で検査）」に1行足す（それだけで CI に入る）→ ④ ここの要点と design-tokens スキルに1行
+- 部品（atoms / molecules）を足したら「どの部品を使うか」に1行足す（無いと `tests/unit/designRules.test.ts` が落ちる）
+- コミット前のチェックに `npm run test:design` を含める（`test:unit` にも含まれるが、規則違反だけを先に見られる）
+
 **新しく何か（ボタン・パネル・見出し・一覧・文字の大きさ）を作るときは、書き始める前に必ず
 `docs/design-system.md` の「どの部品を使うか」と上のスキルを読むこと（2026-10-06 ユーザー指示）。**
 既存の部品・トークンで作り、無いときは先に部品（atoms / molecules）を足して表に1行追記してから使う。
@@ -602,6 +613,9 @@ UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域
   透け具合・ぼかし・枠線・影も含めた地は `floatingSurfaceStyle(theme, 'idle' | 'open')`
   （`ui/atoms/floatingSurface.ts`）から取り、`rgba(...)` や `blur(...)` を直書きしない
   **基準は地図の駅ラベル**（画面上でいちばん数が多く目に入る部品）
+- **影は付けない方針（2026-10-06）。** 影はすべて `ui/atoms/shadow.ts` の `shadow(role, theme)` から取る
+  （役割: marker / floating / raised / overlay。戻すときは `SHADOW` のその役割を `enabled: true` にするだけ）。
+  白字の縁取りは影ではないので `textHalo()`（既定オン）。直書きは `tests/unit/components/ui/shadow.test.ts` が落とす
 - 段階に無い値は近い段階に丸める。新しい段階を足す前に既存で足りないか確認すること
 寸法の一致は `tests/unit/components/ui/atoms.test.tsx` が固定している。
 

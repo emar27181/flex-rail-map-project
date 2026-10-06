@@ -6,6 +6,7 @@ import type { Language } from '../../utils/translation';
 import { Download, Copy, Check, FolderOpen, CheckCheck } from 'lucide-react';
 import Button from '../ui/atoms/Button';
 import TextArea from '../ui/atoms/TextArea';
+import DisclosureIndicator from '../ui/atoms/DisclosureIndicator';
 import type { LabelColorOverride } from '../../constants/ui';
 
 export type MapConfig = {
@@ -119,13 +120,13 @@ export default function MapConfigPanel({ config, theme, language, onImport }: Pr
     <div style={section.wrap(colors)}>
       {/* ヘッダー */}
       <div style={section.header} onClick={() => setOpen(v => !v)}>
-        <span style={section.arrow(colors)}>{open ? '▼' : '▶'}</span>
         <span style={section.title(colors)}>{translateUI('configSaveLoad', language)}</span>
         {importDone && (
           <span style={{ fontSize: L.fs.xs, color: '#27ae60', marginLeft: L.sp.xs }}>
             <Check size={12} aria-hidden style={{ verticalAlign: 'text-bottom', marginRight: 2 }} />{translateUI('configImportDone', language)}
           </span>
         )}
+        <span style={section.indicator}><DisclosureIndicator expanded={open} theme={theme} /></span>
       </div>
 
       {open && (

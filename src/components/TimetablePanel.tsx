@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { TriangleAlert, AlarmClock } from 'lucide-react';
+import { TriangleAlert, AlarmClock, ArrowDown } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
@@ -13,6 +13,8 @@ import {
 import type { RouteResult } from '../utils/routeFinder';
 import { SEMANTIC, FS} from '../constants/ui';
 import Button from './ui/atoms/Button';
+import { CONTROL_SIZE } from './ui/atoms/controlSize';
+import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
 import TextField from './ui/atoms/TextField';
 import { L } from './legend/legendStyles';
 
@@ -253,7 +255,8 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                     onClick={() => toggleExpand(seg.segIndex)}
                     styleOverride={{ marginLeft: 'auto' }}
                   >
-                    {isExpanded ? `▲ ${translateUI('close', language)}` : `▼ ${translateUI('timetableButton', language)}`}
+                    {isExpanded ? translateUI('close', language) : translateUI('timetableButton', language)}
+                    <DisclosureIndicator expanded={isExpanded} theme={theme} tone="inherit" />
                   </Button>
                 )}
               </div>
@@ -317,10 +320,10 @@ const TimetablePanel: React.FC<TimetablePanelProps> = ({
                 </div>
               )}
 
-              {/* 矢印 */}
+              {/* 次の区間へ進む向き（開閉の印ではないので lucide の矢印） */}
               {!isLast && (
-                <div style={{ padding: `0 ${L.sp.xl} 0 ${L.sp['4xl']}`, color: colors.textSecondary, fontSize: FS.caption }}>
-                  ▼
+                <div style={{ padding: `0 ${L.sp.xl} 0 ${L.sp['4xl']}`, color: colors.textSecondary, display: 'flex' }}>
+                  <ArrowDown size={CONTROL_SIZE.sm.iconSize} aria-hidden />
                 </div>
               )}
 

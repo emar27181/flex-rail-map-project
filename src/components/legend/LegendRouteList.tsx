@@ -20,6 +20,7 @@ import Radio from '../ui/atoms/Radio';
 import Slider from '../ui/atoms/Slider';
 import { L } from './legendStyles';
 import DisclosureIndicator from '../ui/atoms/DisclosureIndicator';
+import StationMemoPanel from '../StationMemoPanel';
 
 type SortMode = 'name' | 'color' | 'default' | 'distance';
 
@@ -109,6 +110,10 @@ interface LegendRouteListProps {
   onShowRouteLineChange: (v: boolean) => void;
   mapConfig: MapConfig;
   onImportConfig: (config: MapConfig) => void;
+  /** 複数駅の共通路線: 指定した路線を地図に出す */
+  onShowRoutesFromMemo: (routeKeys: RouteKey[]) => void;
+  /** 複数駅の共通路線: 一覧の駅を出発駅にする */
+  onUseStationAsDeparture?: (stationName: string) => void;
   stationLabelFontSize: number;
   onStationLabelFontSizeChange: (v: number) => void;
   stationIconScale: number;
@@ -126,6 +131,8 @@ interface LegendRouteListProps {
 }
 
 const LegendRouteList: React.FC<LegendRouteListProps> = ({
+  onShowRoutesFromMemo,
+  onUseStationAsDeparture,
   visibleRoutesData,
   visibleRoutes,
   routeOrder,
@@ -238,11 +245,12 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   const [touchDragKey, setTouchDragKey] = useState<RouteKey | null>(null);
   const ROUTE_LIST_LIMIT = 10;
   const [routeListExpanded, setRouteListExpanded] = useState(false);
-  const [groupLabelOpen,  setGroupLabelOpen]  = useState(true);
-  const [groupVizOpen,    setGroupVizOpen]    = useState(true);
+  const [groupLabelOpen,  setGroupLabelOpen]  = useState(false);
+  const [groupVizOpen,    setGroupVizOpen]    = useState(false);
   const [groupFilterOpen, setGroupFilterOpen] = useState(false);
   const [groupMapOpen,    setGroupMapOpen]    = useState(false);
   const [groupDetailOpen, setGroupDetailOpen] = useState(false);
+  const [groupMemoOpen,   setGroupMemoOpen]   = useState(false);
 
   useEffect(() => { if (heatmapEnabled) setGroupVizOpen(true); }, [heatmapEnabled]);
 
@@ -391,7 +399,12 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
   const sectionHeader = (label: string, isOpen: boolean, onToggle: () => void) => (
     <div
+      role="button"
+      tabIndex={0}
+      aria-expanded={isOpen}
+      data-settings-group={label}
       onClick={onToggle}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle(); } }}
       style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${L.sp.xs} ${L.sp.sm}`, cursor: 'pointer', borderRadius: L.r.control, background: colors.surfaceElevated, marginBottom: L.sp.xxs }}
     >
       <span style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary }}>{label}</span>
@@ -603,6 +616,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 {routeListExpanded
                   ? translateUI('collapseList', language)
                   : translateUI('showMoreRoutes', language, { count: String(hidden) })}
+                <DisclosureIndicator expanded={routeListExpanded} theme={theme} tone="inherit" />
               </Button>
             )}
           </>
@@ -775,6 +789,23 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 <Checkbox theme={theme} checked={mapViewMode === 'schematic'} onChange={(checked) => onMapViewModeChange(checked ? 'schematic' : 'realistic')}>
                   {translateUI('schematicMapLabel', language)}
                 </Checkbox>
+                {/* 複数駅の共通路線（以前の「最寄り駅メモ」）。複数の駅の路線を地図に出すのでデータ可視化に置く。
+                    見出しは他の節と同じ sectionHeader、中身は StationMemoPanel（bare） */}
+                {sectionHeader(translateUI('memoTitle', language), groupMemoOpen, () => setGroupMemoOpen(v => !v))}
+                {groupMemoOpen && (
+                  <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
+                    <StationMemoPanel
+                      bare
+                      theme={theme}
+                      language={language}
+                      routeColors={routeColors as Record<string, string>}
+                      routeNames={routeNames as Record<string, string>}
+                      adjustRouteColorForTheme={adjustRouteColorForTheme}
+                      onShowRoutes={onShowRoutesFromMemo}
+                      onUseAsDeparture={onUseStationAsDeparture}
+                    />
+                  </div>
+                )}
               </div>
             )}
 

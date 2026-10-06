@@ -10,6 +10,7 @@ import type { Language } from '../utils/translation';
 import { getInitialLanguage, persistLanguage } from '../utils/languagePersistence';
 import { getInitialUiVersion, persistUiVersion, type UiVersion } from '../utils/uiVersionPersistence';
 import { isEmbedMode } from '../utils/embedMode';
+import { hideAppLoading, scheduleAppLoadingFailsafe, setAppLoadingStage } from '../utils/appLoading';
 
 /**
  * v2 UI切り替えボタンの表示フラグ。
@@ -36,11 +37,14 @@ const ThemeWrapper: React.FC = () => {
     persistUiVersion(uiVersion);
   }, [uiVersion]);
 
-  // JS読み込み完了後にローディング画面を非表示にする
+  // 読み込み画面（constants/appLoading.ts）。ここでは消さずに段階を進め、地図を最初に描いた後に RailwayMap が消す。
+  // 以前はここで消していて、地図ライブラリが届くまで仮表示とフッターが見えていた。
+  // v2 UI は RailwayMap を使わないのでここで消す。何かで消し損ねても一定時間で必ず消す
   useEffect(() => {
-    const el = document.getElementById('app-loading');
-    if (el) el.style.display = 'none';
-  }, []);
+    if (uiVersion === 'v2') { hideAppLoading(); return; }
+    setAppLoadingStage('routes', language);
+    return scheduleAppLoadingFailsafe();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLanguageChange = (newLanguage: Language) => {
     setLanguage(newLanguage);
