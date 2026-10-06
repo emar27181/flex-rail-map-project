@@ -100,9 +100,11 @@ import { getThroughReachableSections } from '../utils/throughService';
 import { findParallelSections, sectionMinutes } from '../utils/parallelRoutes';
 import { STATION_TIME_LINE_HEIGHT, averageTime, stationTimeLinesHtml, timeLineWidth, toTimeLines, type StationTimeLine } from './map/stationTimeLabel';
 import { isSameStation } from '../utils/sameStation';
+import { findDirectionalStation, type StationNavigationKey } from '../utils/stationKeyboardNavigation';
 import { buildEffectiveLineCounts } from '../utils/effectiveLines';
 import Select from './ui/atoms/Select';
 import SegmentedControl from './ui/molecules/SegmentedControl';
+import RouteToggleChip from './legend/RouteToggleChip';
 import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
@@ -1133,6 +1135,60 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return Array.from(map.values());
   }, []);
 
+  // 駅ツールチップを十字キーで隣駅へ移動する。
+  // 入力欄操作中は矢印キー本来の役割を優先し、地図ナビゲーションは発火させない。
+  useEffect(() => {
+    if (!stationTooltip) return;
+
+    const handleStationArrowNavigation = (event: KeyboardEvent) => {
+      if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+
+      const target = event.target as HTMLElement | null;
+      const tagName = target?.tagName?.toLowerCase();
+      if (
+        target?.isContentEditable ||
+        tagName === 'input' ||
+        tagName === 'textarea' ||
+        tagName === 'select'
+      ) {
+        return;
+      }
+
+      const nextStation = findDirectionalStation(
+        stationTooltip.station,
+        routes as Record<string, readonly Station[]>,
+        visibleRoutes,
+        event.key as StationNavigationKey,
+      );
+      if (!nextStation) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      // 次駅の画面座標へツールチップを追従させる。
+      // Leafletのコンテナ座標→viewport座標へ変換できない場合だけ現在位置を維持する。
+      const map = mapRef.current as LeafletMap | null;
+      const point = map?.latLngToContainerPoint?.([nextStation.lat, nextStation.lng]);
+      const container = map?.getContainer?.();
+      const rect = container?.getBoundingClientRect?.();
+      const x = point && rect ? rect.left + point.x : stationTooltip.x;
+      const y = point && rect ? rect.top + point.y : stationTooltip.y;
+
+      setTooltipDragOffset({ dx: 0, dy: 0 });
+      setMethodInfoTooltip(null);
+      setStationTooltip({
+        stationName: nextStation.name,
+        station: nextStation,
+        x,
+        y,
+      });
+      pinTooltip();
+    };
+
+    window.addEventListener('keydown', handleStationArrowNavigation);
+    return () => window.removeEventListener('keydown', handleStationArrowNavigation);
+  }, [stationTooltip, visibleRoutes]);
+
   // 各駅のラベルオフセット（地理座標のみから一度だけ計算、ズーム/移動で再計算しない）
   // [dAnchorX, dAnchorY]: iconAnchor への加算値。ラベルを押し出す方向と逆の調整。
   const stationLabelOffsets = useMemo<Map<string, [number, number]>>(() => {
@@ -1961,81 +2017,70 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             overflowY: 'auto',
           }}>
             {allRoutes.map(rk => {
+              const routeKey = rk as RouteKey;
               const isActive = rk === activeRouteKey;
               const hasData = hasTimetableData(rk);
               const isJourney = journeyRouteKeys.has(rk);
-              const isShowing = visibleRoutes.has(rk as RouteKey);
-              const routeColor = adjustRouteColorForTheme(routeColors[rk as RouteKey] ?? '#888', theme);
+              const isShowing = visibleRoutes.has(routeKey);
+              const routeColor = adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme);
               return (
                 <div
                   key={rk}
                   onClick={e => {
                     e.stopPropagation();
-                    if (!isShowing) {
-                      // 非表示路線 → 即表示ON
-                      setAvailableRoutes(prev => new Set([...prev, rk as RouteKey]));
-                      setVisibleRoutes(prev => new Set([...prev, rk as RouteKey]));
-                    } else {
-                      setTooltipSelectedRoute(rk);
-                    }
+                    setTooltipSelectedRoute(rk);
                   }}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: L.sp.xs,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'stretch',
+                    gap: L.sp.xxs,
                     padding: `${L.sp.xs} ${L.sp.md}`,
                     cursor: 'pointer',
                     backgroundColor: isActive ? colors.primary + '22' : 'transparent',
                     borderLeft: isActive
                       ? `3px solid ${colors.primary}`
                       : isJourney ? `3px solid ${routeColor}` : '3px solid transparent',
+                    opacity: hasData ? 1 : 0.65,
                   }}
                 >
-                  {/* 非表示の路線は名前と色の丸だけ控えめにし、「＋表示」は通常の濃さで出す
-                      （以前は行ごと半透明で、ボタンの色まで沈んで見分けにくかった） */}
-                  <div style={{
-                    width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0,
-                    backgroundColor: routeColor,
-                    opacity: hasData && isShowing ? 1 : 0.45,
-                  }} />
-                  <span style={{
-                    fontSize: FS.caption,
-                    color: !isShowing ? colors.textMuted : (isActive || isJourney) ? colors.text : colors.textSecondary,
-                    fontWeight: isJourney ? 'bold' : 'normal',
-                    whiteSpace: 'normal', wordBreak: 'keep-all', overflowWrap: 'break-word',
-                    opacity: hasData ? 1 : 0.6,
-                    flex: 1,
-                    minWidth: 0,
-                    lineHeight: 1.3,
-                  }}>
-                    {translateRoute(routeNames[rk as RouteKey] ?? rk, currentLanguage)}
-                    {/* 同じ線路を別系統が走る駅（藤沢の東海道線＝上野東京ラインなど）で系統名を添える */}
-                    <ServiceTermini route={rk as RouteKey} theme={theme} language={currentLanguage} variant="brand" />
-                  </span>
-                  {/* 経路上の路線は太字と左の路線色の線で示す（以前あった青い「乗」の文字は不要との指摘で削除） */}
-                  {!isShowing && (
-                    <ColorChip color={routeColor} theme={theme} fontSize={FS.caption} shadow={false}>
-                      ＋{translateUI('show', currentLanguage)}
-                    </ColorChip>
-                  )}
                   {/*
-                    表示中の路線をここから非表示にできるようにする
-                    （以前は「＋表示」で表示に切り替えることしかできず、
-                    片方向のトグルだった）。右カラムの時刻表は isShowing に
-                    関係なく activeRouteKey だけで決まるため、選択中
-                    （isActive）の路線を非表示にしても時刻表は消えない。
-                    通る路線が1つしかない駅では選択中の路線しか無いため、
-                    ここを除外すると非表示ボタンが一切出せなくなっていた。
+                    表示/非表示の見た目と操作は、設定パネルの「表示路線の切替」と
+                    同じ RouteToggleChip（legend/）を使う。独自の「＋表示 / －非表示」
+                    UIを持たせず、状態表現を1箇所へ集約する。
                   */}
-                  {isShowing && (
-                    <ColorChip
-                      color={routeColor}
+                  <div onClick={e => e.stopPropagation()}>
+                    <RouteToggleChip
+                      routeKey={routeKey}
+                      routeName={routeNames[routeKey] ?? rk}
+                      routeColor={routeColors[routeKey] ?? colors.textSecondary}
+                      isVisible={isShowing}
                       theme={theme}
-                      fontSize={FS.caption}
-                      shadow={false}
-                      onClick={(e) => { e.stopPropagation(); toggleRoute(rk as RouteKey); }}
-                    >
-                      －{translateUI('hide', currentLanguage)}
-                    </ColorChip>
-                  )}
+                      language={currentLanguage}
+                      size="sm"
+                      onToggle={(key) => {
+                        setAvailableRoutes(prev => new Set([...prev, key]));
+                        toggleRoute(key);
+                      }}
+                      adjustRouteColorForTheme={adjustRouteColorForTheme}
+                      styleOverride={{
+                        width: '100%',
+                        justifyContent: 'flex-start',
+                        minWidth: 0,
+                      }}
+                      dataAttr={{ 'data-tooltip-route-chip': rk }}
+                    />
+                  </div>
+                  {/* 同じ線路を別系統が走る駅（藤沢の東海道線＝上野東京ラインなど）で系統名を添える */}
+                  <div style={{
+                    fontSize: FS.caption,
+                    color: isActive || isJourney ? colors.text : colors.textSecondary,
+                    fontWeight: isJourney ? 'bold' : 'normal',
+                    lineHeight: 1.3,
+                    minWidth: 0,
+                  }}>
+                    <ServiceTermini route={routeKey} theme={theme} language={currentLanguage} variant="brand" />
+                  </div>
                 </div>
               );
             })}

@@ -20,6 +20,9 @@ const SRC = join(process.cwd(), 'src');
 const ALLOWED = new Set([
   // RouteToggleItem が label={translateRoute(routeName, language)} で翻訳する
   'src/components/legend/LegendRouteList.tsx:routeName={routeNames[routeKey as RouteKey]}',
+  // RouteToggleChip（legend/）が label={translateRoute(routeName, language)} で翻訳する
+  'src/components/RailwayMap.tsx:routeName={routeNames[routeKey] ?? rk}',
+  'src/components/legend/RouteSwitchBoard.tsx:routeName={routeNames[routeKey] ?? routeKey}',
 ]);
 
 function collectTsx(dir: string): string[] {

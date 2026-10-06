@@ -1,5 +1,12 @@
 # CHANGE LOG
 
+## [2026-10-07] セッション（PR #33 を main に合わせてマージ）
+
+### fix: 路線の表示切替チップ（RouteToggleChip）を organism として legend/ に移す
+- `src/components/legend/RouteToggleChip.tsx`（`ui/molecules/` から移動）, `src/components/legend/RouteSwitchBoard.tsx`, `src/components/RailwayMap.tsx`, `tests/unit/utils/routeNameI18n.test.ts`
+- main を取り込んだところ、デザイン規則の CI（部品表の網羅）が「molecules にあるのに部品表に無い」で落ちた。路線（RouteKey・路線名の翻訳）を知る部品なので、層の規則どおり organism の置き場所へ移した
+- 受け取り側で翻訳する `routeName={routeNames[...]}` の2か所を路線名の多言語テストの許可リストに追加。駅ツールチップの路線色の予備値 `'#888'` を `colors.textSecondary` に
+
 ## [2026-10-07] セッション（表示設定を閉じた状態で始める）
 
 ### improve: 「表示路線の切替」パネルを閉じた状態で始める
