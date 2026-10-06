@@ -1,5 +1,13 @@
 # CHANGE LOG
 
+## [2026-10-06] セッション（凡例を見出しと一覧が1枚の開閉パネルに）
+
+### improve: 開閉する見出しの部品（DisclosureIndicator / DisclosureHeader / CollapsiblePanel）を作り、▼ をそろえる
+- `src/components/ui/atoms/{DisclosureIndicator,DisclosureHeader}.tsx`（新規）, `src/components/ui/molecules/CollapsiblePanel.tsx`（新規）,
+  `src/components/{StationSelector,RouteRecommendations,TrainTypeViewer}.tsx`, `src/components/legend/LegendRouteList.tsx`, `src/components/RailwayMap.tsx`, `docs/design-system.md`
+- 駅選択・表示路線の切替・候補ルート・列車種別などで ▼ を個別に書いていて、回す時間（0.2s/0.3s）や色がばらばらだった。「表示路線の切替」の見出しの行も部品にした
+
+
 ## [2026-10-05] セッション（記事の画面を iframe に・路線/駅ページの路線色と駅番号・テーマの保存先の統一）
 
 ### feat: 地図を所要時間を表示した状態で開けるURL（`?times=1`）

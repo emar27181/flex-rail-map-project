@@ -194,6 +194,9 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | つまみで数値を選ぶ | `Slider` |
 | −／＋の増減行 | `Stepper`（molecule） |
 | 排他選択のボタン列 | `SegmentedControl`（molecule） |
+| 開閉する見出しの右端の ▼ | `DisclosureIndicator`（開くと180度回る。回す時間・色は全パネル共通） |
+| 押すと開閉する見出しの行 | `DisclosureHeader`（見出し＋▼。行のどこを押しても開閉、開くと区切り線） |
+| 見出しと中身を1枚の箱にまとめた開閉パネル | `CollapsiblePanel`（molecule。凡例「表示路線N件」が使う。見出しと中身を別の箱に分けない） |
 
 判定に迷ったら次を自問する。
 

@@ -19,6 +19,7 @@ import Select from '../ui/atoms/Select';
 import Radio from '../ui/atoms/Radio';
 import Slider from '../ui/atoms/Slider';
 import { L } from './legendStyles';
+import DisclosureIndicator from '../ui/atoms/DisclosureIndicator';
 
 type SortMode = 'name' | 'color' | 'default' | 'distance';
 
@@ -394,7 +395,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
       style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${L.sp.xs} ${L.sp.sm}`, cursor: 'pointer', borderRadius: L.r.control, background: colors.surfaceElevated, marginBottom: L.sp.xxs }}
     >
       <span style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary }}>{label}</span>
-      <span style={{ fontSize: FS.caption, color: colors.textSecondary, transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
+      <DisclosureIndicator expanded={isOpen} theme={theme} />
     </div>
   );
 

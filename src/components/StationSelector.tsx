@@ -21,6 +21,7 @@ import type { DetectedRoute } from '../utils/trainDetector';
 import TextField from './ui/atoms/TextField';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import { useDeviceClass } from '../hooks/useDeviceClass';
+import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
 
 /** 駅名検索の結果として出す最大件数 */
 const STATION_SUGGESTION_LIMIT = 10;
@@ -482,12 +483,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
       >
         <h3 style={{ margin: `0`, color: colors.text, fontSize: FS.title, fontWeight: 'bold' }}>{translateUI('stationSelection', language)}</h3>
         {onToggleExpanded && (
-          <span style={{
-            fontSize: FS.caption,
-            color: colors.textSecondary,
-            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.3s ease',
-          }}>▼</span>
+          <DisclosureIndicator expanded={isExpanded} theme={theme} />
         )}
       </div>
       

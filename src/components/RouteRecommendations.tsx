@@ -10,6 +10,7 @@ import type { Language } from '../utils/translation';
 import { SEMANTIC, FS} from '../constants/ui';
 import { tintColor } from '../utils/contrast';
 import Button from './ui/atoms/Button';
+import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
 
 interface RouteRecommendationsProps {
   routes: RouteResult[];
@@ -139,14 +140,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
             </Button>
           )}
         </div>
-        <span style={{
-          fontSize: FS.caption,
-          color: '#666',
-          transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-          transition: 'transform 0.3s ease'
-        }}>
-          ▼
-        </span>
+        <DisclosureIndicator expanded={isExpanded} theme={theme} />
       </div>
 
       {isExpanded && (

@@ -111,6 +111,8 @@ import { floatingSurfaceStyle } from './ui/atoms/FloatingButton';
 import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
 import { deviceClassOf } from '../constants/breakpoints';
+import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
+import DisclosureHeader from './ui/atoms/DisclosureHeader';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -5064,14 +5066,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             }}
           >
             <h3 style={{ margin: `0`, color: colors.text, fontSize: FS.title, fontWeight: 'bold' }}>{translateUI('routeToggle', currentLanguage)}</h3>
-            <span style={{
-              fontSize: FS.caption,
-              color: colors.textSecondary,
-              transform: isRouteToggleExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.3s ease'
-            }}>
-              ▼
-            </span>
+            <DisclosureIndicator expanded={isRouteToggleExpanded} theme={theme} />
           </div>
 
           {/* コンテンツ：独立したスクロールコンテナ */}
@@ -5827,11 +5822,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     }}
                   >
                     <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('heatmapShowOtherInfo', currentLanguage)}</span>
-                    <span style={{
-                      fontSize: FS.caption, color: colors.textSecondary, flexShrink: 0,
-                      transform: heatmapParamListOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.2s',
-                    }}>▼</span>
+                    <DisclosureIndicator expanded={heatmapParamListOpen} theme={theme} />
                   </div>
 
                   {/* パラメータ選択（展開時のみ表示） */}
@@ -6112,37 +6103,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 との指摘）。ボタン側の寸法（MAP_CORNER_BUTTON_PX）を
                 そのまま高さに使い、値を別途書き直さない
               */}
-              <div
-                onClick={() => setIsLegendExpanded(!isLegendExpanded)}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  cursor: 'pointer',
-                  boxSizing: 'border-box',
-                  flexShrink: 0,
-                  borderBottom: isLegendExpanded ? `1px solid ${colors.borderLight}` : 'none',
-                  ...(isMobile && !isFullscreen
-                    ? { height: `${MAP_CORNER_BUTTON_PX}px`, padding: `0 ${L.sp.lg}` }
-                    : { padding: L.sp.lg }),
-                }}
-              >
-                <span style={{
-                  fontSize: FS.title,
-                  fontWeight: 'bold',
-                  color: colors.text
-                }}>
-{translateUI('displayedRoutes', currentLanguage)}
-                </span>
-                <span style={{
-                  fontSize: FS.caption,
-                  color: colors.textSecondary,
-                  transform: isLegendExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.3s ease'
-                }}>
-                  ▼
-                </span>
-              </div>
+              <DisclosureHeader
+                theme={theme}
+                title={translateUI('displayedRoutes', currentLanguage)}
+                expanded={isLegendExpanded}
+                onToggle={() => setIsLegendExpanded(!isLegendExpanded)}
+                height={isMobile && !isFullscreen ? MAP_CORNER_BUTTON_PX : undefined}
+              />
 
               {/* コンテンツ：独立したスクロールコンテナ */}
               {isLegendExpanded && (
