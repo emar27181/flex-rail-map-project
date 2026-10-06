@@ -3,38 +3,51 @@ import { fireEvent, render } from '@testing-library/react';
 import { vi } from 'vitest';
 import VisibleRoutesLegend from '../../../../src/components/legend/VisibleRoutesLegend';
 
-const items = Array.from({ length: 12 }, (_, i) => ({ key: `r${i}`, name: `路線${i}`, color: '#336699' }));
+const items = Array.from({ length: 12 }, (_, i) => ({ key: `r${i}`, name: `路線${i}`, color: '#336699', visible: true }));
+const noop = () => {};
 
 describe('表示中の路線の凡例', () => {
-  it('10件までは路線名を並べ、残りは「…ほかN路線」にまとめる', () => {
-    const { container } = render(<VisibleRoutesLegend items={items} theme="dark" language="japanese" maxItems={10} />);
-    expect(container.textContent).toContain('路線9');
-    expect(container.textContent).not.toContain('路線10');
-    expect(container.textContent).toContain('…ほか2路線');
-  });
-
-  it('10件以下なら「ほか」は出さない', () => {
-    const { container } = render(<VisibleRoutesLegend items={items.slice(0, 3)} theme="light" language="japanese" />);
-    expect(container.textContent).not.toContain('ほか');
+  it('路線を「表示路線の切替」と同じチップで全部並べる（5件を超える分は一覧の中でスクロール）', () => {
+    const { container } = render(<VisibleRoutesLegend items={items} theme="dark" language="japanese" onToggleRoute={noop} />);
+    const chips = container.querySelectorAll('[data-legend-route]');
+    expect(chips).toHaveLength(12);
+    expect(container.textContent).toContain('路線11');
   });
 
   it('路線が無ければ何も描かない', () => {
-    const { container } = render(<VisibleRoutesLegend items={[]} theme="light" language="japanese" />);
+    const { container } = render(<VisibleRoutesLegend items={[]} theme="light" language="japanese" onToggleRoute={noop} />);
     expect(container.innerHTML).toBe('');
   });
 });
 
+describe('凡例からの表示切り替え', () => {
+  it('チップを押すとその路線の切り替えが呼ばれる', () => {
+    const toggle = vi.fn();
+    const { container } = render(<VisibleRoutesLegend items={items} theme="dark" language="japanese" onToggleRoute={toggle} />);
+    fireEvent.click(container.querySelector('[data-legend-route="r3"]')!);
+    expect(toggle).toHaveBeenCalledWith('r3');
+  });
+
+  it('非表示にした路線は凡例に残り、非表示の見た目（押されていない状態）になる', () => {
+    const withHidden = items.map(i => (i.key === 'r1' ? { ...i, visible: false } : i));
+    const { container } = render(<VisibleRoutesLegend items={withHidden} theme="dark" language="japanese" onToggleRoute={noop} />);
+    expect(container.querySelector('[data-legend-route="r1"]')!.getAttribute('aria-pressed')).toBe('false');
+    expect(container.querySelector('[data-legend-route="r2"]')!.getAttribute('aria-pressed')).toBe('true');
+  });
+});
+
 describe('凡例の折りたたみ', () => {
-  it('折りたたむと見出しと件数だけになり、路線名は出さない', () => {
-    const { container } = render(<VisibleRoutesLegend items={items} theme="dark" language="japanese" collapsed onToggleCollapsed={() => {}} />);
-    expect(container.textContent).toContain('表示中の路線（12）');
-    expect(container.textContent).not.toContain('路線0');
+  it('折りたたむと見出しと表示中の件数だけになり、路線は出さない', () => {
+    const withHidden = items.map(i => (i.key === 'r0' ? { ...i, visible: false } : i));
+    const { container } = render(<VisibleRoutesLegend items={withHidden} theme="dark" language="japanese" onToggleRoute={noop} collapsed onToggleCollapsed={noop} />);
+    expect(container.textContent).toContain('表示路線11件');
+    expect(container.querySelectorAll('[data-legend-route]')).toHaveLength(0);
   });
 
   it('見出しを押すと開閉の関数が呼ばれる', () => {
     const toggle = vi.fn();
-    const { getByRole } = render(<VisibleRoutesLegend items={items} theme="dark" language="japanese" onToggleCollapsed={toggle} />);
-    fireEvent.click(getByRole('button'));
+    const { getByRole } = render(<VisibleRoutesLegend items={items} theme="dark" language="japanese" onToggleRoute={noop} collapsed onToggleCollapsed={toggle} />);
+    fireEvent.click(getByRole('button', { expanded: false }));
     expect(toggle).toHaveBeenCalledTimes(1);
   });
 });

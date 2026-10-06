@@ -20,7 +20,7 @@ import LegendRouteList from './legend/LegendRouteList';
 import LegendRouteRecommendations from './legend/LegendRouteRecommendations';
 import LegendDisplayOptions from './legend/LegendDisplayOptions';
 import MultiDepartureRoutes from './MultiDepartureRoutes';
-import MobileBottomPanel from './MobileBottomPanel';
+import MobileBottomPanel, { MOBILE_BOTTOM_PANEL_FLOAT } from './MobileBottomPanel';
 import StationMemoPanel from './StationMemoPanel';
 import type { MapConfig } from './legend/MapConfigPanel';
 import type { StationStats } from '../data/stationStats';
@@ -106,6 +106,7 @@ import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
 import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE } from './ui/atoms/controlSize';
+import { floatingSurfaceStyle } from './ui/atoms/FloatingButton';
 
 import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
@@ -137,6 +138,10 @@ interface RailwayMapProps {
  * 4つのボタンすべてがこの定数を参照する。
  */
 const MAP_CORNER_BUTTON_PX = FLOATING_ICON_BUTTON_SIZE.md;
+/** スマホ全画面の左下ボタン群（MobileBottomPanel）に渡す画面下の余白(px) */
+const MOBILE_PANEL_SAFE_BOTTOM = 25;
+/** MobileBottomPanel がボタンを余白からさらに浮かせる量(px)。凡例を同じ高さに並べるのに使う */
+const MOBILE_PANEL_FLOAT = MOBILE_BOTTOM_PANEL_FLOAT;
 /** 上のボタン群のアイコンの大きさ（記事ヘッダーのボタンと共通の値） */
 const MAP_CORNER_ICON_SIZE = FLOATING_ICON_GLYPH_SIZE;
 /**
@@ -529,6 +534,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [visibleRoutesLegendCollapsed, setVisibleRoutesLegendCollapsed] = useState(false);
   // 埋め込み表示（記事などの小さな枠）では凡例が地図を大きく隠すので畳んで始め、閲覧者の設定も上書きしない
   useEffect(() => { setVisibleRoutesLegendCollapsed(embedded || getInitialLegendCollapsed()); }, [embedded]);
+  // 凡例から非表示にした路線。凡例に「非表示」の見た目で残し、もう一度押せば表示に戻せるようにする。
+  // 出発駅・到着駅を選び直したら（表示する路線が選び直されるので）空にする
+  const [legendHiddenRoutes, setLegendHiddenRoutes] = useState<Set<RouteKey>>(() => new Set());
+  // 凡例の並び。押して非表示→表示に戻しても位置が動かないよう、前回の並びを引き継ぐ
+  const legendOrderRef = useRef<RouteKey[]>([]);
   const [showRouteLine, setShowRouteLine] = useState(true);
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
@@ -3344,6 +3354,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // 駅選択に応じた路線表示制御
   // ※ departure && arrival の場合は route recommendation useEffect が availableRoutes/visibleRoutes を管理
+  // 出発駅・到着駅を選び直したら、凡例から非表示にした路線の記憶を捨てる
+  useEffect(() => {
+    setLegendHiddenRoutes(new Set());
+    legendOrderRef.current = [];
+  }, [departure, arrival]);
+
   useEffect(() => {
     if (departure && arrival) return; // 両駅選択時は推薦useEffectに委ねる
 
@@ -4864,10 +4880,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * 書き忘れが起きていた（記事一覧だけ更新し忘れる、など）。
    * ここ1箇所だけで決める。
    */
+  // 背景・影は「表示切替」「表示中の路線」と同じ（ui/atoms/FloatingButton.tsx の floatingSurfaceStyle）
   const cornerButtonStyle = {
     width: MAP_CORNER_BUTTON_PX,
     height: MAP_CORNER_BUTTON_PX,
-    backdropFilter: 'blur(4px)',
+    ...floatingSurfaceStyle(theme),
   };
 
   /**
@@ -6427,7 +6444,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           {isFullscreen && isMobile && (
             <MobileBottomPanel
               theme={theme}
-              safeAreaBottom={25}
+              safeAreaBottom={MOBILE_PANEL_SAFE_BOTTOM}
               buttons={[
                 // 候補ルートは設定より前に置く。候補が無いとき・推薦ルート選択を
                 // 出さない設定（既定）のときはボタン自体を出さない
@@ -6586,26 +6603,47 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               スマホ全画面でヒートマップの凡例が右下に来るときは譲る */}
           {mapViewMode === 'realistic' && !(isFullscreen && isMobile && heatmapEnabled) && (() => {
             const total = Object.keys(routes).length;
-            if (visibleRoutes.size === 0 || visibleRoutes.size >= total) return null;
+            if (visibleRoutes.size >= total) return null;
+            // 表示中の路線（出発・到着駅を通る路線を先頭）＋凡例から非表示にした路線。
+            // 前回の並びを引き継ぎ、新しく出た路線だけを後ろに足す
+            const wanted = [...(highlightedRouteKeys ?? []), ...visibleRoutes]
+              .filter(k => visibleRoutes.has(k));
+            const keep = legendOrderRef.current.filter(k => visibleRoutes.has(k) || legendHiddenRoutes.has(k));
+            const order = [...keep, ...wanted, ...legendHiddenRoutes].filter((k, i, a) => a.indexOf(k) === i);
+            legendOrderRef.current = order;
+            if (order.length === 0) return null;
             // PCでは「表示路線の切替」パネルが右端に幅300pxで浮くので、開いている間はその左に置く。
             // スマホではパネルは右端に来ない（全画面では下の「表示切替」ボタンから開く）ので常に右下に出す。
             // 以前はスマホ全画面でも「パネルが開いている」扱いで凡例を消してしまい、見えなかった
             const panelOnRight = !isMobile && isLegendExpanded;
-            const order = [...(highlightedRouteKeys ?? []), ...visibleRoutes]
-              .filter((k, i, a) => visibleRoutes.has(k) && a.indexOf(k) === i);
+            // スマホ全画面では左下の「表示切替」と同じ高さに並べる
+            const bottom = isMobile
+              ? (isFullscreen ? `${MOBILE_PANEL_SAFE_BOTTOM + MOBILE_PANEL_FLOAT}px` : '64px')
+              : L.sp['4xl'];
             return (
               <VisibleRoutesLegend
                 items={order.map(k => ({
                   key: k,
                   name: translateRoute(routeNames[k] ?? k, currentLanguage),
                   color: adjustRouteColorForTheme(routeColors[k], theme),
+                  visible: visibleRoutes.has(k),
                 }))}
                 theme={theme}
                 language={currentLanguage}
-                maxItems={10}
+                // 切り替えは「表示路線の切替」パネルと同じ toggleRoute を使う
+                onToggleRoute={key => {
+                  const rk = key as RouteKey;
+                  const wasVisible = visibleRoutes.has(rk);
+                  toggleRoute(rk);
+                  setLegendHiddenRoutes(prev => {
+                    const next = new Set(prev);
+                    if (wasVisible) next.add(rk); else next.delete(rk);
+                    return next;
+                  });
+                }}
                 collapsed={visibleRoutesLegendCollapsed}
                 onToggleCollapsed={() => setVisibleRoutesLegendCollapsed(v => { if (!embedded) persistLegendCollapsed(!v); return !v; })}
-                style={{ position: 'absolute', right: panelOnRight ? `calc(300px + ${L.sp.lg})` : L.sp.lg, bottom: isMobile ? '64px' : L.sp['4xl'], zIndex: 1002 }}
+                style={{ position: 'absolute', right: panelOnRight ? `calc(300px + ${L.sp.lg})` : L.sp.lg, bottom, zIndex: 1002 }}
               />
             );
           })()}

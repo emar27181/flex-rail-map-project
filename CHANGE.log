@@ -55,6 +55,22 @@
 - `src/components/RailwayMap.tsx`（`showDimmedMapRoutes` の初期値）
 - 関係の無い路線が薄く並んで多く見えるうえ、この層は線の周り36pxを押すとその路線を表示ONにするため、地図を動かす指で鶴見線などが足され「表示中の路線」が17本に増えていた。設定から出すことはできる
 
+### improve: 埋め込みの地図をタップしなくても動かせるようにする
+- `src/components/ui/atoms/mapEmbed.ts`, `src/utils/articleRender.ts`, `src/seo/pageText.ts`, `src/pages/[...lang]/{lines,stations}/[slug].astro`, `docs/{article-writing,design-system}.md`
+- 押すまで中に触れない覆い（「タップして地図を動かす」）を外した
+
+### improve: 地図の上に浮かぶボタンの見た目を FloatingButton アトムに一元化する
+- `src/components/ui/atoms/FloatingButton.tsx`（新規）, `src/components/MobileBottomPanel.tsx`, `src/components/RailwayMap.tsx`（`cornerButtonStyle`）
+- 「表示切替」・右上の丸いボタン・凡例の高さ（36px）と背景・影をそろえた
+
+### feat: 凡例「表示中の路線」から路線を出し入れできるようにする
+- `src/components/legend/VisibleRoutesLegend.tsx`, `src/components/RailwayMap.tsx`, `tests/unit/components/legend/VisibleRoutesLegend.test.tsx`, `docs/design-system.md`
+- 見出しは FloatingButton、路線は「表示路線の切替」と同じ Chip。押すと既存の toggleRoute で非表示になり、凡例に非表示の見た目で残る。もう一度押すと表示に戻る。スマホ全画面では「表示切替」と同じ高さに並べる
+
+### improve: 凡例を幅168pxに詰め、見出し「表示路線N件」の下に5件ずつ見せる
+- `src/components/legend/VisibleRoutesLegend.tsx`, `src/components/ui/atoms/Chip.tsx`（路線名の見切り）, `src/utils/translation.ts`（`visibleRoutesLegendCount`）
+- 長い路線名・見出しは見切らせ、開閉の印は必ず見せる。6件目からは一覧の中でスクロール
+
 ## [2026-09-30] セッション（PR #28〜#31 のマージ・地図の配色・端末ごとの設計・表の部品化）
 
 ### merge: PR #28 → #29 → #30 → #31 を順に main にマージ

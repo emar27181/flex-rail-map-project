@@ -14,28 +14,22 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { getThemeColors } from '../contexts/ThemeContext';
-import Button from './ui/atoms/Button';
+import FloatingButton, { FLOATING_BUTTON_HEIGHT } from './ui/atoms/FloatingButton';
 import IconButton from './ui/atoms/IconButton';
-import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
 import { L } from './legend/legendStyles';
 import { FS } from '../constants/ui';
 
 // ── 寸法定数 ─────────────────────────────────────────────────────────
 
 /**
- * フローティングボタンの文字・余白・角丸の基準。実際の高さはこれではなく
- * `BTN_H` を使う（地図の隅の丸ボタンと合わせて縦を詰めたため）。
+ * ボタンの高さ。見た目（高さ・ガラス調の背景・影）は FloatingButton アトムが決め、
+ * 地図右上の丸いボタン・凡例「表示中の路線」と同じ高さになる。
+ * ここではポップオーバーの位置の計算にだけ使う。
  */
-const PANEL_BUTTON_SIZE = 'md' as const;
+const BTN_H = FLOATING_BUTTON_HEIGHT;
 
-/**
- * ボタンの実際の高さ。地図右上のフルスクリーン/言語/テーマの各ボタンと
- * 同じ `FLOATING_ICON_BUTTON_SIZE.md`(36px) に揃える。
- * 以前は `CONTROL_SIZE.md`(44px) を使っており、他の地図隅ボタン(36px)より
- * 縦に大きく見えていた（他は単体で浮かぶアイコンボタン専用の尺度を使う一方、
- * ここだけ「同じ行に並ぶ部品用」の `CONTROL_SIZE` を使っていたのが原因）。
- */
-const BTN_H = FLOATING_ICON_BUTTON_SIZE.md;
+/** ボタン群を画面下の余白からさらに浮かせる量(px)。地図右下の凡例も同じ高さに並べるため公開する */
+export const MOBILE_BOTTOM_PANEL_FLOAT = 10;
 
 /** ボタンの最小幅（アイコンなし・テキストのみなので小さめ） */
 const BTN_MIN_W = 0;
@@ -165,7 +159,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
   }, []);
   // ─────────────────────────────────────────────────────────────────
 
-  const safeBottom = safeAreaBottom + 10; // ボタンを少し上に浮かせる
+  const safeBottom = safeAreaBottom + MOBILE_BOTTOM_PANEL_FLOAT; // ボタンを少し上に浮かせる
 
   const activeButton = buttons.find(b => b.key === openKey);
 
@@ -282,33 +276,17 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
         {buttons.map(btn => {
           const isActive = openKey === btn.key;
           return (
-            <Button
+            <FloatingButton
               key={btn.key}
               theme={theme}
-              variant="primary"
-              size={PANEL_BUTTON_SIZE}
               pressed={isActive}
               onClick={() => toggle(btn.key)}
               aria-expanded={isActive}
               aria-controls={`mbp-popover-${btn.key}`}
               icon={btn.icon}
-              styleOverride={{
-                // 地図の上に浮かせるので、開いていないときは下の地図が透けるガラス調にする。
-                // 開いているときは variant の塗りをそのまま使う
-                // （ここで backgroundColor: undefined を渡すと塗りを消してしまう）
-                ...(isActive ? {} : { backgroundColor: colors.glassButton }),
-                // 地図隅の丸ボタン群と高さを揃える（BTN_H を参照）
-                minHeight: BTN_H,
-                backdropFilter: isActive ? 'none' : 'blur(8px)',
-                WebkitBackdropFilter: isActive ? 'none' : 'blur(8px)',
-                fontWeight: 'bold',
-                boxShadow: `0 2px 8px ${colors.shadow}`,
-                userSelect: 'none',
-                WebkitTapHighlightColor: 'transparent',
-              }}
             >
               {btn.label}
-            </Button>
+            </FloatingButton>
           );
         })}
       </div>

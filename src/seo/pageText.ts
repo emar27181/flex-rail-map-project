@@ -145,7 +145,6 @@ export const SEO_TEXT = {
     embedLineTitle: (name: string) => `${name}だけを表示した地図`,
     embedStationTitle: (name: string) => `${name}駅を出発駅にした地図`,
     embedCaption: '実際の地図です。枠の中で拡大・移動でき、駅を押すと時刻表が開きます。',
-    embedActivate: 'タップして地図を動かす',
 
     openMapData: (label: string) => `${label}のヒートマップで路線図を開く`,
     dataHubTitle: `駅周辺データの一覧 | ${SITE_NAME}`,
@@ -235,7 +234,6 @@ export const SEO_TEXT = {
     embedLineTitle: (name: string) => `Map showing only the ${name}`,
     embedStationTitle: (name: string) => `Map with ${name} as the departure`,
     embedCaption: 'The live map. Zoom and pan inside the frame, and tap a station to see its timetable.',
-    embedActivate: 'Tap to use the map',
 
     openMapData: (label: string) => `Open the map with a ${label.toLowerCase()} heatmap`,
     dataHubTitle: `Station Area Data | ${SITE_NAME}`,
@@ -326,7 +324,6 @@ export const SEO_TEXT = {
     embedLineTitle: (name: string) => `只显示${name}的地图`,
     embedStationTitle: (name: string) => `以${name}站为出发站的地图`,
     embedCaption: '这是实际的地图。可以在框内缩放和移动，点击车站可查看时刻表。',
-    embedActivate: '点击后操作地图',
 
     openMapData: (label: string) => `以${label}热力图打开线路图`,
     dataHubTitle: `车站周边数据一览 | ${SITE_NAME}`,
@@ -417,7 +414,6 @@ export const SEO_TEXT = {
     embedLineTitle: (name: string) => `${name}만 표시한 지도`,
     embedStationTitle: (name: string) => `${name}역을 출발역으로 둔 지도`,
     embedCaption: '실제 지도입니다. 틀 안에서 확대·이동할 수 있고, 역을 누르면 시간표가 열립니다.',
-    embedActivate: '눌러서 지도 움직이기',
 
     openMapData: (label: string) => `${label} 히트맵으로 노선도 열기`,
     dataHubTitle: `역 주변 데이터 목록 | ${SITE_NAME}`,

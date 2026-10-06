@@ -13,11 +13,11 @@ import { ARTICLE_SOURCES } from '../data/articles';
 import type { ArticleBlock, ArticleLang, ArticleMapState, ArticleShotSpec, ArticleSource } from '../data/articles/types';
 
 /** 部品に出す決まり文句 */
-export const ARTICLE_BLOCK_LABELS: Record<ArticleLang, { points: string; openMap: string; embedActivate: string; pageActivate: string }> = {
-  ja: { points: 'この記事の結論', openMap: '地図で開く', embedActivate: 'タップして地図を動かす', pageActivate: 'タップして操作する' },
-  en: { points: 'Key takeaways', openMap: 'Open the map', embedActivate: 'Tap to use the map', pageActivate: 'Tap to interact' },
-  zh: { points: '本文结论', openMap: '打开地图', embedActivate: '点击后操作地图', pageActivate: '点击后操作' },
-  ko: { points: '이 글의 결론', openMap: '지도 열기', embedActivate: '눌러서 지도 움직이기', pageActivate: '눌러서 조작하기' },
+export const ARTICLE_BLOCK_LABELS: Record<ArticleLang, { points: string; openMap: string }> = {
+  ja: { points: 'この記事の結論', openMap: '地図で開く' },
+  en: { points: 'Key takeaways', openMap: 'Open the map' },
+  zh: { points: '本文结论', openMap: '打开地图' },
+  ko: { points: '이 글의 결론', openMap: '지도 열기' },
 };
 
 
@@ -72,12 +72,11 @@ function renderBlock(block: ArticleBlock, source: ArticleSource, lang: ArticleLa
       const owner = block.article ? ARTICLE_SOURCES.find(a => a.slug === block.article) : source;
       const spec = owner?.shots[block.shot];
       if (!owner || !spec) throw new Error(`${source.slug}: 画面 "${block.shot}" の撮り方（shots）が無い`);
-      const activateLabel = spec.page ? labels.pageActivate : labels.embedActivate;
-      return mapEmbedHtml({ src: shotEmbedSrc(spec, owner, lang), title: block.alt, caption: block.caption, activateLabel });
+      return mapEmbedHtml({ src: shotEmbedSrc(spec, owner, lang), title: block.alt, caption: block.caption });
     }
     case 'embed': {
       const src = articleMapHref({ ...mapOf(block.map), ...(block.view ?? {}) }, lang, true);
-      return mapEmbedHtml({ src, title: block.title, caption: block.caption, activateLabel: labels.embedActivate });
+      return mapEmbedHtml({ src, title: block.title, caption: block.caption });
     }
     case 'cta':
       return `<div class="cta"><h3>${block.title}</h3><p>${block.text}</p><a class="btn" href="${esc(articleMapHref(mapOf(block.map), lang))}">${labels.openMap} <span class="ar">→</span></a></div>`;
