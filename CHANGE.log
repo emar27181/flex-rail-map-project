@@ -67,6 +67,10 @@
 - `src/components/legend/VisibleRoutesLegend.tsx`, `src/components/RailwayMap.tsx`, `tests/unit/components/legend/VisibleRoutesLegend.test.tsx`, `docs/design-system.md`
 - 見出しは FloatingButton、路線は「表示路線の切替」と同じ Chip。押すと既存の toggleRoute で非表示になり、凡例に非表示の見た目で残る。もう一度押すと表示に戻る。スマホ全画面では「表示切替」と同じ高さに並べる
 
+### improve: 凡例を幅168pxに詰め、見出し「表示路線N件」の下に5件ずつ見せる
+- `src/components/legend/VisibleRoutesLegend.tsx`, `src/components/ui/atoms/Chip.tsx`（路線名の見切り）, `src/utils/translation.ts`（`visibleRoutesLegendCount`）
+- 長い路線名・見出しは見切らせ、開閉の印は必ず見せる。6件目からは一覧の中でスクロール
+
 ## [2026-09-30] セッション（PR #28〜#31 のマージ・地図の配色・端末ごとの設計・表の部品化）
 
 ### merge: PR #28 → #29 → #30 → #31 を順に main にマージ

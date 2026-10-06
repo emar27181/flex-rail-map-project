@@ -8,10 +8,11 @@
  * - 押したときの処理は呼び出し側の既存の切り替え（toggleRoute）を使う。ここでは状態を持たない
  *
  * 見出しを押すと開閉する（開閉の状態は呼び出し側が持ち、保存する）。
- * 開いた一覧は見出しの上に出し、多いときは一覧の中でスクロールする。
+ * 見出し「表示路線N件」の下に一覧を出し、5件を超える分は一覧の中でスクロールする。
+ * 地図を覆いすぎないよう幅は狭く固定し、長い路線名・見出しは見切らせる（開閉の印は必ず見せる）。
  */
 import React from 'react';
-import { ChevronDown, ChevronUp, Layers } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI, type Language } from '../../utils/translation';
 import FloatingButton from '../ui/atoms/FloatingButton';
@@ -41,36 +42,54 @@ interface VisibleRoutesLegendProps {
 
 /** チップの大きさ。「表示路線の切替」パネルのチップと同じ段階 */
 const CHIP_SIZE = 'sm' as const;
-/** 開いた一覧の高さの上限。地図を覆いすぎないよう、多いときは中でスクロールする */
-const LIST_MAX_HEIGHT = '40vh';
-/** 路線名が長いときに一覧が地図を覆いすぎない幅 */
-const LIST_MAX_WIDTH = '220px';
+/** 開いた一覧に一度に見せる路線の数。これより多いときは一覧の中でスクロールする */
+const VISIBLE_ROWS = 5;
+/** 凡例の幅。地図を覆いすぎないよう狭くし、長い路線名・見出しは見切らせる */
+const LEGEND_WIDTH = '168px';
+/** 一覧の高さ: VISIBLE_ROWS 件ぶんのチップ＋間の隙間＋上下の余白 */
+const LIST_MAX_HEIGHT = `calc(${VISIBLE_ROWS} * ${CONTROL_SIZE[CHIP_SIZE].minHeight}px + ${VISIBLE_ROWS - 1} * ${L.sp.xs} + 2 * ${L.sp.sm})`;
 
 export default function VisibleRoutesLegend({ items, theme, language, onToggleRoute, collapsed = false, onToggleCollapsed, style }: VisibleRoutesLegendProps) {
   if (items.length === 0) return null;
   const colors = getThemeColors(theme);
   const visibleCount = items.filter(i => i.visible).length;
   const title = translateUI('visibleRoutesLegendTitle', language);
-  const count = language === 'japanese' ? `（${visibleCount}）` : ` (${visibleCount})`;
   const glyph = CONTROL_SIZE.md.iconSize;
 
   return (
     <div
       aria-label={title}
       style={{
-        display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: L.sp.xs,
-        // 一覧と見出しの間の隙間で地図の操作を止めない
+        display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: L.sp.xs,
+        width: LEGEND_WIDTH,
+        // 見出しと一覧の間の隙間で地図の操作を止めない
         pointerEvents: 'none',
         ...style,
       }}
     >
+      {/* 見出し。幅が足りなければ文字を見切らせ、開閉の印は必ず見せる */}
+      <div style={{ pointerEvents: 'auto' }}>
+        <FloatingButton
+          theme={theme}
+          fullWidth
+          onClick={onToggleCollapsed}
+          aria-expanded={!collapsed}
+          trailing={collapsed
+            ? <ChevronUp size={glyph} aria-hidden style={{ flexShrink: 0 }} />
+            : <ChevronDown size={glyph} aria-hidden style={{ flexShrink: 0 }} />}
+        >
+          <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left' }}>
+            {translateUI('visibleRoutesLegendCount', language, { count: visibleCount })}
+          </span>
+        </FloatingButton>
+      </div>
       {!collapsed && (
         <div
           role="group"
           aria-label={title}
           style={{
             display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: L.sp.xs,
-            maxHeight: LIST_MAX_HEIGHT, maxWidth: LIST_MAX_WIDTH, overflowY: 'auto',
+            maxHeight: LIST_MAX_HEIGHT, overflowY: 'auto', overscrollBehavior: 'contain',
             padding: L.sp.sm,
             backgroundColor: colors.glassOpen,
             border: `1px solid ${colors.border}`,
@@ -89,22 +108,11 @@ export default function VisibleRoutesLegend({ items, theme, language, onToggleRo
               size={CHIP_SIZE}
               onClick={() => onToggleRoute(item.key)}
               dataAttr={{ 'data-legend-route': item.key }}
-              styleOverride={{ justifyContent: 'flex-start', overflow: 'hidden', textOverflow: 'ellipsis' }}
+              styleOverride={{ justifyContent: 'flex-start', flexShrink: 0, maxWidth: '100%' }}
             />
           ))}
         </div>
       )}
-      <div style={{ pointerEvents: 'auto' }}>
-        <FloatingButton
-          theme={theme}
-          onClick={onToggleCollapsed}
-          aria-expanded={!collapsed}
-          icon={<Layers size={glyph} />}
-          trailing={collapsed ? <ChevronUp size={glyph} aria-hidden /> : <ChevronDown size={glyph} aria-hidden />}
-        >
-          {title}{count}
-        </FloatingButton>
-      </div>
     </div>
   );
 }

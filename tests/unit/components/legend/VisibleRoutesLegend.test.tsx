@@ -7,7 +7,7 @@ const items = Array.from({ length: 12 }, (_, i) => ({ key: `r${i}`, name: `路�
 const noop = () => {};
 
 describe('表示中の路線の凡例', () => {
-  it('路線を「表示路線の切替」と同じチップで全部並べる（多いときは一覧の中でスクロール）', () => {
+  it('路線を「表示路線の切替」と同じチップで全部並べる（5件を超える分は一覧の中でスクロール）', () => {
     const { container } = render(<VisibleRoutesLegend items={items} theme="dark" language="japanese" onToggleRoute={noop} />);
     const chips = container.querySelectorAll('[data-legend-route]');
     expect(chips).toHaveLength(12);
@@ -40,7 +40,7 @@ describe('凡例の折りたたみ', () => {
   it('折りたたむと見出しと表示中の件数だけになり、路線は出さない', () => {
     const withHidden = items.map(i => (i.key === 'r0' ? { ...i, visible: false } : i));
     const { container } = render(<VisibleRoutesLegend items={withHidden} theme="dark" language="japanese" onToggleRoute={noop} collapsed onToggleCollapsed={noop} />);
-    expect(container.textContent).toContain('表示中の路線（11）');
+    expect(container.textContent).toContain('表示路線11件');
     expect(container.querySelectorAll('[data-legend-route]')).toHaveLength(0);
   });
 
