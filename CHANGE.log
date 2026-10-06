@@ -27,6 +27,10 @@
   `src/components/ui/molecules/CollapsiblePanel.tsx`, `src/components/{StationSelector,MobileBottomPanel,RailwayMap}.tsx`, `docs/design-system.md`, `CLAUDE.md`, `.claude/skills/design-tokens/SKILL.md`
 - 透け具合 0.72/0.82/0.96 と直書きの rgba、ぼかし 8/10/12px、影の有無が場所ごとにばらばらだった。閉じた箱・ボタン（idle）と開いて読む箱（open）の2段にまとめた
 
+### improve: 開いた箱もすりガラスにする（open 0.96→0.82、ぼかし 10→16px）
+- `src/contexts/ThemeContext.tsx`（`FLOATING_OPACITY`）, `src/components/ui/atoms/floatingSurface.ts`, `docs/design-system.md`
+- 開いた駅選択・凡例が不透明に見え、左下の「表示切替」だけがガラスに見えていた
+
 ## [2026-10-05] セッション（記事の画面を iframe に・路線/駅ページの路線色と駅番号・テーマの保存先の統一）
 
 ### feat: 地図を所要時間を表示した状態で開けるURL（`?times=1`）

@@ -16,11 +16,12 @@ import { getThemeColors } from '../../../contexts/ThemeContext';
 import { CONTROL_BORDER_WIDTH, FLOATING_CONTROL } from './controlSize';
 
 /** 背景のぼかし(px)と影の広がり(px) */
-export const FLOATING_SURFACE = { blurPx: 10, shadowOffsetPx: 2, shadowBlurPx: 8 } as const;
+/** ぼかしは、開いた箱も透かしたまま文字を読めるよう強めにする（iOS のすりガラスと同程度） */
+export const FLOATING_SURFACE = { blurPx: 16, shadowOffsetPx: 2, shadowBlurPx: 8 } as const;
 
 /**
  * - idle: 閉じている箱・ボタン（地図が透ける）
- * - open: 開いて中身を読む箱（ほぼ不透明）
+ * - open: 開いて中身を読む箱（少し濃いすりガラス）
  */
 export type FloatingSurfaceState = 'idle' | 'open';
 
