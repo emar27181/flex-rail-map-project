@@ -11,6 +11,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { filledLabelColors } from '../../utils/contrast';
 import { FS } from '../../constants/ui';
 import { L } from '../legend/legendStyles';
+import { textHalo } from './atoms/shadow';
 
 export type ColorChipProps = {
   /** 元になる色（路線色・ヒートマップ色など） */
@@ -55,7 +56,7 @@ export default function ColorChip({
         backgroundColor: background,
         color: text,
         // 4.5:1 に届かない明るい色は縁取りで読めるようにする
-        textShadow: shadow && needsHalo ? '0 0 2px rgba(0,0,0,0.95),0 1px 2px rgba(0,0,0,0.9)' : undefined,
+        textShadow: shadow && needsHalo ? textHalo('strong') : undefined,
         fontSize,
         fontWeight: bold ? 'bold' : 'normal',
         borderRadius: L.r.control,

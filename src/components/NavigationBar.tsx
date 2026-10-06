@@ -3,6 +3,7 @@ import { APP_ICON_PATH } from '../config/seo';
 import { Sun, Moon, Menu, X, Info, Sparkles } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import IconButton from './ui/atoms/IconButton';
+import { shadow } from './ui/atoms/shadow';
 import { FS } from '../constants/ui';
 import { translateUI } from '../utils/translation';
 import type { Language } from '../utils/translation';
@@ -46,7 +47,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
       padding: `calc(${L.sp.xl} + env(safe-area-inset-top, 0px)) ${L.sp['3xl']} ${L.sp.xl}`,
       backgroundColor: colors.surface,
       borderBottom: `1px solid ${colors.border}`,
-      boxShadow: `0 2px 4px ${colors.shadow}`,
+      boxShadow: shadow('raised', theme),
       marginBottom: L.sp['3xl'],
       // スクロールしても常に見えるよう追従させる。地図側の浮遊ボタン等の
       // z-index(最大1003程度)より確実に上、モーダル類(9999〜)より下にする
@@ -159,7 +160,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           backgroundColor: colors.surface,
           border: `1px solid ${colors.border}`,
           borderRadius: L.r.card,
-          boxShadow: `0 4px 12px ${colors.shadow}`,
+          boxShadow: shadow('overlay', theme),
           zIndex: 1000,
           minWidth: '200px',
           padding: `${L.sp.md} 0`
@@ -317,7 +318,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
               width: '100%',
               maxHeight: '80vh',
               overflowY: 'auto',
-              boxShadow: `0 8px 32px ${colors.shadow}`,
+              boxShadow: shadow('overlay', theme),
               border: `1px solid ${colors.border}`,
               position: 'relative'
             }}

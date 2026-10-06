@@ -10,6 +10,7 @@ import { L } from '../components/legend/legendStyles';
 import { RESPONSIVE_TABLE_CSS } from '../components/ui/atoms/responsiveTable';
 import { MAP_EMBED_CSS } from '../components/ui/atoms/mapEmbed';
 import { CODE_BADGE_CSS } from '../components/ui/atoms/codeBadge';
+import { shadow } from '../components/ui/atoms/shadow';
 
 const light = getThemeColors('light');
 const dark = getThemeColors('dark');
@@ -25,12 +26,12 @@ ${CODE_BADGE_CSS}
 /* 部品の色（表・埋め込み）とページの差し色（路線のページは路線色。SeoPageLayout の accent） */
 body {
   --rt-border: ${light.borderLight}; --rt-muted: ${light.textSecondary}; --rt-hover: ${light.surfaceHover};
-  --me-border: ${light.border}; --me-surface: ${light.surface}; --me-shadow: 0 1px 3px ${light.shadow}; --me-muted: ${light.textSecondary};
+  --me-border: ${light.border}; --me-surface: ${light.surface}; --me-shadow: ${shadow('raised', 'light')}; --me-muted: ${light.textSecondary};
   --page-accent: var(--page-accent-light);
 }
 body.dark {
   --rt-border: ${dark.borderLight}; --rt-muted: ${dark.textSecondary}; --rt-hover: ${dark.surfaceHover};
-  --me-border: ${dark.border}; --me-surface: ${dark.surface}; --me-shadow: 0 1px 3px ${dark.shadow}; --me-muted: ${dark.textSecondary};
+  --me-border: ${dark.border}; --me-surface: ${dark.surface}; --me-shadow: ${shadow('raised', 'dark')}; --me-muted: ${dark.textSecondary};
   --page-accent: var(--page-accent-dark);
 }
 /* 表の順番の数字も差し色にする */

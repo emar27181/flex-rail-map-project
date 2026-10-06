@@ -7,6 +7,7 @@ import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { SEMANTIC, NEUTRAL, FS} from '../constants/ui';
 import Button from './ui/atoms/Button';
 import Chip from './ui/atoms/Chip';
+import { shadow, joinShadows } from './ui/atoms/shadow';
 
 /** デモ画面はテーマ切替を持たずライト固定 */
 const DEMO_THEME = 'light' as const;
@@ -143,7 +144,7 @@ const DemoMap: React.FC = () => {
           gap: L.sp.lg,
           flexShrink: 0,
           zIndex: 1000,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+          boxShadow: shadow('raised', 'light'),
         }}>
           <span style={{ fontSize: FS.heading, flexShrink: 0, display: 'flex' }}>{currentStep.icon}</span>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -202,7 +203,7 @@ const DemoMap: React.FC = () => {
             overflow: 'hidden',
             transition: 'box-shadow 0.3s ease',
             boxShadow: isPanelHighlighted
-              ? `0 0 0 3px ${SEMANTIC.departure}, 0 0 20px ${tintColor(SEMANTIC.departure, 0.4)}`
+              ? joinShadows(`0 0 0 3px ${SEMANTIC.departure}`, shadow('overlay', 'light', { color: tintColor(SEMANTIC.departure, 0.4) }))
               : 'none',
             position: 'relative',
             zIndex: isPanelHighlighted ? 10 : 1,

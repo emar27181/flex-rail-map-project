@@ -1,5 +1,18 @@
 # CHANGE LOG
 
+## [2026-10-07] セッション（影の一元管理・影なしの方針）
+
+### improve: 影を ui/atoms/shadow.ts に一元化し、既定で影なしにする
+- `src/components/ui/atoms/shadow.ts`（新規）, `tests/unit/components/ui/shadow.test.ts`（新規）
+- `src/components/RailwayMap.tsx`（所要時間の丸・駅ラベル・駅の点・現在地・列車の向き・ズームボタン・Leaflet のポップアップ・お知らせ）,
+  `src/components/ui/atoms/{floatingSurface,controlCss,codeBadge}.ts`, `src/components/ui/ColorChip.tsx`,
+  `src/components/{NavigationBar,StickyBottomAd,CookieBanner,RouteRecommendations,DiagramMap,DemoMap,CoverageAnalysis}.tsx`,
+  `src/layouts/seoPageStyles.ts`, `src/styles/article-{layout,introduction}.css`, `src/pages/{index,fullscreen}.astro`
+- 所要時間の丸に影が付いて見えた。影は場所ごとに `0 1px 3px rgba(...)` などを直書きしていて、濃さ・広がりがばらばらだった
+- 役割（marker / floating / raised / overlay）ごとに `enabled` を持たせ、既定はすべて false。戻すときは SHADOW のその役割を true にするだけ
+- 白字の縁取り（ハロー）は影ではなく読みやすさのためなので `textHalo()` に集め、既定でオンのまま
+- 記事の CSS の `--shadow` も同じ規格から作る（TOKEN_VARS_CSS）。直書きはテストで落ちる
+
 ## [2026-10-06] セッション（凡例を見出しと一覧が1枚の開閉パネルに）
 
 ### improve: 開閉する見出しの部品（DisclosureIndicator / DisclosureHeader / CollapsiblePanel）を作り、▼ をそろえる
