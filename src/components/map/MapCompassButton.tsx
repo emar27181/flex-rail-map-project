@@ -10,10 +10,17 @@
  * また回転中は毎フレーム rotate イベントが来るので、地図本体
  * （RailwayMap）の state を更新すると巨大なコンポーネントが毎フレーム
  * 再描画される。角度はこのボタンの中だけで持ち、再描画をここに閉じ込める。
+ *
+ * 2本指で回すと針が激しく震えていた。原因は2つ:
+ * - leaflet-rotate の getBearing は 0〜360° に丸めるため、北をまたぐと 359°→1° と飛び、
+ *   CSS の回転が逆向きにほぼ1周していた → 前の角度から最短の向きに進めた角度（continuousAngle）で回す
+ * - 毎フレーム届く rotate のたびに針の transition が始まり直し、遅れて追いかけていた
+ *   → transition をやめ、1フレームに1回だけ描き直す（requestAnimationFrame）
  */
 import { useEffect, useState, type CSSProperties, type MutableRefObject } from 'react';
 import IconButton from '../ui/atoms/IconButton';
 import CompassNeedle from '../ui/atoms/CompassNeedle';
+import { continuousAngle } from '../../utils/angle';
 
 interface RotatableMap {
   getBearing?: () => number;
@@ -35,7 +42,14 @@ export default function MapCompassButton({ mapRef, theme, label, iconSize, style
 
   useEffect(() => {
     let attached: RotatableMap | null = null;
-    const sync = () => setBearingState(attached?.getBearing?.() ?? 0);
+    let shown = 0;
+    let frame: number | null = null;
+    const draw = () => {
+      frame = null;
+      shown = continuousAngle(shown, attached?.getBearing?.() ?? 0);
+      setBearingState(shown);
+    };
+    const sync = () => { if (frame === null) frame = requestAnimationFrame(draw); };
 
     // 地図の生成はこのボタンより後になることがあるので、見つかるまで待って購読する
     const tryAttach = () => {
@@ -50,6 +64,7 @@ export default function MapCompassButton({ mapRef, theme, label, iconSize, style
 
     return () => {
       if (timer) clearInterval(timer);
+      if (frame !== null) cancelAnimationFrame(frame);
       attached?.off('rotate', sync);
     };
   }, [mapRef]);
