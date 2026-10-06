@@ -2914,6 +2914,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // 出発・到着の両方を選んだら、経路の区間の駅だけを出す（「路線の全区間を表示」がオフのとき・既定）。
     // 以前はここで主要駅（乗り入れ路線の多い駅）が区間の外にも出続けていた
     if (departure && arrival && !showFullRouteStations) return [] as Station[];
+    // 出発駅か到着駅の片方だけを選んだときも出さない。その駅に関係する路線（と直通先）だけを残す画面なのに、
+    // 関係の無い主要駅（武蔵小杉を選んだときの上野など）が目印として残り、乗り換えずに行ける駅に見えていた
+    if (!!departure !== !!arrival) return [] as Station[];
     const covered = new Set<string>();
     if (isTransferHintMode) {
       for (const s of transferHintStations) covered.add(s.name);
