@@ -6,7 +6,7 @@
  * 以前はボタンごとに高さ・背景・影を書いていて、右上の丸いボタン（36px）と
  * 「表示切替」「表示中の路線」の高さがそろっていなかった。
  *
- * - 高さ・文字の大きさは `FLOATING_CONTROL`（丸いボタン・凡例の見出しと共通）
+ * - 高さ・文字の大きさ・角の丸みは `FLOATING_CONTROL`（丸いボタン・凡例・駅選択と共通）
  * - 背景は下の地図が透けるガラス調。押している（開いている）間は Button の塗り
  * - 文字・余白・角丸は Button（`CONTROL_SIZE.md`）のまま
  *
@@ -31,6 +31,7 @@ export function floatingSurfaceStyle(theme: 'light' | 'dark'): CSSProperties {
     backdropFilter: 'blur(8px)',
     WebkitBackdropFilter: 'blur(8px)',
     boxShadow: `0 2px 8px ${colors.shadow}`,
+    borderRadius: FLOATING_CONTROL.radius,
   };
 }
 
@@ -55,6 +56,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ theme, pressed, trailin
         minHeight: FLOATING_BUTTON_HEIGHT,
         height: FLOATING_BUTTON_HEIGHT,
         fontSize: FLOATING_CONTROL.fontSize,
+        borderRadius: FLOATING_CONTROL.radius,
         fontWeight: 'bold',
         userSelect: 'none',
         WebkitTapHighlightColor: 'transparent',

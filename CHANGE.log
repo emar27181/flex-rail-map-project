@@ -18,6 +18,10 @@
 ### docs: 新しく作るときは必ずマニュアル（design-system.md・スキル）を読んでから
 - `CLAUDE.md`, `.claude/skills/design-tokens/SKILL.md`, `docs/design-system.md`
 
+### improve: 地図の上に浮かぶボタン・パネルの角の丸みを FLOATING_CONTROL.radius に一元化
+- `src/components/ui/atoms/{controlSize.ts,FloatingButton.tsx}`, `src/components/ui/molecules/CollapsiblePanel.tsx`, `src/components/{StationSelector,MobileBottomPanel,RailwayMap}.tsx`, `docs/design-system.md`, `CLAUDE.md`
+- 隅の丸いボタン・「表示切替」・表示路線の切替が3px、凡例・駅選択が8px、下のパネルが12px（直書き）とばらばらだった。すべて card(8px) にそろえた
+
 ## [2026-10-05] セッション（記事の画面を iframe に・路線/駅ページの路線色と駅番号・テーマの保存先の統一）
 
 ### feat: 地図を所要時間を表示した状態で開けるURL（`?times=1`）

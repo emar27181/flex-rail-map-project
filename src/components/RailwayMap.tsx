@@ -105,7 +105,7 @@ import SegmentedControl from './ui/molecules/SegmentedControl';
 import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
-import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE } from './ui/atoms/controlSize';
+import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE, FLOATING_CONTROL } from './ui/atoms/controlSize';
 import { floatingSurfaceStyle } from './ui/atoms/FloatingButton';
 
 import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
@@ -6089,7 +6089,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               maxHeight: isFullscreen ? 'calc(100% - 66px)' : 'none',
               backgroundColor: colors.surfaceElevated,
               border: `1px solid ${colors.border}`,
-              borderRadius: L.r.control,
+              // 地図の上に浮かぶ他の操作（丸いボタン・凡例・駅選択）と同じ丸み
+              borderRadius: FLOATING_CONTROL.radius,
               boxShadow: `0 2px 6px ${colors.shadow}`,
               zIndex: 1000,
               overflowY: 'hidden',

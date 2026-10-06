@@ -14,7 +14,7 @@ import { getThemeColors } from '../../../contexts/ThemeContext';
 import { L } from '../../legend/legendStyles';
 import DisclosureHeader from '../atoms/DisclosureHeader';
 import type { DisclosureHeaderSize } from '../atoms/DisclosureHeader';
-import { CONTROL_BORDER_WIDTH } from '../atoms/controlSize';
+import { CONTROL_BORDER_WIDTH, FLOATING_CONTROL } from '../atoms/controlSize';
 
 export interface CollapsiblePanelProps {
   title: ReactNode;
@@ -45,7 +45,7 @@ const CollapsiblePanel: React.FC<CollapsiblePanelProps> = ({
         boxSizing: 'border-box',
         overflow: 'hidden',
         border: `${CONTROL_BORDER_WIDTH}px solid ${colors.border}`,
-        borderRadius: L.r.card,
+        borderRadius: FLOATING_CONTROL.radius,
         backgroundColor: expanded ? colors.glassOpen : colors.glassCollapsed,
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',

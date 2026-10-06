@@ -15,6 +15,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { getThemeColors } from '../contexts/ThemeContext';
 import FloatingButton, { FLOATING_BUTTON_HEIGHT } from './ui/atoms/FloatingButton';
+import { FLOATING_CONTROL } from './ui/atoms/controlSize';
 import IconButton from './ui/atoms/IconButton';
 import { L } from './legend/legendStyles';
 import { FS } from '../constants/ui';
@@ -197,7 +198,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
             border: `1px solid ${colors.border}`,
-            borderRadius: 12,
+            borderRadius: FLOATING_CONTROL.radius,
             boxShadow: `0 4px 24px ${colors.shadow}`,
             display: 'flex',
             flexDirection: 'column',
@@ -221,7 +222,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
             <div style={{
               width: 48,
               height: 5,
-              borderRadius: 3,
+              borderRadius: L.r.pill,
               backgroundColor: colors.border,
             }} />
           </div>
