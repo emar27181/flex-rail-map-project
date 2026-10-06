@@ -8017,6 +8017,20 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "dir."
   },
 
+  // 地図ページの読み込み画面の段階の文言（constants/appLoading.ts）
+  appLoadingStart: {
+    japanese: "読み込んでいます…",
+    english: "Loading…"
+  },
+  appLoadingRoutes: {
+    japanese: "路線図を準備しています…",
+    english: "Preparing the route map…"
+  },
+  appLoadingMap: {
+    japanese: "地図を表示しています…",
+    english: "Drawing the map…"
+  },
+
   // Map loading
   loadingMap: {
     japanese: "マップを読み込み中...",
@@ -8887,6 +8901,9 @@ export const uiChinese: Record<string, string> = {
   moreItemsCount: "+{count}项",
   towardSuffix: "方向",
   loadingMap: "地图加载中...",
+  appLoadingStart: "正在加载…",
+  appLoadingRoutes: "正在准备线路图…",
+  appLoadingMap: "正在显示地图…",
   maxTime: "最大时间:",
   timetableModeOff: "关闭时刻表模式",
   timetableModeOn: "开启时刻表模式",
@@ -9222,6 +9239,9 @@ export const uiKorean: Record<string, string> = {
   moreItemsCount: "+{count}건",
   towardSuffix: "방면",
   loadingMap: "지도 로딩 중...",
+  appLoadingStart: "불러오는 중…",
+  appLoadingRoutes: "노선도를 준비하는 중…",
+  appLoadingMap: "지도를 표시하는 중…",
   maxTime: "최대 시간:",
   timetableModeOff: "시간표 모드 끄기",
   timetableModeOn: "시간표 모드 켜기",

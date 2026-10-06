@@ -73,6 +73,8 @@ import { toArticleLanguage } from '../utils/languagePersistence';
 import { defaultRoutesNear } from '../utils/defaultRoutesNear';
 import { getInitialMapViewFromUrl, getInitialTravelTimesFromUrl } from '../utils/mapViewUrlParam';
 import { isEmbedMode } from '../utils/embedMode';
+import { loadLeafletModules } from '../utils/leafletLoader';
+import { hideAppLoading, setAppLoadingStage } from '../utils/appLoading';
 import {
   getInitialDepartureFromUrl,
   getInitialArrivalFromUrl,
@@ -3070,28 +3072,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       try {
         if (typeof window === 'undefined') return;
 
-        const [
-          { MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, CircleMarker, Circle, useMapEvents, ZoomControl, Pane, Tooltip },
-          leaflet
-        ] = await Promise.all([
-          import('react-leaflet'),
-          import('leaflet'),
-        ]);
+        // 取得はページのスクリプトから先に始めている（utils/leafletLoader.ts）。ここでは同じ Promise を待つだけ
+        const { reactLeaflet, leaflet } = await loadLeafletModules();
+        const { MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, CircleMarker, Circle, useMapEvents, ZoomControl, Pane, Tooltip } = reactLeaflet;
         const { DivIcon } = leaflet;
         const canvasRenderer = leaflet.canvas({ padding: 0.5 });
-
-        // leaflet-rotate はグローバルな `L`（従来のscriptタグ読み込み前提）に
-        // プロトタイプ拡張を行う昔ながらのLeafletプラグイン形式のため、
-        // バンドラー経由で読み込んだ leaflet モジュールを window.L に橋渡しする。
-        // react-leaflet も同じ leaflet モジュールの単一インスタンスを使うため、
-        // ここで拡張したクラス（L.Map・L.Marker 等）がそのまま反映される
-        if (!(window as any).L) {
-          (window as any).L = leaflet;
-        }
-        await import('leaflet-rotate');
         patchRotatedRendererDrift(leaflet);
 
         if (mounted) {
+          // 読み込み画面の文言を「地図を表示しています…」へ（消すのは地図を最初に描いた後）
+          setAppLoadingStage('map');
           setMapComponents({ MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, CircleMarker, Circle, useMapEvents, ZoomControl, DivIcon, Pane, Tooltip, canvasRenderer });
           setIsClient(true);
           setIsLoading(false);
@@ -3100,6 +3090,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         }
       } catch (error) {
         console.error('Failed to load Leaflet:', error);
+        // 読み込みに失敗しても読み込み画面を出したままにしない（仮表示の文言で失敗が分かる）
+        hideAppLoading();
         if (mounted) {
           setIsLoading(false);
         }
@@ -3112,6 +3104,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       mounted = false;
     };
   }, []);
+
+  // 地図を最初に描いた後に読み込み画面を消す。描画が画面に出るのを待つため2フレーム後
+  useEffect(() => {
+    if (!isClient || isLoading || !MapComponents) return;
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => { raf2 = requestAnimationFrame(hideAppLoading); });
+    return () => { cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
+  }, [isClient, isLoading, MapComponents]);
 
   // 最終的な重複除去関数（表示レベル）
   const removeFinalDuplicates = useCallback((routes: RouteResult[]): RouteResult[] => {
