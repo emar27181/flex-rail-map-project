@@ -259,7 +259,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [isStationSelectorExpanded, setIsStationSelectorExpanded] = useState(!embedded);
   const [mobileStationExpanded, setMobileStationExpanded] = useState(!embedded);
   const [isRouteToggleExpanded, setIsRouteToggleExpanded] = useState(false);
-  const [isLegendExpanded, setIsLegendExpanded] = useState(!embedded);
+  // 「表示路線の切替」パネル。設定は必要なときに開くものなので、PC・スマホとも閉じた状態で始める
+  // （以前は開いて始まり、地図の右側を大きく覆っていた）
+  const [isLegendExpanded, setIsLegendExpanded] = useState(false);
 
   // 表示モードの管理
   const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
@@ -531,7 +533,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 設定で路線ごとの表示に切り替えられる
   const [showPerRouteStationTimes, setShowPerRouteStationTimes] = useState(false);
   // 地図右下の「表示中の路線」の凡例を折りたたんでいるか（保存して持ち越す）
-  const [visibleRoutesLegendCollapsed, setVisibleRoutesLegendCollapsed] = useState(false);
+  const [visibleRoutesLegendCollapsed, setVisibleRoutesLegendCollapsed] = useState(true);
   // 埋め込み表示（記事などの小さな枠）では凡例が地図を大きく隠すので畳んで始め、閲覧者の設定も上書きしない
   useEffect(() => { setVisibleRoutesLegendCollapsed(embedded || getInitialLegendCollapsed()); }, [embedded]);
   // 凡例から非表示にした路線。凡例に「非表示」の見た目で残し、もう一度押せば表示に戻せるようにする。
