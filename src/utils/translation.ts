@@ -7509,10 +7509,11 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "{shown} / {total} 路線を表示中",
     english: "{shown} of {total} routes shown"
   },
-  // ── 最寄り駅メモ ──────────────────────────────────────────
+  // ── 複数駅の共通路線（旧: 最寄り駅メモ） ──────────────────
+  // 複数の駅を登録して、それぞれの路線と共通して乗れる路線を地図に出す（以前の名前は「最寄り駅メモ」）
   memoTitle: {
-    japanese: "最寄り駅メモ",
-    english: "Nearest station notes"
+    japanese: "複数駅の共通路線",
+    english: "Lines shared by stations"
   },
   memoDescription: {
     japanese: "誰の最寄り駅がどこかを控えておくと、全員が乗れる路線が分かります。この端末にだけ保存されます。",
@@ -8736,7 +8737,7 @@ export const uiChinese: Record<string, string> = {
   routeShowMore: "再显示{count}条",
   routeNoMatch: "没有符合的线路",
   routeVisibleSummary: "已显示 {shown} / {total} 条线路",
-  memoTitle: "最近车站备忘",
+  memoTitle: "多个车站的共同线路",
   memoDescription: "记下每个人最近的车站，就能看出大家都能乘坐的线路。仅保存在本设备。",
   memoPersonPlaceholder: "姓名",
   memoStationPlaceholder: "最近车站",
@@ -9071,7 +9072,7 @@ export const uiKorean: Record<string, string> = {
   routeShowMore: "{count}개 더 보기",
   routeNoMatch: "일치하는 노선이 없습니다",
   routeVisibleSummary: "{total}개 중 {shown}개 노선 표시 중",
-  memoTitle: "가까운 역 메모",
+  memoTitle: "여러 역의 공통 노선",
   memoDescription: "누구의 가까운 역이 어디인지 적어 두면 모두가 탈 수 있는 노선을 알 수 있습니다. 이 기기에만 저장됩니다.",
   memoPersonPlaceholder: "이름",
   memoStationPlaceholder: "가까운 역",
