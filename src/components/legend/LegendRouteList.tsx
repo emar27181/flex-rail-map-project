@@ -616,6 +616,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 {routeListExpanded
                   ? translateUI('collapseList', language)
                   : translateUI('showMoreRoutes', language, { count: String(hidden) })}
+                <DisclosureIndicator expanded={routeListExpanded} theme={theme} tone="inherit" />
               </Button>
             )}
           </>

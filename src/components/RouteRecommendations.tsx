@@ -10,6 +10,7 @@ import type { Language } from '../utils/translation';
 import { SEMANTIC, FS} from '../constants/ui';
 import { tintColor } from '../utils/contrast';
 import Button from './ui/atoms/Button';
+import { shadow } from './ui/atoms/shadow';
 import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
 import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
 
@@ -113,7 +114,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
       backgroundColor: colors.surfaceElevated,
       border: `1px solid ${colors.border}`,
       borderRadius: L.r.control,
-      boxShadow: `0 2px 6px ${colors.shadow}`,
+      boxShadow: shadow('raised', theme),
       minWidth: '200px'
     }}>
       <div 
@@ -165,7 +166,7 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
               style={{
                 padding: `${L.sp.lg} ${L.sp.xl}`,
                 ...selectableCard(colors, { selected: isSelected, radius: '6px' }),
-                boxShadow: isSelected ? `0 2px 8px ${tintColor(SEMANTIC.primary, 0.3)}` : `0 1px 3px ${colors.shadow}`
+                boxShadow: shadow('raised', theme, isSelected ? { color: tintColor(SEMANTIC.primary, 0.3) } : undefined)
               }}
             >
             {/* ルートヘッダー: 番号・時間・乗換・ボタン */}

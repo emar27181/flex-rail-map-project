@@ -45,6 +45,40 @@
 - `src/components/map/MapCompassButton.tsx`, `src/components/ui/atoms/CompassNeedle.tsx`, `src/utils/angle.ts`（新規）, `tests/unit/utils/angle.test.ts`（新規）
 - leaflet-rotate の回転角は 0〜360° に丸めて届くため、北をまたぐと 359°→1° と飛び、針の CSS 回転が逆向きにほぼ1周していた。前の角度から最短の向きに進めた連続した角度（`continuousAngle`）で回す
 - 回転中は毎フレーム角度が届き、そのたびに針の transition（0.15s）が始まり直して遅れて追いかけていた。transition をやめ、描き直しは1フレームに1回（requestAnimationFrame）にまとめた
+## [2026-10-07] セッション（デザイン規則を CI で検査・規則一覧に一本化）
+
+### improve: 開閉の印（▼）をすべて DisclosureIndicator に統一し、手書きをテストで落とす
+- `src/components/legend/{HeatmapControl,MapConfigPanel,LegendRouteList,legendStyles}.tsx`, `src/components/{TimetablePanel,RailwayMap}.tsx`,
+  `src/components/ui/atoms/DisclosureIndicator.tsx`（`tone`）, `src/utils/translation.ts`, `tests/unit/components/ui/disclosure.test.ts`（新規）
+- ヒートマップ・設定の保存は閉じて ▶ / 開いて ▼、ヒートマップの指標は開いて ▼ / 閉じて ▲ と、パネルごとに向きと回す時間が違った
+- 「▼ 他 N 路線を表示」「▲ 折りたたむ」など翻訳文言に入っていた印を外し、ボタンの中に DisclosureIndicator（`tone="inherit"`）を置く
+- 時刻表の区間の間の ▼ は開閉ではなく進む向きなので lucide の `ArrowDown`
+
+### feat: GitHub Actions で型・デザイン規則・ユニットテスト・ビルドを実行する
+- `.github/workflows/ci.yml`（新規）, `scripts/design-rules.mjs`（新規）, `package.json`（`test:design`、`test:ci` に追加）
+- CI が無く、規則のテストは手元でしか動いていなかった（Netlify のプレビューは build だけ）
+- `npm run test:design` は docs/design-system.md の「規則一覧（CI で検査）」の「検査」列からテストを読む。表に1行足せば CI に入る
+
+### docs: デザインの規則を design-system.md の「規則一覧（CI で検査）」に一本化
+- `docs/design-system.md`, `CLAUDE.md`, `AGENTS.md`, `.claude/skills/design-tokens/SKILL.md`, `tests/unit/designRules.test.ts`（新規）
+- 規則・定義元・検査テストを1つの表にし、CLAUDE.md 等は要点と表への案内だけにする。規則を決めたら「定義元 → 検査 → 表に1行 → 要点」の順でそろえる
+- 表の検査ファイルの存在・部品表の網羅（`RemovableTag`・`SlideSegmentedControl` を追記）・CI の実行内容・入口の文書からの案内をテストで突き合わせる
+- 冒頭の「書くときの判断表だけ読めば足りる」の文の途中に別の節が挟まって崩れていたのを直した
+
+## [2026-10-07] セッション（影の一元管理・影なしの方針）
+
+### improve: 影を ui/atoms/shadow.ts に一元化し、既定で影なしにする
+- `src/components/ui/atoms/shadow.ts`（新規）, `tests/unit/components/ui/shadow.test.ts`（新規）
+- `src/components/RailwayMap.tsx`（所要時間の丸・駅ラベル・駅の点・現在地・列車の向き・ズームボタン・Leaflet のポップアップ・お知らせ）,
+  `src/components/ui/atoms/{floatingSurface,controlCss,codeBadge}.ts`, `src/components/ui/ColorChip.tsx`,
+  `src/components/{NavigationBar,StickyBottomAd,CookieBanner,RouteRecommendations,DiagramMap,DemoMap,CoverageAnalysis}.tsx`,
+  `src/layouts/seoPageStyles.ts`, `src/styles/article-{layout,introduction}.css`, `src/pages/{index,fullscreen}.astro`
+- 所要時間の丸に影が付いて見えた。影は場所ごとに `0 1px 3px rgba(...)` などを直書きしていて、濃さ・広がりがばらばらだった
+- 役割（marker / floating / raised / overlay）ごとに `enabled` を持たせ、既定はすべて false。戻すときは SHADOW のその役割を true にするだけ
+- 白字の縁取り（ハロー）は影ではなく読みやすさのためなので `textHalo()` に集め、既定でオンのまま
+- 記事の CSS の `--shadow` も同じ規格から作る（TOKEN_VARS_CSS）。直書きはテストで落ちる
+
+### docs: 影の規則を design-system.md・design-tokens スキル・CLAUDE.md に追記
 
 ## [2026-10-06] セッション（凡例を見出しと一覧が1枚の開閉パネルに）
 

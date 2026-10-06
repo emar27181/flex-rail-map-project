@@ -3,6 +3,7 @@ import { Cookie, Settings, X } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import Button from './ui/atoms/Button';
 import Switch from './ui/atoms/Switch';
+import { shadow } from './ui/atoms/shadow';
 import { translateUI } from '../utils/translation';
 import type { Language } from '../utils/translation';
 import { FS } from '../constants/ui';
@@ -83,7 +84,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
         backgroundColor: colors.surface,
         border: `1px solid ${colors.border}`,
         borderBottom: 'none',
-        boxShadow: `0 -4px 12px ${colors.shadow}`,
+        boxShadow: shadow('overlay', theme, { upward: true }),
         zIndex: 10000,
         padding: L.sp['3xl'],
         maxHeight: '50vh',

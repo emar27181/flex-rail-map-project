@@ -8,16 +8,17 @@
  *
  * - 透け具合: ThemeContext の FLOATING_OPACITY（idle / open）
  * - 角の丸み: controlSize.ts の FLOATING_CONTROL.radius
- * - ぼかし・影: このファイルの FLOATING_SURFACE
+ * - ぼかし: このファイルの FLOATING_SURFACE
+ * - 影: shadow.ts の SHADOW.floating（既定は影なし）
  * 見た目を変えるときは、この3か所のどれか1か所だけを直す。
  */
 import type { CSSProperties } from 'react';
 import { getThemeColors } from '../../../contexts/ThemeContext';
 import { CONTROL_BORDER_WIDTH, FLOATING_CONTROL } from './controlSize';
+import { shadow } from './shadow';
 
-/** 背景のぼかし(px)と影の広がり(px) */
-/** ぼかしは、開いた箱も透かしたまま文字を読めるよう強めにする（iOS のすりガラスと同程度） */
-export const FLOATING_SURFACE = { blurPx: 16, shadowOffsetPx: 2, shadowBlurPx: 8 } as const;
+/** 背景のぼかし(px)。開いた箱も透かしたまま文字を読めるよう強めにする（iOS のすりガラスと同程度） */
+export const FLOATING_SURFACE = { blurPx: 16 } as const;
 
 /**
  * - idle: 閉じている箱・ボタン（地図が透ける）
@@ -38,9 +39,9 @@ export function floatingSurfaceStyle(theme: 'light' | 'dark', state: FloatingSur
   };
 }
 
-/** 浮かぶものの影（押している・塗っているときも同じ影を付ける） */
+/** 浮かぶものの影（押している・塗っているときも同じ影）。有無と強さは shadow.ts の SHADOW.floating */
 export function floatingShadow(theme: 'light' | 'dark'): string {
-  return `0 ${FLOATING_SURFACE.shadowOffsetPx}px ${FLOATING_SURFACE.shadowBlurPx}px ${getThemeColors(theme).shadow}`;
+  return shadow('floating', theme);
 }
 
 /**

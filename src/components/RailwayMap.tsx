@@ -108,6 +108,7 @@ import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
 import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE } from './ui/atoms/controlSize';
 import { floatingSurfaceStyle, floatingSurfaceCss } from './ui/atoms/floatingSurface';
+import { shadow, dropShadowFilter, joinShadows, textHalo, textHaloCss } from './ui/atoms/shadow';
 
 import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
@@ -185,6 +186,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       }
       .leaflet-tooltip::before {
         display: none !important;
+      }
+      /* Leaflet 既定の影（ポップアップ・ズームボタン）も shadow.ts の方針に従わせる */
+      .leaflet-popup-content-wrapper,
+      .leaflet-popup-tip {
+        box-shadow: ${shadow('overlay', theme)} !important;
+      }
+      .leaflet-bar {
+        box-shadow: ${shadow('floating', theme)} !important;
       }
       .bubble-name-label {
         background: transparent !important;
@@ -1543,7 +1552,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     >
                       {translatedLabel}{hasInfo ? ' ⓘ' : ''}
                     </span>
-                    <span style={{ fontSize: FS.caption, color: pColor, fontWeight: isActive ? 'bold' : 'normal', marginLeft: L.sp.xs, textShadow: '0 0 3px rgba(0,0,0,0.55), 0 0 1px rgba(0,0,0,0.4)' }}>
+                    <span style={{ fontSize: FS.caption, color: pColor, fontWeight: isActive ? 'bold' : 'normal', marginLeft: L.sp.xs, textShadow: textHalo('soft') }}>
                       {v}{translateStatUnit(p.unit, currentLanguage) ? ` ${translateStatUnit(p.unit, currentLanguage)}` : ''}
                     </span>
                   </div>
@@ -1923,7 +1932,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         {labelEl}
                         <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xxs, flexShrink: 0 }}>
                           <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: pColor, flexShrink: 0 }} />
-                          <span style={{ color: pColor, fontWeight: isActive ? 'bold' : 'normal', textShadow: '0 0 3px rgba(0,0,0,0.55), 0 0 1px rgba(0,0,0,0.4)' }}>
+                          <span style={{ color: pColor, fontWeight: isActive ? 'bold' : 'normal', textShadow: textHalo('soft') }}>
                             {v}{translateStatUnit(p.unit, currentLanguage) ? ` ${translateStatUnit(p.unit, currentLanguage)}` : ''}
                           </span>
                         </div>
@@ -2322,12 +2331,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     if (isDetailed) {
       const borderColor = theme === 'dark' ? alphaWhite(0.8) : NEUTRAL.white;
-      const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
       // 枠線色を個別カスタムしている場合は、ヒートマップ等の「枠線なし」より優先する
       const borderCss = stationIconStyle.borderColor
         ? `border:1px solid ${stationIconStyle.borderColor};`
         : (overrideColor ? 'border:none;' : `border:1px solid ${borderColor};`);
-      const shadowCss = overrideColor ? '' : `box-shadow:0 1px 3px ${shadowColor};`;
+      const shadowCss = overrideColor ? '' : `box-shadow:${shadow('marker', theme)};`;
       const translatedStationName = translateStation(station.name, currentLanguage);
       const furigana = (showFurigana && currentLanguage === 'japanese') ? getFurigana(station.name) : '';
       const hasFurigana = furigana.length > 0;
@@ -2367,9 +2375,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const labelBgColor = stationIconStyle.bgColor ?? filledBg;
       const labelTextColor = stationIconStyle.textColor ?? filledText;
       // カスタム背景色のときは自動配色向けのハロー判定は当てにならないため出さない
-      const haloCss = (needsHalo && !stationIconStyle.bgColor)
-        ? 'text-shadow:0 0 2px rgba(0,0,0,0.95),0 1px 2px rgba(0,0,0,0.9);'
-        : '';
+      const haloCss = (needsHalo && !stationIconStyle.bgColor) ? textHaloCss('strong') : '';
       const htmlContent = hasFurigana || hasTime
         ? `<div style="background:${labelBgColor};color:${labelTextColor};${haloCss}padding:${stationLabelBox.paddingCss};border-radius:${stationLabelBox.radiusCss};white-space:nowrap;${borderCss}${shadowCss}text-align:center;opacity:${opacity};display:flex;flex-direction:column;align-items:center;justify-content:center">${hasFurigana ? `<div style="font-size:${stationLabelBox.furiganaFontSize}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${lfs}px;font-weight:bold;line-height:1">${displayName}</div>${timeLine}</div>`
         : `<div style="background:${labelBgColor};color:${labelTextColor};${haloCss}padding:${stationLabelBox.paddingCss};border-radius:${stationLabelBox.radiusCss};font-size:${lfs}px;font-weight:bold;white-space:nowrap;${borderCss}${shadowCss}opacity:${opacity}">${displayName}</div>`;
@@ -2384,13 +2390,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     } else {
       const stationSize = Math.round(Math.max(4, Math.min(24, zoomLevel - 8)) * stationIconScale);
       const borderColor = theme === 'dark' ? alphaWhite(0.8) : NEUTRAL.white;
-      const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)';
       const dotBorder = stationIconStyle.borderColor
         ? `1px solid ${stationIconStyle.borderColor}`
         : (overrideColor ? 'none' : `1px solid ${borderColor}`);
       const dotFill = stationIconStyle.bgColor ?? displayColor;
-      // ティアあり → tierShadow を使用、なし → デフォルトの drop shadow
-      const dotShadow = tierShadow ?? (overrideColor ? 'none' : `0 1px 2px ${shadowColor}`);
+      // ティアあり → tierShadow（多重の輪）を使用、なし → 印の影（shadow.ts）
+      const dotShadow = tierShadow ?? (overrideColor ? 'none' : shadow('marker', theme));
       // ティアあり時は icon サイズを影が見えるよう大きめに確保（4リング=12px、3リング以下=10px）
       const paddingForShadow = tierShadow
         ? (tierShadow.includes('12px') ? 16 : 12)
@@ -2551,9 +2556,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         : stationLabelBox.height)
         + timeLines.length * stationLabelBox.furiganaHeight
         + borderAdjustment;
-      // 出発駅・到着駅は影なし、その他は通常の影
+      // 出発駅・到着駅は枠の輪（boxShadow）を付けない
       const isSelectedStation = (departure && departure.name === station.name) || (arrival && arrival.name === station.name);
-      const shadowColor = isSelectedStation ? 'transparent' : (theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)');
       const ttFontSize = stationLabelBox.fontSize;
       const ttFuriganaSize = stationLabelBox.furiganaFontSize;
 
@@ -2599,9 +2603,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       // 枠線の太さを考慮してサイズを調整
       const borderAdjustment = borderStyle.borderWidth * 2; // 左右・上下の枠線分
       const stationSize = baseStationSize + borderAdjustment;
-      // 出発駅・到着駅は影なし、その他は通常の影
+      // 出発駅・到着駅は枠の輪（boxShadow）を付けない
       const isSelectedStation = (departure && departure.name === station.name) || (arrival && arrival.name === station.name);
-      const shadowColor = isSelectedStation ? 'transparent' : (theme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)');
 
       const bgColor2 = stationIconStyle.bgColor ?? heatOverride ?? routeColors[routeKey];
       const borderColor2 = stationIconStyle.borderColor ?? borderStyle.borderColor;
@@ -2695,7 +2698,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const circleSize = 13;
     const borderWidth = 1;
 
-    const shadowColor = theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)';
     // 既定（背景色を「路線色」にしたとき）は、駅名ラベルと同じ
     // filledLabelColors を使い、実際に路線色で塗った背景にする
     // （以前は路線に関わらず常に中立なグレー/白の背景だったため、
@@ -2716,7 +2718,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         display:flex;
         align-items:center;
         justify-content:center;
-        box-shadow:0 1px 3px ${shadowColor};
+        box-shadow:${shadow('marker', theme)};
         font-weight:bold;
         line-height:1;
       ">
@@ -3580,7 +3582,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           (control as HTMLElement).style.setProperty('background', '#2d2d2d', 'important');
           (control as HTMLElement).style.setProperty('border', '1px solid #404040', 'important');
           (control as HTMLElement).style.setProperty('border-radius', '4px', 'important');
-          (control as HTMLElement).style.setProperty('box-shadow', '0 2px 5px rgba(0,0,0,0.3)', 'important');
+          (control as HTMLElement).style.setProperty('box-shadow', shadow('floating', 'dark'), 'important');
 
           // ズームボタン（+ と -）
           const zoomButtons = control.querySelectorAll('a');
@@ -4007,14 +4009,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           background: #4285F4;
           border: 2px solid white;
           border-radius: 50%;
-          box-shadow: 0 0 0 1px #4285F4, 0 1px 4px rgba(0,0,0,0.3);
+          box-shadow: ${joinShadows('0 0 0 1px #4285F4', shadow('marker', theme))};
         "></div>
       </div>`,
       className: 'user-location-marker',
       iconSize: [36, 36],
       iconAnchor: [18, 18]
     });
-  }, [MapComponents, userLocation, userHeading]);
+  }, [MapComponents, userLocation, userHeading, theme]);
 
   /**
    * 同じ区間を走る路線の索引。
@@ -4300,7 +4302,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               <text x={b.x} y={b.y} textAnchor="middle" dominantBaseline="middle"
                 fontSize={Math.max(7, Math.min(11, b.r * 0.55))}
                 fill={NEUTRAL.white} fontWeight="bold"
-                style={{ pointerEvents: 'none', textShadow: '0 0 3px rgba(0,0,0,0.8)' }}>
+                style={{ pointerEvents: 'none', textShadow: textHalo('strong') }}>
                 {b.displayName.length > 6 ? b.displayName.slice(0, 5) + '…' : b.displayName}
               </text>
             )}
@@ -5575,7 +5577,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   const depTime = formatDemoTime(t.departureMin);
                   const bearing = t.bearing ?? 0;
                   const icon = new MapComponents.DivIcon({
-                    html: `<div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:13px solid ${t.color};transform:rotate(${bearing}deg);filter:drop-shadow(0 1px 1px rgba(0,0,0,0.4));"></div>`,
+                    html: `<div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:13px solid ${t.color};transform:rotate(${bearing}deg);filter:${dropShadowFilter('marker', theme)};"></div>`,
                     className: '',
                     iconSize: [16, 16],
                     iconAnchor: [8, 8],
@@ -5647,7 +5649,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               fontSize: FS.caption,
               fontWeight: 'bold',
               letterSpacing: '0.05em',
-              boxShadow: '0 2px 12px rgba(102,126,234,0.5)',
+              boxShadow: shadow('overlay', theme),
               pointerEvents: 'none',
               whiteSpace: 'nowrap',
             }}>
@@ -5732,11 +5734,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         : (meta ? translateStatParamLabel(meta.label, currentLanguage) : String(heatmapParam)) + (meta?.unit ? ` (${meta.unit})` : '')
                       }
                     </span>
-                    <span style={{
-                      fontSize: FS.caption, color: colors.textSecondary, flexShrink: 0, marginLeft: L.sp.xs,
-                      transform: heatmapParamSelectorOpen ? 'rotate(0deg)' : 'rotate(180deg)',
-                      transition: 'transform 0.2s',
-                    }}>▲</span>
+                    {/* heatmapParamSelectorOpen は「折りたたんでいる」の意味（true で本体を隠す） */}
+                    <span style={{ marginLeft: L.sp.xs, display: 'flex' }}>
+                      <DisclosureIndicator expanded={!heatmapParamSelectorOpen} theme={theme} />
+                    </span>
                   </div>
 
                   {/* 本体（折りたたみ対象） */}
@@ -5879,7 +5880,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               padding: `${L.sp.sm} ${L.sp.xl}`,
               display: 'flex', alignItems: 'center', gap: L.sp.md,
               fontSize: FS.body, color: colors.text,
-              boxShadow: `0 2px 8px ${colors.shadow}`,
+              boxShadow: shadow('overlay', theme),
               whiteSpace: 'nowrap',
             }}>
               <span style={{ fontWeight: 'bold', color: '#9ACD32' }}>
@@ -5972,7 +5973,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 borderRadius: L.r.card,
                 backgroundColor: SEMANTIC.arrival,
                 color: colors.onPrimary,
-                boxShadow: `0 4px 16px ${colors.shadow}`,
+                boxShadow: shadow('overlay', theme),
                 cursor: 'pointer',
               }}
             >

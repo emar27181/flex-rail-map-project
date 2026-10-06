@@ -7,6 +7,7 @@ import { translateUI, translateStatParamLabel } from '../../utils/translation';
 import type { Language } from '../../utils/translation';
 import Select from '../ui/atoms/Select';
 import Checkbox from '../ui/atoms/Checkbox';
+import DisclosureIndicator from '../ui/atoms/DisclosureIndicator';
 
 type Props = {
   enabled: boolean;
@@ -49,7 +50,6 @@ export default function HeatmapControl({
     <div style={section.wrap(colors)}>
       {/* ヘッダー */}
       <div style={section.header} onClick={() => setOpen(v => !v)}>
-        <span style={section.arrow(colors)}>{open ? '▼' : '▶'}</span>
         <Checkbox theme={theme} size="sm" checked={enabled} onChange={onEnabledChange}>
             <span style={section.title(colors)}>{translateUI('stationHeatmap', language)}</span>
           </Checkbox>
@@ -64,6 +64,7 @@ export default function HeatmapControl({
             {currentMeta?.label ?? paramKey as string}
           </span>
         )}
+        <span style={section.indicator}><DisclosureIndicator expanded={open} theme={theme} /></span>
       </div>
 
       {open && (

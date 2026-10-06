@@ -7462,12 +7462,12 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Increase"
   },
   collapseList: {
-    japanese: "▲ 折りたたむ",
-    english: "▲ Collapse"
+    japanese: "折りたたむ",
+    english: "Collapse"
   },
   showMoreRoutes: {
-    japanese: "▼ 他 {count} 路線を表示",
-    english: "▼ Show {count} more routes"
+    japanese: "他 {count} 路線を表示",
+    english: "Show {count} more routes"
   },
   routeViewBoard: {
     japanese: "ボード",
@@ -7965,8 +7965,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "No data"
   },
   showAllTimetable: {
-    japanese: "▼ 時刻表をすべて表示",
-    english: "▼ Show full timetable"
+    japanese: "時刻表をすべて表示",
+    english: "Show full timetable"
   },
   onboardRouteNoData: {
     japanese: "乗車路線ですが\n時刻データなし",
@@ -8739,8 +8739,8 @@ export const uiChinese: Record<string, string> = {
   play: "播放",
   pause: "暂停",
   increase: "放大",
-  collapseList: "▲ 折叠",
-  showMoreRoutes: "▼ 显示其他 {count} 条线路",
+  collapseList: "折叠",
+  showMoreRoutes: "显示其他 {count} 条线路",
   routeViewBoard: "面板",
   routeViewClassic: "列表",
   routeSearchPlaceholder: "搜索线路名称",
@@ -8882,7 +8882,7 @@ export const uiChinese: Record<string, string> = {
   reverseDirectionReference: "反方向（参考）",
   offRouteReference: "路线外参考",
   noData: "无数据",
-  showAllTimetable: "▼ 显示完整时刻表",
+  showAllTimetable: "显示完整时刻表",
   onboardRouteNoData: "乘坐路线，\n无时刻数据",
   noTimetableData: "无时刻数据",
   approximateNote: "概算值·参考用　点击左侧路线名切换",
@@ -9077,8 +9077,8 @@ export const uiKorean: Record<string, string> = {
   play: "재생",
   pause: "일시정지",
   increase: "크게",
-  collapseList: "▲ 접기",
-  showMoreRoutes: "▼ 다른 {count}개 노선 표시",
+  collapseList: "접기",
+  showMoreRoutes: "다른 {count}개 노선 표시",
   routeViewBoard: "보드",
   routeViewClassic: "목록",
   routeSearchPlaceholder: "노선 이름으로 검색",
@@ -9220,7 +9220,7 @@ export const uiKorean: Record<string, string> = {
   reverseDirectionReference: "반대 방향(참고)",
   offRouteReference: "경로 외 참고",
   noData: "데이터 없음",
-  showAllTimetable: "▼ 전체 시간표 표시",
+  showAllTimetable: "전체 시간표 표시",
   onboardRouteNoData: "탑승 노선,\n시간표 데이터 없음",
   noTimetableData: "시간표 없음",
   approximateNote: "개산값·참고용　왼쪽 노선명 클릭으로 전환",

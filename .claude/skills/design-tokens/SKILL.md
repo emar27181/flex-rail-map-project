@@ -10,6 +10,10 @@ description: このプロジェクトのUIを書く・直すときに、色・�
 広がる、ツールチップのバッジだけ塗りつぶしにならない、など）。
 UIを触るときは値を直接書かず、下の定義元から取る。
 
+**規則の一次情報は `docs/design-system.md` の「規則一覧（CI で検査）」。** 規則ごとに検査テストがあり、
+`npm run test:design` と GitHub Actions がそれを実行する。新しい規則を決めたら、定義元 → 検査テスト →
+その表に1行（それだけで CI に入る）→ 下の表に1行、の順でそろえる。
+
 **新しく何かを作るときは、書き始める前に `docs/design-system.md` の「どの部品を使うか」を読む。**
 無い部品は先に atoms / molecules に足し、表に1行追記してから使う。
 
@@ -34,7 +38,8 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 | 地図の上に浮かぶ操作の高さ・文字の大きさ | `FLOATING_CONTROL`（36px / FS.body。丸いボタン・「表示切替」・凡例の見出しで共通） | `src/components/ui/atoms/controlSize.ts` |
 | 地図の上に浮かぶ文字つきボタン | `<FloatingButton>` | `src/components/ui/atoms/FloatingButton.tsx` |
 | 地図の上に浮かぶ箱・ボタンの地（透け具合・ぼかし・枠線・影・丸み） | `floatingSurfaceStyle(theme, 'idle' \| 'open')`。透け具合は `FLOATING_OPACITY` | `src/components/ui/atoms/floatingSurface.ts` |
-| 開閉する見出し・▼ | `<DisclosureHeader size>` / `<DisclosureIndicator>` | `src/components/ui/atoms/` |
+| 影・文字の縁取り（既定は影なし。`SHADOW` の `enabled` で役割ごとに戻せる） | `shadow(role, theme)` / `joinShadows` / `textHalo()`。記事の CSS は `var(--shadow)` | `src/components/ui/atoms/shadow.ts` |
+| 開閉する見出し・▼（▼▲▶ を手で書かない・翻訳文言にも入れない。塗ったボタンの中は `tone="inherit"`） | `<DisclosureHeader size>` / `<DisclosureIndicator>` | `src/components/ui/atoms/` |
 | 見出しと中身が1枚の開閉パネル | `<CollapsiblePanel size>` | `src/components/ui/molecules/CollapsiblePanel.tsx` |
 | 排他選択のボタン列 | `<SegmentedControl>` | `src/components/ui/molecules/SegmentedControl.tsx` |
 | 出発/到着/primary の色 | `SEMANTIC.departure` / `arrival` / `primary` | `src/constants/ui.ts` |

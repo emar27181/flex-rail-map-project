@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { routes, routeNames, type RouteKey } from '../data/routes';
 import { SEMANTIC, NEUTRAL, FS} from '../constants/ui';
 import { L } from './legend/legendStyles';
+import { shadow } from './ui/atoms/shadow';
 
 interface CoverageStats {
   totalRoutes: number;
@@ -122,7 +123,7 @@ const CoverageAnalysis: React.FC = () => {
       padding: L.sp.lg,
       minWidth: '200px',
       maxWidth: isExpanded ? '400px' : '200px',
-      boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+      boxShadow: shadow('raised', 'light'),
       fontSize: FS.caption
     }}>
       <div 
