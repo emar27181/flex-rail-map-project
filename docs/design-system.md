@@ -194,6 +194,11 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | つまみで数値を選ぶ | `Slider` |
 | −／＋の増減行 | `Stepper`（molecule） |
 | 排他選択のボタン列 | `SegmentedControl`（molecule） |
+| 開閉する見出しの右端の ▼ | `DisclosureIndicator`（開くと180度回る。回す時間・色は全パネル共通） |
+| 押すと開閉する見出しの行 | `DisclosureHeader`（見出し＋▼。行のどこを押しても開閉、開くと区切り線。`size="floating"` で高さ・文字が `FLOATING_CONTROL`） |
+| 地図の上に浮かぶ操作の高さ・文字の大きさ | `FLOATING_CONTROL`（`controlSize.ts`。36px・`FS.body`。FloatingButton・凡例の見出し・丸いボタンで共通） |
+| 地図の上に浮かぶ箱・ボタンの地（透け具合・ぼかし・枠線・影・角の丸み） | `floatingSurfaceStyle(theme, 'idle' \| 'open')`（`ui/atoms/floatingSurface.ts`）。閉じた箱・ボタンは idle（72%）、開いて中身を読む箱は open（82%）。どちらもすりガラス（ぼかし16px）。対象は隅の丸いボタン・「表示切替」・凡例・駅選択・駅名の候補一覧・表示路線の切替・下のパネル・ヒートマップの凡例・駅の時刻表/統計のツールチップ・路線のポップアップとツールチップ（Leaflet の `.leaflet-tooltip` は `floatingSurfaceCss`）。コンポーネントで `backdropFilter` / `blur(` / `glassOpen` を書くと `tests/unit/components/ui/floatingSurface.test.ts` が落ちる透け具合は `FLOATING_OPACITY`（ThemeContext）。`glassOpen` などを直接書かない |
+| 見出しと中身を1枚の箱にまとめた開閉パネル | `CollapsiblePanel`（molecule。凡例「N路線」が使う。見出しと中身を別の箱に分けない） |
 
 判定に迷ったら次を自問する。
 
@@ -306,6 +311,12 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | `control` | 3px | ボタン・入力欄・チップ・地図の駅ラベルなど、操作する部品と小さな札 |
 | `card` | 8px | パネル・カード・ポップアップなど、部品を載せる箱 |
 | `pill` | 999px | バッジ・件数など、完全に丸めたい小さな印 |
+
+**地図の上に浮かぶもの（2026-10-06）:** 隅の丸いボタン・「表示切替」・凡例「N路線」・駅選択・
+表示路線の切替・下から開くパネルは、ボタンでもパネルでも **`FLOATING_CONTROL.radius`（= card 8px）** にそろえる
+（`ui/atoms/controlSize.ts`）。隣り合って並ぶのに、ボタンは3px・凡例は8px・下のパネルは12pxとばらばらだった。
+丸みを変えるとき（もっと丸くする等）は `FLOATING_CONTROL.radius` の1か所だけ直す。
+中に並ぶチップ・駅ラベルは `control`(3px) のまま（小さな札は地図の駅ラベルに合わせる）。
 
 **基準は地図の駅ラベル。** 画面上でいちばん数が多く、いちばん目に入る部品なので、
 他の部品をそれに合わせる。

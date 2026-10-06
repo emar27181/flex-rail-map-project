@@ -9,6 +9,7 @@ import { SEMANTIC, FS} from '../constants/ui';
 import Button from './ui/atoms/Button';
 import { L } from './legend/legendStyles';
 import { MEDIA } from '../constants/breakpoints';
+import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
 
 // ---- 表示対象路線 ----
 export const DIAGRAM_ROUTE_KEYS: RouteKey[] = [
@@ -587,9 +588,9 @@ const DiagramMap: React.FC<DiagramMapProps> = ({
       >
         <div style={{
           position: 'absolute', bottom: 8, right: 8, zIndex: 20,
-          background: colors.surfaceElevated, border: `1px solid ${colors.border}`,
-          borderRadius: L.r.control, padding: `${L.sp.xs} ${L.sp.sm}`, fontSize: FS.caption,
-          color: colors.textSecondary, boxShadow: `0 1px 4px ${colors.shadow}`,
+          ...floatingSurfaceStyle(theme, 'open'),
+          padding: `${L.sp.xs} ${L.sp.sm}`, fontSize: FS.caption,
+          color: colors.textSecondary,
           display: 'none',
         }} className="diagram-hint">
           スクロール: ズーム ｜ ドラッグ: 移動

@@ -1,5 +1,42 @@
 # CHANGE LOG
 
+## [2026-10-06] セッション（凡例を見出しと一覧が1枚の開閉パネルに）
+
+### improve: 開閉する見出しの部品（DisclosureIndicator / DisclosureHeader / CollapsiblePanel）を作り、▼ をそろえる
+- `src/components/ui/atoms/{DisclosureIndicator,DisclosureHeader}.tsx`（新規）, `src/components/ui/molecules/CollapsiblePanel.tsx`（新規）,
+  `src/components/{StationSelector,RouteRecommendations,TrainTypeViewer}.tsx`, `src/components/legend/LegendRouteList.tsx`, `src/components/RailwayMap.tsx`, `docs/design-system.md`
+- 駅選択・表示路線の切替・候補ルート・列車種別などで ▼ を個別に書いていて、回す時間（0.2s/0.3s）や色がばらばらだった。「表示路線の切替」の見出しの行も部品にした
+
+### improve: 凡例の見出しと一覧を1枚の箱にまとめる
+- `src/components/legend/VisibleRoutesLegend.tsx`
+- 見出しのボタンと一覧が別々の箱で離れて見えていた。駅選択・表示路線の切替と同じ「見出し＋区切り線＋中身」の開閉パネルにした。閉じたときの高さは「表示切替」と同じ36px
+
+### improve: 地図の上に浮かぶ操作の文字の大きさを FLOATING_CONTROL に一元化し、凡例の見出しを「N路線」に
+- `src/components/ui/atoms/{controlSize.ts,FloatingButton.tsx,DisclosureHeader.tsx}`, `src/components/ui/molecules/CollapsiblePanel.tsx`, `src/components/legend/VisibleRoutesLegend.tsx`, `src/components/RailwayMap.tsx`, `src/utils/translation.ts`
+- 凡例の見出しだけパネルの見出しの大きさ（16px）で「表示切替」（14px）より大きかった
+
+### docs: 新しく作るときは必ずマニュアル（design-system.md・スキル）を読んでから
+- `CLAUDE.md`, `.claude/skills/design-tokens/SKILL.md`, `docs/design-system.md`
+
+### improve: 地図の上に浮かぶボタン・パネルの角の丸みを FLOATING_CONTROL.radius に一元化
+- `src/components/ui/atoms/{controlSize.ts,FloatingButton.tsx}`, `src/components/ui/molecules/CollapsiblePanel.tsx`, `src/components/{StationSelector,MobileBottomPanel,RailwayMap}.tsx`, `docs/design-system.md`, `CLAUDE.md`
+- 隅の丸いボタン・「表示切替」・表示路線の切替が3px、凡例・駅選択が8px、下のパネルが12px（直書き）とばらばらだった。すべて card(8px) にそろえた
+
+### improve: 地図の上に浮かぶ箱・ボタンの透け具合・ぼかし・影を floatingSurfaceStyle に一元化
+- `src/components/ui/atoms/floatingSurface.ts`（新規）, `src/contexts/ThemeContext.tsx`（`FLOATING_OPACITY`）, `src/components/ui/atoms/FloatingButton.tsx`,
+  `src/components/ui/molecules/CollapsiblePanel.tsx`, `src/components/{StationSelector,MobileBottomPanel,RailwayMap}.tsx`, `docs/design-system.md`, `CLAUDE.md`, `.claude/skills/design-tokens/SKILL.md`
+- 透け具合 0.72/0.82/0.96 と直書きの rgba、ぼかし 8/10/12px、影の有無が場所ごとにばらばらだった。閉じた箱・ボタン（idle）と開いて読む箱（open）の2段にまとめた
+
+### improve: 開いた箱もすりガラスにする（open 0.96→0.82、ぼかし 10→16px）
+- `src/contexts/ThemeContext.tsx`（`FLOATING_OPACITY`）, `src/components/ui/atoms/floatingSurface.ts`, `docs/design-system.md`
+- 開いた駅選択・凡例が不透明に見え、左下の「表示切替」だけがガラスに見えていた
+
+### improve: ツールチップ・ポップアップ・駅名の候補一覧もすりガラスに（地図の上に浮かぶものを網羅）
+- `src/components/RailwayMap.tsx`（駅の統計/時刻表ツールチップ・指標の解説・路線のポップアップ/ツールチップ・Leaflet のツールチップ・ヒートマップ凡例の直書き rgba）,
+  `src/components/ui/StationSearchDropdown.tsx`, `src/components/{MultiDepartureRoutes,RouteRecommendations,DiagramMap}.tsx`,
+  `src/components/ui/atoms/floatingSurface.ts`（`floatingSurfaceCss`）, `tests/unit/components/ui/floatingSurface.test.ts`（新規）
+- 不透明な地（surfaceElevated）や直書きの rgba のままのものが11か所あった。直書きはテストで検出する
+
 ## [2026-10-05] セッション（記事の画面を iframe に・路線/駅ページの路線色と駅番号・テーマの保存先の統一）
 
 ### feat: 地図を所要時間を表示した状態で開けるURL（`?times=1`）

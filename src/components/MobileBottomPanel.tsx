@@ -15,6 +15,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { getThemeColors } from '../contexts/ThemeContext';
 import FloatingButton, { FLOATING_BUTTON_HEIGHT } from './ui/atoms/FloatingButton';
+import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
 import IconButton from './ui/atoms/IconButton';
 import { L } from './legend/legendStyles';
 import { FS } from '../constants/ui';
@@ -193,12 +194,8 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
               ? { height: panelHeight }
               : { maxHeight: POPOVER_MAX_H }),
             zIndex: Z_POPOVER,
-            backgroundColor: colors.glassOpen,
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            border: `1px solid ${colors.border}`,
-            borderRadius: 12,
-            boxShadow: `0 4px 24px ${colors.shadow}`,
+            // 地は地図の上に浮かぶ他の箱・ボタンと共通（開いて中身を読む箱なので open）
+            ...floatingSurfaceStyle(theme, 'open'),
             display: 'flex',
             flexDirection: 'column',
           }}
@@ -221,7 +218,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
             <div style={{
               width: 48,
               height: 5,
-              borderRadius: 3,
+              borderRadius: L.r.pill,
               backgroundColor: colors.border,
             }} />
           </div>

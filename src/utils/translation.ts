@@ -7944,8 +7944,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   },
   // 凡例の見出し（短く。狭い幅で見切れても件数が先に読めるように）
   visibleRoutesLegendCount: {
-    japanese: "表示路線{count}件",
-    english: "{count} lines shown"
+    japanese: "{count}路線",
+    english: "{count} lines"
   },
   reverseDirection: {
     japanese: "方向を切り替え",
@@ -8861,7 +8861,7 @@ export const uiChinese: Record<string, string> = {
   showPerRouteStationTimes: "按线路显示时刻",
   visibleRoutesLegendTitle: "显示中的线路",
   moreRoutesCount: "…另外{count}条线路",
-  visibleRoutesLegendCount: "显示线路{count}条",
+  visibleRoutesLegendCount: "{count}条线路",
   reverseDirection: "切换方向",
   reverseDirectionReference: "反方向（参考）",
   offRouteReference: "路线外参考",
@@ -9196,7 +9196,7 @@ export const uiKorean: Record<string, string> = {
   showPerRouteStationTimes: "노선별 시각 표시",
   visibleRoutesLegendTitle: "표시 중인 노선",
   moreRoutesCount: "…외 {count}개 노선",
-  visibleRoutesLegendCount: "표시 노선 {count}개",
+  visibleRoutesLegendCount: "{count}개 노선",
   reverseDirection: "방향 전환",
   reverseDirectionReference: "반대 방향(참고)",
   offRouteReference: "경로 외 참고",

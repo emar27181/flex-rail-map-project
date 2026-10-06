@@ -20,6 +20,7 @@ import type { Language } from '../../utils/translation';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { FS } from '../../constants/ui';
 import { L } from '../legend/legendStyles';
+import { floatingSurfaceStyle } from './atoms/floatingSurface';
 
 export interface StationSearchDropdownPosition {
   top: number;
@@ -64,10 +65,8 @@ const StationSearchDropdown = React.forwardRef<HTMLDivElement, StationSearchDrop
         top: position.top,
         left: position.left,
         width: position.width,
-        backgroundColor: colors.surfaceElevated,
-        border: `1px solid ${colors.border}`,
-        borderRadius: L.r.control,
-        boxShadow: `0 4px 12px ${colors.shadow}`,
+        // 地は地図の上に浮かぶ他の箱と同じすりガラス（ui/atoms/floatingSurface.ts）
+        ...floatingSurfaceStyle(theme, 'open'),
         maxHeight: '240px',
         overflowY: 'auto',
         // iOSで候補内をスクロールしたとき、端に達しても地図やページ側へ

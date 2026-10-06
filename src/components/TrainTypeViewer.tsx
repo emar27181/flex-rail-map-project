@@ -7,6 +7,7 @@ import Select from './ui/atoms/Select';
 import TextField from './ui/atoms/TextField';
 import { FS } from '../constants/ui';
 import { L } from './legend/legendStyles';
+import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
 
 interface TrainTypeViewerProps {
   selectedRoute: RouteKey | null;
@@ -92,13 +93,7 @@ const TrainTypeViewer: React.FC<TrainTypeViewerProps> = ({
         <span style={{ fontWeight: '600', fontSize: FS.title }}>
           <TrainFront size={15} style={{ verticalAlign: 'text-bottom', marginRight: 5 }} />列車種別表示
         </span>
-        <span style={{
-          fontSize: FS.caption,
-          transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-          transition: 'transform 0.2s ease'
-        }}>
-          ▼
-        </span>
+        <DisclosureIndicator expanded={isExpanded} theme={theme} />
       </div>
 
       {isExpanded && (
