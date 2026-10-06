@@ -42,3 +42,20 @@ export function floatingSurfaceStyle(theme: 'light' | 'dark', state: FloatingSur
 export function floatingShadow(theme: 'light' | 'dark'): string {
   return `0 ${FLOATING_SURFACE.shadowOffsetPx}px ${FLOATING_SURFACE.shadowBlurPx}px ${getThemeColors(theme).shadow}`;
 }
+
+/**
+ * 同じ地を CSS の文字列で返す（React の style が使えない所: Leaflet のツールチップなど）。
+ * `important` を付けると Leaflet 既定の CSS より優先させられる。
+ */
+export function floatingSurfaceCss(theme: 'light' | 'dark', state: FloatingSurfaceState = 'open', important = false): string {
+  const s = floatingSurfaceStyle(theme, state);
+  const imp = important ? ' !important' : '';
+  return [
+    `background-color: ${s.backgroundColor}${imp};`,
+    `backdrop-filter: ${s.backdropFilter}${imp};`,
+    `-webkit-backdrop-filter: ${s.WebkitBackdropFilter}${imp};`,
+    `border: ${s.border}${imp};`,
+    `border-radius: ${s.borderRadius}${imp};`,
+    `box-shadow: ${s.boxShadow}${imp};`,
+  ].join('\n');
+}

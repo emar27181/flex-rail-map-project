@@ -197,7 +197,7 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 開閉する見出しの右端の ▼ | `DisclosureIndicator`（開くと180度回る。回す時間・色は全パネル共通） |
 | 押すと開閉する見出しの行 | `DisclosureHeader`（見出し＋▼。行のどこを押しても開閉、開くと区切り線。`size="floating"` で高さ・文字が `FLOATING_CONTROL`） |
 | 地図の上に浮かぶ操作の高さ・文字の大きさ | `FLOATING_CONTROL`（`controlSize.ts`。36px・`FS.body`。FloatingButton・凡例の見出し・丸いボタンで共通） |
-| 地図の上に浮かぶ箱・ボタンの地（透け具合・ぼかし・枠線・影・角の丸み） | `floatingSurfaceStyle(theme, 'idle' \| 'open')`（`ui/atoms/floatingSurface.ts`）。閉じた箱・ボタンは idle（72%）、開いて中身を読む箱は open（82%）。どちらもすりガラス（ぼかし16px）。透け具合は `FLOATING_OPACITY`（ThemeContext）。`glassOpen` などを直接書かない |
+| 地図の上に浮かぶ箱・ボタンの地（透け具合・ぼかし・枠線・影・角の丸み） | `floatingSurfaceStyle(theme, 'idle' \| 'open')`（`ui/atoms/floatingSurface.ts`）。閉じた箱・ボタンは idle（72%）、開いて中身を読む箱は open（82%）。どちらもすりガラス（ぼかし16px）。対象は隅の丸いボタン・「表示切替」・凡例・駅選択・駅名の候補一覧・表示路線の切替・下のパネル・ヒートマップの凡例・駅の時刻表/統計のツールチップ・路線のポップアップとツールチップ（Leaflet の `.leaflet-tooltip` は `floatingSurfaceCss`）。コンポーネントで `backdropFilter` / `blur(` / `glassOpen` を書くと `tests/unit/components/ui/floatingSurface.test.ts` が落ちる透け具合は `FLOATING_OPACITY`（ThemeContext）。`glassOpen` などを直接書かない |
 | 見出しと中身を1枚の箱にまとめた開閉パネル | `CollapsiblePanel`（molecule。凡例「N路線」が使う。見出しと中身を別の箱に分けない） |
 
 判定に迷ったら次を自問する。

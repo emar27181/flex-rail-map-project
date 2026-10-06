@@ -11,6 +11,7 @@ import { SEMANTIC, FS} from '../constants/ui';
 import { tintColor } from '../utils/contrast';
 import Button from './ui/atoms/Button';
 import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
+import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
 
 interface RouteRecommendationsProps {
   routes: RouteResult[];
@@ -92,8 +93,9 @@ const RouteRecommendations: React.FC<RouteRecommendationsProps> = ({
         position: 'fixed',
         left: tooltip.x + 12,
         top: tooltip.y - 36,
-        backgroundColor: 'rgba(30,30,30,0.92)',
-        color: colors.onPrimary,
+        // 地は地図の上に浮かぶ他の箱と同じすりガラス（ui/atoms/floatingSurface.ts）
+        ...floatingSurfaceStyle(theme, 'open'),
+        color: colors.text,
         padding: `${L.sp.xs} ${L.sp.lg}`,
         borderRadius: L.r.control,
         fontSize: FS.caption,

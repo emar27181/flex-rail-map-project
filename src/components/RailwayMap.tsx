@@ -106,7 +106,7 @@ import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
 import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE } from './ui/atoms/controlSize';
-import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
+import { floatingSurfaceStyle, floatingSurfaceCss } from './ui/atoms/floatingSurface';
 
 import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
@@ -176,13 +176,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       .leaflet-interactive:focus {
         outline: none !important;
       }
+      /* 路線名などのツールチップも地図の上に浮かぶ他の箱と同じすりガラス（ui/atoms/floatingSurface.ts） */
       .leaflet-tooltip {
-        background-color: rgba(0,0,0,0.65) !important;
-        color: #fff !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 4px 8px !important;
-        border-radius: 4px !important;
+        ${floatingSurfaceCss(theme, 'open', true)}
+        color: ${colors.text} !important;
+        padding: ${L.sp.xs} ${L.sp.sm} !important;
       }
       .leaflet-tooltip::before {
         display: none !important;
@@ -1451,10 +1449,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           position: 'fixed', left: x, top: y, zIndex: 9999,
           width: `${TW}px`,
           maxHeight: '480px',
-          backgroundColor: colors.surfaceElevated,
-          border: `1px solid ${colors.border}`,
-          borderRadius: L.r.card,
-          boxShadow: `0 4px 16px ${colors.shadow}`,
+          // 地は地図の上に浮かぶ他の箱と同じすりガラス（ui/atoms/floatingSurface.ts）
+          ...floatingSurfaceStyle(theme, 'open'),
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -1586,10 +1582,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           width: `${TW}px`,
           maxHeight: `${maxH}px`,
           overflowY: 'auto',
-          backgroundColor: colors.surfaceElevated,
-          border: `1px solid ${colors.primary}`,
-          borderRadius: L.r.control,
-          boxShadow: `0 4px 12px ${colors.shadow}`,
+          // 地は地図の上に浮かぶ他の箱と同じすりガラス。解説だと分かるよう枠だけ主操作の色にする
+          ...floatingSurfaceStyle(theme, 'open'),
+          borderColor: colors.primary,
           padding: `${L.sp.md} ${L.sp.lg}`,
           fontSize: FS.caption,
           color: colors.text,
@@ -1776,10 +1771,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           position: 'fixed', left: finalX, top: finalY, zIndex: 9999,
           width: `${TW}px`,
           maxHeight: `${maxTooltipH}px`,
-          backgroundColor: colors.surfaceElevated,
-          border: `1px solid ${colors.border}`,
-          borderRadius: L.r.card,
-          boxShadow: `0 4px 16px ${colors.shadow}`,
+          // 地は地図の上に浮かぶ他の箱と同じすりガラス（ui/atoms/floatingSurface.ts）
+          ...floatingSurfaceStyle(theme, 'open'),
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -5696,7 +5689,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             const btnS: React.CSSProperties = {
               width: '18px', height: '18px', fontSize: FS.caption, cursor: 'pointer',
               borderRadius: L.r.control, border: `1px solid ${colors.border}`, flexShrink: 0,
-              background: theme === 'dark' ? 'rgba(60,60,60,0.9)' : 'rgba(220,220,220,0.9)',
+              background: colors.surfaceHover,
               color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center',
               userSelect: 'none' as const,
             };
@@ -5815,7 +5808,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                       padding: `${L.sp.xs} ${L.sp.md}`, cursor: 'pointer',
                       borderTop: `1px solid ${colors.borderLight}`,
-                      background: theme === 'dark' ? 'rgba(40,40,40,0.6)' : 'rgba(245,245,245,0.8)',
+                      background: colors.surfaceHover,
                     }}
                   >
                     <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('heatmapShowOtherInfo', currentLanguage)}</span>
@@ -6004,9 +5997,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onClick={e => e.stopPropagation()}
                 style={{
                   position: 'fixed', left: tx, top: ty, zIndex: 9999,
-                  width: TW, backgroundColor: colors.surfaceElevated,
-                  border: `1px solid ${colors.border}`, borderRadius: L.r.card,
-                  boxShadow: `0 4px 16px ${colors.shadow}`, overflow: 'hidden',
+                  width: TW, overflow: 'hidden',
+                  // 地は地図の上に浮かぶ他の箱と同じすりガラス（ui/atoms/floatingSurface.ts）
+                  ...floatingSurfaceStyle(theme, 'open'),
                 }}
               >
                 <div style={{
@@ -6706,11 +6699,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   position: 'fixed',
                   left: `${routePopupPosition.x}px`,
                   top: `${routePopupPosition.y}px`,
-                  backgroundColor: colors.surfaceElevated,
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: L.r.card,
+                  // 地は地図の上に浮かぶ他の箱と同じすりガラス（ui/atoms/floatingSurface.ts）
+                  ...floatingSurfaceStyle(theme, 'open'),
                   padding: `${L.sp.xl} ${L.sp['2xl']}`,
-                  boxShadow: `0 4px 16px ${colors.shadow}`,
                   zIndex: 9999,
                   minWidth: '180px',
                   transform: 'translate(-50%, -100%)',

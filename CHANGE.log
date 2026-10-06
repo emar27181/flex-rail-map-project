@@ -31,6 +31,12 @@
 - `src/contexts/ThemeContext.tsx`（`FLOATING_OPACITY`）, `src/components/ui/atoms/floatingSurface.ts`, `docs/design-system.md`
 - 開いた駅選択・凡例が不透明に見え、左下の「表示切替」だけがガラスに見えていた
 
+### improve: ツールチップ・ポップアップ・駅名の候補一覧もすりガラスに（地図の上に浮かぶものを網羅）
+- `src/components/RailwayMap.tsx`（駅の統計/時刻表ツールチップ・指標の解説・路線のポップアップ/ツールチップ・Leaflet のツールチップ・ヒートマップ凡例の直書き rgba）,
+  `src/components/ui/StationSearchDropdown.tsx`, `src/components/{MultiDepartureRoutes,RouteRecommendations,DiagramMap}.tsx`,
+  `src/components/ui/atoms/floatingSurface.ts`（`floatingSurfaceCss`）, `tests/unit/components/ui/floatingSurface.test.ts`（新規）
+- 不透明な地（surfaceElevated）や直書きの rgba のままのものが11か所あった。直書きはテストで検出する
+
 ## [2026-10-05] セッション（記事の画面を iframe に・路線/駅ページの路線色と駅番号・テーマの保存先の統一）
 
 ### feat: 地図を所要時間を表示した状態で開けるURL（`?times=1`）
