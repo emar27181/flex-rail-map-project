@@ -7,33 +7,24 @@
  * 「表示切替」「表示中の路線」の高さがそろっていなかった。
  *
  * - 高さ・文字の大きさ・角の丸みは `FLOATING_CONTROL`（丸いボタン・凡例・駅選択と共通）
- * - 背景は下の地図が透けるガラス調。押している（開いている）間は Button の塗り
+ * - 地（透け具合・ぼかし・枠線・影・角の丸み）は floatingSurface.ts。押している（開いている）間は Button の塗り
  * - 文字・余白・角丸は Button（`CONTROL_SIZE.md`）のまま
  *
- * 丸いアイコンだけのボタン（IconButton）にも同じ背景・影を付けるときは
- * `floatingSurfaceStyle` を styleOverride に渡す。
+ * 丸いアイコンだけのボタン（IconButton）にも同じ地を付けるときは
+ * `floatingSurfaceStyle`（floatingSurface.ts）を styleOverride に渡す。
  */
 import React from 'react';
-import type { CSSProperties, ReactNode } from 'react';
-import { getThemeColors } from '../../../contexts/ThemeContext';
+import type { ReactNode } from 'react';
 import Button from './Button';
 import type { ButtonProps } from './Button';
 import { FLOATING_CONTROL } from './controlSize';
+import { floatingSurfaceStyle, floatingShadow } from './floatingSurface';
 
 /** 地図の上に浮かぶボタンの高さ(px)。丸いアイコンボタンと同じ */
 export const FLOATING_BUTTON_HEIGHT = FLOATING_CONTROL.height;
 
-/** 地図の上に浮かぶ操作部品の共通の背景・影（押していないとき） */
-export function floatingSurfaceStyle(theme: 'light' | 'dark'): CSSProperties {
-  const colors = getThemeColors(theme);
-  return {
-    backgroundColor: colors.glassButton,
-    backdropFilter: 'blur(8px)',
-    WebkitBackdropFilter: 'blur(8px)',
-    boxShadow: `0 2px 8px ${colors.shadow}`,
-    borderRadius: FLOATING_CONTROL.radius,
-  };
-}
+/** 地の規格は floatingSurface.ts（ここから使う所のために再公開する） */
+export { floatingSurfaceStyle } from './floatingSurface';
 
 export interface FloatingButtonProps extends Omit<ButtonProps, 'variant' | 'size' | 'styleOverride' | 'children'> {
   /** 文字の後ろに置くもの（開閉の向きを示す印など） */
@@ -42,7 +33,6 @@ export interface FloatingButtonProps extends Omit<ButtonProps, 'variant' | 'size
 }
 
 const FloatingButton: React.FC<FloatingButtonProps> = ({ theme, pressed, trailing, children, ...rest }) => {
-  const colors = getThemeColors(theme);
   return (
     <Button
       {...rest}
@@ -52,11 +42,10 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ theme, pressed, trailin
       pressed={pressed}
       styleOverride={{
         // 押している間は Button の塗りをそのまま使う（ここで背景を上書きすると塗りが消える）
-        ...(pressed ? { boxShadow: `0 2px 8px ${colors.shadow}` } : floatingSurfaceStyle(theme)),
+        ...(pressed ? { boxShadow: floatingShadow(theme), borderRadius: FLOATING_CONTROL.radius } : floatingSurfaceStyle(theme)),
         minHeight: FLOATING_BUTTON_HEIGHT,
         height: FLOATING_BUTTON_HEIGHT,
         fontSize: FLOATING_CONTROL.fontSize,
-        borderRadius: FLOATING_CONTROL.radius,
         fontWeight: 'bold',
         userSelect: 'none',
         WebkitTapHighlightColor: 'transparent',

@@ -105,8 +105,8 @@ import SegmentedControl from './ui/molecules/SegmentedControl';
 import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
-import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE, FLOATING_CONTROL } from './ui/atoms/controlSize';
-import { floatingSurfaceStyle } from './ui/atoms/FloatingButton';
+import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE } from './ui/atoms/controlSize';
+import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
 
 import { sendNotification, vibrate, requestNotifyPermission, getNotifyPermission } from '../utils/notify';
 import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetector';
@@ -5703,7 +5703,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             const numS: React.CSSProperties = {
               width: '34px', fontSize: FS.caption, padding: `${L.sp.xxs} ${L.sp.xxs}`, textAlign: 'center',
               border: `1px solid ${colors.border}`, borderRadius: L.r.control,
-              background: theme === 'dark' ? 'rgba(50,50,50,0.9)' : 'rgba(245,245,245,0.9)',
+              background: colors.surface,
               color: colors.text,
             };
 
@@ -5712,11 +5712,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 {/* 凡例カード（パラメータ選択を下端に統合） */}
                 <div style={{
                   position: 'fixed', ...pos, zIndex: 1001,
-                  background: theme === 'dark' ? 'rgba(30,30,30,0.82)' : alphaWhite(0.82),
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                  border: `1px solid ${colors.border}`, borderRadius: L.r.card,
-                  boxShadow: `0 2px 6px ${colors.shadow}`,
+                  // 地は地図の上に浮かぶ他の箱・ボタンと共通（凡例を読む箱なので open）
+                  ...floatingSurfaceStyle(theme, 'open'),
                   width: cardW, overflow: 'hidden',
                 }}>
                   {/* ヘッダー：クリックで凡例本体を折りたたむ */}
@@ -6087,11 +6084,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 ? { left: '10px', right: `${MOBILE_LEGEND_RIGHT_RESERVED}px`, width: 'auto' }
                 : { right: '0', width: '300px' }),
               maxHeight: isFullscreen ? 'calc(100% - 66px)' : 'none',
-              backgroundColor: colors.surfaceElevated,
-              border: `1px solid ${colors.border}`,
-              // 地図の上に浮かぶ他の操作（丸いボタン・凡例・駅選択）と同じ丸み
-              borderRadius: FLOATING_CONTROL.radius,
-              boxShadow: `0 2px 6px ${colors.shadow}`,
+              // 地（透け具合・ぼかし・枠線・影・丸み）は地図の上に浮かぶ他の箱・ボタンと共通
+              ...floatingSurfaceStyle(theme, isLegendExpanded ? 'open' : 'idle'),
               zIndex: 1000,
               overflowY: 'hidden',
               display: isFullscreen ? 'flex' : 'block',

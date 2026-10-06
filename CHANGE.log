@@ -22,6 +22,11 @@
 - `src/components/ui/atoms/{controlSize.ts,FloatingButton.tsx}`, `src/components/ui/molecules/CollapsiblePanel.tsx`, `src/components/{StationSelector,MobileBottomPanel,RailwayMap}.tsx`, `docs/design-system.md`, `CLAUDE.md`
 - 隅の丸いボタン・「表示切替」・表示路線の切替が3px、凡例・駅選択が8px、下のパネルが12px（直書き）とばらばらだった。すべて card(8px) にそろえた
 
+### improve: 地図の上に浮かぶ箱・ボタンの透け具合・ぼかし・影を floatingSurfaceStyle に一元化
+- `src/components/ui/atoms/floatingSurface.ts`（新規）, `src/contexts/ThemeContext.tsx`（`FLOATING_OPACITY`）, `src/components/ui/atoms/FloatingButton.tsx`,
+  `src/components/ui/molecules/CollapsiblePanel.tsx`, `src/components/{StationSelector,MobileBottomPanel,RailwayMap}.tsx`, `docs/design-system.md`, `CLAUDE.md`, `.claude/skills/design-tokens/SKILL.md`
+- 透け具合 0.72/0.82/0.96 と直書きの rgba、ぼかし 8/10/12px、影の有無が場所ごとにばらばらだった。閉じた箱・ボタン（idle）と開いて読む箱（open）の2段にまとめた
+
 ## [2026-10-05] セッション（記事の画面を iframe に・路線/駅ページの路線色と駅番号・テーマの保存先の統一）
 
 ### feat: 地図を所要時間を表示した状態で開けるURL（`?times=1`）

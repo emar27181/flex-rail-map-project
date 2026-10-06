@@ -15,7 +15,8 @@ import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import RemovableTag from './ui/atoms/RemovableTag';
 import StationSearchDropdown from './ui/StationSearchDropdown';
-import { FLOATING_ICON_BUTTON_SIZE, FLOATING_CONTROL } from './ui/atoms/controlSize';
+import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
+import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 import TextField from './ui/atoms/TextField';
@@ -464,12 +465,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         justifyContent: isExpanded ? 'flex-start' : 'center',
         boxSizing: 'border-box',
         overflow: (showDepartureResults || showArrivalResults) ? 'visible' : 'hidden',
-        border: `1px solid ${colors.border}`,
-        // 地図の上に浮かぶ他の操作（丸いボタン・凡例など）と同じ丸み
-        borderRadius: FLOATING_CONTROL.radius,
-        backgroundColor: isExpanded ? colors.glassOpen : colors.glassCollapsed,
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
+        // 地（透け具合・ぼかし・枠線・影・丸み）は地図の上に浮かぶ他の箱・ボタンと共通
+        ...floatingSurfaceStyle(theme, isExpanded ? 'open' : 'idle'),
       }}
     >
       <div 

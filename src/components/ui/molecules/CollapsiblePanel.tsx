@@ -5,16 +5,15 @@
  * 見出しと中身を別々の箱にすると、どの見出しの中身なのかが分かりにくい
  * （凡例で見出しと一覧が離れていたのを、駅選択・表示路線の切替と同じ形にそろえた）。
  *
- * 地図の上に浮かせるので、背景は下の地図が透けるガラス調（駅選択パネルと同じ）。
+ * 地図の上に浮かせるので、地は floatingSurface.ts（閉じているときは透け、開くとほぼ不透明）。
  * 閉じているときは見出しの行だけになる。size="floating" なら高さ・文字は FLOATING_CONTROL。
  */
 import React, { useId } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
-import { getThemeColors } from '../../../contexts/ThemeContext';
-import { L } from '../../legend/legendStyles';
 import DisclosureHeader from '../atoms/DisclosureHeader';
 import type { DisclosureHeaderSize } from '../atoms/DisclosureHeader';
-import { CONTROL_BORDER_WIDTH, FLOATING_CONTROL } from '../atoms/controlSize';
+import { CONTROL_BORDER_WIDTH } from '../atoms/controlSize';
+import { floatingSurfaceStyle } from '../atoms/floatingSurface';
 
 export interface CollapsiblePanelProps {
   title: ReactNode;
@@ -35,7 +34,6 @@ export interface CollapsiblePanelProps {
 const CollapsiblePanel: React.FC<CollapsiblePanelProps> = ({
   title, expanded, onToggle, theme, size = 'panel', ariaLabel, bodyStyle, style, children,
 }) => {
-  const colors = getThemeColors(theme);
   const bodyId = useId();
   return (
     <section
@@ -44,12 +42,7 @@ const CollapsiblePanel: React.FC<CollapsiblePanelProps> = ({
         display: 'flex', flexDirection: 'column',
         boxSizing: 'border-box',
         overflow: 'hidden',
-        border: `${CONTROL_BORDER_WIDTH}px solid ${colors.border}`,
-        borderRadius: FLOATING_CONTROL.radius,
-        backgroundColor: expanded ? colors.glassOpen : colors.glassCollapsed,
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        boxShadow: `0 2px 8px ${colors.shadow}`,
+        ...floatingSurfaceStyle(theme, expanded ? 'open' : 'idle'),
         ...style,
       }}
     >

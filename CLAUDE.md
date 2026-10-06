@@ -598,7 +598,9 @@ UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域
   大きさは設定パネルから変えられ、選んだ値は保持される
 - 角の丸みは値ではなく役割で選ぶ。control(3px, 操作部品と地図の駅ラベル) /
   card(8px, 箱) / pill(999px, バッジ)。**地図の上に浮かぶボタン・パネルはすべて
-  `FLOATING_CONTROL.radius`**（高さ・文字の大きさも同じ定数。`ui/atoms/controlSize.ts`）
+  `FLOATING_CONTROL.radius`**（高さ・文字の大きさも同じ定数。`ui/atoms/controlSize.ts`）。
+  透け具合・ぼかし・枠線・影も含めた地は `floatingSurfaceStyle(theme, 'idle' | 'open')`
+  （`ui/atoms/floatingSurface.ts`）から取り、`rgba(...)` や `blur(...)` を直書きしない
   **基準は地図の駅ラベル**（画面上でいちばん数が多く目に入る部品）
 - 段階に無い値は近い段階に丸める。新しい段階を足す前に既存で足りないか確認すること
 寸法の一致は `tests/unit/components/ui/atoms.test.tsx` が固定している。
