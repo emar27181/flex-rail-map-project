@@ -10,6 +10,9 @@ description: このプロジェクトのUIを書く・直すときに、色・�
 広がる、ツールチップのバッジだけ塗りつぶしにならない、など）。
 UIを触るときは値を直接書かず、下の定義元から取る。
 
+**新しく何かを作るときは、書き始める前に `docs/design-system.md` の「どの部品を使うか」を読む。**
+無い部品は先に atoms / molecules に足し、表に1行追記してから使う。
+
 現状の詳しい調査結果は `docs/design-system.md` にある。
 
 ## 使う定義元
@@ -28,6 +31,10 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 | −／＋の増減行 | `<Stepper>` | `src/components/ui/molecules/Stepper.tsx` |
 | 1行入力欄 | `<TextField theme size>` | `src/components/ui/atoms/TextField.tsx` |
 | 操作部品の高さ・角丸・余白 | `CONTROL_SIZE[size]`（sm=24px / md=44px） | `src/components/ui/atoms/controlSize.ts` |
+| 地図の上に浮かぶ操作の高さ・文字の大きさ | `FLOATING_CONTROL`（36px / FS.body。丸いボタン・「表示切替」・凡例の見出しで共通） | `src/components/ui/atoms/controlSize.ts` |
+| 地図の上に浮かぶ文字つきボタン | `<FloatingButton>` | `src/components/ui/atoms/FloatingButton.tsx` |
+| 開閉する見出し・▼ | `<DisclosureHeader size>` / `<DisclosureIndicator>` | `src/components/ui/atoms/` |
+| 見出しと中身が1枚の開閉パネル | `<CollapsiblePanel size>` | `src/components/ui/molecules/CollapsiblePanel.tsx` |
 | 排他選択のボタン列 | `<SegmentedControl>` | `src/components/ui/molecules/SegmentedControl.tsx` |
 | 出発/到着/primary の色 | `SEMANTIC.departure` / `arrival` / `primary` | `src/constants/ui.ts` |
 | 白・黒 | `NEUTRAL.white` / `NEUTRAL.black`、半透明は `alphaWhite()` / `alphaBlack()` | `src/constants/ui.ts` |
