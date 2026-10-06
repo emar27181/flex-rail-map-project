@@ -740,9 +740,9 @@ Netlify管理画面の Site configuration → Build & deploy → Branch deploys 
 
 ### 記事（/articles）の書き方
 
-- **1記事1テーマ・結論を先に・起承転結の4見出し・1セクション1枚の実際の画面**。
+- **1記事1テーマ・結論を先に・起承転結の4見出し・1セクション1つの実際の画面**。
   ほかのテーマは本文に書かず、`ARTICLES` の `related`（3本）で記事の最後に案内する
-- 画像は `scripts/capture-article-screenshots.mts` で4言語分撮る（作り物の図を載せない）
+- 画面は画像ではなく実際の画面を iframe で埋め込む（`ui/atoms/mapEmbed.ts`。作り物の図を載せない）
 - 決まり・構成・参考資料は **`docs/article-writing.md`**
 
 ### CHANGE.log 記録ルール

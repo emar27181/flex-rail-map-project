@@ -1,5 +1,60 @@
 # CHANGE LOG
 
+## [2026-10-05] セッション（記事の画面を iframe に・路線/駅ページの路線色と駅番号・テーマの保存先の統一）
+
+### feat: 地図を所要時間を表示した状態で開けるURL（`?times=1`）
+- `src/utils/mapViewUrlParam.ts`（`TRAVEL_TIMES_PARAM`）, `src/utils/mapDeepLink.ts`（`travelTimes`）, `src/components/RailwayMap.tsx`
+- 埋め込みではボタンを押した状態で始められないため、URLで指定できるようにした
+
+### feat: 記事のスクリーンショットを実際の画面の iframe に置き換える
+- `src/components/ui/atoms/mapEmbed.ts`（新規）, `src/utils/articleRender.ts`, `src/data/articles/*.ts`, `src/data/articles/types.ts`,
+  `src/components/articles/ArticleLayout.astro`, `src/styles/article-layout.css`, `tests/unit/data/article{Sources,I18n}.test.ts`,
+  `docs/article-writing.md`, `docs/templates/article-{template.ts,prompt.md}`, `CLAUDE.md`
+- 画像は小さくて読みにくかった。地図は記事の状態で、駅・路線のページは節の位置（`anchor`）で開く。埋め込みの部品は記事と駅・路線のページで共通
+- `public/images/articles/` と `scripts/capture-article-screenshots.mts` は使われなくなった（削除は未実施）
+
+### fix: 記事に埋め込んだ地図が記事と違うテーマで出る問題
+- `src/utils/themeStorage.ts`（新規）, `src/contexts/ThemeContext.tsx`, `src/components/ThemeInitScript.astro`, `src/layouts/StaticPage.astro`,
+  `src/pages/index.astro`, `src/components/articles/ArticleLayout.astro`, `src/components/ui/atoms/mapEmbed.ts`, `tests/unit/utils/themeStorage.test.ts`（新規）
+- 記事は `frm-theme`、地図は `theme` と保存先が別だった。キーを1つにまとめ、埋め込みはページのテーマに従う（保存しない）
+
+### feat: 路線・駅のページに路線色のアクセント・駅番号・冒頭の地図
+- `src/components/ui/atoms/{codeBadge.ts,CodeBadge.astro,MapEmbed.astro}`（新規）, `src/utils/fitMapView.ts`（新規）,
+  `src/layouts/{SeoPageLayout.astro,seoPageStyles.ts,staticPageStyles.ts}`, `src/pages/[...lang]/{lines,stations}/[slug].astro`, `src/seo/pageText.ts`,
+  `tests/unit/utils/fitMapView.test.ts`（新規）
+- 東急東横線なら赤を見出しの下線・地図の枠・順番に使い、駅名の前に TY01 などの札を付ける。冒頭にその路線だけの地図を埋め込む
+
+### docs: 埋め込み・駅番号の札・ページのアクセント色の規格
+- `docs/design-system.md`
+
+### fix: 埋め込みの枠のどこを押しても地図を操作できるようにする
+- `src/components/ui/atoms/mapEmbed.ts`, `src/layouts/{seoPageStyles.ts,SeoPageLayout.astro}`, `src/styles/article-layout.css`, `docs/design-system.md`
+- 押せるのが下の小さなボタンだけで、地図を押しても動かなかった。枠全体を透明なボタンで覆う。枠の上の色付きの線は外した
+
+### improve: 埋め込みの地図では「表示中の路線」の凡例を畳んで始める
+- `src/components/RailwayMap.tsx`
+- 小さな枠では凡例が地図の大部分を隠していた。埋め込みでは閲覧者の開閉の設定を上書きしない
+
+### improve: 通勤時間の記事の例を東京駅から武蔵小杉駅に変える
+- `src/data/articles/commute-30min-cheap-rent.ts`（4言語）
+- 東京駅は路線と駅が多すぎて、住む駅を探す例として地図が読み取りにくかった。駅を通る7路線と乗り入れ先を合わせた16路線（サイトのデータで数えた値）に書き直した
+
+### fix: 出発駅だけを選んだとき、関係の無い主要駅を出さない
+- `src/components/RailwayMap.tsx`（`alwaysVisibleStations`）
+- 武蔵小杉を出発駅にすると、通る路線にも直通先にも無い上野（7路線以上の主要駅として常に出す層）が出て、乗り換えずに行ける駅に見えていた。出発・到着の両方を選んだときと同じく、片方だけのときも出さない
+
+### fix: 出発駅を指定して地図を開いたとき、現在地ではなくその駅を中心にする
+- `src/components/RailwayMap.tsx`（`urlStationCenter`）
+- 記事のボタン（`?from=武蔵小杉`）から開くと現在地（藤沢など）へ移り、現在地付近の路線が余分に出ているように見えていた
+
+### fix: 記事に埋め込んだ地図では、開いただけで位置情報を求めない
+- `src/components/RailwayMap.tsx`
+- 埋め込み表示では「現在地」を押したときだけ取得する
+
+### fix: 記事に埋め込んだ地図では、表示していない路線を薄く描かない
+- `src/components/RailwayMap.tsx`（`showDimmedMapRoutes` の初期値）
+- 関係の無い路線が薄く並んで多く見えるうえ、この層は線の周り36pxを押すとその路線を表示ONにするため、地図を動かす指で鶴見線などが足され「表示中の路線」が17本に増えていた。設定から出すことはできる
+
 ## [2026-09-30] セッション（PR #28〜#31 のマージ・地図の配色・端末ごとの設計・表の部品化）
 
 ### merge: PR #28 → #29 → #30 → #31 を順に main にマージ

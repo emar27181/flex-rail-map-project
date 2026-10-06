@@ -31,3 +31,18 @@ export function getInitialMapViewFromUrl(): MapView | null {
     return null;
   }
 }
+
+/**
+ * 駅と駅の間の所要時間（「所要時間を表示」）を、開いたときから出す（`?times=1`）。
+ * 記事に埋め込む地図で、所要時間を見せたい場面に使う。
+ */
+export const TRAVEL_TIMES_PARAM = 'times';
+
+export function getInitialTravelTimesFromUrl(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return new URLSearchParams(window.location.search).get(TRAVEL_TIMES_PARAM) === '1';
+  } catch {
+    return false;
+  }
+}

@@ -32,6 +32,29 @@ UI の色・サイズ・余白・ボタンが「どこで決まっているか�
 
 空の欄はスマホでは出さない。色はレイアウトが `--rt-border` / `--rt-muted` / `--rt-hover` で渡す。
 
+### 実際の画面の埋め込み（`ui/atoms/mapEmbed.ts`, 2026-10）
+
+記事・駅/路線のページに地図やページを見せるときは、スクリーンショットではなく実際の画面を iframe で埋め込む。
+`<iframe>` を直接書かない。記事は `articleRender.ts`、Astro は `MapEmbed.astro` を使う。
+
+- 高さは `clamp(360px, 62vh, 520px)`。枠は `L.r.card`。枠の線に色は付けない
+- 押すまで中に触れない（スマホでスクロールの指が地図を動かさない）。枠のどこを押しても使えるようになる（文言は `.ctl` の見た目）
+- 中の画面は埋め込み表示（`?embed=1`）。言語は記事の言語、テーマはページのテーマ（URL の `theme`、
+  切り替えは postMessage。`utils/themeStorage.ts`）。埋め込み表示は閲覧者の設定を保存しない
+- 色はレイアウトが `--me-border` / `--me-surface` / `--me-shadow` / `--me-muted` で渡す
+
+### 駅番号の札（`ui/atoms/codeBadge.ts`）
+
+駅名の前の駅番号（TY01 など）。地図の駅ラベルと同じ規則（`filledLabelColors`: 路線色の地に白字、
+明るい色は地を少し暗くし、足りなければ縁取り）。角は `L.r.control`、文字は `FS.caption`。Astro では `CodeBadge.astro`。
+
+### ページのアクセント色（路線色）
+
+路線のページはその路線の色、駅のページは最初の路線の色を、見出しの下線・表の順番に使う
+（`SeoPageLayout` の `accent`）。ライトは白字が読める濃さ（`darkenForWhiteText`）、ダークは
+`adjustRouteColorForTheme` の色。CSS では `var(--page-accent, 既定の primary)` で受け、色の無いページは青のまま。
+本文の文字・リンクには使わない（路線色は読みやすさを保証しないため）。
+
 ## 書くときの判断表」** だけ読めば足りる。
 なぜそうなっているかを知りたいときに残りを読む。
 

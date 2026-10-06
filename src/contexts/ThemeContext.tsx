@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { SEMANTIC, NEUTRAL } from '../constants/ui';
+import { isEmbedMode } from '../utils/embedMode';
+import { getThemeFromUrl, isThemeName, readSavedTheme, saveTheme, THEME_MESSAGE } from '../utils/themeStorage';
 
 export type Theme = 'light' | 'dark';
 
@@ -23,20 +25,26 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>('dark');
+  // 埋め込み表示（?embed=1）は埋め込んだページのテーマに合わせ、保存もしない（utils/themeStorage.ts）
+  const [embedded] = useState(isEmbedMode);
+  // 最初の描画から保存済みのテーマにする。既定の dark で描いてから切り替えると、
+  // その間に dark が保存されてしまい、同じページの別の画面（埋め込みなど）が暗くなっていた
+  const [theme, setTheme] = useState<Theme>(() =>
+    (embedded ? getThemeFromUrl() : null) ?? readSavedTheme() ?? 'dark');
 
   useEffect(() => {
-    // ローカルストレージから設定を読み込み
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme === 'light' || savedTheme === 'dark') {
-      setTheme(savedTheme);
-    }
-    // 保存済み設定がなければデフォルトのダークのまま
-  }, []);
+    if (!embedded) return;
+    // 埋め込んだページでテーマを切り替えたら合わせる（同じサイトのページからのみ受け取る）
+    const onMessage = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin) return;
+      if (e.data?.type === THEME_MESSAGE && isThemeName(e.data.theme)) setTheme(e.data.theme);
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [embedded]);
 
   useEffect(() => {
-    // テーマ変更時にローカルストレージに保存
-    localStorage.setItem('theme', theme);
+    if (!embedded) saveTheme(theme);
 
     // body要素にクラスを追加してグローバルスタイルを適用（他クラスは保持）
     document.body.classList.remove('light', 'dark');

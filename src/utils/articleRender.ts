@@ -6,27 +6,36 @@
  * 地図へのリンク・埋め込みの URL は mapDeepLink.ts で作る（パラメータ名を書かない）。
  */
 import { buildMapHref } from './mapDeepLink';
+import { EMBED_PARAM } from './embedMode';
 import { responsiveTableHtml } from '../components/ui/atoms/responsiveTable';
-import type { ArticleBlock, ArticleLang, ArticleMapState, ArticleSource } from '../data/articles/types';
+import { mapEmbedHtml } from '../components/ui/atoms/mapEmbed';
+import { ARTICLE_SOURCES } from '../data/articles';
+import type { ArticleBlock, ArticleLang, ArticleMapState, ArticleShotSpec, ArticleSource } from '../data/articles/types';
 
 /** 部品に出す決まり文句 */
-export const ARTICLE_BLOCK_LABELS: Record<ArticleLang, { points: string; openMap: string; embedActivate: string }> = {
-  ja: { points: 'この記事の結論', openMap: '地図で開く', embedActivate: 'タップして地図を動かす' },
-  en: { points: 'Key takeaways', openMap: 'Open the map', embedActivate: 'Tap to use the map' },
-  zh: { points: '本文结论', openMap: '打开地图', embedActivate: '点击后操作地图' },
-  ko: { points: '이 글의 결론', openMap: '지도 열기', embedActivate: '눌러서 지도 움직이기' },
+export const ARTICLE_BLOCK_LABELS: Record<ArticleLang, { points: string; openMap: string; embedActivate: string; pageActivate: string }> = {
+  ja: { points: 'この記事の結論', openMap: '地図で開く', embedActivate: 'タップして地図を動かす', pageActivate: 'タップして操作する' },
+  en: { points: 'Key takeaways', openMap: 'Open the map', embedActivate: 'Tap to use the map', pageActivate: 'Tap to interact' },
+  zh: { points: '本文结论', openMap: '打开地图', embedActivate: '点击后操作地图', pageActivate: '点击后操作' },
+  ko: { points: '이 글의 결론', openMap: '지도 열기', embedActivate: '눌러서 지도 움직이기', pageActivate: '눌러서 조작하기' },
 };
 
-/** 画像の置き場所（撮影スクリプトの出力先と同じ） */
-export const articleImagePath = (slug: string, shot: string, lang: ArticleLang) => `/images/articles/${slug}/${shot}-${lang}.webp`;
-/** スクリーンショットの寸法（撮影スクリプトの出力: 1000×640 を幅1200に縮小） */
-export const ARTICLE_SHOT_WIDTH = 1200;
-export const ARTICLE_SHOT_HEIGHT = 768;
 
 const esc = (s: string) => s.replace(/&(?!(?:[a-z]+|#\d+);)/g, '&amp;').replace(/"/g, '&quot;');
 
 export function articleMapHref(state: ArticleMapState, lang: ArticleLang, embed = false): string {
   return buildMapHref({ ...state, lang, embed });
+}
+
+/**
+ * 画面（shots の1つ）を埋め込む URL。どちらも埋め込み表示（?embed=1。テーマを記事に合わせ、設定を保存しない）。
+ * 地図は記事の状態で、駅・路線のページは節の位置（#id）で開く
+ */
+export function shotEmbedSrc(spec: ArticleShotSpec, owner: ArticleSource, lang: ArticleLang): string {
+  if (spec.page) return `${lang === 'ja' ? '' : `/${lang}`}${spec.page}?${EMBED_PARAM}=1${spec.anchor ? `#${spec.anchor}` : ''}`;
+  const map = typeof spec.map === 'string' ? owner.maps[spec.map] : spec.map;
+  if (!map) throw new Error(`${owner.slug}: 画面の撮り方に map も page も無い`);
+  return articleMapHref(map, lang, true);
 }
 
 function renderBlock(block: ArticleBlock, source: ArticleSource, lang: ArticleLang, h2Index: { n: number }): string {
@@ -59,12 +68,16 @@ function renderBlock(block: ArticleBlock, source: ArticleSource, lang: ArticleLa
     case 'uses':
       return `<div class="uses">${block.items.map(u => `<div class="use"><div class="t"><span class="dot"></span>${u.title}</div><p>${u.text}</p></div>`).join('')}</div>`;
     case 'shot': {
-      const src = articleImagePath(block.article ?? source.slug, block.shot, lang);
-      return `<figure class="shot"><a href="${src}"><img src="${src}" width="${ARTICLE_SHOT_WIDTH}" height="${ARTICLE_SHOT_HEIGHT}" loading="lazy" decoding="async" alt="${esc(block.alt)}"></a><figcaption>${block.caption}</figcaption></figure>`;
+      // 実際の画面を埋め込む（2026-10: スクリーンショットは小さくて読みにくかったため置き換えた）
+      const owner = block.article ? ARTICLE_SOURCES.find(a => a.slug === block.article) : source;
+      const spec = owner?.shots[block.shot];
+      if (!owner || !spec) throw new Error(`${source.slug}: 画面 "${block.shot}" の撮り方（shots）が無い`);
+      const activateLabel = spec.page ? labels.pageActivate : labels.embedActivate;
+      return mapEmbedHtml({ src: shotEmbedSrc(spec, owner, lang), title: block.alt, caption: block.caption, activateLabel });
     }
     case 'embed': {
       const src = articleMapHref({ ...mapOf(block.map), ...(block.view ?? {}) }, lang, true);
-      return `<figure class="embed"><div class="embed-frame" data-activate-label="${esc(labels.embedActivate)}"><iframe src="${esc(src)}" title="${esc(block.title)}" loading="lazy"></iframe></div><figcaption>${block.caption}</figcaption></figure>`;
+      return mapEmbedHtml({ src, title: block.title, caption: block.caption, activateLabel: labels.embedActivate });
     }
     case 'cta':
       return `<div class="cta"><h3>${block.title}</h3><p>${block.text}</p><a class="btn" href="${esc(articleMapHref(mapOf(block.map), lang))}">${labels.openMap} <span class="ar">→</span></a></div>`;

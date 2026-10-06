@@ -5,6 +5,8 @@ import leafletCss from "leaflet/dist/leaflet.css?url";
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION } from "../config/seo";
 import GA4Loader from "../components/GA4Loader.astro";
 import FaviconLinks from '../components/seo/FaviconLinks.astro';
+import { THEME_STORAGE_KEY, LEGACY_THEME_STORAGE_KEY, THEME_PARAM } from '../utils/themeStorage';
+import { EMBED_PARAM } from '../utils/embedMode';
 import { SITE_NAME, PROJECT_NAME } from '../config/seo';
 
 // JSON-LD はプレーンな<script>タグの中身をAstroが解釈しないため、
@@ -124,15 +126,20 @@ const webSiteSchema = {
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<!-- ホーム画面起動時もステータスバーをアプリ側の背景で塗るため translucent にする -->
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-		<script is:inline>
+		<script is:inline define:vars={{ themeKey: THEME_STORAGE_KEY, legacyThemeKey: LEGACY_THEME_STORAGE_KEY, themeParam: THEME_PARAM, embedParam: EMBED_PARAM }}>
 			// ハイドレーション前に背景色を確定させる。
 			// これをやらないと、ダークモードでも初回描画からReactのマウントまでの間、
 			// html のキャンバスとローディング画面が白いままになる。
+			// 選び方は ThemeContext と同じ（埋め込み表示は URL のテーマ → 保存済み → dark。utils/themeStorage.ts）
 			(function () {
+				var ok = function (v) { return v === 'light' || v === 'dark'; };
 				var t = 'dark';
 				try {
-					var saved = localStorage.getItem('theme');
-					if (saved === 'light' || saved === 'dark') t = saved;
+					var q = new URLSearchParams(window.location.search);
+					var fromUrl = q.get(embedParam) === '1' ? q.get(themeParam) : null;
+					var saved = localStorage.getItem(themeKey) || localStorage.getItem(legacyThemeKey);
+					if (ok(fromUrl)) t = fromUrl;
+					else if (ok(saved)) t = saved;
 				} catch (e) { /* localStorage 不可でも既定のdarkで続行 */ }
 				var bg = t === 'dark' ? '#1a1a1a' : '#ffffff';
 				document.documentElement.style.backgroundColor = bg;

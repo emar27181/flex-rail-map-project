@@ -72,7 +72,7 @@ import { getInitialVisibleRoutesFromUrl, syncVisibleRoutesToUrl } from '../utils
 import { getInitialHeatmapMetricFromUrl, syncHeatmapMetricToUrl } from '../utils/heatmapUrlParam';
 import { toArticleLanguage } from '../utils/languagePersistence';
 import { defaultRoutesNear } from '../utils/defaultRoutesNear';
-import { getInitialMapViewFromUrl } from '../utils/mapViewUrlParam';
+import { getInitialMapViewFromUrl, getInitialTravelTimesFromUrl } from '../utils/mapViewUrlParam';
 import { isEmbedMode } from '../utils/embedMode';
 import {
   getInitialDepartureFromUrl,
@@ -204,7 +204,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // URL（?center=&zoom=）で表示位置が指定されていればそれを使う（mapViewUrlParam.ts）
   const urlMapView = useMemo(() => getInitialMapViewFromUrl(), []);
-  const [mapCenter, setMapCenter] = useState<[number, number]>(urlMapView?.center ?? [35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
+  // 表示位置の指定が無く、出発駅（無ければ到着駅）を URL で指定して開いたときは、その駅を中心に開く。
+  // 以前は現在地へ移っていたため、記事の「武蔵小杉駅を出発駅にした地図を開く」から開いても
+  // 現在地（藤沢など）周辺の路線の端が映り、関係の無い路線が出ているように見えた
+  const urlStationCenter = useMemo<[number, number] | null>(() => {
+    if (urlMapView) return null;
+    const s = getInitialDepartureFromUrl() ?? getInitialArrivalFromUrl();
+    return s ? [s.lat, s.lng] : null;
+  }, [urlMapView]);
+  const [mapCenter, setMapCenter] = useState<[number, number]>(urlMapView?.center ?? urlStationCenter ?? [35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
   const [mapZoom, setMapZoom] = useState(urlMapView?.zoom ?? 12);
   const [viewCenter, setViewCenter] = useState<[number, number]>([35.57765, 139.66165]); // Updates on moveend/zoomend
   const [viewBounds, setViewBounds] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
@@ -279,7 +287,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [alwaysVisibleMinRoutes, setAlwaysVisibleMinRoutes] = useState(7);
   const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
   const [showStationTierBadges, setShowStationTierBadges] = useState(false); // 乗り入れ路線数リング表示
-  const [showTravelTimes, setShowTravelTimes] = useState(false);
+  const [showTravelTimes, setShowTravelTimes] = useState(getInitialTravelTimesFromUrl);
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
   const [showStationNumbers, setShowStationNumbers] = useState(language !== 'japanese');
@@ -441,7 +449,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [clickedRoute, setClickedRoute] = useState<string | null>(null);
   const [routePopupPosition, setRoutePopupPosition] = useState<{ x: number, y: number } | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
-  const [showDimmedMapRoutes, setShowDimmedMapRoutes] = useState(true);
+  // 表示していない路線を薄く描く層。埋め込み表示（記事などの小さな枠）では出さない。
+  // 記事の内容に絞った地図に関係の無い路線が薄く並んで「多い」と見えるうえ、この層は線の周り36pxを
+  // 押すとその路線を表示ONにするため、地図を動かそうとした指で鶴見線などが足されていた
+  const [showDimmedMapRoutes, setShowDimmedMapRoutes] = useState(!embedded);
   const [dimmedMapTooltip, setDimmedMapTooltip] = useState<{ routeKey: RouteKey; x: number; y: number; isVisible: boolean } | null>(null);
 
   // 現在地表示
@@ -516,7 +527,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showPerRouteStationTimes, setShowPerRouteStationTimes] = useState(false);
   // 地図右下の「表示中の路線」の凡例を折りたたんでいるか（保存して持ち越す）
   const [visibleRoutesLegendCollapsed, setVisibleRoutesLegendCollapsed] = useState(false);
-  useEffect(() => { setVisibleRoutesLegendCollapsed(getInitialLegendCollapsed()); }, []);
+  // 埋め込み表示（記事などの小さな枠）では凡例が地図を大きく隠すので畳んで始め、閲覧者の設定も上書きしない
+  useEffect(() => { setVisibleRoutesLegendCollapsed(embedded || getInitialLegendCollapsed()); }, [embedded]);
   const [showRouteLine, setShowRouteLine] = useState(true);
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
@@ -531,6 +543,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 取得しても出発駅を自動で埋めることはしない（下の useEffect を参照）。
   useEffect(() => {
     if (!navigator.geolocation) return;
+    // 埋め込み表示（記事の中の地図）では、開いただけで位置情報の許可を求めない。
+    // 「現在地」のボタンを押したとき（locationRetryCount が増えたとき）だけ取得する
+    if (embedded && locationRetryCount === 0) return;
     setIsLocating(true);
     setLocationError(null);
     isFirstPositionRef.current = true;
@@ -661,7 +676,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   useEffect(() => {
     if (!userLocation || hasCenteredOnUserRef.current) return;
     hasCenteredOnUserRef.current = true;
-    if (urlMapView) return; // URL で表示位置を指定して開いたときは、その範囲を見せる
+    // URL で表示位置や駅を指定して開いたときは、その範囲・その駅を見せる
+    if (urlMapView || urlStationCenter) return;
     setMapCenter(userLocation);
     setMapZoom(INITIAL_LOCATION_ZOOM);
     // マウント前(mapRef.current が null)は上の state 更新が初期表示に反映される。
@@ -2913,6 +2929,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // 出発・到着の両方を選んだら、経路の区間の駅だけを出す（「路線の全区間を表示」がオフのとき・既定）。
     // 以前はここで主要駅（乗り入れ路線の多い駅）が区間の外にも出続けていた
     if (departure && arrival && !showFullRouteStations) return [] as Station[];
+    // 出発駅か到着駅の片方だけを選んだときも出さない。その駅に関係する路線（と直通先）だけを残す画面なのに、
+    // 関係の無い主要駅（武蔵小杉を選んだときの上野など）が目印として残り、乗り換えずに行ける駅に見えていた
+    if (!!departure !== !!arrival) return [] as Station[];
     const covered = new Set<string>();
     if (isTransferHintMode) {
       for (const s of transferHintStations) covered.add(s.name);
@@ -6585,7 +6604,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 language={currentLanguage}
                 maxItems={10}
                 collapsed={visibleRoutesLegendCollapsed}
-                onToggleCollapsed={() => setVisibleRoutesLegendCollapsed(v => { persistLegendCollapsed(!v); return !v; })}
+                onToggleCollapsed={() => setVisibleRoutesLegendCollapsed(v => { if (!embedded) persistLegendCollapsed(!v); return !v; })}
                 style={{ position: 'absolute', right: panelOnRight ? `calc(300px + ${L.sp.lg})` : L.sp.lg, bottom: isMobile ? '64px' : L.sp['4xl'], zIndex: 1002 }}
               />
             );

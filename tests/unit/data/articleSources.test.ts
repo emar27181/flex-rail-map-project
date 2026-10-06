@@ -1,8 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { existsSync } from 'fs';
-import { join } from 'path';
 import { ARTICLE_SOURCES } from '../../../src/data/articles';
-import { articleImagePath } from '../../../src/utils/articleRender';
+import { shotEmbedSrc } from '../../../src/utils/articleRender';
 import { getRouteCode } from '../../../src/utils/routeUrlCodes';
 import { isUrlHeatmapMetric } from '../../../src/utils/heatmapUrlParam';
 import type { ArticleLang } from '../../../src/data/articles/types';
@@ -40,14 +38,19 @@ describe('記事のデータ', () => {
         for (const lang of LANGS) expect(shape(lang), lang).toBe(shape('ja'));
       });
 
-      it('参照している地図の状態・画像が実在し、画像には代替テキストと説明がある', () => {
+      it('参照している地図の状態・画面が実在し、埋め込みには title と説明がある', () => {
         for (const lang of LANGS) {
           for (const b of a.content[lang].blocks) {
             if (b.type === 'embed' || b.type === 'cta') expect(a.maps[b.map], `${lang} map ${b.map}`).toBeDefined();
             if (b.type === 'shot') {
-              if (!b.article) expect(a.shots[b.shot], `${lang} shot ${b.shot}`).toBeDefined();
-              expect(existsSync(join('public', articleImagePath(b.article ?? a.slug, b.shot, lang))), `${lang} ${b.shot} の画像`).toBe(true);
-              expect(b.alt.trim(), `${lang} ${b.shot} alt`).not.toBe('');
+              const owner = b.article ? ARTICLE_SOURCES.find(x => x.slug === b.article) : a;
+              const spec = owner?.shots[b.shot];
+              expect(spec, `${lang} shot ${b.shot}`).toBeDefined();
+              // 埋め込む URL はその言語で開く（地図は埋め込み表示）
+              const src = shotEmbedSrc(spec!, owner!, lang);
+              if (spec!.page) expect(src.startsWith(lang === 'ja' ? '/' : `/${lang}/`), src).toBe(true);
+              else expect(src, src).toMatch(new RegExp(`[?&]lang=${lang}(&|$).*embed=1|embed=1.*[?&]lang=${lang}`));
+              expect(b.alt.trim(), `${lang} ${b.shot} の title`).not.toBe('');
               expect(b.caption.trim(), `${lang} ${b.shot} caption`).not.toBe('');
             }
           }

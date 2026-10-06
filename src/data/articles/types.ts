@@ -2,8 +2,9 @@
  * 記事1本分のデータの形（src/data/articles/{slug}.ts が従う）。
  *
  * 記事は「1記事1ファイル」。タイトル・説明・本文（ブロックの並び）・地図の状態・
- * スクリーンショットの撮り方を、4言語ぶん1つのファイルに値だけで書く。
- * HTML にするのは src/utils/articleRender.ts、画面を撮るのは scripts/capture-article-screenshots.mts。
+ * 埋め込む画面（shots）を、4言語ぶん1つのファイルに値だけで書く。
+ * HTML にするのは src/utils/articleRender.ts。shots は記事の中に実際の画面として iframe で埋め込む
+ * （2026-10: スクリーンショットは小さくて読みにくかったため置き換えた）。
  * 書き方の決まりは docs/article-writing.md、ひな形は docs/templates/article-template.ts。
  */
 import type { RouteKey } from '../routes';
@@ -22,20 +23,24 @@ export interface ArticleMapState {
   metric?: keyof StationStats;
   center?: [number, number];
   zoom?: number;
+  /** 駅間の所要時間を開いたときから出す */
+  travelTimes?: boolean;
 }
 
-/** スクリーンショットの撮り方（言語は撮影スクリプトが4言語ぶん回す） */
+/** 埋め込む画面。記事の言語の画面を iframe で開く（articleRender.ts の shotEmbedSrc） */
 export interface ArticleShotSpec {
   /** 地図の状態（maps のキー、または状態そのもの） */
   map?: string | ArticleMapState;
-  /** 地図以外のページ（日本語版のパス。他の言語は /en /zh /ko を前に付けて撮る） */
+  /** 地図以外のページ（日本語版のパス。他の言語は /en /zh /ko を前に付けて開く） */
   page?: string;
-  /** 駅選択・路線切替のパネルを畳んで地図を広く見せる */
+  /** 以前の撮影スクリプト用（埋め込み表示はパネルを畳んで始まるので使わない） */
   collapsePanels?: boolean;
-  /** 押すボタン（translation.ts の UI 文言のキー） */
+  /** 以前の撮影スクリプト用。埋め込みでは押せないので、見せたい状態は map の値（travelTimes など）で書く */
   clickUi?: string[];
-  /** ページ内で見せる見出し（src/seo/pageText.ts の SEO_TEXT のキー） */
+  /** 以前の撮影スクリプト用。埋め込みで開く位置は anchor で書く */
   scrollToHeading?: string;
+  /** 埋め込むときに開く位置（ページ内の id。駅・路線のページの節の id） */
+  anchor?: string;
 }
 
 export type ArticleBlock =
@@ -52,7 +57,8 @@ export type ArticleBlock =
   | { type: 'table'; head: string[]; rows: string[][]; kinds?: ColumnKind[] }
   /** 使う場面のカード */
   | { type: 'uses'; items: { title: string; text: string }[] }
-  /** スクリーンショット（shots のキー。別の記事の画像を使うときは article に slug） */
+  /** 実際の画面の埋め込み（shots のキーの状態を iframe で見せる。別の記事の shots を使うときは article に slug）。
+   *  alt は iframe の title（何の画面か）、caption は下に添える説明 */
   | { type: 'shot'; shot: string; article?: string; alt: string; caption: string }
   /** 実際の地図の埋め込み（maps のキー。view で開く範囲を決める） */
   | { type: 'embed'; map: string; view?: { center: [number, number]; zoom: number }; title: string; caption: string }
@@ -81,7 +87,7 @@ export interface ArticleSource {
   keywordsJa: string;
   /** 地図の状態（本文の embed / cta と、撮影の map から名前で参照する） */
   maps: Record<string, ArticleMapState>;
-  /** この記事のスクリーンショット（キーが画像の名前: /images/articles/{slug}/{key}-{lang}.webp） */
+  /** この記事で埋め込む画面（本文の { type: 'shot', shot: キー } から使う） */
   shots: Record<string, ArticleShotSpec>;
   content: Record<ArticleLang, { meta: ArticleMeta; blocks: ArticleBlock[] }>;
 }
