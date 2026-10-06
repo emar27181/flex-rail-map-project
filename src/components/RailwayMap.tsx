@@ -104,7 +104,7 @@ import { findDirectionalStation, type StationNavigationKey } from '../utils/stat
 import { buildEffectiveLineCounts } from '../utils/effectiveLines';
 import Select from './ui/atoms/Select';
 import SegmentedControl from './ui/molecules/SegmentedControl';
-import RouteToggleChip from './ui/molecules/RouteToggleChip';
+import RouteToggleChip from './legend/RouteToggleChip';
 import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
@@ -2046,14 +2046,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 >
                   {/*
                     表示/非表示の見た目と操作は、設定パネルの「表示路線の切替」と
-                    同じ RouteToggleChip molecule を使う。独自の「＋表示 / －非表示」
+                    同じ RouteToggleChip（legend/）を使う。独自の「＋表示 / －非表示」
                     UIを持たせず、状態表現を1箇所へ集約する。
                   */}
                   <div onClick={e => e.stopPropagation()}>
                     <RouteToggleChip
                       routeKey={routeKey}
                       routeName={routeNames[routeKey] ?? rk}
-                      routeColor={routeColors[routeKey] ?? '#888'}
+                      routeColor={routeColors[routeKey] ?? colors.textSecondary}
                       isVisible={isShowing}
                       theme={theme}
                       language={currentLanguage}

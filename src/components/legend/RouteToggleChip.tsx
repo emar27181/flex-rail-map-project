@@ -1,9 +1,9 @@
 import React from 'react';
 import type { CSSProperties } from 'react';
-import type { RouteKey } from '../../../data/routes';
-import { translateRoute } from '../../../utils/translation';
-import type { Language } from '../../../utils/translation';
-import Chip from '../atoms/Chip';
+import type { RouteKey } from '../../data/routes';
+import { translateRoute } from '../../utils/translation';
+import type { Language } from '../../utils/translation';
+import Chip from '../ui/atoms/Chip';
 
 interface RouteToggleChipProps {
   routeKey: RouteKey;
@@ -20,7 +20,11 @@ interface RouteToggleChipProps {
 }
 
 /**
- * 路線の表示/非表示を切り替える共通molecule。
+ * 路線の表示/非表示を切り替える共通チップ（organism）。
+ *
+ * 路線（RouteKey・路線名の翻訳）を知っているので ui/molecules ではなくここに置く
+ * （「路線」という語を部品から消せないなら organism。CLAUDE.md の層の分け方）。
+ * 見た目は Chip アトムのまま。
  *
  * 路線名の翻訳、テーマに応じた路線色補正、表示状態の見た目をここへ集約し、
  * 表示路線切替ボードと駅ツールチップで同じ部品を使う。

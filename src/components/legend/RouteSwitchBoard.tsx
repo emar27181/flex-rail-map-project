@@ -22,7 +22,7 @@ import type { Language } from '../../utils/translation';
 import { FS, SEMANTIC } from '../../constants/ui';
 import { L } from './legendStyles';
 import Button from '../ui/atoms/Button';
-import RouteToggleChip from '../ui/molecules/RouteToggleChip';
+import RouteToggleChip from './RouteToggleChip';
 import TextField from '../ui/atoms/TextField';
 
 /**
