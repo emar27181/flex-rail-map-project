@@ -540,6 +540,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 取得しても出発駅を自動で埋めることはしない（下の useEffect を参照）。
   useEffect(() => {
     if (!navigator.geolocation) return;
+    // 埋め込み表示（記事の中の地図）では、開いただけで位置情報の許可を求めない。
+    // 「現在地」のボタンを押したとき（locationRetryCount が増えたとき）だけ取得する
+    if (embedded && locationRetryCount === 0) return;
     setIsLocating(true);
     setLocationError(null);
     isFirstPositionRef.current = true;
