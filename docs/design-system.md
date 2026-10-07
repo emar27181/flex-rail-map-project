@@ -22,6 +22,7 @@ PR ごとに `npm run test:design` で実行する（手元でも同じコマン
 | 地図の上に浮かぶ箱・ボタンの地（透け具合・ぼかし・枠線・角の丸み）はそろえる | `floatingSurfaceStyle` / `FLOATING_OPACITY` / `FLOATING_CONTROL` | `tests/unit/components/ui/floatingSurface.test.ts` |
 | 影は付けない（2026-10-06）。影も縁取りも1か所から取り、戻すときは `SHADOW` の `enabled` だけを変える | `shadow` / `joinShadows` / `textHalo`（`ui/atoms/shadow.ts`） | `tests/unit/components/ui/shadow.test.ts` |
 | 開閉の印（▼）は手で書かない。翻訳文言にも入れない | `DisclosureIndicator` / `DisclosureHeader` / `CollapsiblePanel` | `tests/unit/components/ui/disclosure.test.ts` |
+| 地図の重なり順（駅は路線数が多いほど上・出発/到着は最上・層の前後）は1か所だけに書く | `MAP_PANE_Z` / `stationMarkerZ` / `ENDPOINT_MARKER_Z`（`constants/mapLayers.ts`） | `tests/unit/constants/mapLayers.test.ts` |
 | 端末の境目（768 / 1024px）は1か所だけに書く | `constants/breakpoints.ts`（`MEDIA` / `useDeviceClass`） | `tests/unit/constants/breakpoints.test.ts` |
 | 静的ページ（記事・駅/路線ページ）の CSS もトークンの CSS 変数を使う | `TOKEN_VARS_CSS` / `CONTROL_CSS`（`ui/atoms/controlCss.ts`） | `tests/unit/styles/articleCssTokens.test.ts`, `tests/unit/components/ui/controlCss.test.ts` |
 | 絵文字を使わない。アイコンは lucide-react | `lucide-react` | `tests/unit/noEmojiIcons.test.ts` |
