@@ -1,5 +1,16 @@
 # CHANGE LOG
 
+## [2026-10-08] セッション（全記事で説明前に地図デモを見せる）
+
+### improve: 全記事・全言語で結論直後に操作可能な地図デモを表示
+- `src/utils/articleRender.ts`, `tests/unit/data/articleSources.test.ts`
+- 既存記事のデータ上で `embed` が末尾近くにあっても、描画時に最初の地図デモを `points` の直後へ昇格する
+- 説明を読み進める前に「この記事で何を見られるか」を実物で体感できるようにし、今後追加する記事にも同じ順序を自動適用する
+
+### docs: 「結論 → デモ → 説明」を記事作成規則に追加
+- `docs/article-writing.md`, `docs/templates/article-template.ts`, `CLAUDE.md`
+- 地図や画面の機能を説明する箇所では、文章だけにせず近くに実際の画面（shot）を置く規則も明記
+
 ## [2026-10-07] セッション（地図アプリの操作を GA4 で計測）
 
 ### feat: 出発駅・到着駅の選択と経路検索を GA4 に送る
