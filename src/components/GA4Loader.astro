@@ -19,13 +19,16 @@
  */
 import { GA_MEASUREMENT_ID } from '../config/seo';
 import { PRODUCTION_ORIGIN } from '../utils/siteHost';
+import { EMBED_PARAM } from '../utils/embedMode';
 ---
 
 {GA_MEASUREMENT_ID && (
-	<script is:inline define:vars={{ GA_MEASUREMENT_ID, PRODUCTION_ORIGIN }}>
+	<script is:inline define:vars={{ GA_MEASUREMENT_ID, PRODUCTION_ORIGIN, EMBED_PARAM }}>
 		(function () {
 			// 計測は本番サイトだけ。プレビュー・ローカルのアクセスを本番の数字に混ぜない（utils/siteHost.ts）
 			if (location.origin !== PRODUCTION_ORIGIN) return;
+			// 記事に埋め込んだ地図（?embed=1）は数えない。記事の閲覧が地図の閲覧として二重に数えられる
+			if (new URLSearchParams(location.search).get(EMBED_PARAM) === '1') return;
 			window.dataLayer = window.dataLayer || [];
 			function gtag() { window.dataLayer.push(arguments); }
 			window.gtag = gtag;

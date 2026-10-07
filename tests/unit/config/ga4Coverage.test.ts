@@ -42,6 +42,10 @@ describe('GA4 をすべてのページで読み込む', () => {
     expect(loader).toContain('PRODUCTION_ORIGIN');
     expect(loader).toMatch(/location\.origin\s*!==\s*PRODUCTION_ORIGIN/);
   });
+
+  it('記事に埋め込んだ地図（?embed=1）では読み込まない（記事の閲覧を地図の閲覧として二重に数えない）', () => {
+    expect(read('components/GA4Loader.astro')).toMatch(/get\(EMBED_PARAM\)\s*===\s*'1'\)\s*return/);
+  });
 });
 
 describe('Cookie の確認は本番で1回だけ', () => {
