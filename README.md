@@ -51,7 +51,7 @@ GA4（Google Analytics 4）とGoogle Search Consoleの確認タグは任意設�
 | `VITE_GA_MEASUREMENT_ID` | GA4測定ID（例: `G-XXXXXXXXXX`） |
 | `GOOGLE_SITE_VERIFICATION` | Search Console のHTMLタグ確認コード |
 
-`.env` に設定するとローカルビルドに反映されます。GA4は[Consent Mode](https://developers.google.com/tag-platform/security/guides/consent)で既定「同意なし」で読み込まれ、Cookieバナーで分析を許可した場合のみ収集を開始します（`src/utils/gtagConsent.ts`）。
+`.env` に設定するとローカルビルドに反映されます。GA4は[Consent Mode](https://developers.google.com/tag-platform/security/guides/consent)で既定「同意なし」で読み込まれ、Cookieバナーで分析を許可した場合のみ収集を開始します（`src/utils/gtagConsent.ts`）。GA4とCookieバナーは本番サイト（`SITE_URL`）でだけ動き、PRのプレビュー・ローカルでは読み込まれません（`src/utils/siteHost.ts`）。
 
 ### 検索流入用ガイドページ（/guides, /en/guides）
 

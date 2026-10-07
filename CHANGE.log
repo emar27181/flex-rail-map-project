@@ -1,5 +1,20 @@
 # CHANGE LOG
 
+## [2026-10-07] セッション（GA4を全ページに・Cookieの確認は本番で1回だけ）
+
+### fix: GA4 をすべてのページで読み込む
+- `src/components/articles/ArticleLayout.astro`, `src/layouts/StaticPage.astro`, `src/pages/{fullscreen,diagram,demo}.astro`, `tests/unit/config/ga4Coverage.test.ts`（新規）
+- 地図・ガイド・駅/路線ページだけが GA4Loader を読み込んでいて、記事（集客の中心）・静的ページ・全画面は計測されていなかった
+- `<head>` を持つ所に抜けがあればテストで落ちる。測定IDを入れてビルドし、全2712ページに入ることを確認
+
+### improve: Cookie の確認と GA4 の計測は本番サイトでだけ行う
+- `src/utils/siteHost.ts`（新規）, `src/components/CookieBanner.tsx`, `src/components/GA4Loader.astro`
+- PR のプレビューはURLが毎回違い保存領域も別のため、開くたびに Cookie の確認が出ていた。本番で1回答えれば次からは出ない
+- プレビュー・ローカルのアクセスを本番の数字に混ぜない
+
+### docs: GA4 の読み込み範囲と Cookie の確認の扱いを記録
+- `docs/seo.md`, `README.md`
+
 ## [2026-10-07] セッション（路線数が多い駅ほど上に描く）
 
 ### improve: 駅アイコン・駅名ラベルを路線数が多い駅ほど上のレイヤーに描く
