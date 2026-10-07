@@ -8,6 +8,28 @@
 - 以前は路線数を5段（1/2/3〜4/5〜9/10以上）に分け、段の差が1000だった。Leaflet は「画面上のY座標 + zIndexOffset」で重ねるため、
   同じ段の中や、画面の下の方にある駅では順番が逆転し、乗換の多い駅のラベルが周りの駅のラベルの下に隠れることがあった
 - 路線数1つごとに100000ずつ上にし（画面の高さで逆転しない）、出発・到着駅はその上。層（Pane）の z-index も同じファイルにまとめた
+## [2026-10-07] セッション（直通運転を経路検索に組み込む）
+
+### fix: 上野東京ラインの直通を「東海道線⇔宇都宮線」「東海道線⇔高崎線」の2系統に分ける
+- `src/data/throughServices.ts`
+- 3路線を1系統にまとめていたため、宇都宮線⇔高崎線（直通列車は無い）も1本で行けることになっていた
+
+### feat: 経路検索で直通運転を乗り換えなしとして扱い、1本で行ける経路を網羅的に出す
+- `src/utils/throughRouting.ts`（新規）, `src/utils/throughSection.ts`（新規）, `src/utils/legTime.ts`（新規）,
+  `src/utils/routeFinder.ts`（`RouteSegment.through`）, `src/utils/throughService.ts`, `tests/unit/utils/throughRouting.test.ts`（新規）
+- 藤沢 → 宇都宮で上野東京ラインが出なかった（東海道線データは東京まで、宇都宮線データは上野からで駅を共有しない）。
+  藤沢 → 大宮の東海道線 → 高崎線、渋谷 → 川越の副都心線 → 東上線も乗換1回と数えていた
+- 直通系統ごとに接続点（共有する駅）と橋渡し（間の路線データ。東京〜上野は高崎線データ）を求め、
+  1本で行ける経路を候補に足し、探索で見つかった経路の乗換も直通なら数え直す。連鎖は推論しない
+- 出発駅だけを選んだときの「1本で行ける範囲」にも橋渡しの区間を描き、線がつながるようにした
+- 全系統の区間の組がつながるかをテストで確認（路線データの欠けでつながらない系統は理由つきで既知の欠けとして列挙）
+
+### feat: 経路候補で直通の乗り継ぎを「直通」と表示する
+- `src/components/ui/RouteRecommendationItem.tsx`, `src/components/legend/LegendRouteRecommendations.tsx`, `src/utils/translation.ts`（`throughShort`）
+- 乗換駅の代わりに「直通」（同じ列車のまま次の路線へ）。乗換の「乗換」文字も翻訳キーにした
+
+### docs: 直通運転を経路検索に使う仕組みと、路線データの欠けを記録
+- `docs/through-services.md`, `docs/data-editing-guide.md`
 
 ## [2026-10-07] セッション（PR #33 を main に合わせてマージ）
 

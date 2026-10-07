@@ -1,6 +1,8 @@
 import { routes, type RouteKey, routeNames } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { getWalkingTransferStations, getWalkingTime } from '../data/walkingTransfers';
+import { legTime } from './legTime';
+import { findThroughTrips, throughContinuations } from './throughRouting';
 
 // ---- 距離計算 ----
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -83,6 +85,12 @@ export interface RouteSegment {
   time: number;
   isWalkingTransfer?: boolean;
   walkingTime?: number;
+  /**
+   * 前の区間から乗り換えずに同じ列車で続く（直通運転。throughRouting.ts）。
+   * 例: 藤沢→宇都宮の上野東京ラインは 東海道線[藤沢→東京] > 高崎線データ[東京→上野] > 宇都宮線[上野→宇都宮]
+   * の3区間で、2・3番目が through。乗換回数には数えない
+   */
+  through?: boolean;
 }
 
 export interface RouteResult {
@@ -169,19 +177,29 @@ export class RouteFinder {
   }
 
   private calculateTime(route: Station[], startIndex: number, endIndex: number): number {
-    let totalTime = 0;
-    const start = Math.min(startIndex, endIndex);
-    const end = Math.max(startIndex, endIndex);
+    return legTime(route, startIndex, endIndex);
+  }
 
-    for (let i = start; i < end; i++) {
-      const station = route[i];
-      if (station.timeToNext) {
-        totalTime += station.timeToNext;
-      } else {
-        totalTime += 3;
-      }
-    }
-    return totalTime;
+  /**
+   * 見つかった経路の乗り換えのうち、直通運転で同じ列車のまま行けるものを数え直す。
+   * 乗換回数を減らし、探索で足した乗換ペナルティを差し引く。
+   */
+  private applyThroughRunning(result: RouteResult): RouteResult {
+    const flags = throughContinuations(result.segments);
+    const count = flags.filter(Boolean).length;
+    if (count === 0) return result;
+    let saved = 0;
+    const segments = result.segments.map((seg, i) => {
+      // 直通として作った経路（findThroughTrips）は乗換ペナルティを足していない
+      if (!flags[i] || seg.through) return seg;
+      saved += this.getTransferPenalty(seg.stations[0].name);
+      return { ...seg, through: true };
+    });
+    return {
+      segments,
+      totalTime: result.totalTime - saved,
+      transfers: Math.max(0, result.transfers - count),
+    };
   }
 
   private createRouteSegment(
@@ -417,6 +435,20 @@ export class RouteFinder {
         }
       }
     });
+
+    // 直通運転: 1本で行ける経路を足し、見つかった経路の乗り換えのうち直通のものを数え直す
+    // （藤沢→宇都宮の上野東京ラインは、東海道線と宇都宮線が駅を共有しないため探索では見つからない）
+    for (const trip of findThroughTrips(departure, arrival)) {
+      results.push({
+        segments: trip.legs.map(leg => ({
+          ...this.createRouteSegment(leg.routeKey, routes[leg.routeKey], leg.fromIndex, leg.toIndex),
+          ...(leg.through ? { through: true } : {}),
+        })),
+        totalTime: trip.totalTime,
+        transfers: 0,
+      });
+    }
+    for (let i = 0; i < results.length; i++) results[i] = this.applyThroughRunning(results[i]);
 
     // Normalize route keys for duplicate detection (unify Tokaido lines)
     const normalizeRouteKey = (routeKey: RouteKey | 'walking'): string => {
