@@ -24,6 +24,7 @@ import {
 import { ARTICLE_BODY_TRANSLATIONS } from "../../data/articleBodyI18n";
 import { APP_ICON_PATH, SITE_URL, SITE_NAME, OG_LOCALE, buildHreflangLinks, hreflangCode, withSiteName } from "../../config/seo";
 import FaviconLinks from "../seo/FaviconLinks.astro";
+import GA4Loader from "../GA4Loader.astro";
 import { CONTROL_CSS, HEADER_LOGO_PX } from "../ui/atoms/controlCss";
 import { RESPONSIVE_TABLE_CSS } from "../ui/atoms/responsiveTable";
 import { MAP_EMBED_CSS, MAP_EMBED_SCRIPT } from "../ui/atoms/mapEmbed";
@@ -107,6 +108,7 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2444529114040977" crossorigin="anonymous"></script>
 
   <FaviconLinks />
+  <GA4Loader />
   <link rel="manifest" href="/manifest.json" />
   <style set:html={CONTROL_CSS + RESPONSIVE_TABLE_CSS + MAP_EMBED_CSS}></style>
   <script is:inline define:vars={{ themeKey: THEME_STORAGE_KEY, legacyThemeKey: LEGACY_THEME_STORAGE_KEY }}>

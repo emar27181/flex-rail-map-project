@@ -9,6 +9,7 @@ import type { Language } from '../utils/translation';
 import { FS } from '../constants/ui';
 import { L } from './legend/legendStyles';
 import { updateAnalyticsConsent } from '../utils/gtagConsent';
+import { isProductionSite } from '../utils/siteHost';
 
 interface CookieBannerProps {
   language: Language;
@@ -26,6 +27,8 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
   });
 
   useEffect(() => {
+    // 確認は本番サイトで1回だけ。プレビューはURLごとに保存領域が別で、開くたびに出ていた（siteHost.ts）
+    if (!isProductionSite()) return;
     const consent = localStorage.getItem('cookieConsent');
     if (!consent) {
       setIsVisible(true);

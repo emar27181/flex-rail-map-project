@@ -1,6 +1,7 @@
 ---
 import DiagramMap from "../components/DiagramMap.tsx";
 import FaviconLinks from '../components/seo/FaviconLinks.astro';
+import GA4Loader from '../components/GA4Loader.astro';
 import { SITE_NAME } from '../config/seo';
 ---
 
@@ -8,6 +9,7 @@ import { SITE_NAME } from '../config/seo';
 	<head>
 		<meta charset="utf-8" />
 		<FaviconLinks />
+		<GA4Loader />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="generator" content={Astro.generator} />
 		<title>路線図モード（準備中） - {SITE_NAME}</title>

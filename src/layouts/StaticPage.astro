@@ -16,6 +16,7 @@ import SiteFooterNav from '../components/SiteFooterNav.astro';
 import { staticPageCss } from './staticPageStyles';
 import { SITE_URL, GOOGLE_SITE_VERIFICATION } from '../config/seo';
 import FaviconLinks from '../components/seo/FaviconLinks.astro';
+import GA4Loader from '../components/GA4Loader.astro';
 
 interface Props {
   /** <title> にそのまま入る */
@@ -61,6 +62,7 @@ const {
 		<meta name="google-adsense-account" content="ca-pub-2444529114040977" />
 		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2444529114040977" crossorigin="anonymous"></script>
 		<FaviconLinks />
+		<GA4Loader />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
 
