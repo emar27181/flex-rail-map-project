@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, RefreshCw, CircleDot } from 'lucide-react';
+import { MapPin, RefreshCw, CircleDot, TrainFront } from 'lucide-react';
 import { routeNames, routeColors } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { checkboxInput, selectableCard, L} from '../legend/legendStyles';
@@ -16,6 +16,8 @@ interface RouteSegment {
   stations?: { name: string }[];
   isWalkingTransfer?: boolean;
   walkingTime?: number;
+  /** 前の区間から同じ列車で続く（直通運転。routeFinder の RouteSegment.through） */
+  through?: boolean;
 }
 
 interface RouteRecommendation {
@@ -86,6 +88,10 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
             {route.transfers > 0 && (
               <span style={{ marginLeft: L.sp.xs }}>{transferText}</span>
             )}
+            {/* 乗り換えなしで別の路線へ入る（直通運転）経路は、そのことを見出しにも出す */}
+            {route.transfers === 0 && route.segments.some(s => s.through) && (
+              <span style={{ marginLeft: L.sp.xs, color: SEMANTIC.success, fontWeight: 'bold' }}>{translateUI('throughShort', language)}</span>
+            )}
           </span>
         </div>
 
@@ -118,6 +124,8 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
           const toName = seg.stations?.[seg.stations.length - 1]?.name ?? '';
           const segMin = Math.round(seg.time);
           const isLast = i === route.segments.length - 1;
+          // 次の区間へ同じ列車のまま入る（直通）なら、境目の駅は乗換ではない
+          const continuesThrough = !isLast && !!route.segments[i + 1]?.through;
 
           return (
             <div key={i}>
@@ -141,8 +149,19 @@ const RouteRecommendationItem: React.FC<RouteRecommendationItemProps> = ({
                   color: isLast ? SEMANTIC.arrival : colors.text,
                   fontSize: FS.caption,
                 }}>
-                  {isLast ? <MapPin size={12} style={{ verticalAlign: 'text-bottom' }} /> : <RefreshCw size={12} style={{ verticalAlign: 'text-bottom' }} />} {translateStation(toName, language)}
-                  {!isLast && <span style={{ fontSize: FS.caption, fontWeight: 'normal', color: colors.textSecondary, marginLeft: L.sp.xs }}>乗換</span>}
+                  {isLast
+                    ? <MapPin size={12} style={{ verticalAlign: 'text-bottom' }} />
+                    : continuesThrough
+                      ? <TrainFront size={12} style={{ verticalAlign: 'text-bottom' }} />
+                      : <RefreshCw size={12} style={{ verticalAlign: 'text-bottom' }} />} {translateStation(toName, language)}
+                  {!isLast && (
+                    <span style={{
+                      fontSize: FS.caption, fontWeight: continuesThrough ? 'bold' : 'normal',
+                      color: continuesThrough ? SEMANTIC.success : colors.textSecondary, marginLeft: L.sp.xs,
+                    }}>
+                      {translateUI(continuesThrough ? 'throughShort' : 'transferShort', language)}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
