@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ARTICLE_SOURCES } from '../../../src/data/articles';
-import { shotEmbedSrc } from '../../../src/utils/articleRender';
+import { articleBlocksForRender, shotEmbedSrc } from '../../../src/utils/articleRender';
 import { getRouteCode } from '../../../src/utils/routeUrlCodes';
 import { isUrlHeatmapMetric } from '../../../src/utils/heatmapUrlParam';
 import type { ArticleLang } from '../../../src/data/articles/types';
@@ -20,7 +20,7 @@ describe('記事のデータ', () => {
 
   for (const a of ARTICLE_SOURCES) {
     describe(a.slug, () => {
-      it('4言語とも、結論（3行）で始まり、見出しは3〜5個、地図の埋め込みと地図を開くボタンがある', () => {
+      it('4言語とも、結論（3行）→地図デモ→詳しい説明の順で、最後は地図を開くボタン', () => {
         for (const lang of LANGS) {
           const blocks = a.content[lang].blocks;
           expect(blocks[0].type, lang).toBe('points');
@@ -30,6 +30,13 @@ describe('記事のデータ', () => {
           expect(h2, lang).toBeLessThanOrEqual(5);
           expect(blocks.some(b => b.type === 'embed'), `${lang} embed`).toBe(true);
           expect(blocks[blocks.length - 1].type, `${lang} 最後は cta`).toBe('cta');
+
+          // 説明を読ませる前に、まず記事の主題に合う実際の地図を触ってもらう。
+          // 既存記事のデータ上の位置にかかわらず、描画時は必ず points → embed → h2... の順。
+          const rendered = articleBlocksForRender(a, lang);
+          expect(rendered[0].type, `${lang} 先頭は結論`).toBe('points');
+          expect(rendered[1].type, `${lang} 結論直後は地図デモ`).toBe('embed');
+          expect(rendered.findIndex(b => b.type === 'h2'), `${lang} 説明はデモの後`).toBeGreaterThan(1);
         }
       });
 
