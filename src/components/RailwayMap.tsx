@@ -55,6 +55,7 @@ import {
   type Departure,
 } from '../data/timetableData';
 import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, alphaWhite, alphaBlack } from '../constants/ui';
+import { MAP_PANE_Z, stationMarkerZ, ENDPOINT_MARKER_Z, TRAVEL_TIME_MARKER_Z, USER_LOCATION_MARKER_Z, TRAIN_DEMO_MARKER_Z } from '../constants/mapLayers';
 import type { LabelColorOverride } from '../constants/ui';
 import {
   getInitialStationSizeScale,
@@ -4420,7 +4421,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (!stationIcon) return null;
 
     const routeCount = stationRouteCountMap.get(station.name) ?? 1;
-    const stationZIndex = routeCount >= 10 ? 5000 : routeCount >= 5 ? 4000 : routeCount >= 3 ? 3000 : routeCount >= 2 ? 2000 : 1000;
+    // 路線数が多い駅ほど上に描く（mapLayers.ts。段の差は画面の高さより大きい）
+    const stationZIndex = stationMarkerZ(routeCount);
     const markerKey = `${keyPrefix}-${stationColor}-${Math.round(stationSizeScale * 10)}`;
 
     return (
@@ -4720,7 +4722,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 key={specialKey}
                 position={[station.lat, station.lng]}
                 icon={specialIcon}
-                zIndexOffset={5000}
+                zIndexOffset={ENDPOINT_MARKER_Z}
                 eventHandlers={{
                   mouseover: (e: LeafletMouseEvent) => {
                     if (!showStationTooltip || isMobile) return;
@@ -4854,7 +4856,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     key={`${routeKey}-time-${index}`}
                     position={midpoint}
                     icon={timeIcon}
-                    zIndexOffset={500}
+                    zIndexOffset={TRAVEL_TIME_MARKER_Z}
                     pane="travelTimePane"
                   />
                 );
@@ -4870,7 +4872,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     key={`${routeKey}-time-transfer-${index}`}
                     position={midpoint}
                     icon={timeIcon}
-                    zIndexOffset={500}
+                    zIndexOffset={TRAVEL_TIME_MARKER_Z}
                     pane="travelTimePane"
                   />
                 );
@@ -4888,7 +4890,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   key={`${routeKey}-time-${index}`}
                   position={midpoint}
                   icon={timeIcon}
-                  zIndexOffset={500}
+                  zIndexOffset={TRAVEL_TIME_MARKER_Z}
                   pane="travelTimePane"
                 />
               );
@@ -5425,7 +5427,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 z-indexを比較しないため、親が違うと550と600の大小関係が
                 意味を持たない）。
               */}
-              <Pane name="travelTimePane" pane="norotatePane" style={{ zIndex: 550 }} />
+              <Pane name="travelTimePane" pane="norotatePane" style={{ zIndex: MAP_PANE_Z.travelTime }} />
 
               {/*
                 現在地マーカー用のPane。markerPane(600)より後面にし、
@@ -5433,11 +5435,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 以前は`zIndexOffset`（6000/10000）だけで前面に出そうとしていたが、
                 `zIndexOffset`は同じmarkerPane内での「画面Y座標＋offset」の
                 比較にしかならず、画面上の位置によっては駅アイコン
-                （routeCount次第で最大5000）より現在地アイコンが上に来て
+                （当時は routeCount 次第で最大5000）より現在地アイコンが上に来て
                 駅を隠すことがあった。travelTimePaneと同じ理由・同じ対処法
                 （専用Pane化）で確実に後面固定する
               */}
-              <Pane name="userLocationPane" pane="norotatePane" style={{ zIndex: 590 }} />
+              <Pane name="userLocationPane" pane="norotatePane" style={{ zIndex: MAP_PANE_Z.userLocation }} />
 
               {/* バブルマップ: 単一SVGオーバーレイで全バブルを高速描画 */}
               {mapViewMode === 'bubble' && (
@@ -5607,14 +5609,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 <Marker
                   position={userLocation}
                   icon={userLocationIcon}
-                  zIndexOffset={6000}
+                  zIndexOffset={USER_LOCATION_MARKER_Z}
                   interactive={false}
                   pane="userLocationPane"
                 />
               )}
 
               {/* 列車位置デモ: markerPane(600)より前面・tooltipPane(650)より後面に表示 */}
-              <Pane name="trainDemoPane" style={{ zIndex: 620 }}>
+              <Pane name="trainDemoPane" style={{ zIndex: MAP_PANE_Z.trainDemo }}>
                 {showTrainDemo && MapComponents?.DivIcon && MapComponents?.Marker && trainPositions.map(t => {
                   const terminals = DEMO_DIRECTION_TERMINALS[t.lineKey];
                   const dest = terminals?.[t.direction] ?? '';
@@ -5650,7 +5652,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 <Marker
                   position={userLocation}
                   icon={userLocationIcon}
-                  zIndexOffset={10000}
+                  zIndexOffset={TRAIN_DEMO_MARKER_Z}
                   interactive={false}
                   pane="userLocationPane"
                 />

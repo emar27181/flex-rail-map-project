@@ -616,6 +616,8 @@ UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域
 - **影は付けない方針（2026-10-06）。** 影はすべて `ui/atoms/shadow.ts` の `shadow(role, theme)` から取る
   （役割: marker / floating / raised / overlay。戻すときは `SHADOW` のその役割を `enabled: true` にするだけ）。
   白字の縁取りは影ではないので `textHalo()`（既定オン）。直書きは `tests/unit/components/ui/shadow.test.ts` が落とす
+- **地図の重なり順は `src/constants/mapLayers.ts` だけに書く（2026-10-07）。** 駅アイコン・駅名ラベルは路線数が多い駅ほど上
+  （`stationMarkerZ`）、出発・到着駅は最上（`ENDPOINT_MARKER_Z`）。`zIndexOffset` や Pane の z-index に数値を直書きしない
 - 段階に無い値は近い段階に丸める。新しい段階を足す前に既存で足りないか確認すること
 寸法の一致は `tests/unit/components/ui/atoms.test.tsx` が固定している。
 

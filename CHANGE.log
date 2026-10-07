@@ -1,5 +1,13 @@
 # CHANGE LOG
 
+## [2026-10-07] セッション（路線数が多い駅ほど上に描く）
+
+### improve: 駅アイコン・駅名ラベルを路線数が多い駅ほど上のレイヤーに描く
+- `src/constants/mapLayers.ts`（新規）, `src/components/RailwayMap.tsx`, `tests/unit/constants/mapLayers.test.ts`（新規）,
+  `docs/design-system.md`（規則一覧）, `CLAUDE.md`, `.claude/skills/design-tokens/SKILL.md`
+- 以前は路線数を5段（1/2/3〜4/5〜9/10以上）に分け、段の差が1000だった。Leaflet は「画面上のY座標 + zIndexOffset」で重ねるため、
+  同じ段の中や、画面の下の方にある駅では順番が逆転し、乗換の多い駅のラベルが周りの駅のラベルの下に隠れることがあった
+- 路線数1つごとに100000ずつ上にし（画面の高さで逆転しない）、出発・到着駅はその上。層（Pane）の z-index も同じファイルにまとめた
 ## [2026-10-07] セッション（直通運転を経路検索に組み込む）
 
 ### fix: 上野東京ラインの直通を「東海道線⇔宇都宮線」「東海道線⇔高崎線」の2系統に分ける
