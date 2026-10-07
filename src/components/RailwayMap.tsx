@@ -55,6 +55,7 @@ import {
   type Departure,
 } from '../data/timetableData';
 import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, alphaWhite, alphaBlack } from '../constants/ui';
+import { trackStationSelect, trackRouteSearch } from '../utils/appAnalytics';
 import { MAP_PANE_Z, stationMarkerZ, ENDPOINT_MARKER_Z, TRAVEL_TIME_MARKER_Z, USER_LOCATION_MARKER_Z, TRAIN_DEMO_MARKER_Z } from '../constants/mapLayers';
 import type { LabelColorOverride } from '../constants/ui';
 import {
@@ -511,6 +512,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   /** 再取得ボタンで監視をやり直すためのカウンタ */
   const [locationRetryCount, setLocationRetryCount] = useState(0);
   const [isManualDeparture, setIsManualDeparture] = useState(false);
+
+  // 地図の中の操作を GA4 へ送る（utils/appAnalytics.ts）。駅が変わったときだけ1回送る
+  useEffect(() => {
+    if (departure) trackStationSelect('departure', departure.name, isManualDeparture ? 'manual' : 'auto');
+  }, [departure?.name]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (arrival) trackStationSelect('arrival', arrival.name, 'manual');
+  }, [arrival?.name]); // eslint-disable-line react-hooks/exhaustive-deps
+  /** 直前に送った経路検索（同じ出発・到着・経由駅で何度も送らない） */
+  const lastRouteSearchKeyRef = useRef('');
 
   // 乗車路線検出
   const gpsHistoryRef = useRef<GpsPoint[]>([]);
@@ -3209,6 +3220,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           ).slice(0, maxRouteRecommendations);
 
       setRouteRecommendations(finalUniqueRoutes);
+      const searchKey = [departure.name, arrival.name, ...waypoints.map(w => w.name)].join('>');
+      if (lastRouteSearchKeyRef.current !== searchKey) {
+        lastRouteSearchKeyRef.current = searchKey;
+        trackRouteSearch(departure.name, arrival.name, finalUniqueRoutes, waypoints.length);
+      }
       // 推薦ルート選択は一旦オフ（=候補全部を同時にハイライトしない）。
       // 全候補を同時表示すると、時刻表示は先頭候補(index 0)の駅にしか
       // 出ないため「時刻が出る路線と出ない路線がある」ように見えて混乱を
