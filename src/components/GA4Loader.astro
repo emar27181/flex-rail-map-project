@@ -13,13 +13,19 @@
  * Consent Mode: 既定は「同意なし」。CookieBannerで既にanalyticsを
  * 許可済み（localStorageに記録済み）なら即座にgrantedへ更新する。
  * 新規訪問者にはCookieBanner側の操作でgtagConsent.tsから更新される。
+ *
+ * 読み込むのは本番サイト（SITE_URL と同じオリジン）だけ。全ページの <head> に置く
+ * （FaviconLinks と同じ場所。tests/unit/config/ga4Coverage.test.ts が抜けを検出する）。
  */
 import { GA_MEASUREMENT_ID } from '../config/seo';
+import { PRODUCTION_ORIGIN } from '../utils/siteHost';
 ---
 
 {GA_MEASUREMENT_ID && (
-	<script is:inline define:vars={{ GA_MEASUREMENT_ID }}>
+	<script is:inline define:vars={{ GA_MEASUREMENT_ID, PRODUCTION_ORIGIN }}>
 		(function () {
+			// 計測は本番サイトだけ。プレビュー・ローカルのアクセスを本番の数字に混ぜない（utils/siteHost.ts）
+			if (location.origin !== PRODUCTION_ORIGIN) return;
 			window.dataLayer = window.dataLayer || [];
 			function gtag() { window.dataLayer.push(arguments); }
 			window.gtag = gtag;
