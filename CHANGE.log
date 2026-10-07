@@ -1,5 +1,19 @@
 # CHANGE LOG
 
+## [2026-10-07] セッション（地図アプリの操作を GA4 で計測）
+
+### feat: 出発駅・到着駅の選択と経路検索を GA4 に送る
+- `src/utils/appAnalytics.ts`（新規）, `src/components/RailwayMap.tsx`, `tests/unit/utils/appAnalytics.test.ts`（新規）
+- 地図の中の操作を何も送っておらず、GA4 ではページの閲覧数しか分からなかった
+- `map_departure_select` / `map_arrival_select` / `map_route_search`（所要時間・乗換回数・直通の有無）。同じ組み合わせの経路検索は1回だけ
+
+### fix: 記事に埋め込んだ地図では GA4 を読み込まない
+- `src/components/GA4Loader.astro`, `tests/unit/config/ga4Coverage.test.ts`
+- 記事の閲覧が、中の地図（iframe）の閲覧としても数えられていた
+
+### docs: 地図アプリの GA4 イベントを記録
+- `docs/seo.md`
+
 ## [2026-10-07] セッション（GA4を全ページに・Cookieの確認は本番で1回だけ）
 
 ### fix: GA4 をすべてのページで読み込む

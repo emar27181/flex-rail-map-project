@@ -180,6 +180,16 @@ B・C のページも作る（路線ページ・隣の駅からのリンク先�
 - 既定は「同意なし」（Consent Mode）。地図を開かずに記事・ガイドだけを見た人は確認を見ないため、
   その人の分は Google のモデリング（推計）になる
 
+### 地図アプリの中の GA4 イベント（2026-10-07）
+
+名前とパラメータは `src/utils/appAnalytics.ts` だけに書く。
+
+- `map_departure_select`: 出発駅を選んだ。`station` / `source`（`manual` 手で選んだ・`auto` URL や現在地から）
+- `map_arrival_select`: 到着駅を選んだ。`station` / `source`
+- `map_route_search`: 出発・到着がそろって経路候補を出した（同じ組み合わせでは1回だけ）。
+  `from_station` / `to_station` / `result_count` / `waypoints` / `best_minutes` / `best_transfers` / `has_through`（直通を使う候補があるか）
+- 記事に埋め込んだ地図（`?embed=1`）では GA4 を読み込まない（記事の閲覧が地図の閲覧として二重に数えられるため）
+
 ### GA4 イベント
 
 クリック時に2つ送る。
