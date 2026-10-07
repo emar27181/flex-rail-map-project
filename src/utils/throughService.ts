@@ -3,24 +3,13 @@
  * 行ける他路線の区間を求める。
  */
 import { routes, type RouteKey } from '../data/routes';
-import { THROUGH_SERVICES, type ThroughSection, type ThroughService } from '../data/throughServices';
+import { THROUGH_SERVICES, type ThroughService } from '../data/throughServices';
 import type { Station } from '../data/yamanote';
 import { isSameStation, type StationRef } from './sameStation';
+import { resolveSectionRange, type RouteStations } from './throughSection';
+import { resolveServices } from './throughRouting';
 
-type RouteStations = Partial<Record<RouteKey, Station[]>>;
-
-/** 区間の駅の添字範囲 [start, end]。駅名が路線に無ければ null */
-export function resolveSectionRange(
-  section: ThroughSection,
-  routeStations: RouteStations = routes,
-): [number, number] | null {
-  const stations = routeStations[section.route];
-  if (!stations || stations.length === 0) return null;
-  const from = section.from === undefined ? 0 : stations.findIndex(s => s.name === section.from);
-  const to = section.to === undefined ? stations.length - 1 : stations.findIndex(s => s.name === section.to);
-  if (from < 0 || to < 0) return null;
-  return [Math.min(from, to), Math.max(from, to)];
-}
+export { resolveSectionRange } from './throughSection';
 
 /** 重なる・隣接する範囲をまとめる（同じ路線を複数の系統から指したときの二重描画防止） */
 function mergeRanges(ranges: [number, number][]): [number, number][] {
@@ -57,20 +46,28 @@ export function getThroughReachableSections(
   );
 
   const rangesByRoute = new Map<RouteKey, [number, number][]>();
-  for (const service of services) {
-    const resolved = service.sections.map(sec => ({ sec, range: resolveSectionRange(sec, routeStations) }));
-    const boards = resolved.some(({ sec, range }) =>
+  const add = (rk: RouteKey, range: [number, number]) => {
+    if (ownRoutes.has(rk)) return;
+    const list = rangesByRoute.get(rk) ?? [];
+    list.push(range);
+    rangesByRoute.set(rk, list);
+  };
+  const resolved = resolveServices(services, routeStations);
+  services.forEach((service, si) => {
+    const resolvedSections = service.sections.map(sec => ({ sec, range: resolveSectionRange(sec, routeStations) }));
+    const boards = resolvedSections.some(({ sec, range }) =>
       range !== null &&
       routeStations[sec.route]!.slice(range[0], range[1] + 1).some(isOrigin),
     );
-    if (!boards) continue;
-    for (const { sec, range } of resolved) {
-      if (!range || ownRoutes.has(sec.route)) continue;
-      const list = rangesByRoute.get(sec.route) ?? [];
-      list.push(range);
-      rangesByRoute.set(sec.route, list);
+    if (!boards) return;
+    for (const { sec, range } of resolvedSections) {
+      if (range) add(sec.route, range);
     }
-  }
+    // 路線データに間の線が無い直通（東海道線の東京〜宇都宮線の上野）は、橋渡しの区間も描いて線をつなぐ
+    for (const link of resolved[si].links.values()) {
+      if (link.kind === 'bridge') add(link.via, [Math.min(link.viaFrom, link.viaTo), Math.max(link.viaFrom, link.viaTo)]);
+    }
+  });
 
   const result = new Map<RouteKey, Station[][]>();
   for (const [rk, ranges] of rangesByRoute) {
