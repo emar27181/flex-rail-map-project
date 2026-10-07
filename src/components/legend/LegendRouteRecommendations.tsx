@@ -16,6 +16,8 @@ interface RouteSegment {
   stations?: { name: string }[];
   isWalkingTransfer?: boolean;
   walkingTime?: number;
+  /** 前の区間から同じ列車で続く（直通運転。routeFinder の RouteSegment.through） */
+  through?: boolean;
 }
 
 interface RouteRecommendation {

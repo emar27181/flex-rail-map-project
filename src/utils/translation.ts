@@ -7659,6 +7659,11 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "乗換",
     english: "Transfer"
   },
+  // 経路の区間の境目で、乗り換えずに同じ列車のまま次の路線へ入る（直通運転）
+  throughShort: {
+    japanese: "直通",
+    english: "Through"
+  },
   direction: {
     japanese: "{destination}行き",
     english: "to {destination}"
@@ -8809,6 +8814,7 @@ export const uiChinese: Record<string, string> = {
   transferInfo: "换乘信息",
   walkingTransferShort: "步行",
   transferShort: "换乘",
+  throughShort: "直通",
   direction: "前往{destination}",
   directionArea: "前往{destination}方向",
   viaStations: "经由",
@@ -9147,6 +9153,7 @@ export const uiKorean: Record<string, string> = {
   transferInfo: "환승 안내",
   walkingTransferShort: "도보",
   transferShort: "환승",
+  throughShort: "직통",
   direction: "{destination}행",
   directionArea: "{destination} 방면",
   viaStations: "경유",
