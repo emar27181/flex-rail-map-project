@@ -235,12 +235,22 @@ export const THROUGH_SERVICES: ThroughService[] = [
   },
 
   // ── JR ──
+  // 上野東京ラインは東海道線から宇都宮線・高崎線のどちらかへ直通する。宇都宮線⇔高崎線の
+  // 直通列車は無いので、行き先ごとに2系統に分ける（1つにすると経路検索で
+  // 宇都宮線から高崎線へ1本で行けることになってしまう）
   {
-    id: 'ueno-tokyo-line',
-    name: '上野東京ライン（東海道線⇔宇都宮線・高崎線）',
+    id: 'ueno-tokyo-line-utsunomiya',
+    name: '上野東京ライン（東海道線⇔宇都宮線、東京・上野経由）',
     sections: [
       { route: 'jrTokaidoMainLine' },
       { route: 'jrUtsunomiyaLine' },
+    ],
+  },
+  {
+    id: 'ueno-tokyo-line-takasaki',
+    name: '上野東京ライン（東海道線⇔高崎線、東京・上野経由）',
+    sections: [
+      { route: 'jrTokaidoMainLine' },
       { route: 'jrTakasakiLine' },
     ],
   },
