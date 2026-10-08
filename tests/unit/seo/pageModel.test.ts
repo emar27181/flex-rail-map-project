@@ -8,6 +8,7 @@ import { SOURCE_TITLE_EN, STAT_SCOPE_EN, STAT_SCOPE_KO, STAT_SCOPE_ZH } from '..
 import { stationTranslationsKorean } from '../../../src/utils/stationTranslationsCJK';
 import { buildMapHref } from '../../../src/utils/mapDeepLink';
 import { decodeVisibleRoutesParam } from '../../../src/utils/routeUrlCodes';
+import { encodeStationParam } from '../../../src/utils/stationUrlParams';
 
 const model = getSeoModel();
 const byName = (name: string) => model.stations.find(s => s.name === name)!;
@@ -164,6 +165,6 @@ describe('地図へのリンク', () => {
 
   it('出発駅を指定できる駅は、地図が同じ駅名で同じ駅を引ける駅だけ', () => {
     expect(byName('新宿').mapFrom).toBe('新宿');
-    expect(buildMapHref({ from: '新宿' })).toBe(`/?from=${encodeURIComponent('新宿')}`);
+    expect(buildMapHref({ from: '新宿' })).toBe(`/?from=${encodeStationParam('新宿')}`);
   });
 });

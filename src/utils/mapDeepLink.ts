@@ -8,7 +8,7 @@
  */
 import type { RouteKey } from '../data/routes';
 import { getRouteCode, MAX_URL_VISIBLE_ROUTES, VISIBLE_ROUTES_PARAM } from './routeUrlCodes';
-import { ARRIVAL_PARAM, DEPARTURE_PARAM } from './stationUrlParams';
+import { ARRIVAL_PARAM, DEPARTURE_PARAM, encodeStationParam } from './stationUrlParams';
 import { HEATMAP_METRIC_PARAM, isUrlHeatmapMetric } from './heatmapUrlParam';
 import { MAP_CENTER_PARAM, MAP_ZOOM_PARAM, TRAVEL_TIMES_PARAM } from './mapViewUrlParam';
 import { EMBED_PARAM } from './embedMode';
@@ -36,8 +36,14 @@ export interface MapLinkOptions {
 
 export function buildMapHref({ routes, from, to, metric, center, zoom, travelTimes = false, lang = 'ja', embed = false }: MapLinkOptions): string {
   const params = new URLSearchParams();
-  if (from) params.set(DEPARTURE_PARAM, from);
-  if (to) params.set(ARRIVAL_PARAM, to);
+  if (from) {
+    const code = encodeStationParam(from);
+    if (code) params.set(DEPARTURE_PARAM, code);
+  }
+  if (to) {
+    const code = encodeStationParam(to);
+    if (code) params.set(ARRIVAL_PARAM, code);
+  }
   if (routes && routes.length > 0) {
     const codes = routes.slice(0, MAX_URL_VISIBLE_ROUTES).map(getRouteCode).filter((c): c is string => !!c);
     if (codes.length > 0) params.set(VISIBLE_ROUTES_PARAM, codes.join(','));

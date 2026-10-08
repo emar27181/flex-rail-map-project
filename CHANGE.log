@@ -1,5 +1,16 @@
 # CHANGE LOG
 
+## [2026-10-08] セッション（駅名URLを英語slug化）
+
+### improve: 出発駅・到着駅・経由駅を人が読める英語slugでURLに出す
+- `src/utils/stationUrlParams.ts`, `src/utils/mapDeepLink.ts`, `tests/unit/utils/stationUrlParams.test.ts`
+- `?from=%E6%B8%8B%E8%B0%B7` のような日本語のパーセントエンコードをやめ、`?from=shibuya` / `?from=musashi-kosugi` のようなASCIIの駅slugを使う
+- 既に共有済みの日本語駅名URLは読み取りだけ後方互換で維持する
+
+### docs: 駅名URLの規則を追加
+- `CLAUDE.md`
+- URL生成は `stationUrlParams.ts` を通し、日本語駅名を直接クエリへ書かない
+
 ## [2026-10-07] セッション（地図アプリの操作を GA4 で計測）
 
 ### feat: 出発駅・到着駅の選択と経路検索を GA4 に送る
