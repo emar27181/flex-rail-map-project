@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ARTICLE_SOURCES } from '../../../src/data/articles';
-import { articleBlocksForRender, shotEmbedSrc } from '../../../src/utils/articleRender';
+import { articleBlocksForRender, articleMapHref, shotEmbedSrc } from '../../../src/utils/articleRender';
 import { getRouteCode } from '../../../src/utils/routeUrlCodes';
 import { isUrlHeatmapMetric } from '../../../src/utils/heatmapUrlParam';
 import type { ArticleLang } from '../../../src/data/articles/types';
@@ -68,6 +68,17 @@ describe('記事のデータ', () => {
           if (!m || typeof m === 'string') continue;
           for (const r of m.routes ?? []) expect(getRouteCode(r), r).toBeTruthy();
           if (m.metric) expect(isUrlHeatmapMetric(m.metric), m.metric).toBe(true);
+        }
+      });
+
+
+      it('記事内の地図URLも駅名を英語slugで出し、日本語のパーセントエンコードを出さない', () => {
+        for (const state of Object.values(a.maps)) {
+          if (!state.from && !state.to) continue;
+          const href = articleMapHref(state, 'ja');
+          expect(href).not.toMatch(/%E[0-9A-F]{1}/i);
+          if (state.from) expect(href).not.toContain(encodeURIComponent(state.from));
+          if (state.to) expect(href).not.toContain(encodeURIComponent(state.to));
         }
       });
 
