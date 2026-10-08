@@ -760,6 +760,7 @@ Netlify管理画面の Site configuration → Build & deploy → Branch deploys 
 - **記事・ガイド・駅/路線ページは言語ごとに別URL**（`/en/articles/...` など）。1つのURLの中でJSで言語を
   差し替えない。言語の切り替えは `LanguageSwitcher.astro`、自動リダイレクトはしない（`docs/seo.md` の「多言語」）
 - 地図を開くリンクは `MapOpenCta.astro` / `mapDeepLink.ts` だけで作る（`routes` `from` `metric` `lang`）。
+- **駅をURLに出すときは日本語名を直接書かない。** `stationUrlParams.ts` の英語slug変換を必ず使う（例: `渋谷` → `shibuya`, `武蔵小杉` → `musashi-kosugi`）。旧URLの日本語値は読み取りだけ後方互換で許可する
   クリックは GA4 の `seo_map_open` と `{guide,station,line,tourist,data}_map_open` で計測する
 - 仕組み・判断基準・ページを足すときの決まりは **`docs/seo.md`**
 
