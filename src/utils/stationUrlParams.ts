@@ -9,7 +9,7 @@
  * 既に共有済みの旧URLを壊さないため、日本語駅名の値も読み取り時だけ後方互換で受け付ける。
  */
 import { getAllStations } from './allStations';
-import { stationTranslations } from './translation';
+import { stationTranslations } from './stationTranslationsEn';
 import type { Station } from '../data/yamanote';
 
 export const DEPARTURE_PARAM = 'from';
