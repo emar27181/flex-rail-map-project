@@ -85,7 +85,25 @@ function renderBlock(block: ArticleBlock, source: ArticleSource, lang: ArticleLa
   }
 }
 
+/**
+ * 記事は「結論を読む → まず実物を触る → 詳しい説明を読む」の順にする。
+ * データ側で embed を末尾近くに置いている既存記事もあるため、描画時に最初の地図デモを
+ * 結論（points）の直後へ昇格させる。これで全記事・全言語に同じ規則が適用される。
+ */
+export function articleBlocksForRender(source: ArticleSource, lang: ArticleLang): ArticleBlock[] {
+  const blocks = source.content[lang].blocks;
+  const demoIndex = blocks.findIndex(b => b.type === 'embed');
+  if (demoIndex <= 1) return blocks;
+
+  return [
+    blocks[0],
+    blocks[demoIndex],
+    ...blocks.slice(1, demoIndex),
+    ...blocks.slice(demoIndex + 1),
+  ];
+}
+
 export function renderArticleBody(source: ArticleSource, lang: ArticleLang): string {
   const h2Index = { n: 0 };
-  return source.content[lang].blocks.map(b => renderBlock(b, source, lang, h2Index)).join('\n');
+  return articleBlocksForRender(source, lang).map(b => renderBlock(b, source, lang, h2Index)).join('\n');
 }
