@@ -81,7 +81,10 @@ describe('syncStationsToUrl', () => {
     expect(window.location.search).toContain(DEPARTURE_PARAM);
     expect(window.location.search).toContain(ARRIVAL_PARAM);
     expect(window.location.search).toContain(WAYPOINTS_PARAM);
-    expect(window.location.search).not.toMatch(/%[0-9A-F]{2}/i);
+    expect(window.location.search).not.toContain(encodeURIComponent(s0.name));
+    expect(window.location.search).not.toContain(encodeURIComponent(s1.name));
+    expect(window.location.search).toContain(encodeStationParam(s0.name)!);
+    expect(window.location.search).toContain(encodeStationParam(s1.name)!);
     expect(getInitialDepartureFromUrl()).toEqual(s0);
     expect(getInitialArrivalFromUrl()).toEqual(s1);
     expect(getInitialWaypointsFromUrl()).toEqual([s2, s3]);
