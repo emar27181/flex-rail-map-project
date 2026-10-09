@@ -1209,6 +1209,18 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "再取得",
     english: "Retry"
   },
+  locationPermissionTitle: {
+    japanese: "位置情報の許可",
+    english: "Location permission"
+  },
+  locationPermissionPrompt: {
+    japanese: "現在地から最寄り駅を出発駅に設定します。「再取得」を押し、確認画面が表示されたら位置情報を許可してください。",
+    english: "Use your location to set the nearest departure station. Tap Retry and allow location access if prompted."
+  },
+  locationPermissionSettings: {
+    japanese: "以前に拒否した場合、確認画面が再表示されないことがあります。ブラウザのこのサイトの設定で位置情報を許可し、端末の位置情報サービスも有効にしてから「再取得」を押してください。埋め込み画面では元のサイトを直接開いてお試しください。",
+    english: "If access was blocked, the browser may not prompt again. Allow location for this site in browser settings and enable device location services, then tap Retry. For an embedded map, open the original site directly."
+  },
   useLocationFeatures: {
     japanese: "現在地から出発駅を自動設定",
     english: "Auto-set departure from location"
@@ -2103,6 +2115,9 @@ export const uiChinese: Record<string, string> = {
   locationDenied: "未允许获取位置信息",
   locationUnavailable: "无法获取当前位置",
   retryLocation: "重试",
+  locationPermissionTitle: "位置权限",
+  locationPermissionPrompt: "使用当前位置设置最近的出发站。点击“重试”，如果出现提示，请允许访问位置信息。",
+  locationPermissionSettings: "如果之前已拒绝，浏览器可能不会再次询问。请在浏览器的此网站设置中允许定位，并启用设备的定位服务，然后点击“重试”。对于嵌入地图，请直接打开原网站。",
   useLocationFeatures: "根据当前位置自动设置出发站",
   moreItemsCount: "+{count}项",
   towardSuffix: "方向",
@@ -2442,6 +2457,9 @@ export const uiKorean: Record<string, string> = {
   locationDenied: "위치 정보가 허용되지 않았습니다",
   locationUnavailable: "현재 위치를 가져올 수 없습니다",
   retryLocation: "다시 시도",
+  locationPermissionTitle: "위치 정보 권한",
+  locationPermissionPrompt: "현재 위치에서 가장 가까운 출발역을 설정합니다. ‘다시 시도’를 누르고 권한 요청이 표시되면 위치 정보 접근을 허용하세요.",
+  locationPermissionSettings: "이전에 거부한 경우 브라우저가 다시 묻지 않을 수 있습니다. 브라우저의 이 사이트 설정에서 위치 권한을 허용하고 기기의 위치 서비스를 켠 후 ‘다시 시도’를 누르세요. 삽입된 지도에서는 원래 사이트를 직접 열어 주세요.",
   useLocationFeatures: "현재 위치로 출발역 자동 설정",
   moreItemsCount: "+{count}건",
   towardSuffix: "방면",

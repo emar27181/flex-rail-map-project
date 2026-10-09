@@ -217,6 +217,7 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 書こうとしているもの | 使うアトム |
 |---|---|
 | 円形の数値バッジ（HTML描画先） | `circularNumberBadge`（寸法・文字・円のHTML。駅/路線の知識は持たない） |
+| モーダルの箱・見出し・フォーカス管理 | `Dialog`（molecule。位置情報などの用途は呼び出し側。地は `floatingSurfaceStyle`、操作は `Button`） |
 | 文字のボタン | `Button` |
 | アイコンだけのボタン | `IconButton`（正方形。`label` 必須） |
 | 押すと画面遷移する | `LinkButton`（要素は `<a>` のまま） |

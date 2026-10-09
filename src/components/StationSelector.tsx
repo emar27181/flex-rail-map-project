@@ -23,6 +23,8 @@ import TextField from './ui/atoms/TextField';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import { useDeviceClass } from '../hooks/useDeviceClass';
 import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
+import LocationPermissionDialog from './LocationPermissionDialog';
+import { useLocationDeparture } from '../hooks/useLocationDeparture';
 
 /** 駅名検索の結果として出す最大件数 */
 const STATION_SUGGESTION_LIMIT = 10;
@@ -132,6 +134,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
+  const locationDeparture = useLocationDeparture(userLocation, locationError, onSetNearestDeparture, onRetryLocation);
   const [departureSearch, setDepartureSearch] = useState('');
   const [arrivalSearch, setArrivalSearch] = useState('');
   const [showDepartureResults, setShowDepartureResults] = useState(false);
@@ -573,8 +576,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
                     {translateUI(locationError === 'denied' ? 'locationDenied' : 'locationUnavailable', language)}
                   </span>
-                  {locationError !== 'denied' && onRetryLocation && (
-                    <Button theme={theme} variant="outline" size="sm" onClick={onRetryLocation}>
+                  {onRetryLocation && (
+                    <Button theme={theme} variant="outline" size="sm" onClick={locationDeparture.start}>
                       {translateUI('retryLocation', language)}
                     </Button>
                   )}
@@ -754,9 +757,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   /*
                     「現在地から」の塗り分けは何度か迷走した経緯があるので
                     最終的な条件をここに書いておく:
-                    - disabled: 位置情報（userLocation）が取れていない間。
-                      押しても意味が無いため非活性にする（消すと隣のボタンの
-                      位置が動くので、消さずに非活性で存在だけ示す）
+                    - 未取得・拒否時も押せる。許可案内と再取得を出す。
                     - pressed(塗りつぶし): 出発駅が「今の現在地の最寄り駅」と
                       一致しているときだけ。「今だったら藤沢本町が最寄り駅で
                       それが出発駅にセットされていたら活性化」との指定どおり、
@@ -767,9 +768,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   */
                   variant="primary"
                   size="sm"
-                  onClick={onSetNearestDeparture}
+                  onClick={locationDeparture.start}
                   icon={<LocateFixed />}
-                  disabled={!userLocation}
                   pressed={isNearestDeparture}
                 >
                   {translateUI('currentLocationFrom', language)}
@@ -1037,6 +1037,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
         </>
       )}
+      <LocationPermissionDialog open={locationDeparture.open} theme={theme} language={language}
+        denied={locationError === 'denied'} supported={typeof navigator !== 'undefined' && !!navigator.geolocation}
+        onRetry={onRetryLocation ? locationDeparture.retry : undefined} onClose={locationDeparture.close} />
     </div>
   );
 };

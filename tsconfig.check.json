@@ -1,12 +1,15 @@
 {
   "extends": "./tsconfig.json",
   "include": [
+    "src/env.d.ts",
     "src/data/stationNumbers.ts",
     "src/data/stationStats.ts",
     "src/data/routes.ts",
     "src/utils/trackGeometry.ts",
     "src/utils/renderedRouteMidpoint.ts",
     "src/utils/routeAdjacency.ts",
+    "src/hooks/useLocationDeparture.ts",
+    "src/components/LocationPermissionDialog.tsx",
     "src/components/ui/atoms/circularNumberBadge.ts",
     "src/data/trackGeometry/index.ts",
     "scripts/track-geometry/collect-osm.mts",
