@@ -1,5 +1,17 @@
 # CHANGE LOG
 
+## [2026-10-08] セッション（全記事で説明前に地図デモを見せる）
+
+### improve: 全記事・全言語で結論直後に操作可能な地図デモを表示
+- `src/utils/articleRender.ts`, `tests/unit/data/articleSources.test.ts`
+- 既存記事のデータ上で `embed` が後ろにあっても、描画時に最初の地図デモを `points` の直後へ昇格する
+- 記事内の地図URLも `mapDeepLink.ts` 経由のため、駅名URLの英語slug化に自動追従することをテストで固定
+
+### docs: 「結論 → デモ → 説明」を記事作成規則に追加
+- `docs/article-writing.md`, `docs/templates/article-template.ts`, `CLAUDE.md`
+- 地図や画面の機能を説明する箇所では、文章だけにせず近くに実際の画面（shot）を置く
+
+
 ## [2026-10-08] セッション（駅名URLを英語slug化）
 
 ### improve: 出発駅・到着駅・経由駅を人が読める英語slugでURLに出す

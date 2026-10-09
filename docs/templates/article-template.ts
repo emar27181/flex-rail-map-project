@@ -1,7 +1,7 @@
 /**
  * 記事のひな形。src/data/articles/{slug}.ts にコピーして使う（手順は docs/article-writing.md）。
  *
- * - 1記事1テーマ。結論（points 3行）→ 見出し4つ（起・承・転・結）→ 地図の埋め込み → 地図を開くボタン
+ * - 1記事1テーマ。結論（points 3行）→ まず地図デモ（embed）→ 見出し4つ（起・承・転・結）→ 地図を開くボタン
  * - 1セクションに1つ、このサイトの実際の画面（shot）を iframe で埋め込む。記事の言語の画面が開く
  * - 値だけを書く（計算で組み立てない）。サービス名は {siteName} と書く
  * - 4言語でブロックの並び（種類）を同じにする（テストで確認）
@@ -49,6 +49,8 @@ export const exampleArticle: ArticleSource = {
       blocks: [
         // 結論を3行で先に言う
         { type: 'points', items: ['結論1', '結論2', '結論3'] },
+        // 説明を読む前に、この記事の主題に合う実際の地図をまず触ってもらう
+        { type: 'embed', map: 'main', view: { center: [35.69, 139.745], zoom: 12 }, title: '{siteName}の地図（〇〇を表示した状態）', caption: '実際の地図（〇〇を表示した状態）。枠の中で拡大・移動できます。' },
         // 01 起: なぜ困るのか・よくある間違い
         { type: 'h2', text: '〇〇が分かりにくい理由' },
         { type: 'p', text: '本文。1段落は3〜4文まで。' },
@@ -62,8 +64,6 @@ export const exampleArticle: ArticleSource = {
         // 04 結: 次にやること
         { type: 'h2', text: '〇〇から始める' },
         { type: 'steps', items: ['手順1', '手順2', '手順3'] },
-        // 実際の地図（押すと操作できる）。view で開く範囲
-        { type: 'embed', map: 'main', view: { center: [35.69, 139.745], zoom: 12 }, title: '{siteName}の地図（〇〇を表示した状態）', caption: '実際の地図（〇〇を表示した状態）。枠の中で拡大・移動できます。' },
         { type: 'cta', map: 'main', title: '〇〇を表示した地図を開く', text: '〇〇の状態で開きます。' },
       ],
     },
