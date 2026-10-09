@@ -2,6 +2,17 @@ import type { LatLng, TrackGeometry } from '../data/trackGeometry/types';
 import type { Point } from './routeOffset';
 
 type StationPosition = { name: string; lat: number; lng: number };
+/** 環状線の全駅表示だけを閉じる。部分区間や既に閉じた配列は変更しない。 */
+export function closeFullRouteStations<T extends StationPosition>(
+  stations: T[], fullRoute: StationPosition[], circular: boolean,
+): T[] {
+  if (!circular || stations.length < 2 || stations.length !== fullRoute.length) return stations;
+  if (!stations.every((s, i) => s.name === fullRoute[i].name && s.lat === fullRoute[i].lat && s.lng === fullRoute[i].lng)) return stations;
+  const first = stations[0], last = stations[stations.length - 1];
+  if (first.name === last.name && first.lat === last.lat && first.lng === last.lng) return stations;
+  return [...stations, first];
+}
+
 export interface RenderedRouteSegment {
   stations: StationPosition[];
   positions: LatLng[];
@@ -29,8 +40,16 @@ export function renderedRouteMidpoint(
 ): LatLng | null {
   const matches = (a: StationPosition, b: StationPosition) => a.name === b.name && a.lat === b.lat && a.lng === b.lng;
   for (const segment of segments) {
-    const a = segment.stations.findIndex(s => matches(s, from));
-    const b = segment.stations.findIndex(s => matches(s, to));
+    // 閉じた環状線の先頭駅は末尾にもあるため、最も近い組を使う。
+    let a = -1, b = -1;
+    segment.stations.forEach((station, i) => {
+      if (!matches(station, from)) return;
+      segment.stations.forEach((other, j) => {
+        if (matches(other, to) && (a < 0 || Math.abs(i - j) < Math.abs(a - b))) {
+          a = i; b = j;
+        }
+      });
+    });
     if (a < 0 || b < 0) continue;
     const points = segment.positions.slice(
       segment.stationIndices[Math.min(a, b)], segment.stationIndices[Math.max(a, b)] + 1,

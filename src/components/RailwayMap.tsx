@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useTravelTimeLabelMode } from '../hooks/useTravelTimeLabelMode';
 import { travelTimeLabelLayout } from './map/travelTimeLabel';
 import { circularNumberBadgeHtml } from './ui/atoms/circularNumberBadge';
-import { renderedRouteMidpoint, stationVertexIndices } from '../utils/renderedRouteMidpoint';
+import { closeFullRouteStations, renderedRouteMidpoint, stationVertexIndices } from '../utils/renderedRouteMidpoint';
 import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X, Timer, TriangleAlert, ArrowUpDown } from 'lucide-react';
 import type { LeafletEvent, LeafletMouseEvent, Map as LeafletMap } from 'leaflet';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
@@ -4548,7 +4548,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const routeLineColor = routeHeatColors.get(routeKey) ?? routeColor;
 
     // 描画線と所要時間の位置は同じ座標列から取る。
-    const renderedSegments = displaySegments.map(segStations => ({
+    const renderedSegments = displaySegments
+      .map(segment => closeFullRouteStations(segment, stations, routeKey === 'yamanote'))
+      .map(segStations => ({
       stations: segStations,
       positions: offsetPositions(segStations, routeKey, routeLineWidth),
       stationIndices: stationVertexIndices(segStations, TRACK_GEOMETRY[routeKey]),
@@ -5471,7 +5473,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   const color = routeHeatColors.get(rKey)
                     ?? adjustRouteColorForTheme(routeColors[rKey] ?? '#888', theme);
                   // 薄い層も同じ規則でずらす（この層の線の太さは3px）
-                  const positions = offsetPositions(stationList as any[], rKey, DIMMED_ROUTE_WEIGHT, fullRouteRanks.get(rKey));
+                  const closedStations = closeFullRouteStations(stationList, stationList, rKey === 'yamanote');
+                  const positions = offsetPositions(closedStations, rKey, DIMMED_ROUTE_WEIGHT,
+                    closedStations === stationList ? fullRouteRanks.get(rKey) : undefined);
                   return (
                     <React.Fragment key={`dimmed-${rKey}`}>
                       {/* 視覚的な半透明路線 */}

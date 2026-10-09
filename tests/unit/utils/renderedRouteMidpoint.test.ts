@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { renderedRouteMidpoint, stationVertexIndices } from '../../../src/utils/renderedRouteMidpoint';
+import { closeFullRouteStations, renderedRouteMidpoint, stationVertexIndices } from '../../../src/utils/renderedRouteMidpoint';
+import { yamanote } from '../../../src/data/yamanote';
 import type { RenderedRouteSegment } from '../../../src/utils/renderedRouteMidpoint';
 import type { LatLng, TrackGeometry } from '../../../src/data/trackGeometry/types';
 
@@ -12,6 +13,29 @@ const midpoint = (segments: RenderedRouteSegment[], from = a, to = b) =>
   renderedRouteMidpoint(segments, from, to, project, unproject);
 
 describe('描画した路線上の所要時間位置', () => {
+  it('山手線の全周は有楽町から東京へ閉じ、元データは変更しない', () => {
+    const closed = closeFullRouteStations(yamanote, yamanote, true);
+    expect(closed.at(-2)?.name).toBe('有楽町');
+    expect(closed.at(-1)?.name).toBe('東京');
+    expect(closed).toHaveLength(yamanote.length + 1);
+    expect(yamanote.at(-1)?.name).toBe('有楽町');
+    expect(stationVertexIndices(closed)).toHaveLength(closed.length);
+  });
+
+  it('部分区間・非環状線・既に閉じた環状線を誤接続しない', () => {
+    const partial = yamanote.slice(0, 3);
+    expect(closeFullRouteStations(partial, yamanote, true)).toBe(partial);
+    expect(closeFullRouteStations(yamanote, yamanote, false)).toBe(yamanote);
+    const closed = [...yamanote, yamanote[0]];
+    expect(closeFullRouteStations(closed, closed, true)).toBe(closed);
+  });
+
+  it('閉じた環状線の末尾から先頭への中点は閉じる区間上に置く', () => {
+    const stations = [a, b, c, a];
+    const segments = [{ stations, positions: stations.map(s => [s.lat, s.lng] as LatLng), stationIndices: [0, 1, 2, 3] }];
+    expect(midpoint(segments, c, a)).toEqual([5, 10]);
+    expect(midpoint(segments, a, c)).toEqual([5, 10]);
+  });
   it('並走オフセット後の線を使い、元の駅の中点には置かない', () => {
     expect(midpoint([{ stations: [a, b], positions: [[2, 0], [12, 10]], stationIndices: [0, 1] }]))
       .toEqual([7, 5]);
