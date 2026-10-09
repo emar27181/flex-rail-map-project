@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useTravelTimeLabelMode } from '../hooks/useTravelTimeLabelMode';
 import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X, Timer, TriangleAlert, ArrowUpDown } from 'lucide-react';
 import type { LeafletEvent, LeafletMouseEvent, Map as LeafletMap } from 'leaflet';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
@@ -363,7 +364,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     paddingCss: `${MAP_LABEL.paddingYPx}px ${MAP_LABEL.paddingXPx}px`,
     borderWidth: 1,
   }), [stationLabelFontSize]);
-  const [travelTimeLabelMode, setTravelTimeLabelMode] = useState<'interval' | 'cumulative'>('interval'); // 累積は実装中
+  const [travelTimeLabelMode, setTravelTimeLabelMode] = useTravelTimeLabelMode(!!departure);
   /**
    * 仮の対応として既定をOFFにしている。
    *
