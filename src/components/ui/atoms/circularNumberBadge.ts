@@ -5,22 +5,20 @@ import { shadow, type ShadowRole } from './shadow';
 /** 汎用の円形数値バッジ。駅・路線・時間・Leafletには依存しない。 */
 export const CIRCULAR_NUMBER_BADGE = {
   fontSizePx: parseFloat(FS.caption),
-  lineHeight: 1.2,
-  paddingXPx: parseFloat(L.sp.xxs),
+  lineHeight: 1,
+  contentDiameterPx: 13,
+  paddingXPx: 0,
   paddingYPx: 0,
   fontWeight: 700,
   borderWidthPx: 1,
-  digitWidthEm: 0.65,
   radius: L.r.pill,
 } as const;
 
 export function circularNumberBadgeLayout(value: number) {
   const text = String(Math.round(value));
   const t = CIRCULAR_NUMBER_BADGE;
-  const diameter = Math.max(
-    Math.ceil(t.fontSizePx * t.lineHeight) + 2 * (t.paddingYPx + t.borderWidthPx),
-    Math.ceil(text.length * t.fontSizePx * t.digitWidthEm) + 2 * (t.paddingXPx + t.borderWidthPx),
-  );
+  // 従来の内容径13px + 両側の枠線。外寸で指定して中心も一致させる。
+  const diameter = t.contentDiameterPx + 2 * t.borderWidthPx;
   return { text, width: diameter, height: diameter, anchor: [diameter / 2, diameter / 2] as [number, number] };
 }
 

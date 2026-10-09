@@ -9,24 +9,22 @@ describe('地図の所要時間ラベル', () => {
     const triple = travelTimeLabelLayout(143);
     expect(TRAVEL_TIME_LABEL.fontSizePx).toBe(parseFloat(FS.caption));
     expect(single.width).toBe(single.height);
-    expect(double.width).toBeGreaterThan(single.width);
-    expect(triple.width).toBeGreaterThan(double.width);
+    expect(single.width).toBe(15);
+    expect(double.width).toBe(single.width);
+    expect(triple.width).toBe(single.width);
     expect(TRAVEL_TIME_LABEL.fontWeight).toBe(700);
     expect(double.height).toBe(double.width);
     expect(triple.height).toBe(triple.width);
   });
 
-  it('全桁の文字幅・左右余白・境界線を含め、アンカーは枠の中心に置く', () => {
+  it('従来の内容径と枠線を維持し、アンカーは外枠の中心に置く', () => {
     for (const time of [0, 3, 43, 99, 143, 1000]) {
       const label = travelTimeLabelLayout(time);
       const token = TRAVEL_TIME_LABEL;
-      expect(label.width).toBeGreaterThanOrEqual(
-        label.text.length * token.fontSizePx * token.digitWidthEm
-        + 2 * (token.paddingXPx + token.borderWidthPx),
-      );
-      expect(label.height).toBeGreaterThanOrEqual(
-        token.fontSizePx * token.lineHeight + 2 * (token.paddingYPx + token.borderWidthPx),
-      );
+      expect(label.width).toBe(token.contentDiameterPx + 2 * token.borderWidthPx);
+      expect(token.lineHeight).toBe(1);
+      expect(token.paddingXPx).toBe(0);
+      expect(token.paddingYPx).toBe(0);
       expect(label.anchor).toEqual([label.width / 2, label.height / 2]);
     }
   });
