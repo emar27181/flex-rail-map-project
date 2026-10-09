@@ -2776,7 +2776,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         align-items:center;
         justify-content:center;
         box-shadow:${shadow('marker', theme)};
-        font-weight:bold;
+        font-weight:${token.fontWeight};
         line-height:${token.lineHeight};
         white-space:nowrap;
         font-variant-numeric:tabular-nums;
