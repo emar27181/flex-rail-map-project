@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useTravelTimeLabelMode } from '../hooks/useTravelTimeLabelMode';
 import { travelTimeLabelLayout } from './map/travelTimeLabel';
 import { circularNumberBadgeHtml } from './ui/atoms/circularNumberBadge';
+import { isCircularRoute } from '../utils/routeAdjacency';
 import { closeFullRouteStations, renderedRouteMidpoint, stationVertexIndices } from '../utils/renderedRouteMidpoint';
 import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X, Timer, TriangleAlert, ArrowUpDown } from 'lucide-react';
 import type { LeafletEvent, LeafletMouseEvent, Map as LeafletMap } from 'leaflet';
@@ -2810,27 +2811,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return keys.size > 0 ? keys : null;
   }, [departure, arrival, highlightedRouteKeys, routeRecommendations, showRouteRecommendationsPanel]);
 
-  // 累積所要時間（乗り換えを跨いだ全体累積）: 選択ルートの全セグメントを走破
-  const globalCumulativeTimeMap = useMemo(() => {
-    if (!departure || !selectedRouteIndices || selectedRouteIndices.size === 0 || routeRecommendations.length === 0) {
-      return new Map<string, number>();
-    }
-    const selectedIdx = [...selectedRouteIndices][0];
-    const route = routeRecommendations[selectedIdx];
-    if (!route) return new Map<string, number>();
-
-    const map = new Map<string, number>();
-    let t = 0;
-    for (const seg of route.segments) {
-      for (let i = 0; i < seg.stations.length; i++) {
-        const name = seg.stations[i].name;
-        if (!map.has(name)) map.set(name, t);
-        if (i < seg.stations.length - 1) t += seg.stations[i].timeToNext || 3;
-      }
-      // 最後の駅（次セグメントの乗換駅）は既に t に反映済み
-    }
-    return map;
-  }, [selectedRouteIndices, routeRecommendations, departure]);
+  // 表示中の路線を対象に単一始点のダイクストラを1回だけ実行する。
+  const cumulativeTimeMap = useMemo(() => {
+    if (!departure || travelTimeLabelMode !== 'cumulative') return new Map<string, number>();
+    const results = routeFinder.findStationsWithinTime(departure, Infinity, visibleRoutes);
+    return new Map(results.map(result => [result.station.name, result.totalTime]));
+  }, [departure, travelTimeLabelMode, visibleRoutes, routeFinder]);
 
   // レンダリング最適化：表示する路線のデータを準備
   const visibleRoutesData = useMemo(() => {
@@ -4549,7 +4535,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     // 描画線と所要時間の位置は同じ座標列から取る。
     const renderedSegments = displaySegments
-      .map(segment => closeFullRouteStations(segment, stations, routeKey === 'yamanote'))
+      .map(segment => closeFullRouteStations(segment, stations, isCircularRoute(routeKey)))
       .map(segStations => ({
       stations: segStations,
       positions: offsetPositions(segStations, routeKey, routeLineWidth),
@@ -4745,49 +4731,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             return renderStationMarker(station, routeKey, `${routeKey}-station-${index}`, routeHasExpressMark);
           }
         })}
-        {(() => {
-          // 累積モード: 出発駅からの累積時間を事前計算
-          const isCumulative = travelTimeLabelMode === 'cumulative' && !!departure;
-          const depIdx = isCumulative
-            ? displayStations.findIndex(s => s.name === departure!.name)
-            : -1;
-          const cumulativeTimes: number[] = new Array(displayStations.length).fill(-1);
-          if (isCumulative && depIdx >= 0) {
-            cumulativeTimes[depIdx] = 0;
-            for (let i = depIdx + 1; i < displayStations.length; i++) {
-              cumulativeTimes[i] = cumulativeTimes[i - 1] + (displayStations[i - 1].timeToNext || 3);
-            }
-            for (let i = depIdx - 1; i >= 0; i--) {
-              cumulativeTimes[i] = cumulativeTimes[i + 1] + (displayStations[i].timeToNext || 3);
-            }
-          }
-          return null;
-        })()}
-        {displayStations.map((station, index) => {
-          if (index < displayStations.length - 1 && station.timeToNext) {
-            const nextStation = displayStations[index + 1];
+        {closeFullRouteStations(displayStations, stations, isCircularRoute(routeKey)).map((station, index, labelStations) => {
+          if (index < labelStations.length - 1 && station.timeToNext) {
+            const nextStation = labelStations[index + 1];
             const isCurrentTransfer = transferStations.has(station.name);
             const isCumulative = travelTimeLabelMode === 'cumulative' && !!departure;
-            const depIdx = isCumulative
-              ? displayStations.findIndex(s => s.name === departure!.name)
-              : -1;
-            const getTimeAt = (idx: number): number => {
-              if (!isCumulative) return -1;
-              // 乗り換えを跨いだ全体累積マップがあれば depIdx に関係なく使用
-              const stationName = displayStations[idx]?.name;
-              if (globalCumulativeTimeMap.size > 0 && stationName) {
-                const t = globalCumulativeTimeMap.get(stationName);
-                if (t !== undefined) return t;
-              }
-              // フォールバック: 同一路線内での累積（depIdx が必要）
-              if (depIdx < 0) return -1;
-              let t = 0;
-              if (idx >= depIdx) {
-                for (let i = depIdx; i < idx; i++) t += displayStations[i].timeToNext || 3;
-              } else {
-                for (let i = idx; i < depIdx; i++) t += displayStations[i].timeToNext || 3;
-              }
-              return t;
+            // 両方向から到達できるため、区間の遠い側の駅への最短時間を示す。
+            const getCumulativeTime = (endIndex: number): number | undefined => {
+              const start = cumulativeTimeMap.get(station.name);
+              const end = cumulativeTimeMap.get(labelStations[endIndex].name);
+              return start === undefined || end === undefined ? undefined : Math.max(start, end);
             };
 
             if (showTransferStationsOnly) {
@@ -4797,9 +4750,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               // 次の乗換駅まで合算
               let totalTime = 0;
               let endIndex = index;
-              for (let i = index; i < displayStations.length - 1; i++) {
-                const cSt = displayStations[i];
-                const nSt = displayStations[i + 1];
+              for (let i = index; i < labelStations.length - 1; i++) {
+                const cSt = labelStations[i];
+                const nSt = labelStations[i + 1];
                 totalTime += cSt.timeToNext || 3;
                 endIndex = i + 1;
                 if (transferStations.has(nSt.name)) break;
@@ -4811,9 +4764,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               if (endIndex === index + 1) {
                 const midpoint = getTimeLabelPosition(station, nextStation);
                 if (!midpoint) return null;
-                const displayTime = isCumulative && (depIdx >= 0 || globalCumulativeTimeMap.size > 0)
-                  ? getTimeAt(index + 1)
+                const displayTime = isCumulative
+                  ? getCumulativeTime(index + 1)
                   : station.timeToNext;
+                if (displayTime === undefined) return null;
                 const timeIcon = createTimeIcon(displayTime, routeColor, zoomLevel, isCumulative);
                 if (!timeIcon) return null;
                 return (
@@ -4826,11 +4780,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   />
                 );
               } else {
-                const midpoint = getTimeLabelPosition(station, displayStations[endIndex]);
+                const midpoint = getTimeLabelPosition(station, labelStations[endIndex]);
                 if (!midpoint) return null;
-                const displayTime = isCumulative && (depIdx >= 0 || globalCumulativeTimeMap.size > 0)
-                  ? getTimeAt(endIndex)
+                const displayTime = isCumulative
+                  ? getCumulativeTime(endIndex)
                   : totalTime;
+                if (displayTime === undefined) return null;
                 const timeIcon = createTimeIcon(displayTime, routeColor, zoomLevel, true);
                 if (!timeIcon) return null;
                 return (
@@ -4846,10 +4801,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             } else {
               // 全駅表示時
               const midpoint = getTimeLabelPosition(station, nextStation);
-                if (!midpoint) return null;
-              const displayTime = isCumulative && depIdx >= 0
-                ? getTimeAt(index + 1)
+              if (!midpoint) return null;
+              const displayTime = isCumulative
+                ? getCumulativeTime(index + 1)
                 : station.timeToNext;
+              if (displayTime === undefined) return null;
               const timeIcon = createTimeIcon(displayTime, routeColor, zoomLevel, isCumulative);
               if (!timeIcon) return null;
               return (
@@ -5473,7 +5429,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   const color = routeHeatColors.get(rKey)
                     ?? adjustRouteColorForTheme(routeColors[rKey] ?? '#888', theme);
                   // 薄い層も同じ規則でずらす（この層の線の太さは3px）
-                  const closedStations = closeFullRouteStations(stationList, stationList, rKey === 'yamanote');
+                  const closedStations = closeFullRouteStations(stationList, stationList, isCircularRoute(rKey));
                   const positions = offsetPositions(closedStations, rKey, DIMMED_ROUTE_WEIGHT,
                     closedStations === stationList ? fullRouteRanks.get(rKey) : undefined);
                   return (
