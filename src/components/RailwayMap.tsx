@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTravelTimeLabelMode } from '../hooks/useTravelTimeLabelMode';
+import { TRAVEL_TIME_LABEL, travelTimeLabelLayout } from './map/travelTimeLabel';
 import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X, Timer, TriangleAlert, ArrowUpDown } from 'lucide-react';
 import type { LeafletEvent, LeafletMouseEvent, Map as LeafletMap } from 'leaflet';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
@@ -2750,11 +2751,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (!MapComponents?.DivIcon || !showTravelTimes || showTrainDemo) return null;
 
     const { DivIcon } = MapComponents;
-    // 駅間に並ぶ小さな目印なので、駅名ラベルより控えめにする。
-    // 中身は1〜2桁の数字だけなので、本文の下限(12px)を下回っても読める。
-    const fontSize = parseInt(FS.caption, 10);
-    const circleSize = 13;
-    const borderWidth = 1;
+    const label = travelTimeLabelLayout(time);
+    const token = TRAVEL_TIME_LABEL;
 
     // 既定（背景色を「路線色」にしたとき）は、駅名ラベルと同じ
     // filledLabelColors を使い、実際に路線色で塗った背景にする
@@ -2764,27 +2762,30 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const bgColor = travelTimeStyle.bgColor ?? filledBg;
     const textColor = travelTimeStyle.textColor ?? filledText;
     const borderColor = travelTimeStyle.borderColor ?? color;
-    const timeNumber = Math.round(time);
 
     return new DivIcon({
       html: `<div style="
-        width:${circleSize}px;
-        height:${circleSize}px;
-        border-radius:50%;
-        border:${borderWidth}px solid ${borderColor};
+        min-width:${label.width}px;
+        height:${label.height}px;
+        box-sizing:border-box;
+        padding:${token.paddingYPx}px ${token.paddingXPx}px;
+        border-radius:${token.radius};
+        border:${token.borderWidthPx}px solid ${borderColor};
         background:${bgColor};
         display:flex;
         align-items:center;
         justify-content:center;
         box-shadow:${shadow('marker', theme)};
         font-weight:bold;
-        line-height:1;
+        line-height:${token.lineHeight};
+        white-space:nowrap;
+        font-variant-numeric:tabular-nums;
       ">
-        <span style="font-size:${fontSize}px;color:${textColor};">${timeNumber}</span>
+        <span style="font-size:${token.fontSizePx}px;color:${textColor};">${label.text}</span>
       </div>`,
       className: isSection ? 'time-text-section' : 'time-text',
-      iconSize: [circleSize, circleSize],
-      iconAnchor: [circleSize / 2, circleSize / 2]
+      iconSize: [label.width, label.height],
+      iconAnchor: label.anchor
     });
   }, [MapComponents, currentLanguage, theme, showTravelTimes, showTrainDemo, travelTimeStyle]);
 
