@@ -738,18 +738,6 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 <Checkbox theme={theme} checked={heatmapEnabled} onChange={onHeatmapEnabledChange}>
                   {translateUI('stationHeatmap', language)}
                 </Checkbox>
-                {heatmapEnabled && (
-                  <Checkbox
-                    theme={theme}
-                    size="sm"
-                    checked={showEstimatedData}
-                    onChange={onShowEstimatedDataChange}
-                    styleOverride={{ paddingLeft: L.sp['2xl'] }}
-                  >
-                    <span>推定データを含める</span>
-                    {!showEstimatedData && <span style={{ marginLeft: L.sp.xs, color: colors.warningText, fontSize: FS.caption }}>（実データのみ）</span>}
-                  </Checkbox>
-                )}
                 {mapViewMode === 'realistic' && (
                   <Checkbox theme={theme} checked={showTrainDemo} onChange={onTrainDemoToggle}>
                   {translateUI('trainDemoLabel', language)}
