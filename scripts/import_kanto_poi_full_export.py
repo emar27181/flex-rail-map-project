@@ -29,7 +29,7 @@ def run(source, apply):
     verification = load(source / "VERIFICATION.json")
     if len(fill) != 1242 or len(new) != 264:
         raise ValueError(f"Unexpected export size: fill={len(fill)} new={len(new)}")
-    if verification.get("counts", {}).get("collected") != 1516:
+    if not any(check.get("check") == "coverage_rows" and check.get("ok") is True and "収集済=1516" in check.get("detail", "") for check in verification.get("checks", [])):
         raise ValueError("Export collection verification is not complete")
     if not all(check.get("ok") is True for check in verification.get("checks", [])):
         raise ValueError("Export verification contains failed checks")
