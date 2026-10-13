@@ -21,6 +21,7 @@ import Slider from '../ui/atoms/Slider';
 import { L } from './legendStyles';
 import DisclosureIndicator from '../ui/atoms/DisclosureIndicator';
 import StationMemoPanel from '../StationMemoPanel';
+import type { MapViewMode } from '../../constants/mapViewMode';
 
 type SortMode = 'name' | 'color' | 'default' | 'distance';
 
@@ -83,8 +84,8 @@ interface LegendRouteListProps {
   viewCenter?: [number, number];
   showTrainDemo: boolean;
   onTrainDemoToggle: () => void;
-  mapViewMode: 'realistic' | 'schematic' | 'bubble';
-  onMapViewModeChange: (mode: 'realistic' | 'schematic' | 'bubble') => void;
+  mapViewMode: MapViewMode;
+  onMapViewModeChange: (mode: MapViewMode) => void;
   heatmapEnabled: boolean;
   heatmapParam: keyof StationStats;
   onHeatmapEnabledChange: (v: boolean) => void;
@@ -776,6 +777,10 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                 )}
                 <Checkbox theme={theme} checked={mapViewMode === 'schematic'} onChange={(checked) => onMapViewModeChange(checked ? 'schematic' : 'realistic')}>
                   {translateUI('schematicMapLabel', language)}
+                </Checkbox>
+                {/* 立体（線路の下の地面の標高）。Terrain3DView */}
+                <Checkbox theme={theme} checked={mapViewMode === 'terrain3d'} onChange={(checked) => onMapViewModeChange(checked ? 'terrain3d' : 'realistic')}>
+                  {translateUI('terrain3dLabel', language)}
                 </Checkbox>
                 {/* 複数駅の共通路線（以前の「最寄り駅メモ」）。複数の駅の路線を地図に出すのでデータ可視化に置く。
                     見出しは他の節と同じ sectionHeader、中身は StationMemoPanel（bare） */}
