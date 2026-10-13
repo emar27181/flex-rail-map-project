@@ -123,3 +123,13 @@ describe('RouteSwitchBoard', () => {
     expect(chipLabels()[0]).toBe('中央線');
   });
 });
+
+describe('グループは閉じた状態で始まり、5行まで見せる', () => {
+  it('表示中・非表示の各グループは、開くまで高さを5行に切っている', () => {
+    renderBoard({ visibleRoutes: new Set<RouteKey>(['yamanote']) });
+    const boxes = document.querySelectorAll('[data-clamped]');
+    // 表示中（山手線）と非表示（銀座線・中央線）の2グループ
+    expect(boxes).toHaveLength(2);
+    boxes.forEach(b => expect(b.getAttribute('data-clamped')).toBe('true'));
+  });
+});

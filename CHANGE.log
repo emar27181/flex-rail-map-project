@@ -1,5 +1,15 @@
 # CHANGE LOG
 
+## [2026-10-13] セッション（表示路線の切替のグループを5行までに）
+
+### improve: 表示路線の切替の各グループを、閉じた状態で5行まで・開くと全部に
+- `src/components/ui/molecules/ClampedWrap.tsx`（新規）, `src/components/legend/RouteSwitchBoard.tsx`,
+  `tests/unit/components/ui/clampedWrap.test.tsx`（新規）, `tests/unit/components/legend/RouteSwitchBoard.test.tsx`,
+  `docs/design-system.md`（どの部品を使うか）, `.claude/skills/design-tokens/SKILL.md`
+- 経路上・駅を通る・表示中・非表示の各グループは数百路線あり、「さらに48件」と件数で区切っていたため、
+  画面の幅によって行数がばらばらだった。行数（5行）で切る部品を作り、下の「他 N 路線を表示」で全部・「折りたたむ」で元に戻す
+- 既定はすべて閉じた状態。閉じているときは先頭60個までしか描かない（数百個のチップを毎回描かない）
+
 ## [2026-10-08] セッション（駅名URLを英語slug化）
 
 ### improve: 出発駅・到着駅・経由駅を人が読める英語slugでURLに出す

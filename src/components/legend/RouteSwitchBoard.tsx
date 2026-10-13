@@ -24,6 +24,7 @@ import { L } from './legendStyles';
 import Button from '../ui/atoms/Button';
 import RouteToggleChip from './RouteToggleChip';
 import TextField from '../ui/atoms/TextField';
+import ClampedWrap from '../ui/molecules/ClampedWrap';
 
 /**
  * このパネルの操作部品の大きさ。
@@ -32,11 +33,12 @@ import TextField from '../ui/atoms/TextField';
  */
 const BOARD_CONTROL_SIZE = 'sm' as const;
 
-/** 1グループで最初に見せる件数。全部描くと490個のチップになり操作が重くなる */
-const GROUP_INITIAL_LIMIT = 24;
-
-/** さらに表示を押すたびに増やす件数 */
-const GROUP_STEP = 48;
+/**
+ * 各グループ（経路上・駅を通る・表示中・非表示）は閉じた状態で始め、チップを5行まで見せる。
+ * 開くと全部見せる（ui/molecules/ClampedWrap）。以前は「さらに48件」と件数で区切っていて、
+ * 画面の幅で行数がばらばらだった
+ */
+const GROUP_MAX_ROWS = 5;
 
 interface RouteSwitchBoardProps {
   /** 表示候補の路線キー（呼び出し側で絞り込んだもの） */
@@ -74,11 +76,12 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
 }) => {
   const colors = getThemeColors(theme);
   const [query, setQuery] = useState('');
-  const [limits, setLimits] = useState<Record<GroupKey, number>>({
-    onRoute: GROUP_INITIAL_LIMIT,
-    atStation: GROUP_INITIAL_LIMIT,
-    visible: GROUP_INITIAL_LIMIT,
-    hidden: GROUP_INITIAL_LIMIT,
+  /** グループごとに開いているか。既定はすべて閉じる（5行まで） */
+  const [expanded, setExpanded] = useState<Record<GroupKey, boolean>>({
+    onRoute: false,
+    atStation: false,
+    visible: false,
+    hidden: false,
   });
 
   const labelOf = (rk: RouteKey) => translateRoute(routeNames[rk], language);
@@ -137,9 +140,6 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
 
   const group = (key: GroupKey, title: string, items: RouteKey[], accent?: string) => {
     if (items.length === 0) return null;
-    const limit = limits[key];
-    const shown = items.slice(0, limit);
-    const rest = items.length - shown.length;
     return (
       <div style={{ marginBottom: L.sp.xl }}>
         <div style={{
@@ -161,21 +161,17 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
           <span>{title}</span>
           <span style={{ opacity: 0.7 }}>{items.length}</span>
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.sm }}>
-          {shown.map(chip)}
-        </div>
-        {rest > 0 && (
-          <Button
-            theme={theme}
-            variant="outline"
-            size={BOARD_CONTROL_SIZE}
-            fullWidth
-            onClick={() => setLimits(prev => ({ ...prev, [key]: prev[key] + GROUP_STEP }))}
-            styleOverride={{ marginTop: L.sp.sm }}
-          >
-            {translateUI('routeShowMore', language, { count: String(rest) })}
-          </Button>
-        )}
+        <ClampedWrap
+          theme={theme}
+          size={BOARD_CONTROL_SIZE}
+          maxRows={GROUP_MAX_ROWS}
+          expanded={expanded[key]}
+          onToggle={() => setExpanded(prev => ({ ...prev, [key]: !prev[key] }))}
+          moreLabel={hidden => translateUI('showMoreRoutes', language, { count: String(hidden) })}
+          lessLabel={translateUI('collapseList', language)}
+        >
+          {items.map(chip)}
+        </ClampedWrap>
       </div>
     );
   };
