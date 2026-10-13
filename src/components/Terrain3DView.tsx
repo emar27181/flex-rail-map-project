@@ -24,6 +24,7 @@ import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
 import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
 import Button from './ui/atoms/Button';
 import Stepper from './ui/molecules/Stepper';
+import SourceDisclosure from './ui/molecules/SourceDisclosure';
 import {
   TERRAIN3D_DATA_URL, TERRAIN3D_EXAGGERATION, selectTerrainRoutes, frameFor, toLocal, extentKm, elevationNear,
   type Terrain3DData,
@@ -224,9 +225,10 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       <div ref={hostRef} style={{ position: 'absolute', inset: 0 }} />
 
       {/* 説明と操作（左下に浮かべる） */}
-      <div style={{
+      <div data-testid="terrain3d-controls" style={{
         position: 'absolute', left: L.sp.lg, bottom: overlayBottom, maxWidth: `min(${OVERLAY_MAX_WIDTH_PX}px, calc(100% - ${L.sp.lg} * 2))`,
         padding: `${L.sp.sm} ${L.sp.md}`, ...floatingSurfaceStyle(theme, 'open'),
+        maxHeight: 'min(60vh, 420px)', overflowY: 'auto', boxSizing: 'border-box',
       }}>
         {!data && !error && <div style={overlayText}>{translateUI('terrain3dLoading', language)}</div>}
         {error && <div style={overlayText}>{translateUI('terrain3dLoadError', language)}</div>}
@@ -262,8 +264,12 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
           </>
         )}
         {data && (
-          <div style={{ ...overlayText, marginTop: L.sp.xs }}>
-            © OpenStreetMap contributors (ODbL) / {data.meta.elevationSource.sourceName}
+          <div style={{ marginTop: L.sp.xs }}>
+            <SourceDisclosure theme={theme} label={language === 'japanese' ? 'データ出典' : 'Data sources'}>
+              <div>© OpenStreetMap contributors (ODbL)</div>
+              <div>{data.meta.elevationSource.sourceName}</div>
+              <div>{translateUI('terrain3dHeightNote', language)}</div>
+            </SourceDisclosure>
           </div>
         )}
       </div>
