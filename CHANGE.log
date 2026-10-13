@@ -1,5 +1,25 @@
 # CHANGE LOG
 
+## [2026-10-13] セッション（路線の立体（標高）表示）
+
+### feat: 地図の表示切替に「立体（標高）」を追加
+- `src/components/Terrain3DView.tsx`（新規）, `src/utils/terrain3d.ts`（新規）, `src/constants/mapViewMode.ts`（新規）,
+  `src/components/RailwayMap.tsx`, `src/components/legend/LegendRouteList.tsx`, `src/components/legend/LegendDisplayOptions.tsx`,
+  `src/utils/translation.ts`, `package.json`（three）
+- 表示中の路線を、線路の下の地面の標高の高さで3次元に描く。線の下に海面までの半透明の幕を下ろし、ドラッグで回転・ホイールで拡大
+- 高さは強調して描く（既定10倍、1〜30倍）。出発駅・到着駅に印と名前を出す
+- 高さは**地面の標高で、線路自体の高さではない**と画面に書く（地下鉄は地下、高架は地面より上）
+- three.js はこの表示を開いたときだけ読み込む（地図の初回表示を重くしない）
+
+### feat: 線形＋標高データを取り込み、表示用ファイルを作るスクリプトを追加
+- `data/kanto-line-geometry-2026-10/`（新規, README）, `scripts/line-geometry/`（新規）, `public/data/terrain3d-lines.json`（生成）
+- 線形は OSM（ODbL）、標高は Copernicus DEM GLO-90（Open-Meteo 経由）
+- アプリの路線とは名前ではなく駅の位置で対応付け（元データの名前による対応は湘南新宿ラインの系統を取り違えていた）。45路線
+- `tests/unit/data/terrain3d.test.ts`（新規）: 出典・範囲・標高の値、駅の9割以上が線形から300m以内、湘南新宿ラインの2系統の区別
+
+### docs: 線形の文書と台帳に立体表示を追記
+- `docs/track-geometry.md`, `docs/data-maintenance-ledger.md`
+
 ## [2026-10-13] セッション（位置情報が無いときは東京駅を中心に開く）
 
 ### improve: 位置情報が無いときの既定の表示位置を東京駅にする

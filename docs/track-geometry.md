@@ -81,3 +81,14 @@ npm run test:data && npm run test:types && npm run test:unit && npm run build
 - 仕組み（型・計算・収集スクリプト・地図への反映・テスト）はできている。合成データで、つなぐ〜区切る〜検証〜書き出しまで通ることを確認した
 - **線形のデータはまだ無い。** サンドボックスから Overpass・OSM・Geofabrik・国土数値情報に接続できない（プロキシが 403）ため
 - 再開に必要なこと: 環境の設定で `overpass-api.de`（または `overpass.private.coffee`）への接続を許可する。上の手順1〜3で小田急小田原線を取り込める
+
+## 立体（標高）表示（2026-10-13）
+
+区間ごとの線形（上の仕組み）とは別に、首都圏の OSM relation 100本の線形と**地面の標高**を受け取り、
+地図の表示切替「立体（標高）」で3次元に描くようにした。
+
+- 元データ・出典・作り方: `data/kanto-line-geometry-2026-10/README.md`
+- 表示用ファイル: `public/data/terrain3d-lines.json`（`scripts/line-geometry/build-terrain3d.mts` で作る）
+- 画面: `src/components/Terrain3DView.tsx`（three.js。この表示を開いたときだけ読み込む）
+- 高さは `terrainElevationM` に当たる**地面の標高**で、線路の高さ（`trackElevationM`）ではない。上の「高さの決まり」どおり混ぜない
+- 水平の距離に比べて標高差が小さいので、高さは強調して描く（既定10倍、画面で1〜30倍に変えられる）
