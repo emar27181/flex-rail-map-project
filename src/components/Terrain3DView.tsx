@@ -116,6 +116,12 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
+    // 左ドラッグ: 平行移動 / 右・中ドラッグ: 視点回転。
+    controls.mouseButtons = {
+      LEFT: THREE.MOUSE.PAN,
+      MIDDLE: THREE.MOUSE.ROTATE,
+      RIGHT: THREE.MOUSE.ROTATE,
+    };
     controls.target.set(0, 0, 0);
     controls.maxPolarAngle = Math.PI / 2 - 0.02; // 地面の下からは見ない
 
