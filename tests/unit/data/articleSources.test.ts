@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ARTICLE_SOURCES } from '../../../src/data/articles';
-import { shotEmbedSrc } from '../../../src/utils/articleRender';
+import { articleBlocksForRender, articleMapHref, shotEmbedSrc, renderArticleBody } from '../../../src/utils/articleRender';
 import { getRouteCode } from '../../../src/utils/routeUrlCodes';
 import { isUrlHeatmapMetric } from '../../../src/utils/heatmapUrlParam';
 import type { ArticleLang } from '../../../src/data/articles/types';
@@ -20,7 +20,7 @@ describe('記事のデータ', () => {
 
   for (const a of ARTICLE_SOURCES) {
     describe(a.slug, () => {
-      it('4言語とも、結論（3行）で始まり、見出しは3〜5個、地図の埋め込みと地図を開くボタンがある', () => {
+      it('4言語とも、結論（3行）→地図デモ→詳しい説明の順で、最後は地図を開くボタン', () => {
         for (const lang of LANGS) {
           const blocks = a.content[lang].blocks;
           expect(blocks[0].type, lang).toBe('points');
@@ -30,6 +30,11 @@ describe('記事のデータ', () => {
           expect(h2, lang).toBeLessThanOrEqual(5);
           expect(blocks.some(b => b.type === 'embed'), `${lang} embed`).toBe(true);
           expect(blocks[blocks.length - 1].type, `${lang} 最後は cta`).toBe('cta');
+
+          const rendered = articleBlocksForRender(a, lang);
+          expect(rendered[0].type, `${lang} 先頭は結論`).toBe('points');
+          expect(rendered[1].type, `${lang} 結論直後は地図デモ`).toBe('embed');
+          expect(rendered.findIndex(b => b.type === 'h2'), `${lang} 説明はデモの後`).toBeGreaterThan(1);
         }
       });
 
@@ -66,6 +71,17 @@ describe('記事のデータ', () => {
         }
       });
 
+
+      it('記事内の地図URLも駅名を英語slugで出し、日本語のパーセントエンコードを出さない', () => {
+        for (const state of Object.values(a.maps)) {
+          if (!state.from && !state.to) continue;
+          const href = articleMapHref(state, 'ja');
+          expect(href).not.toMatch(/%E[0-9A-F]{1}/i);
+          if (state.from) expect(href).not.toContain(encodeURIComponent(state.from));
+          if (state.to) expect(href).not.toContain(encodeURIComponent(state.to));
+        }
+      });
+
       it('関連記事は3本で、実在する別の記事', () => {
         expect(a.related).toHaveLength(3);
         for (const r of a.related) {
@@ -80,4 +96,27 @@ describe('記事のデータ', () => {
       });
     });
   }
+});
+
+describe('埋め込みで記事のページが途中まで動かない', () => {
+  it('埋め込む画面の URL に #（節の位置）を付けない（?section= で中だけをスクロールする）', () => {
+    for (const a of ARTICLE_SOURCES) {
+      for (const lang of LANGS) {
+        for (const spec of Object.values(a.shots ?? {})) {
+          const src = shotEmbedSrc(spec, a, lang);
+          expect(src, `${a.slug} ${lang}`).not.toContain('#');
+        }
+      }
+    }
+  });
+
+  it('同じ画面を1つの記事で2回埋め込まない（冒頭のデモと同じ地図を本文でも出さない）', () => {
+    for (const a of ARTICLE_SOURCES) {
+      for (const lang of LANGS) {
+        const html = renderArticleBody(a, lang);
+        const srcs = [...html.matchAll(/<iframe[^>]*\ssrc="([^"]+)"/g)].map(m => m[1]);
+        expect(new Set(srcs).size, `${a.slug} ${lang}`).toBe(srcs.length);
+      }
+    }
+  });
 });

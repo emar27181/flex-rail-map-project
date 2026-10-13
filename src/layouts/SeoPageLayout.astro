@@ -20,6 +20,7 @@ import { buildBreadcrumbJsonLd, buildHreflangLinks, hreflangCode, type Breadcrum
 import type { SeoLang } from '../seo/pageModel';
 import { SEO_LANGS } from '../seo/pageModel';
 import { MAP_EMBED_SCRIPT } from '../components/ui/atoms/mapEmbed';
+import { EMBED_SECTION_SCRIPT } from '../utils/embedMode';
 import { darkenForWhiteText } from '../utils/contrast';
 import { adjustRouteColorForTheme } from '../contexts/ThemeContext';
 
@@ -88,5 +89,7 @@ const hreflang = buildHreflangLinks(versions, 'ja');
 		<SimpleThemeWrapper client:only="react" />
 		<!-- 埋め込んだ画面は押すまで触れない（ui/atoms/mapEmbed.ts） -->
 		<script is:inline set:html={MAP_EMBED_SCRIPT}></script>
+		<!-- 記事に埋め込まれたとき（?embed=1&section=id）、その節まで自分の中だけをスクロールする -->
+		<script is:inline set:html={EMBED_SECTION_SCRIPT}></script>
 	</body>
 </html>
