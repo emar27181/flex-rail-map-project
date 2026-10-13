@@ -61,6 +61,7 @@ import {
 } from '../data/timetableData';
 import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, alphaWhite, alphaBlack } from '../constants/ui';
 import { trackStationSelect, trackRouteSearch } from '../utils/appAnalytics';
+import { DEFAULT_MAP_CENTER } from '../constants/mapDefaults';
 import { MAP_PANE_Z, stationMarkerZ, ENDPOINT_MARKER_Z, TRAVEL_TIME_MARKER_Z, USER_LOCATION_MARKER_Z, TRAIN_DEMO_MARKER_Z } from '../constants/mapLayers';
 import type { LabelColorOverride } from '../constants/ui';
 import {
@@ -236,9 +237,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const s = getInitialDepartureFromUrl() ?? getInitialArrivalFromUrl();
     return s ? [s.lat, s.lng] : null;
   }, [urlMapView]);
-  const [mapCenter, setMapCenter] = useState<[number, number]>(urlMapView?.center ?? urlStationCenter ?? [35.57765, 139.66165]); // Default center: midpoint of Yokohama and Shinjuku
+  // 位置情報が無いときは東京駅を中心に開く（出発駅は設定しない。mapDefaults.ts）
+  const [mapCenter, setMapCenter] = useState<[number, number]>(urlMapView?.center ?? urlStationCenter ?? DEFAULT_MAP_CENTER);
   const [mapZoom, setMapZoom] = useState(urlMapView?.zoom ?? 12);
-  const [viewCenter, setViewCenter] = useState<[number, number]>([35.57765, 139.66165]); // Updates on moveend/zoomend
+  const [viewCenter, setViewCenter] = useState<[number, number]>(mapCenter); // Updates on moveend/zoomend
   const [viewBounds, setViewBounds] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
   const [visibleRoutes, setVisibleRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
   const [availableRoutes, setAvailableRoutes] = useState<Set<RouteKey>>(new Set(Object.keys(routes) as RouteKey[]));
