@@ -42,6 +42,7 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 | 影・文字の縁取り（既定は影なし。`SHADOW` の `enabled` で役割ごとに戻せる） | `shadow(role, theme)` / `joinShadows` / `textHalo()`。記事の CSS は `var(--shadow)` | `src/components/ui/atoms/shadow.ts` |
 | 開閉する見出し・▼（▼▲▶ を手で書かない・翻訳文言にも入れない。塗ったボタンの中は `tone="inherit"`） | `<DisclosureHeader size>` / `<DisclosureIndicator>` | `src/components/ui/atoms/` |
 | 見出しと中身が1枚の開閉パネル | `<CollapsiblePanel size>` | `src/components/ui/molecules/CollapsiblePanel.tsx` |
+| 並んだチップを5行までに収め、開くと全部 | `<ClampedWrap expanded onToggle>` | `src/components/ui/molecules/ClampedWrap.tsx` |
 | 排他選択のボタン列 | `<SegmentedControl>` | `src/components/ui/molecules/SegmentedControl.tsx` |
 | 出発/到着/primary の色 | `SEMANTIC.departure` / `arrival` / `primary` | `src/constants/ui.ts` |
 | 白・黒 | `NEUTRAL.white` / `NEUTRAL.black`、半透明は `alphaWhite()` / `alphaBlack()` | `src/constants/ui.ts` |
