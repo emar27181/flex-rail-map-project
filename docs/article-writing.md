@@ -64,6 +64,9 @@
 - 記事データの `shots` に画面を書く:
   - 地図: `map` に状態（`routes` `from` `to` `metric` `center` `zoom`、所要時間の表示は `travelTimes: true`）
   - 駅・路線のページ: `page` に日本語版のパス、`anchor` に開く位置（ページ内の id。例: 路線の駅一覧 `station-list`、駅の周辺データ `around-stats`）
+    - 埋め込みのURLでは `#id` ではなく `?section=id` になる（`shotEmbedSrc`）。`#id` だとブラウザが記事のページごとその位置まで
+      スクロールし、記事が途中から表示されて冒頭のデモが見えなかった（2026-10-12）
+  - 冒頭のデモと同じ画面を本文でもう一度埋め込まない。同じ URL の2つ目は描画時に外す（`articleBlocksForRender`）
 - 本文では `{ type: 'shot', shot: 'キー', alt, caption }`。説明している段落のすぐ下に置く。
   `alt` は iframe の title（読み上げ用に、何の画面か）、`caption` に「何を見る画面か」を1文
 - 埋め込みは記事の言語・テーマ（ライト/ダーク）で開く。ボタン（「表示路線の切替」など）は押した状態で始められないので、
