@@ -266,9 +266,8 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
         {data && (
           <div style={{ marginTop: L.sp.xs }}>
             <SourceDisclosure theme={theme} label={language === 'japanese' ? 'データ出典' : 'Data sources'}>
-              <div>© OpenStreetMap contributors (ODbL)</div>
+              <div><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" style={{ color: colors.text }}>© OpenStreetMap contributors (ODbL)</a></div>
               <div>{data.meta.elevationSource.sourceName}</div>
-              <div>{translateUI('terrain3dHeightNote', language)}</div>
             </SourceDisclosure>
           </div>
         )}
