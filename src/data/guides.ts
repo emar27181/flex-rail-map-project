@@ -78,6 +78,7 @@ export interface GuideDefinition {
 export const guides: GuideDefinition[] = [
   {
     slug: 'simple-tokyo-railway-map',
+    city: 'tokyo',
     lang: 'ja',
     breadcrumbLabel: '東京の路線図をシンプルに見る',
     title: '東京の路線図をシンプルに見る方法 | {siteName}',
@@ -127,6 +128,7 @@ export const guides: GuideDefinition[] = [
   },
   {
     slug: 'tokyo-train-map',
+    city: 'tokyo',
     lang: 'en',
     breadcrumbLabel: 'Tokyo Train Map for Tourists',
     title: 'Tokyo Train Map for Tourists (Simple, Interactive) | {siteName}',
@@ -181,6 +183,7 @@ export const guides: GuideDefinition[] = [
   },
   {
     slug: 'tokyo-train-network',
+    city: 'tokyo',
     lang: 'en',
     breadcrumbLabel: "How to Understand Tokyo's Train Network",
     title: "How to Understand Tokyo's Train Network | {siteName}",
@@ -214,6 +217,7 @@ export const guides: GuideDefinition[] = [
   },
   {
     slug: 'tokyo-train-map',
+    city: 'tokyo',
     lang: 'zh',
     breadcrumbLabel: '东京地铁线路图简化查看方法',
     title: '东京地铁线路图太复杂看不懂怎么办 | {siteName}',
@@ -297,6 +301,7 @@ export const guides: GuideDefinition[] = [
   },
   {
     slug: 'simple-tokyo-railway-map',
+    city: 'tokyo',
     lang: 'zh',
     breadcrumbLabel: '东京地铁线路图太密集怎么办',
     title: '东京地铁线路图太密集怎么看 | {siteName}',
@@ -343,6 +348,7 @@ export const guides: GuideDefinition[] = [
   },
   {
     slug: 'simple-tokyo-railway-map',
+    city: 'tokyo',
     lang: 'ko',
     breadcrumbLabel: '도쿄 노선도 심플하게 보는 방법',
     title: '도쿄 노선도 심플하게 보는 방법 | {siteName}',
@@ -389,6 +395,7 @@ export const guides: GuideDefinition[] = [
   },
   {
     slug: 'tokyo-train-map',
+    city: 'tokyo',
     lang: 'ko',
     breadcrumbLabel: '도쿄 노선도 심플하게 보기 (여행자용)',
     title: '도쿄 노선도 심플하게 보는 방법 (여행자용) | {siteName}',

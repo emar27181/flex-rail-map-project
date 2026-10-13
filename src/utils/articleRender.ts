@@ -6,7 +6,7 @@
  * 地図へのリンク・埋め込みの URL は mapDeepLink.ts で作る（パラメータ名を書かない）。
  */
 import { buildMapHref } from './mapDeepLink';
-import { EMBED_PARAM } from './embedMode';
+import { EMBED_PARAM, EMBED_SECTION_PARAM } from './embedMode';
 import { responsiveTableHtml } from '../components/ui/atoms/responsiveTable';
 import { mapEmbedHtml } from '../components/ui/atoms/mapEmbed';
 import { ARTICLE_SOURCES } from '../data/articles';
@@ -29,10 +29,11 @@ export function articleMapHref(state: ArticleMapState, lang: ArticleLang, embed 
 
 /**
  * 画面（shots の1つ）を埋め込む URL。どちらも埋め込み表示（?embed=1。テーマを記事に合わせ、設定を保存しない）。
- * 地図は記事の状態で、駅・路線のページは節の位置（#id）で開く
+ * 地図は記事の状態で、駅・路線のページは節の位置（?section=id）で開く。
+ * `#id` は使わない: ブラウザが記事のページごとその位置までスクロールし、記事が途中から表示されていた
  */
 export function shotEmbedSrc(spec: ArticleShotSpec, owner: ArticleSource, lang: ArticleLang): string {
-  if (spec.page) return `${lang === 'ja' ? '' : `/${lang}`}${spec.page}?${EMBED_PARAM}=1${spec.anchor ? `#${spec.anchor}` : ''}`;
+  if (spec.page) return `${lang === 'ja' ? '' : `/${lang}`}${spec.page}?${EMBED_PARAM}=1${spec.anchor ? `&${EMBED_SECTION_PARAM}=${encodeURIComponent(spec.anchor)}` : ''}`;
   const map = typeof spec.map === 'string' ? owner.maps[spec.map] : spec.map;
   if (!map) throw new Error(`${owner.slug}: 画面の撮り方に map も page も無い`);
   return articleMapHref(map, lang, true);
@@ -85,7 +86,46 @@ function renderBlock(block: ArticleBlock, source: ArticleSource, lang: ArticleLa
   }
 }
 
+/**
+ * 記事は「結論を読む → まず実物を触る → 詳しい説明を読む」の順にする。
+ * データ側で embed を末尾近くに置いている既存記事もあるため、描画時に最初の地図デモを
+ * 結論（points）の直後へ昇格させる。これで全記事・全言語に同じ規則が適用される。
+ */
+export function articleBlocksForRender(source: ArticleSource, lang: ArticleLang): ArticleBlock[] {
+  const blocks = source.content[lang].blocks;
+  const demoIndex = blocks.findIndex(b => b.type === 'embed');
+  const ordered = demoIndex <= 1 ? blocks : [
+    blocks[0],
+    blocks[demoIndex],
+    ...blocks.slice(1, demoIndex),
+    ...blocks.slice(demoIndex + 1),
+  ];
+  // 冒頭のデモと同じ画面を、本文でもう一度埋め込まない（同じ地図が2つ続いて見えていた）
+  const seen = new Set<string>();
+  return ordered.filter(b => {
+    const src = blockEmbedSrc(b, source, lang);
+    if (!src) return true;
+    if (seen.has(src)) return false;
+    seen.add(src);
+    return true;
+  });
+}
+
+/** 画面を埋め込むブロック（embed・shot）の URL。ほかのブロックは null */
+function blockEmbedSrc(block: ArticleBlock, source: ArticleSource, lang: ArticleLang): string | null {
+  if (block.type === 'embed') {
+    const map = source.maps[block.map];
+    return map ? articleMapHref({ ...map, ...(block.view ?? {}) }, lang, true) : null;
+  }
+  if (block.type === 'shot') {
+    const owner = block.article ? ARTICLE_SOURCES.find(a => a.slug === block.article) : source;
+    const spec = owner?.shots[block.shot];
+    return owner && spec ? shotEmbedSrc(spec, owner, lang) : null;
+  }
+  return null;
+}
+
 export function renderArticleBody(source: ArticleSource, lang: ArticleLang): string {
   const h2Index = { n: 0 };
-  return source.content[lang].blocks.map(b => renderBlock(b, source, lang, h2Index)).join('\n');
+  return articleBlocksForRender(source, lang).map(b => renderBlock(b, source, lang, h2Index)).join('\n');
 }

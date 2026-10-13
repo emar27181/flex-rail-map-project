@@ -1,5 +1,37 @@
 # CHANGE LOG
 
+## [2026-10-12] セッション（記事・ガイドの冒頭デモが見えるように）
+
+### fix: 記事を開くと途中までスクロールされ、冒頭の地図デモが見えなかった
+- `src/utils/embedMode.ts`（`EMBED_SECTION_PARAM` / `EMBED_SECTION_SCRIPT`）, `src/utils/articleRender.ts`, `src/layouts/SeoPageLayout.astro`, `tests/unit/data/articleSources.test.ts`
+- 路線・駅のページを埋め込む URL に `#station-list` などを付けていて、ブラウザが記事のページごとその位置までスクロールしていた
+  （家賃・治安の記事は、本文の3つ目の画面の位置から表示されていた）
+- `?section=id` で渡し、埋め込まれたページが自分の中だけをスクロールする
+
+### fix: 冒頭のデモと同じ地図を本文でもう一度埋め込まない
+- `src/utils/articleRender.ts`（`articleBlocksForRender`）
+- 家賃の記事で、冒頭のデモと本文の「渋谷から」の画面が同じ地図だった
+
+### feat: ガイド（京都・大阪・札幌・小田急・東京、4言語）の冒頭に地図デモを置く
+- `src/utils/guideDemo.ts`（新規）, `src/layouts/GuideLayout.astro`, `src/data/guides.ts`（東京のガイドに `city: 'tokyo'`）, `tests/unit/utils/guideDemo.test.ts`（新規）
+- ガイドは「地図を開く」ボタンだけで、ページの中で地図を触れなかった。記事と同じく 結論 → 地図 → 説明 の順に
+- 都市のガイドは街の中心付近に合わせる（京都で大阪・奈良まで広がらない）
+
+### docs: 埋め込みの開く位置とガイドのデモの決まりを記録
+- `docs/article-writing.md`, `docs/seo.md`
+
+## [2026-10-08] セッション（全記事で説明前に地図デモを見せる）
+
+### improve: 全記事・全言語で結論直後に操作可能な地図デモを表示
+- `src/utils/articleRender.ts`, `tests/unit/data/articleSources.test.ts`
+- 既存記事のデータ上で `embed` が後ろにあっても、描画時に最初の地図デモを `points` の直後へ昇格する
+- 記事内の地図URLも `mapDeepLink.ts` 経由のため、駅名URLの英語slug化に自動追従することをテストで固定
+
+### docs: 「結論 → デモ → 説明」を記事作成規則に追加
+- `docs/article-writing.md`, `docs/templates/article-template.ts`, `CLAUDE.md`
+- 地図や画面の機能を説明する箇所では、文章だけにせず近くに実際の画面（shot）を置く
+
+
 ## [2026-10-08] セッション（駅名URLを英語slug化）
 
 ### improve: 出発駅・到着駅・経由駅を人が読める英語slugでURLに出す

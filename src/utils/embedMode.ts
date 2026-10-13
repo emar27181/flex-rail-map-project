@@ -11,6 +11,29 @@
  */
 export const EMBED_PARAM = 'embed';
 
+/**
+ * 埋め込んだページの中で開く位置（節の id）。`#id` を iframe のURLに付けると、
+ * ブラウザが記事のページごとその位置までスクロールしてしまい、記事が途中から表示されていた
+ * （冒頭の地図デモが見えない）。埋め込まれたページが自分の中だけをスクロールする（embedSectionScript）。
+ */
+export const EMBED_SECTION_PARAM = 'section';
+
+/** 埋め込まれたページで、?section=id の節まで自分の中だけをスクロールするスクリプト（<script is:inline> 用） */
+export const EMBED_SECTION_SCRIPT = `(function(){
+  try {
+    var q = new URLSearchParams(location.search);
+    if (q.get('${EMBED_PARAM}') !== '1') return;
+    var id = q.get('${EMBED_SECTION_PARAM}');
+    if (!id) return;
+    var go = function () {
+      var el = document.getElementById(id);
+      // scrollIntoView は親（記事）のページまで動かすので使わない。window.scrollTo はこの iframe の中だけ
+      if (el) window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY);
+    };
+    if (document.readyState === 'complete') go(); else window.addEventListener('load', go, { once: true });
+  } catch (e) {}
+})();`;
+
 export function isEmbedValue(value: string | null | undefined): boolean {
   return value === '1';
 }

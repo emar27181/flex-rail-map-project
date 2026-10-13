@@ -17,6 +17,9 @@ import { guideCss } from './guideStyles';
 import { seoPageCss } from './seoPageStyles';
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import MapOpenCta from '../components/MapOpenCta.astro';
+import MapEmbed from '../components/ui/atoms/MapEmbed.astro';
+import { MAP_EMBED_SCRIPT } from '../components/ui/atoms/mapEmbed';
+import { guideDemoSrc } from '../utils/guideDemo';
 import SeoHead from '../components/seo/SeoHead.astro';
 import ThemeInitScript from '../components/ThemeInitScript.astro';
 import SiteFooterNav from '../components/SiteFooterNav.astro';
@@ -122,6 +125,9 @@ const webPageJsonLd = {
 			<h1 class="page-title">{guide.h1}</h1>
 			<p class="lede">{guide.searchIntentAnswer}</p>
 
+			{/* 結論（検索意図への答え）の直後に、実際に触れる地図を置く（記事と同じ順。utils/guideDemo.ts） */}
+			<MapEmbed src={guideDemoSrc(guide)} title={guide.h1} caption={SEO_TEXT[seoLang ?? 'ja'].embedCaption} />
+
 			<MapOpenCta
 				label={guide.ctaLabel}
 				note={guide.ctaNote}
@@ -205,5 +211,7 @@ const webPageJsonLd = {
 		</div>
 
 		<SimpleThemeWrapper client:only="react" />
+		<!-- 埋め込んだ地図のテーマをページに合わせる（ui/atoms/mapEmbed.ts） -->
+		<script is:inline set:html={MAP_EMBED_SCRIPT}></script>
 	</body>
 </html>
