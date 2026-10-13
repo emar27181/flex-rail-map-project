@@ -1839,6 +1839,43 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "路線図表示（実装中）",
     english: "Diagram View (WIP)"
   },
+  // 立体（標高）表示（Terrain3DView）
+  terrain3dLabel: {
+    japanese: "立体表示（地面の標高）",
+    english: "3D view (ground elevation)"
+  },
+  terrain3dHeightNote: {
+    japanese: "高さは線路の下の地面の標高です。線路自体の高さではありません（地下鉄は地下を、高架は地面より上を走ります）。",
+    english: "Height shows the ground elevation under the track, not the track itself (subways run below ground, elevated lines above it)."
+  },
+  terrain3dExaggeration: {
+    japanese: "高さの強調",
+    english: "Height exaggeration"
+  },
+  terrain3dCoverage: {
+    japanese: "{shown} / {visible} 路線を立体表示中",
+    english: "Showing {shown} of {visible} lines in 3D"
+  },
+  terrain3dNoData: {
+    japanese: "表示中の路線には標高つきの線形データがありません。標高データのある路線は {count} 路線です。",
+    english: "None of the shown lines have elevation data yet. {count} lines have it."
+  },
+  terrain3dShowAvailable: {
+    japanese: "データのある路線をすべて表示",
+    english: "Show all lines with data"
+  },
+  terrain3dLoading: {
+    japanese: "立体データを読み込んでいます…",
+    english: "Loading 3D data…"
+  },
+  terrain3dLoadError: {
+    japanese: "立体データを読み込めませんでした。",
+    english: "Could not load the 3D data."
+  },
+  terrain3dHint: {
+    japanese: "ドラッグで回転、2本指・ホイールで拡大縮小",
+    english: "Drag to rotate, pinch or scroll to zoom"
+  },
   layerOrderHint: {
     japanese: "↑ 最前面 / 背面 ↓",
     english: "↑ Front / Back ↓"
@@ -2249,6 +2286,15 @@ export const uiChinese: Record<string, string> = {
   routeLineWidth: "路线宽度",
   bubbleMaxRadius: "最大半径",
   schematicMapLabel: "路线图显示（开发中）",
+  terrain3dLabel: "立体显示（地面海拔）",
+  terrain3dHeightNote: "高度表示线路下方地面的海拔，而不是线路本身的高度（地铁在地下行驶，高架线在地面以上）。",
+  terrain3dExaggeration: "高度放大",
+  terrain3dCoverage: "立体显示中 {shown} / {visible} 条线路",
+  terrain3dNoData: "显示中的线路没有带海拔的线形数据。有海拔数据的线路共 {count} 条。",
+  terrain3dShowAvailable: "显示所有有数据的线路",
+  terrain3dLoading: "正在加载立体数据…",
+  terrain3dLoadError: "无法加载立体数据。",
+  terrain3dHint: "拖动旋转，双指或滚轮缩放",
   layerOrderHint: "↑ 最前面 / 背面 ↓",
   dragToSort: "⠿ 拖动排序",
   catHousing: "住居",
@@ -2588,6 +2634,15 @@ export const uiKorean: Record<string, string> = {
   routeLineWidth: "노선 두께",
   bubbleMaxRadius: "최대 반경",
   schematicMapLabel: "노선도 표시（개발 중）",
+  terrain3dLabel: "입체 표시（지면 표고）",
+  terrain3dHeightNote: "높이는 선로 아래 지면의 표고이며, 선로 자체의 높이가 아닙니다（지하철은 지하를, 고가는 지면보다 위를 달립니다）.",
+  terrain3dExaggeration: "높이 강조",
+  terrain3dCoverage: "{shown} / {visible} 노선을 입체 표시 중",
+  terrain3dNoData: "표시 중인 노선에는 표고가 있는 선형 데이터가 없습니다. 표고 데이터가 있는 노선은 {count}개입니다.",
+  terrain3dShowAvailable: "데이터가 있는 노선 모두 표시",
+  terrain3dLoading: "입체 데이터를 불러오는 중…",
+  terrain3dLoadError: "입체 데이터를 불러올 수 없습니다.",
+  terrain3dHint: "드래그로 회전, 두 손가락·휠로 확대/축소",
   layerOrderHint: "↑ 최전면 / 배면 ↓",
   dragToSort: "⠿ 드래그",
   catHousing: "주거",

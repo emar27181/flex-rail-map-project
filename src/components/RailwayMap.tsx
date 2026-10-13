@@ -25,7 +25,7 @@ import LegendRouteList from './legend/LegendRouteList';
 import LegendRouteRecommendations from './legend/LegendRouteRecommendations';
 import LegendDisplayOptions from './legend/LegendDisplayOptions';
 import MultiDepartureRoutes from './MultiDepartureRoutes';
-import MobileBottomPanel, { MOBILE_BOTTOM_PANEL_FLOAT } from './MobileBottomPanel';
+import MobileBottomPanel, { MOBILE_BOTTOM_PANEL_FLOAT, mobileBottomPanelStackTop } from './MobileBottomPanel';
 import type { MapConfig } from './legend/MapConfigPanel';
 import type { StationStats } from '../data/stationStats';
 import {
@@ -62,6 +62,9 @@ import {
 import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, alphaWhite, alphaBlack } from '../constants/ui';
 import { trackStationSelect, trackRouteSearch } from '../utils/appAnalytics';
 import { DEFAULT_MAP_CENTER } from '../constants/mapDefaults';
+import type { MapViewMode } from '../constants/mapViewMode';
+// 立体（標高）表示は three.js を使うので、開いたときだけ読み込む
+const Terrain3DView = React.lazy(() => import('./Terrain3DView'));
 import { MAP_PANE_Z, stationMarkerZ, ENDPOINT_MARKER_Z, TRAVEL_TIME_MARKER_Z, USER_LOCATION_MARKER_Z, TRAIN_DEMO_MARKER_Z } from '../constants/mapLayers';
 import type { LabelColorOverride } from '../constants/ui';
 import {
@@ -390,7 +393,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   const [tapToggleMode, setTapToggleMode] = useState(true);
   // 地図表示モード
-  const [mapViewMode, setMapViewMode] = useState<'realistic' | 'schematic' | 'bubble'>('realistic');
+  const [mapViewMode, setMapViewMode] = useState<MapViewMode>('realistic');
+  /** 立体表示の路線の色（地図と同じくテーマに合わせる） */
+  const terrainColorOf = useCallback((rk: RouteKey) => adjustRouteColorForTheme(routeColors[rk], theme), [theme]);
 
   // 列車種別表示モード（常にオン）
   const trainTypeViewEnabled = true;
@@ -988,7 +993,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (cfg.showFurigana !== undefined) setShowFurigana(cfg.showFurigana);
     if (cfg.showStationNumbers !== undefined) setShowStationNumbers(cfg.showStationNumbers);
     if (cfg.showOsmTiles !== undefined) setShowOsmTiles(cfg.showOsmTiles);
-    if (cfg.mapViewMode) setMapViewMode(cfg.mapViewMode as 'realistic' | 'schematic');
+    if (cfg.mapViewMode) setMapViewMode(cfg.mapViewMode as MapViewMode);
     if (cfg.timeFilterEnabled !== undefined) setTimeFilterEnabled(cfg.timeFilterEnabled);
     if (cfg.timeFilterMaxMinutes !== undefined) setTimeFilterMaxMinutes(cfg.timeFilterMaxMinutes);
     if (cfg.showStationTooltip !== undefined) setShowStationTooltip(cfg.showStationTooltip);
@@ -4897,6 +4902,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     />
   );
   const routeRecommendationsPanel = showRouteRecommendationsPanel ? renderRouteRecommendations() : null;
+  /** スマホ全画面の左下ボタン群に「候補ルート」を出すか（候補が無いとき・推薦ルート選択を出さない設定では出さない） */
+  const showMobileRouteCandidatesButton = showRouteRecommendationsPanel && routeRecommendations.length > 0;
+  /** 立体表示の説明の箱の下端。スマホ全画面では左下のボタン群（MobileBottomPanel）の上に置く */
+  const terrainOverlayBottom = isMobile && isFullscreen
+    ? `${mobileBottomPanelStackTop(showMobileRouteCandidatesButton ? 2 : 1, MOBILE_PANEL_SAFE_BOTTOM) + parseFloat(L.sp.sm)}px`
+    : undefined;
 
   return (
     <ErrorBoundary language={currentLanguage}>
@@ -5585,6 +5596,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 />
               )}
             </MapContainer>
+          ) : mapViewMode === 'terrain3d' ? (
+            <React.Suspense fallback={null}>
+              <Terrain3DView
+                visibleRoutes={visibleRoutes}
+                colorOf={terrainColorOf}
+                departure={departure}
+                arrival={arrival}
+                theme={theme}
+                language={currentLanguage}
+                overlayBottom={terrainOverlayBottom}
+                onShowRoutes={(keys) => {
+                  setAvailableRoutes(prev => new Set([...prev, ...keys]));
+                  setVisibleRoutes(prev => new Set([...prev, ...keys]));
+                }}
+              />
+            </React.Suspense>
           ) : (
             <DiagramMap
               visibleRoutes={visibleRoutes}
@@ -6372,7 +6399,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               buttons={[
                 // 候補ルートは設定より前に置く。候補が無いとき・推薦ルート選択を
                 // 出さない設定（既定）のときはボタン自体を出さない
-                ...(showRouteRecommendationsPanel && routeRecommendations.length > 0 ? [{
+                ...(showMobileRouteCandidatesButton ? [{
                   key: 'routes' as const,
                   icon: <TrainFront size={16} />,
                   label: `${translateUI('routeSelection', currentLanguage)} (${routeRecommendations.length})`,

@@ -7,13 +7,14 @@ import { checkboxInput, L} from './legendStyles';
 import Radio from '../ui/atoms/Radio';
 import Checkbox from '../ui/atoms/Checkbox';
 import { FS } from '../../constants/ui';
+import type { MapViewMode } from '../../constants/mapViewMode';
 
 interface LegendDisplayOptionsProps {
-  mapViewMode: 'realistic' | 'schematic';
+  mapViewMode: MapViewMode;
   theme: 'light' | 'dark';
   language: Language;
   trainTypeViewEnabled?: boolean;
-  onMapViewModeChange: (mode: 'realistic' | 'schematic') => void;
+  onMapViewModeChange: (mode: MapViewMode) => void;
   onTrainTypeViewChange?: (enabled: boolean) => void;
 }
 
@@ -63,6 +64,15 @@ const LegendDisplayOptions: React.FC<LegendDisplayOptionsProps> = ({
             onChange={() => onMapViewModeChange('schematic')}
           >
             {translateUI('schematicView', language)}
+          </Radio>
+          <Radio
+            theme={theme}
+            size="sm"
+            name="mapViewMode"
+            checked={mapViewMode === 'terrain3d'}
+            onChange={() => onMapViewModeChange('terrain3d')}
+          >
+            {translateUI('terrain3dLabel', language)}
           </Radio>
         </div>
       </div>

@@ -32,6 +32,15 @@ const BTN_H = FLOATING_BUTTON_HEIGHT;
 /** ボタン群を画面下の余白からさらに浮かせる量(px)。地図右下の凡例も同じ高さに並べるため公開する */
 export const MOBILE_BOTTOM_PANEL_FLOAT = 10;
 
+/**
+ * ボタン群の上端（画面の下端からの距離, px）。ポップオーバーと、
+ * ボタン群の上に置く箱（立体表示の説明など）の位置をそろえるため公開する
+ */
+export function mobileBottomPanelStackTop(buttonCount: number, safeAreaBottom: number): number {
+  if (buttonCount <= 0) return safeAreaBottom;
+  return safeAreaBottom + MOBILE_BOTTOM_PANEL_FLOAT + BTN_H * buttonCount + BTN_GAP * (buttonCount - 1);
+}
+
 /** ボタンの最小幅（アイコンなし・テキストのみなので小さめ） */
 const BTN_MIN_W = 0;
 
@@ -187,7 +196,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
           aria-label={activeButton.label}
           style={{
             position: 'fixed',
-            bottom: safeBottom + BTN_H * buttons.length + BTN_GAP * (buttons.length - 1) + 8,
+            bottom: mobileBottomPanelStackTop(buttons.length, safeAreaBottom) + 8,
             left: GROUP_LEFT,
             width: `min(${POPOVER_MAX_W}px, calc(100vw - ${GROUP_LEFT * 2}px))`,
             ...(panelHeight !== null
