@@ -1873,8 +1873,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Could not load the 3D data."
   },
   terrain3dHint: {
-    japanese: "左ドラッグで移動、右・ホイール押し込みドラッグで回転、ホイールで拡大縮小",
-    english: "Left-drag to pan, right- or middle-drag to rotate, scroll to zoom"
+    japanese: "1本指・左ドラッグで移動、2本指・右ドラッグで回転、ピンチ・ホイールで拡大縮小",
+    english: "One finger or left-drag to move, two fingers or right-drag to rotate, pinch or scroll to zoom"
   },
   layerOrderHint: {
     japanese: "↑ 最前面 / 背面 ↓",
@@ -2294,7 +2294,7 @@ export const uiChinese: Record<string, string> = {
   terrain3dShowAvailable: "显示所有有数据的线路",
   terrain3dLoading: "正在加载立体数据…",
   terrain3dLoadError: "无法加载立体数据。",
-  terrain3dHint: "拖动旋转，双指或滚轮缩放",
+  terrain3dHint: "单指或左键拖动移动，双指或右键拖动旋转，双指捏合或滚轮缩放",
   layerOrderHint: "↑ 最前面 / 背面 ↓",
   dragToSort: "⠿ 拖动排序",
   catHousing: "住居",
@@ -2642,7 +2642,7 @@ export const uiKorean: Record<string, string> = {
   terrain3dShowAvailable: "데이터가 있는 노선 모두 표시",
   terrain3dLoading: "입체 데이터를 불러오는 중…",
   terrain3dLoadError: "입체 데이터를 불러올 수 없습니다.",
-  terrain3dHint: "드래그로 회전, 두 손가락·휠로 확대/축소",
+  terrain3dHint: "한 손가락·왼쪽 드래그로 이동, 두 손가락·오른쪽 드래그로 회전, 핀치·휠로 확대/축소",
   layerOrderHint: "↑ 최전면 / 배면 ↓",
   dragToSort: "⠿ 드래그",
   catHousing: "주거",

@@ -36,6 +36,13 @@ const LINE_WIDTH_PX = 3;
 const CURTAIN_OPACITY = 0.18;
 /** 説明の箱の下端。地図の左下に浮かぶボタン（縮小・方位・言語。FLOATING_ICON_BUTTON_SIZE.md）の上に置く */
 const OVERLAY_BOTTOM = `calc(${L.sp.lg} + ${FLOATING_ICON_BUTTON_SIZE.md}px + ${L.sp.sm})`;
+/**
+ * 操作の感度。OrbitControls の既定（回転・移動・拡大とも 1）では速すぎて、
+ * 少し指を動かしただけで大きく回ってしまったため下げている
+ */
+const CONTROL_SPEED = { rotate: 0.45, pan: 0.6, zoom: 0.6, damping: 0.1 } as const;
+/** 説明の箱の高さの上限（画面の高さに対する割合と px の小さい方）。スマホで地図が隠れすぎないように */
+const OVERLAY_MAX_HEIGHT = 'min(60vh, 420px)';
 /** 説明の箱の最大幅(px)。スマホでは画面の幅から左右の余白を引いた幅まで */
 const OVERLAY_MAX_WIDTH_PX = 360;
 /** 画面の縦横比（幅/高さ）がこれより小さいときは、カメラをその分だけ離す */
@@ -117,12 +124,18 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    // 左ドラッグ: 平行移動 / 右・中ドラッグ: 視点回転。
+    // 地図と同じく、1本指・左ドラッグで移動。向きは2本指・右（中）ドラッグで変える
     controls.mouseButtons = {
       LEFT: THREE.MOUSE.PAN,
       MIDDLE: THREE.MOUSE.ROTATE,
       RIGHT: THREE.MOUSE.ROTATE,
     };
+    controls.touches = { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_ROTATE };
+    controls.screenSpacePanning = false; // 移動は地面に沿って（画面の上下ではなく奥行き方向に動く）
+    controls.rotateSpeed = CONTROL_SPEED.rotate;
+    controls.panSpeed = CONTROL_SPEED.pan;
+    controls.zoomSpeed = CONTROL_SPEED.zoom;
+    controls.dampingFactor = CONTROL_SPEED.damping;
     controls.target.set(0, 0, 0);
     controls.maxPolarAngle = Math.PI / 2 - 0.02; // 地面の下からは見ない
 
@@ -228,7 +241,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       <div data-testid="terrain3d-controls" style={{
         position: 'absolute', left: L.sp.lg, bottom: overlayBottom, maxWidth: `min(${OVERLAY_MAX_WIDTH_PX}px, calc(100% - ${L.sp.lg} * 2))`,
         padding: `${L.sp.sm} ${L.sp.md}`, ...floatingSurfaceStyle(theme, 'open'),
-        maxHeight: 'min(60vh, 420px)', overflowY: 'auto', boxSizing: 'border-box',
+        maxHeight: OVERLAY_MAX_HEIGHT, overflowY: 'auto', boxSizing: 'border-box',
       }}>
         {!data && !error && <div style={overlayText}>{translateUI('terrain3dLoading', language)}</div>}
         {error && <div style={overlayText}>{translateUI('terrain3dLoadError', language)}</div>}
