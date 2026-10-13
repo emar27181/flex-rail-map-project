@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ARTICLE_SOURCES } from '../../../src/data/articles';
-import { articleBlocksForRender, articleMapHref, shotEmbedSrc } from '../../../src/utils/articleRender';
+import { articleBlocksForRender, articleMapHref, shotEmbedSrc, renderArticleBody } from '../../../src/utils/articleRender';
 import { getRouteCode } from '../../../src/utils/routeUrlCodes';
 import { isUrlHeatmapMetric } from '../../../src/utils/heatmapUrlParam';
 import type { ArticleLang } from '../../../src/data/articles/types';
@@ -96,4 +96,27 @@ describe('記事のデータ', () => {
       });
     });
   }
+});
+
+describe('埋め込みで記事のページが途中まで動かない', () => {
+  it('埋め込む画面の URL に #（節の位置）を付けない（?section= で中だけをスクロールする）', () => {
+    for (const a of ARTICLE_SOURCES) {
+      for (const lang of LANGS) {
+        for (const spec of Object.values(a.shots ?? {})) {
+          const src = shotEmbedSrc(spec, a, lang);
+          expect(src, `${a.slug} ${lang}`).not.toContain('#');
+        }
+      }
+    }
+  });
+
+  it('同じ画面を1つの記事で2回埋め込まない（冒頭のデモと同じ地図を本文でも出さない）', () => {
+    for (const a of ARTICLE_SOURCES) {
+      for (const lang of LANGS) {
+        const html = renderArticleBody(a, lang);
+        const srcs = [...html.matchAll(/<iframe[^>]*\ssrc="([^"]+)"/g)].map(m => m[1]);
+        expect(new Set(srcs).size, `${a.slug} ${lang}`).toBe(srcs.length);
+      }
+    }
+  });
 });
