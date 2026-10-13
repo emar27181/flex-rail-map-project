@@ -2,6 +2,7 @@ import { routes, type RouteKey, routeNames } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { getWalkingTransferStations, getWalkingTime } from '../data/walkingTransfers';
 import { legTime } from './legTime';
+import { adjacentRouteStations } from './routeAdjacency';
 import { findThroughTrips, throughContinuations } from './throughRouting';
 
 // ---- 距離計算 ----
@@ -572,13 +573,7 @@ export class RouteFinder {
       const route = routes[cur.node.routeKey];
 
       // 同じ路線を前後に1駅ずつ進む
-      for (const direction of [-1, 1] as const) {
-        const nextIndex = cur.node.index + direction;
-        if (nextIndex < 0 || nextIndex >= route.length) continue;
-        // 進行方向によって参照する timeToNext が変わる（calculateTime と同じ規則）
-        const stepTime = direction === 1
-          ? (route[cur.node.index].timeToNext || 3)
-          : (route[nextIndex].timeToNext || 3);
+      for (const { index: nextIndex, time: stepTime } of adjacentRouteStations(route, cur.node.index, cur.node.routeKey)) {
         push(
           { station: route[nextIndex], routeKey: cur.node.routeKey, index: nextIndex },
           cur.cost + stepTime,

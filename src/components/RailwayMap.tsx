@@ -1,4 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useTravelTimeLabelMode } from '../hooks/useTravelTimeLabelMode';
+import { travelTimeLabelLayout } from './map/travelTimeLabel';
+import { circularNumberBadgeHtml } from './ui/atoms/circularNumberBadge';
+import { isCircularRoute } from '../utils/routeAdjacency';
+import { closeFullRouteStations, renderedRouteMidpoint, stationVertexIndices } from '../utils/renderedRouteMidpoint';
 import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X, Timer, TriangleAlert, ArrowUpDown } from 'lucide-react';
 import type { LeafletEvent, LeafletMouseEvent, Map as LeafletMap } from 'leaflet';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
@@ -363,7 +368,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     paddingCss: `${MAP_LABEL.paddingYPx}px ${MAP_LABEL.paddingXPx}px`,
     borderWidth: 1,
   }), [stationLabelFontSize]);
-  const [travelTimeLabelMode, setTravelTimeLabelMode] = useState<'interval' | 'cumulative'>('interval'); // 累積は実装中
+  const [travelTimeLabelMode, setTravelTimeLabelMode] = useTravelTimeLabelMode(!!departure);
   /**
    * 仮の対応として既定をOFFにしている。
    *
@@ -2749,11 +2754,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (!MapComponents?.DivIcon || !showTravelTimes || showTrainDemo) return null;
 
     const { DivIcon } = MapComponents;
-    // 駅間に並ぶ小さな目印なので、駅名ラベルより控えめにする。
-    // 中身は1〜2桁の数字だけなので、本文の下限(12px)を下回っても読める。
-    const fontSize = parseInt(FS.caption, 10);
-    const circleSize = 13;
-    const borderWidth = 1;
+    const label = travelTimeLabelLayout(time);
 
     // 既定（背景色を「路線色」にしたとき）は、駅名ラベルと同じ
     // filledLabelColors を使い、実際に路線色で塗った背景にする
@@ -2763,27 +2764,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const bgColor = travelTimeStyle.bgColor ?? filledBg;
     const textColor = travelTimeStyle.textColor ?? filledText;
     const borderColor = travelTimeStyle.borderColor ?? color;
-    const timeNumber = Math.round(time);
 
     return new DivIcon({
-      html: `<div style="
-        width:${circleSize}px;
-        height:${circleSize}px;
-        border-radius:50%;
-        border:${borderWidth}px solid ${borderColor};
-        background:${bgColor};
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        box-shadow:${shadow('marker', theme)};
-        font-weight:bold;
-        line-height:1;
-      ">
-        <span style="font-size:${fontSize}px;color:${textColor};">${timeNumber}</span>
-      </div>`,
+      html: circularNumberBadgeHtml(label, { background: bgColor, text: textColor, border: borderColor }, theme),
       className: isSection ? 'time-text-section' : 'time-text',
-      iconSize: [circleSize, circleSize],
-      iconAnchor: [circleSize / 2, circleSize / 2]
+      iconSize: [label.width, label.height],
+      iconAnchor: label.anchor
     });
   }, [MapComponents, currentLanguage, theme, showTravelTimes, showTrainDemo, travelTimeStyle]);
 
@@ -2825,27 +2811,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return keys.size > 0 ? keys : null;
   }, [departure, arrival, highlightedRouteKeys, routeRecommendations, showRouteRecommendationsPanel]);
 
-  // 累積所要時間（乗り換えを跨いだ全体累積）: 選択ルートの全セグメントを走破
-  const globalCumulativeTimeMap = useMemo(() => {
-    if (!departure || !selectedRouteIndices || selectedRouteIndices.size === 0 || routeRecommendations.length === 0) {
-      return new Map<string, number>();
-    }
-    const selectedIdx = [...selectedRouteIndices][0];
-    const route = routeRecommendations[selectedIdx];
-    if (!route) return new Map<string, number>();
-
-    const map = new Map<string, number>();
-    let t = 0;
-    for (const seg of route.segments) {
-      for (let i = 0; i < seg.stations.length; i++) {
-        const name = seg.stations[i].name;
-        if (!map.has(name)) map.set(name, t);
-        if (i < seg.stations.length - 1) t += seg.stations[i].timeToNext || 3;
-      }
-      // 最後の駅（次セグメントの乗換駅）は既に t に反映済み
-    }
-    return map;
-  }, [selectedRouteIndices, routeRecommendations, departure]);
+  // 表示中の路線を対象に単一始点のダイクストラを1回だけ実行する。
+  const cumulativeTimeMap = useMemo(() => {
+    if (!departure || travelTimeLabelMode !== 'cumulative') return new Map<string, number>();
+    const results = routeFinder.findStationsWithinTime(departure, Infinity, visibleRoutes);
+    return new Map(results.map(result => [result.station.name, result.totalTime]));
+  }, [departure, travelTimeLabelMode, visibleRoutes, routeFinder]);
 
   // レンダリング最適化：表示する路線のデータを準備
   const visibleRoutesData = useMemo(() => {
@@ -3796,60 +3767,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   };
 
 
-  const getMidpoint = (lat1: number, lng1: number, lat2: number, lng2: number) => {
-    return [(lat1 + lat2) / 2, (lng1 + lng2) / 2];
-  };
-
-  // 路線に沿った中点を計算（複数駅を跨ぐ区間用）
-  const getRouteBasedMidpoint = (stations: Station[], startIndex: number, endIndex: number) => {
-    if (startIndex >= endIndex || startIndex < 0 || endIndex >= stations.length) {
-      return getMidpoint(stations[startIndex].lat, stations[startIndex].lng, stations[endIndex].lat, stations[endIndex].lng);
-    }
-
-    // 区間内の全ての座標を取得
-    const sectionStations = stations.slice(startIndex, endIndex + 1);
-
-    // 路線の総距離を計算
-    let totalDistance = 0;
-    const distances: number[] = [];
-
-    for (let i = 0; i < sectionStations.length - 1; i++) {
-      const dist = Math.sqrt(
-        Math.pow(sectionStations[i + 1].lat - sectionStations[i].lat, 2) +
-        Math.pow(sectionStations[i + 1].lng - sectionStations[i].lng, 2)
-      );
-      distances.push(dist);
-      totalDistance += dist;
-    }
-
-    // 中点となる距離を計算
-    const midDistance = totalDistance / 2;
-    let accumulatedDistance = 0;
-
-    // 中点が含まれる区間を特定
-    for (let i = 0; i < distances.length; i++) {
-      if (accumulatedDistance + distances[i] >= midDistance) {
-        // この区間内に中点がある
-        const remainingDistance = midDistance - accumulatedDistance;
-        const ratio = remainingDistance / distances[i];
-
-        const lat = sectionStations[i].lat + (sectionStations[i + 1].lat - sectionStations[i].lat) * ratio;
-        const lng = sectionStations[i].lng + (sectionStations[i + 1].lng - sectionStations[i].lng) * ratio;
-
-        return [lat, lng];
-      }
-      accumulatedDistance += distances[i];
-    }
-
-    // フォールバック: 単純な中点
-    return getMidpoint(
-      sectionStations[0].lat,
-      sectionStations[0].lng,
-      sectionStations[sectionStations.length - 1].lat,
-      sectionStations[sectionStations.length - 1].lng
-    );
-  };
-
   const selectAllRoutes = () => {
     setVisibleRoutes(new Set(Object.keys(routes) as RouteKey[]));
   };
@@ -4616,15 +4533,32 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // 線の色だけはヒートマップ表示中、その路線の駅の平均値に応じた色にする
     const routeLineColor = routeHeatColors.get(routeKey) ?? routeColor;
 
+    // 描画線と所要時間の位置は同じ座標列から取る。
+    const renderedSegments = displaySegments
+      .map(segment => closeFullRouteStations(segment, stations, isCircularRoute(routeKey)))
+      .map(segStations => ({
+      stations: segStations,
+      positions: offsetPositions(segStations, routeKey, routeLineWidth),
+      stationIndices: stationVertexIndices(segStations, TRACK_GEOMETRY[routeKey]),
+    }));
+    const getTimeLabelPosition = (from: Station, to: Station) => {
+      const map = mapRef.current;
+      return renderedRouteMidpoint(renderedSegments, from, to,
+        position => map ? map.project(position, zoomLevel) : { x: position[1], y: position[0] },
+        point => {
+          if (!map) return [point.y, point.x];
+          const position = map.unproject([point.x, point.y], zoomLevel);
+          return [position.lat, position.lng];
+        });
+    };
+
     // Fragment key に heatmap 設定を含めることで、モード切替時に全 Marker を強制再マウント
     const fragmentKey = `${routeKey}-${heatmapEnabled ? String(heatmapParam) : 'off'}`;
 
     return (
       <React.Fragment key={fragmentKey}>
         {/* 各セグメントを個別描画（非連続区間を誤接続しない） */}
-        {displaySegments.map((segStations, segIdx) => {
-          // 重なっている路線は線1本分ずつ垂直にずらす
-          const segPositions = offsetPositions(segStations, routeKey, routeLineWidth);
+        {renderedSegments.map(({ positions: segPositions }, segIdx) => {
           return (
             <React.Fragment key={`${routeKey}-seg-${segIdx}`}>
         {/* 実際に見える路線（先に描画して下層に） */}
@@ -4797,49 +4731,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             return renderStationMarker(station, routeKey, `${routeKey}-station-${index}`, routeHasExpressMark);
           }
         })}
-        {(() => {
-          // 累積モード: 出発駅からの累積時間を事前計算
-          const isCumulative = travelTimeLabelMode === 'cumulative' && !!departure;
-          const depIdx = isCumulative
-            ? displayStations.findIndex(s => s.name === departure!.name)
-            : -1;
-          const cumulativeTimes: number[] = new Array(displayStations.length).fill(-1);
-          if (isCumulative && depIdx >= 0) {
-            cumulativeTimes[depIdx] = 0;
-            for (let i = depIdx + 1; i < displayStations.length; i++) {
-              cumulativeTimes[i] = cumulativeTimes[i - 1] + (displayStations[i - 1].timeToNext || 3);
-            }
-            for (let i = depIdx - 1; i >= 0; i--) {
-              cumulativeTimes[i] = cumulativeTimes[i + 1] + (displayStations[i].timeToNext || 3);
-            }
-          }
-          return null;
-        })()}
-        {displayStations.map((station, index) => {
-          if (index < displayStations.length - 1 && station.timeToNext) {
-            const nextStation = displayStations[index + 1];
+        {closeFullRouteStations(displayStations, stations, isCircularRoute(routeKey)).map((station, index, labelStations) => {
+          if (index < labelStations.length - 1 && station.timeToNext) {
+            const nextStation = labelStations[index + 1];
             const isCurrentTransfer = transferStations.has(station.name);
             const isCumulative = travelTimeLabelMode === 'cumulative' && !!departure;
-            const depIdx = isCumulative
-              ? displayStations.findIndex(s => s.name === departure!.name)
-              : -1;
-            const getTimeAt = (idx: number): number => {
-              if (!isCumulative) return -1;
-              // 乗り換えを跨いだ全体累積マップがあれば depIdx に関係なく使用
-              const stationName = displayStations[idx]?.name;
-              if (globalCumulativeTimeMap.size > 0 && stationName) {
-                const t = globalCumulativeTimeMap.get(stationName);
-                if (t !== undefined) return t;
-              }
-              // フォールバック: 同一路線内での累積（depIdx が必要）
-              if (depIdx < 0) return -1;
-              let t = 0;
-              if (idx >= depIdx) {
-                for (let i = depIdx; i < idx; i++) t += displayStations[i].timeToNext || 3;
-              } else {
-                for (let i = idx; i < depIdx; i++) t += displayStations[i].timeToNext || 3;
-              }
-              return t;
+            // 両方向から到達できるため、区間の遠い側の駅への最短時間を示す。
+            const getCumulativeTime = (endIndex: number): number | undefined => {
+              const start = cumulativeTimeMap.get(station.name);
+              const end = cumulativeTimeMap.get(labelStations[endIndex].name);
+              return start === undefined || end === undefined ? undefined : Math.max(start, end);
             };
 
             if (showTransferStationsOnly) {
@@ -4849,9 +4750,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               // 次の乗換駅まで合算
               let totalTime = 0;
               let endIndex = index;
-              for (let i = index; i < displayStations.length - 1; i++) {
-                const cSt = displayStations[i];
-                const nSt = displayStations[i + 1];
+              for (let i = index; i < labelStations.length - 1; i++) {
+                const cSt = labelStations[i];
+                const nSt = labelStations[i + 1];
                 totalTime += cSt.timeToNext || 3;
                 endIndex = i + 1;
                 if (transferStations.has(nSt.name)) break;
@@ -4861,10 +4762,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
               // 隣接する駅も乗換駅なら個別表示、それ以外は合算表示
               if (endIndex === index + 1) {
-                const midpoint = getMidpoint(station.lat, station.lng, nextStation.lat, nextStation.lng);
-                const displayTime = isCumulative && (depIdx >= 0 || globalCumulativeTimeMap.size > 0)
-                  ? getTimeAt(index + 1)
+                const midpoint = getTimeLabelPosition(station, nextStation);
+                if (!midpoint) return null;
+                const displayTime = isCumulative
+                  ? getCumulativeTime(index + 1)
                   : station.timeToNext;
+                if (displayTime === undefined) return null;
                 const timeIcon = createTimeIcon(displayTime, routeColor, zoomLevel, isCumulative);
                 if (!timeIcon) return null;
                 return (
@@ -4877,10 +4780,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   />
                 );
               } else {
-                const midpoint = getRouteBasedMidpoint(displayStations, index, endIndex);
-                const displayTime = isCumulative && (depIdx >= 0 || globalCumulativeTimeMap.size > 0)
-                  ? getTimeAt(endIndex)
+                const midpoint = getTimeLabelPosition(station, labelStations[endIndex]);
+                if (!midpoint) return null;
+                const displayTime = isCumulative
+                  ? getCumulativeTime(endIndex)
                   : totalTime;
+                if (displayTime === undefined) return null;
                 const timeIcon = createTimeIcon(displayTime, routeColor, zoomLevel, true);
                 if (!timeIcon) return null;
                 return (
@@ -4895,10 +4800,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               }
             } else {
               // 全駅表示時
-              const midpoint = getMidpoint(station.lat, station.lng, nextStation.lat, nextStation.lng);
-              const displayTime = isCumulative && depIdx >= 0
-                ? getTimeAt(index + 1)
+              const midpoint = getTimeLabelPosition(station, nextStation);
+              if (!midpoint) return null;
+              const displayTime = isCumulative
+                ? getCumulativeTime(index + 1)
                 : station.timeToNext;
+              if (displayTime === undefined) return null;
               const timeIcon = createTimeIcon(displayTime, routeColor, zoomLevel, isCumulative);
               if (!timeIcon) return null;
               return (
@@ -5522,7 +5429,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   const color = routeHeatColors.get(rKey)
                     ?? adjustRouteColorForTheme(routeColors[rKey] ?? '#888', theme);
                   // 薄い層も同じ規則でずらす（この層の線の太さは3px）
-                  const positions = offsetPositions(stationList as any[], rKey, DIMMED_ROUTE_WEIGHT, fullRouteRanks.get(rKey));
+                  const closedStations = closeFullRouteStations(stationList, stationList, isCircularRoute(rKey));
+                  const positions = offsetPositions(closedStations, rKey, DIMMED_ROUTE_WEIGHT,
+                    closedStations === stationList ? fullRouteRanks.get(rKey) : undefined);
                   return (
                     <React.Fragment key={`dimmed-${rKey}`}>
                       {/* 視覚的な半透明路線 */}
