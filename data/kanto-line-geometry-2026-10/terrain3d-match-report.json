@@ -1,0 +1,462 @@
+{
+  "generatedFrom": "data/kanto-line-geometry-2026-10/kanto-lines-3d_20261013_0219.json",
+  "matchRule": {
+    "matchM": 200,
+    "minCoverage": 0.9,
+    "simplifyM": 8,
+    "joinM": 50,
+    "stationStubKm": 2
+  },
+  "matched": [
+    {
+      "key": "yamanote",
+      "osmRelId": 1972920,
+      "osmName": "JR山手線",
+      "coverage": 1,
+      "stations": 30,
+      "coveredStations": 30,
+      "km": 33.6,
+      "points": 115
+    },
+    {
+      "key": "chuo",
+      "osmRelId": 9069259,
+      "osmName": "JR中央線（上り）",
+      "coverage": 1,
+      "stations": 32,
+      "coveredStations": 32,
+      "km": 52.9,
+      "points": 113
+    },
+    {
+      "key": "ginzaLine",
+      "osmRelId": 443281,
+      "osmName": "東京メトロ銀座線 : 浅草→渋谷",
+      "coverage": 0.947,
+      "stations": 19,
+      "coveredStations": 18,
+      "km": 14.2,
+      "points": 51
+    },
+    {
+      "key": "hibiyaLine",
+      "osmRelId": 443272,
+      "osmName": "東京メトロ日比谷線 : 中目黒→北千住",
+      "coverage": 0.909,
+      "stations": 22,
+      "coveredStations": 20,
+      "km": 20.1,
+      "points": 83
+    },
+    {
+      "key": "tozaiLine",
+      "osmRelId": 9812332,
+      "osmName": "東京メトロ東西線 快速 : 中野→西船橋",
+      "coverage": 1,
+      "stations": 23,
+      "coveredStations": 23,
+      "km": 30.7,
+      "points": 85
+    },
+    {
+      "key": "yurakuchoLine",
+      "osmRelId": 11371520,
+      "osmName": "東京メトロ有楽町線 : 新木場→和光市",
+      "coverage": 1,
+      "stations": 24,
+      "coveredStations": 24,
+      "km": 28.3,
+      "points": 104
+    },
+    {
+      "key": "nambokuLine",
+      "osmRelId": 8026070,
+      "osmName": "東京メトロ南北線 : 赤羽岩淵→目黒",
+      "coverage": 1,
+      "stations": 19,
+      "coveredStations": 19,
+      "km": 21.1,
+      "points": 109
+    },
+    {
+      "key": "fukutoshinLine",
+      "osmRelId": 8026168,
+      "osmName": "東京メトロ副都心線 : 渋谷→和光市",
+      "coverage": 0.938,
+      "stations": 16,
+      "coveredStations": 15,
+      "km": 20.1,
+      "points": 63
+    },
+    {
+      "key": "toeiAsakusaLine",
+      "osmRelId": 3302734,
+      "osmName": "都営浅草線 : 西馬込→押上",
+      "coverage": 1,
+      "stations": 19,
+      "coveredStations": 19,
+      "km": 18.2,
+      "points": 60
+    },
+    {
+      "key": "toeiMitaLine",
+      "osmRelId": 443286,
+      "osmName": "都営三田線 : 目黒→西高島平",
+      "coverage": 1,
+      "stations": 27,
+      "coveredStations": 27,
+      "km": 26.2,
+      "points": 89
+    },
+    {
+      "key": "jrSobuLine",
+      "osmRelId": 1904851,
+      "osmName": "JR総武快速線",
+      "coverage": 1,
+      "stations": 21,
+      "coveredStations": 21,
+      "km": 38.9,
+      "points": 77
+    },
+    {
+      "key": "jrSaikyoLine",
+      "osmRelId": 10372985,
+      "osmName": "JR埼京線",
+      "coverage": 1,
+      "stations": 19,
+      "coveredStations": 19,
+      "km": 36.7,
+      "points": 90
+    },
+    {
+      "key": "jrTakasakiLine",
+      "osmRelId": 5430810,
+      "osmName": "高崎線 (下り)",
+      "coverage": 0.944,
+      "stations": 18,
+      "coveredStations": 17,
+      "km": 97.5,
+      "points": 170
+    },
+    {
+      "key": "odakyuLine",
+      "osmRelId": 9483158,
+      "osmName": "小田急電鉄小田原線",
+      "coverage": 0.979,
+      "stations": 47,
+      "coveredStations": 46,
+      "km": 82.2,
+      "points": 204
+    },
+    {
+      "key": "tokyuToyokoLine",
+      "osmRelId": 10032466,
+      "osmName": "東京地下鉄の直通運転 - 東急東横線",
+      "coverage": 1,
+      "stations": 21,
+      "coveredStations": 21,
+      "km": 24.1,
+      "points": 79
+    },
+    {
+      "key": "tokyuDenEnToshiLine",
+      "osmRelId": 404834,
+      "osmName": "東急田園都市線 (中央林間 -> 渋谷)",
+      "coverage": 1,
+      "stations": 27,
+      "coveredStations": 27,
+      "km": 31.4,
+      "points": 103
+    },
+    {
+      "key": "jrMusashinoLine",
+      "osmRelId": 1952540,
+      "osmName": "JR武蔵野線 (南船橋 => 府中本町)",
+      "coverage": 0.926,
+      "stations": 27,
+      "coveredStations": 25,
+      "km": 71.7,
+      "points": 114
+    },
+    {
+      "key": "tokyoMonorail",
+      "osmRelId": 3417174,
+      "osmName": "東京モノレール羽田空港線 普通 (モノレール浜松町 => 羽田空港第2ターミナル)",
+      "coverage": 1,
+      "stations": 9,
+      "coveredStations": 9,
+      "km": 16.9,
+      "points": 65
+    },
+    {
+      "key": "keiseiMainLine",
+      "osmRelId": 3336661,
+      "osmName": "京成電鉄 シテイライナー (京成成田 → 京成上野)",
+      "coverage": 0.952,
+      "stations": 42,
+      "coveredStations": 40,
+      "km": 61.1,
+      "points": 177
+    },
+    {
+      "key": "yokohamaBlueLine",
+      "osmRelId": 1905261,
+      "osmName": "横浜市営地下鉄ブルーライン",
+      "coverage": 1,
+      "stations": 31,
+      "coveredStations": 31,
+      "km": 40.4,
+      "points": 144
+    },
+    {
+      "key": "rinkaiLine",
+      "osmRelId": 7963668,
+      "osmName": "りんかい線（大崎⇒新木場）",
+      "coverage": 1,
+      "stations": 8,
+      "coveredStations": 8,
+      "km": 12.2,
+      "points": 38
+    },
+    {
+      "key": "yurikamomeLine",
+      "osmRelId": 3670770,
+      "osmName": "ゆりかもめ",
+      "coverage": 0.933,
+      "stations": 15,
+      "coveredStations": 14,
+      "km": 14.6,
+      "points": 68
+    },
+    {
+      "key": "tsukubaExpress",
+      "osmRelId": 4589046,
+      "osmName": "つくばエクスプレス線下り",
+      "coverage": 0.95,
+      "stations": 20,
+      "coveredStations": 19,
+      "km": 58.1,
+      "points": 146
+    },
+    {
+      "key": "sotetsuIzumino",
+      "osmRelId": 9561172,
+      "osmName": "相模鉄道いずみ野線",
+      "coverage": 1,
+      "stations": 8,
+      "coveredStations": 8,
+      "km": 11.2,
+      "points": 45
+    },
+    {
+      "key": "jrKeiyo",
+      "osmRelId": 5326726,
+      "osmName": "JR京葉線 各駅停車 (東京 → 蘇我)",
+      "coverage": 0.941,
+      "stations": 17,
+      "coveredStations": 16,
+      "km": 41.7,
+      "points": 93
+    },
+    {
+      "key": "tokyuMeguro",
+      "osmRelId": 10023807,
+      "osmName": "東京地下鉄-目黒線",
+      "coverage": 1,
+      "stations": 13,
+      "coveredStations": 13,
+      "km": 11.9,
+      "points": 32
+    },
+    {
+      "key": "yokohamaGreenLine",
+      "osmRelId": 3444217,
+      "osmName": "横浜市営地下鉄グリーンライン(中山->日吉)",
+      "coverage": 1,
+      "stations": 10,
+      "coveredStations": 10,
+      "km": 12.9,
+      "points": 48
+    },
+    {
+      "key": "jrSotoboLine",
+      "osmRelId": 1949528,
+      "osmName": "JR外房線 (千葉 → 安房鴨川)",
+      "coverage": 1,
+      "stations": 18,
+      "coveredStations": 18,
+      "km": 56.1,
+      "points": 110
+    },
+    {
+      "key": "shinkeisei",
+      "osmRelId": 11502414,
+      "osmName": "京成松戸線 (京成津田沼 → 松戸)",
+      "coverage": 1,
+      "stations": 24,
+      "coveredStations": 24,
+      "km": 26.5,
+      "points": 109
+    },
+    {
+      "key": "tamaMonorail",
+      "osmRelId": 9337952,
+      "osmName": "多摩都市モノレール線",
+      "coverage": 0.947,
+      "stations": 19,
+      "coveredStations": 18,
+      "km": 16,
+      "points": 50
+    },
+    {
+      "key": "todenArakawaLine",
+      "osmRelId": 9254425,
+      "osmName": "都電荒川線（三ノ輪橋⇒早稲田）",
+      "coverage": 0.967,
+      "stations": 30,
+      "coveredStations": 29,
+      "km": 11.7,
+      "points": 44
+    },
+    {
+      "key": "nipporiToneriLiner",
+      "osmRelId": 3423146,
+      "osmName": "日暮里・舎人ライナー",
+      "coverage": 1,
+      "stations": 13,
+      "coveredStations": 13,
+      "km": 9.6,
+      "points": 18
+    },
+    {
+      "key": "tokyuOimachiLine",
+      "osmRelId": 9341649,
+      "osmName": "東急大井町線(溝の口=>大井町)",
+      "coverage": 1,
+      "stations": 15,
+      "coveredStations": 15,
+      "km": 10.4,
+      "points": 39
+    },
+    {
+      "key": "jrHachikoLine",
+      "osmRelId": 223040,
+      "osmName": "八高線 (古い)",
+      "coverage": 1,
+      "stations": 6,
+      "coveredStations": 6,
+      "km": 15.7,
+      "points": 49
+    },
+    {
+      "key": "tobuDaishiLine",
+      "osmRelId": 5219659,
+      "osmName": "東武大師線",
+      "coverage": 1,
+      "stations": 2,
+      "coveredStations": 2,
+      "km": 0.9,
+      "points": 7
+    },
+    {
+      "key": "tobuKameidoLine",
+      "osmRelId": 5219680,
+      "osmName": "東武鉄道亀戸線",
+      "coverage": 1,
+      "stations": 5,
+      "coveredStations": 5,
+      "km": 3.5,
+      "points": 15
+    },
+    {
+      "key": "jrShonanShinjukuLine",
+      "osmRelId": 4684035,
+      "osmName": "湘南新宿ライン",
+      "coverage": 0.944,
+      "stations": 36,
+      "coveredStations": 34,
+      "km": 154.8,
+      "points": 311
+    },
+    {
+      "key": "jrShonanShinjukuTakasakiTokaido",
+      "osmRelId": 4673470,
+      "osmName": "湘南新宿ライン (前橋=>小田原)",
+      "coverage": 1,
+      "stations": 36,
+      "coveredStations": 36,
+      "km": 193.6,
+      "points": 386
+    },
+    {
+      "key": "odakyuTamaLine",
+      "osmRelId": 9504629,
+      "osmName": "小田急電鉄多摩線",
+      "coverage": 1,
+      "stations": 8,
+      "coveredStations": 8,
+      "km": 10.7,
+      "points": 29
+    },
+    {
+      "key": "keikyuAirportLine",
+      "osmRelId": 9499448,
+      "osmName": "京浜急行電鉄空港線",
+      "coverage": 1,
+      "stations": 7,
+      "coveredStations": 7,
+      "km": 6.4,
+      "points": 20
+    },
+    {
+      "key": "keiseiOshiageLine",
+      "osmRelId": 3338455,
+      "osmName": "京成電鉄 押上線 (青砥 → 押上)",
+      "coverage": 1,
+      "stations": 6,
+      "coveredStations": 6,
+      "km": 5.7,
+      "points": 14
+    },
+    {
+      "key": "hokusouLine",
+      "osmRelId": 3120358,
+      "osmName": "京成スカイライナー (成田空港 → 京成上野)",
+      "coverage": 1,
+      "stations": 15,
+      "coveredStations": 15,
+      "km": 32.2,
+      "points": 67
+    },
+    {
+      "key": "newShuttle",
+      "osmRelId": 1949290,
+      "osmName": "埼玉新都市交通伊奈線",
+      "coverage": 0.923,
+      "stations": 13,
+      "coveredStations": 12,
+      "km": 11.2,
+      "points": 16
+    },
+    {
+      "key": "jrUtsunomiyaLine",
+      "osmRelId": 8519860,
+      "osmName": "JR東北本線（上り）",
+      "coverage": 0.909,
+      "stations": 22,
+      "coveredStations": 20,
+      "km": 91.7,
+      "points": 133
+    },
+    {
+      "key": "izuhakoneOyamazanLine",
+      "osmRelId": 5746641,
+      "osmName": "伊豆箱根鉄道大雄山線",
+      "coverage": 0.917,
+      "stations": 12,
+      "coveredStations": 11,
+      "km": 9.1,
+      "points": 31
+    }
+  ]
+}
