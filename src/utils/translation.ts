@@ -1873,8 +1873,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Could not load the 3D data."
   },
   terrain3dHint: {
-    japanese: "ドラッグで回転、2本指・ホイールで拡大縮小",
-    english: "Drag to rotate, pinch or scroll to zoom"
+    japanese: "左ドラッグで移動、右・ホイール押し込みドラッグで回転、ホイールで拡大縮小",
+    english: "Left-drag to pan, right- or middle-drag to rotate, scroll to zoom"
   },
   layerOrderHint: {
     japanese: "↑ 最前面 / 背面 ↓",
