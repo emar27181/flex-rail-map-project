@@ -3,8 +3,8 @@
  * jsdom のユニットテストでは WebGL が動かないので、真っ黒・点滅・駅名の重なり・ボタンの位置はここで確かめる。
  */
 import { createHash } from 'node:crypto';
-import { test, expect, type Page } from '@playwright/test';
-import { collectErrors, overlaps, screenshotCanvasOnly, type Box } from './helpers';
+import type { Page } from '@playwright/test';
+import { test, expect, collectErrors, overlaps, screenshotCanvasOnly, type Box } from './helpers';
 import { pngStats } from './png';
 import { FLOATING_ICON_BUTTON_SIZE } from '../../src/components/ui/atoms/controlSize';
 
@@ -55,13 +55,15 @@ test('設定はアイコンから開き、最初は閉じている。アイコ�
 
 test('動かしている間も描けていて、描き直されている（何も描かれないコマ・固まったコマが無い）', async ({ page }, info) => {
   test.skip(info.project.name === 'mobile', 'マウスのドラッグで回すのは PC だけ');
+  // CI の WebGL はソフトウェア描画（SwiftShader）で、描画面の撮影1回に数秒かかる（2026-10-14、60秒で打ち切られた）
+  test.setTimeout(120_000);
   const canvas = await open3d(page);
   const box = (await canvas.boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.down({ button: 'right' });
   let prev = '';
-  for (let i = 1; i <= 6; i++) {
-    await page.mouse.move(box.x + box.width / 2 + i * 30, box.y + box.height / 2 + i * 10);
+  for (let i = 1; i <= 4; i++) {
+    await page.mouse.move(box.x + box.width / 2 + i * 40, box.y + box.height / 2 + i * 12);
     const shot = await screenshotCanvasOnly(page, CANVAS);
     const stats = pngStats(shot);
     expect(stats.nonDominantRatio, `${i} コマ目が描けている`).toBeGreaterThan(0.2);

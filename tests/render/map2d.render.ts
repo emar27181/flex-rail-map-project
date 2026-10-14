@@ -1,8 +1,7 @@
 /**
  * 通常の地図（2D）が描けているか。
  */
-import { test, expect } from '@playwright/test';
-import { collectErrors } from './helpers';
+import { test, expect, collectErrors } from './helpers';
 import { pngStats } from './png';
 
 test('出発・到着を指定して開くと、地図・路線・駅が描かれ、実行時エラーが無い', async ({ page }) => {
