@@ -119,7 +119,7 @@ import RouteToggleChip from './legend/RouteToggleChip';
 import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
-import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE } from './ui/atoms/controlSize';
+import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE, FLOATING_PANEL } from './ui/atoms/controlSize';
 import { floatingSurfaceStyle, floatingSurfaceCss } from './ui/atoms/floatingSurface';
 import { shadow, dropShadowFilter, joinShadows, textHalo, textHaloCss } from './ui/atoms/shadow';
 
@@ -4906,7 +4906,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const showMobileRouteCandidatesButton = showRouteRecommendationsPanel && routeRecommendations.length > 0;
   /** 立体表示の説明の箱の下端。スマホ全画面では左下のボタン群（MobileBottomPanel）の上に置く */
   const terrainOverlayBottom = isMobile && isFullscreen
-    ? `${mobileBottomPanelStackTop(showMobileRouteCandidatesButton ? 2 : 1, MOBILE_PANEL_SAFE_BOTTOM) + parseFloat(L.sp.sm)}px`
+    ? `calc(${mobileBottomPanelStackTop(showMobileRouteCandidatesButton ? 2 : 1, MOBILE_PANEL_SAFE_BOTTOM)}px + ${FLOATING_PANEL.gap})`
     : undefined;
 
   return (
@@ -5606,6 +5606,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 theme={theme}
                 language={currentLanguage}
                 overlayBottom={terrainOverlayBottom}
+                lineWidth={routeLineWidth}
                 onShowRoutes={(keys) => {
                   setAvailableRoutes(prev => new Set([...prev, ...keys]));
                   setVisibleRoutes(prev => new Set([...prev, ...keys]));

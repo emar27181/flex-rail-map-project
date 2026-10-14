@@ -19,10 +19,10 @@ import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import type { RouteKey } from '../data/routes';
 import { getThemeColors } from '../contexts/ThemeContext';
-import { FS, SEMANTIC, NEUTRAL } from '../constants/ui';
+import { FS, SEMANTIC, NEUTRAL, ROUTE_LINE } from '../constants/ui';
 import { L } from './legend/legendStyles';
 import { translateStation, translateUI, type Language } from '../utils/translation';
-import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
+import { FLOATING_PANEL, CONTROL_SIZE, aboveFloatingButtons } from './ui/atoms/controlSize';
 import Button from './ui/atoms/Button';
 import Stepper from './ui/molecules/Stepper';
 import Checkbox from './ui/atoms/Checkbox';
@@ -38,21 +38,15 @@ import {
   type Terrain3DData, type Terrain3DGround, type Terrain3DGroundMeta,
 } from '../utils/terrain3d';
 
-/** 線の太さ（画面上の px）。地図の路線の線と同じくらい */
-const LINE_WIDTH_PX = 3;
 /** 海面までの幕の不透明度 */
 const CURTAIN_OPACITY = 0.18;
-/** 説明の箱の下端。地図の左下に浮かぶボタン（縮小・方位・言語。FLOATING_ICON_BUTTON_SIZE.md）の上に置く */
-const OVERLAY_BOTTOM = `calc(${L.sp.lg} + ${FLOATING_ICON_BUTTON_SIZE.md}px + ${L.sp.sm})`;
+/** 説明の箱の下端。地図の左下に浮かぶボタン（縮小・方位・言語）1段の上に置く */
+const OVERLAY_BOTTOM = aboveFloatingButtons(1);
 /**
  * 操作の感度。OrbitControls の既定（回転・移動・拡大とも 1）では速すぎて、
  * 少し指を動かしただけで大きく回ってしまったため下げている
  */
 const CONTROL_SPEED = { rotate: 0.45, pan: 0.6, zoom: 0.6, damping: 0.1 } as const;
-/** 説明の箱の高さの上限（画面の高さに対する割合と px の小さい方）。スマホで地図が隠れすぎないように */
-const OVERLAY_MAX_HEIGHT = 'min(60vh, 420px)';
-/** 説明の箱の最大幅(px)。スマホでは画面の幅から左右の余白を引いた幅まで */
-const OVERLAY_MAX_WIDTH_PX = 360;
 /** 画面の縦横比（幅/高さ）がこれより小さいときは、カメラをその分だけ離す */
 const PORTRAIT_FIT_ASPECT = 1.2;
 /** 地面を描く範囲: 表示中の路線の範囲の外に足す幅（度）。0.05度 ≒ 5km */
@@ -90,8 +84,8 @@ const STRUCTURE_STYLE: Record<Terrain3DStructure, { casing: boolean; dashed: boo
   e: { casing: true, dashed: false, opacity: 1 },
   u: { casing: false, dashed: true, opacity: 0.85 },
 };
-/** 高架の縁取りの太さ（線の両側に足す px） */
-const CASING_EXTRA_PX = 1.5;
+/** 高架の縁取りの太さ（線の太さに対する割合。両側にこの分ずつ足す） */
+const CASING_RATIO = 0.5;
 /** 地下の破線の長さ・間隔（表示範囲に対する割合。拡大しても見え方がそろうように範囲から決める） */
 const DASH_RATIO = { dash: 0.006, gap: 0.004 } as const;
 
@@ -167,10 +161,13 @@ export interface Terrain3DViewProps {
   onShowRoutes: (routeKeys: RouteKey[]) => void;
   /** 説明の箱の下端。左下に別のボタン群がある画面（スマホ全画面）で、その上に置くために渡す */
   overlayBottom?: string;
+  /** 線の太さ（画面上の px）。地図の「路線の太さ」の設定と同じ値 */
+  lineWidth?: number;
 }
 
 const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   visibleRoutes, colorOf, departure, arrival, theme, language, onShowRoutes, overlayBottom = OVERLAY_BOTTOM,
+  lineWidth = ROUTE_LINE.defaultWidth,
 }) => {
   const colors = getThemeColors(theme);
   const hostRef = useRef<HTMLDivElement>(null);
@@ -297,7 +294,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
         disposables.push(geometry);
         // 高架: 灰色の太い線を下に敷いて縁取る（橋の表し方。背景色だとダークで黒い点線に見えた）
         if (style.casing) {
-          const casingMaterial = new LineMaterial({ color: colors.textSecondary, linewidth: LINE_WIDTH_PX + CASING_EXTRA_PX * 2, worldUnits: false });
+          const casingMaterial = new LineMaterial({ color: colors.textSecondary, linewidth: lineWidth * (1 + CASING_RATIO * 2), worldUnits: false });
           casingMaterial.resolution.set(width, height);
           lineMaterials.push(casingMaterial);
           const casing = new Line2(geometry, casingMaterial);
@@ -307,7 +304,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
         }
         // 線（地下は破線）
         const material = new LineMaterial({
-          color, linewidth: LINE_WIDTH_PX, worldUnits: false,
+          color, linewidth: lineWidth, worldUnits: false,
           transparent: style.opacity < 1, opacity: style.opacity,
           dashed: style.dashed, dashSize: size * DASH_RATIO.dash, gapSize: size * DASH_RATIO.gap,
         });
@@ -321,7 +318,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
         if (groundShown) {
           // 山などの地面に隠れた部分は、同じ線を薄く・奥行きを無視して描いて透かす
           const hiddenMaterial = new LineMaterial({
-            color, linewidth: LINE_WIDTH_PX, worldUnits: false,
+            color, linewidth: lineWidth, worldUnits: false,
             transparent: true, opacity: HIDDEN_LINE_OPACITY, depthTest: false, depthWrite: false,
             dashed: style.dashed, dashSize: size * DASH_RATIO.dash, gapSize: size * DASH_RATIO.gap,
           });
@@ -405,7 +402,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       host.removeChild(renderer.domElement);
       host.removeChild(labelRenderer.domElement);
     };
-  }, [shown, exaggeration, theme, departure, arrival, colorOf, language, ground, showGround]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [shown, exaggeration, theme, departure, arrival, colorOf, language, ground, showGround, lineWidth]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const overlayText: React.CSSProperties = { fontSize: FS.caption, color: colors.textSecondary, lineHeight: 1.5 };
 
@@ -421,11 +418,9 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
         title={data && shown.length > 0
           ? translateUI('terrain3dCoverage', language, { shown: String(shown.length), visible: String(visibleRoutes.size) })
           : translateUI('terrain3dLabel', language)}
-        style={{
-          position: 'absolute', left: L.sp.lg, bottom: overlayBottom,
-          width: `min(${OVERLAY_MAX_WIDTH_PX}px, calc(100% - ${L.sp.lg} * 2))`,
-        }}
-        bodyStyle={{ padding: `${L.sp.sm} ${L.sp.md}`, maxHeight: OVERLAY_MAX_HEIGHT, overflowY: 'auto', boxSizing: 'border-box' }}
+        width="wide"
+        style={{ position: 'absolute', left: FLOATING_PANEL.inset, bottom: overlayBottom }}
+        bodyStyle={{ padding: `${L.sp.sm} ${L.sp.md}`, boxSizing: 'border-box' }}
       >
         <div data-testid="terrain3d-controls" style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
           <SegmentedControl<Terrain3DVersion>
@@ -454,7 +449,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
           {data && shown.length > 0 && (
             <>
               <div style={overlayText}>{translateUI('terrain3dHeightNote', language)}</div>
-              {version === 'v2' && <StructureLegend theme={theme} language={language} />}
+              {version === 'v2' && <StructureLegend theme={theme} language={language} lineWidth={lineWidth} />}
               <Stepper
                 theme={theme}
                 label={translateUI('terrain3dExaggeration', language)}
@@ -505,14 +500,17 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
 };
 
 /** 区間の構造の凡例（v2）。線の見本は STRUCTURE_STYLE と同じ描き方 */
-const StructureLegend: React.FC<{ theme: 'light' | 'dark'; language: Language }> = ({ theme, language }) => {
+const StructureLegend: React.FC<{ theme: 'light' | 'dark'; language: Language; lineWidth: number }> = ({ theme, language, lineWidth }) => {
   const colors = getThemeColors(theme);
-  const w = 28, h = 10, mid = h / 2;
+  // 見本の大きさは補助の操作部品（CONTROL_SIZE.sm）の幅と、縁取りを含めた線の太さから決める
+  const casingWidth = lineWidth * (1 + CASING_RATIO * 2);
+  const w = CONTROL_SIZE.sm.minHeight, h = Math.ceil(casingWidth), mid = h / 2;
+  const dash = `${lineWidth * 2} ${lineWidth}`;
   const sample = (s: Terrain3DStructure) => (
     <svg width={w} height={h} aria-hidden="true" style={{ flexShrink: 0 }}>
-      {STRUCTURE_STYLE[s].casing && <line x1={0} y1={mid} x2={w} y2={mid} stroke={colors.textSecondary} strokeWidth={LINE_WIDTH_PX + CASING_EXTRA_PX * 2} />}
-      <line x1={0} y1={mid} x2={w} y2={mid} stroke={colors.text} strokeWidth={LINE_WIDTH_PX}
-        strokeDasharray={STRUCTURE_STYLE[s].dashed ? '5 3' : undefined} opacity={STRUCTURE_STYLE[s].opacity} />
+      {STRUCTURE_STYLE[s].casing && <line x1={0} y1={mid} x2={w} y2={mid} stroke={colors.textSecondary} strokeWidth={casingWidth} />}
+      <line x1={0} y1={mid} x2={w} y2={mid} stroke={colors.text} strokeWidth={lineWidth}
+        strokeDasharray={STRUCTURE_STYLE[s].dashed ? dash : undefined} opacity={STRUCTURE_STYLE[s].opacity} />
     </svg>
   );
   const items: [Terrain3DStructure, string][] = [

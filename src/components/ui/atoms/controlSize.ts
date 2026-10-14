@@ -101,6 +101,36 @@ export const FLOATING_CONTROL = {
 } as const;
 
 /**
+ * 地図の上に浮かぶ開閉パネル（CollapsiblePanel: 凡例「N路線」・立体表示の説明など）の寸法。
+ * 幅・高さの上限・地図の端との間・浮かぶ部品どうしの間をここ1か所で決める。
+ * 以前は凡例が 168px、立体表示の箱が 360px と高さの上限 `min(60vh, 420px)` を各ファイルに直書きしていた。
+ * - width.narrow: 一覧（チップを縦に並べる）。地図を覆いすぎない幅
+ * - width.wide: 説明と操作（文章・Stepper・チェックボックス）を入れる幅
+ * - maxHeight: 開いたときの高さの上限（中はスクロール）。スマホで地図が隠れすぎないように
+ */
+export const FLOATING_PANEL = {
+  width: { narrow: 168, wide: 360 },
+  maxHeight: 'min(60vh, 420px)',
+  /** 地図の端からの距離 */
+  inset: L.sp.lg,
+  /** 浮かぶ部品どうしの間（ボタンの列とパネルの間など） */
+  gap: L.sp.sm,
+} as const;
+
+export type FloatingPanelWidth = keyof typeof FLOATING_PANEL.width;
+
+/** パネルの幅。狭い画面では地図の左右の端との間（inset）を残して縮む */
+export const floatingPanelWidth = (w: FloatingPanelWidth) =>
+  `min(${FLOATING_PANEL.width[w]}px, calc(100% - 2 * ${FLOATING_PANEL.inset}))`;
+
+/**
+ * 地図の隅の丸いボタン（FLOATING_ICON_BUTTON_SIZE.md）が rows 段並んでいる所の、すぐ上の位置（下端からの距離）。
+ * 左下の「縮小・方位・言語」の上にパネルを置くときに使う
+ */
+export const aboveFloatingButtons = (rows = 1) =>
+  `calc(${FLOATING_PANEL.inset} + ${rows} * (${FLOATING_ICON_BUTTON_SIZE.md}px + ${FLOATING_PANEL.gap}))`;
+
+/**
  * 浮かせたアイコンボタン（地図の隅・記事ヘッダー）の中のアイコンの大きさ(px)。
  * FLOATING_ICON_BUTTON_SIZE.md（36px）の箱に対して詰まりすぎない大きさ。
  */
