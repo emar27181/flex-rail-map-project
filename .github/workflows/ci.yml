@@ -35,3 +35,33 @@ jobs:
         run: npm run test:unit
       - name: ビルド
         run: npm run build
+
+  # 描画テスト: ビルドしたサイトを実際のブラウザ（Chromium, WebGL はソフトウェア描画）で開き、
+  # 地図・立体表示が描けているか（真っ黒・固まる・駅名の重なり・ボタンの位置）を確かめる。
+  # 何を確かめているか・足すときの決まりは docs/render-tests.md
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: 依存関係
+        run: npm ci
+      - name: ブラウザ（Chromium）
+        run: npx playwright install --with-deps chromium
+      - name: ビルド
+        run: npm run build
+      - name: 描画テスト
+        run: npm run test:render
+      - name: 失敗したときの画面とトレース
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-test-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
