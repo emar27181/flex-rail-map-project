@@ -5607,6 +5607,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 overlayBottom={terrainOverlayBottom}
                 lineWidth={routeLineWidth}
                 toggleSlot={terrainToggleSlot}
+                stationLabelFontPx={stationLabelFontSize}
                 onShowRoutes={(keys) => {
                   setAvailableRoutes(prev => new Set([...prev, ...keys]));
                   setVisibleRoutes(prev => new Set([...prev, ...keys]));

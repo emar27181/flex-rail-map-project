@@ -1,5 +1,15 @@
 # CHANGE LOG
 
+## [2026-10-14] セッション（立体表示に駅を小さく出す）
+
+### feat: 立体表示に駅の点と駅名を、小さく重ならないように出す
+- `src/components/Terrain3DView.tsx`, `src/utils/terrain3dStations.ts`（新規）, `src/components/ui/atoms/textBadge.ts`（`plainTextLabelStyle`）,
+  `src/components/RailwayMap.tsx`（駅名の大きさを渡す）, `src/utils/translation.ts`
+- 駅は小さな点（出発・到着の印と同じ大きさ）を GPU でまとめて描く。同じ名前・近い位置の駅は1つにまとめる
+- 駅名は塗りの無い小さな文字で、画面上で重ならないものだけを出す（乗換駅を先に、最大40）。近づくほど多く出る
+- 文字の大きさは地図の「駅名の大きさ」の設定と同じ。設定の箱の「駅を表示」で消せる
+- `tests/unit/utils/terrain3dStations.test.ts`（新規）: まとめ方・同名別駅・重ならない選び方
+
 ## [2026-10-14] セッション（立体表示の設定をアイコンから・ちらつき）
 
 ### feat: 地図に浮かぶアイコンボタンの部品（FloatingIconButton）
