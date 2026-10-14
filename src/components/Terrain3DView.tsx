@@ -489,7 +489,8 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       disposables.push(material);
       const label = document.createElement('span');
       label.textContent = translateStation(st.name, language);
-      Object.assign(label.style, plainTextLabelStyle(theme, stationLabelFontPx));
+      // Match 2D endpoint badges: semantic background and contrast-safe text.
+      Object.assign(label.style, textBadgeStyle(color, theme), { fontSize: stationLabelFontPx + 'px' });
       const obj = new CSS2DObject(label);
       obj.position.copy(sphere.position);
       scene.add(obj);
