@@ -1,5 +1,23 @@
 # CHANGE LOG
 
+## [2026-10-14] セッション（立体表示の出発・到着の印を小さく共通化）
+
+### improve: 表示範囲で大きくなる球を、画面上で外径6pxの点に置き換え
+- `src/components/Terrain3DView.tsx`: SphereGeometry を除去し、既存の投影位置に CSS2D の印と駅名を配置。出発・到着は既存の意味色、標高・翻訳・路線の描画は維持。
+- `src/components/ui/atoms/pointMarker.ts`, `textBadge.ts`: 印の寸法・境界線、文字・余白・角丸・コントラストを共通管理。
+- `src/components/ui/molecules/anchoredPointLabel.ts`: 2アトムを組み合わせて原点に点を固定し、名前をその上に表示。駅やThree.jsに依存しない。
+
+### test / docs: 共通部品と再発防止
+- `tests/unit/components/ui/anchoredPointLabel.test.ts`: 両テーマ・意味色の同寸法、点の中心・ラベルの位置、トークンとコントラスト、多言語とHTMLの安全性、球と独自styleの再導入を検査。
+- `docs/design-system.md`: 部品表に追記。`tsconfig.check.json`: .ts形式のmoleculesも型チェック対象に追加。
+
+### improve: 地表カラーを選べるようにし、暗い単色を既定に
+- `src/utils/terrain3dAppearance.ts`, `src/components/Terrain3DView.tsx`: 通常マップのダーク配色（陸・海）を再利用したシンプル表示と、従来の標高グラデーションを共通のSegmentedControlで切り替え。地形と陰影は維持し、選択はlocalStorageに保存。
+- `src/utils/translation.ts`: 地表カラーの設定を4言語で追加。
+
+### fix: 高さの強調や地表カラーの変更で視点が初期化される問題
+- `src/utils/terrain3dCamera.ts`, `src/components/Terrain3DView.tsx`: シーン再生成前にカメラ位置・注視点・上方向・ズーム・描画距離を保存し、同じ座標系・表示範囲なら復元する。路線の範囲が変わった場合だけ全体表示に合わせる。
+
 ## [2026-10-14] セッション（立体表示の見出しの大きさ・浮かぶパネルの規則・地面を関東全域に）
 
 ### fix: 立体表示の説明の箱の見出しを「表示切替」と同じ大きさに
