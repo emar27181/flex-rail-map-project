@@ -1908,6 +1908,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "線形と区間の種類: OpenStreetMap（Geofabrik 関東抽出, 2026-10-14）。高さは地面の標高（Copernicus DEM の格子）",
     english: "Lines and section types: OpenStreetMap (Geofabrik Kanto extract, 2026-10-14). Heights are ground elevation (Copernicus DEM grid)"
   },
+  terrain3dStationsLabel: {
+    japanese: "駅を表示",
+    english: "Show stations"
+  },
   terrain3dGroundLabel: {
     japanese: "地面を表示",
     english: "Show ground"
@@ -2354,6 +2358,7 @@ export const uiChinese: Record<string, string> = {
   terrain3dStructureUnderground: "地下",
   terrain3dStructureNote: "区间类型依据 OpenStreetMap 的隧道·桥梁标签。地下深度未知，因此以虚线绘制在地面位置。",
   terrain3dV2Source: "线路与区间类型: OpenStreetMap（Geofabrik 关东提取, 2026-10-14）。高度为地面高程（Copernicus DEM 网格）",
+  terrain3dStationsLabel: "显示车站",
   terrain3dGroundLabel: "显示地面",
   terrain3dGroundStyle: "地表配色",
   terrain3dGroundSimple: "简洁（深色）",
@@ -2717,6 +2722,7 @@ export const uiKorean: Record<string, string> = {
   terrain3dStructureUnderground: "지하",
   terrain3dStructureNote: "구간 종류는 OpenStreetMap의 터널·교량 태그에 따른 것입니다. 지하 깊이는 알 수 없어 지면 위치에 점선으로 그렸습니다.",
   terrain3dV2Source: "선형과 구간 종류: OpenStreetMap（Geofabrik 간토 추출, 2026-10-14）. 높이는 지면 표고（Copernicus DEM 격자）",
+  terrain3dStationsLabel: "역 표시",
   terrain3dGroundLabel: "지면 표시",
   terrain3dGroundStyle: "지표 색상",
   terrain3dGroundSimple: "심플（어두운색）",

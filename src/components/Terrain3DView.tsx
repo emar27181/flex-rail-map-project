@@ -19,9 +19,9 @@ import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-import type { RouteKey } from '../data/routes';
+import { routes, type RouteKey } from '../data/routes';
 import { getThemeColors } from '../contexts/ThemeContext';
-import { FS, SEMANTIC, NEUTRAL, ROUTE_LINE } from '../constants/ui';
+import { FS, SEMANTIC, NEUTRAL, ROUTE_LINE, MAP_LABEL } from '../constants/ui';
 import { L } from './legend/legendStyles';
 import { translateStation, translateUI, type Language } from '../utils/translation';
 import { FLOATING_PANEL, CONTROL_SIZE, aboveFloatingButtons } from './ui/atoms/controlSize';
@@ -32,6 +32,9 @@ import FloatingIconButton from './ui/atoms/FloatingIconButton';
 import CollapsiblePanel from './ui/molecules/CollapsiblePanel';
 import SourceDisclosure from './ui/molecules/SourceDisclosure';
 import { anchoredPointLabel } from './ui/molecules/anchoredPointLabel';
+import { POINT_MARKER } from './ui/atoms/pointMarker';
+import { plainTextLabelStyle } from './ui/atoms/textBadge';
+import { collectTerrainStations, placeLabels, estimateLabelWidth } from '../utils/terrain3dStations';
 import { deviceClassOf } from '../constants/breakpoints';
 import { initialDisplayUrlOptions } from '../utils/mapDisplayUrlParam';
 import { captureTerrainCamera, restoreTerrainCamera, type TerrainCameraSnapshot } from '../utils/terrain3dCamera';
@@ -217,12 +220,18 @@ export interface Terrain3DViewProps {
    * 説明と操作の箱はボタンで開いたときだけ出す。無ければ箱を見出しつきで常に出す
    */
   toggleSlot?: HTMLElement | null;
+  /** 駅名の文字の大きさ(px)。地図の「駅名の大きさ」の設定と同じ値（MAP_LABEL） */
+  stationLabelFontPx?: number;
 }
+
+/** 一度に出す駅名の上限。重ならないものだけを出すので、引いて見たときは乗換駅など一部だけになる */
+const MAX_STATION_LABELS = 40;
 
 const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   visibleRoutes, colorOf, departure, arrival, theme, language, onShowRoutes, overlayBottom = OVERLAY_BOTTOM,
   lineWidth = ROUTE_LINE.defaultWidth,
   toggleSlot = null,
+  stationLabelFontPx = Math.round(MAP_LABEL.baseFontPx * MAP_LABEL.defaultScale),
 }) => {
   const colors = getThemeColors(theme);
   const hostRef = useRef<HTMLDivElement>(null);
@@ -235,6 +244,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   const [ground, setGround] = useState<Terrain3DGround | null>(null);
   const [groundError, setGroundError] = useState(false);
   const [showGround, setShowGround] = useState(() => initialDisplayUrlOptions().ground ?? true);
+  const [showStations, setShowStations] = useState(true);
   const [groundStyle, setGroundStyle] = useState<Terrain3DGroundStyle>(() => initialDisplayUrlOptions().groundStyle ?? loadTerrain3dGroundStyle());
   useEffect(() => { saveTerrain3dGroundStyle(groundStyle); }, [groundStyle]);
   // 説明と操作の箱。設定ボタン（toggleSlot）があるときは閉じて始める（地図を広く見せる）。
@@ -430,6 +440,84 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       scene.add(obj);
     }
 
+    // 駅: 小さな点（GPU でまとめて描く）と、重ならない駅名だけ。出発・到着は上の印があるので除く
+    let updateStationLabels = () => {};
+    let stationLayer: HTMLDivElement | null = null;
+    if (showStations) {
+      const exclude = new Set([departure?.name, arrival?.name].filter((n): n is string => !!n));
+      const stations = collectTerrainStations(shown.map(r => r.key), k => routes[k], exclude)
+        .flatMap(st => {
+          const ele = groundData ? groundElevationAt(groundData, st.lat, st.lng) : elevationNear(shown, st.lat, st.lng);
+          if (ele === null) return []; // 高さが分からない駅は描かない
+          return [{ ...st, pos: new THREE.Vector3(...toLocal(frame, st.lat, st.lng, lineElevation(st.lat, st.lng, ele), exaggeration)) }];
+        });
+      if (stations.length > 0) {
+        // 点の見た目は出発・到着の印（POINT_MARKER）と同じ大きさ・縁取りで、塗りは地の色（地図の駅の白丸と同じ）
+        const tex = document.createElement('canvas');
+        tex.width = tex.height = 64;
+        const ctx = tex.getContext('2d');
+        if (ctx) {
+          const border = 64 * POINT_MARKER.borderWidthPx / POINT_MARKER.diameterPx;
+          ctx.beginPath();
+          ctx.arc(32, 32, 32 - border / 2, 0, Math.PI * 2);
+          ctx.fillStyle = colors.surface;
+          ctx.fill();
+          ctx.lineWidth = border;
+          ctx.strokeStyle = colors.textSecondary;
+          ctx.stroke();
+        }
+        const texture = new THREE.CanvasTexture(tex);
+        const geometry = new THREE.BufferGeometry().setFromPoints(stations.map(s => s.pos));
+        const material = new THREE.PointsMaterial({
+          size: POINT_MARKER.diameterPx * renderer.getPixelRatio(), sizeAttenuation: false,
+          map: texture, transparent: true, alphaTest: 0.5, depthTest: false,
+        });
+        const points = new THREE.Points(geometry, material);
+        points.renderOrder = 5;
+        scene.add(points);
+        disposables.push(geometry, material, texture);
+
+        // 駅名: 画面に投影して、重ならないものだけを出す（毎回 DOM を全部作らず、決まった数の箱を使い回す）
+        stationLayer = document.createElement('div');
+        Object.assign(stationLayer.style, { position: 'absolute', inset: '0', pointerEvents: 'none', overflow: 'hidden' });
+        host.appendChild(stationLayer);
+        const labelStyle = plainTextLabelStyle(theme, stationLabelFontPx);
+        const pool = Array.from({ length: MAX_STATION_LABELS }, () => {
+          const el = document.createElement('span');
+          Object.assign(el.style, labelStyle, { position: 'absolute', left: '0', top: '0', display: 'none' });
+          stationLayer!.appendChild(el);
+          return el;
+        });
+        const names = stations.map(s => translateStation(s.name, language));
+        const widths = names.map(n => estimateLabelWidth(n, stationLabelFontPx));
+        const lineH = stationLabelFontPx * 1.2;
+        const above = POINT_MARKER.diameterPx / 2 + parseFloat(L.sp.xxs);
+        const v = new THREE.Vector3();
+        updateStationLabels = () => {
+          const w = host.clientWidth, h = host.clientHeight;
+          const boxes = stations.map((s, i) => {
+            v.copy(s.pos).project(camera);
+            if (v.z > 1 || v.x < -1.1 || v.x > 1.1 || v.y < -1.1 || v.y > 1.1) return null;
+            const x = (v.x + 1) / 2 * w, y = (1 - v.y) / 2 * h;
+            return { x: x - widths[i] / 2, y: y - above - lineH, w: widths[i], h: lineH, priority: s.routeCount };
+          });
+          const valid = boxes.flatMap((b, i) => (b ? [{ ...b, i }] : []));
+          const picked = placeLabels(valid, MAX_STATION_LABELS, parseFloat(L.sp.xs));
+          pool.forEach((el, k) => {
+            const pick = picked[k];
+            if (pick === undefined) { el.style.display = 'none'; return; }
+            const b = valid[pick];
+            el.textContent = names[b.i];
+            el.style.transform = `translate(${Math.round(b.x)}px, ${Math.round(b.y)}px)`;
+            el.style.display = 'block';
+          });
+        };
+      }
+    }
+    // 視点が動いたときだけ駅名を並べ直す
+    let labelsDirty = true;
+    controls.addEventListener('change', () => { labelsDirty = true; });
+
     let raf = 0;
     const render = () => {
       raf = requestAnimationFrame(render);
@@ -444,6 +532,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       camera.updateProjectionMatrix();
       renderer.render(scene, camera);
       labelRenderer.render(scene, camera);
+      if (labelsDirty) { labelsDirty = false; updateStationLabels(); }
     };
     render();
 
@@ -458,6 +547,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       renderer.render(scene, camera);
       labelRenderer.render(scene, camera);
       lineMaterials.forEach(m => m.resolution.set(w, h));
+      labelsDirty = true;
     });
     ro.observe(host);
 
@@ -470,8 +560,9 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       renderer.dispose();
       host.removeChild(renderer.domElement);
       host.removeChild(labelRenderer.domElement);
+      if (stationLayer) host.removeChild(stationLayer);
     };
-  }, [shown, exaggeration, theme, departure, arrival, colorOf, language, ground, showGround, groundStyle, lineWidth]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [shown, exaggeration, theme, departure, arrival, colorOf, language, ground, showGround, groundStyle, lineWidth, showStations, stationLabelFontPx]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const overlayText: React.CSSProperties = { fontSize: FS.caption, color: colors.textSecondary, lineHeight: 1.5 };
 
@@ -560,6 +651,9 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
                   value, label: translateUI(value === 'simple' ? 'terrain3dGroundSimple' : 'terrain3dGroundElevation', language),
                 }))}
               />}
+              <Checkbox theme={theme} size="sm" checked={showStations} onChange={setShowStations}>
+                {translateUI('terrain3dStationsLabel', language)}
+              </Checkbox>
               <div style={overlayText}>
                 {translateUI(groundError ? 'terrain3dGroundLoadError' : 'terrain3dGroundNote', language)}
               </div>
