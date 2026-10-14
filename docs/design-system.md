@@ -221,6 +221,7 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 円形の数値バッジ（HTML描画先） | `circularNumberBadge`（寸法・文字・円のHTML。駅/路線の知識は持たない） |
 | 非操作の小さな位置の印 | `pointMarker` / `POINT_MARKER`（画面上の外径6px、色を変えても寸法は同じ） |
 | 色付きの小ラベルの文字・余白・配色 | `textBadge` / `textBadgeStyle`（`FS.caption`・`L.sp`・`L.r`・`filledLabelColors`） |
+| 塗りの無い小さな文字ラベル（数が多い駅名など。塗りの箱だと地図を埋めるもの） | `plainTextLabelStyle(theme, fontPx)`（`textBadge.ts`。文字の大きさは地図の駅名と同じ `MAP_LABEL` × 設定の倍率を渡す。ダークは縁取り `textHalo`） |
 | 投影した点の印と小ラベル（DOM描画先） | `anchoredPointLabel`（molecule。上記2アトムを組み合わせ、点の中心を原点に固定。立体表示側は翻訳・意味の色・座標のみを渡す） |
 | 文字のボタン | `Button` |
 | アイコンだけのボタン | `IconButton`（正方形。`label` 必須） |
