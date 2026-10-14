@@ -612,6 +612,9 @@ UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域
   `FLOATING_CONTROL.radius`**（高さ・文字の大きさも同じ定数。`ui/atoms/controlSize.ts`）。
   透け具合・ぼかし・枠線・影も含めた地は `floatingSurfaceStyle(theme, 'idle' | 'open')`
   （`ui/atoms/floatingSurface.ts`）から取り、`rgba(...)` や `blur(...)` を直書きしない
+  **地図の上に浮かぶ開閉パネルは `CollapsiblePanel`**（2026-10-14）。見出しは常に「表示切替」と同じ大きさ、幅は
+  `width="narrow" | "wide"`、高さの上限と位置は `FLOATING_PANEL` / `aboveFloatingButtons`。使うファイルに px / vh を書かない
+  （`tests/unit/components/ui/floatingPanel.test.tsx`）
   **基準は地図の駅ラベル**（画面上でいちばん数が多く目に入る部品）
 - **影は付けない方針（2026-10-06）。** 影はすべて `ui/atoms/shadow.ts` の `shadow(role, theme)` から取る
   （役割: marker / floating / raised / overlay。戻すときは `SHADOW` のその役割を `enabled: true` にするだけ）。

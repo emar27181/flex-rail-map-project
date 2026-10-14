@@ -11,7 +11,14 @@
     "src/data/trackGeometry/index.ts",
     "scripts/track-geometry/collect-osm.mts",
     "src/data/articles/index.ts",
-    "src/data/articleBodyI18n.ts"
+    "src/data/articleBodyI18n.ts",
+    "src/env.d.ts",
+    "src/components/ui/atoms/**/*.ts",
+    "src/components/ui/atoms/**/*.tsx",
+    "src/components/ui/molecules/**/*.tsx",
+    "src/components/legend/VisibleRoutesLegend.tsx",
+    "src/components/Terrain3DView.tsx",
+    "src/utils/terrain3d.ts"
   ],
   "exclude": ["dist"],
   "compilerOptions": {

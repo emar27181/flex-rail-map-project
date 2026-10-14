@@ -22,6 +22,8 @@ PR ごとに `npm run test:design` で実行する（手元でも同じコマン
 | 地図の上に浮かぶ箱・ボタンの地（透け具合・ぼかし・枠線・角の丸み）はそろえる | `floatingSurfaceStyle` / `FLOATING_OPACITY` / `FLOATING_CONTROL` | `tests/unit/components/ui/floatingSurface.test.ts` |
 | 影は付けない（2026-10-06）。影も縁取りも1か所から取り、戻すときは `SHADOW` の `enabled` だけを変える | `shadow` / `joinShadows` / `textHalo`（`ui/atoms/shadow.ts`） | `tests/unit/components/ui/shadow.test.ts` |
 | 開閉の印（▼）は手で書かない。翻訳文言にも入れない | `DisclosureIndicator` / `DisclosureHeader` / `CollapsiblePanel` | `tests/unit/components/ui/disclosure.test.ts` |
+| 地図の上に浮かぶ開閉パネルは `CollapsiblePanel`。見出しは常に「表示切替」と同じ高さ・文字（`FLOATING_CONTROL`）。幅は `width="narrow"` か `"wide"`、高さの上限・地図の端との間・隅のボタンの上の位置も定義元から取り、使うファイルに px / vh を書かない | `CollapsiblePanel` / `FLOATING_PANEL` / `floatingPanelWidth` / `aboveFloatingButtons`（`ui/atoms/controlSize.ts`） | `tests/unit/components/ui/floatingPanel.test.tsx` |
+| 部品（atoms / molecules）と、それを使う地図の上の部品（立体表示・凡例）は型チェックの対象に入れる | `tsconfig.check.json` の `include` | `npm run test:types`（CI の checks） |
 | 地図の重なり順（駅は路線数が多いほど上・出発/到着は最上・層の前後）は1か所だけに書く | `MAP_PANE_Z` / `stationMarkerZ` / `ENDPOINT_MARKER_Z`（`constants/mapLayers.ts`） | `tests/unit/constants/mapLayers.test.ts` |
 | 端末の境目（768 / 1024px）は1か所だけに書く | `constants/breakpoints.ts`（`MEDIA` / `useDeviceClass`） | `tests/unit/constants/breakpoints.test.ts` |
 | 静的ページ（記事・駅/路線ページ）の CSS もトークンの CSS 変数を使う | `TOKEN_VARS_CSS` / `CONTROL_CSS`（`ui/atoms/controlCss.ts`） | `tests/unit/styles/articleCssTokens.test.ts`, `tests/unit/components/ui/controlCss.test.ts` |
@@ -239,7 +241,7 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 地図の上に浮かぶ操作の高さ・文字の大きさ | `FLOATING_CONTROL`（`controlSize.ts`。36px・`FS.body`。FloatingButton・凡例の見出し・丸いボタンで共通） |
 | 地図の上に浮かぶ箱・ボタンの地（透け具合・ぼかし・枠線・影・角の丸み） | `floatingSurfaceStyle(theme, 'idle' \| 'open')`（`ui/atoms/floatingSurface.ts`）。閉じた箱・ボタンは idle（72%）、開いて中身を読む箱は open（82%）。どちらもすりガラス（ぼかし16px）。対象は隅の丸いボタン・「表示切替」・凡例・駅選択・駅名の候補一覧・表示路線の切替・下のパネル・ヒートマップの凡例・駅の時刻表/統計のツールチップ・路線のポップアップとツールチップ（Leaflet の `.leaflet-tooltip` は `floatingSurfaceCss`）。コンポーネントで `backdropFilter` / `blur(` / `glassOpen` を書くと `tests/unit/components/ui/floatingSurface.test.ts` が落ちる透け具合は `FLOATING_OPACITY`（ThemeContext）。`glassOpen` などを直接書かない |
 | 影（box-shadow / text-shadow / drop-shadow）と文字の縁取り | `shadow(role, theme)`（`ui/atoms/shadow.ts`）。役割は marker（地図の上の印: 駅ラベル・駅の点・所要時間・現在地）/ floating（浮かぶ箱・ボタン）/ raised（ナビ・広告・カード・記事の囲み。記事の CSS は `var(--shadow)`）/ overlay（メニュー・ポップアップ）。**方針は影なし（2026-10-06）**で、`SHADOW` の各役割の `enabled` を true にすればその役割だけ戻る。輪と影を重ねるときは `joinShadows`。白字の縁取りは影ではないので `textHalo()`（既定オン）。広がりだけの輪（駅の多重枠 `0 0 0 2px 色`）は枠線なので対象外。直書きは `tests/unit/components/ui/shadow.test.ts` が落とす |
-| 見出しと中身を1枚の箱にまとめた開閉パネル | `CollapsiblePanel`（molecule。凡例「N路線」が使う。見出しと中身を別の箱に分けない） |
+| 見出しと中身を1枚の箱にまとめた開閉パネル（地図の上に浮かぶもの） | `CollapsiblePanel`（molecule。凡例「N路線」・立体表示の説明が使う。見出しと中身を別の箱に分けない。見出しは常に `FLOATING_CONTROL`、幅は `width="narrow"`（一覧）/ `"wide"`（説明と操作）、開いた中身は `FLOATING_PANEL.maxHeight` でスクロール。左下の丸いボタンの上に置くときは `bottom: aboveFloatingButtons(1)`） |
 | 地図・グラフの出典を小さな情報アイコンで格納し、必要時だけ展開する | `SourceDisclosure`（molecule。出典や注記を折りたたみ、キーボードでも開閉可能。色・余白・フォントは既存トークン） |
 | 折り返して並ぶチップなどを、閉じているときは決まった行数（既定5行）まで見せ、開くと全部見せる | `ClampedWrap`（molecule。表示路線の切替の各グループが使う。件数ではなく行数で切るので、画面の幅によらず高さがそろう） |
 

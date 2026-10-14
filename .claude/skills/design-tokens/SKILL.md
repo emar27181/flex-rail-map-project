@@ -41,7 +41,8 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 | 地図の重なり順（駅は路線数が多いほど上・出発/到着は最上） | `stationMarkerZ(路線数)` / `ENDPOINT_MARKER_Z` / `MAP_PANE_Z` | `src/constants/mapLayers.ts` |
 | 影・文字の縁取り（既定は影なし。`SHADOW` の `enabled` で役割ごとに戻せる） | `shadow(role, theme)` / `joinShadows` / `textHalo()`。記事の CSS は `var(--shadow)` | `src/components/ui/atoms/shadow.ts` |
 | 開閉する見出し・▼（▼▲▶ を手で書かない・翻訳文言にも入れない。塗ったボタンの中は `tone="inherit"`） | `<DisclosureHeader size>` / `<DisclosureIndicator>` | `src/components/ui/atoms/` |
-| 見出しと中身が1枚の開閉パネル | `<CollapsiblePanel size>` | `src/components/ui/molecules/CollapsiblePanel.tsx` |
+| 見出しと中身が1枚の開閉パネル（地図の上に浮かぶ） | `<CollapsiblePanel width="narrow\|wide">`（見出しは常に `FLOATING_CONTROL`。size は渡せない） | `src/components/ui/molecules/CollapsiblePanel.tsx` |
+| 浮かぶパネルの幅・高さの上限・地図の端との間・隅のボタンの上の位置 | `FLOATING_PANEL` / `floatingPanelWidth` / `aboveFloatingButtons(段数)` | `src/components/ui/atoms/controlSize.ts` |
 | 並んだチップを5行までに収め、開くと全部 | `<ClampedWrap expanded onToggle>` | `src/components/ui/molecules/ClampedWrap.tsx` |
 | 排他選択のボタン列 | `<SegmentedControl>` | `src/components/ui/molecules/SegmentedControl.tsx` |
 | 出発/到着/primary の色 | `SEMANTIC.departure` / `arrival` / `primary` | `src/constants/ui.ts` |
