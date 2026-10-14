@@ -1,5 +1,27 @@
 # CHANGE LOG
 
+## [2026-10-14] セッション（立体表示の見出しの大きさ・浮かぶパネルの規則・地面を関東全域に）
+
+### fix: 立体表示の説明の箱の見出しを「表示切替」と同じ大きさに
+- `src/components/ui/molecules/CollapsiblePanel.tsx`, `src/components/Terrain3DView.tsx`, `src/components/legend/VisibleRoutesLegend.tsx`
+- CollapsiblePanel は見出しの大きさを選べて、既定がパネル用（FS.title）だった。地図の上に浮かぶパネルなので、見出しは常に `FLOATING_CONTROL` にした
+
+### improve: 浮かぶパネルの寸法を定義元に集め、直書きをやめる
+- `src/components/ui/atoms/controlSize.ts`（`FLOATING_PANEL` / `floatingPanelWidth` / `aboveFloatingButtons`）
+- 凡例の幅 168px・立体表示の箱の 360px と高さの上限 `min(60vh, 420px)` を各ファイルに書いていた。`width="narrow" | "wide"` で選ぶ
+- 立体表示の線の太さは、地図の「路線の太さ」の設定と同じ値（`routeLineWidth`、既定は `ROUTE_LINE.defaultWidth`）
+
+### test / docs: 追加する UI の規則を見直し、CI で検査する
+- `tests/unit/components/ui/floatingPanel.test.tsx`（新規）: 見出しの高さが「表示切替」と同じ・size を渡さない・幅は段階で選ぶ・パネルを使うファイルに px / vh を書かない
+- `tsconfig.check.json`: atoms / molecules と立体表示・凡例を型チェックの対象に入れた（これまで部品は `test:types` で見ていなかった）
+- `docs/design-system.md`（規則一覧・どの部品を使うか）, `.claude/skills/design-tokens/SKILL.md`, `CLAUDE.md`
+
+### feat: 立体表示の地面を関東全域に広げ、範囲を決めずに見て回れるように
+- `scripts/line-geometry/terrain_ground_build.py`, `public/data/terrain3d-ground.*`（470×520, 約730KB）, `src/components/Terrain3DView.tsx`, `src/utils/terrain3d.ts`
+- 以前は表示中の路線の周り（＋5km）だけ地面を描いていて、動かすと地面が途切れた
+- 64格子ごとの塊に分けて描き（画面の外は描かない）、法線は格子全体から求める（塊の境目で陰影が段にならない）
+- 遠くはカメラの距離に合わせた霧で背景に溶かす。富士山を含むのでテストの標高の上限を 3800m に
+
 ## [2026-10-14] セッション（立体表示の線形データ v2）
 
 ### feat: 立体表示に線形データ v2（地上・高架・地下）を追加し、既定にする
