@@ -8,8 +8,9 @@
   同じ DEM なので、線形の高さと地面の高さの基準（EGM2008）がそろう
 - 1度×1度のタイル（1200×1200, 3秒角≒90m）を、STEP_DEG ごとの格子の**平均**に縮める（間引きではなく平均）
 - 水域は同じタイルに付いている水域マスク（WBM: 1=海, 2=湖, 3=川）から、格子の半分以上が水のときだけ水にする
-- 範囲は public/data/terrain3d-lines.json の線形の範囲に PAD_DEG を足したもの
-- 取得できなかったタイルは止める（0 や推測で埋めない）
+- 範囲は立体表示の線形（v1: terrain3d-lines.json と v2: terrain3d-lines-v2.json）の範囲に PAD_DEG を足したもの
+- 取得できなかったタイルは止める（0 や推測で埋めない）。ただし公式のタイル一覧（tileList.txt）に無いタイルは
+  陸を含まない海だけの区画（Copernicus は海だけの区画のタイルを作らない）なので、海（高さ0）として扱う
 
 書き出すもの:
   public/data/terrain3d-ground.json  … 格子の位置・大きさ・出典
@@ -28,6 +29,7 @@ import tifffile
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 LINES = os.path.join(ROOT, 'public', 'data', 'terrain3d-lines.json')
+LINES_V2 = os.path.join(ROOT, 'public', 'data', 'terrain3d-lines-v2.json')
 OUT_META = os.path.join(ROOT, 'public', 'data', 'terrain3d-ground.json')
 OUT_BIN = os.path.join(ROOT, 'public', 'data', 'terrain3d-ground.bin')
 
@@ -56,8 +58,16 @@ def fetch(url: str, path: str) -> str:
     return path
 
 
-def read_tile(cache: str, lat: int, lng: int):
+def official_tiles(cache: str) -> set:
+    path = fetch(f'{BUCKET}/tileList.txt', os.path.join(cache, 'tileList.txt'))
+    return {line.strip() for line in open(path, encoding='utf-8') if line.strip()}
+
+
+def read_tile(cache: str, lat: int, lng: int, listed: set):
     name = tile_name(lat, lng)
+    if name not in listed:
+        # 陸の無い区画（海だけ）。高さ0・水域=海
+        return np.zeros((TILE_PX, TILE_PX)), np.ones((TILE_PX, TILE_PX), dtype=np.uint8)
     dem = fetch(f'{BUCKET}/{name}/{name}.tif', os.path.join(cache, f'{name}.tif'))
     wbm_name = name.replace('_DEM', '_WBM')
     wbm = fetch(f'{BUCKET}/{name}/AUXFILES/{wbm_name}.tif', os.path.join(cache, f'{wbm_name}.tif'))
@@ -80,9 +90,12 @@ def main():
     ap.add_argument('--cache', required=True, help='DEM タイルを保存するフォルダ（リポジトリの外）')
     args = ap.parse_args()
 
-    lines = json.load(open(LINES, encoding='utf-8'))
-    lats = [p[0] for r in lines['routes'] for path in r['paths'] for p in path]
-    lngs = [p[1] for r in lines['routes'] for path in r['paths'] for p in path]
+    v1 = json.load(open(LINES, encoding='utf-8'))
+    v2 = json.load(open(LINES_V2, encoding='utf-8'))
+    pts = [p for r in v1['routes'] for path in r['paths'] for p in path]
+    pts += [p for r in v2['routes'] for run in r['runs'] for p in run['p']]
+    lats = [p[0] for p in pts]
+    lngs = [p[1] for p in pts]
     s = math.floor((min(lats) - PAD_DEG) / STEP_DEG) * STEP_DEG
     n = math.ceil((max(lats) + PAD_DEG) / STEP_DEG) * STEP_DEG
     w = math.floor((min(lngs) - PAD_DEG) / STEP_DEG) * STEP_DEG
@@ -93,9 +106,10 @@ def main():
     lng_tiles = list(range(math.floor(w), math.ceil(e)))
     H, W = TILE_PX * len(lat_tiles), TILE_PX * len(lng_tiles)
     z = np.empty((H, W)); water = np.empty((H, W), dtype=np.uint8)
+    listed = official_tiles(args.cache)
     for i, lat in enumerate(reversed(lat_tiles)):
         for j, lng in enumerate(lng_tiles):
-            tz, tw = read_tile(args.cache, lat, lng)
+            tz, tw = read_tile(args.cache, lat, lng, listed)
             z[i * TILE_PX:(i + 1) * TILE_PX, j * TILE_PX:(j + 1) * TILE_PX] = tz
             water[i * TILE_PX:(i + 1) * TILE_PX, j * TILE_PX:(j + 1) * TILE_PX] = tw
     if not np.isfinite(z).all() or (z < -1000).any():
@@ -127,7 +141,8 @@ def main():
             'sourceUrl': 'https://registry.opendata.aws/copernicus-dem/',
             'license': '© DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved',
             'retrievedAt': datetime.date.today().isoformat(),
-            'tiles': [tile_name(la, ln) for la in lat_tiles for ln in lng_tiles],
+            'tiles': [tile_name(la, ln) for la in lat_tiles for ln in lng_tiles if tile_name(la, ln) in listed],
+            'seaOnlyTiles': [tile_name(la, ln) for la in lat_tiles for ln in lng_tiles if tile_name(la, ln) not in listed],
         },
         'stats': {
             'minM': int(elev.min()), 'maxM': int(elev.max()),
