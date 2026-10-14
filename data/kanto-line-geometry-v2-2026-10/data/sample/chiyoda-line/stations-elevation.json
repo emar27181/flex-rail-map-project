@@ -1,0 +1,505 @@
+{
+ "type": "FeatureCollection",
+ "metadata": {
+  "lineLabel": "chiyoda-line",
+  "osmRelationId": 443284,
+  "generatedAt": "2026-10-14",
+  "structureSegments": [
+   {
+    "chainIndex": 0,
+    "segmentIndex": 0,
+    "structureType": "elevated",
+    "lengthM": 555.2
+   },
+   {
+    "chainIndex": 0,
+    "segmentIndex": 1,
+    "structureType": "at_grade",
+    "lengthM": 214.6
+   },
+   {
+    "chainIndex": 0,
+    "segmentIndex": 2,
+    "structureType": "underground",
+    "lengthM": 19062.0
+   },
+   {
+    "chainIndex": 0,
+    "segmentIndex": 3,
+    "structureType": "at_grade",
+    "lengthM": 226.5
+   },
+   {
+    "chainIndex": 0,
+    "segmentIndex": 4,
+    "structureType": "elevated",
+    "lengthM": 606.5
+   },
+   {
+    "chainIndex": 0,
+    "segmentIndex": 5,
+    "structureType": "at_grade",
+    "lengthM": 23.9
+   },
+   {
+    "chainIndex": 0,
+    "segmentIndex": 6,
+    "structureType": "elevated",
+    "lengthM": 180.5
+   },
+   {
+    "chainIndex": 0,
+    "segmentIndex": 7,
+    "structureType": "at_grade",
+    "lengthM": 358.9
+   },
+   {
+    "chainIndex": 0,
+    "segmentIndex": 8,
+    "structureType": "elevated",
+    "lengthM": 861.9
+   }
+  ],
+  "elevationPolicy": "推定で見かけのカバー率を上げない。不明は null。",
+  "verticalDatum": "TP (東京湾平均海面) — DEM10m と算出値は同一基準"
+ },
+ "stations": [
+  {
+   "stationName": "代々木上原",
+   "osmNodeId": null,
+   "lon": 139.679773,
+   "lat": 35.669027,
+   "groundElevationM": 28.6,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "代々木公園",
+   "osmNodeId": null,
+   "lon": 139.69012,
+   "lat": 35.669069,
+   "groundElevationM": 21.3,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "明治神宮前〈原宿〉",
+   "osmNodeId": null,
+   "lon": 139.704384,
+   "lat": 35.669004,
+   "groundElevationM": 26.2,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "表参道",
+   "osmNodeId": null,
+   "lon": 139.712439,
+   "lat": 35.665282,
+   "groundElevationM": 33.5,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "乃木坂",
+   "osmNodeId": null,
+   "lon": 139.726291,
+   "lat": 35.666709,
+   "groundElevationM": 31.4,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "赤坂",
+   "osmNodeId": null,
+   "lon": 139.73628,
+   "lat": 35.672188,
+   "groundElevationM": 10.6,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "国会議事堂前",
+   "osmNodeId": null,
+   "lon": 139.743424,
+   "lat": 35.673757,
+   "groundElevationM": 23.6,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "霞ケ関",
+   "osmNodeId": null,
+   "lon": 139.751661,
+   "lat": 35.672556,
+   "groundElevationM": 6.2,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "日比谷",
+   "osmNodeId": null,
+   "lon": 139.758308,
+   "lat": 35.673776,
+   "groundElevationM": 2.0,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "二重橋前〈丸の内〉",
+   "osmNodeId": null,
+   "lon": 139.76162,
+   "lat": 35.680336,
+   "groundElevationM": 2.9,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "大手町",
+   "osmNodeId": null,
+   "lon": 139.763575,
+   "lat": 35.686781,
+   "groundElevationM": 3.5,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "新御茶ノ水",
+   "osmNodeId": null,
+   "lon": 139.765493,
+   "lat": 35.69721,
+   "groundElevationM": 11.6,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "湯島",
+   "osmNodeId": null,
+   "lon": 139.769932,
+   "lat": 35.707334,
+   "groundElevationM": 4.7,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "根津",
+   "osmNodeId": null,
+   "lon": 139.765722,
+   "lat": 35.717353,
+   "groundElevationM": 5.6,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "千駄木",
+   "osmNodeId": null,
+   "lon": 139.763271,
+   "lat": 35.725547,
+   "groundElevationM": 6.3,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "西日暮里",
+   "osmNodeId": null,
+   "lon": 139.767221,
+   "lat": 35.732579,
+   "groundElevationM": 5.4,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "町屋",
+   "osmNodeId": null,
+   "lon": 139.780081,
+   "lat": 35.742182,
+   "groundElevationM": 2.1,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "北千住",
+   "osmNodeId": null,
+   "lon": 139.804431,
+   "lat": 35.749677,
+   "groundElevationM": 0.5,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  },
+  {
+   "stationName": "綾瀬",
+   "osmNodeId": null,
+   "lon": 139.824863,
+   "lat": 35.762174,
+   "groundElevationM": 0.0,
+   "groundElevationSource": {
+    "sourceName": "国土地理院 数値標高モデル(DEM5A) 地形タイル",
+    "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html#dem5a",
+    "license": "国土地理院利用規約(出典表示)",
+    "accessedDate": "2026-10-14"
+   },
+   "groundElevationQuality": "official",
+   "depthBelowGroundM": null,
+   "depthSource": null,
+   "trackElevationM": null,
+   "trackElevationQuality": "unknown",
+   "elevationDatum": "TP (東京湾平均海面)",
+   "stationTrackDistanceM": 0.0,
+   "notes": [
+    "東京メトロの駅深度の一次資料(縦断面図等)は本調査では未入手。機械的な深度割当は行わない。"
+   ]
+  }
+ ]
+}

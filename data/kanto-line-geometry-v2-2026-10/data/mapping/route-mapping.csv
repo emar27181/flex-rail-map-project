@@ -1,0 +1,670 @@
+﻿routeId,osmRelationId,routeName,operator,routeType,existingAppRouteKeys,existingLineName,matchMethod,matchConfidence
+frx-osm-rel-119303,119303,京王電鉄井の頭線,京王電鉄,railway,,,unmatched,none
+frx-osm-rel-223038,223038,高崎線,東日本旅客鉃道,railway,,,unmatched,none
+frx-osm-rel-223040,223040,八高線 (古い),東日本旅客鉄道,train,,八高線 (古い),osmRelationId,high
+frx-osm-rel-223061,223061,秩父本線,秩父鉄道,railway,,,unmatched,none
+frx-osm-rel-404834,404834,東急田園都市線 (中央林間 -> 渋谷),東急電鉄,train,tokyuDenEnToshiLine,東急田園都市線 (中央林間 -> 渋谷),osmRelationId,high
+frx-osm-rel-443259,443259,都営新宿線 : 本八幡→新宿,東京都交通局,subway,,,unmatched,none
+frx-osm-rel-443269,443269,東京メトロ有楽町線 : 和光市→新木場,Tokyo Metro,subway,,,unmatched,none
+frx-osm-rel-443272,443272,東京メトロ日比谷線 : 中目黒→北千住,東京地下鉄,subway,hibiyaLine,東京メトロ日比谷線 : 中目黒→北千住,osmRelationId,high
+frx-osm-rel-443279,443279,東京メトロ半蔵門線 : 渋谷→押上,Tokyo Metro,subway,hanzomonLine,東京メトロ半蔵門線 : 渋谷→押上,osmRelationId,high
+frx-osm-rel-443281,443281,東京メトロ銀座線 : 浅草→渋谷,東京地下鉄,subway,ginzaLine,東京メトロ銀座線 : 浅草→渋谷,osmRelationId,high
+frx-osm-rel-443282,443282,東京メトロ丸ノ内線 : 荻窪→池袋,東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-443284,443284,東京メトロ千代田線 (代々木上原->綾瀬),東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-443286,443286,都営三田線 : 目黒→西高島平,東京都交通局,subway,toeiMitaLine,都営三田線 : 目黒→西高島平,osmRelationId,high
+frx-osm-rel-906154,906154,銚子電気鉄道線（銚子→外川）,銚子電気鉄道,train,choshiDenki,銚子電気鉄道線,osmRelationId,high
+frx-osm-rel-1830049,1830049,東海道本線,,railway,,,unmatched,none
+frx-osm-rel-1831323,1831323,御殿場線,東海旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-1832947,1832947,JR横須賀線 (久里浜 → 東京),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-1834403,1834403,JR南武線 各駅停車 (川崎 => 立川),JR東日本,train,,,unmatched,none
+frx-osm-rel-1860557,1860557,上越新幹線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-1860622,1860622,東北新幹線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-1872548,1872548,JR常磐線（下り）,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-1872550,1872550,JR日光線,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-1872551,1872551,JR水郡線（下り）,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-1872553,1872553,東武日光線 (東武動物公園=>東武日光),東武鉄道,train,,,unmatched,none
+frx-osm-rel-1876844,1876844,信越本線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-1904851,1904851,JR総武快速線 (千葉 → 東京),東日本旅客鉄道,train,,JR総武快速線,osmRelationId,high
+frx-osm-rel-1905260,1905260,横浜高速鉄道みなとみらい21線 (横浜=>元町・中華街),横浜高速鉄道,subway,,横浜高速鉄道みなとみらい21線,osmRelationId,high
+frx-osm-rel-1905261,1905261,横浜市営地下鉄ブルーライン(B32:あざみ野=>B01:湘南台),横浜市交通局,subway,yokohamaBlueLine,横浜市営地下鉄ブルーライン,osmRelationId,high
+frx-osm-rel-1924544,1924544,上越線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-1926309,1926309,秩父本線,秩父鉄道,railway,,,unmatched,none
+frx-osm-rel-1926310,1926310,東武東上線,,railway,,,unmatched,none
+frx-osm-rel-1926311,1926311,西武鉄道池袋線 (吾野=>飯能),,train,,,unmatched,none
+frx-osm-rel-1926312,1926312,西武鉄道西武秩父線,,train,,,unmatched,none
+frx-osm-rel-1926393,1926393,北陸新幹線,東日本旅客鉄道;西日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-1927482,1927482,京成電鉄 金町線 (京成金町 → 京成高砂),京成電鉄,train,,,unmatched,none
+frx-osm-rel-1927483,1927483,京成松戸線,,railway,,,unmatched,none
+frx-osm-rel-1934573,1934573,はやて列車,,train,,,unmatched,none
+frx-osm-rel-1934849,1934849,日光列車,,train,,,unmatched,none
+frx-osm-rel-1942948,1942948,JR横浜線,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-1942949,1942949,相模線 (茅ケ崎->橋本),東日本旅客鉄道,train,,相模線 (茅ケ崎->橋本),osmRelationId,high
+frx-osm-rel-1942950,1942950,京王電鉄京王線,京王電鉄,railway,,,unmatched,none
+frx-osm-rel-1942951,1942951,ふじさん,小田急電鉄;東海旅客鉄道,train,,,unmatched,none
+frx-osm-rel-1942960,1942960,京王電鉄相模原線,京王電鉄,railway,,,unmatched,none
+frx-osm-rel-1942961,1942961,京王電鉄高尾線,京王電鉄,railway,,,unmatched,none
+frx-osm-rel-1942962,1942962,小田急電鉄多摩線,小田急電鉄,train,,,unmatched,none
+frx-osm-rel-1942963,1942963,小田急小田原線,小田急電鉄,railway,,,unmatched,none
+frx-osm-rel-1942964,1942964,小田急電鉄江ノ島線,,railway,,,unmatched,none
+frx-osm-rel-1943301,1943301,江ノ島電鉄 (鎌倉=>藤沢),江ノ島電鉄株式会社,light_rail,,,unmatched,none
+frx-osm-rel-1943302,1943302,踊り子 (伊豆急下田=>東京),,train,,,unmatched,none
+frx-osm-rel-1947329,1947329,西武国分寺線 (国分寺=>東村山),,train,,,unmatched,none
+frx-osm-rel-1947331,1947331,西武多摩湖線 (国分寺->多摩湖),,train,,,unmatched,none
+frx-osm-rel-1947332,1947332,西武拝島線,西武鉄道,railway,,,unmatched,none
+frx-osm-rel-1947333,1947333,西武新宿線,西武鉄道,railway,,,unmatched,none
+frx-osm-rel-1947536,1947536,東急東横線: 横浜 => 渋谷,東急電鉄,train,,,unmatched,none
+frx-osm-rel-1948965,1948965,こまち列車,,train,,,unmatched,none
+frx-osm-rel-1949276,1949276,両毛線,,railway,,,unmatched,none
+frx-osm-rel-1949282,1949282,吾妻線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-1949283,1949283,JR水戸線,,train,,,unmatched,none
+frx-osm-rel-1949285,1949285,真岡鐵道真岡線,,train,,,unmatched,none
+frx-osm-rel-1949287,1949287,わたらせ渓谷線,わたらせ渓谷鐵道,railway,,,unmatched,none
+frx-osm-rel-1949288,1949288,とき: 新潟 => 東京,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-1949290,1949290,埼玉新都市交通伊奈線,"Saitama New Urban Transit Co., Ltd.",light_rail,,埼玉新都市交通伊奈線,osmRelationId,high
+frx-osm-rel-1949291,1949291,東武佐野線 (館林=>葛生),東武鉄道,train,,,unmatched,none
+frx-osm-rel-1949292,1949292,関東鉄道常総線（下り）,,train,,,unmatched,none
+frx-osm-rel-1949381,1949381,JR烏山線,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-1949382,1949382,上毛電気鉄道上毛線,,railway,,,unmatched,none
+frx-osm-rel-1949383,1949383,上信電鉄上信線,上信電鉄,railway,,,unmatched,none
+frx-osm-rel-1949384,1949384,東武宇都宮線 (新栃木->東武宇都宮),東武鉄道,train,,,unmatched,none
+frx-osm-rel-1949385,1949385,東武小泉線,東武鉄道,train,,,unmatched,none
+frx-osm-rel-1949386,1949386,東武鉄道桐生線 (太田=>赤城),東武鉄道,train,,,unmatched,none
+frx-osm-rel-1949512,1949512,JR成田線 空港支線 (成田 → 成田空港),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-1949513,1949513,JR鹿島線,,train,,,unmatched,none
+frx-osm-rel-1949514,1949514,しおさい,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-1949516,1949516,鹿島臨海鉄道鹿島臨港線,,railway,,,unmatched,none
+frx-osm-rel-1949528,1949528,JR外房線 (千葉 → 安房鴨川),東日本旅客鉄道,train,jrSotoboLine,JR外房線 (千葉 → 安房鴨川),osmRelationId,high
+frx-osm-rel-1949529,1949529,JR東金線,,train,,,unmatched,none
+frx-osm-rel-1950427,1950427,つばさ列車,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-1952418,1952418,都電荒川線（早稲田⇒三ノ輪橋）,東京都交通局,tram,todenArakawaLine,都電荒川線（早稲田⇒三ノ輪橋）,osmRelationId,high
+frx-osm-rel-1952540,1952540,JR武蔵野線 (南船橋 → 府中本町),東日本旅客鉄道,train,jrMusashinoLine,JR武蔵野線 (南船橋 => 府中本町),osmRelationId,high
+frx-osm-rel-1957502,1957502,JR中央線快速,,train,,,unmatched,none
+frx-osm-rel-1968180,1968180,相模鉄道いずみ野線: 横浜 => 湘南台,相模鉄道株式会社,train,,,unmatched,none
+frx-osm-rel-1972920,1972920,JR山手線 (外回り),東日本旅客鉄道,train,yamanote,JR山手線,osmRelationId,high
+frx-osm-rel-1972958,1972958,TJライナー (小川町=>池袋),,train,,,unmatched,none
+frx-osm-rel-1972959,1972959,ちちぶ (飯能=>池袋),,train,,,unmatched,none
+frx-osm-rel-1972960,1972960,JR山手線 (内回り),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-1979617,1979617,総武流山電鉄 (流山=>馬橋),,train,,,unmatched,none
+frx-osm-rel-1984869,1984869,JR五日市線,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-1984870,1984870,JR青梅線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-1984872,1984872,西武鉄道狭山線,,railway,,,unmatched,none
+frx-osm-rel-1994312,1994312,京急久里浜線 特急 (堀ノ内 → 三崎口),京浜急行電鉄,train,,,unmatched,none
+frx-osm-rel-1994313,1994313,京急本線 普通 (浦賀 → 品川),京浜急行電鉄,train,,,unmatched,none
+frx-osm-rel-1994314,1994314,京浜急行電鉄逗子線,京浜急行電鉄,train,,逗子線 (逗子・葉山->金沢八景),osmRelationId,high
+frx-osm-rel-2060618,2060618,京成電鉄 千葉線 (京成津田沼 → 千葉中央),京成電鉄,train,,,unmatched,none
+frx-osm-rel-2060696,2060696,京成電鉄 千原線 (千葉中央 → ちはら台),京成電鉄,train,,,unmatched,none
+frx-osm-rel-2278669,2278669,JR内房線 (千葉 → 安房鴨川),東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-2280296,2280296,総武本線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-2301215,2301215,久留里線(木更津->上総亀山),東日本旅客鉄道 (JR East),train,,,unmatched,none
+frx-osm-rel-2318072,2318072,JRさざなみ (東京 → 君津),東日本旅客鉄道株式会社,train,,JRさざなみ (東京 → 君津),osmRelationId,high
+frx-osm-rel-2549404,2549404,つくばエクスプレス線上り,首都圏新都市鉄道,train,tsukubaExpress,つくばエクスプレス線上り,osmRelationId,high
+frx-osm-rel-2654154,2654154,トロッコ列車ライン,碓氷峠交流記念財団,railway,,,unmatched,none
+frx-osm-rel-2790323,2790323,東京メトロ千代田線 : 北綾瀬→綾瀬,Tokyo Metro,subway,,,unmatched,none
+frx-osm-rel-2920278,2920278,京王電鉄井の頭線,,train,,,unmatched,none
+frx-osm-rel-2970698,2970698,京浜急行電鉄大師線,京浜急行電鉄,train,,京浜急行電鉄大師線,osmRelationId,high
+frx-osm-rel-3120358,3120358,京成スカイライナー (成田空港 → 京成上野),京成電鉄,train,,京成スカイライナー (成田空港 → 京成上野),osmRelationId,high
+frx-osm-rel-3139193,3139193,JR成田線 (佐倉 → 銚子),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-3159234,3159234,エアポート快特 成田空港駅->羽田空港第1・第2ターミナル駅,京浜急行電鉄;東京都交通局,subway,,,unmatched,none
+frx-osm-rel-3300716,3300716,ゆりかもめ (新橋 → 豊洲),株式会社ゆりかもめ,light_rail,,,unmatched,none
+frx-osm-rel-3302734,3302734,都営浅草線 : 西馬込→押上,東京都交通局,subway,toeiAsakusaLine,都営浅草線 : 西馬込→押上,osmRelationId,high
+frx-osm-rel-3304256,3304256,りんかい線 (新木場 → 大崎),東京臨海高速鉄道,train,,,unmatched,none
+frx-osm-rel-3311485,3311485,小江戸 : 西武新宿→本川越,西武鉄道,train,,,unmatched,none
+frx-osm-rel-3336654,3336654,京成電鉄 京成本線 通勤特急 (京成上野 → 成田空港),京成電鉄,train,,,unmatched,none
+frx-osm-rel-3336655,3336655,京成電鉄 京成本線 快速特急 (京成上野 → 成田空港),京成電鉄,train,,,unmatched,none
+frx-osm-rel-3336656,3336656,京成電鉄 京成本線 特急 (京成上野 → 成田空港),京成電鉄,train,,,unmatched,none
+frx-osm-rel-3336657,3336657,京成電鉄 京成本線 快速 (京成上野 → 成田空港),京成電鉄,train,,,unmatched,none
+frx-osm-rel-3336658,3336658,京成電鉄 京成本線 (成田空港 → 京成上野),京成電鉄,train,,,unmatched,none
+frx-osm-rel-3336661,3336661,京成電鉄 シテイライナー (京成成田 → 京成上野),京成電鉄,train,,京成電鉄 シテイライナー (京成成田 → 京成上野),osmRelationId,high
+frx-osm-rel-3338455,3338455,京成電鉄 押上線 (青砥 → 押上),京成電鉄,train,,京成電鉄 押上線 (青砥 → 押上),osmRelationId,high
+frx-osm-rel-3340250,3340250,北総線各駅 (京成高砂=>印旛日本医大),,train,,,unmatched,none
+frx-osm-rel-3340251,3340251,京急空港線 (京急蒲田 → 羽田空港第1・第2ターミナル),京浜急行電鉄,train,,,unmatched,none
+frx-osm-rel-3340252,3340252,京成成田空港アクセス (京成上野 → 成田空港),京成電鉄,train,,,unmatched,none
+frx-osm-rel-3340253,3340253,京浜電鉄 - 都営浅草線快特 - 京成成田空港アクセス (羽田空港 → 浅草 → 成田空港),京成電鉄,subway,toeiAsakusaLine,京浜電鉄 - 都営浅草線快特 - 京成成田空港アクセス (羽田空港 → 浅草 → 成田空港),osmRelationId,high
+frx-osm-rel-3347989,3347989,京成電鉄 東成田線 (京成成田 → 東成田),京成電鉄,train,,,unmatched,none
+frx-osm-rel-3351488,3351488,JR中央・総武緩行線 (千葉 → 三鷹),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-3355612,3355612,都営大江戸線 : 光が丘→都庁前,東京都交通局,subway,,,unmatched,none
+frx-osm-rel-3413154,3413154,はこね,小田急電鉄,train,,,unmatched,none
+frx-osm-rel-3414847,3414847,小田急箱根鉄道線 (強羅=>箱根湯本),小田急箱根,train,hakoneTozan;hakoneTozan2,箱根登山鉄道鉄道線,osmRelationId,high
+frx-osm-rel-3417174,3417174,東京モノレール羽田空港線 普通 (モノレール浜松町 => 羽田空港第2ターミナル),東京モノレール,monorail,tokyoMonorail,東京モノレール羽田空港線 普通 (モノレール浜松町 => 羽田空港第2ターミナル),osmRelationId,high
+frx-osm-rel-3417185,3417185,多摩都市モノレール線,"Tokyo Tama Intercity Monorail Co., Ltd.",monorail,,,unmatched,none
+frx-osm-rel-3423146,3423146,日暮里・舎人ライナー (日暮里=>見沼代親水公園),東京都交通局,light_rail,nipporiToneriLiner,日暮里・舎人ライナー,osmRelationId,high
+frx-osm-rel-3444217,3444217,横浜市営地下鉄グリーンライン(中山->日吉),横浜市交通局,subway,yokohamaGreenLine,横浜市営地下鉄グリーンライン(中山->日吉),osmRelationId,high
+frx-osm-rel-3557458,3557458,ウエスタンリバー鉄道,オリエンタルランド,train,,,unmatched,none
+frx-osm-rel-3670770,3670770,ゆりかもめ (豊洲 → 新橋),株式会社ゆりかもめ,light_rail,yurikamomeLine,ゆりかもめ,osmRelationId,high
+frx-osm-rel-3941253,3941253,ディズニーリゾートライン,舞浜リゾートライン,monorail,,,unmatched,none
+frx-osm-rel-3952114,3952114,千葉都市モノレール1号線 (千葉みなと => 県庁前),千葉都市モノレール株式会社,monorail,,,unmatched,none
+frx-osm-rel-3952117,3952117,千葉都市モノレール2号線 (千葉みなと => 千城台),千葉都市モノレール株式会社,monorail,,,unmatched,none
+frx-osm-rel-4243861,4243861,さがみ,小田急電鉄,train,,,unmatched,none
+frx-osm-rel-4243863,4243863,さがみ,小田急電鉄,train,,さがみ (outbound),osmRelationId,high
+frx-osm-rel-4243864,4243864,はこね,小田急電鉄,train,,はこね,osmRelationId,high
+frx-osm-rel-4243866,4243866,はこね,小田急電鉄,train,,,unmatched,none
+frx-osm-rel-4243867,4243867,スーパーはこね,小田急電鉄,train,,スーパーはこね,osmRelationId,high
+frx-osm-rel-4589046,4589046,つくばエクスプレス線下り,首都圏新都市鉄道,train,tsukubaExpress,つくばエクスプレス線下り,osmRelationId,high
+frx-osm-rel-4673470,4673470,湘南新宿ライン (前橋=>小田原),東日本旅客鉄道,train,jrShonanShinjukuLine,湘南新宿ライン (前橋=>小田原),osmRelationId,high
+frx-osm-rel-4684034,4684034,湘南新宿ライン(宇都宮=>JS24:大宮=>JS06:逗子),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-4684035,4684035,湘南新宿ライン(JS06:逗子＝＞JS24:大宮=>宇都宮),東日本旅客鉄道,train,jrShonanShinjukuLine,湘南新宿ライン,osmRelationId,high
+frx-osm-rel-5195691,5195691,JR京浜東北線・根岸線 各駅停車 (大宮 → 大船),東日本旅客鉄道,train,keihinTohoku,JR京浜東北線(南行),osmRelationId,high
+frx-osm-rel-5195692,5195692,JR京浜東北線・根岸線 各駅停車 (大船 → 大宮),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-5195693,5195693,上野東京ライン (大宮=>東京),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-5219635,5219635,JR東金線,,train,,,unmatched,none
+frx-osm-rel-5219659,5219659,東武大師線,東武鉄道,train,tobuDaishiLine,東武大師線,osmRelationId,high
+frx-osm-rel-5219680,5219680,東武鉄道亀戸線,東武鉄道,train,,東武鉄道亀戸線,osmRelationId,high
+frx-osm-rel-5219681,5219681,東武鉄道亀戸線,東武鉄道,train,,東武鉄道亀戸線,osmRelationId,high
+frx-osm-rel-5219728,5219728,東急こどもの国線 (長津田->こどもの国),東急電鉄,train,tokyuKodomoLine,東急こどもの国線,osmRelationId,high
+frx-osm-rel-5263977,5263977,東海道新幹線,東海旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-5326532,5326532,京王電鉄井の頭線,京王電鉄,railway,,,unmatched,none
+frx-osm-rel-5326726,5326726,JR京葉線 各駅停車 (東京 → 蘇我),東日本旅客鉄道,train,jrKeiyo,JR京葉線 各駅停車 (東京 → 蘇我),osmRelationId,high
+frx-osm-rel-5326727,5326727,JR内房線 (安房鴨川 → 千葉),東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-5361845,5361845,山形新幹線,,railway,,,unmatched,none
+frx-osm-rel-5371620,5371620,東京メトロ東西線 各駅停車 : 中野→西船橋,東京地下鉄,subway,tozaiLine,東京メトロ東西線 各駅停車 : 中野→西船橋,osmRelationId,high
+frx-osm-rel-5372771,5372771,東武アーバンパークライン (船橋=>柏),東武鉄道,train,,,unmatched,none
+frx-osm-rel-5375678,5375678,東京メトロ副都心線 : 和光市→渋谷,Tokyo Metro,subway,fukutoshinLine,東京メトロ副都心線 : 和光市→渋谷,osmRelationId,high
+frx-osm-rel-5375679,5375679,東急多摩川線 (蒲田=>多摩川),東急電鉄,train,,,unmatched,none
+frx-osm-rel-5375680,5375680,東急目黒線 (日吉=>目黒),東急電鉄,train,,,unmatched,none
+frx-osm-rel-5376317,5376317,東京地下鉄の直通運転 - 常磐線,東日本旅客鉄道;東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-5376382,5376382,山手線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-5392090,5392090,東武スカイツリーライン (浅草=>東武動物公園),東武鉄道,train,,,unmatched,none
+frx-osm-rel-5419188,5419188,"湘南新宿ライン (高崎線直通, 北行 小田原=>前橋)",東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-5422228,5422228,東海道本線 (貨物線),東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-5426443,5426443,山手貨物線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-5426444,5426444,品鶴線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-5429559,5429559,山手線 (大崎支線),東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-5429734,5429734,東北本線 (貨物線),東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-5430106,5430106,上野東京ライン (東京=>大宮),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-5430809,5430809,JR高崎線 (上り),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-5430810,5430810,JR高崎線 (下り),東日本旅客鉄道,train,jrTakasakiLine,高崎線 (下り),osmRelationId,high
+frx-osm-rel-5485481,5485481,きぬがわ列車 : 鬼怒川温泉→新宿,東日本旅客鉄道;東武鉄道,train,,,unmatched,none
+frx-osm-rel-5485482,5485482,東武鬼怒川線 (下今市=>新藤原),東武鉄道,train,,,unmatched,none
+frx-osm-rel-5486040,5486040,川越線 (高麗川=>大宮),,train,,,unmatched,none
+frx-osm-rel-5486513,5486513,西武園線,西武鉄道,train,,,unmatched,none
+frx-osm-rel-5486514,5486514,西武豊島線,,railway,,,unmatched,none
+frx-osm-rel-5486515,5486515,西武有楽町線 (練馬=>小竹向原),,train,,,unmatched,none
+frx-osm-rel-5503502,5503502,横浜シーサイドライン金沢シーサイドライン (新杉田=>金沢八景),横浜シーサイドライン,light_rail,,横浜シーサイドライン金沢シーサイドライン,osmRelationId,high
+frx-osm-rel-5503503,5503503,横浜シーサイドライン金沢シーサイドライン (金沢八景=>新杉田),横浜シーサイドライン,light_rail,,横浜シーサイドライン金沢シーサイドライン,osmRelationId,high
+frx-osm-rel-5575989,5575989,川越線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-5610304,5610304,ひたちなか海浜鉄道湊線（上り）,ひたちなか海浜鉄道,train,hitachinakaSeaRailway,ひたちなか海浜鉄道湊線（上り）,osmRelationId,high
+frx-osm-rel-5611693,5611693,関東鉄道竜ヶ崎線（上り）,,train,,,unmatched,none
+frx-osm-rel-5611715,5611715,JR水郡線常陸太田支線,,train,,,unmatched,none
+frx-osm-rel-5611753,5611753,JR成田線 我孫子支線 (成田 → 我孫子),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-5652901,5652901,JR宇都宮線,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-5746641,5746641,伊豆箱根鉄道大雄山線 (小田原->大雄山),伊豆箱根鉄道,train,izuhakoneOyamazanLine,伊豆箱根鉄道大雄山線,osmRelationId,high
+frx-osm-rel-5748913,5748913,いすみ線 (大原 => 上総中野),いすみ鉄道,train,,いすみ線 (大原 => 上総中野),osmRelationId,high
+frx-osm-rel-5751783,5751783,野岩鉄道会津鬼怒川線,野岩鉄道株式会社,train,,,unmatched,none
+frx-osm-rel-5954401,5954401,湘南新宿ライン,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-6683982,6683982,東葉高速線 (東葉勝田台 -> 西船橋),東葉高速鉄道,subway,,,unmatched,none
+frx-osm-rel-7002081,7002081,埼玉高速鉄道線（赤羽岩淵⇒浦和美園）,埼玉高速鉄道,subway,,,unmatched,none
+frx-osm-rel-7215409,7215409,東急電鉄世田谷線 三軒茶屋→下高井戸,東急電鉄,light_rail,,,unmatched,none
+frx-osm-rel-7215410,7215410,東急電鉄世田谷線 下高井戸→三軒茶屋,東急電鉄,light_rail,,,unmatched,none
+frx-osm-rel-7703632,7703632,横浜高速鉄道みなとみらい21線 (元町・中華街=>横浜),横浜高速鉄道,subway,,,unmatched,none
+frx-osm-rel-7715259,7715259,湘南モノレール江の島線 (大船 → 湘南江の島),湘南モノレール,monorail,,,unmatched,none
+frx-osm-rel-7715378,7715378,千葉都市モノレール2号線 (千城台 => 千葉みなと),千葉都市モノレール株式会社,monorail,,千葉都市モノレール2号線 (千城台 => 千葉みなと),osmRelationId,high
+frx-osm-rel-7715379,7715379,千葉都市モノレール1号線 (県庁前 => 千葉みなと),千葉都市モノレール株式会社,monorail,,,unmatched,none
+frx-osm-rel-7730199,7730199,東京メトロ南北線 : 目黒→ 赤羽岩淵,東京メトロ,subway,,,unmatched,none
+frx-osm-rel-7732275,7732275,横浜市営地下鉄グリーンライン(日吉->中山),横浜市交通局,subway,,,unmatched,none
+frx-osm-rel-7732276,7732276,横浜市営地下鉄ブルーライン(B01:湘南台=>B32:あざみ野),横浜市交通局,subway,yokohamaBlueLine,横浜市営地下鉄ブルーライン,osmRelationId,high
+frx-osm-rel-7963668,7963668,りんかい線 (大崎 → 新木場),東京臨海高速鉄道,train,rinkaiLine,りんかい線（大崎⇒新木場）,osmRelationId,high
+frx-osm-rel-8015930,8015930,東京メトロ丸ノ内線 : 中野坂上→方南町,東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-8015931,8015931,東京メトロ丸ノ内線 : 方南町→中野坂上,東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-8015932,8015932,東京メトロ丸ノ内線 : 池袋→荻窪,東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-8019849,8019849,都営浅草線 : 押上→西馬込,東京都交通局,subway,,,unmatched,none
+frx-osm-rel-8019858,8019858,都営新宿線 : 新宿→本八幡,東京都交通局,subway,,,unmatched,none
+frx-osm-rel-8019883,8019883,都営大江戸線 : 都庁前→光が丘,東京都交通局,subway,,,unmatched,none
+frx-osm-rel-8019910,8019910,都営三田線 : 西高島平→目黒,東京都交通局,subway,,,unmatched,none
+frx-osm-rel-8026050,8026050,東京メトロ千代田線 (綾瀬->代々木上原),東京地下鉄,subway,chiyodaLine,千代田線 (綾瀬->代々木上原),osmRelationId,high
+frx-osm-rel-8026053,8026053,東京メトロ千代田線 : 綾瀬→北綾瀬,Tokyo Metro,subway,,,unmatched,none
+frx-osm-rel-8026070,8026070,東京メトロ南北線 : 赤羽岩淵→目黒,東京メトロ,subway,nambokuLine,東京メトロ南北線 : 赤羽岩淵→目黒,osmRelationId,high
+frx-osm-rel-8026074,8026074,東京メトロ銀座線 : 渋谷→浅草,東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-8026141,8026141,東京メトロ東西線 各駅停車 : 西船橋→中野,東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-8026155,8026155,東京メトロ日比谷線 : 北千住→中目黒,東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-8026159,8026159,東京メトロ半蔵門線 : 押上→渋谷,東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-8026168,8026168,東京メトロ副都心線 : 渋谷→和光市,Tokyo Metro,subway,fukutoshinLine,東京メトロ副都心線 : 渋谷→和光市,osmRelationId,high
+frx-osm-rel-8061897,8061897,西武多摩川線 (是政->武蔵境),西武鉄道,train,,,unmatched,none
+frx-osm-rel-8391468,8391468,東京地下鉄の直通運転 - 常磐線,東日本旅客鉄道;東京地下鉄,subway,jrJobanLine,東京地下鉄の直通運転 - 常磐線,osmRelationId,high
+frx-osm-rel-8449228,8449228,Soetsu Izumino Line (trackage),相模鉄道,railway,,,unmatched,none
+frx-osm-rel-8449597,8449597,相鉄新横浜線,相模鉄道,railway,,,unmatched,none
+frx-osm-rel-8506268,8506268,JR常磐線（上り）,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-8519859,8519859,JR東北本線（下り）,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-8519860,8519860,JR東北本線（上り）,東日本旅客鉄道,train,jrTohokuMainLine,JR東北本線（上り）,osmRelationId,high
+frx-osm-rel-8765907,8765907,,,railway,,,unmatched,none
+frx-osm-rel-8836495,8836495,中央本線（下り）,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-8836496,8836496,中央本線（上り）,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-8899856,8899856,,,railway,,,unmatched,none
+frx-osm-rel-9059060,9059060,ひたちなか海浜鉄道湊線（下り）,ひたちなか海浜鉄道,train,hitachinakaSeaRailway,ひたちなか海浜鉄道湊線（下り）,osmRelationId,high
+frx-osm-rel-9062718,9062718,JR水郡線（上り）,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-9062738,9062738,関東鉄道常総線（上り）,,train,,,unmatched,none
+frx-osm-rel-9062754,9062754,鹿島臨海鉄道大洗鹿島線（上り）,,train,,,unmatched,none
+frx-osm-rel-9062755,9062755,鹿島臨海鉄道大洗鹿島線（下り）,,train,,,unmatched,none
+frx-osm-rel-9069180,9069180,常磐線（上り）,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-9069181,9069181,常磐線（下り）,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-9069204,9069204,水郡線常陸太田支線,,railway,,,unmatched,none
+frx-osm-rel-9069205,9069205,水郡線（上り）,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-9069206,9069206,水郡線（下り）,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-9069207,9069207,大洗鹿島線（上り）,鹿島臨海鉄道,railway,,,unmatched,none
+frx-osm-rel-9069208,9069208,大洗鹿島線（下り）,鹿島臨海鉄道,railway,,,unmatched,none
+frx-osm-rel-9069219,9069219,東北本線（上り）,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-9069220,9069220,東北本線（下り）,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-9069258,9069258,JR中央線（下り）,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-9069259,9069259,JR中央線（上り）,東日本旅客鉄道,train,chuo,JR中央線（上り）,osmRelationId,high
+frx-osm-rel-9069362,9069362,あずさ (新宿 => 松本),東日本旅客鉄道,train,,あずさ (新宿 => 松本),osmRelationId,high
+frx-osm-rel-9251462,9251462,東京モノレール羽田空港線 普通 (羽田空港第2ターミナル => モノレール浜松町),東京モノレール,monorail,,,unmatched,none
+frx-osm-rel-9253570,9253570,日暮里・舎人ライナー (見沼代親水公園=>日暮里),東京都交通局,light_rail,,,unmatched,none
+frx-osm-rel-9254425,9254425,都電荒川線（三ノ輪橋⇒早稲田）,都電荒川線,tram,todenArakawaLine,都電荒川線（三ノ輪橋⇒早稲田）,osmRelationId,high
+frx-osm-rel-9255286,9255286,飛鳥山公園モノレール,,monorail,,,unmatched,none
+frx-osm-rel-9282661,9282661,湘南新宿ライン,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-9282834,9282834,東京臨海高速鉄道りんかい線,東京臨海高速鉄道 (TWR),railway,,,unmatched,none
+frx-osm-rel-9282836,9282836,東北本線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-9283014,9283014,京浜東北線,,railway,,,unmatched,none
+frx-osm-rel-9283468,9283468,東葉高速線 (西船橋 -> 東葉勝田台),東葉高速鉄道,subway,,,unmatched,none
+frx-osm-rel-9288982,9288982,東急東横線: 渋谷 => 横浜,東急電鉄,train,,,unmatched,none
+frx-osm-rel-9297561,9297561,上越新幹線埼玉-本庄高架橋,,railway,,,unmatched,none
+frx-osm-rel-9297740,9297740,JR京葉線高架段,,railway,,,unmatched,none
+frx-osm-rel-9300554,9300554,上越新幹線本庄-高崎高架橋,,railway,,,unmatched,none
+frx-osm-rel-9326156,9326156,東北新幹線（下り）,東日本旅客鉄道,train,tohokuShinkansen,東北新幹線（下り）,osmRelationId,high
+frx-osm-rel-9336149,9336149,埼玉高速鉄道線（浦和美園⇒赤羽岩淵）,埼玉高速鉄道,subway,,,unmatched,none
+frx-osm-rel-9337952,9337952,多摩都市モノレール線,"Tokyo Tama Intercity Monorail Co., Ltd.",monorail,,多摩都市モノレール線,osmRelationId,high
+frx-osm-rel-9338169,9338169,西武山口線,"Seibu Railway Company, Ltd.",light_rail,,,unmatched,none
+frx-osm-rel-9338170,9338170,西武山口線,"Seibu Railway Company, Ltd.",light_rail,,,unmatched,none
+frx-osm-rel-9340969,9340969,東急目黒線 (目黒=>日吉),東急電鉄,train,,,unmatched,none
+frx-osm-rel-9341647,9341647,東急大井町線 (大井町=>溝の口),東急電鉄,train,,,unmatched,none
+frx-osm-rel-9341649,9341649,東急大井町線 (溝の口=>大井町),東急電鉄,train,tokyuOimachiLine,東急大井町線(溝の口=>大井町),osmRelationId,high
+frx-osm-rel-9341815,9341815,東急田園都市線 (渋谷 -> 中央林間),東急電鉄,train,,,unmatched,none
+frx-osm-rel-9342007,9342007,東急池上線 (蒲田 -> 五反田),東急電鉄,train,,,unmatched,none
+frx-osm-rel-9342008,9342008,東急池上線 (五反田 -> 蒲田),東急電鉄,train,,,unmatched,none
+frx-osm-rel-9343886,9343886,東急多摩川線(多摩川->蒲田),東急電鉄,train,,,unmatched,none
+frx-osm-rel-9344152,9344152,東急こどもの国線 (こどもの国->長津田),東急電鉄,train,,,unmatched,none
+frx-osm-rel-9346453,9346453,埼玉新都市交通伊奈線,"Saitama New Urban Transit Co., Ltd.",light_rail,,,unmatched,none
+frx-osm-rel-9349293,9349293,東北新幹線（上り）,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-9393678,9393678,S-Train (Weekdays) (豊洲=>小手指),西武鉄道株式会社,subway,,,unmatched,none
+frx-osm-rel-9434683,9434683,エアポート快特 羽田空港第1・第2ターミナル駅->成田空港駅,東京都交通局,subway,,エアポート快特 羽田空港第1・第2ターミナル駅->成田空港駅,osmRelationId,high
+frx-osm-rel-9474241,9474241,JR京葉線 各駅停車 (蘇我 → 東京),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-9475339,9475339,JR総武快速線 (東京 → 千葉),東日本旅客鉄道,train,,JR総武快速線,osmRelationId,high
+frx-osm-rel-9477155,9477155,JR横須賀線 (東京 → 久里浜),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-9477760,9477760,西武鉄道池袋線 (池袋=>飯能),,train,,,unmatched,none
+frx-osm-rel-9479857,9479857,京成電鉄 京成本線 (京成上野 → 成田空港),京成電鉄,train,,,unmatched,none
+frx-osm-rel-9480049,9480049,京成電鉄 東成田線 (東成田 → 京成成田),京成電鉄,train,,,unmatched,none
+frx-osm-rel-9480126,9480126,京成電鉄 押上線 (押上 → 青砥),京成電鉄,train,,,unmatched,none
+frx-osm-rel-9480180,9480180,京成電鉄 千葉線 (千葉中央=>京成津田沼),京成電鉄,train,,京成電鉄 千葉線 (千葉中央 → 京成津田沼),osmRelationId,high
+frx-osm-rel-9480229,9480229,京成電鉄 千原線 (ちはら台 → 千葉中央),京成電鉄,train,,,unmatched,none
+frx-osm-rel-9480251,9480251,京成電鉄 金町線 (京成高砂 → 京成金町),京成電鉄,train,,,unmatched,none
+frx-osm-rel-9480368,9480368,京成成田空港アクセス (成田空港 → 京成上野),京成電鉄,train,,,unmatched,none
+frx-osm-rel-9483158,9483158,小田急電鉄小田原線 (新宿=>小田原),小田急電鉄,train,,小田急電鉄小田原線,osmRelationId,high
+frx-osm-rel-9483255,9483255,小田急電鉄小田原線 (小田原=>新宿),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-9486466,9486466,JR武蔵野線 (府中本町 → 南船橋),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-9486543,9486543,東武アーバンパークライン (大宮->柏),東武鉄道,train,tobuNodaLine,東武アーバンパークライン,osmRelationId,high
+frx-osm-rel-9486548,9486548,東武アーバンパークライン (柏=>大宮),東武鉄道,train,,,unmatched,none
+frx-osm-rel-9486564,9486564,芝山鉄道線,京成電鉄,train,,,unmatched,none
+frx-osm-rel-9486566,9486566,芝山鉄道線,京成電鉄,train,,,unmatched,none
+frx-osm-rel-9488081,9488081,TJライナー (池袋=>小川町),,train,,,unmatched,none
+frx-osm-rel-9498719,9498719,京急本線 普通 (品川 → 浦賀),京浜急行電鉄,train,,,unmatched,none
+frx-osm-rel-9498744,9498744,京浜急行電鉄本線,京浜急行電鉄,railway,,,unmatched,none
+frx-osm-rel-9499381,9499381,京浜急行電鉄大師線,京浜急行電鉄,train,,京浜急行電鉄大師線,osmRelationId,high
+frx-osm-rel-9499448,9499448,京急空港線 (羽田空港第1・第2ターミナル → 京急蒲田),京浜急行電鉄,train,,京浜急行電鉄空港線,osmRelationId,high
+frx-osm-rel-9499867,9499867,京浜急行電鉄逗子線,京浜急行電鉄,train,,,unmatched,none
+frx-osm-rel-9499880,9499880,京急久里浜線 特急 (三崎口 → 堀ノ内),京浜急行電鉄,train,,京浜急行電鉄久里浜線,osmRelationId,high
+frx-osm-rel-9499956,9499956,江ノ島電鉄 (藤沢=>鎌倉),江ノ島電鉄株式会社,light_rail,,,unmatched,none
+frx-osm-rel-9499966,9499966,湘南モノレール江の島線 (湘南江の島 → 大船),湘南モノレール,monorail,,,unmatched,none
+frx-osm-rel-9504526,9504526,東武スカイツリーライン (東武動物公園→浅草),東武鉄道,train,,,unmatched,none
+frx-osm-rel-9504540,9504540,東武鉄道大師線,東武鉄道,train,,,unmatched,none
+frx-osm-rel-9504629,9504629,小田急電鉄多摩線,小田急電鉄,train,,小田急電鉄多摩線,osmRelationId,high
+frx-osm-rel-9504670,9504670,小田急江ノ島線 各駅停車 (藤沢 => 片瀬江ノ島),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-9504671,9504671,小田急江ノ島線 各駅停車 (相模大野 => 藤沢),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-9504673,9504673,小田急江ノ島線 各駅停車 (藤沢 => 相模大野),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-9504674,9504674,小田急江ノ島線 各駅停車 (片瀬江ノ島 => 藤沢),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-9506864,9506864,西武新宿線 (西武新宿=>小平=>本川越),西武鉄道,train,,,unmatched,none
+frx-osm-rel-9507191,9507191,西武新宿線 (本川越=>小平=>西武新宿),西武鉄道,train,,,unmatched,none
+frx-osm-rel-9507231,9507231,西武拝島線 (拝島=>小平),西武鉄道,train,,,unmatched,none
+frx-osm-rel-9507232,9507232,西武拝島線 (小平=>拝島),西武鉄道,train,,,unmatched,none
+frx-osm-rel-9507251,9507251,西武多摩湖線 (多摩湖->国分寺),,train,,,unmatched,none
+frx-osm-rel-9507252,9507252,西武多摩湖線,,railway,,,unmatched,none
+frx-osm-rel-9555849,9555849,JR南武線 各駅停車 (立川 => 川崎),JR東日本,train,,,unmatched,none
+frx-osm-rel-9555850,9555850,JR南武線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-9561109,9561109,相鉄本線,相鉄,railway,,,unmatched,none
+frx-osm-rel-9561111,9561111,相鉄本線,相模鉄道株式会社,railway,,,unmatched,none
+frx-osm-rel-9561172,9561172,相模鉄道いずみ野線: 湘南台 => 横浜,相模鉄道株式会社,train,,相模鉄道いずみ野線,osmRelationId,high
+frx-osm-rel-9603897,9603897,山万ユーカリが丘線,山万株式会社,monorail,,山万ユーカリが丘線,osmRelationId,high
+frx-osm-rel-9603907,9603907,山万ユーカリが丘線,山万株式会社,monorail,,山万ユーカリが丘線,osmRelationId,high
+frx-osm-rel-9675109,9675109,東海道貨物線(東京貨物ターミナル支線),,railway,,,unmatched,none
+frx-osm-rel-9675110,9675110,高島線,JR Freight,railway,,,unmatched,none
+frx-osm-rel-9802401,9802401,のぞみ,東海旅客鉄道株式会社,train,,のぞみ,osmRelationId,high
+frx-osm-rel-9802494,9802494,のぞみ,東海旅客鉄道株式会社,train,,,unmatched,none
+frx-osm-rel-9802524,9802524,こだま (新大阪 => 東京),東海旅客鉄道,train,,,unmatched,none
+frx-osm-rel-9802525,9802525,こだま (東京 => 新大阪),東海旅客鉄道,train,,,unmatched,none
+frx-osm-rel-9807033,9807033,のぞみ (博多 => 東京),東海旅客鉄道株式会社,train,,,unmatched,none
+frx-osm-rel-9807034,9807034,のぞみ (東京 => 博多),東海旅客鉄道株式会社,train,,,unmatched,none
+frx-osm-rel-9807035,9807035,こだま (名古屋 => 東京),JR東海,train,,,unmatched,none
+frx-osm-rel-9807036,9807036,こだま (東京 => 名古屋),東海旅客鉄道,train,,,unmatched,none
+frx-osm-rel-9812240,9812240,かがやき (敦賀 => 東京),東日本旅客鉄道;西日本旅客鉄道,train,,かがやき (敦賀 => 東京),osmRelationId,high
+frx-osm-rel-9812289,9812289,かがやき (東京 => 敦賀),東日本旅客鉄道;西日本旅客鉄道,train,,かがやき (東京 => 敦賀),osmRelationId,high
+frx-osm-rel-9812331,9812331,東京メトロ東西線 快速 : 西船橋→中野,東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-9812332,9812332,東京メトロ東西線 快速 : 中野→西船橋,東京地下鉄,subway,tozaiLine,東京メトロ東西線 快速 : 中野→西船橋,osmRelationId,high
+frx-osm-rel-9873751,9873751,東京モノレール羽田空港線 空港快速 (モノレール浜松町 => 羽田空港第2ターミナル),東京モノレール,monorail,,,unmatched,none
+frx-osm-rel-9873752,9873752,東京モノレール羽田空港線 空港快速 (羽田空港第2ターミナル => モノレール浜松町),東京モノレール,monorail,,,unmatched,none
+frx-osm-rel-9878144,9878144,あさま (東京 => 長野),東日本旅客鉄道,train,,あさま (東京 => 長野),osmRelationId,high
+frx-osm-rel-9878145,9878145,あさま (長野 => 東京),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-9973139,9973139,都営新宿線 急行 : 新宿→本八幡,東京都交通局,subway,,,unmatched,none
+frx-osm-rel-9973140,9973140,都営新宿線 急行 : 本八幡→新宿,東京都交通局,subway,,,unmatched,none
+frx-osm-rel-10006738,10006738,銚子電気鉄道線（外川→銚子）,銚子電気鉄道,train,,,unmatched,none
+frx-osm-rel-10021119,10021119,東京地下鉄の直通運転 - 中央線,東日本旅客鉄道;東京地下鉄,train,,,unmatched,none
+frx-osm-rel-10021165,10021165,東京地下鉄の直通運転 - 中央線,東日本旅客鉄道;東京地下鉄,train,chuo,東京地下鉄の直通運転 - 中央線,osmRelationId,high
+frx-osm-rel-10023807,10023807,東京地下鉄-目黒線,東急電鉄;東京地下鉄;東京都交通局,subway,,東京地下鉄-目黒線,osmRelationId,high
+frx-osm-rel-10023808,10023808,東京地下鉄-目黒線,東急電鉄;東京地下鉄;東京都交通局,subway,,,unmatched,none
+frx-osm-rel-10025276,10025276,JR常磐緩行線 (綾瀬->取手),東日本旅客鉄道,subway,,常磐緩行線 (綾瀬->取手),osmRelationId,high
+frx-osm-rel-10025277,10025277,JR常磐緩行線 （取手=>綾瀬）,東日本旅客鉄道,subway,,,unmatched,none
+frx-osm-rel-10025434,10025434,東京地下鉄の直通運転 - 東急田園都市線 : 渋谷→中央林間,東急電鉄;東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-10025435,10025435,東京メトロ半蔵門線 - 東急田園都市線直通運転 : 中央林間→渋谷→押上,東急電鉄;東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-10025510,10025510,東京メトロ日比谷線 - 東武スカイツリーライン直通運転 : 中目黒→北千住→南栗橋,,subway,,,unmatched,none
+frx-osm-rel-10025511,10025511,東京メトロ日比谷線 - 東武スカイツリーライン直通運転 : 南栗橋→北千住→中目黒,,subway,,,unmatched,none
+frx-osm-rel-10025573,10025573,東京地下鉄の直通運転 - スカイツリーライン (押上〈スカイツリー前〉=>東武動物公園),東武鉄道;東京地下鉄,subway,,東京地下鉄の直通運転 - スカイツリーライン,osmRelationId,high
+frx-osm-rel-10025574,10025574,東京地下鉄の直通運転 - スカイツリーライン (東武動物公園=>押上〈スカイツリー前〉),東武鉄道;東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-10029863,10029863,東京地下鉄の直通運転 - 飯能線,西武鉄道;東京地下鉄,train,,東京地下鉄の直通運転 - 飯能線,osmRelationId,high
+frx-osm-rel-10029864,10029864,東京地下鉄の直通運転 - 飯能線,西武鉄道;東京地下鉄,train,,,unmatched,none
+frx-osm-rel-10029924,10029924,西武有楽町線 (小竹向原=>練馬),,train,,,unmatched,none
+frx-osm-rel-10032017,10032017,東武東上線 (寄居=>池袋),東武鉄道,train,,,unmatched,none
+frx-osm-rel-10032085,10032085,東武東上線 (池袋=>寄居),東武鉄道,train,,,unmatched,none
+frx-osm-rel-10032124,10032124,東京地下鉄の直通運転 - 東武東上線 : 森林公園→和光市,,subway,,,unmatched,none
+frx-osm-rel-10032125,10032125,東武東上線準急,東武鉄道,train,,,unmatched,none
+frx-osm-rel-10032126,10032126,東京地下鉄の直通運転 - 東武東上線 : 和光市→森林公園,,subway,,,unmatched,none
+frx-osm-rel-10032466,10032466,東京地下鉄の直通運転 - 東急東横線 : 横浜→渋谷,東急電鉄,subway,tokyuToyokoLine,東京地下鉄の直通運転 - 東急東横線,osmRelationId,high
+frx-osm-rel-10032467,10032467,東京地下鉄の直通運転 - 東急東横線 : 渋谷→横浜,東急電鉄,subway,,,unmatched,none
+frx-osm-rel-10036862,10036862,小田急電鉄 通勤準急,小田急電鉄;東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-10036863,10036863,小田急電鉄 千代田線直通列車,小田急電鉄;東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-10036878,10036878,東京地下鉄の直通運転 - 向ヶ丘遊園バイパス線,小田急電鉄;東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-10036879,10036879,東京地下鉄の直通運転 - 向ヶ丘遊園バイパス線,小田急電鉄;東京地下鉄,train,,,unmatched,none
+frx-osm-rel-10056053,10056053,京王電鉄京王新線 : 新線新宿→笹塚,京王電鉄,train,,,unmatched,none
+frx-osm-rel-10056073,10056073,京王電鉄京王新線 : 笹塚→新線新宿,京王電鉄,train,,,unmatched,none
+frx-osm-rel-10240098,10240098,JR鶴見線,,railway,,,unmatched,none
+frx-osm-rel-10256351,10256351,JR横浜線 各駅停車 (桜木町 => 八王子),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-10256354,10256354,JR横浜線 各駅停車 (八王子 => 桜木町),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-10257298,10257298,JR根岸線 (大船 → 磯子),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-10257299,10257299,JR根岸線 (磯子 → 大船),東日本旅客鉄道,train,,JR根岸線 (下り),osmRelationId,high
+frx-osm-rel-10312042,10312042,中央・総武緩行線,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-10312043,10312043,JR中央・総武緩行線 (三鷹 → 千葉),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-10322300,10322300,相鉄 (海老名->新宿),相模鉄道,train,,,unmatched,none
+frx-osm-rel-10322301,10322301,新宿 => 海老名,相模鉄道,train,,,unmatched,none
+frx-osm-rel-10355300,10355300,JR京葉線 快速 (蘇我 → 東京),東日本旅客鉄道,train,jrKeiyo,JR京葉線 快速 (蘇我 → 東京),osmRelationId,high
+frx-osm-rel-10355301,10355301,JR京葉線 快速 (東京 → 蘇我),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-10358686,10358686,相鉄本線 : 横浜 => 海老名,相模鉄道,train,,,unmatched,none
+frx-osm-rel-10358687,10358687,相鉄本線 : 海老名 => 横浜,相模鉄道,train,,,unmatched,none
+frx-osm-rel-10358978,10358978,相模鉄道いずみ野線,相模鉄道株式会社,railway,,,unmatched,none
+frx-osm-rel-10358982,10358982,JR京浜東北線・根岸線 快速 (大船 → 大宮),東日本旅客鉄道,train,keihinTohoku,JR京浜東北線快速(北行),osmRelationId,high
+frx-osm-rel-10358983,10358983,JR京浜東北線・根岸線 快速 (大宮 → 大船),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-10363875,10363875,JR中央線快速（上り）,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-10363876,10363876,JR中央線快速（下り）,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-10372984,10372984,JR埼京線 (大宮 → 大崎),東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-10372985,10372985,JR埼京線 (大崎 → 大宮),東日本旅客鉄道,railway,jrSaikyoLine,JR埼京線,osmRelationId,high
+frx-osm-rel-10384057,10384057,京成スカイライナー (京成上野 → 成田空港),京成電鉄,train,,,unmatched,none
+frx-osm-rel-10443252,10443252,東武越生線(越生->坂戸),東武鉄道,train,,,unmatched,none
+frx-osm-rel-10535228,10535228,小田急箱根鉄道線 (箱根湯本=>強羅),小田急箱根,train,,,unmatched,none
+frx-osm-rel-10535229,10535229,箱根登山鉄道鉄道線,箱根登山鉄道,railway,,,unmatched,none
+frx-osm-rel-10757872,10757872,JR常磐線快速（上り）,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-10757873,10757873,JR常磐線快速（下り）,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-10840434,10840434,東京メトロ東西線 通勤快速 : 西船橋→中野,東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-10927698,10927698,JR常磐緩行線 （北千住=>我孫子）,東日本旅客鉄道,subway,,,unmatched,none
+frx-osm-rel-10927699,10927699,JR常磐緩行線 (我孫子=>北千住),東日本旅客鉄道,subway,,,unmatched,none
+frx-osm-rel-10928742,10928742,JR成田線 我孫子支線 (我孫子 → 成田),,train,,,unmatched,none
+frx-osm-rel-10956059,10956059,西武有楽町線・池袋線 : 飯能→小竹向原,西武鉄道;東京地下鉄,train,,,unmatched,none
+frx-osm-rel-10961873,10961873,西武豊島線,,train,,,unmatched,none
+frx-osm-rel-10961874,10961874,西武豊島線,,train,,,unmatched,none
+frx-osm-rel-11065584,11065584,東武スカイツリーライン (押上〈スカイツリー前〉=>東武動物公園),東武鉄道,train,,,unmatched,none
+frx-osm-rel-11065585,11065585,東武スカイツリーライン (東武動物公園=>押上〈スカイツリー前〉),東武鉄道,train,,,unmatched,none
+frx-osm-rel-11072815,11072815,小田急箱根鉄道線,小田急箱根,train,,,unmatched,none
+frx-osm-rel-11072816,11072816,小田急箱根鉄道線,小田急箱根,train,hakoneTozan;hakoneTozan2,箱根登山鉄道鉄道線,osmRelationId,high
+frx-osm-rel-11270762,11270762,京王電鉄動物園線 : 高原不動→多摩動物公園,京王電鉄,train,,,unmatched,none
+frx-osm-rel-11271039,11271039,京王電鉄京王線 : 新宿→京王八王子,京王電鉄,train,keioLine,京王線 (西に),osmRelationId,high
+frx-osm-rel-11271045,11271045,京王電鉄京王線 : 京王八王子→新宿,京王電鉄,train,,,unmatched,none
+frx-osm-rel-11273527,11273527,小田急通勤急行,小田急電鉄,train,,,unmatched,none
+frx-osm-rel-11273528,11273528,小田急通勤急行,小田急電鉄,train,,,unmatched,none
+frx-osm-rel-11299749,11299749,京王電鉄相模原線 : 橋本→調布,京王電鉄,train,,,unmatched,none
+frx-osm-rel-11299750,11299750,京王電鉄相模原線 : 調布→橋本,京王電鉄,train,,,unmatched,none
+frx-osm-rel-11323466,11323466,神奈川臨海鉄道千鳥線,神奈川臨海鉄道,railway,,,unmatched,none
+frx-osm-rel-11359988,11359988,西武有楽町線・池袋線 : 小竹向原→飯能,西武鉄道;東京地下鉄,train,,西武有楽町・池袋線,osmRelationId,high
+frx-osm-rel-11371520,11371520,東京メトロ有楽町線 : 新木場→和光市,Tokyo Metro,subway,yurakuchoLine,東京メトロ有楽町線 : 新木場→和光市,osmRelationId,high
+frx-osm-rel-11501094,11501094,京成松戸線 (松戸 → 京成津田沼),京成電鉄,train,,京成松戸線 (松戸 → 京成津田沼),osmRelationId,high
+frx-osm-rel-11502414,11502414,京成松戸線 (京成津田沼 → 松戸),京成電鉄,train,,京成松戸線 (京成津田沼 → 松戸),osmRelationId,high
+frx-osm-rel-11561062,11561062,京浜電鉄 - 都営浅草線快特 - 京成成田空港アクセス (成田空港 → 浅草 → 羽田空港),京成電鉄,subway,toeiAsakusaLine,京浜電鉄 - 都営浅草線快特 - 京成成田空港アクセス (成田空港 → 浅草 → 羽田空港),osmRelationId,high
+frx-osm-rel-11583472,11583472,東武アーバンパークライン (柏=>船橋),東武鉄道,train,tobuNodaLine,東武アーバンパークライン,osmRelationId,high
+frx-osm-rel-11587706,11587706,西武鉄道狭山線 (西武球場前=>西所沢),,train,,,unmatched,none
+frx-osm-rel-11587709,11587709,西武鉄道狭山線 (西所沢=>西武球場前),,train,,,unmatched,none
+frx-osm-rel-11588621,11588621,総武流山電鉄 (馬橋=>流山),,train,,,unmatched,none
+frx-osm-rel-11602038,11602038,京王電鉄井の頭線 (渋谷=>吉祥寺),京王電鉄,train,,,unmatched,none
+frx-osm-rel-11602293,11602293,京王電鉄井の頭線 (吉祥寺=.>渋谷),京王電鉄,train,,,unmatched,none
+frx-osm-rel-11644243,11644243,京成電鉄 シテイライナー (京成上野 → 京成成田),京成電鉄,train,,,unmatched,none
+frx-osm-rel-11664583,11664583,横須賀・総武快速線 (大船 → 千葉),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-11664782,11664782,横須賀・総武快速線 (千葉 → 大船),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-11680902,11680902,JR東海道本線,,train,,,unmatched,none
+frx-osm-rel-11680903,11680903,JR東海道本線 (東京=>神戸),,train,,,unmatched,none
+frx-osm-rel-11688125,11688125,京王競馬場線 : 東府中→府中競馬正門前,京王電鉄,train,,,unmatched,none
+frx-osm-rel-11688292,11688292,京王電鉄動物園線 : 多摩動物公園→高原不動,京王電鉄,train,,,unmatched,none
+frx-osm-rel-11688294,11688294,京王競馬場線 : 府中競馬正門前→東府中,京王電鉄,train,,,unmatched,none
+frx-osm-rel-11688348,11688348,JR成田エクスプレス (成田空港 → 大船),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-11688356,11688356,JR成田エクスプレス (大船 → 成田空港),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-11688429,11688429,JR成田エクスプレス (成田空港 → 大宮),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-11693928,11693928,JR成田エクスプレス (大宮 → 成田空港),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-11694683,11694683,JR成田エクスプレス (成田空港 → 高尾),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-11694684,11694684,JR成田エクスプレス (高尾 → 成田空港),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-11700308,11700308,東急目黒線急行 (目黒=>日吉),東急電鉄,train,,,unmatched,none
+frx-osm-rel-11700309,11700309,東急目黒線急行 (日吉=>目黒),東急電鉄,train,,,unmatched,none
+frx-osm-rel-11700879,11700879,東武越生線(坂戸->越生),東武鉄道,train,,,unmatched,none
+frx-osm-rel-11701968,11701968,北総線各駅 (印旛日本医大=>京成高砂),,train,,,unmatched,none
+frx-osm-rel-11702545,11702545,北総線特急 (印旛日本医大=>京成高砂),,train,,,unmatched,none
+frx-osm-rel-11702546,11702546,北総線特急 (京成高砂=>印旛日本医大),,train,,,unmatched,none
+frx-osm-rel-11702547,11702547,北総線急行 (印旛日本医大=>京成高砂),,train,,,unmatched,none
+frx-osm-rel-11702548,11702548,北総線急行 (京成高砂=>印旛日本医大),,train,,,unmatched,none
+frx-osm-rel-11702746,11702746,東武東上線準急,東武鉄道,train,,,unmatched,none
+frx-osm-rel-11703136,11703136,西武鉄道西武秩父線,,train,,,unmatched,none
+frx-osm-rel-11703928,11703928,伊勢崎線 (伊勢崎=>東武動物公園),東武鉄道,train,,,unmatched,none
+frx-osm-rel-11703931,11703931,伊勢崎線 (東武動物公園=>伊勢崎),東武鉄道,train,,,unmatched,none
+frx-osm-rel-11722738,11722738,西武国分寺線 (東村山=>国分寺),,train,,,unmatched,none
+frx-osm-rel-11722741,11722741,西武園線,西武鉄道,train,,,unmatched,none
+frx-osm-rel-11727092,11727092,西武多摩川線 (武蔵境->是政),西武鉄道,train,,,unmatched,none
+frx-osm-rel-11742719,11742719,踊り子 (東京=>伊豆急下田),,train,,,unmatched,none
+frx-osm-rel-11763508,11763508,ちちぶ (西武秩父=>飯能),,train,,,unmatched,none
+frx-osm-rel-11763509,11763509,ちちぶ (飯能=>西武秩父),,train,,,unmatched,none
+frx-osm-rel-11763510,11763510,ちちぶ (池袋=>飯能),,train,,,unmatched,none
+frx-osm-rel-11763511,11763511,西武鉄道池袋線 (飯能=>池袋),,train,,,unmatched,none
+frx-osm-rel-11763512,11763512,西武鉄道池袋線 (飯能=>吾野),,train,,,unmatched,none
+frx-osm-rel-11771811,11771811,きぬがわ列車 : 新宿→鬼怒川温泉,東日本旅客鉄道;東武鉄道,train,,,unmatched,none
+frx-osm-rel-11776970,11776970,JR鶴見線(鶴見->扇町),,train,,,unmatched,none
+frx-osm-rel-11776971,11776971,JR鶴見線(鶴見->大川),,train,,,unmatched,none
+frx-osm-rel-11776972,11776972,JR鶴見線(海芝浦->鶴見),,train,,,unmatched,none
+frx-osm-rel-11776973,11776973,JR鶴見線(扇町->鶴見),,train,,,unmatched,none
+frx-osm-rel-11777029,11777029,JR鶴見線(鶴見->海芝浦),,train,,,unmatched,none
+frx-osm-rel-11777033,11777033,JR鶴見線(大川->鶴見),,train,,,unmatched,none
+frx-osm-rel-11801442,11801442,東武鬼怒川線 (新藤原=>下今市),東武鉄道,train,,,unmatched,none
+frx-osm-rel-11801443,11801443,東武鬼怒川線,,railway,,,unmatched,none
+frx-osm-rel-11801494,11801494,東武鉄道桐生線 (赤城=>太田),東武鉄道,train,,,unmatched,none
+frx-osm-rel-11801495,11801495,東武鉄道桐生線,,railway,,,unmatched,none
+frx-osm-rel-11801773,11801773,東武日光線 (東武日光=>東武動物公園),東武鉄道,train,,,unmatched,none
+frx-osm-rel-11801774,11801774,東武日光線,東武鉄道,railway,,,unmatched,none
+frx-osm-rel-11801851,11801851,東武宇都宮線 (東武宇都宮->新栃木),東武鉄道,train,,,unmatched,none
+frx-osm-rel-11801886,11801886,東武佐野線 (葛生=>館林),東武鉄道,train,,,unmatched,none
+frx-osm-rel-11801904,11801904,東武小泉線,東武鉄道,train,,,unmatched,none
+frx-osm-rel-11801905,11801905,東武小泉線,東武鉄道,train,,,unmatched,none
+frx-osm-rel-11801906,11801906,東武小泉線,東武鉄道,train,,,unmatched,none
+frx-osm-rel-11804580,11804580,上毛電気鉄道上毛線 (中央前橋=>丸山下),上毛電気鉃道,train,,,unmatched,none
+frx-osm-rel-11804680,11804680,上毛電気鉄道上毛線 (西桐生=>中央前橋),上毛電気鉃道,train,,,unmatched,none
+frx-osm-rel-11813271,11813271,京王電鉄井の頭線急行 (渋谷=>吉祥寺),京王電鉄,train,,,unmatched,none
+frx-osm-rel-11813272,11813272,京王電鉄井の頭線急行 (吉祥寺=.>渋谷),京王電鉄,train,,,unmatched,none
+frx-osm-rel-11814879,11814879,JR五日市線,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-11814887,11814887,JR青梅線 (立川=>奥多摩),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-11814888,11814888,JR青梅線 (奥多摩=>立川),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-11832174,11832174,関東鉄道竜ヶ崎線（下り）,,train,,,unmatched,none
+frx-osm-rel-11851398,11851398,太陽の恵み鉄道パークライン,,train,,,unmatched,none
+frx-osm-rel-11953294,11953294,川越線 (大宮=>高麗川),,train,,,unmatched,none
+frx-osm-rel-11992684,11992684,伊豆箱根鉄道大雄山線 (大雄山->小田原),伊豆箱根鉄道,train,,,unmatched,none
+frx-osm-rel-12014184,12014184,JR東海道本線 (熱海=>東京),,train,,,unmatched,none
+frx-osm-rel-12014185,12014185,JR東海道本線 (東京=>熱海),,train,,,unmatched,none
+frx-osm-rel-12022274,12022274,JR中央線JC（上り）,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-12022275,12022275,JR中央線JC（下り）,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-12032381,12032381,JR御殿場線 (沼津->国府津),東海旅客鉄道,train,,,unmatched,none
+frx-osm-rel-12032382,12032382,JR御殿場線 (国府津->沼津),東海旅客鉄道,train,,,unmatched,none
+frx-osm-rel-12184302,12184302,東京メトロ半蔵門線 - 東急田園都市線直通運転 : 押上→渋谷→中央林間,東急電鉄;東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-12184335,12184335,東京メトロ半蔵門線 - 東急田園都市線直通運転 : 押上→渋谷→長津田,東急電鉄;東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-12184336,12184336,東京メトロ半蔵門線 - 東急田園都市線直通運転 : 長津田→渋谷→押上,東急電鉄;東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-12185778,12185778,東京メトロ半蔵門線 - 東急田園都市線 - 東武スカイツリーライン直通運転 (中央林間→渋谷→押上→南栗橋),東急電鉄;東京地下鉄;東武鉄道,subway,,,unmatched,none
+frx-osm-rel-12185878,12185878,東京メトロ半蔵門線 - 東急田園都市線 - 東武スカイツリーライン直通運転 : 南栗橋→押上→渋谷→中央林間,東急電鉄;東京地下鉄;東武鉄道,subway,,,unmatched,none
+frx-osm-rel-12200093,12200093,上野東京ライン (大宮=>大船),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-12200178,12200178,上野東京ライン (大船=>大宮),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-12210362,12210362,JR宇都宮線 (東京=>黒磯),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-12213561,12213561,JR宇都宮線 (黒磯=>東京),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-12250433,12250433,東京地下鉄の直通運転 - 副都心線 : 渋谷→和光市,Tokyo Metro,subway,,,unmatched,none
+frx-osm-rel-12250868,12250868,東京地下鉄の直通運転 - 副都心線 : 渋谷→小竹向原,Tokyo Metro,subway,,,unmatched,none
+frx-osm-rel-12250869,12250869,東京地下鉄の直通運転 - 西武池袋線 : 飯能→練馬,西武鉄道;東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-12250870,12250870,東京地下鉄の直通運転 - 西武池袋線 : 練馬→飯能,西武鉄道;東京地下鉄,subway,,,unmatched,none
+frx-osm-rel-12250871,12250871,東京地下鉄の直通運転 - 西武有楽町線 : 小竹向原→練馬,,subway,,,unmatched,none
+frx-osm-rel-12250872,12250872,東京地下鉄の直通運転 - 副都心線 : 小竹向原→渋谷,Tokyo Metro,subway,,,unmatched,none
+frx-osm-rel-12250873,12250873,東京地下鉄の直通運転 - 西武有楽町線 : 練馬→小竹向原,,subway,,,unmatched,none
+frx-osm-rel-12252077,12252077,小江戸 : 本川越→西武新宿,西武鉄道,train,,,unmatched,none
+frx-osm-rel-12419659,12419659,宇都宮ライトレール（下り）,宇都宮ライトレール,light_rail,,,unmatched,none
+frx-osm-rel-12419662,12419662,宇都宮ライトレール（上り）,,light_rail,,,unmatched,none
+frx-osm-rel-12437350,12437350,こまち列車,,train,,,unmatched,none
+frx-osm-rel-12437943,12437943,はやて列車,,train,,,unmatched,none
+frx-osm-rel-12438356,12438356,はやぶさ列車,,train,,,unmatched,none
+frx-osm-rel-12438357,12438357,はやぶさ列車,,train,,,unmatched,none
+frx-osm-rel-12439067,12439067,やまびこ列車,,train,,,unmatched,none
+frx-osm-rel-12439068,12439068,やまびこ列車,,train,,,unmatched,none
+frx-osm-rel-12439161,12439161,なすの列車,,train,,,unmatched,none
+frx-osm-rel-12439162,12439162,なすの列車,,train,,,unmatched,none
+frx-osm-rel-12440668,12440668,つばさ列車,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-12458960,12458960,各駅停車,小田急電鉄,train,,,unmatched,none
+frx-osm-rel-12458961,12458961,各駅停車,小田急電鉄,train,,,unmatched,none
+frx-osm-rel-12463697,12463697,小田急小田原線・江ノ島線 快速急行 (新宿 => 藤沢),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-12463785,12463785,小田急小田原線・江ノ島線 快速急行 (藤沢 => 新宿),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-12534440,12534440,つばさ列車,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-12534441,12534441,つばさ列車,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-13097973,13097973,とき: 東京 => 新潟,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-13098205,13098205,たにがわ: 越後湯沢 => 東京,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-13098206,13098206,たにがわ: 東京 => 越後湯沢,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-13472383,13472383,相鉄厚木線,相模鉄道,train,,,unmatched,none
+frx-osm-rel-14284531,14284531,JR南武線浜川崎支線 普通 (浜川崎 => 尻手),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14284669,14284669,JR南武線浜川崎支線 普通 (尻手 => 浜川崎),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14298300,14298300,JR成田線 (成田空港 → 千葉),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14298709,14298709,JR成田線 (千葉 → 成田空港),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14302812,14302812,相模線 (橋本->茅ケ崎),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14303195,14303195,総武本線 (千葉 → 銚子),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14303196,14303196,総武本線 (銚子 → 千葉),,train,,,unmatched,none
+frx-osm-rel-14303575,14303575,JR外房線 (千葉 → 上総一ノ宮),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14303576,14303576,JR外房線 (上総一ノ宮 → 千葉),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14303806,14303806,JR内房線 (安房鴨川 → 君津),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14303807,14303807,JR内房線 (君津 → 安房鴨川),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14306814,14306814,京王電鉄高尾線 : 高尾山口→北野,京王電鉄,train,,,unmatched,none
+frx-osm-rel-14306815,14306815,京王電鉄高尾線 : 北野→高尾山口,京王電鉄,train,,,unmatched,none
+frx-osm-rel-14309203,14309203,東武アーバンパークライン (船橋->大宮),東武鉄道,train,,,unmatched,none
+frx-osm-rel-14309204,14309204,東武アーバンパークライン (大宮->船橋),東武鉄道,train,,,unmatched,none
+frx-osm-rel-14323630,14323630,八高線 (八王子->高麗川),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14323631,14323631,八高線 (高麗川->八王子),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14330371,14330371,常磐快速線 (取手->品川),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14330372,14330372,常磐快速線 (品川->取手),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14344304,14344304,久留里線(上総亀山->木更津),東日本旅客鉄道 (JR East),train,,,unmatched,none
+frx-osm-rel-14489075,14489075,小田急江ノ島線 各駅停車 (相模大野 => 片瀬江ノ島),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-14496200,14496200,小田急江ノ島線 各駅停車 (片瀬江ノ島 => 相模大野),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-14656631,14656631,JR武蔵野線 (東京 → 府中本町),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14656632,14656632,JR武蔵野線 (府中本町 → 東京),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14656663,14656663,京葉線 (南船橋->西船橋),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14656664,14656664,京葉線 (西船橋->南船橋),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-14679071,14679071,筑波山ケーブルカー,筑波観光鉄道,railway,,,unmatched,none
+frx-osm-rel-14681763,14681763,相鉄新横浜線 (西谷->新横浜),相模鉄道,train,,,unmatched,none
+frx-osm-rel-14681764,14681764,相鉄新横浜線 (新横浜->西谷),相模鉄道,train,,,unmatched,none
+frx-osm-rel-14681765,14681765,東急新横浜線 (新横浜->日吉),東急電鉄,train,,,unmatched,none
+frx-osm-rel-14681766,14681766,東急新横浜線 (日吉->新横浜),東急電鉄,train,,,unmatched,none
+frx-osm-rel-14706931,14706931,小湊鉄道線 (上総中野 => 五井),小湊鐵道,train,,,unmatched,none
+frx-osm-rel-14706932,14706932,小湊鉄道線 (五井 => 上総中野),小湊鐵道,train,,,unmatched,none
+frx-osm-rel-15094614,15094614,JR総武快速線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-15094615,15094615,横須賀・総武快速線 (東京=>大船),東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-15095423,15095423,東急新横浜線,東急電鉄,railway,,,unmatched,none
+frx-osm-rel-15434257,15434257,拝島ライナー: 西武新宿 => 拝島,西武鉄道,train,,,unmatched,none
+frx-osm-rel-15434270,15434270,,,train,,,unmatched,none
+frx-osm-rel-15701073,15701073,Link Line to Kita-Kogane,JR Freight,railway,,,unmatched,none
+frx-osm-rel-15701074,15701074,馬橋支線,JR Freight,railway,,,unmatched,none
+frx-osm-rel-15764704,15764704,新金貨物線,,railway,,,unmatched,none
+frx-osm-rel-15880312,15880312,あずさ (松本 => 新宿),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-16928972,16928972,いすみ線 (上総中野 => 大原),いすみ鉄道,train,,,unmatched,none
+frx-osm-rel-16947957,16947957,JR外房線 (上総一ノ宮 → 安房鴨川),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-16947958,16947958,JR外房線 (安房鴨川 → 千葉),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-16947970,16947970,JR外房線 (安房鴨川 → 上総一ノ宮),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-17055692,17055692,JR内房線 (君津 → 千葉),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-17055693,17055693,JR内房線 (千葉 → 君津),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-17055839,17055839,JRさざなみ (君津 → 東京),東日本旅客鉄道株式会社,train,,,unmatched,none
+frx-osm-rel-17348677,17348677,かがやき,,train,,,unmatched,none
+frx-osm-rel-17348678,17348678,かがやき,,train,,,unmatched,none
+frx-osm-rel-17656091,17656091,野岩鉄道会津鬼怒川線,,railway,,,unmatched,none
+frx-osm-rel-18100867,18100867,JR横浜線 各駅停車 (東神奈川 => 八王子),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-18100868,18100868,JR横浜線 各駅停車 (八王子 => 東神奈川),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-18100869,18100869,JR横浜線 快速 (桜木町 => 八王子),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-18100870,18100870,JR横浜線 快速 (八王子 => 桜木町),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-18138001,18138001,いすみ鉄道 いすみ線,,railway,,,unmatched,none
+frx-osm-rel-18138336,18138336,小湊鉄道線,,railway,,,unmatched,none
+frx-osm-rel-18469350,18469350,鹿島線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-18755638,18755638,京急逗子線•本線•空港線 急行 (逗子・葉山 => 羽田空港第１・第２ターミナル),京浜急行電鉄,train,,,unmatched,none
+frx-osm-rel-18755639,18755639,京急空港線•本線•逗子線 急行 (羽田空港第１・第２ターミナル => 逗子・葉山),京浜急行電鉄,train,,,unmatched,none
+frx-osm-rel-18769582,18769582,東京モノレール羽田空港線 区間快速 (羽田空港第2ターミナル => モノレール浜松町),東京モノレール,monorail,,,unmatched,none
+frx-osm-rel-18769583,18769583,東京モノレール羽田空港線 区間快速 (モノレール浜松町 => 羽田空港第2ターミナル),東京モノレール,monorail,,,unmatched,none
+frx-osm-rel-18788965,18788965,JR中央線・青梅線　立川 => 西立川,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-18815741,18815741,JR横須賀線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-18819167,18819167,しおさい,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-18877841,18877841,上越新幹線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-19098793,19098793,ひたち（下り）,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-19098794,19098794,ひたち（上り）,東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-19347938,19347938,特急あずさ（新宿＝＞錦糸町）,東日本旅客鉄道株式会社,train,,,unmatched,none
+frx-osm-rel-19710529,19710529,えのしま (片瀬江ノ島 => 新宿),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-19710530,19710530,えのしま (新宿 => 片瀬江ノ島),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-19715482,19715482,小田急江ノ島線 各駅停車 (町田 => 藤沢),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-19715483,19715483,小田急江ノ島線 各駅停車 (藤沢 => 町田),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-19903349,19903349,JR南武線 各駅停車 (矢向 => 川崎),JR東日本,train,,,unmatched,none
+frx-osm-rel-19903350,19903350,JR南武線 快速 (立川 => 川崎),JR東日本,train,,,unmatched,none
+frx-osm-rel-19903351,19903351,JR南武線 快速 (川崎 => 立川),JR東日本,train,,,unmatched,none
+frx-osm-rel-19928461,19928461,京成本線 普通 (京成津田沼 => 京成上野),京成電鉄,train,,,unmatched,none
+frx-osm-rel-19928462,19928462,京成本線 普通 (京成上野 => 京成津田沼),京成電鉄,train,,,unmatched,none
+frx-osm-rel-19931515,19931515,京成本線・千葉線 普通 (千葉中央 => 京成上野),京成電鉄,train,,,unmatched,none
+frx-osm-rel-19931516,19931516,京成本線・千葉線・千原線 普通 (ちはら台 => 京成上野),京成電鉄,train,,,unmatched,none
+frx-osm-rel-19931517,19931517,京成本線・千葉線・千原線 普通 (京成上野 => ちはら台),京成電鉄,train,,,unmatched,none
+frx-osm-rel-19931523,19931523,京成本線・千葉線 普通 (京成上野 => 千葉中央),京成電鉄,train,,,unmatched,none
+frx-osm-rel-20387723,20387723,京葉臨海鉄道臨海本線,,train,,,unmatched,none
+frx-osm-rel-20424033,20424033,常磐線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-20446247,20446247,相鉄・JR直通線,,railway,,,unmatched,none
+frx-osm-rel-20499054,20499054,常磐線田端貨物線,,railway,,,unmatched,none
+frx-osm-rel-20499059,20499059,常磐線隅田川貨物線,,railway,,,unmatched,none
+frx-osm-rel-20709438,20709438,尻手短絡線,東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-20734041,20734041,羽沢線,,railway,,,unmatched,none
+frx-osm-rel-20752612,20752612,武蔵野南線,,railway,,,unmatched,none
+frx-osm-rel-20999319,20999319,JR赤羽線,,railway,,,unmatched,none
+frx-osm-rel-21006366,21006366,上越線,東日本旅客鉄道株式会社,train,,,unmatched,none
+frx-osm-rel-21017361,21017361,吾妻線（太子支線）,,railway,,,unmatched,none
+frx-osm-rel-21017874,21017874,吾妻線（旧線）,,railway,,,unmatched,none
+frx-osm-rel-21018182,21018182,上越線,東日本旅客鉄道株式会社,train,,,unmatched,none
+frx-osm-rel-21165851,21165851,神奈川臨海鉄道本牧線,,train,,,unmatched,none
+frx-osm-rel-21165897,21165897,神奈川臨海鉄道浮島線,,train,,,unmatched,none
+frx-osm-rel-21262040,21262040,横須賀・総武快速線 (久里浜 → 千葉),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-21262041,21262041,横須賀・総武快速線 (千葉 → 久里浜),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-21262315,21262315,JR横須賀線 (品川 → 久里浜),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-21262316,21262316,JR横須賀線 (久里浜 → 品川),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-21267159,21267159,小田急江ノ島線 (片瀬江ノ島 => 藤沢),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-21267160,21267160,小田急江ノ島線 (藤沢 => 片瀬江ノ島),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-21267161,21267161,小田急江ノ島線 (藤沢 => 相模大野),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-21267162,21267162,小田急江ノ島線 (相模大野 => 藤沢),小田急電鉄,train,,,unmatched,none
+frx-osm-rel-21268981,21268981,八高線 (高崎->高麗川),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-21268982,21268982,八高線 (高麗川->高崎),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-21289546,21289546,根岸線 (横浜 → 大船),東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-21289547,21289547,根岸線 (大船 → 横浜),東日本旅客鉄道,railway,,,unmatched,none
+frx-osm-rel-21297283,21297283,JR京浜東北線・根岸線 各駅停車 (磯子 → 南浦和),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-21297284,21297284,JR京浜東北線・根岸線 各駅停車 (南浦和 → 磯子),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-21297285,21297285,JR京浜東北線・根岸線 各駅停車 (南浦和 → 大船),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-21297286,21297286,JR京浜東北線・根岸線 各駅停車 (大船 → 南浦和),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-21297287,21297287,JR京浜東北線・根岸線 各駅停車 (磯子 → 大宮),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-21297288,21297288,JR京浜東北線・根岸線 各駅停車 (大宮 → 磯子),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-21311314,21311314,京急本線 特急 (品川 → 浦賀),京浜急行電鉄,train,,,unmatched,none
+frx-osm-rel-21311315,21311315,京急本線 特急 (浦賀 → 品川),京浜急行電鉄,train,,,unmatched,none
+frx-osm-rel-21311316,21311316,京急本線 特急 (泉岳寺 → 浦賀),京浜急行電鉄,train,,,unmatched,none
+frx-osm-rel-21320560,21320560,京急本線・久里浜線 普通 (京急久里浜 → 品川),京浜急行電鉄,train,,,unmatched,none
+frx-osm-rel-21320561,21320561,京急本線・久里浜線 普通 (品川 → 京急久里浜),京浜急行電鉄,train,,,unmatched,none
+frx-osm-rel-21320562,21320562,京急本線・久里浜線 快特 (三崎口 → 泉岳寺),京浜急行電鉄,train,,,unmatched,none
+frx-osm-rel-21320563,21320563,京急本線・久里浜線 快特 (泉岳寺 → 三崎口),京浜急行電鉄,train,,,unmatched,none
+frx-osm-rel-21320564,21320564,京急本線・久里浜線 特急 (三崎口 → 品川),京浜急行電鉄,train,,,unmatched,none
+frx-osm-rel-21320565,21320565,京急本線・久里浜線 特急 (品川 → 三崎口),京浜急行電鉄,train,,,unmatched,none
+frx-osm-rel-21361169,21361169,信越本線（横軽線）,,railway,,,unmatched,none
+frx-osm-rel-21361895,21361895,JR埼京線 (新宿 → 大宮),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-21361896,21361896,JR埼京線 (大宮 → 新宿),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-21361897,21361897,JR埼京線 (大崎 → 大宮),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-21389061,21389061,多摩快速急行,小田急電鉄,train,,,unmatched,none
+frx-osm-rel-21453299,21453299,信越本線 (高崎 → 横川),東日本旅客鉄道,train,,,unmatched,none
+frx-osm-rel-21453300,21453300,信越本線 (横川 → 高崎),東日本旅客鉄道,train,,,unmatched,none
