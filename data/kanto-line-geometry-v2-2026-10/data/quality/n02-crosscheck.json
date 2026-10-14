@@ -1,0 +1,41 @@
+{
+ "sourceName": "国土数値情報(国土交通省) 鉄道データ N02-25 (2025年度版, 原典: 鉄道要覧ほか)",
+ "sourceUrl": "https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N02-v3_1.html",
+ "license": "国土数値情報利用規約 (オープンデータ規約, 出典表示)",
+ "checkedAt": null,
+ "totalFeatures": 21933,
+ "uniqueLineNames": 553,
+ "N02km_12号線大江戸線": 40.82,
+ "N02km_9号線千代田線": 25.41,
+ "N02km_4号線丸ノ内線": 24.58,
+ "N02km_山手線": 31.19,
+ "OSM_chiyoda_relations": [
+  {
+   "routeId": "frx-osm-rel-10036863",
+   "name": "小田急電鉄 千代田線直通列車",
+   "km": 49.49
+  },
+  {
+   "routeId": "frx-osm-rel-443284",
+   "name": "東京メトロ千代田線 (代々木上原->綾瀬)",
+   "km": 22.09
+  },
+  {
+   "routeId": "frx-osm-rel-8026050",
+   "name": "東京メトロ千代田線 (綾瀬->代々木上原)",
+   "km": 22.08
+  }
+ ],
+ "OSM_oedo_relations": [
+  {
+   "routeId": "frx-osm-rel-8019883",
+   "name": "都営大江戸線 : 都庁前→光が丘",
+   "km": 40.72
+  },
+  {
+   "routeId": "frx-osm-rel-3355612",
+   "name": "都営大江戸線 : 光が丘→都庁前",
+   "km": 40.67
+  }
+ ]
+}

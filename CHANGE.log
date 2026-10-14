@@ -1,5 +1,27 @@
 # CHANGE LOG
 
+## [2026-10-14] セッション（立体表示の線形データ v2）
+
+### feat: 立体表示に線形データ v2（地上・高架・地下）を追加し、既定にする
+- `data/kanto-line-geometry-v2-2026-10/`（新規, README・対応付けに使った80本）, `scripts/line-geometry/build-terrain3d-v2.mts`（新規）,
+  `scripts/line-geometry/geo.mts`（v1 と共通の計算を切り出し）, `public/data/terrain3d-lines-v2.json`（生成）
+- ユーザー提供の OSM 669 relation（Geofabrik）から、駅の位置で80路線を対応付け（v1 は45路線）。付属の対応表は v1 の名前による対応の写しなので使わない
+- 標高は持たない（元データもすべて null）。画面で地面の格子の高さに載せる
+- 全669本は約55MB のため、使った80本だけを置いた。80本から作っても全部から作っても同じファイルになることを確かめた
+
+### feat: 区間の構造で線の描き方を変え、線形データの版を切り替えられるように
+- `src/components/Terrain3DView.tsx`, `src/utils/terrain3d.ts`, `src/utils/translation.ts`
+- 高架は灰色の縁取り、地下は破線（地図の慣例）。地下の深さは分からないので地面の下に沈めず、凡例にそう書く
+- 説明の箱の先頭で v2 / v1 を切り替える。既定は v2
+
+### improve: 地面の格子を v2 の範囲まで広げる
+- `scripts/line-geometry/terrain_ground_build.py`, `public/data/terrain3d-ground.*`（371×297, 約330KB）
+- 海だけの区画は Copernicus のタイルが無い（公式のタイル一覧に無い）ので、海として扱う。一覧にあるのに取れないタイルは止める
+
+### test / docs
+- `tests/unit/data/terrain3d.test.ts`: v2 の構造の値・格子の範囲・駅の近さ・地下鉄がほぼ地下で山手線・ゆりかもめは地下でないこと
+- `docs/track-geometry.md`, `docs/data-maintenance-ledger.md`
+
 ## [2026-10-14] セッション（立体表示に地面を追加・説明の箱を折りたためるように）
 
 ### feat: 立体表示に地面（標高の面）を出す

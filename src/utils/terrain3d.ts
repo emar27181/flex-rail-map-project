@@ -7,7 +7,7 @@
  */
 import type { RouteKey } from '../data/routes';
 
-/** 表示用データの置き場所 */
+/** 表示用データの置き場所（v1）。版ごとの置き場所は TERRAIN3D_DATA_URLS */
 export const TERRAIN3D_DATA_URL = '/data/terrain3d-lines.json';
 
 /** 高さの強調倍率（水平の距離に比べて標高差は小さいので、そのままでは平らに見える） */
@@ -20,6 +20,53 @@ export interface Terrain3DRoute {
   osmRelId: number;
   osmName: string;
   paths: Terrain3DPoint[][];
+  /** 線形データ v2 のみ: paths と同じ並びで、その線の区間の構造（地上・高架・地下） */
+  structures?: Terrain3DStructure[];
+}
+
+// ─── 線形データの版 ───────────────────────────────────────────────
+// v1: 線形ごとに地面の標高を持つ（Copernicus DEM, OSM relation 100本から45路線）
+// v2: 区間の構造（地上・高架・地下）を持つ。標高は持たない（地面の格子の高さに載せる）。669 relation から80路線
+
+export type Terrain3DVersion = 'v1' | 'v2';
+/** 既定は v2（地下の区間が分かる） */
+export const TERRAIN3D_DEFAULT_VERSION: Terrain3DVersion = 'v2';
+export const TERRAIN3D_DATA_URLS: Record<Terrain3DVersion, string> = {
+  v1: '/data/terrain3d-lines.json',
+  v2: '/data/terrain3d-lines-v2.json',
+};
+
+/** 区間の構造（g=地上, e=高架, u=地下）。OSM の tunnel / bridge などのタグによる種類で、深さ・高さ（m）ではない */
+export type Terrain3DStructure = 'g' | 'e' | 'u';
+export const TERRAIN3D_STRUCTURES: readonly Terrain3DStructure[] = ['g', 'e', 'u'];
+
+export interface Terrain3DDataV2 {
+  meta: {
+    version: 2;
+    lineSource: { sourceName: string; sourceUrl: string; license: string; retrievedAt: string };
+    structure: string;
+    heightMeaning: 'none';
+  };
+  routes: { key: RouteKey; osmRelId: number; osmName: string; runs: { s: Terrain3DStructure; p: [number, number][] }[] }[];
+}
+
+/**
+ * v2 を、v1 と同じ形（点ごとに標高を持つ線）にそろえる。標高は地面の格子の値（線の下の地面）。
+ * 格子の外の点は描かない（高さが分からないので）
+ */
+export function v2ToRoutes(data: Terrain3DDataV2, ground: Terrain3DGround): Terrain3DRoute[] {
+  return data.routes.map(r => {
+    const paths: Terrain3DPoint[][] = [];
+    const structures: Terrain3DStructure[] = [];
+    for (const run of r.runs) {
+      const pts = run.p.flatMap(([lat, lng]): Terrain3DPoint[] => {
+        const ele = groundElevationAt(ground, lat, lng);
+        return ele === null ? [] : [[lat, lng, ele]];
+      });
+      if (pts.length >= 2) { paths.push(pts); structures.push(run.s); }
+    }
+    return { key: r.key, osmRelId: r.osmRelId, osmName: r.osmName, paths, structures };
+  }).filter(r => r.paths.length > 0);
 }
 
 export interface Terrain3DData {
@@ -33,7 +80,7 @@ export interface Terrain3DData {
 }
 
 /** 表示中の路線のうち、立体のデータがある路線（表示中の順を保つ） */
-export function selectTerrainRoutes(data: Terrain3DData, visible: Iterable<RouteKey>): Terrain3DRoute[] {
+export function selectTerrainRoutes(data: { routes: Terrain3DRoute[] }, visible: Iterable<RouteKey>): Terrain3DRoute[] {
   const byKey = new Map(data.routes.map(r => [r.key, r]));
   const out: Terrain3DRoute[] = [];
   for (const k of visible) {

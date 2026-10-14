@@ -13,10 +13,12 @@
  * - 対応付けの結果は data/kanto-line-geometry-2026-10/terrain3d-match-report.json に残す
  */
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'fs';
-import { join, dirname } from 'path';
+import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { routes, type RouteKey } from '../../src/data/routes';
 import type { Station } from '../../src/data/yamanote';
+import { distM, bbox, overlaps, simplify3d, round, pathKm, type P3 } from './geo.mts';
+export { simplify3d };
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..');
 const DATA_DIR = join(ROOT, 'data/kanto-line-geometry-2026-10');
@@ -34,7 +36,6 @@ export const JOIN_M = 50;
 /** 駅を1つしか含まないチェーンは、この長さ（km）以下なら丸ごと使う（終点駅の構内だけの短い way） */
 export const STATION_STUB_KM = 2;
 
-type P3 = [number, number, number];
 interface SourceLine {
   relId: number;
   lineName: string;
@@ -50,12 +51,6 @@ const latestFile = (prefix: string) => {
   return join(DATA_DIR, files[files.length - 1]);
 };
 
-/** 2点間の距離（m）。数百km以内なので正距円筒近似で足りる */
-function distM(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const k = Math.cos(((lat1 + lat2) / 2) * Math.PI / 180);
-  return Math.hypot((lat1 - lat2) * 110_540, (lon1 - lon2) * 111_320 * k);
-}
-
 interface ChainHit { chain: number; index: number; d: number }
 
 /** 駅ごとに、線のどの頂点が一番近いか（MATCH_M 以内のときだけ） */
@@ -70,41 +65,6 @@ function stationHits(stations: Station[], line: SourceLine): (ChainHit | null)[]
     });
     return best;
   });
-}
-
-function bbox(points: { lat: number; lng: number }[]) {
-  let s = 90, n = -90, w = 180, e = -180;
-  for (const p of points) { s = Math.min(s, p.lat); n = Math.max(n, p.lat); w = Math.min(w, p.lng); e = Math.max(e, p.lng); }
-  return { s, n, w, e };
-}
-const overlaps = (a: ReturnType<typeof bbox>, b: ReturnType<typeof bbox>, padDeg = 0.01) =>
-  a.s <= b.n + padDeg && b.s <= a.n + padDeg && a.w <= b.e + padDeg && b.w <= a.e + padDeg;
-
-/** 3次元の Douglas-Peucker（水平は m に直し、標高も m のまま同じ許容誤差で見る） */
-export function simplify3d(points: P3[], tolM: number): P3[] {
-  if (points.length <= 2) return points;
-  const lat0 = points[0][0];
-  const k = Math.cos(lat0 * Math.PI / 180);
-  const xyz = points.map(p => [p[1] * 111_320 * k, p[0] * 110_540, p[2]] as const);
-  const keep = new Uint8Array(points.length);
-  keep[0] = 1; keep[points.length - 1] = 1;
-  const stack: [number, number][] = [[0, points.length - 1]];
-  while (stack.length) {
-    const [a, b] = stack.pop()!;
-    const [ax, ay, az] = xyz[a]; const [bx, by, bz] = xyz[b];
-    const dx = bx - ax, dy = by - ay, dz = bz - az;
-    const len2 = dx * dx + dy * dy + dz * dz;
-    let maxD = -1, maxI = -1;
-    for (let i = a + 1; i < b; i++) {
-      const [px, py, pz] = xyz[i];
-      let t = len2 > 0 ? ((px - ax) * dx + (py - ay) * dy + (pz - az) * dz) / len2 : 0;
-      t = Math.max(0, Math.min(1, t));
-      const d = Math.hypot(px - (ax + t * dx), py - (ay + t * dy), pz - (az + t * dz));
-      if (d > maxD) { maxD = d; maxI = i; }
-    }
-    if (maxD > tolM) { keep[maxI] = 1; stack.push([a, maxI], [maxI, b]); }
-  }
-  return points.filter((_, i) => keep[i]);
 }
 
 /**
@@ -135,8 +95,6 @@ export function joinTouchingChains(chains: P3[][], joinM = JOIN_M): P3[][] {
   return out;
 }
 
-const round = (v: number, d: number) => Math.round(v * 10 ** d) / 10 ** d;
-const pathKm = (p: P3[]) => p.reduce((s, pt, i) => (i ? s + distM(p[i - 1][0], p[i - 1][1], pt[0], pt[1]) : 0), 0) / 1000;
 
 function main() {
   const srcFile = latestFile('kanto-lines-3d_');
@@ -221,4 +179,5 @@ function main() {
   console.log(`routes=${out.length} points=${report.reduce((s, r) => s + (r.points as number), 0)} → ${OUT.slice(ROOT.length + 1)}`);
 }
 
-main();
+// v2 の作成スクリプトが定数を読むときは、ここを実行しない
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();

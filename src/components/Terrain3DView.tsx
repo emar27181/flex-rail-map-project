@@ -29,8 +29,10 @@ import Checkbox from './ui/atoms/Checkbox';
 import CollapsiblePanel from './ui/molecules/CollapsiblePanel';
 import SourceDisclosure from './ui/molecules/SourceDisclosure';
 import { deviceClassOf } from '../constants/breakpoints';
+import SegmentedControl from './ui/molecules/SegmentedControl';
 import {
-  TERRAIN3D_DATA_URL, TERRAIN3D_EXAGGERATION, TERRAIN3D_GROUND_META_URL, TERRAIN3D_GROUND_BIN_URL, GROUND_WATER,
+  TERRAIN3D_DATA_URLS, TERRAIN3D_DEFAULT_VERSION, TERRAIN3D_EXAGGERATION, v2ToRoutes,
+  type Terrain3DVersion, type Terrain3DDataV2, type Terrain3DRoute, type Terrain3DStructure, TERRAIN3D_GROUND_META_URL, TERRAIN3D_GROUND_BIN_URL, GROUND_WATER,
   selectTerrainRoutes, frameFor, toLocal, extentKm, elevationNear,
   parseGround, groundCellCenter, groundElevationAt, groundWindow,
   type Terrain3DData, type Terrain3DGround, type Terrain3DGroundMeta,
@@ -64,17 +66,34 @@ const LIGHT_DIRECTION = [-1, 1.4, -1] as const;
 /** 出発・到着の印の大きさ（表示範囲に対する割合） */
 const MARKER_RATIO = 0.008;
 
-let dataPromise: Promise<Terrain3DData> | null = null;
-function loadData(): Promise<Terrain3DData> {
-  if (!dataPromise) {
-    dataPromise = fetch(TERRAIN3D_DATA_URL).then(r => {
+type LinesFile = { v1: Terrain3DData; v2: Terrain3DDataV2 };
+const linesPromises: Partial<Record<Terrain3DVersion, Promise<unknown>>> = {};
+/** 線形データ（版ごと）。一度読んだら使い回す。失敗したら次に開いたときに読み直す */
+function loadLines<V extends Terrain3DVersion>(version: V): Promise<LinesFile[V]> {
+  if (!linesPromises[version]) {
+    const p = fetch(TERRAIN3D_DATA_URLS[version]).then(r => {
       if (!r.ok) throw new Error(String(r.status));
-      return r.json() as Promise<Terrain3DData>;
+      return r.json();
     });
-    dataPromise.catch(() => { dataPromise = null; });
+    p.catch(() => { delete linesPromises[version]; });
+    linesPromises[version] = p;
   }
-  return dataPromise;
+  return linesPromises[version] as Promise<LinesFile[V]>;
 }
+
+/**
+ * 区間の構造ごとの線の描き方（地図の慣例: 高架は縁取り、地下は破線）。
+ * 地下の深さは分からないので、地面の位置に破線で描く（地下に沈めない）
+ */
+const STRUCTURE_STYLE: Record<Terrain3DStructure, { casing: boolean; dashed: boolean; opacity: number }> = {
+  g: { casing: false, dashed: false, opacity: 1 },
+  e: { casing: true, dashed: false, opacity: 1 },
+  u: { casing: false, dashed: true, opacity: 0.85 },
+};
+/** 高架の縁取りの太さ（線の両側に足す px） */
+const CASING_EXTRA_PX = 1.5;
+/** 地下の破線の長さ・間隔（表示範囲に対する割合。拡大しても見え方がそろうように範囲から決める） */
+const DASH_RATIO = { dash: 0.006, gap: 0.004 } as const;
 
 let groundPromise: Promise<Terrain3DGround> | null = null;
 function loadGround(): Promise<Terrain3DGround> {
@@ -155,8 +174,10 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
 }) => {
   const colors = getThemeColors(theme);
   const hostRef = useRef<HTMLDivElement>(null);
-  const [data, setData] = useState<Terrain3DData | null>(null);
-  const [error, setError] = useState(false);
+  const [version, setVersion] = useState<Terrain3DVersion>(TERRAIN3D_DEFAULT_VERSION);
+  const [v1, setV1] = useState<Terrain3DData | null>(null);
+  const [v2, setV2] = useState<Terrain3DDataV2 | null>(null);
+  const [errorVersion, setErrorVersion] = useState<Terrain3DVersion | null>(null);
   const [exaggeration, setExaggeration] = useState<number>(TERRAIN3D_EXAGGERATION.default);
   const [ground, setGround] = useState<Terrain3DGround | null>(null);
   const [groundError, setGroundError] = useState(false);
@@ -166,12 +187,29 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
 
   useEffect(() => {
     let alive = true;
-    loadData().then(d => { if (alive) setData(d); }).catch(() => { if (alive) setError(true); });
     loadGround().then(g => { if (alive) setGround(g); }).catch(() => { if (alive) setGroundError(true); });
     return () => { alive = false; };
   }, []);
 
-  const shown = useMemo(() => (data ? selectTerrainRoutes(data, visibleRoutes) : []), [data, visibleRoutes]);
+  useEffect(() => {
+    let alive = true;
+    setErrorVersion(null);
+    if (version === 'v1') loadLines('v1').then(d => { if (alive) setV1(d); }).catch(() => { if (alive) setErrorVersion('v1'); });
+    else loadLines('v2').then(d => { if (alive) setV2(d); }).catch(() => { if (alive) setErrorVersion('v2'); });
+    return () => { alive = false; };
+  }, [version]);
+
+  /** 選んだ版の線（v1 と同じ形）。v2 は地面の高さに載せるので、地面を読み終えるまで null */
+  const lineRoutes = useMemo<Terrain3DRoute[] | null>(() => {
+    if (version === 'v1') return v1?.routes ?? null;
+    return v2 && ground ? v2ToRoutes(v2, ground) : null;
+  }, [version, v1, v2, ground]);
+  const data = lineRoutes ? { routes: lineRoutes } : null;
+  // v2 は地面の高さを使うので、地面が読めなければ描けない
+  const error = errorVersion === version || (version === 'v2' && groundError);
+  const lineSourceName = version === 'v1' ? v1?.meta.elevationSource.sourceName : null;
+
+  const shown = useMemo(() => (lineRoutes ? selectTerrainRoutes({ routes: lineRoutes }, visibleRoutes) : []), [lineRoutes, visibleRoutes]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -251,31 +289,50 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
 
     for (const route of shown) {
       const color = colorOf(route.key);
-      for (const path of route.paths) {
+      route.paths.forEach((path, pi) => {
+        const style = STRUCTURE_STYLE[route.structures?.[pi] ?? 'g'];
         const pts = path.map(([lat, lng, ele]) => toLocal(frame, lat, lng, lineElevation(lat, lng, ele), exaggeration));
-        // 線
         const geometry = new LineGeometry();
         geometry.setPositions(pts.flat());
-        const material = new LineMaterial({ color, linewidth: LINE_WIDTH_PX, worldUnits: false });
+        disposables.push(geometry);
+        // 高架: 灰色の太い線を下に敷いて縁取る（橋の表し方。背景色だとダークで黒い点線に見えた）
+        if (style.casing) {
+          const casingMaterial = new LineMaterial({ color: colors.textSecondary, linewidth: LINE_WIDTH_PX + CASING_EXTRA_PX * 2, worldUnits: false });
+          casingMaterial.resolution.set(width, height);
+          lineMaterials.push(casingMaterial);
+          const casing = new Line2(geometry, casingMaterial);
+          casing.renderOrder = 2;
+          scene.add(casing);
+          disposables.push(casingMaterial);
+        }
+        // 線（地下は破線）
+        const material = new LineMaterial({
+          color, linewidth: LINE_WIDTH_PX, worldUnits: false,
+          transparent: style.opacity < 1, opacity: style.opacity,
+          dashed: style.dashed, dashSize: size * DASH_RATIO.dash, gapSize: size * DASH_RATIO.gap,
+        });
         material.resolution.set(width, height);
         lineMaterials.push(material);
         const line = new Line2(geometry, material);
-        line.renderOrder = 2;
+        if (style.dashed) line.computeLineDistances();
+        line.renderOrder = 3;
         scene.add(line);
-        disposables.push(geometry, material);
+        disposables.push(material);
         if (groundShown) {
           // 山などの地面に隠れた部分は、同じ線を薄く・奥行きを無視して描いて透かす
           const hiddenMaterial = new LineMaterial({
             color, linewidth: LINE_WIDTH_PX, worldUnits: false,
             transparent: true, opacity: HIDDEN_LINE_OPACITY, depthTest: false, depthWrite: false,
+            dashed: style.dashed, dashSize: size * DASH_RATIO.dash, gapSize: size * DASH_RATIO.gap,
           });
           hiddenMaterial.resolution.set(width, height);
           lineMaterials.push(hiddenMaterial);
           const hidden = new Line2(geometry, hiddenMaterial);
+          if (style.dashed) hidden.computeLineDistances();
           hidden.renderOrder = 1;
           scene.add(hidden);
           disposables.push(hiddenMaterial);
-          continue; // 地面があるときは海面までの幕は要らない（地面に埋もれる）
+          return; // 地面があるときは海面までの幕は要らない（地面に埋もれる）
         }
         // 海面までの幕（三角形の帯）
         const curtain = new THREE.BufferGeometry();
@@ -291,7 +348,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
         });
         scene.add(new THREE.Mesh(curtain, curtainMaterial));
         disposables.push(curtain, curtainMaterial);
-      }
+      });
     }
 
     // 出発駅・到着駅の印と名前
@@ -371,6 +428,17 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
         bodyStyle={{ padding: `${L.sp.sm} ${L.sp.md}`, maxHeight: OVERLAY_MAX_HEIGHT, overflowY: 'auto', boxSizing: 'border-box' }}
       >
         <div data-testid="terrain3d-controls" style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
+          <SegmentedControl<Terrain3DVersion>
+            theme={theme}
+            variant="slide"
+            ariaLabel={translateUI('terrain3dVersion', language)}
+            value={version}
+            onChange={setVersion}
+            options={[
+              { value: 'v2', label: translateUI('terrain3dVersionV2', language) },
+              { value: 'v1', label: translateUI('terrain3dVersionV1', language) },
+            ]}
+          />
           {!data && !error && <div style={overlayText}>{translateUI('terrain3dLoading', language)}</div>}
           {error && <div style={overlayText}>{translateUI('terrain3dLoadError', language)}</div>}
           {data && shown.length === 0 && (
@@ -386,6 +454,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
           {data && shown.length > 0 && (
             <>
               <div style={overlayText}>{translateUI('terrain3dHeightNote', language)}</div>
+              {version === 'v2' && <StructureLegend theme={theme} language={language} />}
               <Stepper
                 theme={theme}
                 label={translateUI('terrain3dExaggeration', language)}
@@ -416,7 +485,9 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
           {data && (
             <SourceDisclosure theme={theme} label={translateUI('dataSource', language)}>
               <div><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" style={{ color: colors.text }}>© OpenStreetMap contributors (ODbL)</a></div>
-              <div>{data.meta.elevationSource.sourceName}</div>
+              {version === 'v2'
+                ? <div>{translateUI('terrain3dV2Source', language)}</div>
+                : lineSourceName && <div>{lineSourceName}</div>}
               {ground && (
                 <div>
                   <a href={ground.meta.source.sourceUrl} target="_blank" rel="noopener noreferrer" style={{ color: colors.text }}>
@@ -429,6 +500,36 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
           )}
         </div>
       </CollapsiblePanel>
+    </div>
+  );
+};
+
+/** 区間の構造の凡例（v2）。線の見本は STRUCTURE_STYLE と同じ描き方 */
+const StructureLegend: React.FC<{ theme: 'light' | 'dark'; language: Language }> = ({ theme, language }) => {
+  const colors = getThemeColors(theme);
+  const w = 28, h = 10, mid = h / 2;
+  const sample = (s: Terrain3DStructure) => (
+    <svg width={w} height={h} aria-hidden="true" style={{ flexShrink: 0 }}>
+      {STRUCTURE_STYLE[s].casing && <line x1={0} y1={mid} x2={w} y2={mid} stroke={colors.textSecondary} strokeWidth={LINE_WIDTH_PX + CASING_EXTRA_PX * 2} />}
+      <line x1={0} y1={mid} x2={w} y2={mid} stroke={colors.text} strokeWidth={LINE_WIDTH_PX}
+        strokeDasharray={STRUCTURE_STYLE[s].dashed ? '5 3' : undefined} opacity={STRUCTURE_STYLE[s].opacity} />
+    </svg>
+  );
+  const items: [Terrain3DStructure, string][] = [
+    ['g', 'terrain3dStructureAtGrade'], ['e', 'terrain3dStructureElevated'], ['u', 'terrain3dStructureUnderground'],
+  ];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xxs }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: `${L.sp.xxs} ${L.sp.md}` }}>
+        {items.map(([s, key]) => (
+          <span key={s} style={{ display: 'inline-flex', alignItems: 'center', gap: L.sp.xs, fontSize: FS.caption, color: colors.text }}>
+            {sample(s)}{translateUI(key, language)}
+          </span>
+        ))}
+      </div>
+      <div style={{ fontSize: FS.caption, color: colors.textSecondary, lineHeight: 1.5 }}>
+        {translateUI('terrain3dStructureNote', language)}
+      </div>
     </div>
   );
 };

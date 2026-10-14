@@ -1,0 +1,433 @@
+{
+ "checkedAt": "2026-10-14",
+ "checks": {
+  "json_parse_errors": [],
+  "out_of_japan_bbox": [],
+  "empty_geometry": [],
+  "duplicateRouteNames": {
+   "東武小泉線": [
+    "frx-osm-rel-11801904",
+    "frx-osm-rel-11801905",
+    "frx-osm-rel-11801906",
+    "frx-osm-rel-1949385"
+   ],
+   "つばさ列車": [
+    "frx-osm-rel-12440668",
+    "frx-osm-rel-12534440",
+    "frx-osm-rel-12534441",
+    "frx-osm-rel-1950427"
+   ],
+   "西武豊島線": [
+    "frx-osm-rel-10961873",
+    "frx-osm-rel-10961874",
+    "frx-osm-rel-5486514"
+   ],
+   "京王電鉄井の頭線": [
+    "frx-osm-rel-119303",
+    "frx-osm-rel-2920278",
+    "frx-osm-rel-5326532"
+   ],
+   "上越線": [
+    "frx-osm-rel-1924544",
+    "frx-osm-rel-21006366",
+    "frx-osm-rel-21018182"
+   ],
+   "はこね": [
+    "frx-osm-rel-3413154",
+    "frx-osm-rel-4243864",
+    "frx-osm-rel-4243866"
+   ],
+   "東京地下鉄の直通運転 - 中央線": [
+    "frx-osm-rel-10021119",
+    "frx-osm-rel-10021165"
+   ],
+   "東京地下鉄-目黒線": [
+    "frx-osm-rel-10023807",
+    "frx-osm-rel-10023808"
+   ],
+   "東京地下鉄の直通運転 - 飯能線": [
+    "frx-osm-rel-10029863",
+    "frx-osm-rel-10029864"
+   ],
+   "東武東上線準急": [
+    "frx-osm-rel-10032125",
+    "frx-osm-rel-11702746"
+   ],
+   "東京地下鉄の直通運転 - 向ヶ丘遊園バイパス線": [
+    "frx-osm-rel-10036878",
+    "frx-osm-rel-10036879"
+   ],
+   "JR埼京線 (大崎 → 大宮)": [
+    "frx-osm-rel-10372985",
+    "frx-osm-rel-21361897"
+   ],
+   "小田急箱根鉄道線": [
+    "frx-osm-rel-11072815",
+    "frx-osm-rel-11072816"
+   ],
+   "小田急通勤急行": [
+    "frx-osm-rel-11273527",
+    "frx-osm-rel-11273528"
+   ],
+   "西武鉄道西武秩父線": [
+    "frx-osm-rel-11703136",
+    "frx-osm-rel-1926312"
+   ],
+   "西武園線": [
+    "frx-osm-rel-11722741",
+    "frx-osm-rel-5486513"
+   ],
+   "JR五日市線": [
+    "frx-osm-rel-11814879",
+    "frx-osm-rel-1984869"
+   ],
+   "こまち列車": [
+    "frx-osm-rel-12437350",
+    "frx-osm-rel-1948965"
+   ],
+   "はやて列車": [
+    "frx-osm-rel-12437943",
+    "frx-osm-rel-1934573"
+   ],
+   "はやぶさ列車": [
+    "frx-osm-rel-12438356",
+    "frx-osm-rel-12438357"
+   ],
+   "やまびこ列車": [
+    "frx-osm-rel-12439067",
+    "frx-osm-rel-12439068"
+   ],
+   "なすの列車": [
+    "frx-osm-rel-12439161",
+    "frx-osm-rel-12439162"
+   ],
+   "各駅停車": [
+    "frx-osm-rel-12458960",
+    "frx-osm-rel-12458961"
+   ],
+   "かがやき": [
+    "frx-osm-rel-17348677",
+    "frx-osm-rel-17348678"
+   ],
+   "野岩鉄道会津鬼怒川線": [
+    "frx-osm-rel-17656091",
+    "frx-osm-rel-5751783"
+   ],
+   "上越新幹線": [
+    "frx-osm-rel-1860557",
+    "frx-osm-rel-18877841"
+   ],
+   "しおさい": [
+    "frx-osm-rel-18819167",
+    "frx-osm-rel-1949514"
+   ],
+   "秩父本線": [
+    "frx-osm-rel-1926309",
+    "frx-osm-rel-223061"
+   ],
+   "小田急電鉄多摩線": [
+    "frx-osm-rel-1942962",
+    "frx-osm-rel-9504629"
+   ],
+   "埼玉新都市交通伊奈線": [
+    "frx-osm-rel-1949290",
+    "frx-osm-rel-9346453"
+   ]
+  },
+  "stationTrackDistanceOver300m": [
+   {
+    "chiyoda-line": []
+   },
+   {
+    "oedo-line": []
+   }
+  ],
+  "elevationDatumSet": [
+   "TP (東京湾平均海面)"
+  ],
+  "datumMixing": false,
+  "shortUndergroundSegments": [
+   [
+    "frx-osm-rel-12213561",
+    "JR宇都宮線 (黒磯=>東京)",
+    {
+     "at_grade": 148854.0,
+     "elevated": 14993.5,
+     "underground": 91.4
+    }
+   ],
+   [
+    "frx-osm-rel-12210362",
+    "JR宇都宮線 (東京=>黒磯)",
+    {
+     "at_grade": 149973.9,
+     "elevated": 13812.2,
+     "underground": 127.0
+    }
+   ],
+   [
+    "frx-osm-rel-10032017",
+    "東武東上線 (寄居=>池袋)",
+    {
+     "at_grade": 73226.1,
+     "elevated": 2308.6,
+     "underground": 11.0
+    }
+   ],
+   [
+    "frx-osm-rel-10032125",
+    "東武東上線準急",
+    {
+     "at_grade": 62526.7,
+     "elevated": 1905.3,
+     "underground": 11.0
+    }
+   ],
+   [
+    "frx-osm-rel-1972958",
+    "TJライナー (小川町=>池袋)",
+    {
+     "at_grade": 62434.6,
+     "elevated": 1912.1,
+     "underground": 11.0
+    }
+   ],
+   [
+    "frx-osm-rel-14330371",
+    "常磐快速線 (取手->品川)",
+    {
+     "at_grade": 37099.5,
+     "elevated": 13087.4,
+     "underground": 118.1
+    }
+   ],
+   [
+    "frx-osm-rel-14330372",
+    "常磐快速線 (品川->取手)",
+    {
+     "at_grade": 36965.5,
+     "elevated": 13065.0,
+     "underground": 115.5
+    }
+   ],
+   [
+    "frx-osm-rel-11763510",
+    "ちちぶ (池袋=>飯能)",
+    {
+     "underground": 146.6,
+     "at_grade": 35563.0,
+     "elevated": 7958.1
+    }
+   ],
+   [
+    "frx-osm-rel-9477760",
+    "西武鉄道池袋線 (池袋=>飯能)",
+    {
+     "underground": 146.6,
+     "at_grade": 35563.0,
+     "elevated": 7955.4
+    }
+   ],
+   [
+    "frx-osm-rel-1972959",
+    "ちちぶ (飯能=>池袋)",
+    {
+     "underground": 146.8,
+     "at_grade": 31565.3,
+     "elevated": 11933.4
+    }
+   ],
+   [
+    "frx-osm-rel-1872550",
+    "JR日光線",
+    {
+     "at_grade": 41772.8,
+     "elevated": 435.6,
+     "underground": 58.6
+    }
+   ],
+   [
+    "frx-osm-rel-10032124",
+    "東京地下鉄の直通運転 - 東武東上線 : 森林公園→和光市",
+    {
+     "at_grade": 38933.4,
+     "elevated": 1501.3,
+     "underground": 11.0
+    }
+   ],
+   [
+    "frx-osm-rel-10032126",
+    "東京地下鉄の直通運転 - 東武東上線 : 和光市→森林公園",
+    {
+     "at_grade": 38852.7,
+     "underground": 90.5,
+     "elevated": 1496.7
+    }
+   ],
+   [
+    "frx-osm-rel-12250870",
+    "東京地下鉄の直通運転 - 西武池袋線 : 練馬→飯能",
+    {
+     "elevated": 6717.4,
+     "at_grade": 31007.6,
+     "underground": 27.1
+    }
+   ],
+   [
+    "frx-osm-rel-12250869",
+    "東京地下鉄の直通運転 - 西武池袋線 : 飯能→練馬",
+    {
+     "at_grade": 31034.6,
+     "elevated": 6674.9,
+     "underground": 28.1
+    }
+   ],
+   [
+    "frx-osm-rel-19903351",
+    "JR南武線 快速 (川崎 => 立川)",
+    {
+     "underground": 116.6,
+     "at_grade": 26935.0,
+     "elevated": 8340.1
+    }
+   ],
+   [
+    "frx-osm-rel-1834403",
+    "JR南武線 各駅停車 (川崎 => 立川)",
+    {
+     "underground": 116.9,
+     "at_grade": 26896.7,
+     "elevated": 8339.6
+    }
+   ],
+   [
+    "frx-osm-rel-1949383",
+    "上信電鉄上信線",
+    {
+     "at_grade": 33376.6,
+     "elevated": 937.0,
+     "underground": 50.4
+    }
+   ],
+   [
+    "frx-osm-rel-5430106",
+    "上野東京ライン (東京=>大宮)",
+    {
+     "at_grade": 23148.0,
+     "elevated": 7535.6,
+     "underground": 83.2
+    }
+   ],
+   [
+    "frx-osm-rel-5195693",
+    "上野東京ライン (大宮=>東京)",
+    {
+     "underground": 81.4,
+     "at_grade": 23320.6,
+     "elevated": 7217.1
+    }
+   ],
+   [
+    "frx-osm-rel-10025277",
+    "JR常磐緩行線 （取手=>綾瀬）",
+    {
+     "at_grade": 24652.7,
+     "elevated": 4993.4,
+     "underground": 92.6
+    }
+   ],
+   [
+    "frx-osm-rel-1949516",
+    "鹿島臨海鉄道鹿島臨港線",
+    {
+     "at_grade": 19972.5,
+     "underground": 99.6
+    }
+   ],
+   [
+    "frx-osm-rel-11801443",
+    "東武鬼怒川線",
+    {
+     "at_grade": 17726.3,
+     "elevated": 652.1,
+     "underground": 46.6
+    }
+   ],
+   [
+    "frx-osm-rel-5485482",
+    "東武鬼怒川線 (下今市=>新藤原)",
+    {
+     "at_grade": 15527.7,
+     "elevated": 652.1,
+     "underground": 46.6
+    }
+   ],
+   [
+    "frx-osm-rel-11801442",
+    "東武鬼怒川線 (新藤原=>下今市)",
+    {
+     "at_grade": 15519.4,
+     "elevated": 652.1,
+     "underground": 46.6
+    }
+   ],
+   [
+    "frx-osm-rel-12419662",
+    "宇都宮ライトレール（上り）",
+    {
+     "at_grade": 12351.2,
+     "elevated": 2113.3,
+     "underground": 80.0
+    }
+   ],
+   [
+    "frx-osm-rel-12419659",
+    "宇都宮ライトレール（下り）",
+    {
+     "at_grade": 12314.9,
+     "elevated": 2121.3,
+     "underground": 80.4
+    }
+   ],
+   [
+    "frx-osm-rel-2060696",
+    "京成電鉄 千原線 (千葉中央 → ちはら台)",
+    {
+     "elevated": 6949.1,
+     "at_grade": 3901.9,
+     "underground": 70.7
+    }
+   ],
+   [
+    "frx-osm-rel-9480229",
+    "京成電鉄 千原線 (ちはら台 → 千葉中央)",
+    {
+     "underground": 74.6,
+     "at_grade": 3901.3,
+     "elevated": 6948.1
+    }
+   ],
+   [
+    "frx-osm-rel-20999319",
+    "JR赤羽線",
+    {
+     "at_grade": 6997.8,
+     "elevated": 2150.7,
+     "underground": 26.0
+    }
+   ]
+  ]
+ },
+ "anomalies": {},
+ "counts": {
+  "routeFiles": 669,
+  "features": 47026,
+  "structureKmByType": {
+   "at_grade": 20324.0,
+   "elevated": 10348.5,
+   "underground": 3918.3
+  },
+  "sampleStations": 58,
+  "sampleDepthNull": 51
+ }
+}

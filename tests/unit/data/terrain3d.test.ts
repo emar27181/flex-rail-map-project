@@ -10,7 +10,7 @@ import { join } from 'node:path';
 import { routes, type RouteKey } from '../../../src/data/routes';
 import {
   selectTerrainRoutes, frameFor, toLocal, elevationNear, nearestOnPaths,
-  parseGround, groundElevationAt, groundWindow, groundCellCenter, GROUND_WATER,
+  parseGround, groundElevationAt, v2ToRoutes, TERRAIN3D_STRUCTURES, TERRAIN3D_DEFAULT_VERSION, type Terrain3DDataV2, groundWindow, groundCellCenter, GROUND_WATER,
   type Terrain3DGroundMeta, type Terrain3DData,
 } from '../../../src/utils/terrain3d';
 
@@ -164,5 +164,59 @@ describe('地面の計算', () => {
   it('路線の範囲にかかる格子だけを切り出す', () => {
     const route = { key: 'yamanote' as RouteKey, osmRelId: 0, osmName: '', paths: [[[35.75, 139.25, 0], [35.6, 139.4, 0]] as [number, number, number][]] };
     expect(groundWindow(g, [route], 0)).toEqual({ r0: 0, r1: 1, c0: 0, c1: 1 });
+  });
+});
+
+const v2 = JSON.parse(readFileSync(join(__dirname, '../../../public/data/terrain3d-lines-v2.json'), 'utf8')) as Terrain3DDataV2;
+const v2Routes = v2ToRoutes(v2, ground);
+
+describe('立体表示のデータ v2（区間の構造つき）', () => {
+  const kmBy = (key: string) => {
+    const r = v2.routes.find(x => x.key === key)!;
+    const km: Record<string, number> = { g: 0, e: 0, u: 0 };
+    for (const run of r.runs) for (let i = 1; i < run.p.length; i++) {
+      km[run.s] += Math.hypot((run.p[i][0] - run.p[i - 1][0]) * 110.54, (run.p[i][1] - run.p[i - 1][1]) * 90.5);
+    }
+    const total = km.g + km.e + km.u;
+    return { underground: km.u / total, elevated: km.e / total };
+  };
+
+  it('既定は v2。出典は OSM で、高さは持たない（地面に載せる）', () => {
+    expect(TERRAIN3D_DEFAULT_VERSION).toBe('v2');
+    expect(v2.meta.version).toBe(2);
+    expect(v2.meta.heightMeaning).toBe('none');
+    expect(v2.meta.lineSource.license).toContain('ODbL');
+  });
+
+  it('路線は実在するキーで重複せず、v1 の路線はすべて入っている', () => {
+    const keys = v2.routes.map(r => r.key);
+    expect(new Set(keys).size).toBe(keys.length);
+    for (const k of keys) expect(routes[k], k).toBeDefined();
+    for (const r of data.routes) expect(keys, r.key).toContain(r.key);
+  });
+
+  it('区間の構造は地上・高架・地下のどれかで、すべての点が地面の格子の中にある', () => {
+    for (const r of v2.routes) for (const run of r.runs) {
+      expect(TERRAIN3D_STRUCTURES, r.key).toContain(run.s);
+      expect(run.p.length, r.key).toBeGreaterThanOrEqual(2);
+      for (const [lat, lng] of run.p) expect(groundElevationAt(ground, lat, lng), `${r.key} ${lat},${lng}`).not.toBeNull();
+    }
+    // 格子の外で落ちた点が無いので、変換しても線の数は変わらない
+    expect(v2Routes.reduce((s, r) => s + r.paths.length, 0)).toBe(v2.routes.reduce((s, r) => s + r.runs.length, 0));
+  });
+
+  it('対応付けた路線の駅は、9割以上が線形の近く（300m以内）にある', () => {
+    for (const r of v2Routes) {
+      const stations = routes[r.key]!;
+      const near = stations.filter(s => nearestOnPaths([r], s.lat, s.lng)!.km <= 0.3);
+      expect(near.length / stations.length, r.key).toBeGreaterThanOrEqual(0.9);
+    }
+  });
+
+  it('地下鉄はほぼ地下、山手線・ゆりかもめはほぼ地下ではない（構造の取り違えがない）', () => {
+    for (const k of ['ginzaLine', 'nambokuLine', 'toeiOedoLine', 'toeiAsakusaLine']) expect(kmBy(k).underground, k).toBeGreaterThan(0.9);
+    expect(kmBy('yamanote').underground).toBeLessThan(0.1);
+    expect(kmBy('yurikamomeLine').underground).toBeLessThan(0.05);
+    expect(kmBy('yurikamomeLine').elevated).toBeGreaterThan(0.9);
   });
 });
