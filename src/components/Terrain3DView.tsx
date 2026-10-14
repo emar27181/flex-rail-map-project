@@ -296,12 +296,12 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
 
     const width = host.clientWidth || 1;
     const height = host.clientHeight || 1;
-    const camera = new THREE.PerspectiveCamera(45, width / height, size / 1000, size * 20);
+    const camera = new THREE.PerspectiveCamera(45, width / height, size * 0.002, size * 12);
     // 縦長の画面（スマホ）では横の画角が狭いので、横幅に収まるまで離す
     const fit = Math.max(1, PORTRAIT_FIT_ASPECT / (width / height));
     camera.position.set(size * 0.4 * fit, size * 0.65 * fit, size * 0.9 * fit);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(width, height);
     host.appendChild(renderer.domElement);
@@ -443,11 +443,8 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
     const render = () => {
       raf = requestAnimationFrame(render);
       controls.update();
-      // 霧と描く距離を、カメラから見ている中心までの距離に合わせる
-      const d = camera.position.distanceTo(controls.target);
-      if (scene.fog instanceof THREE.Fog) { scene.fog.near = d * FOG_RANGE.near; scene.fog.far = d * FOG_RANGE.far; }
-      const far = d * FOG_RANGE.far * 1.2;
-      if (Math.abs(camera.far - far) > far * 0.05) { camera.far = far; camera.near = far / 20000; camera.updateProjectionMatrix(); }
+      // Keep clipping planes stable while orbiting/zooming. Repeated near/far
+      // changes reduce depth precision and cause visible terrain/rail flicker.
       renderer.render(scene, camera);
       labelRenderer.render(scene, camera);
     };
