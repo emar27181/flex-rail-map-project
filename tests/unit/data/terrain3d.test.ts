@@ -10,7 +10,7 @@ import { join } from 'node:path';
 import { routes, type RouteKey } from '../../../src/data/routes';
 import {
   selectTerrainRoutes, frameFor, toLocal, elevationNear, nearestOnPaths,
-  parseGround, groundElevationAt, v2ToRoutes, TERRAIN3D_STRUCTURES, TERRAIN3D_DEFAULT_VERSION, type Terrain3DDataV2, groundWindow, groundCellCenter, GROUND_WATER,
+  parseGround, groundElevationAt, v2ToRoutes, TERRAIN3D_STRUCTURES, TERRAIN3D_DEFAULT_VERSION, type Terrain3DDataV2, groundCellCenter, GROUND_WATER,
   type Terrain3DGroundMeta, type Terrain3DData,
 } from '../../../src/utils/terrain3d';
 
@@ -120,7 +120,7 @@ describe('立体表示の地面', () => {
     let min = Infinity, max = -Infinity;
     for (const v of ground.elevation) { min = Math.min(min, v); max = Math.max(max, v); }
     expect(min).toBeGreaterThan(-50);
-    expect(max).toBeLessThan(2600);
+    expect(max).toBeLessThan(3800); // 富士山（3776m）を含む
     const cell = (lat: number, lng: number) => {
       const r = Math.floor((groundMeta.latMax - lat) / groundMeta.stepDeg);
       const c = Math.floor((lng - groundMeta.lngMin) / groundMeta.stepDeg);
@@ -159,11 +159,6 @@ describe('地面の計算', () => {
     expect(groundElevationAt(g, latD, lngD)).toBeCloseTo(300);
     expect(groundElevationAt(g, (latA + latD) / 2, (lngA + lngD) / 2)).toBeCloseTo(150);
     expect(groundElevationAt(g, 40, 139.5)).toBeNull();
-  });
-
-  it('路線の範囲にかかる格子だけを切り出す', () => {
-    const route = { key: 'yamanote' as RouteKey, osmRelId: 0, osmName: '', paths: [[[35.75, 139.25, 0], [35.6, 139.4, 0]] as [number, number, number][]] };
-    expect(groundWindow(g, [route], 0)).toEqual({ r0: 0, r1: 1, c0: 0, c1: 1 });
   });
 });
 

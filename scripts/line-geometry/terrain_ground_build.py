@@ -8,7 +8,7 @@
   同じ DEM なので、線形の高さと地面の高さの基準（EGM2008）がそろう
 - 1度×1度のタイル（1200×1200, 3秒角≒90m）を、STEP_DEG ごとの格子の**平均**に縮める（間引きではなく平均）
 - 水域は同じタイルに付いている水域マスク（WBM: 1=海, 2=湖, 3=川）から、格子の半分以上が水のときだけ水にする
-- 範囲は立体表示の線形（v1: terrain3d-lines.json と v2: terrain3d-lines-v2.json）の範囲に PAD_DEG を足したもの
+- 範囲は関東全域（REGION）。立体表示の線形（v1 / v2）がはみ出すときは、その範囲＋PAD_DEG まで広げる
 - 取得できなかったタイルは止める（0 や推測で埋めない）。ただし公式のタイル一覧（tileList.txt）に無いタイルは
   陸を含まない海だけの区画（Copernicus は海だけの区画のタイルを作らない）なので、海（高さ0）として扱う
 
@@ -38,6 +38,9 @@ BUCKET = 'https://copernicus-dem-90m.s3.amazonaws.com'
 STEP_DEG = 0.005
 # 線形の範囲の外に足す幅（度）
 PAD_DEG = 0.05
+# 地面は路線の周りだけでなく関東全域を覆う（立体表示で範囲を決めずに見て回れるように, 2026-10-14）。
+# 関東1都6県（伊豆諸島・小笠原を除く）がおおむね入る範囲。線形がはみ出すときは線形の範囲まで広げる
+REGION = {'s': 34.85, 'n': 37.2, 'w': 138.35, 'e': 140.95}
 # 1タイルの画素数（北緯50度まではどのタイルも 1200×1200）
 TILE_PX = 1200
 WATER_CLASSES = {1: 'ocean', 2: 'lake', 3: 'river'}
@@ -96,10 +99,10 @@ def main():
     pts += [p for r in v2['routes'] for run in r['runs'] for p in run['p']]
     lats = [p[0] for p in pts]
     lngs = [p[1] for p in pts]
-    s = math.floor((min(lats) - PAD_DEG) / STEP_DEG) * STEP_DEG
-    n = math.ceil((max(lats) + PAD_DEG) / STEP_DEG) * STEP_DEG
-    w = math.floor((min(lngs) - PAD_DEG) / STEP_DEG) * STEP_DEG
-    e = math.ceil((max(lngs) + PAD_DEG) / STEP_DEG) * STEP_DEG
+    s = math.floor(min(min(lats) - PAD_DEG, REGION['s']) / STEP_DEG) * STEP_DEG
+    n = math.ceil(max(max(lats) + PAD_DEG, REGION['n']) / STEP_DEG) * STEP_DEG
+    w = math.floor(min(min(lngs) - PAD_DEG, REGION['w']) / STEP_DEG) * STEP_DEG
+    e = math.ceil(max(max(lngs) + PAD_DEG, REGION['e']) / STEP_DEG) * STEP_DEG
 
     # 必要なタイルをつないだ1枚の画像（北が上）
     lat_tiles = list(range(math.floor(s), math.ceil(n)))
