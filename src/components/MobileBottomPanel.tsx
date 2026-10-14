@@ -271,6 +271,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
       {/* フローティングボタングループ（左下） */}
       <div
         ref={groupRef}
+        data-mobile-map-controls
         style={{
           position: 'fixed',
           bottom: safeBottom,

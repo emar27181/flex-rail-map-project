@@ -31,7 +31,14 @@ import Checkbox from './ui/atoms/Checkbox';
 import FloatingIconButton from './ui/atoms/FloatingIconButton';
 import CollapsiblePanel from './ui/molecules/CollapsiblePanel';
 import SourceDisclosure from './ui/molecules/SourceDisclosure';
+import { anchoredPointLabel } from './ui/molecules/anchoredPointLabel';
 import { deviceClassOf } from '../constants/breakpoints';
+import { initialDisplayUrlOptions } from '../utils/mapDisplayUrlParam';
+import { captureTerrainCamera, restoreTerrainCamera, type TerrainCameraSnapshot } from '../utils/terrain3dCamera';
+import {
+  TERRAIN3D_GROUND_STYLES, terrain3dPalette, loadTerrain3dGroundStyle, saveTerrain3dGroundStyle,
+  type Terrain3DGroundStyle,
+} from '../utils/terrain3dAppearance';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import {
   TERRAIN3D_DATA_URLS, TERRAIN3D_DEFAULT_VERSION, TERRAIN3D_EXAGGERATION, v2ToRoutes,
@@ -49,7 +56,7 @@ const OVERLAY_BOTTOM = aboveFloatingButtons(1);
  * 操作の感度。OrbitControls の既定（回転・移動・拡大とも 1）では速すぎて、
  * 少し指を動かしただけで大きく回ってしまったため下げている
  */
-const CONTROL_SPEED = { rotate: 0.45, pan: 0.6, zoom: 0.6, damping: 0.1 } as const;
+const CONTROL_SPEED = { rotate: 0.45, pan: 0.6, zoom: 0.3, damping: 0.1 } as const;
 /** 画面の縦横比（幅/高さ）がこれより小さいときは、カメラをその分だけ離す */
 const PORTRAIT_FIT_ASPECT = 1.2;
 /** 地面を分ける塊の大きさ（格子の数）。画面の外の塊は描かないので、関東全域を出しても軽い */
@@ -66,14 +73,14 @@ const FOG_RANGE = { near: 1.6, far: 4.5 } as const;
 const CLIP_RANGE = { near: 0.005, far: FOG_RANGE.far * 1.2 } as const;
 /** どこまで引いて見られるか（表示範囲に対する倍率）。関東全域が入るくらい */
 const MAX_DISTANCE_RATIO = 6;
+/** Prevent zooming through tracks: near clipping distance relative to visible rail extent. */
+const MIN_DISTANCE_RATIO = 0.025;
 /** 地面の色を高い側の色にしきる標高（m）。関東平野の低い土地の差も見えるよう、対数で補間する */
 const GROUND_TINT_MAX_M = 1500;
 /** 地面に隠れた線を透かして見せる濃さ */
 const HIDDEN_LINE_OPACITY = 0.28;
 /** 陰影の光の向き（地図の陰影図の慣例どおり北西から。x=東, y=上, z=南） */
 const LIGHT_DIRECTION = [-1, 1.4, -1] as const;
-/** 出発・到着の印の大きさ（表示範囲に対する割合） */
-const MARKER_RATIO = 0.008;
 
 type LinesFile = { v1: Terrain3DData; v2: Terrain3DDataV2 };
 const linesPromises: Partial<Record<Terrain3DVersion, Promise<unknown>>> = {};
@@ -219,16 +226,21 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
 }) => {
   const colors = getThemeColors(theme);
   const hostRef = useRef<HTMLDivElement>(null);
-  const [version, setVersion] = useState<Terrain3DVersion>(TERRAIN3D_DEFAULT_VERSION);
+  const cameraSnapshotRef = useRef<TerrainCameraSnapshot | null>(null);
+  const [version, setVersion] = useState<Terrain3DVersion>(() => initialDisplayUrlOptions().terrainVersion ?? TERRAIN3D_DEFAULT_VERSION);
   const [v1, setV1] = useState<Terrain3DData | null>(null);
   const [v2, setV2] = useState<Terrain3DDataV2 | null>(null);
   const [errorVersion, setErrorVersion] = useState<Terrain3DVersion | null>(null);
   const [exaggeration, setExaggeration] = useState<number>(TERRAIN3D_EXAGGERATION.default);
   const [ground, setGround] = useState<Terrain3DGround | null>(null);
   const [groundError, setGroundError] = useState(false);
-  const [showGround, setShowGround] = useState(true);
-  // 説明と操作の箱。設定ボタンがあるときは閉じて始める（地図を広く見せる）。
-  // ボタンが無いときはスマホだけ閉じて始める
+  const [showGround, setShowGround] = useState(() => initialDisplayUrlOptions().ground ?? true);
+  const [groundStyle, setGroundStyle] = useState<Terrain3DGroundStyle>(() => initialDisplayUrlOptions().groundStyle ?? loadTerrain3dGroundStyle());
+  useEffect(() => { saveTerrain3dGroundStyle(groundStyle); }, [groundStyle]);
+  // 説明と操作の箱。設定ボタン（toggleSlot）があるときは閉じて始める（地図を広く見せる）。
+  // ボタンが無いときはスマホだけ閉じて始める。
+  // 以前はスマホで閉じた箱の見出し（「N / M 路線を立体表示中」）を「表示切替」の右に寄せていたが、
+  // その位置には立体のアイコンを置く（2026-10-14 ユーザー指示）
   const [panelOpen, setPanelOpen] = useState(() => !toggleSlot && (typeof window === 'undefined' || deviceClassOf(window.innerWidth) !== 'mobile'));
   const panelId = useId();
 
@@ -267,9 +279,11 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
     const frame = frameFor(shown);
     if (!frame) return;
     const size = extentKm(frame, shown);
+    const cameraFrame = JSON.stringify([frame.lat0, frame.lng0, frame.kmPerLng, size]);
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(colors.background);
+    const palette = terrain3dPalette(groundStyle, theme);
+    scene.background = new THREE.Color(palette.background);
 
     const width = host.clientWidth || 1;
     const height = host.clientHeight || 1;
@@ -306,7 +320,10 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
     controls.dampingFactor = CONTROL_SPEED.damping;
     controls.target.set(0, 0, 0);
     controls.maxPolarAngle = Math.PI / 2 - 0.02; // 地面の下からは見ない
+    controls.minDistance = Math.max(size * MIN_DISTANCE_RATIO, camera.near * 2);
     controls.maxDistance = size * MAX_DISTANCE_RATIO;
+    restoreTerrainCamera(camera, controls.target, cameraFrame, cameraSnapshotRef.current);
+    controls.update();
 
     const disposables: { dispose: () => void }[] = [];
     const lineMaterials: LineMaterial[] = [];
@@ -314,13 +331,11 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
     const groundData = showGround ? ground : null;
     const groundShown = groundData !== null;
     if (groundData) {
-      const groundMesh = buildGround(groundData, frame, exaggeration, {
-        low: colors.terrainLow, high: colors.terrainHigh, water: colors.terrainWater,
-      });
+      const groundMesh = buildGround(groundData, frame, exaggeration, palette);
       scene.add(groundMesh.group);
       disposables.push(groundMesh);
-      scene.fog = new THREE.Fog(colors.background, size * FOG_RANGE.near, size * FOG_RANGE.far);
-      scene.add(new THREE.HemisphereLight(NEUTRAL.white, colors.terrainWater, 0.9));
+      scene.fog = new THREE.Fog(palette.background, size * FOG_RANGE.near, size * FOG_RANGE.far);
+      scene.add(new THREE.HemisphereLight(NEUTRAL.white, palette.water, 0.9));
       const sun = new THREE.DirectionalLight(NEUTRAL.white, 1.6);
       sun.position.set(...LIGHT_DIRECTION);
       scene.add(sun);
@@ -408,19 +423,8 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       const ele = elevationNear(shown, st.lat, st.lng);
       if (ele === null) continue; // 表示中の線形から離れた駅は、高さが分からないので描かない
       const pos = toLocal(frame, st.lat, st.lng, lineElevation(st.lat, st.lng, ele), exaggeration);
-      const sphereGeo = new THREE.SphereGeometry(size * MARKER_RATIO, 16, 12);
-      const sphereMat = new THREE.MeshBasicMaterial({ color });
-      const sphere = new THREE.Mesh(sphereGeo, sphereMat);
-      sphere.position.set(...pos);
-      scene.add(sphere);
-      disposables.push(sphereGeo, sphereMat);
-      const label = document.createElement('div');
-      label.textContent = translateStation(st.name, language);
-      Object.assign(label.style, {
-        background: color, color: colors.onPrimary, fontSize: FS.caption, fontWeight: 'bold',
-        padding: `${L.sp.xxs} ${L.sp.xs}`, borderRadius: L.r.control, whiteSpace: 'nowrap',
-        transform: `translateY(-${L.sp.lg})`,
-      } satisfies Partial<CSSStyleDeclaration>);
+      // 印と文字は画面上の固定寸法。範囲やカメラ距離で肥大化させない。
+      const label = anchoredPointLabel(translateStation(st.name, language), color, theme);
       const obj = new CSS2DObject(label);
       obj.position.set(...pos);
       scene.add(obj);
@@ -458,6 +462,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
     ro.observe(host);
 
     return () => {
+      cameraSnapshotRef.current = captureTerrainCamera(camera, controls.target, cameraFrame);
       cancelAnimationFrame(raf);
       ro.disconnect();
       controls.dispose();
@@ -466,7 +471,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       host.removeChild(renderer.domElement);
       host.removeChild(labelRenderer.domElement);
     };
-  }, [shown, exaggeration, theme, departure, arrival, colorOf, language, ground, showGround, lineWidth]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [shown, exaggeration, theme, departure, arrival, colorOf, language, ground, showGround, groundStyle, lineWidth]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const overlayText: React.CSSProperties = { fontSize: FS.caption, color: colors.textSecondary, lineHeight: 1.5 };
 
@@ -548,6 +553,13 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
               >
                 {translateUI('terrain3dGroundLabel', language)}
               </Checkbox>
+              {showGround && !groundError && <SegmentedControl
+                theme={theme} size="sm" ariaLabel={translateUI('terrain3dGroundStyle', language)}
+                value={groundStyle} onChange={setGroundStyle}
+                options={TERRAIN3D_GROUND_STYLES.map(value => ({
+                  value, label: translateUI(value === 'simple' ? 'terrain3dGroundSimple' : 'terrain3dGroundElevation', language),
+                }))}
+              />}
               <div style={overlayText}>
                 {translateUI(groundError ? 'terrain3dGroundLoadError' : 'terrain3dGroundNote', language)}
               </div>

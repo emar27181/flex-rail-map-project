@@ -1912,6 +1912,9 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "地面を表示",
     english: "Show ground"
   },
+  terrain3dGroundStyle: { japanese: "地表カラー", english: "Ground colors" },
+  terrain3dGroundSimple: { japanese: "シンプル（暗色）", english: "Simple (dark)" },
+  terrain3dGroundElevation: { japanese: "標高（従来）", english: "Elevation (original)" },
   terrain3dGroundNote: {
     japanese: "地面は同じ標高データを約500m四方で平均したものです。地面に隠れた線は薄く透けて見えます。",
     english: "The ground is the same elevation data averaged over about 500 m cells. Lines hidden by the ground are shown faintly."
@@ -2352,6 +2355,9 @@ export const uiChinese: Record<string, string> = {
   terrain3dStructureNote: "区间类型依据 OpenStreetMap 的隧道·桥梁标签。地下深度未知，因此以虚线绘制在地面位置。",
   terrain3dV2Source: "线路与区间类型: OpenStreetMap（Geofabrik 关东提取, 2026-10-14）。高度为地面高程（Copernicus DEM 网格）",
   terrain3dGroundLabel: "显示地面",
+  terrain3dGroundStyle: "地表配色",
+  terrain3dGroundSimple: "简洁（深色）",
+  terrain3dGroundElevation: "高程（原有）",
   terrain3dGroundNote: "地面为同一高程数据按约500米网格取平均。被地面遮挡的线路以半透明显示。",
   terrain3dGroundLoadError: "无法加载地面数据，仅显示线路。",
   terrain3dHint: "单指或左键拖动移动，双指或右键拖动旋转，双指捏合或滚轮缩放",
@@ -2712,6 +2718,9 @@ export const uiKorean: Record<string, string> = {
   terrain3dStructureNote: "구간 종류는 OpenStreetMap의 터널·교량 태그에 따른 것입니다. 지하 깊이는 알 수 없어 지면 위치에 점선으로 그렸습니다.",
   terrain3dV2Source: "선형과 구간 종류: OpenStreetMap（Geofabrik 간토 추출, 2026-10-14）. 높이는 지면 표고（Copernicus DEM 격자）",
   terrain3dGroundLabel: "지면 표시",
+  terrain3dGroundStyle: "지표 색상",
+  terrain3dGroundSimple: "심플（어두운색）",
+  terrain3dGroundElevation: "표고（기존）",
   terrain3dGroundNote: "지면은 같은 표고 데이터를 약 500m 격자로 평균한 것입니다. 지면에 가려진 선은 흐리게 비쳐 보입니다.",
   terrain3dGroundLoadError: "지면 데이터를 불러오지 못했습니다. 선만 표시합니다.",
   terrain3dHint: "한 손가락·왼쪽 드래그로 이동, 두 손가락·오른쪽 드래그로 회전, 핀치·휠로 확대/축소",

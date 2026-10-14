@@ -219,6 +219,9 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 書こうとしているもの | 使うアトム |
 |---|---|
 | 円形の数値バッジ（HTML描画先） | `circularNumberBadge`（寸法・文字・円のHTML。駅/路線の知識は持たない） |
+| 非操作の小さな位置の印 | `pointMarker` / `POINT_MARKER`（画面上の外径6px、色を変えても寸法は同じ） |
+| 色付きの小ラベルの文字・余白・配色 | `textBadge` / `textBadgeStyle`（`FS.caption`・`L.sp`・`L.r`・`filledLabelColors`） |
+| 投影した点の印と小ラベル（DOM描画先） | `anchoredPointLabel`（molecule。上記2アトムを組み合わせ、点の中心を原点に固定。立体表示側は翻訳・意味の色・座標のみを渡す） |
 | 文字のボタン | `Button` |
 | アイコンだけのボタン | `IconButton`（正方形。`label` 必須） |
 | 押すと画面遷移する | `LinkButton`（要素は `<a>` のまま） |
