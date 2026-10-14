@@ -31,8 +31,6 @@ import Checkbox from './ui/atoms/Checkbox';
 import FloatingIconButton from './ui/atoms/FloatingIconButton';
 import CollapsiblePanel from './ui/molecules/CollapsiblePanel';
 import SourceDisclosure from './ui/molecules/SourceDisclosure';
-import { anchoredPointLabel } from './ui/molecules/anchoredPointLabel';
-import { POINT_MARKER } from './ui/atoms/pointMarker';
 import { plainTextLabelStyle } from './ui/atoms/textBadge';
 import { collectTerrainStations, placeLabels, estimateLabelWidth } from '../utils/terrain3dStations';
 import { deviceClassOf } from '../constants/breakpoints';
@@ -59,7 +57,10 @@ const OVERLAY_BOTTOM = aboveFloatingButtons(1);
  * 操作の感度。OrbitControls の既定（回転・移動・拡大とも 1）では速すぎて、
  * 少し指を動かしただけで大きく回ってしまったため下げている
  */
-const CONTROL_SPEED = { rotate: 0.45, pan: 0.6, zoom: 0.3, damping: 0.1 } as const;
+const CONTROL_SPEED = { rotate: 0.45, pan: 0.6, touchPan: 0.85, zoom: 0.3, damping: 0.1 } as const;
+/** 地図上の駅位置を示す実寸に近い直径。Three.jsのワールド単位はkm。 */
+const STATION_DIAMETER_KM = 0.03;
+const STATION_SURFACE_OFFSET_KM = 0.006;
 /** 画面の縦横比（幅/高さ）がこれより小さいときは、カメラをその分だけ離す */
 const PORTRAIT_FIT_ASPECT = 1.2;
 /** 地面を分ける塊の大きさ（格子の数）。画面の外の塊は描かないので、関東全域を出しても軽い */
@@ -326,6 +327,8 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
     controls.screenSpacePanning = false; // 移動は地面に沿って（画面の上下ではなく奥行き方向に動く）
     controls.rotateSpeed = CONTROL_SPEED.rotate;
     controls.panSpeed = CONTROL_SPEED.pan;
+    const setPanSpeed = (event: PointerEvent) => { controls.panSpeed = event.pointerType === 'touch' ? CONTROL_SPEED.touchPan : CONTROL_SPEED.pan; };
+    renderer.domElement.addEventListener('pointerdown', setPanSpeed);
     controls.zoomSpeed = CONTROL_SPEED.zoom;
     controls.dampingFactor = CONTROL_SPEED.damping;
     controls.target.set(0, 0, 0);
@@ -426,17 +429,26 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       });
     }
 
-    // 出発駅・到着駅の印と名前
+    // 出発・到着の位置もワールド座標の球で表示。駅名だけ画面上のラベルにする。
     const markers: [typeof departure, string][] = [[departure, SEMANTIC.departure], [arrival, SEMANTIC.arrival]];
+    const endpointGeometry = new THREE.SphereGeometry(STATION_DIAMETER_KM / 2, 10, 8);
+    disposables.push(endpointGeometry);
     for (const [st, color] of markers) {
       if (!st) continue;
       const ele = elevationNear(shown, st.lat, st.lng);
-      if (ele === null) continue; // 表示中の線形から離れた駅は、高さが分からないので描かない
+      if (ele === null) continue;
       const pos = toLocal(frame, st.lat, st.lng, lineElevation(st.lat, st.lng, ele), exaggeration);
-      // 印と文字は画面上の固定寸法。範囲やカメラ距離で肥大化させない。
-      const label = anchoredPointLabel(translateStation(st.name, language), color, theme);
+      const material = new THREE.MeshBasicMaterial({ color, depthTest: false });
+      const sphere = new THREE.Mesh(endpointGeometry, material);
+      sphere.position.set(pos[0], pos[1] + STATION_SURFACE_OFFSET_KM, pos[2]);
+      sphere.renderOrder = 6;
+      scene.add(sphere);
+      disposables.push(material);
+      const label = document.createElement('span');
+      label.textContent = translateStation(st.name, language);
+      Object.assign(label.style, plainTextLabelStyle(theme, stationLabelFontPx));
       const obj = new CSS2DObject(label);
-      obj.position.set(...pos);
+      obj.position.copy(sphere.position);
       scene.add(obj);
     }
 
@@ -452,30 +464,27 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
           return [{ ...st, pos: new THREE.Vector3(...toLocal(frame, st.lat, st.lng, lineElevation(st.lat, st.lng, ele), exaggeration)) }];
         });
       if (stations.length > 0) {
-        // 点の見た目は出発・到着の印（POINT_MARKER）と同じ大きさ・縁取りで、塗りは地の色（地図の駅の白丸と同じ）
-        const tex = document.createElement('canvas');
-        tex.width = tex.height = 64;
-        const ctx = tex.getContext('2d');
-        if (ctx) {
-          const border = 64 * POINT_MARKER.borderWidthPx / POINT_MARKER.diameterPx;
-          ctx.beginPath();
-          ctx.arc(32, 32, 32 - border / 2, 0, Math.PI * 2);
-          ctx.fillStyle = colors.surface;
-          ctx.fill();
-          ctx.lineWidth = border;
-          ctx.strokeStyle = colors.textSecondary;
-          ctx.stroke();
-        }
-        const texture = new THREE.CanvasTexture(tex);
-        const geometry = new THREE.BufferGeometry().setFromPoints(stations.map(s => s.pos));
-        const material = new THREE.PointsMaterial({
-          size: POINT_MARKER.diameterPx * renderer.getPixelRatio(), sizeAttenuation: false,
-          map: texture, transparent: true, alphaTest: 0.5, depthTest: false,
+        // 実寸基準の駅マーカー。近づけば大きく、離れれば小さく見える。
+        // 乗換駅は接続する表示中の路線色を平均（色の優先順位に依存しない）。
+        const geometry = new THREE.SphereGeometry(STATION_DIAMETER_KM / 2, 8, 6);
+        const material = new THREE.MeshBasicMaterial({ depthTest: false });
+        const markers = new THREE.InstancedMesh(geometry, material, stations.length);
+        const transform = new THREE.Object3D();
+        stations.forEach((st, i) => {
+          transform.position.copy(st.pos);
+          transform.position.y += STATION_SURFACE_OFFSET_KM;
+          transform.updateMatrix();
+          markers.setMatrixAt(i, transform.matrix);
+          const color = new THREE.Color();
+          st.routeKeys.forEach(key => color.add(new THREE.Color(colorOf(key))));
+          color.multiplyScalar(1 / st.routeKeys.length);
+          markers.setColorAt(i, color);
         });
-        const points = new THREE.Points(geometry, material);
-        points.renderOrder = 5;
-        scene.add(points);
-        disposables.push(geometry, material, texture);
+        markers.instanceMatrix.needsUpdate = true;
+        if (markers.instanceColor) markers.instanceColor.needsUpdate = true;
+        markers.renderOrder = 5;
+        scene.add(markers);
+        disposables.push(geometry, material);
 
         // 駅名: 画面に投影して、重ならないものだけを出す（毎回 DOM を全部作らず、決まった数の箱を使い回す）
         stationLayer = document.createElement('div');
@@ -492,7 +501,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
         const names = stations.map(s => translateStation(s.name, language));
         const widths = names.map(n => estimateLabelWidth(n, stationLabelFontPx));
         const lineH = stationLabelFontPx * 1.2;
-        const above = POINT_MARKER.diameterPx / 2 + parseFloat(L.sp.xxs);
+        const above = parseFloat(L.sp.xs);
         const v = new THREE.Vector3();
         updateStationLabels = () => {
           const w = host.clientWidth, h = host.clientHeight;
@@ -556,6 +565,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       cameraSnapshotRef.current = captureTerrainCamera(camera, controls.target, cameraFrame);
       cancelAnimationFrame(raf);
       ro.disconnect();
+      renderer.domElement.removeEventListener('pointerdown', setPanSpeed);
       controls.dispose();
       disposables.forEach(d => d.dispose());
       renderer.dispose();
