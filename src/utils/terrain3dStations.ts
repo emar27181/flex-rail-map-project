@@ -6,6 +6,7 @@
  *   （小さく・シンプルに。全部の駅名を出して地図を埋めない）
  */
 import type { RouteKey } from '../data/routes';
+import type { Terrain3DRoute } from './terrain3d';
 
 export interface TerrainStation {
   name: string;
@@ -47,6 +48,41 @@ export function collectTerrainStations(
     }
   }
   return out;
+}
+
+
+/** Station and rail geometry come from different datasets. Snap a marker only to
+ * its own visible line, and discard unsupported locations rather than drawing
+ * plausible-looking dots outside the track. All distances are in kilometres. */
+export const STATION_RAIL_SNAP_MAX_KM = 0.5;
+
+export function stationOnVisibleRail(
+  station: Pick<TerrainStation, 'lat' | 'lng' | 'routeKeys'>,
+  visibleRoutes: readonly Terrain3DRoute[],
+  maxKm = STATION_RAIL_SNAP_MAX_KM,
+): { lat: number; lng: number; elevationM: number; distanceKm: number } | null {
+  const keys = new Set(station.routeKeys);
+  const kmPerLng = 111.32 * Math.cos(station.lat * Math.PI / 180);
+  const kmPerLat = 110.54;
+  let best: { lat: number; lng: number; elevationM: number; distanceKm: number } | null = null;
+  for (const route of visibleRoutes) {
+    if (!keys.has(route.key)) continue;
+    for (const path of route.paths) for (let i = 1; i < path.length; i++) {
+      const [la, ln, ea] = path[i - 1];
+      const [lb, lnb, eb] = path[i];
+      const ax = (ln - station.lng) * kmPerLng;
+      const ay = (la - station.lat) * kmPerLat;
+      const dx = (lnb - ln) * kmPerLng;
+      const dy = (lb - la) * kmPerLat;
+      const lengthSquared = dx * dx + dy * dy;
+      const t = lengthSquared === 0 ? 0 : Math.max(0, Math.min(1, -(ax * dx + ay * dy) / lengthSquared));
+      const distanceKm = Math.hypot(ax + dx * t, ay + dy * t);
+      if (!best || distanceKm < best.distanceKm) {
+        best = { lat: la + (lb - la) * t, lng: ln + (lnb - ln) * t, elevationM: ea + (eb - ea) * t, distanceKm };
+      }
+    }
+  }
+  return best && best.distanceKm <= maxKm ? best : null;
 }
 
 export interface LabelBox { x: number; y: number; w: number; h: number; priority: number }
