@@ -479,6 +479,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
 
         // 駅名: 画面に投影して、重ならないものだけを出す（毎回 DOM を全部作らず、決まった数の箱を使い回す）
         stationLayer = document.createElement('div');
+        stationLayer.dataset.terrain3dStationLabels = '';
         Object.assign(stationLayer.style, { position: 'absolute', inset: '0', pointerEvents: 'none', overflow: 'hidden' });
         host.appendChild(stationLayer);
         const labelStyle = plainTextLabelStyle(theme, stationLabelFontPx);
