@@ -1,5 +1,21 @@
 # CHANGE LOG
 
+## [2026-10-14] セッション（立体表示の設定をアイコンから・ちらつき）
+
+### feat: 地図に浮かぶアイコンボタンの部品（FloatingIconButton）
+- `src/components/ui/atoms/FloatingIconButton.tsx`（新規）, `src/components/RailwayMap.tsx`（隅のボタン）, `docs/design-system.md`, `.claude/skills/design-tokens/SKILL.md`
+- 隅のボタンの寸法・地を RailwayMap の中で組み立てていたのを部品にした。`pressed` を渡すと開閉ボタン
+
+### feat: 立体表示の設定を「表示切替」の右のアイコンから開く
+- `src/components/Terrain3DView.tsx`, `src/components/MobileBottomPanel.tsx`（`trailing`）, `src/components/RailwayMap.tsx`, `src/utils/translation.ts`
+- 説明と操作の箱は、アイコンを押したときだけ出す（立体のデータがある路線が表示されていないときは自動で開く）
+- スマホ全画面は「表示切替」の右、それ以外は隅のボタンの列の右端に置く
+
+### fix: 立体表示を動かしたときのちらつき
+- `src/components/Terrain3DView.tsx`
+- 描く奥行きの手前の端を奥の 1/20000 にしていて精度が足りず、地面と線が交互に前に出ていた（z-fighting）。
+  手前・奥を見ている距離の一定割合にし、地面を奥へずらす量も増やした。大きさが変わったときはすぐ描き直す
+
 ## [2026-10-14] セッション（立体表示の出発・到着の印を小さく共通化）
 
 ### improve: 表示範囲で大きくなる球を、画面上で外径6pxの点に置き換え

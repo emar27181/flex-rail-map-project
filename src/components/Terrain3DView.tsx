@@ -10,7 +10,9 @@
  * - three.js はこの表示を開いたときだけ読み込む（RailwayMap から React.lazy で読む）
  * - 線形: © OpenStreetMap contributors（ODbL）。出典は画面の下に出す
  */
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { Rotate3d } from 'lucide-react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Line2 } from 'three/examples/jsm/lines/Line2.js';
@@ -26,6 +28,7 @@ import { FLOATING_PANEL, CONTROL_SIZE, aboveFloatingButtons } from './ui/atoms/c
 import Button from './ui/atoms/Button';
 import Stepper from './ui/molecules/Stepper';
 import Checkbox from './ui/atoms/Checkbox';
+import FloatingIconButton from './ui/atoms/FloatingIconButton';
 import CollapsiblePanel from './ui/molecules/CollapsiblePanel';
 import SourceDisclosure from './ui/molecules/SourceDisclosure';
 import { anchoredPointLabel } from './ui/molecules/anchoredPointLabel';
@@ -63,6 +66,11 @@ const CHUNK_CELLS = 64;
  * （見ている所の周りは常にはっきり見え、地平線のほうだけ溶ける。地面の端が唐突に切れて見えない）
  */
 const FOG_RANGE = { near: 1.6, far: 4.5 } as const;
+/**
+ * 描く奥行きの範囲（カメラから見ている中心までの距離に対する倍率）。手前は真下の地面より近く、
+ * 奥は霧で消えきる所まで。比（far / near）を小さく保つと奥行きの精度が上がり、ちらつかない
+ */
+const CLIP_RANGE = { near: 0.005, far: FOG_RANGE.far * 1.2 } as const;
 /** どこまで引いて見られるか（表示範囲に対する倍率）。関東全域が入るくらい */
 const MAX_DISTANCE_RATIO = 6;
 /** Prevent zooming through tracks: near clipping distance relative to visible rail extent. */
@@ -158,7 +166,7 @@ function buildGround(
   const material = new THREE.MeshLambertMaterial({
     vertexColors: true,
     // 線と同じ高さで重なったときに面が手前に出ないよう、奥へずらす
-    polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
+    polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 4,
   });
   const group = new THREE.Group();
   const geometries: THREE.BufferGeometry[] = [];
@@ -204,11 +212,17 @@ export interface Terrain3DViewProps {
   overlayBottom?: string;
   /** 線の太さ（画面上の px）。地図の「路線の太さ」の設定と同じ値 */
   lineWidth?: number;
+  /**
+   * 設定を開くボタンを置く場所（RailwayMap が用意する箱）。あればそこに立体のアイコンを出し、
+   * 説明と操作の箱はボタンで開いたときだけ出す。無ければ箱を見出しつきで常に出す
+   */
+  toggleSlot?: HTMLElement | null;
 }
 
 const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   visibleRoutes, colorOf, departure, arrival, theme, language, onShowRoutes, overlayBottom = OVERLAY_BOTTOM,
   lineWidth = ROUTE_LINE.defaultWidth,
+  toggleSlot = null,
 }) => {
   const colors = getThemeColors(theme);
   const hostRef = useRef<HTMLDivElement>(null);
@@ -223,38 +237,12 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   const [showGround, setShowGround] = useState(() => initialDisplayUrlOptions().ground ?? true);
   const [groundStyle, setGroundStyle] = useState<Terrain3DGroundStyle>(() => initialDisplayUrlOptions().groundStyle ?? loadTerrain3dGroundStyle());
   useEffect(() => { saveTerrain3dGroundStyle(groundStyle); }, [groundStyle]);
-  // 説明の箱はスマホでは閉じて始める（地図が隠れないように）。開閉は見出しで
-  const [panelOpen, setPanelOpen] = useState(() => typeof window === 'undefined' || deviceClassOf(window.innerWidth) !== 'mobile');
-  // Align the collapsed 3D status with the mobile "表示切替" button.
-  // Read the actual button bounds rather than hardcoding its translated width.
-  const [mobileStatusPosition, setMobileStatusPosition] = useState<{ left: number; bottom: number; maxWidth: number } | null>(null);
-  useEffect(() => {
-    const update = () => {
-      if (deviceClassOf(window.innerWidth) !== 'mobile') {
-        setMobileStatusPosition(null);
-        return;
-      }
-      const group = document.querySelector('[data-mobile-map-controls]');
-      const button = group?.lastElementChild;
-      if (!button) { setMobileStatusPosition(null); return; }
-      const bounds = button.getBoundingClientRect();
-      const gap = parseFloat(FLOATING_PANEL.gap);
-      const inset = parseFloat(FLOATING_PANEL.inset);
-      const left = bounds.right + gap;
-      setMobileStatusPosition({
-        left,
-        bottom: window.innerHeight - bounds.bottom,
-        maxWidth: Math.max(0, window.innerWidth - left - inset),
-      });
-    };
-    update();
-    const group = document.querySelector('[data-mobile-map-controls]');
-    const observer = typeof ResizeObserver !== 'undefined' && group ? new ResizeObserver(update) : null;
-    if (group && observer) observer.observe(group);
-    window.addEventListener('resize', update);
-    return () => { observer?.disconnect(); window.removeEventListener('resize', update); };
-  }, []);
-
+  // 説明と操作の箱。設定ボタン（toggleSlot）があるときは閉じて始める（地図を広く見せる）。
+  // ボタンが無いときはスマホだけ閉じて始める。
+  // 以前はスマホで閉じた箱の見出し（「N / M 路線を立体表示中」）を「表示切替」の右に寄せていたが、
+  // その位置には立体のアイコンを置く（2026-10-14 ユーザー指示）
+  const [panelOpen, setPanelOpen] = useState(() => !toggleSlot && (typeof window === 'undefined' || deviceClassOf(window.innerWidth) !== 'mobile'));
+  const panelId = useId();
 
   useEffect(() => {
     let alive = true;
@@ -281,6 +269,9 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   const lineSourceName = version === 'v1' ? v1?.meta.elevationSource.sourceName : null;
 
   const shown = useMemo(() => (lineRoutes ? selectTerrainRoutes({ routes: lineRoutes }, visibleRoutes) : []), [lineRoutes, visibleRoutes]);
+  // 表示中の路線に立体のデータが無いときは、案内（データのある路線を表示）が見えるよう箱を開く
+  const noShown = lineRoutes !== null && shown.length === 0;
+  useEffect(() => { if (noShown) setPanelOpen(true); }, [noShown]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -446,8 +437,11 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       // 霧と描く距離を、カメラから見ている中心までの距離に合わせる
       const d = camera.position.distanceTo(controls.target);
       if (scene.fog instanceof THREE.Fog) { scene.fog.near = d * FOG_RANGE.near; scene.fog.far = d * FOG_RANGE.far; }
-      const far = d * FOG_RANGE.far * 1.2;
-      if (Math.abs(camera.far - far) > far * 0.05) { camera.far = far; camera.near = far / 20000; camera.updateProjectionMatrix(); }
+      // 奥行きの精度は手前の端（near）で決まる。以前は near を far の 1/20000 にしていて精度が足りず、
+      // 動かすと地面と線が交互に前に出てちらついた（z-fighting）。near を見ている距離の一定割合にする
+      camera.near = d * CLIP_RANGE.near;
+      camera.far = d * CLIP_RANGE.far;
+      camera.updateProjectionMatrix();
       renderer.render(scene, camera);
       labelRenderer.render(scene, camera);
     };
@@ -460,6 +454,9 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
       labelRenderer.setSize(w, h);
+      // 大きさを変えると描画面が消えるので、次の描画を待たずにすぐ描く（スマホでアドレスバーが出入りしたときの点滅）
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
       lineMaterials.forEach(m => m.resolution.set(w, h));
     });
     ro.observe(host);
@@ -482,8 +479,21 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
     <div style={{ position: 'absolute', inset: 0, backgroundColor: colors.background }} data-terrain3d>
       <div ref={hostRef} style={{ position: 'absolute', inset: 0 }} />
 
-      {/* 説明と操作（左下に浮かべる）。見出しで開閉する */}
-      <CollapsiblePanel
+      {/* 設定を開くボタン（RailwayMap が用意した場所に出す） */}
+      {toggleSlot && createPortal(
+        <FloatingIconButton
+          theme={theme}
+          icon={<Rotate3d />}
+          label={translateUI('terrain3dSettings', language)}
+          pressed={panelOpen}
+          controls={panelId}
+          onClick={() => setPanelOpen(v => !v)}
+        />,
+        toggleSlot,
+      )}
+
+      {/* 説明と操作（左下に浮かべる）。設定ボタンがあるときは開いている間だけ出す */}
+      {(panelOpen || !toggleSlot) && <div id={panelId}><CollapsiblePanel
         theme={theme}
         expanded={panelOpen}
         onToggle={() => setPanelOpen(v => !v)}
@@ -491,13 +501,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
           ? translateUI('terrain3dCoverage', language, { shown: String(shown.length), visible: String(visibleRoutes.size) })
           : translateUI('terrain3dLabel', language)}
         width="wide"
-        style={{
-          position: 'absolute',
-          left: mobileStatusPosition && !panelOpen ? mobileStatusPosition.left : FLOATING_PANEL.inset,
-          bottom: mobileStatusPosition && !panelOpen ? mobileStatusPosition.bottom : overlayBottom,
-          // Collapsed on mobile: stay next to the settings button without covering it.
-          ...(mobileStatusPosition && !panelOpen ? { maxWidth: mobileStatusPosition.maxWidth, minWidth: 0 } : {}),
-        }}
+        style={{ position: 'absolute', left: FLOATING_PANEL.inset, bottom: overlayBottom }}
         bodyStyle={{ padding: `${L.sp.sm} ${L.sp.md}`, boxSizing: 'border-box' }}
       >
         <div data-testid="terrain3d-controls" style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
@@ -579,7 +583,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
             </SourceDisclosure>
           )}
         </div>
-      </CollapsiblePanel>
+      </CollapsiblePanel></div>}
     </div>
   );
 };

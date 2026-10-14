@@ -37,6 +37,7 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 | 操作部品の高さ・角丸・余白 | `CONTROL_SIZE[size]`（sm=24px / md=44px） | `src/components/ui/atoms/controlSize.ts` |
 | 地図の上に浮かぶ操作の高さ・文字の大きさ | `FLOATING_CONTROL`（36px / FS.body。丸いボタン・「表示切替」・凡例の見出しで共通） | `src/components/ui/atoms/controlSize.ts` |
 | 地図の上に浮かぶ文字つきボタン | `<FloatingButton>` | `src/components/ui/atoms/FloatingButton.tsx` |
+| 地図の上に浮かぶアイコンだけのボタン（開閉にも使う） | `<FloatingIconButton icon label onClick pressed?>` | `src/components/ui/atoms/FloatingIconButton.tsx` |
 | 地図の上に浮かぶ箱・ボタンの地（透け具合・ぼかし・枠線・影・丸み） | `floatingSurfaceStyle(theme, 'idle' \| 'open')`。透け具合は `FLOATING_OPACITY` | `src/components/ui/atoms/floatingSurface.ts` |
 | 地図の重なり順（駅は路線数が多いほど上・出発/到着は最上） | `stationMarkerZ(路線数)` / `ENDPOINT_MARKER_Z` / `MAP_PANE_Z` | `src/constants/mapLayers.ts` |
 | 影・文字の縁取り（既定は影なし。`SHADOW` の `enabled` で役割ごとに戻せる） | `shadow(role, theme)` / `joinShadows` / `textHalo()`。記事の CSS は `var(--shadow)` | `src/components/ui/atoms/shadow.ts` |

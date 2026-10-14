@@ -1872,6 +1872,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "立体データを読み込めませんでした。",
     english: "Could not load the 3D data."
   },
+  terrain3dSettings: {
+    japanese: "立体表示の設定",
+    english: "3D view settings"
+  },
   terrain3dVersion: {
     japanese: "線形データの版",
     english: "Line data version"
@@ -2341,6 +2345,7 @@ export const uiChinese: Record<string, string> = {
   terrain3dShowAvailable: "显示所有有数据的线路",
   terrain3dLoading: "正在加载立体数据…",
   terrain3dLoadError: "无法加载立体数据。",
+  terrain3dSettings: "3D 显示设置",
   terrain3dVersion: "线路数据版本",
   terrain3dVersionV2: "v2（地面·高架·地下）",
   terrain3dVersionV1: "v1",
@@ -2703,6 +2708,7 @@ export const uiKorean: Record<string, string> = {
   terrain3dShowAvailable: "데이터가 있는 노선 모두 표시",
   terrain3dLoading: "입체 데이터를 불러오는 중…",
   terrain3dLoadError: "입체 데이터를 불러올 수 없습니다.",
+  terrain3dSettings: "입체 표시 설정",
   terrain3dVersion: "선형 데이터 버전",
   terrain3dVersionV2: "v2（지상·고가·지하）",
   terrain3dVersionV1: "v1",
