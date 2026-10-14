@@ -1,9 +1,9 @@
 {
-  "latMax": 36.8,
-  "lngMin": 138.96,
+  "latMax": 37.2,
+  "lngMin": 138.35,
   "stepDeg": 0.005,
-  "rows": 371,
-  "cols": 297,
+  "rows": 470,
+  "cols": 520,
   "layout": "Int16 標高(m, little endian) rows×cols（北の行から・西の列から）→ Uint8 水域 rows×cols（0=陸, 1=海, 2=湖, 3=川）",
   "aggregation": "元の 6×6 画素（3秒角）の平均。水域は半分以上が水のときだけ",
   "heightMeaning": "terrain",
@@ -21,7 +21,10 @@
       "Copernicus_DSM_COG_30_N35_00_E140_00_DEM",
       "Copernicus_DSM_COG_30_N36_00_E138_00_DEM",
       "Copernicus_DSM_COG_30_N36_00_E139_00_DEM",
-      "Copernicus_DSM_COG_30_N36_00_E140_00_DEM"
+      "Copernicus_DSM_COG_30_N36_00_E140_00_DEM",
+      "Copernicus_DSM_COG_30_N37_00_E138_00_DEM",
+      "Copernicus_DSM_COG_30_N37_00_E139_00_DEM",
+      "Copernicus_DSM_COG_30_N37_00_E140_00_DEM"
     ],
     "seaOnlyTiles": [
       "Copernicus_DSM_COG_30_N34_00_E140_00_DEM"
@@ -29,11 +32,11 @@
   },
   "stats": {
     "minM": -2,
-    "maxM": 2485,
+    "maxM": 3674,
     "waterCells": {
-      "ocean": 17006,
-      "lake": 845,
-      "river": 188
+      "ocean": 55206,
+      "lake": 1320,
+      "river": 357
     }
   }
 }

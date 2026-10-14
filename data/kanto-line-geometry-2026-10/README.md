@@ -61,10 +61,12 @@ npx tsx scripts/line-geometry/build-terrain3d.mts
 ```bash
 python -m venv .venv-dem && .venv-dem/bin/pip install tifffile imagecodecs numpy
 .venv-dem/bin/python -I scripts/line-geometry/terrain_ground_build.py --cache <作業用フォルダ>
-# → public/data/terrain3d-ground.json（格子の位置・出典）と terrain3d-ground.bin（約230KB）
+# → public/data/terrain3d-ground.json（格子の位置・出典）と terrain3d-ground.bin（約730KB）
 ```
 
-- 範囲は立体表示の線形の範囲＋0.05度。258行×297列
+- 範囲は**関東全域**（北緯34.85〜37.2度・東経138.35〜140.95度。富士山・日光・房総を含む）。線形がはみ出すときは線形の範囲＋0.05度まで広げる。
+  470行×520列（約730KB）。画面では路線の周りを切り出さず全体を描くので、動かして見て回っても地面が途切れない（2026-10-14）
+- 海だけの区画（Copernicus の公式タイル一覧に無いタイル）は海として扱う。一覧にあるのに取れないタイルは止める
 - 水域は同じタイルの水域マスク（WBM）から、格子の半分以上が水のときだけ海・湖・川にする。海だけ高さ0にそろえ、湖・川はその場の標高のまま色だけ水にする
 - Copernicus DEM は建物・樹木を含む表面（DSM）。都心の値は地面より数m〜十数m高い
 - 出典表記: © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved（画面の「出典」に出す）

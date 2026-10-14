@@ -19,10 +19,10 @@ import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import type { RouteKey } from '../data/routes';
 import { getThemeColors } from '../contexts/ThemeContext';
-import { FS, SEMANTIC, NEUTRAL } from '../constants/ui';
+import { FS, SEMANTIC, NEUTRAL, ROUTE_LINE } from '../constants/ui';
 import { L } from './legend/legendStyles';
 import { translateStation, translateUI, type Language } from '../utils/translation';
-import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
+import { FLOATING_PANEL, CONTROL_SIZE, aboveFloatingButtons } from './ui/atoms/controlSize';
 import Button from './ui/atoms/Button';
 import Stepper from './ui/molecules/Stepper';
 import Checkbox from './ui/atoms/Checkbox';
@@ -34,29 +34,30 @@ import {
   TERRAIN3D_DATA_URLS, TERRAIN3D_DEFAULT_VERSION, TERRAIN3D_EXAGGERATION, v2ToRoutes,
   type Terrain3DVersion, type Terrain3DDataV2, type Terrain3DRoute, type Terrain3DStructure, TERRAIN3D_GROUND_META_URL, TERRAIN3D_GROUND_BIN_URL, GROUND_WATER,
   selectTerrainRoutes, frameFor, toLocal, extentKm, elevationNear,
-  parseGround, groundCellCenter, groundElevationAt, groundWindow,
+  parseGround, groundCellCenter, groundElevationAt,
   type Terrain3DData, type Terrain3DGround, type Terrain3DGroundMeta,
 } from '../utils/terrain3d';
 
-/** 線の太さ（画面上の px）。地図の路線の線と同じくらい */
-const LINE_WIDTH_PX = 3;
 /** 海面までの幕の不透明度 */
 const CURTAIN_OPACITY = 0.18;
-/** 説明の箱の下端。地図の左下に浮かぶボタン（縮小・方位・言語。FLOATING_ICON_BUTTON_SIZE.md）の上に置く */
-const OVERLAY_BOTTOM = `calc(${L.sp.lg} + ${FLOATING_ICON_BUTTON_SIZE.md}px + ${L.sp.sm})`;
+/** 説明の箱の下端。地図の左下に浮かぶボタン（縮小・方位・言語）1段の上に置く */
+const OVERLAY_BOTTOM = aboveFloatingButtons(1);
 /**
  * 操作の感度。OrbitControls の既定（回転・移動・拡大とも 1）では速すぎて、
  * 少し指を動かしただけで大きく回ってしまったため下げている
  */
 const CONTROL_SPEED = { rotate: 0.45, pan: 0.6, zoom: 0.6, damping: 0.1 } as const;
-/** 説明の箱の高さの上限（画面の高さに対する割合と px の小さい方）。スマホで地図が隠れすぎないように */
-const OVERLAY_MAX_HEIGHT = 'min(60vh, 420px)';
-/** 説明の箱の最大幅(px)。スマホでは画面の幅から左右の余白を引いた幅まで */
-const OVERLAY_MAX_WIDTH_PX = 360;
 /** 画面の縦横比（幅/高さ）がこれより小さいときは、カメラをその分だけ離す */
 const PORTRAIT_FIT_ASPECT = 1.2;
-/** 地面を描く範囲: 表示中の路線の範囲の外に足す幅（度）。0.05度 ≒ 5km */
-const GROUND_MARGIN_DEG = 0.05;
+/** 地面を分ける塊の大きさ（格子の数）。画面の外の塊は描かないので、関東全域を出しても軽い */
+const CHUNK_CELLS = 64;
+/**
+ * 遠くの地面を背景に溶かす霧。カメラから見ている中心までの距離に対する倍率で、拡大・縮小に合わせて動かす
+ * （見ている所の周りは常にはっきり見え、地平線のほうだけ溶ける。地面の端が唐突に切れて見えない）
+ */
+const FOG_RANGE = { near: 1.6, far: 4.5 } as const;
+/** どこまで引いて見られるか（表示範囲に対する倍率）。関東全域が入るくらい */
+const MAX_DISTANCE_RATIO = 6;
 /** 地面の色を高い側の色にしきる標高（m）。関東平野の低い土地の差も見えるよう、対数で補間する */
 const GROUND_TINT_MAX_M = 1500;
 /** 地面に隠れた線を透かして見せる濃さ */
@@ -90,8 +91,8 @@ const STRUCTURE_STYLE: Record<Terrain3DStructure, { casing: boolean; dashed: boo
   e: { casing: true, dashed: false, opacity: 1 },
   u: { casing: false, dashed: true, opacity: 0.85 },
 };
-/** 高架の縁取りの太さ（線の両側に足す px） */
-const CASING_EXTRA_PX = 1.5;
+/** 高架の縁取りの太さ（線の太さに対する割合。両側にこの分ずつ足す） */
+const CASING_RATIO = 0.5;
 /** 地下の破線の長さ・間隔（表示範囲に対する割合。拡大しても見え方がそろうように範囲から決める） */
 const DASH_RATIO = { dash: 0.006, gap: 0.004 } as const;
 
@@ -113,46 +114,73 @@ function groundTint(low: THREE.Color, high: THREE.Color, elevationM: number, out
   return out.copy(low).lerp(high, t);
 }
 
-/** 地面の面（格子の点をつないだ三角形）。高さは表示用の倍率をかけたもの */
-function buildGroundMesh(
-  ground: Terrain3DGround, routes: ReturnType<typeof selectTerrainRoutes>, frame: NonNullable<ReturnType<typeof frameFor>>,
+/**
+ * 地面（格子の全体）。路線の周りだけを切り出さず、データのある範囲（関東全域）を描くので、
+ * 動かして見て回っても地面が途切れない。CHUNK_CELLS 四方の塊に分け、画面の外の塊は three.js が描かない。
+ * 法線は格子全体から求める（塊ごとに求めると、塊の境目で陰影が段になる）
+ */
+function buildGround(
+  ground: Terrain3DGround, frame: NonNullable<ReturnType<typeof frameFor>>,
   exaggeration: number, palette: { low: string; high: string; water: string },
-): THREE.Mesh | null {
-  const win = groundWindow(ground, routes, GROUND_MARGIN_DEG);
-  if (!win) return null;
-  const { cols } = ground.meta;
-  const nr = win.r1 - win.r0 + 1, nc = win.c1 - win.c0 + 1;
-  const positions = new Float32Array(nr * nc * 3);
-  const colorAttr = new Float32Array(nr * nc * 3);
+): { group: THREE.Group; dispose: () => void } {
+  const { rows, cols } = ground.meta;
+  const n = rows * cols;
+  const pos = new Float32Array(n * 3);
+  const col = new Float32Array(n * 3);
   const low = new THREE.Color(palette.low), high = new THREE.Color(palette.high), water = new THREE.Color(palette.water);
   const c = new THREE.Color();
-  for (let i = 0; i < nr; i++) for (let j = 0; j < nc; j++) {
-    const idx = (win.r0 + i) * cols + (win.c0 + j);
+  for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) {
+    const idx = r * cols + q;
     const kind = ground.water[idx];
-    const isWater = kind !== GROUND_WATER.land;
     // 海だけ高さ0にそろえる（湖・川は内陸の高いところにもあるので、その場の標高のまま色だけ水にする）
     const ele = kind === GROUND_WATER.ocean ? 0 : Math.max(0, ground.elevation[idx]);
-    const [lat, lng] = groundCellCenter(ground.meta, win.r0 + i, win.c0 + j);
-    const k = (i * nc + j) * 3;
-    positions.set(toLocal(frame, lat, lng, ele, exaggeration), k);
-    (isWater ? c.copy(water) : groundTint(low, high, ele, c)).toArray(colorAttr, k);
+    const [lat, lng] = groundCellCenter(ground.meta, r, q);
+    pos.set(toLocal(frame, lat, lng, ele, exaggeration), idx * 3);
+    (kind !== GROUND_WATER.land ? c.copy(water) : groundTint(low, high, ele, c)).toArray(col, idx * 3);
   }
-  const index: number[] = [];
-  for (let i = 0; i < nr - 1; i++) for (let j = 0; j < nc - 1; j++) {
-    const a = i * nc + j, b = a + 1, d = a + nc, e = d + 1;
-    index.push(a, d, b, b, d, e);
+  // 法線: 南北・東西の隣の点の差の外積（端は自分の点を使う）
+  const nor = new Float32Array(n * 3);
+  const v = (r: number, q: number, k: number) => pos[(Math.min(rows - 1, Math.max(0, r)) * cols + Math.min(cols - 1, Math.max(0, q))) * 3 + k];
+  for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) {
+    const sx = v(r + 1, q, 0) - v(r - 1, q, 0), sy = v(r + 1, q, 1) - v(r - 1, q, 1), sz = v(r + 1, q, 2) - v(r - 1, q, 2); // 南向き
+    const ex = v(r, q + 1, 0) - v(r, q - 1, 0), ey = v(r, q + 1, 1) - v(r, q - 1, 1), ez = v(r, q + 1, 2) - v(r, q - 1, 2); // 東向き
+    const nx = sy * ez - sz * ey, ny = sz * ex - sx * ez, nz = sx * ey - sy * ex;
+    const len = Math.hypot(nx, ny, nz) || 1;
+    nor.set([nx / len, ny / len, nz / len], (r * cols + q) * 3);
   }
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute('color', new THREE.BufferAttribute(colorAttr, 3));
-  geometry.setIndex(index);
-  geometry.computeVertexNormals();
   const material = new THREE.MeshLambertMaterial({
     vertexColors: true,
     // 線と同じ高さで重なったときに面が手前に出ないよう、奥へずらす
     polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
   });
-  return new THREE.Mesh(geometry, material);
+  const group = new THREE.Group();
+  const geometries: THREE.BufferGeometry[] = [];
+  for (let r0 = 0; r0 < rows - 1; r0 += CHUNK_CELLS) for (let c0 = 0; c0 < cols - 1; c0 += CHUNK_CELLS) {
+    // 隣の塊と境目の行・列を共有して、すき間を作らない
+    const r1 = Math.min(rows - 1, r0 + CHUNK_CELLS), c1 = Math.min(cols - 1, c0 + CHUNK_CELLS);
+    const nr = r1 - r0 + 1, nc = c1 - c0 + 1;
+    const p = new Float32Array(nr * nc * 3), cc = new Float32Array(nr * nc * 3), nn = new Float32Array(nr * nc * 3);
+    for (let i = 0; i < nr; i++) {
+      const from = ((r0 + i) * cols + c0) * 3, to = from + nc * 3;
+      p.set(pos.subarray(from, to), i * nc * 3);
+      cc.set(col.subarray(from, to), i * nc * 3);
+      nn.set(nor.subarray(from, to), i * nc * 3);
+    }
+    const index: number[] = [];
+    for (let i = 0; i < nr - 1; i++) for (let j = 0; j < nc - 1; j++) {
+      const a = i * nc + j, b = a + 1, d = a + nc, e = d + 1;
+      index.push(a, d, b, b, d, e);
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(p, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(cc, 3));
+    geometry.setAttribute('normal', new THREE.BufferAttribute(nn, 3));
+    geometry.setIndex(index);
+    geometry.computeBoundingSphere();
+    geometries.push(geometry);
+    group.add(new THREE.Mesh(geometry, material));
+  }
+  return { group, dispose: () => { geometries.forEach(g => g.dispose()); material.dispose(); } };
 }
 
 export interface Terrain3DViewProps {
@@ -167,10 +195,13 @@ export interface Terrain3DViewProps {
   onShowRoutes: (routeKeys: RouteKey[]) => void;
   /** 説明の箱の下端。左下に別のボタン群がある画面（スマホ全画面）で、その上に置くために渡す */
   overlayBottom?: string;
+  /** 線の太さ（画面上の px）。地図の「路線の太さ」の設定と同じ値 */
+  lineWidth?: number;
 }
 
 const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   visibleRoutes, colorOf, departure, arrival, theme, language, onShowRoutes, overlayBottom = OVERLAY_BOTTOM,
+  lineWidth = ROUTE_LINE.defaultWidth,
 }) => {
   const colors = getThemeColors(theme);
   const hostRef = useRef<HTMLDivElement>(null);
@@ -256,6 +287,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
     controls.dampingFactor = CONTROL_SPEED.damping;
     controls.target.set(0, 0, 0);
     controls.maxPolarAngle = Math.PI / 2 - 0.02; // 地面の下からは見ない
+    controls.maxDistance = size * MAX_DISTANCE_RATIO;
 
     const disposables: { dispose: () => void }[] = [];
     const lineMaterials: LineMaterial[] = [];
@@ -263,13 +295,12 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
     const groundData = showGround ? ground : null;
     const groundShown = groundData !== null;
     if (groundData) {
-      const mesh = buildGroundMesh(groundData, shown, frame, exaggeration, {
+      const groundMesh = buildGround(groundData, frame, exaggeration, {
         low: colors.terrainLow, high: colors.terrainHigh, water: colors.terrainWater,
       });
-      if (mesh) {
-        scene.add(mesh);
-        disposables.push(mesh.geometry, mesh.material as THREE.Material);
-      }
+      scene.add(groundMesh.group);
+      disposables.push(groundMesh);
+      scene.fog = new THREE.Fog(colors.background, size * FOG_RANGE.near, size * FOG_RANGE.far);
       scene.add(new THREE.HemisphereLight(NEUTRAL.white, colors.terrainWater, 0.9));
       const sun = new THREE.DirectionalLight(NEUTRAL.white, 1.6);
       sun.position.set(...LIGHT_DIRECTION);
@@ -297,7 +328,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
         disposables.push(geometry);
         // 高架: 灰色の太い線を下に敷いて縁取る（橋の表し方。背景色だとダークで黒い点線に見えた）
         if (style.casing) {
-          const casingMaterial = new LineMaterial({ color: colors.textSecondary, linewidth: LINE_WIDTH_PX + CASING_EXTRA_PX * 2, worldUnits: false });
+          const casingMaterial = new LineMaterial({ color: colors.textSecondary, linewidth: lineWidth * (1 + CASING_RATIO * 2), worldUnits: false });
           casingMaterial.resolution.set(width, height);
           lineMaterials.push(casingMaterial);
           const casing = new Line2(geometry, casingMaterial);
@@ -307,7 +338,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
         }
         // 線（地下は破線）
         const material = new LineMaterial({
-          color, linewidth: LINE_WIDTH_PX, worldUnits: false,
+          color, linewidth: lineWidth, worldUnits: false,
           transparent: style.opacity < 1, opacity: style.opacity,
           dashed: style.dashed, dashSize: size * DASH_RATIO.dash, gapSize: size * DASH_RATIO.gap,
         });
@@ -321,7 +352,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
         if (groundShown) {
           // 山などの地面に隠れた部分は、同じ線を薄く・奥行きを無視して描いて透かす
           const hiddenMaterial = new LineMaterial({
-            color, linewidth: LINE_WIDTH_PX, worldUnits: false,
+            color, linewidth: lineWidth, worldUnits: false,
             transparent: true, opacity: HIDDEN_LINE_OPACITY, depthTest: false, depthWrite: false,
             dashed: style.dashed, dashSize: size * DASH_RATIO.dash, gapSize: size * DASH_RATIO.gap,
           });
@@ -380,6 +411,11 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
     const render = () => {
       raf = requestAnimationFrame(render);
       controls.update();
+      // 霧と描く距離を、カメラから見ている中心までの距離に合わせる
+      const d = camera.position.distanceTo(controls.target);
+      if (scene.fog instanceof THREE.Fog) { scene.fog.near = d * FOG_RANGE.near; scene.fog.far = d * FOG_RANGE.far; }
+      const far = d * FOG_RANGE.far * 1.2;
+      if (Math.abs(camera.far - far) > far * 0.05) { camera.far = far; camera.near = far / 20000; camera.updateProjectionMatrix(); }
       renderer.render(scene, camera);
       labelRenderer.render(scene, camera);
     };
@@ -405,7 +441,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       host.removeChild(renderer.domElement);
       host.removeChild(labelRenderer.domElement);
     };
-  }, [shown, exaggeration, theme, departure, arrival, colorOf, language, ground, showGround]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [shown, exaggeration, theme, departure, arrival, colorOf, language, ground, showGround, lineWidth]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const overlayText: React.CSSProperties = { fontSize: FS.caption, color: colors.textSecondary, lineHeight: 1.5 };
 
@@ -421,11 +457,9 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
         title={data && shown.length > 0
           ? translateUI('terrain3dCoverage', language, { shown: String(shown.length), visible: String(visibleRoutes.size) })
           : translateUI('terrain3dLabel', language)}
-        style={{
-          position: 'absolute', left: L.sp.lg, bottom: overlayBottom,
-          width: `min(${OVERLAY_MAX_WIDTH_PX}px, calc(100% - ${L.sp.lg} * 2))`,
-        }}
-        bodyStyle={{ padding: `${L.sp.sm} ${L.sp.md}`, maxHeight: OVERLAY_MAX_HEIGHT, overflowY: 'auto', boxSizing: 'border-box' }}
+        width="wide"
+        style={{ position: 'absolute', left: FLOATING_PANEL.inset, bottom: overlayBottom }}
+        bodyStyle={{ padding: `${L.sp.sm} ${L.sp.md}`, boxSizing: 'border-box' }}
       >
         <div data-testid="terrain3d-controls" style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
           <SegmentedControl<Terrain3DVersion>
@@ -454,7 +488,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
           {data && shown.length > 0 && (
             <>
               <div style={overlayText}>{translateUI('terrain3dHeightNote', language)}</div>
-              {version === 'v2' && <StructureLegend theme={theme} language={language} />}
+              {version === 'v2' && <StructureLegend theme={theme} language={language} lineWidth={lineWidth} />}
               <Stepper
                 theme={theme}
                 label={translateUI('terrain3dExaggeration', language)}
@@ -505,14 +539,17 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
 };
 
 /** 区間の構造の凡例（v2）。線の見本は STRUCTURE_STYLE と同じ描き方 */
-const StructureLegend: React.FC<{ theme: 'light' | 'dark'; language: Language }> = ({ theme, language }) => {
+const StructureLegend: React.FC<{ theme: 'light' | 'dark'; language: Language; lineWidth: number }> = ({ theme, language, lineWidth }) => {
   const colors = getThemeColors(theme);
-  const w = 28, h = 10, mid = h / 2;
+  // 見本の大きさは補助の操作部品（CONTROL_SIZE.sm）の幅と、縁取りを含めた線の太さから決める
+  const casingWidth = lineWidth * (1 + CASING_RATIO * 2);
+  const w = CONTROL_SIZE.sm.minHeight, h = Math.ceil(casingWidth), mid = h / 2;
+  const dash = `${lineWidth * 2} ${lineWidth}`;
   const sample = (s: Terrain3DStructure) => (
     <svg width={w} height={h} aria-hidden="true" style={{ flexShrink: 0 }}>
-      {STRUCTURE_STYLE[s].casing && <line x1={0} y1={mid} x2={w} y2={mid} stroke={colors.textSecondary} strokeWidth={LINE_WIDTH_PX + CASING_EXTRA_PX * 2} />}
-      <line x1={0} y1={mid} x2={w} y2={mid} stroke={colors.text} strokeWidth={LINE_WIDTH_PX}
-        strokeDasharray={STRUCTURE_STYLE[s].dashed ? '5 3' : undefined} opacity={STRUCTURE_STYLE[s].opacity} />
+      {STRUCTURE_STYLE[s].casing && <line x1={0} y1={mid} x2={w} y2={mid} stroke={colors.textSecondary} strokeWidth={casingWidth} />}
+      <line x1={0} y1={mid} x2={w} y2={mid} stroke={colors.text} strokeWidth={lineWidth}
+        strokeDasharray={STRUCTURE_STYLE[s].dashed ? dash : undefined} opacity={STRUCTURE_STYLE[s].opacity} />
     </svg>
   );
   const items: [Terrain3DStructure, string][] = [

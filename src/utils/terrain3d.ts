@@ -230,20 +230,3 @@ export function groundElevationAt(ground: Terrain3DGround, lat: number, lng: num
   const bottom = at(r0 + 1, c0) * (1 - tc) + at(r0 + 1, c0 + 1) * tc;
   return top * (1 - tr) + bottom * tr;
 }
-
-/** 表示中の路線の範囲（＋余白 marginDeg）にかかる格子の行・列の範囲。かからなければ null */
-export function groundWindow(
-  ground: Terrain3DGround, routes: Terrain3DRoute[], marginDeg: number,
-): { r0: number; r1: number; c0: number; c1: number } | null {
-  let s = 90, n = -90, w = 180, e = -180;
-  for (const r of routes) for (const p of r.paths) for (const [lat, lng] of p) {
-    s = Math.min(s, lat); n = Math.max(n, lat); w = Math.min(w, lng); e = Math.max(e, lng);
-  }
-  if (s > n) return null;
-  const { latMax, lngMin, stepDeg, rows, cols } = ground.meta;
-  const r0 = Math.max(0, Math.floor((latMax - (n + marginDeg)) / stepDeg));
-  const r1 = Math.min(rows - 1, Math.ceil((latMax - (s - marginDeg)) / stepDeg));
-  const c0 = Math.max(0, Math.floor((w - marginDeg - lngMin) / stepDeg));
-  const c1 = Math.min(cols - 1, Math.ceil((e + marginDeg - lngMin) / stepDeg));
-  return r1 - r0 >= 1 && c1 - c0 >= 1 ? { r0, r1, c0, c1 } : null;
-}
