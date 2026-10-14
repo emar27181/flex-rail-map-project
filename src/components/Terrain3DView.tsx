@@ -33,6 +33,7 @@ import CollapsiblePanel from './ui/molecules/CollapsiblePanel';
 import SourceDisclosure from './ui/molecules/SourceDisclosure';
 import { plainTextLabelStyle, textBadgeStyle } from './ui/atoms/textBadge';
 import { collectTerrainStations, stationOnVisibleRail, placeLabels, estimateLabelWidth } from '../utils/terrain3dStations';
+import { averageStationRouteColor } from '../utils/stationRouteColor';
 import { deviceClassOf } from '../constants/breakpoints';
 import { initialDisplayUrlOptions } from '../utils/mapDisplayUrlParam';
 import { captureTerrainCamera, restoreTerrainCamera, type TerrainCameraSnapshot } from '../utils/terrain3dCamera';
@@ -57,7 +58,7 @@ const OVERLAY_BOTTOM = aboveFloatingButtons(1);
  * 操作の感度。OrbitControls の既定（回転・移動・拡大とも 1）では速すぎて、
  * 少し指を動かしただけで大きく回ってしまったため下げている
  */
-const CONTROL_SPEED = { rotate: 0.45, pan: 0.6, touchPan: 0.85, zoom: 0.3, damping: 0.1 } as const;
+const CONTROL_SPEED = { rotate: 0.45, touchRotate: 0.62, pan: 0.6, touchPan: 0.85, zoom: 0.3, damping: 0.1 } as const;
 /** 地図上の駅位置を示す実寸に近い直径。Three.jsのワールド単位はkm。 */
 const STATION_DIAMETER_KM = 0.03;
 const STATION_SURFACE_OFFSET_KM = 0.006;
@@ -330,8 +331,23 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
     controls.screenSpacePanning = false; // 移動は地面に沿って（画面の上下ではなく奥行き方向に動く）
     controls.rotateSpeed = CONTROL_SPEED.rotate;
     controls.panSpeed = CONTROL_SPEED.pan;
-    const setPanSpeed = (event: PointerEvent) => { controls.panSpeed = event.pointerType === 'touch' ? CONTROL_SPEED.touchPan : CONTROL_SPEED.pan; };
-    renderer.domElement.addEventListener('pointerdown', setPanSpeed);
+    const activeTouchPointers = new Set<number>();
+    const syncPointerSensitivity = (event: PointerEvent) => {
+      if (event.pointerType !== 'touch') return;
+      if (event.type === 'pointerdown') activeTouchPointers.add(event.pointerId);
+      else activeTouchPointers.delete(event.pointerId);
+      controls.panSpeed = CONTROL_SPEED.touchPan;
+      controls.rotateSpeed = activeTouchPointers.size >= 2 ? CONTROL_SPEED.touchRotate : CONTROL_SPEED.rotate;
+    };
+    const resetPointerSensitivity = (event: PointerEvent) => {
+      if (event.pointerType !== 'touch') return;
+      activeTouchPointers.delete(event.pointerId);
+      controls.rotateSpeed = activeTouchPointers.size >= 2 ? CONTROL_SPEED.touchRotate : CONTROL_SPEED.rotate;
+      if (activeTouchPointers.size === 0) controls.panSpeed = CONTROL_SPEED.pan;
+    };
+    renderer.domElement.addEventListener('pointerdown', syncPointerSensitivity);
+    renderer.domElement.addEventListener('pointerup', resetPointerSensitivity);
+    renderer.domElement.addEventListener('pointercancel', resetPointerSensitivity);
     controls.zoomSpeed = CONTROL_SPEED.zoom;
     controls.dampingFactor = CONTROL_SPEED.damping;
     controls.target.set(0, 0, 0);
@@ -503,11 +519,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
         const transform = new THREE.Object3D();
         // Determine the station's one canonical color; share it between
         // the 3D marker and either station-name presentation.
-        const stationColors = stations.map(st => {
-          const color = new THREE.Color();
-          st.routeKeys.forEach(key => color.add(new THREE.Color(colorOf(key))));
-          return color.multiplyScalar(1 / st.routeKeys.length);
-        });
+        const stationColors = stations.map(st => averageStationRouteColor(st.routeKeys, colorOf));
         stations.forEach((st, i) => {
           transform.position.copy(st.pos);
           transform.position.y += STATION_SURFACE_OFFSET_KM;
@@ -609,7 +621,9 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       cameraSnapshotRef.current = captureTerrainCamera(camera, controls.target, cameraFrame);
       cancelAnimationFrame(raf);
       ro.disconnect();
-      renderer.domElement.removeEventListener('pointerdown', setPanSpeed);
+      renderer.domElement.removeEventListener('pointerdown', syncPointerSensitivity);
+      renderer.domElement.removeEventListener('pointerup', resetPointerSensitivity);
+      renderer.domElement.removeEventListener('pointercancel', resetPointerSensitivity);
       controls.dispose();
       disposables.forEach(d => d.dispose());
       renderer.dispose();
