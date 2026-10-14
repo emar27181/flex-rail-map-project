@@ -31,7 +31,7 @@ import Checkbox from './ui/atoms/Checkbox';
 import FloatingIconButton from './ui/atoms/FloatingIconButton';
 import CollapsiblePanel from './ui/molecules/CollapsiblePanel';
 import SourceDisclosure from './ui/molecules/SourceDisclosure';
-import { plainTextLabelStyle } from './ui/atoms/textBadge';
+import { plainTextLabelStyle, textBadgeStyle } from './ui/atoms/textBadge';
 import { collectTerrainStations, placeLabels, estimateLabelWidth } from '../utils/terrain3dStations';
 import { deviceClassOf } from '../constants/breakpoints';
 import { initialDisplayUrlOptions } from '../utils/mapDisplayUrlParam';
@@ -246,6 +246,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   const [groundError, setGroundError] = useState(false);
   const [showGround, setShowGround] = useState(() => initialDisplayUrlOptions().ground ?? true);
   const [showStations, setShowStations] = useState(true);
+  const [stationDisplayStyle, setStationDisplayStyle] = useState<'plain' | 'badge'>('plain');
   const [groundStyle, setGroundStyle] = useState<Terrain3DGroundStyle>(() => initialDisplayUrlOptions().groundStyle ?? loadTerrain3dGroundStyle());
   useEffect(() => { saveTerrain3dGroundStyle(groundStyle); }, [groundStyle]);
   // 説明と操作の箱。設定ボタン（toggleSlot）があるときは閉じて始める（地図を広く見せる）。
@@ -499,8 +500,11 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
           return el;
         });
         const names = stations.map(s => translateStation(s.name, language));
-        const widths = names.map(n => estimateLabelWidth(n, stationLabelFontPx));
-        const lineH = stationLabelFontPx * 1.2;
+        const badgePaddingX = parseFloat(L.sp.xs);
+        const badgePaddingY = parseFloat(L.sp.xxs);
+        const badgeMode = stationDisplayStyle === 'badge';
+        const widths = names.map(n => estimateLabelWidth(n, stationLabelFontPx) + (badgeMode ? 2 * badgePaddingX : 0));
+        const lineH = stationLabelFontPx * 1.2 + (badgeMode ? 2 * badgePaddingY : 0);
         const above = parseFloat(L.sp.xs);
         const v = new THREE.Vector3();
         updateStationLabels = () => {
@@ -518,6 +522,15 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
             if (pick === undefined) { el.style.display = 'none'; return; }
             const b = valid[pick];
             el.textContent = names[b.i];
+            const station = stations[b.i];
+            if (badgeMode) {
+              const color = new THREE.Color();
+              station.routeKeys.forEach(key => color.add(new THREE.Color(colorOf(key))));
+              color.multiplyScalar(1 / station.routeKeys.length);
+              Object.assign(el.style, textBadgeStyle('#' + color.getHexString(), theme), {
+                fontSize: stationLabelFontPx + 'px',
+              });
+            }
             el.style.transform = `translate(${Math.round(b.x)}px, ${Math.round(b.y)}px)`;
             el.style.display = 'block';
           });
@@ -573,7 +586,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       host.removeChild(labelRenderer.domElement);
       if (stationLayer) host.removeChild(stationLayer);
     };
-  }, [shown, exaggeration, theme, departure, arrival, colorOf, language, ground, showGround, groundStyle, lineWidth, showStations, stationLabelFontPx]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [shown, exaggeration, theme, departure, arrival, colorOf, language, ground, showGround, groundStyle, lineWidth, showStations, stationLabelFontPx, stationDisplayStyle]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const overlayText: React.CSSProperties = { fontSize: FS.caption, color: colors.textSecondary, lineHeight: 1.5 };
 
@@ -665,6 +678,14 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
               <Checkbox theme={theme} size="sm" checked={showStations} onChange={setShowStations}>
                 {translateUI('terrain3dStationsLabel', language)}
               </Checkbox>
+              {showStations && <SegmentedControl
+                theme={theme} size="sm" ariaLabel={translateUI('terrain3dStationStyleLabel', language)}
+                value={stationDisplayStyle} onChange={setStationDisplayStyle}
+                options={[
+                  { value: 'plain', label: translateUI('terrain3dStationStylePlain', language) },
+                  { value: 'badge', label: translateUI('terrain3dStationStyleBadge', language) },
+                ]}
+              />}
               <div style={overlayText}>
                 {translateUI(groundError ? 'terrain3dGroundLoadError' : 'terrain3dGroundNote', language)}
               </div>
