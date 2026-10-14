@@ -31,6 +31,9 @@ PR ごとに `npm run test:design` で実行する（手元でも同じコマン
 | サービス名・アプリのアイコンは1か所から取る | `SITE_NAME`（`config/seo.ts`）/ `APP_ICON_PATH` | `tests/unit/config/siteName.test.ts`, `tests/unit/config/appIcon.test.ts` |
 | 部品（atoms / molecules）を足したら「どの部品を使うか」に1行足す。この表の検査はすべて CI で動く | この文書 | `tests/unit/designRules.test.ts` |
 
+**画面に描けているか**（真っ黒・固まる・重なり・ボタンの位置）は、この表のユニットテスト（jsdom）では見られない。
+実際のブラウザで確かめる描画テスト（`npm run test:render`, CI の `render` ジョブ）の一覧と足すときの決まりは `docs/render-tests.md`。
+
 **規則を新しく決めたら:** ① 定義元（atoms / molecules / constants）を作る → ② 直書きを見つけて落とすテストを書く →
 ③ この表に1行足す（`test:design` はこの表の「検査」列のテストを実行するので、足せば CI に入る）→
 ④ `CLAUDE.md` の要点に1行と、`.claude/skills/design-tokens/SKILL.md` の表に1行。
