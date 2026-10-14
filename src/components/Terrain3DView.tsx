@@ -490,7 +490,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
         title={data && shown.length > 0
           ? translateUI('terrain3dCoverage', language, { shown: String(shown.length), visible: String(visibleRoutes.size) })
           : translateUI('terrain3dLabel', language)}
-        width={mobileStatusPosition && !panelOpen ? "narrow" : "wide"}
+        width="wide"
         style={{
           position: 'absolute',
           left: mobileStatusPosition && !panelOpen ? mobileStatusPosition.left : FLOATING_PANEL.inset,
