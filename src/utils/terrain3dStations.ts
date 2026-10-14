@@ -13,6 +13,8 @@ export interface TerrainStation {
   lng: number;
   /** この駅を通る、表示中の路線の数（駅名を出す順番に使う） */
   routeCount: number;
+  /** 接続する表示中の路線。色の算出に利用 */
+  routeKeys: RouteKey[];
 }
 
 /** 同じ名前の駅をまとめる距離（km）。これより離れた同名の駅は別の駅として扱う（同名別駅） */
@@ -35,10 +37,10 @@ export function collectTerrainStations(
       if (exclude.has(s.name)) continue;
       const same = (byName.get(s.name) ?? []).find(t => distKm(t.lat, t.lng, s.lat, s.lng) <= SAME_STATION_KM);
       if (same) {
-        if (!seenOnRoute.has(same)) { same.routeCount++; seenOnRoute.add(same); }
+        if (!seenOnRoute.has(same)) { same.routeCount++; same.routeKeys.push(key); seenOnRoute.add(same); }
         continue;
       }
-      const station: TerrainStation = { name: s.name, lat: s.lat, lng: s.lng, routeCount: 1 };
+      const station: TerrainStation = { name: s.name, lat: s.lat, lng: s.lng, routeCount: 1, routeKeys: [key] };
       seenOnRoute.add(station);
       out.push(station);
       byName.set(s.name, [...(byName.get(s.name) ?? []), station]);
