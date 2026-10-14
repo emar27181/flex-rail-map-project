@@ -246,7 +246,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   const [groundError, setGroundError] = useState(false);
   const [showGround, setShowGround] = useState(() => initialDisplayUrlOptions().ground ?? true);
   const [showStations, setShowStations] = useState(true);
-  const [stationDisplayStyle, setStationDisplayStyle] = useState<'plain' | 'badge'>('plain');
+  const [stationDisplayStyle, setStationDisplayStyle] = useState<'plain' | 'badge'>('badge');
   const [groundStyle, setGroundStyle] = useState<Terrain3DGroundStyle>(() => initialDisplayUrlOptions().groundStyle ?? loadTerrain3dGroundStyle());
   useEffect(() => { saveTerrain3dGroundStyle(groundStyle); }, [groundStyle]);
   // 説明と操作の箱。設定ボタン（toggleSlot）があるときは閉じて始める（地図を広く見せる）。
@@ -281,6 +281,8 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   const lineSourceName = version === 'v1' ? v1?.meta.elevationSource.sourceName : null;
 
   const shown = useMemo(() => (lineRoutes ? selectTerrainRoutes({ routes: lineRoutes }, visibleRoutes) : []), [lineRoutes, visibleRoutes]);
+  // Display-only backdrop: no hit detection or interaction until a future feature.
+  const dimmedRoutes = useMemo(() => (lineRoutes ?? []).filter(r => !visibleRoutes.has(r.key)), [lineRoutes, visibleRoutes]);
   // 表示中の路線に立体のデータが無いときは、案内（データのある路線を表示）が見えるよう箱を開く
   const noShown = lineRoutes !== null && shown.length === 0;
   useEffect(() => { if (noShown) setPanelOpen(true); }, [noShown]);
@@ -365,6 +367,30 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       const g = groundElevationAt(groundData, lat, lng);
       return g === null ? ele : Math.max(ele, g);
     };
+
+    // Inactive railway lines are a lightweight, non-interactive ghost layer.
+    // Draw first, behind selected routes; no station markers or raycast handlers.
+    for (const route of dimmedRoutes) {
+      const color = colorOf(route.key);
+      for (const path of route.paths) {
+        if (path.length < 2) continue;
+        const geometry = new LineGeometry();
+        geometry.setPositions(path.flatMap(([lat, lng, ele]) =>
+          toLocal(frame, lat, lng, lineElevation(lat, lng, ele), exaggeration)));
+        const material = new LineMaterial({
+          color, linewidth: lineWidth, worldUnits: false,
+          transparent: true, opacity: HIDDEN_LINE_OPACITY,
+          depthWrite: false, depthTest: false,
+        });
+        material.resolution.set(width, height);
+        lineMaterials.push(material);
+        const ghost = new Line2(geometry, material);
+        ghost.renderOrder = 0;
+        ghost.raycast = () => {};
+        scene.add(ghost);
+        disposables.push(geometry, material);
+      }
+    }
 
     for (const route of shown) {
       const color = colorOf(route.key);
@@ -591,7 +617,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       host.removeChild(labelRenderer.domElement);
       if (stationLayer) host.removeChild(stationLayer);
     };
-  }, [shown, exaggeration, theme, departure, arrival, colorOf, language, ground, showGround, groundStyle, lineWidth, showStations, stationLabelFontPx, stationDisplayStyle]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [shown, dimmedRoutes, exaggeration, theme, departure, arrival, colorOf, language, ground, showGround, groundStyle, lineWidth, showStations, stationLabelFontPx, stationDisplayStyle]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const overlayText: React.CSSProperties = { fontSize: FS.caption, color: colors.textSecondary, lineHeight: 1.5 };
 
