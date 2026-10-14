@@ -30,6 +30,7 @@ import CollapsiblePanel from './ui/molecules/CollapsiblePanel';
 import SourceDisclosure from './ui/molecules/SourceDisclosure';
 import { anchoredPointLabel } from './ui/molecules/anchoredPointLabel';
 import { deviceClassOf } from '../constants/breakpoints';
+import { initialDisplayUrlOptions } from '../utils/mapDisplayUrlParam';
 import { captureTerrainCamera, restoreTerrainCamera, type TerrainCameraSnapshot } from '../utils/terrain3dCamera';
 import {
   TERRAIN3D_GROUND_STYLES, terrain3dPalette, loadTerrain3dGroundStyle, saveTerrain3dGroundStyle,
@@ -52,7 +53,7 @@ const OVERLAY_BOTTOM = aboveFloatingButtons(1);
  * 操作の感度。OrbitControls の既定（回転・移動・拡大とも 1）では速すぎて、
  * 少し指を動かしただけで大きく回ってしまったため下げている
  */
-const CONTROL_SPEED = { rotate: 0.45, pan: 0.6, zoom: 0.6, damping: 0.1 } as const;
+const CONTROL_SPEED = { rotate: 0.45, pan: 0.6, zoom: 0.3, damping: 0.1 } as const;
 /** 画面の縦横比（幅/高さ）がこれより小さいときは、カメラをその分だけ離す */
 const PORTRAIT_FIT_ASPECT = 1.2;
 /** 地面を分ける塊の大きさ（格子の数）。画面の外の塊は描かないので、関東全域を出しても軽い */
@@ -64,6 +65,8 @@ const CHUNK_CELLS = 64;
 const FOG_RANGE = { near: 1.6, far: 4.5 } as const;
 /** どこまで引いて見られるか（表示範囲に対する倍率）。関東全域が入るくらい */
 const MAX_DISTANCE_RATIO = 6;
+/** Prevent zooming through tracks: near clipping distance relative to visible rail extent. */
+const MIN_DISTANCE_RATIO = 0.025;
 /** 地面の色を高い側の色にしきる標高（m）。関東平野の低い土地の差も見えるよう、対数で補間する */
 const GROUND_TINT_MAX_M = 1500;
 /** 地面に隠れた線を透かして見せる濃さ */
@@ -210,18 +213,48 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   const colors = getThemeColors(theme);
   const hostRef = useRef<HTMLDivElement>(null);
   const cameraSnapshotRef = useRef<TerrainCameraSnapshot | null>(null);
-  const [version, setVersion] = useState<Terrain3DVersion>(TERRAIN3D_DEFAULT_VERSION);
+  const [version, setVersion] = useState<Terrain3DVersion>(() => initialDisplayUrlOptions().terrainVersion ?? TERRAIN3D_DEFAULT_VERSION);
   const [v1, setV1] = useState<Terrain3DData | null>(null);
   const [v2, setV2] = useState<Terrain3DDataV2 | null>(null);
   const [errorVersion, setErrorVersion] = useState<Terrain3DVersion | null>(null);
   const [exaggeration, setExaggeration] = useState<number>(TERRAIN3D_EXAGGERATION.default);
   const [ground, setGround] = useState<Terrain3DGround | null>(null);
   const [groundError, setGroundError] = useState(false);
-  const [showGround, setShowGround] = useState(true);
-  const [groundStyle, setGroundStyle] = useState<Terrain3DGroundStyle>(loadTerrain3dGroundStyle);
+  const [showGround, setShowGround] = useState(() => initialDisplayUrlOptions().ground ?? true);
+  const [groundStyle, setGroundStyle] = useState<Terrain3DGroundStyle>(() => initialDisplayUrlOptions().groundStyle ?? loadTerrain3dGroundStyle());
   useEffect(() => { saveTerrain3dGroundStyle(groundStyle); }, [groundStyle]);
   // 説明の箱はスマホでは閉じて始める（地図が隠れないように）。開閉は見出しで
   const [panelOpen, setPanelOpen] = useState(() => typeof window === 'undefined' || deviceClassOf(window.innerWidth) !== 'mobile');
+  // Align the collapsed 3D status with the mobile "表示切替" button.
+  // Read the actual button bounds rather than hardcoding its translated width.
+  const [mobileStatusPosition, setMobileStatusPosition] = useState<{ left: number; bottom: number; maxWidth: number } | null>(null);
+  useEffect(() => {
+    const update = () => {
+      if (deviceClassOf(window.innerWidth) !== 'mobile') {
+        setMobileStatusPosition(null);
+        return;
+      }
+      const group = document.querySelector('[data-mobile-map-controls]');
+      const button = group?.lastElementChild;
+      if (!button) { setMobileStatusPosition(null); return; }
+      const bounds = button.getBoundingClientRect();
+      const gap = parseFloat(FLOATING_PANEL.gap);
+      const inset = parseFloat(FLOATING_PANEL.inset);
+      const left = bounds.right + gap;
+      setMobileStatusPosition({
+        left,
+        bottom: window.innerHeight - bounds.bottom,
+        maxWidth: Math.max(0, window.innerWidth - left - inset),
+      });
+    };
+    update();
+    const group = document.querySelector('[data-mobile-map-controls]');
+    const observer = typeof ResizeObserver !== 'undefined' && group ? new ResizeObserver(update) : null;
+    if (group && observer) observer.observe(group);
+    window.addEventListener('resize', update);
+    return () => { observer?.disconnect(); window.removeEventListener('resize', update); };
+  }, []);
+
 
   useEffect(() => {
     let alive = true;
@@ -296,6 +329,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
     controls.dampingFactor = CONTROL_SPEED.damping;
     controls.target.set(0, 0, 0);
     controls.maxPolarAngle = Math.PI / 2 - 0.02; // 地面の下からは見ない
+    controls.minDistance = Math.max(size * MIN_DISTANCE_RATIO, camera.near * 2);
     controls.maxDistance = size * MAX_DISTANCE_RATIO;
     restoreTerrainCamera(camera, controls.target, cameraFrame, cameraSnapshotRef.current);
     controls.update();
@@ -457,7 +491,13 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
           ? translateUI('terrain3dCoverage', language, { shown: String(shown.length), visible: String(visibleRoutes.size) })
           : translateUI('terrain3dLabel', language)}
         width="wide"
-        style={{ position: 'absolute', left: FLOATING_PANEL.inset, bottom: overlayBottom }}
+        style={{
+          position: 'absolute',
+          left: mobileStatusPosition && !panelOpen ? mobileStatusPosition.left : FLOATING_PANEL.inset,
+          bottom: mobileStatusPosition && !panelOpen ? mobileStatusPosition.bottom : overlayBottom,
+          // Collapsed on mobile: stay next to the settings button without covering it.
+          ...(mobileStatusPosition && !panelOpen ? { maxWidth: mobileStatusPosition.maxWidth, minWidth: 0 } : {}),
+        }}
         bodyStyle={{ padding: `${L.sp.sm} ${L.sp.md}`, boxSizing: 'border-box' }}
       >
         <div data-testid="terrain3d-controls" style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
