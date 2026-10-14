@@ -52,7 +52,7 @@ const OVERLAY_BOTTOM = aboveFloatingButtons(1);
  * 操作の感度。OrbitControls の既定（回転・移動・拡大とも 1）では速すぎて、
  * 少し指を動かしただけで大きく回ってしまったため下げている
  */
-const CONTROL_SPEED = { rotate: 0.45, pan: 0.6, zoom: 0.6, damping: 0.1 } as const;
+const CONTROL_SPEED = { rotate: 0.45, pan: 0.6, zoom: 0.3, damping: 0.1 } as const;
 /** 画面の縦横比（幅/高さ）がこれより小さいときは、カメラをその分だけ離す */
 const PORTRAIT_FIT_ASPECT = 1.2;
 /** 地面を分ける塊の大きさ（格子の数）。画面の外の塊は描かないので、関東全域を出しても軽い */
@@ -64,6 +64,8 @@ const CHUNK_CELLS = 64;
 const FOG_RANGE = { near: 1.6, far: 4.5 } as const;
 /** どこまで引いて見られるか（表示範囲に対する倍率）。関東全域が入るくらい */
 const MAX_DISTANCE_RATIO = 6;
+/** Prevent zooming through tracks: near clipping distance relative to visible rail extent. */
+const MIN_DISTANCE_RATIO = 0.025;
 /** 地面の色を高い側の色にしきる標高（m）。関東平野の低い土地の差も見えるよう、対数で補間する */
 const GROUND_TINT_MAX_M = 1500;
 /** 地面に隠れた線を透かして見せる濃さ */
@@ -296,6 +298,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
     controls.dampingFactor = CONTROL_SPEED.damping;
     controls.target.set(0, 0, 0);
     controls.maxPolarAngle = Math.PI / 2 - 0.02; // 地面の下からは見ない
+    controls.minDistance = Math.max(size * MIN_DISTANCE_RATIO, camera.near * 2);
     controls.maxDistance = size * MAX_DISTANCE_RATIO;
     restoreTerrainCamera(camera, controls.target, cameraFrame, cameraSnapshotRef.current);
     controls.update();
