@@ -32,7 +32,7 @@ import FloatingIconButton from './ui/atoms/FloatingIconButton';
 import CollapsiblePanel from './ui/molecules/CollapsiblePanel';
 import SourceDisclosure from './ui/molecules/SourceDisclosure';
 import { plainTextLabelStyle, textBadgeStyle } from './ui/atoms/textBadge';
-import { collectTerrainStations, placeLabels, estimateLabelWidth } from '../utils/terrain3dStations';
+import { collectTerrainStations, stationOnVisibleRail, placeLabels, estimateLabelWidth } from '../utils/terrain3dStations';
 import { deviceClassOf } from '../constants/breakpoints';
 import { initialDisplayUrlOptions } from '../utils/mapDisplayUrlParam';
 import { captureTerrainCamera, restoreTerrainCamera, type TerrainCameraSnapshot } from '../utils/terrain3dCamera';
@@ -460,9 +460,13 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       const exclude = new Set([departure?.name, arrival?.name].filter((n): n is string => !!n));
       const stations = collectTerrainStations(shown.map(r => r.key), k => routes[k], exclude)
         .flatMap(st => {
-          const ele = groundData ? groundElevationAt(groundData, st.lat, st.lng) : elevationNear(shown, st.lat, st.lng);
-          if (ele === null) return []; // 高さが分からない駅は描かない
-          return [{ ...st, pos: new THREE.Vector3(...toLocal(frame, st.lat, st.lng, lineElevation(st.lat, st.lng, ele), exaggeration)) }];
+          // Station master coordinates are not necessarily on the actual OSM rail geometry.
+          // Match only this station's visible rail lines; don't draw a marker when there
+          // is no supported section nearby.
+          const rail = stationOnVisibleRail(st, shown);
+          if (!rail) return [];
+          const ele = lineElevation(rail.lat, rail.lng, rail.elevationM);
+          return [{ ...st, pos: new THREE.Vector3(...toLocal(frame, rail.lat, rail.lng, ele, exaggeration)) }];
         });
       if (stations.length > 0) {
         // 実寸基準の駅マーカー。近づけば大きく、離れれば小さく見える。
