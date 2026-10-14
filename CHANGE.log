@@ -1,5 +1,22 @@
 # CHANGE LOG
 
+## [2026-10-14] セッション（立体表示に地面を追加・説明の箱を折りたためるように）
+
+### feat: 立体表示に地面（標高の面）を出す
+- `scripts/line-geometry/terrain_ground_build.py`（新規）, `public/data/terrain3d-ground.json` / `.bin`（生成）,
+  `src/utils/terrain3d.ts`, `src/components/Terrain3DView.tsx`, `src/contexts/ThemeContext.tsx`（terrainLow / terrainHigh / terrainWater）, `src/utils/translation.ts`
+- 線形の標高と同じ Copernicus DEM GLO-90 を約500mの格子に平均して描く。標高の色分け（彩度を抑える）と北西からの光の陰影、水域は青
+- 線は地面の上に載せ、山などに隠れた部分は薄く透かす。今後、地下の区間を地面の下に描いたときに、どれが地下を走るか分かるように
+- 「地面を表示」で消せる（消すと前と同じ、海面までの幕と格子）
+- `tests/unit/data/terrain3d.test.ts`: 出典・範囲・海と陸・線形との差（中央値10m未満）・補間の計算
+
+### improve: 立体表示の説明の箱を見出しで折りたためるように
+- `src/components/Terrain3DView.tsx`（CollapsiblePanel）
+- 見出しは「45 / 48 路線を立体表示中」。スマホでは閉じた状態で始める（地図が隠れないように）
+
+### docs: 地面のデータと、地下の区間を描くときの決まりを追記
+- `data/kanto-line-geometry-2026-10/README.md`, `docs/track-geometry.md`, `docs/data-maintenance-ledger.md`
+
 ## [2026-10-13] セッション（立体表示の操作を地図と同じに・感度を下げる）
 
 ### improve: 立体表示は1本指で移動、2本指で回転・向き替え、操作の感度を下げる
