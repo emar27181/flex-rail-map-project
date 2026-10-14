@@ -59,6 +59,11 @@ const CHUNK_CELLS = 64;
  * （見ている所の周りは常にはっきり見え、地平線のほうだけ溶ける。地面の端が唐突に切れて見えない）
  */
 const FOG_RANGE = { near: 1.6, far: 4.5 } as const;
+/**
+ * 描く奥行きの範囲（カメラから見ている中心までの距離に対する倍率）。手前は真下の地面より近く、
+ * 奥は霧で消えきる所まで。比（far / near）を小さく保つと奥行きの精度が上がり、ちらつかない
+ */
+const CLIP_RANGE = { near: 0.005, far: FOG_RANGE.far * 1.2 } as const;
 /** どこまで引いて見られるか（表示範囲に対する倍率）。関東全域が入るくらい */
 const MAX_DISTANCE_RATIO = 6;
 /** 地面の色を高い側の色にしきる標高（m）。関東平野の低い土地の差も見えるよう、対数で補間する */
@@ -154,7 +159,7 @@ function buildGround(
   const material = new THREE.MeshLambertMaterial({
     vertexColors: true,
     // 線と同じ高さで重なったときに面が手前に出ないよう、奥へずらす
-    polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
+    polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 4,
   });
   const group = new THREE.Group();
   const geometries: THREE.BufferGeometry[] = [];
@@ -428,8 +433,11 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       // 霧と描く距離を、カメラから見ている中心までの距離に合わせる
       const d = camera.position.distanceTo(controls.target);
       if (scene.fog instanceof THREE.Fog) { scene.fog.near = d * FOG_RANGE.near; scene.fog.far = d * FOG_RANGE.far; }
-      const far = d * FOG_RANGE.far * 1.2;
-      if (Math.abs(camera.far - far) > far * 0.05) { camera.far = far; camera.near = far / 20000; camera.updateProjectionMatrix(); }
+      // 奥行きの精度は手前の端（near）で決まる。以前は near を far の 1/20000 にしていて精度が足りず、
+      // 動かすと地面と線が交互に前に出てちらついた（z-fighting）。near を見ている距離の一定割合にする
+      camera.near = d * CLIP_RANGE.near;
+      camera.far = d * CLIP_RANGE.far;
+      camera.updateProjectionMatrix();
       renderer.render(scene, camera);
       labelRenderer.render(scene, camera);
     };
@@ -442,6 +450,9 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
       labelRenderer.setSize(w, h);
+      // 大きさを変えると描画面が消えるので、次の描画を待たずにすぐ描く（スマホでアドレスバーが出入りしたときの点滅）
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
       lineMaterials.forEach(m => m.resolution.set(w, h));
     });
     ro.observe(host);
