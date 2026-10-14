@@ -10,7 +10,9 @@
  * - three.js はこの表示を開いたときだけ読み込む（RailwayMap から React.lazy で読む）
  * - 線形: © OpenStreetMap contributors（ODbL）。出典は画面の下に出す
  */
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { Rotate3d } from 'lucide-react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Line2 } from 'three/examples/jsm/lines/Line2.js';
@@ -26,6 +28,7 @@ import { FLOATING_PANEL, CONTROL_SIZE, aboveFloatingButtons } from './ui/atoms/c
 import Button from './ui/atoms/Button';
 import Stepper from './ui/molecules/Stepper';
 import Checkbox from './ui/atoms/Checkbox';
+import FloatingIconButton from './ui/atoms/FloatingIconButton';
 import CollapsiblePanel from './ui/molecules/CollapsiblePanel';
 import SourceDisclosure from './ui/molecules/SourceDisclosure';
 import { deviceClassOf } from '../constants/breakpoints';
@@ -197,11 +200,17 @@ export interface Terrain3DViewProps {
   overlayBottom?: string;
   /** 線の太さ（画面上の px）。地図の「路線の太さ」の設定と同じ値 */
   lineWidth?: number;
+  /**
+   * 設定を開くボタンを置く場所（RailwayMap が用意する箱）。あればそこに立体のアイコンを出し、
+   * 説明と操作の箱はボタンで開いたときだけ出す。無ければ箱を見出しつきで常に出す
+   */
+  toggleSlot?: HTMLElement | null;
 }
 
 const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   visibleRoutes, colorOf, departure, arrival, theme, language, onShowRoutes, overlayBottom = OVERLAY_BOTTOM,
   lineWidth = ROUTE_LINE.defaultWidth,
+  toggleSlot = null,
 }) => {
   const colors = getThemeColors(theme);
   const hostRef = useRef<HTMLDivElement>(null);
@@ -213,8 +222,10 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   const [ground, setGround] = useState<Terrain3DGround | null>(null);
   const [groundError, setGroundError] = useState(false);
   const [showGround, setShowGround] = useState(true);
-  // 説明の箱はスマホでは閉じて始める（地図が隠れないように）。開閉は見出しで
-  const [panelOpen, setPanelOpen] = useState(() => typeof window === 'undefined' || deviceClassOf(window.innerWidth) !== 'mobile');
+  // 説明と操作の箱。設定ボタンがあるときは閉じて始める（地図を広く見せる）。
+  // ボタンが無いときはスマホだけ閉じて始める
+  const [panelOpen, setPanelOpen] = useState(() => !toggleSlot && (typeof window === 'undefined' || deviceClassOf(window.innerWidth) !== 'mobile'));
+  const panelId = useId();
 
   useEffect(() => {
     let alive = true;
@@ -241,6 +252,9 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   const lineSourceName = version === 'v1' ? v1?.meta.elevationSource.sourceName : null;
 
   const shown = useMemo(() => (lineRoutes ? selectTerrainRoutes({ routes: lineRoutes }, visibleRoutes) : []), [lineRoutes, visibleRoutes]);
+  // 表示中の路線に立体のデータが無いときは、案内（データのある路線を表示）が見えるよう箱を開く
+  const noShown = lineRoutes !== null && shown.length === 0;
+  useEffect(() => { if (noShown) setPanelOpen(true); }, [noShown]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -449,8 +463,21 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
     <div style={{ position: 'absolute', inset: 0, backgroundColor: colors.background }} data-terrain3d>
       <div ref={hostRef} style={{ position: 'absolute', inset: 0 }} />
 
-      {/* 説明と操作（左下に浮かべる）。見出しで開閉する */}
-      <CollapsiblePanel
+      {/* 設定を開くボタン（RailwayMap が用意した場所に出す） */}
+      {toggleSlot && createPortal(
+        <FloatingIconButton
+          theme={theme}
+          icon={<Rotate3d />}
+          label={translateUI('terrain3dSettings', language)}
+          pressed={panelOpen}
+          controls={panelId}
+          onClick={() => setPanelOpen(v => !v)}
+        />,
+        toggleSlot,
+      )}
+
+      {/* 説明と操作（左下に浮かべる）。設定ボタンがあるときは開いている間だけ出す */}
+      {(panelOpen || !toggleSlot) && <div id={panelId}><CollapsiblePanel
         theme={theme}
         expanded={panelOpen}
         onToggle={() => setPanelOpen(v => !v)}
@@ -533,7 +560,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
             </SourceDisclosure>
           )}
         </div>
-      </CollapsiblePanel>
+      </CollapsiblePanel></div>}
     </div>
   );
 };

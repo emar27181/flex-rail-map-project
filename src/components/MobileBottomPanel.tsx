@@ -87,12 +87,15 @@ export interface MobileBottomPanelProps {
   theme: 'light' | 'dark';
   /** セーフエリア下部の余白（px）。デフォルト 0。 */
   safeAreaBottom?: number;
+  /** いちばん下のボタンの右に並べるもの（立体表示の設定を開くボタンなど）。段数は増えない */
+  trailing?: React.ReactNode;
 }
 
 const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
   buttons,
   theme,
   safeAreaBottom = 0,
+  trailing,
 }) => {
   const colors = getThemeColors(theme);
   const [openKey, setOpenKey] = useState<PopoverKey | null>(null);
@@ -279,9 +282,9 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
           alignItems: 'flex-start',
         }}
       >
-        {buttons.map(btn => {
+        {buttons.map((btn, i) => {
           const isActive = openKey === btn.key;
-          return (
+          const button = (
             <FloatingButton
               key={btn.key}
               theme={theme}
@@ -294,6 +297,10 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
               {btn.label}
             </FloatingButton>
           );
+          // いちばん下の段だけ、右に trailing を並べる（段数は変えないので、ポップオーバーの位置も変わらない）
+          return i === buttons.length - 1 && trailing
+            ? <div key={btn.key} style={{ display: 'flex', gap: BTN_GAP, alignItems: 'center' }}>{button}{trailing}</div>
+            : button;
         })}
       </div>
     </>

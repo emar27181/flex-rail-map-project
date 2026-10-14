@@ -120,6 +120,7 @@ import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
 import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE, FLOATING_PANEL } from './ui/atoms/controlSize';
+import FloatingIconButton from './ui/atoms/FloatingIconButton';
 import { floatingSurfaceStyle, floatingSurfaceCss } from './ui/atoms/floatingSurface';
 import { shadow, dropShadowFilter, joinShadows, textHalo, textHaloCss } from './ui/atoms/shadow';
 
@@ -394,6 +395,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [tapToggleMode, setTapToggleMode] = useState(true);
   // 地図表示モード
   const [mapViewMode, setMapViewMode] = useState<MapViewMode>('realistic');
+  /**
+   * 立体表示の設定を開くボタンを置く場所（DOM の箱）。立体表示は自分の状態を持ったまま、
+   * ボタンだけをここに出す（スマホ全画面では「表示切替」の右、それ以外は隅のボタンの列の右端）
+   */
+  const [terrainToggleSlot, setTerrainToggleSlot] = useState<HTMLElement | null>(null);
   /** 立体表示の路線の色（地図と同じくテーマに合わせる） */
   const terrainColorOf = useCallback((rk: RouteKey) => adjustRouteColorForTheme(routeColors[rk], theme), [theme]);
 
@@ -4870,15 +4876,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * （呼び出し側で cornerButtonStyle を直接参照する）。
    */
   const renderCornerButton = (icon: React.ReactNode, label: string, onClick: () => void) => (
-    <IconButton
-      theme={theme}
-      size="sm"
-      variant="outline"
-      onClick={onClick}
-      label={label}
-      icon={icon}
-      styleOverride={cornerButtonStyle}
-    />
+    <FloatingIconButton theme={theme} onClick={onClick} label={label} icon={icon} />
   );
 
   /**
@@ -5607,6 +5605,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 language={currentLanguage}
                 overlayBottom={terrainOverlayBottom}
                 lineWidth={routeLineWidth}
+                toggleSlot={terrainToggleSlot}
                 onShowRoutes={(keys) => {
                   setAvailableRoutes(prev => new Set([...prev, ...keys]));
                   setVisibleRoutes(prev => new Set([...prev, ...keys]));
@@ -6397,6 +6396,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             <MobileBottomPanel
               theme={theme}
               safeAreaBottom={MOBILE_PANEL_SAFE_BOTTOM}
+              trailing={mapViewMode === 'terrain3d' ? <div ref={setTerrainToggleSlot} style={{ display: 'flex' }} /> : undefined}
               buttons={[
                 // 候補ルートは設定より前に置く。候補が無いとき・推薦ルート選択を
                 // 出さない設定（既定）のときはボタン自体を出さない
@@ -6644,6 +6644,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onLanguageChange(langs[(langs.indexOf(language) + 1) % langs.length]);
               },
             )}</div>}
+
+            {/* 立体表示の設定を開くボタンの置き場所（スマホ全画面は「表示切替」の右に置く） */}
+            {mapViewMode === 'terrain3d' && !(isFullscreen && isMobile) && (
+              <div ref={setTerrainToggleSlot} style={{ display: 'flex' }} />
+            )}
 
             {/* テーマ切り替え・記事一覧は全画面時は地図を広く使うため隠す
                 （全画面を解除すると再表示される）。スマホの非全画面時も、
