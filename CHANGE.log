@@ -1,5 +1,21 @@
 # CHANGE LOG
 
+## [2026-10-14] セッション（CI に描画テストを追加）
+
+### test: 実際のブラウザで描けているかを確かめる描画テストを CI に追加
+- `playwright.render.config.ts`（新規）, `tests/render/`（新規: `map2d.render.ts`, `terrain3d.render.ts`, `png.ts`, `helpers.ts`）,
+  `.github/workflows/ci.yml`（`render` ジョブ）, `package.json`（`test:render`）, `src/components/Terrain3DView.tsx`（駅名の箱に `data-terrain3d-station-labels`）
+- これまで CI は型・デザイン規則・ユニットテスト（jsdom）・ビルドだけで、WebGL・地図の描画は一度もブラウザで確かめていなかった
+- 地図（2D）: 路線・駅が描かれ一色でない。立体表示: 描画面に描けている・駅名が重ならない・設定はアイコンから・回している間に固まらない・スマホでアイコンが「表示切替」の右
+- わざと壊して（描画を止める・固める・重なり判定をやめる）それぞれ落ちることを確かめた。最初は描画面の撮影に DOM が写り込み、描画を止めても通っていたので、描画面だけを撮るようにした
+- `docs/render-tests.md`（新規）, `docs/design-system.md`, `CLAUDE.md`: 描画に関わる変更は test:render も通し、確かめられていなければ検査を足す
+
+### fix: 描画テストが CI でだけ外部スクリプトの例外で落ちるのを止める
+- `tests/render/helpers.ts`, `tests/render/*.render.ts`, `docs/render-tests.md`
+- CI では広告・計測などの外部スクリプトが読み込まれ、承認外のドメイン（127.0.0.1）で例外（`pageerror: Y`）を出していた。手元のサーバー以外への通信を止め、どこで動かしても同じ条件にした
+- 例外には最初の呼び出し元も残す（縮められたスクリプトの例外は message だけでは出どころが分からない）
+- 回転のテストは CI のソフトウェア描画で60秒を超えたので、上限を120秒・撮影を4コマに
+
 ## [2026-10-14] セッション（立体表示に駅を小さく出す）
 
 ### feat: 立体表示に駅の点と駅名を、小さく重ならないように出す
