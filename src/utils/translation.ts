@@ -1912,6 +1912,9 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "駅を表示",
     english: "Show stations"
   },
+  terrain3dStationStyleLabel: { japanese: "一般駅の表示", english: "Station label style" },
+  terrain3dStationStylePlain: { japanese: "シンプル", english: "Plain" },
+  terrain3dStationStyleBadge: { japanese: "出発駅風", english: "Badge" },
   terrain3dGroundLabel: {
     japanese: "地面を表示",
     english: "Show ground"
