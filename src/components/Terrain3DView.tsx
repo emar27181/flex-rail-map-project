@@ -30,6 +30,7 @@ import CollapsiblePanel from './ui/molecules/CollapsiblePanel';
 import SourceDisclosure from './ui/molecules/SourceDisclosure';
 import { anchoredPointLabel } from './ui/molecules/anchoredPointLabel';
 import { deviceClassOf } from '../constants/breakpoints';
+import { initialDisplayUrlOptions } from '../utils/mapDisplayUrlParam';
 import { captureTerrainCamera, restoreTerrainCamera, type TerrainCameraSnapshot } from '../utils/terrain3dCamera';
 import {
   TERRAIN3D_GROUND_STYLES, terrain3dPalette, loadTerrain3dGroundStyle, saveTerrain3dGroundStyle,
@@ -212,15 +213,15 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   const colors = getThemeColors(theme);
   const hostRef = useRef<HTMLDivElement>(null);
   const cameraSnapshotRef = useRef<TerrainCameraSnapshot | null>(null);
-  const [version, setVersion] = useState<Terrain3DVersion>(TERRAIN3D_DEFAULT_VERSION);
+  const [version, setVersion] = useState<Terrain3DVersion>(() => initialDisplayUrlOptions().terrainVersion ?? TERRAIN3D_DEFAULT_VERSION);
   const [v1, setV1] = useState<Terrain3DData | null>(null);
   const [v2, setV2] = useState<Terrain3DDataV2 | null>(null);
   const [errorVersion, setErrorVersion] = useState<Terrain3DVersion | null>(null);
   const [exaggeration, setExaggeration] = useState<number>(TERRAIN3D_EXAGGERATION.default);
   const [ground, setGround] = useState<Terrain3DGround | null>(null);
   const [groundError, setGroundError] = useState(false);
-  const [showGround, setShowGround] = useState(true);
-  const [groundStyle, setGroundStyle] = useState<Terrain3DGroundStyle>(loadTerrain3dGroundStyle);
+  const [showGround, setShowGround] = useState(() => initialDisplayUrlOptions().ground ?? true);
+  const [groundStyle, setGroundStyle] = useState<Terrain3DGroundStyle>(() => initialDisplayUrlOptions().groundStyle ?? loadTerrain3dGroundStyle());
   useEffect(() => { saveTerrain3dGroundStyle(groundStyle); }, [groundStyle]);
   // 説明の箱はスマホでは閉じて始める（地図が隠れないように）。開閉は見出しで
   const [panelOpen, setPanelOpen] = useState(() => typeof window === 'undefined' || deviceClassOf(window.innerWidth) !== 'mobile');
