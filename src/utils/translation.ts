@@ -1872,6 +1872,18 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "立体データを読み込めませんでした。",
     english: "Could not load the 3D data."
   },
+  terrain3dGroundLabel: {
+    japanese: "地面を表示",
+    english: "Show ground"
+  },
+  terrain3dGroundNote: {
+    japanese: "地面は同じ標高データを約500m四方で平均したものです。地面に隠れた線は薄く透けて見えます。",
+    english: "The ground is the same elevation data averaged over about 500 m cells. Lines hidden by the ground are shown faintly."
+  },
+  terrain3dGroundLoadError: {
+    japanese: "地面のデータを読み込めませんでした。線だけを表示しています。",
+    english: "Could not load the ground data. Showing lines only."
+  },
   terrain3dHint: {
     japanese: "1本指・左ドラッグで移動、2本指・右ドラッグで回転、ピンチ・ホイールで拡大縮小",
     english: "One finger or left-drag to move, two fingers or right-drag to rotate, pinch or scroll to zoom"
@@ -2294,6 +2306,9 @@ export const uiChinese: Record<string, string> = {
   terrain3dShowAvailable: "显示所有有数据的线路",
   terrain3dLoading: "正在加载立体数据…",
   terrain3dLoadError: "无法加载立体数据。",
+  terrain3dGroundLabel: "显示地面",
+  terrain3dGroundNote: "地面为同一高程数据按约500米网格取平均。被地面遮挡的线路以半透明显示。",
+  terrain3dGroundLoadError: "无法加载地面数据，仅显示线路。",
   terrain3dHint: "单指或左键拖动移动，双指或右键拖动旋转，双指捏合或滚轮缩放",
   layerOrderHint: "↑ 最前面 / 背面 ↓",
   dragToSort: "⠿ 拖动排序",
@@ -2642,6 +2657,9 @@ export const uiKorean: Record<string, string> = {
   terrain3dShowAvailable: "데이터가 있는 노선 모두 표시",
   terrain3dLoading: "입체 데이터를 불러오는 중…",
   terrain3dLoadError: "입체 데이터를 불러올 수 없습니다.",
+  terrain3dGroundLabel: "지면 표시",
+  terrain3dGroundNote: "지면은 같은 표고 데이터를 약 500m 격자로 평균한 것입니다. 지면에 가려진 선은 흐리게 비쳐 보입니다.",
+  terrain3dGroundLoadError: "지면 데이터를 불러오지 못했습니다. 선만 표시합니다.",
   terrain3dHint: "한 손가락·왼쪽 드래그로 이동, 두 손가락·오른쪽 드래그로 회전, 핀치·휠로 확대/축소",
   layerOrderHint: "↑ 최전면 / 배면 ↓",
   dragToSort: "⠿ 드래그",
