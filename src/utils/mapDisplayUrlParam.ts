@@ -1,20 +1,11 @@
 /** Optional initial display settings; invalid values are ignored. */
 import type { MapViewMode } from '../constants/mapViewMode';
-import type { StationStats } from '../data/stationStats';
+import { STAT_PARAMS, type StationStats } from '../data/stationStats';
 import type { Terrain3DVersion } from './terrain3d';
 import type { Terrain3DGroundStyle } from './terrain3dAppearance';
 
-export const HEATMAP_URL_KEYS = [
-  'routeCount', 'restaurantCount', 'cafeCount', 'convenienceStoreCount',
-  'supermarketCount', 'hospitalCount', 'parkAreaM2', 'crimeIndex',
-  'fastFoodCount', 'mallCount', 'bankCount', 'postOfficeCount', 'pharmacyCount',
-  'nurseryCount', 'schoolCount', 'universityCount', 'libraryCount',
-  'clinicCount', 'cinemaCount', 'gymCount', 'hotelCount', 'attractionCount',
-  'parkCount', 'avgRent1K', 'avgRent1LDK', 'populationDensity',
-  'dailyPassengers', 'morningCongestion', 'izakayaCount', 'ramenCount',
-  'bookstoreCount', 'safetyScore', 'noiseScore', 'greenRatioPct',
-  'officeCount', 'coworkingCount',
-] as const satisfies readonly (keyof StationStats)[];
+// Reuse the application's canonical selectable statistics; do not maintain a second list.
+export const HEATMAP_URL_KEYS = STAT_PARAMS.map(param => param.key);
 
 export interface DisplayUrlOptions {
   view?: MapViewMode;
