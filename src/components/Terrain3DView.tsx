@@ -475,15 +475,19 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
         const material = new THREE.MeshBasicMaterial({ depthTest: false });
         const markers = new THREE.InstancedMesh(geometry, material, stations.length);
         const transform = new THREE.Object3D();
+        // Determine the station's one canonical color; share it between
+        // the 3D marker and either station-name presentation.
+        const stationColors = stations.map(st => {
+          const color = new THREE.Color();
+          st.routeKeys.forEach(key => color.add(new THREE.Color(colorOf(key))));
+          return color.multiplyScalar(1 / st.routeKeys.length);
+        });
         stations.forEach((st, i) => {
           transform.position.copy(st.pos);
           transform.position.y += STATION_SURFACE_OFFSET_KM;
           transform.updateMatrix();
           markers.setMatrixAt(i, transform.matrix);
-          const color = new THREE.Color();
-          st.routeKeys.forEach(key => color.add(new THREE.Color(colorOf(key))));
-          color.multiplyScalar(1 / st.routeKeys.length);
-          markers.setColorAt(i, color);
+          markers.setColorAt(i, stationColors[i]);
         });
         markers.instanceMatrix.needsUpdate = true;
         if (markers.instanceColor) markers.instanceColor.needsUpdate = true;
@@ -526,15 +530,12 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
             if (pick === undefined) { el.style.display = 'none'; return; }
             const b = valid[pick];
             el.textContent = names[b.i];
-            const station = stations[b.i];
-            if (badgeMode) {
-              const color = new THREE.Color();
-              station.routeKeys.forEach(key => color.add(new THREE.Color(colorOf(key))));
-              color.multiplyScalar(1 / station.routeKeys.length);
-              Object.assign(el.style, textBadgeStyle('#' + color.getHexString(), theme), {
-                fontSize: stationLabelFontPx + 'px',
-              });
-            }
+            const stationColor = '#' + stationColors[b.i].getHexString();
+            // Same route-derived color for the station marker AND station name.
+            // Badge background stays neutral to avoid same-color text on fill.
+            Object.assign(el.style, badgeMode
+              ? { ...textBadgeStyle(colors.surface, theme), color: stationColor, fontSize: stationLabelFontPx + 'px' }
+              : { ...labelStyle, color: stationColor });
             el.style.transform = `translate(${Math.round(b.x)}px, ${Math.round(b.y)}px)`;
             el.style.display = 'block';
           });
