@@ -63,6 +63,7 @@ import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, alphaWhite, alphaBlack } from
 import { trackStationSelect, trackRouteSearch } from '../utils/appAnalytics';
 import { DEFAULT_MAP_CENTER } from '../constants/mapDefaults';
 import type { MapViewMode } from '../constants/mapViewMode';
+import { initialDisplayUrlOptions } from '../utils/mapDisplayUrlParam';
 // 立体（標高）表示は three.js を使うので、開いたときだけ読み込む
 const Terrain3DView = React.lazy(() => import('./Terrain3DView'));
 import { MAP_PANE_Z, stationMarkerZ, ENDPOINT_MARKER_Z, TRAVEL_TIME_MARKER_Z, USER_LOCATION_MARKER_Z, TRAIN_DEMO_MARKER_Z } from '../constants/mapLayers';
@@ -393,7 +394,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   const [tapToggleMode, setTapToggleMode] = useState(true);
   // 地図表示モード
-  const [mapViewMode, setMapViewMode] = useState<MapViewMode>('realistic');
+  const [mapViewMode, setMapViewMode] = useState<MapViewMode>(() => initialDisplayUrlOptions().view ?? 'realistic');
   /** 立体表示の路線の色（地図と同じくテーマに合わせる） */
   const terrainColorOf = useCallback((rk: RouteKey) => adjustRouteColorForTheme(routeColors[rk], theme), [theme]);
 
@@ -546,11 +547,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const gpsSessionStartRef = useRef<number>(0);
 
   // ヒートマップ
-  const [heatmapEnabled, setHeatmapEnabled] = useState(false);
+  const [heatmapEnabled, setHeatmapEnabled] = useState(() => initialDisplayUrlOptions().heatmap ?? false);
   const [showEstimatedData, setShowEstimatedData] = useState(false);
-  const [heatmapParam, setHeatmapParam] = useState<keyof StationStats>('restaurantCount');
+  const [heatmapParam, setHeatmapParam] = useState<keyof StationStats>(() => initialDisplayUrlOptions().heatmapParam ?? 'restaurantCount');
   // 複数パラメータ選択（1個=単一表示、2個以上=複合シグマモード、0個=全駅データなし色）
-  const [heatmapMultiParams, setHeatmapMultiParams] = useState<Set<keyof StationStats>>(new Set<keyof StationStats>(['restaurantCount']));
+  const [heatmapMultiParams, setHeatmapMultiParams] = useState<Set<keyof StationStats>>(new Set<keyof StationStats>([initialDisplayUrlOptions().heatmapParam ?? 'restaurantCount']));
   // バブルマップの形状（円 or 四角）
   const [bubbleShape, setBubbleShape] = useState<'circle' | 'square'>('circle');
   // バブルマップの地理的最大半径（メートル）。値が最大の駅がこの半径になる
