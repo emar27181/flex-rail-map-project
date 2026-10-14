@@ -557,11 +557,11 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
             const b = valid[pick];
             el.textContent = names[b.i];
             const stationColor = '#' + stationColors[b.i].getHexString();
-            // Same route-derived color for the station marker AND station name.
-            // Badge background stays neutral to avoid same-color text on fill.
+            // Share the same route color and contrast-aware badge background
+            // calculation as the 2D station icons (filledLabelColors via textBadgeStyle).
             Object.assign(el.style, badgeMode
-              ? { ...textBadgeStyle(colors.surface, theme), color: stationColor, fontSize: stationLabelFontPx + 'px' }
-              : { ...labelStyle, color: stationColor });
+              ? { ...textBadgeStyle(stationColor, theme), fontSize: stationLabelFontPx + 'px' }
+              : { ...labelStyle, color: stationColor, backgroundColor: 'transparent' });
             el.style.transform = `translate(${Math.round(b.x)}px, ${Math.round(b.y)}px)`;
             el.style.display = 'block';
           });
