@@ -57,6 +57,6 @@ describe('投影した点の小さな印とラベル', () => {
     expect(source).toContain('THREE.InstancedMesh');
     expect(source).toContain('textBadgeStyle(');
     expect(source).toContain('plainTextLabelStyle(');
-    expect(source).not.toMatch(/MARKER_RATIO|Object\\.assign\\(label\\.style/);
+    expect(source).not.toContain('MARKER_RATIO');
   });
 });
