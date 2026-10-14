@@ -92,3 +92,8 @@ npm run test:data && npm run test:types && npm run test:unit && npm run build
 - 画面: `src/components/Terrain3DView.tsx`（three.js。この表示を開いたときだけ読み込む）
 - 高さは `terrainElevationM` に当たる**地面の標高**で、線路の高さ（`trackElevationM`）ではない。上の「高さの決まり」どおり混ぜない
 - 水平の距離に比べて標高差が小さいので、高さは強調して描く（既定10倍、画面で1〜30倍に変えられる）
+- **地面**（2026-10-14）: 同じ DEM を約500mの格子に平均した面を、標高の色分け（彩度を抑えた低い→高い）と北西からの光の陰影で描く。
+  水域は青。線は地面の上に載せ、山などに隠れた部分は薄く透かす（`public/data/terrain3d-ground.*`）
+- **地下の区間を描くとき（今後）**: 線路自体の標高（`trackElevationM`）が出典つきで分かった区間だけ、地面の下に描く。
+  地面より下の線は「隠れた線」と同じく地面越しに薄く見えるので、どれが地下を走るか分かる。
+  OSM の `tunnel` / `layer` から深さを作らない（上の「高さの決まり」）

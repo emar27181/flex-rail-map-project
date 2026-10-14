@@ -9,7 +9,9 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { routes, type RouteKey } from '../../../src/data/routes';
 import {
-  selectTerrainRoutes, frameFor, toLocal, elevationNear, nearestOnPaths, type Terrain3DData,
+  selectTerrainRoutes, frameFor, toLocal, elevationNear, nearestOnPaths,
+  parseGround, groundElevationAt, groundWindow, groundCellCenter, GROUND_WATER,
+  type Terrain3DGroundMeta, type Terrain3DData,
 } from '../../../src/utils/terrain3d';
 
 const data = JSON.parse(readFileSync(join(__dirname, '../../../public/data/terrain3d-lines.json'), 'utf8')) as Terrain3DData;
@@ -93,5 +95,74 @@ describe('立体表示の計算', () => {
     const mid = nearestOnPaths([route], 35, 139.005)!;
     expect(mid.km).toBeCloseTo(0, 5);
     expect(mid.elevationM).toBeCloseTo(20);
+  });
+});
+
+const groundMeta = JSON.parse(readFileSync(join(__dirname, '../../../public/data/terrain3d-ground.json'), 'utf8')) as Terrain3DGroundMeta;
+const groundBin = readFileSync(join(__dirname, '../../../public/data/terrain3d-ground.bin'));
+const ground = parseGround(groundMeta, groundBin.buffer.slice(groundBin.byteOffset, groundBin.byteOffset + groundBin.byteLength));
+
+describe('立体表示の地面', () => {
+  it('線形と同じ Copernicus DEM で、高さの意味は地面', () => {
+    expect(groundMeta.heightMeaning).toBe('terrain');
+    expect(groundMeta.source.sourceName).toContain('Copernicus');
+    expect(groundMeta.source.license).toContain('COPERNICUS');
+    expect(data.meta.elevationSource.sourceName).toContain('Copernicus');
+  });
+
+  it('立体表示のすべての線形が格子の中に入る', () => {
+    for (const r of data.routes) for (const p of r.paths) for (const [lat, lng] of p) {
+      expect(groundElevationAt(ground, lat, lng), `${r.key} ${lat},${lng}`).not.toBeNull();
+    }
+  });
+
+  it('標高は首都圏としてありうる範囲で、海は海として入っている', () => {
+    let min = Infinity, max = -Infinity;
+    for (const v of ground.elevation) { min = Math.min(min, v); max = Math.max(max, v); }
+    expect(min).toBeGreaterThan(-50);
+    expect(max).toBeLessThan(2600);
+    const cell = (lat: number, lng: number) => {
+      const r = Math.floor((groundMeta.latMax - lat) / groundMeta.stepDeg);
+      const c = Math.floor((lng - groundMeta.lngMin) / groundMeta.stepDeg);
+      return r * groundMeta.cols + c;
+    };
+    expect(ground.water[cell(35.55, 139.9)]).toBe(GROUND_WATER.ocean); // 東京湾
+    expect(ground.water[cell(35.632, 139.27)]).toBe(GROUND_WATER.land); // 高尾
+    expect(ground.elevation[cell(35.632, 139.27)]).toBeGreaterThan(100);
+  });
+
+  it('線形の標高と、同じ地点の地面（約500mの平均）は大きくずれない', () => {
+    const diffs: number[] = [];
+    for (const r of data.routes) for (const p of r.paths) for (const [lat, lng, ele] of p) {
+      diffs.push(Math.abs(groundElevationAt(ground, lat, lng)! - ele));
+    }
+    diffs.sort((a, b) => a - b);
+    expect(diffs[Math.floor(diffs.length / 2)]).toBeLessThan(10); // 中央値
+  });
+});
+
+describe('地面の計算', () => {
+  const meta = { latMax: 36, lngMin: 139, stepDeg: 0.5, rows: 2, cols: 2 } as Terrain3DGroundMeta;
+  const buf = new ArrayBuffer(2 * 2 * 3);
+  const v = new DataView(buf);
+  [0, 100, 200, 300].forEach((e, i) => v.setInt16(i * 2, e, true));
+  const g = parseGround(meta, buf);
+
+  it('大きさが合わないデータは読まない', () => {
+    expect(() => parseGround(meta, new ArrayBuffer(5))).toThrow();
+  });
+
+  it('格子の中心どうしの間は双一次補間、格子の外は null', () => {
+    const [latA, lngA] = groundCellCenter(meta, 0, 0);
+    const [latD, lngD] = groundCellCenter(meta, 1, 1);
+    expect(groundElevationAt(g, latA, lngA)).toBeCloseTo(0);
+    expect(groundElevationAt(g, latD, lngD)).toBeCloseTo(300);
+    expect(groundElevationAt(g, (latA + latD) / 2, (lngA + lngD) / 2)).toBeCloseTo(150);
+    expect(groundElevationAt(g, 40, 139.5)).toBeNull();
+  });
+
+  it('路線の範囲にかかる格子だけを切り出す', () => {
+    const route = { key: 'yamanote' as RouteKey, osmRelId: 0, osmName: '', paths: [[[35.75, 139.25, 0], [35.6, 139.4, 0]] as [number, number, number][]] };
+    expect(groundWindow(g, [route], 0)).toEqual({ r0: 0, r1: 1, c0: 0, c1: 1 });
   });
 });

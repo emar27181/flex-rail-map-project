@@ -53,6 +53,24 @@ npx tsx scripts/line-geometry/build-terrain3d.mts
 対応しなかった路線（relation が収集範囲に無い、または駅の 90% に届かない）は立体表示に出ない。
 画面には「表示中 N 路線のうち M 路線」と出る。
 
+## 地面（標高の格子, 2026-10-14）
+
+立体表示の「地面を表示」で描く面。線形の標高と**同じ Copernicus DEM GLO-90** を、AWS Open Data の COG 版
+（`copernicus-dem-90m`、北緯35〜36度・東経138〜140度の6タイル）から取り、0.005度（約500m）の格子の**平均**に縮めた。
+
+```bash
+python -m venv .venv-dem && .venv-dem/bin/pip install tifffile imagecodecs numpy
+.venv-dem/bin/python -I scripts/line-geometry/terrain_ground_build.py --cache <作業用フォルダ>
+# → public/data/terrain3d-ground.json（格子の位置・出典）と terrain3d-ground.bin（約230KB）
+```
+
+- 範囲は立体表示の線形の範囲＋0.05度。258行×297列
+- 水域は同じタイルの水域マスク（WBM）から、格子の半分以上が水のときだけ海・湖・川にする。海だけ高さ0にそろえ、湖・川はその場の標高のまま色だけ水にする
+- Copernicus DEM は建物・樹木を含む表面（DSM）。都心の値は地面より数m〜十数m高い
+- 出典表記: © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved（画面の「出典」に出す）
+- 線形の標高と地面（格子の平均）の差は中央値10m未満（テストで確認）。格子は粗いので、画面では線を地面より下に沈めない（地面の上に載せる）
+- 国土地理院の DEM（5m/10m, T.P. 基準）はサンドボックスから取得できない（2026-10-14 確認, プロキシが 403）。取れる環境なら細かい地面に置き換えられるが、線形の標高（EGM2008）と基準が違うので、置き換えるなら両方そろえる
+
 ## 収集スクリプト
 
 `scripts/line-geometry/*.py` は収集に使ったスクリプト（受け取った ZIP のもの）。サンドボックスからは

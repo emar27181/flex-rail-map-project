@@ -118,6 +118,14 @@ export const getThemeColors = (theme: Theme) => {
     mapLand: theme === 'dark' ? '#2b2f33' : '#f7f6f2',
     mapSea:  theme === 'dark' ? '#15181b' : '#cfd8df',
     mapCoast: theme === 'dark' ? '#4a5157' : '#a9b4bd',
+    /**
+     * 立体表示の地面の色（標高で低い→高いへ補間し、陰影は光で付ける）。路線の線が載る面なので、
+     * 一般的な段彩図（緑→茶）より彩度をかなり抑える。水域（海・湖・川）は青み。
+     * 地図の海（mapSea）はダークで背景とほぼ同じ暗さのため、立体では穴に見えた。少し明るい青にする
+     */
+    terrainLow: theme === 'dark' ? '#323833' : '#eceee4',
+    terrainHigh: theme === 'dark' ? '#6a6252' : '#b8a98d',
+    terrainWater: theme === 'dark' ? '#24384a' : '#bfd1e0',
     // 地図の上に浮かぶ箱・ボタンの半透明の地（FLOATING_OPACITY）。直接使わず floatingSurfaceStyle を使う
     glassCollapsed: tintColor(surface, FLOATING_OPACITY.idle),
     glassOpen:      tintColor(surface, FLOATING_OPACITY.open),

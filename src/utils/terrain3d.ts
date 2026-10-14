@@ -122,3 +122,81 @@ export function elevationNear(routes: Terrain3DRoute[], lat: number, lng: number
   const near = nearestOnPaths(routes, lat, lng);
   return near && near.km <= maxKm ? near.elevationM : null;
 }
+
+// ─── 地面（標高の格子） ─────────────────────────────────────────────
+// scripts/line-geometry/terrain_ground_build.py が作る。線形の標高と同じ Copernicus DEM を
+// 約500mの格子の平均に縮めたもの。地面を描き、地下に入る線（今後）と地上の線を見分けられるようにする
+
+export const TERRAIN3D_GROUND_META_URL = '/data/terrain3d-ground.json';
+export const TERRAIN3D_GROUND_BIN_URL = '/data/terrain3d-ground.bin';
+
+/** 水域の種類（格子の半分以上が水のとき） */
+export const GROUND_WATER = { land: 0, ocean: 1, lake: 2, river: 3 } as const;
+
+export interface Terrain3DGroundMeta {
+  latMax: number;
+  lngMin: number;
+  stepDeg: number;
+  rows: number;
+  cols: number;
+  heightMeaning: 'terrain';
+  heightReference: string;
+  source: { sourceName: string; sourceUrl: string; license: string; retrievedAt: string };
+}
+
+export interface Terrain3DGround {
+  meta: Terrain3DGroundMeta;
+  /** 標高（m）。rows×cols、北の行から・西の列から */
+  elevation: Int16Array;
+  /** 水域（GROUND_WATER）。並びは elevation と同じ */
+  water: Uint8Array;
+}
+
+/** .bin（標高 Int16 の後に水域 Uint8）を読み分ける。大きさが合わなければ例外（壊れたデータを描かない） */
+export function parseGround(meta: Terrain3DGroundMeta, buffer: ArrayBuffer): Terrain3DGround {
+  const n = meta.rows * meta.cols;
+  if (buffer.byteLength !== n * 3) throw new Error(`ground: ${buffer.byteLength} bytes, expected ${n * 3}`);
+  const view = new DataView(buffer);
+  const elevation = new Int16Array(n);
+  for (let i = 0; i < n; i++) elevation[i] = view.getInt16(i * 2, true);
+  return { meta, elevation, water: new Uint8Array(buffer, n * 2, n) };
+}
+
+/** 格子の点（行・列）の中心の緯度経度 */
+export function groundCellCenter(meta: Terrain3DGroundMeta, row: number, col: number): [number, number] {
+  return [meta.latMax - (row + 0.5) * meta.stepDeg, meta.lngMin + (col + 0.5) * meta.stepDeg];
+}
+
+/**
+ * その地点の地面の標高（m）。格子の中心の値を双一次補間する（地面の面を描くときと同じ補間）。
+ * 格子の外は null
+ */
+export function groundElevationAt(ground: Terrain3DGround, lat: number, lng: number): number | null {
+  const { latMax, lngMin, stepDeg, rows, cols } = ground.meta;
+  const fr = (latMax - lat) / stepDeg - 0.5;
+  const fc = (lng - lngMin) / stepDeg - 0.5;
+  if (fr < 0 || fc < 0 || fr > rows - 1 || fc > cols - 1) return null;
+  const r0 = Math.min(Math.floor(fr), rows - 2), c0 = Math.min(Math.floor(fc), cols - 2);
+  const tr = fr - r0, tc = fc - c0;
+  const at = (r: number, c: number) => Math.max(0, ground.elevation[r * cols + c]);
+  const top = at(r0, c0) * (1 - tc) + at(r0, c0 + 1) * tc;
+  const bottom = at(r0 + 1, c0) * (1 - tc) + at(r0 + 1, c0 + 1) * tc;
+  return top * (1 - tr) + bottom * tr;
+}
+
+/** 表示中の路線の範囲（＋余白 marginDeg）にかかる格子の行・列の範囲。かからなければ null */
+export function groundWindow(
+  ground: Terrain3DGround, routes: Terrain3DRoute[], marginDeg: number,
+): { r0: number; r1: number; c0: number; c1: number } | null {
+  let s = 90, n = -90, w = 180, e = -180;
+  for (const r of routes) for (const p of r.paths) for (const [lat, lng] of p) {
+    s = Math.min(s, lat); n = Math.max(n, lat); w = Math.min(w, lng); e = Math.max(e, lng);
+  }
+  if (s > n) return null;
+  const { latMax, lngMin, stepDeg, rows, cols } = ground.meta;
+  const r0 = Math.max(0, Math.floor((latMax - (n + marginDeg)) / stepDeg));
+  const r1 = Math.min(rows - 1, Math.ceil((latMax - (s - marginDeg)) / stepDeg));
+  const c0 = Math.max(0, Math.floor((w - marginDeg - lngMin) / stepDeg));
+  const c1 = Math.min(cols - 1, Math.ceil((e + marginDeg - lngMin) / stepDeg));
+  return r1 - r0 >= 1 && c1 - c0 >= 1 ? { r0, r1, c0, c1 } : null;
+}
