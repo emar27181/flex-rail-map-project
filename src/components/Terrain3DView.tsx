@@ -225,6 +225,36 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   useEffect(() => { saveTerrain3dGroundStyle(groundStyle); }, [groundStyle]);
   // 説明の箱はスマホでは閉じて始める（地図が隠れないように）。開閉は見出しで
   const [panelOpen, setPanelOpen] = useState(() => typeof window === 'undefined' || deviceClassOf(window.innerWidth) !== 'mobile');
+  // Align the collapsed 3D status with the mobile "表示切替" button.
+  // Read the actual button bounds rather than hardcoding its translated width.
+  const [mobileStatusPosition, setMobileStatusPosition] = useState<{ left: number; bottom: number; maxWidth: number } | null>(null);
+  useEffect(() => {
+    const update = () => {
+      if (deviceClassOf(window.innerWidth) !== 'mobile') {
+        setMobileStatusPosition(null);
+        return;
+      }
+      const group = document.querySelector('[data-mobile-map-controls]');
+      const button = group?.lastElementChild;
+      if (!button) { setMobileStatusPosition(null); return; }
+      const bounds = button.getBoundingClientRect();
+      const gap = parseFloat(FLOATING_PANEL.gap);
+      const inset = parseFloat(FLOATING_PANEL.inset);
+      const left = bounds.right + gap;
+      setMobileStatusPosition({
+        left,
+        bottom: window.innerHeight - bounds.bottom,
+        maxWidth: Math.max(0, window.innerWidth - left - inset),
+      });
+    };
+    update();
+    const group = document.querySelector('[data-mobile-map-controls]');
+    const observer = typeof ResizeObserver !== 'undefined' && group ? new ResizeObserver(update) : null;
+    if (group && observer) observer.observe(group);
+    window.addEventListener('resize', update);
+    return () => { observer?.disconnect(); window.removeEventListener('resize', update); };
+  }, []);
+
 
   useEffect(() => {
     let alive = true;
@@ -460,8 +490,14 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
         title={data && shown.length > 0
           ? translateUI('terrain3dCoverage', language, { shown: String(shown.length), visible: String(visibleRoutes.size) })
           : translateUI('terrain3dLabel', language)}
-        width="wide"
-        style={{ position: 'absolute', left: FLOATING_PANEL.inset, bottom: overlayBottom }}
+        width={mobileStatusPosition && !panelOpen ? "narrow" : "wide"}
+        style={{
+          position: 'absolute',
+          left: mobileStatusPosition && !panelOpen ? mobileStatusPosition.left : FLOATING_PANEL.inset,
+          bottom: mobileStatusPosition && !panelOpen ? mobileStatusPosition.bottom : overlayBottom,
+          // Collapsed on mobile: stay next to the settings button without covering it.
+          ...(mobileStatusPosition && !panelOpen ? { maxWidth: mobileStatusPosition.maxWidth, minWidth: 0 } : {}),
+        }}
         bodyStyle={{ padding: `${L.sp.sm} ${L.sp.md}`, boxSizing: 'border-box' }}
       >
         <div data-testid="terrain3d-controls" style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
