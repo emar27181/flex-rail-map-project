@@ -1872,6 +1872,38 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "立体データを読み込めませんでした。",
     english: "Could not load the 3D data."
   },
+  terrain3dVersion: {
+    japanese: "線形データの版",
+    english: "Line data version"
+  },
+  terrain3dVersionV2: {
+    japanese: "v2（地上・高架・地下）",
+    english: "v2 (ground / elevated / underground)"
+  },
+  terrain3dVersionV1: {
+    japanese: "v1",
+    english: "v1"
+  },
+  terrain3dStructureAtGrade: {
+    japanese: "地上",
+    english: "At grade"
+  },
+  terrain3dStructureElevated: {
+    japanese: "高架",
+    english: "Elevated"
+  },
+  terrain3dStructureUnderground: {
+    japanese: "地下",
+    english: "Underground"
+  },
+  terrain3dStructureNote: {
+    japanese: "区間の種類は OpenStreetMap のトンネル・橋のタグによるものです。地下の深さは分からないため、地面の位置に破線で描いています。",
+    english: "Section types come from OpenStreetMap tunnel and bridge tags. Underground depth is unknown, so those sections are drawn dashed at ground level."
+  },
+  terrain3dV2Source: {
+    japanese: "線形と区間の種類: OpenStreetMap（Geofabrik 関東抽出, 2026-10-14）。高さは地面の標高（Copernicus DEM の格子）",
+    english: "Lines and section types: OpenStreetMap (Geofabrik Kanto extract, 2026-10-14). Heights are ground elevation (Copernicus DEM grid)"
+  },
   terrain3dGroundLabel: {
     japanese: "地面を表示",
     english: "Show ground"
@@ -2306,6 +2338,14 @@ export const uiChinese: Record<string, string> = {
   terrain3dShowAvailable: "显示所有有数据的线路",
   terrain3dLoading: "正在加载立体数据…",
   terrain3dLoadError: "无法加载立体数据。",
+  terrain3dVersion: "线路数据版本",
+  terrain3dVersionV2: "v2（地面·高架·地下）",
+  terrain3dVersionV1: "v1",
+  terrain3dStructureAtGrade: "地面",
+  terrain3dStructureElevated: "高架",
+  terrain3dStructureUnderground: "地下",
+  terrain3dStructureNote: "区间类型依据 OpenStreetMap 的隧道·桥梁标签。地下深度未知，因此以虚线绘制在地面位置。",
+  terrain3dV2Source: "线路与区间类型: OpenStreetMap（Geofabrik 关东提取, 2026-10-14）。高度为地面高程（Copernicus DEM 网格）",
   terrain3dGroundLabel: "显示地面",
   terrain3dGroundNote: "地面为同一高程数据按约500米网格取平均。被地面遮挡的线路以半透明显示。",
   terrain3dGroundLoadError: "无法加载地面数据，仅显示线路。",
@@ -2657,6 +2697,14 @@ export const uiKorean: Record<string, string> = {
   terrain3dShowAvailable: "데이터가 있는 노선 모두 표시",
   terrain3dLoading: "입체 데이터를 불러오는 중…",
   terrain3dLoadError: "입체 데이터를 불러올 수 없습니다.",
+  terrain3dVersion: "선형 데이터 버전",
+  terrain3dVersionV2: "v2（지상·고가·지하）",
+  terrain3dVersionV1: "v1",
+  terrain3dStructureAtGrade: "지상",
+  terrain3dStructureElevated: "고가",
+  terrain3dStructureUnderground: "지하",
+  terrain3dStructureNote: "구간 종류는 OpenStreetMap의 터널·교량 태그에 따른 것입니다. 지하 깊이는 알 수 없어 지면 위치에 점선으로 그렸습니다.",
+  terrain3dV2Source: "선형과 구간 종류: OpenStreetMap（Geofabrik 간토 추출, 2026-10-14）. 높이는 지면 표고（Copernicus DEM 격자）",
   terrain3dGroundLabel: "지면 표시",
   terrain3dGroundNote: "지면은 같은 표고 데이터를 약 500m 격자로 평균한 것입니다. 지면에 가려진 선은 흐리게 비쳐 보입니다.",
   terrain3dGroundLoadError: "지면 데이터를 불러오지 못했습니다. 선만 표시합니다.",
