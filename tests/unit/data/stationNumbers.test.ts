@@ -46,6 +46,36 @@ describe('getStationNumber', () => {
     expect(getStationNumber('nipporiToneriLiner', '見沼代親水公園')).toBe('NT13');
   });
 
+  it('公式資料に基づく江ノ電のEN01〜EN15を返す', () => {
+    expect(getStationNumber('enoshimaElectricRailway', '藤沢')).toBe('EN01');
+    expect(getStationNumber('enoshimaElectricRailway', '江ノ島')).toBe('EN06');
+    expect(getStationNumber('enoshimaElectricRailway', '鎌倉')).toBe('EN15');
+  });
+
+  it('東急世田谷線のSG01〜SG10を返す', () => {
+    expect(getStationNumber('tokyuSetagayaLine', '三軒茶屋')).toBe('SG01');
+    expect(getStationNumber('tokyuSetagayaLine', '世田谷')).toBe('SG05');
+    expect(getStationNumber('tokyuSetagayaLine', '下高井戸')).toBe('SG10');
+  });
+
+  it('京成押上線は公式確認済みの5駅のみ番号を返す', () => {
+    expect(getStationNumber('keiseiOshiageLine', '押上')).toBe('KS45');
+    expect(getStationNumber('keiseiOshiageLine', '京成曳舟')).toBe('KS46');
+    expect(getStationNumber('keiseiOshiageLine', '八広')).toBe('KS47');
+    expect(getStationNumber('keiseiOshiageLine', '四ツ木')).toBe('KS48');
+    expect(getStationNumber('keiseiOshiageLine', '青砥')).toBe('KS09');
+    // Existing route data calls this station 立石, but the official name is 京成立石.
+    expect(getStationNumber('keiseiOshiageLine', '立石')).toBeUndefined();
+  });
+
+  it('都電荒川線の公式全30停留場の番号を返す', () => {
+    expect(getStationNumber('todenArakawaLine', '三ノ輪橋')).toBe('SA01');
+    expect(getStationNumber('todenArakawaLine', '熊野前')).toBe('SA09');
+    expect(getStationNumber('todenArakawaLine', '王子駅前')).toBe('SA16');
+    expect(getStationNumber('todenArakawaLine', '鬼子母神前')).toBe('SA27');
+    expect(getStationNumber('todenArakawaLine', '早稲田')).toBe('SA30');
+  });
+
   it('存在しない駅はundefinedを返す', () => {
     expect(getStationNumber('yamanote', '存在しない駅')).toBeUndefined();
   });
