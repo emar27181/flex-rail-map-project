@@ -32,6 +32,11 @@
 - `tests/unit/utils/articleFacts.test.ts`, `articleMapLink.test.ts`, `articleAnalytics.test.ts`（新規）, `tests/unit/data/articleSources.test.ts`, `tests/render/article.render.ts`（新規）
 - `docs/article-platform.md`（新規・設計判断）, `docs/article-writing.md`, `docs/templates/article-prompt.md`, `docs/seo.md`, `CLAUDE.md`
 
+## [2026-10-16] セッション（PR #74 の競合解消）
+
+### docs: 訪日客向け調査計画と観光地ガイド企画を両方保持
+- `TODO.md`: 最新 main を取り込み、検索流入の仮説検証と観光地×駅×地図デモの企画を別項目として統合。
+
 ## [2026-10-16] セッション（駅ナンバリングの公式照合と修正）
 
 ### fix: 公式資料と異なる駅番号の逆順・欠落駅によるずれ・系統記号を修正
