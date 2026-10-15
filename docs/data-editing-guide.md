@@ -48,6 +48,7 @@ Flex Railway Map のデータ（路線・駅・直通運転・運行系統・駅
 | 路線の駅（駅名・座標・次の駅までの分） | `src/data/<路線>.ts`（例: `jr-tokaido-main-line.ts`） | `tests/unit/data/routeDuplication.test.ts` ほか |
 | 路線の登録・色・日本語名 | `src/data/routes.ts`（`routes` / `routeColors` / `routeNames`） | 同上 |
 | 路線名の英語 | `src/utils/translation.ts` の路線名の表 | `tests/unit/utils/translation.test.ts` |
+| 駅番号（ナンバリング） | `src/data/stationNumbers.ts`、公式照合記録は `data/station-number-audit-2026-10-16/` | `tests/unit/data/stationNumberOfficialAudit.test.ts` ほか |
 | 直通運転（乗り換えなしで行ける範囲） | `src/data/throughServices.ts` | `tests/unit/data/throughServices.test.ts` |
 | 運行系統名と主な始発・行先 | `src/data/serviceSystems.ts` | `tests/unit/data/serviceSystems.test.ts` |
 | 並走区間（色を見分けられるようにする組） | `src/data/sharedCorridors.ts` | `tests/unit/data/sharedCorridors.test.ts` |
@@ -74,6 +75,15 @@ export const jrExampleLine: Station[] = [
   路線ごとに方式をそろえる（CLAUDE.md「小田急線の経路推薦」の経緯を参照）
 - 新しい路線は `routes.ts` の `routes`・`routeColors`・`routeNames` の3か所に登録し、
   `translation.ts` に英語名を足す
+
+### 駅番号（`src/data/stationNumbers.ts`）
+
+- 番号は公式一覧から転記する。駅の配列順から連番を計算しない（途中駅・分岐・逆順でずれる）。
+- 公式資料の発行者・題名・URL・参照日（JST）と、照合した駅×路線キーの範囲を監査記録に残す。
+- `data/station-number-audit-2026-10-16/verified.json` はテスト用の公式資料照合スナップショット。本番データの定義元は `stationNumbers.ts` だけ。
+- 新しい変更には照合記録と回帰テストを追加する。期待値を本番データからコピー生成して正しさの証明にしない。
+- 複数系統・他社への直通・共同使用駅では正式な記号を使う。合成駅に番号を捏造しない。
+- 未照合は `deferred` / TODOに残し、登録済み件数を公式検証済み件数と混同しない。
 
 ### 直通運転（`src/data/throughServices.ts`）
 

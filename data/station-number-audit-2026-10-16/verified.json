@@ -1,0 +1,4410 @@
+{
+  "checkedAt": "2026-10-16",
+  "timeZone": "Asia/Tokyo",
+  "scope": "公式資料で確認できた駅・路線キーの組だけ。全国全件の照合完了ではない。",
+  "sources": [
+    {
+      "id": "jr2016",
+      "publisher": "JR東日本",
+      "title": "首都圏エリアへ駅ナンバリングを導入します・別紙2",
+      "url": "https://www.jreast.co.jp/press/2016/20160402.pdf",
+      "publishedAt": "2016-04-06",
+      "checkedAt": "2026-10-16",
+      "note": "2016年の公式一覧。新駅・改称は別の現行資料で補完。掲載範囲外を自動採番しない。"
+    },
+    {
+      "id": "jy26",
+      "publisher": "JR東日本",
+      "title": "高輪ゲートウェイ駅・駅ナンバリング",
+      "url": "https://www.jreast.co.jp/estation/station/info.aspx?StationCd=1750",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "toei",
+      "publisher": "東京都交通局",
+      "title": "各駅情報・都営地下鉄",
+      "url": "https://www.kotsu.metro.tokyo.jp/subway/stations/",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "hibiya",
+      "publisher": "東京メトロ",
+      "title": "日比谷線・路線と駅の情報",
+      "url": "https://www.tokyometro.jp/station/line_hibiya/index.html",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "odakyu",
+      "publisher": "小田急電鉄",
+      "title": "各駅のお子さま向け設備一覧・駅番号併記",
+      "url": "https://www.odakyu.jp/oyako/facilities/",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "keikyu",
+      "publisher": "京浜急行電鉄",
+      "title": "路線図・各駅情報・駅番号付き一覧",
+      "url": "https://www.keikyu.co.jp/ride/kakueki/",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "keio",
+      "publisher": "京王電鉄",
+      "title": "2023年会社要覧・路線の概要",
+      "url": "https://www.keio.co.jp/company/corporate/summary/corporate_manual/pdf/2023/2023_p017_p018.pdf",
+      "checkedAt": "2026-10-16",
+      "note": "京王本線・相模原線・高尾線の駅名と番号をPDF画像でも目視照合。文字抽出だけの不正な駅名対応は採用しない。"
+    },
+    {
+      "id": "rinkai",
+      "publisher": "東京臨海高速鉄道",
+      "title": "駅ナンバリングの導入について・全8駅の一覧",
+      "url": "https://www.twr.co.jp/tabid/101/Default.aspx?dispmid=860&itemid=218",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "yurikamome",
+      "publisher": "ゆりかもめ",
+      "title": "駅・時刻表・全駅の番号一覧",
+      "url": "https://www.yurikamome.co.jp/?vm=r",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "blue",
+      "publisher": "横浜市交通局",
+      "title": "地下鉄路線図・Station Number",
+      "url": "https://www.city.yokohama.lg.jp/kotsu/kigyo/anzen/sonotataisaku.files/0003_20210330.pdf?lang=pt",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "tobu",
+      "publisher": "東武鉄道",
+      "title": "各駅のお子さま向け設備一覧・日光線駅番号",
+      "url": "https://www.tobu.co.jp/railway/guide/childcare_support/station/",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "monorail",
+      "publisher": "東京モノレール",
+      "title": "Monorail Guide・Fare table・駅番号併記",
+      "url": "https://www.tokyo-monorail.co.jp/english/guidance/train_info.html",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "keikyu-rename",
+      "publisher": "京浜急行電鉄",
+      "title": "駅名変更を記念した企画・番号と新旧駅名の対応表",
+      "url": "https://www.keikyu.co.jp/company/news/2019/20200309HP_19252TS.html",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "sr-akabane-iwabuchi",
+      "publisher": "埼玉高速鉄道",
+      "title": "赤羽岩淵・各駅案内（駅番号）",
+      "url": "https://www.s-rail.co.jp/ticket/line/akabane-iwabuchi/",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "sr-kawaguchi-motogo",
+      "publisher": "埼玉高速鉄道",
+      "title": "川口元郷・各駅案内（駅番号）",
+      "url": "https://www.s-rail.co.jp/ticket/line/kawaguchi-motogo/",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "sr-minami-hatogaya",
+      "publisher": "埼玉高速鉄道",
+      "title": "南鳩ヶ谷・各駅案内（駅番号）",
+      "url": "https://www.s-rail.co.jp/ticket/line/minami-hatogaya/",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "sr-hatogaya",
+      "publisher": "埼玉高速鉄道",
+      "title": "鳩ヶ谷・各駅案内（駅番号）",
+      "url": "https://www.s-rail.co.jp/ticket/line/hatogaya/",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "sr-araijuku",
+      "publisher": "埼玉高速鉄道",
+      "title": "新井宿・各駅案内（駅番号）",
+      "url": "https://www.s-rail.co.jp/ticket/line/araijuku/",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "sr-tozuka-angyo",
+      "publisher": "埼玉高速鉄道",
+      "title": "戸塚安行・各駅案内（駅番号）",
+      "url": "https://www.s-rail.co.jp/ticket/line/tozuka-angyo/",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "sr-higashi-kawaguchi",
+      "publisher": "埼玉高速鉄道",
+      "title": "東川口・各駅案内（駅番号）",
+      "url": "https://www.s-rail.co.jp/ticket/line/higashi-kawaguchi/",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "sr-urawa-misono",
+      "publisher": "埼玉高速鉄道",
+      "title": "浦和美園・各駅案内（駅番号）",
+      "url": "https://www.s-rail.co.jp/ticket/line/urawa-misono/",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "metro-ayase",
+      "publisher": "東京メトロ",
+      "title": "綾瀬駅/C19・路線と駅の情報",
+      "url": "https://www.tokyometro.jp/station/ayase/index.html",
+      "checkedAt": "2026-10-16"
+    }
+  ],
+  "verified": [
+    {
+      "routeKey": "yamanote",
+      "stationName": "高輪ゲートウェイ",
+      "code": "JY26",
+      "sourceIds": [
+        "jy26"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "北千住",
+      "code": "H22",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "南千住",
+      "code": "H21",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "三ノ輪",
+      "code": "H20",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "入谷",
+      "code": "H19",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "上野",
+      "code": "H18",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "仲御徒町",
+      "code": "H17",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "秋葉原",
+      "code": "H16",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "小伝馬町",
+      "code": "H15",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "人形町",
+      "code": "H14",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "茅場町",
+      "code": "H13",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "八丁堀",
+      "code": "H12",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "築地",
+      "code": "H11",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "東銀座",
+      "code": "H10",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "銀座",
+      "code": "H09",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "日比谷",
+      "code": "H08",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "霞ケ関",
+      "code": "H07",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "虎ノ門ヒルズ",
+      "code": "H06",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "神谷町",
+      "code": "H05",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "六本木",
+      "code": "H04",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "広尾",
+      "code": "H03",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "恵比寿",
+      "code": "H02",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "hibiyaLine",
+      "stationName": "中目黒",
+      "code": "H01",
+      "sourceIds": [
+        "hibiya"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "西馬込",
+      "code": "A01",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "馬込",
+      "code": "A02",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "中延",
+      "code": "A03",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "戸越",
+      "code": "A04",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "五反田",
+      "code": "A05",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "高輪台",
+      "code": "A06",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "泉岳寺",
+      "code": "A07",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "三田",
+      "code": "A08",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "大門",
+      "code": "A09",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "新橋",
+      "code": "A10",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "東銀座",
+      "code": "A11",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "宝町",
+      "code": "A12",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "東日本橋",
+      "code": "A15",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "人形町",
+      "code": "A14",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "浅草橋",
+      "code": "A16",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "蔵前",
+      "code": "A17",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "浅草",
+      "code": "A18",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "本所吾妻橋",
+      "code": "A19",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiAsakusaLine",
+      "stationName": "押上",
+      "code": "A20",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "西高島平",
+      "code": "I27",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "新高島平",
+      "code": "I26",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "高島平",
+      "code": "I25",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "蓮根",
+      "code": "I23",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "西台",
+      "code": "I24",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "志村三丁目",
+      "code": "I22",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "志村坂上",
+      "code": "I21",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "本蓮沼",
+      "code": "I20",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "板橋本町",
+      "code": "I19",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "板橋区役所前",
+      "code": "I18",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "新板橋",
+      "code": "I17",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "西巣鴨",
+      "code": "I16",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "巣鴨",
+      "code": "I15",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "千石",
+      "code": "I14",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "白山",
+      "code": "I13",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "春日",
+      "code": "I12",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "水道橋",
+      "code": "I11",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "神保町",
+      "code": "I10",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "大手町",
+      "code": "I09",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "日比谷",
+      "code": "I08",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "内幸町",
+      "code": "I07",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "御成門",
+      "code": "I06",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "芝公園",
+      "code": "I05",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "三田",
+      "code": "I04",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "白金高輪",
+      "code": "I03",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "白金台",
+      "code": "I02",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiMitaLine",
+      "stationName": "目黒",
+      "code": "I01",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "新宿",
+      "code": "S01",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "曙橋",
+      "code": "S03",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "市ケ谷",
+      "code": "S04",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "九段下",
+      "code": "S05",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "神保町",
+      "code": "S06",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "小川町",
+      "code": "S07",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "岩本町",
+      "code": "S08",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "馬喰横山",
+      "code": "S09",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "浜町",
+      "code": "S10",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "森下",
+      "code": "S11",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "菊川",
+      "code": "S12",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "住吉",
+      "code": "S13",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "西大島",
+      "code": "S14",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "大島",
+      "code": "S15",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "東大島",
+      "code": "S16",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "船堀",
+      "code": "S17",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "一之江",
+      "code": "S18",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "瑞江",
+      "code": "S19",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "篠崎",
+      "code": "S20",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiShinjukuLine",
+      "stationName": "本八幡",
+      "code": "S21",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "都庁前",
+      "code": "E28",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "新宿西口",
+      "code": "E01",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "東新宿",
+      "code": "E02",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "若松河田",
+      "code": "E03",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "牛込柳町",
+      "code": "E04",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "牛込神楽坂",
+      "code": "E05",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "飯田橋",
+      "code": "E06",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "春日",
+      "code": "E07",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "本郷三丁目",
+      "code": "E08",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "上野御徒町",
+      "code": "E09",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "新御徒町",
+      "code": "E10",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "蔵前",
+      "code": "E11",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "両国",
+      "code": "E12",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "森下",
+      "code": "E13",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "清澄白河",
+      "code": "E14",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "門前仲町",
+      "code": "E15",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "月島",
+      "code": "E16",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "勝どき",
+      "code": "E17",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "築地市場",
+      "code": "E18",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "汐留",
+      "code": "E19",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "大門",
+      "code": "E20",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "赤羽橋",
+      "code": "E21",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "麻布十番",
+      "code": "E22",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "六本木",
+      "code": "E23",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "青山一丁目",
+      "code": "E24",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "国立競技場",
+      "code": "E25",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "代々木",
+      "code": "E26",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "新宿",
+      "code": "E27",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "中野坂上",
+      "code": "E30",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "西新宿五丁目",
+      "code": "E29",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "中井",
+      "code": "E32",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "落合南長崎",
+      "code": "E33",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "新江古田",
+      "code": "E34",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "練馬",
+      "code": "E35",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "豊島園",
+      "code": "E36",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "練馬春日町",
+      "code": "E37",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "toeiOedoLine",
+      "stationName": "光が丘",
+      "code": "E38",
+      "sourceIds": [
+        "toei"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "相模大野",
+      "code": "OH28",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "東林間",
+      "code": "OE01",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "中央林間",
+      "code": "OE02",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "南林間",
+      "code": "OE03",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "鶴間",
+      "code": "OE04",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "大和",
+      "code": "OE05",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "桜ヶ丘",
+      "code": "OE06",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "高座渋谷",
+      "code": "OE07",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "長後",
+      "code": "OE08",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "湘南台",
+      "code": "OE09",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "六会日大前",
+      "code": "OE10",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "善行",
+      "code": "OE11",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "藤沢本町",
+      "code": "OE12",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "藤沢",
+      "code": "OE13",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "本鵠沼",
+      "code": "OE14",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "鵠沼海岸",
+      "code": "OE15",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuEnoshimaLine",
+      "stationName": "片瀬江ノ島",
+      "code": "OE16",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuTamaLine",
+      "stationName": "新百合ヶ丘",
+      "code": "OH23",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuTamaLine",
+      "stationName": "五月台",
+      "code": "OT01",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuTamaLine",
+      "stationName": "栗平",
+      "code": "OT02",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuTamaLine",
+      "stationName": "黒川",
+      "code": "OT03",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuTamaLine",
+      "stationName": "はるひ野",
+      "code": "OT04",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuTamaLine",
+      "stationName": "小田急永山",
+      "code": "OT05",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuTamaLine",
+      "stationName": "小田急多摩センター",
+      "code": "OT06",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "odakyuTamaLine",
+      "stationName": "唐木田",
+      "code": "OT07",
+      "sourceIds": [
+        "odakyu"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "新宿",
+      "code": "KO01",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "笹塚",
+      "code": "KO04",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "代田橋",
+      "code": "KO05",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "明大前",
+      "code": "KO06",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "下高井戸",
+      "code": "KO07",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "桜上水",
+      "code": "KO08",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "上北沢",
+      "code": "KO09",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "八幡山",
+      "code": "KO10",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "芦花公園",
+      "code": "KO11",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "千歳烏山",
+      "code": "KO12",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "仙川",
+      "code": "KO13",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "つつじヶ丘",
+      "code": "KO14",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "柴崎",
+      "code": "KO15",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "国領",
+      "code": "KO16",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "布田",
+      "code": "KO17",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "調布",
+      "code": "KO18",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "西調布",
+      "code": "KO19",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "飛田給",
+      "code": "KO20",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "武蔵野台",
+      "code": "KO21",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "多磨霊園",
+      "code": "KO22",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "東府中",
+      "code": "KO23",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "府中",
+      "code": "KO24",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "分倍河原",
+      "code": "KO25",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "中河原",
+      "code": "KO26",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "聖蹟桜ヶ丘",
+      "code": "KO27",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "百草園",
+      "code": "KO28",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "高幡不動",
+      "code": "KO29",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "南平",
+      "code": "KO30",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "平山城址公園",
+      "code": "KO31",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "長沼",
+      "code": "KO32",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "北野",
+      "code": "KO33",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "京王八王子",
+      "code": "KO34",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "山田",
+      "code": "KO49",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "京王片倉",
+      "code": "KO48",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioLine",
+      "stationName": "高尾山口",
+      "code": "KO53",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "品川",
+      "code": "KK01",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "北品川",
+      "code": "KK02",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "新馬場",
+      "code": "KK03",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "青物横丁",
+      "code": "KK04",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "鮫洲",
+      "code": "KK05",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "立会川",
+      "code": "KK06",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "大森海岸",
+      "code": "KK07",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "平和島",
+      "code": "KK08",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "大森町",
+      "code": "KK09",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "梅屋敷",
+      "code": "KK10",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "京急蒲田",
+      "code": "KK11",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "雑色",
+      "code": "KK18",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "六郷土手",
+      "code": "KK19",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "京急川崎",
+      "code": "KK20",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "港町",
+      "code": "KK21",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "鶴見市場",
+      "code": "KK28",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "京急鶴見",
+      "code": "KK29",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "生麦",
+      "code": "KK31",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "京急新子安",
+      "code": "KK32",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "子安",
+      "code": "KK33",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "神奈川新町",
+      "code": "KK34",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "神奈川",
+      "code": "KK36",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "横浜",
+      "code": "KK37",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuAirportLine",
+      "stationName": "京急蒲田",
+      "code": "KK11",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuAirportLine",
+      "stationName": "糀谷",
+      "code": "KK12",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuAirportLine",
+      "stationName": "大鳥居",
+      "code": "KK13",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuAirportLine",
+      "stationName": "穴守稲荷",
+      "code": "KK14",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuAirportLine",
+      "stationName": "天空橋",
+      "code": "KK15",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuAirportLine",
+      "stationName": "羽田空港第3ターミナル",
+      "code": "KK16",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuAirportLine",
+      "stationName": "羽田空港第1・第2ターミナル",
+      "code": "KK17",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuKurihamaLine",
+      "stationName": "堀ノ内",
+      "code": "KK61",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuKurihamaLine",
+      "stationName": "新大津",
+      "code": "KK65",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuKurihamaLine",
+      "stationName": "北久里浜",
+      "code": "KK66",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuKurihamaLine",
+      "stationName": "京急久里浜",
+      "code": "KK67",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuKurihamaLine",
+      "stationName": "三浦海岸",
+      "code": "KK71",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "keikyuKurihamaLine",
+      "stationName": "三崎口",
+      "code": "KK72",
+      "sourceIds": [
+        "keikyu"
+      ]
+    },
+    {
+      "routeKey": "rinkaiLine",
+      "stationName": "大崎",
+      "code": "R08",
+      "sourceIds": [
+        "rinkai"
+      ]
+    },
+    {
+      "routeKey": "rinkaiLine",
+      "stationName": "大井町",
+      "code": "R07",
+      "sourceIds": [
+        "rinkai"
+      ]
+    },
+    {
+      "routeKey": "rinkaiLine",
+      "stationName": "品川シーサイド",
+      "code": "R06",
+      "sourceIds": [
+        "rinkai"
+      ]
+    },
+    {
+      "routeKey": "rinkaiLine",
+      "stationName": "天王洲アイル",
+      "code": "R05",
+      "sourceIds": [
+        "rinkai"
+      ]
+    },
+    {
+      "routeKey": "rinkaiLine",
+      "stationName": "東京テレポート",
+      "code": "R04",
+      "sourceIds": [
+        "rinkai"
+      ]
+    },
+    {
+      "routeKey": "rinkaiLine",
+      "stationName": "国際展示場",
+      "code": "R03",
+      "sourceIds": [
+        "rinkai"
+      ]
+    },
+    {
+      "routeKey": "rinkaiLine",
+      "stationName": "東雲",
+      "code": "R02",
+      "sourceIds": [
+        "rinkai"
+      ]
+    },
+    {
+      "routeKey": "rinkaiLine",
+      "stationName": "新木場",
+      "code": "R01",
+      "sourceIds": [
+        "rinkai"
+      ]
+    },
+    {
+      "routeKey": "yurikamomeLine",
+      "stationName": "新橋",
+      "code": "U01",
+      "sourceIds": [
+        "yurikamome"
+      ]
+    },
+    {
+      "routeKey": "yurikamomeLine",
+      "stationName": "汐留",
+      "code": "U02",
+      "sourceIds": [
+        "yurikamome"
+      ]
+    },
+    {
+      "routeKey": "yurikamomeLine",
+      "stationName": "竹芝",
+      "code": "U03",
+      "sourceIds": [
+        "yurikamome"
+      ]
+    },
+    {
+      "routeKey": "yurikamomeLine",
+      "stationName": "日の出",
+      "code": "U04",
+      "sourceIds": [
+        "yurikamome"
+      ]
+    },
+    {
+      "routeKey": "yurikamomeLine",
+      "stationName": "芝浦ふ頭",
+      "code": "U05",
+      "sourceIds": [
+        "yurikamome"
+      ]
+    },
+    {
+      "routeKey": "yurikamomeLine",
+      "stationName": "お台場海浜公園",
+      "code": "U06",
+      "sourceIds": [
+        "yurikamome"
+      ]
+    },
+    {
+      "routeKey": "yurikamomeLine",
+      "stationName": "台場",
+      "code": "U07",
+      "sourceIds": [
+        "yurikamome"
+      ]
+    },
+    {
+      "routeKey": "yurikamomeLine",
+      "stationName": "テレコムセンター",
+      "code": "U09",
+      "sourceIds": [
+        "yurikamome"
+      ]
+    },
+    {
+      "routeKey": "yurikamomeLine",
+      "stationName": "青海",
+      "code": "U10",
+      "sourceIds": [
+        "yurikamome"
+      ]
+    },
+    {
+      "routeKey": "yurikamomeLine",
+      "stationName": "東京国際クルーズターミナル",
+      "code": "U08",
+      "sourceIds": [
+        "yurikamome"
+      ]
+    },
+    {
+      "routeKey": "yurikamomeLine",
+      "stationName": "有明",
+      "code": "U12",
+      "sourceIds": [
+        "yurikamome"
+      ]
+    },
+    {
+      "routeKey": "yurikamomeLine",
+      "stationName": "有明テニスの森",
+      "code": "U13",
+      "sourceIds": [
+        "yurikamome"
+      ]
+    },
+    {
+      "routeKey": "yurikamomeLine",
+      "stationName": "市場前",
+      "code": "U14",
+      "sourceIds": [
+        "yurikamome"
+      ]
+    },
+    {
+      "routeKey": "yurikamomeLine",
+      "stationName": "新豊洲",
+      "code": "U15",
+      "sourceIds": [
+        "yurikamome"
+      ]
+    },
+    {
+      "routeKey": "yurikamomeLine",
+      "stationName": "豊洲",
+      "code": "U16",
+      "sourceIds": [
+        "yurikamome"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "湘南台",
+      "code": "B01",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "下飯田",
+      "code": "B02",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "立場",
+      "code": "B03",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "中田",
+      "code": "B04",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "踊場",
+      "code": "B05",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "戸塚",
+      "code": "B06",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "舞岡",
+      "code": "B07",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "港南中央",
+      "code": "B10",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "上永谷",
+      "code": "B09",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "上大岡",
+      "code": "B11",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "弘明寺",
+      "code": "B12",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "蒔田",
+      "code": "B13",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "吉野町",
+      "code": "B14",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "阪東橋",
+      "code": "B15",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "伊勢佐木長者町",
+      "code": "B16",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "関内",
+      "code": "B17",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "桜木町",
+      "code": "B18",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "高島町",
+      "code": "B19",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "横浜",
+      "code": "B20",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "三ツ沢下町",
+      "code": "B21",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "三ツ沢上町",
+      "code": "B22",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "片倉町",
+      "code": "B23",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "岸根公園",
+      "code": "B24",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "新横浜",
+      "code": "B25",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "北新横浜",
+      "code": "B26",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "新羽",
+      "code": "B27",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "仲町台",
+      "code": "B28",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "センター南",
+      "code": "B29",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "センター北",
+      "code": "B30",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "中川",
+      "code": "B31",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "yokohamaBlueLine",
+      "stationName": "あざみ野",
+      "code": "B32",
+      "sourceIds": [
+        "blue"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "杉戸高野台",
+      "code": "TN01",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "幸手",
+      "code": "TN02",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "南栗橋",
+      "code": "TN03",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "栗橋",
+      "code": "TN04",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "新古河",
+      "code": "TN05",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "柳生",
+      "code": "TN06",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "板倉東洋大前",
+      "code": "TN07",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "藤岡",
+      "code": "TN08",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "静和",
+      "code": "TN09",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "新大平下",
+      "code": "TN10",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "栃木",
+      "code": "TN11",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "新栃木",
+      "code": "TN12",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "合戦場",
+      "code": "TN13",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "家中",
+      "code": "TN14",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "東武金崎",
+      "code": "TN15",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "楡木",
+      "code": "TN16",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "樅山",
+      "code": "TN17",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "新鹿沼",
+      "code": "TN18",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "北鹿沼",
+      "code": "TN19",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "板荷",
+      "code": "TN20",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "下小代",
+      "code": "TN21",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "明神",
+      "code": "TN22",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "下今市",
+      "code": "TN23",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "上今市",
+      "code": "TN24",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "東武日光",
+      "code": "TN25",
+      "sourceIds": [
+        "tobu"
+      ]
+    },
+    {
+      "routeKey": "tokyoMonorail",
+      "stationName": "モノレール浜松町",
+      "code": "MO01",
+      "sourceIds": [
+        "monorail"
+      ]
+    },
+    {
+      "routeKey": "tokyoMonorail",
+      "stationName": "天王洲アイル",
+      "code": "MO02",
+      "sourceIds": [
+        "monorail"
+      ]
+    },
+    {
+      "routeKey": "tokyoMonorail",
+      "stationName": "大井競馬場前",
+      "code": "MO03",
+      "sourceIds": [
+        "monorail"
+      ]
+    },
+    {
+      "routeKey": "tokyoMonorail",
+      "stationName": "流通センター",
+      "code": "MO04",
+      "sourceIds": [
+        "monorail"
+      ]
+    },
+    {
+      "routeKey": "tokyoMonorail",
+      "stationName": "昭和島",
+      "code": "MO05",
+      "sourceIds": [
+        "monorail"
+      ]
+    },
+    {
+      "routeKey": "tokyoMonorail",
+      "stationName": "整備場",
+      "code": "MO06",
+      "sourceIds": [
+        "monorail"
+      ]
+    },
+    {
+      "routeKey": "tokyoMonorail",
+      "stationName": "天空橋",
+      "code": "MO07",
+      "sourceIds": [
+        "monorail"
+      ]
+    },
+    {
+      "routeKey": "tokyoMonorail",
+      "stationName": "羽田空港第3ターミナル",
+      "code": "MO08",
+      "sourceIds": [
+        "monorail"
+      ]
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "花月園前",
+      "code": "KK30",
+      "sourceIds": [
+        "keikyu-rename"
+      ],
+      "note": "現行駅名は花月総持寺。路線データの既存キーを維持。"
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "仲木戸",
+      "code": "KK35",
+      "sourceIds": [
+        "keikyu-rename"
+      ],
+      "note": "現行駅名は京急東神奈川。路線データの既存キーを維持。"
+    },
+    {
+      "routeKey": "keikyuLine",
+      "stationName": "泉岳寺",
+      "code": "A07",
+      "sourceIds": [
+        "toei"
+      ],
+      "note": "共同使用駅。存在しないKK01を割り当てない。"
+    },
+    {
+      "routeKey": "tobuNikkoLine",
+      "stationName": "東武動物公園",
+      "code": "TS30",
+      "sourceIds": [
+        "tobu"
+      ],
+      "note": "日光線の先頭をTN01としない。"
+    },
+    {
+      "routeKey": "keioSagamiharaLine",
+      "stationName": "調布",
+      "code": "KO18",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "saitamaRailway",
+      "stationName": "赤羽岩淵",
+      "code": "SR19",
+      "sourceIds": [
+        "sr-akabane-iwabuchi"
+      ]
+    },
+    {
+      "routeKey": "saitamaRailway",
+      "stationName": "川口元郷",
+      "code": "SR20",
+      "sourceIds": [
+        "sr-kawaguchi-motogo"
+      ]
+    },
+    {
+      "routeKey": "saitamaRailway",
+      "stationName": "南鳩ヶ谷",
+      "code": "SR21",
+      "sourceIds": [
+        "sr-minami-hatogaya"
+      ]
+    },
+    {
+      "routeKey": "saitamaRailway",
+      "stationName": "鳩ヶ谷",
+      "code": "SR22",
+      "sourceIds": [
+        "sr-hatogaya"
+      ]
+    },
+    {
+      "routeKey": "saitamaRailway",
+      "stationName": "新井宿",
+      "code": "SR23",
+      "sourceIds": [
+        "sr-araijuku"
+      ]
+    },
+    {
+      "routeKey": "saitamaRailway",
+      "stationName": "戸塚安行",
+      "code": "SR24",
+      "sourceIds": [
+        "sr-tozuka-angyo"
+      ]
+    },
+    {
+      "routeKey": "saitamaRailway",
+      "stationName": "東川口",
+      "code": "SR25",
+      "sourceIds": [
+        "sr-higashi-kawaguchi"
+      ]
+    },
+    {
+      "routeKey": "saitamaRailway",
+      "stationName": "浦和美園",
+      "code": "SR26",
+      "sourceIds": [
+        "sr-urawa-misono"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "東京",
+      "code": "JY01",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "神田",
+      "code": "JY02",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "秋葉原",
+      "code": "JY03",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "御徒町",
+      "code": "JY04",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "上野",
+      "code": "JY05",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "鶯谷",
+      "code": "JY06",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "日暮里",
+      "code": "JY07",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "西日暮里",
+      "code": "JY08",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "田端",
+      "code": "JY09",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "駒込",
+      "code": "JY10",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "巣鴨",
+      "code": "JY11",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "大塚",
+      "code": "JY12",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "池袋",
+      "code": "JY13",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "目白",
+      "code": "JY14",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "高田馬場",
+      "code": "JY15",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "新大久保",
+      "code": "JY16",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "新宿",
+      "code": "JY17",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "代々木",
+      "code": "JY18",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "原宿",
+      "code": "JY19",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "渋谷",
+      "code": "JY20",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "恵比寿",
+      "code": "JY21",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "五反田",
+      "code": "JY23",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "大崎",
+      "code": "JY24",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "品川",
+      "code": "JY25",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "田町",
+      "code": "JY27",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "浜松町",
+      "code": "JY28",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "新橋",
+      "code": "JY29",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "有楽町",
+      "code": "JY30",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "東京",
+      "code": "JC01",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "神田",
+      "code": "JC02",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "御茶ノ水",
+      "code": "JC03",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "水道橋",
+      "code": "JB17",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "飯田橋",
+      "code": "JB16",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "市ケ谷",
+      "code": "JB15",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "四ツ谷",
+      "code": "JC04",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "信濃町",
+      "code": "JB13",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "千駄ケ谷",
+      "code": "JB12",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "代々木",
+      "code": "JB11",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "新宿",
+      "code": "JC05",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "大久保",
+      "code": "JB09",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "東中野",
+      "code": "JB08",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "中野",
+      "code": "JC06",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "高円寺",
+      "code": "JC07",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "阿佐ケ谷",
+      "code": "JC08",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "荻窪",
+      "code": "JC09",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "西荻窪",
+      "code": "JC10",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "吉祥寺",
+      "code": "JC11",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "三鷹",
+      "code": "JC12",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "武蔵境",
+      "code": "JC13",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "東小金井",
+      "code": "JC14",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "武蔵小金井",
+      "code": "JC15",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "国分寺",
+      "code": "JC16",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "西国分寺",
+      "code": "JC17",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "国立",
+      "code": "JC18",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "立川",
+      "code": "JC19",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "日野",
+      "code": "JC20",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "豊田",
+      "code": "JC21",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "八王子",
+      "code": "JC22",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "西八王子",
+      "code": "JC23",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chuo",
+      "stationName": "高尾",
+      "code": "JC24",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "東京",
+      "code": "JO19",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "新日本橋",
+      "code": "JO20",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "馬喰町",
+      "code": "JO21",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "錦糸町",
+      "code": "JO22",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "亀戸",
+      "code": "JB23",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "平井",
+      "code": "JB24",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "新小岩",
+      "code": "JO23",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "小岩",
+      "code": "JB26",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "市川",
+      "code": "JO24",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "本八幡",
+      "code": "JB28",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "下総中山",
+      "code": "JB29",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "西船橋",
+      "code": "JB30",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "船橋",
+      "code": "JO25",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "東船橋",
+      "code": "JB32",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "津田沼",
+      "code": "JO26",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "幕張本郷",
+      "code": "JB34",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "幕張",
+      "code": "JB35",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "新検見川",
+      "code": "JB36",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "稲毛",
+      "code": "JO27",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "西千葉",
+      "code": "JB38",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrSobuLine",
+      "stationName": "千葉",
+      "code": "JO28",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrJobanLine",
+      "stationName": "上野",
+      "code": "JJ01",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrJobanLine",
+      "stationName": "日暮里",
+      "code": "JJ02",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrJobanLine",
+      "stationName": "三河島",
+      "code": "JJ03",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrJobanLine",
+      "stationName": "南千住",
+      "code": "JJ04",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrJobanLine",
+      "stationName": "北千住",
+      "code": "JJ05",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrJobanLine",
+      "stationName": "松戸",
+      "code": "JJ06",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrJobanLine",
+      "stationName": "柏",
+      "code": "JJ07",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrJobanLine",
+      "stationName": "我孫子",
+      "code": "JJ08",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrJobanLine",
+      "stationName": "天王台",
+      "code": "JJ09",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrJobanLine",
+      "stationName": "取手",
+      "code": "JJ10",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yokosukaLine",
+      "stationName": "大船",
+      "code": "JO09",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yokosukaLine",
+      "stationName": "北鎌倉",
+      "code": "JO08",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yokosukaLine",
+      "stationName": "鎌倉",
+      "code": "JO07",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yokosukaLine",
+      "stationName": "逗子",
+      "code": "JO06",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yokosukaLine",
+      "stationName": "東逗子",
+      "code": "JO05",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yokosukaLine",
+      "stationName": "田浦",
+      "code": "JO04",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yokosukaLine",
+      "stationName": "横須賀",
+      "code": "JO03",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yokosukaLine",
+      "stationName": "衣笠",
+      "code": "JO02",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yokosukaLine",
+      "stationName": "久里浜",
+      "code": "JO01",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yokosukaLine",
+      "stationName": "品川",
+      "code": "JO17",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yokosukaLine",
+      "stationName": "西大井",
+      "code": "JO16",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yokosukaLine",
+      "stationName": "武蔵小杉",
+      "code": "JO15",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yokosukaLine",
+      "stationName": "新川崎",
+      "code": "JO14",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yokosukaLine",
+      "stationName": "東京",
+      "code": "JO19",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yokosukaLine",
+      "stationName": "新橋",
+      "code": "JO18",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yokosukaLine",
+      "stationName": "横浜",
+      "code": "JO13",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "東神奈川",
+      "code": "JH13",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "大口",
+      "code": "JH14",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "菊名",
+      "code": "JH15",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "新横浜",
+      "code": "JH16",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "小机",
+      "code": "JH17",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "鴨居",
+      "code": "JH18",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "中山",
+      "code": "JH19",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "十日市場",
+      "code": "JH20",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "長津田",
+      "code": "JH21",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "成瀬",
+      "code": "JH22",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "町田",
+      "code": "JH23",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "古淵",
+      "code": "JH24",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "淵野辺",
+      "code": "JH25",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "矢部",
+      "code": "JH26",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "相模原",
+      "code": "JH27",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "橋本",
+      "code": "JH28",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "相原",
+      "code": "JH29",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "八王子みなみ野",
+      "code": "JH30",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "片倉",
+      "code": "JH31",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrYokohamaLine",
+      "stationName": "八王子",
+      "code": "JH32",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "立川",
+      "code": "JN26",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "西国立",
+      "code": "JN25",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "矢川",
+      "code": "JN24",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "谷保",
+      "code": "JN23",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "西府",
+      "code": "JN22",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "分倍河原",
+      "code": "JN21",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "府中本町",
+      "code": "JN20",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "南多摩",
+      "code": "JN19",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "矢野口",
+      "code": "JN17",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "稲城長沼",
+      "code": "JN18",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "稲田堤",
+      "code": "JN16",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "中野島",
+      "code": "JN15",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "登戸",
+      "code": "JN14",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "宿河原",
+      "code": "JN13",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "久地",
+      "code": "JN12",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "津田山",
+      "code": "JN11",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "武蔵溝ノ口",
+      "code": "JN10",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "武蔵小杉",
+      "code": "JN07",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "向河原",
+      "code": "JN06",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "平間",
+      "code": "JN05",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrNanbuLine",
+      "stationName": "川崎",
+      "code": "JN01",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "府中本町",
+      "code": "JM35",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "北府中",
+      "code": "JM34",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "西国分寺",
+      "code": "JM33",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "新小平",
+      "code": "JM32",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "新秋津",
+      "code": "JM31",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "東所沢",
+      "code": "JM30",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "新座",
+      "code": "JM29",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "北朝霞",
+      "code": "JM28",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "西浦和",
+      "code": "JM27",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "武蔵浦和",
+      "code": "JM26",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "南浦和",
+      "code": "JM25",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "東浦和",
+      "code": "JM24",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "東川口",
+      "code": "JM23",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "南越谷",
+      "code": "JM22",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "越谷レイクタウン",
+      "code": "JM21",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "吉川美南",
+      "code": "JM19",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "新三郷",
+      "code": "JM18",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "三郷",
+      "code": "JM17",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "南流山",
+      "code": "JM16",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "新松戸",
+      "code": "JM15",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "新八柱",
+      "code": "JM14",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "東松戸",
+      "code": "JM13",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "市川大野",
+      "code": "JM12",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "船橋法典",
+      "code": "JM11",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "西船橋",
+      "code": "JM10",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "市川塩浜",
+      "code": "JE09",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "jrMusashinoLine",
+      "stationName": "新木場",
+      "code": "JE05",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "sotetsuJRLine",
+      "stationName": "武蔵小杉",
+      "code": "JS15",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "sotetsuJRLine",
+      "stationName": "西大井",
+      "code": "JS16",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "sotetsuJRLine",
+      "stationName": "大崎",
+      "code": "JS17",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "sotetsuJRLine",
+      "stationName": "恵比寿",
+      "code": "JS18",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "sotetsuJRLine",
+      "stationName": "渋谷",
+      "code": "JS19",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "sotetsuJRLine",
+      "stationName": "新宿",
+      "code": "JS20",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chiyodaLine",
+      "stationName": "綾瀬",
+      "code": "C19",
+      "sourceIds": [
+        "metro-ayase"
+      ]
+    },
+    {
+      "routeKey": "chiyodaLine",
+      "stationName": "亀有",
+      "code": "JL20",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "chiyodaLine",
+      "stationName": "金町",
+      "code": "JL21",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "yamanote",
+      "stationName": "目黒",
+      "code": "JY22",
+      "sourceIds": [
+        "jr2016"
+      ]
+    },
+    {
+      "routeKey": "keioSagamiharaLine",
+      "stationName": "京王多摩川",
+      "code": "KO35",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioSagamiharaLine",
+      "stationName": "京王稲田堤",
+      "code": "KO36",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioSagamiharaLine",
+      "stationName": "京王よみうりランド",
+      "code": "KO37",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioSagamiharaLine",
+      "stationName": "稲城",
+      "code": "KO38",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioSagamiharaLine",
+      "stationName": "若葉台",
+      "code": "KO39",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioSagamiharaLine",
+      "stationName": "京王永山",
+      "code": "KO40",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioSagamiharaLine",
+      "stationName": "京王多摩センター",
+      "code": "KO41",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioSagamiharaLine",
+      "stationName": "京王堀之内",
+      "code": "KO42",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioSagamiharaLine",
+      "stationName": "南大沢",
+      "code": "KO43",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioSagamiharaLine",
+      "stationName": "多摩境",
+      "code": "KO44",
+      "sourceIds": [
+        "keio"
+      ]
+    },
+    {
+      "routeKey": "keioSagamiharaLine",
+      "stationName": "橋本",
+      "code": "KO45",
+      "sourceIds": [
+        "keio"
+      ]
+    }
+  ],
+  "removed": [
+    {
+      "routeKey": "keioLine",
+      "stationName": "片倉",
+      "sourceIds": [
+        "jr2016",
+        "keio"
+      ],
+      "reason": "片倉はJR横浜線JH31。京王片倉KO48とは別駅であり、京王線の偽のKO34を除去。路線データ自体の混同は別途確認。"
+    },
+    {
+      "routeKey": "tokyoMonorail",
+      "stationName": "羽田空港第1・第2ターミナル",
+      "sourceIds": [
+        "monorail"
+      ],
+      "reason": "東京モノレールは第1ターミナルMO10と第2ターミナルMO11の別駅。MO09は新整備場であり、合成駅に番号を付けない。"
+    },
+    {
+      "routeKey": "jrJobanLine",
+      "stationName": "品川",
+      "sourceIds": [
+        "jr2016"
+      ],
+      "reason": "JJの公式番号一覧は上野JJ01から。上野東京ライン直通区間に架空のJJ番号を追加しない。"
+    },
+    {
+      "routeKey": "jrJobanLine",
+      "stationName": "田町",
+      "sourceIds": [
+        "jr2016"
+      ],
+      "reason": "JJの公式番号一覧は上野JJ01から。上野東京ライン直通区間に架空のJJ番号を追加しない。"
+    },
+    {
+      "routeKey": "jrJobanLine",
+      "stationName": "浜松町",
+      "sourceIds": [
+        "jr2016"
+      ],
+      "reason": "JJの公式番号一覧は上野JJ01から。上野東京ライン直通区間に架空のJJ番号を追加しない。"
+    },
+    {
+      "routeKey": "jrJobanLine",
+      "stationName": "新橋",
+      "sourceIds": [
+        "jr2016"
+      ],
+      "reason": "JJの公式番号一覧は上野JJ01から。上野東京ライン直通区間に架空のJJ番号を追加しない。"
+    },
+    {
+      "routeKey": "jrJobanLine",
+      "stationName": "東京",
+      "sourceIds": [
+        "jr2016"
+      ],
+      "reason": "JJの公式番号一覧は上野JJ01から。上野東京ライン直通区間に架空のJJ番号を追加しない。"
+    }
+  ],
+  "deferred": [
+    {
+      "routeKeys": [
+        "jrJobanLine",
+        "jrTakasakiLine",
+        "jrUtsunomiyaLine"
+      ],
+      "reason": "取手・大宮より先など、2016年の駅番号導入範囲外にある既存番号は今回未照合。現行公式資料で個別に確認する。"
+    },
+    {
+      "routeKeys": [
+        "jrKeiyo"
+      ],
+      "reason": "幕張豊砂開業後のJE番号変更は現行公式資料で別途照合する。"
+    },
+    {
+      "routeKeys": [
+        "tamaMonorail",
+        "hokusouLine",
+        "tobuTojoLine",
+        "tobuNodaLine",
+        "shinkeisei",
+        "shinkeisei2"
+      ],
+      "reason": "今回の照合対象外。既存番号の取得率を正確性と混同しない。"
+    },
+    {
+      "routeKeys": [
+        "osakaLoopLine",
+        "jrOsakaLoop",
+        "nagoyaMeijoline",
+        "kyotoSubwayTozai",
+        "sendaiTozaiLine"
+      ],
+      "reason": "全国の既存番号も未照合が残る。関東の確認できた範囲を先行修正する。"
+    }
+  ]
+}

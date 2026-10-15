@@ -2,10 +2,24 @@ import { describe, it, expect } from 'vitest';
 import { getStationNumber, getAnyStationNumber } from '../../../src/data/stationNumbers';
 
 describe('getStationNumber', () => {
-  it('山手線の駅番号を正しく返す', () => {
-    expect(getStationNumber('yamanote', '渋谷')).toBe('JY05');
-    expect(getStationNumber('yamanote', '新宿')).toBe('JY08');
-    expect(getStationNumber('yamanote', '東京')).toBe('JY24');
+  it('山手線の駅番号を正しく返す（東京 JY01 から内回りの向き。2026-10-15 まで大崎起点の逆向きで誤っていた）', () => {
+    expect(getStationNumber('yamanote', '東京')).toBe('JY01');
+    expect(getStationNumber('yamanote', '上野')).toBe('JY05');
+    expect(getStationNumber('yamanote', '新宿')).toBe('JY17');
+    expect(getStationNumber('yamanote', '渋谷')).toBe('JY20');
+    expect(getStationNumber('yamanote', '大崎')).toBe('JY24');
+    expect(getStationNumber('yamanote', '品川')).toBe('JY25');
+    expect(getStationNumber('yamanote', '有楽町')).toBe('JY30');
+  });
+
+  it('山手線は全30駅に番号があり、路線の駅の並び（環状）と番号の並びが1つずつ続いている', async () => {
+    const { routes } = await import('../../../src/data/routes');
+    const nums = routes.yamanote.map(s => Number(getStationNumber('yamanote', s.name)?.slice(2)));
+    expect(nums.every(n => n >= 1 && n <= 30)).toBe(true);
+    expect(new Set(nums).size).toBe(30);
+    // 隣の駅との差は ±1（30 と 1 の間は環状でつながる）
+    const steps = nums.slice(1).map((n, i) => (n - nums[i] + 30) % 30);
+    expect(new Set(steps.filter(d => d !== 0)).size).toBe(1);
   });
 
   it('新京成線のくぬぎ山を返す（今回追加）', () => {
@@ -17,9 +31,9 @@ describe('getStationNumber', () => {
     expect(getStationNumber('jrNanbuLine', '立川')).toBe('JN26');
   });
 
-  it('武蔵野線の府中本町を返す（今回追加）', () => {
-    expect(getStationNumber('jrMusashinoLine', '府中本町')).toBe('JM01');
-    expect(getStationNumber('jrMusashinoLine', '西船橋')).toBe('JM25');
+  it('武蔵野線は公式番号を返す（JR東日本2016/04/06別紙2、2026-10-16照合。旧期待値も逆順で誤っていた）', () => {
+    expect(getStationNumber('jrMusashinoLine', '府中本町')).toBe('JM35');
+    expect(getStationNumber('jrMusashinoLine', '西船橋')).toBe('JM10');
   });
 
   it('京葉線の東京を返す（今回追加）', () => {
@@ -30,6 +44,36 @@ describe('getStationNumber', () => {
   it('日暮里舎人ライナーの駅番号を返す（今回追加）', () => {
     expect(getStationNumber('nipporiToneriLiner', '日暮里')).toBe('NT01');
     expect(getStationNumber('nipporiToneriLiner', '見沼代親水公園')).toBe('NT13');
+  });
+
+  it('公式資料に基づく江ノ電のEN01〜EN15を返す', () => {
+    expect(getStationNumber('enoshimaElectricRailway', '藤沢')).toBe('EN01');
+    expect(getStationNumber('enoshimaElectricRailway', '江ノ島')).toBe('EN06');
+    expect(getStationNumber('enoshimaElectricRailway', '鎌倉')).toBe('EN15');
+  });
+
+  it('東急世田谷線のSG01〜SG10を返す', () => {
+    expect(getStationNumber('tokyuSetagayaLine', '三軒茶屋')).toBe('SG01');
+    expect(getStationNumber('tokyuSetagayaLine', '世田谷')).toBe('SG05');
+    expect(getStationNumber('tokyuSetagayaLine', '下高井戸')).toBe('SG10');
+  });
+
+  it('京成押上線は公式確認済みの5駅のみ番号を返す', () => {
+    expect(getStationNumber('keiseiOshiageLine', '押上')).toBe('KS45');
+    expect(getStationNumber('keiseiOshiageLine', '京成曳舟')).toBe('KS46');
+    expect(getStationNumber('keiseiOshiageLine', '八広')).toBe('KS47');
+    expect(getStationNumber('keiseiOshiageLine', '四ツ木')).toBe('KS48');
+    expect(getStationNumber('keiseiOshiageLine', '青砥')).toBe('KS09');
+    // Existing route data calls this station 立石, but the official name is 京成立石.
+    expect(getStationNumber('keiseiOshiageLine', '立石')).toBeUndefined();
+  });
+
+  it('都電荒川線の公式全30停留場の番号を返す', () => {
+    expect(getStationNumber('todenArakawaLine', '三ノ輪橋')).toBe('SA01');
+    expect(getStationNumber('todenArakawaLine', '熊野前')).toBe('SA09');
+    expect(getStationNumber('todenArakawaLine', '王子駅前')).toBe('SA16');
+    expect(getStationNumber('todenArakawaLine', '鬼子母神前')).toBe('SA27');
+    expect(getStationNumber('todenArakawaLine', '早稲田')).toBe('SA30');
   });
 
   it('存在しない駅はundefinedを返す', () => {
