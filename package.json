@@ -20,6 +20,8 @@
     "test:render": "playwright test -c playwright.render.config.ts",
     "article:new": "node scripts/new-article.mjs",
     "article:validate": "vitest run tests/unit/data/articleSources.test.ts tests/unit/data/articleI18n.test.ts tests/unit/utils/articleFacts.test.ts",
+
+    "og:capture": "npx --yes tsx scripts/capture-map-previews.mts",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:prod": "TEST_URL=https://flex-railway-map.netlify.app playwright test",
     "deploy:preview": "npm run test:ci && netlify deploy --alias preview",

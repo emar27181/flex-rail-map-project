@@ -60,7 +60,7 @@ import {
   type Departure,
 } from '../data/timetableData';
 import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, alphaWhite, alphaBlack } from '../constants/ui';
-import { trackStationSelect, trackRouteSearch } from '../utils/appAnalytics';
+import { trackStationSelect, trackRouteSearch, trackViewSwitch } from '../utils/appAnalytics';
 import { DEFAULT_MAP_CENTER } from '../constants/mapDefaults';
 import type { MapViewMode } from '../constants/mapViewMode';
 import { initialDisplayUrlOptions } from '../utils/mapDisplayUrlParam';
@@ -397,6 +397,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [tapToggleMode, setTapToggleMode] = useState(true);
   // 地図表示モード
   const [mapViewMode, setMapViewMode] = useState<MapViewMode>(() => initialDisplayUrlOptions().view ?? 'realistic');
+  /** 利用者が表示方式を切り替えたとき（設定パネル）。GA4 に送るのはここだけ（URL・保存した設定での復元は数えない） */
+  const changeMapViewMode = (next: MapViewMode) => {
+    trackViewSwitch(next, mapViewMode);
+    setMapViewMode(next);
+  };
   /**
    * 立体表示の設定を開くボタンを置く場所（DOM の箱）。立体表示は自分の状態を持ったまま、
    * ボタンだけをここに出す（スマホ全画面では「表示切替」の右、それ以外は隅のボタンの列の右端）
@@ -490,10 +495,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [clickedRoute, setClickedRoute] = useState<string | null>(null);
   const [routePopupPosition, setRoutePopupPosition] = useState<{ x: number, y: number } | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
-  // 表示していない路線を薄く描く層。埋め込み表示（記事などの小さな枠）では出さない。
-  // 記事の内容に絞った地図に関係の無い路線が薄く並んで「多い」と見えるうえ、この層は線の周り36pxを
-  // 押すとその路線を表示ONにするため、地図を動かそうとした指で鶴見線などが足されていた
-  const [showDimmedMapRoutes, setShowDimmedMapRoutes] = useState(!embedded);
+  // 表示していない路線を薄く描く層。埋め込み表示（記事などの枠）でも地図ページと同じに出す（2026-10-15:
+  // 記事の地図が実際の画面と違って見えた）。以前は埋め込みで出していなかった。線の周り36pxを押すと
+  // 切替モードでは確認なしで路線が足され、狭い枠で地図を動かす指で鶴見線などが足されていたため。
+  // 埋め込みでは押しても確認の吹き出しを出すだけにする（下の click）
+  const [showDimmedMapRoutes, setShowDimmedMapRoutes] = useState(true);
   const [dimmedMapTooltip, setDimmedMapTooltip] = useState<{ routeKey: RouteKey; x: number; y: number; isVisible: boolean } | null>(null);
 
   // 現在地表示
@@ -5467,8 +5473,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           click: (e: LeafletMouseEvent) => {
                           (e.target as any)?.closeTooltip?.();
                           justClickedLayerRef.current = true;
-                          if (tapToggleMode) {
-                            // 切替モード：確認なしで即表示
+                          if (tapToggleMode && !embedded) {
+                            // 切替モード：確認なしで即表示（埋め込みでは確認を出す。狭い枠で地図を動かす指で足されないように）
                             setAvailableRoutes(prev => new Set([...prev, rKey]));
                             setVisibleRoutes(prev => new Set([...prev, rKey]));
                             return;
@@ -6178,7 +6184,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     showEstimatedData={showEstimatedData}
                     onShowEstimatedDataChange={handleShowEstimatedDataChange}
                     mapViewMode={mapViewMode}
-                    onMapViewModeChange={setMapViewMode}
+                    onMapViewModeChange={changeMapViewMode}
                     bubbleShape={bubbleShape}
                     onBubbleShapeChange={setBubbleShape}
                     bubbleMaxRadiusM={bubbleMaxRadiusM}
@@ -6239,7 +6245,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     theme={theme}
                     language={currentLanguage}
                     trainTypeViewEnabled={trainTypeViewEnabled}
-                    onMapViewModeChange={setMapViewMode}
+                    onMapViewModeChange={changeMapViewMode}
                   />
 
                   {/* 4. 推薦ルート選択 (Route Recommendations) */}
@@ -6468,7 +6474,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         showEstimatedData={showEstimatedData}
                         onShowEstimatedDataChange={handleShowEstimatedDataChange}
                         mapViewMode={mapViewMode}
-                        onMapViewModeChange={setMapViewMode}
+                        onMapViewModeChange={changeMapViewMode}
                         bubbleShape={bubbleShape}
                         onBubbleShapeChange={setBubbleShape}
                         bubbleMaxRadiusM={bubbleMaxRadiusM}

@@ -27,6 +27,22 @@ describe('東海道線の駅ナンバリング', () => {
 });
 
 describe('駅ナンバリング全体の整合性', () => {
+  it('同一路線に同じ駅番号を二重登録しない', () => {
+    for (const [routeKey, numbering] of Object.entries(stationNumbers)) {
+      const codes = Object.values(numbering);
+      expect(new Set(codes).size, `${routeKey} に重複した駅番号があります`).toBe(codes.length);
+    }
+  });
+
+  it('公式確認済みの追加2路線はすべての駅に番号があり、既存路線データと一致する', () => {
+    for (const routeKey of ['enoshimaElectricRailway', 'tokyuSetagayaLine'] as const) {
+      const stationNames = routes[routeKey].map(station => station.name);
+      const numbers = stationNumbers[routeKey];
+      expect(numbers).toBeDefined();
+      expect(Object.keys(numbers ?? {}).sort()).toEqual([...stationNames].sort());
+    }
+  });
+
   // 路線データ側に該当駅が無いまま番号だけ残っているもの。
   // いずれも直通運転先の駅で、実際の付番としては正しい可能性があるため
   // 路線データ側を直すべきか番号を消すべきか判断が要る。未解決として記録し、

@@ -34,8 +34,10 @@ export interface ArticleSeoInput {
   /** 本文に表示している更新日（記事ごとに明示したときだけ。無ければ dateModified を出さない） */
   modifiedDate?: string;
   canonicalUrl: string;
-  /** サイト内パス（/icon_...png など） */
+  /** サイト内パス（/icon_...png など）。発行者のロゴに使う */
   ogImage: string;
+  /** 記事冒頭の地図の実際の画面（src/seo/mapPreview.ts）。本文に同じ画面を出しているときだけ渡す */
+  image?: string;
   /** 記事の言語 */
   lang?: ArticleLanguage;
 }
@@ -50,6 +52,7 @@ export function articleJsonLd(a: ArticleSeoInput) {
     datePublished: a.publishedDate,
     ...(a.modifiedDate ? { dateModified: a.modifiedDate } : {}),
     url: a.canonicalUrl,
+    ...(a.image ? { image: [`${SITE_URL}${a.image}`] } : {}),
     ...(a.lang ? { inLanguage: hreflangCode(a.lang) } : {}),
     author: { '@type': 'Organization', name: PROJECT_NAME },
     publisher: {

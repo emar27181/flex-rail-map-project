@@ -121,6 +121,22 @@ B・C のページも作る（路線ページ・隣の駅からのリンク先�
 - 英語・中国語・韓国語ページに出す統計の範囲・時期は `pageText.ts` の `STAT_SCOPE_EN` /
   `STAT_SCOPE_ZH` / `STAT_SCOPE_KO`、出典名は `SOURCE_TITLE_EN` に訳が無いとテストが落ちる
 
+### 路線ページの title・description（2026-10-15）
+
+Search Console（2026-09-15〜10-12）で、英語の路線ページ（JR奈良線 249表示・0クリック、京急空港線 144表示・2クリック）が
+表示されるのに押されていなかった。title が「All 21 Stations, Transfers and Through Services」で、
+検索する人が探す「Map」も、その路線で行ける観光地も見えなかった。
+
+- 文の形は `src/seo/pageText.ts` の `lineTitle` / `lineDescription` / `lineLede`、値は `src/seo/lineFacts.ts`（路線データ・観光地データだけ）
+- title は「路線名 + Map（路線図）+ 駅数 + 両端 + 主な観光地の最寄り駅（あれば1つ）」。例:
+  `JR Nara Line Map: 21 Stations from Kyoto to Nara (Inari for Fushimi Inari Taisha)`
+- 観光地は `touristSpots.ts` にあり、その路線の駅が最寄り駅のものだけ。並びは `touristSpots.ts` の順
+  （主な観光地を先に書く）。終点の駅名に含まれる観光地（羽田空港）・駅名と同じ観光地（すすきの）は書かない
+- 直通運転は `throughServices.ts` に登録がある路線だけ書く
+- 中国語・韓国語は路線名の訳が無いので、観光地を title に入れない（英語名が混ざって長くなる）
+- すべての路線・言語で title・description が重複しないことを `tests/unit/seo/lineFacts.test.ts` が確かめる
+- **効果は Search Console で改稿前後の28日を比べて判断する**（表示回数・クリック・CTR・平均掲載順位）。改稿日は 2026-10-15
+
 ### 内部リンク（すべて自動）
 
 - 駅 ⇔ 路線（駅ページの路線チップ、路線ページの駅一覧）
@@ -130,6 +146,8 @@ B・C のページも作る（路線ページ・隣の駅からのリンク先�
 - ガイド ⇔ 路線・駅（ガイドの `ctaRoutes` と節ごとの `cta.routes` にある路線を相互にリンク）
 - 中国語・韓国語ページからは、その言語版がある駅ページにだけリンクする（無い駅は文字だけ）
 - ガイドの関連リンク先が実在するか（その言語版があるか）は `tests/unit/seo/guideLinks.test.ts` が確かめる
+- ビルドした全ページの `<a href="/...">` の行き先が dist にあるか（リンク切れ）と、sitemap に載るページの description が
+  互いに重複していないかは `npm run test:seo`（`tests/seo/built.test.ts`）が確かめる。CI の `checks` ジョブでビルドの後に動く
 
 ## 多言語（言語ごとの別URL・言語の切り替え）
 
@@ -163,6 +181,26 @@ B・C のページも作る（路線ページ・隣の駅からのリンク先�
   路線のガイド（小田急など `city` なし）は路線全体
 - 東京のガイドにも `city: 'tokyo'` を付けた（GA4 の `city` にも送られる）
 - 埋め込んだ駅・路線のページの中で開く位置は `?section=id`（`#id` は記事のページごと動くので使わない。`EMBED_SECTION_SCRIPT`）
+
+## プレビュー画像（検索結果・SNS のサムネイル, 2026-10-15）
+
+以前はどのページも og:image がアプリのアイコンで、検索結果や SNS で見ても「どんな画面なのか」が分からなかった。
+**ページ冒頭に埋め込んである地図の実際の画面**（同じ URL・同じ範囲・そのページの言語の UI）を撮った画像を使う。作り物の図は使わない。
+
+| 使う所 | 中身 |
+|---|---|
+| `og:image`・`twitter:image`（`summary_large_image`） | `SeoHead.astro`（駅・路線・データ・ガイド）と `ArticleLayout.astro`（記事）が、画像があれば自動で使う |
+| 記事の構造化データ `Article.image` | 記事だけ（本文に同じ画面を出しているので） |
+| 冒頭の埋め込み地図の下に敷く画像（読み込むまで見える） | `ui/atoms/mapEmbed.ts`（`poster`）。最初の埋め込みにだけ付ける |
+
+- 画像は `public/og/{ページのパス}.jpg`（1200×630）。パスの決まりは `src/seo/mapPreview.ts`
+- 撮り方: `npm run build` → `npm run og:capture`（`scripts/capture-map-previews.mts`）→ もう一度 `npm run build`
+  - sitemap に載っている路線・ガイド・記事・駅のページのうち、冒頭に地図を埋め込んでいるページを撮る
+  - `-- --only /en/lines/` で絞る、`-- --missing` でまだ画像が無いページだけ撮る
+  - 撮影条件は描画テストと同じ（サービスワーカーと外部への通信を止める・ダークテーマ）。800×420 を 1.5 倍で撮る
+- **画像が無いページはアプリのアイコンのまま**（壊れた画像を出さない）。新しい路線・記事を足したら `--missing` で撮る
+- **地図の見た目・UI の文言を変えたら撮り直す**（画像が古い画面のままになるため）
+- og:image・埋め込みの画像が dist に実在するかは `npm run test:seo` が確かめる
 
 ## 地図を開くCTA（設定済みの地図へのリンク）
 
@@ -200,6 +238,8 @@ B・C のページも作る（路線ページ・隣の駅からのリンク先�
 - `map_arrival_select`: 到着駅を選んだ。`station` / `source`
 - `map_route_search`: 出発・到着がそろって経路候補を出した（同じ組み合わせでは1回だけ）。
   `from_station` / `to_station` / `result_count` / `waypoints` / `best_minutes` / `best_transfers` / `has_through`（直通を使う候補があるか）
+- `map_view_switch`: 表示方式（`realistic` 実際の地図・`schematic` 路線図風・`bubble`・`terrain3d` 立体）を設定パネルで切り替えた。
+  `view`（切り替え先）/ `from_view`（切り替え前）。URL（`?view=terrain3d`）や保存した設定で開いたときは送らない（2026-10-15）
 - 記事に埋め込んだ地図（`?embed=1`）では GA4 を読み込まない（記事の閲覧が地図の閲覧として二重に数えられるため）
 
 ### 記事の中の GA4 イベント（2026-10-15）
@@ -207,6 +247,21 @@ B・C のページも作る（路線ページ・隣の駅からのリンク先�
 `src/utils/articleAnalytics.ts` だけに書く。`article_demo_view` / `article_demo_interact` / `article_demo_fullscreen` /
 `article_map_open`（`source`: `demo` / `cta`）/ `article_related_click`。パラメータは `article`（slug）・`locale`・`demo_id`。
 中身と使い方は `docs/article-writing.md` の「計測」。
+
+### 計測したい操作と既存のイベント（2026-10-15 に確認）
+
+集客の改善指示で候補に挙がった名前と、実際に送っているイベントの対応。同じ操作を別の名前で二重に送らない。
+
+| 候補 | 送っているイベント | 備考 |
+|---|---|---|
+| open_railway_map（路線ページ → 地図） | `line_map_open`（＋全ページ共通の `seo_map_open`） | 駅・ガイド・観光地・データのページは `{種類}_map_open` |
+| select_departure_station | `map_departure_select` | `source` で手動・自動を区別 |
+| select_arrival_station | `map_arrival_select` | |
+| display_route | `map_route_search` | 同じ組み合わせは1回だけ |
+| switch_3d_view | `map_view_switch`（`view=terrain3d`） | 3D 以外の切り替えも同じイベントで数える |
+
+- 駅名は送るが、現在地の緯度経度・個人を特定する情報は送らない
+- 本番サイトでだけ GA4 を読み込む（プレビュー・ローカルは数えない）。GA4 が無いときは何も送らず、地図は普通に動く
 
 ### GA4 イベント
 

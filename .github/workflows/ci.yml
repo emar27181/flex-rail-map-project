@@ -35,6 +35,8 @@ jobs:
         run: npm run test:unit
       - name: ビルド
         run: npm run build
+      - name: ビルド結果の SEO（sitemap・canonical・hreflang・title・description の重複・内部リンク切れ）
+        run: npm run test:seo
 
   # 描画テスト: ビルドしたサイトを実際のブラウザ（Chromium, WebGL はソフトウェア描画）で開き、
   # 地図・立体表示が描けているか（真っ黒・固まる・駅名の重なり・ボタンの位置）を確かめる。
