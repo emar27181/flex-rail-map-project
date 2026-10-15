@@ -1,5 +1,17 @@
 # CHANGE LOG
 
+## [2026-10-15] セッション（言語ごとの文字の切れ）
+
+### test: どの言語でも画面の文字が切れていないかを確かめる描画テストを足す
+- `tests/render/textFit.ts`（新規, `findClippedText`）, `tests/render/textFit.render.ts`（新規）, `docs/render-tests.md`, `CLAUDE.md`
+- 4言語 × 地図・経路・埋め込み・路線ページ × 開閉できる箱を開いた状態 × PC・スマホ（390px・360px）。入力欄の案内文・選択欄も測る
+
+### fix: 英語で切れていた文字を、文字を縮めたり変な所で折り返したりせずに収める
+- `src/components/ui/atoms/SlideSegmentedControl.tsx`: 「Depart / Arrive」が「De…」に。項目をいちばん長い文字に合わせた等幅にした
+- `src/components/StationSelector.tsx`, `src/utils/translation.ts`: 入力欄の「Enter station name」→「Station」（上に見出しがある）。駅を選ぶ前は ✕ の余白を取らない
+- `src/utils/translation.ts`: メモの「Nearest station」→「Station」（「Name」と並ぶ入力欄）
+- `src/components/ui/atoms/Chip.tsx`: 長い路線名のボタンが一覧の右端で切れていた。並びの幅までにし、語の切れ目で2行にする
+
 ## [2026-10-14] セッション（CI に描画テストを追加）
 
 ### test: 実際のブラウザで描けているかを確かめる描画テストを CI に追加
