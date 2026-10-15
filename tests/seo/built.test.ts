@@ -85,6 +85,18 @@ describe.skipIf(!built)('ビルド結果の SEO 検証（dist）', () => {
     expect([...byDesc.values()].filter(ps => ps.length > 1)).toEqual([]);
   });
 
+  it('og:image・埋め込み地図の画像（/og/...）が dist にある（壊れた画像を検索結果・ページに出さない）', () => {
+    const broken = new Set<string>();
+    for (const f of htmlFiles) {
+      const refs = [
+        ...[...f.html.matchAll(/<meta (?:property="og:image"|name="twitter:image") content="([^"]+)"/g)].map(m => m[1].replace(SITE_URL, '')),
+        ...[...f.html.matchAll(/<img class="map-embed-poster" src="([^"]+)"/g)].map(m => m[1]),
+      ];
+      for (const r of refs) if (r.startsWith('/') && !existsSync(join(DIST, r))) broken.add(`${f.path} → ${r}`);
+    }
+    expect([...broken]).toEqual([]);
+  });
+
   it.skipIf(!LIVE)('sitemap の全URLが HTTP 200 を返す（SEO_LIVE_BASE_URL 指定時）', async () => {
     const failures: string[] = [];
     for (const loc of locs) {
