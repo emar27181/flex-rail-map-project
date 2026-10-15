@@ -1,4 +1,4 @@
-/** Verified route-data-driven visitor guide: station-exit-vs-platform-number. */
+/** Visitor guide: station-exit-vs-platform-number. Station and route references come from the shared map data. */
 import type { ArticleSource } from './types';
 export const guide_station_exit_vs_platform_number: ArticleSource = {
   "slug": "station-exit-vs-platform-number",
@@ -69,7 +69,7 @@ export const guide_station_exit_vs_platform_number: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "同じ数字でも駅コード・のりば・出口では意味が違います。表示の種類を先に見分けます。 横浜駅から先の移動では、みなとみらい線の駅の並びを単独で見ると分かりやすくなります。 出発前に、目的地の名称・利用する鉄道会社・降りる駅をそれぞれ確認しましょう。観光施設の名前がそのまま駅名になるとは限りません。"
+          "text": "同じ数字でも駅コード・のりば・出口では意味が違います。表示の種類を先に見分けます。 出発駅と目的地を確かめて、利用する路線だけを地図に表示してみましょう。駅名と路線名をセットでメモすると、現地の標識とも照合しやすくなります。"
         },
         {
           "type": "h2",
@@ -91,7 +91,7 @@ export const guide_station_exit_vs_platform_number: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "同じ数字でも駅コード・のりば・出口では意味が違います。表示の種類を先に見分けます。 地図上の位置関係は道順・運賃・列車種別・ホームの場所を保証しません。現地の公式表示と最新情報を確認してください。 路線の線は接続関係やおおまかな位置を示しますが、駅構内の歩行距離・運賃・運転間隔・各列車の停車駅まで保証するものではありません。"
+          "text": "路線図から読み取れるのは路線のつながりや駅の位置関係です。ホーム、列車種別、運転状況、乗換に必要な時間、出口への道順はこの図だけでは判断できません。乗車前に鉄道事業者の公式案内で確認してください。"
         },
         {
           "type": "h2",
@@ -147,7 +147,7 @@ export const guide_station_exit_vs_platform_number: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "A station code identifies the stop on a line; a platform number and exit number refer to different physical locations. Yokohama Station is a large interchange. To plan the waterfront leg, isolate the Minatomirai Line before examining the full city network. Before following a route search result, identify the railway operator, your destination station and any connecting line. Tourist attraction names, railway station names and platform labels answer different questions."
+          "text": "A station code identifies the stop on a line; a platform number and exit number refer to different physical locations. Before following a route result, note the operator, your starting station and the station you plan to reach. Attraction names and railway station names answer different questions. Use this live map to separate the relevant railway corridor from nearby lines."
         },
         {
           "type": "h2",
@@ -169,7 +169,7 @@ export const guide_station_exit_vs_platform_number: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "A station code identifies the stop on a line; a platform number and exit number refer to different physical locations. Through-services can keep you on the same train while the line name changes. Confirm the destination display on board; map labels alone do not guarantee a through train. Map lines explain connectivity and rough location. They do not establish indoor walking distances, service frequency, fare validity, disruption status or which train stops at each station."
+          "text": "This simplified line map explains connectivity and approximate station position; it is not a live timetable, fare calculator or indoor navigation plan. A line continuing beyond a station does not guarantee your train stops there. Check the operator's official service information, platform signage and current conditions before you board."
         },
         {
           "type": "h2",
@@ -225,7 +225,7 @@ export const guide_station_exit_vs_platform_number: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "查看车站编号、站台号与出口号的区别时，先确认铁路公司、线路以及实际车站名。 不同线路可能使用相似的目的地名称，先找准运营公司和车站名称。 出发前请区分景点名称、铁路运营商与实际到达的车站。三者不一定同名。"
+          "text": "查看车站编号、站台号与出口号的区别时，先确认铁路公司、线路以及实际车站名。 出发前分别确认运营商、出发站与目的站。景点名称不一定等于站名。使用下方互动地图，单独查看需要的线路。"
         },
         {
           "type": "h2",
@@ -247,7 +247,7 @@ export const guide_station_exit_vs_platform_number: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "查看车站编号、站台号与出口号的区别时，先确认铁路公司、线路以及实际车站名。 线路图不等于步行路线、票价或实时列车信息。请核对运营商的官方指示。 线路图主要解释连接关系，不提供可靠的站内步行距离、票价、发车频率或各班列车停靠信息。"
+          "text": "简化线路图主要说明车站连接和大致位置，并不是实时时刻表、票价查询或站内导航。列车不一定停靠线路上的每一站。乘车前请核对运营商的官方信息和站台指示。"
         },
         {
           "type": "h2",
@@ -303,7 +303,7 @@ export const guide_station_exit_vs_platform_number: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "역 번호·승강장 번호·출구 번호을(를) 확인할 때 철도 회사와 실제 역 이름을 함께 살펴보세요. 비슷한 목적지 이름이라도 이용 노선과 역은 다를 수 있습니다. 출발 전 관광지 이름, 철도 운영사, 실제 하차역을 각각 확인하세요. 이름이 항상 같지는 않습니다."
+          "text": "역 번호·승강장 번호·출구 번호을(를) 확인할 때 철도 회사와 실제 역 이름을 함께 살펴보세요. 출발 전 운영사, 출발역, 목적지 역을 각각 확인하세요. 관광지 이름이 역 이름과 같지는 않을 수 있습니다. 아래 지도에서 필요한 노선만 살펴보세요."
         },
         {
           "type": "h2",
@@ -325,7 +325,7 @@ export const guide_station_exit_vs_platform_number: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "역 번호·승강장 번호·출구 번호을(를) 확인할 때 철도 회사와 실제 역 이름을 함께 살펴보세요. 노선도는 도보 경로, 요금, 실시간 열차 정보를 대신하지 않습니다. 운영사 공식 안내를 확인하세요. 노선도는 연결 관계를 이해하기 위한 것이며 역내 도보 거리, 요금, 운행 간격, 각 열차 정차역을 보증하지 않습니다."
+          "text": "간단한 노선도는 역 사이의 연결과 대략적인 위치를 보여 줍니다. 실시간 시각표나 운임표, 역 내부 길찾기를 대신하지 않으며 모든 열차가 모든 역에 정차하는 것도 아닙니다. 공식 안내를 확인하세요."
         },
         {
           "type": "h2",
