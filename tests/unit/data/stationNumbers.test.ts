@@ -54,6 +54,14 @@ describe('getStationNumber', () => {
     expect(getStationNumber('keiseiOshiageLine', '立石')).toBeUndefined();
   });
 
+  it('都電荒川線の公式全30停留場の番号を返す', () => {
+    expect(getStationNumber('todenArakawaLine', '三ノ輪橋')).toBe('SA01');
+    expect(getStationNumber('todenArakawaLine', '熊野前')).toBe('SA09');
+    expect(getStationNumber('todenArakawaLine', '王子駅前')).toBe('SA16');
+    expect(getStationNumber('todenArakawaLine', '鬼子母神前')).toBe('SA27');
+    expect(getStationNumber('todenArakawaLine', '早稲田')).toBe('SA30');
+  });
+
   it('存在しない駅はundefinedを返す', () => {
     expect(getStationNumber('yamanote', '存在しない駅')).toBeUndefined();
   });
