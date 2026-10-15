@@ -494,10 +494,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [clickedRoute, setClickedRoute] = useState<string | null>(null);
   const [routePopupPosition, setRoutePopupPosition] = useState<{ x: number, y: number } | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
-  // 表示していない路線を薄く描く層。埋め込み表示（記事などの小さな枠）では出さない。
-  // 記事の内容に絞った地図に関係の無い路線が薄く並んで「多い」と見えるうえ、この層は線の周り36pxを
-  // 押すとその路線を表示ONにするため、地図を動かそうとした指で鶴見線などが足されていた
-  const [showDimmedMapRoutes, setShowDimmedMapRoutes] = useState(!embedded);
+  // 表示していない路線を薄く描く層。埋め込み表示（記事などの枠）でも地図ページと同じに出す（2026-10-15:
+  // 記事の地図が実際の画面と違って見えた）。以前は埋め込みで出していなかった。線の周り36pxを押すと
+  // 切替モードでは確認なしで路線が足され、狭い枠で地図を動かす指で鶴見線などが足されていたため。
+  // 埋め込みでは押しても確認の吹き出しを出すだけにする（下の click）
+  const [showDimmedMapRoutes, setShowDimmedMapRoutes] = useState(true);
   const [dimmedMapTooltip, setDimmedMapTooltip] = useState<{ routeKey: RouteKey; x: number; y: number; isVisible: boolean } | null>(null);
 
   // 現在地表示
@@ -5471,8 +5472,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           click: (e: LeafletMouseEvent) => {
                           (e.target as any)?.closeTooltip?.();
                           justClickedLayerRef.current = true;
-                          if (tapToggleMode) {
-                            // 切替モード：確認なしで即表示
+                          if (tapToggleMode && !embedded) {
+                            // 切替モード：確認なしで即表示（埋め込みでは確認を出す。狭い枠で地図を動かす指で足されないように）
                             setAvailableRoutes(prev => new Set([...prev, rKey]));
                             setVisibleRoutes(prev => new Set([...prev, rKey]));
                             return;
