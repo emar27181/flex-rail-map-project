@@ -799,6 +799,16 @@ export const stationNumbers: Partial<Record<RouteKey, Record<string, string>>> =
     '新井宿': 'SR05', '戸塚安行': 'SR06', '東川口': 'SR07', '浦和美園': 'SR08',
   },
 
+  // ── 京成押上線 ──────────────────────────────────────────────
+  // 京成電鉄 会社要覧2024 (駅一覧), 確認日: 2026-10-15
+  // https://www.keisei.co.jp/keisei/quality/image/youran2024.pdf
+  // 「立石」は路線データ上の略称であり、公式駅名「京成立石」と一致しないため
+  // 名寄せの整備までは番号を登録しない。残り5駅のみ公式情報と突合。
+  keiseiOshiageLine: {
+    '押上': 'KS45', '京成曳舟': 'KS46', '八広': 'KS47',
+    '四ツ木': 'KS48', '青砥': 'KS09',
+  },
+
   // ── 江ノ島電鉄（公式駅ナンバリング） ─────────────────────────────
   // https://www.odakyu.jp/program/info/data.info/8052_1284200_.pdf
   // 確認日: 2026-10-15 / 公式資料に基づく EN01〜EN15
