@@ -13,6 +13,9 @@ test('英語の路線ページ（JR奈良線）: 冒頭に実際の地図があ�
   await expect(page).toHaveTitle(/^JR Nara Line Map: /);
   await expect(page.locator('h1')).toHaveText('JR Nara Line Map and Stations');
   await expect(page.locator('iframe').first()).toBeVisible();
+  // 埋め込みの地図も地図ページと同じに、表示していない路線を薄く描く（以前は埋め込みだけ出していなかった）
+  const embed = page.frameLocator('iframe').first();
+  await expect.poll(() => embed.locator('.leaflet-container path').count(), { timeout: 20_000 }).toBeGreaterThan(50);
 
   const cta = page.locator(CTA).first();
   await expect(cta).toBeVisible();
