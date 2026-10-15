@@ -44,6 +44,16 @@ describe('getStationNumber', () => {
     expect(getStationNumber('tokyuSetagayaLine', '下高井戸')).toBe('SG10');
   });
 
+  it('京成押上線は公式確認済みの5駅のみ番号を返す', () => {
+    expect(getStationNumber('keiseiOshiageLine', '押上')).toBe('KS45');
+    expect(getStationNumber('keiseiOshiageLine', '京成曳舟')).toBe('KS46');
+    expect(getStationNumber('keiseiOshiageLine', '八広')).toBe('KS47');
+    expect(getStationNumber('keiseiOshiageLine', '四ツ木')).toBe('KS48');
+    expect(getStationNumber('keiseiOshiageLine', '青砥')).toBe('KS09');
+    // Existing route data calls this station 立石, but the official name is 京成立石.
+    expect(getStationNumber('keiseiOshiageLine', '立石')).toBeUndefined();
+  });
+
   it('存在しない駅はundefinedを返す', () => {
     expect(getStationNumber('yamanote', '存在しない駅')).toBeUndefined();
   });
