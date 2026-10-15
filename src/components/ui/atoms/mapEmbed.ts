@@ -7,7 +7,7 @@
  * - 最初から中を操作できる（2026-10: 以前は押すまで触れない形にしていたが、
  *   「タップしなくても地図が動くように」との判断で外した）
  * - 画面に近づくまで読み込まない（loading="lazy"）
- * - 高さは端末に合わせて 360〜520px（画面の高さの 62%）
+ * - 高さは端末に合わせて 360〜520px（画面の高さの 62%）。スマホでは縦長の枠（MAP_EMBED_PHONE）
  * - 読み込むまでは、同じ画面を撮った画像（poster, src/seo/mapPreview.ts）を下に敷いて見せる。検索エンジンにも
  *   ページの中身として同じ画像が見える（og:image と同じ画像）。画像が無いページは敷かない
  * - 中の画面のテーマ（ライト/ダーク）を埋め込んだページに合わせる。開くときは URL の `theme`、
@@ -20,7 +20,14 @@ import { FS } from '../../../constants/ui';
 import { L } from '../../legend/legendStyles';
 import { EMBED_PARAM } from '../../../utils/embedMode';
 import { THEME_MESSAGE, THEME_PARAM } from '../../../utils/themeStorage';
+import { MEDIA } from '../../../constants/breakpoints';
 
+/**
+ * スマホで見るときの枠。スマホの画面と同じ縦長にし、中の地図もスマホの画面のまま見せる（2026-10-15:
+ * 横長の枠では縦が足りなかった）。大きさはユーザーの別サイト（my-net-homepage-project の作品の埋め込み
+ * `.works-preview-frame`）に合わせた: 幅は最大 390px、縦横比 9:17.5
+ */
+export const MAP_EMBED_PHONE = { maxWidthPx: 390, aspectRatio: '9 / 17.5' } as const;
 
 export const ME_CLASS = { figure: 'map-embed', frame: 'map-embed-frame', poster: 'map-embed-poster' } as const;
 
@@ -69,6 +76,9 @@ export const MAP_EMBED_CSS = `
 }
 .${ME_CLASS.frame} iframe { position: relative; display: block; width: 100%; height: 100%; border: 0; }
 .${ME_CLASS.poster} { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+@media ${MEDIA.mobile} {
+  .${ME_CLASS.frame} { width: min(100%, ${MAP_EMBED_PHONE.maxWidthPx}px); height: auto; aspect-ratio: ${MAP_EMBED_PHONE.aspectRatio}; margin: 0 auto; }
+}
 .${ME_CLASS.figure} figcaption { margin-top: ${L.sp.sm}; font-size: ${FS.caption}; line-height: 1.7; color: var(--me-muted, inherit); }
 `;
 

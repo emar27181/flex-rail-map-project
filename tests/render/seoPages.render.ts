@@ -4,6 +4,7 @@
  */
 import { test, expect, collectErrors } from './helpers';
 import { CONTROL_SIZE } from '../../src/components/ui/atoms/controlSize';
+import { MAP_EMBED_PHONE } from '../../src/components/ui/atoms/mapEmbed';
 
 const CTA = 'a[data-seo-map-open]';
 
@@ -13,6 +14,12 @@ test('英語の路線ページ（JR奈良線）: 冒頭に実際の地図があ�
   await expect(page).toHaveTitle(/^JR Nara Line Map: /);
   await expect(page.locator('h1')).toHaveText('JR Nara Line Map and Stations');
   await expect(page.locator('iframe').first()).toBeVisible();
+  if (test.info().project.name === 'mobile') {
+    // スマホでは枠もスマホの画面と同じ縦長（MAP_EMBED_PHONE: 幅は最大 390px・縦横比 9:17.5）
+    const box = (await page.locator('.map-embed-frame').first().boundingBox())!;
+    expect(box.width).toBeLessThanOrEqual(MAP_EMBED_PHONE.maxWidthPx);
+    expect(box.height / box.width).toBeCloseTo(17.5 / 9, 1);
+  }
   // 埋め込みの地図も地図ページと同じに、表示していない路線を薄く描く（以前は埋め込みだけ出していなかった）
   const embed = page.frameLocator('iframe').first();
   await expect.poll(() => embed.locator('.leaflet-container path').count(), { timeout: 20_000 }).toBeGreaterThan(50);
