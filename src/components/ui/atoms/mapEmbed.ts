@@ -19,7 +19,23 @@ import { L } from '../../legend/legendStyles';
 import { EMBED_PARAM } from '../../../utils/embedMode';
 import { THEME_MESSAGE, THEME_PARAM } from '../../../utils/themeStorage';
 
-export const ME_CLASS = { figure: 'map-embed', frame: 'map-embed-frame' } as const;
+export const ME_CLASS = {
+  figure: 'map-embed', frame: 'map-embed-frame', status: 'map-embed-status', actions: 'map-embed-actions',
+} as const;
+
+/**
+ * 埋め込みの下の操作と、読み込み中の案内の文言（言語ごと）。
+ * - 「地図を大きく開く」: 同じ状態の地図を普通の画面で開く（記事の外に出て全部の操作ができる）
+ * - 「全画面」: この枠を画面いっぱいにする（ブラウザが対応していないときは出さない。iPhone の Safari など）
+ * - 読み込み中: 枠の地に出す文字。地図が描かれると隠れる。読み込めないときもリンクから開ける
+ */
+export const MAP_EMBED_LABELS = {
+  ja: { open: '地図を大きく開く', fullscreen: '全画面', loading: '地図を読み込んでいます。表示されないときは「地図を大きく開く」から開けます。' },
+  en: { open: 'Open the full map', fullscreen: 'Full screen', loading: 'Loading the map. If it does not appear, use “Open the full map”.' },
+  zh: { open: '打开完整地图', fullscreen: '全屏', loading: '正在加载地图。如果没有显示，请点击“打开完整地图”。' },
+  ko: { open: '지도 크게 열기', fullscreen: '전체 화면', loading: '지도를 불러오는 중입니다. 표시되지 않으면 ‘지도 크게 열기’를 눌러 주세요.' },
+} as const;
+export type MapEmbedLang = keyof typeof MAP_EMBED_LABELS;
 
 const esc = (s: string) => s.replace(/&(?!(?:[a-z]+|#\d+);)/g, '&amp;').replace(/"/g, '&quot;');
 
@@ -30,11 +46,23 @@ export interface MapEmbedProps {
   title: string;
   /** 下に添える説明（HTML 可） */
   caption?: string;
+  /** 同じ画面を埋め込みでなく開く URL。渡すと下に「地図を大きく開く」「全画面」を出す */
+  openHref?: string;
+  /** 下の操作・読み込み中の文言の言語（openHref を渡すとき） */
+  lang?: MapEmbedLang;
+  /** 計測用の名前（記事の slug/地図のキー。GA4 の demo_id） */
+  demoId?: string;
 }
 
-export function mapEmbedHtml({ src, title, caption }: MapEmbedProps): string {
-  return `<figure class="${ME_CLASS.figure}"><div class="${ME_CLASS.frame}">`
+export function mapEmbedHtml({ src, title, caption, openHref, lang = 'ja', demoId }: MapEmbedProps): string {
+  const t = MAP_EMBED_LABELS[lang];
+  return `<figure class="${ME_CLASS.figure}"${demoId ? ` data-demo-id="${esc(demoId)}"` : ''}><div class="${ME_CLASS.frame}">`
+    + (openHref ? `<p class="${ME_CLASS.status}">${t.loading}</p>` : '')
     + `<iframe src="${esc(src)}" title="${esc(title)}" loading="lazy"></iframe></div>`
+    + (openHref
+      ? `<div class="${ME_CLASS.actions}"><a class="ctl" href="${esc(openHref)}" data-me-open>${t.open}</a>`
+        + `<button type="button" class="ctl" data-me-fullscreen hidden>${t.fullscreen}</button></div>`
+      : '')
     + (caption ? `<figcaption>${caption}</figcaption>` : '')
     + `</figure>`;
 }
@@ -46,7 +74,13 @@ export const MAP_EMBED_CSS = `
   border: 1px solid var(--me-border, currentColor);
   border-radius: ${L.r.card}; background: var(--me-surface, transparent); box-shadow: var(--me-shadow, none);
 }
-.${ME_CLASS.frame} iframe { display: block; width: 100%; height: 100%; border: 0; }
+.${ME_CLASS.frame} iframe { position: relative; display: block; width: 100%; height: 100%; border: 0; }
+.${ME_CLASS.status} {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; margin: 0;
+  padding: ${L.sp['3xl']}; text-align: center; font-size: ${FS.caption}; line-height: 1.7; color: var(--me-muted, inherit);
+}
+.${ME_CLASS.actions} { display: flex; flex-wrap: wrap; gap: ${L.sp.sm}; margin-top: ${L.sp.sm}; }
+.${ME_CLASS.frame}:fullscreen { height: 100%; border-radius: 0; }
 .${ME_CLASS.figure} figcaption { margin-top: ${L.sp.sm}; font-size: ${FS.caption}; line-height: 1.7; color: var(--me-muted, inherit); }
 `;
 
@@ -62,6 +96,16 @@ export const MAP_EMBED_SCRIPT = `(function(){
     var d = document.documentElement.getAttribute('data-theme');
     if (d === 'light' || d === 'dark') return d;
     return document.body.classList.contains('dark') ? 'dark' : 'light';
+  }
+  // 全画面: ブラウザが対応しているときだけボタンを出す（iPhone の Safari は要素の全画面に対応していない）
+  if (document.fullscreenEnabled) {
+    document.querySelectorAll('[data-me-fullscreen]').forEach(function (btn) {
+      btn.hidden = false;
+      btn.addEventListener('click', function () {
+        var frame = btn.closest('.${ME_CLASS.figure}').querySelector('.${ME_CLASS.frame}');
+        if (document.fullscreenElement) document.exitFullscreen(); else if (frame) frame.requestFullscreen();
+      });
+    });
   }
   var theme = pageTheme();
   frames.forEach(function (frame) {

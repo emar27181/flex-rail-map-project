@@ -28,6 +28,10 @@ import GA4Loader from "../GA4Loader.astro";
 import { CONTROL_CSS, HEADER_LOGO_PX } from "../ui/atoms/controlCss";
 import { RESPONSIVE_TABLE_CSS } from "../ui/atoms/responsiveTable";
 import { MAP_EMBED_CSS, MAP_EMBED_SCRIPT } from "../ui/atoms/mapEmbed";
+import { ARTICLE_SOURCES } from "../../data/articles";
+import { articleToc } from "../../utils/articleRender";
+import { findArticleStation } from "../../utils/articleFacts";
+import { getSeoModel, hasStationPage, lineByKey, linePath, routeName, stationName, stationPath } from "../../seo/pageModel";
 import { THEME_STORAGE_KEY, LEGACY_THEME_STORAGE_KEY } from "../../utils/themeStorage";
 import { L } from "../legend/legendStyles";
 import SiteFooterNav from "../SiteFooterNav.astro";
@@ -76,6 +80,23 @@ const formatDate = (iso: string) =>
 const UPDATED: Record<ArticleLanguage, string> = { ja: "更新", en: "Updated", zh: "更新", ko: "수정" };
 const home = lang === "ja" ? "/" : `/?lang=${lang}`;
 const indexCrumb = { name: shell.articles, path: articleIndexPath(lang) };
+// 記事データ（目次・出典・関連する路線と駅）
+const source = isArticle ? ARTICLE_SOURCES.find(a => a.slug === pageKey) : undefined;
+const toc = source ? articleToc(source, lang).map(t => ({ ...t, text: withSiteName(t.text) })) : [];
+const sources = source?.sources ?? [];
+// 関連する路線・駅は、その言語のページがあるものはリンク、無いものは名前だけ
+const relatedLines = (source?.relatedRoutes ?? []).map(key => {
+  const line = lineByKey(key);
+  return { name: routeName(key, lang), href: line ? linePath(line.slug, lang) : undefined };
+});
+const relatedStations = (source?.relatedStations ?? []).map(ref => {
+  const st = findArticleStation(ref);
+  const page = st && getSeoModel().stations.find(s => s.name === ref.name && s.routes.includes(ref.route));
+  return {
+    name: page ? stationName(page, lang) : ref.name,
+    href: page && hasStationPage(page, lang) ? stationPath(page.slug, lang) : undefined,
+  };
+});
 // 関連記事（1記事1テーマにしているので、ほかのテーマはここから案内する）
 const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? [] : [])
   .map(slug => ({ slug, meta: withSiteName(ARTICLE_PAGE_TRANSLATIONS[slug][lang]) }));
@@ -165,10 +186,37 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
       </div>
     </header>
     <slot name="beforeArticle" />
+    {toc.length > 0 && (
+      // 目次は閉じて置く（記事は「結論 → まず地図に触る」の順。目次で冒頭のデモを下へ押し出さない）
+      <nav class="toc" aria-label={shell.toc}>
+        <details>
+          <summary>{shell.toc}</summary>
+          <ol>{toc.map(t => <li><a href={`#${t.id}`}>{t.text}</a></li>)}</ol>
+        </details>
+      </nav>
+    )}
     <article>
       {body && <div class="article-body" set:html={body} />}
       <slot />
     </article>
+    {(relatedLines.length > 0 || relatedStations.length > 0) && (
+      <section class="places" aria-labelledby="places-heading">
+        <h2 id="places-heading">{shell.relatedPlaces}</h2>
+        <ul class="place-list">
+          {[...relatedLines, ...relatedStations].map(p => <li>{p.href ? <a href={p.href}>{p.name}</a> : p.name}</li>)}
+        </ul>
+      </section>
+    )}
+    {sources.length > 0 && (
+      <section class="sources" aria-labelledby="sources-heading">
+        <h2 id="sources-heading">{shell.sources}</h2>
+        <ul>
+          {sources.map(src => (
+            <li><a href={src.url} rel="noopener" target="_blank">{src.title}</a> <span class="meta">{src.publisher} · {shell.checkedAt} <time datetime={src.checkedAt}>{formatDate(src.checkedAt)}</time></span></li>
+          ))}
+        </ul>
+      </section>
+    )}
     {related.length > 0 && (
       <section class="related" aria-labelledby="related-heading">
         <h2 id="related-heading">{shell.relatedArticles}</h2>
@@ -206,6 +254,15 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
   </script>
   <!-- 埋め込んだ画面は押すまで触れない（ui/atoms/mapEmbed.ts） -->
   <script is:inline set:html={MAP_EMBED_SCRIPT}></script>
+  {isArticle && (
+    <script is:inline type="application/json" id="article-context" set:html={JSON.stringify({ article: pageKey, locale: lang })}></script>
+  )}
+  <script>
+    // 記事の中の操作（デモを見た・触った・地図へ移った・関連記事）を GA4 に送る（utils/articleAnalytics.ts）
+    import { initArticleAnalytics } from "../../utils/articleAnalytics";
+    const el = document.getElementById("article-context");
+    if (el) initArticleAnalytics(JSON.parse(el.textContent || "{}"));
+  </script>
   <slot name="scripts" />
 </body>
 </html>
