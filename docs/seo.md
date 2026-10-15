@@ -202,6 +202,12 @@ B・C のページも作る（路線ページ・隣の駅からのリンク先�
   `from_station` / `to_station` / `result_count` / `waypoints` / `best_minutes` / `best_transfers` / `has_through`（直通を使う候補があるか）
 - 記事に埋め込んだ地図（`?embed=1`）では GA4 を読み込まない（記事の閲覧が地図の閲覧として二重に数えられるため）
 
+### 記事の中の GA4 イベント（2026-10-15）
+
+`src/utils/articleAnalytics.ts` だけに書く。`article_demo_view` / `article_demo_interact` / `article_demo_fullscreen` /
+`article_map_open`（`source`: `demo` / `cta`）/ `article_related_click`。パラメータは `article`（slug）・`locale`・`demo_id`。
+中身と使い方は `docs/article-writing.md` の「計測」。
+
 ### GA4 イベント
 
 クリック時に2つ送る。

@@ -1,5 +1,31 @@
 # CHANGE LOG
 
+## [2026-10-15] セッション（記事 × 地図デモの基盤と、駅番号の記事）
+
+### feat: 記事の地図デモで、駅を中心に開く・駅番号を出す・立体表示を指定できるようにする
+- `src/data/articles/types.ts`（`focus` `stationNumbers` `view`）, `src/utils/articleRender.ts`, `src/utils/mapDeepLink.ts`,
+  `src/utils/mapDisplayUrlParam.ts`（`?numbers=`）, `src/components/RailwayMap.tsx`
+- 日本語の地図は駅番号を出さないのが既定だったため、記事で番号を見せられなかった。URL で指定できるようにした
+
+### feat: 記事の文章に駅番号・駅名・路線名を路線データから差し込む（手で書かない）
+- `src/utils/articleFacts.ts`（新規）。データに無い駅・番号はビルドとテストで止まる。生成 AI の原稿に存在しない番号が紛れ込まない
+
+### feat: 記事に出典・目次・この記事の路線と駅、デモに「地図を大きく開く」「全画面」・読み込み中の文を出す
+- `src/components/articles/ArticleLayout.astro`, `src/data/articleI18n.ts`, `src/styles/article-layout.css`, `src/components/ui/atoms/mapEmbed.ts`
+
+### feat: 記事の中の操作（デモを見た・触った・全画面・地図へ移った・関連記事）を GA4 で数える
+- `src/utils/articleAnalytics.ts`（新規）
+
+### feat: 記事のひな形を作るコマンドと検査（npm run article:new / article:validate）
+- `scripts/new-article.mjs`（新規）, `docs/templates/article-template.ts`。書きかけの「〇〇」が残るとテストが落ちる
+
+### feat: 記事「駅番号の読み方」（4言語、英語を主に）
+- `src/data/articles/how-to-read-station-numbers.ts`。デモは山手線（渋谷中心）・東京駅付近・渋谷の乗換。番号はすべて差し込み
+
+### test / docs
+- `tests/unit/utils/articleFacts.test.ts`, `articleMapLink.test.ts`, `articleAnalytics.test.ts`（新規）, `tests/unit/data/articleSources.test.ts`, `tests/render/article.render.ts`（新規）
+- `docs/article-platform.md`（新規・設計判断）, `docs/article-writing.md`, `docs/templates/article-prompt.md`, `docs/seo.md`, `CLAUDE.md`
+
 ## [2026-10-15] セッション（山手線の駅番号）
 
 ### fix: 山手線の駅番号が大崎起点の逆向きになっていたのを、東京 JY01 からの正しい番号に直す

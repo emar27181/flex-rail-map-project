@@ -779,6 +779,9 @@ Netlify管理画面の Site configuration → Build & deploy → Branch deploys 
 - 記事内の地図リンクも `mapDeepLink.ts` 経由で作り、駅名は `stationUrlParams.ts` の英語slugを使う。記事データには従来どおり日本語駅名を書いてよい
 - 画面は画像ではなく実際の画面を iframe で埋め込む（`ui/atoms/mapEmbed.ts`。作り物の図を載せない）
 - 決まり・構成・参考資料は **`docs/article-writing.md`**
+- **記事の駅番号・駅名・路線名は手で書かない。** `{stationNumber:路線キー:駅名}` などで路線データから差し込む（`src/utils/articleFacts.ts`）。
+  事実を書いたら `sources`（出典）を付ける。新しい記事は `npm run article:new -- --slug {slug}` → `npm run article:validate`。
+  設計判断は `docs/article-platform.md`、AI への指示文は `docs/templates/article-prompt.md`
 
 ### CHANGE.log 記録ルール
 
