@@ -1,5 +1,12 @@
 # CHANGE LOG
 
+## [2026-10-15] セッション（山手線の駅番号）
+
+### fix: 山手線の駅番号が大崎起点の逆向きになっていたのを、東京 JY01 からの正しい番号に直す
+- `src/data/stationNumbers.ts`, `tests/unit/data/stationNumbers.test.ts`, `docs/data-maintenance-ledger.md`
+- 地図に「JY24 Tokyo」「JY05 Shibuya」と出ていた（正しくは東京 JY01・渋谷 JY20）。既存記事の「東京は JY01」とも食い違っていた
+- 東京から内回りの向きに番号が1つずつ続くことをテストで確かめる。東武日光線・湘南新宿ラインの疑いは台帳に記録（未修正）
+
 ## [2026-10-14] セッション（CI に描画テストを追加）
 
 ### test: 実際のブラウザで描けているかを確かめる描画テストを CI に追加
