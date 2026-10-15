@@ -121,6 +121,22 @@ B・C のページも作る（路線ページ・隣の駅からのリンク先�
 - 英語・中国語・韓国語ページに出す統計の範囲・時期は `pageText.ts` の `STAT_SCOPE_EN` /
   `STAT_SCOPE_ZH` / `STAT_SCOPE_KO`、出典名は `SOURCE_TITLE_EN` に訳が無いとテストが落ちる
 
+### 路線ページの title・description（2026-10-15）
+
+Search Console（2026-09-15〜10-12）で、英語の路線ページ（JR奈良線 249表示・0クリック、京急空港線 144表示・2クリック）が
+表示されるのに押されていなかった。title が「All 21 Stations, Transfers and Through Services」で、
+検索する人が探す「Map」も、その路線で行ける観光地も見えなかった。
+
+- 文の形は `src/seo/pageText.ts` の `lineTitle` / `lineDescription` / `lineLede`、値は `src/seo/lineFacts.ts`（路線データ・観光地データだけ）
+- title は「路線名 + Map（路線図）+ 駅数 + 両端 + 主な観光地の最寄り駅（あれば1つ）」。例:
+  `JR Nara Line Map: 21 Stations from Kyoto to Nara (Inari for Fushimi Inari Taisha)`
+- 観光地は `touristSpots.ts` にあり、その路線の駅が最寄り駅のものだけ。並びは `touristSpots.ts` の順
+  （主な観光地を先に書く）。終点の駅名に含まれる観光地（羽田空港）・駅名と同じ観光地（すすきの）は書かない
+- 直通運転は `throughServices.ts` に登録がある路線だけ書く
+- 中国語・韓国語は路線名の訳が無いので、観光地を title に入れない（英語名が混ざって長くなる）
+- すべての路線・言語で title・description が重複しないことを `tests/unit/seo/lineFacts.test.ts` が確かめる
+- **効果は Search Console で改稿前後の28日を比べて判断する**（表示回数・クリック・CTR・平均掲載順位）。改稿日は 2026-10-15
+
 ### 内部リンク（すべて自動）
 
 - 駅 ⇔ 路線（駅ページの路線チップ、路線ページの駅一覧）
@@ -130,6 +146,8 @@ B・C のページも作る（路線ページ・隣の駅からのリンク先�
 - ガイド ⇔ 路線・駅（ガイドの `ctaRoutes` と節ごとの `cta.routes` にある路線を相互にリンク）
 - 中国語・韓国語ページからは、その言語版がある駅ページにだけリンクする（無い駅は文字だけ）
 - ガイドの関連リンク先が実在するか（その言語版があるか）は `tests/unit/seo/guideLinks.test.ts` が確かめる
+- ビルドした全ページの `<a href="/...">` の行き先が dist にあるか（リンク切れ）と、sitemap に載るページの description が
+  互いに重複していないかは `npm run test:seo`（`tests/seo/built.test.ts`）が確かめる。CI の `checks` ジョブでビルドの後に動く
 
 ## 多言語（言語ごとの別URL・言語の切り替え）
 
@@ -200,7 +218,24 @@ B・C のページも作る（路線ページ・隣の駅からのリンク先�
 - `map_arrival_select`: 到着駅を選んだ。`station` / `source`
 - `map_route_search`: 出発・到着がそろって経路候補を出した（同じ組み合わせでは1回だけ）。
   `from_station` / `to_station` / `result_count` / `waypoints` / `best_minutes` / `best_transfers` / `has_through`（直通を使う候補があるか）
+- `map_view_switch`: 表示方式（`realistic` 実際の地図・`schematic` 路線図風・`bubble`・`terrain3d` 立体）を設定パネルで切り替えた。
+  `view`（切り替え先）/ `from_view`（切り替え前）。URL（`?view=terrain3d`）や保存した設定で開いたときは送らない（2026-10-15）
 - 記事に埋め込んだ地図（`?embed=1`）では GA4 を読み込まない（記事の閲覧が地図の閲覧として二重に数えられるため）
+
+### 計測したい操作と既存のイベント（2026-10-15 に確認）
+
+集客の改善指示で候補に挙がった名前と、実際に送っているイベントの対応。同じ操作を別の名前で二重に送らない。
+
+| 候補 | 送っているイベント | 備考 |
+|---|---|---|
+| open_railway_map（路線ページ → 地図） | `line_map_open`（＋全ページ共通の `seo_map_open`） | 駅・ガイド・観光地・データのページは `{種類}_map_open` |
+| select_departure_station | `map_departure_select` | `source` で手動・自動を区別 |
+| select_arrival_station | `map_arrival_select` | |
+| display_route | `map_route_search` | 同じ組み合わせは1回だけ |
+| switch_3d_view | `map_view_switch`（`view=terrain3d`） | 3D 以外の切り替えも同じイベントで数える |
+
+- 駅名は送るが、現在地の緯度経度・個人を特定する情報は送らない
+- 本番サイトでだけ GA4 を読み込む（プレビュー・ローカルは数えない）。GA4 が無いときは何も送らず、地図は普通に動く
 
 ### GA4 イベント
 
