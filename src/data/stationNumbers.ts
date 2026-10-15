@@ -799,6 +799,25 @@ export const stationNumbers: Partial<Record<RouteKey, Record<string, string>>> =
     '新井宿': 'SR05', '戸塚安行': 'SR06', '東川口': 'SR07', '浦和美園': 'SR08',
   },
 
+  // ── 江ノ島電鉄（公式駅ナンバリング） ─────────────────────────────
+  // https://www.odakyu.jp/program/info/data.info/8052_1284200_.pdf
+  // 確認日: 2026-10-15 / 公式資料に基づく EN01〜EN15
+  enoshimaElectricRailway: {
+    '藤沢': 'EN01', '石上': 'EN02', '柳小路': 'EN03', '鵠沼': 'EN04',
+    '湘南海岸公園': 'EN05', '江ノ島': 'EN06', '腰越': 'EN07', '鎌倉高校前': 'EN08',
+    '七里ヶ浜': 'EN09', '稲村ヶ崎': 'EN10', '極楽寺': 'EN11', '長谷': 'EN12',
+    '由比ヶ浜': 'EN13', '和田塚': 'EN14', '鎌倉': 'EN15',
+  },
+
+  // ── 東急世田谷線（公式駅ナンバリング） ──────────────────────────
+  // https://www.tokyu.co.jp/railway/sg/
+  // 確認日: 2026-10-15 / 公式サイトに基づく SG01〜SG10
+  tokyuSetagayaLine: {
+    '三軒茶屋': 'SG01', '西太子堂': 'SG02', '若林': 'SG03', '松陰神社前': 'SG04',
+    '世田谷': 'SG05', '上町': 'SG06', '宮の坂': 'SG07', '山下': 'SG08',
+    '松原': 'SG09', '下高井戸': 'SG10',
+  },
+
 };
 
 export const getStationNumber = (routeKey: RouteKey, stationName: string): string | undefined => {
