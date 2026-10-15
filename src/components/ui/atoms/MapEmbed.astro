@@ -1,12 +1,14 @@
 ---
 /**
- * 実際の画面（地図など）の埋め込み。規格（HTML・CSS・押すまで触れないスクリプト）は mapEmbed.ts。
+ * 実際の画面（地図など）の埋め込み。規格（HTML・CSS・スクリプト）は mapEmbed.ts。
  * CSS とスクリプトはレイアウト（SeoPageLayout / ArticleLayout）が1回だけ入れる。
  */
 import { mapEmbedHtml, type MapEmbedProps } from './mapEmbed';
+import { existingMapPreview } from '../../../seo/mapPreview';
 
 export type Props = MapEmbedProps;
-const html = mapEmbedHtml(Astro.props);
+// 読み込むまで敷く画像は、このページの冒頭の地図を撮ったもの（ページに埋め込みは1つだけ）
+const html = mapEmbedHtml({ ...Astro.props, poster: Astro.props.poster ?? existingMapPreview(Astro.url.pathname) });
 ---
 
 <Fragment set:html={html} />

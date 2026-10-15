@@ -3,7 +3,7 @@
  */
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { APP_EVENTS, routeSearchParams, trackRouteSearch, trackStationSelect } from '../../../src/utils/appAnalytics';
+import { APP_EVENTS, routeSearchParams, trackRouteSearch, trackStationSelect, trackViewSwitch } from '../../../src/utils/appAnalytics';
 
 describe('経路検索のイベントの値', () => {
   it('先頭の候補の所要時間・乗換回数と、直通を使う候補があるかを載せる', () => {
@@ -40,6 +40,13 @@ describe('送信', () => {
   it('経路検索は map_route_search で送る', () => {
     trackRouteSearch('藤沢', '大宮', [{ totalTime: 52, transfers: 0, segments: [{}] }], 0);
     expect(gtag).toHaveBeenCalledWith('event', 'map_route_search', expect.objectContaining({ from_station: '藤沢', to_station: '大宮' }));
+  });
+
+  it('表示方式の切り替えは map_view_switch で、切り替え先と切り替え前を送る。同じ方式なら送らない', () => {
+    trackViewSwitch('terrain3d', 'realistic');
+    trackViewSwitch('realistic', 'realistic');
+    expect(gtag).toHaveBeenCalledTimes(1);
+    expect(gtag).toHaveBeenCalledWith('event', 'map_view_switch', { view: 'terrain3d', from_view: 'realistic' });
   });
 
   it('GA4 が無い環境（gtag 未読み込み）でも落ちない', () => {

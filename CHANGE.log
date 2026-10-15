@@ -1,5 +1,39 @@
 # CHANGE LOG
 
+## [2026-10-15] セッション（検索結果のクリック率と地図への導線）
+
+### fix: 記事・ページに埋め込んだ地図でも、表示していない路線を地図ページと同じに薄く描く
+- `src/components/RailwayMap.tsx`（`showDimmedMapRoutes` の初期値、埋め込みでの押したときの動き）, `tests/render/seoPages.render.ts`
+- 埋め込みだけ薄い路線を消していて、記事の地図が実際の画面と違って見えた。以前消していた理由（狭い枠で地図を動かす指で路線が足される）は、
+  埋め込みでは押しても確認の吹き出しを出すだけにして防ぐ
+
+### improve: スマホでは記事・ページに埋め込んだ地図の枠をスマホの画面と同じ縦長にする
+- `src/components/ui/atoms/mapEmbed.ts`（`MAP_EMBED_PHONE`）, `tests/render/seoPages.render.ts`
+- 横長の枠では縦が足りなかった。幅は最大 390px・縦横比 9:17.5（ユーザーの別サイト my-net-homepage-project の作品の埋め込みに合わせた）。中の地図もスマホの画面のまま見える
+
+### feat: 検索結果・SNS のサムネイルと埋め込み地図の読み込み中の表示に、そのページの実際の地図画面を使う
+- `src/seo/mapPreview.ts`（新規）, `scripts/capture-map-previews.mts`（新規, `npm run og:capture`）, `public/og/`（撮った画像）,
+  `src/components/seo/SeoHead.astro`, `src/components/articles/ArticleLayout.astro`, `src/config/articleSeo.ts`, `src/components/ui/atoms/mapEmbed.ts`, `MapEmbed.astro`
+- 以前はどのページも og:image がアプリのアイコンだった。冒頭の地図と同じ URL（そのページの言語の UI）を撮った 1200×630 の画像にし、`summary_large_image` にする
+- 記事は構造化データの `image` にも入れる。画像が無いページはアイコンのまま。og:image と埋め込みの画像が実在するかを `test:seo` で確かめる
+
+### improve: 路線ページの title・description・H1 を「路線図（Map）」と観光地の最寄り駅が分かる形に
+- `src/seo/lineFacts.ts`（新規）, `src/seo/pageText.ts`, `src/pages/[...lang]/lines/[slug].astro`, `tests/unit/seo/lineFacts.test.ts`（新規）
+- Search Console（2026-09-15〜10-12）で英語の路線ページ（JR奈良線 249表示・0クリック、京急空港線 144表示・2クリック）が押されていなかった
+- 例: `JR Nara Line: All 21 Stations, Transfers and Through Services` → `JR Nara Line Map: 21 Stations from Kyoto to Nara (Inari for Fushimi Inari Taisha)`
+- 観光地は touristSpots.ts、直通運転は throughServices.ts にあるものだけ。終点名と同じ観光地・駅名と同じ観光地は書かない。全路線・全言語で重複なし
+
+### improve: 札幌のガイドの title・H1・説明を検索意図（札幌 地下鉄 路線図）に合わせ、東豊線・市電への関連リンクを足す
+- `src/data/guides.ts`（日本語・英語）。答え（3路線は大通で乗り換え・新千歳空港へはJR千歳線）を title に出した
+
+### feat: 表示方式の切り替え（立体表示など）を GA4 の map_view_switch で数える
+- `src/utils/appAnalytics.ts`, `src/components/RailwayMap.tsx`, `tests/unit/utils/appAnalytics.test.ts`
+- 設定パネルで切り替えたときだけ送る（URL・保存した設定での復元は数えない）。既存の出発・到着・経路検索・地図遷移のイベントとの対応は docs/seo.md
+
+### test: ビルド結果の内部リンク切れ・description の重複を検査し、CI で動かす。路線ページ・ガイドから地図を開く導線の描画テスト
+- `tests/seo/built.test.ts`, `.github/workflows/ci.yml`（checks に `npm run test:seo`）, `tests/render/seoPages.render.ts`（新規）, `docs/render-tests.md`, `docs/seo.md`
+- 地図ボタンから路線を外すと落ちることを確かめた
+
 ## [2026-10-14] セッション（CI に描画テストを追加）
 
 ### test: 実際のブラウザで描けているかを確かめる描画テストを CI に追加

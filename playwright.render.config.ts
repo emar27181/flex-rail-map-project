@@ -23,6 +23,10 @@ export default defineConfig({
     baseURL: `http://127.0.0.1:${PORT}`,
     locale: 'ja-JP',
     colorScheme: 'dark',
+    // サービスワーカー（public/sw.js）を止める。地図ページが登録したあとの画面遷移では、外部への通信が
+    // サービスワーカー経由になり、helpers.ts の通信遮断（page.route）をすり抜ける。CI でだけ広告などの
+    // 外部スクリプトが読み込まれ、例外（pageerror: Y）で落ちていた（2026-10-15, 路線ページ → 地図の遷移）
+    serviceWorkers: 'block',
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
     launchOptions: {

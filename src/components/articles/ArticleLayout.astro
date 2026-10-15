@@ -12,6 +12,7 @@
  *   その言語のものだけを入れる
  * - 言語の切り替えは右上の LanguageSwitcher（各言語版へのリンク）
  */
+import { existingMapPreview, MAP_PREVIEW } from '../../seo/mapPreview';
 import "../../styles/article-layout.css";
 import {
   ARTICLES,
@@ -27,7 +28,7 @@ import FaviconLinks from "../seo/FaviconLinks.astro";
 import GA4Loader from "../GA4Loader.astro";
 import { CONTROL_CSS, HEADER_LOGO_PX } from "../ui/atoms/controlCss";
 import { RESPONSIVE_TABLE_CSS } from "../ui/atoms/responsiveTable";
-import { MAP_EMBED_CSS, MAP_EMBED_SCRIPT } from "../ui/atoms/mapEmbed";
+import { MAP_EMBED_CSS, MAP_EMBED_SCRIPT, withFirstEmbedPoster } from "../ui/atoms/mapEmbed";
 import { THEME_STORAGE_KEY, LEGACY_THEME_STORAGE_KEY } from "../../utils/themeStorage";
 import { L } from "../legend/legendStyles";
 import SiteFooterNav from "../SiteFooterNav.astro";
@@ -62,12 +63,16 @@ const isArticle = kind === "article";
 // 文章中の {siteName} は正式なサービス名（src/config/seo.ts）に置き換える
 const shell = withSiteName(ARTICLE_SHELL_TRANSLATIONS[lang]);
 const meta = withSiteName(ARTICLE_PAGE_TRANSLATIONS[pageKey][lang]);
-const body = withSiteName(ARTICLE_BODY_TRANSLATIONS[pageKey]?.[lang]);
+const rawBody = withSiteName(ARTICLE_BODY_TRANSLATIONS[pageKey]?.[lang]);
 // 日本語のキーワードだけ用意してある（他の言語は meta keywords を出さない）
 const keywords = lang === "ja" ? withSiteName(ARTICLE_PAGE_KEYWORDS[pageKey]) : undefined;
 const pathOf = (l: ArticleLanguage) => (isArticle ? articlePath(pageKey, l) : articleIndexPath(l));
 const path = pathOf(lang);
 const canonicalUrl = `${SITE_URL}${path}`;
+// 記事冒頭の地図の実際の画面（src/seo/mapPreview.ts）。無い記事はアプリのアイコン
+const preview = existingMapPreview(path);
+// 冒頭の地図の埋め込みには、読み込むまで同じ画面の画像を敷く
+const body = rawBody && withFirstEmbedPoster(rawBody, preview);
 const versions = Object.fromEntries(ARTICLE_LANGUAGES.map(l => [l, pathOf(l)]));
 const hreflang = buildHreflangLinks(ARTICLE_LANGUAGES.map(l => ({ lang: l, path: pathOf(l) })), "ja");
 const LOCALE: Record<ArticleLanguage, string> = { ja: "ja-JP", en: "en-US", zh: "zh-CN", ko: "ko-KR" };
@@ -98,10 +103,14 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
   <meta property="og:description" content={meta.description} />
   <meta property="og:type" content={isArticle ? "article" : "website"} />
   <meta property="og:url" content={canonicalUrl} />
-  <meta property="og:image" content={`${SITE_URL}${ogImage}`} />
+  <meta property="og:image" content={`${SITE_URL}${preview ?? ogImage}`} />
+  {preview && <meta property="og:image:width" content={String(MAP_PREVIEW.width)} />}
+  {preview && <meta property="og:image:height" content={String(MAP_PREVIEW.height)} />}
+  {preview && <meta property="og:image:alt" content={meta.title} />}
   <meta property="og:locale" content={OG_LOCALE[lang]} />
   {ARTICLE_LANGUAGES.filter(l => l !== lang).map(l => <meta property="og:locale:alternate" content={OG_LOCALE[l]} />)}
-  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:card" content={preview ? "summary_large_image" : "summary"} />
+  {preview && <meta name="twitter:image" content={`${SITE_URL}${preview}`} />}
 
   <meta name="google-site-verification" content="uyjBT9z6vOnpxn6lM6YnxbI6R4jLSDIAboC8zo1slhM" />
   <meta name="google-adsense-account" content="ca-pub-2444529114040977" />
@@ -123,7 +132,7 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
     })();
   </script>
 
-  {isArticle && <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd({ title: meta.title, description: meta.description, keywords, publishedDate, modifiedDate, canonicalUrl, ogImage, lang }))}></script>}
+  {isArticle && <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd({ title: meta.title, description: meta.description, keywords, publishedDate, modifiedDate, canonicalUrl, ogImage, image: preview, lang }))}></script>}
   <script type="application/ld+json" set:html={JSON.stringify(articleBreadcrumbJsonLd(isArticle ? { title: meta.title, canonicalUrl } : undefined, indexCrumb))}></script>
 
   {lang === "ja" && (
