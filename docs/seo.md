@@ -182,6 +182,26 @@ Search Console（2026-09-15〜10-12）で、英語の路線ページ（JR奈良�
 - 東京のガイドにも `city: 'tokyo'` を付けた（GA4 の `city` にも送られる）
 - 埋め込んだ駅・路線のページの中で開く位置は `?section=id`（`#id` は記事のページごと動くので使わない。`EMBED_SECTION_SCRIPT`）
 
+## プレビュー画像（検索結果・SNS のサムネイル, 2026-10-15）
+
+以前はどのページも og:image がアプリのアイコンで、検索結果や SNS で見ても「どんな画面なのか」が分からなかった。
+**ページ冒頭に埋め込んである地図の実際の画面**（同じ URL・同じ範囲・そのページの言語の UI）を撮った画像を使う。作り物の図は使わない。
+
+| 使う所 | 中身 |
+|---|---|
+| `og:image`・`twitter:image`（`summary_large_image`） | `SeoHead.astro`（駅・路線・データ・ガイド）と `ArticleLayout.astro`（記事）が、画像があれば自動で使う |
+| 記事の構造化データ `Article.image` | 記事だけ（本文に同じ画面を出しているので） |
+| 冒頭の埋め込み地図の下に敷く画像（読み込むまで見える） | `ui/atoms/mapEmbed.ts`（`poster`）。最初の埋め込みにだけ付ける |
+
+- 画像は `public/og/{ページのパス}.jpg`（1200×630）。パスの決まりは `src/seo/mapPreview.ts`
+- 撮り方: `npm run build` → `npm run og:capture`（`scripts/capture-map-previews.mts`）→ もう一度 `npm run build`
+  - sitemap に載っている路線・ガイド・記事・駅のページのうち、冒頭に地図を埋め込んでいるページを撮る
+  - `-- --only /en/lines/` で絞る、`-- --missing` でまだ画像が無いページだけ撮る
+  - 撮影条件は描画テストと同じ（サービスワーカーと外部への通信を止める・ダークテーマ）。800×420 を 1.5 倍で撮る
+- **画像が無いページはアプリのアイコンのまま**（壊れた画像を出さない）。新しい路線・記事を足したら `--missing` で撮る
+- **地図の見た目・UI の文言を変えたら撮り直す**（画像が古い画面のままになるため）
+- og:image・埋め込みの画像が dist に実在するかは `npm run test:seo` が確かめる
+
 ## 地図を開くCTA（設定済みの地図へのリンク）
 
 `src/components/MapOpenCta.astro` だけで作る。URL は `src/utils/mapDeepLink.ts`
