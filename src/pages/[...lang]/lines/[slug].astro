@@ -19,6 +19,7 @@ import {
   stationName, stationPath, type SeoLang, type SeoLine,
 } from '../../../seo/pageModel';
 import { SEO_TEXT, formatNumber, statLabel } from '../../../seo/pageText';
+import { lineFacts } from '../../../seo/lineFacts';
 
 export function getStaticPaths() {
   return SEO_LANGS.flatMap(lang =>
@@ -34,9 +35,7 @@ const { lang, line } = Astro.props;
 const t = SEO_TEXT[lang];
 const name = routeName(line.key, lang);
 const path = linePath(line.slug, lang);
-const first = stationName(line.stops[0].station, lang);
-const last = stationName(line.stops[line.stops.length - 1].station, lang);
-const transferCount = line.stops.filter(s => s.station.effectiveLines >= 2).length;
+const facts = lineFacts(line, lang);
 const relatedGuides = guidesForRoutes([line.key], lang);
 // 駅一覧に添える駅周辺データ（データのページがある指標の先頭1つ。統計を集めている都市の路線だけ）
 const dataPage = line.stops.some(s => s.station.stats.length > 0) ? getSeoModel().dataPages.find(d => d.indexable) : undefined;
@@ -69,8 +68,8 @@ const codeOf = (stationNameJa: string) => getStationNumber(line.key, stationName
 
 <SeoPageLayout
 	lang={lang}
-	title={t.lineTitle(name, line.stops.length)}
-	description={t.lineDescription(name, line.stops.length, first, last, transferCount)}
+	title={t.lineTitle(facts)}
+	description={t.lineDescription(facts)}
 	path={path}
 	langPaths={Object.fromEntries(SEO_LANGS.map(l => [l, linePath(line.slug, l)]))}
 	breadcrumbs={[
@@ -79,7 +78,7 @@ const codeOf = (stationNameJa: string) => getStationNumber(line.key, stationName
 		{ name: name, path },
 	]}
 	h1={t.lineH1(name)}
-	lede={t.lineLede(name, line.stops.length, first, last, transferCount)}
+	lede={t.lineLede(facts)}
 	indexable={line.indexable}
 	accent={line.color}
 >
