@@ -32,6 +32,18 @@ describe('getStationNumber', () => {
     expect(getStationNumber('nipporiToneriLiner', '見沼代親水公園')).toBe('NT13');
   });
 
+  it('公式資料に基づく江ノ電のEN01〜EN15を返す', () => {
+    expect(getStationNumber('enoshimaElectricRailway', '藤沢')).toBe('EN01');
+    expect(getStationNumber('enoshimaElectricRailway', '江ノ島')).toBe('EN06');
+    expect(getStationNumber('enoshimaElectricRailway', '鎌倉')).toBe('EN15');
+  });
+
+  it('東急世田谷線のSG01〜SG10を返す', () => {
+    expect(getStationNumber('tokyuSetagayaLine', '三軒茶屋')).toBe('SG01');
+    expect(getStationNumber('tokyuSetagayaLine', '世田谷')).toBe('SG05');
+    expect(getStationNumber('tokyuSetagayaLine', '下高井戸')).toBe('SG10');
+  });
+
   it('存在しない駅はundefinedを返す', () => {
     expect(getStationNumber('yamanote', '存在しない駅')).toBeUndefined();
   });
