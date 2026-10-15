@@ -31,10 +31,9 @@ import Checkbox from './ui/atoms/Checkbox';
 import FloatingIconButton from './ui/atoms/FloatingIconButton';
 import CollapsiblePanel from './ui/molecules/CollapsiblePanel';
 import SourceDisclosure from './ui/molecules/SourceDisclosure';
-import { anchoredPointLabel } from './ui/molecules/anchoredPointLabel';
-import { POINT_MARKER } from './ui/atoms/pointMarker';
-import { plainTextLabelStyle } from './ui/atoms/textBadge';
-import { collectTerrainStations, placeLabels, estimateLabelWidth } from '../utils/terrain3dStations';
+import { plainTextLabelStyle, textBadgeStyle } from './ui/atoms/textBadge';
+import { collectTerrainStations, stationOnVisibleRail, placeLabels, estimateLabelWidth } from '../utils/terrain3dStations';
+import { averageStationRouteColor } from '../utils/stationRouteColor';
 import { deviceClassOf } from '../constants/breakpoints';
 import { initialDisplayUrlOptions } from '../utils/mapDisplayUrlParam';
 import { captureTerrainCamera, restoreTerrainCamera, type TerrainCameraSnapshot } from '../utils/terrain3dCamera';
@@ -59,7 +58,10 @@ const OVERLAY_BOTTOM = aboveFloatingButtons(1);
  * 操作の感度。OrbitControls の既定（回転・移動・拡大とも 1）では速すぎて、
  * 少し指を動かしただけで大きく回ってしまったため下げている
  */
-const CONTROL_SPEED = { rotate: 0.45, pan: 0.6, zoom: 0.3, damping: 0.1 } as const;
+const CONTROL_SPEED = { rotate: 0.45, touchRotate: 0.62, pan: 0.6, touchPan: 0.85, zoom: 0.3, damping: 0.1 } as const;
+/** 地図上の駅位置を示す実寸に近い直径。Three.jsのワールド単位はkm。 */
+const STATION_DIAMETER_KM = 0.03;
+const STATION_SURFACE_OFFSET_KM = 0.006;
 /** 画面の縦横比（幅/高さ）がこれより小さいときは、カメラをその分だけ離す */
 const PORTRAIT_FIT_ASPECT = 1.2;
 /** 地面を分ける塊の大きさ（格子の数）。画面の外の塊は描かないので、関東全域を出しても軽い */
@@ -245,6 +247,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   const [groundError, setGroundError] = useState(false);
   const [showGround, setShowGround] = useState(() => initialDisplayUrlOptions().ground ?? true);
   const [showStations, setShowStations] = useState(true);
+  const [stationDisplayStyle, setStationDisplayStyle] = useState<'plain' | 'badge'>('badge');
   const [groundStyle, setGroundStyle] = useState<Terrain3DGroundStyle>(() => initialDisplayUrlOptions().groundStyle ?? loadTerrain3dGroundStyle());
   useEffect(() => { saveTerrain3dGroundStyle(groundStyle); }, [groundStyle]);
   // 説明と操作の箱。設定ボタン（toggleSlot）があるときは閉じて始める（地図を広く見せる）。
@@ -279,6 +282,8 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
   const lineSourceName = version === 'v1' ? v1?.meta.elevationSource.sourceName : null;
 
   const shown = useMemo(() => (lineRoutes ? selectTerrainRoutes({ routes: lineRoutes }, visibleRoutes) : []), [lineRoutes, visibleRoutes]);
+  // Display-only backdrop: no hit detection or interaction until a future feature.
+  const dimmedRoutes = useMemo(() => (lineRoutes ?? []).filter(r => !visibleRoutes.has(r.key)), [lineRoutes, visibleRoutes]);
   // 表示中の路線に立体のデータが無いときは、案内（データのある路線を表示）が見えるよう箱を開く
   const noShown = lineRoutes !== null && shown.length === 0;
   useEffect(() => { if (noShown) setPanelOpen(true); }, [noShown]);
@@ -326,6 +331,23 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
     controls.screenSpacePanning = false; // 移動は地面に沿って（画面の上下ではなく奥行き方向に動く）
     controls.rotateSpeed = CONTROL_SPEED.rotate;
     controls.panSpeed = CONTROL_SPEED.pan;
+    const activeTouchPointers = new Set<number>();
+    const syncPointerSensitivity = (event: PointerEvent) => {
+      if (event.pointerType !== 'touch') return;
+      if (event.type === 'pointerdown') activeTouchPointers.add(event.pointerId);
+      else activeTouchPointers.delete(event.pointerId);
+      controls.panSpeed = CONTROL_SPEED.touchPan;
+      controls.rotateSpeed = activeTouchPointers.size >= 2 ? CONTROL_SPEED.touchRotate : CONTROL_SPEED.rotate;
+    };
+    const resetPointerSensitivity = (event: PointerEvent) => {
+      if (event.pointerType !== 'touch') return;
+      activeTouchPointers.delete(event.pointerId);
+      controls.rotateSpeed = activeTouchPointers.size >= 2 ? CONTROL_SPEED.touchRotate : CONTROL_SPEED.rotate;
+      if (activeTouchPointers.size === 0) controls.panSpeed = CONTROL_SPEED.pan;
+    };
+    renderer.domElement.addEventListener('pointerdown', syncPointerSensitivity);
+    renderer.domElement.addEventListener('pointerup', resetPointerSensitivity);
+    renderer.domElement.addEventListener('pointercancel', resetPointerSensitivity);
     controls.zoomSpeed = CONTROL_SPEED.zoom;
     controls.dampingFactor = CONTROL_SPEED.damping;
     controls.target.set(0, 0, 0);
@@ -361,6 +383,30 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       const g = groundElevationAt(groundData, lat, lng);
       return g === null ? ele : Math.max(ele, g);
     };
+
+    // Inactive railway lines are a lightweight, non-interactive ghost layer.
+    // Draw first, behind selected routes; no station markers or raycast handlers.
+    for (const route of dimmedRoutes) {
+      const color = colorOf(route.key);
+      for (const path of route.paths) {
+        if (path.length < 2) continue;
+        const geometry = new LineGeometry();
+        geometry.setPositions(path.flatMap(([lat, lng, ele]) =>
+          toLocal(frame, lat, lng, lineElevation(lat, lng, ele), exaggeration)));
+        const material = new LineMaterial({
+          color, linewidth: lineWidth, worldUnits: false,
+          transparent: true, opacity: HIDDEN_LINE_OPACITY,
+          depthWrite: false, depthTest: false,
+        });
+        material.resolution.set(width, height);
+        lineMaterials.push(material);
+        const ghost = new Line2(geometry, material);
+        ghost.renderOrder = 0;
+        ghost.raycast = () => {};
+        scene.add(ghost);
+        disposables.push(geometry, material);
+      }
+    }
 
     for (const route of shown) {
       const color = colorOf(route.key);
@@ -426,17 +472,27 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       });
     }
 
-    // 出発駅・到着駅の印と名前
+    // 出発・到着の位置もワールド座標の球で表示。駅名だけ画面上のラベルにする。
     const markers: [typeof departure, string][] = [[departure, SEMANTIC.departure], [arrival, SEMANTIC.arrival]];
+    const endpointGeometry = new THREE.SphereGeometry(STATION_DIAMETER_KM / 2, 10, 8);
+    disposables.push(endpointGeometry);
     for (const [st, color] of markers) {
       if (!st) continue;
       const ele = elevationNear(shown, st.lat, st.lng);
-      if (ele === null) continue; // 表示中の線形から離れた駅は、高さが分からないので描かない
+      if (ele === null) continue;
       const pos = toLocal(frame, st.lat, st.lng, lineElevation(st.lat, st.lng, ele), exaggeration);
-      // 印と文字は画面上の固定寸法。範囲やカメラ距離で肥大化させない。
-      const label = anchoredPointLabel(translateStation(st.name, language), color, theme);
+      const material = new THREE.MeshBasicMaterial({ color, depthTest: false });
+      const sphere = new THREE.Mesh(endpointGeometry, material);
+      sphere.position.set(pos[0], pos[1] + STATION_SURFACE_OFFSET_KM, pos[2]);
+      sphere.renderOrder = 6;
+      scene.add(sphere);
+      disposables.push(material);
+      const label = document.createElement('span');
+      label.textContent = translateStation(st.name, language);
+      // Match 2D endpoint badges: semantic background and contrast-safe text.
+      Object.assign(label.style, textBadgeStyle(color, theme), { fontSize: stationLabelFontPx + 'px' });
       const obj = new CSS2DObject(label);
-      obj.position.set(...pos);
+      obj.position.copy(sphere.position);
       scene.add(obj);
     }
 
@@ -447,35 +503,36 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       const exclude = new Set([departure?.name, arrival?.name].filter((n): n is string => !!n));
       const stations = collectTerrainStations(shown.map(r => r.key), k => routes[k], exclude)
         .flatMap(st => {
-          const ele = groundData ? groundElevationAt(groundData, st.lat, st.lng) : elevationNear(shown, st.lat, st.lng);
-          if (ele === null) return []; // 高さが分からない駅は描かない
-          return [{ ...st, pos: new THREE.Vector3(...toLocal(frame, st.lat, st.lng, lineElevation(st.lat, st.lng, ele), exaggeration)) }];
+          // Station master coordinates are not necessarily on the actual OSM rail geometry.
+          // Match only this station's visible rail lines; don't draw a marker when there
+          // is no supported section nearby.
+          const rail = stationOnVisibleRail(st, shown);
+          if (!rail) return [];
+          const ele = lineElevation(rail.lat, rail.lng, rail.elevationM);
+          return [{ ...st, pos: new THREE.Vector3(...toLocal(frame, rail.lat, rail.lng, ele, exaggeration)) }];
         });
       if (stations.length > 0) {
-        // 点の見た目は出発・到着の印（POINT_MARKER）と同じ大きさ・縁取りで、塗りは地の色（地図の駅の白丸と同じ）
-        const tex = document.createElement('canvas');
-        tex.width = tex.height = 64;
-        const ctx = tex.getContext('2d');
-        if (ctx) {
-          const border = 64 * POINT_MARKER.borderWidthPx / POINT_MARKER.diameterPx;
-          ctx.beginPath();
-          ctx.arc(32, 32, 32 - border / 2, 0, Math.PI * 2);
-          ctx.fillStyle = colors.surface;
-          ctx.fill();
-          ctx.lineWidth = border;
-          ctx.strokeStyle = colors.textSecondary;
-          ctx.stroke();
-        }
-        const texture = new THREE.CanvasTexture(tex);
-        const geometry = new THREE.BufferGeometry().setFromPoints(stations.map(s => s.pos));
-        const material = new THREE.PointsMaterial({
-          size: POINT_MARKER.diameterPx * renderer.getPixelRatio(), sizeAttenuation: false,
-          map: texture, transparent: true, alphaTest: 0.5, depthTest: false,
+        // 実寸基準の駅マーカー。近づけば大きく、離れれば小さく見える。
+        // 乗換駅は接続する表示中の路線色を平均（色の優先順位に依存しない）。
+        const geometry = new THREE.SphereGeometry(STATION_DIAMETER_KM / 2, 8, 6);
+        const material = new THREE.MeshBasicMaterial({ depthTest: false });
+        const markers = new THREE.InstancedMesh(geometry, material, stations.length);
+        const transform = new THREE.Object3D();
+        // Determine the station's one canonical color; share it between
+        // the 3D marker and either station-name presentation.
+        const stationColors = stations.map(st => averageStationRouteColor(st.routeKeys, colorOf));
+        stations.forEach((st, i) => {
+          transform.position.copy(st.pos);
+          transform.position.y += STATION_SURFACE_OFFSET_KM;
+          transform.updateMatrix();
+          markers.setMatrixAt(i, transform.matrix);
+          markers.setColorAt(i, stationColors[i]);
         });
-        const points = new THREE.Points(geometry, material);
-        points.renderOrder = 5;
-        scene.add(points);
-        disposables.push(geometry, material, texture);
+        markers.instanceMatrix.needsUpdate = true;
+        if (markers.instanceColor) markers.instanceColor.needsUpdate = true;
+        markers.renderOrder = 5;
+        scene.add(markers);
+        disposables.push(geometry, material);
 
         // 駅名: 画面に投影して、重ならないものだけを出す（毎回 DOM を全部作らず、決まった数の箱を使い回す）
         stationLayer = document.createElement('div');
@@ -490,9 +547,12 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
           return el;
         });
         const names = stations.map(s => translateStation(s.name, language));
-        const widths = names.map(n => estimateLabelWidth(n, stationLabelFontPx));
-        const lineH = stationLabelFontPx * 1.2;
-        const above = POINT_MARKER.diameterPx / 2 + parseFloat(L.sp.xxs);
+        const badgePaddingX = parseFloat(L.sp.xs);
+        const badgePaddingY = parseFloat(L.sp.xxs);
+        const badgeMode = stationDisplayStyle === 'badge';
+        const widths = names.map(n => estimateLabelWidth(n, stationLabelFontPx) + (badgeMode ? 2 * badgePaddingX : 0));
+        const lineH = stationLabelFontPx * 1.2 + (badgeMode ? 2 * badgePaddingY : 0);
+        const above = parseFloat(L.sp.xs);
         const v = new THREE.Vector3();
         updateStationLabels = () => {
           const w = host.clientWidth, h = host.clientHeight;
@@ -509,6 +569,12 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
             if (pick === undefined) { el.style.display = 'none'; return; }
             const b = valid[pick];
             el.textContent = names[b.i];
+            const stationColor = '#' + stationColors[b.i].getHexString();
+            // Share the same route color and contrast-aware badge background
+            // calculation as the 2D station icons (filledLabelColors via textBadgeStyle).
+            Object.assign(el.style, badgeMode
+              ? { ...textBadgeStyle(stationColor, theme), fontSize: stationLabelFontPx + 'px' }
+              : { ...labelStyle, color: stationColor, backgroundColor: 'transparent' });
             el.style.transform = `translate(${Math.round(b.x)}px, ${Math.round(b.y)}px)`;
             el.style.display = 'block';
           });
@@ -556,6 +622,9 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       cameraSnapshotRef.current = captureTerrainCamera(camera, controls.target, cameraFrame);
       cancelAnimationFrame(raf);
       ro.disconnect();
+      renderer.domElement.removeEventListener('pointerdown', syncPointerSensitivity);
+      renderer.domElement.removeEventListener('pointerup', resetPointerSensitivity);
+      renderer.domElement.removeEventListener('pointercancel', resetPointerSensitivity);
       controls.dispose();
       disposables.forEach(d => d.dispose());
       renderer.dispose();
@@ -563,7 +632,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
       host.removeChild(labelRenderer.domElement);
       if (stationLayer) host.removeChild(stationLayer);
     };
-  }, [shown, exaggeration, theme, departure, arrival, colorOf, language, ground, showGround, groundStyle, lineWidth, showStations, stationLabelFontPx]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [shown, dimmedRoutes, exaggeration, theme, departure, arrival, colorOf, language, ground, showGround, groundStyle, lineWidth, showStations, stationLabelFontPx, stationDisplayStyle]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const overlayText: React.CSSProperties = { fontSize: FS.caption, color: colors.textSecondary, lineHeight: 1.5 };
 
@@ -655,6 +724,14 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
               <Checkbox theme={theme} size="sm" checked={showStations} onChange={setShowStations}>
                 {translateUI('terrain3dStationsLabel', language)}
               </Checkbox>
+              {showStations && <SegmentedControl
+                theme={theme} size="sm" ariaLabel={translateUI('terrain3dStationStyleLabel', language)}
+                value={stationDisplayStyle} onChange={setStationDisplayStyle}
+                options={[
+                  { value: 'plain', label: translateUI('terrain3dStationStylePlain', language) },
+                  { value: 'badge', label: translateUI('terrain3dStationStyleBadge', language) },
+                ]}
+              />}
               <div style={overlayText}>
                 {translateUI(groundError ? 'terrain3dGroundLoadError' : 'terrain3dGroundNote', language)}
               </div>

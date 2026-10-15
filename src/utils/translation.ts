@@ -1912,6 +1912,9 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "駅を表示",
     english: "Show stations"
   },
+  terrain3dStationStyleLabel: { japanese: "一般駅の表示", english: "Station label style" },
+  terrain3dStationStylePlain: { japanese: "シンプル", english: "Plain" },
+  terrain3dStationStyleBadge: { japanese: "出発駅風", english: "Badge" },
   terrain3dGroundLabel: {
     japanese: "地面を表示",
     english: "Show ground"
@@ -2031,6 +2034,9 @@ export type Language = 'japanese' | 'english' | 'chinese' | 'korean';
 
 // 中国語（簡体字）UI翻訳
 export const uiChinese: Record<string, string> = {
+  terrain3dStationStyleLabel: "普通车站的显示方式",
+  terrain3dStationStylePlain: "简洁",
+  terrain3dStationStyleBadge: "出发站样式",
   clearSelection: "清除选择",
   decrease: "缩小",
   play: "播放",
@@ -2395,6 +2401,9 @@ export const uiChinese: Record<string, string> = {
 
 // 韓国語UI翻訳
 export const uiKorean: Record<string, string> = {
+  terrain3dStationStyleLabel: "일반역 표시 방식",
+  terrain3dStationStylePlain: "간단히",
+  terrain3dStationStyleBadge: "출발역 스타일",
   clearSelection: "선택 해제",
   decrease: "작게",
   play: "재생",

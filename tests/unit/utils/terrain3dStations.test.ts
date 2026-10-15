@@ -2,7 +2,7 @@
  * 立体表示の駅（点と駅名）を集める・駅名を重ならないように選ぶ計算のテスト。
  */
 import { describe, it, expect } from 'vitest';
-import { collectTerrainStations, placeLabels, estimateLabelWidth, SAME_STATION_KM } from '../../../src/utils/terrain3dStations';
+import { collectTerrainStations, stationOnVisibleRail, placeLabels, estimateLabelWidth, SAME_STATION_KM } from '../../../src/utils/terrain3dStations';
 import { routes, type RouteKey } from '../../../src/data/routes';
 
 describe('立体表示の駅を集める', () => {
@@ -31,6 +31,25 @@ describe('立体表示の駅を集める', () => {
   it('同じ路線に同じ駅が2回あっても1路線として数える', () => {
     const out = collectTerrainStations(['yamanote'] as RouteKey[], k => routes[k]);
     expect(Math.max(...out.map(s => s.routeCount))).toBe(1);
+  });
+});
+
+describe('3D駅マーカーの線路位置検証', () => {
+  const rail = [{
+    key: 'yamanote' as RouteKey, osmRelId: 1, osmName: 'sample',
+    paths: [[[35.0, 139.0, 0], [35.0, 139.02, 0]] as [number, number, number][]],
+  }];
+
+  it('駅を対応路線上へスナップして駅以外の点を作らない', () => {
+    const hit = stationOnVisibleRail({ lat: 35.0001, lng: 139.01, routeKeys: ['yamanote'] as RouteKey[] }, rail);
+    expect(hit?.lat).toBeCloseTo(35);
+    expect(hit?.lng).toBeCloseTo(139.01);
+  });
+  it('線路から離れた駅は描かない', () => {
+    expect(stationOnVisibleRail({ lat: 35.1, lng: 139.01, routeKeys: ['yamanote'] as RouteKey[] }, rail)).toBeNull();
+  });
+  it('別路線の線路にはスナップしない', () => {
+    expect(stationOnVisibleRail({ lat: 35, lng: 139.01, routeKeys: ['chuo'] as RouteKey[] }, rail)).toBeNull();
   });
 });
 

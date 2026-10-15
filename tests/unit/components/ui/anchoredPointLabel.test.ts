@@ -49,9 +49,26 @@ describe('投影した点の小さな印とラベル', () => {
     expect(meetsContrast(colors.background, colors.text)).toBe(true);
   });
 
+  it('3Dの駅名背景も2Dと共通の路線色コントラスト規則を使う', () => {
+    const source = readFileSync(join(process.cwd(), 'src/components/Terrain3DView.tsx'), 'utf8');
+    expect(source).toContain('textBadgeStyle(stationColor, theme)');
+    expect(source).not.toContain('textBadgeStyle(colors.surface, theme)');
+    for (const theme of ['light', 'dark'] as const) {
+      const style = textBadgeStyle(SEMANTIC.departure, theme);
+      const palette = filledLabelColors(SEMANTIC.departure, theme);
+      expect(style.backgroundColor).toBe(palette.background);
+      expect(style.color).toBe(palette.text);
+    }
+  });
+
   it('立体表示は共通部品だけを使い、巨大な球と独自の駅名styleを復活させない', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/Terrain3DView.tsx'), 'utf8');
-    expect(source).toContain('anchoredPointLabel(translateStation(st.name, language), color, theme)');
-    expect(source).not.toMatch(/SphereGeometry|MARKER_RATIO|Object\.assign\(label\.style/);
+    // The new station icons are intentionally world-sized meshes instead of 6px CSS points.
+    // Shared marker geometry and label styles must remain centralized.
+    expect(source).toContain('STATION_DIAMETER_KM');
+    expect(source).toContain('THREE.InstancedMesh');
+    expect(source).toContain('textBadgeStyle(');
+    expect(source).toContain('plainTextLabelStyle(');
+    expect(source).not.toContain('MARKER_RATIO');
   });
 });
