@@ -58,7 +58,7 @@ const OVERLAY_BOTTOM = aboveFloatingButtons(1);
  * 操作の感度。OrbitControls の既定（回転・移動・拡大とも 1）では速すぎて、
  * 少し指を動かしただけで大きく回ってしまったため下げている
  */
-const CONTROL_SPEED = { rotate: 0.45, touchRotate: 0.62, pan: 0.6, touchPan: 0.85, zoom: 0.3, damping: 0.1 } as const;
+const CONTROL_SPEED = { rotate: 0.45, touchRotate: 0.62, pan: 0.6, touchPan: 1.0, zoom: 0.4, damping: 0.1 } as const;
 /** 地図上の駅位置を示す実寸に近い直径。Three.jsのワールド単位はkm。 */
 const STATION_DIAMETER_KM = 0.03;
 const STATION_SURFACE_OFFSET_KM = 0.006;
