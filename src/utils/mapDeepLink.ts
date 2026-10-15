@@ -2,7 +2,8 @@
  * 地図アプリ（/）を特定の状態で開くURLを組み立てる。
  *
  * 地図側が読むURLパラメータ（routes: routeUrlCodes.ts, from: stationUrlParams.ts,
- * metric: heatmapUrlParam.ts, center/zoom: mapViewUrlParam.ts, embed: embedMode.ts）と
+ * metric: heatmapUrlParam.ts, center/zoom: mapViewUrlParam.ts, embed: embedMode.ts,
+ * numbers/view: mapDisplayUrlParam.ts）と
  * 同じ定数・同じ変換を使う。ガイドのCTA・駅/路線/データのページから地図へ
  * 飛ぶリンクは、すべてここで作る（パラメータ名を各所に書かない）。
  */
@@ -12,6 +13,7 @@ import { ARRIVAL_PARAM, DEPARTURE_PARAM, encodeStationParam } from './stationUrl
 import { HEATMAP_METRIC_PARAM, isUrlHeatmapMetric } from './heatmapUrlParam';
 import { MAP_CENTER_PARAM, MAP_ZOOM_PARAM, TRAVEL_TIMES_PARAM } from './mapViewUrlParam';
 import { EMBED_PARAM } from './embedMode';
+import { STATION_NUMBERS_PARAM, VIEW_PARAM } from './mapDisplayUrlParam';
 import type { StationStats } from '../data/stationStats';
 
 export interface MapLinkOptions {
@@ -28,13 +30,19 @@ export interface MapLinkOptions {
   zoom?: number;
   /** 駅間の所要時間を開いたときから出す */
   travelTimes?: boolean;
+  /** 駅名の前に駅番号を出す（日本語の地図は既定で出さない） */
+  stationNumbers?: boolean;
+  /** 立体（3D）の表示で開く */
+  view3d?: boolean;
   /** 地図の表示言語。日本語は既定なので付けない */
   lang?: 'ja' | 'en' | 'zh' | 'ko';
   /** 記事などに iframe で埋め込む表示（embedMode.ts） */
   embed?: boolean;
 }
 
-export function buildMapHref({ routes, from, to, metric, center, zoom, travelTimes = false, lang = 'ja', embed = false }: MapLinkOptions): string {
+export function buildMapHref({
+  routes, from, to, metric, center, zoom, travelTimes = false, stationNumbers = false, view3d = false, lang = 'ja', embed = false,
+}: MapLinkOptions): string {
   const params = new URLSearchParams();
   if (from) {
     const code = encodeStationParam(from);
@@ -54,6 +62,8 @@ export function buildMapHref({ routes, from, to, metric, center, zoom, travelTim
     if (zoom !== undefined) params.set(MAP_ZOOM_PARAM, String(zoom));
   }
   if (travelTimes) params.set(TRAVEL_TIMES_PARAM, '1');
+  if (stationNumbers) params.set(STATION_NUMBERS_PARAM, '1');
+  if (view3d) params.set(VIEW_PARAM, 'terrain3d');
   // 日本語は既定なので付けない。ただし埋め込みは閲覧者のブラウザの言語で開かないよう、記事の言語を必ず付ける
   if (lang !== 'ja' || embed) params.set('lang', lang);
   if (embed) params.set(EMBED_PARAM, '1');
