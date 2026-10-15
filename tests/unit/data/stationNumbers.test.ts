@@ -2,10 +2,24 @@ import { describe, it, expect } from 'vitest';
 import { getStationNumber, getAnyStationNumber } from '../../../src/data/stationNumbers';
 
 describe('getStationNumber', () => {
-  it('山手線の駅番号を正しく返す', () => {
-    expect(getStationNumber('yamanote', '渋谷')).toBe('JY05');
-    expect(getStationNumber('yamanote', '新宿')).toBe('JY08');
-    expect(getStationNumber('yamanote', '東京')).toBe('JY24');
+  it('山手線の駅番号を正しく返す（東京 JY01 から内回りの向き。2026-10-15 まで大崎起点の逆向きで誤っていた）', () => {
+    expect(getStationNumber('yamanote', '東京')).toBe('JY01');
+    expect(getStationNumber('yamanote', '上野')).toBe('JY05');
+    expect(getStationNumber('yamanote', '新宿')).toBe('JY17');
+    expect(getStationNumber('yamanote', '渋谷')).toBe('JY20');
+    expect(getStationNumber('yamanote', '大崎')).toBe('JY24');
+    expect(getStationNumber('yamanote', '品川')).toBe('JY25');
+    expect(getStationNumber('yamanote', '有楽町')).toBe('JY30');
+  });
+
+  it('山手線は全30駅に番号があり、路線の駅の並び（環状）と番号の並びが1つずつ続いている', async () => {
+    const { routes } = await import('../../../src/data/routes');
+    const nums = routes.yamanote.map(s => Number(getStationNumber('yamanote', s.name)?.slice(2)));
+    expect(nums.every(n => n >= 1 && n <= 30)).toBe(true);
+    expect(new Set(nums).size).toBe(30);
+    // 隣の駅との差は ±1（30 と 1 の間は環状でつながる）
+    const steps = nums.slice(1).map((n, i) => (n - nums[i] + 30) % 30);
+    expect(new Set(steps.filter(d => d !== 0)).size).toBe(1);
   });
 
   it('新京成線のくぬぎ山を返す（今回追加）', () => {
