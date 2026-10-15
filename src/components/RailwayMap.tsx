@@ -60,7 +60,7 @@ import {
   type Departure,
 } from '../data/timetableData';
 import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, alphaWhite, alphaBlack } from '../constants/ui';
-import { trackStationSelect, trackRouteSearch } from '../utils/appAnalytics';
+import { trackStationSelect, trackRouteSearch, trackViewSwitch } from '../utils/appAnalytics';
 import { DEFAULT_MAP_CENTER } from '../constants/mapDefaults';
 import type { MapViewMode } from '../constants/mapViewMode';
 import { initialDisplayUrlOptions } from '../utils/mapDisplayUrlParam';
@@ -396,6 +396,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [tapToggleMode, setTapToggleMode] = useState(true);
   // 地図表示モード
   const [mapViewMode, setMapViewMode] = useState<MapViewMode>(() => initialDisplayUrlOptions().view ?? 'realistic');
+  /** 利用者が表示方式を切り替えたとき（設定パネル）。GA4 に送るのはここだけ（URL・保存した設定での復元は数えない） */
+  const changeMapViewMode = (next: MapViewMode) => {
+    trackViewSwitch(next, mapViewMode);
+    setMapViewMode(next);
+  };
   /**
    * 立体表示の設定を開くボタンを置く場所（DOM の箱）。立体表示は自分の状態を持ったまま、
    * ボタンだけをここに出す（スマホ全画面では「表示切替」の右、それ以外は隅のボタンの列の右端）
@@ -6177,7 +6182,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     showEstimatedData={showEstimatedData}
                     onShowEstimatedDataChange={handleShowEstimatedDataChange}
                     mapViewMode={mapViewMode}
-                    onMapViewModeChange={setMapViewMode}
+                    onMapViewModeChange={changeMapViewMode}
                     bubbleShape={bubbleShape}
                     onBubbleShapeChange={setBubbleShape}
                     bubbleMaxRadiusM={bubbleMaxRadiusM}
@@ -6238,7 +6243,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     theme={theme}
                     language={currentLanguage}
                     trainTypeViewEnabled={trainTypeViewEnabled}
-                    onMapViewModeChange={setMapViewMode}
+                    onMapViewModeChange={changeMapViewMode}
                   />
 
                   {/* 4. 推薦ルート選択 (Route Recommendations) */}
@@ -6467,7 +6472,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         showEstimatedData={showEstimatedData}
                         onShowEstimatedDataChange={handleShowEstimatedDataChange}
                         mapViewMode={mapViewMode}
-                        onMapViewModeChange={setMapViewMode}
+                        onMapViewModeChange={changeMapViewMode}
                         bubbleShape={bubbleShape}
                         onBubbleShapeChange={setBubbleShape}
                         bubbleMaxRadiusM={bubbleMaxRadiusM}
