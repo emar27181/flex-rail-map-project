@@ -13,8 +13,25 @@ import type { TouristSpot } from '../data/touristSpots';
 import { translateStatParamLabel, translateStatUnit, type Language } from '../utils/translation';
 import { SITE_NAME } from '../config/seo';
 
+/**
+ * 路線ページの title・description・冒頭の文に入れる事実（すべて路線データ・観光地データから。推測で足さない）。
+ * - through: 直通運転している路線の名前（直通運転の登録がある路線だけ）
+ * - spots: 路線上の駅が最寄り駅になっている観光地（touristSpots.ts にあるものだけ）
+ */
+export interface LineFacts {
+  name: string;
+  n: number;
+  from: string;
+  to: string;
+  transfers: number;
+  through: string[];
+  spots: Array<{ spot: string; station: string }>;
+}
+
 const LOCALE: Record<SeoLang, string> = { ja: 'ja-JP', en: 'en-US', zh: 'zh-CN', ko: 'ko-KR' };
 const fmt = (n: number, lang: SeoLang) => n.toLocaleString(LOCALE[lang]);
+/** 英語の並列（"A", "A and B", "A, B and C"） */
+const andList = (xs: string[]) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
 
 /** 言語の切り替えリンクに出す名前（その言語自身での表記） */
 export const LANG_LABEL: Record<SeoLang, string> = { ja: '日本語', en: 'English', zh: '简体中文', ko: '한국어' };
@@ -128,12 +145,18 @@ export const SEO_TEXT = {
     linesHubH1: '路線の一覧',
     linesHubLede: (n: number) => `東京・横浜・大阪・京都・札幌などの主要${n}路線の駅一覧・乗換駅・直通運転を、都市ごとにまとめています。`,
 
-    lineTitle: (name: string, n: number) => `${name}の駅一覧（${n}駅）・乗換駅・直通運転 | ${SITE_NAME}`,
-    lineDescription: (name: string, n: number, from: string, to: string, transfers: number) =>
-      `${name}（${from}〜${to}）の全${n}駅を順に一覧。乗り換えできる駅${transfers}駅と、直通運転している路線をまとめています。`,
-    lineH1: (name: string) => `${name}の駅一覧`,
-    lineLede: (name: string, n: number, from: string, to: string, transfers: number) =>
-      `${name}は${from}から${to}までの${n}駅です。そのうち${transfers}駅で他の路線に乗り換えられます。`,
+    // 検索する人が探すのは「路線図」（ページの冒頭にも実際の地図がある）。路線の両端・駅数・観光地の最寄り駅で見分けられるようにする
+    lineTitle: (f: LineFacts) =>
+      `${f.name}の路線図・駅一覧（${f.from}〜${f.to}・${f.n}駅）${f.spots[0] ? `｜${f.spots[0].spot}は${f.spots[0].station}駅` : ''} | ${SITE_NAME}`,
+    lineDescription: (f: LineFacts) =>
+      `${f.name}（${f.from}〜${f.to}）の全${f.n}駅を、拡大・移動できる路線図と一覧で確認できます。乗り換えできる駅は${f.transfers}駅。` +
+      `${f.through.length > 0 ? `${f.through.slice(0, 2).join('・')}${f.through.length > 2 ? 'など' : ''}と直通運転しています。` : ''}` +
+      `${f.spots.length > 0 ? `観光地の最寄り駅: ${f.spots.slice(0, 2).map(x => `${x.spot}（${x.station}駅）`).join('・')}。` : ''}`,
+    lineH1: (name: string) => `${name}の路線図と駅一覧`,
+    lineLede: (f: LineFacts) =>
+      `${f.name}は${f.from}から${f.to}までの${f.n}駅です。そのうち${f.transfers}駅で他の路線に乗り換えられます。` +
+      `${f.through.length > 0 ? `${f.through.join('・')}と直通運転しています。` : ''}` +
+      `${f.spots.length > 0 ? `${f.spots.map(x => `${x.spot}の最寄り駅は${x.station}駅`).join('、')}です。` : ''}`,
     stationList: '駅一覧',
     colNo: '順', colStation: '駅', colTransfers: '乗り換え',
     section: (from: string, to: string) => `${from}〜${to}`,
@@ -217,12 +240,17 @@ export const SEO_TEXT = {
     linesHubH1: 'Lines',
     linesHubLede: (n: number) => `Station lists, transfer stations and through services for ${n} major lines in Tokyo, Yokohama, Osaka, Kyoto, Sapporo and other cities, grouped by city.`,
 
-    lineTitle: (name: string, n: number) => `${name}: All ${n} Stations, Transfers and Through Services | ${SITE_NAME}`,
-    lineDescription: (name: string, n: number, from: string, to: string, transfers: number) =>
-      `All ${n} stations of the ${name} (${from} to ${to}) in order, ${transfers} transfer stations, and lines it runs through to.`,
-    lineH1: (name: string) => `${name} Stations`,
-    lineLede: (name: string, n: number, from: string, to: string, transfers: number) =>
-      `The ${name} has ${n} stations from ${from} to ${to}. You can transfer to other lines at ${transfers} of them.`,
+    lineTitle: (f: LineFacts) =>
+      `${f.name} Map: ${f.n} Stations from ${f.from} to ${f.to}${f.spots[0] ? ` (${f.spots[0].station} for ${f.spots[0].spot})` : ''} | ${SITE_NAME}`,
+    lineDescription: (f: LineFacts) =>
+      `See all ${f.n} stations of the ${f.name} (${f.from} to ${f.to}) on a map you can zoom and pan, and in a list with ${f.transfers} transfer stations.` +
+      `${f.through.length > 0 ? ` Through trains continue onto the ${f.through.length > 2 ? `${f.through.slice(0, 2).join(', ')} and other lines` : andList(f.through)}.` : ''}` +
+      `${f.spots.length > 0 ? ` Nearest stations: ${f.spots.slice(0, 2).map(x => `${x.station} for ${x.spot}`).join(', ')}.` : ''}`,
+    lineH1: (name: string) => `${name} Map and Stations`,
+    lineLede: (f: LineFacts) =>
+      `The ${f.name} has ${f.n} stations from ${f.from} to ${f.to}. You can transfer to other lines at ${f.transfers} of them.` +
+      `${f.through.length > 0 ? ` Through trains continue onto the ${andList(f.through)}.` : ''}` +
+      `${f.spots.length > 0 ? ` ${f.spots.map(x => `${x.station} is the nearest station to ${x.spot}`).join('; ')}.` : ''}`,
     stationList: 'Stations',
     colNo: 'No.', colStation: 'Station', colTransfers: 'Transfers',
     section: (from: string, to: string) => `${from} - ${to}`,
@@ -307,12 +335,14 @@ export const SEO_TEXT = {
     linesHubH1: '线路一览',
     linesHubLede: (n: number) => `按城市整理东京、横滨、大阪、京都、札幌等地${n}条主要线路的车站一览、换乘站和直通运行。`,
 
-    lineTitle: (name: string, n: number) => `${name}全${n}站一览・换乘站・直通运行 | ${SITE_NAME}`,
-    lineDescription: (name: string, n: number, from: string, to: string, transfers: number) =>
-      `按顺序列出${name}（${from}～${to}）的全部${n}个车站，以及${transfers}个换乘站和直通运行的线路。`,
-    lineH1: (name: string) => `${name}车站一览`,
-    lineLede: (name: string, n: number, from: string, to: string, transfers: number) =>
-      `${name}从${from}到${to}共有${n}个车站，其中${transfers}个车站可以换乘其他线路。`,
+    lineTitle: (f: LineFacts) => `${f.name}线路图与全${f.n}站一览（${f.from}～${f.to}）| ${SITE_NAME}`,
+    lineDescription: (f: LineFacts) =>
+      `用可缩放、可移动的线路图和列表查看${f.name}（${f.from}～${f.to}）的全部${f.n}个车站，其中${f.transfers}个车站可以换乘。` +
+      `${f.through.length > 0 ? `与${f.through.slice(0, 2).join('、')}${f.through.length > 2 ? '等' : ''}直通运行。` : ''}`,
+    lineH1: (name: string) => `${name}线路图与车站一览`,
+    lineLede: (f: LineFacts) =>
+      `${f.name}从${f.from}到${f.to}共有${f.n}个车站，其中${f.transfers}个车站可以换乘其他线路。` +
+      `${f.through.length > 0 ? `与${f.through.join('、')}直通运行。` : ''}`,
     stationList: '车站一览',
     colNo: '序号', colStation: '车站', colTransfers: '换乘',
     section: (from: string, to: string) => `${from}～${to}`,
@@ -397,12 +427,14 @@ export const SEO_TEXT = {
     linesHubH1: '노선 목록',
     linesHubLede: (n: number) => `도쿄, 요코하마, 오사카, 교토, 삿포로 등 주요 노선 ${n}개의 역 목록, 환승역, 직통 운행을 도시별로 정리했습니다.`,
 
-    lineTitle: (name: string, n: number) => `${name} 전체 ${n}개 역・환승역・직통 운행 | ${SITE_NAME}`,
-    lineDescription: (name: string, n: number, from: string, to: string, transfers: number) =>
-      `${name}(${from}~${to})의 전체 ${n}개 역을 순서대로 정리하고, 환승할 수 있는 역 ${transfers}곳과 직통 운행 노선을 소개합니다.`,
-    lineH1: (name: string) => `${name} 역 목록`,
-    lineLede: (name: string, n: number, from: string, to: string, transfers: number) =>
-      `${name}: ${from}부터 ${to}까지 ${n}개 역이 있으며, 그중 ${transfers}개 역에서 다른 노선으로 환승할 수 있습니다.`,
+    lineTitle: (f: LineFacts) => `${f.name} 노선도・전체 ${f.n}개 역 (${f.from}~${f.to}) | ${SITE_NAME}`,
+    lineDescription: (f: LineFacts) =>
+      `${f.name}(${f.from}~${f.to})의 전체 ${f.n}개 역을 확대・이동할 수 있는 노선도와 목록으로 확인할 수 있습니다. 환승할 수 있는 역은 ${f.transfers}곳입니다.` +
+      `${f.through.length > 0 ? ` 직통 운행 노선: ${f.through.slice(0, 2).join(', ')}${f.through.length > 2 ? ' 등' : ''}.` : ''}`,
+    lineH1: (name: string) => `${name} 노선도와 역 목록`,
+    lineLede: (f: LineFacts) =>
+      `${f.name}: ${f.from}부터 ${f.to}까지 ${f.n}개 역이 있으며, 그중 ${f.transfers}개 역에서 다른 노선으로 환승할 수 있습니다.` +
+      `${f.through.length > 0 ? ` 직통 운행 노선: ${f.through.join(', ')}.` : ''}`,
     stationList: '역 목록',
     colNo: '순서', colStation: '역', colTransfers: '환승',
     section: (from: string, to: string) => `${from}~${to}`,

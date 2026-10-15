@@ -15,6 +15,7 @@ import GA4Loader from '../GA4Loader.astro';
 import { canonicalUrl, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION, OG_LOCALE, SITE_NAME, type HreflangLink } from '../../config/seo';
 import FaviconLinks from './FaviconLinks.astro';
 import { CONTROL_CSS } from '../ui/atoms/controlCss';
+import { existingMapPreview, MAP_PREVIEW } from '../../seo/mapPreview';
 
 export interface Props {
   title: string;
@@ -37,6 +38,9 @@ const {
   robots = 'index, follow', hreflang = [], ogType = 'website', keywords, jsonLd = [], styles = [],
 } = Astro.props;
 const canonical = canonicalUrl(path);
+// ページ冒頭の地図の実際の画面（src/seo/mapPreview.ts）。無いページはアプリのアイコン
+const preview = existingMapPreview(path);
+const ogImage = preview ? canonicalUrl(preview) : DEFAULT_OG_IMAGE;
 ---
 
 <meta charset="utf-8" />
@@ -59,11 +63,15 @@ const canonical = canonicalUrl(path);
 <meta property="og:url" content={canonical} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
-<meta property="og:image" content={DEFAULT_OG_IMAGE} />
+<meta property="og:image" content={ogImage} />
+{preview && <meta property="og:image:width" content={String(MAP_PREVIEW.width)} />}
+{preview && <meta property="og:image:height" content={String(MAP_PREVIEW.height)} />}
+{preview && <meta property="og:image:alt" content={title} />}
 <meta property="og:locale" content={OG_LOCALE[lang]} />
 <meta property="og:site_name" content={SITE_NAME} />
-<meta name="twitter:card" content="summary" />
+<meta name="twitter:card" content={preview ? 'summary_large_image' : 'summary'} />
 <meta name="twitter:title" content={title} />
+{preview && <meta name="twitter:image" content={ogImage} />}
 <meta name="twitter:description" content={description} />
 
 {jsonLd.map(j => <script type="application/ld+json" set:html={JSON.stringify(j)} />)}

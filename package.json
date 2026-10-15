@@ -18,6 +18,7 @@
     "test:ci": "npm run test:types && npm run test:design && npm run test:unit",
     "test:e2e": "playwright test",
     "test:render": "playwright test -c playwright.render.config.ts",
+    "og:capture": "npx --yes tsx scripts/capture-map-previews.mts",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:prod": "TEST_URL=https://flex-railway-map.netlify.app playwright test",
     "deploy:preview": "npm run test:ci && netlify deploy --alias preview",
