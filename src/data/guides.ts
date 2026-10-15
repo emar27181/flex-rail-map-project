@@ -959,10 +959,11 @@ export const guides: GuideDefinition[] = [
     slug: 'sapporo-train-map',
     city: 'hokkaido',
     lang: 'ja',
-    breadcrumbLabel: '札幌の路線図をシンプルに見る',
-    title: '札幌の地下鉄・路線図をシンプルに見る方法（大通・すすきの・新千歳空港）| {siteName}',
-    description: '札幌の地下鉄は南北線・東西線・東豊線の3路線で、3路線とも大通駅で乗り換えられます。新千歳空港・小樽へのJRも含め、必要な路線だけの路線図を{siteName}で開けます。',
-    h1: '札幌の路線図をシンプルに見る',
+    breadcrumbLabel: '札幌の地下鉄・JR路線図',
+    // 検索されるのは「札幌 地下鉄 路線図」。答え（3路線・大通で乗り換え・空港へは千歳線）を title に出す（2026-10-15）
+    title: '札幌の地下鉄路線図｜南北線・東西線・東豊線は大通で乗り換え、新千歳空港へはJR千歳線 | {siteName}',
+    description: '札幌の地下鉄は南北線・東西線・東豊線の3路線で、3路線とも大通駅で乗り換えられます。新千歳空港へはJR千歳線、小樽へはJR函館本線。この路線だけを表示した路線図を、その場で拡大・移動して確かめられます。',
+    h1: '札幌の地下鉄・JR路線図',
     searchIntentAnswer:
       '札幌の地下鉄は南北線・東西線・東豊線の3路線で、3路線とも大通駅で乗り換えられます。まず大通を中心に3路線の向きをつかみ、新千歳空港や小樽へ向かうときはJRの路線を足すと、全体が分かりやすくなります。',
     sections: [
@@ -994,6 +995,8 @@ export const guides: GuideDefinition[] = [
     related: [
       { href: '/lines/sapporo-subway-namboku-line', label: '札幌市営地下鉄南北線の駅一覧' },
       { href: '/lines/sapporo-subway-tozai-line', label: '札幌市営地下鉄東西線の駅一覧' },
+      { href: '/lines/sapporo-subway-toho-line', label: '札幌市営地下鉄東豊線の駅一覧' },
+      { href: '/lines/sapporo-streetcar', label: '札幌市電の駅一覧' },
       { href: '/lines/jr-chitose-line', label: 'JR千歳線の駅一覧' },
       { href: '/stations/odori', label: '大通駅の路線・乗り換え' },
       { href: '/stations/new-chitose-airport', label: '新千歳空港駅' },
@@ -1015,10 +1018,10 @@ export const guides: GuideDefinition[] = [
     slug: 'sapporo-train-map',
     city: 'hokkaido',
     lang: 'en',
-    breadcrumbLabel: 'A Simple Sapporo Train Map',
-    title: 'Sapporo Subway and Train Map Made Simple (Odori, Susukino, New Chitose Airport) | {siteName}',
-    description: "Sapporo's subway has three lines, the Namboku, Tozai and Toho Lines, and all three meet at Odori. Open a map with only the lines you need, including JR to New Chitose Airport and Otaru.",
-    h1: 'A Simple Sapporo Train Map',
+    breadcrumbLabel: 'Sapporo Subway and Train Map',
+    title: 'Sapporo Subway Map: Namboku, Tozai and Toho Lines, Odori Transfers and JR to New Chitose Airport | {siteName}',
+    description: "Sapporo's subway has three lines, the Namboku, Tozai and Toho Lines, and all three meet at Odori. The JR Chitose Line runs to New Chitose Airport and the JR Hakodate Main Line to Otaru. Zoom and pan a map showing only these lines.",
+    h1: 'Sapporo Subway and Train Map',
     searchIntentAnswer:
       "Sapporo's subway has three lines, the Namboku, Tozai and Toho Lines, and you can change between all three at Odori Station. Start by getting the direction of the three lines around Odori, then add the JR lines when you head to New Chitose Airport or Otaru.",
     sections: [
@@ -1050,6 +1053,8 @@ export const guides: GuideDefinition[] = [
     related: [
       { href: '/en/lines/sapporo-subway-namboku-line', label: 'Sapporo Subway Namboku Line: all stations' },
       { href: '/en/lines/sapporo-subway-tozai-line', label: 'Sapporo Subway Tozai Line: all stations' },
+      { href: '/en/lines/sapporo-subway-toho-line', label: 'Sapporo Subway Toho Line: all stations' },
+      { href: '/en/lines/sapporo-streetcar', label: 'Sapporo Streetcar: all stops' },
       { href: '/en/lines/jr-chitose-line', label: 'JR Chitose Line: all stations' },
       { href: '/en/stations/odori', label: 'Odori Station: lines and transfers' },
       { href: '/en/stations/new-chitose-airport', label: 'New Chitose Airport Station' },

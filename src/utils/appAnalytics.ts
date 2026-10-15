@@ -15,6 +15,8 @@ export const APP_EVENTS = {
   arrivalSelect: 'map_arrival_select',
   /** 出発駅と到着駅がそろい、経路候補を出した */
   routeSearch: 'map_route_search',
+  /** 表示方式（実際の地図・路線図風・バブル・立体）を手で切り替えた。URL や保存した設定で開いたときは送らない */
+  viewSwitch: 'map_view_switch',
 } as const;
 
 /** GA4 のパラメータ値の上限（文字数） */
@@ -54,4 +56,10 @@ export function routeSearchParams(from: string, to: string, results: RouteSearch
 
 export function trackRouteSearch(from: string, to: string, results: RouteSearchSummary[], waypoints: number): void {
   trackEvent(APP_EVENTS.routeSearch, routeSearchParams(from, to, results, waypoints));
+}
+
+/** 表示方式の切り替えを送る（view: 切り替え先, from_view: 切り替え前）。値は MapViewMode の名前だけで、個人の情報は含まない */
+export function trackViewSwitch(view: string, fromView: string): void {
+  if (view === fromView) return;
+  trackEvent(APP_EVENTS.viewSwitch, { view: clip(view), from_view: clip(fromView) });
 }
