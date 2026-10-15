@@ -6,7 +6,11 @@
  * - 値だけを書く（計算で組み立てない）。サービス名は {siteName} と書く
  * - 4言語でブロックの並び（種類）を同じにする（テストで確認）
  * - 駅名・路線名の英中韓は translation.ts の訳に合わせる。訳が無い名前は出さない書き方にする
- * - 数字は、このサイトのデータか出典のある公開情報だけ。時点を書く
+ * - 数字は、このサイトのデータか出典のある公開情報だけ。時点を書く。事実を書いたら sources に出典を書く
+ * - 駅番号・駅名・路線名は手で書かず差し込む: {stationNumber:路線キー:駅名} {station:路線キー:駅名} {line:路線キー}
+ *   （src/utils/articleFacts.ts。データに無い駅・番号はビルドが止まる。タイトル・説明では使わない）
+ * - 「〇〇」が残っているとテストが落ちる（書き忘れのまま公開しない）
+ * - ひな形は npm run article:new -- --slug {slug} で作れる（4言語ぶん・index.ts への追加まで）
  */
 import type { ArticleSource } from './types';
 
@@ -18,11 +22,19 @@ export const exampleArticle: ArticleSource = {
   related: ['tokyo-train-map-beginner', 'flex-rail-map-introduction', 'tokyo-sightseeing-routes'],
   // 日本語の検索語（カンマ区切り）
   keywordsJa: '検索語1, 検索語2, 検索語3',
+  // 出典（記事に書いた事実の確かめ先）。駅番号・導入時期・料金などを書いたら必須。記事の最後に一覧で出る
+  sources: [
+    { title: '〇〇（資料の題名）', url: 'https://example.com/', publisher: '〇〇（鉄道会社など）', checkedAt: '2026-10-01' },
+  ],
+  // この記事で扱う路線・駅（記事の最後に路線・駅のページへのリンクを出す）。駅は必ず路線と組で書く
+  relatedRoutes: ['yamanote'],
+  relatedStations: [{ name: '渋谷', route: 'yamanote' }],
 
   // 地図の状態。embed / cta の map、shots の map から名前で使う
   // routes は src/data/routes.ts のキー、from/to は路線データの駅名、metric は実データの指標だけ
+  // focus: その駅を中心に開く（駅は路線と組。zoom を省くと駅を見る拡大率）。stationNumbers: 駅番号を出す。view: '3d' で立体表示
   maps: {
-    main: { routes: ['yamanote', 'ginzaLine'] },
+    main: { routes: ['yamanote', 'ginzaLine'], focus: { name: '渋谷', route: 'yamanote' }, stationNumbers: true },
   },
 
   // 埋め込む画面（本文の { type: 'shot', shot: 'キー' } で使う）
@@ -53,7 +65,7 @@ export const exampleArticle: ArticleSource = {
         { type: 'embed', map: 'main', view: { center: [35.69, 139.745], zoom: 12 }, title: '{siteName}の地図（〇〇を表示した状態）', caption: '実際の地図（〇〇を表示した状態）。枠の中で拡大・移動できます。' },
         // 01 起: なぜ困るのか・よくある間違い
         { type: 'h2', text: '〇〇が分かりにくい理由' },
-        { type: 'p', text: '本文。1段落は3〜4文まで。' },
+        { type: 'p', text: '本文。1段落は3〜4文まで。駅番号は {line:yamanote}の{station:yamanote:渋谷}（{stationNumber:yamanote:渋谷}）のように差し込む。' },
         // 02 承: 基本のやり方（サイトの操作を画面つきで）
         { type: 'h2', text: '〇〇する' },
         { type: 'p', text: '{siteName}の「〇〇」で〇〇します。' },
