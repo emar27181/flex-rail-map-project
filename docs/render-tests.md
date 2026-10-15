@@ -38,7 +38,7 @@ CI（`.github/workflows/ci.yml` の `render` ジョブ）が PR ごとに動か�
 - 検査を足したら、**一度わざと壊して落ちることを確かめる**（上の表に1行足す）。通るだけのテストは役に立たない
 - 画面の撮影は `tests/render/png.ts` の `pngStats`（色の種類・いちばん多い色以外の割合）で数える。画像の見た目そのもの（ピクセル単位の一致）は
   フォント・GPU で変わるので比べない
-- 描画テストは手元のサーバー以外への通信を止めて動かす（`tests/render/helpers.ts` の `test`）。広告・計測・地図タイルの外部スクリプトは CI でだけ読み込まれ、承認外のドメインで例外を出して結果を変えていた（2026-10-14）。テストは `@playwright/test` ではなく `./helpers` から `test` / `expect` を取る
+- 描画テストはサービスワーカーを止め（`playwright.render.config.ts` の `serviceWorkers: 'block'`。止めないと地図ページが登録したあとの遷移で通信の遮断をすり抜ける）、手元のサーバー以外への通信を止めて動かす（`tests/render/helpers.ts` の `test`）。広告・計測・地図タイルの外部スクリプトは CI でだけ読み込まれ、承認外のドメインで例外を出して結果を変えていた（2026-10-14）。テストは `@playwright/test` ではなく `./helpers` から `test` / `expect` を取る
 
 ## 手元で動かす
 
