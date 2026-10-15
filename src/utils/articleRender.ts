@@ -10,6 +10,7 @@ import { EMBED_PARAM, EMBED_SECTION_PARAM } from './embedMode';
 import { responsiveTableHtml } from '../components/ui/atoms/responsiveTable';
 import { mapEmbedHtml } from '../components/ui/atoms/mapEmbed';
 import { ARTICLE_SOURCES } from '../data/articles';
+import { findArticleStation, resolveArticleTokens } from './articleFacts';
 import type { ArticleBlock, ArticleLang, ArticleMapState, ArticleShotSpec, ArticleSource } from '../data/articles/types';
 
 /** 部品に出す決まり文句 */
@@ -23,8 +24,20 @@ export const ARTICLE_BLOCK_LABELS: Record<ArticleLang, { points: string; openMap
 
 const esc = (s: string) => s.replace(/&(?!(?:[a-z]+|#\d+);)/g, '&amp;').replace(/"/g, '&quot;');
 
+/** focus（駅を中心に開く）で zoom を書かなかったときの拡大率（駅とその両隣が見える程度） */
+export const ARTICLE_FOCUS_ZOOM = 14;
+
 export function articleMapHref(state: ArticleMapState, lang: ArticleLang, embed = false): string {
-  return buildMapHref({ ...state, lang, embed });
+  const { focus, view, ...rest } = state;
+  let center = rest.center;
+  let zoom = rest.zoom;
+  if (focus && !center) {
+    const st = findArticleStation(focus);
+    if (!st) throw new Error(`地図の focus: 路線 ${focus.route} に駅「${focus.name}」が無い`);
+    center = [st.lat, st.lng];
+    zoom = zoom ?? ARTICLE_FOCUS_ZOOM;
+  }
+  return buildMapHref({ ...rest, center, zoom, view3d: view === '3d', lang, embed });
 }
 
 /**
@@ -32,11 +45,29 @@ export function articleMapHref(state: ArticleMapState, lang: ArticleLang, embed 
  * 地図は記事の状態で、駅・路線のページは節の位置（?section=id）で開く。
  * `#id` は使わない: ブラウザが記事のページごとその位置までスクロールし、記事が途中から表示されていた
  */
+/** 埋め込んだ画面を、埋め込みでない普通の画面で開く URL（「地図を大きく開く」のリンク） */
+export function shotOpenHref(spec: ArticleShotSpec, owner: ArticleSource, lang: ArticleLang): string {
+  if (spec.page) return `${lang === 'ja' ? '' : `/${lang}`}${spec.page}${spec.anchor ? `#${spec.anchor}` : ''}`;
+  const map = typeof spec.map === 'string' ? owner.maps[spec.map] : spec.map;
+  if (!map) throw new Error(`${owner.slug}: 画面の撮り方に map も page も無い`);
+  return articleMapHref(map, lang);
+}
+
 export function shotEmbedSrc(spec: ArticleShotSpec, owner: ArticleSource, lang: ArticleLang): string {
   if (spec.page) return `${lang === 'ja' ? '' : `/${lang}`}${spec.page}?${EMBED_PARAM}=1${spec.anchor ? `&${EMBED_SECTION_PARAM}=${encodeURIComponent(spec.anchor)}` : ''}`;
   const map = typeof spec.map === 'string' ? owner.maps[spec.map] : spec.map;
   if (!map) throw new Error(`${owner.slug}: 画面の撮り方に map も page も無い`);
   return articleMapHref(map, lang, true);
+}
+
+/** 見出しの id（目次から飛ぶ先）。言語に依らず section-1, section-2… */
+export const articleSectionId = (n: number) => `section-${n}`;
+
+/** 目次（見出しの文と飛ぶ先）。描画と同じ並び（冒頭のデモを前に出した後）で数える */
+export function articleToc(source: ArticleSource, lang: ArticleLang): Array<{ id: string; text: string }> {
+  return articleBlocksForRender(source, lang)
+    .filter((b): b is Extract<ArticleBlock, { type: 'h2' }> => b.type === 'h2')
+    .map((b, i) => ({ id: articleSectionId(i + 1), text: resolveArticleTokens(b.text, lang, source.slug) }));
 }
 
 function renderBlock(block: ArticleBlock, source: ArticleSource, lang: ArticleLang, h2Index: { n: number }): string {
@@ -51,7 +82,7 @@ function renderBlock(block: ArticleBlock, source: ArticleSource, lang: ArticleLa
       return `<div class="points"><div class="ttl">${labels.points}</div><ul>${block.items.map(i => `<li>${i}</li>`).join('')}</ul></div>`;
     case 'h2':
       h2Index.n += 1;
-      return `<h2><span class="num">${String(h2Index.n).padStart(2, '0')}</span><span>${block.text}</span></h2>`;
+      return `<h2 id="${articleSectionId(h2Index.n)}"><span class="num">${String(h2Index.n).padStart(2, '0')}</span><span>${block.text}</span></h2>`;
     case 'h3':
       return `<h3>${block.text}</h3>`;
     case 'p':
@@ -73,11 +104,17 @@ function renderBlock(block: ArticleBlock, source: ArticleSource, lang: ArticleLa
       const owner = block.article ? ARTICLE_SOURCES.find(a => a.slug === block.article) : source;
       const spec = owner?.shots[block.shot];
       if (!owner || !spec) throw new Error(`${source.slug}: 画面 "${block.shot}" の撮り方（shots）が無い`);
-      return mapEmbedHtml({ src: shotEmbedSrc(spec, owner, lang), title: block.alt, caption: block.caption });
+      return mapEmbedHtml({
+        src: shotEmbedSrc(spec, owner, lang), title: block.alt, caption: block.caption,
+        openHref: shotOpenHref(spec, owner, lang), lang, demoId: `${owner.slug}/${block.shot}`,
+      });
     }
     case 'embed': {
-      const src = articleMapHref({ ...mapOf(block.map), ...(block.view ?? {}) }, lang, true);
-      return mapEmbedHtml({ src, title: block.title, caption: block.caption });
+      const state = { ...mapOf(block.map), ...(block.view ?? {}) };
+      return mapEmbedHtml({
+        src: articleMapHref(state, lang, true), title: block.title, caption: block.caption,
+        openHref: articleMapHref(state, lang), lang, demoId: `${source.slug}/${block.map}`,
+      });
     }
     case 'cta':
       return `<div class="cta"><h3>${block.title}</h3><p>${block.text}</p><a class="btn" href="${esc(articleMapHref(mapOf(block.map), lang))}">${labels.openMap} <span class="ar">→</span></a></div>`;
@@ -127,5 +164,7 @@ function blockEmbedSrc(block: ArticleBlock, source: ArticleSource, lang: Article
 
 export function renderArticleBody(source: ArticleSource, lang: ArticleLang): string {
   const h2Index = { n: 0 };
-  return articleBlocksForRender(source, lang).map(b => renderBlock(b, source, lang, h2Index)).join('\n');
+  const html = articleBlocksForRender(source, lang).map(b => renderBlock(b, source, lang, h2Index)).join('\n');
+  // 駅番号・駅名の差し込み（articleFacts.ts）。データに無いものはここで止まる
+  return resolveArticleTokens(html, lang, `${source.slug} (${lang})`);
 }

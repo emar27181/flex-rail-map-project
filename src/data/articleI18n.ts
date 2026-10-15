@@ -29,6 +29,10 @@ export const ARTICLE_SHELL_TRANSLATIONS = {
     switchTheme: "ダークモード切り替え",
     readAll: "全記事",
     relatedArticles: "関連記事",
+    toc: "目次",
+    sources: "出典",
+    checkedAt: "確認",
+    relatedPlaces: "この記事の路線と駅",
   },
   en: {
     brand: "{siteName}",
@@ -41,6 +45,10 @@ export const ARTICLE_SHELL_TRANSLATIONS = {
     switchTheme: "Toggle dark mode",
     readAll: "All articles",
     relatedArticles: "Related articles",
+    toc: "Contents",
+    sources: "Sources",
+    checkedAt: "checked",
+    relatedPlaces: "Lines and stations in this article",
   },
   zh: {
     brand: "{siteName}",
@@ -53,6 +61,10 @@ export const ARTICLE_SHELL_TRANSLATIONS = {
     switchTheme: "切换深色模式",
     readAll: "全部文章",
     relatedArticles: "相关文章",
+    toc: "目录",
+    sources: "参考资料",
+    checkedAt: "确认日期",
+    relatedPlaces: "本文涉及的线路和车站",
   },
   ko: {
     brand: "{siteName}",
@@ -65,6 +77,10 @@ export const ARTICLE_SHELL_TRANSLATIONS = {
     switchTheme: "다크 모드 전환",
     readAll: "전체 기사",
     relatedArticles: "관련 글",
+    toc: "목차",
+    sources: "출처",
+    checkedAt: "확인",
+    relatedPlaces: "이 글의 노선과 역",
   },
 } satisfies Record<ArticleLanguage, Record<string, string>>;
 

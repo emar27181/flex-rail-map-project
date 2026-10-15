@@ -14,19 +14,31 @@
 | `src/utils/articleRender.ts` | ブロック → HTML。部品の HTML はここだけで作る |
 | `src/styles/article-layout.css` | 見た目（角丸・ボタンはデザイントークンの CSS 変数だけ） |
 | `src/components/ui/atoms/mapEmbed.ts` | 実際の画面の埋め込み（iframe）の部品。記事と駅・路線のページで共通 |
-| `docs/templates/article-template.ts` | ひな形 |
+| `docs/templates/article-template.ts` | ひな形（`npm run article:new -- --slug {slug}` で写せる） |
+| `docs/templates/article-prompt.md` | ChatGPT / Claude などに記事を書いてもらう指示文（入力・出力・守ること） |
+| `src/utils/articleFacts.ts` | 駅番号・駅名・路線名の差し込み（`{stationNumber:路線:駅}` など）。データに無いと止まる |
+| `src/utils/articleAnalytics.ts` | 記事の中の操作の GA4 イベント（デモを見た・触った・地図へ移った） |
+| `docs/article-platform.md` | 記事 × 地図デモの基盤の設計判断（なぜ既存の仕組みを広げたか・名前の対応） |
 
 ページのファイル（`.astro`）は作らなくてよい。記事データを足せば日本語・英語・中国語・韓国語のページ、
 記事一覧、sitemap、関連記事が自動でできる。
 
 ## 記事を足す手順
 
-1. `docs/templates/article-template.ts` を `src/data/articles/{slug}.ts` にコピーして書く（4言語）
-2. `src/data/articles/index.ts` に1行足す
-3. 開発サーバーを起動し（`npm run dev`）、`/articles/{slug}` と英中韓の版を開く
-4. 埋め込んだ画面（iframe）が説明文と合っているか目で確かめる（ライト・ダークの両方）
-5. `npm run test:types` → `npm run test:unit` → `npm run build`
-   （形の決まりは `tests/unit/data/articleSources.test.ts` が確かめる）
+1. テーマと検索意図を決める（Search Console の検索語・訪日旅行者の困りごと）
+2. 既存の記事と重ならないか確かめる（`src/data/articles/index.ts`）
+3. 出典（公式資料）で事実を確かめる。確かめられないことは書かない
+4. `npm run article:new -- --slug {slug}` でひな形を作る（4言語・`index.ts` への追加まで）。
+   ほかの AI に書いてもらうときは `docs/templates/article-prompt.md` を渡す
+5. 本文・メタ情報を書く。駅番号・駅名・路線名は差し込み（下の「駅番号・駅名の差し込み」）
+6. デモ（`maps` / `shots`）を書く（下の「地図デモの書き方」）
+7. `npm run article:validate`（差し込み・駅と路線の組・出典・4言語の並び・書きかけを確かめる）
+8. `npm run dev` で4言語のページを開き、デモが説明と合っているか目で確かめる（ライト・ダーク、スマホ幅）
+9. `npm run test:types` → `npm run test:unit` → `npm run build`（`test:render` に記事の描画テストもある）
+10. PR を作り、Netlify のプレビューで確認する
+11. 承認されたら公開（マージ）
+12. 公開後 2〜4週間、Search Console（記事ごとの表示回数・クリック・CTR・平均掲載順位・国と言語）と
+    GA4（下の「計測」）で様子を見る。少ないデータで効果を決めつけない
 
 ## 何を書くか
 
@@ -84,6 +96,54 @@
 - `{ type: 'cta', map: 'main' }` は同じ状態の地図を全画面で開くボタン。記事の最後に置く
 - 地図の状態は `maps` に名前を付けて1回だけ書く。URL は `mapDeepLink.ts` が作る（パラメータ名を書かない）
 
+## 駅番号・駅名の差し込み（2026-10-15）
+
+記事に駅番号を手で書くと、データと食い違う（記事は「東京は JY01」、地図は「JY24」だった）。
+生成 AI の原稿に存在しない番号が紛れ込むのも防ぐため、駅番号・駅名・路線名は次の書き方で書く。
+
+| 書き方 | 出るもの |
+|---|---|
+| `{stationNumber:yamanote:渋谷}` | その路線でのその駅の番号（`src/data/stationNumbers.ts`） |
+| `{station:yamanote:渋谷}` | 記事の言語の駅名（`translateStation`） |
+| `{line:yamanote}` | 記事の言語の路線名（駅・路線のページと同じ） |
+
+- 駅は「路線キー:駅名」の組で書く（同じ名前の別の駅と区別するため）。将来、全路線で一意の駅 ID ができたらそれに替える
+- データに無い駅・番号を書くとビルドとテストが止まる。タイトル・説明（meta）では使わない（検索結果に出る文はそのまま書く）
+- 駅番号を書いた記事は `sources`（出典）が必須。照合が済んでいない路線（`docs/data-maintenance-ledger.md`）は例に使わない
+
+## 地図デモの書き方（`maps` / `shots`）
+
+| 項目 | 中身 |
+|---|---|
+| `routes` | 表示する路線 |
+| `focus: { name, route }` | その駅を中心に開く（`zoom` を省くと駅を見る拡大率 `ARTICLE_FOCUS_ZOOM`） |
+| `stationNumbers: true` | 駅番号を出す（URL の `?numbers=1`。日本語の地図は既定で出さない） |
+| `view: '3d'` | 立体表示で開く（URL の `?view=terrain3d`） |
+| `center` `zoom` / `from` `to` / `metric` / `travelTimes` | 以前からの指定 |
+
+- 1つの記事にデモはいくつでも置ける（冒頭の `embed` と、本文の `shot`）。同じ状態を2回は置かない
+- 記事の中の地図は最初から操作できる。下に「地図を大きく開く」（同じ状態の地図のページへ）と「全画面」
+  （対応していないブラウザでは出ない）が付き、読み込むまでは案内の文が出る（`ui/atoms/mapEmbed.ts`）
+
+## 出典・この記事の路線と駅・目次
+
+- `sources`: 記事の最後に「出典」として一覧で出る（題名・発行元・確認日）
+- `relatedRoutes` / `relatedStations`: 記事の最後に路線・駅のページへのリンクを出す（その言語のページがあるものだけリンク）
+- 目次は `h2` から自動で作る（見出しに `section-1` などの id が付く）
+
+## 計測（GA4, `src/utils/articleAnalytics.ts`）
+
+| イベント | いつ |
+|---|---|
+| `article_demo_view` | デモが画面に入った（デモごとに1回） |
+| `article_demo_interact` | デモの中を初めて触った（デモごとに1回） |
+| `article_demo_fullscreen` | デモを全画面にした |
+| `article_map_open` | デモの「地図を大きく開く」・最後のボタンで地図へ移った（`source`: `demo` / `cta`） |
+| `article_related_click` | 関連記事を開いた |
+
+パラメータは `article`（slug）・`locale`・`demo_id`。記事の閲覧そのものは GA4 の `page_view` で数える。
+GA4 は本番サイトでだけ読み込む（プレビューの操作は数えない）。
+
 ## テスト（`tests/unit/data/articleSources.test.ts`, `articleI18n.test.ts`）
 
 - 4言語とも結論3行で始まり、**描画時はその直後に地図デモが来てから説明が始まり**、見出しは3〜5個、最後が地図を開くボタン
@@ -92,6 +152,11 @@
 - 地図の状態の路線・指標が地図側で読めるもの
 - 関連記事が3本で、実在する別の記事
 - サービス名を直書きしていない（`{siteName}`）
+- 差し込みがすべて路線データの値になる（無い駅・番号は落ちる）。メタ情報に差し込みを使っていない
+- `focus`・`relatedStations` の駅が、その路線に実在する。`relatedRoutes` の路線が実在する
+- 出典の URL・題名・発行元・確認日がそろう。駅番号を書いた記事は出典が必須
+- ひな形の書きかけ（「〇〇」）が残っていない
+- 描画テスト（`tests/render/article.render.ts`）: 本文が HTML にあり、デモに駅番号が出て、「地図を大きく開く」で同じ状態に移る
 - 地図へのリンクの `lang` がその記事の言語と一致する
 
 ## 参考にした資料

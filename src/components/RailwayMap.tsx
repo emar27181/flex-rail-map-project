@@ -323,7 +323,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showTravelTimes, setShowTravelTimes] = useState(getInitialTravelTimesFromUrl);
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
-  const [showStationNumbers, setShowStationNumbers] = useState(language !== 'japanese');
+  // 既定は日本語以外で出す。記事の地図デモ・共有リンクは URL（?numbers=1, mapDisplayUrlParam.ts）で指定できる
+  const [showStationNumbers, setShowStationNumbers] = useState(() => initialDisplayUrlOptions().stationNumbers ?? language !== 'japanese');
   /**
    * 駅ラベルの倍率と路線の線の太さ。
    *
@@ -808,9 +809,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     };
   }, [arrivalAlertEnabled, arrivalAlertMinutes, arrival, currentLanguage]);
 
-  // 日本語以外はデフォルトで駅コードを表示
+  // 日本語以外はデフォルトで駅コードを表示。URL で指定されていればそれに従う（記事の地図デモで駅番号を見せる）
   useEffect(() => {
-    setShowStationNumbers(language !== 'japanese');
+    setShowStationNumbers(initialDisplayUrlOptions().stationNumbers ?? language !== 'japanese');
   }, [language]);
 
   // モバイル幅の監視（端末の区分は src/constants/breakpoints.ts だけで決める）

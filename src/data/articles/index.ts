@@ -9,6 +9,7 @@ import { tokyoTrainMapBeginner } from './tokyo-train-map-beginner';
 import { tokyoSightseeingRoutes } from './tokyo-sightseeing-routes';
 import { commute30minCheapRent } from './commute-30min-cheap-rent';
 import { tokyoSafeAreaByRoute } from './tokyo-safe-area-by-route';
+import { howToReadStationNumbers } from './how-to-read-station-numbers';
 
 export const ARTICLE_SOURCES: ArticleSource[] = [
   tokyoRentByRoute,
@@ -17,4 +18,5 @@ export const ARTICLE_SOURCES: ArticleSource[] = [
   tokyoSightseeingRoutes,
   commute30minCheapRent,
   tokyoSafeAreaByRoute,
+  howToReadStationNumbers,
 ];

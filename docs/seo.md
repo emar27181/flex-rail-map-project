@@ -242,6 +242,12 @@ Search Console（2026-09-15〜10-12）で、英語の路線ページ（JR奈良�
   `view`（切り替え先）/ `from_view`（切り替え前）。URL（`?view=terrain3d`）や保存した設定で開いたときは送らない（2026-10-15）
 - 記事に埋め込んだ地図（`?embed=1`）では GA4 を読み込まない（記事の閲覧が地図の閲覧として二重に数えられるため）
 
+### 記事の中の GA4 イベント（2026-10-15）
+
+`src/utils/articleAnalytics.ts` だけに書く。`article_demo_view` / `article_demo_interact` / `article_demo_fullscreen` /
+`article_map_open`（`source`: `demo` / `cta`）/ `article_related_click`。パラメータは `article`（slug）・`locale`・`demo_id`。
+中身と使い方は `docs/article-writing.md` の「計測」。
+
 ### 計測したい操作と既存のイベント（2026-10-15 に確認）
 
 集客の改善指示で候補に挙がった名前と、実際に送っているイベントの対応。同じ操作を別の名前で二重に送らない。

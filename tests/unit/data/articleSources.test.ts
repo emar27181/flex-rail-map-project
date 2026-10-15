@@ -2,6 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { ARTICLE_SOURCES } from '../../../src/data/articles';
 import { articleBlocksForRender, articleMapHref, shotEmbedSrc, renderArticleBody } from '../../../src/utils/articleRender';
 import { getRouteCode } from '../../../src/utils/routeUrlCodes';
+import { findArticleStation, ARTICLE_TOKEN_RE, ARTICLE_LINE_TOKEN_RE } from '../../../src/utils/articleFacts';
+import { encodeStationParam } from '../../../src/utils/stationUrlParams';
+import { routes } from '../../../src/data/routes';
 import { isUrlHeatmapMetric } from '../../../src/utils/heatmapUrlParam';
 import type { ArticleLang } from '../../../src/data/articles/types';
 
@@ -82,12 +85,61 @@ describe('記事のデータ', () => {
         }
       });
 
+      it('地図の focus・関連する路線と駅は路線データにあり、駅は路線と組で実在する（同名の別駅を取り違えない）', () => {
+        const states = [...Object.values(a.maps), ...Object.values(a.shots).map(sh => sh.map).filter(m => m && typeof m !== 'string')];
+        for (const m of states) {
+          if (!m || typeof m === 'string') continue;
+          if (m.focus) expect(findArticleStation(m.focus), `focus ${m.focus.route}:${m.focus.name}`).toBeDefined();
+          for (const st of [m.from, m.to]) if (st) expect(encodeStationParam(st), `駅 ${st} を地図が引けない`).toBeTruthy();
+          if (m.zoom !== undefined) expect(m.zoom, 'zoom').toBeGreaterThanOrEqual(5);
+          if (m.zoom !== undefined) expect(m.zoom, 'zoom').toBeLessThanOrEqual(18);
+        }
+        for (const r of a.relatedRoutes ?? []) expect(r in routes, `relatedRoutes ${r}`).toBe(true);
+        for (const st of a.relatedStations ?? []) expect(findArticleStation(st), `relatedStations ${st.route}:${st.name}`).toBeDefined();
+      });
+
+      it('出典は https の URL・題名・発行元・確認日がそろう。駅番号を差し込む記事は出典が必須', () => {
+        for (const src of a.sources ?? []) {
+          expect(src.url, src.title).toMatch(/^https:\/\/[^\s]+$/);
+          expect(src.title.trim()).not.toBe('');
+          expect(src.publisher.trim()).not.toBe('');
+          expect(src.checkedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        }
+        const usesNumbers = JSON.stringify(a.content).includes('{stationNumber:');
+        if (usesNumbers) expect((a.sources ?? []).length, '駅番号を書いた記事に出典が無い').toBeGreaterThan(0);
+      });
+
+      it('4言語とも描画でき（差し込みがすべて路線データの値になる）、本文に差し込みの書き方が残らない', () => {
+        for (const lang of LANGS) {
+          const html = renderArticleBody(a, lang);
+          expect(html, lang).not.toMatch(new RegExp(ARTICLE_TOKEN_RE.source));
+          expect(html, lang).not.toMatch(new RegExp(ARTICLE_LINE_TOKEN_RE.source));
+        }
+      });
+
+      it('タイトル・説明には差し込みを使わない（検索結果に出る文はそのまま書く）', () => {
+        for (const lang of LANGS) {
+          const meta = JSON.stringify(a.content[lang].meta);
+          expect(meta, lang).not.toMatch(/\{(stationNumber|station|line):/);
+        }
+      });
+
+      it('駅番号を見せる地図は URL に numbers=1 が付く（日本語の地図は既定で番号を出さないため）', () => {
+        for (const m of Object.values(a.maps)) {
+          if (m.stationNumbers) expect(articleMapHref(m, 'ja', true)).toContain('numbers=1');
+        }
+      });
+
       it('関連記事は3本で、実在する別の記事', () => {
         expect(a.related).toHaveLength(3);
         for (const r of a.related) {
           expect(r).not.toBe(a.slug);
           expect(ARTICLE_SOURCES.some(x => x.slug === r), r).toBe(true);
         }
+      });
+
+      it('ひな形の書きかけ（〇〇）が残っていない', () => {
+        expect(JSON.stringify(a)).not.toContain('〇〇');
       });
 
       it('サービス名を直書きしない（{siteName} と書く）', () => {
