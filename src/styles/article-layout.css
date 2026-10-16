@@ -168,6 +168,9 @@ figure.map{ margin:34px 0; padding:0; background:var(--surface); border:1px soli
 .article-index{ margin-top:8px; }
 .article-list li{ margin:0; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card); box-shadow:var(--shadow); overflow:hidden; }
 .article-list a{ display:block; padding:18px 18px; color:var(--ink); text-decoration:none; }
+.article-thumbnail{ display:block; width:100%; height:auto; aspect-ratio:1200/630; object-fit:cover; object-position:center; border-radius:var(--r-control); margin:0 0 12px; background:var(--surface-2); }
+.article-list a:has(.article-thumbnail){ padding:12px 12px 18px; }
+.article-list a:has(.article-thumbnail) .article-card-title, .article-list a:has(.article-thumbnail) .meta { margin-left:6px; margin-right:6px; }
 .article-card-title{ display:block; font-size:16px; font-weight:800; line-height:1.65; }
 .article-list a:hover{ color:var(--accent-strong); text-decoration:none; }
 .article-list .meta{ display:block; margin-top:6px; }
