@@ -7,9 +7,8 @@ import type { ArticleLanguage } from '../../data/articleI18n';
 interface Props {
   slug: string;
   lang: ArticleLanguage;
-  title: string;
 }
-const { slug, lang, title } = Astro.props;
+const { slug, lang } = Astro.props;
 const preview = existingMapPreview(articlePath(slug, lang));
 ---
 {preview && (
@@ -18,7 +17,7 @@ const preview = existingMapPreview(articlePath(slug, lang));
     src={preview}
     width="1200"
     height="630"
-    alt={title}
+    alt=""
     loading="lazy"
     decoding="async"
   />
