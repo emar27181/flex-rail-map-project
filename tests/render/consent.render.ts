@@ -15,10 +15,20 @@ const LOCAL = 'http://127.0.0.1:4321';
 async function serveProductionFromLocal(page: Page) {
   await page.route(`${PRODUCTION_ORIGIN}/**`, async route => {
     const url = new URL(route.request().url());
-    const res = await page.request.fetch(`${LOCAL}${url.pathname}${url.search}`);
-    await route.fulfill({ response: res });
+    try {
+      const res = await page.request.fetch(`${LOCAL}${url.pathname}${url.search}`);
+      await route.fulfill({ response: res });
+    } catch {
+      // テストが終わってページを閉じた後に、埋め込みの地図などの読み込みが残っていることがある（2026-10-16: これで落ちていた）
+      await route.abort().catch(() => {});
+    }
   });
 }
+
+// 終わったページに振り向けが残っていると、閉じるときに失敗する
+test.afterEach(async ({ page }) => {
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
+});
 
 /** GA4 に送る予定の命令のうち、閲覧の送信を始める config の数 */
 const configCount = (page: Page) =>

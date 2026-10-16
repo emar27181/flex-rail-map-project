@@ -71,7 +71,10 @@ const Chip: React.FC<ChipProps> = ({
         // 太さを変えると幅が変わって並びが動くので、状態で変えない
         fontWeight: 'normal',
         cursor: 'pointer',
-        whiteSpace: 'nowrap',
+        // 並びの幅を超えない。長い路線名（英語の "JR Kagoshima Main Line (Kumamoto - Kagoshima-Chuo)" など）は
+        // 一覧の右端で切れていた（2026-10-15）。省略せず、語の切れ目で2行にする
+        maxWidth: '100%',
+        textAlign: 'start',
         ...styleOverride,
       }}
     >
@@ -90,8 +93,8 @@ const Chip: React.FC<ChipProps> = ({
           backgroundColor: selected ? text : color,
         }}
       />
-      {/* 幅が足りないときは路線名を見切らせる（丸は残す） */}
-      <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
+      {/* 幅が足りないときは語の切れ目で折り返す（省略すると路線を見分けられない） */}
+      <span style={{ minWidth: 0 }}>{label}</span>
     </button>
   );
 };
