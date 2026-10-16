@@ -1,0 +1,48 @@
+name: Article preview images
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/tourist-guides-30-20261016
+    paths:
+      - 'src/**'
+      - 'scripts/capture-map-previews.mts'
+      - '.github/workflows/article-preview-images.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: article-preview-images
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Build pages before capture
+        run: npm run build
+      - name: Capture the actual article demo maps (4 languages)
+        run: npm run og:capture -- --only /articles/
+      - name: Save screenshots to the PR branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/og/articles public/og/en/articles public/og/zh/articles public/og/ko/articles
+          if ! git diff --cached --quiet; then
+            git commit -m "assets(articles): capture demo screenshots for cards and search previews"
+            git push
+          fi
