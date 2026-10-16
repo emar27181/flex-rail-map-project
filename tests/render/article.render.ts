@@ -38,3 +38,21 @@ test('日本語の記事: 日本語の地図でも、指定したデモには駅
   await expect(page.frameLocator('figure[data-demo-id] iframe').first().getByText(new RegExp(`${SHIBUYA_JY}\\s*渋谷`)).first())
     .toBeVisible({ timeout: 30_000 });
 });
+
+test('記事の広告枠: 手元（本番以外）では広告を読み込まず、本文の3つ目の見出しの前と読み終わった後に「広告枠」の箱だけ出る', async ({ page }) => {
+  await page.goto('/en/articles/sapporo-namboku-line-map');
+  const slots = page.locator('aside.ad-slot');
+  await expect(slots).toHaveCount(2);
+  await expect(slots.nth(0)).toHaveAttribute('data-ad-position', 'inline-1');
+  await expect(slots.nth(1)).toHaveAttribute('data-ad-position', 'end');
+  for (const slot of await slots.all()) {
+    await expect(slot).toBeVisible();
+    await expect(slot).toHaveClass(/is-preview/);
+    await expect(slot.locator('.ad-slot-label')).toHaveText('Advertisement');
+  }
+  // 広告のタグは残さない（本番以外で広告を表示・計上させない）
+  await expect(page.locator('ins.adsbygoogle')).toHaveCount(0);
+  // 本文の広告は3つ目の見出しのすぐ前、読み終わった後の広告は関連記事の前
+  expect(await slots.nth(0).evaluate(el => el.nextElementSibling?.id)).toBe('section-3');
+  expect(await slots.nth(1).evaluate(el => el.nextElementSibling?.classList.contains('related'))).toBe(true);
+});

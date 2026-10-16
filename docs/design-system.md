@@ -67,6 +67,16 @@ PR ごとに `npm run test:design` で実行する（手元でも同じコマン
 
 空の欄はスマホでは出さない。色はレイアウトが `--rt-border` / `--rt-muted` / `--rt-hover` で渡す。
 
+### 記事の中の広告枠（`ui/atoms/adSlot.ts`, 2026-10）
+
+記事に広告（AdSense の記事内広告）を置くときは `adSlotHtml` を使う。`<ins class="adsbygoogle">` を直接書かない。
+置く位置は記事の描画（`utils/articleRender.ts` の `articleAdSections` / `articleEndAdHtml`）が決める。
+
+- 広告を読み込むのは本番のサイトだけ。プレビュー・手元では点線の「広告枠」の箱で位置だけ見せる
+- 広告ユニット ID は `config/ads.ts` の `ADSENSE_SLOTS`。空なら本番では枠ごと出さない。配信が無いときも隠す
+- 上に「広告」と書き、線を引いて本文・地図のデモと分ける。地図を開くボタン・説明文の無い地図のデモのすぐ下には置かない
+- 色はレイアウトが `--ad-border` / `--ad-muted` で渡す
+
 ### 実際の画面の埋め込み（`ui/atoms/mapEmbed.ts`, 2026-10）
 
 記事・駅/路線のページに地図やページを見せるときは、スクリーンショットではなく実際の画面を iframe で埋め込む。
