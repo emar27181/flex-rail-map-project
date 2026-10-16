@@ -6,6 +6,9 @@
  * URL を書き換えると履歴・共有URLが落ち着かないため、書き戻しはしない）。
  * 指定があるときは、現在地への自動移動をしない（指定した範囲を見せるため）。
  */
+import { decodeVisibleRoutesParam, VISIBLE_ROUTES_PARAM } from './routeUrlCodes';
+import { fitVisibleRoutes } from './routeMapViewport';
+
 export const MAP_CENTER_PARAM = 'center';
 export const MAP_ZOOM_PARAM = 'zoom';
 const MIN_ZOOM = 3;
@@ -26,7 +29,12 @@ export function getInitialMapViewFromUrl(): MapView | null {
   if (typeof window === 'undefined') return null;
   try {
     const params = new URLSearchParams(window.location.search);
-    return parseMapView(params.get(MAP_CENTER_PARAM), params.get(MAP_ZOOM_PARAM));
+    const explicit = parseMapView(params.get(MAP_CENTER_PARAM), params.get(MAP_ZOOM_PARAM));
+    if (explicit) return explicit;
+    // ?routes=... だけでも対象路線全体が画面内に収まる初期位置で開く。
+    // 地図本体・記事・共有リンクを同じ計算に統一する。
+    const selected = decodeVisibleRoutesParam(params.get(VISIBLE_ROUTES_PARAM));
+    return selected ? fitVisibleRoutes([...selected]) ?? null : null;
   } catch {
     return null;
   }
