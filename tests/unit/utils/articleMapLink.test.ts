@@ -18,6 +18,23 @@ describe('記事の地図デモの URL', () => {
     expect(query(href).get('zoom')).toBe(String(ARTICLE_FOCUS_ZOOM));
   });
 
+  it('路線フィルタだけ指定した記事の初期位置は東京駅固定ではなく路線全体に合わせる', () => {
+    const params = query(articleMapHref({ routes: ['enoshimaElectricRailway'] }, 'ja', true));
+    const center = params.get('center')?.split(',').map(Number);
+    expect(center).toHaveLength(2);
+    expect(center![0]).toBeGreaterThan(35.25);
+    expect(center![0]).toBeLessThan(35.4);
+    expect(Number(params.get('zoom'))).toBeGreaterThanOrEqual(3);
+  });
+
+  it('複数路線を表示する場合も範囲全体を収め、明示した中心位置は上書きしない', () => {
+    const fitted = query(articleMapHref({ routes: ['yamanote', 'odakyuEnoshimaLine'] }, 'en', true));
+    expect(fitted.get('center')).toBeTruthy();
+    const explicit = query(articleMapHref({ routes: ['yamanote'], center: [35.68, 139.76], zoom: 12 }, 'en', true));
+    expect(explicit.get('center')).toBe('35.68,139.76');
+    expect(explicit.get('zoom')).toBe('12');
+  });
+
   it('路線に無い駅を focus にすると止める', () => {
     expect(() => articleMapHref({ focus: { name: '梅田', route: 'yamanote' } }, 'en')).toThrow(/梅田/);
   });
