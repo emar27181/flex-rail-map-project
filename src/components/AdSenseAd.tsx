@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { requestAd } from '../utils/adsense';
+import { ADSENSE_CLIENT } from '../config/ads';
 import { L } from './legend/legendStyles';
 
 interface AdSenseAdProps {
@@ -47,7 +48,7 @@ const AdSenseAd: React.FC<AdSenseAdProps> = ({
           display: 'block',
           ...style
         }}
-        data-ad-client="ca-pub-2444529114040977"
+        data-ad-client={ADSENSE_CLIENT}
         data-ad-slot={adSlot}
         data-ad-format={adFormat}
         data-ad-layout={adLayout}

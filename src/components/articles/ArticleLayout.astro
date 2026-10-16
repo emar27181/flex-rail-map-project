@@ -27,6 +27,7 @@ import { ARTICLE_BODY_TRANSLATIONS } from "../../data/articleBodyI18n";
 import { APP_ICON_PATH, SITE_URL, SITE_NAME, OG_LOCALE, buildHreflangLinks, hreflangCode, withSiteName } from "../../config/seo";
 import FaviconLinks from "../seo/FaviconLinks.astro";
 import GA4Loader from "../GA4Loader.astro";
+import { ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC } from "../../config/ads";
 import { CONTROL_CSS, HEADER_LOGO_PX } from "../ui/atoms/controlCss";
 import { RESPONSIVE_TABLE_CSS } from "../ui/atoms/responsiveTable";
 import { ARTICLE_SOURCES } from "../../data/articles";
@@ -136,8 +137,8 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
   {preview && <meta name="twitter:image" content={`${SITE_URL}${preview}`} />}
 
   <meta name="google-site-verification" content="uyjBT9z6vOnpxn6lM6YnxbI6R4jLSDIAboC8zo1slhM" />
-  <meta name="google-adsense-account" content="ca-pub-2444529114040977" />
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2444529114040977" crossorigin="anonymous"></script>
+  <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
+  <script async src={ADSENSE_SCRIPT_SRC} crossorigin="anonymous"></script>
 
   <FaviconLinks />
   <GA4Loader />
