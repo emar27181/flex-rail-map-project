@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { requestAd } from '../utils/adsense';
+import { ADSENSE_CLIENT } from '../config/ads';
 import { X } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import IconButton from './ui/atoms/IconButton';
@@ -127,7 +128,7 @@ const StickyBottomAd: React.FC<StickyBottomAdProps> = ({ adSlot }) => {
               width: '100%',
               height: '90px'
             }}
-            data-ad-client="ca-pub-2444529114040977"
+            data-ad-client={ADSENSE_CLIENT}
             data-ad-slot={adSlot}
             data-ad-format="horizontal"
             data-full-width-responsive="true"

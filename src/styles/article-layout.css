@@ -19,6 +19,9 @@
   --me-surface: var(--surface);
   --me-shadow: var(--shadow);
   --me-muted: var(--ink-soft);
+  /* 記事の中の広告枠（ui/atoms/adSlot.ts の .ad-slot）の色 */
+  --ad-border: var(--border);
+  --ad-muted: var(--ink-faint);
   --bg:#F6F7F8;
   --surface:#FFFFFF;
   --surface-2:#F1F3F4;
