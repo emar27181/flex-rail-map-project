@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { ARTICLE_SOURCES } from '../../../src/data/articles';
 import { ARTICLE_LANGUAGES } from '../../../src/data/articleI18n';
 import type { ArticleBlock } from '../../../src/data/articles/types';
 import {
-  ARTICLE_AD_EVERY_SECTIONS, articleAdSections, articleBlocksForRender, articleEndAdHtml, renderArticleBody,
+  ARTICLE_AD_EVERY_SECTIONS, ARTICLE_AD_FIRST_SECTION, articleAdSections, articleBlocksForRender, renderArticleBody,
 } from '../../../src/utils/articleRender';
 import { AD_CLASS, AD_SLOT_LABELS, AD_SLOT_SCRIPT, adSlotHtml } from '../../../src/components/ui/atoms/adSlot';
 import { ADSENSE_CLIENT } from '../../../src/config/ads';
@@ -21,12 +23,13 @@ function article(n: number, after: Record<number, ArticleBlock> = {}): ArticleBl
 }
 
 describe('本文の広告の位置（articleAdSections）', () => {
-  it('3つ目の見出しの前から3節ごと。節の多い記事ほど増える', () => {
-    expect(ARTICLE_AD_EVERY_SECTIONS).toBe(3);
+  it('3つ目の見出しの前に1つ、そこから6節ごと（4〜8節の記事は1つ）', () => {
+    expect(ARTICLE_AD_FIRST_SECTION).toBe(3);
+    expect(ARTICLE_AD_EVERY_SECTIONS).toBe(6);
     expect(articleAdSections(article(2))).toEqual([]);
     expect(articleAdSections(article(4))).toEqual([3]);
-    expect(articleAdSections(article(7))).toEqual([3, 6]);
-    expect(articleAdSections(article(9))).toEqual([3, 6, 9]);
+    expect(articleAdSections(article(8))).toEqual([3]);
+    expect(articleAdSections(article(9))).toEqual([3, 9]);
   });
 
   it('結論・冒頭の地図のデモと最初の2節の間には置かない', () => {
@@ -36,8 +39,10 @@ describe('本文の広告の位置（articleAdSections）', () => {
   it('説明文の無い地図のデモ・地図を開くボタンのすぐ下には置かず、後ろの節へずらす。ずらせなければ置かない', () => {
     expect(articleAdSections(article(4, { 2: shot }))).toEqual([4]);
     expect(articleAdSections(article(4, { 2: shot, 3: { type: 'cta', title: 't', text: 't', map: 'main' } }))).toEqual([]);
-    // ずらしても次の候補（6）を越えない
     expect(articleAdSections(article(7, { 2: shot, 3: shot, 4: shot }))).toEqual([6]);
+    // ずらしても次の候補（9）を越えない。越える分は次の候補の側で置く
+    const many = Object.fromEntries([2, 3, 4, 5, 6, 7, 8].map(n => [n, shot]));
+    expect(articleAdSections(article(10, many))).toEqual([10]);
   });
 
   it('説明文のある地図のデモの下には置ける（ボタンと広告の間に文が挟まる）', () => {
@@ -86,9 +91,9 @@ describe('広告枠の部品（ui/atoms/adSlot.ts）', () => {
     expect(html).toContain('aria-label="Advertisement"');
   });
 
-  it('読み終わった後の広告は end の位置', () => {
-    expect(articleEndAdHtml('ko')).toContain('data-ad-position="end"');
-    expect(articleEndAdHtml('ko')).toContain(AD_SLOT_LABELS.ko.label);
+  it('読み終わった後（関連記事の前）には置かない（2026-10-16: 1記事に2つは多すぎた）', () => {
+    const layout = readFileSync(join(__dirname, '../../../src/components/articles/ArticleLayout.astro'), 'utf8');
+    expect(layout).not.toMatch(/adSlotHtml|ad-slot/);
   });
 
   it('広告を読み込むのは本番のサイトだけ（プレビュー・手元では位置だけ見せる）', () => {

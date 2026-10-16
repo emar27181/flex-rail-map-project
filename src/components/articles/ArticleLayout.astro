@@ -31,7 +31,7 @@ import { ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC } from "../../config/ads";
 import { CONTROL_CSS, HEADER_LOGO_PX } from "../ui/atoms/controlCss";
 import { RESPONSIVE_TABLE_CSS } from "../ui/atoms/responsiveTable";
 import { ARTICLE_SOURCES } from "../../data/articles";
-import { articleEndAdHtml, articleToc } from "../../utils/articleRender";
+import { articleToc } from "../../utils/articleRender";
 import { AD_SLOT_CSS, AD_SLOT_SCRIPT } from "../ui/atoms/adSlot";
 import { findArticleStation } from "../../utils/articleFacts";
 import { getSeoModel, hasStationPage, lineByKey, linePath, routeName, stationName, stationPath } from "../../seo/pageModel";
@@ -230,8 +230,6 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
         </ul>
       </section>
     )}
-    {/* 読み終わった後の広告（本文の間の広告は articleRender.ts が置く）。位置の決まりは ui/atoms/adSlot.ts */}
-    {isArticle && <Fragment set:html={articleEndAdHtml(lang)} />}
     {related.length > 0 && (
       <section class="related" aria-labelledby="related-heading">
         <h2 id="related-heading">{shell.relatedArticles}</h2>

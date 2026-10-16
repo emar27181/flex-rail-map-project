@@ -786,7 +786,7 @@ Netlify管理画面の Site configuration → Build & deploy → Branch deploys 
 - **記事の駅番号・駅名・路線名は手で書かない。** `{stationNumber:路線キー:駅名}` などで路線データから差し込む（`src/utils/articleFacts.ts`）。
   事実を書いたら `sources`（出典）を付ける。新しい記事は `npm run article:new -- --slug {slug}` → `npm run article:validate`。
   設計判断は `docs/article-platform.md`、AI への指示文は `docs/templates/article-prompt.md`
-- **広告は記事データに書かない。** `articleRender.ts` が本文の3節ごと（3つ目の見出しの前から）と読み終わった後に置く。
+- **広告は記事データに書かない。** `articleRender.ts` が本文の3つ目の見出しの前に1つ、そこから6節ごとに置く（4〜8節の記事は1つ）。
   本番のサイトだけで読み込み、プレビューでは位置だけ見せる。広告ユニット ID は `src/config/ads.ts`（推測した値を入れない）。
   決まりは `docs/article-writing.md` の「広告」
 

@@ -175,10 +175,11 @@ function blockEmbedSrc(block: ArticleBlock, source: ArticleSource, lang: Article
 
 /**
  * 本文の広告の置き方。結論とその直後の地図のデモの近くには置かず（読む前に広告を見せない・地図の操作と押し間違えさせない）、
- * 3つ目の見出しの前から3節ごとに1つ置く。節の多い長い記事ほど広告が増える（4節の記事は1つ、7節なら2つ）。
- * 読み終わった後の広告（articleEndAdHtml）は別に1つ。
+ * 3つ目の見出しの前に1つ、そこから6節ごとに1つ置く（4〜8節の記事は1つ、9節以上で2つ）。
+ * 2026-10-16: 最初は3節ごと＋読み終わった後にも1つ（4節の記事で2つ）だったが、多すぎると判断して半分にした
  */
-export const ARTICLE_AD_EVERY_SECTIONS = 3;
+export const ARTICLE_AD_FIRST_SECTION = 3;
+export const ARTICLE_AD_EVERY_SECTIONS = 6;
 
 /**
  * 広告のすぐ上に来てよいか。地図を開くボタン・中身の分からない HTML・説明文の無い地図のデモの下には置かない
@@ -197,18 +198,13 @@ function adSafeAfter(block: ArticleBlock): boolean {
 export function articleAdSections(blocks: ArticleBlock[]): number[] {
   const h2At = blocks.flatMap((b, i) => (b.type === 'h2' ? [i] : []));
   const sections: number[] = [];
-  for (let k = ARTICLE_AD_EVERY_SECTIONS; k <= h2At.length; k += ARTICLE_AD_EVERY_SECTIONS) {
+  for (let k = ARTICLE_AD_FIRST_SECTION; k <= h2At.length; k += ARTICLE_AD_EVERY_SECTIONS) {
     for (let s = k; s <= h2At.length && s < k + ARTICLE_AD_EVERY_SECTIONS; s++) {
       const prev = blocks[h2At[s - 1] - 1];
       if (prev && adSafeAfter(prev)) { sections.push(s); break; }
     }
   }
   return sections;
-}
-
-/** 読み終わった後（出典の後・関連記事の前）に置く広告 */
-export function articleEndAdHtml(lang: ArticleLang): string {
-  return adSlotHtml({ slot: ADSENSE_SLOTS.articleInline, lang, position: 'end' });
 }
 
 export function renderArticleBody(source: ArticleSource, lang: ArticleLang): string {
