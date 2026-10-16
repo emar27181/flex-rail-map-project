@@ -15,9 +15,8 @@
  * 撮影条件: 800×420 を 1.5 倍・ダークテーマ・サービスワーカーと外部への通信を止める（描画テストと同じ条件）
  */
 import { chromium, type Browser } from 'playwright';
-import sharp from 'sharp';
 import { spawn } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { MAP_PREVIEW, mapPreviewPath } from '../src/seo/mapPreview';
 import { SITE_URL } from '../src/config/seo';
@@ -47,7 +46,7 @@ function targets(): Array<{ path: string; src: string }> {
     .filter(p => KINDS.some(k => p.includes(k)) && (!only || p.includes(only)))
     .flatMap(p => {
       const html = readFileSync(join(DIST, p, 'index.html'), 'utf8');
-      const src = html.match(/<div class="map-embed-frame">(?:<img [^>]*>)?<iframe src="([^"]+)"/)?.[1];
+      const src = html.match(/<div class="map-embed-frame">[\s\S]*?<iframe src="([^"]+)"/)?.[1];
       return src ? [{ path: p, src: unescape(src) }] : [];
     })
     .filter(t => !missingOnly || !existsSync(join(ROOT, 'public', mapPreviewPath(t.path)!)));
@@ -55,8 +54,8 @@ function targets(): Array<{ path: string; src: string }> {
 
 async function capture(browser: Browser, t: { path: string; src: string }): Promise<void> {
   const ctx = await browser.newContext({
-    viewport: MAP_PREVIEW.viewport,
-    deviceScaleFactor: MAP_PREVIEW.scale,
+    viewport: { width: MAP_PREVIEW.width, height: MAP_PREVIEW.height },
+    deviceScaleFactor: 1,
     colorScheme: 'dark',
     serviceWorkers: 'block',
   });
@@ -68,10 +67,10 @@ async function capture(browser: Browser, t: { path: string; src: string }): Prom
     await page.waitForSelector('.leaflet-container', { timeout: 30_000 });
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(1200);
-    const png = await page.screenshot({ type: 'png' });
+    const jpg = await page.screenshot({ type: 'jpeg', quality: 76 });
     const out = join(ROOT, 'public', mapPreviewPath(t.path)!);
     mkdirSync(dirname(out), { recursive: true });
-    await sharp(png).resize(MAP_PREVIEW.width, MAP_PREVIEW.height).jpeg({ quality: 72, mozjpeg: true }).toFile(out);
+    writeFileSync(out, jpg);
   } finally {
     await ctx.close();
   }
