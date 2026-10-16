@@ -538,8 +538,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   placeholder={departure ? translateStation(departure.name, language) : translateUI('stationPlaceholder', language)}
                   className="station-input-filled"
                   styleOverride={{
-                    // ✕ を重ねるので右側だけ余白を広げる
-                    paddingRight: L.sp['3xl'],
+                    // ✕ を重ねるときだけ右側の余白を広げる（駅を選ぶ前は ✕ が無いので、案内の文字に幅を使う。
+                    // 英語の "Enter station name" が狭い画面で切れていた, 2026-10-15）
+                    ...(departure ? { paddingRight: L.sp['3xl'] } : {}),
                     // 出発＝緑 で塗りつぶし、文字は白。地図の上でも役割が一目で分かるようにする
                     border: `2px solid ${SEMANTIC.departure}`,
                     backgroundColor: SEMANTIC.departure,
@@ -667,8 +668,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   placeholder={arrival ? translateStation(arrival.name, language) : translateUI('stationPlaceholder', language)}
                   className="station-input-filled"
                   styleOverride={{
-                    // ✕ を重ねるので右側だけ余白を広げる
-                    paddingRight: L.sp['3xl'],
+                    // ✕ を重ねるときだけ右側の余白を広げる（出発駅と同じ）
+                    ...(arrival ? { paddingRight: L.sp['3xl'] } : {}),
                     // 到着＝赤 で塗りつぶし、文字は白（出発欄と対になる配色）
                     border: `2px solid ${SEMANTIC.arrival}`,
                     backgroundColor: SEMANTIC.arrival,

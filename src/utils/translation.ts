@@ -561,9 +561,11 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "到着駅",
     english: "Arrival"
   },
+  // 入力欄の上に「Departure / Arrival」の見出しがあるので、案内は短く。"Enter station name" は
+  // スマホの幅（2つの入力欄が横に並ぶ）で "Enter static" と切れていた（2026-10-15）
   stationPlaceholder: {
     japanese: "駅名入力",
-    english: "Enter station name"
+    english: "Station"
   },
   swapStations: {
     japanese: "⇄ 入替",
@@ -723,9 +725,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "名前",
     english: "Name"
   },
+  // 「Name」と横に並ぶ入力欄。"Nearest station" は設定パネルの幅で切れていた（2026-10-15）
   memoStationPlaceholder: {
     japanese: "最寄り駅",
-    english: "Nearest station"
+    english: "Station"
   },
   memoNotePlaceholder: {
     japanese: "ひとこと（任意）",

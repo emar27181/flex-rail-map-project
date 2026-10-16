@@ -10,6 +10,23 @@
 ### fix: Cookie の確認の描画テストが終わった後の読み込みで落ちることがあったのを直す
 - `tests/render/consent.render.ts`。CI のスマホで落ち、PR #76 の CI も赤になっていた
 
+## [2026-10-16] セッション（PR #76 の競合解消）
+
+### fix: 最新 main の駅番号修正・公式照合記録を保持して統合
+- `CHANGE.log`: UI文字切れ対応と main 側の変更記録を両方残す。機能・データの巻き戻しなし。
+
+## [2026-10-15] セッション（言語ごとの文字の切れ）
+
+### test: どの言語でも画面の文字が切れていないかを確かめる描画テストを足す
+- `tests/render/textFit.ts`（新規, `findClippedText`）, `tests/render/textFit.render.ts`（新規）, `docs/render-tests.md`, `CLAUDE.md`
+- 4言語 × 地図・経路・埋め込み・路線ページ × 開閉できる箱を開いた状態 × PC・スマホ（390px・360px）。入力欄の案内文・選択欄も測る
+
+### fix: 英語で切れていた文字を、文字を縮めたり変な所で折り返したりせずに収める
+- `src/components/ui/atoms/SlideSegmentedControl.tsx`: 「Depart / Arrive」が「De…」に。項目をいちばん長い文字に合わせた等幅にした
+- `src/components/StationSelector.tsx`, `src/utils/translation.ts`: 入力欄の「Enter station name」→「Station」（上に見出しがある）。駅を選ぶ前は ✕ の余白を取らない
+- `src/utils/translation.ts`: メモの「Nearest station」→「Station」（「Name」と並ぶ入力欄）
+- `src/components/ui/atoms/Chip.tsx`: 長い路線名のボタンが一覧の右端で切れていた。並びの幅までにし、語の切れ目で2行にする
+
 ## [2026-10-16] セッション（記事などでも Cookie の確認を出し、GA4 で数えられるようにする）
 
 ### fix: 地図のページ以外でも Cookie の確認を出し、答えてから GA4 の計測を始める

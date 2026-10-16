@@ -49,7 +49,10 @@ function SlideSegmentedControl<T extends string>({
       aria-label={ariaLabel}
       style={{
         position: 'relative',
-        display: 'flex',
+        // 項目はどれも同じ幅で、いちばん長い文字に合わせる（言語によって長さが違う。flex で等分すると
+        // 英語の "Depart" が "De…" に切れていた, 2026-10-15）。文字を省略・折り返しせずに枠の方を広げる
+        display: 'grid',
+        gridTemplateColumns: `repeat(${options.length}, minmax(max-content, 1fr))`,
         minHeight: `${dims.minHeight}px`,
         border: `${CONTROL_BORDER_WIDTH}px solid ${colors.border}`,
         borderRadius: dims.radius,
@@ -81,8 +84,6 @@ function SlideSegmentedControl<T extends string>({
             onClick={() => onChange(opt.value)}
             style={{
               position: 'relative',
-              flex: 1,
-              minWidth: 0,
               border: 'none',
               background: 'transparent',
               padding: dims.padding,
@@ -91,8 +92,6 @@ function SlideSegmentedControl<T extends string>({
               color: isSelected ? colors.onPrimary : colors.text,
               cursor: 'pointer',
               whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
             }}
           >
             {opt.label}
