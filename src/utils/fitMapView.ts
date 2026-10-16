@@ -24,6 +24,6 @@ export function fitMapView(points: Array<{ lat: number; lng: number }>, opts: Fi
   const usableW = width * (1 - padding * 2), usableH = height * (1 - padding * 2);
   const zx = Math.log2((usableW * 360) / (256 * Math.max(e - w, 1e-6)));
   const zy = Math.log2((usableH * 2 * Math.PI) / (256 * Math.max(mercY(n) - mercY(s), 1e-9)));
-  const zoom = Math.max(minZoom, Math.min(maxZoom, Math.floor(Math.min(zx, zy))));
+  const zoom = Math.max(minZoom, Math.min(maxZoom, Math.floor(Math.min(zx, zy) * 10) / 10));
   return { center, zoom };
 }
