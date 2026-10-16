@@ -6,6 +6,8 @@
  * 地図へのリンク・埋め込みの URL は mapDeepLink.ts で作る（パラメータ名を書かない）。
  */
 import { buildMapHref } from './mapDeepLink';
+import { fitMapView } from './fitMapView';
+import { routes } from '../data/routes';
 import { EMBED_PARAM, EMBED_SECTION_PARAM } from './embedMode';
 import { responsiveTableHtml } from '../components/ui/atoms/responsiveTable';
 import { mapEmbedHtml } from '../components/ui/atoms/mapEmbed';
@@ -36,6 +38,18 @@ export function articleMapHref(state: ArticleMapState, lang: ArticleLang, embed 
     if (!st) throw new Error(`地図の focus: 路線 ${focus.route} に駅「${focus.name}」が無い`);
     center = [st.lat, st.lng];
     zoom = zoom ?? ARTICLE_FOCUS_ZOOM;
+  } else if (!center && rest.routes?.length) {
+    // 記事で路線だけ指定した場合、東京駅固定の初期位置にせず、
+    // 表示対象すべての駅から適切な中心・ズームを計算する。
+    // モバイルの埋め込み枠でも全線が収まるよう小さめの画面幅を基準にする。
+    const stations = rest.routes.flatMap(key => routes[key] ?? []);
+    if (stations.length) {
+      const fitted = fitMapView(stations, {
+        width: 360, height: 300, padding: 0.18, minZoom: 3, maxZoom: 14,
+      });
+      center = fitted.center;
+      zoom = zoom ?? fitted.zoom;
+    }
   }
   return buildMapHref({ ...rest, center, zoom, view3d: view === '3d', lang, embed });
 }
