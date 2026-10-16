@@ -13,6 +13,7 @@
  * - 言語の切り替えは右上の LanguageSwitcher（各言語版へのリンク）
  */
 import { existingMapPreview, MAP_PREVIEW } from '../../seo/mapPreview';
+import ArticleThumbnail from './ArticleThumbnail.astro';
 import "../../styles/article-layout.css";
 import {
   ARTICLES,
@@ -234,6 +235,7 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
           {related.map(r => (
             <li>
               <a href={articlePath(r.slug, lang)}>
+                <ArticleThumbnail slug={r.slug} lang={lang} title={r.meta.title} />
                 <span class="article-card-title">{r.meta.title}</span>
                 <span class="meta">{r.meta.description}</span>
               </a>
