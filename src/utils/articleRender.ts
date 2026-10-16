@@ -6,7 +6,7 @@
  * 地図へのリンク・埋め込みの URL は mapDeepLink.ts で作る（パラメータ名を書かない）。
  */
 import { buildMapHref } from './mapDeepLink';
-import { fitArticleRoutes } from './articleMapViewport';
+import { fitVisibleRoutes } from './routeMapViewport';
 import { EMBED_PARAM, EMBED_SECTION_PARAM } from './embedMode';
 import { responsiveTableHtml } from '../components/ui/atoms/responsiveTable';
 import { mapEmbedHtml } from '../components/ui/atoms/mapEmbed';
@@ -39,8 +39,8 @@ export function articleMapHref(state: ArticleMapState, lang: ArticleLang, embed 
     zoom = zoom ?? ARTICLE_FOCUS_ZOOM;
   } else if (!center && rest.routes?.length) {
     // 路線フィルタがある場合、記事内に固定されたズーム値よりも全線表示を優先。
-    // 単路線・複数路線とも設定は articleMapViewport.ts で一元管理する。
-    const fitted = fitArticleRoutes(rest);
+    // 単路線・複数路線とも設定は routeMapViewport.ts で一元管理する。
+    const fitted = fitVisibleRoutes(rest.routes);
     if (fitted) {
       center = fitted.center;
       zoom = fitted.zoom;
