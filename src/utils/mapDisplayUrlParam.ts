@@ -7,8 +7,14 @@ import type { Terrain3DGroundStyle } from './terrain3dAppearance';
 // Reuse the application's canonical selectable statistics; do not maintain a second list.
 export const HEATMAP_URL_KEYS = STAT_PARAMS.map(param => param.key);
 
+/** 駅名の前に駅番号を出すか（記事の地図デモ・共有リンク）。1 / 0 */
+export const STATION_NUMBERS_PARAM = 'numbers';
+/** 表示方式（realistic / schematic / bubble / terrain3d） */
+export const VIEW_PARAM = 'view';
+
 export interface DisplayUrlOptions {
   view?: MapViewMode;
+  stationNumbers?: boolean;
   heatmap?: boolean;
   heatmapParam?: keyof StationStats;
   terrainVersion?: Terrain3DVersion;
@@ -18,8 +24,11 @@ export interface DisplayUrlOptions {
 export function parseDisplayUrlParams(search: string): DisplayUrlOptions {
   const params = new URLSearchParams(search);
   const result: DisplayUrlOptions = {};
-  const view = params.get('view');
+  const view = params.get(VIEW_PARAM);
   if (view === 'realistic' || view === 'schematic' || view === 'bubble' || view === 'terrain3d') result.view = view;
+  const numbers = params.get(STATION_NUMBERS_PARAM);
+  if (numbers === '1' || numbers === 'true') result.stationNumbers = true;
+  if (numbers === '0' || numbers === 'false') result.stationNumbers = false;
   const heatmap = params.get('heatmap');
   if (heatmap === '1' || heatmap === 'true') result.heatmap = true;
   if (heatmap === '0' || heatmap === 'false') result.heatmap = false;

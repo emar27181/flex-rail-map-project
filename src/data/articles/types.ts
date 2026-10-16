@@ -13,6 +13,27 @@ import type { ColumnKind } from '../../components/ui/atoms/responsiveTable';
 
 export type ArticleLang = 'ja' | 'en' | 'zh' | 'ko';
 
+/**
+ * 駅の指定。駅名だけだと同じ名前の別の駅（長谷〈江ノ電〉と長谷〈播但線〉など）と区別できないので、
+ * 必ず路線キーと組にする（touristSpots.ts と同じ決まり）。駅ID（全路線で一意の識別子）ができたら id を足す
+ */
+export interface ArticleStationRef {
+  /** 路線データの駅名（日本語。路線データの表記に合わせる） */
+  name: string;
+  /** その駅を通る路線のキー（src/data/routes.ts） */
+  route: RouteKey;
+}
+
+/** 出典（記事に書いた事実の確かめ先）。記事の最後に一覧で出す */
+export interface ArticleSourceRef {
+  title: string;
+  url: string;
+  /** 発行元（鉄道会社・新聞社など） */
+  publisher: string;
+  /** 確かめた日（YYYY-MM-DD） */
+  checkedAt: string;
+}
+
 /** 地図の状態（mapDeepLink.ts の buildMapHref にそのまま渡す。言語・埋め込みは描画側で付ける） */
 export interface ArticleMapState {
   routes?: RouteKey[];
@@ -25,6 +46,12 @@ export interface ArticleMapState {
   zoom?: number;
   /** 駅間の所要時間を開いたときから出す */
   travelTimes?: boolean;
+  /** この駅を中心に開く（center を書かないとき。拡大率は zoom、無ければ駅を見る拡大率） */
+  focus?: ArticleStationRef;
+  /** 駅名の前に駅番号（JY20 など）を出す。日本語の地図では既定で出さないので、見せたいときは true */
+  stationNumbers?: boolean;
+  /** 立体（3D）で開く。既定は2Dの地図 */
+  view?: '2d' | '3d';
 }
 
 /** 埋め込む画面。記事の言語の画面を iframe で開く（articleRender.ts の shotEmbedSrc） */
@@ -85,6 +112,12 @@ export interface ArticleSource {
   related: string[];
   /** 日本語の meta keywords */
   keywordsJa: string;
+  /** 出典。事実（駅番号・導入時期など）を書いた記事は必須（テストで確認）。記事の最後に一覧で出る */
+  sources?: ArticleSourceRef[];
+  /** この記事で扱う路線。記事の最後に路線のページへのリンクを出す */
+  relatedRoutes?: RouteKey[];
+  /** この記事で扱う駅（駅名＋路線）。記事の最後に駅のページへのリンクを出す */
+  relatedStations?: ArticleStationRef[];
   /** 地図の状態（本文の embed / cta と、撮影の map から名前で参照する） */
   maps: Record<string, ArticleMapState>;
   /** この記事で埋め込む画面（本文の { type: 'shot', shot: キー } から使う） */

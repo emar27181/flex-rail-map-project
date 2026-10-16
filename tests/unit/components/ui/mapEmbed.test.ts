@@ -7,6 +7,17 @@ import { mapEmbedHtml, withFirstEmbedPoster } from '../../../../src/components/u
 import { mapPreviewPath } from '../../../../src/seo/mapPreview';
 
 describe('埋め込み地図の読み込み中の画像', () => {
+  it('記事デモの操作・読み込み案内と、main のポスター表示を併用できる', () => {
+    const body = mapEmbedHtml({ src: '/?embed=1', title: '駅番号の地図', openHref: '/?numbers=1', demoId: 'numbers', lang: 'ja' });
+    const out = withFirstEmbedPoster(body, '/og/articles/numbers.jpg');
+    expect(out).toContain('data-demo-id="numbers"');
+    expect(out).toContain('map-embed-status');
+    expect(out).toContain('data-me-open');
+    expect(out).toContain('data-me-fullscreen');
+    expect(out.match(/map-embed-poster/g)).toHaveLength(1);
+    expect(out).toMatch(/alt="駅番号の地図"[^>]*><iframe /);
+  });
+
   it('poster を渡すと iframe の下に画像を敷く（alt は iframe と同じ説明）', () => {
     const html = mapEmbedHtml({ src: '/?routes=jrnar&embed=1', title: 'JR奈良線だけを表示した地図', poster: '/og/lines/jr-nara-line.jpg' });
     expect(html).toMatch(/<img class="map-embed-poster" src="\/og\/lines\/jr-nara-line\.jpg" alt="JR奈良線だけを表示した地図"[^>]*><iframe /);

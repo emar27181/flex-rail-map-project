@@ -18,4 +18,9 @@ describe('shareable map display URL', () => {
   it('keeps existing defaults when not supplied', () => {
     expect(parseDisplayUrlParams('')).toEqual({});
   });
+  it('station numbers can be forced on or off from the URL (article demos show them in Japanese too)', () => {
+    expect(parseDisplayUrlParams('?numbers=1')).toEqual({ stationNumbers: true });
+    expect(parseDisplayUrlParams('?numbers=0')).toEqual({ stationNumbers: false });
+    expect(parseDisplayUrlParams('?numbers=maybe')).toEqual({});
+  });
 });

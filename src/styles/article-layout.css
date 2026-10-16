@@ -149,6 +149,17 @@ figure.map{ margin:34px 0; padding:0; background:var(--surface); border:1px soli
 .readout b{ color:var(--accent-strong); font-weight:800; }
 
 
+/* 目次（閉じて置く）・この記事の路線と駅・出典（ArticleLayout.astro）。見出しは関連記事と同じ h2 */
+.toc{ margin:24px 0 0; padding:0 16px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card); }
+.toc summary{ display:flex; align-items:center; min-height:var(--ctl-md-h); cursor:pointer; font-weight:700; color:var(--ink-soft); }
+.toc ol{ margin:0 0 14px; padding-left:1.4em; display:grid; gap:6px; }
+.toc a{ color:var(--accent-strong); text-decoration:none; }
+.toc a:hover{ text-decoration:underline; }
+.places, .sources{ margin:10px 0 36px; }
+.place-list{ list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:8px 16px; }
+.sources ul{ margin:0; padding-left:1.2em; font-size:13px; line-height:1.8; color:var(--ink-soft); }
+.sources a, .places a{ color:var(--accent-strong); }
+
 .related{ margin:10px 0 36px; }
 .related .article-list{ margin-top:1em; }
 .related .meta{ line-height:1.7; }

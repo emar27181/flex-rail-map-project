@@ -22,14 +22,30 @@ import { EMBED_PARAM } from '../../../utils/embedMode';
 import { THEME_MESSAGE, THEME_PARAM } from '../../../utils/themeStorage';
 import { MEDIA } from '../../../constants/breakpoints';
 
+export const ME_CLASS = {
+  figure: 'map-embed', frame: 'map-embed-frame', status: 'map-embed-status', actions: 'map-embed-actions', poster: 'map-embed-poster',
+} as const;
+
+/**
+ * 埋め込みの下の操作と、読み込み中の案内の文言（言語ごと）。
+ * - 「地図を大きく開く」: 同じ状態の地図を普通の画面で開く（記事の外に出て全部の操作ができる）
+ * - 「全画面」: この枠を画面いっぱいにする（ブラウザが対応していないときは出さない。iPhone の Safari など）
+ * - 読み込み中: 枠の地に出す文字。地図が描かれると隠れる。読み込めないときもリンクから開ける
+ */
+export const MAP_EMBED_LABELS = {
+  ja: { open: '地図を大きく開く', fullscreen: '全画面', loading: '地図を読み込んでいます。表示されないときは「地図を大きく開く」から開けます。' },
+  en: { open: 'Open the full map', fullscreen: 'Full screen', loading: 'Loading the map. If it does not appear, use “Open the full map”.' },
+  zh: { open: '打开完整地图', fullscreen: '全屏', loading: '正在加载地图。如果没有显示，请点击“打开完整地图”。' },
+  ko: { open: '지도 크게 열기', fullscreen: '전체 화면', loading: '지도를 불러오는 중입니다. 표시되지 않으면 ‘지도 크게 열기’를 눌러 주세요.' },
+} as const;
+export type MapEmbedLang = keyof typeof MAP_EMBED_LABELS;
+
 /**
  * スマホで見るときの枠。スマホの画面と同じ縦長にし、中の地図もスマホの画面のまま見せる（2026-10-15:
  * 横長の枠では縦が足りなかった）。大きさはユーザーの別サイト（my-net-homepage-project の作品の埋め込み
  * `.works-preview-frame`）に合わせた: 幅は最大 390px、縦横比 9:17.5
  */
 export const MAP_EMBED_PHONE = { maxWidthPx: 390, aspectRatio: '9 / 17.5' } as const;
-
-export const ME_CLASS = { figure: 'map-embed', frame: 'map-embed-frame', poster: 'map-embed-poster' } as const;
 
 const esc = (s: string) => s.replace(/&(?!(?:[a-z]+|#\d+);)/g, '&amp;').replace(/"/g, '&quot;');
 
@@ -40,6 +56,12 @@ export interface MapEmbedProps {
   title: string;
   /** 下に添える説明（HTML 可） */
   caption?: string;
+  /** 同じ画面を埋め込みでなく開く URL。渡すと下に「地図を大きく開く」「全画面」を出す */
+  openHref?: string;
+  /** 下の操作・読み込み中の文言の言語（openHref を渡すとき） */
+  lang?: MapEmbedLang;
+  /** 計測用の名前（記事の slug/地図のキー。GA4 の demo_id） */
+  demoId?: string;
   /** 読み込むまで下に敷く、同じ画面を撮った画像（src/seo/mapPreview.ts の existingMapPreview） */
   poster?: string;
 }
@@ -47,10 +69,16 @@ export interface MapEmbedProps {
 const posterHtml = (poster: string, alt: string) =>
   `<img class="${ME_CLASS.poster}" src="${esc(poster)}" alt="${esc(alt)}" width="1200" height="630" decoding="async">`;
 
-export function mapEmbedHtml({ src, title, caption, poster }: MapEmbedProps): string {
-  return `<figure class="${ME_CLASS.figure}"><div class="${ME_CLASS.frame}">`
+export function mapEmbedHtml({ src, title, caption, poster, openHref, lang = 'ja', demoId }: MapEmbedProps): string {
+  const t = MAP_EMBED_LABELS[lang];
+  return `<figure class="${ME_CLASS.figure}"${demoId ? ` data-demo-id="${esc(demoId)}"` : ''}><div class="${ME_CLASS.frame}">`
+    + (openHref ? `<p class="${ME_CLASS.status}">${t.loading}</p>` : '')
     + (poster ? posterHtml(poster, title) : '')
     + `<iframe src="${esc(src)}" title="${esc(title)}" loading="lazy"></iframe></div>`
+    + (openHref
+      ? `<div class="${ME_CLASS.actions}"><a class="ctl" href="${esc(openHref)}" data-me-open>${t.open}</a>`
+        + `<button type="button" class="ctl" data-me-fullscreen hidden>${t.fullscreen}</button></div>`
+      : '')
     + (caption ? `<figcaption>${caption}</figcaption>` : '')
     + `</figure>`;
 }
@@ -61,10 +89,10 @@ export function mapEmbedHtml({ src, title, caption, poster }: MapEmbedProps): st
  */
 export function withFirstEmbedPoster(html: string, poster: string | undefined): string {
   if (!poster) return html;
-  const m = html.match(new RegExp(`<div class="${ME_CLASS.frame}">(<iframe [^>]*title="([^"]*)")`));
+  const m = html.match(new RegExp(`<div class="${ME_CLASS.frame}">((?:<p class="${ME_CLASS.status}">[\\s\\S]*?</p>)?)(<iframe [^>]*title="([^"]*)")`));
   if (!m || m.index === undefined) return html;
-  const at = m.index + `<div class="${ME_CLASS.frame}">`.length;
-  return html.slice(0, at) + posterHtml(poster, m[2]) + html.slice(at);
+  const at = m.index + `<div class="${ME_CLASS.frame}">`.length + m[1].length;
+  return html.slice(0, at) + posterHtml(poster, m[3]) + html.slice(at);
 }
 
 export const MAP_EMBED_CSS = `
@@ -75,10 +103,17 @@ export const MAP_EMBED_CSS = `
   border-radius: ${L.r.card}; background: var(--me-surface, transparent); box-shadow: var(--me-shadow, none);
 }
 .${ME_CLASS.frame} iframe { position: relative; display: block; width: 100%; height: 100%; border: 0; }
+.${ME_CLASS.status} {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; margin: 0;
+  padding: ${L.sp['3xl']}; text-align: center; font-size: ${FS.caption}; line-height: 1.7; color: var(--me-muted, inherit);
+}
+.${ME_CLASS.actions} { display: flex; flex-wrap: wrap; gap: ${L.sp.sm}; margin-top: ${L.sp.sm}; }
+
 .${ME_CLASS.poster} { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 @media ${MEDIA.mobile} {
   .${ME_CLASS.frame} { width: min(100%, ${MAP_EMBED_PHONE.maxWidthPx}px); height: auto; aspect-ratio: ${MAP_EMBED_PHONE.aspectRatio}; margin: 0 auto; }
 }
+.${ME_CLASS.frame}:fullscreen { width: 100%; max-width: none; height: 100%; aspect-ratio: auto; margin: 0; border-radius: 0; }
 .${ME_CLASS.figure} figcaption { margin-top: ${L.sp.sm}; font-size: ${FS.caption}; line-height: 1.7; color: var(--me-muted, inherit); }
 `;
 
@@ -94,6 +129,16 @@ export const MAP_EMBED_SCRIPT = `(function(){
     var d = document.documentElement.getAttribute('data-theme');
     if (d === 'light' || d === 'dark') return d;
     return document.body.classList.contains('dark') ? 'dark' : 'light';
+  }
+  // 全画面: ブラウザが対応しているときだけボタンを出す（iPhone の Safari は要素の全画面に対応していない）
+  if (document.fullscreenEnabled) {
+    document.querySelectorAll('[data-me-fullscreen]').forEach(function (btn) {
+      btn.hidden = false;
+      btn.addEventListener('click', function () {
+        var frame = btn.closest('.${ME_CLASS.figure}').querySelector('.${ME_CLASS.frame}');
+        if (document.fullscreenElement) document.exitFullscreen(); else if (frame) frame.requestFullscreen();
+      });
+    });
   }
   var theme = pageTheme();
   frames.forEach(function (frame) {
