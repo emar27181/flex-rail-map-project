@@ -24,7 +24,7 @@ import {
   type ArticleLanguage,
 } from "../../data/articleI18n";
 import { ARTICLE_BODY_TRANSLATIONS } from "../../data/articleBodyI18n";
-import { APP_ICON_PATH, SITE_URL, SITE_NAME, OG_LOCALE, buildHreflangLinks, hreflangCode, withSiteName } from "../../config/seo";
+import { APP_ICON_PATH, GOOGLE_SITE_VERIFICATION, SITE_URL, SITE_NAME, OG_LOCALE, buildHreflangLinks, hreflangCode, withSiteName } from "../../config/seo";
 import FaviconLinks from "../seo/FaviconLinks.astro";
 import GA4Loader from "../GA4Loader.astro";
 import { ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC } from "../../config/ads";
@@ -137,12 +137,12 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
   <meta name="twitter:card" content={preview ? "summary_large_image" : "summary"} />
   {preview && <meta name="twitter:image" content={`${SITE_URL}${preview}`} />}
 
-  <meta name="google-site-verification" content="uyjBT9z6vOnpxn6lM6YnxbI6R4jLSDIAboC8zo1slhM" />
+  {GOOGLE_SITE_VERIFICATION && <meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />}
   <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
   <script async src={ADSENSE_SCRIPT_SRC} crossorigin="anonymous"></script>
 
   <FaviconLinks />
-  <GA4Loader />
+  <GA4Loader consentBanner />
   <link rel="manifest" href="/manifest.json" />
   <style set:html={CONTROL_CSS + RESPONSIVE_TABLE_CSS + MAP_EMBED_CSS + AD_SLOT_CSS}></style>
   <script is:inline define:vars={{ themeKey: THEME_STORAGE_KEY, legacyThemeKey: LEGACY_THEME_STORAGE_KEY }}>

@@ -768,6 +768,8 @@ Netlify管理画面の Site configuration → Build & deploy → Branch deploys 
 - 地図を開くリンクは `MapOpenCta.astro` / `mapDeepLink.ts` だけで作る（`routes` `from` `metric` `lang`）。
 - **駅をURLに出すときは日本語名を直接書かない。** `stationUrlParams.ts` の英語slug変換を必ず使う（例: `渋谷` → `shibuya`, `武蔵小杉` → `musashi-kosugi`）。旧URLの日本語値は読み取りだけ後方互換で許可する
   クリックは GA4 の `seo_map_open` と `{guide,station,line,tourist,data}_map_open` で計測する
+- **GA4 は地図のページ以外では `<GA4Loader consentBanner />` で置く**（Cookie の確認を出し、答えが出るまで計測を始めない）。
+  地図のバナーが無いページで同意を聞かないと、検索から来た人が数えられない（2026-10-16, `docs/seo.md`「GA4 の読み込み範囲」）
 - 仕組み・判断基準・ページを足すときの決まりは **`docs/seo.md`**
 
 ### 記事（/articles）の書き方

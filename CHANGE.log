@@ -1,5 +1,17 @@
 # CHANGE LOG
 
+## [2026-10-16] セッション（記事などでも Cookie の確認を出し、GA4 で数えられるようにする）
+
+### fix: 地図のページ以外でも Cookie の確認を出し、答えてから GA4 の計測を始める
+- `src/components/consent/staticConsentBanner.ts`（新規）, `src/components/GA4Loader.astro`（`consentBanner`）, `ArticleLayout.astro`, `SeoHead.astro`, `StaticPage.astro`, `pages/diagram.astro`, `pages/demo.astro`
+- 確認が地図のページにしか無く、検索から記事に来た人は同意できないため GA4 にほとんど数えられていなかった
+- 答えが出るまで閲覧の送信（config）を始めず、許可なら Cookie 付き・拒否なら Cookie 無しで1回だけ送る
+- テスト: `tests/render/consent.render.ts`（本番の URL を手元のビルドに振り向けて確認。わざと壊して落ちることを確認）, `tests/unit/config/ga4Coverage.test.ts`
+- 文書: `docs/seo.md`「GA4 の読み込み範囲」, `docs/render-tests.md`, `CLAUDE.md`
+
+### improve: 記事ページの Search Console 確認コードを設定から取る
+- `ArticleLayout.astro`。直接書いた確認コードは `ga4Coverage.test.ts` が落とす
+
 ## [2026-10-16] セッション（記事の広告枠）
 
 ### improve: AdSense のサイト運営者 ID を1か所にまとめる

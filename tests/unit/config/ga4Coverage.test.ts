@@ -10,6 +10,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { isProductionSite, PRODUCTION_ORIGIN } from '../../../src/utils/siteHost';
 import { SITE_URL } from '../../../src/config/seo';
+import { CONSENT_STORAGE_KEY, CONSENT_TEXTS } from '../../../src/components/consent/staticConsentBanner';
 
 const SRC = join(__dirname, '../../../src');
 const read = (p: string) => readFileSync(join(SRC, p), 'utf8');
@@ -60,5 +61,51 @@ describe('Cookie の確認は本番で1回だけ', () => {
     const banner = read('components/CookieBanner.tsx');
     expect(banner).toContain('isProductionSite()');
     expect(banner).toContain("localStorage.getItem('cookieConsent')");
+  });
+});
+
+describe('地図のページ以外でも Cookie の確認を出す（2026-10-16）', () => {
+  /** React の地図（RailwayMap の CookieBanner）を読み込むページ。ここは地図のバナーが聞く */
+  const MAP_APP_PAGES = ['pages/index.astro', 'pages/fullscreen.astro'];
+
+  it('GA4Loader を置く所は、地図のページ以外すべて consentBanner を付ける', () => {
+    const withoutBanner = astroFiles(SRC)
+      .map(f => relative(SRC, f).split('\\').join('/'))
+      .filter(rel => rel !== 'components/GA4Loader.astro')
+      .filter(rel => /<GA4Loader\b/.test(read(rel)))
+      .filter(rel => !/<GA4Loader\s+consentBanner\b/.test(read(rel)));
+    expect(withoutBanner.sort()).toEqual([...MAP_APP_PAGES].sort());
+  });
+
+  it('地図のページは地図のバナー（CookieBanner）を出す RailwayMap を読み込む', () => {
+    expect(read('components/RailwayMap.tsx')).toMatch(/<CookieBanner\b/);
+    expect(read('pages/index.astro')).toMatch(/ThemeWrapper/);
+    expect(read('components/FullscreenMapWrapper.tsx')).toMatch(/<RailwayMap\b/);
+  });
+
+  it('答えは地図のバナーと同じ保存先に残す（どちらで答えても、もう一方では聞かない）', () => {
+    expect(read('components/CookieBanner.tsx')).toContain(`localStorage.getItem('${CONSENT_STORAGE_KEY}')`);
+  });
+
+  it('確認を出すページでは、答えが出るまで GA4 の閲覧の送信（config）を始めない', () => {
+    const loader = read('components/GA4Loader.astro');
+    expect(loader).toMatch(/var waitForAnswer = CONSENT_BANNER && !stored;/);
+    expect(loader).toMatch(/if \(!waitForAnswer\) start\(\);/);
+    expect(loader).toMatch(/window\.flexConsentDecided = function/);
+  });
+
+  it('文言は4言語そろっている（地図のバナーと同じ翻訳）', () => {
+    for (const texts of Object.values(CONSENT_TEXTS)) {
+      for (const v of Object.values(texts)) expect(v).toBeTruthy();
+    }
+  });
+});
+
+describe('Search Console の確認コード', () => {
+  it('.env.production 以外に直接書かない（config/seo.ts の GOOGLE_SITE_VERIFICATION から取る）', () => {
+    const offenders = astroFiles(SRC)
+      .map(f => relative(SRC, f).split('\\').join('/'))
+      .filter(rel => /name="google-site-verification"\s+content="/.test(read(rel)));
+    expect(offenders).toEqual([]);
   });
 });

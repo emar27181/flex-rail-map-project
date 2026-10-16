@@ -16,14 +16,28 @@
  *
  * 読み込むのは本番サイト（SITE_URL と同じオリジン）だけ。全ページの <head> に置く
  * （FaviconLinks と同じ場所。tests/unit/config/ga4Coverage.test.ts が抜けを検出する）。
+ *
+ * consentBanner: React の地図（CookieBanner.tsx）を読み込まないページ（記事・ガイド・駅/路線・静的ページ）では
+ * true にする。Cookie の確認をこのページでも出し（components/consent/staticConsentBanner.ts）、答えが出るまで
+ * 計測を始めない。許可なら Cookie 付き、拒否なら Cookie 無しで、そのページの閲覧を1回だけ送る
+ * （2026-10-16: 以前は記事に確認が無く、検索から来た人がほとんど数えられていなかった）。
  */
 import { GA_MEASUREMENT_ID } from '../config/seo';
 import { PRODUCTION_ORIGIN } from '../utils/siteHost';
 import { EMBED_PARAM } from '../utils/embedMode';
+import { CONSENT_CSS, CONSENT_SCRIPT, CONSENT_STORAGE_KEY } from './consent/staticConsentBanner';
+import { CONTROL_CSS } from './ui/atoms/controlCss';
+
+interface Props {
+	/** このページで Cookie の確認を出し、答えが出るまで計測を待つ（地図のページ以外） */
+	consentBanner?: boolean;
+}
+const { consentBanner = false } = Astro.props;
+const CONSENT_BANNER = consentBanner;
 ---
 
 {GA_MEASUREMENT_ID && (
-	<script is:inline define:vars={{ GA_MEASUREMENT_ID, PRODUCTION_ORIGIN, EMBED_PARAM }}>
+	<script is:inline define:vars={{ GA_MEASUREMENT_ID, PRODUCTION_ORIGIN, EMBED_PARAM, CONSENT_BANNER, CONSENT_STORAGE_KEY }}>
 		(function () {
 			// 計測は本番サイトだけ。プレビュー・ローカルのアクセスを本番の数字に混ぜない（utils/siteHost.ts）
 			if (location.origin !== PRODUCTION_ORIGIN) return;
@@ -33,23 +47,44 @@ import { EMBED_PARAM } from '../utils/embedMode';
 			function gtag() { window.dataLayer.push(arguments); }
 			window.gtag = gtag;
 			gtag('consent', 'default', { analytics_storage: 'denied' });
+			var stored = null;
 			try {
-				var stored = JSON.parse(localStorage.getItem('cookieConsent') || 'null');
+				stored = JSON.parse(localStorage.getItem(CONSENT_STORAGE_KEY) || 'null');
 				if (stored && stored.analytics) {
 					gtag('consent', 'update', { analytics_storage: 'granted' });
 				}
 			} catch (e) { /* localStorage不可なら既定のdeniedのまま */ }
+			gtag('js', new Date());
 
+			// 計測（閲覧の送信）を始めるのは1回だけ。確認を出すページでは答えが出てから
+			var started = false;
+			var start = function () {
+				if (started) return;
+				started = true;
+				gtag('config', GA_MEASUREMENT_ID);
+			};
+			var waitForAnswer = CONSENT_BANNER && !stored;
+			window.flexConsentDecided = function (granted) {
+				gtag('consent', 'update', { analytics_storage: granted ? 'granted' : 'denied' });
+				start();
+			};
 			var load = function () {
 				var s = document.createElement('script');
 				s.async = true;
 				s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
 				document.head.appendChild(s);
-				gtag('js', new Date());
-				gtag('config', GA_MEASUREMENT_ID);
+				if (!waitForAnswer) start();
 			};
 			if (document.readyState === 'complete') load();
 			else window.addEventListener('load', load, { once: true });
 		})();
 	</script>
+)}
+
+{consentBanner && (
+	<>
+		{/* ボタンは記事と同じ .ctl（.ctl を読み込んでいないページもあるため一緒に入れる。値は同じ定義元） */}
+		<style set:html={CONTROL_CSS + CONSENT_CSS}></style>
+		<script is:inline set:html={CONSENT_SCRIPT}></script>
+	</>
 )}
