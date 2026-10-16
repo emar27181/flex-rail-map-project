@@ -1,5 +1,15 @@
 # CHANGE LOG
 
+## [2026-10-16] セッション（記事の広告を減らす）
+
+### improve: 記事の広告を1記事に1つ（半分）に減らす
+- `src/utils/articleRender.ts`（`ARTICLE_AD_FIRST_SECTION` = 3, `ARTICLE_AD_EVERY_SECTIONS` = 6）, `ArticleLayout.astro`（読み終わった後の広告をやめる）
+- 4節の記事で2つ → 1つ。全148ページで1つになったことをビルド結果で確認
+- テスト: `tests/unit/utils/articleAds.test.ts`, `tests/render/article.render.ts`。文書: `docs/article-writing.md`「広告」, `docs/design-system.md`, `docs/render-tests.md`, `CLAUDE.md`
+
+### fix: Cookie の確認の描画テストが終わった後の読み込みで落ちることがあったのを直す
+- `tests/render/consent.render.ts`。CI のスマホで落ち、PR #76 の CI も赤になっていた
+
 ## [2026-10-16] セッション（記事などでも Cookie の確認を出し、GA4 で数えられるようにする）
 
 ### fix: 地図のページ以外でも Cookie の確認を出し、答えてから GA4 の計測を始める
