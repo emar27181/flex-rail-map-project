@@ -18,6 +18,26 @@ describe('記事の地図デモの URL', () => {
     expect(query(href).get('zoom')).toBe(String(ARTICLE_FOCUS_ZOOM));
   });
 
+  it('記事の初期位置を路線全体から求め、東京駅固定にしない', () => {
+    const params = query(articleMapHref({ routes: ['enoshimaElectricRailway'], zoom: 13 }, 'ja', true));
+    const center = params.get('center')?.split(',').map(Number) ?? [];
+    expect(center).toHaveLength(2);
+    expect(center[0]).toBeGreaterThan(35.2);
+    expect(center[0]).toBeLessThan(35.4);
+    expect(center[1]).toBeLessThan(139.7);
+    // 記事に指定されたズーム値は全線フィット計算で置き換える。
+    expect(Number(params.get('zoom'))).toBeLessThan(13);
+  });
+
+  it('複数の路線も一括で範囲計算し、明示的な中心とfocusは保つ', () => {
+    const a = query(articleMapHref({ routes: ['enoshimaElectricRailway', 'yamanote'] }, 'en', true));
+    expect(a.get('center')).toBeTruthy();
+    expect(Number(a.get('zoom'))).toBeGreaterThanOrEqual(2);
+    const explicit = query(articleMapHref({ routes: ['yamanote'], center: [35.68, 139.76], zoom: 12 }, 'en', true));
+    expect(explicit.get('center')).toBe('35.68,139.76');
+    expect(explicit.get('zoom')).toBe('12');
+  });
+
   it('路線に無い駅を focus にすると止める', () => {
     expect(() => articleMapHref({ focus: { name: '梅田', route: 'yamanote' } }, 'en')).toThrow(/梅田/);
   });

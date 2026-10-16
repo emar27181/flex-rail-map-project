@@ -167,3 +167,10 @@ GA4 は本番サイトでだけ読み込む（プレビューの操作は数え�
   https://developers.google.com/search/docs/appearance/google-images
 - PREP 法（結論を先に言う）: https://tcd-theme.com/2021/11/prep.html
 - 起承転結で記事を組み立てる: https://note.com/aquaescape/n/nb96ff5723c83
+
+## 記事プレビュー画像と公開前確認
+
+- 記事一覧・関連記事・OG / Twitter / Article構造化データは、同じ `public/og/{言語}/articles/{slug}.jpg` を再利用する。
+- 画像の撮影は `npm run build && npm run og:capture -- --only /articles/`。路線フィルタが変わったら再撮影し、再ビルドする。
+- 画像が無い記事は壊れた画像を出さない。検索結果のサムネイル表示は検索エンジン側の判断であり保証されない。
+- **マージ前に必ず最新headのCI成功、Netlifyプレビュー成功を確認する。** 自動生成画像のコミットでCIが承認待ちになった場合はグリーン扱いしない。
