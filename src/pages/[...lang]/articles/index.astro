@@ -4,6 +4,7 @@ import ArticleLayout from "../../../components/articles/ArticleLayout.astro";
 import { ARTICLES, ARTICLE_LANGUAGES, ARTICLE_PAGE_TRANSLATIONS, type ArticleLanguage } from "../../../data/articleI18n";
 import { articlePath } from "../../../config/articleSeo";
 import { withSiteName } from "../../../config/seo";
+import ArticleThumbnail from '../../../components/articles/ArticleThumbnail.astro';
 
 export function getStaticPaths() {
   return ARTICLE_LANGUAGES.filter(lang => lang !== "ja").map(lang => ({ params: { lang }, props: { lang } }));
@@ -25,6 +26,7 @@ const meta = ARTICLE_PAGE_TRANSLATIONS.articles[lang];
         return (
           <li>
             <a href={articlePath(article.slug, lang)}>
+              <ArticleThumbnail slug={article.slug} lang={lang} title={t.title} />
               <span class="article-card-title">{t.title}</span>
               <span class="meta">{month(article.publishedDate)} ｜ <span>{t.category}</span></span>
             </a>
