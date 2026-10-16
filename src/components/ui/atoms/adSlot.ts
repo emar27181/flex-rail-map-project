@@ -35,7 +35,7 @@ export interface AdSlotProps {
   /** 広告ユニット ID。空なら本番では出さない */
   slot: string;
   lang: AdSlotLang;
-  /** 位置の名前（本文の何番目か・読み終わった後か。確かめるときの目印） */
+  /** 位置の名前（本文の何番目か。確かめるときの目印） */
   position: string;
 }
 

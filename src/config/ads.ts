@@ -18,7 +18,7 @@ export const ADSENSE_SCRIPT_SRC = `https://pagead2.googlesyndication.com/pagead/
  * 推測した値・仮の値を入れない（2026-10: 地図の下の固定広告の `0987654321` は管理画面で
  * 実在を確かめられていない仮の値のまま残っている）。空のあいだは、その広告枠は本番に出さない。
  *
- * - articleInline: 記事の本文の間と読み終わった後に置く「記事内広告」（ui/atoms/adSlot.ts）。
+ * - articleInline: 記事の本文の間に置く「記事内広告」（ui/atoms/adSlot.ts）。
  *   同じユニットを1ページに何回置いてもよい（AdSense の決まり）
  */
 export const ADSENSE_SLOTS = {
