@@ -25,16 +25,18 @@ export function parseMapView(center: string | null | undefined, zoom: string | n
   return { center: [lat, lng], zoom: z !== undefined && Number.isFinite(z) && z >= MIN_ZOOM && z <= MAX_ZOOM ? z : undefined };
 }
 
+/** URLの初期表示設定を解決する純粋関数。明示座標 > 路線フィット > デフォルト。 */
+export function resolveInitialMapView(params: URLSearchParams): MapView | null {
+  const explicit = parseMapView(params.get(MAP_CENTER_PARAM), params.get(MAP_ZOOM_PARAM));
+  if (explicit) return explicit;
+  const selected = decodeVisibleRoutesParam(params.get(VISIBLE_ROUTES_PARAM));
+  return selected ? fitVisibleRoutes([...selected]) ?? null : null;
+}
+
 export function getInitialMapViewFromUrl(): MapView | null {
   if (typeof window === 'undefined') return null;
   try {
-    const params = new URLSearchParams(window.location.search);
-    const explicit = parseMapView(params.get(MAP_CENTER_PARAM), params.get(MAP_ZOOM_PARAM));
-    if (explicit) return explicit;
-    // ?routes=... だけでも対象路線全体が画面内に収まる初期位置で開く。
-    // 地図本体・記事・共有リンクを同じ計算に統一する。
-    const selected = decodeVisibleRoutesParam(params.get(VISIBLE_ROUTES_PARAM));
-    return selected ? fitVisibleRoutes([...selected]) ?? null : null;
+    return resolveInitialMapView(new URLSearchParams(window.location.search));
   } catch {
     return null;
   }
