@@ -100,3 +100,12 @@ describe('地図のページ以外でも Cookie の確認を出す（2026-10-16�
     }
   });
 });
+
+describe('Search Console の確認コード', () => {
+  it('.env.production 以外に直接書かない（config/seo.ts の GOOGLE_SITE_VERIFICATION から取る）', () => {
+    const offenders = astroFiles(SRC)
+      .map(f => relative(SRC, f).split('\\').join('/'))
+      .filter(rel => /name="google-site-verification"\s+content="/.test(read(rel)));
+    expect(offenders).toEqual([]);
+  });
+});

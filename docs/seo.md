@@ -234,6 +234,8 @@ Search Console（2026-09-15〜10-12）で、英語の路線ページ（JR奈良�
 - 確認を出すページでは、**答えが出るまで GA4 の閲覧の送信（`config`）を始めない**。許可なら Cookie 付き、
   「必要なもののみ」なら Cookie 無しで、そのページの閲覧を1回だけ送る（同意の後に二重に数えない）。答えないまま
   離れた人は送らない。地図のページ（`index` / `fullscreen`）は地図のバナー（`CookieBanner`）が聞き、今までどおりすぐ始める
+- Search Console の確認コードは `GOOGLE_SITE_VERIFICATION`（`.env.production`）だけから出す。ページに直接書かない
+  （`tests/unit/config/ga4Coverage.test.ts`）
 
 ### 地図アプリの中の GA4 イベント（2026-10-07）
 
