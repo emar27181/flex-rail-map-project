@@ -142,7 +142,7 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
   <script async src={ADSENSE_SCRIPT_SRC} crossorigin="anonymous"></script>
 
   <FaviconLinks />
-  <GA4Loader />
+  <GA4Loader consentBanner />
   <link rel="manifest" href="/manifest.json" />
   <style set:html={CONTROL_CSS + RESPONSIVE_TABLE_CSS + MAP_EMBED_CSS + AD_SLOT_CSS}></style>
   <script is:inline define:vars={{ themeKey: THEME_STORAGE_KEY, legacyThemeKey: LEGACY_THEME_STORAGE_KEY }}>
