@@ -770,6 +770,8 @@ Netlify管理画面の Site configuration → Build & deploy → Branch deploys 
 - 地図を開くリンクは `MapOpenCta.astro` / `mapDeepLink.ts` だけで作る（`routes` `from` `metric` `lang`）。
 - **駅をURLに出すときは日本語名を直接書かない。** `stationUrlParams.ts` の英語slug変換を必ず使う（例: `渋谷` → `shibuya`, `武蔵小杉` → `musashi-kosugi`）。旧URLの日本語値は読み取りだけ後方互換で許可する
   クリックは GA4 の `seo_map_open` と `{guide,station,line,tourist,data}_map_open` で計測する
+- **GA4 は地図のページ以外では `<GA4Loader consentBanner />` で置く**（Cookie の確認を出し、答えが出るまで計測を始めない）。
+  地図のバナーが無いページで同意を聞かないと、検索から来た人が数えられない（2026-10-16, `docs/seo.md`「GA4 の読み込み範囲」）
 - 仕組み・判断基準・ページを足すときの決まりは **`docs/seo.md`**
 
 ### 記事（/articles）の書き方
@@ -784,6 +786,9 @@ Netlify管理画面の Site configuration → Build & deploy → Branch deploys 
 - **記事の駅番号・駅名・路線名は手で書かない。** `{stationNumber:路線キー:駅名}` などで路線データから差し込む（`src/utils/articleFacts.ts`）。
   事実を書いたら `sources`（出典）を付ける。新しい記事は `npm run article:new -- --slug {slug}` → `npm run article:validate`。
   設計判断は `docs/article-platform.md`、AI への指示文は `docs/templates/article-prompt.md`
+- **広告は記事データに書かない。** `articleRender.ts` が本文の3節ごと（3つ目の見出しの前から）と読み終わった後に置く。
+  本番のサイトだけで読み込み、プレビューでは位置だけ見せる。広告ユニット ID は `src/config/ads.ts`（推測した値を入れない）。
+  決まりは `docs/article-writing.md` の「広告」
 
 ### CHANGE.log 記録ルール
 

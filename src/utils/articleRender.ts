@@ -6,9 +6,12 @@
  * 地図へのリンク・埋め込みの URL は mapDeepLink.ts で作る（パラメータ名を書かない）。
  */
 import { buildMapHref } from './mapDeepLink';
+import { fitVisibleRoutes } from './routeMapViewport';
 import { EMBED_PARAM, EMBED_SECTION_PARAM } from './embedMode';
 import { responsiveTableHtml } from '../components/ui/atoms/responsiveTable';
 import { mapEmbedHtml } from '../components/ui/atoms/mapEmbed';
+import { adSlotHtml } from '../components/ui/atoms/adSlot';
+import { ADSENSE_SLOTS } from '../config/ads';
 import { ARTICLE_SOURCES } from '../data/articles';
 import { findArticleStation, resolveArticleTokens } from './articleFacts';
 import type { ArticleBlock, ArticleLang, ArticleMapState, ArticleShotSpec, ArticleSource } from '../data/articles/types';
@@ -36,6 +39,14 @@ export function articleMapHref(state: ArticleMapState, lang: ArticleLang, embed 
     if (!st) throw new Error(`地図の focus: 路線 ${focus.route} に駅「${focus.name}」が無い`);
     center = [st.lat, st.lng];
     zoom = zoom ?? ARTICLE_FOCUS_ZOOM;
+  } else if (!center && rest.routes?.length) {
+    // 路線フィルタがある場合、記事内に固定されたズーム値よりも全線表示を優先。
+    // 単路線・複数路線とも設定は routeMapViewport.ts で一元管理する。
+    const fitted = fitVisibleRoutes(rest.routes);
+    if (fitted) {
+      center = fitted.center;
+      zoom = fitted.zoom;
+    }
   }
   return buildMapHref({ ...rest, center, zoom, view3d: view === '3d', lang, embed });
 }
@@ -162,9 +173,54 @@ function blockEmbedSrc(block: ArticleBlock, source: ArticleSource, lang: Article
   return null;
 }
 
+/**
+ * 本文の広告の置き方。結論とその直後の地図のデモの近くには置かず（読む前に広告を見せない・地図の操作と押し間違えさせない）、
+ * 3つ目の見出しの前から3節ごとに1つ置く。節の多い長い記事ほど広告が増える（4節の記事は1つ、7節なら2つ）。
+ * 読み終わった後の広告（articleEndAdHtml）は別に1つ。
+ */
+export const ARTICLE_AD_EVERY_SECTIONS = 3;
+
+/**
+ * 広告のすぐ上に来てよいか。地図を開くボタン・中身の分からない HTML・説明文の無い地図のデモの下には置かない
+ * （地図のデモの下には「地図を大きく開く」などのボタンがある。説明文があれば、ボタンと広告の間に文が挟まる）
+ */
+function adSafeAfter(block: ArticleBlock): boolean {
+  if (block.type === 'cta' || block.type === 'html') return false;
+  if (block.type === 'embed' || block.type === 'shot') return Boolean(block.caption);
+  return true;
+}
+
+/**
+ * 本文に広告を置く節の番号（1始まり。その節の見出しの前に置く）。
+ * 候補の節の直前がボタン・説明文の無い地図なら、次の候補の手前までの範囲で後ろの節へずらす。置ける所が無ければ置かない
+ */
+export function articleAdSections(blocks: ArticleBlock[]): number[] {
+  const h2At = blocks.flatMap((b, i) => (b.type === 'h2' ? [i] : []));
+  const sections: number[] = [];
+  for (let k = ARTICLE_AD_EVERY_SECTIONS; k <= h2At.length; k += ARTICLE_AD_EVERY_SECTIONS) {
+    for (let s = k; s <= h2At.length && s < k + ARTICLE_AD_EVERY_SECTIONS; s++) {
+      const prev = blocks[h2At[s - 1] - 1];
+      if (prev && adSafeAfter(prev)) { sections.push(s); break; }
+    }
+  }
+  return sections;
+}
+
+/** 読み終わった後（出典の後・関連記事の前）に置く広告 */
+export function articleEndAdHtml(lang: ArticleLang): string {
+  return adSlotHtml({ slot: ADSENSE_SLOTS.articleInline, lang, position: 'end' });
+}
+
 export function renderArticleBody(source: ArticleSource, lang: ArticleLang): string {
   const h2Index = { n: 0 };
-  const html = articleBlocksForRender(source, lang).map(b => renderBlock(b, source, lang, h2Index)).join('\n');
+  const blocks = articleBlocksForRender(source, lang);
+  const adSections = articleAdSections(blocks);
+  const html = blocks.map(b => {
+    const ad = b.type === 'h2' && adSections.includes(h2Index.n + 1)
+      ? adSlotHtml({ slot: ADSENSE_SLOTS.articleInline, lang, position: `inline-${adSections.indexOf(h2Index.n + 1) + 1}` }) + '\n'
+      : '';
+    return ad + renderBlock(b, source, lang, h2Index);
+  }).join('\n');
   // 駅番号・駅名の差し込み（articleFacts.ts）。データに無いものはここで止まる
   return resolveArticleTokens(html, lang, `${source.slug} (${lang})`);
 }

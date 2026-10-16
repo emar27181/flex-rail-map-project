@@ -131,6 +131,22 @@
 - `relatedRoutes` / `relatedStations`: 記事の最後に路線・駅のページへのリンクを出す（その言語のページがあるものだけリンク）
 - 目次は `h2` から自動で作る（見出しに `section-1` などの id が付く）
 
+## 広告（2026-10-16, `ui/atoms/adSlot.ts`）
+
+記事データに広告を書かない。描画（`src/utils/articleRender.ts`）がすべての記事・言語に同じ決まりで置く。
+
+| 位置 | 決まり |
+|---|---|
+| 本文の間 | 3つ目の見出しの前から3節ごとに1つ（`articleAdSections`）。4節の記事は1つ、7節なら2つ。結論と冒頭のデモの近くには置かない |
+| 読み終わった後 | 出典の後・関連記事の前に1つ（`articleEndAdHtml`） |
+
+- 地図を開くボタン・説明文の無い地図のデモのすぐ下には置かない（後ろの節へずらす。押し間違えを誘わない）
+- 広告は本番のサイトだけで読み込む。プレビューでは点線の「広告枠」の箱で位置だけ見せる
+- 広告ユニット ID は `src/config/ads.ts` の `ADSENSE_SLOTS.articleInline`（AdSense の管理画面で作った「記事内広告」の ID）。
+  空のあいだは本番に何も出ない
+- どの広告が出るかは AdSense がページの内容（言語・地名・話題）と閲覧者から選ぶ。記事の話題がはっきりしているほど
+  記事に合った広告になりやすい（1記事1テーマにする理由の1つ）。広告主をこちらで指定することはできない
+
 ## 計測（GA4, `src/utils/articleAnalytics.ts`）
 
 | イベント | いつ |
@@ -167,3 +183,10 @@ GA4 は本番サイトでだけ読み込む（プレビューの操作は数え�
   https://developers.google.com/search/docs/appearance/google-images
 - PREP 法（結論を先に言う）: https://tcd-theme.com/2021/11/prep.html
 - 起承転結で記事を組み立てる: https://note.com/aquaescape/n/nb96ff5723c83
+
+## 記事プレビュー画像と公開前確認
+
+- 記事一覧・関連記事・OG / Twitter / Article構造化データは、同じ `public/og/{言語}/articles/{slug}.jpg` を再利用する。
+- 画像の撮影は `npm run build && npm run og:capture -- --only /articles/`。路線フィルタが変わったら再撮影し、再ビルドする。
+- 画像が無い記事は壊れた画像を出さない。検索結果のサムネイル表示は検索エンジン側の判断であり保証されない。
+- **マージ前に必ず最新headのCI成功、Netlifyプレビュー成功を確認する。** 自動生成画像のコミットでCIが承認待ちになった場合はグリーン扱いしない。

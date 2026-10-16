@@ -4,6 +4,7 @@ import SiteFooterNav from "../components/SiteFooterNav.astro";
 import leafletCss from "leaflet/dist/leaflet.css?url";
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION } from "../config/seo";
 import GA4Loader from "../components/GA4Loader.astro";
+import { ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC } from "../config/ads";
 import FaviconLinks from '../components/seo/FaviconLinks.astro';
 import { translateUI, type Language } from '../utils/translation';
 import { APP_LOADING_ID, APP_LOADING_MESSAGE_ID, APP_LOADING_STAGES, APP_LOADING_MESSAGE_KEYS, APP_LOADING_FADE_MS, APP_LOADING_BAR, type AppLoadingMessages } from '../constants/appLoading';
@@ -105,8 +106,8 @@ const appLoadingMessages = Object.fromEntries(APP_LOADING_LANGUAGES.map(lang => 
 		{GOOGLE_SITE_VERIFICATION && (
 			<meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />
 		)}
-		<meta name="google-adsense-account" content="ca-pub-2444529114040977" />
-		<script is:inline>
+		<meta name="google-adsense-account" content={ADSENSE_CLIENT} />
+		<script is:inline define:vars={{ ADSENSE_SCRIPT_SRC }}>
 			// 広告スクリプトは head で読むとアプリのJSと帯域・実行時間を奪い合い、
 			// 地図が出るまでの時間が延びる。表示に必要なものが揃ってから読み込む。
 			(function () {
@@ -114,7 +115,7 @@ const appLoadingMessages = Object.fromEntries(APP_LOADING_LANGUAGES.map(lang => 
 					var s = document.createElement('script');
 					s.async = true;
 					s.crossOrigin = 'anonymous';
-					s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2444529114040977';
+					s.src = ADSENSE_SCRIPT_SRC;
 					document.head.appendChild(s);
 				};
 				// 記事に埋め込む表示（?embed=1, src/utils/embedMode.ts）では広告を読まない

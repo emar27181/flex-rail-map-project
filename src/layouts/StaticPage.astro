@@ -10,6 +10,7 @@
  * ページ側には中身だけを書く。日本語版を `<div id={`${langPrefix}-ja`}>`、
  * 英語版を `-en` で囲むと、?lang= に応じてどちらかが表示される。
  */
+import { ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC } from "../config/ads";
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import { THEME_STORAGE_KEY, LEGACY_THEME_STORAGE_KEY } from '../utils/themeStorage';
 import SiteFooterNav from '../components/SiteFooterNav.astro';
@@ -59,10 +60,10 @@ const {
 		{GOOGLE_SITE_VERIFICATION && (
 			<meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />
 		)}
-		<meta name="google-adsense-account" content="ca-pub-2444529114040977" />
-		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2444529114040977" crossorigin="anonymous"></script>
+		<meta name="google-adsense-account" content={ADSENSE_CLIENT} />
+		<script async src={ADSENSE_SCRIPT_SRC} crossorigin="anonymous"></script>
 		<FaviconLinks />
-		<GA4Loader />
+		<GA4Loader consentBanner />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
 

@@ -13,6 +13,7 @@
  * - 言語の切り替えは右上の LanguageSwitcher（各言語版へのリンク）
  */
 import { existingMapPreview, MAP_PREVIEW } from '../../seo/mapPreview';
+import ArticleThumbnail from './ArticleThumbnail.astro';
 import "../../styles/article-layout.css";
 import {
   ARTICLES,
@@ -23,13 +24,15 @@ import {
   type ArticleLanguage,
 } from "../../data/articleI18n";
 import { ARTICLE_BODY_TRANSLATIONS } from "../../data/articleBodyI18n";
-import { APP_ICON_PATH, SITE_URL, SITE_NAME, OG_LOCALE, buildHreflangLinks, hreflangCode, withSiteName } from "../../config/seo";
+import { APP_ICON_PATH, GOOGLE_SITE_VERIFICATION, SITE_URL, SITE_NAME, OG_LOCALE, buildHreflangLinks, hreflangCode, withSiteName } from "../../config/seo";
 import FaviconLinks from "../seo/FaviconLinks.astro";
 import GA4Loader from "../GA4Loader.astro";
+import { ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC } from "../../config/ads";
 import { CONTROL_CSS, HEADER_LOGO_PX } from "../ui/atoms/controlCss";
 import { RESPONSIVE_TABLE_CSS } from "../ui/atoms/responsiveTable";
 import { ARTICLE_SOURCES } from "../../data/articles";
-import { articleToc } from "../../utils/articleRender";
+import { articleEndAdHtml, articleToc } from "../../utils/articleRender";
+import { AD_SLOT_CSS, AD_SLOT_SCRIPT } from "../ui/atoms/adSlot";
 import { findArticleStation } from "../../utils/articleFacts";
 import { getSeoModel, hasStationPage, lineByKey, linePath, routeName, stationName, stationPath } from "../../seo/pageModel";
 
@@ -134,14 +137,14 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
   <meta name="twitter:card" content={preview ? "summary_large_image" : "summary"} />
   {preview && <meta name="twitter:image" content={`${SITE_URL}${preview}`} />}
 
-  <meta name="google-site-verification" content="uyjBT9z6vOnpxn6lM6YnxbI6R4jLSDIAboC8zo1slhM" />
-  <meta name="google-adsense-account" content="ca-pub-2444529114040977" />
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2444529114040977" crossorigin="anonymous"></script>
+  {GOOGLE_SITE_VERIFICATION && <meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />}
+  <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
+  <script async src={ADSENSE_SCRIPT_SRC} crossorigin="anonymous"></script>
 
   <FaviconLinks />
-  <GA4Loader />
+  <GA4Loader consentBanner />
   <link rel="manifest" href="/manifest.json" />
-  <style set:html={CONTROL_CSS + RESPONSIVE_TABLE_CSS + MAP_EMBED_CSS}></style>
+  <style set:html={CONTROL_CSS + RESPONSIVE_TABLE_CSS + MAP_EMBED_CSS + AD_SLOT_CSS}></style>
   <script is:inline define:vars={{ themeKey: THEME_STORAGE_KEY, legacyThemeKey: LEGACY_THEME_STORAGE_KEY }}>
     // 地図・ほかのページと同じ保存先のテーマ（utils/themeStorage.ts）
     (function(){
@@ -227,6 +230,8 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
         </ul>
       </section>
     )}
+    {/* 読み終わった後の広告（本文の間の広告は articleRender.ts が置く）。位置の決まりは ui/atoms/adSlot.ts */}
+    {isArticle && <Fragment set:html={articleEndAdHtml(lang)} />}
     {related.length > 0 && (
       <section class="related" aria-labelledby="related-heading">
         <h2 id="related-heading">{shell.relatedArticles}</h2>
@@ -234,6 +239,7 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
           {related.map(r => (
             <li>
               <a href={articlePath(r.slug, lang)}>
+                <ArticleThumbnail slug={r.slug} lang={lang} title={r.meta.title} />
                 <span class="article-card-title">{r.meta.title}</span>
                 <span class="meta">{r.meta.description}</span>
               </a>
@@ -264,6 +270,8 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
   </script>
   <!-- 埋め込んだ画面は押すまで触れない（ui/atoms/mapEmbed.ts） -->
   <script is:inline set:html={MAP_EMBED_SCRIPT}></script>
+  <!-- 広告は本番のサイトだけ。ほかでは位置だけ見せる（ui/atoms/adSlot.ts） -->
+  <script is:inline set:html={AD_SLOT_SCRIPT}></script>
   {isArticle && (
     <script is:inline type="application/json" id="article-context" set:html={JSON.stringify({ article: pageKey, locale: lang })}></script>
   )}

@@ -17,6 +17,31 @@
 - `src/utils/translation.ts`: メモの「Nearest station」→「Station」（「Name」と並ぶ入力欄）
 - `src/components/ui/atoms/Chip.tsx`: 長い路線名のボタンが一覧の右端で切れていた。並びの幅までにし、語の切れ目で2行にする
 
+## [2026-10-16] セッション（記事などでも Cookie の確認を出し、GA4 で数えられるようにする）
+
+### fix: 地図のページ以外でも Cookie の確認を出し、答えてから GA4 の計測を始める
+- `src/components/consent/staticConsentBanner.ts`（新規）, `src/components/GA4Loader.astro`（`consentBanner`）, `ArticleLayout.astro`, `SeoHead.astro`, `StaticPage.astro`, `pages/diagram.astro`, `pages/demo.astro`
+- 確認が地図のページにしか無く、検索から記事に来た人は同意できないため GA4 にほとんど数えられていなかった
+- 答えが出るまで閲覧の送信（config）を始めず、許可なら Cookie 付き・拒否なら Cookie 無しで1回だけ送る
+- テスト: `tests/render/consent.render.ts`（本番の URL を手元のビルドに振り向けて確認。わざと壊して落ちることを確認）, `tests/unit/config/ga4Coverage.test.ts`
+- 文書: `docs/seo.md`「GA4 の読み込み範囲」, `docs/render-tests.md`, `CLAUDE.md`
+
+### improve: 記事ページの Search Console 確認コードを設定から取る
+- `ArticleLayout.astro`。直接書いた確認コードは `ga4Coverage.test.ts` が落とす
+
+## [2026-10-16] セッション（記事の広告枠）
+
+### improve: AdSense のサイト運営者 ID を1か所にまとめる
+- `src/config/ads.ts`（新規）, `src/components/AdSenseAd.tsx`, `src/components/StickyBottomAd.tsx`, `src/components/articles/ArticleLayout.astro`, `src/layouts/StaticPage.astro`, `src/pages/index.astro`
+- 6か所の `ca-pub-…` の直書きをやめた。直書き・仮の連番の広告ユニット ID は `tests/unit/config/ads.test.ts` が落とす
+
+### feat: 記事の本文の間と読み終わった後に広告枠を置く
+- `src/components/ui/atoms/adSlot.ts`（新規）, `src/utils/articleRender.ts`（`articleAdSections` / `articleEndAdHtml`）, `ArticleLayout.astro`, `article-layout.css`
+- 本文: 3つ目の見出しの前から3節ごとに1つ。読み終わった後: 出典の後・関連記事の前に1つ。地図を開くボタン・説明文の無いデモの直下には置かない
+- 広告を読むのは本番だけ。プレビューでは点線の「広告枠」の箱で位置だけ見せる。広告ユニット ID（`ADSENSE_SLOTS.articleInline`）は未設定のため、設定するまで本番には出ない
+- テスト: `tests/unit/utils/articleAds.test.ts`（全記事・全言語の位置）, `tests/render/article.render.ts`（本番以外で広告を読まず箱が出る。わざと壊して落ちることを確認）
+- 文書: `docs/article-writing.md`「広告」, `docs/design-system.md`, `docs/render-tests.md`, `CLAUDE.md`
+
 ## [2026-10-16] セッション（PR #79 の競合解消）
 
 ### fix: 最新 main と記事基盤を統合し、双方の地図デモ機能を保持

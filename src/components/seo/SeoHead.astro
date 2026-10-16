@@ -76,6 +76,6 @@ const ogImage = preview ? canonicalUrl(preview) : DEFAULT_OG_IMAGE;
 
 {jsonLd.map(j => <script type="application/ld+json" set:html={JSON.stringify(j)} />)}
 
-<GA4Loader />
+<GA4Loader consentBanner />
 
 {[CONTROL_CSS, ...styles].map(css => <style set:html={css}></style>)}

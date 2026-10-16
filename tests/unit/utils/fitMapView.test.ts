@@ -26,6 +26,14 @@ describe('fitMapView', () => {
     expect(px).toBeLessThanOrEqual(box.width * 0.7);
   });
 
+  it('整数ズームに切り捨てず、路線を収めたまま大きく表示する', () => {
+    const pts = [{ lat: 35.4657, lng: 139.6223 }, { lat: 35.6580, lng: 139.7016 }];
+    const result = fitMapView(pts, { ...box, padding: 0.08 });
+    expect(Number.isFinite(result.zoom)).toBe(true);
+    const spanPx = (256 * Math.pow(2, result.zoom) * (pts[1].lng - pts[0].lng)) / 360;
+    expect(spanPx).toBeLessThanOrEqual(box.width * 0.84);
+  });
+
   it('1駅だけでも最大の拡大率で止まる', () => {
     expect(fitMapView([{ lat: 35.68, lng: 139.76 }], box).zoom).toBe(14);
   });
