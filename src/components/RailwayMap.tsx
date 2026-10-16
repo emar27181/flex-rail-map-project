@@ -321,6 +321,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
   const [showStationTierBadges, setShowStationTierBadges] = useState(false); // 乗り入れ路線数リング表示
   const [showTravelTimes, setShowTravelTimes] = useState(getInitialTravelTimesFromUrl);
+  // 出発駅の新規設定・変更時は所要時間を自動表示する。
+  // 駅が変わらない限りは手動OFFを維持（同じ出発駅での再描画ではONに戻さない）。
+  // 累積/区間の既定切替は useTravelTimeLabelMode が一元管理する。
+  useEffect(() => {
+    if (departure) setShowTravelTimes(true);
+  }, [departure?.name, departure?.lat, departure?.lng]); // eslint-disable-line react-hooks/exhaustive-deps
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
   // 既定は日本語以外で出す。記事の地図デモ・共有リンクは URL（?numbers=1, mapDisplayUrlParam.ts）で指定できる
