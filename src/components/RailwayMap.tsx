@@ -5467,7 +5467,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               ))}
 
               {/* 非表示路線（半透明・クリック可能）─ バブルモードでは非表示 */}
-              {mapViewMode !== 'bubble' && showDimmedMapRoutes && Object.entries(routes)
+              {transportMode === 'rail' && mapViewMode !== 'bubble' && showDimmedMapRoutes && Object.entries(routes)
                 .filter(([rk]) => !visibleRoutes.has(rk as RouteKey))
                 .map(([rk, stationList]) => {
                   const rKey = rk as RouteKey;
@@ -5528,7 +5528,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               }
 
               {/* 路線・駅マーカー ─ バブルモードでは非表示（CircleMarker で代替） */}
-              {mapViewMode !== 'bubble' && [...visibleRoutesData].sort(([a], [b]) => {
+              {transportMode === 'rail' && mapViewMode !== 'bubble' && [...visibleRoutesData].sort(([a], [b]) => {
                 const ai = routeOrder.indexOf(a as RouteKey);
                 const bi = routeOrder.indexOf(b as RouteKey);
                 // 上（index小）が最前面になるよう降順（後から描画＝前面）
