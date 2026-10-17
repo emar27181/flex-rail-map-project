@@ -180,7 +180,19 @@ const MOBILE_LEGEND_RIGHT_RESERVED = MAP_CORNER_BUTTON_PX + parseFloat(L.sp.xs);
 const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguageChange, onFullscreenChange }) => {
   // console.log('RailwayMap component initialized');
   const { theme, toggleTheme } = useTheme();
-  const [transportMode, setTransportMode] = useState<'rail'|'highway'>('rail');
+  const [transportMode, setTransportMode] = useState<'rail'|'highway'>(() => typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('transport') === 'highway' ? 'highway' : 'rail');
+  const changeTransportMode = useCallback((next: 'rail'|'highway') => {
+    setTransportMode(next);
+    const url = new URL(window.location.href);
+    if (next === 'highway') url.searchParams.set('transport','highway');
+    else url.searchParams.delete('transport');
+    window.history.replaceState(window.history.state,'',url.toString());
+  },[]);
+  useEffect(() => {
+    const sync = () => setTransportMode(new URLSearchParams(window.location.search).get('transport') === 'highway' ? 'highway' : 'rail');
+    window.addEventListener('popstate',sync);
+    return () => window.removeEventListener('popstate',sync);
+  },[]);
   const [visibleHighways, setVisibleHighways] = useState<Set<string>>(() => new Set(HIGHWAY_ROUTES.map(r=>r.id)));
 
   const colors = getThemeColors(theme);
@@ -4936,7 +4948,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         }
       >
         <div style={{display:'flex',flexWrap:'wrap',gap:L.sp.sm,alignItems:'center',marginBottom:L.sp.sm,position:'relative',zIndex:1002}}>
-          <SegmentedControl theme={theme} value={transportMode} onChange={setTransportMode} options={[{value:'rail',label:'鉄道'},{value:'highway',label:'高速道路（試験）'}]} ariaLabel="交通モード" variant="slide"/>
+          <SegmentedControl theme={theme} value={transportMode} onChange={changeTransportMode} options={[{value:'rail',label:'鉄道'},{value:'highway',label:'高速道路（試験）'}]} ariaLabel="交通モード" variant="slide"/>
           {transportMode==='highway' && HIGHWAY_ROUTES.map(route=><Button key={route.id} theme={theme} size="sm" pressed={visibleHighways.has(route.id)} onClick={()=>setVisibleHighways(prev=>{const next=new Set(prev);next.has(route.id)?next.delete(route.id):next.add(route.id);return next})}>{route.name}</Button>)}
         </div>
         {/* 駅選択UI */}
