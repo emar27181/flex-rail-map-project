@@ -117,6 +117,7 @@ import { buildEffectiveLineCounts } from '../utils/effectiveLines';
 import Select from './ui/atoms/Select';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import HighwayLayer from './map/HighwayLayer';
+import TransportRouteLine from './map/TransportRouteLine';
 import { HIGHWAY_ROUTES } from '../data/highwayRoutes';
 import RouteToggleChip from './legend/RouteToggleChip';
 import TextField from './ui/atoms/TextField';
@@ -4607,15 +4608,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             <React.Fragment key={`${routeKey}-seg-${segIdx}`}>
         {/* 実際に見える路線（先に描画して下層に） */}
         {showRouteLine && (
-          <Polyline
-            positions={segPositions}
-            pathOptions={{
-              color: routeLineColor,
-              weight: hoveredRoute === routeKey ? routeLineWidth + 2 : routeLineWidth,
-              opacity: hoveredRoute === routeKey ? 0.5 : 0.85,
-            }}
-            interactive={false}
-          />
+          <TransportRouteLine positions={segPositions} color={routeLineColor} width={routeLineWidth} hovered={hoveredRoute === routeKey} />
         )}
         {/* 太い透明線でクリック判定を拡大（前面に描画して36px幅を有効化） */}
         <Polyline
