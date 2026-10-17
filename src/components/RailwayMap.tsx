@@ -116,6 +116,7 @@ import { findDirectionalStation, type StationNavigationKey } from '../utils/stat
 import { buildEffectiveLineCounts } from '../utils/effectiveLines';
 import Select from './ui/atoms/Select';
 import SegmentedControl from './ui/molecules/SegmentedControl';
+import HighwayLayer, { HIGHWAY_ROUTES } from './map/HighwayLayer';
 import RouteToggleChip from './legend/RouteToggleChip';
 import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
@@ -178,6 +179,9 @@ const MOBILE_LEGEND_RIGHT_RESERVED = MAP_CORNER_BUTTON_PX + parseFloat(L.sp.xs);
 const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguageChange, onFullscreenChange }) => {
   // console.log('RailwayMap component initialized');
   const { theme, toggleTheme } = useTheme();
+  const [transportMode, setTransportMode] = useState<'rail'|'highway'>('rail');
+  const [visibleHighways, setVisibleHighways] = useState<Set<string>>(() => new Set(HIGHWAY_ROUTES.map(r=>r.id)));
+
   const colors = getThemeColors(theme);
 
   // Leafletツールチップのテーマ対応CSS注入
@@ -4930,6 +4934,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           : { padding: `0 ${L.sp['3xl']}` }
         }
       >
+        <div style={{display:'flex',flexWrap:'wrap',gap:L.sp.sm,alignItems:'center',marginBottom:L.sp.sm,position:'relative',zIndex:1002}}>
+          <SegmentedControl theme={theme} value={transportMode} onChange={setTransportMode} options={[{value:'rail',label:'鉄道'},{value:'highway',label:'高速道路（試験）'}]} ariaLabel="交通モード" variant="slide"/>
+          {transportMode==='highway' && HIGHWAY_ROUTES.map(route=><Button key={route.id} theme={theme} size="sm" pressed={visibleHighways.has(route.id)} onClick={()=>setVisibleHighways(prev=>{const next=new Set(prev);next.has(route.id)?next.delete(route.id):next.add(route.id);return next})}>{route.name}</Button>)}
+        </div>
         {/* 駅選択UI */}
         {isFullscreen ? (
           /* モバイルフルスクリーン時は下部統合パネルで表示するためスキップ */
@@ -5352,6 +5360,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               {...({ rotate: true, touchRotate: true, rotateControl: false, zoomAnimation: false } as any)}
             >
               <MapEvents />
+              {transportMode === 'highway' && <HighwayLayer visible={visibleHighways} />}
+
 
               {/*
                 所要時間ラベル用のPane。markerPane(600)より後面に表示し、
