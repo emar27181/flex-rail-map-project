@@ -116,7 +116,8 @@ import { findDirectionalStation, type StationNavigationKey } from '../utils/stat
 import { buildEffectiveLineCounts } from '../utils/effectiveLines';
 import Select from './ui/atoms/Select';
 import SegmentedControl from './ui/molecules/SegmentedControl';
-import HighwayLayer, { HIGHWAY_ROUTES } from './map/HighwayLayer';
+import HighwayLayer from './map/HighwayLayer';
+import { HIGHWAY_ROUTES } from '../data/highwayRoutes';
 import RouteToggleChip from './legend/RouteToggleChip';
 import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
@@ -5340,7 +5341,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           ? { position: 'absolute', inset: 0, border: 'none' }
           : { height: '600px', width: '100%', border: `1px solid ${colors.border}`, position: 'relative' }
         }>
-          {(mapViewMode === 'realistic' || mapViewMode === 'bubble') ? (
+          {(transportMode === 'highway' || mapViewMode === 'realistic' || mapViewMode === 'bubble') ? (
             <MapContainer
               center={mapCenter}
               zoom={mapZoom}
