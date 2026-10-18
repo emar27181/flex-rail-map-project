@@ -24,3 +24,12 @@ export const ADSENSE_SCRIPT_SRC = `https://pagead2.googlesyndication.com/pagead/
 export const ADSENSE_SLOTS = {
   articleInline: '',
 } as const;
+
+/** 広告の配置方針。画面上に重なる自動広告はAdSense管理画面で別途設定する。 */
+export const AD_PLACEMENT = {
+  inlineMaxWidth: '600px',
+  inlinePreviewMinHeight: '84px',
+  inlineFormat: 'horizontal',
+  preferredAnchorPosition: 'bottom only',
+  suggestedVignetteIntervalMinutes: 20,
+} as const;
