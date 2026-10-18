@@ -6,7 +6,7 @@
 import { APP_ICON_PATH } from '../../config/seo';
 ---
 
-<link rel="icon" type="image/png" sizes="32x32" href={APP_ICON_PATH} />
-<link rel="icon" type="image/png" sizes="16x16" href={APP_ICON_PATH} />
-<link rel="apple-touch-icon" sizes="180x180" href={APP_ICON_PATH} />
-<link rel="shortcut icon" href={APP_ICON_PATH} />
+<!-- 実体はPWAと同じ正方形PNG。実ファイルと異なる16/32pxのsizes指定をしない -->
+<link rel="icon" type="image/png" href={APP_ICON_PATH} />
+<link rel="apple-touch-icon" href={APP_ICON_PATH} />
+<link rel="shortcut icon" type="image/png" href={APP_ICON_PATH} />
