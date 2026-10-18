@@ -20,6 +20,8 @@ import {
 } from '../../../seo/pageModel';
 import { SEO_TEXT, formatNumber, statLabel } from '../../../seo/pageText';
 import { lineFacts } from '../../../seo/lineFacts';
+import { articlesForRoute } from '../../../utils/routeRelatedArticles';
+import { ARTICLE_SHELL_TRANSLATIONS } from '../../../data/articleI18n';
 
 export function getStaticPaths() {
   return SEO_LANGS.flatMap(lang =>
@@ -37,6 +39,7 @@ const name = routeName(line.key, lang);
 const path = linePath(line.slug, lang);
 const facts = lineFacts(line, lang);
 const relatedGuides = guidesForRoutes([line.key], lang);
+const relatedArticles = articlesForRoute(line.key, lang);
 // 駅一覧に添える駅周辺データ（データのページがある指標の先頭1つ。統計を集めている都市の路線だけ）
 const dataPage = line.stops.some(s => s.station.stats.length > 0) ? getSeoModel().dataPages.find(d => d.indexable) : undefined;
 const dataLabel = dataPage && statLabel(dataPage.meta.label, lang);
@@ -123,6 +126,14 @@ const codeOf = (stationNameJa: string) => getStationNumber(line.key, stationName
 			<h2>{t.relatedGuides}</h2>
 			<ul class="related-list">
 				{relatedGuides.map(g => <li><a href={g.path}>{g.title}</a></li>)}
+			</ul>
+		</section>
+	)}
+	{relatedArticles.length > 0 && (
+		<section aria-labelledby="related-articles">
+			<h2 id="related-articles">{ARTICLE_SHELL_TRANSLATIONS[lang].relatedArticles}</h2>
+			<ul class="related-list">
+				{relatedArticles.map(article => <li><a href={article.href}>{article.title}</a></li>)}
 			</ul>
 		</section>
 	)}
