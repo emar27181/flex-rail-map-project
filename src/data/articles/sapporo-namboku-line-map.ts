@@ -41,8 +41,8 @@ export const guide_sapporo_namboku_line_map: ArticleSource = {
   "content": {
     "ja": {
       "meta": {
-        "title": "札幌地下鉄南北線の駅の見方",
-        "description": "札幌のJRと地下鉄は別の路線です。南北線の駅だけを見て方向を整理しましょう。 操作できる実際の路線図で駅の順序や接続を確認します。",
+        "title": "札幌地下鉄南北線の路線図・駅一覧｜JRとの違いと乗り方",
+        "description": "札幌市営地下鉄南北線の路線図と駅の並びを、拡大・移動できる地図で確認。JRと地下鉄の違い、乗換駅や行き先の確かめ方を初心者向けに説明します。",
         "category": "鉄道の使い方",
         "kicker": "鉄道の使い方",
         "readTime": "読了 約5分",
@@ -119,8 +119,8 @@ export const guide_sapporo_namboku_line_map: ArticleSource = {
     },
     "en": {
       "meta": {
-        "title": "Sapporo Namboku Subway: A First-Time Map",
-        "description": "Sapporo's subway and JR services are distinct. The Namboku Line diagram helps you identify the subway stop sequence. Use a real interactive map to examine the relevant rail corridor.",
+        "title": "Sapporo Namboku Line Subway Map & Stations | First-Time Guide",
+        "description": "Explore the Sapporo Namboku Subway Line map and station order on an interactive map. Learn how to distinguish JR from the subway and check transfers before you ride.",
         "category": "Japan rail travel",
         "kicker": "Japan rail travel",
         "readTime": "About 5 min read",
