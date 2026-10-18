@@ -237,6 +237,7 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 塗りの無い小さな文字ラベル（数が多い駅名など。塗りの箱だと地図を埋めるもの） | `plainTextLabelStyle(theme, fontPx)`（`textBadge.ts`。文字の大きさは地図の駅名と同じ `MAP_LABEL` × 設定の倍率を渡す。ダークは縁取り `textHalo`） |
 | 投影した点の印と小ラベル（DOM描画先） | `anchoredPointLabel`（molecule。上記2アトムを組み合わせ、点の中心を原点に固定。立体表示側は翻訳・意味の色・座標のみを渡す） |
 | 文字のボタン | `Button` |
+| 静的ページのリンクコピー | `copyLinkHtml` / `COPY_LINK_SCRIPT`（汎用アトム。URL取得・翻訳は呼び出し元から渡す。Lucide Share2、結果は読み上げ可能） |
 | アイコンだけのボタン | `IconButton`（正方形。`label` 必須） |
 | 押すと画面遷移する | `LinkButton`（要素は `<a>` のまま） |
 | 色を持つ切り替え（路線など） | `Chip`（「表示路線の切替」パネルと凡例「表示中の路線」で同じもの） |

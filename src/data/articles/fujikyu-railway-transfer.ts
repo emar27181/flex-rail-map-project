@@ -53,7 +53,7 @@ export const guide_fujikyu_railway_transfer: ArticleSource = {
           "type": "points",
           "items": [
             "富士山方面に向かうときは、JRと富士急行のつながる駅を確認します。",
-            "まず下の路線図で必要な路線だけを見て、駅の順番を確認しましょう。",
+            "このデモは富士急行線のみを表示します。大月駅へ接続するJR区間は未収録のため、JRからの乗換経路全体は表示できません。",
             "列車の行先・のりば・運行情報は公式案内で最後に確認してください。"
           ]
         },
@@ -61,7 +61,7 @@ export const guide_fujikyu_railway_transfer: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "富士急行線への乗換え前に駅を確認",
-          "caption": "実際に操作できる路線図です。拡大・移動して駅の位置関係を確かめられます。"
+          "caption": "このデモは富士急行線のみを表示します。大月駅へ接続するJR区間は未収録のため、JRからの乗換経路全体は表示できません。"
         },
         {
           "type": "h2",
@@ -131,7 +131,7 @@ export const guide_fujikyu_railway_transfer: ArticleSource = {
           "type": "points",
           "items": [
             "Traveling toward the Mt Fuji area is easier when you separate the JR approach from the Fujikyu railway section.",
-            "Begin with the line shown below; keep other lines out of the way until you need a transfer.",
+            "This demo shows only the Fujikyu railway. The connecting JR section at Otsuki is not yet included, so the complete JR transfer route is not shown.",
             "Verify station signs, the platform and your service with the operator before you travel."
           ]
         },
@@ -139,7 +139,7 @@ export const guide_fujikyu_railway_transfer: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "Mt Fuji Area: Finding the Fujikyu Railway Connection",
-          "caption": "Real, interactive railway map. Zoom, pan and examine the stations on this route."
+          "caption": "This demo shows only the Fujikyu railway. The connecting JR section at Otsuki is not yet included, so the complete JR transfer route is not shown."
         },
         {
           "type": "h2",
@@ -209,7 +209,7 @@ export const guide_fujikyu_railway_transfer: ArticleSource = {
           "type": "points",
           "items": [
             "不同线路可能使用相似的目的地名称，先找准运营公司和车站名称。",
-            "先只显示所需线路，再查看各站顺序。",
+            "此演示仅显示富士急行线。本站尚未收录连接大月站的JR区间，因此无法显示完整的JR换乘路线。",
             "乘车前请以官方站牌、站台与列车运行信息为准。"
           ]
         },
@@ -217,7 +217,7 @@ export const guide_fujikyu_railway_transfer: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "富士山地区：富士急行铁路换乘",
-          "caption": "可操作的真实铁路线路图，可以缩放和移动查看站点。"
+          "caption": "此演示仅显示富士急行线。本站尚未收录连接大月站的JR区间，因此无法显示完整的JR换乘路线。"
         },
         {
           "type": "h2",
@@ -287,7 +287,7 @@ export const guide_fujikyu_railway_transfer: ArticleSource = {
           "type": "points",
           "items": [
             "비슷한 목적지 이름이라도 이용 노선과 역은 다를 수 있습니다.",
-            "필요한 노선만 표시해 역 순서를 먼저 확인하세요.",
+            "이 데모는 후지큐 철도만 표시합니다. 오쓰키역에 연결되는 JR 구간이 아직 없어 전체 환승 경로는 표시되지 않습니다.",
             "탑승 전 공식 역 안내와 승강장 및 운행 정보를 확인하세요."
           ]
         },
@@ -295,7 +295,7 @@ export const guide_fujikyu_railway_transfer: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "후지산 지역 후지큐선 환승",
-          "caption": "직접 조작할 수 있는 실제 노선도입니다. 확대·이동하며 역을 살펴보세요."
+          "caption": "이 데모는 후지큐 철도만 표시합니다. 오쓰키역에 연결되는 JR 구간이 아직 없어 전체 환승 경로는 표시되지 않습니다."
         },
         {
           "type": "h2",
@@ -351,5 +351,6 @@ export const guide_fujikyu_railway_transfer: ArticleSource = {
         }
       ]
     }
-  }
+  },
+  "modifiedDate": "2026-10-17"
 };

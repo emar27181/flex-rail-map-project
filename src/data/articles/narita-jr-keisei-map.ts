@@ -53,7 +53,7 @@ export const guide_narita_jr_keisei_map: ArticleSource = {
           "type": "points",
           "items": [
             "空港に向かう列車を探す前に、JRか京成かを確認すると路線図を読みやすくできます。",
-            "まず下の路線図で必要な路線だけを見て、駅の順番を確認しましょう。",
+            "このデモは京成本線のみを表示します。JR成田線の空港支線は未収録のため、空港へのJR・京成両ルートを比較する地図ではありません。",
             "列車の行先・のりば・運行情報は公式案内で最後に確認してください。"
           ]
         },
@@ -61,7 +61,7 @@ export const guide_narita_jr_keisei_map: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "成田空港でJRと京成を見分ける路線図",
-          "caption": "実際に操作できる路線図です。拡大・移動して駅の位置関係を確かめられます。"
+          "caption": "このデモは京成本線のみを表示します。JR成田線の空港支線は未収録のため、空港へのJR・京成両ルートを比較する地図ではありません。"
         },
         {
           "type": "h2",
@@ -131,7 +131,7 @@ export const guide_narita_jr_keisei_map: ArticleSource = {
           "type": "points",
           "items": [
             "At Narita Airport, railway company names matter as much as the destination. Compare the JR and Keisei networks separately before evaluating a ticket or platform.",
-            "Begin with the line shown below; keep other lines out of the way until you need a transfer.",
+            "This demo shows only the Keisei Main Line. The JR Narita airport branch is not yet included; this is not a map comparing both airport approaches.",
             "Verify station signs, the platform and your service with the operator before you travel."
           ]
         },
@@ -139,7 +139,7 @@ export const guide_narita_jr_keisei_map: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "Narita Airport: How to Separate JR and Keisei Lines",
-          "caption": "Real, interactive railway map. Zoom, pan and examine the stations on this route."
+          "caption": "This demo shows only the Keisei Main Line. The JR Narita airport branch is not yet included; this is not a map comparing both airport approaches."
         },
         {
           "type": "h2",
@@ -209,7 +209,7 @@ export const guide_narita_jr_keisei_map: ArticleSource = {
           "type": "points",
           "items": [
             "不同线路可能使用相似的目的地名称，先找准运营公司和车站名称。",
-            "先只显示所需线路，再查看各站顺序。",
+            "此演示仅显示京成本线。本站尚未收录JR成田线机场支线，因此本地图不能比较两条机场路线。",
             "乘车前请以官方站牌、站台与列车运行信息为准。"
           ]
         },
@@ -217,7 +217,7 @@ export const guide_narita_jr_keisei_map: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "成田机场：如何区分JR与京成",
-          "caption": "可操作的真实铁路线路图，可以缩放和移动查看站点。"
+          "caption": "此演示仅显示京成本线。本站尚未收录JR成田线机场支线，因此本地图不能比较两条机场路线。"
         },
         {
           "type": "h2",
@@ -287,7 +287,7 @@ export const guide_narita_jr_keisei_map: ArticleSource = {
           "type": "points",
           "items": [
             "비슷한 목적지 이름이라도 이용 노선과 역은 다를 수 있습니다.",
-            "필요한 노선만 표시해 역 순서를 먼저 확인하세요.",
+            "이 데모는 게이세이 본선만 표시합니다. JR 나리타선 공항 지선은 아직 없어 두 공항 접근 경로를 비교하는 지도는 아닙니다.",
             "탑승 전 공식 역 안내와 승강장 및 운행 정보를 확인하세요."
           ]
         },
@@ -295,7 +295,7 @@ export const guide_narita_jr_keisei_map: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "나리타 공항 JR·게이세이 구별하기",
-          "caption": "직접 조작할 수 있는 실제 노선도입니다. 확대·이동하며 역을 살펴보세요."
+          "caption": "이 데모는 게이세이 본선만 표시합니다. JR 나리타선 공항 지선은 아직 없어 두 공항 접근 경로를 비교하는 지도는 아닙니다."
         },
         {
           "type": "h2",
@@ -351,5 +351,6 @@ export const guide_narita_jr_keisei_map: ArticleSource = {
         }
       ]
     }
-  }
+  },
+  "modifiedDate": "2026-10-17"
 };

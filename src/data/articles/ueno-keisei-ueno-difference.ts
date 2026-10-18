@@ -11,38 +11,39 @@ export const guide_ueno_keisei_ueno_difference: ArticleSource = {
   "keywordsJa": "上野駅と京成上野駅の違い, 日本 鉄道 観光 英語 路線図",
   "sources": [
     {
-      "title": "Japan travel and transport information",
-      "url": "https://www.japan.travel/en/plan/getting-around/",
-      "publisher": "Japan National Tourism Organization",
-      "checkedAt": "2026-10-16"
+      "title": "京成上野駅・乗り換え路線",
+      "url": "https://www.keisei.co.jp/keisei/tetudou/accessj/keisei-ueno.php",
+      "publisher": "京成電鉄",
+      "checkedAt": "2026-10-17"
     }
   ],
   "relatedRoutes": [
-    "keiseiMainLine"
+    "keiseiMainLine",
+    "yamanote",
+    "ginzaLine",
+    "hibiyaLine"
   ],
   "maps": {
     "main": {
+      "focus": { "name": "上野", "route": "yamanote" },
       "routes": [
-        "keiseiMainLine"
-      ],
-      "zoom": 11
+        "keiseiMainLine",
+        "yamanote",
+        "ginzaLine",
+        "hibiyaLine"
+      ]
     }
   },
   "shots": {
     "detail": {
-      "map": {
-        "routes": [
-          "keiseiMainLine"
-        ],
-        "zoom": 13
-      }
+      "map": "main"
     }
   },
   "content": {
     "ja": {
       "meta": {
-        "title": "上野駅と京成上野駅の違い",
-        "description": "上野周辺ではJR・地下鉄・京成の駅名を区別する必要があります。 実際に操作できる路線図を使い、駅の順番と行き先の確認方法を整理します。",
+        "title": "上野駅と京成上野駅の違い｜JR・地下鉄・京成の位置を地図で比較",
+        "description": "上野駅と京成上野駅は別の駅です。JR・銀座線・日比谷線・京成線を同じ地図に表示し、乗り換え前に駅の位置と利用する路線を確認できます。",
         "category": "鉄道の使い方",
         "kicker": "鉄道の使い方",
         "readTime": "読了 約5分",
@@ -52,8 +53,8 @@ export const guide_ueno_keisei_ueno_difference: ArticleSource = {
         {
           "type": "points",
           "items": [
-            "上野周辺ではJR・地下鉄・京成の駅名を区別する必要があります。",
-            "まず下の路線図で必要な路線だけを見て、駅の順番を確認しましょう。",
+            "JR・東京メトロの{station:yamanote:上野}と、京成の{station:keiseiMainLine:京成上野}は別の駅です。",
+            "下の地図は上野周辺から始まります。山手線・銀座線・日比谷線と京成線を重ね、2つの駅の位置を見比べてください。",
             "列車の行先・のりば・運行情報は公式案内で最後に確認してください。"
           ]
         },
@@ -61,7 +62,7 @@ export const guide_ueno_keisei_ueno_difference: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "上野駅と京成上野駅の違い",
-          "caption": "実際に操作できる路線図です。拡大・移動して駅の位置関係を確かめられます。"
+          "caption": "上野周辺を拡大して表示しています。駅をタップして路線を確認し、縮小すると各路線の行き先を追えます。徒歩経路の案内図ではありません。"
         },
         {
           "type": "h2",
@@ -107,20 +108,20 @@ export const guide_ueno_keisei_ueno_difference: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "駅名だけでなく路線名も一緒に控えておくと、現地の案内と照合しやすくなります。乗換がある場合は次の路線も個別に表示してから比較しましょう。通信できない場合に備えて重要な駅名をメモしておくと安心です。"
+          "text": "駅名だけでなく路線名も一緒に控えておくと、現地の案内と照合しやすくなります。選択済みの路線を同じ地図で見比べ、目的地の路線名も確認しましょう。通信できない場合に備えて重要な駅名をメモしておくと安心です。"
         },
         {
           "type": "cta",
           "map": "main",
-          "title": "この路線の地図を開く",
-          "text": "記事のデモと同じ路線を開きます。"
+          "title": "上野・京成上野の位置を地図で比較する",
+          "text": "同じ4路線と上野周辺の表示範囲で開きます。"
         }
       ]
     },
     "en": {
       "meta": {
-        "title": "Ueno vs Keisei-Ueno: Two Names Travelers Confuse",
-        "description": "Ueno and Keisei-Ueno are not interchangeable labels on a railway ticket. Match the operator printed in your route result before choosing a station. Explore the real interactive line map and learn what to verify before boarding.",
+        "title": "Ueno vs Keisei-Ueno: Compare Station Locations on a Map",
+        "description": "Ueno and Keisei-Ueno are separate stations. Compare JR, Tokyo Metro and Keisei on one interactive map, then check the operator's station guide for your walking connection.",
         "category": "Japan rail travel",
         "kicker": "Japan rail travel",
         "readTime": "About 5 min read",
@@ -130,8 +131,8 @@ export const guide_ueno_keisei_ueno_difference: ArticleSource = {
         {
           "type": "points",
           "items": [
-            "Ueno and Keisei-Ueno are not interchangeable labels on a railway ticket. Match the operator printed in your route result before choosing a station.",
-            "Begin with the line shown below; keep other lines out of the way until you need a transfer.",
+            "JR and Tokyo Metro serve {station:yamanote:上野}; Keisei serves the separate {station:keiseiMainLine:京成上野} station.",
+            "The map starts around Ueno, showing the Yamanote, Ginza, Hibiya and Keisei lines together so you can compare the station locations.",
             "Verify station signs, the platform and your service with the operator before you travel."
           ]
         },
@@ -139,7 +140,7 @@ export const guide_ueno_keisei_ueno_difference: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "Ueno vs Keisei-Ueno: Two Names Travelers Confuse",
-          "caption": "Real, interactive railway map. Zoom, pan and examine the stations on this route."
+          "caption": "Start with the two station locations. Tap a station to inspect its lines, or zoom out to follow the routes. This is not a walking-directions map."
         },
         {
           "type": "h2",
@@ -169,7 +170,7 @@ export const guide_ueno_keisei_ueno_difference: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "Looking at the Keisei route alone clarifies which corridor connects to Keisei-Ueno. Confirm the pedestrian connection separately when transferring. Map lines explain connectivity and rough location. They do not establish indoor walking distances, service frequency, fare validity, disruption status or which train stops at each station."
+          "text": "The four selected lines help distinguish the stations. Use the official Keisei station guide in the sources below for the pedestrian connection. The map does not establish indoor walking distances, service frequency, fare validity, disruption status or which train stops at each station."
         },
         {
           "type": "h2",
@@ -185,7 +186,7 @@ export const guide_ueno_keisei_ueno_difference: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "Save the line name together with the station name so you can compare it with the signs you see at the station. If your itinerary contains another line, open that line separately before comparing the transfer. Keep an offline or written copy of the essential stop names in case network access is unavailable."
+          "text": "Save the line name together with the station name so you can compare it with the signs you see at the station. Compare the selected lines together, and check the railway operator for your destination. Keep an offline or written copy of the essential stop names in case network access is unavailable."
         },
         {
           "type": "cta",
@@ -208,8 +209,8 @@ export const guide_ueno_keisei_ueno_difference: ArticleSource = {
         {
           "type": "points",
           "items": [
-            "不同线路可能使用相似的目的地名称，先找准运营公司和车站名称。",
-            "先只显示所需线路，再查看各站顺序。",
+            "JR、东京地铁的{station:yamanote:上野}与京成的{station:keiseiMainLine:京成上野}是不同的车站。",
+            "地图从上野周边开始，同时显示山手线、银座线、日比谷线和京成线，可比较两个车站的位置。",
             "乘车前请以官方站牌、站台与列车运行信息为准。"
           ]
         },
@@ -286,8 +287,8 @@ export const guide_ueno_keisei_ueno_difference: ArticleSource = {
         {
           "type": "points",
           "items": [
-            "비슷한 목적지 이름이라도 이용 노선과 역은 다를 수 있습니다.",
-            "필요한 노선만 표시해 역 순서를 먼저 확인하세요.",
+            "JR·도쿄메트로의 {station:yamanote:上野}와 게이세이의 {station:keiseiMainLine:京成上野}는 서로 다른 역입니다.",
+            "지도는 우에노 주변에서 시작합니다. 야마노테선·긴자선·히비야선·게이세이선을 함께 보며 두 역의 위치를 비교하세요.",
             "탑승 전 공식 역 안내와 승강장 및 운행 정보를 확인하세요."
           ]
         },
@@ -351,5 +352,6 @@ export const guide_ueno_keisei_ueno_difference: ArticleSource = {
         }
       ]
     }
-  }
+  },
+  "modifiedDate": "2026-10-17"
 };

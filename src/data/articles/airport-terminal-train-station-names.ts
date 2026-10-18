@@ -18,24 +18,20 @@ export const guide_airport_terminal_train_station_names: ArticleSource = {
     }
   ],
   "relatedRoutes": [
-    "tokyoMonorail"
+    "tokyoMonorail",
+    "keikyuAirportLine"
   ],
   "maps": {
     "main": {
       "routes": [
-        "tokyoMonorail"
-      ],
-      "zoom": 11
+        "tokyoMonorail",
+        "keikyuAirportLine"
+      ]
     }
   },
   "shots": {
     "detail": {
-      "map": {
-        "routes": [
-          "tokyoMonorail"
-        ],
-        "zoom": 13
-      }
+      "map": "main"
     }
   },
   "content": {
@@ -107,7 +103,7 @@ export const guide_airport_terminal_train_station_names: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "駅名だけでなく路線名も一緒に控えておくと、現地の案内と照合しやすくなります。乗換がある場合は次の路線も個別に表示してから比較しましょう。通信できない場合に備えて重要な駅名をメモしておくと安心です。"
+          "text": "駅名だけでなく路線名も一緒に控えておくと、現地の案内と照合しやすくなります。選択済みの路線を同じ地図で見比べ、目的地の路線名も確認しましょう。通信できない場合に備えて重要な駅名をメモしておくと安心です。"
         },
         {
           "type": "cta",
@@ -185,7 +181,7 @@ export const guide_airport_terminal_train_station_names: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "Save the line name together with the station name so you can compare it with the signs you see at the station. If your itinerary contains another line, open that line separately before comparing the transfer. Keep an offline or written copy of the essential stop names in case network access is unavailable."
+          "text": "Save the line name together with the station name so you can compare it with the signs you see at the station. Compare the selected lines together, and check the railway operator for your destination. Keep an offline or written copy of the essential stop names in case network access is unavailable."
         },
         {
           "type": "cta",
@@ -351,5 +347,6 @@ export const guide_airport_terminal_train_station_names: ArticleSource = {
         }
       ]
     }
-  }
+  },
+  "modifiedDate": "2026-10-17"
 };
