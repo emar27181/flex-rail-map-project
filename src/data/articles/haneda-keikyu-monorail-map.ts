@@ -18,24 +18,22 @@ export const guide_haneda_keikyu_monorail_map: ArticleSource = {
     }
   ],
   "relatedRoutes": [
-    "keikyuAirportLine"
+    "keikyuAirportLine",
+    "keikyuLine",
+    "tokyoMonorail"
   ],
   "maps": {
     "main": {
       "routes": [
-        "keikyuAirportLine"
-      ],
-      "zoom": 11
+        "keikyuAirportLine",
+        "keikyuLine",
+        "tokyoMonorail"
+      ]
     }
   },
   "shots": {
     "detail": {
-      "map": {
-        "routes": [
-          "keikyuAirportLine"
-        ],
-        "zoom": 13
-      }
+      "map": "main"
     }
   },
   "content": {
@@ -107,7 +105,7 @@ export const guide_haneda_keikyu_monorail_map: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "駅名だけでなく路線名も一緒に控えておくと、現地の案内と照合しやすくなります。乗換がある場合は次の路線も個別に表示してから比較しましょう。通信できない場合に備えて重要な駅名をメモしておくと安心です。"
+          "text": "駅名だけでなく路線名も一緒に控えておくと、現地の案内と照合しやすくなります。選択済みの路線を同じ地図で見比べ、目的地の路線名も確認しましょう。通信できない場合に備えて重要な駅名をメモしておくと安心です。"
         },
         {
           "type": "cta",
@@ -169,7 +167,7 @@ export const guide_haneda_keikyu_monorail_map: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "Start from the line you can actually board, then check the airport terminal shown on official signage. This example highlights the Keikyu Airport Line, not a fare comparison. Map lines explain connectivity and rough location. They do not establish indoor walking distances, service frequency, fare validity, disruption status or which train stops at each station."
+          "text": "Start from the line you can actually board, then check the airport terminal shown on official signage. This example shows the Keikyu Airport Line, Keikyu Main Line and Tokyo Monorail together; it is not a fare comparison. Map lines explain connectivity and rough location. They do not establish indoor walking distances, service frequency, fare validity, disruption status or which train stops at each station."
         },
         {
           "type": "h2",
@@ -185,7 +183,7 @@ export const guide_haneda_keikyu_monorail_map: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "Save the line name together with the station name so you can compare it with the signs you see at the station. If your itinerary contains another line, open that line separately before comparing the transfer. Keep an offline or written copy of the essential stop names in case network access is unavailable."
+          "text": "Save the line name together with the station name so you can compare it with the signs you see at the station. Compare the selected lines together, and check the railway operator for your destination. Keep an offline or written copy of the essential stop names in case network access is unavailable."
         },
         {
           "type": "cta",
@@ -351,5 +349,6 @@ export const guide_haneda_keikyu_monorail_map: ArticleSource = {
         }
       ]
     }
-  }
+  },
+  "modifiedDate": "2026-10-17"
 };

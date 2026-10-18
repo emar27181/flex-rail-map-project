@@ -53,7 +53,7 @@ export const guide_kawagoe_tobu_vs_jr: ArticleSource = {
           "type": "points",
           "items": [
             "川越に行く路線は一つではありません。駅名と路線名を組にして確認します。",
-            "まず下の路線図で必要な路線だけを見て、駅の順番を確認しましょう。",
+            "このデモは東武東上線のみを表示します。JR川越線のデータが未収録のため、JRと東武の両方を地図上で比較することはまだできません。",
             "列車の行先・のりば・運行情報は公式案内で最後に確認してください。"
           ]
         },
@@ -61,7 +61,7 @@ export const guide_kawagoe_tobu_vs_jr: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "川越観光で東武・JRを見分ける",
-          "caption": "実際に操作できる路線図です。拡大・移動して駅の位置関係を確かめられます。"
+          "caption": "このデモは東武東上線のみを表示します。JR川越線のデータが未収録のため、JRと東武の両方を地図上で比較することはまだできません。"
         },
         {
           "type": "h2",
@@ -131,7 +131,7 @@ export const guide_kawagoe_tobu_vs_jr: ArticleSource = {
           "type": "points",
           "items": [
             "Kawagoe is reachable through more than one rail network. The station you should use depends on your origin and the district you want to visit.",
-            "Begin with the line shown below; keep other lines out of the way until you need a transfer.",
+            "This demo shows only the Tobu Tojo Line. JR Kawagoe Line data is not yet included, so this map cannot yet compare both railways.",
             "Verify station signs, the platform and your service with the operator before you travel."
           ]
         },
@@ -139,7 +139,7 @@ export const guide_kawagoe_tobu_vs_jr: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "Kawagoe: Tobu vs JR Station Names",
-          "caption": "Real, interactive railway map. Zoom, pan and examine the stations on this route."
+          "caption": "This demo shows only the Tobu Tojo Line. JR Kawagoe Line data is not yet included, so this map cannot yet compare both railways."
         },
         {
           "type": "h2",
@@ -209,7 +209,7 @@ export const guide_kawagoe_tobu_vs_jr: ArticleSource = {
           "type": "points",
           "items": [
             "不同线路可能使用相似的目的地名称，先找准运营公司和车站名称。",
-            "先只显示所需线路，再查看各站顺序。",
+            "此演示仅显示东武东上线。本站尚未收录JR川越线数据，因此暂时无法在地图上比较两条线路。",
             "乘车前请以官方站牌、站台与列车运行信息为准。"
           ]
         },
@@ -217,7 +217,7 @@ export const guide_kawagoe_tobu_vs_jr: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "川越旅游：东武与JR",
-          "caption": "可操作的真实铁路线路图，可以缩放和移动查看站点。"
+          "caption": "此演示仅显示东武东上线。本站尚未收录JR川越线数据，因此暂时无法在地图上比较两条线路。"
         },
         {
           "type": "h2",
@@ -287,7 +287,7 @@ export const guide_kawagoe_tobu_vs_jr: ArticleSource = {
           "type": "points",
           "items": [
             "비슷한 목적지 이름이라도 이용 노선과 역은 다를 수 있습니다.",
-            "필요한 노선만 표시해 역 순서를 먼저 확인하세요.",
+            "이 데모는 도부 도조선만 표시합니다. JR 가와고에선 데이터가 아직 없어 두 노선을 지도에서 비교할 수 없습니다.",
             "탑승 전 공식 역 안내와 승강장 및 운행 정보를 확인하세요."
           ]
         },
@@ -295,7 +295,7 @@ export const guide_kawagoe_tobu_vs_jr: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "가와고에 도부선과 JR",
-          "caption": "직접 조작할 수 있는 실제 노선도입니다. 확대·이동하며 역을 살펴보세요."
+          "caption": "이 데모는 도부 도조선만 표시합니다. JR 가와고에선 데이터가 아직 없어 두 노선을 지도에서 비교할 수 없습니다."
         },
         {
           "type": "h2",
@@ -351,5 +351,6 @@ export const guide_kawagoe_tobu_vs_jr: ArticleSource = {
         }
       ]
     }
-  }
+  },
+  "modifiedDate": "2026-10-17"
 };

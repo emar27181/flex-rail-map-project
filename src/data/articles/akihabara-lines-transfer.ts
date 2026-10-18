@@ -18,24 +18,25 @@ export const guide_akihabara_lines_transfer: ArticleSource = {
     }
   ],
   "relatedRoutes": [
-    "yamanote"
+    "yamanote",
+    "keihinTohoku",
+    "hibiyaLine",
+    "tsukubaExpress"
   ],
   "maps": {
     "main": {
+      "focus": { "name": "秋葉原", "route": "yamanote" },
       "routes": [
-        "yamanote"
-      ],
-      "zoom": 11
+        "yamanote",
+        "keihinTohoku",
+        "hibiyaLine",
+        "tsukubaExpress"
+      ]
     }
   },
   "shots": {
     "detail": {
-      "map": {
-        "routes": [
-          "yamanote"
-        ],
-        "zoom": 13
-      }
+      "map": "main"
     }
   },
   "content": {
@@ -53,7 +54,7 @@ export const guide_akihabara_lines_transfer: ArticleSource = {
           "type": "points",
           "items": [
             "秋葉原の周辺では駅名と路線名を分けて確認するのが近道です。",
-            "まず下の路線図で必要な路線だけを見て、駅の順番を確認しましょう。",
+            "中央・総武線各駅停車の秋葉原区間は現データに未収録です。この地図は山手線・京浜東北線・日比谷線・つくばエクスプレスを表示します。",
             "列車の行先・のりば・運行情報は公式案内で最後に確認してください。"
           ]
         },
@@ -61,7 +62,7 @@ export const guide_akihabara_lines_transfer: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "秋葉原のJRと地下鉄の乗換えを地図で整理",
-          "caption": "実際に操作できる路線図です。拡大・移動して駅の位置関係を確かめられます。"
+          "caption": "中央・総武線各駅停車の秋葉原区間は現データに未収録です。この地図は山手線・京浜東北線・日比谷線・つくばエクスプレスを表示します。"
         },
         {
           "type": "h2",
@@ -107,7 +108,7 @@ export const guide_akihabara_lines_transfer: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "駅名だけでなく路線名も一緒に控えておくと、現地の案内と照合しやすくなります。乗換がある場合は次の路線も個別に表示してから比較しましょう。通信できない場合に備えて重要な駅名をメモしておくと安心です。"
+          "text": "駅名だけでなく路線名も一緒に控えておくと、現地の案内と照合しやすくなります。選択済みの路線を同じ地図で見比べ、目的地の路線名も確認しましょう。通信できない場合に備えて重要な駅名をメモしておくと安心です。"
         },
         {
           "type": "cta",
@@ -131,7 +132,7 @@ export const guide_akihabara_lines_transfer: ArticleSource = {
           "type": "points",
           "items": [
             "At Akihabara, multiple services use the same neighborhood and different platforms. Find the line you are arriving on before looking for the next one.",
-            "Begin with the line shown below; keep other lines out of the way until you need a transfer.",
+            "The Chuo–Sobu local section at Akihabara is not yet included. This map shows the Yamanote, Keihin-Tohoku, Hibiya and Tsukuba Express lines.",
             "Verify station signs, the platform and your service with the operator before you travel."
           ]
         },
@@ -139,7 +140,7 @@ export const guide_akihabara_lines_transfer: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "Akihabara Transfers: Understand the Lines First",
-          "caption": "Real, interactive railway map. Zoom, pan and examine the stations on this route."
+          "caption": "The Chuo–Sobu local section at Akihabara is not yet included. This map shows the Yamanote, Keihin-Tohoku, Hibiya and Tsukuba Express lines."
         },
         {
           "type": "h2",
@@ -185,7 +186,7 @@ export const guide_akihabara_lines_transfer: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "Save the line name together with the station name so you can compare it with the signs you see at the station. If your itinerary contains another line, open that line separately before comparing the transfer. Keep an offline or written copy of the essential stop names in case network access is unavailable."
+          "text": "Save the line name together with the station name so you can compare it with the signs you see at the station. Compare the selected lines together, and check the railway operator for your destination. Keep an offline or written copy of the essential stop names in case network access is unavailable."
         },
         {
           "type": "cta",
@@ -209,7 +210,7 @@ export const guide_akihabara_lines_transfer: ArticleSource = {
           "type": "points",
           "items": [
             "不同线路可能使用相似的目的地名称，先找准运营公司和车站名称。",
-            "先只显示所需线路，再查看各站顺序。",
+            "本站尚未收录中央·总武线各站停车的秋叶原区间。本地图显示山手线、京滨东北线、日比谷线和筑波快线。",
             "乘车前请以官方站牌、站台与列车运行信息为准。"
           ]
         },
@@ -217,7 +218,7 @@ export const guide_akihabara_lines_transfer: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "秋叶原换乘：先辨认线路",
-          "caption": "可操作的真实铁路线路图，可以缩放和移动查看站点。"
+          "caption": "本站尚未收录中央·总武线各站停车的秋叶原区间。本地图显示山手线、京滨东北线、日比谷线和筑波快线。"
         },
         {
           "type": "h2",
@@ -287,7 +288,7 @@ export const guide_akihabara_lines_transfer: ArticleSource = {
           "type": "points",
           "items": [
             "비슷한 목적지 이름이라도 이용 노선과 역은 다를 수 있습니다.",
-            "필요한 노선만 표시해 역 순서를 먼저 확인하세요.",
+            "아키하바라의 주오·소부선 각역정차 구간은 아직 없습니다. 야마노테선·게이힌 도호쿠선·히비야선·쓰쿠바 익스프레스를 표시합니다.",
             "탑승 전 공식 역 안내와 승강장 및 운행 정보를 확인하세요."
           ]
         },
@@ -295,7 +296,7 @@ export const guide_akihabara_lines_transfer: ArticleSource = {
           "type": "embed",
           "map": "main",
           "title": "아키하바라 환승 노선 이해하기",
-          "caption": "직접 조작할 수 있는 실제 노선도입니다. 확대·이동하며 역을 살펴보세요."
+          "caption": "아키하바라의 주오·소부선 각역정차 구간은 아직 없습니다. 야마노테선·게이힌 도호쿠선·히비야선·쓰쿠바 익스프레스를 표시합니다."
         },
         {
           "type": "h2",
@@ -351,5 +352,6 @@ export const guide_akihabara_lines_transfer: ArticleSource = {
         }
       ]
     }
-  }
+  },
+  "modifiedDate": "2026-10-17"
 };
