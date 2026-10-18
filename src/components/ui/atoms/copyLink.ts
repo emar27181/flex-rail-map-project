@@ -1,3 +1,4 @@
+import { COPY_LINK_SUCCESS_EVENT } from '../../../utils/copyLinkEvent';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { Share2 } from 'lucide-react';
@@ -31,7 +32,7 @@ export const COPY_LINK_SCRIPT = `function bindCopyLink(button, getUrl) {
       button.focus({ preventScroll: true });
       return ok;
     };
-    var result = function (ok) { status.textContent = ok ? button.dataset.copied : button.dataset.failed; };
+    var result = function (ok) { status.textContent = ok ? button.dataset.copied : button.dataset.failed; if (ok) button.dispatchEvent(new CustomEvent('${COPY_LINK_SUCCESS_EVENT}', { bubbles: true })); };
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(value).then(function () { result(true); }, function () { result(fallback()); });
     } else { result(fallback()); }
