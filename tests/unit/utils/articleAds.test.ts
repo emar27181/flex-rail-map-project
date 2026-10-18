@@ -5,7 +5,7 @@ import { ARTICLE_SOURCES } from '../../../src/data/articles';
 import { ARTICLE_LANGUAGES } from '../../../src/data/articleI18n';
 import type { ArticleBlock } from '../../../src/data/articles/types';
 import {
-  ARTICLE_AD_EVERY_SECTIONS, ARTICLE_AD_FIRST_SECTION, articleAdSections, articleBlocksForRender, renderArticleBody,
+  ARTICLE_AD_EVERY_SECTIONS, ARTICLE_AD_FIRST_SECTION, ARTICLE_AD_MAX_SLOTS, articleAdSections, articleBlocksForRender, renderArticleBody,
 } from '../../../src/utils/articleRender';
 import { AD_CLASS, AD_SLOT_LABELS, AD_SLOT_SCRIPT, adSlotHtml } from '../../../src/components/ui/atoms/adSlot';
 import { ADSENSE_CLIENT } from '../../../src/config/ads';
@@ -23,30 +23,31 @@ function article(n: number, after: Record<number, ArticleBlock> = {}): ArticleBl
 }
 
 describe('本文の広告の位置（articleAdSections）', () => {
-  it('3つ目の見出しの前に1つ、そこから6節ごと（4〜8節の記事は1つ）', () => {
-    expect(ARTICLE_AD_FIRST_SECTION).toBe(3);
+  it('4つ目の見出しの前から、長文でも最大1枠', () => {
+    expect(ARTICLE_AD_FIRST_SECTION).toBe(4);
+    expect(ARTICLE_AD_MAX_SLOTS).toBe(1);
     expect(ARTICLE_AD_EVERY_SECTIONS).toBe(6);
     expect(articleAdSections(article(2))).toEqual([]);
-    expect(articleAdSections(article(4))).toEqual([3]);
-    expect(articleAdSections(article(8))).toEqual([3]);
-    expect(articleAdSections(article(9))).toEqual([3, 9]);
+    expect(articleAdSections(article(4))).toEqual([4]);
+    expect(articleAdSections(article(8))).toEqual([4]);
+    expect(articleAdSections(article(9))).toEqual([4]);
   });
 
-  it('結論・冒頭の地図のデモと最初の2節の間には置かない', () => {
-    for (let n = 1; n <= 10; n++) expect(articleAdSections(article(n)).every(s => s >= 3)).toBe(true);
+  it('結論・冒頭の地図のデモと最初の3節の間には置かない', () => {
+    for (let n = 1; n <= 10; n++) expect(articleAdSections(article(n)).every(s => s >= 4)).toBe(true);
   });
 
   it('説明文の無い地図のデモ・地図を開くボタンのすぐ下には置かず、後ろの節へずらす。ずらせなければ置かない', () => {
-    expect(articleAdSections(article(4, { 2: shot }))).toEqual([4]);
-    expect(articleAdSections(article(4, { 2: shot, 3: { type: 'cta', title: 't', text: 't', map: 'main' } }))).toEqual([]);
-    expect(articleAdSections(article(7, { 2: shot, 3: shot, 4: shot }))).toEqual([6]);
-    // ずらしても次の候補（9）を越えない。越える分は次の候補の側で置く
-    const many = Object.fromEntries([2, 3, 4, 5, 6, 7, 8].map(n => [n, shot]));
-    expect(articleAdSections(article(10, many))).toEqual([10]);
+    expect(articleAdSections(article(5, { 3: shot }))).toEqual([5]);
+    expect(articleAdSections(article(5, { 3: shot, 4: { type: 'cta', title: 't', text: 't', map: 'main' } }))).toEqual([]);
+    expect(articleAdSections(article(7, { 3: shot, 4: shot, 5: shot }))).toEqual([7]);
+    // 安全に配置できる場所が候補範囲になければ、無理に末尾へ挿入しない
+    const many = Object.fromEntries([3, 4, 5, 6, 7, 8, 9].map(n => [n, shot]));
+    expect(articleAdSections(article(10, many))).toEqual([]);
   });
 
   it('説明文のある地図のデモの下には置ける（ボタンと広告の間に文が挟まる）', () => {
-    expect(articleAdSections(article(4, { 2: shotWithCaption }))).toEqual([3]);
+    expect(articleAdSections(article(4, { 3: shotWithCaption }))).toEqual([4]);
   });
 });
 
@@ -59,7 +60,7 @@ describe('記事の本文に入る広告枠（全記事・全言語）', () => {
         const ads = html.match(new RegExp(`<aside class="${AD_CLASS.slot}"`, 'g')) ?? [];
         expect(ads.length).toBe(sections.length);
         // 4節以上の記事には本文の間に広告が入る
-        if (articleBlocksForRender(source, lang).filter(b => b.type === 'h2').length >= 4) expect(ads.length).toBeGreaterThanOrEqual(1);
+        if (articleBlocksForRender(source, lang).filter(b => b.type === 'h2').length >= 4) expect(ads.length).toBe(1);
         // 広告のすぐ上が、説明文の無い地図の埋め込み・地図を開くボタンではない
         expect(html).not.toMatch(new RegExp(`</div></figure>\\s*<aside class="${AD_CLASS.slot}"`));
         expect(html).not.toMatch(new RegExp(`class="btn"[^]*?</a></div>\\s*<aside class="${AD_CLASS.slot}"`));
@@ -87,7 +88,8 @@ describe('広告枠の部品（ui/atoms/adSlot.ts）', () => {
     const html = adSlotHtml({ slot: '1357924680', lang: 'en', position: 'inline-1' });
     expect(html).toContain(`data-ad-client="${ADSENSE_CLIENT}"`);
     expect(html).toContain('data-ad-slot="1357924680"');
-    expect(html).toContain('data-ad-layout="in-article"');
+    expect(html).toContain('data-ad-format="horizontal"');
+    expect(html).not.toContain('data-ad-layout="in-article"');
     expect(html).toContain('aria-label="Advertisement"');
   });
 

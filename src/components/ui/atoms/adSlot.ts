@@ -17,7 +17,7 @@
  */
 import { FS } from '../../../constants/ui';
 import { L } from '../../legend/legendStyles';
-import { ADSENSE_CLIENT } from '../../../config/ads';
+import { ADSENSE_CLIENT, AD_PLACEMENT } from '../../../config/ads';
 import { PRODUCTION_ORIGIN } from '../../../utils/siteHost';
 
 export const AD_CLASS = { slot: 'ad-slot', label: 'ad-slot-label', placeholder: 'ad-slot-placeholder' } as const;
@@ -46,15 +46,19 @@ export function adSlotHtml({ slot, lang, position }: AdSlotProps): string {
     + `<p class="${AD_CLASS.placeholder}">${t.placeholder}</p>`
     + (slot
       ? `<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-client="${ADSENSE_CLIENT}" data-ad-slot="${slot}"`
-        + ` data-ad-format="fluid" data-ad-layout="in-article"></ins>`
+        + ` data-ad-format="${position.startsWith('inline-') ? AD_PLACEMENT.inlineFormat : 'fluid'}"${position.startsWith('inline-') ? '' : ' data-ad-layout="in-article"'}></ins>`
       : '')
     + `</aside>`;
 }
 
 /** 枠はスクリプトが本番（is-live）か本番以外（is-preview）かを決めるまで出さない */
+export const AD_INLINE_MAX_WIDTH = AD_PLACEMENT.inlineMaxWidth;
+
 export const AD_SLOT_CSS = `
 .${AD_CLASS.slot} { display: none; margin: ${L.sp['3xl']} 0; padding-top: ${L.sp.sm}; border-top: 1px solid var(--ad-border, currentColor); }
 .${AD_CLASS.slot}.is-live, .${AD_CLASS.slot}.is-preview { display: block; }
+.${AD_CLASS.slot}[data-ad-position^="inline-"] { width: min(100%, ${AD_INLINE_MAX_WIDTH}); margin-inline: auto; }
+.${AD_CLASS.slot}[data-ad-position^="inline-"].is-preview .${AD_CLASS.placeholder} { min-height: ${AD_PLACEMENT.inlinePreviewMinHeight}; display: grid; place-items: center; }
 .${AD_CLASS.slot}.is-live:has(ins.adsbygoogle[data-ad-status="unfilled"]) { display: none; }
 .${AD_CLASS.label} { display: block; margin-bottom: ${L.sp.sm}; font-size: ${FS.caption}; line-height: 1.7; color: var(--ad-muted, inherit); }
 .${AD_CLASS.placeholder} {
