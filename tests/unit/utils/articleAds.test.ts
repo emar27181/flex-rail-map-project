@@ -88,7 +88,8 @@ describe('広告枠の部品（ui/atoms/adSlot.ts）', () => {
     const html = adSlotHtml({ slot: '1357924680', lang: 'en', position: 'inline-1' });
     expect(html).toContain(`data-ad-client="${ADSENSE_CLIENT}"`);
     expect(html).toContain('data-ad-slot="1357924680"');
-    expect(html).toContain('data-ad-layout="in-article"');
+    expect(html).toContain('data-ad-format="horizontal"');
+    expect(html).not.toContain('data-ad-layout="in-article"');
     expect(html).toContain('aria-label="Advertisement"');
   });
 
