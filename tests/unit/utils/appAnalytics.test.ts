@@ -3,7 +3,7 @@
  */
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { APP_EVENTS, routeSearchParams, trackRouteSearch, trackStationSelect, trackViewSwitch } from '../../../src/utils/appAnalytics';
+import { APP_EVENTS, routeSearchParams, trackRouteSearch, trackStationSelect, trackViewSwitch, trackRouteVisibility, trackRouteVisibilityBulk } from '../../../src/utils/appAnalytics';
 
 describe('経路検索のイベントの値', () => {
   it('先頭の候補の所要時間・乗換回数と、直通を使う候補があるかを載せる', () => {
@@ -47,6 +47,17 @@ describe('送信', () => {
     trackViewSwitch('realistic', 'realistic');
     expect(gtag).toHaveBeenCalledTimes(1);
     expect(gtag).toHaveBeenCalledWith('event', 'map_view_switch', { view: 'terrain3d', from_view: 'realistic' });
+  });
+
+  it('表示路線のオン・オフと全表示・全非表示の操作を別イベントで送る', () => {
+    trackRouteVisibility('ginzaLine', false, 2);
+    trackRouteVisibilityBulk('show_all', 490);
+    expect(gtag).toHaveBeenNthCalledWith(1, 'event', APP_EVENTS.routeVisibility, {
+      route: 'ginzaLine', visible: false, visible_count: 2,
+    });
+    expect(gtag).toHaveBeenNthCalledWith(2, 'event', APP_EVENTS.routeVisibilityBulk, {
+      action: 'show_all', visible_count: 490,
+    });
   });
 
   it('GA4 が無い環境（gtag 未読み込み）でも落ちない', () => {
