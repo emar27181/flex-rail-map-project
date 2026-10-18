@@ -49,9 +49,11 @@ const month = (iso:string) => new Date(iso+'T00:00:00Z').toLocaleDateString(loca
           })}
         </ul>
       </details>}
+      {i < groups.filter(g => g.articles.length > 0).length - 1 && i % 2 === 0 && (
+        <div class="index-ad" set:html={adSlotHtml({ slot: ADSENSE_SLOTS.articleInline, lang, position: `article-index-between-${i + 1}-${i + 2}` })} />
+      )}
     </section>
   ))}
-  <div class="index-ad" set:html={adSlotHtml({ slot: ADSENSE_SLOTS.articleInline, lang, position: 'article-index-bottom' })}/>
 </div>
 <style>
 .categorized-articles { width:100%; }
@@ -64,5 +66,5 @@ const month = (iso:string) => new Date(iso+'T00:00:00Z').toLocaleDateString(loca
 .more { margin-top:1rem; }
 .more summary { cursor:pointer; padding:.7rem .85rem; border:1px solid currentColor; border-radius:.45rem; opacity:.85; }
 .more[open] summary { margin-bottom:1rem; }
-.index-ad { margin-top:2rem; }
+.index-ad { margin:2rem 0; clear:both; }
 </style>
