@@ -1,5 +1,7 @@
 # 描画テスト（`npm run test:render`）
 
+`articleShare.render.ts`: 記事直下で現在の路線フィルタをコピーし、通常表示で復元する。PC/390px・ライト/ダークで操作、Clipboard APIの実読み書き、44pxの高さを検査する。
+
 ビルドしたサイト（`astro preview`）を実際のブラウザ（Chromium）で開き、**画面に描けているか**を確かめるテスト。
 CI（`.github/workflows/ci.yml` の `render` ジョブ）が PR ごとに動かす。設定は `playwright.render.config.ts`、テストは `tests/render/`。
 
@@ -39,6 +41,8 @@ CI（`.github/workflows/ci.yml` の `render` ジョブ）が PR ごとに動か�
 描画面を撮るときは `screenshotCanvasOnly`（`tests/render/helpers.ts`）で、上に重なる DOM を隠して撮る。
 
 ## 足すときの決まり
+
+2026-10-17追加: `consent.render.ts` は上野の比較記事内の地図を移動し、操作イベントが1回だけ出ること、iframe側にGA4が無いことを検証する。地図を開いた後に駅ラベルをクリックして上野→鶯谷を設定し、経路候補と `map_route_search` まで確認する（PC・スマホ幅）。Googleへの送信は遮断し、送信命令を確認する。
 
 - **描画に関わる変更**（地図・立体表示・地図の上に浮かぶ UI）を入れたら、この表のどれかで確かめられているかを見る。
   足りなければ、その変更が壊れたら落ちる検査を足す

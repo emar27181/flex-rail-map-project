@@ -18,7 +18,9 @@
  */
 import { FS } from '../../../constants/ui';
 import { L } from '../../legend/legendStyles';
-import { EMBED_PARAM } from '../../../utils/embedMode';
+import { EMBED_PARAM, EMBED_SECTION_PARAM } from '../../../utils/embedMode';
+import { copyLinkHtml, COPY_LINK_SCRIPT } from './copyLink';
+import { CONTROL_SIZE } from './controlSize';
 import { THEME_MESSAGE, THEME_PARAM } from '../../../utils/themeStorage';
 import { MEDIA } from '../../../constants/breakpoints';
 
@@ -39,6 +41,13 @@ export const MAP_EMBED_LABELS = {
   ko: { open: '지도 크게 열기', fullscreen: '전체 화면', loading: '지도를 불러오는 중입니다. 표시되지 않으면 ‘지도 크게 열기’를 눌러 주세요.' },
 } as const;
 export type MapEmbedLang = keyof typeof MAP_EMBED_LABELS;
+
+export const MAP_SHARE_LABELS = {
+  ja: { copy: 'リンクをコピー', copied: 'コピーしました', failed: 'コピーできませんでした。「地図を大きく開く」からURLをコピーしてください。' },
+  en: { copy: 'Copy map link', copied: 'Link copied', failed: 'Could not copy. Open the full map and copy its URL.' },
+  zh: { copy: '复制地图链接', copied: '链接已复制', failed: '无法复制。请打开完整地图并复制网址。' },
+  ko: { copy: '지도 링크 복사', copied: '링크를 복사했습니다', failed: '복사하지 못했습니다. 지도를 크게 열어 URL을 복사해 주세요.' },
+} as const;
 
 /**
  * スマホで見るときの枠。スマホの画面と同じ縦長にし、中の地図もスマホの画面のまま見せる（2026-10-15:
@@ -77,6 +86,7 @@ export function mapEmbedHtml({ src, title, caption, poster, openHref, lang = 'ja
     + `<iframe src="${esc(src)}" title="${esc(title)}" loading="lazy"></iframe></div>`
     + (openHref
       ? `<div class="${ME_CLASS.actions}"><a class="ctl" href="${esc(openHref)}" data-me-open>${t.open}</a>`
+        + copyLinkHtml(MAP_SHARE_LABELS[lang])
         + `<button type="button" class="ctl" data-me-fullscreen hidden>${t.fullscreen}</button></div>`
       : '')
     + (caption ? `<figcaption>${caption}</figcaption>` : '')
@@ -108,6 +118,11 @@ export const MAP_EMBED_CSS = `
   padding: ${L.sp['3xl']}; text-align: center; font-size: ${FS.caption}; line-height: 1.7; color: var(--me-muted, inherit);
 }
 .${ME_CLASS.actions} { display: flex; flex-wrap: wrap; gap: ${L.sp.sm}; margin-top: ${L.sp.sm}; }
+.${ME_CLASS.actions} .ctl { min-height: ${CONTROL_SIZE.md.minHeight}px; }
+.${ME_CLASS.actions} [hidden] { display: none; }
+.${ME_CLASS.actions} [data-copy-control] { display: contents; }
+.${ME_CLASS.actions} [data-copy-status] { align-self: center; font-size: ${FS.caption}; color: var(--me-muted, inherit); }
+.${ME_CLASS.actions} [data-copy-status]:empty { display: none; }
 
 .${ME_CLASS.poster} { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 @media ${MEDIA.mobile} {
@@ -123,6 +138,7 @@ export const MAP_EMBED_CSS = `
  * ページのテーマは、記事は html の data-theme、ほかのページは body の class（無ければライト）
  */
 export const MAP_EMBED_SCRIPT = `(function(){
+  ${COPY_LINK_SCRIPT}
   var frames = document.querySelectorAll('.${ME_CLASS.frame}');
   if (!frames.length) return;
   function pageTheme() {
@@ -143,6 +159,23 @@ export const MAP_EMBED_SCRIPT = `(function(){
   var theme = pageTheme();
   frames.forEach(function (frame) {
     var iframe = frame.querySelector('iframe');
+    var figure = frame.closest('.${ME_CLASS.figure}');
+    var open = figure.querySelector('[data-me-open]');
+    function currentUrl() {
+      if (!open) return null;
+      var u = new URL(open.href, location.href);
+      try {
+        var current = new URL(iframe.contentWindow.location.href);
+        if (current.origin === location.origin && current.pathname === u.pathname) u = current;
+      } catch (e) {}
+      u.searchParams.delete('${EMBED_PARAM}');
+      var section = u.searchParams.get('${EMBED_SECTION_PARAM}');
+      if (section) u.hash = section;
+      u.searchParams.delete('${EMBED_SECTION_PARAM}');
+      return u.href;
+    }
+    bindCopyLink(figure.querySelector('[data-copy-link]'), currentUrl);
+    if (open) open.addEventListener('click', function () { open.href = currentUrl(); });
     if (iframe) {
       try {
         var u = new URL(iframe.getAttribute('src'), window.location.href);
