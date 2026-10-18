@@ -76,6 +76,13 @@ GA4（Google Analytics 4）とGoogle Search Consoleの確認タグは任意設�
 
 **Suggested credit:** Flex Railway Map — compiled and edited by [emar27181](https://github.com/emar27181) ([website](https://flex-railway-map.netlify.app/)).
 
+## 運用マニュアル
+
+- [広告設定・配置・検証（AdSense）](docs/ads-operation.md)
+- [記事作成・サイトマップ・Search Console・検索結果画像](docs/publishing-operations.md)
+- [記事制作の詳細手順](docs/article-writing.md)
+- [SEO・サイトマップの実装ルール](docs/seo.md)
+
 ## License / Disclaimer
 
 - 駅・路線データは独自作成、またはオープンデータ（国土交通省・各自治体公開データ等）を利用しています
