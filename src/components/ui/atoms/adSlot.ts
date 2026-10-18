@@ -52,9 +52,12 @@ export function adSlotHtml({ slot, lang, position }: AdSlotProps): string {
 }
 
 /** 枠はスクリプトが本番（is-live）か本番以外（is-preview）かを決めるまで出さない */
+export const AD_INLINE_MAX_WIDTH = '320px';
+
 export const AD_SLOT_CSS = `
 .${AD_CLASS.slot} { display: none; margin: ${L.sp['3xl']} 0; padding-top: ${L.sp.sm}; border-top: 1px solid var(--ad-border, currentColor); }
 .${AD_CLASS.slot}.is-live, .${AD_CLASS.slot}.is-preview { display: block; }
+.${AD_CLASS.slot}[data-ad-position^="inline-"] { width: min(100%, ${AD_INLINE_MAX_WIDTH}); margin-inline: auto; }
 .${AD_CLASS.slot}.is-live:has(ins.adsbygoogle[data-ad-status="unfilled"]) { display: none; }
 .${AD_CLASS.label} { display: block; margin-bottom: ${L.sp.sm}; font-size: ${FS.caption}; line-height: 1.7; color: var(--ad-muted, inherit); }
 .${AD_CLASS.placeholder} {
