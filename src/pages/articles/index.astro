@@ -2,30 +2,12 @@
 /**
  * 記事一覧の日本語版（/articles）。英語・中国語・韓国語版は src/pages/[...lang]/articles/index.astro。
  */
+import ArticleIndexCategories from '../../components/articles/ArticleIndexCategories.astro';
 import ArticleLayout from "./_ArticleLayout.astro";
-import { ARTICLES, ARTICLE_PAGE_TRANSLATIONS } from "../../data/articleI18n";
-import { articlePath } from "../../config/articleSeo";
-import { withSiteName } from "../../config/seo";
-import ArticleThumbnail from '../../components/articles/ArticleThumbnail.astro';
 
-const month = (iso: string) => iso.slice(0, 7).replace("-", "年") + "月";
+
 ---
 
 <ArticleLayout pageKey="articles" kind="index">
-  <section class="article-index" aria-label={ARTICLE_PAGE_TRANSLATIONS.articles.ja.title}>
-    <ul class="article-list">
-      {ARTICLES.map(article => {
-        const t = withSiteName(ARTICLE_PAGE_TRANSLATIONS[article.slug].ja);
-        return (
-          <li>
-            <a href={articlePath(article.slug, "ja")}>
-              <ArticleThumbnail slug={article.slug} lang="ja" title={t.title} />
-              <span class="article-card-title">{t.title}</span>
-              <span class="meta">{month(article.publishedDate)} ｜ <span>{t.category}</span></span>
-            </a>
-          </li>
-        );
-      })}
-    </ul>
-  </section>
+  <ArticleIndexCategories lang="ja" />
 </ArticleLayout>

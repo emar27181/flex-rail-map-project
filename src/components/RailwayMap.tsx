@@ -82,6 +82,7 @@ import { patchRotatedRendererDrift } from '../utils/leafletRotatePatch';
 import { getInitialVisibleRoutesFromUrl, syncVisibleRoutesToUrl } from '../utils/routeUrlCodes';
 import { getInitialHeatmapMetricFromUrl, syncHeatmapMetricToUrl } from '../utils/heatmapUrlParam';
 import { toArticleLanguage } from '../utils/languagePersistence';
+import { SITE_FOOTER_LINKS, type NavLang } from '../config/siteNav';
 import { defaultRoutesNear } from '../utils/defaultRoutesNear';
 import { getInitialMapViewFromUrl, getInitialTravelTimesFromUrl } from '../utils/mapViewUrlParam';
 import { isEmbedMode } from '../utils/embedMode';
@@ -6635,6 +6636,25 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 isFullscreen ? translateUI('exitFullscreen', currentLanguage) : translateUI('enterFullscreen', currentLanguage),
                 () => setIsFullscreen(!isFullscreen),
               )}
+            </div>
+
+            {/* 地図内情報ボタンは記事トップへ直接移動。フッターと共通のURL・言語定義を参照 */}
+            <div style={isFullscreen && isMobile ? { gridColumn: 1, gridRow: 2 } : undefined}>
+              {(() => {
+                const articleLink = SITE_FOOTER_LINKS.find(link => link.path === '/articles');
+                if (!articleLink) return null;
+                const lang = toArticleLanguage(currentLanguage) as NavLang;
+                return <LinkButton
+                  href={articleLink.localized?.[lang] ?? articleLink.path}
+                  theme={theme}
+                  size="sm"
+                  iconOnly
+                  title={articleLink.label[lang]}
+                  aria-label={articleLink.label[lang]}
+                  icon={<Info size={MAP_CORNER_ICON_SIZE} />}
+                  styleOverride={cornerButtonStyle}
+                />;
+              })()}
             </div>
 
             {/* 方位: 2本指回転後も北が分かるように。押すと北を上に戻す */}
