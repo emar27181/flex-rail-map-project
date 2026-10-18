@@ -4,11 +4,13 @@ import { ARTICLE_PAGE_TRANSLATIONS, type ArticleLanguage } from '../../data/arti
 import { articlePath } from '../../config/articleSeo';
 import { withSiteName } from '../../config/seo';
 import { ADSENSE_SLOTS } from '../../config/ads';
+import { SITE_FOOTER_LINKS } from '../../config/siteNav';
 import { adSlotHtml } from '../ui/atoms/adSlot';
 import ArticleThumbnail from './ArticleThumbnail.astro';
 interface Props { lang: ArticleLanguage }
 const { lang } = Astro.props;
 const groups = groupedArticles();
+const guideLink = SITE_FOOTER_LINKS.find(link => link.path === '/guide');
 const locale = {ja:'ja-JP',en:'en-US',zh:'zh-CN',ko:'ko-KR'}[lang];
 const text = {
   ja:{intro:'路線図の使い方から観光・乗り換えまで、目的別に記事を探せます。',more:'このジャンルをすべて見る',recommended:'まず読む3記事',ads:'広告'},
@@ -20,6 +22,7 @@ const month = (iso:string) => new Date(iso+'T00:00:00Z').toLocaleDateString(loca
 ---
 <div class="categorized-articles">
   <p class="intro">{text.intro}</p>
+  {guideLink && <a class="guide-intro" href={`${guideLink.path}?lang=${lang}`}>{guideLink.label[lang]} →</a>}
   {groups.filter(g=>g.articles.length>0).map((group,i)=>(
     <section class="category" aria-labelledby={group.id}>
       <h2 id={group.id}>{group.title(lang)}</h2>
@@ -52,7 +55,8 @@ const month = (iso:string) => new Date(iso+'T00:00:00Z').toLocaleDateString(loca
 </div>
 <style>
 .categorized-articles { width:100%; }
-.intro { margin-bottom:1.8rem; }
+.intro { margin-bottom:.8rem; }
+.guide-intro { display:inline-block; padding:.7rem 1rem; border:1px solid currentColor; border-radius:.5rem; margin-bottom:1rem; color:inherit; text-decoration:none; }
 .category { margin:2.3rem 0; }
 .category h2 { margin:0 0 .4rem; font-size:1.25rem; }
 .category-lead { opacity:.7; font-size:.85rem; margin:.2rem 0 .8rem; }
