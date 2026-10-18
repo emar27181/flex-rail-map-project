@@ -41,9 +41,9 @@ describe('本文の広告の位置（articleAdSections）', () => {
     expect(articleAdSections(article(5, { 3: shot }))).toEqual([5]);
     expect(articleAdSections(article(5, { 3: shot, 4: { type: 'cta', title: 't', text: 't', map: 'main' } }))).toEqual([]);
     expect(articleAdSections(article(7, { 3: shot, 4: shot, 5: shot }))).toEqual([7]);
-    // ずらしても次の候補（9）を越えない。越える分は次の候補の側で置く
+    // 安全に配置できる場所が候補範囲になければ、無理に末尾へ挿入しない
     const many = Object.fromEntries([3, 4, 5, 6, 7, 8, 9].map(n => [n, shot]));
-    expect(articleAdSections(article(10, many))).toEqual([10]);
+    expect(articleAdSections(article(10, many))).toEqual([]);
   });
 
   it('説明文のある地図のデモの下には置ける（ボタンと広告の間に文が挟まる）', () => {
