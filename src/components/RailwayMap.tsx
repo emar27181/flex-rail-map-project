@@ -82,6 +82,7 @@ import { patchRotatedRendererDrift } from '../utils/leafletRotatePatch';
 import { getInitialVisibleRoutesFromUrl, syncVisibleRoutesToUrl } from '../utils/routeUrlCodes';
 import { getInitialHeatmapMetricFromUrl, syncHeatmapMetricToUrl } from '../utils/heatmapUrlParam';
 import { toArticleLanguage } from '../utils/languagePersistence';
+import { SITE_FOOTER_LINKS, type NavLang } from '../config/siteNav';
 import { defaultRoutesNear } from '../utils/defaultRoutesNear';
 import { getInitialMapViewFromUrl, getInitialTravelTimesFromUrl } from '../utils/mapViewUrlParam';
 import { isEmbedMode } from '../utils/embedMode';
@@ -285,6 +286,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [isStationSelectorExpanded, setIsStationSelectorExpanded] = useState(!embedded);
   const [mobileStationExpanded, setMobileStationExpanded] = useState(!embedded);
   const [isRouteToggleExpanded, setIsRouteToggleExpanded] = useState(false);
+  const [isMapInfoOpen, setIsMapInfoOpen] = useState(false);
   // 「表示路線の切替」パネル。設定は必要なときに開くものなので、PC・スマホとも閉じた状態で始める
   // （以前は開いて始まり、地図の右側を大きく覆っていた）
   const [isLegendExpanded, setIsLegendExpanded] = useState(false);
@@ -6634,6 +6636,45 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 isFullscreen ? <Minimize2 size={MAP_CORNER_ICON_SIZE} /> : <Maximize2 size={MAP_CORNER_ICON_SIZE} />,
                 isFullscreen ? translateUI('exitFullscreen', currentLanguage) : translateUI('enterFullscreen', currentLanguage),
                 () => setIsFullscreen(!isFullscreen),
+              )}
+            </div>
+
+            {/* 地図内の情報入口。全画面時も使える。リンクはフッターの共通定義から取得 */}
+            <div style={{ position: 'relative', ...(isFullscreen && isMobile ? { gridColumn: 1, gridRow: 2 } : {}) }}>
+              {renderCornerButton(
+                <Info size={MAP_CORNER_ICON_SIZE} />,
+                currentLanguage === 'japanese' ? '記事・使い方を開く' : 'Open articles and guides',
+                () => setIsMapInfoOpen(open => !open),
+              )}
+              {isMapInfoOpen && (
+                <nav aria-label={currentLanguage === 'japanese' ? '地図の情報メニュー' : 'Map information'} style={{
+                  position: 'absolute',
+                  ...(isMobile && !isFullscreen ? { top: 0, right: '100%' } : { bottom: '100%', left: 0 }),
+                  minWidth: 'max-content',
+                  padding: L.sp.sm,
+                  backgroundColor: colors.surface,
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: L.r.card,
+                  boxShadow: shadow('overlay', theme),
+                  zIndex: 1100,
+                }}>
+                  {SITE_FOOTER_LINKS.filter(link => link.path === '/articles' || link.path === '/guide').map(link => {
+                    const lang = toArticleLanguage(currentLanguage) as NavLang;
+                    const href = link.localized?.[lang] ?? link.path;
+                    return (
+                      <a key={link.path} href={href} onClick={() => setIsMapInfoOpen(false)} style={{
+                        display: 'block',
+                        padding: `${L.sp.sm} ${L.sp.lg}`,
+                        color: colors.text,
+                        fontSize: FS.body,
+                        textDecoration: 'none',
+                        borderRadius: L.r.control,
+                      }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = colors.surfaceElevated; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}>
+                        {link.label[lang]}
+                      </a>
+                    );
+                  })}
+                </nav>
               )}
             </div>
 
