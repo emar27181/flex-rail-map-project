@@ -1,0 +1,64 @@
+---
+import { groupedArticles } from '../../data/articleIndexGroups';
+import { ARTICLE_PAGE_TRANSLATIONS, type ArticleLanguage } from '../../data/articleI18n';
+import { articlePath } from '../../config/articleSeo';
+import { withSiteName } from '../../config/seo';
+import { ADSENSE_SLOTS } from '../../config/ads';
+import { adSlotHtml } from '../ui/atoms/adSlot';
+import ArticleThumbnail from './ArticleThumbnail.astro';
+interface Props { lang: ArticleLanguage }
+const { lang } = Astro.props;
+const groups = groupedArticles();
+const locale = {ja:'ja-JP',en:'en-US',zh:'zh-CN',ko:'ko-KR'}[lang];
+const text = {
+  ja:{intro:'路線図の使い方から観光・乗り換えまで、目的別に記事を探せます。',more:'このジャンルをすべて見る',recommended:'まず読む3記事',ads:'広告'},
+  en:{intro:'Find practical guides by topic, from using the map to sightseeing and transfers.',more:'View all in this category',recommended:'Start with these three',ads:'Advertisement'},
+  zh:{intro:'按主题查找路线图使用方法、观光及换乘指南。',more:'查看此分类全部文章',recommended:'推荐阅读3篇',ads:'广告'},
+  ko:{intro:'노선도 사용법부터 관광·환승까지 주제별로 살펴보세요.',more:'이 분야의 모든 글 보기',recommended:'먼저 읽을 글 3개',ads:'광고'},
+}[lang];
+const month = (iso:string) => new Date(iso+'T00:00:00Z').toLocaleDateString(locale,{year:'numeric',month:'short',timeZone:'UTC'});
+---
+<div class="categorized-articles">
+  <p class="intro">{text.intro}</p>
+  {groups.filter(g=>g.articles.length>0).map((group,i)=>(
+    <section class="category" aria-labelledby={group.id}>
+      <h2 id={group.id}>{group.title(lang)}</h2>
+      <p class="category-lead">{text.recommended}</p>
+      <ul class="article-list">
+        {group.articles.slice(0,3).map(article=>{
+          const meta=withSiteName(ARTICLE_PAGE_TRANSLATIONS[article.slug][lang]);
+          return <li><a href={articlePath(article.slug,lang)}>
+            <ArticleThumbnail slug={article.slug} lang={lang} title={meta.title}/>
+            <span class="article-card-title">{meta.title}</span>
+            <span class="meta">{month(article.publishedDate)}</span>
+          </a></li>;
+        })}
+      </ul>
+      {group.articles.length>3 && <details class="more"><summary>{text.more}（{group.articles.length - 3}）</summary>
+        <ul class="article-list">
+          {group.articles.slice(3).map(article=>{
+            const meta=withSiteName(ARTICLE_PAGE_TRANSLATIONS[article.slug][lang]);
+            return <li><a href={articlePath(article.slug,lang)}>
+              <ArticleThumbnail slug={article.slug} lang={lang} title={meta.title}/>
+              <span class="article-card-title">{meta.title}</span>
+              <span class="meta">{month(article.publishedDate)}</span>
+            </a></li>;
+          })}
+        </ul>
+      </details>}
+    </section>
+  ))}
+  <div class="index-ad" set:html={adSlotHtml({ slot: ADSENSE_SLOTS.articleInline, lang, position: 'article-index-bottom' })}/>
+</div>
+<style>
+.categorized-articles { width:100%; }
+.intro { margin-bottom:1.8rem; }
+.category { margin:2.3rem 0; }
+.category h2 { margin:0 0 .4rem; font-size:1.25rem; }
+.category-lead { opacity:.7; font-size:.85rem; margin:.2rem 0 .8rem; }
+.category .article-list { padding:0; margin:0; }
+.more { margin-top:1rem; }
+.more summary { cursor:pointer; padding:.7rem .85rem; border:1px solid currentColor; border-radius:.45rem; opacity:.85; }
+.more[open] summary { margin-bottom:1rem; }
+.index-ad { margin-top:2rem; }
+</style>
