@@ -66,19 +66,28 @@ export function initArticleAnalytics(ctx: ArticleEventContext, doc: Document = d
     const demo = fig.dataset.demoId ?? '';
     const iframe = fig.querySelector('iframe');
     // 同じサイトの画面なので、読み込んだあとに中の操作を受け取れる。最初の1回だけ送る
-    iframe?.addEventListener('load', () => {
-      let sent = false;
-      const once = () => {
-        if (sent) return;
-        sent = true;
-        trackArticleEvent(ARTICLE_EVENTS.demoInteract, ctx, { demo_id: demo });
-      };
+    // 読み込み済みの iframe にも登録する。再読み込みされてもデモごとに1回だけ数える。
+    let sent = false;
+    const attached = new WeakSet<Document>();
+    const once = () => {
+      if (sent) return;
+      sent = true;
+      trackArticleEvent(ARTICLE_EVENTS.demoInteract, ctx, { demo_id: demo });
+    };
+    const attach = () => {
       try {
-        const inner = iframe.contentDocument;
-        inner?.addEventListener('pointerdown', once, { passive: true });
-        inner?.addEventListener('wheel', once, { passive: true });
+        const inner = iframe?.contentDocument;
+        if (!inner || attached.has(inner)) return;
+        attached.add(inner);
+        inner.addEventListener('pointerdown', once, { passive: true });
+        inner.addEventListener('wheel', once, { passive: true });
+        inner.addEventListener('keydown', e => {
+          if (['Enter', ' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', '+', '-'].includes(e.key)) once();
+        });
       } catch { /* 別のサイトの画面は数えない */ }
-    });
+    };
+    iframe?.addEventListener('load', attach);
+    attach();
     fig.querySelector('[data-me-fullscreen]')?.addEventListener('click', () =>
       trackArticleEvent(ARTICLE_EVENTS.demoFullscreen, ctx, { demo_id: demo }));
     fig.querySelector('[data-me-open]')?.addEventListener('click', () =>

@@ -32,4 +32,26 @@ describe('記事の GA4 イベント', () => {
     delete (window as unknown as { gtag?: unknown }).gtag;
     expect(() => trackArticleEvent(ARTICLE_EVENTS.mapOpen, { article: 'x', locale: 'ja' })).not.toThrow();
   });
+
+  it('先に読み込まれたデモの操作も拾い、load が再発しても1回だけ数える', () => {
+    document.body.innerHTML = '<figure data-demo-id="art/main"><iframe></iframe></figure>';
+    const iframe = document.querySelector('iframe')!;
+    initArticleAnalytics({ article: 'art', locale: 'ja' });
+    iframe.contentDocument!.dispatchEvent(new Event('pointerdown'));
+    iframe.dispatchEvent(new Event('load'));
+    iframe.contentDocument!.dispatchEvent(new Event('wheel'));
+    expect(gtag.mock.calls.filter(c => c[1] === ARTICLE_EVENTS.demoInteract)).toHaveLength(1);
+  });
+
+  it('キーボードで地図を操作した場合も数える（Tab の移動だけでは数えない）', () => {
+    document.body.innerHTML = '<figure data-demo-id="art/main"><iframe></iframe></figure>';
+    initArticleAnalytics({ article: 'art', locale: 'ja' });
+    const inner = document.querySelector('iframe')!.contentDocument!;
+    inner.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+    expect(gtag).not.toHaveBeenCalled();
+    inner.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    expect(gtag).toHaveBeenCalledWith('event', ARTICLE_EVENTS.demoInteract, {
+      article: 'art', locale: 'ja', demo_id: 'art/main',
+    });
+  });
 });
