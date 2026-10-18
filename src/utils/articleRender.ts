@@ -175,11 +175,11 @@ function blockEmbedSrc(block: ArticleBlock, source: ArticleSource, lang: Article
 
 /**
  * 本文の広告の置き方。結論とその直後の地図のデモの近くには置かず（読む前に広告を見せない・地図の操作と押し間違えさせない）、
- * 3つ目の見出しの前に1つ、そこから6節ごとに1つ置く（4〜8節の記事は1つ、9節以上で2つ）。
- * 2026-10-16: 最初は3節ごと＋読み終わった後にも1つ（4節の記事で2つ）だったが、多すぎると判断して半分にした
+ * 4つ目の見出しの前から、長文の記事も最大1枠までに抑える。
+ * 冒頭と地図デモの操作近くを避け、短い記事には挿入しない。
  */
-export const ARTICLE_AD_FIRST_SECTION = 3;
-export const ARTICLE_AD_EVERY_SECTIONS = 6;
+export const ARTICLE_AD_FIRST_SECTION = 4;
+export const ARTICLE_AD_EVERY_SECTIONS = 999;
 
 /**
  * 広告のすぐ上に来てよいか。地図を開くボタン・中身の分からない HTML・説明文の無い地図のデモの下には置かない
