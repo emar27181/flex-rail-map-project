@@ -5,6 +5,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ARTICLE_EVENTS, initArticleAnalytics, trackArticleEvent } from '../../../src/utils/articleAnalytics';
 import { mapEmbedHtml } from '../../../src/components/ui/atoms/mapEmbed';
+import { COPY_LINK_SUCCESS_EVENT } from '../../../src/utils/copyLinkEvent';
 
 describe('記事の GA4 イベント', () => {
   const gtag = vi.fn();
@@ -26,6 +27,13 @@ describe('記事の GA4 イベント', () => {
     const names = gtag.mock.calls.map(c => c[1]);
     expect(names).toEqual(['article_map_open', 'article_map_open', 'article_related_click']);
     expect(gtag.mock.calls[0][2]).toMatchObject({ demo_id: 'art/main', source: 'demo' });
+  });
+
+  it('共有リンクを正常にコピーしたときだけ記事の共有イベントを送る', () => {
+    document.body.innerHTML = '<figure data-demo-id="a/main"><button data-copy-link>copy</button></figure>';
+    initArticleAnalytics({ article: 'a', locale: 'en' });
+    document.querySelector('[data-copy-link]')!.dispatchEvent(new CustomEvent(COPY_LINK_SUCCESS_EVENT, { bubbles: true }));
+    expect(gtag).toHaveBeenCalledWith('event', ARTICLE_EVENTS.shareCopy, { article: 'a', locale: 'en', demo_id: 'a/main' });
   });
 
   it('GA4 が無い環境でも落ちない', () => {
