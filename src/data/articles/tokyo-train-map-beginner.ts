@@ -55,8 +55,8 @@ export const tokyoTrainMapBeginner: ArticleSource = {
   "content": {
     "ja": {
       "meta": {
-        "title": "東京の路線図の読み方｜初めてでも迷わない3つのコツ",
-        "description": "東京の路線図が複雑に見えるのは、複数の会社の路線が1枚に重なっているからです。1本の色だけを追う、駅ナンバリングを見る、乗換駅で方面を確かめる。この3つのコツを実際の画面で説明します。",
+        "title": "東京の複雑な路線図の見方｜初心者向け3つのコツ",
+        "description": "東京の路線図が複雑でわからないときは、必要な路線だけを表示。路線の色、駅ナンバリング、乗換方向を確認する3つのコツを、操作できる地図とともに説明します。",
         "category": "初心者ガイド",
         "kicker": "はじめての東京の電車",
         "readTime": "読了 約5分",
@@ -161,8 +161,8 @@ export const tokyoTrainMapBeginner: ArticleSource = {
     },
     "en": {
       "meta": {
-        "title": "How to Read a Tokyo Train Map: 3 Tips for First-Time Riders",
-        "description": "Tokyo rail maps look complex because lines from several companies are drawn on one sheet. Follow one color, read station numbers, and check the direction at transfer stations. Real screenshots explain each tip.",
+        "title": "Tokyo Train Map Explained: 3 Tips for a Confusing Rail Network",
+        "description": "Tokyo's rail map looks overwhelming? Isolate one line on an interactive map, follow its color, read station numbers and check transfer directions in three steps.",
         "category": "Beginner Guide",
         "kicker": "Tokyo Trains for Beginners",
         "readTime": "About 5 min read",
