@@ -24,6 +24,7 @@ const month = (iso:string) => new Date(iso+'T00:00:00Z').toLocaleDateString(loca
   <p class="intro">{text.intro}</p>
   {guideLink && <a class="guide-intro" href={`${guideLink.path}?lang=${lang}`}>{guideLink.label[lang]} →</a>}
   {groups.filter(g=>g.articles.length>0).map((group,i)=>(
+    <div class="category-block">
     <section class="category" aria-labelledby={group.id}>
       <h2 id={group.id}>{group.title(lang)}</h2>
       <p class="category-lead">{text.recommended}</p>
@@ -49,10 +50,11 @@ const month = (iso:string) => new Date(iso+'T00:00:00Z').toLocaleDateString(loca
           })}
         </ul>
       </details>}
+    </section>
       {i < groups.filter(g => g.articles.length > 0).length - 1 && i % 2 === 0 && (
         <div class="index-ad" set:html={adSlotHtml({ slot: ADSENSE_SLOTS.articleInline, lang, position: `article-index-between-${i + 1}-${i + 2}` })} />
       )}
-    </section>
+    </div>
   ))}
 </div>
 <style>
