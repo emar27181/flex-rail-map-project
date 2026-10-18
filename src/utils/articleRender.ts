@@ -179,7 +179,8 @@ function blockEmbedSrc(block: ArticleBlock, source: ArticleSource, lang: Article
  * 冒頭と地図デモの操作近くを避け、短い記事には挿入しない。
  */
 export const ARTICLE_AD_FIRST_SECTION = 4;
-export const ARTICLE_AD_EVERY_SECTIONS = 999;
+export const ARTICLE_AD_MAX_SLOTS = 1;
+export const ARTICLE_AD_EVERY_SECTIONS = 6;
 
 /**
  * 広告のすぐ上に来てよいか。地図を開くボタン・中身の分からない HTML・説明文の無い地図のデモの下には置かない
@@ -198,7 +199,7 @@ function adSafeAfter(block: ArticleBlock): boolean {
 export function articleAdSections(blocks: ArticleBlock[]): number[] {
   const h2At = blocks.flatMap((b, i) => (b.type === 'h2' ? [i] : []));
   const sections: number[] = [];
-  for (let k = ARTICLE_AD_FIRST_SECTION; k <= h2At.length; k += ARTICLE_AD_EVERY_SECTIONS) {
+  for (let k = ARTICLE_AD_FIRST_SECTION; k <= h2At.length && sections.length < ARTICLE_AD_MAX_SLOTS; k += ARTICLE_AD_EVERY_SECTIONS) {
     for (let s = k; s <= h2At.length && s < k + ARTICLE_AD_EVERY_SECTIONS; s++) {
       const prev = blocks[h2At[s - 1] - 1];
       if (prev && adSafeAfter(prev)) { sections.push(s); break; }
