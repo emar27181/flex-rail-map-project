@@ -34,6 +34,7 @@ import { ARTICLE_SOURCES } from "../../data/articles";
 import { articleToc } from "../../utils/articleRender";
 import { AD_SLOT_CSS, AD_SLOT_SCRIPT } from "../ui/atoms/adSlot";
 import { findArticleStation } from "../../utils/articleFacts";
+import { buildMapHref } from "../../utils/mapDeepLink";
 import { getSeoModel, hasStationPage, lineByKey, linePath, routeName, stationName, stationPath } from "../../seo/pageModel";
 
 import { MAP_EMBED_CSS, MAP_EMBED_SCRIPT, withFirstEmbedPoster } from "../ui/atoms/mapEmbed";
@@ -218,6 +219,9 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
         <ul class="place-list">
           {[...relatedLines, ...relatedStations].map(p => <li>{p.href ? <a href={p.href}>{p.name}</a> : p.name}</li>)}
         </ul>
+        {relatedLines.some(p => p.href) && source?.relatedRoutes?.length && (
+          <a class="back-link" data-article-related-map href={buildMapHref({ routes: source.relatedRoutes, lang })}>{shell.openRelatedMap}</a>
+        )}
       </section>
     )}
     {sources.length > 0 && (
