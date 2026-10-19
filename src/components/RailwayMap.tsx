@@ -60,7 +60,7 @@ import {
   type Departure,
 } from '../data/timetableData';
 import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, alphaWhite, alphaBlack } from '../constants/ui';
-import { trackStationSelect, trackRouteSearch, trackViewSwitch } from '../utils/appAnalytics';
+import { trackStationSelect, trackRouteSearch, trackViewSwitch, trackRouteVisibility, trackRouteVisibilityBulk } from '../utils/appAnalytics';
 import { DEFAULT_MAP_CENTER } from '../constants/mapDefaults';
 import type { MapViewMode } from '../constants/mapViewMode';
 import { initialDisplayUrlOptions } from '../utils/mapDisplayUrlParam';
@@ -3784,6 +3784,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     }
     console.log('🔄 New visibleRoutes:', newVisibleRoutes);
     setVisibleRoutes(newVisibleRoutes);
+    trackRouteVisibility(routeKey, newVisibleRoutes.has(routeKey), newVisibleRoutes.size);
   };
 
   const getMarkerRadius = (zoom: number) => {
@@ -3796,11 +3797,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
 
   const selectAllRoutes = () => {
-    setVisibleRoutes(new Set(Object.keys(routes) as RouteKey[]));
+    const all = new Set(Object.keys(routes) as RouteKey[]);
+    setVisibleRoutes(all);
+    trackRouteVisibilityBulk('show_all', all.size);
   };
 
   const deselectAllRoutes = () => {
     setVisibleRoutes(new Set());
+    trackRouteVisibilityBulk('hide_all', 0);
   };
 
   const handleRouteClick = (routeKey: RouteKey) => {

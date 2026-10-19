@@ -17,6 +17,10 @@ export const APP_EVENTS = {
   routeSearch: 'map_route_search',
   /** 表示方式（実際の地図・路線図風・バブル・立体）を手で切り替えた。URL や保存した設定で開いたときは送らない */
   viewSwitch: 'map_view_switch',
+  /** 表示路線を個別にオン・オフした */
+  routeVisibility: 'map_route_visibility',
+  /** 全表示・全非表示を押した */
+  routeVisibilityBulk: 'map_route_visibility_bulk',
 } as const;
 
 /** GA4 のパラメータ値の上限（文字数） */
@@ -62,4 +66,13 @@ export function trackRouteSearch(from: string, to: string, results: RouteSearchS
 export function trackViewSwitch(view: string, fromView: string): void {
   if (view === fromView) return;
   trackEvent(APP_EVENTS.viewSwitch, { view: clip(view), from_view: clip(fromView) });
+}
+
+/** ユーザーによる路線表示の変更のみ。URL/設定インポート時の初期化は数えない。 */
+export function trackRouteVisibility(route: string, visible: boolean, visibleCount: number): void {
+  trackEvent(APP_EVENTS.routeVisibility, { route: clip(route), visible, visible_count: visibleCount });
+}
+
+export function trackRouteVisibilityBulk(action: 'show_all' | 'hide_all', visibleCount: number): void {
+  trackEvent(APP_EVENTS.routeVisibilityBulk, { action, visible_count: visibleCount });
 }

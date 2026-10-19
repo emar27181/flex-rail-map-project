@@ -9,6 +9,7 @@
  * 記事の閲覧そのものは GA4 の page_view で数えるので、別のイベントは作らない。
  */
 import { trackEvent } from './gtagConsent';
+import { COPY_LINK_SUCCESS_EVENT } from './copyLinkEvent';
 
 export const ARTICLE_EVENTS = {
   /** 地図のデモが画面に入った（1つのデモにつき1回） */
@@ -21,6 +22,8 @@ export const ARTICLE_EVENTS = {
   mapOpen: 'article_map_open',
   /** 関連記事を開いた */
   relatedClick: 'article_related_click',
+  /** 記事内デモの共有リンクのコピーに成功 */
+  shareCopy: 'article_share_copy',
 } as const;
 
 /** パラメータの値は GA4 の上限（100文字）で切る */
@@ -49,6 +52,10 @@ export function trackArticleEvent(
  * デモは mapEmbed.ts の figure（data-demo-id）、地図への移動は data-me-open・.cta .btn、関連記事は .related a
  */
 export function initArticleAnalytics(ctx: ArticleEventContext, doc: Document = document): void {
+  doc.addEventListener(COPY_LINK_SUCCESS_EVENT, (event) => {
+    const figure = (event.target as Element)?.closest?.('figure[data-demo-id]');
+    if (figure) trackArticleEvent(ARTICLE_EVENTS.shareCopy, ctx, { demo_id: (figure as HTMLElement).dataset.demoId ?? '' });
+  });
   const figures = Array.from(doc.querySelectorAll<HTMLElement>('figure[data-demo-id]'));
   const seen = new Set<Element>();
   if (typeof IntersectionObserver !== 'undefined') {
