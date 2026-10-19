@@ -14,6 +14,7 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SITE_URL } from '../config/seo';
+import { existingMapPreview } from '../seo/mapPreview';
 import { buildSitemapEntries, buildSitemapXml, extractPageSeo, parseSitemapLocs, verifySeo, type PageSeo } from '../seo/sitemapCore';
 import { createLastModified } from '../seo/gitLastModified';
 
@@ -45,7 +46,7 @@ export default function seoSitemap(): AstroIntegration {
         const root = process.cwd();
         const pages = readBuiltPages(distDir);
         const lastmod = createLastModified(root);
-        const entries = buildSitemapEntries(pages, SITE_URL, lastmod);
+        const entries = buildSitemapEntries(pages, SITE_URL, lastmod, existingMapPreview);
         const xml = buildSitemapXml(entries);
         writeFileSync(join(distDir, 'sitemap.xml'), xml);
 
