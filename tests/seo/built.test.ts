@@ -97,6 +97,21 @@ describe.skipIf(!built)('ビルド結果の SEO 検証（dist）', () => {
     expect([...broken]).toEqual([]);
   });
 
+  it('Google画像サイトマップは、実在する画像をそのページのog:imageと一致させる', () => {
+    const sitemap = readFileSync(join(DIST, 'sitemap.xml'), 'utf8');
+    const pairs = [...sitemap.matchAll(/<url>\s*<loc>([^<]+)<\/loc>([\s\S]*?)<\/url>/g)]
+      .flatMap(m => [...m[2].matchAll(/<image:image><image:loc>([^<]+)<\/image:loc><\/image:image>/g)]
+        .map(image => ({ page: m[1], url: image[1] })));
+    expect(pairs.length).toBeGreaterThan(0);
+    const htmlByUrl = new Map(htmlFiles.map(f => [pageUrl(SITE_URL, f.path), f.html]));
+    const broken = pairs.filter(({ page, url }) => {
+      const pathname = new URL(url).pathname;
+      return !existsSync(join(DIST, pathname)) ||
+        !htmlByUrl.get(page)?.includes(`property="og:image" content="${url}"`);
+    });
+    expect(broken).toEqual([]);
+  });
+
   it.skipIf(!LIVE)('sitemap の全URLが HTTP 200 を返す（SEO_LIVE_BASE_URL 指定時）', async () => {
     const failures: string[] = [];
     for (const loc of locs) {
