@@ -10,6 +10,8 @@ import type { Language } from '../utils/translation';
 import type { UiVersion } from '../utils/uiVersionPersistence';
 import { L } from './legend/legendStyles';
 import { SITE_NAME } from '../config/seo';
+import { SITE_FOOTER_LINKS, type NavLang } from '../config/siteNav';
+import { toArticleLanguage } from '../utils/languagePersistence';
 
 const LANGUAGES: Language[] = ['japanese', 'english', 'chinese', 'korean'];
 const LANG_LABELS: Record<Language, string> = { japanese: '日', english: 'En', chinese: '中', korean: '한' };
@@ -218,6 +220,30 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           >
             {{ japanese: 'ガイド一覧', english: 'Guides', chinese: '指南列表', korean: '가이드 목록' }[language]}
           </div>
+          {/* 記事一覧: フッターと同じ一元管理ナビゲーション定義を使用 */}
+          {(() => {
+            const articleLink = SITE_FOOTER_LINKS.find(link => link.path === '/articles');
+            if (!articleLink) return null;
+            const lang = toArticleLanguage(language) as NavLang;
+            return (
+              <a
+                href={articleLink.localized?.[lang] ?? articleLink.path}
+                onClick={() => setIsMenuOpen(false)}
+                style={{
+                  display: 'block',
+                  padding: `${L.sp.xl} ${L.sp['2xl']}`,
+                  fontSize: FS.title,
+                  color: colors.text,
+                  textDecoration: 'none',
+                  borderBottom: `1px solid ${colors.borderLight}`,
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surfaceElevated}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                {articleLink.label[lang]}
+              </a>
+            );
+          })()}
           <div
             style={{
               padding: `${L.sp.xl} ${L.sp['2xl']}`,
