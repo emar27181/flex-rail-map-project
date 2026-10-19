@@ -26,6 +26,8 @@ export interface SitemapEntry {
   loc: string;
   lastmod?: string;
   alternates: Array<{ hreflang: string; href: string }>;
+  /** ページで実際に使用する地図画像。Google画像検索の発見性を上げる。 */
+  images?: string[];
 }
 
 const attr = (tag: string, name: string): string | undefined =>
@@ -72,6 +74,8 @@ export function buildSitemapEntries(
   pages: PageSeo[],
   siteUrl: string,
   lastmodOf: (path: string) => string | undefined,
+  /** そのページで表示する主画像のサイト内パス。無しなら画像エントリは出さない */
+  imagePathOf?: (path: string) => string | undefined,
 ): SitemapEntry[] {
   const seen = new Set<string>();
   const entries: SitemapEntry[] = [];
@@ -80,7 +84,10 @@ export function buildSitemapEntries(
     const loc = p.canonical!;
     if (seen.has(loc)) continue;
     seen.add(loc);
-    entries.push({ loc, lastmod: lastmodOf(p.path), alternates: p.hreflang });
+    const imagePath = imagePathOf?.(p.path);
+    entries.push({ loc, lastmod: lastmodOf(p.path), alternates: p.hreflang,
+      ...(imagePath && imagePath.startsWith('/') ? { images: [new URL(imagePath, siteUrl).href] } : {}),
+    });
   }
   return entries;
 }
@@ -89,10 +96,11 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 
 export function buildSitemapXml(entries: SitemapEntry[]): string {
   const hasAlternates = entries.some(e => e.alternates.length > 0);
+  const hasImages = entries.some(e => (e.images?.length ?? 0) > 0);
   const lines = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<!-- ビルド時に自動生成（src/integrations/seoSitemap.ts）。手で編集しないこと -->',
-    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"${hasAlternates ? ' xmlns:xhtml="http://www.w3.org/1999/xhtml"' : ''}>`,
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"${hasAlternates ? ' xmlns:xhtml="http://www.w3.org/1999/xhtml"' : ''}${hasImages ? ' xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"' : ''}>`,
   ];
   for (const e of entries) {
     lines.push('  <url>');
@@ -101,6 +109,7 @@ export function buildSitemapXml(entries: SitemapEntry[]): string {
     for (const a of e.alternates) {
       lines.push(`    <xhtml:link rel="alternate" hreflang="${esc(a.hreflang)}" href="${esc(a.href)}"/>`);
     }
+    for (const image of e.images ?? []) lines.push(`    <image:image><image:loc>${esc(image)}</image:loc></image:image>`);
     lines.push('  </url>');
   }
   lines.push('</urlset>', '');
