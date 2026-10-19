@@ -2,7 +2,7 @@
 import ThemeWrapper from "../components/ThemeWrapper.tsx";
 import SiteFooterNav from "../components/SiteFooterNav.astro";
 import leafletCss from "leaflet/dist/leaflet.css?url";
-import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION } from "../config/seo";
+import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION, GOOGLE_IMAGE_PREVIEW_DIRECTIVE } from "../config/seo";
 import GA4Loader from "../components/GA4Loader.astro";
 import { ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC } from "../config/ads";
 import FaviconLinks from '../components/seo/FaviconLinks.astro';
@@ -172,7 +172,7 @@ const appLoadingMessages = Object.fromEntries(APP_LOADING_LANGUAGES.map(lang => 
 		<!-- SEO Meta Description -->
 		<meta name="description" content={`路線図が見にくい・複雑すぎると感じていませんか？${SITE_NAME}は、必要な路線だけ選んで表示できるシンプルなインタラクティブ路線図です。情報を絞り込んで見やすくし、遅延・運休時も自分で乗り換えを判断できます。`} />
 		<meta name="keywords" content="路線図 見にくい,路線図 複雑,路線図 分かりにくい,見やすい路線図,シンプル路線図,フレックス路線図,乗り換え 分かりやすい,鉄道路線図,東京路線図,路線図 絞り込み,インタラクティブ路線図,乗り換え検索,電車 路線図,Flex Railway Map" />
-		<meta name="robots" content="index, follow" />
+		<meta name="robots" content={`index, follow, ${GOOGLE_IMAGE_PREVIEW_DIRECTIVE}`} />
 		<meta name="author" content={PROJECT_NAME} />
 
 		<!-- Open Graph / SNS シェア用 -->
