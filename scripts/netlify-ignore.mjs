@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process'
 
 function shouldBuild(context, message) {
   if (context === 'production') return true
-  if (context === 'deploy-preview') return /\\[netlify-preview\\]/i.test(message)
+  if (context === 'deploy-preview') return message.toLowerCase().includes('[netlify-preview]')
   return false // branch deploys are not needed for this site
 }
 
