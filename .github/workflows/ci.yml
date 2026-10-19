@@ -28,7 +28,7 @@ jobs:
       - name: 依存関係
         run: npm ci
       - name: Netlify build gate safety tests
-        run: node --test tests/netlify-ignore.test.mjs
+        run: node --test tests/netlify-ignore.node.mjs
 
       - name: 型チェック
         run: npm run test:types
