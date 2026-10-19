@@ -24,7 +24,7 @@ import {
   type ArticleLanguage,
 } from "../../data/articleI18n";
 import { ARTICLE_BODY_TRANSLATIONS } from "../../data/articleBodyI18n";
-import { APP_ICON_PATH, GOOGLE_SITE_VERIFICATION, SITE_URL, SITE_NAME, OG_LOCALE, buildHreflangLinks, hreflangCode, withSiteName } from "../../config/seo";
+import { APP_ICON_PATH, GOOGLE_SITE_VERIFICATION, SITE_URL, SITE_NAME, OG_LOCALE, GOOGLE_IMAGE_PREVIEW_DIRECTIVE, buildPrimaryImageJsonLd, buildHreflangLinks, hreflangCode, withSiteName } from "../../config/seo";
 import FaviconLinks from "../seo/FaviconLinks.astro";
 import GA4Loader from "../GA4Loader.astro";
 import { ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC } from "../../config/ads";
@@ -120,7 +120,7 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
   <title>{meta.title} | {SITE_NAME}</title>
   <meta name="description" content={meta.description} />
   {keywords && <meta name="keywords" content={keywords} />}
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content={`index, follow, ${GOOGLE_IMAGE_PREVIEW_DIRECTIVE}`} />
   <meta name="theme-color" content={themeColor} />
   <link rel="canonical" href={canonicalUrl} />
   {hreflang.map(h => <link rel="alternate" hreflang={h.hreflang} href={h.href} />)}
@@ -159,6 +159,7 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
   </script>
 
   {isArticle && <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd({ title: meta.title, description: meta.description, keywords, publishedDate, modifiedDate, canonicalUrl, ogImage, image: preview, lang }))}></script>}
+  {preview && <script type="application/ld+json" set:html={JSON.stringify(buildPrimaryImageJsonLd(canonicalUrl, preview))}></script>}
   <script type="application/ld+json" set:html={JSON.stringify(articleBreadcrumbJsonLd(isArticle ? { title: meta.title, canonicalUrl } : undefined, indexCrumb))}></script>
 
   {lang === "ja" && (

@@ -35,6 +35,23 @@ describe('sitemap に載せるページ', () => {
     expect(isSitemapEligible(page('/a', { canonical: `${SITE}/a?lang=en` }), SITE)).toBe(false);
   });
 
+  it('Google画像検索向けに実在するページだけ画像サイトマップを出す', () => {
+    const pages = [
+      page('/articles/a', { canonical: `${SITE}/articles/a`, title: 'A' }),
+      page('/articles/b', { canonical: `${SITE}/articles/b`, title: 'B' }),
+      page('/articles/c', { canonical: `${SITE}/articles/c`, title: 'C', robots: 'noindex' }),
+    ];
+    const entries = buildSitemapEntries(pages, SITE, () => undefined,
+      path => path === '/articles/a' ? '/og/articles/a.jpg' : undefined);
+    const xml = buildSitemapXml(entries);
+    expect(xml).toContain('xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"');
+    expect(xml).toContain('<image:image><image:loc>https://example.test/og/articles/a.jpg</image:loc></image:image>');
+    expect(xml).not.toContain('/og/articles/b.jpg');
+    expect(xml).not.toContain('/articles/c');
+    // sitemapのページURLは画像URLを誤って含まない。
+    expect(parseSitemapLocs(xml)).toEqual([`${SITE}/articles/a`, `${SITE}/articles/b`]);
+  });
+
   it('生成した sitemap には対象ページだけが1回ずつ、lastmod と hreflang 付きで入る', () => {
     const pages = [
       page('/', { canonical: `${SITE}/`, title: 'Top' }),

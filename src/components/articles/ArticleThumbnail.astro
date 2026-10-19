@@ -2,14 +2,23 @@
 /** 記事一覧・関連記事で共通利用する地図デモの静止画サムネイル。 */
 import { existingMapPreview } from '../../seo/mapPreview';
 import { articlePath } from '../../config/articleSeo';
-import type { ArticleLanguage } from '../../data/articleI18n';
+import { ARTICLE_PAGE_TRANSLATIONS, type ArticleLanguage } from '../../data/articleI18n';
+import { withSiteName } from '../../config/seo';
 
 interface Props {
   slug: string;
   lang: ArticleLanguage;
   title?: string;
 }
-const { slug, lang } = Astro.props;
+const { slug, lang, title } = Astro.props;
+// Google画像検索と読み上げに、画像が何を表すかを伝える。記事の見出しと同じ翻訳データを使う。
+const articleTitle = title ?? withSiteName(ARTICLE_PAGE_TRANSLATIONS[slug]?.[lang]?.title ?? slug);
+const previewAlt = {
+  ja: `${articleTitle}で紹介する路線図のプレビュー`,
+  en: `Railway map preview from ${articleTitle}`,
+  zh: `${articleTitle}的线路图预览`,
+  ko: `${articleTitle}에서 소개하는 노선도 미리보기`,
+}[lang];
 const preview = existingMapPreview(articlePath(slug, lang));
 ---
 {preview && (
@@ -18,7 +27,7 @@ const preview = existingMapPreview(articlePath(slug, lang));
     src={preview}
     width="1200"
     height="630"
-    alt=""
+    alt={previewAlt}
     loading="lazy"
     decoding="async"
   />

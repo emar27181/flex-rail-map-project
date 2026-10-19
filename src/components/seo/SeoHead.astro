@@ -12,7 +12,7 @@
  * - jsonLd には画面に実際に出している内容だけを入れる
  */
 import GA4Loader from '../GA4Loader.astro';
-import { canonicalUrl, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION, OG_LOCALE, SITE_NAME, type HreflangLink } from '../../config/seo';
+import { canonicalUrl, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION, OG_LOCALE, SITE_NAME, GOOGLE_IMAGE_PREVIEW_DIRECTIVE, buildPrimaryImageJsonLd, type HreflangLink } from '../../config/seo';
 import FaviconLinks from './FaviconLinks.astro';
 import { CONTROL_CSS } from '../ui/atoms/controlCss';
 import { existingMapPreview, MAP_PREVIEW } from '../../seo/mapPreview';
@@ -54,7 +54,7 @@ const ogImage = preview ? canonicalUrl(preview) : DEFAULT_OG_IMAGE;
 <title>{title}</title>
 <meta name="description" content={description} />
 {keywords && <meta name="keywords" content={keywords} />}
-<meta name="robots" content={robots} />
+<meta name="robots" content={`${robots}, ${GOOGLE_IMAGE_PREVIEW_DIRECTIVE}`} />
 
 <link rel="canonical" href={canonical} />
 {hreflang.map(l => <link rel="alternate" hreflang={l.hreflang} href={l.href} />)}
@@ -74,7 +74,7 @@ const ogImage = preview ? canonicalUrl(preview) : DEFAULT_OG_IMAGE;
 {preview && <meta name="twitter:image" content={ogImage} />}
 <meta name="twitter:description" content={description} />
 
-{jsonLd.map(j => <script type="application/ld+json" set:html={JSON.stringify(j)} />)}
+{[...jsonLd, ...(preview ? [buildPrimaryImageJsonLd(canonical, preview)] : [])].map(j => <script type="application/ld+json" set:html={JSON.stringify(j)} />)}
 
 <GA4Loader consentBanner />
 

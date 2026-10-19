@@ -312,3 +312,13 @@ GA4 の管理画面でレポートに使うには、これらをカスタムデ�
 - `article_share_copy`: 記事内デモの共有URLが実際にクリップボードにコピーできたとき（`article` / `locale` / `demo_id`）。失敗時には送らず、共有URL自体は送らない。
 - すべて共通の `trackEvent` から送信し、本番以外・計測未設定では送信しない。v2の独自路線チップは今回の対象外。
 - GA4でイベント別に追う場合、必要なパラメータはカスタムディメンションに登録する。
+
+### 2026-10-19: Google画像検索と検索結果の画像プレビュー
+
+- **既存画像を使う**: `public/og/{ページのパス}.jpg` にある実際の地図画像を利用し、同じ画像を `og:image`・`primaryImageOfPage`・Google画像サイトマップに登録する。画像パスは `src/seo/mapPreview.ts` でのみ生成・存在確認する。
+- **ビルドで自動登録**: `src/integrations/seoSitemap.ts` がindex対象ページだけに `<image:image>` を追加。画像がないページは画像エントリを出さず、404 URLを渡さない。サイトマップは手編集しない。
+- **HTMLに画像も置く**: 記事本文の最初の地図デモには実画面の画像（`<img src>`）が存在し、記事一覧・関連記事のサムネイルには記事タイトルに基づく各言語のaltを設定する。CSSの背景画像だけにしない。
+- **検索の画像プレビュー許可**: `max-image-preview:large` を本番ページのrobotsメタに追加。画像を表示するかどうか・選ばれる画像はGoogleが判断する。
+- **favicon**: サイトロゴは全ページで `FaviconLinks.astro` → `APP_ICON_PATH`（manifest・ヘッダーも共通）。URLは頻繁に変えない。Googleによる再クロールは数日〜数週間かかる場合がある。
+- **運用**: Google Search Consoleでsitemap.xmlを再送信し、代表記事のURL検査でインデックス登録をリクエスト。しばらく経ってから「検索パフォーマンス → 検索タイプ：画像」でクリック・表示を比較する。Google画像検索での掲載・faviconの表示は保証されない。
+- 参考: https://developers.google.com/search/docs/appearance/google-images 、https://developers.google.com/search/docs/appearance/favicon-in-search
