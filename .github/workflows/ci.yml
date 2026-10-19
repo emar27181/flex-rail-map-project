@@ -27,6 +27,9 @@ jobs:
           cache: npm
       - name: 依存関係
         run: npm ci
+      - name: Netlify build gate safety tests
+        run: node --test tests/netlify-ignore.test.mjs
+
       - name: 型チェック
         run: npm run test:types
       - name: デザイン規則（docs/design-system.md の規則一覧）
