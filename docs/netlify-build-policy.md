@@ -31,6 +31,12 @@ git push
 
 後続コミットがマーカー無しなら次回のプレビューはスキップされ、前のプレビューは古くなる。再度必要なときだけマーカー付きコミットを作る。これもNetlifyがビルドできる利用枠に戻ってから確認する。
 
+## 外部PRとシークレット
+
+- [netlify-preview] はPR作成者も指定できる **ビルド要求の目印であり、承認・認可ではない**。パブリックリポジトリの外部PRが無制限にNetlifyビルドや機密値を使える設定にしない。
+- Flex Railway Mapのような公開Git連携サイトでは、Netlifyの **Sensitive variable policy** を「Require approval」（推奨）または「Deploy without sensitive variables」にする。**Deploy without restrictions は避ける**。誰がプレビューを要求しても、承認とシークレットの扱いはNetlify側で制御する。
+- Memorioのプレビューにも不要な秘密情報・個人データを渡さない。環境変数は本番/プレビューのスコープを分離し、プレビューの公開範囲を確認する。
+- GitHub Actionsのpull_requestには新しい書き込み権限やトークンを渡さず、Netlifyの認証情報をこのリポジトリに保存しない。
 ## Netlify管理画面で確認（このPRからは変更しない）
 
 1. 各サイトの Project configuration → Developer settings → Continuous deployment で **Deploy Previewsが有効**、追加のBranch deployが不要なら無効になっていることを確認。
