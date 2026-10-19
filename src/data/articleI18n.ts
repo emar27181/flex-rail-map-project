@@ -32,6 +32,7 @@ export const ARTICLE_SHELL_TRANSLATIONS = {
     toc: "目次",
     sources: "出典",
     checkedAt: "確認",
+    openRelatedMap: "関連路線を地図で開く →",
     relatedPlaces: "この記事の路線と駅",
   },
   en: {
@@ -48,6 +49,7 @@ export const ARTICLE_SHELL_TRANSLATIONS = {
     toc: "Contents",
     sources: "Sources",
     checkedAt: "checked",
+    openRelatedMap: "Open the related lines on the map →",
     relatedPlaces: "Lines and stations in this article",
   },
   zh: {
@@ -64,6 +66,7 @@ export const ARTICLE_SHELL_TRANSLATIONS = {
     toc: "目录",
     sources: "参考资料",
     checkedAt: "确认日期",
+    openRelatedMap: "在地图上查看相关线路 →",
     relatedPlaces: "本文涉及的线路和车站",
   },
   ko: {
@@ -80,6 +83,7 @@ export const ARTICLE_SHELL_TRANSLATIONS = {
     toc: "목차",
     sources: "출처",
     checkedAt: "확인",
+    openRelatedMap: "지도에서 관련 노선 열기 →",
     relatedPlaces: "이 글의 노선과 역",
   },
 } satisfies Record<ArticleLanguage, Record<string, string>>;
