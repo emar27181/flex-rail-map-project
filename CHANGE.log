@@ -1,5 +1,20 @@
 # CHANGE LOG
 
+## [2026-11-04] セッション（スマホで地図の線をタップしても路線が切り替わらない）
+
+### fix: 所要時間の数字が地図の線へのタップを吸い取らないようにする
+- `src/components/RailwayMap.tsx`（所要時間の数字の Marker に `interactive={false}`）
+- 押しても何もしない数字がタップを受け取る設定で、指のずれの補正で線へのタップが数字に吸われていた（出発駅を選ぶと既定で出る）
+
+### fix: 指で操作する端末では地図の線にホバーの処理を付けない
+- `src/hooks/useCanHover.ts`（新規）, `src/components/RailwayMap.tsx`
+- iPhone の Safari は、ホバーで中身が変わる要素の1回目のタップをホバー扱いにする。線の強調と路線名の吹き出しはマウスのときだけ
+
+### test / docs
+- `tests/render/routeTap.render.ts`（新規。所要時間の数字の検査は修正前の main で落ちることを確認）, `tests/unit/components/map/useCanHover.test.tsx`
+- `docs/design-system.md`（端末ごとの設計）, `docs/render-tests.md`
+- 調べて分かったこと: 縮小した地図では表示中の線が駅名のラベルの下に隠れ、線を押すと駅を押すことになる（駅の情報が出る）。今回は変えていない
+
 ## [2026-10-18] 記事のフィルタ付き地図を共有
 
 - 地図直下の「地図を大きく開く」の隣に、Lucide Share2付き「リンクをコピー」を追加。コピー操作は汎用アトム、文言は4言語の共通定義、寸法・色は既存トークンを使用。
