@@ -2793,6 +2793,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const textColor = travelTimeStyle.textColor ?? filledText;
     const borderColor = travelTimeStyle.borderColor ?? color;
 
+    // 所要時間のラベルは見せるだけ。地図には interactive={false} で置き、タップを受け取らせない。
+    // 受け取らせると線の上に並ぶラベルが指のタップを吸い取り、線をタップしても路線の表示が切り替わらなかった（2026-11）
     return new DivIcon({
       html: circularNumberBadgeHtml(label, { background: bgColor, text: textColor, border: borderColor }, theme),
       className: isSection ? 'time-text-section' : 'time-text',
@@ -4809,6 +4811,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     icon={timeIcon}
                     zIndexOffset={TRAVEL_TIME_MARKER_Z}
                     pane="travelTimePane"
+                    interactive={false}
                   />
                 );
               } else {
@@ -4827,6 +4830,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     icon={timeIcon}
                     zIndexOffset={TRAVEL_TIME_MARKER_Z}
                     pane="travelTimePane"
+                    interactive={false}
                   />
                 );
               }
@@ -4847,6 +4851,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   icon={timeIcon}
                   zIndexOffset={TRAVEL_TIME_MARKER_Z}
                   pane="travelTimePane"
+                  interactive={false}
                 />
               );
             }
