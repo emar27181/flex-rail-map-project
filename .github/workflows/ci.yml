@@ -45,7 +45,9 @@ jobs:
   # 地図・立体表示が描けているか（真っ黒・固まる・駅名の重なり・ボタンの位置）を確かめる。
   # 何を確かめているか・足すときの決まりは docs/render-tests.md
   render:
-    runs-on: ubuntu-latest
+    # Playwright（ブラウザ）が対応している版に固定する。2026-11: ubuntu-latest が 26.04 になり、
+    # Playwright 1.60 が「ubuntu26.04 は未対応」でブラウザを入れられず、テストの前に落ちた
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
