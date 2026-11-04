@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTravelTimeLabelMode } from '../hooks/useTravelTimeLabelMode';
+import { useCanHover } from '../hooks/useCanHover';
 import { travelTimeLabelLayout } from './map/travelTimeLabel';
 import { circularNumberBadgeHtml } from './ui/atoms/circularNumberBadge';
 import { isCircularRoute } from '../utils/routeAdjacency';
@@ -499,6 +500,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // 路線ホバー・ポップアップ状態
   const [hoveredRoute, setHoveredRoute] = useState<string | null>(null);
+  // 地図の線のホバー（強調・路線名の吹き出し）はマウスのときだけ付ける。
+  // 付けたままだと iPhone の Safari が1回目のタップをホバー扱いにし、線をタップしても表示が切り替わらない（hooks/useCanHover.ts）
+  const canHover = useCanHover();
+  const routeHoverHandlers = (routeKey: string) => (canHover
+    ? { mouseover: () => setHoveredRoute(routeKey), mouseout: () => setHoveredRoute(null) }
+    : {});
   const [clickedRoute, setClickedRoute] = useState<string | null>(null);
   const [routePopupPosition, setRoutePopupPosition] = useState<{ x: number, y: number } | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
@@ -4638,12 +4645,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               }
               justClickedLayerRef.current = true;
             },
-            mouseover: () => setHoveredRoute(routeKey),
-            mouseout: () => setHoveredRoute(null),
+            ...routeHoverHandlers(routeKey),
           }}
           style={{ cursor: 'pointer' }}
         >
-          <Tooltip sticky offset={[10, 0]} direction="right" opacity={0.97}>
+          {canHover && <Tooltip sticky offset={[10, 0]} direction="right" opacity={0.97}>
             <span style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, fontWeight: 'bold', fontSize: FS.caption }}>
               <span style={{
                 display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%',
@@ -4651,7 +4657,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               }} />
               {translateRoute(routeNames[routeKey] ?? routeKey, currentLanguage)}
             </span>
-          </Tooltip>
+          </Tooltip>}
         </Polyline>
             </React.Fragment>
           );
@@ -5484,8 +5490,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         positions={positions} color={color} weight={36} opacity={0.001}
                         pathOptions={{ cursor: 'pointer' }}
                         eventHandlers={{
-                          mouseover: () => setHoveredRoute(rKey),
-                          mouseout: () => setHoveredRoute(null),
+                          ...routeHoverHandlers(rKey),
                           click: (e: LeafletMouseEvent) => {
                           (e.target as any)?.closeTooltip?.();
                           justClickedLayerRef.current = true;
@@ -5499,7 +5504,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           setDimmedMapTooltip({ routeKey: rKey, x: oe?.clientX ?? 400, y: oe?.clientY ?? 300, isVisible: false });
                         }}}
                       >
-                        <Tooltip sticky offset={[10, 0]} direction="right" opacity={0.97}>
+                        {canHover && <Tooltip sticky offset={[10, 0]} direction="right" opacity={0.97}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, fontWeight: 'bold', fontSize: FS.caption }}>
                             <span style={{
                               display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%',
@@ -5507,7 +5512,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                             }} />
                             {translateRoute(routeNames[rKey] ?? rKey, currentLanguage)}
                           </span>
-                        </Tooltip>
+                        </Tooltip>}
                       </Polyline>
                     </React.Fragment>
                   );
