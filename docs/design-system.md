@@ -50,6 +50,10 @@ PR ごとに `npm run test:design` で実行する（手元でも同じコマン
 | PC | 1024px 以上 | 横にパネル。ホバーで補足。表はふつうの表 |
 
 - **指で操作するかは幅で決めない**（大きいタブレット・小さいPCがある）。ホバーの効果は `MEDIA.mouse`（`hover: hover` かつ `pointer: fine`）の中だけに書く
+  React では `useCanHover()`（`src/hooks/useCanHover.ts`）が true のときだけホバーの処理を付ける。iPhone の Safari は
+  ホバーで中身が変わる要素の1回目のタップをホバー扱いにし、クリックを送らない（2026-11: 地図の線をタップしても路線が切り替わらなかった）
+- 地図の上に見せるだけのもの（所要時間の数字など）は `interactive={false}` で置く。押せる設定のままだと、指のタップを吸い取って
+  下の線や駅に届かない（スマホのブラウザは指のずれを近くの押せる要素に合わせる）
 - 区切りは Bootstrap / Tailwind の md=768・lg=1024 と同じ（一般的な Web の区切り）
 
 ### 表（`ui/atoms/responsiveTable.ts`）
