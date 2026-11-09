@@ -27,7 +27,7 @@ import { ARTICLE_BODY_TRANSLATIONS } from "../../data/articleBodyI18n";
 import { APP_ICON_PATH, GOOGLE_SITE_VERIFICATION, SITE_URL, SITE_NAME, OG_LOCALE, GOOGLE_IMAGE_PREVIEW_DIRECTIVE, buildPrimaryImageJsonLd, buildHreflangLinks, hreflangCode, withSiteName } from "../../config/seo";
 import FaviconLinks from "../seo/FaviconLinks.astro";
 import GA4Loader from "../GA4Loader.astro";
-import { ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC } from "../../config/ads";
+import { ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC, ADSENSE_SLOTS, hasManualAdSlot } from "../../config/ads";
 import { CONTROL_CSS, HEADER_LOGO_PX } from "../ui/atoms/controlCss";
 import { RESPONSIVE_TABLE_CSS } from "../ui/atoms/responsiveTable";
 import { ARTICLE_SOURCES } from "../../data/articles";
@@ -140,7 +140,8 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
 
   {GOOGLE_SITE_VERIFICATION && <meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />}
   <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
-  <script async src={ADSENSE_SCRIPT_SRC} crossorigin="anonymous"></script>
+  {/* 記事の広告の枠（ADSENSE_SLOTS.articleInline）があるときだけ広告スクリプトを読む（自動広告を出さない, config/ads.ts） */}
+  {hasManualAdSlot(ADSENSE_SLOTS.articleInline) && <script async src={ADSENSE_SCRIPT_SRC} crossorigin="anonymous"></script>}
 
   <FaviconLinks />
   <GA4Loader consentBanner />

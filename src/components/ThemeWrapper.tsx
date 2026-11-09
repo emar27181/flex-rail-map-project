@@ -6,6 +6,7 @@ import Footer from './Footer';
 import NavigationBar from './NavigationBar';
 import AdSenseAd from './AdSenseAd';
 import StickyBottomAd from './StickyBottomAd';
+import { ADSENSE_SLOTS, hasManualAdSlot } from '../config/ads';
 import type { Language } from '../utils/translation';
 import { getInitialLanguage, persistLanguage } from '../utils/languagePersistence';
 import { getInitialUiVersion, persistUiVersion, type UiVersion } from '../utils/uiVersionPersistence';
@@ -53,7 +54,8 @@ const ThemeWrapper: React.FC = () => {
   return (
     <ThemeProvider>
       {/* 追従型広告: RailwayMap より先に置くことで同z-index競合時に地図が前面に来る */}
-      {!isFullscreen && !embedded && <StickyBottomAd adSlot="0987654321" />}
+      {/* 広告ユニット ID が空のあいだは出さない（推測・仮の ID を入れない, config/ads.ts） */}
+      {!isFullscreen && !embedded && hasManualAdSlot(ADSENSE_SLOTS.mapBottom) && <StickyBottomAd adSlot={ADSENSE_SLOTS.mapBottom} />}
       {!embedded && <NavigationBar
         language={language}
         onLanguageChange={handleLanguageChange}

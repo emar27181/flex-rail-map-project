@@ -4,7 +4,9 @@ import SiteFooterNav from "../components/SiteFooterNav.astro";
 import leafletCss from "leaflet/dist/leaflet.css?url";
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION, GOOGLE_IMAGE_PREVIEW_DIRECTIVE } from "../config/seo";
 import GA4Loader from "../components/GA4Loader.astro";
-import { ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC } from "../config/ads";
+import { ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC, ADSENSE_SLOTS, hasManualAdSlot } from "../config/ads";
+// 地図の画面に広告の枠（ADSENSE_SLOTS.mapBottom）があるときだけ広告スクリプトを読む（自動広告を出さない, config/ads.ts）
+const LOAD_ADSENSE = hasManualAdSlot(ADSENSE_SLOTS.mapBottom);
 import FaviconLinks from '../components/seo/FaviconLinks.astro';
 import { translateUI, type Language } from '../utils/translation';
 import { APP_LOADING_ID, APP_LOADING_MESSAGE_ID, APP_LOADING_STAGES, APP_LOADING_MESSAGE_KEYS, APP_LOADING_FADE_MS, APP_LOADING_BAR, type AppLoadingMessages } from '../constants/appLoading';
@@ -107,7 +109,7 @@ const appLoadingMessages = Object.fromEntries(APP_LOADING_LANGUAGES.map(lang => 
 			<meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />
 		)}
 		<meta name="google-adsense-account" content={ADSENSE_CLIENT} />
-		<script is:inline define:vars={{ ADSENSE_SCRIPT_SRC }}>
+		{LOAD_ADSENSE && <script is:inline define:vars={{ ADSENSE_SCRIPT_SRC }}>
 			// 広告スクリプトは head で読むとアプリのJSと帯域・実行時間を奪い合い、
 			// 地図が出るまでの時間が延びる。表示に必要なものが揃ってから読み込む。
 			(function () {
@@ -123,7 +125,7 @@ const appLoadingMessages = Object.fromEntries(APP_LOADING_LANGUAGES.map(lang => 
 				if (document.readyState === 'complete') load();
 				else window.addEventListener('load', load, { once: true });
 			})();
-		</script>
+		</script>}
 		<GA4Loader />
 		<FaviconLinks />
 		<link rel="manifest" href="/manifest.json" />
