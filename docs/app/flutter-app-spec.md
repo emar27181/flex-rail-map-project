@@ -67,28 +67,38 @@
 
 ## 4. データ・経路探索・地図
 
-### 4.1 データの書き出し
+### 4.1 データの書き出し（2026-11 作成済み）
 
-`scripts/export-app-data.mts`（新規）で、ビルドのたびに次を JSON にする。アプリはこれを `assets/data/` に同梱する。
+`npm run app:data`（`scripts/app-data/export.mts`、中身は `scripts/app-data/buildAppData.ts`）で次を JSON にする。
+既定の書き出し先は `app/assets/data/`（git に入れない。手で直さない）。中身の検査は `tests/unit/scripts/appData.test.ts`。
 
-| ファイル | 元 | 中身 |
-|---|---|---|
-| `routes.json` | `src/data/routes.ts` と各路線ファイル | 路線（キー・名前・色・駅の並び・駅間の所要時間・線形） |
-| `stations.json` | 同上 + 駅番号・読み | 駅（名前・緯度経度・通る路線・駅番号・読み） |
-| `translations.json` | `translation.ts`（UI 文言・駅名・路線名の4言語） | Flutter の ARB に変換して使う |
-| `timetables.json` | `timetableData.ts` | 路線ごと・方向ごとの発車時刻 |
-| `transfers.json` | 乗り換え・徒歩連絡（`walkingTransfers.ts` など） | 経路探索に使う |
-| `stats.json` | `station-stats-data.json` + `STAT_PARAMS`（出典・`dataQuality`） | MVP の後のヒートマップ用 |
-| `tokens.json` | `src/constants/ui.ts`（`FS` `L` `SEMANTIC` `TARGET`）・`getThemeColors` | 5章のデザインの値 |
-| `manifest.json` | — | データの版番号・作った日時・各ファイルのハッシュ |
+| ファイル | 元 | 中身 | 大きさ（2026-11） |
+|---|---|---|---|
+| `routes.json` | `src/data/routes.ts`（`routes` `routeColors` `routeNames`）・`routeUrlCodes.ts` | 路線 491 本（キー・URL の路線コード・名前・色・駅の並び・駅間の所要時間・急行停車） | 約 600KB |
+| `stations.json` | 同上 + `stationUrlParams.ts`・駅名の訳の表 | 駅 6,001（名前・緯度経度・URL の slug・通る路線）。駅は名前で1つにまとめる（経路探索と同じ） | 約 960KB |
+| `translations.json` | `translation.ts`（`uiTranslations` `uiChinese` `uiKorean`） | 画面の文言 360 個の4言語。Flutter の ARB に変換して使う | 約 50KB |
+| `timetables.json` | `timetableData.ts`（`timetableLines` `TIMETABLE_SOURCE`） | 路線ごと・方向ごとの発車時刻と出典 | 約 230KB |
+| `transfers.json` | `walkingTransfers.ts`・`throughServices.ts` | 徒歩の乗り換え・直通運転（経路探索に使う） | 約 16KB |
+| `tokens.json` | `src/constants/ui.ts`（`FS` `SEMANTIC` `NEUTRAL` `TARGET`）・`L`・`getThemeColors` | 5章のデザインの値。押せる大きさはアプリ用に `target.app = 48` | 約 2KB |
+| `route-golden.json` | `routeFinder.ts` の答え | 経路の正解データ（4.2） | 約 100KB |
+| `manifest.json` | — | 形の版（`schemaVersion`）・中身から決めた版（`version`）・各ファイルのハッシュと大きさ | — |
 
+- 訳が無いものは **null**。Web の表示用の関数（`translateStation` など）は訳が無いと英語や日本語で埋めるので使わず、訳の表を直接引く。
+  2026-11 時点: 駅名の英語 6,001 / 中国語 6,000 / 韓国語 1,065、路線名の中国語・韓国語の表は無い（Web は英語で出している）。どの言語で埋めるかはアプリが決める
+- `version` は中身から決める（中身が同じなら同じ版）。アプリは版が変わったときだけ取り直す
 - データファイルの規約（`docs/data-editing-guide.md`）は今のまま。アプリのためにデータファイルを書き換えない
-- **更新**: 同じ JSON を Web（`/app-data/<版>/`）にも置く。アプリは起動時に `manifest.json` を見て、新しければ取り直す（審査なしでデータを直せる）。取れなければ同梱の版で動く
+- **更新**: 同じ JSON を Web（`/app-data/<版>/`）にも置く。アプリは起動時に `manifest.json` を見て、新しければ取り直す（審査なしでデータを直せる）。取れなければ同梱の版で動く（Web に置く仕組みは未作成）
+- 時刻表の駅間時間の扱い・ヒートマップ（`stats.json`）は、使う段階で足す
 
 ### 4.2 経路探索
 
-- `routeFinder.ts`（約680行）を Dart に移す。アルゴリズムは変えない
-- **答えがずれないための検査**: TypeScript 版で代表的な「出発→到着」数百組の答え（候補の路線・乗換駅・所要時間）を `tests/fixtures/route-golden.json` に書き出す。Dart のテストが同じ答えを出すかを CI で毎回確かめる。Web 側で探索を直したら、この JSON を作り直してアプリ側も直す
+- `routeFinder.ts`（約680行）と、それが使う `legTime.ts`・`routeAdjacency.ts`・`throughRouting.ts` を Dart に移す。アルゴリズムは変えない
+- **答えがずれないための検査**: 書き出しと同時に `route-golden.json` を作る（主な駅 20 の組 + 関東の駅から一定の間隔で選んだ組、計 144 組の上位5件。乱数は使わない）。
+  Dart のテストは同じ版の `routes.json` などを読んで経路を引き、`route-golden.json` と同じ答え（区間の路線・始点・終点・所要時間・乗換回数）になるかを確かめる。
+  正解はデータと同じ版から作るので、路線データを直しても食い違わない。Web 側で探索のしかたを直したときは、Dart 側も同じように直す
+- **徒歩の乗り換えは区間にならない**: routeFinder は徒歩の乗り換え（東京↔大手町、秋葉原↔岩本町など）を区間として持たず、次の区間がその駅から始まる。
+  東京→新宿の候補が「丸ノ内線 大手町→新宿」から始まることもある。Dart 版もこの形を再現し、画面で「徒歩 N 分」を補って見せる
+- 経路が見つからない組（25 組。ロープウェイなど他とつながらない路線）も正解に含める。Dart 版も「見つからない」を返すこと
 - 時間のモデルの既知の問題（駅数の多い私鉄が各駅停車基準で遅く出る。CLAUDE.md の小田急線の件）は Web と共通の課題として扱う
 
 ### 4.3 地図
@@ -140,7 +150,7 @@
 | 検査 | 中身 |
 |---|---|
 | `flutter analyze` / `flutter test` | Dart の型・ユニットテスト |
-| 経路の正解データ | 4.2。Web と同じ答えを出すか |
+| 経路の正解データ | 4.2。Web と同じ答えを出すか（Dart 側）。書き出しの中身は Web 側の `tests/unit/scripts/appData.test.ts` |
 | 押せる大きさ | 全画面のウィジェットテストで、押せるものが 48 未満なら落とす |
 | コントラスト | `tokens.json` の組を検査 |
 | 4言語の文字の収まり | Web の `textFit.render.ts` と同じ考え方で、ボタンの文字が切れていないか |
@@ -154,11 +164,10 @@
 ```
 flex-rail-map-project/
 ├── src/ …… 今の Web（一次情報）
-├── scripts/export-app-data.mts …… JSON の書き出し（新規）
-├── tests/fixtures/route-golden.json …… 経路の正解データ（新規）
+├── scripts/app-data/ …… JSON と経路の正解データの書き出し（npm run app:data）
 └── app/ …… Flutter のアプリ（新規）
     ├── lib/
-    ├── assets/data/ …… 書き出した JSON（ビルドで作る。手で直さない）
+    ├── assets/data/ …… 書き出した JSON と正解データ（npm run app:data で作る。git に入れない）
     └── test/
 ```
 
