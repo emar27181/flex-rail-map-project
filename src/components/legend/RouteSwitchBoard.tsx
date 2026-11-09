@@ -12,6 +12,11 @@
  * オン・オフを塗りの有無で示す。並びは意味のある順（経路上→駅を通る→
  * 表示中→非表示）に固定し、絞り込みの入力欄を置く。
  *
+ * グループの区切りは余白だけで示し、見出しは画面に出さない（2026-11）。
+ * 「経路上の路線」「選択した駅を通る路線」の見出しは違いが分かりにくいと指摘された。
+ * 表示中か非表示かはチップの塗りで分かり、経路に近い路線ほど上に来る並び順で足りる。
+ * 見出しは読み上げ用（role="group" の aria-label）にだけ残す。
+ *
  * 従来の一覧も残してあり、呼び出し側で切り替えられる。
  */
 import React, { useMemo, useState } from 'react';
@@ -19,7 +24,7 @@ import type { RouteKey } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateRoute, translateUI } from '../../utils/translation';
 import type { Language } from '../../utils/translation';
-import { FS, SEMANTIC } from '../../constants/ui';
+import { FS } from '../../constants/ui';
 import { L } from './legendStyles';
 import Button from '../ui/atoms/Button';
 import RouteToggleChip from './RouteToggleChip';
@@ -39,6 +44,12 @@ const BOARD_CONTROL_SIZE = 'sm' as const;
  * 画面の幅で行数がばらばらだった
  */
 const GROUP_MAX_ROWS = 5;
+
+/**
+ * グループとグループの間の余白。見出しを出さないので、チップ同士の間（ClampedWrap の 6px）より
+ * はっきり広くして、余白だけで「ここから別のまとまり」と分かるようにする（近いものは同じ仲間に見える）
+ */
+const GROUP_GAP = L.sp['2xl'];
 
 interface RouteSwitchBoardProps {
   /** 表示候補の路線キー（呼び出し側で絞り込んだもの） */
@@ -138,29 +149,10 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
     />
   );
 
-  const group = (key: GroupKey, title: string, items: RouteKey[], accent?: string) => {
+  const group = (key: GroupKey, title: string, items: RouteKey[]) => {
     if (items.length === 0) return null;
     return (
-      <div style={{ marginBottom: L.sp.xl }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: L.sp.sm,
-          marginBottom: L.sp.sm,
-          fontSize: FS.caption,
-          color: colors.textSecondary,
-        }}>
-          {accent && (
-            <span aria-hidden style={{
-              width: '3px',
-              alignSelf: 'stretch',
-              borderRadius: L.r.control,
-              backgroundColor: accent,
-            }} />
-          )}
-          <span>{title}</span>
-          <span style={{ opacity: 0.7 }}>{items.length}</span>
-        </div>
+      <div key={key} role="group" aria-label={`${title} ${items.length}`} data-route-group={key}>
         <ClampedWrap
           theme={theme}
           size={BOARD_CONTROL_SIZE}
@@ -209,12 +201,12 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
           {translateUI('routeNoMatch', language)}
         </div>
       ) : (
-        <>
-          {group('onRoute', translateUI('routeGroupOnRoute', language), groups.onRoute, SEMANTIC.primary)}
-          {group('atStation', translateUI('routeGroupAtStation', language), groups.atStation, SEMANTIC.departure)}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: GROUP_GAP, marginBottom: L.sp.xl }}>
+          {group('onRoute', translateUI('routeGroupOnRoute', language), groups.onRoute)}
+          {group('atStation', translateUI('routeGroupAtStation', language), groups.atStation)}
           {group('visible', translateUI('routeGroupVisible', language), groups.visible)}
           {group('hidden', translateUI('routeGroupHidden', language), groups.hidden)}
-        </>
+        </div>
       )}
     </div>
   );

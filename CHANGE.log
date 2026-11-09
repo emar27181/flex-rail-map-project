@@ -15,6 +15,16 @@
 - `docs/ads-operation.md`（自動広告をオフにする管理画面の手順・広告を出す位置の表）, `docs/article-writing.md`, `docs/design-system.md`, `CLAUDE.md`
 - `AD_PLACEMENT` からアンカー広告の位置・全画面広告の間隔の記録を外した（使わないため）
 
+## [2026-11-09] セッション（路線の切り替えパネルの見出しをなくす）
+
+### improve: 路線の切り替えパネルのグループを余白だけで区切り、見出しを出さない
+- `src/components/legend/RouteSwitchBoard.tsx`
+- 「経路上の路線」「選択した駅を通る路線」の違いが分かりにくいと指摘された。表示中か非表示かはチップの塗りで分かり、関係の深い路線が上に来る並び順で足りる
+- グループの間は 16px（チップ同士の 6px の2倍以上）。見出しと件数は読み上げ用に `role="group"` の `aria-label` に残す
+
+### test / docs
+- `tests/unit/components/legend/RouteSwitchBoard.test.tsx`, `docs/design-system.md`（書くときの判断表に「並びをまとまりに分ける」）
+
 ## [2026-11-04] セッション（スマホで地図の線をタップしても路線が切り替わらない）
 
 ### fix: 所要時間の数字が地図の線へのタップを吸い取らないようにする
