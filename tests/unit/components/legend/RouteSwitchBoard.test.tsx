@@ -133,3 +133,38 @@ describe('グループは閉じた状態で始まり、5行まで見せる', () 
     boxes.forEach(b => expect(b.getAttribute('data-clamped')).toBe('true'));
   });
 });
+
+describe('グループの区切りは余白で示し、見出しは出さない（2026-11）', () => {
+  // 「経路上の路線」「選択した駅を通る路線」の見出しは違いが分かりにくいと指摘された。
+  // 表示中か非表示かはチップの塗りで分かり、関係の深い路線ほど上に来る並び順で足りる
+  const props = {
+    highlightedRouteKeys: new Set<RouteKey>(['ginzaLine']),
+    stationRouteKeys: new Set<RouteKey>(['yamanote']),
+    visibleRoutes: new Set<RouteKey>(['ginzaLine', 'yamanote', 'chuo']),
+  };
+
+  it('グループの見出しを画面に出さない', () => {
+    renderBoard(props);
+    for (const key of ['routeGroupOnRoute', 'routeGroupAtStation', 'routeGroupVisible', 'routeGroupHidden']) {
+      expect(screen.queryByText(key)).toBeNull();
+    }
+  });
+
+  it('読み上げでは見出しと件数が分かる（role="group" の aria-label）', () => {
+    renderBoard(props);
+    const groups = screen.getAllByRole('group');
+    expect(groups.map(g => g.getAttribute('aria-label'))).toEqual([
+      'routeGroupOnRoute 1', 'routeGroupAtStation 1', 'routeGroupVisible 1',
+    ]);
+  });
+
+  it('グループの間はチップ同士の間より広く空ける（余白だけで区切りが分かる）', () => {
+    renderBoard(props);
+    const stack = screen.getAllByRole('group')[0].parentElement as HTMLElement;
+    const wrap = document.querySelector('[data-clamped]') as HTMLElement;
+    const chipGap = parseFloat(wrap.style.gap);
+    expect(chipGap).toBeGreaterThan(0);
+    const groupGap = parseFloat(stack.style.gap);
+    expect(groupGap).toBeGreaterThanOrEqual(chipGap * 2);
+  });
+});
