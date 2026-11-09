@@ -10,7 +10,7 @@
  * ページ側には中身だけを書く。日本語版を `<div id={`${langPrefix}-ja`}>`、
  * 英語版を `-en` で囲むと、?lang= に応じてどちらかが表示される。
  */
-import { ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC } from "../config/ads";
+import { ADSENSE_CLIENT } from "../config/ads";
 import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import { THEME_STORAGE_KEY, LEGACY_THEME_STORAGE_KEY } from '../utils/themeStorage';
 import SiteFooterNav from '../components/SiteFooterNav.astro';
@@ -61,7 +61,7 @@ const {
 			<meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />
 		)}
 		<meta name="google-adsense-account" content={ADSENSE_CLIENT} />
-		<script async src={ADSENSE_SCRIPT_SRC} crossorigin="anonymous"></script>
+		{/* 広告の枠が無いページなので広告スクリプトは読まない（読むと自動広告が出る, config/ads.ts） */}
 		<FaviconLinks />
 		<GA4Loader consentBanner />
 		<meta name="viewport" content="width=device-width" />

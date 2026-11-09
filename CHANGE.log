@@ -1,5 +1,20 @@
 # CHANGE LOG
 
+## [2026-11-09] セッション（広告をこちらで決めた位置にだけ出す）
+
+### improve: 自動広告・全画面広告を出さないよう、広告スクリプトは広告の枠があるページだけで読む
+- `src/config/ads.ts`（`hasManualAdSlot`、`ADSENSE_SLOTS.mapBottom`）, `src/pages/index.astro`, `src/components/articles/ArticleLayout.astro`, `src/layouts/StaticPage.astro`
+- これまでは地図・記事・静的ページのすべてで広告スクリプトを読んでいて、管理画面の自動広告（全画面広告・アンカー広告を含む）が出る状態だった
+- 静的ページは広告の枠が無いので読まない。所有確認は `google-adsense-account` の meta で続ける
+
+### fix: 地図の下の広告に直接書かれていた仮の広告ユニット ID をやめる
+- `src/components/ThemeWrapper.tsx`（`0987654321` → `ADSENSE_SLOTS.mapBottom`。空のあいだは出さない）
+
+### test / docs
+- `tests/unit/config/ads.test.ts`（修正前のコードで4件落ちることを確認）
+- `docs/ads-operation.md`（自動広告をオフにする管理画面の手順・広告を出す位置の表）, `docs/article-writing.md`, `docs/design-system.md`, `CLAUDE.md`
+- `AD_PLACEMENT` からアンカー広告の位置・全画面広告の間隔の記録を外した（使わないため）
+
 ## [2026-11-09] セッション（路線の切り替えパネルの見出しをなくす）
 
 ### improve: 路線の切り替えパネルのグループを余白だけで区切り、見出しを出さない

@@ -13,23 +13,37 @@ export const ADSENSE_CLIENT = 'ca-pub-2444529114040977';
 export const ADSENSE_SCRIPT_SRC = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`;
 
 /**
- * 広告ユニット ID（AdSense の管理画面「広告 → 広告ユニットごと」で作った広告の data-ad-slot）。
+ * 広告の出し方（2026-11 ユーザー決定）: **こちらで決めた位置にだけ出す。**
  *
- * 推測した値・仮の値を入れない（2026-10: 地図の下の固定広告の `0987654321` は管理画面で
- * 実在を確かめられていない仮の値のまま残っている）。空のあいだは、その広告枠は本番に出さない。
- *
- * - articleInline: 記事の本文の間に置く「記事内広告」（ui/atoms/adSlot.ts）。
- *   同じユニットを1ページに何回置いてもよい（AdSense の決まり）
+ * - 自動広告（Google が位置を選んでページに差し込む広告）は使わない。全画面広告（Vignette）・
+ *   画面下に貼り付くアンカー広告も使わない。どれも AdSense の管理画面でオフにする（docs/ads-operation.md）
+ * - 広告スクリプト（ADSENSE_SCRIPT_SRC）は、そのページに有効な広告ユニット ID の枠があるときだけ読む
+ *   （hasManualAdSlot）。スクリプトを読んだページでは、管理画面の自動広告の設定が効いてしまうため。
+ *   サイトの所有確認は <meta name="google-adsense-account"> で行い、スクリプトには頼らない
+ * - 広告ユニット ID は AdSense の管理画面「広告 → 広告ユニットごと」で作った広告の data-ad-slot。
+ *   推測した値・仮の値を入れない。空のあいだは、その広告枠は本番に出さず、スクリプトも読まない
  */
 export const ADSENSE_SLOTS = {
+  /**
+   * 記事の本文の間（utils/articleRender.ts）と記事一覧のジャンルの間（ArticleIndexCategories.astro）。
+   * 同じユニットを1ページに何回置いてもよい（AdSense の決まり）
+   */
   articleInline: '',
+  /**
+   * 地図の画面の下（StickyBottomAd.tsx。閉じるボタン付き・配信があるときだけ出る）。
+   * 2026-10 まで実在を確かめられていない仮の値 `0987654321` が直接書かれていたため空に戻した
+   */
+  mapBottom: '',
 } as const;
 
-/** 広告の配置方針。画面上に重なる自動広告はAdSense管理画面で別途設定する。 */
+/** 広告ユニット ID が1つでも入っているか（広告スクリプトを読むかの判定） */
+export function hasManualAdSlot(...slots: string[]): boolean {
+  return slots.some(slot => slot.trim() !== '');
+}
+
+/** 記事の本文の間の広告の大きさ（ui/atoms/adSlot.ts） */
 export const AD_PLACEMENT = {
   inlineMaxWidth: '600px',
   inlinePreviewMinHeight: '84px',
   inlineFormat: 'horizontal',
-  preferredAnchorPosition: 'bottom only',
-  suggestedVignetteIntervalMinutes: 20,
 } as const;
