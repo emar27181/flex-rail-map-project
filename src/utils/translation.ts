@@ -671,6 +671,11 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "他 {count} 路線を表示",
     english: "Show {count} more routes"
   },
+  // 「さらに表示」1回で一部だけ広げる（ClampedWrap）。全部が出るわけではないので「他 N 路線を表示」と書かない
+  showMoreRoutesStep: {
+    japanese: "さらに表示（残り {count}）",
+    english: "Show more ({count} left)"
+  },
   routeViewBoard: {
     japanese: "ボード",
     english: "Board"
@@ -2047,6 +2052,7 @@ export const uiChinese: Record<string, string> = {
   increase: "放大",
   collapseList: "折叠",
   showMoreRoutes: "显示其他 {count} 条线路",
+  showMoreRoutesStep: "显示更多（剩余 {count}）",
   routeViewBoard: "面板",
   routeViewClassic: "列表",
   routeSearchPlaceholder: "搜索线路名称",
@@ -2414,6 +2420,7 @@ export const uiKorean: Record<string, string> = {
   increase: "크게",
   collapseList: "접기",
   showMoreRoutes: "다른 {count}개 노선 표시",
+  showMoreRoutesStep: "더 보기 (남은 {count}개)",
   routeViewBoard: "보드",
   routeViewClassic: "목록",
   routeSearchPlaceholder: "노선 이름으로 검색",

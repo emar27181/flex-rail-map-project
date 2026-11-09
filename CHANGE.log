@@ -1,5 +1,12 @@
 # CHANGE LOG
 
+## [2026-11-09] セッション（路線の一覧を少しずつ広げる）
+
+### improve: 路線の切り替えの「他 N 路線を表示」を、10行ずつ広げる「さらに表示」にする
+- `src/components/ui/molecules/ClampedWrap.tsx`, `src/components/legend/RouteSwitchBoard.tsx`, `src/utils/translation.ts`（`showMoreRoutesStep` 4言語）
+- 押すと数百路線が一度に出て、スクロールがとても長くなっていた。最初は5行、1回押すごとに10行（スマホで25〜30路線・画面の約3分の1）ずつ広げ、「折りたたむ」で5行に戻す（箱の先頭を画面に戻す）
+- `tests/unit/components/ui/clampedWrap.test.tsx`, `tests/unit/components/legend/RouteSwitchBoard.test.tsx`, `docs/design-system.md`
+
 ## [2026-11-09] セッション（広告をこちらで決めた位置にだけ出す）
 
 ### improve: 自動広告・全画面広告を出さないよう、広告スクリプトは広告の枠があるページだけで読む
