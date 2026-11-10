@@ -133,6 +133,7 @@ import type { DetectedRoute, GpsPoint, StationVisit } from '../utils/trainDetect
 import { deviceClassOf } from '../constants/breakpoints';
 import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
 import DisclosureHeader from './ui/atoms/DisclosureHeader';
+import { isPinchGestureActive, patchSmoothTouchGestures } from '../utils/mapGestures';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -3154,6 +3155,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         const { DivIcon } = leaflet;
         const canvasRenderer = leaflet.canvas({ padding: 0.5 });
         patchRotatedRendererDrift(leaflet);
+        patchSmoothTouchGestures(leaflet);
 
         if (mounted) {
           // 読み込み画面の文言を「地図を表示しています…」へ（消すのは地図を最初に描いた後）
@@ -4146,6 +4148,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       // 余白を使い切る前（余白の4割を動いた時点）にだけ描き直す。
       move: (e: LeafletEvent) => {
         const map = e.target as LeafletMap;
+        // 2本指の操作中（拡大・縮小・回転）は描き直さない。指を離したとき（zoomend / moveend）にまとめて描く。
+        // 操作中に描き直すと、数千の駅を React が描き直すあいだ地図が止まり、カクついていた（2026-11）
+        if (isPinchGestureActive(map)) return;
         const last = lastCommittedCenterRef.current;
         if (last) {
           const moved = map.latLngToContainerPoint(last)
