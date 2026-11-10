@@ -15,7 +15,8 @@ import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import RemovableTag from './ui/atoms/RemovableTag';
 import StationSearchDropdown from './ui/StationSearchDropdown';
-import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
+import { CONTROL_SIZE, FLOATING_ICON_BUTTON_SIZE, type ControlSize } from './ui/atoms/controlSize';
+import { useCanHover } from '../hooks/useCanHover';
 import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
@@ -131,6 +132,23 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   onTimeModeChange,
 }) => {
   const { theme } = useTheme();
+  /**
+   * 出発駅・到着駅の入力欄と入れ替えボタンの大きさ。指で操作する端末では md（44px）、マウスでは sm（24px）。
+   * 2026-11: スマホで入力欄・入れ替えが 24px しかなく、iOS 44pt / Android 48dp の推奨の半分だった
+   * （docs/app/ui-review-2026-11.md の A1・A2）。同じ行に並ぶので、入力欄と入れ替えは同じ段階にする。
+   * 4つの切り替え（現在地から・所要時間を表示 など）は、パネルが縦に伸びて地図を覆うため今は sm のまま（ユーザーの選択 A）
+   */
+  const canHover = useCanHover();
+  const stationFieldSize: ControlSize = canHover ? 'sm' : 'md';
+  /** 指で操作する端末では出発・到着を縦に積む（下の入力欄の行のコメント） */
+  const stackStationFields = !canHover;
+  /**
+   * 入力欄の中に重ねる「消す」（×）は補助操作なので sm のまま。md にすると 44px 幅を取り、
+   * 狭いスマホで駅名（「Shinjuku」など）が見切れた（tests/render/textFit.render.ts）
+   */
+  const CLEAR_BUTTON_SIZE: ControlSize = 'sm';
+  /** 入力欄の上に重ねる「消す」ボタンの分だけ右を空ける（ボタンは正方形なので幅＝高さ） */
+  const clearButtonInset = `${CONTROL_SIZE[CLEAR_BUTTON_SIZE].minHeight}px`;
   const colors = getThemeColors(theme);
   const [departureSearch, setDepartureSearch] = useState('');
   const [arrivalSearch, setArrivalSearch] = useState('');
@@ -487,7 +505,19 @@ const StationSelector: React.FC<StationSelectorProps> = ({
       
       {isExpanded && (
         <>
-          <div style={{
+          {/*
+            PC（マウス）は 出発・入れ替え・到着 を1行に並べる。
+            指で操作する端末は入力欄が 44px になり、パネル幅（360px の画面で約 250px）を
+            3つで分けると1欄 85px しかなく駅名が見切れた（tests/render/textFit.render.ts）。
+            そこで出発・到着を縦に積んで幅いっぱいに使い、入れ替えを右に置く（地図アプリで一般的な並び）。
+          */}
+          <div style={stackStationFields ? {
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1fr) auto',
+            columnGap: L.sp.xs,
+            rowGap: L.sp.sm,
+            alignItems: 'start',
+          } : {
             display: 'flex',
             gap: L.sp.xs,
             alignItems: 'flex-start',
@@ -496,7 +526,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           }}>
             {/* 出発駅選択 */}
             <div ref={departureRef} style={{
-              flex: '1 1 0',
+              ...(stackStationFields ? { gridColumn: 1, gridRow: 1 } : { flex: '1 1 0' }),
               minWidth: '0',
               position: 'relative'
             }}>
@@ -506,7 +536,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               <div style={{ position: 'relative' }}>
                 <TextField
                   theme={theme}
-                  size="sm"
+                  size={stationFieldSize}
                   type="text"
                   value={departureSearch}
                   onChange={(e) => {
@@ -540,7 +570,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   styleOverride={{
                     // ✕ を重ねるときだけ右側の余白を広げる（駅を選ぶ前は ✕ が無いので、案内の文字に幅を使う。
                     // 英語の "Enter station name" が狭い画面で切れていた, 2026-10-15）
-                    ...(departure ? { paddingRight: L.sp['3xl'] } : {}),
+                    ...(departure ? { paddingRight: clearButtonInset } : {}),
                     // 出発＝緑 で塗りつぶし、文字は白。地図の上でも役割が一目で分かるようにする
                     border: `2px solid ${SEMANTIC.departure}`,
                     backgroundColor: SEMANTIC.departure,
@@ -550,7 +580,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 {departure && (
                   <IconButton
                     theme={theme}
-                    size="sm"
+                    size={CLEAR_BUTTON_SIZE}
                     onClick={clearDeparture}
                     label={translateUI('clearSelection', language)}
                     icon={<X size={14} />}
@@ -599,17 +629,22 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
 
             {/* 入れ替えボタン */}
-            <div style={{
+            <div style={stackStationFields ? {
+              // 縦に積んだ2つの入力欄の間に来るよう、2行ぶんの高さの中央に置く
+              gridColumn: 2,
+              gridRow: '1 / span 2',
+              alignSelf: 'center',
+            } : {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'flex-end',
               paddingBottom: L.sp.xxs,
             }}>
               {/* ラベル (line-height≒18px) + margin-bottom 3px 分のオフセット */}
-              <div style={{ height: '21px' }} />
+              {!stackStationFields && <div style={{ height: '21px' }} />}
               <IconButton
                 theme={theme}
-                size="sm"
+                size={stationFieldSize}
                 onClick={() => {
                   const prevDep = departure;
                   const prevArr = arrival;
@@ -626,7 +661,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
             {/* 到着駅選択 */}
             <div ref={arrivalRef} style={{
-              flex: '1 1 0',
+              ...(stackStationFields ? { gridColumn: 1, gridRow: 2 } : { flex: '1 1 0' }),
               minWidth: '0',
               position: 'relative'
             }}>
@@ -636,7 +671,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               <div style={{ position: 'relative' }}>
                 <TextField
                   theme={theme}
-                  size="sm"
+                  size={stationFieldSize}
                   type="text"
                   value={arrivalSearch}
                   onChange={(e) => {
@@ -669,7 +704,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   className="station-input-filled"
                   styleOverride={{
                     // ✕ を重ねるときだけ右側の余白を広げる（出発駅と同じ）
-                    ...(arrival ? { paddingRight: L.sp['3xl'] } : {}),
+                    ...(arrival ? { paddingRight: clearButtonInset } : {}),
                     // 到着＝赤 で塗りつぶし、文字は白（出発欄と対になる配色）
                     border: `2px solid ${SEMANTIC.arrival}`,
                     backgroundColor: SEMANTIC.arrival,
@@ -679,7 +714,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 {arrival && (
                   <IconButton
                     theme={theme}
-                    size="sm"
+                    size={CLEAR_BUTTON_SIZE}
                     onClick={clearArrival}
                     label={translateUI('clearSelection', language)}
                     icon={<X size={14} />}
