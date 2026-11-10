@@ -25,7 +25,7 @@
  * `_update()`だけでは頂点データ自体が古いズーム時点のままになり、
  * コンテナだけ新しいズームに合わせて動いて頂点は動かない
  * （＝路線の形・縮尺だけが一瞬おかしく見える）ため、頂点の再投影まで
- * 必要だった。回転していない通常の地図はこれまでどおり（対象外）。
+ * 必要だった。回転していない通常の地図・回転できるが北向きの地図はこれまでどおり（対象外）。
  * ピンチズーム中の負荷は上がるが、ズレたまま動くよりはこちらを優先する。
  *
  * （`_reset()`を直接呼ばないのは、`Renderer.prototype._reset()`が内部で
@@ -33,6 +33,21 @@
  * このパッチ自身を再帰的に呼んでしまうため。`_reset()`と同じ処理を
  * ここで直接展開している）
  */
+/**
+ * 地図が実際に回っているか（向きが北以外か）。
+ *
+ * 2026-11: 回転を使えるようにしてあるだけで（`_rotate` が true）、北向きのままでも
+ * ピンチの毎フレームに全路線を再投影していた。スマホで2本指の操作が止まる・カクつく主な原因だった。
+ * 北向きのときは Leaflet の通常の速い方法（CSS transform で拡大縮小）でズレないことを
+ * 描画テスト（tests/render/pinchGesture.render.ts）で確かめてある。
+ */
+function isRotated(map: any): boolean {
+  const bearing = typeof map.getBearing === 'function' ? map.getBearing() : map._bearing;
+  // 360 度で一周して北に戻ったときも北として扱う
+  return typeof bearing === 'number' && Math.abs(((bearing % 360) + 360) % 360) > 1e-6
+    && Math.abs(((bearing % 360) + 360) % 360 - 360) > 1e-6;
+}
+
 export function patchRotatedRendererDrift(leaflet: any): void {
   const RendererProto = leaflet?.Renderer?.prototype;
   if (!RendererProto || RendererProto.__rotateDriftPatched) return;
@@ -43,7 +58,7 @@ export function patchRotatedRendererDrift(leaflet: any): void {
     center: unknown,
     zoom: unknown,
   ) {
-    if (this._map && this._map._rotate) {
+    if (this._map && this._map._rotate && isRotated(this._map)) {
       this._update();
       for (const id in this._layers) {
         this._layers[id]._reset();
