@@ -59,7 +59,7 @@ const visibleRouteHitPoint = (page: Page) => page.evaluate((far) => {
   return null;
 }, FAR_FROM_MARKERS_PX);
 
-test('地図の線を押すと路線の表示が切り替わる。指で操作する端末では路線名の吹き出し（ホバー）を出さない', async ({ page, isMobile }) => {
+test('地図の線を押すと路線の表示が切り替わり、どの路線かを画面の下に1行で知らせる。指で操作する端末では路線名の吹き出し（ホバー）を出さない', async ({ page, isMobile }) => {
   // 経路を出さずに、山手線と中央線だけを表示し、駅と駅の間が空いている所（田町〜高輪ゲートウェイ）を拡大して開く。
   // 縮小した地図では表示中の線が駅名のラベルの下に隠れ、線を押すと駅を押すことになる（それは駅の情報を出す正しい動き）
   await page.goto('/?routes=yama,chuo&center=35.6406,139.7440&zoom=16&lang=ja');
@@ -73,11 +73,21 @@ test('地図の線を押すと路線の表示が切り替わる。指で操作�
   // 押した路線が非表示になる（1つ減る）
   await expect.poll(async () => (await routesParam(page)).length).toBe(1);
 
+  // どの路線を非表示にしたかを画面の下に知らせる（指の端末では吹き出しが無いので、これが無いと分からない）
+  const notice = page.locator('[data-snackbar]');
+  await expect(notice).toBeVisible();
+  await expect(notice).toContainText(/(山手線|中央線).*を非表示にしました/);
+
   if (isMobile) {
     // 指の端末ではホバーが無いと判定され、線に吹き出しを付けない
     expect(await page.evaluate(() => matchMedia('(hover: hover) and (pointer: fine)').matches)).toBe(false);
     await expect(page.locator('.leaflet-tooltip-pane .leaflet-tooltip')).toHaveCount(0);
   }
+
+  // 知らせは1行だけ（ボタンを持たず、地図に浮かぶほかの部品と同じ高さ）
+  await expect(notice.getByRole('button')).toHaveCount(0);
+  const box = (await notice.boundingBox())!;
+  expect(box.height).toBeLessThanOrEqual(40);
 });
 
 test('所要時間の数字（線の上に並ぶ）はタップを受け取らない（指のタップを吸って何もしなかった）', async ({ page }) => {
