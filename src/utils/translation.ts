@@ -675,7 +675,7 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   showMoreRoutesStep: {
     japanese: "さらに表示（残り {count}）",
     english: "Show more ({count} left)"
-
+  },
   // 地図の線をタップして路線を切り替えたときの知らせ（map/RouteToggleSnackbar.tsx）
   routeToggledShown: {
     japanese: "{route}を表示しました",
@@ -2062,7 +2062,6 @@ export const uiChinese: Record<string, string> = {
   collapseList: "折叠",
   showMoreRoutes: "显示其他 {count} 条线路",
   showMoreRoutesStep: "显示更多（剩余 {count}）",
-
   routeToggledShown: "已显示{route}",
   routeToggledHidden: "已隐藏{route}",
   routeViewBoard: "面板",
@@ -2433,7 +2432,6 @@ export const uiKorean: Record<string, string> = {
   collapseList: "접기",
   showMoreRoutes: "다른 {count}개 노선 표시",
   showMoreRoutesStep: "더 보기 (남은 {count}개)",
-
   routeToggledShown: "{route} 표시됨",
   routeToggledHidden: "{route} 숨겨짐",
   routeViewBoard: "보드",
