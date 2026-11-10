@@ -685,18 +685,21 @@ UI（色・フォントサイズ・余白・角丸・ボタン・タッチ領域
 - E2E（`npm run test:e2e`）は時間がかかるため省略してよい。
   代わりに `test:types` / `test:unit` / `build` は必ず通すこと
 
-#### プレビューは1本にまとめる（2026-11-10 ユーザー指示「previewブランチに全部まとめるように今後も」）
+#### プレビューは `develop` ブランチ1本にまとめる（2026-11-10 ユーザー指示「previewブランチに全部まとめる」「developのブランチを番号なく固定で」）
 
 作業ごとのブランチ・PR はこれまでどおり作る（論理的な単位・CI は個別に通す）が、**ユーザーに見てもらうプレビューは
-`claude/preview` ブランチの PR 1本にまとめ、そのURLだけを案内する。** PR ごとにプレビューURLが増えると、どれを見ればよいか分からなくなるため。
+`develop` ブランチ1本にまとめる。** PR ごとにプレビューURLが増えると、どれを見ればよいか分からなくなるため。
 
-- 新しい作業を push したら、`claude/preview` に最新の `main` とその作業ブランチをマージして push する（最後のコミットに `[netlify-preview]`）。
-  リベース・force push はしない（ブランチの更新とマージの方法の決まりと同じ）
+- **固定URL: `https://develop--flex-railway-map.netlify.app`**（PR 番号が付かない。Netlify の branch deploy）。
+  使うには Netlify の管理画面で `develop` の Branch deploy を許可する必要がある（手順は `docs/netlify-build-policy.md`）。
+  **ユーザーが設定を済ませたと確認できるまでは、このURLを貼らない。** それまでは `develop` → `main` の PR の Deploy Preview のURLを貼る
+- 新しい作業を push したら、`develop` に最新の `main` とその作業ブランチをマージして push する。
+  リベース・force push はしない（ブランチの更新とマージの方法の決まりと同じ）。固定URLが使えるまでは最後のコミットに `[netlify-preview]` を付ける
 - コンフリクトは両方の変更を残して解消し、`test:types` / `test:design` / `test:unit` / `build` を通してから push する
-- 報告の末尾の「プレビュー」欄は、まとめ PR のURL1つと、その中に入っている PR の一覧を書く
-- ユーザーが OK を出したら、まとめ PR を `main` にマージする（中の個別 PR は、コミットが `main` に入るので GitHub 上でマージ済みになる）。
-  一部だけ OK のときは、その個別 PR だけをマージし、`claude/preview` に `main` をマージし直す
-- `main` にマージしたあとは、次の作業のために `claude/preview` を `main` から作り直してよい（push 済みの内容がすべて `main` に入っているときだけ）
+- 報告の末尾の「プレビュー」欄は、確認用のURL1つと、`develop` に入っている PR の一覧を書く
+- ユーザーが OK を出したら、`develop` → `main` の PR をマージする（中の個別 PR は、コミットが `main` に入るので GitHub 上でマージ済みになる）。
+  一部だけ OK のときは、その個別 PR だけをマージし、`develop` に `main` をマージし直す
+- `develop` は消さない（固定URLが消えるため）。マージ後も `main` を取り込んで使い続ける
 
 #### 🔴 push したら必ずプレビューURLを書く（2026-09-02追加）
 
@@ -750,14 +753,12 @@ https://deploy-preview-<PR番号>--flex-railway-map.netlify.app
 確認できる**。「ビルド中かもしれません」と曖昧に濁さず、ボットの状態を書くこと。
 コメントのコミットが古いままならまだビルド中なので、そう書く。
 
-**将来URLを固定にしたい場合:**
+**URLを固定にする（2026-11-10 準備済み）:**
 
-PRごとのURLはPR番号が変わると変わってしまう。ブランチ名は固定なので、
-Netlify管理画面の Site configuration → Build & deploy → Branch deploys で
-対象ブランチ（`claude/project-loading-ktm7lo`）を許可すると
-`https://claude-project-loading-ktm7lo--flex-railway-map.netlify.app` が使える。
-（`/` と `_` はハイフンに置換され、小文字化されたものがサブドメインになる）
-**この設定はユーザーがダッシュボードで行う必要がある。有効化を確認するまでは
+PRごとのURLはPR番号が変わると変わってしまうため、`develop` ブランチの branch deploy で
+`https://develop--flex-railway-map.netlify.app` を使う（上の「プレビューは `develop` ブランチ1本にまとめる」）。
+`scripts/netlify-ignore.mjs` は `develop` の branch deploy だけビルドするようにしてある。
+**Netlify管理画面の設定（Branch deploys に `develop` を追加）はユーザーが行う必要がある。有効化を確認するまでは
 このURLを貼らないこと。**
 
 サンドボックスから `npm run deploy:preview` は実行できない（Netlify CLI が

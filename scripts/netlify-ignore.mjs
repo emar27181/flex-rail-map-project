@@ -9,6 +9,13 @@ import { fileURLToPath } from 'node:url';
 
 export const PREVIEW_MARKER = '[netlify-preview]';
 
+/**
+ * 番号の付かない固定URLで確認するためのブランチ（2026-11-10 ユーザー指示）。
+ * branch-deploy はこのブランチだけビルドし、https://develop--flex-railway-map.netlify.app に出る。
+ * Netlify の管理画面で、このブランチの Branch deploy を許可しておく必要がある（docs/netlify-build-policy.md）
+ */
+export const FIXED_PREVIEW_BRANCH = 'develop';
+
 /** Known non-deploy paths only. In Memorio, brain/*.md IS deployed content. */
 export const NON_DEPLOY_PATHS = Object.freeze({
   files: new Set(['README.md', 'CONTRIBUTING.md', 'CHANGELOG.md', 'LICENSE', 'CLAUDE.md', 'ARCHITECTURE.md', 'DESIGN.md']),
@@ -20,9 +27,9 @@ export function isNonDeployPath(file) {
     || NON_DEPLOY_PATHS.directories.some(prefix => file.startsWith(prefix));
 }
 
-export function shouldBuild({ context, message = '', changedFiles = null }) {
+export function shouldBuild({ context, message = '', changedFiles = null, branch = '' }) {
   if (context === 'deploy-preview') return message.toLowerCase().includes(PREVIEW_MARKER);
-  if (context === 'branch-deploy') return false;
+  if (context === 'branch-deploy') return branch === FIXED_PREVIEW_BRANCH;
   if (context === 'production') {
     // An absent or empty diff is unreliable; never silently skip production.
     if (!Array.isArray(changedFiles) || changedFiles.length === 0) return true;
@@ -37,7 +44,12 @@ function git(args) {
 
 export function evaluateNetlifyBuild(env = process.env) {
   const { CONTEXT: context, COMMIT_REF: headCommit, CACHED_COMMIT_REF: cachedCommit } = env;
-  if (context === 'branch-deploy') return { build: false, reason: 'branch deployment disabled' };
+  if (context === 'branch-deploy') {
+    // Netlify は BRANCH にビルドするブランチ名を入れる（HEAD も同じ値）
+    const branch = env.BRANCH || env.HEAD || '';
+    const build = shouldBuild({ context, branch });
+    return { build, reason: build ? `fixed preview branch (${branch})` : 'branch deployment disabled' };
+  }
   if (context === 'deploy-preview') {
     try {
       const message = git(['log', '-1', '--format=%B', headCommit || 'HEAD']);
