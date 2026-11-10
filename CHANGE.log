@@ -2,12 +2,13 @@
 
 ## [2026-11-10] セッション（地図の線をタップしたときに路線名を知らせる）
 
-### feat: 地図の線をタップして路線を切り替えたら、どの路線かを画面の下に出し、元に戻せるようにする
-- `src/components/ui/molecules/Snackbar.tsx`（新規。一度に1つ・5秒で消える・指が乗っている間は消さない・操作1つ・`role="status"`）
-- `src/components/map/RouteToggleSnackbar.tsx`（新規。「山手線を非表示にしました ［元に戻す］」、路線の色の点）
+### feat: 地図の線をタップして路線を切り替えたら、どの路線かを画面の下に1行で出す
+- `src/components/ui/molecules/Snackbar.tsx`（新規。一度に1つ・4秒で消える・指が乗っている間は消さない・1行で高さは浮かぶ部品と同じ・操作と×は任意・`role="status"`）
+- `src/components/map/RouteToggleSnackbar.tsx`（新規。「● 山手線を非表示にしました」。長い路線名は名前だけ「…」で省略し、文の終わりは残す）
 - `src/components/RailwayMap.tsx`（表示中の線・薄い線のタップで知らせる。位置は下に並ぶ浮かぶ部品のすぐ上）, `src/utils/translation.ts`（4言語）
-- 指の端末では線に路線名の吹き出しを出さない（#100）ため、タップでどの路線が消えた・出たのか分からず、押し間違えても戻せなかった
-- `tests/unit/components/ui/snackbar.test.tsx`, `tests/render/routeTap.render.ts`（知らせを消すと落ちることを確認）, `docs/design-system.md`
+- 指の端末では線に路線名の吹き出しを出さない（#100）ため、タップでどの路線が消えた・出たのか分からなかった
+- 最初は「元に戻す」と×を付けたが、同じ線をもう一度押せば戻るので外し、縦幅を取らない1行にした（ユーザー指示）
+- `tests/unit/components/ui/snackbar.test.tsx`, `tests/render/routeTap.render.ts`（知らせを消すと落ちることを確認）, `tests/unit/utils/routeNameI18n.test.ts`, `docs/design-system.md`
 
 ## [2026-11-09] セッション（広告をこちらで決めた位置にだけ出す）
 

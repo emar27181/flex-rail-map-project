@@ -59,7 +59,7 @@ const visibleRouteHitPoint = (page: Page) => page.evaluate((far) => {
   return null;
 }, FAR_FROM_MARKERS_PX);
 
-test('地図の線を押すと路線の表示が切り替わり、どの路線かを画面の下に知らせる（元に戻せる）。指で操作する端末では路線名の吹き出し（ホバー）を出さない', async ({ page, isMobile }) => {
+test('地図の線を押すと路線の表示が切り替わり、どの路線かを画面の下に1行で知らせる。指で操作する端末では路線名の吹き出し（ホバー）を出さない', async ({ page, isMobile }) => {
   // 経路を出さずに、山手線と中央線だけを表示し、駅と駅の間が空いている所（田町〜高輪ゲートウェイ）を拡大して開く。
   // 縮小した地図では表示中の線が駅名のラベルの下に隠れ、線を押すと駅を押すことになる（それは駅の情報を出す正しい動き）
   await page.goto('/?routes=yama,chuo&center=35.6406,139.7440&zoom=16&lang=ja');
@@ -84,10 +84,10 @@ test('地図の線を押すと路線の表示が切り替わり、どの路線�
     await expect(page.locator('.leaflet-tooltip-pane .leaflet-tooltip')).toHaveCount(0);
   }
 
-  // 「元に戻す」で、非表示にした路線が戻る
-  await notice.getByRole('button', { name: '元に戻す' }).click();
-  await expect.poll(async () => (await routesParam(page)).sort().join(',')).toBe('chuo,yama');
-  await expect(notice).toHaveCount(0);
+  // 知らせは1行だけ（ボタンを持たず、地図に浮かぶほかの部品と同じ高さ）
+  await expect(notice.getByRole('button')).toHaveCount(0);
+  const box = (await notice.boundingBox())!;
+  expect(box.height).toBeLessThanOrEqual(40);
 });
 
 test('所要時間の数字（線の上に並ぶ）はタップを受け取らない（指のタップを吸って何もしなかった）', async ({ page }) => {

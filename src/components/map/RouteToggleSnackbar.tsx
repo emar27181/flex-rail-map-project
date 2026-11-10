@@ -1,6 +1,8 @@
 /**
- * 地図の線をタップして路線の表示を切り替えたときに、どの路線をどうしたかを画面の下に出す（オーガニズム）。
- * 「山手線を非表示にしました ［元に戻す］」。押し間違えたら「元に戻す」で戻せる。
+ * 地図の線をタップして路線の表示を切り替えたときに、どの路線をどうしたかを画面の下に1行で出す（オーガニズム）。
+ * 「● 山手線を非表示にしました」。押し間違えたら同じ線をもう一度押せば戻るので、「元に戻す」は付けない（2026-11 ユーザー指示）。
+ * 長い路線名（「東武伊勢崎線（スカイツリーライン）」など）は路線名だけを「…」で省略し、「を非表示にしました」は残す
+ * （文の終わりが切れると、表示したのか消したのか分からなくなるため）。
  *
  * 2026-11: 指の端末では線に路線名の吹き出し（ホバー）を出さない（hooks/useCanHover.ts）ため、
  * タップで切り替えても、どの路線が消えた・出たのか分からなかった。
@@ -29,14 +31,17 @@ interface RouteToggleSnackbarProps {
   theme: 'light' | 'dark';
   language: Language;
   bottom: string;
-  onUndo: () => void;
   onClose: () => void;
 }
 
+/** 文言の {route} の位置で前後に分ける（言語ごとに路線名の位置が違う: 「{route}を表示しました」「Showing {route}」） */
+const ROUTE_SLOT = '\u0000';
+
 const RouteToggleSnackbar: React.FC<RouteToggleSnackbarProps> = ({
-  notice, routeName, routeColor, theme, language, bottom, onUndo, onClose,
+  notice, routeName, routeColor, theme, language, bottom, onClose,
 }) => {
   const route = translateRoute(routeName, language);
+  const [before = '', after = ''] = translateUI(notice.shown ? 'routeToggledShown' : 'routeToggledHidden', language, { route: ROUTE_SLOT }).split(ROUTE_SLOT);
   return (
     <Snackbar
       key={notice.id}
@@ -49,11 +54,14 @@ const RouteToggleSnackbar: React.FC<RouteToggleSnackbarProps> = ({
           style={{ width: L.sp.md, height: L.sp.md, borderRadius: L.r.pill, backgroundColor: routeColor, flexShrink: 0 }}
         />
       )}
-      message={translateUI(notice.shown ? 'routeToggledShown' : 'routeToggledHidden', language, { route })}
-      actionLabel={translateUI('undo', language)}
-      onAction={onUndo}
+      message={(
+        <>
+          {before && <span style={{ flexShrink: 0 }}>{before}</span>}
+          <span data-route-name style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{route}</span>
+          {after && <span style={{ flexShrink: 0 }}>{after}</span>}
+        </>
+      )}
       onClose={onClose}
-      closeLabel={translateUI('close', language)}
     />
   );
 };

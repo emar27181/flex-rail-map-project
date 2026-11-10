@@ -509,19 +509,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     : {});
   /**
    * 地図の線をタップして路線を切り替えたときの知らせ（map/RouteToggleSnackbar）。
-   * 指の端末では線に路線名の吹き出しを出さないので、どの路線を切り替えたかをここで知らせ、「元に戻す」で戻せるようにする
+   * 指の端末では線に路線名の吹き出しを出さないので、どの路線を切り替えたかをここで1行だけ知らせる
+   * （戻すときは同じ線をもう一度押す。「元に戻す」は付けない）
    */
   const [routeToggleNotice, setRouteToggleNotice] = useState<RouteToggleNotice | null>(null);
   const noticeRouteToggle = (routeKey: string, shown: boolean) =>
     setRouteToggleNotice(prev => ({ id: (prev?.id ?? 0) + 1, routeKey, shown }));
-  const undoRouteToggle = (notice: RouteToggleNotice) => {
-    const rk = notice.routeKey as RouteKey;
-    setVisibleRoutes(prev => {
-      const next = new Set(prev);
-      if (notice.shown) next.delete(rk); else next.add(rk);
-      return next;
-    });
-  };
   const [clickedRoute, setClickedRoute] = useState<string | null>(null);
   const [routePopupPosition, setRoutePopupPosition] = useState<{ x: number, y: number } | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
@@ -6655,7 +6648,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               theme={theme}
               language={currentLanguage}
               bottom={routeToggleSnackbarBottom}
-              onUndo={() => undoRouteToggle(routeToggleNotice)}
               onClose={() => setRouteToggleNotice(null)}
             />
           )}

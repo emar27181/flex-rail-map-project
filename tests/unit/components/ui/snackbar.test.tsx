@@ -3,6 +3,7 @@
  * 地図の線をタップして路線を切り替えたときの知らせ（map/RouteToggleSnackbar）のテスト。
  *
  * 2026-11: 指の端末では線に路線名の吹き出しを出さないため、タップでどの路線を切り替えたか分からなかった。
+ * 帯は1行だけ（「元に戻す」は付けない。同じ線をもう一度押せば戻る）。
  */
 // @vitest-environment jsdom
 import { readFileSync } from 'node:fs';
@@ -61,26 +62,38 @@ describe('Snackbar', () => {
     renderSnackbar({ actionLabel: undefined, onAction: undefined });
     expect(screen.getAllByRole('button')).toHaveLength(1);
   });
+
+  it('閉じるボタンの名前が無ければ×も出さない', () => {
+    renderSnackbar({ actionLabel: undefined, onAction: undefined, closeLabel: undefined });
+    expect(screen.queryAllByRole('button')).toHaveLength(0);
+  });
 });
 
 describe('RouteToggleSnackbar', () => {
   const base = { routeName: '山手線', routeColor: '#9ACD32', theme: 'dark' as const, bottom: '0px', onClose: () => {} };
 
-  it('どの路線をどうしたかを、表示する言語で出す', () => {
-    const { rerender } = render(
-      <RouteToggleSnackbar {...base} notice={{ id: 1, routeKey: 'yamanote', shown: false }} language="japanese" onUndo={() => {}} />,
-    );
-    expect(screen.getByRole('status').textContent).toContain('山手線を非表示にしました');
-    rerender(<RouteToggleSnackbar {...base} notice={{ id: 2, routeKey: 'yamanote', shown: true }} language="english" onUndo={() => {}} />);
-    expect(screen.getByRole('status').textContent).toContain('Showing Yamanote Line');
-    expect(screen.getByText('Undo')).toBeTruthy();
+  it('どの路線をどうしたかを、表示する言語で1行に出す', () => {
+    const { rerender } = render(<RouteToggleSnackbar {...base} notice={{ id: 1, routeKey: 'yamanote', shown: false }} language="japanese" />);
+    expect(screen.getByRole('status').textContent).toBe('山手線を非表示にしました');
+    rerender(<RouteToggleSnackbar {...base} notice={{ id: 2, routeKey: 'yamanote', shown: true }} language="english" />);
+    expect(screen.getByRole('status').textContent).toBe('Showing Yamanote Line');
   });
 
-  it('「元に戻す」で onUndo を呼ぶ', () => {
-    const onUndo = vi.fn();
-    render(<RouteToggleSnackbar {...base} notice={{ id: 1, routeKey: 'yamanote', shown: false }} language="japanese" onUndo={onUndo} />);
-    fireEvent.click(screen.getByText('元に戻す'));
-    expect(onUndo).toHaveBeenCalledTimes(1);
+  it('「元に戻す」も×も出さない（同じ線をもう一度押せば戻るので、帯は文だけ）', () => {
+    render(<RouteToggleSnackbar {...base} notice={{ id: 1, routeKey: 'yamanote', shown: false }} language="japanese" />);
+    expect(screen.queryAllByRole('button')).toHaveLength(0);
+  });
+
+  it('2行に折り返さず、長い路線名は路線名だけを省略して「を非表示にしました」を残す', () => {
+    render(<RouteToggleSnackbar {...base} routeName="東武伊勢崎線（スカイツリーライン）" notice={{ id: 1, routeKey: 'tobuIsesaki', shown: false }} language="japanese" />);
+    const bar = screen.getByRole('status');
+    expect(bar.style.whiteSpace).toBe('nowrap');
+    const name = bar.querySelector('[data-route-name]') as HTMLElement;
+    expect(name.style.textOverflow).toBe('ellipsis');
+    expect(name.style.minWidth).toBe('0px');
+    const suffix = name.nextElementSibling as HTMLElement;
+    expect(suffix.textContent).toBe('を非表示にしました');
+    expect(suffix.style.flexShrink).toBe('0');
   });
 });
 

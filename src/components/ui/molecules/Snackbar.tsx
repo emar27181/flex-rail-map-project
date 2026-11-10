@@ -7,7 +7,10 @@
  * 決まり（Material Design のスナックバーと同じ考え方）:
  * - 一度に1つ。新しい知らせは前のものを置き換える（呼び出し側が key を変える）
  * - SNACKBAR_DURATION_MS で自動で消える。指やマウスが乗っている間・中にフォーカスがある間は消さない
- * - 操作（「元に戻す」など）は1つまで。押すと onAction を呼んで閉じる
+ * - **1行に収める**。高さは地図に浮かぶほかの部品（FLOATING_CONTROL.height）と同じで、文の長さに合わせて幅が縮む。
+ *   2行に折り返さない（2026-11 ユーザー指示「余分な縦幅を使わずシンプルに」）。収まらない長い名前は呼び出し側で省略する
+ * - 操作（「元に戻す」など）と閉じるボタンは任意。無ければ帯は文だけになる
+ *   （2026-11: 路線の切り替えは同じ線をもう一度押せば戻せるので、「元に戻す」は付けない）
  * - 地図の操作を止めない（全体を覆わない・確認を求めない）。読み上げでは role="status" で知らせる
  *
  * 何を知らせるか（路線など）は知らない。文言・先頭の印は呼び出し側が渡す。
@@ -17,17 +20,14 @@ import type { CSSProperties, ReactNode } from 'react';
 import { X } from 'lucide-react';
 import Button from '../atoms/Button';
 import IconButton from '../atoms/IconButton';
-import { FLOATING_PANEL, floatingPanelWidth } from '../atoms/controlSize';
+import { FLOATING_CONTROL, FLOATING_PANEL, floatingPanelWidth } from '../atoms/controlSize';
 import { floatingSurfaceStyle } from '../atoms/floatingSurface';
 import { getThemeColors } from '../../../contexts/ThemeContext';
 import { FS } from '../../../constants/ui';
 import { L } from '../../legend/legendStyles';
 
-/**
- * 自動で消えるまでの時間。読む時間と押す時間を合わせて、操作ありの知らせとして短すぎない長さ
- * （Material Design は 4〜10 秒。操作がある場合は短くしない）
- */
-export const SNACKBAR_DURATION_MS = 5000;
+/** 自動で消えるまでの時間（Material Design は 4〜10 秒。1行の短い知らせなので下限の4秒） */
+export const SNACKBAR_DURATION_MS = 4000;
 
 /** 地図の上に浮かぶボタン（1003）・凡例（1002）より上に出す */
 export const SNACKBAR_Z = 1004;
@@ -43,8 +43,8 @@ export interface SnackbarProps {
   onAction?: () => void;
   /** 閉じる（自動で消えるとき・×・操作のあと） */
   onClose: () => void;
-  /** 閉じるボタンの読み上げ用の名前 */
-  closeLabel: string;
+  /** 閉じるボタン（×）の読み上げ用の名前。無ければ×を出さない（自動で消えるのを待つ） */
+  closeLabel?: string;
   /** 自動で消えるまでの時間(ms) */
   duration?: number;
   /** 置く位置（地図の下端からの距離）。浮かぶボタンとの位置関係は呼び出し側が決める */
@@ -83,19 +83,23 @@ const Snackbar: React.FC<SnackbarProps> = ({
         transform: 'translateX(-50%)',
         bottom,
         zIndex: SNACKBAR_Z,
-        width: floatingPanelWidth('wide'),
+        // 文の長さに合わせて縮み、画面の幅を超えない
+        width: 'max-content',
+        maxWidth: floatingPanelWidth('wide'),
+        minHeight: FLOATING_CONTROL.height,
         boxSizing: 'border-box',
         display: 'flex',
         alignItems: 'center',
         gap: L.sp.sm,
-        padding: `${L.sp.xs} ${L.sp.xs} ${L.sp.xs} ${FLOATING_PANEL.inset}`,
+        padding: `0 ${actionLabel || closeLabel ? L.sp.xs : FLOATING_PANEL.inset} 0 ${FLOATING_PANEL.inset}`,
         color: colors.text,
         fontSize: FS.body,
+        whiteSpace: 'nowrap',
         ...style,
       }}
     >
       {leading}
-      <span style={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>{message}</span>
+      <span data-snackbar-message style={{ display: 'flex', minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap' }}>{message}</span>
       {actionLabel && onAction && (
         <Button
           theme={theme}
@@ -107,7 +111,7 @@ const Snackbar: React.FC<SnackbarProps> = ({
           {actionLabel}
         </Button>
       )}
-      <IconButton theme={theme} variant="ghost" size="md" label={closeLabel} icon={<X />} onClick={onClose} />
+      {closeLabel && <IconButton theme={theme} variant="ghost" size="md" label={closeLabel} icon={<X />} onClick={onClose} />}
     </div>
   );
 };
