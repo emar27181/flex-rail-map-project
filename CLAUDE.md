@@ -805,6 +805,12 @@ PRごとのURLはPR番号が変わると変わってしまうため、`develop` 
   本番のサイトだけで読み込み、プレビューでは位置だけ見せる。広告ユニット ID は `src/config/ads.ts`（推測した値を入れない）。
   決まりは `docs/article-writing.md` の「広告」
 
+### バージョンと更新履歴（2026-11）
+
+- 設定パネルのいちばん下に、いまの版・ビルドの時刻・更新の確認・更新履歴を出す（`src/components/legend/VersionPanel.tsx`）
+- 履歴は `src/data/releases.ts`（新しい順）。**リリース（`develop` → `main` の PR）のたびに先頭に1件足す。** 新機能を含めば真ん中、それ以外は右端を上げる
+- `package.json` の `version` は履歴の先頭とそろえる（テストで確認）。手順は **`docs/release-process.md`**
+
 ### CHANGE.log 記録ルール
 
 **セッション中に行った変更は必ず `CHANGE.log` に記録すること。**

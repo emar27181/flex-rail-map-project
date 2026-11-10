@@ -1787,6 +1787,51 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "白",
     english: "White"
   },
+  // ── バージョン・更新履歴（設定パネルのいちばん下） ──
+  versionTitle: {
+    japanese: "バージョン",
+    english: "Version"
+  },
+  versionBuiltAt: {
+    japanese: "ビルド",
+    english: "Built"
+  },
+  versionCheckUpdate: {
+    japanese: "更新を確認",
+    english: "Check for updates"
+  },
+  versionChecking: {
+    japanese: "確認中…",
+    english: "Checking…"
+  },
+  versionUpToDate: {
+    japanese: "最新です",
+    english: "Up to date"
+  },
+  versionUpdateAvailable: {
+    japanese: "新しい版 {version} があります",
+    english: "Version {version} is available"
+  },
+  versionReload: {
+    japanese: "再読み込み",
+    english: "Reload"
+  },
+  versionCheckFailed: {
+    japanese: "確認できませんでした",
+    english: "Could not check"
+  },
+  versionLastChecked: {
+    japanese: "最終確認 {time}",
+    english: "Last checked {time}"
+  },
+  versionHistory: {
+    japanese: "更新履歴",
+    english: "Update history"
+  },
+  versionShowMore: {
+    japanese: "さらに表示（残り {count}）",
+    english: "Show more ({count} left)"
+  },
   // ── 設定保存・読込 ──
   configSaveLoad: {
     japanese: "設定の保存・読込",
@@ -2350,6 +2395,17 @@ export const uiChinese: Record<string, string> = {
   colorPresetDefault: "线路颜色",
   colorPresetBlack: "黑色",
   colorPresetWhite: "白色",
+  versionTitle: "版本",
+  versionBuiltAt: "构建",
+  versionCheckUpdate: "检查更新",
+  versionChecking: "正在检查…",
+  versionUpToDate: "已是最新",
+  versionUpdateAvailable: "有新版本 {version}",
+  versionReload: "重新加载",
+  versionCheckFailed: "无法检查",
+  versionLastChecked: "上次检查 {time}",
+  versionHistory: "更新记录",
+  versionShowMore: "显示更多（还有 {count} 个）",
   configSaveLoad: "保存·读取设置",
   configExportDesc: "导出（当前显示设置）",
   configExportSave: "保存JSON",
@@ -2720,6 +2776,17 @@ export const uiKorean: Record<string, string> = {
   colorPresetDefault: "노선 색",
   colorPresetBlack: "검정",
   colorPresetWhite: "흰색",
+  versionTitle: "버전",
+  versionBuiltAt: "빌드",
+  versionCheckUpdate: "업데이트 확인",
+  versionChecking: "확인 중…",
+  versionUpToDate: "최신 버전입니다",
+  versionUpdateAvailable: "새 버전 {version}이(가) 있습니다",
+  versionReload: "새로고침",
+  versionCheckFailed: "확인하지 못했습니다",
+  versionLastChecked: "마지막 확인 {time}",
+  versionHistory: "업데이트 기록",
+  versionShowMore: "더 보기 ({count}개 남음)",
   configSaveLoad: "설정 저장·불러오기",
   configExportDesc: "내보내기（현재 표시 설정）",
   configExportSave: "JSON 저장",

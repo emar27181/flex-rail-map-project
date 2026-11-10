@@ -6,6 +6,7 @@ import type { Language } from '../../utils/translation';
 import RouteToggleItem from '../ui/RouteToggleItem';
 import type { StationStats } from '../../data/stationStats';
 import MapConfigPanel from './MapConfigPanel';
+import VersionPanel from './VersionPanel';
 import type { MapConfig } from './MapConfigPanel';
 import Checkbox from '../ui/atoms/Checkbox';
 import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, ROUTE_LINE } from '../../constants/ui';
@@ -879,6 +880,9 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
       {/* ═══ セクション3: 設定の保存/読み込み ═══ */}
       <MapConfigPanel config={mapConfig} theme={theme} language={language} onImport={onImportConfig} />
+
+      {/* ═══ セクション4: バージョン・更新履歴（いちばん下） ═══ */}
+      <VersionPanel theme={theme} language={language} />
 
     </div>
   );
