@@ -109,6 +109,7 @@ import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import MapCompassButton from './map/MapCompassButton';
 import VisibleRoutesLegend from './legend/VisibleRoutesLegend';
+import RouteToggleSnackbar, { type RouteToggleNotice } from './map/RouteToggleSnackbar';
 import { getInitialLegendCollapsed, persistLegendCollapsed } from '../utils/legendPersistence';
 import { getThroughReachableSections } from '../utils/throughService';
 import { findParallelSections, sectionMinutes } from '../utils/parallelRoutes';
@@ -122,7 +123,7 @@ import RouteToggleChip from './legend/RouteToggleChip';
 import TextField from './ui/atoms/TextField';
 import Checkbox from './ui/atoms/Checkbox';
 import LinkButton from './ui/atoms/LinkButton';
-import { FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE, FLOATING_PANEL } from './ui/atoms/controlSize';
+import { FLOATING_CONTROL, FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE, FLOATING_PANEL } from './ui/atoms/controlSize';
 import FloatingIconButton from './ui/atoms/FloatingIconButton';
 import { floatingSurfaceStyle, floatingSurfaceCss } from './ui/atoms/floatingSurface';
 import { shadow, dropShadowFilter, joinShadows, textHalo, textHaloCss } from './ui/atoms/shadow';
@@ -506,6 +507,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const routeHoverHandlers = (routeKey: string) => (canHover
     ? { mouseover: () => setHoveredRoute(routeKey), mouseout: () => setHoveredRoute(null) }
     : {});
+  /**
+   * 地図の線をタップして路線を切り替えたときの知らせ（map/RouteToggleSnackbar）。
+   * 指の端末では線に路線名の吹き出しを出さないので、どの路線を切り替えたかをここで知らせ、「元に戻す」で戻せるようにする
+   */
+  const [routeToggleNotice, setRouteToggleNotice] = useState<RouteToggleNotice | null>(null);
+  const noticeRouteToggle = (routeKey: string, shown: boolean) =>
+    setRouteToggleNotice(prev => ({ id: (prev?.id ?? 0) + 1, routeKey, shown }));
+  const undoRouteToggle = (notice: RouteToggleNotice) => {
+    const rk = notice.routeKey as RouteKey;
+    setVisibleRoutes(prev => {
+      const next = new Set(prev);
+      if (notice.shown) next.delete(rk); else next.add(rk);
+      return next;
+    });
+  };
   const [clickedRoute, setClickedRoute] = useState<string | null>(null);
   const [routePopupPosition, setRoutePopupPosition] = useState<{ x: number, y: number } | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
@@ -4631,6 +4647,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   newVisibleRoutes.add(routeKey);
                 }
                 setVisibleRoutes(newVisibleRoutes);
+                noticeRouteToggle(routeKey, newVisibleRoutes.has(routeKey));
                 justClickedLayerRef.current = true;
                 return;
               }
@@ -4933,6 +4950,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   /** スマホ全画面の左下ボタン群に「候補ルート」を出すか（候補が無いとき・推薦ルート選択を出さない設定では出さない） */
   const showMobileRouteCandidatesButton = showRouteRecommendationsPanel && routeRecommendations.length > 0;
   /** 立体表示の説明の箱の下端。スマホ全画面では左下のボタン群（MobileBottomPanel）の上に置く */
+  /** 地図の下端に並ぶ浮かぶ部品（スマホ全画面の「表示切替」・右下の凡例「N路線」）の下端からの距離 */
+  const floatingRowBottom = isMobile
+    ? (isFullscreen ? `${MOBILE_PANEL_SAFE_BOTTOM + MOBILE_PANEL_FLOAT}px` : '64px')
+    : L.sp['4xl'];
+  /** 路線を切り替えた知らせ（スナックバー）の位置。下に並ぶ浮かぶ部品のすぐ上（スマホ全画面ではボタンの列の上） */
+  const routeToggleSnackbarBottom = isMobile && isFullscreen
+    ? `calc(${mobileBottomPanelStackTop(showMobileRouteCandidatesButton ? 2 : 1, MOBILE_PANEL_SAFE_BOTTOM)}px + ${FLOATING_PANEL.gap})`
+    : `calc(${floatingRowBottom} + ${FLOATING_CONTROL.height}px + ${FLOATING_PANEL.gap})`;
   const terrainOverlayBottom = isMobile && isFullscreen
     ? `calc(${mobileBottomPanelStackTop(showMobileRouteCandidatesButton ? 2 : 1, MOBILE_PANEL_SAFE_BOTTOM)}px + ${FLOATING_PANEL.gap})`
     : undefined;
@@ -5498,6 +5523,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                             // 切替モード：確認なしで即表示（埋め込みでは確認を出す。狭い枠で地図を動かす指で足されないように）
                             setAvailableRoutes(prev => new Set([...prev, rKey]));
                             setVisibleRoutes(prev => new Set([...prev, rKey]));
+                            noticeRouteToggle(rKey, true);
                             return;
                           }
                           const oe = (e as any).originalEvent as MouseEvent;
@@ -6592,9 +6618,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             // 以前はスマホ全画面でも「パネルが開いている」扱いで凡例を消してしまい、見えなかった
             const panelOnRight = !isMobile && isLegendExpanded;
             // スマホ全画面では左下の「表示切替」と同じ高さに並べる
-            const bottom = isMobile
-              ? (isFullscreen ? `${MOBILE_PANEL_SAFE_BOTTOM + MOBILE_PANEL_FLOAT}px` : '64px')
-              : L.sp['4xl'];
+            const bottom = floatingRowBottom;
             return (
               <VisibleRoutesLegend
                 items={order.map(k => ({
@@ -6622,6 +6646,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               />
             );
           })()}
+
+          {routeToggleNotice && (
+            <RouteToggleSnackbar
+              notice={routeToggleNotice}
+              routeName={routeNames[routeToggleNotice.routeKey as RouteKey] ?? routeToggleNotice.routeKey}
+              routeColor={adjustRouteColorForTheme(routeColors[routeToggleNotice.routeKey as RouteKey], theme)}
+              theme={theme}
+              language={currentLanguage}
+              bottom={routeToggleSnackbarBottom}
+              onUndo={() => undoRouteToggle(routeToggleNotice)}
+              onClose={() => setRouteToggleNotice(null)}
+            />
+          )}
 
           <div style={{
             position: 'absolute',

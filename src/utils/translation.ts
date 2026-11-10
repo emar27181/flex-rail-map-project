@@ -671,6 +671,19 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "他 {count} 路線を表示",
     english: "Show {count} more routes"
   },
+  // 地図の線をタップして路線を切り替えたときの知らせ（map/RouteToggleSnackbar.tsx）
+  routeToggledShown: {
+    japanese: "{route}を表示しました",
+    english: "Showing {route}"
+  },
+  routeToggledHidden: {
+    japanese: "{route}を非表示にしました",
+    english: "Hid {route}"
+  },
+  undo: {
+    japanese: "元に戻す",
+    english: "Undo"
+  },
   routeViewBoard: {
     japanese: "ボード",
     english: "Board"
@@ -2047,6 +2060,9 @@ export const uiChinese: Record<string, string> = {
   increase: "放大",
   collapseList: "折叠",
   showMoreRoutes: "显示其他 {count} 条线路",
+  routeToggledShown: "已显示{route}",
+  routeToggledHidden: "已隐藏{route}",
+  undo: "撤销",
   routeViewBoard: "面板",
   routeViewClassic: "列表",
   routeSearchPlaceholder: "搜索线路名称",
@@ -2414,6 +2430,9 @@ export const uiKorean: Record<string, string> = {
   increase: "크게",
   collapseList: "접기",
   showMoreRoutes: "다른 {count}개 노선 표시",
+  routeToggledShown: "{route} 표시됨",
+  routeToggledHidden: "{route} 숨겨짐",
+  undo: "실행 취소",
   routeViewBoard: "보드",
   routeViewClassic: "목록",
   routeSearchPlaceholder: "노선 이름으로 검색",
