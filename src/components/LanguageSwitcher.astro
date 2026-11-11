@@ -16,6 +16,7 @@
 import { FS } from '../constants/ui';
 import { L } from './legend/legendStyles';
 import { hreflangCode } from '../config/seo';
+import { LANGUAGE_NATIVE_NAME, LANGUAGE_SHORT_NAME } from '../constants/languages';
 
 type Lang = 'ja' | 'en' | 'zh' | 'ko';
 
@@ -27,10 +28,9 @@ export interface Props {
 
 const { current, versions } = Astro.props;
 const ORDER: Lang[] = ['ja', 'en', 'zh', 'ko'];
-/** その言語自身での名前 */
-const NATIVE: Record<Lang, string> = { ja: '日本語', en: 'English', zh: '简体中文', ko: '한국어' };
-/** ボタンに出す短い表記（狭いヘッダーでも折り返さない） */
-const SHORT: Record<Lang, string> = { ja: '日', en: 'EN', zh: '中', ko: '한' };
+// 名前と短い表記は constants/languages.ts（地図アプリの言語メニューと同じ）
+const NATIVE = LANGUAGE_NATIVE_NAME;
+const SHORT = LANGUAGE_SHORT_NAME;
 const MENU_LABEL: Record<Lang, string> = { ja: '言語', en: 'Language', zh: '语言', ko: '언어' };
 const UNAVAILABLE: Record<Lang, string> = {
   ja: 'このページの翻訳はありません',
