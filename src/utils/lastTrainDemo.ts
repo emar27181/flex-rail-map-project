@@ -5,6 +5,7 @@
  */
 import { yamanote, type Station } from '../data/yamanote';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
+import { THROUGH_SERVICES, type ThroughService } from '../data/throughServices';
 import { chuo } from '../data/chuo';
 import { keihinTohoku } from '../data/keihin-tohoku';
 
@@ -23,6 +24,8 @@ export interface DemoLeg {
   from: string;
   to: string;
   lineId: string;
+  /** 同じ列車が路線境界を越えるときも共通のID（ない場合は従来の路線単位フォールバック）。 */
+  tripId?: string;
   depart: number;
   arrive: number;
 }
@@ -77,6 +80,11 @@ export function buildDestinationDemoNetwork(
   const selected: RouteKey[] = [];
   const seen = new Set<string>([destination]);
   const directSet = new Set(direct);
+  // 到着駅に直接乗り入れる路線が属する直通系統の相手側路線を優先する。
+  // 例: 新宿→小田急小田原線→江ノ島線・藤沢を30路線制限で取りこぼさない。
+  const throughPriority = new Set(THROUGH_SERVICES
+    .filter(service => service.sections.some(sec => directSet.has(sec.route)))
+    .flatMap(service => service.sections.map(sec => sec.route)));
   const cap = Math.max(1, Math.floor(maxLines));
 
   while (selected.length < cap) {
@@ -89,7 +97,8 @@ export function buildDestinationDemoNetwork(
       const common = stations.filter(st => seen.has(st.name)).length;
       if (common === 0) continue;
       // 到着駅に直接乗り入れる路線を優先し、次に乗換駅の多い路線へ展開する。
-      const score = (directSet.has(key) ? 10000 : 0) + common * 100 - Math.min(stations.length, 200);
+      const score = (directSet.has(key) ? 10000 : throughPriority.has(key) ? 5000 : 0)
+        + common * 100 - Math.min(stations.length, 200);
       if (score > best) { best = score; candidate = key; }
     }
     if (!candidate) break;
@@ -169,9 +178,67 @@ export function buildDemoLegs(lines: readonly DemoLine[] = DEMO_LINES): DemoLeg[
           const duration = Math.max(1, base ?? 2);
           result.push({
             from: from.name, to: to.name, lineId: line.id,
+            tripId: `line:${line.id}:${reversed ? 'reverse' : 'forward'}:${origin}`,
             depart: cursor, arrive: cursor + duration,
           });
           cursor += duration;
+        }
+      }
+    }
+  }
+  result.push(...buildDemoThroughLegs(lines));
+  return result;
+}
+
+/**
+ * throughServicesで確認済みの路線間接続について、同じ列車IDで跨ぐ架空便を生成する。
+ * 終点で折り返す通常便は上の路線ごとのデモ便として残す。
+ * 現状は共有する接続駅が明確な2路線の定義だけ対象とする（実時刻は生成しない）。
+ */
+export function buildDemoThroughLegs(
+  lines: readonly DemoLine[],
+  services: readonly ThroughService[] = THROUGH_SERVICES,
+): DemoLeg[] {
+  const byKey = new Map(lines.map(line => [line.routeKey, line] as const));
+  const result: DemoLeg[] = [];
+  for (const service of services) {
+    if (service.sections.length !== 2 || service.sections.some(sec => !byKey.has(sec.route))) continue;
+    const sections = service.sections.map(sec => {
+      const src = routes[sec.route];
+      const start = sec.from ? src.findIndex(st => st.name === sec.from) : 0;
+      const end = sec.to ? src.findIndex(st => st.name === sec.to) : src.length - 1;
+      if (start < 0 || end < 0) return null;
+      const seq = start <= end ? src.slice(start, end + 1) : src.slice(end, start + 1).reverse();
+      return { routeKey: sec.route, seq, original: src };
+    });
+    const first = sections[0], second = sections[1];
+    if (!first || !second || first.seq.length < 2 || second.seq.length < 2) continue;
+    if (first.seq[first.seq.length - 1].name !== second.seq[0].name) continue;
+
+    const edges: { from: string; to: string; lineId: string; minutes: number }[] = [];
+    for (const sec of [first, second]) {
+      for (let i = 0; i < sec.seq.length - 1; i++) {
+        const from = sec.seq[i], to = sec.seq[i + 1];
+        const originalIndex = sec.original.findIndex(st => st.name === from.name);
+        const nextIndex = sec.original.findIndex(st => st.name === to.name);
+        const forwardIndex = Math.min(originalIndex, nextIndex);
+        const base = sec.original[forwardIndex]?.timeToNext;
+        edges.push({ from: from.name, to: to.name, lineId: sec.routeKey,
+          minutes: Math.max(1, base ?? 2) });
+      }
+    }
+    const lastOrigin = Math.min(...service.sections.map(sec => byKey.get(sec.route)!.lastOrigin));
+    for (const reversed of [false, true]) {
+      const journey = reversed
+        ? [...edges].reverse().map(edge => ({ ...edge, from: edge.to, to: edge.from }))
+        : edges;
+      for (let origin = 21 * 60 + 40; origin <= lastOrigin; origin += 24) {
+        let cursor = origin;
+        const tripId = `through:${service.id}:${reversed ? 'reverse' : 'forward'}:${origin}`;
+        for (const edge of journey) {
+          result.push({ from: edge.from, to: edge.to, lineId: edge.lineId,
+            tripId, depart: cursor, arrive: cursor + edge.minutes });
+          cursor += edge.minutes;
         }
       }
     }
@@ -197,28 +264,27 @@ export function calculateDemoLastTrain(
   destination: string,
   transferMinutes = DEMO_TRANSFER_MINUTES,
 ): LastTrainDemoResult {
-  // station → lineId → 最も遅く乗車できる時刻
-  const latestByLine = new Map<string, Map<string, number>>();
+  // station → tripId → その列車で目的地に着ける最遅の次便出発時刻
+  const latestByTrip = new Map<string, Map<string, number>>();
+  const latestAny = new Map<string, number>();
   const feasibleLegs: DemoLeg[] = [];
   const sorted = [...legs].sort((a, b) => b.depart - a.depart);
   for (const leg of sorted) {
     if (leg.from === destination) continue;
-    const next = latestByLine.get(leg.to);
-    const canFinish = leg.to === destination || (
-      next !== undefined && [...next].some(([lineId, latest]) =>
-        leg.arrive + (lineId === leg.lineId ? 0 : transferMinutes) <= latest
-      )
-    );
+    const tripKey = leg.tripId ?? leg.lineId;
+    const sameTrip = latestByTrip.get(leg.to)?.get(tripKey);
+    const transfer = latestAny.get(leg.to);
+    const canFinish = leg.to === destination
+      || (sameTrip !== undefined && leg.arrive <= sameTrip)
+      || (transfer !== undefined && leg.arrive + transferMinutes <= transfer);
     if (!canFinish) continue;
     feasibleLegs.push(leg);
-    const state = latestByLine.get(leg.from) ?? new Map<string, number>();
-    state.set(leg.lineId, Math.max(state.get(leg.lineId) ?? -Infinity, leg.depart));
-    latestByLine.set(leg.from, state);
+    const state = latestByTrip.get(leg.from) ?? new Map<string, number>();
+    state.set(tripKey, Math.max(state.get(tripKey) ?? -Infinity, leg.depart));
+    latestByTrip.set(leg.from, state);
+    latestAny.set(leg.from, Math.max(latestAny.get(leg.from) ?? -Infinity, leg.depart));
   }
-  const latestDeparture = new Map<string, number>();
-  for (const [station, states] of latestByLine) {
-    latestDeparture.set(station, Math.max(...states.values()));
-  }
+  const latestDeparture = latestAny;
   return { latestDeparture, feasibleLegs };
 }
 
