@@ -21,9 +21,13 @@
     "src/components/Terrain3DView.tsx",
     "src/utils/terrain3d.ts",
     "src/utils/terrain3dAppearance.ts",
-    "src/utils/terrain3dCamera.ts"
+    "src/utils/terrain3dCamera.ts",
+    "src/utils/lastTrainDemo.ts",
+    "src/components/LastTrainModeControls.tsx"
   ],
-  "exclude": ["dist"],
+  "exclude": [
+    "dist"
+  ],
   "compilerOptions": {
     "noEmit": true
   }
