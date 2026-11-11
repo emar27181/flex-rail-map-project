@@ -41,5 +41,8 @@ test('到着駅が未指定の場合、終電モードを押せない', async ({
   await page.goto('/?experiment=last-train');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
   await expect(page.locator('input[type="time"]').first()).toHaveValue(/^\d{2}:\d{2}$/);
-  await expect(page.getByRole('button', { name: '終電モード' })).toBeDisabled();
+  const mode = page.getByRole('button', { name: '終電モード' });
+  await expect(mode).toBeEnabled();
+  await mode.click();
+  await expect(page.getByText('終電モードを使うには、まず到着駅を選択してください。')).toBeVisible();
 });
