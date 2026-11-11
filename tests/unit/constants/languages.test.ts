@@ -5,14 +5,13 @@
 import { describe, it, expect } from 'vitest';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { LANGUAGE_CODES, LANGUAGE_HTML_LANG, LANGUAGE_NATIVE_NAME, LANGUAGE_SHORT_NAME } from '../../../src/constants/languages';
+import { LANGUAGE_CODES, LANGUAGE_HTML_LANG, LANGUAGE_NATIVE_NAME } from '../../../src/constants/languages';
 
 describe('言語名の定義', () => {
-  it('4言語すべてに名前・短い表記・lang 属性がある', () => {
+  it('4言語すべてに名前・lang 属性がある', () => {
     expect(LANGUAGE_CODES).toEqual(['ja', 'en', 'zh', 'ko']);
     for (const c of LANGUAGE_CODES) {
       expect(LANGUAGE_NATIVE_NAME[c], c).toBeTruthy();
-      expect(LANGUAGE_SHORT_NAME[c], c).toBeTruthy();
       expect(LANGUAGE_HTML_LANG[c], c).toBeTruthy();
     }
   });

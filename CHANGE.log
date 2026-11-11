@@ -97,12 +97,13 @@
 ### improve: 言語の切り替えを、押すたびに次へ進む巡回ボタンから、一覧を開いて直接選ぶメニューにする
 - `src/components/ui/molecules/OptionMenu.tsx`（新規）, `src/components/LanguagePicker.tsx`（新規）, `src/components/NavigationBar.tsx`, `src/components/RailwayMap.tsx`
 - 以前は「次の言語の略称（En → 中 → 한 → 日）」を出す巡回ボタンで、押す前にどの言語になるか分からず、狙った言語へ行くまで何度も押す必要があった（ユーザー指示「切り替えだから直感的じゃない」）
-- 今は地球儀のアイコンと今の言語（日 / EN / 中 / 한）のボタンを押すと、4言語が「その言語自身の文字」で並び、押したものへ直接切り替わる。今の言語は塗りと ✓ で示す
+- 今は地球儀のアイコンのボタンを押すと、4言語が「その言語自身の文字」で並び、押したものへ直接切り替わる。今の言語は塗りと ✓ で示す
+- ボタンは**地球儀のアイコンだけ**（全世界共通の記号。「日」「EN」のような文字は添えない。ユーザー指示）。今の言語は読み上げ名「言語: 日本語」で伝える。静的ページの言語切り替えも同じ見た目にそろえた
 - 外を押す・Escape で閉じ、↑↓ Home End で動ける（WAI-ARIA の menu button）。選択肢の行は指で押せる 44px。地図の左下では上へ、右上（スマホ全画面）とヘッダーでは下へ開く
 - 読み上げ名は「言語: 日本語」のように今の言語を含める（以前は英語の「Switch language」固定）
 
 ### improve: 言語名を1か所（`constants/languages.ts`）にまとめる
-- `src/constants/languages.ts`（新規）, `src/components/LanguageSwitcher.astro`, `src/components/LanguageSuggestion.astro`, `src/seo/pageText.ts`
+- `src/constants/languages.ts`（新規。短い表記「日 / EN」は使わなくなったので持たない）, `src/components/ui/atoms/FloatingIconButton.tsx`（aria-haspopup など属性を渡せるように）, `src/components/LanguageSwitcher.astro`, `src/components/LanguageSuggestion.astro`, `src/seo/pageText.ts`
 - 「日本語 / English / 简体中文 / 한국어」の表が3か所に書き写されていた。静的ページの言語切り替えと地図の言語メニューは同じ名前・並び・アイコンになる
 
 ### test / docs

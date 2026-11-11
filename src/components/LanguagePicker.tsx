@@ -4,6 +4,7 @@
  * 以前は「次の言語の略称（En → 中 → 한 → 日）」を出す巡回ボタンで、押す前にどの言語になるか分からず、
  * 狙った言語へ行くまで何度も押す必要があった。今は、地球儀のアイコンと今の言語（日 / EN / 中 / 한）の
  * ボタンを押すと、4言語が「その言語自身の文字」で並び、押したものへ直接切り替わる。
+ * ボタンは地球儀のアイコンだけ（全世界共通の記号。文字は添えない。今の言語は読み上げ名「言語: 日本語」で伝える）。
  * 静的ページの言語切り替え（LanguageSwitcher.astro）と同じ並び・名前・アイコンで、サイト全体でそろう。
  */
 import React from 'react';
@@ -12,7 +13,7 @@ import OptionMenu, { type OptionMenuOption, type OptionMenuProps } from './ui/mo
 import { translateUI, type Language } from '../utils/translation';
 import { normalizeLanguage, toArticleLanguage } from '../utils/languagePersistence';
 import {
-  LANGUAGE_CODES, LANGUAGE_HTML_LANG, LANGUAGE_NATIVE_NAME, LANGUAGE_SHORT_NAME, type LangCode,
+  LANGUAGE_CODES, LANGUAGE_HTML_LANG, LANGUAGE_NATIVE_NAME, type LangCode,
 } from '../constants/languages';
 
 export interface LanguagePickerProps extends Pick<OptionMenuProps, 'appearance' | 'placement' | 'align'> {
@@ -37,7 +38,6 @@ const LanguagePicker: React.FC<LanguagePickerProps> = ({ theme, language, onLang
       triggerLabel={`${menuLabel}: ${LANGUAGE_NATIVE_NAME[current]}`}
       menuLabel={menuLabel}
       triggerIcon={<Globe />}
-      triggerText={LANGUAGE_SHORT_NAME[current]}
       options={options}
       value={current}
       onSelect={code => {

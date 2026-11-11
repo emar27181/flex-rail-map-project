@@ -18,17 +18,18 @@ const open = (language: Language) => {
 };
 
 describe('LanguagePicker', () => {
-  it('ボタンには「今の言語」を出す（次の言語ではない）', () => {
-    const cases: Array<[Language, string, string]> = [
-      ['japanese', '日', '言語: 日本語'],
-      ['english', 'EN', 'Language: English'],
-      ['chinese', '中', '语言: 简体中文'],
-      ['korean', '한', '언어: 한국어'],
+  it('ボタンは地球儀のアイコンだけ（文字を添えない）。今の言語は読み上げ名で伝える', () => {
+    const cases: Array<[Language, string]> = [
+      ['japanese', '言語: 日本語'],
+      ['english', 'Language: English'],
+      ['chinese', '语言: 简体中文'],
+      ['korean', '언어: 한국어'],
     ];
-    for (const [language, short, label] of cases) {
+    for (const [language, label] of cases) {
       const r = render(<LanguagePicker theme="light" language={language} onLanguageChange={() => {}} />);
       const button = r.getByRole('button', { name: label });
-      expect(button.textContent).toContain(short);
+      expect(button.textContent, label).toBe('');
+      expect(button.querySelector('svg'), label).not.toBeNull();
       r.unmount();
     }
   });

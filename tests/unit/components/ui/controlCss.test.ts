@@ -17,7 +17,7 @@ describe('静的ページの操作部品（.ctl）', () => {
     const layout = readFileSync(join(SRC, 'components/articles/ArticleLayout.astro'), 'utf8');
     const switcher = readFileSync(join(SRC, 'components/LanguageSwitcher.astro'), 'utf8');
     expect(layout).toMatch(/class="ctl ctl-icon theme-btn"/);
-    expect(switcher).toMatch(/<summary class="ctl"/);
+    expect(switcher).toMatch(/<summary class="ctl ctl-icon"/);
     const css = readFileSync(join(SRC, 'styles/article-layout.css'), 'utf8');
     expect(css).not.toMatch(/\.theme-btn\{[^}]*(width|height)/);
   });
