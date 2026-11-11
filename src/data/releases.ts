@@ -33,7 +33,7 @@ export const RELEASES: Release[] = [
     version: '1.34.0',
     releasedAt: null,
     kind: 'feat',
-    prs: [104, 105, 107, 108, 112, 113],
+    prs: [104, 105, 107, 108, 112, 113, 114],
     notes: {
       ja: [
         '設定のいちばん下にバージョンと更新履歴、更新の確認',
@@ -41,6 +41,7 @@ export const RELEASES: Release[] = [
         '路線の一覧を、全部ではなく少しずつ広げる「さらに表示」に',
         '凡例を開いた状態で始める',
         'スマホで2本指の操作（拡大・縮小・回転）が止まる・カクつくのを修正。少しひねっただけでは回らない',
+        '現在地の向き（進行方向の扇形）の表示をやめる',
         'アプリ化の企画書・仕様書（画面の変更なし）',
       ],
       en: [
@@ -49,6 +50,7 @@ export const RELEASES: Release[] = [
         'Line lists grow a little at a time with "Show more" instead of all at once',
         'The legend starts open',
         'Two-finger zoom and rotate on phones no longer freezes or stutters; a small twist no longer rotates the map',
+        'The current location no longer shows a heading cone',
         'App plan and specification (no visible changes)',
       ],
     },
