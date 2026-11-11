@@ -61,6 +61,11 @@ UIを触るときは値を直接書かず、下の定義元から取る。
 
 ## 禁止
 
+## 既存UIへの機能追加
+
+**新しいモードを追加するときは `docs/ui-mode-extension-guide.md` を必ず確認。** 駅・時刻など既存の入力を一元利用し、ON/OFFボタンだけを元のボタン列に追加して表示を切り替える。別画面、専用パネル、入力欄やスライダーの重複は禁止。ルールは `docs/design-system.md` の「規則一覧（CI で検査）」と `tests/unit/components/ui/noDuplicateModeUI.test.ts` で保護される。
+
+
 - `fontSize: '12px'` のような数値の直書き → `FS.caption`。**12px未満は作らない**
   （Apple HIG / Material / GOV.UK のいずれも12pxが下限）。
   例外は地図の駅ラベルとそのふりがなだけで、こちらは `MAP_LABEL` から取る
