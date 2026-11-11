@@ -51,6 +51,46 @@ describe('終電到達マップ（架空ダイヤPoC）', () => {
     expect(buildDestinationDemoNetwork('存在しない試験駅').lines).toEqual([]);
   });
 
+  it('相模大野で路線名が変わっても同一の直通デモ便なら乗換0分で新宿までつながる', () => {
+    const legs: DemoLeg[] = [
+      { from: '藤沢', to: '相模大野', lineId: 'odakyuEnoshimaLine',
+        tripId: 'through:odakyu-enoshima:reverse:1420', depart: 1420, arrive: 1440 },
+      { from: '相模大野', to: '新宿', lineId: 'odakyuLine',
+        tripId: 'through:odakyu-enoshima:reverse:1420', depart: 1440, arrive: 1480 },
+      // こちらは相模大野止まり。既存の直通便に接続できないため到達扱いにしない。
+      { from: '藤沢', to: '相模大野', lineId: 'odakyuEnoshimaLine',
+        tripId: 'line:odakyuEnoshimaLine:1428', depart: 1428, arrive: 1450 },
+    ];
+    const result = calculateDemoLastTrain(legs, '新宿', 4);
+    expect(result.latestDeparture.get('藤沢')).toBe(1420);
+    expect(result.feasibleLegs.some(leg => leg.tripId === 'line:odakyuEnoshimaLine:1428')).toBe(false);
+    expect(new Set(result.feasibleLegs.map(leg => leg.lineId))).toEqual(
+      new Set(['odakyuEnoshimaLine', 'odakyuLine']),
+    );
+  });
+
+  it('実際の直通運転定義を参照して小田急江ノ島線と小田原線の一体の架空便を生成する', () => {
+    const network = buildDestinationDemoNetwork('新宿');
+    const keys = network.lines.map(line => line.routeKey);
+    expect(keys).toContain('odakyuLine');
+    expect(keys).toContain('odakyuEnoshimaLine');
+    const trains = network.legs.filter(leg =>
+      leg.tripId?.startsWith('through:odakyu-enoshima:reverse:'));
+    expect(trains.some(leg => leg.from === '藤沢')).toBe(true);
+    const fullTrain = trains.filter(leg => leg.tripId === trains[0].tripId);
+    expect(new Set(fullTrain.map(leg => leg.lineId))).toEqual(
+      new Set(['odakyuEnoshimaLine', 'odakyuLine']),
+    );
+    const result = calculateDemoLastTrain(network.legs, '新宿');
+    expect(result.latestDeparture.get('藤沢')).toBeDefined();
+    expect(result.feasibleLegs.some(leg =>
+      leg.lineId === 'odakyuEnoshimaLine'
+      && leg.tripId?.startsWith('through:odakyu-enoshima:reverse:'))).toBe(true);
+    expect(result.feasibleLegs.some(leg =>
+      leg.lineId === 'odakyuLine'
+      && leg.tripId?.startsWith('through:odakyu-enoshima:reverse:'))).toBe(true);
+  });
+
   it('別路線への乗換で4分未満なら接続せず、同一路線は継続可能', () => {
     const legs: DemoLeg[] = [
       { from: 'A', to: 'B', lineId: 'red', depart: 1430, arrive: 1438 },
