@@ -492,7 +492,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           marginBottom: isExpanded ? '6px' : '0'
         }}
       >
-        <h3 style={{ margin: `0`, color: colors.text, fontSize: FS.title, fontWeight: 'bold' }}>{lastTrainDemoMode ? demoText.chooseHeading : translateUI('stationSelection', language)}</h3>
+        <h3 style={{ margin: `0`, color: colors.text, fontSize: FS.title, fontWeight: 'bold' }}>{translateUI('stationSelection', language)}</h3>
         {onToggleExpanded && (
           <DisclosureIndicator expanded={isExpanded} theme={theme} />
         )}
