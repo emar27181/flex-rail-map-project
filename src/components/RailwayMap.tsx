@@ -134,6 +134,7 @@ import { deviceClassOf } from '../constants/breakpoints';
 import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
 import DisclosureHeader from './ui/atoms/DisclosureHeader';
 import { isPinchGestureActive, patchSmoothTouchGestures } from '../utils/mapGestures';
+import { userLocationIconHtml } from '../utils/userLocationIcon';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -4024,25 +4025,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const userLocationIcon = useMemo(() => {
     if (!MapComponents?.DivIcon || !userLocation) return null;
     const { DivIcon } = MapComponents;
-    // 向き（userHeading）が取れているときだけ、進行方向を示す矢印を点の上に重ねる。
-    // 静止中は heading が null になる仕様のため、そのときは従来どおり点だけ表示する
-    const headingCone = userHeading !== null
-      ? `<div style="position:absolute;left:0;top:0;width:36px;height:36px;transform:rotate(${userHeading}deg);">
-           <div style="position:absolute;left:13px;top:16px;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:14px solid rgba(66,133,244,0.45);"></div>
-         </div>`
-      : '';
     return new DivIcon({
-      html: `<div style="position:relative;width:36px;height:36px;">
-        ${headingCone}
-        <div style="
-          position:absolute; left:12.5px; top:12.5px;
-          width: 11px; height: 11px;
-          background: #4285F4;
-          border: 2px solid white;
-          border-radius: 50%;
-          box-shadow: ${joinShadows('0 0 0 1px #4285F4', shadow('marker', theme))};
-        "></div>
-      </div>`,
+      // 向き（進行方向の扇形）は今はオフ（utils/userLocationIcon.ts の SHOW_USER_HEADING）
+      html: userLocationIconHtml({ heading: userHeading, dotShadow: joinShadows('0 0 0 1px #4285F4', shadow('marker', theme)) }),
       className: 'user-location-marker',
       iconSize: [36, 36],
       iconAnchor: [18, 18]
