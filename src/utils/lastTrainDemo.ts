@@ -4,7 +4,7 @@
  * 実際の終電案内や移動判断には絶対に使わないこと。
  */
 import { yamanote, type Station } from '../data/yamanote';
-import type { RouteKey } from '../data/routes';
+import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { chuo } from '../data/chuo';
 import { keihinTohoku } from '../data/keihin-tohoku';
 
@@ -51,6 +51,73 @@ export const DEMO_LINES: DemoLine[] = [
 export const DEMO_STATIONS: Station[] = Array.from(
   new Map(DEMO_LINES.flatMap(line => line.stations.map(st => [st.name, st] as const))).values(),
 ).sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+
+/**
+ * 任意の到着駅で試せるよう、既存の駅・路線情報から周辺のつながりを抽出。
+ * 30路線上限は計算量の上限であり、選んだ路線内の駅を途中で省略しない。
+ * 運行時刻は引き続き全て架空。実際の終電推定ではない。
+ */
+export const DEMO_MAX_CONNECTED_LINES = 30;
+
+export interface DestinationDemoNetwork {
+  lines: DemoLine[];
+  stations: Station[];
+  legs: DemoLeg[];
+  limited: boolean;
+}
+
+export function buildDestinationDemoNetwork(
+  destination: string,
+  maxLines: number = DEMO_MAX_CONNECTED_LINES,
+): DestinationDemoNetwork {
+  const allKeys = Object.keys(routes) as RouteKey[];
+  const direct = allKeys.filter(key => routes[key].some(st => st.name === destination));
+  if (direct.length === 0 || maxLines < 1) return { lines: [], stations: [], legs: [], limited: false };
+
+  const selected: RouteKey[] = [];
+  const seen = new Set<string>([destination]);
+  const directSet = new Set(direct);
+  const cap = Math.max(1, Math.floor(maxLines));
+
+  while (selected.length < cap) {
+    let candidate: RouteKey | undefined;
+    let best = -Infinity;
+    for (const key of allKeys) {
+      if (selected.includes(key)) continue;
+      const stations = routes[key];
+      if (stations.length < 2) continue;
+      const common = stations.filter(st => seen.has(st.name)).length;
+      if (common === 0) continue;
+      // 到着駅に直接乗り入れる路線を優先し、次に乗換駅の多い路線へ展開する。
+      const score = (directSet.has(key) ? 10000 : 0) + common * 100 - Math.min(stations.length, 200);
+      if (score > best) { best = score; candidate = key; }
+    }
+    if (!candidate) break;
+    selected.push(candidate);
+    for (const st of routes[candidate]) seen.add(st.name);
+  }
+
+  const lines: DemoLine[] = selected.map((routeKey, i) => {
+    const stations = routes[routeKey];
+    return {
+      id: routeKey,
+      routeKey,
+      label: routeNames[routeKey] ?? routeKey,
+      color: routeColors[routeKey],
+      stations,
+      circular: stations.length > 2 && stations[0].name === stations[stations.length - 1].name,
+      interval: 12 + (i % 5) * 3,
+      lastOrigin: 24 * 60 + 4 - (i % 6) * 3,
+    };
+  });
+  const stations: Station[] = [...new Map(lines.flatMap(line =>
+    line.stations.map(st => [st.name, st] as const),
+  )).values()].sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+  const limited = selected.length >= cap && allKeys.some(key =>
+    !selected.includes(key) && routes[key].some(st => seen.has(st.name))
+  );
+  return { lines, stations, legs: buildDemoLegs(lines), limited };
+}
 
 export function formatDemoClock(minutes: number): string {
   const hour = Math.floor(minutes / 60);
