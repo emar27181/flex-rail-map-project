@@ -12,7 +12,7 @@ import { JAPAN_OUTLINE } from '../data/japanOutline';
 import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
 import LastTrainModeControls from './LastTrainModeControls';
-import { DEMO_LINES, DEMO_STATIONS, DEMO_START, DEMO_END, DEMO_STEP, buildDemoLegs, calculateDemoLastTrain, availableDemoStations, demoEdgeKey, formatDemoClock, parseDemoClock, toInputClock, getCurrentDemoClock } from '../utils/lastTrainDemo';
+import { DEMO_END, DEMO_STEP, buildDestinationDemoNetwork, calculateDemoLastTrain, availableDemoStations, demoEdgeKey, formatDemoClock, parseDemoClock, toInputClock, getCurrentDemoClock } from '../utils/lastTrainDemo';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
@@ -183,10 +183,6 @@ const MAP_CORNER_ICON_SIZE = FLOATING_ICON_GLYPH_SIZE;
  */
 const MOBILE_LEGEND_RIGHT_RESERVED = MAP_CORNER_BUTTON_PX + parseFloat(L.sp.xs);
 
-const LAST_TRAIN_TRIAL_LEGS = buildDemoLegs();
-const LAST_TRAIN_STATION_OWNER = new Map(DEMO_LINES.flatMap(line => line.stations.map(st => [st.name, line.routeKey] as const)));
-const LAST_TRAIN_SUPPORTED_STATIONS = new Set(DEMO_STATIONS.map(st => st.name));
-
 const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguageChange, onFullscreenChange }) => {
   // 試作URLのみ。既存の画面・操作部品をそのまま使う。通常のアクセスは完全に従来どおり。
   const [lastTrainDemo] = useState(() => typeof window !== 'undefined'
@@ -277,14 +273,21 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [arrival, setArrival] = useState<Station | null>(null);
   // 試作も通常の駅/時刻入力を利用。試作モードはボタンを押すまで有効にしない。
   const [lastTrainModeEnabled, setLastTrainModeEnabled] = useState(false);
-  const lastTrainDestinationSupported = !!arrival && LAST_TRAIN_SUPPORTED_STATIONS.has(arrival.name);
+  // 選択した到着駅を通る路線を起点に、最大30路線（駅は省略しない）を探索。
+  // 3路線固定だった旧試作とは異なり、路線図に存在する任意の到着駅を試せる。
+  const demoNetwork = useMemo(() => lastTrainDemo && arrival
+    ? buildDestinationDemoNetwork(arrival.name) : null,
+    [lastTrainDemo, arrival?.name]);
+  const lastTrainDestinationSupported = !!demoNetwork && demoNetwork.lines.length > 0;
   const lastTrainFilterActive = lastTrainDemo && lastTrainModeEnabled && lastTrainDestinationSupported;
   const [demoMinute, setDemoMinute] = useState(getCurrentDemoClock);
   const [demoPlaying, setDemoPlaying] = useState(false);
   const [demoInspectedStation, setDemoInspectedStation] = useState('新宿');
-  const demoReachability = useMemo(() => lastTrainFilterActive && arrival
-    ? calculateDemoLastTrain(LAST_TRAIN_TRIAL_LEGS, arrival.name) : null,
-    [lastTrainFilterActive, arrival?.name]);
+  const demoStationOwner = useMemo(() => new Map(demoNetwork?.lines.flatMap(line =>
+    line.stations.map(st => [st.name, line.routeKey] as const)) ?? []), [demoNetwork]);
+  const demoReachability = useMemo(() => lastTrainFilterActive && arrival && demoNetwork
+    ? calculateDemoLastTrain(demoNetwork.legs, arrival.name) : null,
+    [lastTrainFilterActive, demoNetwork, arrival?.name]);
   const demoAvailableStations = useMemo(() => new Set(
     demoReachability && arrival ? availableDemoStations(demoReachability.latestDeparture, arrival.name, demoMinute) : []
   ), [demoReachability, arrival?.name, demoMinute]);
@@ -4992,7 +4995,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (enabled && lastTrainDestinationSupported) {
       setMapViewMode('realistic');
       mapRef.current?.fitBounds(
-        DEMO_STATIONS.map(st => [st.lat, st.lng] as [number, number]),
+        (demoNetwork?.stations ?? []).map(st => [st.lat, st.lng] as [number, number]),
         { padding: [24, 24] },
       );
     }
@@ -5003,7 +5006,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       playing={demoPlaying} onPlayingChange={setDemoPlaying}
       inspectedStation={demoInspectedStation} onInspectedStationChange={setDemoInspectedStation}
       latestDeparture={demoReachability?.latestDeparture ?? new Map<string, number>()}
-      availableCount={demoAvailableStations.size} />
+      availableCount={demoAvailableStations.size}
+      stations={demoNetwork?.stations ?? []}
+      limited={demoNetwork?.limited ?? false} />
   ) : null;
   /** 立体表示の説明の箱の下端。スマホ全画面では左下のボタン群（MobileBottomPanel）の上に置く */
   /** 地図の下端に並ぶ浮かぶ部品（スマホ全画面の「表示切替」・右下の凡例「N路線」）の下端からの距離 */
@@ -5612,7 +5617,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               }
 
               {/* 終電デモ専用の表示切替。基盤は既存Leaflet地図/共通ルート色/駅マーカーを再利用。 */}
-              {lastTrainFilterActive && mapViewMode === 'realistic' && DEMO_LINES.map(line => {
+              {lastTrainFilterActive && mapViewMode === 'realistic' && demoNetwork?.lines.map(line => {
                 const rk = line.routeKey;
                 const base = line.circular ? [...line.stations, line.stations[0]] : line.stations;
                 const color = adjustRouteColorForTheme(routeColors[rk], theme);
@@ -5630,7 +5635,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           interactive={false} />
                       ) : null;
                     })}
-                    {line.stations.filter(st => LAST_TRAIN_STATION_OWNER.get(st.name) === rk).map(st =>
+                    {line.stations.filter(st => demoStationOwner.get(st.name) === rk).map(st =>
                       renderStationMarker(st, rk, 'last-train-' + st.name, false))}
                   </React.Fragment>
                 );
