@@ -3,7 +3,7 @@ import type { Language } from './translation';
 /** 試作画面の全UI文言。駅名は既存の translateStation を使用する。 */
 export interface LastTrainCopy {
   back: string; trial: string; title: string; intro: string;
-  toggleMode: string; unsupportedDestination: string; nowButton: string; lineLimitNotice: string;
+  toggleMode: string; unsupportedDestination: string; nowButton: string; lineLimitNotice: string; pleaseSelectDestination: string;
   warnTitle: string; warnBody: string;
   chooseHeading: string; destinationPrompt: string; scope: string;
   timeHeading: string; virtualTime: string; timeAria: string;
@@ -21,6 +21,7 @@ export interface LastTrainCopy {
 export const LAST_TRAIN_I18N: Record<Language, LastTrainCopy> = {
   japanese: {
     back: '路線図に戻る', trial: 'EXPERIMENT / 非公開試作',
+    pleaseSelectDestination: '終電モードを使うには、まず到着駅を選択してください。',
     lineLimitNotice: '試作は接続する最大30路線を計算対象にしています。対象路線内の駅は省略しません。',
     nowButton: '現在時刻に戻す', toggleMode: '終電モード', unsupportedDestination: '選択した到着駅は試作ダイヤの対象外です。対象路線の駅を選択してください。',
     title: '終電で帰れる駅が、時間とともに消えていく。',
@@ -46,6 +47,7 @@ export const LAST_TRAIN_I18N: Record<Language, LastTrainCopy> = {
   },
   english: {
     back: 'Back to map', trial: 'EXPERIMENT / PRIVATE PREVIEW',
+    pleaseSelectDestination: 'Choose an arrival station to apply last-train mode.',
     lineLimitNotice: 'Demo limited to 30 connected lines. No stations within the selected lines are omitted.',
     nowButton: 'Back to current time', toggleMode: 'Last train mode', unsupportedDestination: 'This destination is outside the sample timetable. Choose a station on the supported lines.',
     title: 'Watch the last-train network disappear over time.',
@@ -71,6 +73,7 @@ export const LAST_TRAIN_I18N: Record<Language, LastTrainCopy> = {
   },
   chinese: {
     back: '返回线路图', trial: 'EXPERIMENT / 内部试用',
+    pleaseSelectDestination: '请先选择目的地，才能应用末班车模式。',
     lineLimitNotice: '本次模拟最多涵盖30条相连线路，所选线路的所有车站均予保留。',
     nowButton: '返回当前时间', toggleMode: '末班车模式', unsupportedDestination: '该目的地不在模拟时刻表的支持范围内。请重新选择车站。',
     title: '随着夜色加深，末班车可达线路逐渐消失。',
@@ -96,6 +99,7 @@ export const LAST_TRAIN_I18N: Record<Language, LastTrainCopy> = {
   },
   korean: {
     back: '노선도로 돌아가기', trial: 'EXPERIMENT / 비공개 테스트',
+    pleaseSelectDestination: '막차 모드를 사용하려면 먼저 도착역을 선택하세요.',
     lineLimitNotice: '시험에서는 연결된 노선 최대 30개를 계산하며, 선택한 노선 내 역은 생략하지 않습니다.',
     nowButton: '현재 시각으로', toggleMode: '막차 모드', unsupportedDestination: '이 목적지는 시험 운행표에 없습니다. 지원되는 역을 선택하세요.',
     title: '시간이 지나면 막차로 갈 수 있는 역이 사라집니다.',
