@@ -33,7 +33,7 @@ export const RELEASES: Release[] = [
     version: '1.34.0',
     releasedAt: null,
     kind: 'feat',
-    prs: [104, 105, 107, 108, 112, 113, 114],
+    prs: [104, 105, 107, 108, 112, 113, 114, 115],
     notes: {
       ja: [
         '設定のいちばん下にバージョンと更新履歴、更新の確認',
@@ -42,6 +42,7 @@ export const RELEASES: Release[] = [
         '凡例を開いた状態で始める',
         'スマホで2本指の操作（拡大・縮小・回転）が止まる・カクつくのを修正。少しひねっただけでは回らない',
         '現在地の向き（進行方向の扇形）の表示をやめる',
+        '言語の切り替えを、押すたびに次へ進むボタンから、4言語を並べた一覧を開いて直接選ぶメニューに',
         'アプリ化の企画書・仕様書（画面の変更なし）',
       ],
       en: [
@@ -51,6 +52,7 @@ export const RELEASES: Release[] = [
         'The legend starts open',
         'Two-finger zoom and rotate on phones no longer freezes or stutters; a small twist no longer rotates the map',
         'The current location no longer shows a heading cone',
+        'Language switching is now a menu listing all four languages to pick from directly, instead of a button that cycles to the next one',
         'App plan and specification (no visible changes)',
       ],
     },
