@@ -807,7 +807,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   variant="primary"
                   size="sm"
                   pressed={lastTrainModeEnabled}
-                  disabled={!arrival || !lastTrainDestinationSupported}
                   onClick={() => onLastTrainModeChange(!lastTrainModeEnabled)}
                   icon={<TrainFront />}
                 >
@@ -1060,6 +1059,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 </div>
               </div>
             </div>
+          )}
+          {lastTrainDemoMode && lastTrainModeEnabled && !arrival && (
+            <p role="status" style={{ fontSize: FS.caption, color: colors.textSecondary, marginTop: L.sp.sm }}>{demoText.pleaseSelectDestination}</p>
           )}
           {lastTrainDemoMode && arrival && !lastTrainDestinationSupported && (
             <p style={{ fontSize: FS.caption, color: colors.textSecondary, marginTop: L.sp.sm }}>{demoText.unsupportedDestination}</p>
