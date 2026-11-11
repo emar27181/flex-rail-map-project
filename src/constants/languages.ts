@@ -24,14 +24,6 @@ export const LANGUAGE_NATIVE_NAME: Record<LangCode, string> = {
   ko: '한국어',
 };
 
-/** ボタンに出す短い表記（狭いヘッダーでも折り返さない） */
-export const LANGUAGE_SHORT_NAME: Record<LangCode, string> = {
-  ja: '日',
-  en: 'EN',
-  zh: '中',
-  ko: '한',
-};
-
 /** HTML の lang 属性（読み上げ・フォントの選択用。中国語は簡体字） */
 export const LANGUAGE_HTML_LANG: Record<LangCode, string> = {
   ja: 'ja',

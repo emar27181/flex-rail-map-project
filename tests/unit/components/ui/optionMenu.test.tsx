@@ -21,7 +21,6 @@ const setup = (props: Partial<React.ComponentProps<typeof OptionMenu>> = {}) => 
       triggerLabel="言語: エー"
       menuLabel="言語"
       triggerIcon={<svg />}
-      triggerText="A"
       options={options}
       value="a"
       onSelect={onSelect}
@@ -33,9 +32,10 @@ const setup = (props: Partial<React.ComponentProps<typeof OptionMenu>> = {}) => 
 };
 
 describe('OptionMenu', () => {
-  it('閉じているときは今の選択だけをボタンに出し、一覧は出さない', () => {
+  it('閉じているときはアイコンだけのボタン（文字を添えない）で、一覧は出さない', () => {
     const { trigger, queryByRole } = setup();
-    expect(trigger().textContent).toContain('A');
+    expect(trigger().textContent).toBe('');
+    expect(trigger().querySelector('svg')).not.toBeNull();
     expect(trigger().getAttribute('aria-haspopup')).toBe('menu');
     expect(trigger().getAttribute('aria-expanded')).toBe('false');
     expect(queryByRole('menu')).toBeNull();
@@ -46,6 +46,8 @@ describe('OptionMenu', () => {
     fireEvent.click(trigger());
     expect(trigger().getAttribute('aria-expanded')).toBe('true');
     expect(getByRole('menu', { name: '言語' })).toBeTruthy();
+    // ボタンと一覧が aria-controls でつながる
+    expect(trigger().getAttribute('aria-controls')).toBe(getByRole('menu').id);
     const items = getAllByRole('menuitemradio');
     expect(items.map(i => i.textContent)).toEqual(['エー', 'Bee', 'シー']);
     expect(items.map(i => i.getAttribute('aria-checked'))).toEqual(['true', 'false', 'false']);
@@ -120,5 +122,22 @@ describe('OptionMenu', () => {
     expect(style.bottom).toContain('100%');
     expect(style.left).toBe('0px');
     expect(style.top).toBe('');
+  });
+});
+
+describe('OptionMenu（地図の上に浮かぶ見た目）', () => {
+  it('floating でも同じ属性・動きで、アイコンだけの丸いボタンになる', () => {
+    const { getByRole, queryByRole } = render(
+      <OptionMenu theme="dark" appearance="floating" triggerLabel="言語: エー" menuLabel="言語" triggerIcon={<svg />}
+        options={options} value="a" onSelect={() => {}} />,
+    );
+    const trigger = getByRole('button', { name: '言語: エー' });
+    expect(trigger.textContent).toBe('');
+    expect(trigger.getAttribute('aria-haspopup')).toBe('menu');
+    fireEvent.click(trigger);
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(trigger.getAttribute('aria-controls')).toBe(getByRole('menu').id);
+    fireEvent.keyDown(getByRole('menu'), { key: 'Escape' });
+    expect(queryByRole('menu')).toBeNull();
   });
 });

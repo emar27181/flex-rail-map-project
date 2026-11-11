@@ -5,7 +5,8 @@
  * 巡回ボタンにすると、押す前に行き先が分からず、狙った選択肢に行くまで何度も押すことになる。
  * ここでは一覧を開き、今の選択に印を付け、押したものへ直接切り替える（ユーザーが「巡回は直感的でない」と指摘, 2026-11）。
  *
- * - ボタンには今の選択を出す（`triggerText`）。開いている間は塗る
+ * - ボタンはアイコンだけ（言語なら地球儀。文字は添えない）。今の選択は読み上げ名（`triggerLabel`）で伝え、
+ *   開いている間は塗る
  * - 一覧の外を押す・Escape・Tab で閉じる。閉じたらボタンへ焦点を戻す
  * - 開くと今の選択に焦点が移り、↑↓ Home End で動ける（WAI-ARIA の menu button）
  * - 選択肢の行は指で押せる大きさ（md = 44px）。今の選択は塗りと ✓ で示す（色だけにしない）
@@ -16,7 +17,8 @@ import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Check } from 'lucide-react';
 import Button from '../atoms/Button';
-import FloatingButton from '../atoms/FloatingButton';
+import FloatingIconButton from '../atoms/FloatingIconButton';
+import IconButton from '../atoms/IconButton';
 import { L } from '../../legend/legendStyles';
 import { floatingSurfaceStyle } from '../atoms/floatingSurface';
 import { CONTROL_SIZE } from '../atoms/controlSize';
@@ -35,13 +37,11 @@ export interface OptionMenuProps {
   triggerLabel: string;
   /** 一覧の読み上げ名 */
   menuLabel: string;
-  /** ボタンの文字の前のアイコン（lucide-react） */
+  /** ボタンのアイコン（lucide-react） */
   triggerIcon: ReactNode;
-  /** ボタンに出す文字（今の選択の短い表記） */
-  triggerText: string;
   /**
-   * ボタンの見た目。floating = 地図の上に浮かぶ（36px・すりガラス）。
-   * plain = ヘッダーなど（補助操作の小さいボタン）
+   * ボタンの見た目。floating = 地図の上に浮かぶ丸いアイコンボタン（36px・すりガラス）。
+   * plain = ヘッダーなど（補助操作の小さいアイコンボタン）
    */
   appearance?: 'floating' | 'plain';
   options: OptionMenuOption[];
@@ -60,7 +60,7 @@ const MENU_MIN_WIDTH = '160px';
 const MENU_LAYER_Z = 1;
 
 const OptionMenu: React.FC<OptionMenuProps> = ({
-  theme, triggerLabel, menuLabel, triggerIcon, triggerText, appearance = 'plain',
+  theme, triggerLabel, menuLabel, triggerIcon, appearance = 'plain',
   options, value, onSelect, placement = 'below', align = 'end',
 }) => {
   const [open, setOpen] = useState(false);
@@ -113,12 +113,8 @@ const OptionMenu: React.FC<OptionMenuProps> = ({
   };
 
   const triggerProps = {
-    theme,
-    'aria-label': triggerLabel,
-    title: triggerLabel,
+    label: triggerLabel,
     'aria-haspopup': 'menu' as const,
-    'aria-expanded': open,
-    'aria-controls': open ? menuId : undefined,
     icon: triggerIcon,
     onClick: () => setOpen(v => !v),
     onKeyDown: (e: React.KeyboardEvent) => {
@@ -144,8 +140,8 @@ const OptionMenu: React.FC<OptionMenuProps> = ({
   return (
     <div ref={rootRef} style={{ position: 'relative', display: 'inline-flex' }}>
       {appearance === 'floating'
-        ? <FloatingButton {...triggerProps} pressed={open}>{triggerText}</FloatingButton>
-        : <Button {...triggerProps} variant="ghost" size="sm">{triggerText}</Button>}
+        ? <FloatingIconButton {...triggerProps} theme={theme} pressed={open} controls={open ? menuId : undefined} />
+        : <IconButton {...triggerProps} theme={theme} variant="ghost" size="sm" aria-expanded={open} aria-controls={open ? menuId : undefined} />}
       {open && (
         <div ref={menuRef} id={menuId} role="menu" aria-label={menuLabel} style={menuStyle} onKeyDown={onMenuKeyDown}>
           {options.map(o => {
