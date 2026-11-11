@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   DEMO_END, DEMO_START, DEMO_LINES, DEMO_STATIONS,
-  availableDemoStations, buildDemoLegs, calculateDemoLastTrain, demoEdgeKey,
+  availableDemoStations, buildDemoLegs, buildDestinationDemoNetwork, calculateDemoLastTrain, demoEdgeKey,
   formatDemoClock, parseDemoClock, toInputClock, getCurrentDemoClock, type DemoLeg,
 } from '../../../src/utils/lastTrainDemo';
 
@@ -31,6 +31,24 @@ describe('終電到達マップ（架空ダイヤPoC）', () => {
     expect(legs.every(leg => leg.arrive > leg.depart)).toBe(true);
     expect(DEMO_LINES.map(line => line.id)).toEqual(['yamanote', 'chuo', 'keihin']);
     expect(demoEdgeKey('yamanote', '東京', '神田')).toBe('yamanote:東京→神田');
+  });
+
+  it('路線図にある任意の到着駅から接続路線を試験計算し、収録路線の全駅を省略しない', () => {
+    const station = '藤沢';
+    const result = buildDestinationDemoNetwork(station);
+    expect(result.lines.length).toBeGreaterThan(0);
+    expect(result.lines.length).toBeLessThanOrEqual(30);
+    expect(result.lines.some(line => line.stations.some(st => st.name === station))).toBe(true);
+    const allStations = new Set(result.lines.flatMap(line => line.stations.map(st => st.name)));
+    expect(result.stations.length).toBe(allStations.size);
+    for (const name of allStations) {
+      expect(result.stations.some(st => st.name === name)).toBe(true);
+    }
+    expect(result.legs.length).toBeGreaterThan(0);
+    const smaller = buildDestinationDemoNetwork(station, 3);
+    expect(smaller.lines.length).toBeLessThanOrEqual(3);
+    expect(smaller.stations.length).toBe(new Set(smaller.lines.flatMap(line => line.stations.map(st => st.name))).size);
+    expect(buildDestinationDemoNetwork('存在しない試験駅').lines).toEqual([]);
   });
 
   it('別路線への乗換で4分未満なら接続せず、同一路線は継続可能', () => {
