@@ -12,7 +12,7 @@ describe('終電マップ試作は元の地図UI上で表示する', () => {
     expect(map).toContain('<MapContainer');
     expect(map).toContain('lastTrainFilterActive && mapViewMode');
     expect(map).toContain('renderStationMarker(st, rk');
-    expect(map).toContain('DEMO_LINES.map(line =>');
+    expect(map).toContain('demoNetwork?.lines.map(line =>');
     expect(existsSync(join(root, 'src/components/LastTrainDemo.tsx'))).toBe(false);
     expect(existsSync(join(root, 'src/styles/last-train-demo.css'))).toBe(false);
   });
@@ -21,6 +21,8 @@ describe('終電マップ試作は元の地図UI上で表示する', () => {
     const map = source('src/components/RailwayMap.tsx');
     const controls = source('src/components/LastTrainModeControls.tsx');
     expect(station).toContain('lastTrainDemoMode');
+    expect(station).toContain('onLastTrainModeChange');
+    expect(station).not.toContain('disabled={!arrival || !lastTrainDestinationSupported}');
     expect(station).toContain('{extraContent}');
     expect(map.match(/extraContent={lastTrainTrialPanel}/g)?.length).toBe(3);
     expect(controls).toContain("import Button from './ui/atoms/Button'");
