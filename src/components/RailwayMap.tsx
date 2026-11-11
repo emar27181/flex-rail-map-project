@@ -295,13 +295,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     (demoReachability?.feasibleLegs ?? []).filter(leg => leg.depart >= demoMinute)
       .map(leg => demoEdgeKey(leg.lineId, leg.from, leg.to))
   ), [demoReachability, demoMinute]);
-  useEffect(() => {
-    if (lastTrainModeEnabled && !lastTrainDestinationSupported) {
-      setLastTrainModeEnabled(false);
-      setDemoPlaying(false);
-    }
-  }, [lastTrainModeEnabled, lastTrainDestinationSupported]);
-
   /** 経由駅（順序どおりに経由する） */
   const [waypoints, setWaypoints] = useState<Station[]>([]);
   const handleAddWaypoint = useCallback((station: Station) => {
@@ -4990,7 +4983,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const showMobileRouteCandidatesButton = !lastTrainFilterActive && showRouteRecommendationsPanel && routeRecommendations.length > 0;
   // 通常の路線図と同じ地図を使う。フィルタON時は試験対象の全駅を画面に収める。
   const handleLastTrainModeChange = (enabled: boolean) => {
-    setLastTrainModeEnabled(enabled && lastTrainDestinationSupported);
+    setLastTrainModeEnabled(enabled);
     setDemoPlaying(false);
     if (enabled && lastTrainDestinationSupported) {
       setMapViewMode('realistic');
