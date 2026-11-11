@@ -31,6 +31,9 @@ PR ごとに `npm run test:design` で実行する（手元でも同じコマン
 | サービス名・アプリのアイコンは1か所から取る | `SITE_NAME`（`config/seo.ts`）/ `APP_ICON_PATH` | `tests/unit/config/siteName.test.ts`, `tests/unit/config/appIcon.test.ts` |
 | 言語など少数の選択肢は、押すたびに次へ進む巡回ボタンにせず、一覧を開いて直接選ぶ。言語名は「その言語自身の文字」で1か所だけに書く（旗は使わない） | `OptionMenu` / `LanguagePicker` / `LANGUAGE_NATIVE_NAME`（`constants/languages.ts`）。ボタンは地球儀のアイコンだけ（「日」「EN」のような文字を添えない） | `tests/unit/constants/languages.test.ts`, `tests/unit/components/LanguagePicker.test.tsx` |
 | 部品（atoms / molecules）を足したら「どの部品を使うか」に1行足す。この表の検査はすべて CI で動く | この文書 | `tests/unit/designRules.test.ts` |
+| 既存画面にモード・フィルタを足すとき、同じ駅・時刻の入力欄、専用パネル、独立地図、スライダーを重複して作らず、既存UIのボタンON/OFFで表示だけ変える | `StationSelector` / `RailwayMap` / `timetableBaseTime` / `docs/ui-mode-extension-guide.md` | `tests/unit/components/ui/noDuplicateModeUI.test.ts` |
+
+**既存機能にモードを追加する前に:** `docs/ui-mode-extension-guide.md` を読むこと。既存の駅入力・時刻欄をそのまま使い、専用パネルや独立画面は増やさない。例外は既存UIで表現できないことをPRで説明する。
 
 **画面に描けているか**（真っ黒・固まる・重なり・ボタンの位置）は、この表のユニットテスト（jsdom）では見られない。
 実際のブラウザで確かめる描画テスト（`npm run test:render`, CI の `render` ジョブ）の一覧と足すときの決まりは `docs/render-tests.md`。
