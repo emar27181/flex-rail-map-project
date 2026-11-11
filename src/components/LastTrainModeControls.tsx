@@ -9,7 +9,7 @@ import { L } from './legend/legendStyles';
 import Button from './ui/atoms/Button';
 import Select from './ui/atoms/Select';
 import Slider from './ui/atoms/Slider';
-import { DEMO_START, DEMO_END, DEMO_STATIONS, formatDemoClock, getCurrentDemoClock } from '../utils/lastTrainDemo';
+import { DEMO_START, DEMO_END, formatDemoClock, getCurrentDemoClock } from '../utils/lastTrainDemo';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
 
 export interface LastTrainModeControlsProps {
@@ -23,6 +23,8 @@ export interface LastTrainModeControlsProps {
   onInspectedStationChange: (name: string) => void;
   latestDeparture: ReadonlyMap<string, number>;
   availableCount: number;
+  stations: Station[];
+  limited: boolean;
 }
 
 /**
@@ -32,7 +34,7 @@ export interface LastTrainModeControlsProps {
  */
 export default function LastTrainModeControls({
   language, destination, minute, onMinuteChange, playing, onPlayingChange,
-  inspectedStation, onInspectedStationChange, latestDeparture, availableCount,
+  inspectedStation, onInspectedStationChange, latestDeparture, availableCount, stations, limited,
 }: LastTrainModeControlsProps) {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
@@ -40,7 +42,7 @@ export default function LastTrainModeControls({
   const latest = latestDeparture.get(inspectedStation);
   const remaining = latest === undefined ? null : latest - minute;
   const isDestination = inspectedStation === destination?.name;
-  const total = DEMO_STATIONS.length - (destination && DEMO_STATIONS.some(s => s.name === destination.name) ? 1 : 0);
+  const total = stations.length - (destination && stations.some(s => s.name === destination.name) ? 1 : 0);
   const sectionStyle: React.CSSProperties = {
     borderTop: '1px solid ' + colors.border,
     paddingTop: L.sp.lg, marginTop: L.sp.lg, display: 'grid', gap: L.sp.sm,
@@ -87,11 +89,12 @@ export default function LastTrainModeControls({
       </div>
       <div style={{ ...labelStyle }}>
         {t.reachableSummary} : <strong style={{ color: colors.text }}>{availableCount} / {total} {t.stationUnit}</strong>
+        {limited && <div style={{ marginTop: L.sp.xs }}>{t.lineLimitNotice}</div>}
       </div>
       <label htmlFor="lt-inspected-station" style={labelStyle}>{t.inspectLabel}</label>
       <Select id="lt-inspected-station" theme={theme} size="sm" fullWidth value={inspectedStation}
         onChange={e => onInspectedStationChange(e.target.value)}>
-        {DEMO_STATIONS.map(st =>
+        {stations.map(st =>
           <option key={st.name} value={st.name}>{translateStation(st.name, language)}</option>)}
       </Select>
       <div style={{
