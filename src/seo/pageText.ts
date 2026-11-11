@@ -9,6 +9,7 @@
  * stationTranslationsCJK.ts、観光地名は touristSpots.ts にある表記だけを使う。
  */
 import type { SeoLang } from './pageModel';
+import { LANGUAGE_NATIVE_NAME } from '../constants/languages';
 import type { TouristSpot } from '../data/touristSpots';
 import { translateStatParamLabel, translateStatUnit, type Language } from '../utils/translation';
 import { SITE_NAME } from '../config/seo';
@@ -34,7 +35,7 @@ const fmt = (n: number, lang: SeoLang) => n.toLocaleString(LOCALE[lang]);
 const andList = (xs: string[]) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
 
 /** 言語の切り替えリンクに出す名前（その言語自身での表記） */
-export const LANG_LABEL: Record<SeoLang, string> = { ja: '日本語', en: 'English', zh: '简体中文', ko: '한국어' };
+export const LANG_LABEL: Record<SeoLang, string> = LANGUAGE_NATIVE_NAME;
 
 /** 地図アプリの翻訳関数（translation.ts）の言語名 */
 export const APP_LANGUAGE: Record<SeoLang, Language> = { ja: 'japanese', en: 'english', zh: 'chinese', ko: 'korean' };

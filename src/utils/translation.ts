@@ -1540,6 +1540,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "メニューを開く",
     english: "Open menu"
   },
+  languageMenuLabel: {
+    japanese: "言語",
+    english: "Language"
+  },
   appTitle: {
     japanese: SITE_NAME,
     english: SITE_NAME
@@ -2333,6 +2337,7 @@ export const uiChinese: Record<string, string> = {
   aboutSiteTitle: "关于本站",
   menuTitle: "菜单",
   openMenuLabel: "打开菜单",
+  languageMenuLabel: "语言",
   appTitle: "弹性路线图",
   appTagline: "只显示所需路线的简洁路线图",
   aboutLink: "关于本站",
@@ -2714,6 +2719,7 @@ export const uiKorean: Record<string, string> = {
   aboutSiteTitle: "사이트 소개",
   menuTitle: "메뉴",
   openMenuLabel: "메뉴 열기",
+  languageMenuLabel: "언어",
   appTitle: "플렉스 노선도",
   appTagline: "필요한 노선만 표시하는 심플한 노선도",
   aboutLink: "사이트 소개",

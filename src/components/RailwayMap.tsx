@@ -135,6 +135,7 @@ import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
 import DisclosureHeader from './ui/atoms/DisclosureHeader';
 import { isPinchGestureActive, patchSmoothTouchGestures } from '../utils/mapGestures';
 import { userLocationIconHtml } from '../utils/userLocationIcon';
+import LanguagePicker from './LanguagePicker';
 
 // デバッグ用のwindow拡張
 declare global {
@@ -6701,17 +6702,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               />
             </div>
 
-            {onLanguageChange && !(isMobile && !isFullscreen) && <div style={isFullscreen && isMobile ? { gridColumn: 2, gridRow: 1 } : undefined}>{renderCornerButton(
-              // 文字をアイコン代わりに置くので、大きさは規格から取る
-              <span style={{ fontSize: FS.body, fontWeight: 'bold', fontFamily: 'monospace' }}>
-                {(() => { const langs: Language[] = ['japanese', 'english', 'chinese', 'korean']; const next = langs[(langs.indexOf(language) + 1) % langs.length]; return { japanese: '日', english: 'En', chinese: '中', korean: '한' }[next]; })()}
-              </span>,
-              'Switch language',
-              () => {
-                const langs: Language[] = ['japanese', 'english', 'chinese', 'korean'];
-                onLanguageChange(langs[(langs.indexOf(language) + 1) % langs.length]);
-              },
-            )}</div>}
+            {/* 言語メニュー。押すと4言語が並び、選んだ言語へ直接切り替わる（以前は次の言語の略称を出す巡回ボタンで、
+                押す前にどの言語になるか分からなかった）。左下に置くとき（PC・全画面）は上へ、右上（スマホ全画面）は下へ開く */}
+            {onLanguageChange && !(isMobile && !isFullscreen) && (
+              <div style={isFullscreen && isMobile ? { gridColumn: 2, gridRow: 1 } : undefined}>
+                <LanguagePicker
+                  theme={theme}
+                  language={language}
+                  onLanguageChange={onLanguageChange}
+                  appearance="floating"
+                  placement={isFullscreen && isMobile ? 'below' : 'above'}
+                  align={isFullscreen && isMobile ? 'end' : 'start'}
+                />
+              </div>
+            )}
 
             {/* 立体表示の設定を開くボタンの置き場所（スマホ全画面は「表示切替」の右に置く） */}
             {mapViewMode === 'terrain3d' && !(isFullscreen && isMobile) && (

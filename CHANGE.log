@@ -92,6 +92,23 @@
   向きの取得・計算は残し、戻すときは `SHOW_USER_HEADING` を true にするだけにした
 - `tests/unit/utils/userLocationIcon.test.ts`
 
+## [2026-11-11] セッション（言語メニュー）
+
+### improve: 言語の切り替えを、押すたびに次へ進む巡回ボタンから、一覧を開いて直接選ぶメニューにする
+- `src/components/ui/molecules/OptionMenu.tsx`（新規）, `src/components/LanguagePicker.tsx`（新規）, `src/components/NavigationBar.tsx`, `src/components/RailwayMap.tsx`
+- 以前は「次の言語の略称（En → 中 → 한 → 日）」を出す巡回ボタンで、押す前にどの言語になるか分からず、狙った言語へ行くまで何度も押す必要があった（ユーザー指示「切り替えだから直感的じゃない」）
+- 今は地球儀のアイコンと今の言語（日 / EN / 中 / 한）のボタンを押すと、4言語が「その言語自身の文字」で並び、押したものへ直接切り替わる。今の言語は塗りと ✓ で示す
+- 外を押す・Escape で閉じ、↑↓ Home End で動ける（WAI-ARIA の menu button）。選択肢の行は指で押せる 44px。地図の左下では上へ、右上（スマホ全画面）とヘッダーでは下へ開く
+- 読み上げ名は「言語: 日本語」のように今の言語を含める（以前は英語の「Switch language」固定）
+
+### improve: 言語名を1か所（`constants/languages.ts`）にまとめる
+- `src/constants/languages.ts`（新規）, `src/components/LanguageSwitcher.astro`, `src/components/LanguageSuggestion.astro`, `src/seo/pageText.ts`
+- 「日本語 / English / 简体中文 / 한국어」の表が3か所に書き写されていた。静的ページの言語切り替えと地図の言語メニューは同じ名前・並び・アイコンになる
+
+### test / docs
+- `tests/unit/components/ui/optionMenu.test.tsx`, `tests/unit/components/LanguagePicker.test.tsx`, `tests/unit/constants/languages.test.ts`（言語名の重複・巡回切り替えを書くと落ちる）, `tests/render/languageMenu.render.ts`
+- `docs/design-system.md`（規則一覧と部品表）, `docs/render-tests.md`, `CLAUDE.md`, `.claude/skills/design-tokens/SKILL.md`
+
 ## [2026-11-09] セッション（広告をこちらで決めた位置にだけ出す）
 
 ### improve: 自動広告・全画面広告を出さないよう、広告スクリプトは広告の枠があるページだけで読む

@@ -3,6 +3,7 @@ import { APP_ICON_PATH } from '../config/seo';
 import { Sun, Moon, Menu, X, Info, Sparkles } from 'lucide-react';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import IconButton from './ui/atoms/IconButton';
+import LanguagePicker from './LanguagePicker';
 import { shadow } from './ui/atoms/shadow';
 import { FS } from '../constants/ui';
 import { translateUI } from '../utils/translation';
@@ -13,9 +14,6 @@ import { SITE_NAME } from '../config/seo';
 import { SITE_FOOTER_LINKS, type NavLang } from '../config/siteNav';
 import { toArticleLanguage } from '../utils/languagePersistence';
 
-const LANGUAGES: Language[] = ['japanese', 'english', 'chinese', 'korean'];
-const LANG_LABELS: Record<Language, string> = { japanese: '日', english: 'En', chinese: '中', korean: '한' };
-const nextLanguage = (lang: Language): Language => LANGUAGES[(LANGUAGES.indexOf(lang) + 1) % LANGUAGES.length];
 
 interface NavigationBarProps {
   language: Language;
@@ -108,18 +106,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ language, onLanguageChang
           icon={<Info size={ICON_SIZE} />}
         />
 
-        {/* 言語切り替えボタン。アイコンではなく次の言語の略称を出す */}
-        <IconButton
-          theme={theme}
-          size="sm"
-          onClick={() => onLanguageChange(nextLanguage(language))}
-          label="Switch language"
-          icon={
-            <span style={{ fontSize: FS.body, fontWeight: 'bold', fontFamily: 'monospace' }}>
-              {LANG_LABELS[nextLanguage(language)]}
-            </span>
-          }
-        />
+        {/* 言語メニュー。押すと4言語が並び、選んだ言語へ直接切り替わる（巡回ボタンはどの言語になるか分からなかった） */}
+        <LanguagePicker theme={theme} language={language} onLanguageChange={onLanguageChange} />
 
         {/* テーマ切り替えボタン */}
         <IconButton
