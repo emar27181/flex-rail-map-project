@@ -3,6 +3,15 @@ import { uiTranslations, uiChinese, uiKorean, stationTranslations, routeTranslat
 import { routes, routeNames } from '../../../src/data/routes';
 import { stationTranslationsChinese, stationTranslationsKorean } from '../../../src/utils/stationTranslationsCJK';
 
+describe('路線の半透明表示ラベル', () => {
+  it('選択していない路線の表示状態を4言語すべてで明示する', () => {
+    expect(uiTranslations.showOutsideSegmentRoutes.japanese).toBe('選択していない路線を半透明で表示');
+    expect(uiTranslations.showOutsideSegmentRoutes.english).toBe('Show unselected lines semi-transparently');
+    expect(uiChinese.showOutsideSegmentRoutes).toBe('半透明显示未选中的线路');
+    expect(uiKorean.showOutsideSegmentRoutes).toBe('선택하지 않은 노선을 반투명으로 표시');
+  });
+});
+
 describe('翻訳キー完全性', () => {
   const jaEnKeys = Object.keys(uiTranslations);
   const zhKeys = Object.keys(uiChinese);
