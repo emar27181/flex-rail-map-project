@@ -671,6 +671,20 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "他 {count} 路線を表示",
     english: "Show {count} more routes"
   },
+  // 「さらに表示」1回で一部だけ広げる（ClampedWrap）。全部が出るわけではないので「他 N 路線を表示」と書かない
+  showMoreRoutesStep: {
+    japanese: "さらに表示（残り {count}）",
+    english: "Show more ({count} left)"
+  },
+  // 地図の線をタップして路線を切り替えたときの知らせ（map/RouteToggleSnackbar.tsx）
+  routeToggledShown: {
+    japanese: "{route}を表示しました",
+    english: "Showing {route}"
+  },
+  routeToggledHidden: {
+    japanese: "{route}を非表示にしました",
+    english: "Hid {route}"
+  },
   routeViewBoard: {
     japanese: "ボード",
     english: "Board"
@@ -1526,6 +1540,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "メニューを開く",
     english: "Open menu"
   },
+  languageMenuLabel: {
+    japanese: "言語",
+    english: "Language"
+  },
   appTitle: {
     japanese: SITE_NAME,
     english: SITE_NAME
@@ -1772,6 +1790,51 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   colorPresetWhite: {
     japanese: "白",
     english: "White"
+  },
+  // ── バージョン・更新履歴（設定パネルのいちばん下） ──
+  versionTitle: {
+    japanese: "バージョン",
+    english: "Version"
+  },
+  versionBuiltAt: {
+    japanese: "ビルド",
+    english: "Built"
+  },
+  versionCheckUpdate: {
+    japanese: "更新を確認",
+    english: "Check for updates"
+  },
+  versionChecking: {
+    japanese: "確認中…",
+    english: "Checking…"
+  },
+  versionUpToDate: {
+    japanese: "最新です",
+    english: "Up to date"
+  },
+  versionUpdateAvailable: {
+    japanese: "新しい版 {version} があります",
+    english: "Version {version} is available"
+  },
+  versionReload: {
+    japanese: "再読み込み",
+    english: "Reload"
+  },
+  versionCheckFailed: {
+    japanese: "確認できませんでした",
+    english: "Could not check"
+  },
+  versionLastChecked: {
+    japanese: "最終確認 {time}",
+    english: "Last checked {time}"
+  },
+  versionHistory: {
+    japanese: "更新履歴",
+    english: "Update history"
+  },
+  versionShowMore: {
+    japanese: "さらに表示（残り {count}）",
+    english: "Show more ({count} left)"
   },
   // ── 設定保存・読込 ──
   configSaveLoad: {
@@ -2047,6 +2110,9 @@ export const uiChinese: Record<string, string> = {
   increase: "放大",
   collapseList: "折叠",
   showMoreRoutes: "显示其他 {count} 条线路",
+  showMoreRoutesStep: "显示更多（剩余 {count}）",
+  routeToggledShown: "已显示{route}",
+  routeToggledHidden: "已隐藏{route}",
   routeViewBoard: "面板",
   routeViewClassic: "列表",
   routeSearchPlaceholder: "搜索线路名称",
@@ -2271,6 +2337,7 @@ export const uiChinese: Record<string, string> = {
   aboutSiteTitle: "关于本站",
   menuTitle: "菜单",
   openMenuLabel: "打开菜单",
+  languageMenuLabel: "语言",
   appTitle: "弹性路线图",
   appTagline: "只显示所需路线的简洁路线图",
   aboutLink: "关于本站",
@@ -2333,6 +2400,17 @@ export const uiChinese: Record<string, string> = {
   colorPresetDefault: "线路颜色",
   colorPresetBlack: "黑色",
   colorPresetWhite: "白色",
+  versionTitle: "版本",
+  versionBuiltAt: "构建",
+  versionCheckUpdate: "检查更新",
+  versionChecking: "正在检查…",
+  versionUpToDate: "已是最新",
+  versionUpdateAvailable: "有新版本 {version}",
+  versionReload: "重新加载",
+  versionCheckFailed: "无法检查",
+  versionLastChecked: "上次检查 {time}",
+  versionHistory: "更新记录",
+  versionShowMore: "显示更多（还有 {count} 个）",
   configSaveLoad: "保存·读取设置",
   configExportDesc: "导出（当前显示设置）",
   configExportSave: "保存JSON",
@@ -2414,6 +2492,9 @@ export const uiKorean: Record<string, string> = {
   increase: "크게",
   collapseList: "접기",
   showMoreRoutes: "다른 {count}개 노선 표시",
+  showMoreRoutesStep: "더 보기 (남은 {count}개)",
+  routeToggledShown: "{route} 표시됨",
+  routeToggledHidden: "{route} 숨겨짐",
   routeViewBoard: "보드",
   routeViewClassic: "목록",
   routeSearchPlaceholder: "노선 이름으로 검색",
@@ -2638,6 +2719,7 @@ export const uiKorean: Record<string, string> = {
   aboutSiteTitle: "사이트 소개",
   menuTitle: "메뉴",
   openMenuLabel: "메뉴 열기",
+  languageMenuLabel: "언어",
   appTitle: "플렉스 노선도",
   appTagline: "필요한 노선만 표시하는 심플한 노선도",
   aboutLink: "사이트 소개",
@@ -2700,6 +2782,17 @@ export const uiKorean: Record<string, string> = {
   colorPresetDefault: "노선 색",
   colorPresetBlack: "검정",
   colorPresetWhite: "흰색",
+  versionTitle: "버전",
+  versionBuiltAt: "빌드",
+  versionCheckUpdate: "업데이트 확인",
+  versionChecking: "확인 중…",
+  versionUpToDate: "최신 버전입니다",
+  versionUpdateAvailable: "새 버전 {version}이(가) 있습니다",
+  versionReload: "새로고침",
+  versionCheckFailed: "확인하지 못했습니다",
+  versionLastChecked: "마지막 확인 {time}",
+  versionHistory: "업데이트 기록",
+  versionShowMore: "더 보기 ({count}개 남음)",
   configSaveLoad: "설정 저장·불러오기",
   configExportDesc: "내보내기（현재 표시 설정）",
   configExportSave: "JSON 저장",

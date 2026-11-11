@@ -8,6 +8,7 @@
  * - 大きさは FLOATING_ICON_BUTTON_SIZE（既定 md = 36px。「表示切替」・凡例の見出しと同じ高さ）
  * - アイコンの大きさは FLOATING_ICON_GLYPH_SIZE
  * - 地は floatingSurface.ts。pressed を渡すと開閉ボタンになり、開いている間は主操作の塗り
+ * - aria-haspopup や onKeyDown など、ボタンの属性はそのまま渡せる（メニューを開くボタンなど）
  */
 import React, { cloneElement, isValidElement } from 'react';
 import type { ReactNode } from 'react';
@@ -15,7 +16,8 @@ import IconButton from './IconButton';
 import { FLOATING_CONTROL, FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE, type FloatingIconButtonSize } from './controlSize';
 import { floatingSurfaceStyle } from './floatingSurface';
 
-export interface FloatingIconButtonProps {
+export interface FloatingIconButtonProps
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'style' | 'onClick' | 'children' | 'title' | 'aria-label'> {
   theme: 'light' | 'dark';
   /** 読み上げ用の名前（title にも出る） */
   label: string;
@@ -28,13 +30,14 @@ export interface FloatingIconButtonProps {
   controls?: string;
 }
 
-const FloatingIconButton: React.FC<FloatingIconButtonProps> = ({ theme, label, icon, onClick, pressed, size = 'md', controls }) => {
+const FloatingIconButton: React.FC<FloatingIconButtonProps> = ({ theme, label, icon, onClick, pressed, size = 'md', controls, ...rest }) => {
   const px = FLOATING_ICON_BUTTON_SIZE[size];
   const sizedIcon = isValidElement<{ size?: number }>(icon)
     ? cloneElement(icon, { size: icon.props.size ?? FLOATING_ICON_GLYPH_SIZE })
     : icon;
   return (
     <IconButton
+      {...rest}
       theme={theme}
       size="sm"
       variant={pressed === undefined ? 'outline' : 'primary'}

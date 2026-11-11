@@ -8,7 +8,7 @@ GitHub Actions（型・Lint・単体/UI/描画テストなど）はこれまで�
 | プレビューを要求したPRの最新コミット | 従来のCIを実行 | Deploy Previewをビルド |
 | mainにコード・画像・データ・設定をマージ | 従来のCIを実行 | 本番ビルド |
 | mainでREADME・docs・CI設定・テストのみ変更 | 従来のCIを実行 | 変更差分を安全に確認できたときだけスキップ |
-| branch-deploy（本番以外の直接push） | リポジトリのCI設定どおり | スキップ |
+| branch-deploy（本番以外の直接push） | リポジトリのCI設定どおり | スキップ（`develop` だけはビルドして固定URLに出す） |
 
 ## 実装と安全な失敗動作
 
@@ -19,6 +19,19 @@ GitHub Actions（型・Lint・単体/UI/描画テストなど）はこれまで�
 - Git参照が無い・同一・浅い履歴で比較不可・HEAD不一致・未知のコンテキスト等は **本番ビルド実行**。スキップによって必要な公開が失われるより、余分な1回のビルドを許容する。
 - GitHub Actionsの既存CI concurrency / cancel-in-progress はすでに設定済み。権限・シークレットの追加やGitHub API呼び出しは不要。
 - ビルドフック経由ではNetlifyがignoreを適用しない仕様。第三者連携やhooksによる追加ビルドはNetlify画面で別途調査する。
+
+## 番号の付かない固定URLのプレビュー（`develop`, 2026-11-10）
+
+確認用の変更はすべて `develop` ブランチにまとめる（CLAUDE.md「プレビューは1本にまとめる」）。`develop` に push すると、
+Netlify の branch deploy で **`https://develop--flex-railway-map.netlify.app`**（PR 番号が付かない固定URL）が更新される。
+
+- `scripts/netlify-ignore.mjs` は branch-deploy のうち `FIXED_PREVIEW_BRANCH`（`develop`）だけビルドする。ほかのブランチの直接 push は今までどおりスキップ
+- `develop` への push は毎回ビルドする（マーカー不要）。PR のプレビューと二重にビルドしないよう、固定URLが使えるようになったら
+  `develop` のコミットには `[netlify-preview]` を付けない
+- **Netlify の管理画面で次を設定する必要がある（リポジトリからは変えられない）**:
+  Site configuration → Build & deploy → Continuous deployment → Branches and deploy contexts → Configure →
+  Branch deploys を「Let me add individual branches」にして `develop` を追加 → Save
+- 設定するまでは固定URLは404になる。その間は `develop` の PR の Deploy Preview（マーカー付き）で確認する
 
 ## プレビューの要求方法
 

@@ -11,6 +11,7 @@
 import { FS } from '../constants/ui';
 import { L } from './legend/legendStyles';
 import { hreflangCode } from '../config/seo';
+import { LANGUAGE_NATIVE_NAME } from '../constants/languages';
 
 type Lang = 'ja' | 'en' | 'zh' | 'ko';
 
@@ -21,7 +22,7 @@ export interface Props {
 
 const { current, versions } = Astro.props;
 const ORDER: Lang[] = ['ja', 'en', 'zh', 'ko'];
-const NATIVE: Record<Lang, string> = { ja: '日本語', en: 'English', zh: '简体中文', ko: '한국어' };
+const NATIVE = LANGUAGE_NATIVE_NAME;
 /** 案内の文言は「案内する言語」で書く（その言語の読者に向けた案内なので） */
 const SUGGEST: Record<Lang, string> = {
   ja: 'このページは日本語でも読めます',

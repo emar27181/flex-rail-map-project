@@ -21,7 +21,7 @@ function makeFakeLeaflet() {
 }
 
 describe('patchRotatedRendererDrift', () => {
-  it('回転が有効なときは _update() に加え各レイヤーの _reset() も呼び、元の _updateTransform は呼ばない', () => {
+  it('地図が回っているときは _update() に加え各レイヤーの _reset() も呼び、元の _updateTransform は呼ばない', () => {
     const leaflet = makeFakeLeaflet();
     const original = leaflet.Renderer.prototype._updateTransform;
     patchRotatedRendererDrift(leaflet);
@@ -30,7 +30,7 @@ describe('patchRotatedRendererDrift', () => {
     const layerAReset = vi.fn();
     const layerBReset = vi.fn();
     const ctx = {
-      _map: { _rotate: true },
+      _map: { _rotate: true, getBearing: () => 30 },
       _update: update,
       _layers: { a: { _reset: layerAReset }, b: { _reset: layerBReset } },
     };
@@ -40,6 +40,21 @@ describe('patchRotatedRendererDrift', () => {
     expect(layerAReset).toHaveBeenCalledTimes(1);
     expect(layerBReset).toHaveBeenCalledTimes(1);
     expect(original).not.toHaveBeenCalled();
+  });
+
+  it('回転を使えても北向きのとき（0度・360度）は、元の速い _updateTransform を呼ぶ（ピンチの毎フレームに全路線を再投影しない）', () => {
+    for (const bearing of [0, 360, -360]) {
+      const leaflet = makeFakeLeaflet();
+      const original = leaflet.Renderer.prototype._updateTransform;
+      patchRotatedRendererDrift(leaflet);
+      const update = vi.fn();
+      const reset = vi.fn();
+      const ctx = { _map: { _rotate: true, getBearing: () => bearing }, _update: update, _layers: { a: { _reset: reset } } };
+      leaflet.Renderer.prototype._updateTransform.call(ctx, 'center', 5);
+      expect(update).not.toHaveBeenCalled();
+      expect(reset).not.toHaveBeenCalled();
+      expect(original).toHaveBeenCalledWith('center', 5);
+    }
   });
 
   it('回転していないときは元の _updateTransform をそのまま呼ぶ（非回転の地図には影響しない）', () => {

@@ -5,7 +5,7 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { isNonDeployPath, shouldBuild, PREVIEW_MARKER } from '../scripts/netlify-ignore.mjs';
+import { isNonDeployPath, shouldBuild, PREVIEW_MARKER, FIXED_PREVIEW_BRANCH } from '../scripts/netlify-ignore.mjs';
 
 const script = fileURLToPath(new URL('../scripts/netlify-ignore.mjs', import.meta.url));
 
@@ -22,10 +22,10 @@ function repository() {
     git('commit', '-qm', message);
     return git('rev-parse', 'HEAD');
   };
-  const run = (context, head, cached) => {
+  const run = (context, head, cached, branch = '') => {
     const result = spawnSync(process.execPath, [script], {
       cwd: dir,
-      env: { ...process.env, CONTEXT: context, COMMIT_REF: head, CACHED_COMMIT_REF: cached },
+      env: { ...process.env, CONTEXT: context, COMMIT_REF: head, CACHED_COMMIT_REF: cached, BRANCH: branch, HEAD: branch },
       encoding: 'utf8',
     });
     assert.equal(result.error, undefined);
@@ -52,6 +52,10 @@ test('context policy fails open if changed files are unknown', () => {
   assert.equal(shouldBuild({ context: 'deploy-preview', message: 'request ' + PREVIEW_MARKER }), true);
   assert.equal(shouldBuild({ context: 'deploy-preview', message: 'regular commit' }), false);
   assert.equal(shouldBuild({ context: 'branch-deploy' }), false);
+  assert.equal(shouldBuild({ context: 'branch-deploy', branch: 'claude/some-work' }), false);
+  // 番号の付かない固定URLで確認するブランチだけは、branch-deploy をビルドする
+  assert.equal(FIXED_PREVIEW_BRANCH, 'develop');
+  assert.equal(shouldBuild({ context: 'branch-deploy', branch: FIXED_PREVIEW_BRANCH }), true);
   assert.equal(shouldBuild({ context: undefined }), true);
 });
 
@@ -77,6 +81,8 @@ test('Git history: preview requires marker in the latest commit', (t) => {
   const marked = r.commit('README.md', 'docs', 'preview requested ' + PREVIEW_MARKER);
   assert.equal(r.run('deploy-preview', marked, initial), 1);
   assert.equal(r.run('branch-deploy', marked, initial), 0);
+  assert.equal(r.run('branch-deploy', marked, initial, 'claude/some-work'), 0);
+  assert.equal(r.run('branch-deploy', initial, initial, FIXED_PREVIEW_BRANCH), 1);
   assert.equal(r.run('unrecognized', marked, initial), 1);
   const later = r.commit('docs/x.md', 'x', 'a newer change without marker');
   assert.equal(r.run('deploy-preview', later, initial), 0);

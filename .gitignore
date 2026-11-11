@@ -53,3 +53,6 @@ scripts/missing-stations-report.json
 playwright-report/
 test-results/
 scripts/output/
+
+# アプリ用に書き出したデータ（npm run app:data で作る。手で直さない）
+app/assets/data/

@@ -39,9 +39,9 @@ import ClampedWrap from '../ui/molecules/ClampedWrap';
 const BOARD_CONTROL_SIZE = 'sm' as const;
 
 /**
- * 各グループ（経路上・駅を通る・表示中・非表示）は閉じた状態で始め、チップを5行まで見せる。
- * 開くと全部見せる（ui/molecules/ClampedWrap）。以前は「さらに48件」と件数で区切っていて、
- * 画面の幅で行数がばらばらだった
+ * 各グループ（経路上・駅を通る・表示中・非表示）はチップを5行まで見せて始め、「さらに表示」で10行ずつ広げる
+ * （ui/molecules/ClampedWrap）。以前は「さらに48件」と件数で区切っていて画面の幅で行数がばらばらだった。
+ * 2026-11 まで「他 479 路線を表示」で全部が一度に出て、スクロールがとても長くなっていた
  */
 const GROUP_MAX_ROWS = 5;
 
@@ -87,12 +87,12 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
 }) => {
   const colors = getThemeColors(theme);
   const [query, setQuery] = useState('');
-  /** グループごとに開いているか。既定はすべて閉じる（5行まで） */
-  const [expanded, setExpanded] = useState<Record<GroupKey, boolean>>({
-    onRoute: false,
-    atStation: false,
-    visible: false,
-    hidden: false,
+  /** グループごとの「さらに表示」を押した回数。既定はすべて 0（5行まで） */
+  const [steps, setSteps] = useState<Record<GroupKey, number>>({
+    onRoute: 0,
+    atStation: 0,
+    visible: 0,
+    hidden: 0,
   });
 
   const labelOf = (rk: RouteKey) => translateRoute(routeNames[rk], language);
@@ -157,9 +157,9 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
           theme={theme}
           size={BOARD_CONTROL_SIZE}
           maxRows={GROUP_MAX_ROWS}
-          expanded={expanded[key]}
-          onToggle={() => setExpanded(prev => ({ ...prev, [key]: !prev[key] }))}
-          moreLabel={hidden => translateUI('showMoreRoutes', language, { count: String(hidden) })}
+          steps={steps[key]}
+          onStepsChange={n => setSteps(prev => ({ ...prev, [key]: n }))}
+          moreLabel={hidden => translateUI('showMoreRoutesStep', language, { count: String(hidden) })}
           lessLabel={translateUI('collapseList', language)}
         >
           {items.map(chip)}

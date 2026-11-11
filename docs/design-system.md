@@ -29,6 +29,7 @@ PR ごとに `npm run test:design` で実行する（手元でも同じコマン
 | 静的ページ（記事・駅/路線ページ）の CSS もトークンの CSS 変数を使う | `TOKEN_VARS_CSS` / `CONTROL_CSS`（`ui/atoms/controlCss.ts`） | `tests/unit/styles/articleCssTokens.test.ts`, `tests/unit/components/ui/controlCss.test.ts` |
 | 絵文字を使わない。アイコンは lucide-react | `lucide-react` | `tests/unit/noEmojiIcons.test.ts` |
 | サービス名・アプリのアイコンは1か所から取る | `SITE_NAME`（`config/seo.ts`）/ `APP_ICON_PATH` | `tests/unit/config/siteName.test.ts`, `tests/unit/config/appIcon.test.ts` |
+| 言語など少数の選択肢は、押すたびに次へ進む巡回ボタンにせず、一覧を開いて直接選ぶ。言語名は「その言語自身の文字」で1か所だけに書く（旗は使わない） | `OptionMenu` / `LanguagePicker` / `LANGUAGE_NATIVE_NAME`（`constants/languages.ts`）。ボタンは地球儀のアイコンだけ（「日」「EN」のような文字を添えない） | `tests/unit/constants/languages.test.ts`, `tests/unit/components/LanguagePicker.test.tsx` |
 | 部品（atoms / molecules）を足したら「どの部品を使うか」に1行足す。この表の検査はすべて CI で動く | この文書 | `tests/unit/designRules.test.ts` |
 
 **画面に描けているか**（真っ黒・固まる・重なり・ボタンの位置）は、この表のユニットテスト（jsdom）では見られない。
@@ -267,7 +268,11 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 地図の上に浮かぶアイコンだけの丸いボタン（隅の縮小・言語・テーマ、立体表示の設定） | `FloatingIconButton`（atom。大きさ `FLOATING_ICON_BUTTON_SIZE`・アイコン `FLOATING_ICON_GLYPH_SIZE`・地 `floatingSurfaceStyle`。`pressed` を渡すと開閉ボタンになり、開いている間は塗り。寸法や地を呼び出し側で組み立てない） |
 | 見出しと中身を1枚の箱にまとめた開閉パネル（地図の上に浮かぶもの） | `CollapsiblePanel`（molecule。凡例「N路線」・立体表示の説明が使う。見出しと中身を別の箱に分けない。見出しは常に `FLOATING_CONTROL`、幅は `width="narrow"`（一覧）/ `"wide"`（説明と操作）、開いた中身は `FLOATING_PANEL.maxHeight` でスクロール。左下の丸いボタンの上に置くときは `bottom: aboveFloatingButtons(1)`） |
 | 地図・グラフの出典を小さな情報アイコンで格納し、必要時だけ展開する | `SourceDisclosure`（molecule。出典や注記を折りたたみ、キーボードでも開閉可能。色・余白・フォントは既存トークン） |
+| 折り返して並ぶチップなどを、決まった行数（既定5行）まで見せ、「さらに表示」1回で10行ずつ広げる（全部を一度に出さない） | `ClampedWrap`（molecule。表示路線の切替の各グループが使う。件数ではなく行数で切るので、画面の幅によらず高さがそろう。1回の量の理由は部品の冒頭のコメント、2026-11） |
+| 操作の結果を画面の下に1行で短く知らせる（「● 山手線を非表示にしました」） | `Snackbar`（molecule。一度に1つ・4秒で自動で消える・指が乗っている間は消さない・**1行に収め、高さは `FLOATING_CONTROL.height`**・操作と×は任意・`role="status"`。位置 `bottom` は呼び出し側が浮かぶボタンとの関係で決める。地図の線をタップしたときは `map/RouteToggleSnackbar`（「元に戻す」は付けない。長い路線名は名前だけ省略）、2026-11） |
+
 | 折り返して並ぶチップなどを、閉じているときは決まった行数（既定5行）まで見せ、開くと全部見せる | `ClampedWrap`（molecule。表示路線の切替の各グループが使う。件数ではなく行数で切るので、画面の幅によらず高さがそろう） |
+| ボタンを押すと選択肢の一覧が開き、1つ選ぶ（言語の切り替えなど。**押すたびに次へ進む巡回ボタンは使わない**。押す前に行き先が分からない） | `OptionMenu`（molecule。ボタンはアイコンだけで文字は添えず、今の選択は読み上げ名で伝える。一覧に今の選択を塗りと ✓ で示す。外を押す・Escape で閉じ、↑↓ で動ける。地図の言語は organism の `LanguagePicker`（`constants/languages.ts` の名前・並びを使う）） |
 
 判定に迷ったら次を自問する。
 

@@ -1,5 +1,115 @@
 # CHANGE LOG
 
+## [2026-11-10] セッション（番号の付かない固定URLのプレビュー）
+
+### feat: `develop` ブランチだけ Netlify の branch deploy をビルドし、固定URLで確認できるようにする
+- `scripts/netlify-ignore.mjs`（`FIXED_PREVIEW_BRANCH = 'develop'`）, `tests/netlify-ignore.node.mjs`
+- PR ごとにプレビューのURLが変わるため、番号の付かない `https://develop--flex-railway-map.netlify.app` で見たい（ユーザー指示）。
+  Netlify の管理画面で `develop` の Branch deploy を許可すると使える（`docs/netlify-build-policy.md`）
+- まとめのブランチを `claude/preview` から `develop` に替えた（`CLAUDE.md`）
+
+## [2026-11-10] セッション（プレビューを1本にまとめる）
+
+### docs: 確認用のプレビューを `claude/preview` の PR 1本にまとめる決まりを書く
+- `CLAUDE.md`（プレビューデプロイルール）。作業ごとの PR は残し、ユーザーに見てもらうURLは1つにする（ユーザー指示）
+- まとめに入れた PR: #104（アプリ化の企画書・仕様書・データの書き出し）, #105（路線の一覧を10行ずつ）, #107（タップで路線名を1行で知らせる）, #108（凡例を開いて始める）
+
+## [2026-11-09] セッション（Flutter でのアプリ化の調査・企画書・仕様書・UI の見直し）
+
+### docs: アプリ化の企画書・仕様書と、スマホ幅での UI の見直しを書く
+- `docs/app/flutter-app-proposal.md`（企画書: なぜアプリか・方式の比較（推奨はハイブリッド）・MVP・費用・進め方・決めてほしいこと）
+- `docs/app/flutter-app-spec.md`（仕様書: 画面構成（深さ最大2段）・機能・データの書き出し・経路探索の正解データ・地図タイル・デザイン・権限・広告/計測・CI）
+- `docs/app/ui-review-2026-11.md`（押せるものはすべて 44px 未満、「表示切替」は全部開くと画面 11.6 枚分・開閉3段、経路の候補が既定で隠れている、など A1〜C7）
+- `docs/app/images/`（スマホ幅の画面写真）
+
+### feat: スマホ幅の UI を数え直すスクリプト
+- `scripts/audit-mobile-ui.mjs`（押せるものの大きさ・コントラスト・開閉の段・パネルの長さ）
+
+### feat: アプリ用のデータと経路の正解データを JSON に書き出す（アプリ化の段階0）
+- `scripts/app-data/buildAppData.ts`, `scripts/app-data/export.mts`, `package.json`（`npm run app:data`）, `.gitignore`（`app/assets/data/`）
+- 路線 491・駅 6,001・画面の文言・時刻表・徒歩の乗り換え/直通運転・デザインの値と、経路の正解 144 組（上位5件）。訳が無いものは null（英語・日本語で埋めない）
+- 経路探索は徒歩の乗り換えを区間にしない（東京→新宿が「丸ノ内線 大手町→新宿」から始まる）ことが分かった。仕様書 4.2 に書き、Dart 版も再現する
+- `tests/unit/scripts/appData.test.ts`, `docs/app/flutter-app-spec.md`（4.1・4.2 を実際の中身に合わせた）
+
+## [2026-11-09] セッション（路線の一覧を少しずつ広げる）
+
+### improve: 路線の切り替えの「他 N 路線を表示」を、10行ずつ広げる「さらに表示」にする
+- `src/components/ui/molecules/ClampedWrap.tsx`, `src/components/legend/RouteSwitchBoard.tsx`, `src/utils/translation.ts`（`showMoreRoutesStep` 4言語）
+- 押すと数百路線が一度に出て、スクロールがとても長くなっていた。最初は5行、1回押すごとに10行（スマホで25〜30路線・画面の約3分の1）ずつ広げ、「折りたたむ」で5行に戻す（箱の先頭を画面に戻す）
+- `tests/unit/components/ui/clampedWrap.test.tsx`, `tests/unit/components/legend/RouteSwitchBoard.test.tsx`, `docs/design-system.md`
+
+## [2026-11-10] セッション（地図の線をタップしたときに路線名を知らせる）
+
+### feat: 地図の線をタップして路線を切り替えたら、どの路線かを画面の下に1行で出す
+- `src/components/ui/molecules/Snackbar.tsx`（新規。一度に1つ・4秒で消える・指が乗っている間は消さない・1行で高さは浮かぶ部品と同じ・操作と×は任意・`role="status"`）
+- `src/components/map/RouteToggleSnackbar.tsx`（新規。「● 山手線を非表示にしました」。長い路線名は名前だけ「…」で省略し、文の終わりは残す）
+- `src/components/RailwayMap.tsx`（表示中の線・薄い線のタップで知らせる。位置は下に並ぶ浮かぶ部品のすぐ上）, `src/utils/translation.ts`（4言語）
+- 指の端末では線に路線名の吹き出しを出さない（#100）ため、タップでどの路線が消えた・出たのか分からなかった
+- 最初は「元に戻す」と×を付けたが、同じ線をもう一度押せば戻るので外し、縦幅を取らない1行にした（ユーザー指示）
+- `tests/unit/components/ui/snackbar.test.tsx`, `tests/render/routeTap.render.ts`（知らせを消すと落ちることを確認）, `tests/unit/utils/routeNameI18n.test.ts`, `docs/design-system.md`
+
+## [2026-11-10] セッション（凡例を開いて始める）
+
+### improve: 地図右下の凡例「N路線」を、既定で開いた状態で始める
+- `src/utils/legendPersistence.ts`（保存が無ければ開く。閉じたことを保存した人だけ閉じて始める）, `tests/unit/utils/legendPersistence.test.ts`
+- 閉じて始めていたため、どの色の線がどの路線かを開かないと分からなかった（ユーザー指示「凡例はデフォルト展開で」）。一覧は5件ぶんの高さで、多いときは凡例の中でスクロールする
+
+## [2026-11-10] セッション（スマホで2本指の操作が止まる・カクつく）
+
+### fix: 回転できる地図でも北向きのときは、ピンチの毎フレームに全路線を再投影しない
+- `src/utils/leafletRotatePatch.ts`（`isRotated`）
+- 回転を使えるようにしてあるだけで（北向きのままでも）、ピンチの毎フレームに全路線の座標を計算し直していた。北向きのときは Leaflet の通常の方法（CSS の拡大縮小）に戻す。回した地図はこれまでどおり
+- CPU を 4 倍遅くしたスマホ相当で2回ピンチ: 50ms を超えるフレーム 112 → 2、操作が止まっていた時間 9.4 秒 → 0.5 秒
+
+### improve: 拡大しようとして指の向きが少し変わっただけでは地図を回さない・1フレームに1回だけ反映する
+- `src/utils/mapGestures.ts`（`patchSmoothTouchGestures`、`ROTATE_THRESHOLD_DEG = 15`）, `src/components/RailwayMap.tsx`
+- 以前は少しでも指の向きが変わると地図が回り、回るたびに全路線を描き直していた。地図アプリと同じく、15 度以上ひねったときだけ回し始める（その時点の向きから回すので飛ばない）
+- 回転と拡大・移動を touchmove ごとではなく 1 フレームに 1 回まとめる。2本指の操作中は駅の描き直し（React）もしない
+
+### test / docs
+- `tests/render/pinchGesture.render.ts`（わざと壊すと最大 135px ずれて落ちることを確認）, `tests/unit/utils/mapGestures.test.ts`, `tests/unit/utils/leafletRotatePatch.test.ts`, `docs/render-tests.md`
+
+## [2026-11-10] セッション（バージョンと更新履歴）
+
+### feat: 設定パネルのいちばん下に、バージョン・ビルドの時刻・更新の確認・更新履歴を出す
+- `src/components/legend/VersionPanel.tsx`, `src/components/legend/LegendRouteList.tsx`, `src/utils/appVersion.ts`, `src/pages/version.json.ts`, `astro.config.mjs`（ビルドの時刻・コミットを埋め込む）, `src/utils/translation.ts`（4言語）
+- 「更新を確認」は `/version.json` をキャッシュなしで取りに行き、新しい版があれば再読み込みを出す。最後に確認した時刻も出す
+- 履歴は5件から出し、「さらに表示」で10件ずつ広げる。時刻は分まで、見ている人の時間帯で出す
+
+### data: 更新履歴（1.0.0 〜 1.34.0）
+- `src/data/releases.ts`, `package.json`（0.1.0 → 1.34.0）
+- それまでに main へ入った PR 85件（1つ = 1リリース）の種類と main に入った時刻（GitHub の merged_at）から番号を振り直した。新機能は真ん中、それ以外は右端を上げる
+- 1.34.0 は今回のリリース（#104 #105 #107 #108 #112 #113）
+
+### test / docs
+- `tests/unit/data/releases.test.ts`, `tests/unit/utils/appVersion.test.ts`, `tests/unit/components/legend/VersionPanel.test.tsx`, `docs/release-process.md`, `CLAUDE.md`
+
+## [2026-11-11] セッション（現在地の向きの表示をオフにする）
+
+### improve: 地図の現在地マーカーに向き（進行方向の扇形）を出さない
+- `src/utils/userLocationIcon.ts`（`SHOW_USER_HEADING = false`）, `src/components/RailwayMap.tsx`
+- 向きがうまく合っていないと指摘された（ユーザー指示「向いてる向きの機能は上手くできていないから見た目をオフで」）。
+  向きの取得・計算は残し、戻すときは `SHOW_USER_HEADING` を true にするだけにした
+- `tests/unit/utils/userLocationIcon.test.ts`
+
+## [2026-11-11] セッション（言語メニュー）
+
+### improve: 言語の切り替えを、押すたびに次へ進む巡回ボタンから、一覧を開いて直接選ぶメニューにする
+- `src/components/ui/molecules/OptionMenu.tsx`（新規）, `src/components/LanguagePicker.tsx`（新規）, `src/components/NavigationBar.tsx`, `src/components/RailwayMap.tsx`
+- 以前は「次の言語の略称（En → 中 → 한 → 日）」を出す巡回ボタンで、押す前にどの言語になるか分からず、狙った言語へ行くまで何度も押す必要があった（ユーザー指示「切り替えだから直感的じゃない」）
+- 今は地球儀のアイコンのボタンを押すと、4言語が「その言語自身の文字」で並び、押したものへ直接切り替わる。今の言語は塗りと ✓ で示す
+- ボタンは**地球儀のアイコンだけ**（全世界共通の記号。「日」「EN」のような文字は添えない。ユーザー指示）。今の言語は読み上げ名「言語: 日本語」で伝える。静的ページの言語切り替えも同じ見た目にそろえた
+- 外を押す・Escape で閉じ、↑↓ Home End で動ける（WAI-ARIA の menu button）。選択肢の行は指で押せる 44px。地図の左下では上へ、右上（スマホ全画面）とヘッダーでは下へ開く
+- 読み上げ名は「言語: 日本語」のように今の言語を含める（以前は英語の「Switch language」固定）
+
+### improve: 言語名を1か所（`constants/languages.ts`）にまとめる
+- `src/constants/languages.ts`（新規。短い表記「日 / EN」は使わなくなったので持たない）, `src/components/ui/atoms/FloatingIconButton.tsx`（aria-haspopup など属性を渡せるように）, `src/components/LanguageSwitcher.astro`, `src/components/LanguageSuggestion.astro`, `src/seo/pageText.ts`
+- 「日本語 / English / 简体中文 / 한국어」の表が3か所に書き写されていた。静的ページの言語切り替えと地図の言語メニューは同じ名前・並び・アイコンになる
+
+### test / docs
+- `tests/unit/components/ui/optionMenu.test.tsx`, `tests/unit/components/LanguagePicker.test.tsx`, `tests/unit/constants/languages.test.ts`（言語名の重複・巡回切り替えを書くと落ちる）, `tests/render/languageMenu.render.ts`
+- `docs/design-system.md`（規則一覧と部品表）, `docs/render-tests.md`, `CLAUDE.md`, `.claude/skills/design-tokens/SKILL.md`
+
 ## [2026-11-09] セッション（広告をこちらで決めた位置にだけ出す）
 
 ### improve: 自動広告・全画面広告を出さないよう、広告スクリプトは広告の枠があるページだけで読む
