@@ -82,6 +82,7 @@ const StationSearchDropdown = React.forwardRef<HTMLDivElement, StationSearchDrop
       {stations.map((station, index) => (
         <div
           key={`${station.name}-${index}`}
+          data-station-option={station.name}
           onClick={() => onSelect(station)}
           style={{
             padding: `${L.sp.md} ${L.sp.xl}`,

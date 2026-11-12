@@ -13,6 +13,7 @@ import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
 import { buildDestinationDemoNetwork, calculateDemoLastTrain, availableDemoStations, demoEdgeKey, formatDemoClock, parseDemoClock, getCurrentDemoClock } from '../utils/lastTrainDemo';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
+import { rankMeetingStations, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
@@ -275,6 +276,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [arrival, setArrival] = useState<Station | null>(null);
   // 試作も通常の駅/時刻入力を利用。試作モードはボタンを押すまで有効にしない。
   const [lastTrainModeEnabled, setLastTrainModeEnabled] = useState(false);
+  // 集合駅を探すモード（出発駅の一覧は追加出発駅 extraDepartures を共用する）
+  const [meetingModeEnabled, setMeetingModeEnabled] = useState(false);
   // 通常の経路推薦数と終電モードで選択肢・既定値を1箇所の設定から共用する。
   const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(DEFAULT_ROUTE_RECOMMENDATION_LIMIT);
   // 選択した到着駅を通る路線を起点に、通常の候補数設定の範囲内で探索。
@@ -2906,6 +2909,34 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return new Map(results.map(result => [result.station.name, result.totalTime]));
   }, [departure, travelTimeLabelMode, visibleRoutes, routeFinder]);
 
+  // 集合駅を探す: 出発駅（メイン + 追加出発駅）それぞれから全駅への所要時間（ダイクストラ）を求め、
+  // 「いちばん遅い人の所要時間」が短い順に並べる。計算は utils/meetingPoint.ts
+  const meetingOrigins = useMemo(() => {
+    const seen = new Set<string>();
+    return [departure, ...extraDepartures].filter((st): st is Station => {
+      if (!st || seen.has(st.name)) return false;
+      seen.add(st.name);
+      return true;
+    });
+  }, [departure, extraDepartures]);
+  const meetingRanking = useMemo(() => {
+    if (!meetingModeEnabled || meetingOrigins.length < 2) return [];
+    const allRouteKeys = new Set(Object.keys(routes) as RouteKey[]);
+    const timeMaps = meetingOrigins.map(origin => new Map(
+      timeFilter.findStationsWithinTime(origin, MEETING_MAX_MINUTES, allRouteKeys).map(r => [r.station.name, r.totalTime] as [string, number]),
+    ));
+    return rankMeetingStations(meetingOrigins.map(o => o.name), timeMaps);
+  }, [meetingModeEnabled, meetingOrigins, timeFilter]);
+  const meetingCandidates = useMemo(() => meetingRanking.slice(0, MEETING_RESULT_LIMIT), [meetingRanking]);
+  /** 地図の駅ラベルに出す「全員が着くまでの最大時間」 */
+  const meetingMaxTimeMap = useMemo(() => new Map(meetingRanking.map(c => [c.name, c.max])), [meetingRanking]);
+  // 駅選択パネルの「追加」欄は、集合駅モードでは経由駅ではなく追加出発駅として使う
+  const selectorWaypoints = meetingModeEnabled ? extraDepartures : waypoints;
+  const selectorOnAddWaypoint = meetingModeEnabled ? handleAddExtraDeparture : handleAddWaypoint;
+  const selectorOnRemoveWaypoint = meetingModeEnabled
+    ? (index: number) => { const st = extraDepartures[index]; if (st) handleRemoveExtraDeparture(st.name); }
+    : handleRemoveWaypoint;
+
   // レンダリング最適化：表示する路線のデータを準備
   const visibleRoutesData = useMemo(() => {
     // availableRoutes状態に基づいて凡例に表示する路線を決定
@@ -4419,8 +4450,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // 累積所要時間オーバーレイ: 所要時間を2行目ラベルとして表示（時刻表ラベルより優先）
     const travelTimeMins = showTravelTimeOverlay ? travelTimeMap.get(station.name) : undefined;
     const demoLatest = demoReachability?.latestDeparture.get(station.name);
+    const meetingMax = meetingModeEnabled ? meetingMaxTimeMap.get(station.name) : undefined;
     const effectiveTimeLabel = lastTrainFilterActive
       ? (demoLatest === undefined ? undefined : formatDemoClock(demoLatest) + ' *')
+      : meetingMax !== undefined
+        ? `${meetingMax}${translateUI('minutesSuffix', currentLanguage)}`
       : travelTimeMins !== undefined
         ? `${travelTimeMins}${translateUI('minutesSuffix', currentLanguage)}`
         : stationTimeLabel;
@@ -5061,9 +5095,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onShowTravelTimeChange={setShowTravelTimes}
                 showTransferStationsOnly={showTransferStationsOnly}
                 onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
-                waypoints={waypoints}
-                onAddWaypoint={handleAddWaypoint}
-                onRemoveWaypoint={handleRemoveWaypoint}
+                waypoints={selectorWaypoints}
+                onAddWaypoint={selectorOnAddWaypoint}
+                onRemoveWaypoint={selectorOnRemoveWaypoint}
+                meetingMode={meetingModeEnabled}
+                onMeetingModeChange={setMeetingModeEnabled}
+                meetingCandidates={meetingCandidates}
+                meetingOriginNames={meetingOrigins.map(o => o.name)}
                 showStationTimeLabels={timetableModeEnabled}
                 onShowStationTimeLabelsChange={setTimetableModeEnabled}
                 timeMode={timeMode}
@@ -5108,9 +5146,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             onShowTravelTimeChange={setShowTravelTimes}
             showTransferStationsOnly={showTransferStationsOnly}
             onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
-            waypoints={waypoints}
-            onAddWaypoint={handleAddWaypoint}
-            onRemoveWaypoint={handleRemoveWaypoint}
+            waypoints={selectorWaypoints}
+            onAddWaypoint={selectorOnAddWaypoint}
+            onRemoveWaypoint={selectorOnRemoveWaypoint}
+            meetingMode={meetingModeEnabled}
+            onMeetingModeChange={setMeetingModeEnabled}
+            meetingCandidates={meetingCandidates}
+            meetingOriginNames={meetingOrigins.map(o => o.name)}
             showStationTimeLabels={timetableModeEnabled}
             onShowStationTimeLabelsChange={setTimetableModeEnabled}
             timeMode={timeMode}
@@ -6513,9 +6555,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onShowTravelTimeChange={setShowTravelTimes}
                 showTransferStationsOnly={showTransferStationsOnly}
                 onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
-                waypoints={waypoints}
-                onAddWaypoint={handleAddWaypoint}
-                onRemoveWaypoint={handleRemoveWaypoint}
+                waypoints={selectorWaypoints}
+                onAddWaypoint={selectorOnAddWaypoint}
+                onRemoveWaypoint={selectorOnRemoveWaypoint}
+                meetingMode={meetingModeEnabled}
+                onMeetingModeChange={setMeetingModeEnabled}
+                meetingCandidates={meetingCandidates}
+                meetingOriginNames={meetingOrigins.map(o => o.name)}
                 showStationTimeLabels={timetableModeEnabled}
                 onShowStationTimeLabelsChange={setTimetableModeEnabled}
                 timeMode={timeMode}
