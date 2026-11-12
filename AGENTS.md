@@ -20,7 +20,7 @@
    （色・文字サイズ・余白・角の丸み・影・開閉の印は定義元から取り、直書きすると CI が落ちる）。
 
 4. 推測した値・出典の無い値をデータに書かない。分からないものは空けておく。
-5. `main` に直接マージしない（ユーザーがプレビューで目視確認してからマージする）。
+5. `main` に直接コミットしない。開発は `develop` ブランチに乗せ、`develop` → `main` の PR を CI がグリーンになってからマージする（ユーザーの目視確認は待たない。2026-11-12 ユーザー決定。詳しくは `CLAUDE.md` の「デプロイ」）。
 6. **記事（/articles）を書く・足すときは `docs/article-writing.md` を読むこと。**
    記事は `src/data/articles/{slug}.ts` に1記事1ファイル（ひな形 `docs/templates/article-template.ts`、
    指示文 `docs/templates/article-prompt.md`）。

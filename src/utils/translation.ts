@@ -1445,8 +1445,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Station heatmap"
   },
   showOutsideSegmentRoutes: {
-    japanese: "区間外の路線を表示",
-    english: "Show outside-segment routes"
+    japanese: "選択していない路線を半透明で表示",
+    english: "Show unselected lines semi-transparently"
   },
   showMapTiles: {
     japanese: "地図タイルを表示",
@@ -2313,7 +2313,7 @@ export const uiChinese: Record<string, string> = {
   noDataForStation: "该站暂无数据",
   showStationCodes: "显示站编码",
   stationHeatmap: "车站统计热力图",
-  showOutsideSegmentRoutes: "显示区间外路线",
+  showOutsideSegmentRoutes: "半透明显示未选中的线路",
   showMapTiles: "显示地图图块",
   showFullRouteStations: "显示所有途经站",
   showRouteRecommendationsPanel: "显示推荐路线选择",
@@ -2695,7 +2695,7 @@ export const uiKorean: Record<string, string> = {
   noDataForStation: "이 역의 데이터가 없습니다",
   showStationCodes: "역 코드 표시",
   stationHeatmap: "역 통계 히트맵",
-  showOutsideSegmentRoutes: "구간 외 노선 표시",
+  showOutsideSegmentRoutes: "선택하지 않은 노선을 반투명으로 표시",
   showMapTiles: "지도 타일 표시",
   showFullRouteStations: "전체 경유역 표시",
   showRouteRecommendationsPanel: "추천 경로 선택 표시",
