@@ -3,6 +3,7 @@ import type { ArticleSource } from './types';
 export const guide_sapporo_namboku_line_map: ArticleSource = {
   "slug": "sapporo-namboku-line-map",
   "publishedDate": "2026-10-16",
+  "modifiedDate": "2026-11-12",
   "related": [
     "how-to-read-station-numbers",
     "tokyo-train-map-beginner",
