@@ -6,6 +6,7 @@
 import { yamanote, type Station } from '../data/yamanote';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { THROUGH_SERVICES, type ThroughService } from '../data/throughServices';
+import { DEFAULT_ROUTE_RECOMMENDATION_LIMIT } from '../constants/routeRecommendationLimit';
 import { chuo } from '../data/chuo';
 import { keihinTohoku } from '../data/keihin-tohoku';
 
@@ -56,12 +57,11 @@ export const DEMO_STATIONS: Station[] = Array.from(
 ).sort((a, b) => a.name.localeCompare(b.name, 'ja'));
 
 /**
- * 任意の到着駅で試せるよう、既存の駅・路線情報から周辺のつながりを抽出。
- * 30路線上限は計算量の上限であり、選んだ路線内の駅を途中で省略しない。
- * 運行時刻は引き続き全て架空。実際の終電推定ではない。
+ * 到着駅へ直接乗り入れる路線は全件採用し、残り枠を乗換1回の路線から順番に拡張する。
+ * 例えば到着駅に1路線だけなら、直接路線1本+接続路線4本で計5路線（既定値）。
+ * 直接乗り入れる路線が指定上限を超える場合は、直接路線を優先して残す。
+ * 入力ダイヤは全て架空で、時刻表の正確さを意味しない。
  */
-export const DEMO_MAX_CONNECTED_LINES = 30;
-
 export interface DestinationDemoNetwork {
   lines: DemoLine[];
   stations: Station[];
@@ -71,39 +71,49 @@ export interface DestinationDemoNetwork {
 
 export function buildDestinationDemoNetwork(
   destination: string,
-  maxLines: number = DEMO_MAX_CONNECTED_LINES,
+  maxLines: number = DEFAULT_ROUTE_RECOMMENDATION_LIMIT,
 ): DestinationDemoNetwork {
   const allKeys = Object.keys(routes) as RouteKey[];
   const direct = allKeys.filter(key => routes[key].some(st => st.name === destination));
-  if (direct.length === 0 || maxLines < 1) return { lines: [], stations: [], legs: [], limited: false };
+  if (direct.length === 0 || !Number.isFinite(maxLines) || maxLines < 1) {
+    return { lines: [], stations: [], legs: [], limited: false };
+  }
 
-  const selected: RouteKey[] = [];
-  const seen = new Set<string>([destination]);
-  const directSet = new Set(direct);
-  // 到着駅に直接乗り入れる路線が属する直通系統の相手側路線を優先する。
-  // 例: 新宿→小田急小田原線→江ノ島線・藤沢を30路線制限で取りこぼさない。
+  // 表示上限より直接乗入路線が多い場合も省略しない。
+  const cap = Math.max(direct.length, Math.floor(maxLines));
+  const selected: RouteKey[] = [...direct];
+  const selectedSet = new Set<RouteKey>(direct);
+  const allSelectedStationNames = new Set(direct.flatMap(key => routes[key].map(st => st.name)));
+  let frontier = new Set(allSelectedStationNames);
+
+  // 既存の直通系統を優先するが、系統外の路線を勝手に直通列車扱いしない。
+  const directSet = new Set<RouteKey>(direct);
   const throughPriority = new Set(THROUGH_SERVICES
     .filter(service => service.sections.some(sec => directSet.has(sec.route)))
     .flatMap(service => service.sections.map(sec => sec.route)));
-  const cap = Math.max(1, Math.floor(maxLines));
 
-  while (selected.length < cap) {
-    let candidate: RouteKey | undefined;
-    let best = -Infinity;
-    for (const key of allKeys) {
-      if (selected.includes(key)) continue;
-      const stations = routes[key];
-      if (stations.length < 2) continue;
-      const common = stations.filter(st => seen.has(st.name)).length;
-      if (common === 0) continue;
-      // 到着駅に直接乗り入れる路線を優先し、次に乗換駅の多い路線へ展開する。
-      const score = (directSet.has(key) ? 10000 : throughPriority.has(key) ? 5000 : 0)
-        + common * 100 - Math.min(stations.length, 200);
-      if (score > best) { best = score; candidate = key; }
+  // BFS: 直通路線 → 乗換1回で接続 → 2回... の順。候補上限に達したら終了。
+  while (selected.length < cap && frontier.size > 0) {
+    const candidates = allKeys.filter(key => !selectedSet.has(key) &&
+      routes[key].length >= 2 && routes[key].some(st => frontier.has(st.name)));
+    if (candidates.length === 0) break;
+    const score = (key: RouteKey) =>
+      (throughPriority.has(key) ? 5000 : 0) +
+      routes[key].filter(st => frontier.has(st.name)).length * 100 -
+      Math.min(routes[key].length, 200);
+    candidates.sort((a, b) => score(b) - score(a) || allKeys.indexOf(a) - allKeys.indexOf(b));
+
+    const nextFrontier = new Set<string>();
+    for (const key of candidates) {
+      if (selected.length >= cap) break;
+      selected.push(key);
+      selectedSet.add(key);
+      for (const st of routes[key]) {
+        if (!allSelectedStationNames.has(st.name)) nextFrontier.add(st.name);
+        allSelectedStationNames.add(st.name);
+      }
     }
-    if (!candidate) break;
-    selected.push(candidate);
-    for (const st of routes[candidate]) seen.add(st.name);
+    frontier = nextFrontier;
   }
 
   const lines: DemoLine[] = selected.map((routeKey, i) => {
@@ -123,7 +133,7 @@ export function buildDestinationDemoNetwork(
     line.stations.map(st => [st.name, st] as const),
   )).values()].sort((a, b) => a.name.localeCompare(b.name, 'ja'));
   const limited = selected.length >= cap && allKeys.some(key =>
-    !selected.includes(key) && routes[key].some(st => seen.has(st.name))
+    !selectedSet.has(key) && routes[key].some(st => allSelectedStationNames.has(st.name))
   );
   return { lines, stations, legs: buildDemoLegs(lines), limited };
 }
