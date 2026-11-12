@@ -51,6 +51,18 @@ describe('終電到達マップ（架空ダイヤPoC）', () => {
     expect(buildDestinationDemoNetwork('存在しない試験駅').lines).toEqual([]);
   });
 
+  it('既存の候補路線数（1/2/3/5/10）を上限として適用し、対象路線内の駅を間引かない', () => {
+    for (const count of [1, 2, 3, 5, 10]) {
+      const result = buildDestinationDemoNetwork('新宿', count);
+      expect(result.lines.length).toBeGreaterThan(0);
+      expect(result.lines.length).toBeLessThanOrEqual(count);
+      expect(result.stations.length).toBe(new Set(
+        result.lines.flatMap(line => line.stations.map(st => st.name)),
+      ).size);
+      expect(result.lines.some(line => line.stations.some(st => st.name === '新宿'))).toBe(true);
+    }
+  });
+
   it('相模大野で路線名が変わっても同一の直通デモ便なら乗換0分で新宿までつながる', () => {
     const legs: DemoLeg[] = [
       { from: '藤沢', to: '相模大野', lineId: 'odakyuEnoshimaLine',
