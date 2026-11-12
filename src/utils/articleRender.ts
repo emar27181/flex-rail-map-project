@@ -13,6 +13,8 @@ import { mapEmbedHtml } from '../components/ui/atoms/mapEmbed';
 import { adSlotHtml } from '../components/ui/atoms/adSlot';
 import { ADSENSE_SLOTS } from '../config/ads';
 import { ARTICLE_SOURCES } from '../data/articles';
+import { lineByKey, stationName } from '../seo/pageModel';
+import { SEO_TEXT } from '../seo/pageText';
 import { findArticleStation, resolveArticleTokens } from './articleFacts';
 import type { ArticleBlock, ArticleLang, ArticleMapState, ArticleShotSpec, ArticleSource } from '../data/articles/types';
 
@@ -108,6 +110,19 @@ function renderBlock(block: ArticleBlock, source: ArticleSource, lang: ArticleLa
         block.head.map((label, i) => ({ label, kind: block.kinds?.[i] ?? (i === 0 ? 'title' : 'text') })),
         block.rows,
       );
+    case 'routeStations': {
+      // 駅名・順序は路線データのみから生成。本文に駅名をコピーしない。
+      const line = lineByKey(block.route);
+      if (!line) throw new Error(`${source.slug}: 路線 ${block.route} の駅一覧が見つからない`);
+      const t = SEO_TEXT[lang];
+      return responsiveTableHtml(
+        [{ label: t.colNo, kind: 'index' }, { label: t.colStation, kind: 'title' }],
+        line.stops.map((stop, i) => [
+          String(i + 1),
+          stationName(stop.station, lang).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+        ]),
+      );
+    }
     case 'uses':
       return `<div class="uses">${block.items.map(u => `<div class="use"><div class="t"><span class="dot"></span>${u.title}</div><p>${u.text}</p></div>`).join('')}</div>`;
     case 'shot': {
