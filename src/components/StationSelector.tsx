@@ -1,11 +1,12 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
-import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Timer, TrainFront, Waypoints, X } from 'lucide-react';
+import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Timer, TrainFront, Users, Waypoints, X } from 'lucide-react';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { translateStation, translateUI } from '../utils/translation'
 import type { Language } from '../utils/translation';
+import { MEETING_MAX_MINUTES, type MeetingCandidate } from '../utils/meetingPoint';
 import { stationReadings, normalizeToHiragana, hiraganaToRomaji, normalizeRomajiForMatch } from '../utils/stationReadings';
 import { findNearestStations } from '../utils/nearestStations';
 import { loadStationHistory, recordStationSelection, buildSuggestions } from '../utils/stationHistory';
@@ -46,6 +47,17 @@ const SHOW_DEPARTURE_TIME_ROW: boolean = true;
 const NEARBY_STATION_COUNT = STATION_SUGGESTION_LIMIT;
 
 interface StationSelectorProps {
+  /**
+   * 集合駅を探すモード（複数の出発駅から、お互いに行きやすい駅を探す）。
+   * 新しい入力欄は作らず、出発駅欄・「経由駅を追加」と同じ欄を「出発駅を追加」として使い、
+   * 結果から選ぶと既存の到着駅に入る。渡されたときだけ、所要時間ボタンの列にON/OFFを1つ出す。
+   */
+  onMeetingModeChange?: (enabled: boolean) => void;
+  meetingMode?: boolean;
+  /** 集合駅の候補（いちばん遅い人の所要時間が短い順）。出発駅が2つ未満のときは空 */
+  meetingCandidates?: MeetingCandidate[];
+  /** 出発駅の名前（出発駅欄 + 追加した駅）。候補の所要時間と同じ並び */
+  meetingOriginNames?: string[];
   /** 既存ボタン群に試験用の切替を1個だけ追加する */
   lastTrainDemoMode?: boolean;
   lastTrainModeEnabled?: boolean;
@@ -103,6 +115,10 @@ interface StationSelectorProps {
 }
 
 const StationSelector: React.FC<StationSelectorProps> = ({
+  onMeetingModeChange,
+  meetingMode = false,
+  meetingCandidates = [],
+  meetingOriginNames = [],
   lastTrainDemoMode = false,
   lastTrainModeEnabled = false,
   onLastTrainModeChange,
@@ -746,7 +762,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
             寸法は Button の size="sm" に揃えてあるので2つの大きさは一致する。
           */}
-          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange || onAddWaypoint || onShowStationTimeLabelsChange || (lastTrainDemoMode && onLastTrainModeChange)) && (
+          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange || onAddWaypoint || onShowStationTimeLabelsChange || onMeetingModeChange || (lastTrainDemoMode && onLastTrainModeChange)) && (
             <div style={{
               // 出発駅・到着駅欄とこの行の間隔も、ボタン同士の間隔（下記gap）と
               // 揃える。片方だけ広げるとリズムが不揃いに見えるため統一する。
@@ -795,6 +811,18 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   icon={<Clock />}
                 >
                   {translateUI('showTravelTimes', language)}
+                </Button>
+              )}
+              {onMeetingModeChange && (
+                <Button
+                  theme={theme}
+                  variant="primary"
+                  size="sm"
+                  pressed={meetingMode}
+                  onClick={() => onMeetingModeChange(!meetingMode)}
+                  icon={<Users />}
+                >
+                  {translateUI('meetingModeButton', language)}
                 </Button>
               )}
               {lastTrainDemoMode && onLastTrainModeChange && (
@@ -846,7 +874,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setShowWaypointInput(true);
                   }}
                 >
-                  {translateUI('addWaypoint', language)}
+                  {translateUI(meetingMode ? 'addMeetingOrigin' : 'addWaypoint', language)}
                 </Button>
               )}
               {/*
@@ -946,7 +974,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                         setShowWaypointInput(false);
                         setWaypointSearch('');
                       }}
-                      placeholder={translateUI('addWaypoint', language)}
+                      placeholder={translateUI(meetingMode ? 'addMeetingOrigin' : 'addWaypoint', language)}
                     />
                     {showWaypointResults && waypointDropdownPos && (
                       <StationSearchDropdown
@@ -989,6 +1017,55 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     </span>
                   ))}
                 </div>
+              )}
+            </div>
+          )}
+
+          {/*
+            集合駅の候補。出発駅が2つ以上そろうと、全員の所要時間（ダイクストラ法）から
+            「いちばん遅い人の所要時間」が短い順に出す。選ぶと既存の到着駅に入る
+            （別の入力欄・別パネルは作らない。計算は utils/meetingPoint.ts）。
+          */}
+          {meetingMode && (
+            <div style={{ marginTop: L.sp.md, display: 'flex', flexDirection: 'column', gap: L.sp.xs }} data-meeting-results>
+              {meetingOriginNames.length < 2 ? (
+                <div style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                  {translateUI('meetingNeedOrigins', language)}
+                </div>
+              ) : meetingCandidates.length === 0 ? (
+                <div style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                  {translateUI('meetingNoResults', language, { minutes: MEETING_MAX_MINUTES })}
+                </div>
+              ) : (
+                <>
+                  <div style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                    {translateUI('meetingResultsTitle', language)}
+                  </div>
+                  {meetingCandidates.map((c, i) => {
+                    const station = allStations.find(st => st.name === c.name);
+                    return (
+                      <div key={c.name} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.xs }}>
+                        <Button
+                          theme={theme}
+                          size="sm"
+                          variant="outline"
+                          pressed={arrival?.name === c.name}
+                          disabled={!station}
+                          onClick={() => station && onArrivalChange(station)}
+                        >
+                          {`${i + 1}. ${translateStation(c.name, language)} · ${translateUI('meetingMaxMinutes', language, { minutes: c.max })}`}
+                        </Button>
+                        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                          {meetingOriginNames.map((n, k) => `${translateStation(n, language)} ${c.times[k]}`).join(' / ')}
+                          {translateUI('minutesSuffix', language)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                  <div style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                    {translateUI('meetingResultsNote', language)}
+                  </div>
+                </>
               )}
             </div>
           )}
