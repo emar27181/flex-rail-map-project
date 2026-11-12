@@ -805,7 +805,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   pressed={lastTrainModeEnabled}
                   onClick={() => {
                     if (!arrival) {
-                      // 新しいメッセージ欄は作らず、既存の到着駅入力へフォーカスを戻す。
+                      // 親側で共通Snackbarを表示。入力操作は既存の到着駅欄で続ける。
+                      onLastTrainModeChange(true);
                       arrivalRef.current?.querySelector('input')?.focus();
                       setShowArrivalResults(true);
                       return;
