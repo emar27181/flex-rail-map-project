@@ -32,13 +32,16 @@ test('終電モード切替時に余分なパネル・スライダー・駅選�
   expect(errors).toEqual([]);
 });
 
-test('到着駅未選択で押すと既存の到着駅欄にフォーカスする', async ({ page }) => {
+test('到着駅未選択で押すと路線切替と共通のSnackbarで案内し入力欄にフォーカスする', async ({ page }) => {
   await page.goto('/?experiment=last-train');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
   const toggle = page.getByRole('button', { name: '終電モード' });
   await expect(toggle).toBeEnabled();
   await toggle.click();
+  await expect(page.locator('[data-snackbar]')).toHaveCount(1);
+  await expect(page.locator('[data-snackbar]')).toContainText('終電モードを使用するには、到着駅を設定してください。');
   await expect(page.locator('input.station-input-filled').nth(1)).toBeFocused();
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
   await expect(page.getByRole('slider', { name: '仮想現在時刻を変更' })).toHaveCount(0);
 });
 
