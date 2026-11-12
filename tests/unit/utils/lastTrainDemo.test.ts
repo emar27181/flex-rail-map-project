@@ -48,9 +48,8 @@ describe('終電到達マップ（架空ダイヤPoC）', () => {
     }
     expect(result.legs.length).toBeGreaterThan(0);
     const smaller = buildDestinationDemoNetwork(station, 3);
-    const directCount = (Object.keys(routes) as RouteKey[])
-      .filter(key => routes[key].some(st => st.name === station)).length;
-    expect(smaller.lines.length).toBeLessThanOrEqual(Math.max(3, directCount + 1));
+    const directCount = buildDestinationDemoNetwork(station, 1).lines.length;
+    expect(smaller.lines.length).toBeLessThanOrEqual(Math.max(3, directCount));
     expect(smaller.stations.length).toBe(new Set(smaller.lines.flatMap(line => line.stations.map(st => st.name))).size);
     expect(buildDestinationDemoNetwork('存在しない試験駅').lines).toEqual([]);
   });
@@ -59,9 +58,8 @@ describe('終電到達マップ（架空ダイヤPoC）', () => {
     for (const count of [1, 2, 3, 5, 10]) {
       const result = buildDestinationDemoNetwork('新宿', count);
       expect(result.lines.length).toBeGreaterThan(0);
-      const physicalDirectCount = (Object.keys(routes) as RouteKey[])
-        .filter(key => routes[key].some(st => st.name === '新宿')).length;
-      expect(result.lines.length).toBeLessThanOrEqual(Math.max(count, physicalDirectCount + 8));
+      const directCount = buildDestinationDemoNetwork('新宿', 1).lines.length;
+      expect(result.lines.length).toBeLessThanOrEqual(Math.max(count, directCount));
       expect(result.stations.length).toBe(new Set(
         result.lines.flatMap(line => line.stations.map(st => st.name)),
       ).size);
