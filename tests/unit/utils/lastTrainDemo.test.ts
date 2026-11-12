@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { routes, type RouteKey } from '../../../src/data/routes';
+import { DEFAULT_ROUTE_RECOMMENDATION_LIMIT, ROUTE_RECOMMENDATION_LIMIT_OPTIONS } from '../../../src/constants/routeRecommendationLimit';
 import {
   DEMO_END, DEMO_START, DEMO_LINES, DEMO_STATIONS,
   availableDemoStations, buildDemoLegs, buildDestinationDemoNetwork, calculateDemoLastTrain, demoEdgeKey,
@@ -46,7 +48,9 @@ describe('終電到達マップ（架空ダイヤPoC）', () => {
     }
     expect(result.legs.length).toBeGreaterThan(0);
     const smaller = buildDestinationDemoNetwork(station, 3);
-    expect(smaller.lines.length).toBeLessThanOrEqual(3);
+    const directCount = (Object.keys(routes) as RouteKey[])
+      .filter(key => routes[key].some(st => st.name === station)).length;
+    expect(smaller.lines.length).toBeLessThanOrEqual(Math.max(3, directCount + 1));
     expect(smaller.stations.length).toBe(new Set(smaller.lines.flatMap(line => line.stations.map(st => st.name))).size);
     expect(buildDestinationDemoNetwork('存在しない試験駅').lines).toEqual([]);
   });
@@ -55,11 +59,45 @@ describe('終電到達マップ（架空ダイヤPoC）', () => {
     for (const count of [1, 2, 3, 5, 10]) {
       const result = buildDestinationDemoNetwork('新宿', count);
       expect(result.lines.length).toBeGreaterThan(0);
-      expect(result.lines.length).toBeLessThanOrEqual(count);
+      const physicalDirectCount = (Object.keys(routes) as RouteKey[])
+        .filter(key => routes[key].some(st => st.name === '新宿')).length;
+      expect(result.lines.length).toBeLessThanOrEqual(Math.max(count, physicalDirectCount + 8));
       expect(result.stations.length).toBe(new Set(
         result.lines.flatMap(line => line.stations.map(st => st.name)),
       ).size);
       expect(result.lines.some(line => line.stations.some(st => st.name === '新宿'))).toBe(true);
+    }
+  });
+
+  it('初期値は5路線で、既存の候補数（1/2/3/5/10）と一致する', () => {
+    expect(DEFAULT_ROUTE_RECOMMENDATION_LIMIT).toBe(5);
+    expect(ROUTE_RECOMMENDATION_LIMIT_OPTIONS).toEqual([1, 2, 3, 5, 10]);
+    const explicit = buildDestinationDemoNetwork('片瀬江ノ島', 5);
+    const omitted = buildDestinationDemoNetwork('片瀬江ノ島');
+    expect(omitted.lines.map(line => line.routeKey)).toEqual(explicit.lines.map(line => line.routeKey));
+  });
+
+  it('直接乗り入れる全路線を上限より優先し、残り枠を接続路線で埋める', () => {
+    const station = '新宿';
+    const physicalDirect = (Object.keys(routes) as RouteKey[])
+      .filter(key => routes[key].some(st => st.name === station));
+    expect(physicalDirect.length).toBeGreaterThan(1);
+    const limitedToOne = buildDestinationDemoNetwork(station, 1);
+    const included = new Set(limitedToOne.lines.map(line => line.routeKey));
+    for (const key of physicalDirect) expect(included.has(key)).toBe(true);
+    // 直通系統も「1本で行ける路線」として優先。相模大野で分断しない。
+    expect(included.has('odakyuEnoshimaLine')).toBe(true);
+
+    const smallerStation = '片瀬江ノ島';
+    const network = buildDestinationDemoNetwork(smallerStation, 5);
+    expect(network.lines.length).toBeLessThanOrEqual(5);
+    expect(network.lines.length).toBeGreaterThan(1);
+    expect(network.lines.some(line => line.stations.some(st => st.name === smallerStation))).toBe(true);
+    // 追加路線は、既に選択された路線の駅と乗換接続できること。
+    const previouslySeen = new Set<string>();
+    for (const [i, line] of network.lines.entries()) {
+      if (i > 0) expect(line.stations.some(st => previouslySeen.has(st.name))).toBe(true);
+      line.stations.forEach(st => previouslySeen.add(st.name));
     }
   });
 
