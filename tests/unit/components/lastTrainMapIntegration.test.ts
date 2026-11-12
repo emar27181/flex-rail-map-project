@@ -38,7 +38,10 @@ describe('終電モードは元のUIだけで操作する（回帰防止）', ()
     const map = read('src/components/RailwayMap.tsx');
     expect(map).toContain('buildDestinationDemoNetwork(arrival.name, maxRouteRecommendations)');
     expect(map).toContain('[lastTrainDemo, arrival?.name, maxRouteRecommendations]');
-    expect(map.split('const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(10)').length - 1).toBe(1);
+    expect(map.split('const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(DEFAULT_ROUTE_RECOMMENDATION_LIMIT)').length - 1).toBe(1);
+    expect(map).toContain('ROUTE_RECOMMENDATION_LIMIT_OPTIONS.map(count =>');
+    expect(map).toContain("import { DEFAULT_ROUTE_RECOMMENDATION_LIMIT, ROUTE_RECOMMENDATION_LIMIT_OPTIONS } from '../constants/routeRecommendationLimit'");
+    expect(read('src/constants/routeRecommendationLimit.ts')).toContain('DEFAULT_ROUTE_RECOMMENDATION_LIMIT = 5');
     expect(map).toContain('onChange={(e) => setMaxRouteRecommendations(Number(e.target.value))}');
   });
   it('到着駅未設定の案内は既存のSnackbarを使い新規パネルを増やさない', () => {
