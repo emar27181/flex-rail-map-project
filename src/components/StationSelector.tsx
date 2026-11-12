@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Timer, Waypoints, X } from 'lucide-react';
+import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
+import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Timer, TrainFront, Waypoints, X } from 'lucide-react';
 import { routes } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
@@ -45,6 +46,10 @@ const SHOW_DEPARTURE_TIME_ROW: boolean = true;
 const NEARBY_STATION_COUNT = STATION_SUGGESTION_LIMIT;
 
 interface StationSelectorProps {
+  /** 既存ボタン群に試験用の切替を1個だけ追加する */
+  lastTrainDemoMode?: boolean;
+  lastTrainModeEnabled?: boolean;
+  onLastTrainModeChange?: (enabled: boolean) => void;
   onDepartureChange: (station: Station | null) => void;
   onArrivalChange: (station: Station | null) => void;
   departure: Station | null;
@@ -98,6 +103,9 @@ interface StationSelectorProps {
 }
 
 const StationSelector: React.FC<StationSelectorProps> = ({
+  lastTrainDemoMode = false,
+  lastTrainModeEnabled = false,
+  onLastTrainModeChange,
   onDepartureChange,
   onArrivalChange,
   departure,
@@ -132,6 +140,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 }) => {
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
+  const demoText = lastTrainCopy(language);
   const [departureSearch, setDepartureSearch] = useState('');
   const [arrivalSearch, setArrivalSearch] = useState('');
   const [showDepartureResults, setShowDepartureResults] = useState(false);
@@ -494,7 +503,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             flexDirection: 'row',
             flexWrap: 'wrap'
           }}>
-            {/* 出発駅選択 */}
+            {/* 出発駅選択（試作でも通常と同じUI） */}
             <div ref={departureRef} style={{
               flex: '1 1 0',
               minWidth: '0',
@@ -737,7 +746,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
             寸法は Button の size="sm" に揃えてあるので2つの大きさは一致する。
           */}
-          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange || onAddWaypoint || onShowStationTimeLabelsChange) && (
+          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange || onAddWaypoint || onShowStationTimeLabelsChange || (lastTrainDemoMode && onLastTrainModeChange)) && (
             <div style={{
               // 出発駅・到着駅欄とこの行の間隔も、ボタン同士の間隔（下記gap）と
               // 揃える。片方だけ広げるとリズムが不揃いに見えるため統一する。
@@ -786,6 +795,28 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   icon={<Clock />}
                 >
                   {translateUI('showTravelTimes', language)}
+                </Button>
+              )}
+              {lastTrainDemoMode && onLastTrainModeChange && (
+                <Button
+                  theme={theme}
+                  variant="primary"
+                  size="sm"
+                  pressed={lastTrainModeEnabled}
+                  onClick={() => {
+                    if (!arrival) {
+                      // 親側で共通Snackbarを表示。入力操作は既存の到着駅欄で続ける。
+                      onLastTrainModeChange(true);
+                      arrivalRef.current?.querySelector('input')?.focus();
+                      setShowArrivalResults(true);
+                      return;
+                    }
+                    onLastTrainModeChange(!lastTrainModeEnabled);
+                  }}
+                  title={demoText.warnBody}
+                  icon={<TrainFront />}
+                >
+                  {demoText.toggleMode}
                 </Button>
               )}
               {onShowTransferStationsOnlyChange && (
@@ -851,7 +882,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             詰めて配置してあるので、ここには選択済みチップと検索欄（開いて
             いるときだけ）を出す。どちらも無ければ何も描画せず余白を使わない。
           */}
-          {onAddWaypoint && ((waypoints ?? []).length > 0 || showWaypointInput) && (
+          {!lastTrainDemoMode && onAddWaypoint && ((waypoints ?? []).length > 0 || showWaypointInput) && (
             <div style={{ marginTop: L.sp.md }}>
               {/*
                 入力欄を開いていないときは、選択済みチップだけを独立した行で表示。
@@ -971,7 +1002,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             「時刻を表示」ボタンと同様、経路が無いと意味を持たないため
             出発駅・到着駅の両方が決まってから表示する。
           */}
-          {SHOW_DEPARTURE_TIME_ROW && onDepartureTimeChange && departure && arrival && (
+          {SHOW_DEPARTURE_TIME_ROW && onDepartureTimeChange && ((departure && arrival) || lastTrainDemoMode) && (
             <div style={{ marginTop: L.sp.sm }}>
               <div style={{
                 display: 'flex',
@@ -980,7 +1011,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 flexWrap: 'wrap',
               }}>
                 <label style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
-                  {translateUI(timeMode === 'arrival' ? 'arrivalTimeLabel' : 'departureTime', language)}
+                  {lastTrainDemoMode ? demoText.virtualTime : translateUI(timeMode === 'arrival' ? 'arrivalTimeLabel' : 'departureTime', language)}
                 </label>
                 <TextField
                   theme={theme}
@@ -1017,7 +1048,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   >
                     {translateUI('currentTime', language)}
                   </Button>
-                  {onTimeModeChange && (
+                  {!lastTrainDemoMode && onTimeModeChange && (
                     <SegmentedControl
                       theme={theme}
                       size="sm"

@@ -7,6 +7,8 @@
    `docs/data-editing-guide.md` を読むこと。**
 3. 編集したら次を実行し、すべて通ってから変更を渡すこと。
 
+   **UIのモード/フィルタを新設・変更する前には、`docs/ui-mode-extension-guide.md` を読むこと。** 既存の駅選択・時刻欄・地図を再利用して、専用パネル/スライダーを二重に作らない（終電試作 PR #106 の再発防止）。
+
    ```bash
    npm run test:data
    npm run test:types
