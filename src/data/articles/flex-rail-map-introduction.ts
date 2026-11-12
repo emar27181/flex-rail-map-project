@@ -8,7 +8,7 @@ import type { ArticleSource } from './types';
 export const flexRailMapIntroduction: ArticleSource = {
   "slug": "flex-rail-map-introduction",
   "publishedDate": "2025-06-06",
-  "modifiedDate": "2026-09-29",
+  "modifiedDate": "2026-11-12",
   "related": [
     "tokyo-train-map-beginner",
     "tokyo-sightseeing-routes",
@@ -16,6 +16,30 @@ export const flexRailMapIntroduction: ArticleSource = {
   ],
   "keywordsJa": "フレックス路線図, 路線図 見にくい, 路線図 複雑, 必要な路線だけ, インタラクティブ路線図, 乗り換え 分かりやすい",
   "maps": {
+    "all": {
+      "routes": [
+        "yamanote",
+        "chuo",
+        "keihinTohoku",
+        "jrSobuLine",
+        "ginzaLine",
+        "marunouchiLine",
+        "hibiyaLine",
+        "tozaiLine",
+        "chiyodaLine",
+        "yurakuchoLine",
+        "hanzomonLine",
+        "nambokuLine",
+        "fukutoshinLine",
+        "toeiAsakusaLine",
+        "toeiOedoLine"
+      ],
+      "center": [
+        35.683,
+        139.745
+      ],
+      "zoom": 13
+    },
     "main": {
       "from": "新宿",
       "to": "東京"
@@ -93,18 +117,18 @@ export const flexRailMapIntroduction: ArticleSource = {
           ]
         },
         {
+          "type": "embed",
+          "map": "all",
+          "title": "{siteName}の地図（都心の主要15路線をすべて表示した状態）",
+          "caption": "実際の地図に、都心の主要15路線をすべて表示した状態です。見にくいですよね。枠の中で拡大・移動して確かめてください。"
+        },
+        {
           "type": "h2",
           "text": "全部の路線が出ていると、自分の線が見つからない"
         },
         {
           "type": "p",
-          "text": "都心の主要15路線を同時に表示すると、下の図のようになります。山手線の内側では線と駅名が重なり、どの色がどこへ向かうのかを追うだけで時間がかかります。駅の案内図が分かりにくいのも同じ理由です。情報が足りないのではなく、今の自分に関係のない情報が多すぎるのです。"
-        },
-        {
-          "type": "shot",
-          "shot": "all-lines",
-          "alt": "都心の主要15路線をすべて表示した{siteName}の地図。山手線の内側で線と駅名が重なっている",
-          "caption": "都心の主要15路線を同時に表示した状態。線と駅名が重なり、1本の線を追いにくい"
+          "text": "上の地図は、都心の主要15路線をすべて表示した状態です。見にくいですよね。山手線の内側では線と駅名が重なり、どの色がどこへ向かうのかを追うだけで時間がかかります。駅の案内図が分かりにくいのも同じ理由です。情報が足りないのではなく、今の自分に関係のない情報が多すぎるのです。そこで{siteName}は、必要な情報だけに切り替えられるようにしています。"
         },
         {
           "type": "h2",
@@ -164,19 +188,6 @@ export const flexRailMapIntroduction: ArticleSource = {
           ]
         },
         {
-          "type": "embed",
-          "map": "main",
-          "view": {
-            "center": [
-              35.684,
-              139.735
-            ],
-            "zoom": 13
-          },
-          "title": "{siteName}の地図（新宿から東京を選んだ状態）",
-          "caption": "実際の地図（新宿から東京を選んだ状態）。枠の中で拡大・移動できます。"
-        },
-        {
           "type": "cta",
           "map": "main",
           "title": "新宿から東京の例をそのまま開く",
@@ -203,18 +214,18 @@ export const flexRailMapIntroduction: ArticleSource = {
           ]
         },
         {
+          "type": "embed",
+          "map": "all",
+          "title": "{siteName} map (all 15 major central lines shown)",
+          "caption": "The live map with all 15 major central Tokyo lines shown. Hard to read, isn't it? You can zoom and pan inside the frame to see for yourself."
+        },
+        {
           "type": "h2",
           "text": "With every line on screen, you cannot find yours"
         },
         {
           "type": "p",
-          "text": "Showing 15 major central Tokyo lines at once looks like the image below. Inside the Yamanote Line loop, lines and station names overlap, and just following one color takes time. Station maps are hard for the same reason: the problem is not missing information, but too much information that has nothing to do with your trip."
-        },
-        {
-          "type": "shot",
-          "shot": "all-lines",
-          "alt": "{siteName} map showing 15 major central Tokyo lines at once, with lines and station names overlapping inside the Yamanote Line loop",
-          "caption": "Fifteen central lines shown together. Lines and names overlap, making a single line hard to follow"
+          "text": "The map above shows all 15 major central Tokyo lines at once. Hard to read, isn't it? Inside the Yamanote Line loop, lines and station names overlap, and just following one color takes time. Station maps are hard for the same reason: the problem is not missing information, but too much information that has nothing to do with your trip. So {siteName} lets you switch to only the information you need."
         },
         {
           "type": "h2",
@@ -274,19 +285,6 @@ export const flexRailMapIntroduction: ArticleSource = {
           ]
         },
         {
-          "type": "embed",
-          "map": "main",
-          "view": {
-            "center": [
-              35.684,
-              139.735
-            ],
-            "zoom": 13
-          },
-          "title": "{siteName} map (Shinjuku to Tokyo selected)",
-          "caption": "The live map (Shinjuku to Tokyo selected). You can zoom and pan inside the frame."
-        },
-        {
           "type": "cta",
           "map": "main",
           "title": "Open the Shinjuku to Tokyo example",
@@ -313,18 +311,18 @@ export const flexRailMapIntroduction: ArticleSource = {
           ]
         },
         {
+          "type": "embed",
+          "map": "all",
+          "title": "{siteName}地图（显示市中心全部15条主要线路）",
+          "caption": "实际的地图，显示了东京市中心的全部15条主要线路。是不是很难看清？可以在框内缩放和移动来亲自确认。"
+        },
+        {
           "type": "h2",
           "text": "所有线路都显示时，找不到自己的线"
         },
         {
           "type": "p",
-          "text": "同时显示东京市中心的15条主要线路，就是下图的样子。山手线环内的线路和站名重叠，光是追踪某个颜色通往哪里就要花时间。车站的线路图难懂也是同样的原因：不是信息不够，而是与现在的自己无关的信息太多。"
-        },
-        {
-          "type": "shot",
-          "shot": "all-lines",
-          "alt": "{siteName}同时显示东京市中心15条主要线路的地图，山手线环内线路和站名重叠",
-          "caption": "同时显示15条市中心线路。线路和站名重叠，很难追踪一条线"
+          "text": "上面的地图显示了东京市中心的全部15条主要线路。是不是很难看清？山手线环内的线路和站名重叠，光是追踪某个颜色通往哪里就要花时间。车站的线路图难懂也是同样的原因：不是信息不够，而是与现在的自己无关的信息太多。于是{siteName}可以切换为只显示需要的信息。"
         },
         {
           "type": "h2",
@@ -384,19 +382,6 @@ export const flexRailMapIntroduction: ArticleSource = {
           ]
         },
         {
-          "type": "embed",
-          "map": "main",
-          "view": {
-            "center": [
-              35.684,
-              139.735
-            ],
-            "zoom": 13
-          },
-          "title": "{siteName}地图（已选择新宿到东京）",
-          "caption": "实际的地图（已选择新宿到东京）。可以在框内缩放和移动。"
-        },
-        {
           "type": "cta",
           "map": "main",
           "title": "直接打开新宿到东京的示例",
@@ -423,18 +408,18 @@ export const flexRailMapIntroduction: ArticleSource = {
           ]
         },
         {
+          "type": "embed",
+          "map": "all",
+          "title": "{siteName} 지도(도심 주요 15개 노선을 모두 표시한 상태)",
+          "caption": "실제 지도에 도쿄 도심의 주요 15개 노선을 모두 표시한 상태입니다. 보기 어렵죠? 틀 안에서 확대·이동하며 직접 확인해 보세요."
+        },
+        {
           "type": "h2",
           "text": "모든 노선이 나와 있으면 내 노선을 찾을 수 없다"
         },
         {
           "type": "p",
-          "text": "도쿄 도심의 주요 15개 노선을 한꺼번에 표시하면 아래 그림처럼 됩니다. 야마노테선 안쪽은 선과 역 이름이 겹쳐서, 어떤 색이 어디로 가는지 따라가는 데만 시간이 걸립니다. 역의 노선 안내도가 어려운 것도 같은 이유입니다. 정보가 부족한 것이 아니라, 지금의 나와 상관없는 정보가 너무 많은 것입니다."
-        },
-        {
-          "type": "shot",
-          "shot": "all-lines",
-          "alt": "도쿄 도심 주요 15개 노선을 모두 표시한 {siteName} 지도. 야마노테선 안쪽에서 선과 역 이름이 겹쳐 있다",
-          "caption": "도심 15개 노선을 동시에 표시한 상태. 선과 역 이름이 겹쳐 한 노선을 따라가기 어렵다"
+          "text": "위 지도는 도심 주요 15개 노선을 모두 표시한 상태입니다. 보기 어렵죠? 야마노테선 안쪽은 선과 역 이름이 겹쳐서, 어떤 색이 어디로 가는지 따라가는 데만 시간이 걸립니다. 역의 노선 안내도가 어려운 것도 같은 이유입니다. 정보가 부족한 것이 아니라, 지금의 나와 상관없는 정보가 너무 많은 것입니다. 그래서 {siteName}는 필요한 정보만 표시하도록 바꿀 수 있습니다."
         },
         {
           "type": "h2",
@@ -492,19 +477,6 @@ export const flexRailMapIntroduction: ArticleSource = {
               "text": "영어·중국어·한국어로 바꿀 수 있고, 선의 흐름으로 방향을 잡을 수 있습니다."
             }
           ]
-        },
-        {
-          "type": "embed",
-          "map": "main",
-          "view": {
-            "center": [
-              35.684,
-              139.735
-            ],
-            "zoom": 13
-          },
-          "title": "{siteName} 지도(신주쿠→도쿄를 고른 상태)",
-          "caption": "실제 지도(신주쿠→도쿄를 고른 상태). 틀 안에서 확대·이동할 수 있습니다."
         },
         {
           "type": "cta",
