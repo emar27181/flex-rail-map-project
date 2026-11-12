@@ -42,7 +42,7 @@ export const guide_sapporo_namboku_line_map: ArticleSource = {
     "ja": {
       "meta": {
         "title": "札幌地下鉄南北線の路線図・駅一覧｜JRとの違いと乗り方",
-        "description": "札幌市営地下鉄南北線の路線図と駅の並びを、拡大・移動できる地図で確認。JRと地下鉄の違い、乗換駅や行き先の確かめ方を初心者向けに説明します。",
+        "description": "札幌市営地下鉄南北線の路線図と全駅一覧を掲載。麻生〜真駒内の駅順や、さっぽろ・大通など乗換駅の確認方法を、操作できる地図とともに紹介します。",
         "category": "鉄道の使い方",
         "kicker": "鉄道の使い方",
         "readTime": "読了 約5分",
@@ -65,7 +65,11 @@ export const guide_sapporo_namboku_line_map: ArticleSource = {
         },
         {
           "type": "h2",
-          "text": "最初に確認したいこと"
+          "text": "札幌地下鉄南北線の駅一覧（麻生〜真駒内）"
+        },
+        {
+          "type": "routeStations",
+          "route": "sapporoNambokuLine"
         },
         {
           "type": "p",
@@ -143,7 +147,11 @@ export const guide_sapporo_namboku_line_map: ArticleSource = {
         },
         {
           "type": "h2",
-          "text": "What to check first"
+          "text": "Namboku Line stations (Asabu–Makomanai)"
+        },
+        {
+          "type": "routeStations",
+          "route": "sapporoNambokuLine"
         },
         {
           "type": "p",
@@ -221,7 +229,11 @@ export const guide_sapporo_namboku_line_map: ArticleSource = {
         },
         {
           "type": "h2",
-          "text": "先确认哪些信息"
+          "text": "南北线站点列表"
+        },
+        {
+          "type": "routeStations",
+          "route": "sapporoNambokuLine"
         },
         {
           "type": "p",
@@ -299,7 +311,11 @@ export const guide_sapporo_namboku_line_map: ArticleSource = {
         },
         {
           "type": "h2",
-          "text": "먼저 확인할 것"
+          "text": "난보쿠선 역 목록"
+        },
+        {
+          "type": "routeStations",
+          "route": "sapporoNambokuLine"
         },
         {
           "type": "p",
