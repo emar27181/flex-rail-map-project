@@ -34,6 +34,24 @@ describe('終電モードは元のUIだけで操作する（回帰防止）', ()
     expect(selector).not.toContain('<Slider');
     expect(selector).not.toContain('disabled={!arrival || !lastTrainDestinationSupported}');
   });
+  it('終電モードの路線上限は通常の候補路線数設定をそのまま使い、固定30路線にしない', () => {
+    const map = read('src/components/RailwayMap.tsx');
+    expect(map).toContain('buildDestinationDemoNetwork(arrival.name, maxRouteRecommendations)');
+    expect(map).toContain('[lastTrainDemo, arrival?.name, maxRouteRecommendations]');
+    expect(map.match(/const \\[maxRouteRecommendations, setMaxRouteRecommendations\\] = useState\\(10\\)/g)?.length).toBe(1);
+    expect(map).toContain('onChange={(e) => setMaxRouteRecommendations(Number(e.target.value))}');
+  });
+  it('到着駅未設定の案内は既存のSnackbarを使い新規パネルを増やさない', () => {
+    const map = read('src/components/RailwayMap.tsx');
+    const selector = read('src/components/StationSelector.tsx');
+    const i18n = read('src/utils/lastTrainDemoI18n.ts');
+    expect(map).toContain("import Snackbar from './ui/molecules/Snackbar'");
+    expect(map).toContain('lastTrainArrivalNoticeId > 0');
+    expect(map).toContain('message={lastTrainCopy(currentLanguage).chooseArrivalNotice}');
+    expect(selector).toContain('onLastTrainModeChange(true)');
+    expect(i18n).toContain('終電モードを使用するには、到着駅を設定してください。');
+    expect(map).not.toContain('LastTrainModeControls');
+  });
   it('元のサイトは試作モードがデフォルトでOFF', () => {
     const map = read('src/components/RailwayMap.tsx');
     expect(map).toContain('setLastTrainModeEnabled');
