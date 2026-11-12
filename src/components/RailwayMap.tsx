@@ -63,6 +63,7 @@ import {
   type Departure,
 } from '../data/timetableData';
 import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, alphaWhite, alphaBlack } from '../constants/ui';
+import { DEFAULT_ROUTE_RECOMMENDATION_LIMIT, ROUTE_RECOMMENDATION_LIMIT_OPTIONS } from '../constants/routeRecommendationLimit';
 import { trackStationSelect, trackRouteSearch, trackViewSwitch, trackRouteVisibility, trackRouteVisibilityBulk } from '../utils/appAnalytics';
 import { DEFAULT_MAP_CENTER } from '../constants/mapDefaults';
 import type { MapViewMode } from '../constants/mapViewMode';
@@ -274,8 +275,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [arrival, setArrival] = useState<Station | null>(null);
   // 試作も通常の駅/時刻入力を利用。試作モードはボタンを押すまで有効にしない。
   const [lastTrainModeEnabled, setLastTrainModeEnabled] = useState(false);
-  // 既存の候補路線数（1/2/3/5/10）を終電モードの路線上限にも利用する。
-  const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(10);
+  // 通常の経路推薦数と終電モードで選択肢・既定値を1箇所の設定から共用する。
+  const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(DEFAULT_ROUTE_RECOMMENDATION_LIMIT);
   // 選択した到着駅を通る路線を起点に、通常の候補数設定の範囲内で探索。
   // 3路線固定だった旧試作とは異なり、路線図に存在する任意の到着駅を試せる。
   const demoNetwork = useMemo(() => lastTrainDemo && arrival
@@ -5175,11 +5176,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     value={maxRouteRecommendations}
                     onChange={(e) => setMaxRouteRecommendations(Number(e.target.value))}
                   >
-                    <option value={1}>{translateUI('routeCount', currentLanguage, { count: '1' })}</option>
-                    <option value={2}>{translateUI('routeCount', currentLanguage, { count: '2' })}</option>
-                    <option value={3}>{translateUI('routeCount', currentLanguage, { count: '3' })}</option>
-                    <option value={5}>{translateUI('routeCount', currentLanguage, { count: '5' })}</option>
-                    <option value={10}>{translateUI('routeCount', currentLanguage, { count: '10' })}</option>
+                    {ROUTE_RECOMMENDATION_LIMIT_OPTIONS.map(count => (
+                      <option key={count} value={count}>
+                        {translateUI('routeCount', currentLanguage, { count: String(count) })}
+                      </option>
+                    ))}
                   </Select>
                   <Button theme={theme} variant="positive" size="sm" onClick={selectAllRoutes}>
                     {translateUI('allShow', currentLanguage)}
