@@ -1,5 +1,15 @@
 # CHANGE LOG
 
+## [2026-11-12] セッション（集合駅を探すモード）
+
+### feat: 複数の出発駅から、お互いに行きやすい駅を探す「集合駅を探す」モード
+- `src/utils/meetingPoint.ts`（新規）, `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`, `src/components/ui/StationSearchDropdown.tsx`（`data-station-option`）, `src/utils/translation.ts`（4言語）
+- 所要時間ボタンと同じ列に「集合駅を探す」のON/OFFを1つ足した。出発駅は、出発駅欄 + 追加出発駅（`extraDepartures`）。駅選択パネルの追加欄はこのモードの間だけ「出発駅を追加」になる（新しい入力欄は作らない）
+- 出発駅ごとにダイクストラ（`findStationsWithinTime`）で全駅への所要時間を出し、「いちばん遅い人の所要時間」が短い順（同じなら合計が短い順）に候補5件を出す。候補を押すと既存の到着駅に入る。地図の駅ラベルには全員が着くまでの最大時間を出す
+- 所要時間は路線データによる目安（画面にも注記）
+- `tests/unit/utils/meetingPoint.test.ts`（新規, 6件）, `tests/render/meetingPoint.render.ts`（新規, PC・スマホ）, `docs/ui-mode-extension-guide.md` / `docs/render-tests.md` に追記
+- 終電モード（#106）は 1.35.0 で `main` に入っている（`/?experiment=last-train`）。今回は手を入れていない
+
 ## [2026-11-12] セッション（導入記事の見せ方）
 
 ### improve: 「{siteName}とは」の記事を、全路線の実地図 → 見にくい → 必要な路線だけ、の順にする
