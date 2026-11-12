@@ -82,6 +82,8 @@ export type ArticleBlock =
   | { type: 'steps'; items: string[] }
   /** 表。kinds で列の種類（ui/atoms/responsiveTable.ts）。省略時は1列目が見出し、ほかは文章 */
   | { type: 'table'; head: string[]; rows: string[][]; kinds?: ColumnKind[] }
+  /** 路線データを正本として全駅を一覧にする（本文で駅名を重複管理しない） */
+  | { type: 'routeStations'; route: RouteKey }
   /** 使う場面のカード */
   | { type: 'uses'; items: { title: string; text: string }[] }
   /** 実際の画面の埋め込み（shots のキーの状態を iframe で見せる。別の記事の shots を使うときは article に slug）。
