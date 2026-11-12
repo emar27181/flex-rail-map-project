@@ -30,6 +30,24 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    version: '1.35.0',
+    releasedAt: '2026-11-12T11:54:39Z',
+    kind: 'feat',
+    prs: [106, 116, 117],
+    notes: {
+      ja: [
+        '終電モードの試作（URL に ?experiment=last-train を付けたときだけ使える。時刻は架空のデモデータ）',
+        '札幌南北線の記事に、全駅の一覧を追加',
+        '設定「区間外の路線を表示」を、分かりやすい「選択していない路線を半透明で表示」に変更',
+      ],
+      en: [
+        'Last-train mode prototype (only available with ?experiment=last-train in the URL; times are fictional demo data)',
+        'Added a list of all stations to the Sapporo Namboku Line article',
+        'Renamed the setting "Show outside-segment routes" to the clearer "Show unselected lines semi-transparently"',
+      ],
+    },
+  },
+  {
     version: '1.34.0',
     releasedAt: '2026-11-11T22:35:40Z',
     kind: 'feat',
