@@ -74,10 +74,29 @@ export function buildDestinationDemoNetwork(
   maxLines: number = DEFAULT_ROUTE_RECOMMENDATION_LIMIT,
 ): DestinationDemoNetwork {
   const allKeys = Object.keys(routes) as RouteKey[];
-  const direct = allKeys.filter(key => routes[key].some(st => st.name === destination));
-  if (direct.length === 0 || !Number.isFinite(maxLines) || maxLines < 1) {
+  const onStation = allKeys.filter(key => routes[key].some(st => st.name === destination));
+  if (onStation.length === 0 || !Number.isFinite(maxLines) || maxLines < 1) {
     return { lines: [], stations: [], legs: [], limited: false };
   }
+
+  // 既存の「乗換なしで直通する系統」も直接つながる路線として扱う。
+  // ただし現在の架空デモで列車IDを連続させている2路線系統に限定する。
+  // セクションの区間に目的地が含まれない（例: 新宿と千代田線の直通）ものは含めない。
+  const directThrough = new Set<RouteKey>();
+  for (const service of THROUGH_SERVICES) {
+    if (service.sections.length !== 2) continue;
+    const includesDestination = service.sections.some(section => {
+      const stations = routes[section.route];
+      const start = section.from ? stations.findIndex(st => st.name === section.from) : 0;
+      const end = section.to ? stations.findIndex(st => st.name === section.to) : stations.length - 1;
+      const position = stations.findIndex(st => st.name === destination);
+      return start >= 0 && end >= 0 && position >= Math.min(start, end) && position <= Math.max(start, end);
+    });
+    if (includesDestination) {
+      for (const section of service.sections) directThrough.add(section.route);
+    }
+  }
+  const direct = allKeys.filter(key => onStation.includes(key) || directThrough.has(key));
 
   // 表示上限より直接乗入路線が多い場合も省略しない。
   const cap = Math.max(direct.length, Math.floor(maxLines));
