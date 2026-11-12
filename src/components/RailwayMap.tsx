@@ -12,6 +12,7 @@ import { JAPAN_OUTLINE } from '../data/japanOutline';
 import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
 import { buildDestinationDemoNetwork, calculateDemoLastTrain, availableDemoStations, demoEdgeKey, formatDemoClock, parseDemoClock, getCurrentDemoClock } from '../utils/lastTrainDemo';
+import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
@@ -111,6 +112,7 @@ import IconButton from './ui/atoms/IconButton';
 import MapCompassButton from './map/MapCompassButton';
 import VisibleRoutesLegend from './legend/VisibleRoutesLegend';
 import RouteToggleSnackbar, { type RouteToggleNotice } from './map/RouteToggleSnackbar';
+import Snackbar from './ui/molecules/Snackbar';
 import { getInitialLegendCollapsed, persistLegendCollapsed } from '../utils/legendPersistence';
 import { getThroughReachableSections } from '../utils/throughService';
 import { findParallelSections, sectionMinutes } from '../utils/parallelRoutes';
@@ -272,11 +274,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [arrival, setArrival] = useState<Station | null>(null);
   // 試作も通常の駅/時刻入力を利用。試作モードはボタンを押すまで有効にしない。
   const [lastTrainModeEnabled, setLastTrainModeEnabled] = useState(false);
-  // 選択した到着駅を通る路線を起点に、最大30路線（駅は省略しない）を探索。
+  // 既存の候補路線数（1/2/3/5/10）を終電モードの路線上限にも利用する。
+  const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(10);
+  // 選択した到着駅を通る路線を起点に、通常の候補数設定の範囲内で探索。
   // 3路線固定だった旧試作とは異なり、路線図に存在する任意の到着駅を試せる。
   const demoNetwork = useMemo(() => lastTrainDemo && arrival
-    ? buildDestinationDemoNetwork(arrival.name) : null,
-    [lastTrainDemo, arrival?.name]);
+    ? buildDestinationDemoNetwork(arrival.name, maxRouteRecommendations) : null,
+    [lastTrainDemo, arrival?.name, maxRouteRecommendations]);
   const lastTrainDestinationSupported = !!demoNetwork && demoNetwork.lines.length > 0;
   const lastTrainFilterActive = lastTrainDemo && lastTrainModeEnabled && lastTrainDestinationSupported;
   const [demoMinute, setDemoMinute] = useState(getCurrentDemoClock);
@@ -454,7 +458,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [selectedTrainType, setSelectedTrainType] = useState<string | null>(null);
 
   // 経路推薦設定
-  const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(10);
 
   // 時間フィルター機能
   const [timeFilterEnabled, setTimeFilterEnabled] = useState(false);
@@ -547,8 +550,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * （戻すときは同じ線をもう一度押す。「元に戻す」は付けない）
    */
   const [routeToggleNotice, setRouteToggleNotice] = useState<RouteToggleNotice | null>(null);
-  const noticeRouteToggle = (routeKey: string, shown: boolean) =>
+  // 到着駅未選択時も既存Snackbarを再利用。番号を更新し連続タップで表示時間をリセット。
+  const [lastTrainArrivalNoticeId, setLastTrainArrivalNoticeId] = useState(0);
+  const noticeRouteToggle = (routeKey: string, shown: boolean) => {
+    setLastTrainArrivalNoticeId(0);
     setRouteToggleNotice(prev => ({ id: (prev?.id ?? 0) + 1, routeKey, shown }));
+  };
   const [clickedRoute, setClickedRoute] = useState<string | null>(null);
   const [routePopupPosition, setRoutePopupPosition] = useState<{ x: number, y: number } | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
@@ -4970,6 +4977,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const showMobileRouteCandidatesButton = !lastTrainFilterActive && showRouteRecommendationsPanel && routeRecommendations.length > 0;
   // 追加パネルを作らない。既存の到着駅・時刻欄・トグルだけで描画を切り替える。
   const handleLastTrainModeChange = (enabled: boolean) => {
+    if (enabled && !arrival) {
+      setRouteToggleNotice(null);
+      setLastTrainArrivalNoticeId(id => id + 1);
+      return;
+    }
+    setLastTrainArrivalNoticeId(0);
     setLastTrainModeEnabled(enabled);
     if (enabled && lastTrainDestinationSupported) {
       setMapViewMode('realistic');
@@ -6710,6 +6723,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             );
           })()}
 
+          {lastTrainArrivalNoticeId > 0 && (
+            <Snackbar
+              key={lastTrainArrivalNoticeId}
+              theme={theme}
+              bottom={routeToggleSnackbarBottom}
+              message={lastTrainCopy(currentLanguage).chooseArrivalNotice}
+              onClose={() => setLastTrainArrivalNoticeId(0)}
+            />
+          )}
           {routeToggleNotice && (
             <RouteToggleSnackbar
               notice={routeToggleNotice}
