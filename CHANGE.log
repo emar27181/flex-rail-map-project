@@ -1,5 +1,18 @@
 # CHANGE LOG
 
+## [2026-11-13] セッション（知らせの一元管理・到着予定時刻のボタン）
+
+### improve: 地図の下の知らせ（スナックバー）を1か所で管理し、終電モードの案内は入力欄へ移らず下の帯で出す
+- `src/components/map/mapNotice.ts`（新規）, `src/hooks/useMapNotice.ts`（新規）, `src/components/map/MapNoticeSnackbar.tsx`（新規）, `src/components/RailwayMap.tsx`, `src/components/StationSelector.tsx`
+- 路線の切り替えの知らせと終電モードの案内が、別々の状態・別々の表示になっていた。知らせは一度に1つ（新しいものが前のものを置き換える）で、状態は `useMapNotice`、表示は `MapNoticeSnackbar` の1か所にした。新しい知らせは種類を足すだけ
+- 到着駅が未選択のまま終電モードを押したとき、到着駅欄にカーソルを移して候補を開くのをやめ、「終電モードを使用するには、到着駅を設定してください。」を下の帯だけで出す
+- `tests/unit/components/map/mapNotice.test.ts`（新規）, `tests/render/lastTrainMap.render.ts`（カーソルが移らないことを確認）, 関連するユニットテストの期待を新しい作りに更新, `docs/ui-mode-extension-guide.md`, `docs/last-train-map-poc.md`
+
+### improve: 「時刻を表示」ボタンを「到着予定時刻を表示」にして、駅名の下の時刻の意味をはっきりさせる
+- `src/utils/translation.ts`（4言語）, `src/components/StationSelector.tsx`（`title` に説明を追加）
+- 駅名の下の時刻は、経路上の各駅の到着予定時刻（路線データの駅間時間による目安）。ボタン1つで出し入れできる（既存の `Button` アトム）
+- `tests/render/arrivalTimeLabels.render.ts`（新規, PC・スマホ）, `docs/render-tests.md`
+
 ## [2026-11-13] セッション（集合駅までの各ルート）
 
 ### feat: 「集合駅を探す」で、出発駅ごとに集合駅までのルートと使う路線を見られるようにする

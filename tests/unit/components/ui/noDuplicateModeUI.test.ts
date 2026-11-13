@@ -14,7 +14,8 @@ describe('UIモード拡張時の二重操作禁止', () => {
     const map = read('src/components/RailwayMap.tsx');
     expect(selector).toContain("onLastTrainModeChange(!lastTrainModeEnabled)");
     expect(selector).toContain("onDepartureTimeChange(e.target.value)");
-    expect(selector).toContain("arrivalRef.current?.querySelector('input')?.focus()");
+    // 到着駅が未選択のときの案内は下の帯（知らせ）で出し、入力欄にはカーソルを移さない
+    expect(selector).not.toContain("arrivalRef.current?.querySelector('input')?.focus()");
     expect(selector).not.toContain('<Slider');
     expect(selector).not.toContain('extraContent');
     expect(map.match(/<StationSelector/g)?.length).toBe(3);
