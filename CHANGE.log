@@ -1,5 +1,13 @@
 # CHANGE LOG
 
+## [2026-11-13] セッション（集合駅までの各ルート）
+
+### feat: 「集合駅を探す」で、出発駅ごとに集合駅までのルートと使う路線を見られるようにする
+- `src/utils/meetingPoint.ts`（`summarizeMeetingRoutes`）, `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`, `src/utils/translation.ts`（4言語）
+- 集合駅（到着駅）が決まると、結果の下に「{駅}までの各ルート（使う路線）」を出発駅ごとに並べる（路線は地図と同じ色の `ColorChip`、所要時間つき）。集合駅と同じ出発駅は「集合駅と同じ」、ルートが無ければ「ルートなし」。地図には全員が使う路線を足して表示する
+- 追加した出発駅の行は、横が空いていれば2つずつ並べて詰める
+- `tests/unit/utils/meetingPoint.test.ts`（+2件）, `tests/render/meetingPoint.render.ts`（路線の表示・行の横並びを追加）
+
 ## [2026-11-12] セッション（集合駅モードの出発駅の行）
 
 ### improve: 「集合駅を探す」で、出発駅の行を人数に合わせて増減できるようにする

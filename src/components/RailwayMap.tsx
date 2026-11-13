@@ -13,7 +13,7 @@ import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
 import { buildDestinationDemoNetwork, calculateDemoLastTrain, availableDemoStations, demoEdgeKey, formatDemoClock, parseDemoClock, getCurrentDemoClock } from '../utils/lastTrainDemo';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
-import { rankMeetingStations, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
+import { rankMeetingStations, summarizeMeetingRoutes, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
@@ -2928,6 +2928,26 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return rankMeetingStations(meetingOrigins.map(o => o.name), timeMaps);
   }, [meetingModeEnabled, meetingOrigins, timeFilter]);
   const meetingCandidates = useMemo(() => meetingRanking.slice(0, MEETING_RESULT_LIMIT), [meetingRanking]);
+  // 集合駅（到着駅）が決まっているとき、出発駅ごとのルートと使う路線
+  const meetingRouteEntries = useMemo(() => {
+    if (!meetingModeEnabled || !arrival || meetingOrigins.length < 2) return [];
+    return summarizeMeetingRoutes(
+      meetingOrigins.map(o => o.name),
+      arrival.name,
+      originName => {
+        const origin = meetingOrigins.find(o => o.name === originName);
+        return origin ? routeFinder.findRoutes(origin, arrival, 1)[0] ?? null : null;
+      },
+    );
+  }, [meetingModeEnabled, arrival, meetingOrigins, routeFinder]);
+  // 全員が使う路線を地図に出す（経路候補の路線だけを出す処理の後に足す）
+  useEffect(() => {
+    const keys = [...new Set(meetingRouteEntries.flatMap(e => e.lines))] as RouteKey[];
+    if (keys.length === 0) return;
+    setVisibleRoutes(prev => (keys.every(k => prev.has(k)) ? prev : new Set([...prev, ...keys])));
+    setAvailableRoutes(prev => (keys.every(k => prev.has(k)) ? prev : new Set([...prev, ...keys])));
+    // 経路候補が変わると路線の表示が作り直されるので、そのたびに足し直す
+  }, [meetingRouteEntries, drawnRecommendations]);
   /** 地図の駅ラベルに出す「全員が着くまでの最大時間」 */
   const meetingMaxTimeMap = useMemo(() => new Map(meetingRanking.map(c => [c.name, c.max])), [meetingRanking]);
   // 駅選択パネルの「追加」欄は、集合駅モードでは経由駅ではなく追加出発駅として使う
@@ -5102,6 +5122,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onMeetingModeChange={setMeetingModeEnabled}
                 meetingCandidates={meetingCandidates}
                 meetingOriginNames={meetingOrigins.map(o => o.name)}
+                meetingRoutes={meetingRouteEntries}
                 showStationTimeLabels={timetableModeEnabled}
                 onShowStationTimeLabelsChange={setTimetableModeEnabled}
                 timeMode={timeMode}
@@ -5153,6 +5174,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             onMeetingModeChange={setMeetingModeEnabled}
             meetingCandidates={meetingCandidates}
             meetingOriginNames={meetingOrigins.map(o => o.name)}
+            meetingRoutes={meetingRouteEntries}
             showStationTimeLabels={timetableModeEnabled}
             onShowStationTimeLabelsChange={setTimetableModeEnabled}
             timeMode={timeMode}
@@ -6562,6 +6584,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onMeetingModeChange={setMeetingModeEnabled}
                 meetingCandidates={meetingCandidates}
                 meetingOriginNames={meetingOrigins.map(o => o.name)}
+                meetingRoutes={meetingRouteEntries}
                 showStationTimeLabels={timetableModeEnabled}
                 onShowStationTimeLabelsChange={setTimetableModeEnabled}
                 timeMode={timeMode}

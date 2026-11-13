@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
 import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Timer, TrainFront, Users, Waypoints, X } from 'lucide-react';
-import { routes } from '../data/routes';
+import { routes, routeNames, routeColors } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
-import { translateStation, translateUI } from '../utils/translation'
+import { translateStation, translateUI, translateRoute } from '../utils/translation'
 import type { Language } from '../utils/translation';
-import { MEETING_MAX_MINUTES, type MeetingCandidate } from '../utils/meetingPoint';
+import { MEETING_MAX_MINUTES, type MeetingCandidate, type MeetingRouteEntry } from '../utils/meetingPoint';
+import ColorChip from './ui/ColorChip';
 import { stationReadings, normalizeToHiragana, hiraganaToRomaji, normalizeRomajiForMatch } from '../utils/stationReadings';
 import { findNearestStations } from '../utils/nearestStations';
 import { loadStationHistory, recordStationSelection, buildSuggestions } from '../utils/stationHistory';
@@ -58,6 +59,8 @@ interface StationSelectorProps {
   meetingCandidates?: MeetingCandidate[];
   /** 出発駅の名前（出発駅欄 + 追加した駅）。候補の所要時間と同じ並び */
   meetingOriginNames?: string[];
+  /** 到着駅（集合駅）が決まっているときの、出発駅ごとのルートと使う路線 */
+  meetingRoutes?: MeetingRouteEntry[];
   /** 既存ボタン群に試験用の切替を1個だけ追加する */
   lastTrainDemoMode?: boolean;
   lastTrainModeEnabled?: boolean;
@@ -119,6 +122,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   meetingMode = false,
   meetingCandidates = [],
   meetingOriginNames = [],
+  meetingRoutes = [],
   lastTrainDemoMode = false,
   lastTrainModeEnabled = false,
   onLastTrainModeChange,
@@ -931,7 +935,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   集合駅モード: 追加した出発駅は、出発駅欄と同じ見た目（緑の塗り・閉じるボタン）の行で縦に並べる。
                   「出発駅を追加」を押すたびに行が増え、閉じるボタンで減らせる（人数に合わせて増減できる）。
                 */
-                <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs, marginBottom: showWaypointInput ? L.sp.xs : 0 }} data-meeting-origin-rows>
+                <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: L.sp.xs, marginBottom: showWaypointInput ? L.sp.xs : 0 }} data-meeting-origin-rows>
                   {(waypoints ?? []).map((wp, index) => (
                     <div key={`${wp.name}-${index}`} style={{ width: waypointFieldWidth ? `${waypointFieldWidth}px` : '100%', maxWidth: '100%' }}>
                       <label style={{ display: 'block', marginBottom: L.sp.xs, fontWeight: 'bold', color: colors.textSecondary, fontSize: FS.caption }}>
@@ -1120,6 +1124,43 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     {translateUI('meetingResultsNote', language)}
                   </div>
                 </>
+              )}
+              {/*
+                集合駅（到着駅）が決まっているとき、出発駅ごとにどの路線を使うかを並べる。
+                路線の色は地図と同じ（ColorChip）。ルートの地図表示は RailwayMap 側で全員分の路線を出す。
+              */}
+              {arrival && meetingRoutes.length > 0 && (
+                <div style={{ marginTop: L.sp.xs, display: 'flex', flexDirection: 'column', gap: L.sp.xs }} data-meeting-routes>
+                  <div style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary }}>
+                    {translateUI('meetingRoutesTitle', language, { station: translateStation(arrival.name, language) })}
+                  </div>
+                  {meetingRoutes.map(entry => (
+                    <div key={entry.origin} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.xs }} data-meeting-route={entry.origin}>
+                      <span style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.text }}>
+                        {translateStation(entry.origin, language)}
+                      </span>
+                      {entry.totalTime === null ? (
+                        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('meetingNoRoute', language)}</span>
+                      ) : entry.lines.length === 0 ? (
+                        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('meetingAlreadyThere', language)}</span>
+                      ) : (
+                        entry.lines.map((key, i) => (
+                          <React.Fragment key={`${key}-${i}`}>
+                            {i > 0 && <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{'→'}</span>}
+                            <ColorChip color={routeColors[key as keyof typeof routeColors] ?? colors.textSecondary} theme={theme}>
+                              {translateRoute(routeNames[key as keyof typeof routeNames] ?? key, language)}
+                            </ColorChip>
+                          </React.Fragment>
+                        ))
+                      )}
+                      {entry.totalTime !== null && (
+                        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                          {entry.totalTime}{translateUI('minutesSuffix', language)}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           )}

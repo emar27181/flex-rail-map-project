@@ -66,3 +66,30 @@ describe('実際の路線データでの集合駅', () => {
     for (let i = 1; i < r.length; i++) expect(r[i].max).toBeGreaterThanOrEqual(r[i - 1].max);
   });
 });
+
+import { summarizeMeetingRoutes } from '../../../src/utils/meetingPoint';
+
+describe('summarizeMeetingRoutes', () => {
+  const route = (keys: Array<string | { routeKey: string; isWalkingTransfer: true }>, totalTime: number, transfers: number) => ({
+    totalTime, transfers,
+    segments: keys.map(k => typeof k === 'string' ? { routeKey: k } : k),
+  });
+
+  it('出発駅ごとに、乗る路線を順に並べる（同じ路線の連続と徒歩は除く）', () => {
+    const r = summarizeMeetingRoutes(['A', 'B', 'C'], 'X', origin => ({
+      A: route(['yamanote', 'yamanote', 'chuo'], 20.4, 1),
+      B: route([{ routeKey: 'walking', isWalkingTransfer: true }, 'ginzaLine'], 12, 0),
+      C: null,
+    } as Record<string, ReturnType<typeof route> | null>)[origin]);
+    expect(r).toEqual([
+      { origin: 'A', lines: ['yamanote', 'chuo'], totalTime: 20, transfers: 1 },
+      { origin: 'B', lines: ['ginzaLine'], totalTime: 12, transfers: 0 },
+      { origin: 'C', lines: [], totalTime: null, transfers: 0 },
+    ]);
+  });
+
+  it('集合駅と同じ出発駅は 0 分・路線なし', () => {
+    const r = summarizeMeetingRoutes(['X'], 'X', () => { throw new Error('探索しない'); });
+    expect(r[0]).toEqual({ origin: 'X', lines: [], totalTime: 0, transfers: 0 });
+  });
+});
