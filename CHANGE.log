@@ -8,6 +8,14 @@
 - 架空ダイヤのままなので、ボタン名に「試作」・`title`・駅ラベルの `*` で明示（実際の終電検索には使えない）
 - `tests/render/lastTrainMap.render.ts`（通常画面のON/OFF・Snackbarを追加）, `tests/unit/components/lastTrainMapIntegration.test.ts`（deps の名前を更新）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
 
+## [2026-11-13] セッション（集合駅の「＋ 出発駅を追加」入力欄を常に出す）
+
+### improve: 「集合駅を探す」で、「＋ 出発駅を追加」の入力欄をいつでも出す
+- `src/components/StationSelector.tsx`, `src/utils/translation.ts`（案内文を4言語で更新）, `src/data/articles/meeting-station-finder.ts`（説明を合わせた）
+- これまでは「出発駅を追加」ボタンを押して入力欄を開いていた。追加した出発駅の行の最後に、点線の枠の「＋ 出発駅を追加」入力欄を常に出す。駅名を入れて選ぶと行が増え、入力欄は次の駅の分として空に戻る（ボタンは出さない）。横が空いていれば行と並べて詰める。開いたときにキーボードが出ないよう、自動のフォーカスはしない
+- 候補は、追加済みの駅と出発駅欄の駅を除く
+- `tests/render/meetingPoint.render.ts`, `tests/render/featureArticles.render.ts`, `docs/ui-mode-extension-guide.md`, `docs/render-tests.md`
+
 ## [2026-11-13] セッション（新機能の記事と注意書き）
 
 ### feat: 終電モード・集合駅を探すモードの記事を2本（4言語）、試作・推定の注意書きを自動で付ける仕組み

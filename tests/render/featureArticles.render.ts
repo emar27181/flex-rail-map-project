@@ -60,5 +60,7 @@ test('集合駅モードのURL（埋め込みでない）: 出発駅の行が追
   await page.goto('/?mode=meeting&from=shinjuku&with=tokyo,yokohama');
   await expect(page.getByRole('button', { name: '集合駅を探す' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('[data-meeting-origin-rows] input.station-input-filled')).toHaveCount(2);
+  // 追加の入力欄も、ボタンなしで最初から出ている
+  await expect(page.locator('[data-meeting-add]')).toBeVisible();
   await expect(page.locator('[data-meeting-results]').getByRole('button')).toHaveCount(5);
 });

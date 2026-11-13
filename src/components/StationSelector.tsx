@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
-import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Timer, TrainFront, Users, Waypoints, X } from 'lucide-react';
+import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Plus, Timer, TrainFront, Users, Waypoints, X } from 'lucide-react';
 import { routes, routeNames, routeColors } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
@@ -44,6 +44,11 @@ const SUGGESTION_HEAD_COUNT = SUGGESTION_NEARBY_COUNT + SUGGESTION_FREQUENT_COUN
  * 要望を受け、駅選択パネルからも直接操作できるようにした
  */
 const SHOW_DEPARTURE_TIME_ROW: boolean = true;
+/**
+ * 集合駅モードの「＋ 出発駅を追加」入力欄の最小の幅（px）。4言語の案内の文字（英語は "Add departure station"）が
+ * 16px の入力欄で切れない幅。出発駅の行（出発駅欄と同じ幅）より狭いときもこの幅を確保する。
+ */
+export const MEETING_ADD_MIN_WIDTH_PX = 220;
 /** 近隣駅は候補の補充にも使うため、先頭3件より多めに求めておく */
 const NEARBY_STATION_COUNT = STATION_SUGGESTION_LIMIT;
 
@@ -380,8 +385,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   // 経由駅の候補は、まだ経由駅に入っていない駅だけに絞る（同じ駅を二重に選べないように）
   const filteredWaypointStations = useMemo(() => {
     const already = new Set((waypoints ?? []).map(s => s.name));
+    // 集合駅モードでは出発駅欄の駅も、追加の出発駅に入れない（同じ駅を二重に選ばない）
+    if (meetingMode && departure) already.add(departure.name);
     return filterStations(waypointSearch, majorStations).filter(s => !already.has(s.name));
-  }, [allStations, waypointSearch, majorStations, waypoints]);
+  }, [allStations, waypointSearch, majorStations, waypoints, meetingMode, departure]);
 
   const handleWaypointSelect = (station: Station) => {
     onAddWaypoint?.(station);
@@ -880,7 +887,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 「経由駅を追加」は乗換駅のみ表示の右に詰めて置く。入力欄を
                 開いている間は下に検索欄が出るのでボタン自体は隠す。
               */}
-              {onAddWaypoint && !showWaypointInput && (
+              {onAddWaypoint && !showWaypointInput && !meetingMode && (
                 <Button
                   theme={theme}
                   size="sm"
@@ -891,7 +898,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setShowWaypointInput(true);
                   }}
                 >
-                  {translateUI(meetingMode ? 'addMeetingOrigin' : 'addWaypoint', language)}
+                  {translateUI('addWaypoint', language)}
                 </Button>
               )}
               {/*
@@ -937,7 +944,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             詰めて配置してあるので、ここには選択済みチップと検索欄（開いて
             いるときだけ）を出す。どちらも無ければ何も描画せず余白を使わない。
           */}
-          {!lastTrainDemoMode && onAddWaypoint && ((waypoints ?? []).length > 0 || showWaypointInput) && (
+          {!lastTrainDemoMode && onAddWaypoint && !meetingMode && ((waypoints ?? []).length > 0 || showWaypointInput) && (
             <div style={{ marginTop: L.sp.md }}>
               {/*
                 入力欄を開いていないときは、選択済みチップだけを独立した行で表示。
@@ -945,52 +952,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 右側が空くため、チップは入力欄と同じ行に詰めて表示し
                 空きスペースを使う（無ければ何も出ない）。
               */}
-              {meetingMode && (waypoints ?? []).length > 0 && (
-                /*
-                  集合駅モード: 追加した出発駅は、出発駅欄と同じ見た目（緑の塗り・閉じるボタン）の行で縦に並べる。
-                  「出発駅を追加」を押すたびに行が増え、閉じるボタンで減らせる（人数に合わせて増減できる）。
-                */
-                <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: L.sp.xs, marginBottom: showWaypointInput ? L.sp.xs : 0 }} data-meeting-origin-rows>
-                  {(waypoints ?? []).map((wp, index) => (
-                    <div key={`${wp.name}-${index}`} style={{ width: waypointFieldWidth ? `${waypointFieldWidth}px` : '100%', maxWidth: '100%' }}>
-                      <label style={{ display: 'block', marginBottom: L.sp.xs, fontWeight: 'bold', color: colors.textSecondary, fontSize: FS.caption }}>
-                        {`${translateUI('departureStation', language)} ${index + 2}`}
-                      </label>
-                      <div style={{ position: 'relative' }}>
-                        <TextField
-                          theme={theme}
-                          size="sm"
-                          type="text"
-                          readOnly
-                          value={translateStation(wp.name, language)}
-                          aria-label={`${translateUI('departureStation', language)} ${index + 2}`}
-                          className="station-input-filled"
-                          styleOverride={{
-                            paddingRight: L.sp['3xl'],
-                            border: `2px solid ${SEMANTIC.departure}`,
-                            backgroundColor: SEMANTIC.departure,
-                            color: colors.onPrimary,
-                          }}
-                        />
-                        <IconButton
-                          theme={theme}
-                          size="sm"
-                          onClick={() => onRemoveWaypoint?.(index)}
-                          label={translateUI('clearSelection', language)}
-                          icon={<X size={14} />}
-                          styleOverride={{
-                            position: 'absolute',
-                            right: '2px',
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            color: alphaWhite(0.9),
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
               {!meetingMode && (waypoints ?? []).length > 0 && !showWaypointInput && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.xs }}>
                   {(waypoints ?? []).map((wp, index) => (
@@ -1091,6 +1052,122 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/*
+            集合駅モードの出発駅。追加した出発駅の行（出発駅欄と同じ見た目の緑の行）の最後に、
+            **常に「＋ 出発駅を追加」の入力欄を出す**。ボタンを押して入力欄を開く手間なく、駅名を入れて選ぶだけで行が増える
+            （人数に合わせて何人でも足せる。行の閉じるボタンで減らせる）。横が空いていれば2つずつ並べて詰める。
+            入力欄・候補の出し方は経由駅の追加と同じ部品（TextField / StationSearchDropdown）。
+            開いたときにキーボードが出ないよう、自動でフォーカスはしない。
+          */}
+          {!lastTrainDemoMode && onAddWaypoint && meetingMode && (
+            <div
+              style={{ marginTop: L.sp.md, display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: L.sp.xs }}
+              data-meeting-origin-rows
+            >
+              {(waypoints ?? []).map((wp, index) => (
+                <div key={`${wp.name}-${index}`} style={{ width: waypointFieldWidth ? `${waypointFieldWidth}px` : '100%', maxWidth: '100%' }}>
+                  <label style={{ display: 'block', marginBottom: L.sp.xs, fontWeight: 'bold', color: colors.textSecondary, fontSize: FS.caption }}>
+                    {`${translateUI('departureStation', language)} ${index + 2}`}
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <TextField
+                      theme={theme}
+                      size="sm"
+                      type="text"
+                      readOnly
+                      value={translateStation(wp.name, language)}
+                      aria-label={`${translateUI('departureStation', language)} ${index + 2}`}
+                      className="station-input-filled"
+                      styleOverride={{
+                        paddingRight: L.sp['3xl'],
+                        border: `2px solid ${SEMANTIC.departure}`,
+                        backgroundColor: SEMANTIC.departure,
+                        color: colors.onPrimary,
+                      }}
+                    />
+                    <IconButton
+                      theme={theme}
+                      size="sm"
+                      onClick={() => onRemoveWaypoint?.(index)}
+                      label={translateUI('clearSelection', language)}
+                      icon={<X size={14} />}
+                      styleOverride={{
+                        position: 'absolute',
+                        right: '2px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        color: alphaWhite(0.9),
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+              {/* いつでも出ている「＋ 出発駅を追加」の入力欄（出発駅の行と同じ幅・同じ高さ） */}
+              <div
+                data-meeting-add
+                // 案内の文字（「出発駅を追加」）が切れない幅（MEETING_ADD_MIN_WIDTH_PX）を確保し、行の横に収まらなければ次の行で
+                // 残りの幅いっぱいに広げる（狭いスマホでは出発駅の行の半分の幅には入らない）
+                style={{ flex: `1 1 ${Math.max(waypointFieldWidth ?? 0, MEETING_ADD_MIN_WIDTH_PX)}px`, minWidth: 0, maxWidth: '100%', position: 'relative' }}
+              >
+                <label style={{ display: 'block', marginBottom: L.sp.xs, fontWeight: 'bold', color: colors.textSecondary, fontSize: FS.caption }}>
+                  {`${translateUI('departureStation', language)} ${(waypoints ?? []).length + 2}`}
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <Plus
+                    size={16}
+                    aria-hidden
+                    style={{ position: 'absolute', left: L.sp.md, top: '50%', transform: 'translateY(-50%)', color: colors.textSecondary, pointerEvents: 'none' }}
+                  />
+                  <TextField
+                    theme={theme}
+                    size="sm"
+                    type="text"
+                    fullWidth
+                    value={waypointSearch}
+                    onChange={(e) => {
+                      setWaypointSearch(e.target.value);
+                      setWaypointDropdownPos(getInputDropdownPosition(e.currentTarget.getBoundingClientRect()));
+                      setShowWaypointResults(true);
+                    }}
+                    onFocus={(e) => {
+                      focusedInputRef.current = e.currentTarget;
+                      setWaypointDropdownPos(getInputDropdownPosition(e.currentTarget.getBoundingClientRect()));
+                      setShowWaypointResults(true);
+                    }}
+                    onBlur={() => {
+                      focusedInputRef.current = null;
+                      setShowWaypointResults(false);
+                      setWaypointSearch('');
+                    }}
+                    placeholder={translateUI('addMeetingOrigin', language)}
+                    aria-label={translateUI('addMeetingOrigin', language)}
+                    styleOverride={{
+                      // ＋のアイコン（16px）と案内の文字の間に余白を取る
+                      paddingLeft: `calc(${L.sp.md} + 16px + ${L.sp.xs})`,
+                      border: `2px dashed ${SEMANTIC.departure}`,
+                    }}
+                  />
+                </div>
+                {showWaypointResults && waypointDropdownPos && (
+                  <StationSearchDropdown
+                    position={waypointDropdownPos}
+                    stations={filteredWaypointStations}
+                    onSelect={(station) => {
+                      // 選んだら行が増え、入力欄は空に戻って次の駅をすぐ入れられる
+                      onAddWaypoint(station);
+                      setWaypointSearch('');
+                      setShowWaypointResults(false);
+                    }}
+                    theme={theme}
+                    language={language}
+                    hasQuery={!!waypointSearch}
+                    onMouseDown={(e) => e.preventDefault()}
+                  />
+                )}
+              </div>
             </div>
           )}
 
