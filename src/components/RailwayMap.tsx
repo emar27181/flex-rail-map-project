@@ -13,6 +13,7 @@ import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
 import { buildDestinationDemoNetwork, calculateDemoLastTrain, availableDemoStations, demoEdgeKey, formatDemoClock, parseDemoClock, getCurrentDemoClock } from '../utils/lastTrainDemo';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
+import { requestFreshPosition, resolveCurrentPosition } from '../utils/freshLocation';
 import { rankMeetingStations, summarizeMeetingRoutes, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
@@ -1433,11 +1434,26 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (station) handleManualSetDeparture(station);
   }, [handleManualSetDeparture]);
 
-  const handleSetNearestDeparture = useCallback(() => {
-    if (!userLocation) return;
-    const nearest = findNearestStation(userLocation[0], userLocation[1]);
+  // 「現在地から」: 押した時点の位置で最寄り駅を決める。
+  // 位置の監視は画面を閉じている間などに止まり、古い位置のままになるため、
+  // 最後の更新から時間が空いているときは取り直す（直前に更新されていれば待たずにそれを使う）。
+  // 取り直せなかったとき（権限・圏外・時間切れ）は直前の位置で続ける。
+  const userLocationRef = useRef(userLocation);
+  const userLocationAtRef = useRef(0);
+  userLocationRef.current = userLocation;
+  useEffect(() => { if (userLocation) userLocationAtRef.current = Date.now(); }, [userLocation]);
+  const handleSetNearestDeparture = useCallback(async () => {
+    const { position, refreshed } = await resolveCurrentPosition({
+      known: userLocationRef.current,
+      knownAt: userLocationAtRef.current,
+      now: Date.now(),
+      fetchFresh: () => requestFreshPosition(),
+    });
+    if (refreshed && position) setUserLocation(position);
+    if (!position) return;
+    const nearest = findNearestStation(position[0], position[1]);
     if (nearest) setDeparture(nearest);
-  }, [userLocation, findNearestStation]);
+  }, [findNearestStation]);
 
   /**
    * 「現在地から」ボタンを塗りつぶしにするかどうかの条件。
