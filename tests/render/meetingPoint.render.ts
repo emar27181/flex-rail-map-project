@@ -32,8 +32,9 @@ test('集合駅モード: 出発駅を追加すると候補が出て、選ぶと
   await expect(results).toContainText('新宿');
   await expect(results).toContainText('東京');
   // 駅の入力欄が増えるのは、追加した出発駅の行（1つ）だけ。別のパネル・入力欄は作らない
-  expect(await stationInputs.count()).toBe(inputsBefore + 1);
-  await expect(page.locator('[data-meeting-origin-rows] input.station-input-filled')).toHaveCount(1);
+  // 追加した出発駅はタグ（1つ）。駅の入力欄（出発・到着）は増えない
+  expect(await stationInputs.count()).toBe(inputsBefore);
+  await expect(page.locator('[data-meeting-origin-rows] [data-tag-item]')).toHaveCount(1);
 
   // 候補を押すと到着駅に入る
   const first = results.getByRole('button').first();
@@ -54,52 +55,56 @@ test('集合駅モード: 出発駅を追加すると候補が出て、選ぶと
   expect(errors).toEqual([]);
 });
 
-test('集合駅モード: 出発駅の行は「追加」を押すたびに増え、✕で減らせる', async ({ page }) => {
+test('集合駅モード: 追加した出発駅は横一列のタグで増え、×で減らせる（番号と名前は1つにまとまる）', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('/?from=shinjuku');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
   await page.getByRole('button', { name: '集合駅を探す' }).click();
 
-  const rows = page.locator('[data-meeting-origin-rows] input.station-input-filled');
-  await expect(rows).toHaveCount(0);
+  const tags = page.locator('[data-meeting-origin-rows] [data-tag-item]');
+  await expect(tags).toHaveCount(0);
   for (const name of ['東京', '横浜', '渋谷']) {
     await page.getByPlaceholder('出発駅を追加').fill(name);
     await page.locator(`[data-station-option="${name}"]`).first().click();
   }
-  // 入力欄は消えず、次の出発駅（出発駅 5）の分としていつでも出ている
+  // 入力欄は消えず、同じ行の末尾にいつでも出ている。行ごとの見出し（出発駅 2 …）は立てない
   await expect(page.locator('[data-meeting-add]')).toHaveCount(1);
-  await expect(page.locator('[data-meeting-add] label')).toHaveText('出発駅 5');
-  // 出発駅欄と同じ見た目の行が、追加した数だけ縦に並ぶ（出発駅2・3・4）
-  await expect(rows).toHaveCount(3);
-  await expect(rows.nth(0)).toHaveValue('東京');
-  await expect(rows.nth(2)).toHaveValue('渋谷');
-  const widths = await rows.evaluateAll(els => els.map(e => Math.round(e.getBoundingClientRect().width)));
-  const departureWidth = await page.locator('input.station-input-filled').first().evaluate(e => Math.round(e.getBoundingClientRect().width));
-  for (const w of widths) expect(Math.abs(w - departureWidth)).toBeLessThanOrEqual(2);
+  await expect(page.locator('[data-meeting-origin-rows] label')).toHaveCount(0);
+  // 番号と名前が1つのタグにまとまる
+  await expect(tags).toHaveCount(3);
+  await expect(tags.nth(0)).toHaveText(/2\. 東京/);
+  await expect(tags.nth(2)).toHaveText(/4\. 渋谷/);
   // 4人分の所要時間が候補に並ぶ
   await expect(page.locator('[data-meeting-results]')).toContainText('新宿');
   await expect(page.locator('[data-meeting-results]')).toContainText('渋谷');
 
-  // 横が空いていれば詰める: 2つ目までは同じ行に並ぶ
-  const tops = await rows.evaluateAll(els => els.map(e => Math.round(e.getBoundingClientRect().top)));
-  expect(tops[0]).toBe(tops[1]);
+  // 横一列: タグは同じ行に並ぶ（折り返す前）。入力欄も同じ行か、収まらなければ次の行で広がる
+  const tops = await tags.evaluateAll(els => els.map(e => Math.round(e.getBoundingClientRect().top)));
+  expect(new Set(tops).size).toBe(1);
+
+  // 点線や色付きの枠にしない（普通の入力欄と同じ枠）
+  const border = await page.locator('[data-meeting-add] input').evaluate(el => {
+    const cs = getComputedStyle(el);
+    const normal = getComputedStyle(document.querySelector('input[type="time"], input.station-input-filled') ?? el);
+    return { style: cs.borderTopStyle, color: cs.borderTopColor, normalColor: normal.borderTopColor };
+  });
+  expect(border.style).toBe('solid');
 
   // 集合駅を決めると、4人それぞれのルートと使う路線が並ぶ
   await page.locator('[data-meeting-results]').getByRole('button').first().click();
   await expect(page.locator('[data-meeting-route]')).toHaveCount(4);
   await expect(page.locator('[data-meeting-routes]')).toContainText('横浜');
 
-  // ✕で行が減る
-  await page.locator('[data-meeting-origin-rows] button[aria-label]').first().click();
-  await expect(rows).toHaveCount(2);
-  await expect(rows.nth(0)).toHaveValue('横浜');
+  // ×でタグが減る（番号は詰め直される）
+  await page.locator('[data-meeting-origin-rows] [data-tag-item] button').first().click();
+  await expect(tags).toHaveCount(2);
+  await expect(tags.nth(0)).toHaveText(/2\. 横浜/);
   expect(errors).toEqual([]);
 });
 
-
 for (const lang of ['ja', 'en', 'zh', 'ko'] as const) {
   test(`集合駅モード: 「＋ 出発駅を追加」の案内の文字が切れない（${lang}）`, async ({ page }) => {
-    // 出発駅の行が1つのとき、追加欄が行の横に並ぶ（幅が足りなければ次の行へ回る）。狭いスマホで確かめる
+    // タグが1つのとき、入力欄はタグの横に並ぶ（幅が足りなければ次の行へ回る）。狭いスマホで確かめる
     await page.setViewportSize({ width: 360, height: 780 });
     await page.goto(`/?mode=meeting&from=shinjuku&with=tokyo&lang=${lang}`);
     const input = page.locator('[data-meeting-add] input');
@@ -118,17 +123,17 @@ for (const lang of ['ja', 'en', 'zh', 'ko'] as const) {
   });
 }
 
-test('集合駅モード: 狭いスマホ（360px）でも「＋ 出発駅を追加」は出発駅の行の下で残りの幅いっぱいに出る', async ({ page }) => {
+test('集合駅モード: 狭いスマホ（360px）でタグが増えても、入力欄は行からはみ出さず残りの幅に収まる', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 780 });
-  await page.goto('/?mode=meeting&from=shinjuku&with=tokyo,yokohama');
-  const add = page.locator('[data-meeting-add]');
-  await expect(add).toBeVisible();
+  await page.goto('/?mode=meeting&from=shinjuku&with=tokyo,yokohama,shibuya');
+  await expect(page.locator('[data-meeting-add]')).toBeVisible();
   const boxes = await page.evaluate(() => {
-    const rows = [...document.querySelectorAll('[data-meeting-origin-rows] input.station-input-filled')].map(e => e.getBoundingClientRect());
+    const row = document.querySelector('[data-meeting-origin-rows]')!.getBoundingClientRect();
     const add = document.querySelector('[data-meeting-add]')!.getBoundingClientRect();
-    return { rowBottom: Math.max(...rows.map(r => r.bottom)), addTop: add.top, addWidth: Math.round(add.width), panelRight: document.querySelector('[data-meeting-origin-rows]')!.getBoundingClientRect().right, addRight: add.right };
+    const tags = [...document.querySelectorAll('[data-meeting-origin-rows] [data-tag-item]')].map(e => e.getBoundingClientRect());
+    return { rowRight: row.right, addRight: add.right, addWidth: Math.round(add.width), tagRights: tags.map(t => t.right) };
   });
-  expect(boxes.addTop).toBeGreaterThanOrEqual(boxes.rowBottom - 1); // 行の下に回る
-  expect(boxes.addWidth).toBeGreaterThanOrEqual(200);
-  expect(boxes.addRight).toBeLessThanOrEqual(boxes.panelRight + 1);
+  expect(boxes.addRight).toBeLessThanOrEqual(boxes.rowRight + 1);
+  for (const r of boxes.tagRights) expect(r).toBeLessThanOrEqual(boxes.rowRight + 1);
+  expect(boxes.addWidth).toBeGreaterThanOrEqual(150);
 });

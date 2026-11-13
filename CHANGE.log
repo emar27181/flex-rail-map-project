@@ -8,6 +8,15 @@
 - 架空ダイヤのままなので、ボタン名に「試作」・`title`・駅ラベルの `*` で明示（実際の終電検索には使えない）
 - `tests/render/lastTrainMap.render.ts`（通常画面のON/OFF・Snackbarを追加）, `tests/unit/components/lastTrainMapIntegration.test.ts`（deps の名前を更新）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
 
+## [2026-11-13] セッション（集合駅の出発駅を横一列のタグにまとめる）
+
+### improve: 追加した出発駅を横一列のタグにし、点線・色付きの枠をやめる（部品 `TagInputRow`）
+- `src/components/ui/molecules/TagInputRow.tsx`（新規）, `src/components/ui/atoms/controlSize.ts`（`TAG_INPUT_MIN_WIDTH_EM`）, `src/components/StationSelector.tsx`
+- 「分かりにくい」との指摘を受け、行ごとの見出し（出発駅 2 …）・緑の塗りと枠・点線の枠の入力欄をやめた。番号と名前は「2. 東京 ×」の1つのタグにまとめて横一列に並べ、同じ行の末尾に普通の枠の「＋ 出発駅を追加」入力欄をいつでも出す。収まらなければ次の行で広がる
+- 最小の幅は px の直書きをやめ、定義元の `TAG_INPUT_MIN_WIDTH_EM`（em）にした。出発駅欄の幅を実測する処理も不要になり削除
+- アトム（`RemovableTag` / `TextField`）の組み合わせだけで作った molecule。駅の知識は持たない（候補・追加の処理は `StationSelector` が渡す）
+- `tests/unit/components/ui/tagInputRow.test.tsx`（新規）, `tests/render/meetingPoint.render.ts`・`featureArticles.render.ts`（タグの増減・同じ行・通常の枠・4言語の案内が切れない・狭いスマホ）, `docs/design-system.md`（部品の表に追加）, `docs/ui-mode-extension-guide.md`, `docs/render-tests.md`
+
 ## [2026-11-13] セッション（集合駅の「＋ 出発駅を追加」入力欄を常に出す）
 
 ### improve: 「集合駅を探す」で、「＋ 出発駅を追加」の入力欄をいつでも出す

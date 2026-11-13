@@ -135,3 +135,10 @@ export const aboveFloatingButtons = (rows = 1) =>
  * FLOATING_ICON_BUTTON_SIZE.md（36px）の箱に対して詰まりすぎない大きさ。
  */
 export const FLOATING_ICON_GLYPH_SIZE = 18;
+
+/**
+ * タグを並べた行の末尾に置く入力欄（TagInputRow）の最小の幅（em。入力欄の文字の大きさに対する倍数）。
+ * 4言語の案内の文字（英語は "Add departure station"）が、＋のアイコンと一緒に切れずに入る幅。
+ * 行に収まらなければ入力欄が次の行へ回り、残りの幅いっぱいに広がる。px を呼び出し側に書かない。
+ */
+export const TAG_INPUT_MIN_WIDTH_EM = 14;
