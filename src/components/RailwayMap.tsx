@@ -282,11 +282,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(DEFAULT_ROUTE_RECOMMENDATION_LIMIT);
   // 選択した到着駅を通る路線を起点に、通常の候補数設定の範囲内で探索。
   // 3路線固定だった旧試作とは異なり、路線図に存在する任意の到着駅を試せる。
-  const demoNetwork = useMemo(() => lastTrainDemo && arrival
+  // 終電モードの画面の変更（基準時刻・経由駅の欄の差し替えなど）は、試作URL か、ボタンでONにしている間だけ。
+  // 通常の画面にもボタンを出し（試作と明示）、押したときだけこの画面に切り替わる。
+  const lastTrainUiActive = lastTrainDemo || lastTrainModeEnabled;
+  const demoNetwork = useMemo(() => lastTrainUiActive && arrival
     ? buildDestinationDemoNetwork(arrival.name, maxRouteRecommendations) : null,
-    [lastTrainDemo, arrival?.name, maxRouteRecommendations]);
+    [lastTrainUiActive, arrival?.name, maxRouteRecommendations]);
   const lastTrainDestinationSupported = !!demoNetwork && demoNetwork.lines.length > 0;
-  const lastTrainFilterActive = lastTrainDemo && lastTrainModeEnabled && lastTrainDestinationSupported;
+  const lastTrainFilterActive = lastTrainUiActive && lastTrainModeEnabled && lastTrainDestinationSupported;
   const [demoMinute, setDemoMinute] = useState(getCurrentDemoClock);
   const demoStationOwner = useMemo(() => new Map(demoNetwork?.lines.flatMap(line =>
     line.stations.map(st => [st.name, line.routeKey] as const)) ?? []), [demoNetwork]);
@@ -5039,12 +5042,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     }
     setLastTrainArrivalNoticeId(0);
     setLastTrainModeEnabled(enabled);
-    if (enabled && lastTrainDestinationSupported) {
-      setMapViewMode('realistic');
-      mapRef.current?.fitBounds(
-        (demoNetwork?.stations ?? []).map(st => [st.lat, st.lng] as [number, number]),
-        { padding: [24, 24] },
-      );
+    if (enabled && arrival) {
+      // ONにした直後はまだ作られていないので、ここで同じ到着駅のネットワークを求める
+      const network = demoNetwork ?? buildDestinationDemoNetwork(arrival.name, maxRouteRecommendations);
+      if (network.lines.length > 0) {
+        setMapViewMode('realistic');
+        mapRef.current?.fitBounds(
+          network.stations.map(st => [st.lat, st.lng] as [number, number]),
+          { padding: [24, 24] },
+        );
+      }
     }
   };
   /** 立体表示の説明の箱の下端。スマホ全画面では左下のボタン群（MobileBottomPanel）の上に置く */
@@ -5088,7 +5095,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               borderRadius: L.r.card,
             }}>
               <StationSelector
-                lastTrainDemoMode={lastTrainDemo}
+                lastTrainDemoMode={lastTrainUiActive}
+                lastTrainButton
                 lastTrainModeEnabled={lastTrainModeEnabled}
                 onLastTrainModeChange={handleLastTrainModeChange}
                 departure={departure}
@@ -5133,7 +5141,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           )
         ) : (
           <StationSelector
-                lastTrainDemoMode={lastTrainDemo}
+                lastTrainDemoMode={lastTrainUiActive}
+                lastTrainButton
                 lastTrainModeEnabled={lastTrainModeEnabled}
                 onLastTrainModeChange={handleLastTrainModeChange}
             departure={departure}
@@ -6550,7 +6559,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               overflowY: 'auto',
             }}>
               <StationSelector
-                lastTrainDemoMode={lastTrainDemo}
+                lastTrainDemoMode={lastTrainUiActive}
+                lastTrainButton
                 lastTrainModeEnabled={lastTrainModeEnabled}
                 onLastTrainModeChange={handleLastTrainModeChange}
                 departure={departure}

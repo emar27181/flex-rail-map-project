@@ -54,3 +54,36 @@ test('固定3路線外の駅でも既存の終電モードボタンを押せる'
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
   await expect(page.getByRole('slider', { name: '仮想現在時刻を変更' })).toHaveCount(0);
 });
+
+test('通常の画面にも終電モード（試作）のボタンがあり、押したときだけ終電の画面になる', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('/?from=shinjuku&to=shibuya');
+  await expect(page.locator('.leaflet-container').first()).toBeVisible();
+  const toggle = page.getByRole('button', { name: '終電モード（試作）' });
+  await expect(toggle).toBeEnabled();
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+  // 押す前は通常の画面（出発時刻の欄、「集合駅を探す」も並んでいる）
+  await expect(page.getByText('出発時刻')).toBeVisible();
+  await expect(page.getByRole('button', { name: '集合駅を探す' })).toBeVisible();
+
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByText('基準時刻')).toBeVisible();
+  // 駅の入力欄・時刻欄は元の1組だけ
+  await expect(page.locator('input.station-input-filled')).toHaveCount(2);
+  await expect(page.locator('input[type="time"]')).toHaveCount(1);
+
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.getByText('出発時刻')).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('通常の画面で到着駅が未選択のまま押すと、共通のSnackbarで案内する（画面は変わらない）', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.leaflet-container').first()).toBeVisible();
+  const toggle = page.getByRole('button', { name: '終電モード（試作）' });
+  await toggle.click();
+  await expect(page.locator('[data-snackbar]')).toContainText('終電モードを使用するには、到着駅を設定してください。');
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+});

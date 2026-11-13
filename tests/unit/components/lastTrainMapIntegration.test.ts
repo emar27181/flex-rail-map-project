@@ -37,7 +37,7 @@ describe('終電モードは元のUIだけで操作する（回帰防止）', ()
   it('終電モードの路線上限は通常の候補路線数設定をそのまま使い、固定30路線にしない', () => {
     const map = read('src/components/RailwayMap.tsx');
     expect(map).toContain('buildDestinationDemoNetwork(arrival.name, maxRouteRecommendations)');
-    expect(map).toContain('[lastTrainDemo, arrival?.name, maxRouteRecommendations]');
+    expect(map).toContain('[lastTrainUiActive, arrival?.name, maxRouteRecommendations]');
     expect(map.split('const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(DEFAULT_ROUTE_RECOMMENDATION_LIMIT)').length - 1).toBe(1);
     expect(map).toContain('ROUTE_RECOMMENDATION_LIMIT_OPTIONS.map(count =>');
     expect(map).toContain("import { DEFAULT_ROUTE_RECOMMENDATION_LIMIT, ROUTE_RECOMMENDATION_LIMIT_OPTIONS } from '../constants/routeRecommendationLimit'");

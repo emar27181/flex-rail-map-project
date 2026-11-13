@@ -63,6 +63,8 @@ interface StationSelectorProps {
   meetingRoutes?: MeetingRouteEntry[];
   /** 既存ボタン群に試験用の切替を1個だけ追加する */
   lastTrainDemoMode?: boolean;
+  /** 通常の画面にも終電モード（試作）のボタンを出す。ボタンを押したときだけ終電の画面になる */
+  lastTrainButton?: boolean;
   lastTrainModeEnabled?: boolean;
   onLastTrainModeChange?: (enabled: boolean) => void;
   onDepartureChange: (station: Station | null) => void;
@@ -124,6 +126,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   meetingOriginNames = [],
   meetingRoutes = [],
   lastTrainDemoMode = false,
+  lastTrainButton = false,
   lastTrainModeEnabled = false,
   onLastTrainModeChange,
   onDepartureChange,
@@ -774,7 +777,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
             寸法は Button の size="sm" に揃えてあるので2つの大きさは一致する。
           */}
-          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange || onAddWaypoint || onShowStationTimeLabelsChange || onMeetingModeChange || (lastTrainDemoMode && onLastTrainModeChange)) && (
+          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange || onAddWaypoint || onShowStationTimeLabelsChange || onMeetingModeChange || ((lastTrainDemoMode || lastTrainButton) && onLastTrainModeChange)) && (
             <div style={{
               // 出発駅・到着駅欄とこの行の間隔も、ボタン同士の間隔（下記gap）と
               // 揃える。片方だけ広げるとリズムが不揃いに見えるため統一する。
@@ -837,7 +840,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   {translateUI('meetingModeButton', language)}
                 </Button>
               )}
-              {lastTrainDemoMode && onLastTrainModeChange && (
+              {(lastTrainDemoMode || lastTrainButton) && onLastTrainModeChange && (
                 <Button
                   theme={theme}
                   variant="primary"

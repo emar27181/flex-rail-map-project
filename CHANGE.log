@@ -1,5 +1,13 @@
 # CHANGE LOG
 
+## [2026-11-13] セッション（終電モードを通常の画面へ）
+
+### feat: 終電モード（試作）を、試作URLなしでも通常の駅選択パネルから使えるようにする
+- `src/components/StationSelector.tsx`（`lastTrainButton`）, `src/components/RailwayMap.tsx`（`lastTrainUiActive`）, `src/utils/lastTrainDemoI18n.ts`（ボタン名に「試作」を4言語で追加）
+- ボタンを押したときだけ終電の画面（基準時刻・到達圏の絞り込み）になる。OFFで通常に戻る。到着駅が未選択なら共通Snackbarで案内
+- 架空ダイヤのままなので、ボタン名に「試作」・`title`・駅ラベルの `*` で明示（実際の終電検索には使えない）
+- `tests/render/lastTrainMap.render.ts`（通常画面のON/OFF・Snackbarを追加）, `tests/unit/components/lastTrainMapIntegration.test.ts`（deps の名前を更新）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
+
 ## [2026-11-13] セッション（集合駅までの各ルート）
 
 ### feat: 「集合駅を探す」で、出発駅ごとに集合駅までのルートと使う路線を見られるようにする
