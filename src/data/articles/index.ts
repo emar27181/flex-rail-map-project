@@ -10,6 +10,8 @@ import { tokyoSightseeingRoutes } from './tokyo-sightseeing-routes';
 import { commute30minCheapRent } from './commute-30min-cheap-rent';
 import { tokyoSafeAreaByRoute } from './tokyo-safe-area-by-route';
 import { howToReadStationNumbers } from './how-to-read-station-numbers';
+import { lastTrainModeGuide } from './last-train-mode-guide';
+import { meetingStationFinder } from './meeting-station-finder';
 
 import { guide_airport_terminal_train_station_names } from './airport-terminal-train-station-names';
 import { guide_akihabara_lines_transfer } from './akihabara-lines-transfer';
@@ -51,6 +53,8 @@ export const ARTICLE_SOURCES: ArticleSource[] = [
   commute30minCheapRent,
   tokyoSafeAreaByRoute,
   howToReadStationNumbers,
+  lastTrainModeGuide,
+  meetingStationFinder,
   guide_express_vs_local_stop_check,
   guide_fukuoka_airport_subway_map,
   guide_kyoto_karasuma_subway_first,

@@ -52,6 +52,11 @@ export interface ArticleMapState {
   stationNumbers?: boolean;
   /** 立体（3D）で開く。既定は2Dの地図 */
   view?: '2d' | '3d';
+  /** モードを入れて開く（mapModeUrlParam.ts）。終電モードは to、集合駅モードは from と withStations が要る。
+   *  試作・推定を含むモードは、記事に注意書きが自動で付く（articleNotices.ts） */
+  mode?: 'last-train' | 'meeting';
+  /** 集合駅モードの、from のほかの出発駅（日本語の駅名） */
+  withStations?: string[];
 }
 
 /** 埋め込む画面。記事の言語の画面を iframe で開く（articleRender.ts の shotEmbedSrc） */
@@ -91,6 +96,9 @@ export type ArticleBlock =
   | { type: 'shot'; shot: string; article?: string; alt: string; caption: string }
   /** 実際の地図の埋め込み（maps のキー。view で開く範囲を決める） */
   | { type: 'embed'; map: string; view?: { center: [number, number]; zoom: number }; title: string; caption: string }
+  /** 注意書き（試作・架空のデータ・推定を含む）。モードを開く記事は、必要な注意書きが結論の次に自動で付く
+   *  （articleNotices.ts）。本文の途中に足したいときだけ書く。text は決まり文句に足す説明（省略可） */
+  | { type: 'notice'; kind: 'prototype' | 'fictional' | 'estimated'; text?: string }
   /** 地図を開くボタン（maps のキー） */
   | { type: 'cta'; map: string; title: string; text: string }
   /** 上の型で書けない図（初心者記事の操作できる図など）。新しく使う前に型を足せないか考える */

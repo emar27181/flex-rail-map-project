@@ -8,6 +8,16 @@
 - 架空ダイヤのままなので、ボタン名に「試作」・`title`・駅ラベルの `*` で明示（実際の終電検索には使えない）
 - `tests/render/lastTrainMap.render.ts`（通常画面のON/OFF・Snackbarを追加）, `tests/unit/components/lastTrainMapIntegration.test.ts`（deps の名前を更新）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
 
+## [2026-11-13] セッション（新機能の記事と注意書き）
+
+### feat: 終電モード・集合駅を探すモードの記事を2本（4言語）、試作・推定の注意書きを自動で付ける仕組み
+- 記事: `src/data/articles/last-train-mode-guide.ts`（終電モードの使い方・試作）, `src/data/articles/meeting-station-finder.ts`（集合駅を探す）, `src/data/articles/index.ts`
+- 注意書き: `src/utils/articleNotices.ts`（新規）, `src/utils/articleRender.ts`, `src/data/articles/types.ts`（`notice` ブロック）, `src/styles/article-layout.css`（`.notice`・橙の注意色）
+  - 試作の機能・架空のデータ・推定を含む画面を載せる記事は、記事の地図の状態（`mode` / `travelTimes`）から必要な注意書きを決め、最初の地図デモの直後に自動で入れる。書き忘れを防ぐため（文言は4言語で1か所）
+  - 終電モード → 試作＋架空のデータ、集合駅 → 推定、所要時間を出す地図 → 推定。既存の「通勤時間から住む駅を探す」にも「推定を含みます」が付く
+- 機能を開いたときからそのモードにする URL: `src/utils/mapModeUrlParam.ts`（新規。`?mode=last-train&to=…` / `?mode=meeting&from=…&with=…`）, `src/utils/mapDeepLink.ts`, `src/components/RailwayMap.tsx`（初期状態）。埋め込みの画面ではボタンを押せないため
+- `tests/unit/utils/articleNotices.test.ts`（新規, 11件）, `tests/render/featureArticles.render.ts`（新規, PC・スマホ）, `docs/article-writing.md`, `docs/templates/article-prompt.md`, `docs/render-tests.md`
+
 ## [2026-11-13] セッション（終電モードの絞り込みと時刻の注記）
 
 ### fix: 終電モードでも駅の絞り込み（乗換駅のみ・急行駅のみ）が効くようにする
