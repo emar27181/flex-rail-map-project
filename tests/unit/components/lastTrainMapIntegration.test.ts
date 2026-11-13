@@ -51,7 +51,8 @@ describe('終電モードは元のUIだけで操作する（回帰防止）', ()
     const i18n = read('src/utils/lastTrainDemoI18n.ts');
     // 知らせは useMapNotice の1か所で管理する（路線切替などと同じ帯。専用の状態・表示を作らない）
     expect(map).toContain("import MapNoticeSnackbar from './map/MapNoticeSnackbar'");
-    expect(map).toContain('notifyMessage(lastTrainCopy(currentLanguage).chooseArrivalNotice)');
+    // 足りない入力の案内は注意（warning）の印つきで出す
+    expect(map).toContain("notifyMessage(lastTrainCopy(currentLanguage).chooseArrivalNotice, 'warning')");
     expect(map).not.toContain('lastTrainArrivalNoticeId');
     expect(selector).toContain('onLastTrainModeChange(!lastTrainModeEnabled)');
     expect(i18n).toContain('終電モードを使用するには、到着駅を設定してください。');

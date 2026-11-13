@@ -483,6 +483,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   return (
     <div
       ref={panelRef}
+      // 知らせ（入力が足りないときの案内など）を、このパネルのすぐ下に出すための目印（map/MapNoticeSnackbar）
+      data-station-selector
       onTouchStart={stopTouchPropagation}
       onTouchMove={stopTouchPropagation}
       onTouchEnd={stopTouchPropagation}

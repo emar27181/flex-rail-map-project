@@ -8,6 +8,14 @@
 - 架空ダイヤのままなので、ボタン名に「試作」・`title`・駅ラベルの `*` で明示（実際の終電検索には使えない）
 - `tests/render/lastTrainMap.render.ts`（通常画面のON/OFF・Snackbarを追加）, `tests/unit/components/lastTrainMapIntegration.test.ts`（deps の名前を更新）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
 
+## [2026-11-13] セッション（知らせを操作した場所の近くに出す）
+
+### improve: 入力が足りない知らせを、駅選択パネルのすぐ下に注意の印つきで出す
+- `src/components/map/mapNotice.ts`（`noticePlacement` / `MESSAGE_NOTICE_DURATION_MS`）, `src/components/map/mapNoticePlacement.ts`（新規）, `src/components/map/MapNoticeSnackbar.tsx`, `src/hooks/useMapNotice.ts`, `src/components/StationSelector.tsx`（`data-station-selector`）, `src/components/RailwayMap.tsx`
+- 終電モードの案内が画面の下の端に出て、目に止まらなかった。フィードバックは操作・入力の近くに出すのがベストプラクティスなので、文の案内（駅選択パネルでの操作の結果）は**パネルのすぐ下**（左端をそろえ、パネルの幅まで）に、注意の印（橙のアイコン）つきで出す。6秒出す（行動が必要な文は4秒より長く）。パネルが見つからないときは従来どおり地図の下
+- 地図の線をタップした知らせは従来どおり地図の下（指の下にあるのは地図のため）。知らせの管理・表示は `useMapNotice` / `MapNoticeSnackbar` の1か所のまま、種類ごとに場所を決める
+- `tests/unit/components/map/mapNoticePlacement.test.ts`（新規）, `tests/render/mapNotice.render.ts`（パネルのすぐ下・左端そろえ・上半分・アイコン）, `docs/ui-mode-extension-guide.md`, `docs/design-system.md`, `docs/last-train-map-poc.md`, `docs/render-tests.md`
+
 ## [2026-11-13] セッション（知らせの文末が切れる）
 
 ### fix: 地図の下の知らせで、案内の文末が切れないようにする（`multiline`）

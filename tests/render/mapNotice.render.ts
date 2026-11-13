@@ -43,20 +43,30 @@ for (const lang of ['ja', 'en', 'zh', 'ko'] as const) {
   }
 }
 
-test('知らせは下に並ぶ浮かぶボタン（表示切替など）に重ならず、そのすぐ上に出る', async ({ page }) => {
+test('入力が足りない知らせは、操作した駅選択パネルのすぐ下に、注意の印つきで出る（画面の下の端ではない）', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
   await page.getByRole('button', { name: '終電モード（試作）' }).click();
   const bar = page.locator('[data-snackbar]');
   await expect(bar).toBeVisible();
   const r = await page.evaluate(() => {
-    const barBox = (document.querySelector('[data-snackbar]') as HTMLElement).getBoundingClientRect();
-    const buttons = [...document.querySelectorAll('button')]
-      .filter(b => /表示切替/.test(b.textContent ?? ''))
-      .map(b => b.getBoundingClientRect())
-      .filter(b => b.width > 0);
-    return { barBottom: barBox.bottom, barTop: barBox.top, buttonTops: buttons.map(b => b.top), viewportHeight: window.innerHeight };
+    const bar = (document.querySelector('[data-snackbar]') as HTMLElement).getBoundingClientRect();
+    const panel = (document.querySelector('[data-station-selector]') as HTMLElement).getBoundingClientRect();
+    const icon = document.querySelector('[data-snackbar] svg');
+    return {
+      barTop: bar.top, barBottom: bar.bottom, barLeft: bar.left, barRight: bar.right,
+      panelBottom: panel.bottom, panelLeft: panel.left, panelRight: panel.right,
+      viewport: window.innerHeight, hasIcon: !!icon,
+    };
   });
-  expect(r.barTop).toBeGreaterThanOrEqual(0);
-  for (const top of r.buttonTops) expect(r.barBottom, '浮かぶボタンに重なっている').toBeLessThanOrEqual(top + 1);
+  // パネルのすぐ下（隙間は数px〜16px）。パネルに重ならない
+  expect(r.barTop).toBeGreaterThanOrEqual(r.panelBottom);
+  expect(r.barTop - r.panelBottom).toBeLessThanOrEqual(16);
+  // パネルの左端にそろい、パネルの幅を超えない
+  expect(Math.abs(r.barLeft - r.panelLeft)).toBeLessThanOrEqual(1);
+  expect(r.barRight).toBeLessThanOrEqual(Math.max(r.panelRight, r.panelLeft + 240) + 1);
+  // 目に入る高さ（画面の上半分）に出る。画面の下の端には出さない
+  expect(r.barBottom).toBeLessThan(r.viewport * 0.7);
+  // 注意の印（アイコン）がある
+  expect(r.hasIcon).toBe(true);
 });

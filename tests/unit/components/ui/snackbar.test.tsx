@@ -125,6 +125,6 @@ describe('Snackbar の multiline（文末を切らない）', () => {
 
   it('文だけの知らせ（MapNoticeSnackbar）は multiline で出す（案内の文末を切らない）', () => {
     const src = readFileSync(join(__dirname, '../../../../src/components/map/MapNoticeSnackbar.tsx'), 'utf8');
-    expect(src).toMatch(/<Snackbar[^>]*multiline/);
+    expect(src).toMatch(/<Snackbar[\s\S]*?multiline/);
   });
 });

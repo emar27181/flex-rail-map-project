@@ -5080,7 +5080,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const handleLastTrainModeChange = (enabled: boolean) => {
     if (enabled && !arrival) {
       // 到着駅を決めてから使うモード。入力欄には移らず、ほかの知らせと同じ下の帯で案内する
-      notifyMessage(lastTrainCopy(currentLanguage).chooseArrivalNotice);
+      notifyMessage(lastTrainCopy(currentLanguage).chooseArrivalNotice, 'warning');
       return;
     }
     setLastTrainModeEnabled(enabled);
