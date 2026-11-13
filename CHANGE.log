@@ -1,5 +1,13 @@
 # CHANGE LOG
 
+## [2026-11-13] セッション（線形の試作）
+
+### feat: 2D の地図を実際の線路の形で描く試作（`?experiment=track-geometry`）
+- `scripts/track-geometry/build-from-terrain3d-v2.mts`（新規）, `public/data/track-geometry-prototype.json`（新規, 52路線）, `src/utils/trackGeometryPrototype.ts`（新規）, `src/components/RailwayMap.tsx`（`trackGeometryOf`）
+- 立体表示用に受け取っていた線形（OSM 由来・80路線）を、駅の位置で区切って `TrackSection` にした。検証（`splitAtStations`）に通った路線だけを使う。通常の画面は変わらない
+- 駅と線の距離の基準は試作では 300m（本番は 150m）。除外した28路線は直線のまま（理由は JSON の `meta.skipped`）
+- `tests/unit/utils/trackGeometryPrototype.test.ts`（新規, 8件）, `tests/render/trackGeometry.render.ts`（新規）, `docs/track-geometry.md`, `docs/render-tests.md`
+
 ## [2026-11-13] セッション（集合駅までの各ルート）
 
 ### feat: 「集合駅を探す」で、出発駅ごとに集合駅までのルートと使う路線を見られるようにする
