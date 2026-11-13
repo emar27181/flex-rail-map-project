@@ -7,8 +7,11 @@
  * 決まり（Material Design のスナックバーと同じ考え方）:
  * - 一度に1つ。新しい知らせは前のものを置き換える（呼び出し側が key を変える）
  * - SNACKBAR_DURATION_MS で自動で消える。指やマウスが乗っている間・中にフォーカスがある間は消さない
- * - **1行に収める**。高さは地図に浮かぶほかの部品（FLOATING_CONTROL.height）と同じで、文の長さに合わせて幅が縮む。
- *   2行に折り返さない（2026-11 ユーザー指示「余分な縦幅を使わずシンプルに」）。収まらない長い名前は呼び出し側で省略する
+ * - **原則1行**。高さは地図に浮かぶほかの部品（FLOATING_CONTROL.height）と同じで、文の長さに合わせて幅が縮む
+ *   （2026-11 ユーザー指示「余分な縦幅を使わずシンプルに」）。収まらない長い名前は呼び出し側で省略する
+ * - **文そのものは切らない**（2026-11-13 ユーザー指摘: 「…設定してくださ」で文末が切れていた）。
+ *   文を出すとき（`multiline`）は、幅に収まらなければ**2行まで折り返す**（Material Design も2行まで）。
+ *   文末が大事な文を「…」や overflow で隠さない。路線名のように省略できる部分だけが省略の対象
  * - 操作（「元に戻す」など）と閉じるボタンは任意。無ければ帯は文だけになる
  *   （2026-11: 路線の切り替えは同じ線をもう一度押せば戻せるので、「元に戻す」は付けない）
  * - 地図の操作を止めない（全体を覆わない・確認を求めない）。読み上げでは role="status" で知らせる
@@ -51,10 +54,15 @@ export interface SnackbarProps {
   bottom: string;
   /** 位置の上書き（テストや別の置き場所） */
   style?: CSSProperties;
+  /**
+   * 文を出す帯。幅に収まらないときは2行まで折り返して、文末を切らない（既定は1行で、はみ出す部分は隠す）。
+   * 案内文のように文末が大事なものに使う。路線名を省略する知らせ（RouteToggleSnackbar）は使わない
+   */
+  multiline?: boolean;
 }
 
 const Snackbar: React.FC<SnackbarProps> = ({
-  theme, message, leading, actionLabel, onAction, onClose, closeLabel, duration = SNACKBAR_DURATION_MS, bottom, style,
+  theme, message, leading, actionLabel, onAction, onClose, closeLabel, duration = SNACKBAR_DURATION_MS, bottom, style, multiline = false,
 }) => {
   const colors = getThemeColors(theme);
   const [paused, setPaused] = useState(false);
@@ -91,15 +99,22 @@ const Snackbar: React.FC<SnackbarProps> = ({
         display: 'flex',
         alignItems: 'center',
         gap: L.sp.sm,
-        padding: `0 ${actionLabel || closeLabel ? L.sp.xs : FLOATING_PANEL.inset} 0 ${FLOATING_PANEL.inset}`,
+        // 2行になるときも上下に余白を取り、1行のときの高さ（minHeight）は変えない
+        padding: `${multiline ? L.sp.sm : 0} ${actionLabel || closeLabel ? L.sp.xs : FLOATING_PANEL.inset} ${multiline ? L.sp.sm : 0} ${FLOATING_PANEL.inset}`,
         color: colors.text,
         fontSize: FS.body,
-        whiteSpace: 'nowrap',
+        whiteSpace: multiline ? 'normal' : 'nowrap',
         ...style,
       }}
     >
       {leading}
-      <span data-snackbar-message style={{ display: 'flex', minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap' }}>{message}</span>
+      <span
+        data-snackbar-message
+        style={multiline
+          // 2行にするときは行の長さをそろえ、文末の数文字だけが次の行に残らないようにする（text-wrap: balance）
+          ? { display: 'block', minWidth: 0, whiteSpace: 'normal', overflowWrap: 'anywhere', lineHeight: 1.4, textWrap: 'balance' as CSSProperties['textWrap'] }
+          : { display: 'flex', minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap' }}
+      >{message}</span>
       {actionLabel && onAction && (
         <Button
           theme={theme}

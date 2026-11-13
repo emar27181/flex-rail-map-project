@@ -1,6 +1,6 @@
 /**
  * 地図の下に出す知らせの表示（オーガニズム）。出すのは常にこの1か所で、知らせは一度に1つ。
- * 種類ごとの見た目: 路線の切り替え → RouteToggleSnackbar（路線の色の点つき）／文だけの案内 → Snackbar。
+ * 種類ごとの見た目: 路線の切り替え → RouteToggleSnackbar（路線の色の点つき）／文だけの案内 → Snackbar（文末を切らず2行まで折り返す）。
  * どちらも帯そのもの（自動で消える・1行・読み上げ）は ui/molecules/Snackbar。位置は呼び出し側が決める。
  */
 import React from 'react';
@@ -35,7 +35,8 @@ const MapNoticeSnackbar: React.FC<Props> = ({ notice, theme, language, bottom, r
       />
     );
   }
-  return <Snackbar key={notice.id} theme={theme} bottom={bottom} message={notice.message} onClose={onClose} />;
+  // 文の案内は文末が大事なので、切らずに2行まで折り返す（Snackbar の multiline）
+  return <Snackbar key={notice.id} theme={theme} bottom={bottom} message={notice.message} onClose={onClose} multiline />;
 };
 
 export default MapNoticeSnackbar;

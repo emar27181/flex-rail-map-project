@@ -8,6 +8,13 @@
 - 架空ダイヤのままなので、ボタン名に「試作」・`title`・駅ラベルの `*` で明示（実際の終電検索には使えない）
 - `tests/render/lastTrainMap.render.ts`（通常画面のON/OFF・Snackbarを追加）, `tests/unit/components/lastTrainMapIntegration.test.ts`（deps の名前を更新）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
 
+## [2026-11-13] セッション（知らせの文末が切れる）
+
+### fix: 地図の下の知らせで、案内の文末が切れないようにする（`multiline`）
+- `src/components/ui/molecules/Snackbar.tsx`（`multiline`）, `src/components/map/MapNoticeSnackbar.tsx`, `docs/design-system.md`
+- スマホで「終電モードを使用するには、到着駅を設定してくださ」と文末が切れていた（幅 360px を超える文を、1行・overflow で隠していた）。文の案内は、収まらないときに**2行まで折り返す**ようにした（Material Design も2行まで）。1行のときの高さは変えない。路線名の知らせは従来どおり1行で、路線名だけを省略する
+- `tests/render/mapNotice.render.ts`（新規。4言語×360/390px で文が切れない・2行まで・画面の端に収まる・下の浮かぶボタンに重ならない。複数行を外すと落ちることを確認）, `tests/unit/components/ui/snackbar.test.tsx`, `docs/render-tests.md`
+
 ## [2026-11-13] セッション（集合駅の出発駅を横一列のタグにまとめる）
 
 ### improve: 追加した出発駅を横一列のタグにし、点線・色付きの枠をやめる（部品 `TagInputRow`）

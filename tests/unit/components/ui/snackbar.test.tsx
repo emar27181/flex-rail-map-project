@@ -107,3 +107,24 @@ describe('地図の線をタップして切り替えたときに知らせる（R
     expect(src).toContain('<MapNoticeSnackbar');
   });
 });
+
+describe('Snackbar の multiline（文末を切らない）', () => {
+  it('multiline は折り返しを許し（2行まで）、文を overflow で隠さない。既定は1行', () => {
+    const { rerender } = render(<Snackbar theme="dark" bottom="10px" message="とても長い案内の文" onClose={() => {}} />);
+    const single = document.querySelector('[data-snackbar-message]') as HTMLElement;
+    expect(single.style.whiteSpace).toBe('nowrap');
+    expect(single.style.overflow).toBe('hidden');
+
+    rerender(<Snackbar theme="dark" bottom="10px" message="とても長い案内の文" onClose={() => {}} multiline />);
+    const multi = document.querySelector('[data-snackbar-message]') as HTMLElement;
+    expect(multi.style.whiteSpace).toBe('normal');
+    expect(multi.style.overflow).toBe('');
+    const bar = document.querySelector('[data-snackbar]') as HTMLElement;
+    expect(bar.style.whiteSpace).toBe('normal');
+  });
+
+  it('文だけの知らせ（MapNoticeSnackbar）は multiline で出す（案内の文末を切らない）', () => {
+    const src = readFileSync(join(__dirname, '../../../../src/components/map/MapNoticeSnackbar.tsx'), 'utf8');
+    expect(src).toMatch(/<Snackbar[^>]*multiline/);
+  });
+});
