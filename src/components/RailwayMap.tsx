@@ -283,17 +283,29 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(DEFAULT_ROUTE_RECOMMENDATION_LIMIT);
   // 選択した到着駅を通る路線を起点に、通常の候補数設定の範囲内で探索。
   // 3路線固定だった旧試作とは異なり、路線図に存在する任意の到着駅を試せる。
-  const demoNetwork = useMemo(() => lastTrainDemo && arrival
+  // 終電モードの画面の変更（基準時刻・経由駅の欄の差し替えなど）は、試作URL か、ボタンでONにしている間だけ。
+  // 通常の画面にもボタンを出し（試作と明示）、押したときだけこの画面に切り替わる。
+  const lastTrainUiActive = lastTrainDemo || lastTrainModeEnabled;
+  const demoNetwork = useMemo(() => lastTrainUiActive && arrival
     ? buildDestinationDemoNetwork(arrival.name, maxRouteRecommendations) : null,
-    [lastTrainDemo, arrival?.name, maxRouteRecommendations]);
+    [lastTrainUiActive, arrival?.name, maxRouteRecommendations]);
   const lastTrainDestinationSupported = !!demoNetwork && demoNetwork.lines.length > 0;
-  const lastTrainFilterActive = lastTrainDemo && lastTrainModeEnabled && lastTrainDestinationSupported;
+  const lastTrainFilterActive = lastTrainUiActive && lastTrainModeEnabled && lastTrainDestinationSupported;
   const [demoMinute, setDemoMinute] = useState(getCurrentDemoClock);
   const demoStationOwner = useMemo(() => new Map(demoNetwork?.lines.flatMap(line =>
     line.stations.map(st => [st.name, line.routeKey] as const)) ?? []), [demoNetwork]);
   const demoReachability = useMemo(() => lastTrainFilterActive && arrival && demoNetwork
     ? calculateDemoLastTrain(demoNetwork.legs, arrival.name) : null,
     [lastTrainFilterActive, demoNetwork, arrival?.name]);
+  // 終電モードでも、駅の絞り込み（乗換駅のみ・急行駅のみ）は通常の画面と同じに効かせる。到着駅は常に出す
+  const demoRouteHasExpressMark = (rk: RouteKey) => (routes[rk] as Station[] | undefined)?.some(s => s.isExpress) ?? false;
+  const isDemoStationShown = (st: Station, rk: RouteKey): boolean => {
+    if (st.name === arrival?.name) return true;
+    const isTransfer = transferStations.has(st.name);
+    if (showTransferStationsOnly && !isTransfer) return false;
+    if (showExpressStationsOnly && demoRouteHasExpressMark(rk) && !st.isExpress && !isTransfer) return false;
+    return true;
+  };
   const demoAvailableStations = useMemo(() => new Set(
     demoReachability && arrival ? availableDemoStations(demoReachability.latestDeparture, arrival.name, demoMinute) : []
   ), [demoReachability, arrival?.name, demoMinute]);
@@ -4483,8 +4495,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const travelTimeMins = showTravelTimeOverlay ? travelTimeMap.get(station.name) : undefined;
     const demoLatest = demoReachability?.latestDeparture.get(station.name);
     const meetingMax = meetingModeEnabled ? meetingMaxTimeMap.get(station.name) : undefined;
+    // 終電モードでは、駅名の下の時刻は「その駅を出発できる最終時刻」。「時刻を表示」で出し入れできる（既定はオン）
     const effectiveTimeLabel = lastTrainFilterActive
-      ? (demoLatest === undefined ? undefined : formatDemoClock(demoLatest) + ' *')
+      ? (!timetableModeEnabled || demoLatest === undefined ? undefined : formatDemoClock(demoLatest) + ' *')
       : meetingMax !== undefined
         ? `${meetingMax}${translateUI('minutesSuffix', currentLanguage)}`
       : travelTimeMins !== undefined
@@ -5050,12 +5063,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       return;
     }
     setLastTrainModeEnabled(enabled);
-    if (enabled && lastTrainDestinationSupported) {
-      setMapViewMode('realistic');
-      mapRef.current?.fitBounds(
-        (demoNetwork?.stations ?? []).map(st => [st.lat, st.lng] as [number, number]),
-        { padding: [24, 24] },
-      );
+    // 終電モードでは「時刻を表示」を既定でオンにする（駅名の下に最終時刻が出る）
+    if (enabled) { setTimetableModeEnabled(true); setMeetingModeEnabled(false); }
+    if (enabled && arrival) {
+      // ONにした直後はまだ作られていないので、ここで同じ到着駅のネットワークを求める
+      const network = demoNetwork ?? buildDestinationDemoNetwork(arrival.name, maxRouteRecommendations);
+      if (network.lines.length > 0) {
+        setMapViewMode('realistic');
+        mapRef.current?.fitBounds(
+          network.stations.map(st => [st.lat, st.lng] as [number, number]),
+          { padding: [24, 24] },
+        );
+      }
     }
   };
   /** 立体表示の説明の箱の下端。スマホ全画面では左下のボタン群（MobileBottomPanel）の上に置く */
@@ -5099,7 +5118,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               borderRadius: L.r.card,
             }}>
               <StationSelector
-                lastTrainDemoMode={lastTrainDemo}
+                lastTrainDemoMode={lastTrainUiActive}
+                lastTrainButton
                 lastTrainModeEnabled={lastTrainModeEnabled}
                 onLastTrainModeChange={handleLastTrainModeChange}
                 departure={departure}
@@ -5144,7 +5164,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           )
         ) : (
           <StationSelector
-                lastTrainDemoMode={lastTrainDemo}
+                lastTrainDemoMode={lastTrainUiActive}
+                lastTrainButton
                 lastTrainModeEnabled={lastTrainModeEnabled}
                 onLastTrainModeChange={handleLastTrainModeChange}
             departure={departure}
@@ -5689,8 +5710,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           interactive={false} />
                       ) : null;
                     })}
-                    {line.stations.filter(st => demoStationOwner.get(st.name) === rk).map(st =>
-                      renderStationMarker(st, rk, 'last-train-' + st.name, false))}
+                    {line.stations.filter(st => demoStationOwner.get(st.name) === rk && isDemoStationShown(st, rk)).map(st =>
+                      renderStationMarker(st, rk, 'last-train-' + st.name, demoRouteHasExpressMark(rk)))}
                   </React.Fragment>
                 );
               })}
@@ -6561,7 +6582,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               overflowY: 'auto',
             }}>
               <StationSelector
-                lastTrainDemoMode={lastTrainDemo}
+                lastTrainDemoMode={lastTrainUiActive}
+                lastTrainButton
                 lastTrainModeEnabled={lastTrainModeEnabled}
                 onLastTrainModeChange={handleLastTrainModeChange}
                 departure={departure}

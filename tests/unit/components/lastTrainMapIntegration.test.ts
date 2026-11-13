@@ -38,7 +38,7 @@ describe('終電モードは元のUIだけで操作する（回帰防止）', ()
   it('終電モードの路線上限は通常の候補路線数設定をそのまま使い、固定30路線にしない', () => {
     const map = read('src/components/RailwayMap.tsx');
     expect(map).toContain('buildDestinationDemoNetwork(arrival.name, maxRouteRecommendations)');
-    expect(map).toContain('[lastTrainDemo, arrival?.name, maxRouteRecommendations]');
+    expect(map).toContain('[lastTrainUiActive, arrival?.name, maxRouteRecommendations]');
     expect(map.split('const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(DEFAULT_ROUTE_RECOMMENDATION_LIMIT)').length - 1).toBe(1);
     expect(map).toContain('ROUTE_RECOMMENDATION_LIMIT_OPTIONS.map(count =>');
     expect(map).toContain("import { DEFAULT_ROUTE_RECOMMENDATION_LIMIT, ROUTE_RECOMMENDATION_LIMIT_OPTIONS } from '../constants/routeRecommendationLimit'");
@@ -56,6 +56,24 @@ describe('終電モードは元のUIだけで操作する（回帰防止）', ()
     expect(selector).toContain('onLastTrainModeChange(!lastTrainModeEnabled)');
     expect(i18n).toContain('終電モードを使用するには、到着駅を設定してください。');
     expect(map).not.toContain('LastTrainModeControls');
+  });
+  it('終電モードでも駅の絞り込みと「時刻を表示」が効く（通常の画面と同じ部品・同じ状態を使う）', () => {
+    const map = read('src/components/RailwayMap.tsx');
+    const selector = read('src/components/StationSelector.tsx');
+    // 乗換駅のみ・急行駅のみは通常の描画と同じ状態（showTransferStationsOnly / showExpressStationsOnly）で絞る。到着駅は残す
+    const fn = map.slice(map.indexOf('const isDemoStationShown'), map.indexOf('const demoAvailableStations'));
+    expect(fn).toContain('arrival?.name');
+    expect(fn).toContain('showTransferStationsOnly');
+    expect(fn).toContain('showExpressStationsOnly');
+    expect(map).toContain('isDemoStationShown(st, rk)');
+    // 時刻は「時刻を表示」（timetableModeEnabled）で出し入れし、終電モードに入ったら既定でオンにする
+    expect(map).toContain('!timetableModeEnabled || demoLatest === undefined');
+    expect(map).toContain('if (enabled) { setTimetableModeEnabled(true);');
+    // ボタンの名前はモードで変えない（意味は※の注記で説明する）。終電モードは到着駅だけでボタンを出す
+    expect(selector).toContain("translateUI('showStationTimeLabelsButton', language)");
+    expect(selector).toContain('(!!departure || lastTrainModeEnabled)');
+    expect(selector).toContain("'timeLabelNoteLastTrain'");
+    expect(selector).toContain('data-time-label-note');
   });
   it('元のサイトは試作モードがデフォルトでOFF', () => {
     const map = read('src/components/RailwayMap.tsx');

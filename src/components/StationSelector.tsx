@@ -63,6 +63,8 @@ interface StationSelectorProps {
   meetingRoutes?: MeetingRouteEntry[];
   /** 既存ボタン群に試験用の切替を1個だけ追加する */
   lastTrainDemoMode?: boolean;
+  /** 通常の画面にも終電モード（試作）のボタンを出す。ボタンを押したときだけ終電の画面になる */
+  lastTrainButton?: boolean;
   lastTrainModeEnabled?: boolean;
   onLastTrainModeChange?: (enabled: boolean) => void;
   onDepartureChange: (station: Station | null) => void;
@@ -124,6 +126,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   meetingOriginNames = [],
   meetingRoutes = [],
   lastTrainDemoMode = false,
+  lastTrainButton = false,
   lastTrainModeEnabled = false,
   onLastTrainModeChange,
   onDepartureChange,
@@ -161,6 +164,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const { theme } = useTheme();
   const colors = getThemeColors(theme);
   const demoText = lastTrainCopy(language);
+  /** 「時刻を表示」を出すか。出発駅・到着駅がそろったとき。終電モードは到着駅だけで出す */
+  const timeLabelButtonShown = !!onShowStationTimeLabelsChange && !!arrival && (!!departure || lastTrainModeEnabled);
+  /** 駅名の下の時刻の意味（到着予定時刻／終電モードでは最終時刻） */
+  const timeLabelNote = translateUI(lastTrainModeEnabled ? 'timeLabelNoteLastTrain' : 'timeLabelNoteArrival', language);
   const [departureSearch, setDepartureSearch] = useState('');
   const [arrivalSearch, setArrivalSearch] = useState('');
   const [showDepartureResults, setShowDepartureResults] = useState(false);
@@ -774,7 +781,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
             寸法は Button の size="sm" に揃えてあるので2つの大きさは一致する。
           */}
-          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange || onAddWaypoint || onShowStationTimeLabelsChange || onMeetingModeChange || (lastTrainDemoMode && onLastTrainModeChange)) && (
+          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange || onAddWaypoint || onShowStationTimeLabelsChange || onMeetingModeChange || ((lastTrainDemoMode || lastTrainButton) && onLastTrainModeChange)) && (
             <div style={{
               // 出発駅・到着駅欄とこの行の間隔も、ボタン同士の間隔（下記gap）と
               // 揃える。片方だけ広げるとリズムが不揃いに見えるため統一する。
@@ -820,6 +827,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   size="sm"
                   pressed={!!showTravelTime}
                   onClick={() => onShowTravelTimeChange(!showTravelTime)}
+                  // 終電モードでは駅の間の所要時間の丸は出さない（駅名の下の時刻が最終時刻になるため）
+                  disabled={lastTrainModeEnabled}
+                  title={lastTrainModeEnabled ? translateUI('unavailableInLastTrain', language) : undefined}
                   icon={<Clock />}
                 >
                   {translateUI('showTravelTimes', language)}
@@ -832,12 +842,14 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   size="sm"
                   pressed={meetingMode}
                   onClick={() => onMeetingModeChange(!meetingMode)}
+                  disabled={lastTrainModeEnabled}
+                  title={lastTrainModeEnabled ? translateUI('unavailableInLastTrain', language) : undefined}
                   icon={<Users />}
                 >
                   {translateUI('meetingModeButton', language)}
                 </Button>
               )}
-              {lastTrainDemoMode && onLastTrainModeChange && (
+              {(lastTrainDemoMode || lastTrainButton) && onLastTrainModeChange && (
                 <Button
                   theme={theme}
                   variant="primary"
@@ -887,20 +899,29 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 「経路が無いのに時刻を表示するかを聞かれる」状態を避け、
                 両方揃ったときだけボタンを出す（そのときは既定でON。
                 RailwayMap.tsx側で両方揃った瞬間にONへ戻す処理を入れている）。
+                終電モードでは出発駅が無くても、到着駅があれば出す（既定でON。駅名の下は最終時刻になる）。
+                時刻の意味はモードで変わる（到着予定時刻／最終時刻）ので、ボタンは「時刻を表示」のままにし、
+                意味は下の※の注記とボタンの title で説明する。
               */}
-              {onShowStationTimeLabelsChange && departure && arrival && (
+              {timeLabelButtonShown && (
                 <Button
                   theme={theme}
                   variant="primary"
                   size="sm"
                   pressed={!!showStationTimeLabels}
-                  onClick={() => onShowStationTimeLabelsChange(!showStationTimeLabels)}
-                  title={translateUI('showStationTimeLabelsHint', language)}
+                  onClick={() => onShowStationTimeLabelsChange?.(!showStationTimeLabels)}
+                  title={timeLabelNote}
                   icon={<Timer />}
                 >
                   {translateUI('showStationTimeLabelsButton', language)}
                 </Button>
               )}
+            </div>
+          )}
+          {/* ※ 駅名の下の時刻の意味（モードで変わる）。時刻を出しているときだけ、小さく添える */}
+          {timeLabelButtonShown && showStationTimeLabels && (
+            <div data-time-label-note style={{ marginTop: L.sp.xs, fontSize: FS.caption, color: colors.textSecondary }}>
+              {'※ '}{timeLabelNote}
             </div>
           )}
 
