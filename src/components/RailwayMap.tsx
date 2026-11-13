@@ -114,8 +114,8 @@ import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import MapCompassButton from './map/MapCompassButton';
 import VisibleRoutesLegend from './legend/VisibleRoutesLegend';
-import RouteToggleSnackbar, { type RouteToggleNotice } from './map/RouteToggleSnackbar';
-import Snackbar from './ui/molecules/Snackbar';
+import MapNoticeSnackbar from './map/MapNoticeSnackbar';
+import { useMapNotice } from '../hooks/useMapNotice';
 import { getInitialLegendCollapsed, persistLegendCollapsed } from '../utils/legendPersistence';
 import { getThroughReachableSections } from '../utils/throughService';
 import { findParallelSections, sectionMinutes } from '../utils/parallelRoutes';
@@ -553,17 +553,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     ? { mouseover: () => setHoveredRoute(routeKey), mouseout: () => setHoveredRoute(null) }
     : {});
   /**
-   * 地図の線をタップして路線を切り替えたときの知らせ（map/RouteToggleSnackbar）。
-   * 指の端末では線に路線名の吹き出しを出さないので、どの路線を切り替えたかをここで1行だけ知らせる
+   * 地図の下の知らせ（スナックバー）。路線の切り替え・モードの案内など、すべてここ1か所で管理する
+   * （一度に1つ。種類は map/mapNotice.ts、表示は map/MapNoticeSnackbar）。
+   * 指の端末では線に路線名の吹き出しを出さないので、線をタップして切り替えたときはどの路線かをここで1行だけ知らせる
    * （戻すときは同じ線をもう一度押す。「元に戻す」は付けない）
    */
-  const [routeToggleNotice, setRouteToggleNotice] = useState<RouteToggleNotice | null>(null);
-  // 到着駅未選択時も既存Snackbarを再利用。番号を更新し連続タップで表示時間をリセット。
-  const [lastTrainArrivalNoticeId, setLastTrainArrivalNoticeId] = useState(0);
-  const noticeRouteToggle = (routeKey: string, shown: boolean) => {
-    setLastTrainArrivalNoticeId(0);
-    setRouteToggleNotice(prev => ({ id: (prev?.id ?? 0) + 1, routeKey, shown }));
-  };
+  const { notice: mapNotice, notifyRouteToggle, notifyMessage, clearNotice } = useMapNotice();
+  const noticeRouteToggle = notifyRouteToggle;
   const [clickedRoute, setClickedRoute] = useState<string | null>(null);
   const [routePopupPosition, setRoutePopupPosition] = useState<{ x: number, y: number } | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
@@ -5052,11 +5048,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 追加パネルを作らない。既存の到着駅・時刻欄・トグルだけで描画を切り替える。
   const handleLastTrainModeChange = (enabled: boolean) => {
     if (enabled && !arrival) {
-      setRouteToggleNotice(null);
-      setLastTrainArrivalNoticeId(id => id + 1);
+      // 到着駅を決めてから使うモード。入力欄には移らず、ほかの知らせと同じ下の帯で案内する
+      notifyMessage(lastTrainCopy(currentLanguage).chooseArrivalNotice);
       return;
     }
-    setLastTrainArrivalNoticeId(0);
     setLastTrainModeEnabled(enabled);
     if (enabled && arrival) {
       // ONにした直後はまだ作られていないので、ここで同じ到着駅のネットワークを求める
@@ -5076,7 +5071,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     ? (isFullscreen ? `${MOBILE_PANEL_SAFE_BOTTOM + MOBILE_PANEL_FLOAT}px` : '64px')
     : L.sp['4xl'];
   /** 路線を切り替えた知らせ（スナックバー）の位置。下に並ぶ浮かぶ部品のすぐ上（スマホ全画面ではボタンの列の上） */
-  const routeToggleSnackbarBottom = isMobile && isFullscreen
+  const mapNoticeBottom = isMobile && isFullscreen
     ? `calc(${mobileBottomPanelStackTop(showMobileRouteCandidatesButton ? 2 : 1, MOBILE_PANEL_SAFE_BOTTOM)}px + ${FLOATING_PANEL.gap})`
     : `calc(${floatingRowBottom} + ${FLOATING_CONTROL.height}px + ${FLOATING_PANEL.gap})`;
   const terrainOverlayBottom = isMobile && isFullscreen
@@ -6819,26 +6814,15 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             );
           })()}
 
-          {lastTrainArrivalNoticeId > 0 && (
-            <Snackbar
-              key={lastTrainArrivalNoticeId}
-              theme={theme}
-              bottom={routeToggleSnackbarBottom}
-              message={lastTrainCopy(currentLanguage).chooseArrivalNotice}
-              onClose={() => setLastTrainArrivalNoticeId(0)}
-            />
-          )}
-          {routeToggleNotice && (
-            <RouteToggleSnackbar
-              notice={routeToggleNotice}
-              routeName={routeNames[routeToggleNotice.routeKey as RouteKey] ?? routeToggleNotice.routeKey}
-              routeColor={adjustRouteColorForTheme(routeColors[routeToggleNotice.routeKey as RouteKey], theme)}
-              theme={theme}
-              language={currentLanguage}
-              bottom={routeToggleSnackbarBottom}
-              onClose={() => setRouteToggleNotice(null)}
-            />
-          )}
+          <MapNoticeSnackbar
+            notice={mapNotice}
+            theme={theme}
+            language={currentLanguage}
+            bottom={mapNoticeBottom}
+            routeName={key => routeNames[key as RouteKey] ?? key}
+            routeColor={key => adjustRouteColorForTheme(routeColors[key as RouteKey], theme)}
+            onClose={clearNotice}
+          />
 
           <div style={{
             position: 'absolute',

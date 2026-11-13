@@ -103,6 +103,7 @@ describe('地図の線をタップして切り替えたときに知らせる（R
   it('表示中の線・薄い線のどちらをタップして切り替えても知らせる', () => {
     expect(src).toMatch(/setVisibleRoutes\(newVisibleRoutes\);\s*noticeRouteToggle\(routeKey, newVisibleRoutes\.has\(routeKey\)\);/);
     expect(src).toMatch(/setVisibleRoutes\(prev => new Set\(\[\.\.\.prev, rKey\]\)\);\s*noticeRouteToggle\(rKey, true\);/);
-    expect(src).toContain('<RouteToggleSnackbar');
+    // 知らせの表示は MapNoticeSnackbar の1か所（種類ごとの見た目はその中で分ける）
+    expect(src).toContain('<MapNoticeSnackbar');
   });
 });
