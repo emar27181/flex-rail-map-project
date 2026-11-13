@@ -82,6 +82,28 @@ npm run test:data && npm run test:types && npm run test:unit && npm run build
 - **線形のデータはまだ無い。** サンドボックスから Overpass・OSM・Geofabrik・国土数値情報に接続できない（プロキシが 403）ため
 - 再開に必要なこと: 環境の設定で `overpass-api.de`（または `overpass.private.coffee`）への接続を許可する。上の手順1〜3で小田急小田原線を取り込める
 
+## 試作: 2D の地図を実際の線路の形で描く（2026-11-13）
+
+**`/?experiment=track-geometry` を付けると、駅の間を実際の線路の形（カーブ・分岐の手前の曲がり）で描く。** 通常の画面は変わらない。
+サンドボックスから OSM に接続できなくても、立体表示用に受け取った線形（`public/data/terrain3d-lines-v2.json`, OSM 由来・80路線）を駅で区切り直して使える。
+
+| 置き場所 | 中身 |
+|---|---|
+| `scripts/track-geometry/build-from-terrain3d-v2.mts` | 立体表示用の線形を、駅の位置で区切って `TrackSection` にする（`splitAtStations` で検証し、通った路線だけ書き出す） |
+| `public/data/track-geometry-prototype.json` | 上のスクリプトの出力（52路線）。除外した路線は `meta.skipped` に理由つきで残す |
+| `src/utils/trackGeometryPrototype.ts` | 試作のURLパラメータの判定と、JSON を `TrackGeometry` にする変換 |
+| `src/components/RailwayMap.tsx` の `trackGeometryOf` | 本番の線形（`TRACK_GEOMETRY`）が先、無ければ試作。主線・薄い線のどちらも `offsetPositions` を通るので同じに描かれる |
+| `tests/unit/utils/trackGeometryPrototype.test.ts` | 出典・検証・「駅の間を飛ばない・遠回りしない」・標高を持たないことを確かめる |
+| `tests/render/trackGeometry.render.ts` | パラメータがあるときだけ線の頂点が増える／データが読めなくても直線で描ける |
+
+- 作り直し: `npx tsx scripts/track-geometry/build-from-terrain3d-v2.mts`（ネットワーク不要）
+- **駅と線の距離の基準は試作では 300m**（本番の基準は上の表のとおり 150m）。ターミナル駅は駅舎の中心と線路が離れるため、150m だと52路線ではなく35路線になる。
+  本番に取り込むときは基準を 150m に戻し、外れる駅は駅の座標側を確かめる
+- 構造の対応は 地上 → `untagged`（地上とは限らない）／高架 → `bridge`／地下 → `tunnel`。高さ（m）には変換しない
+- 除外した28路線は直線のまま: 山手線など環状線・折り返しのある路線（線上の順番が逆）、駅が線から数km離れている路線（東海道線の熱海、総武線快速の東京 など）、
+  駅の間の点が飛んでいる路線。線形の元データを直すか、路線ごとに収集（OSM）して取り込む
+- **出典: © OpenStreetMap contributors（ODbL-1.0）。** 試作を本番にするときは、地図の出典表示に OpenStreetMap を明記する
+
 ## 立体（標高）表示（2026-10-13）
 
 区間ごとの線形（上の仕組み）とは別に、首都圏の OSM relation 100本の線形と**地面の標高**を受け取り、
