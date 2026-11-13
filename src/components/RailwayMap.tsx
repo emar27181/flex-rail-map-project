@@ -92,6 +92,7 @@ import { SITE_FOOTER_LINKS, type NavLang } from '../config/siteNav';
 import { defaultRoutesNear } from '../utils/defaultRoutesNear';
 import { getInitialMapViewFromUrl, getInitialTravelTimesFromUrl } from '../utils/mapViewUrlParam';
 import { isEmbedMode } from '../utils/embedMode';
+import { getInitialMapModeFromUrl, getInitialExtraDeparturesFromUrl } from '../utils/mapModeUrlParam';
 import { loadLeafletModules } from '../utils/leafletLoader';
 import { hideAppLoading, setAppLoadingStage } from '../utils/appLoading';
 import {
@@ -276,9 +277,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [departure, setDeparture] = useState<Station | null>(null);
   const [arrival, setArrival] = useState<Station | null>(null);
   // 試作も通常の駅/時刻入力を利用。試作モードはボタンを押すまで有効にしない。
-  const [lastTrainModeEnabled, setLastTrainModeEnabled] = useState(false);
+  // ?mode=last-train（記事の埋め込み・共有リンク。到着駅 to が要る）のときだけ、開いたときからONにする
+  const [lastTrainModeEnabled, setLastTrainModeEnabled] = useState(() => getInitialMapModeFromUrl() === 'last-train' && !!getInitialArrivalFromUrl());
   // 集合駅を探すモード（出発駅の一覧は追加出発駅 extraDepartures を共用する）
-  const [meetingModeEnabled, setMeetingModeEnabled] = useState(false);
+  // ?mode=meeting&from=…&with=…（記事の埋め込み・共有リンク）のときだけ、開いたときからONにする
+  const [meetingModeEnabled, setMeetingModeEnabled] = useState(() => getInitialMapModeFromUrl() === 'meeting');
   // 通常の経路推薦数と終電モードで選択肢・既定値を1箇所の設定から共用する。
   const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(DEFAULT_ROUTE_RECOMMENDATION_LIMIT);
   // 選択した到着駅を通る路線を起点に、通常の候補数設定の範囲内で探索。
@@ -324,7 +327,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [routeRecommendations, setRouteRecommendations] = useState<RouteResult[]>([]);
   const [selectedRouteIndices, setSelectedRouteIndices] = useState<Set<number> | null>(null);
   // メインの出発駅とは別に、同じゴール駅への経路を比較したい追加出発駅（例: 藤沢・大磯・平塚から新橋）
-  const [extraDepartures, setExtraDepartures] = useState<Station[]>([]);
+  const [extraDepartures, setExtraDepartures] = useState<Station[]>(() => (getInitialMapModeFromUrl() === 'meeting' ? getInitialExtraDeparturesFromUrl() : []));
 
   // Language state management
   const currentLanguage = language;

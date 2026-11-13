@@ -14,6 +14,7 @@ import { HEATMAP_METRIC_PARAM, isUrlHeatmapMetric } from './heatmapUrlParam';
 import { MAP_CENTER_PARAM, MAP_ZOOM_PARAM, TRAVEL_TIMES_PARAM } from './mapViewUrlParam';
 import { EMBED_PARAM } from './embedMode';
 import { STATION_NUMBERS_PARAM, VIEW_PARAM } from './mapDisplayUrlParam';
+import { MODE_PARAM, WITH_PARAM, MAX_URL_EXTRA_DEPARTURES, type MapMode } from './mapModeUrlParam';
 import type { StationStats } from '../data/stationStats';
 
 export interface MapLinkOptions {
@@ -34,6 +35,10 @@ export interface MapLinkOptions {
   stationNumbers?: boolean;
   /** 立体（3D）の表示で開く */
   view3d?: boolean;
+  /** モードを入れて開く（mapModeUrlParam.ts）。終電モードは到着駅 to、集合駅モードは from と withStations が要る */
+  mode?: MapMode;
+  /** 集合駅モードの、出発駅欄のほかの出発駅（駅名。地図側が駅名で引ける駅だけを渡すこと） */
+  withStations?: string[];
   /** 地図の表示言語。日本語は既定なので付けない */
   lang?: 'ja' | 'en' | 'zh' | 'ko';
   /** 記事などに iframe で埋め込む表示（embedMode.ts） */
@@ -41,7 +46,7 @@ export interface MapLinkOptions {
 }
 
 export function buildMapHref({
-  routes, from, to, metric, center, zoom, travelTimes = false, stationNumbers = false, view3d = false, lang = 'ja', embed = false,
+  routes, from, to, metric, center, zoom, travelTimes = false, stationNumbers = false, view3d = false, lang = 'ja', embed = false, mode, withStations,
 }: MapLinkOptions): string {
   const params = new URLSearchParams();
   if (from) {
@@ -60,6 +65,11 @@ export function buildMapHref({
   if (center) {
     params.set(MAP_CENTER_PARAM, center.join(','));
     if (zoom !== undefined) params.set(MAP_ZOOM_PARAM, String(zoom));
+  }
+  if (mode) params.set(MODE_PARAM, mode);
+  if (withStations && withStations.length > 0) {
+    const codes = withStations.slice(0, MAX_URL_EXTRA_DEPARTURES).map(encodeStationParam).filter((c): c is string => !!c);
+    if (codes.length > 0) params.set(WITH_PARAM, codes.join(','));
   }
   if (travelTimes) params.set(TRAVEL_TIMES_PARAM, '1');
   if (stationNumbers) params.set(STATION_NUMBERS_PARAM, '1');
