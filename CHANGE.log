@@ -8,6 +8,15 @@
 - 架空ダイヤのままなので、ボタン名に「試作」・`title`・駅ラベルの `*` で明示（実際の終電検索には使えない）
 - `tests/render/lastTrainMap.render.ts`（通常画面のON/OFF・Snackbarを追加）, `tests/unit/components/lastTrainMapIntegration.test.ts`（deps の名前を更新）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
 
+## [2026-11-13] セッション（出発駅の欄を同じ緑の部品にそろえる）
+
+### improve: 追加した出発駅も出発駅欄と同じ緑の欄にし、入れるたびに次の欄が隣に出る（部品 `RoleField`）
+- `src/components/ui/molecules/RoleField.tsx`（新規）, `src/components/ui/atoms/controlSize.ts`（`ROLE_FIELD_MIN_WIDTH_EM`）, `src/components/StationSelector.tsx`, `src/utils/translation.ts`（英語の案内を "Add departure" に）
+- 追加した出発駅が灰色のタグで、出発駅欄と別の見た目だった（「別の出発駅でも色は同じで」）。出発駅・到着駅・追加の出発駅・追加の入力欄を、役割の色（出発=緑・到着=赤）で塗る同じ部品 `RoleField` にそろえた。出発欄と到着欄で同じ入力欄を2回手書きしていたのもここ1か所にまとめた
+- 入れるごとに次の欄が隣（右）に出る（2つ入れたら3つ目は右。収まらない狭いスマホは1列で幅いっぱい）。行ごとの見出し・番号・点線・タグは無し。先に作った `TagInputRow`（タグ＋入力欄）は使わなくなったので削除
+- 並びは CSS グリッド（1つぶんの最小の幅は `ROLE_FIELD_MIN_WIDTH_EM`＝em。px の直書きなし）
+- `tests/unit/components/ui/roleField.test.tsx`（新規。色・実線・クリア・アイコン・出発/到着/追加が同じ部品であること）, `tests/render/meetingPoint.render.ts`・`featureArticles.render.ts`（緑・右に出る・4言語×広い/狭いで案内が切れない・1列）, `docs/design-system.md`（部品の表）, `docs/ui-mode-extension-guide.md`, `docs/render-tests.md`
+
 ## [2026-11-13] セッション（終電モードの動きを軽くする）
 
 ### improve: 終電モードのスクロール・ズームの重さを減らす（駅アイコンの使い回し・画面の外は描かない）

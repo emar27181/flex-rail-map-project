@@ -915,7 +915,7 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   },
   addMeetingOrigin: {
     japanese: "出発駅を追加",
-    english: "Add departure station"
+    english: "Add departure"
   },
   meetingNeedOrigins: {
     japanese: "出発駅欄と、下の「＋ 出発駅を追加」欄に駅を入れて、2駅以上そろえると、全員が行きやすい駅を探します。",

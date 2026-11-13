@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
-import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Timer, TrainFront, Users, Waypoints, X } from 'lucide-react';
+import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Plus, Timer, TrainFront, Users, Waypoints, X } from 'lucide-react';
 import { routes, routeNames, routeColors } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
@@ -18,12 +18,12 @@ import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import RemovableTag from './ui/atoms/RemovableTag';
 import StationSearchDropdown from './ui/StationSearchDropdown';
-import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
+import { CONTROL_SIZE, FLOATING_ICON_BUTTON_SIZE, ROLE_FIELD_MIN_WIDTH_EM } from './ui/atoms/controlSize';
 import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 import TextField from './ui/atoms/TextField';
-import TagInputRow from './ui/molecules/TagInputRow';
+import RoleField from './ui/molecules/RoleField';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import { useDeviceClass } from '../hooks/useDeviceClass';
 import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
@@ -545,8 +545,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 {translateUI('departureStation', language)}
               </label>
               <div style={{ position: 'relative' }}>
-                <TextField
+                <RoleField
                   theme={theme}
+                  role="departure"
                   size="sm"
                   type="text"
                   value={departureSearch}
@@ -577,34 +578,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     }
                   }}
                   placeholder={departure ? translateStation(departure.name, language) : translateUI('stationPlaceholder', language)}
-                  className="station-input-filled"
-                  styleOverride={{
-                    // ✕ を重ねるときだけ右側の余白を広げる（駅を選ぶ前は ✕ が無いので、案内の文字に幅を使う。
-                    // 英語の "Enter station name" が狭い画面で切れていた, 2026-10-15）
-                    ...(departure ? { paddingRight: L.sp['3xl'] } : {}),
-                    // 出発＝緑 で塗りつぶし、文字は白。地図の上でも役割が一目で分かるようにする
-                    border: `2px solid ${SEMANTIC.departure}`,
-                    backgroundColor: SEMANTIC.departure,
-                    color: colors.onPrimary,
-                  }}
+                  onClear={departure ? clearDeparture : undefined}
+                  clearLabel={translateUI('clearSelection', language)}
                 />
-                {departure && (
-                  <IconButton
-                    theme={theme}
-                    size="sm"
-                    onClick={clearDeparture}
-                    label={translateUI('clearSelection', language)}
-                    icon={<X size={14} />}
-                    styleOverride={{
-                      position: 'absolute',
-                      right: '2px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      // 塗りつぶした入力欄の上に置くため白系にする
-                      color: alphaWhite(0.9),
-                    }}
-                  />
-                )}
               </div>
               {/*
                 位置情報が取れないときは黙って何も出さないと、
@@ -675,8 +651,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 {translateUI('arrivalStation', language)}
               </label>
               <div style={{ position: 'relative' }}>
-                <TextField
+                <RoleField
                   theme={theme}
+                  role="arrival"
                   size="sm"
                   type="text"
                   value={arrivalSearch}
@@ -707,33 +684,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     }
                   }}
                   placeholder={arrival ? translateStation(arrival.name, language) : translateUI('stationPlaceholder', language)}
-                  className="station-input-filled"
-                  styleOverride={{
-                    // ✕ を重ねるときだけ右側の余白を広げる（出発駅と同じ）
-                    ...(arrival ? { paddingRight: L.sp['3xl'] } : {}),
-                    // 到着＝赤 で塗りつぶし、文字は白（出発欄と対になる配色）
-                    border: `2px solid ${SEMANTIC.arrival}`,
-                    backgroundColor: SEMANTIC.arrival,
-                    color: colors.onPrimary,
-                  }}
+                  onClear={arrival ? clearArrival : undefined}
+                  clearLabel={translateUI('clearSelection', language)}
                 />
-                {arrival && (
-                  <IconButton
-                    theme={theme}
-                    size="sm"
-                    onClick={clearArrival}
-                    label={translateUI('clearSelection', language)}
-                    icon={<X size={14} />}
-                    styleOverride={{
-                      position: 'absolute',
-                      right: '2px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      // 塗りつぶした入力欄の上に置くため白系にする
-                      color: alphaWhite(0.9),
-                    }}
-                  />
-                )}
               </div>
               
               {showArrivalResults && arrivalDropdownPos && (
@@ -1046,51 +999,70 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           )}
 
           {/*
-            集合駅モードの出発駅。追加した出発駅は「2. 東京 ×」のようにタグで横一列に並べ、同じ行の末尾に
-            **常に「＋ 出発駅を追加」の入力欄を出す**（ボタンを押して開く手間がない。人数に合わせて何人でも足せ、
-            タグの×で減らせる）。番号と名前は1つのタグにまとめ、行ごとの見出しは立てない。
-            並べ方・入力欄は molecule の TagInputRow、候補の出し方は経由駅の追加と同じ部品（StationSearchDropdown）。
-            開いたときにキーボードが出ないよう、自動でフォーカスはしない。
+            集合駅モードの出発駅。追加した出発駅も、出発駅欄と**同じ部品・同じ緑**（RoleField role="departure"）で出す。
+            1つ入れるごとに次の入力欄（＋ 出発駅を追加）が隣に出る（2つ入れると3つ目は右、収まらなければ次の行）。
+            行ごとの見出しは立てず、番号は付けない。入力欄は**いつでも出ている**（ボタンを押して開く手間がない）。
+            並べ方は CSS グリッドで、1つぶんの最小の幅は ROLE_FIELD_MIN_WIDTH_EM（足りない狭い画面では1列で幅いっぱい）。
+            候補の出し方は経由駅の追加と同じ部品（StationSearchDropdown）。開いたときにキーボードが出ないよう、自動でフォーカスはしない。
           */}
           {!lastTrainDemoMode && onAddWaypoint && meetingMode && (
-            <div style={{ marginTop: L.sp.md }}>
-              <TagInputRow
-                theme={theme}
-                tags={(waypoints ?? []).map((wp, index) => ({
-                  id: wp.name,
-                  label: `${index + 2}. ${translateStation(wp.name, language)}`,
-                }))}
-                onRemove={(name) => {
-                  const index = (waypoints ?? []).findIndex(wp => wp.name === name);
-                  if (index >= 0) onRemoveWaypoint?.(index);
-                }}
-                removeLabel={translateUI('clearSelection', language)}
-                inputValue={waypointSearch}
-                onInputChange={(value, target) => {
-                  setWaypointSearch(value);
-                  setWaypointDropdownPos(getInputDropdownPosition(target.getBoundingClientRect()));
-                  setShowWaypointResults(true);
-                }}
-                onInputFocus={(target) => {
-                  focusedInputRef.current = target;
-                  setWaypointDropdownPos(getInputDropdownPosition(target.getBoundingClientRect()));
-                  setShowWaypointResults(true);
-                }}
-                onInputBlur={() => {
-                  focusedInputRef.current = null;
-                  setShowWaypointResults(false);
-                  setWaypointSearch('');
-                }}
-                placeholder={translateUI('addMeetingOrigin', language)}
-                rowAttr={{ 'data-meeting-origin-rows': true }}
-                inputAttr={{ 'data-meeting-add': true }}
-              >
+            <div
+              data-meeting-origin-rows
+              style={{
+                marginTop: L.sp.md,
+                display: 'grid',
+                gridTemplateColumns: `repeat(auto-fit, minmax(${ROLE_FIELD_MIN_WIDTH_EM}em, 1fr))`,
+                gap: L.sp.xs,
+              }}
+            >
+              {(waypoints ?? []).map((wp, index) => (
+                <RoleField
+                  key={`${wp.name}-${index}`}
+                  theme={theme}
+                  role="departure"
+                  size="sm"
+                  type="text"
+                  readOnly
+                  value={translateStation(wp.name, language)}
+                  aria-label={`${translateUI('departureStation', language)} ${index + 2}`}
+                  onClear={() => onRemoveWaypoint?.(index)}
+                  clearLabel={translateUI('clearSelection', language)}
+                  wrapperAttr={{ 'data-meeting-extra': true }}
+                />
+              ))}
+              <div style={{ position: 'relative' }}>
+                <RoleField
+                  theme={theme}
+                  role="departure"
+                  size="sm"
+                  type="text"
+                  value={waypointSearch}
+                  onChange={(e) => {
+                    setWaypointSearch(e.target.value);
+                    setWaypointDropdownPos(getInputDropdownPosition(e.currentTarget.getBoundingClientRect()));
+                    setShowWaypointResults(true);
+                  }}
+                  onFocus={(e) => {
+                    focusedInputRef.current = e.currentTarget;
+                    setWaypointDropdownPos(getInputDropdownPosition(e.currentTarget.getBoundingClientRect()));
+                    setShowWaypointResults(true);
+                  }}
+                  onBlur={() => {
+                    focusedInputRef.current = null;
+                    setShowWaypointResults(false);
+                    setWaypointSearch('');
+                  }}
+                  placeholder={translateUI('addMeetingOrigin', language)}
+                  aria-label={translateUI('addMeetingOrigin', language)}
+                  adornment={<Plus size={CONTROL_SIZE.sm.iconSize} />}
+                  wrapperAttr={{ 'data-meeting-add': true }}
+                />
                 {showWaypointResults && waypointDropdownPos && (
                   <StationSearchDropdown
                     position={waypointDropdownPos}
                     stations={filteredWaypointStations}
                     onSelect={(station) => {
-                      // 選んだらタグが増え、入力欄は空に戻って次の駅をすぐ入れられる
+                      // 選んだら欄が増え、入力欄は空に戻って次の駅をすぐ入れられる（次の欄は隣に出る）
                       onAddWaypoint(station);
                       setWaypointSearch('');
                       setShowWaypointResults(false);
@@ -1101,7 +1073,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     onMouseDown={(e) => e.preventDefault()}
                   />
                 )}
-              </TagInputRow>
+              </div>
             </div>
           )}
 

@@ -31,10 +31,9 @@ test('集合駅モード: 出発駅を追加すると候補が出て、選ぶと
   await expect(results).toContainText('最大');
   await expect(results).toContainText('新宿');
   await expect(results).toContainText('東京');
-  // 駅の入力欄が増えるのは、追加した出発駅の行（1つ）だけ。別のパネル・入力欄は作らない
-  // 追加した出発駅はタグ（1つ）。駅の入力欄（出発・到着）は増えない
-  expect(await stationInputs.count()).toBe(inputsBefore);
-  await expect(page.locator('[data-meeting-origin-rows] [data-tag-item]')).toHaveCount(1);
+  // 追加した出発駅は出発駅欄と同じ部品の欄（1つ）。次の欄（＋ 出発駅を追加）が増えるだけで、別のパネル・入力欄は作らない
+  await expect(page.locator('[data-meeting-extra]')).toHaveCount(1);
+  expect(await stationInputs.count()).toBe(inputsBefore + 2);
 
   // 候補を押すと到着駅に入る
   const first = results.getByRole('button').first();
@@ -55,85 +54,99 @@ test('集合駅モード: 出発駅を追加すると候補が出て、選ぶと
   expect(errors).toEqual([]);
 });
 
-test('集合駅モード: 追加した出発駅は横一列のタグで増え、×で減らせる（番号と名前は1つにまとまる）', async ({ page }) => {
+test('集合駅モード: 追加した出発駅も出発駅欄と同じ緑の欄で、入れるたびに次の欄が隣（右）に出る', async ({ page }) => {
   const errors = collectErrors(page);
+  await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/?from=shinjuku');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
   await page.getByRole('button', { name: '集合駅を探す' }).click();
 
-  const tags = page.locator('[data-meeting-origin-rows] [data-tag-item]');
-  await expect(tags).toHaveCount(0);
-  for (const name of ['東京', '横浜', '渋谷']) {
+  const extras = page.locator('[data-meeting-extra]');
+  const add = page.locator('[data-meeting-add]');
+  await expect(extras).toHaveCount(0);
+  await expect(add).toHaveCount(1);
+
+  const addOne = async (name: string) => {
     await page.getByPlaceholder('出発駅を追加').fill(name);
     await page.locator(`[data-station-option="${name}"]`).first().click();
-  }
-  // 入力欄は消えず、同じ行の末尾にいつでも出ている。行ごとの見出し（出発駅 2 …）は立てない
-  await expect(page.locator('[data-meeting-add]')).toHaveCount(1);
-  await expect(page.locator('[data-meeting-origin-rows] label')).toHaveCount(0);
-  // 番号と名前が1つのタグにまとまる
-  await expect(tags).toHaveCount(3);
-  await expect(tags.nth(0)).toHaveText(/2\. 東京/);
-  await expect(tags.nth(2)).toHaveText(/4\. 渋谷/);
-  // 4人分の所要時間が候補に並ぶ
-  await expect(page.locator('[data-meeting-results]')).toContainText('新宿');
-  await expect(page.locator('[data-meeting-results]')).toContainText('渋谷');
-
-  // 横一列: タグは同じ行に並ぶ（折り返す前）。入力欄も同じ行か、収まらなければ次の行で広がる
-  const tops = await tags.evaluateAll(els => els.map(e => Math.round(e.getBoundingClientRect().top)));
-  expect(new Set(tops).size).toBe(1);
-
-  // 点線や色付きの枠にしない（普通の入力欄と同じ枠）
-  const border = await page.locator('[data-meeting-add] input').evaluate(el => {
-    const cs = getComputedStyle(el);
-    const normal = getComputedStyle(document.querySelector('input[type="time"], input.station-input-filled') ?? el);
-    return { style: cs.borderTopStyle, color: cs.borderTopColor, normalColor: normal.borderTopColor };
+  };
+  // 1つ入れると、次の欄は隣（右）に出る（出発駅を2つ入れたら、3つ目の欄は右）
+  await addOne('東京');
+  await expect(extras).toHaveCount(1);
+  const pos1 = await page.evaluate(() => {
+    const e = document.querySelector('[data-meeting-extra]')!.getBoundingClientRect();
+    const a = document.querySelector('[data-meeting-add]')!.getBoundingClientRect();
+    return { extraTop: Math.round(e.top), addTop: Math.round(a.top), extraRight: e.right, addLeft: a.left };
   });
-  expect(border.style).toBe('solid');
+  expect(pos1.addTop).toBe(pos1.extraTop);
+  expect(pos1.addLeft).toBeGreaterThanOrEqual(pos1.extraRight);
+  await addOne('横浜');
+  await addOne('渋谷');
+  await expect(extras).toHaveCount(3);
+  await expect(add).toHaveCount(1);
+  // 行ごとの見出し・番号は立てない
+  await expect(page.locator('[data-meeting-origin-rows] label')).toHaveCount(0);
+  await expect(extras.nth(0).locator('input')).toHaveValue('東京');
+  await expect(extras.nth(2).locator('input')).toHaveValue('渋谷');
 
-  // 集合駅を決めると、4人それぞれのルートと使う路線が並ぶ
+  // 色は出発駅欄と同じ緑（追加の欄も、入力待ちの欄も）。点線にしない
+  const colors = await page.evaluate(() => {
+    const bg = (el: Element) => getComputedStyle(el).backgroundColor;
+    const main = document.querySelector('input.station-input-filled') as HTMLInputElement; // 出発駅欄
+    const extra = document.querySelector('[data-meeting-extra] input') as HTMLInputElement;
+    const addInput = document.querySelector('[data-meeting-add] input') as HTMLInputElement;
+    return { main: bg(main), extra: bg(extra), add: bg(addInput), addStyle: getComputedStyle(addInput).borderTopStyle };
+  });
+  expect(colors.extra).toBe(colors.main);
+  expect(colors.add).toBe(colors.main);
+  expect(colors.addStyle).toBe('solid');
+
+  // 4人分の所要時間が候補に並び、集合駅を決めると4人それぞれのルートと使う路線が並ぶ
+  await expect(page.locator('[data-meeting-results]')).toContainText('渋谷');
   await page.locator('[data-meeting-results]').getByRole('button').first().click();
   await expect(page.locator('[data-meeting-route]')).toHaveCount(4);
-  await expect(page.locator('[data-meeting-routes]')).toContainText('横浜');
 
-  // ×でタグが減る（番号は詰め直される）
-  await page.locator('[data-meeting-origin-rows] [data-tag-item] button').first().click();
-  await expect(tags).toHaveCount(2);
-  await expect(tags.nth(0)).toHaveText(/2\. 横浜/);
+  // ×で欄が減る
+  await extras.nth(0).locator('button').click();
+  await expect(extras).toHaveCount(2);
+  await expect(extras.nth(0).locator('input')).toHaveValue('横浜');
   expect(errors).toEqual([]);
 });
 
 for (const lang of ['ja', 'en', 'zh', 'ko'] as const) {
-  test(`集合駅モード: 「＋ 出発駅を追加」の案内の文字が切れない（${lang}）`, async ({ page }) => {
-    // タグが1つのとき、入力欄はタグの横に並ぶ（幅が足りなければ次の行へ回る）。狭いスマホで確かめる
-    await page.setViewportSize({ width: 360, height: 780 });
-    await page.goto(`/?mode=meeting&from=shinjuku&with=tokyo&lang=${lang}`);
-    const input = page.locator('[data-meeting-add] input');
-    await expect(input).toBeVisible();
-    // 案内（placeholder）の文字の幅が、入力欄の中の幅（左の＋アイコンの余白を除く）に収まる
-    const fit = await input.evaluate((el: HTMLInputElement) => {
-      const cs = getComputedStyle(el);
-      const ctx = document.createElement('canvas').getContext('2d')!;
-      ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-      const text = ctx.measureText(el.placeholder).width;
-      const inner = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-      return { text: Math.round(text), inner: Math.round(inner), placeholder: el.placeholder };
+  for (const width of [1280, 360]) {
+    test(`集合駅モード: 「＋ 出発駅を追加」の案内の文字が切れない（${lang}・${width}px）`, async ({ page }) => {
+      // 広い画面は2列（欄の幅が狭い）、狭いスマホは1列。どちらでも案内の文字が収まる
+      await page.setViewportSize({ width, height: 780 });
+      await page.goto(`/?mode=meeting&from=shinjuku&with=tokyo&lang=${lang}`);
+      const input = page.locator('[data-meeting-add] input');
+      await expect(input).toBeVisible();
+      // 案内（placeholder）の文字の幅が、入力欄の中の幅（左の＋アイコンの余白を除く）に収まる
+      const fit = await input.evaluate((el: HTMLInputElement) => {
+        const cs = getComputedStyle(el);
+        const ctx = document.createElement('canvas').getContext('2d')!;
+        ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+        const text = ctx.measureText(el.placeholder).width;
+        const inner = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+        return { text: Math.round(text), inner: Math.round(inner), placeholder: el.placeholder };
+      });
+      expect(fit.placeholder.length).toBeGreaterThan(0);
+      expect(fit.text, JSON.stringify(fit)).toBeLessThanOrEqual(fit.inner);
     });
-    expect(fit.placeholder.length).toBeGreaterThan(0);
-    expect(fit.text, JSON.stringify(fit)).toBeLessThanOrEqual(fit.inner);
-  });
+  }
 }
 
-test('集合駅モード: 狭いスマホ（360px）でタグが増えても、入力欄は行からはみ出さず残りの幅に収まる', async ({ page }) => {
+test('集合駅モード: 狭いスマホ（360px）では1列で幅いっぱいになり、はみ出さない', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 780 });
   await page.goto('/?mode=meeting&from=shinjuku&with=tokyo,yokohama,shibuya');
   await expect(page.locator('[data-meeting-add]')).toBeVisible();
   const boxes = await page.evaluate(() => {
     const row = document.querySelector('[data-meeting-origin-rows]')!.getBoundingClientRect();
-    const add = document.querySelector('[data-meeting-add]')!.getBoundingClientRect();
-    const tags = [...document.querySelectorAll('[data-meeting-origin-rows] [data-tag-item]')].map(e => e.getBoundingClientRect());
-    return { rowRight: row.right, addRight: add.right, addWidth: Math.round(add.width), tagRights: tags.map(t => t.right) };
+    const fields = [...document.querySelectorAll('[data-meeting-extra], [data-meeting-add]')].map(e => e.getBoundingClientRect());
+    return { rowLeft: row.left, rowRight: row.right, rights: fields.map(f => f.right), lefts: fields.map(f => f.left), widths: fields.map(f => Math.round(f.width)) };
   });
-  expect(boxes.addRight).toBeLessThanOrEqual(boxes.rowRight + 1);
-  for (const r of boxes.tagRights) expect(r).toBeLessThanOrEqual(boxes.rowRight + 1);
-  expect(boxes.addWidth).toBeGreaterThanOrEqual(150);
+  for (const r of boxes.rights) expect(r).toBeLessThanOrEqual(boxes.rowRight + 1);
+  for (const l of boxes.lefts) expect(l).toBeGreaterThanOrEqual(boxes.rowLeft - 1);
+  // 狭いときは1列（どの欄も行の幅いっぱい）
+  for (const w of boxes.widths) expect(w).toBeGreaterThanOrEqual(Math.round(boxes.rowRight - boxes.rowLeft) - 2);
 });

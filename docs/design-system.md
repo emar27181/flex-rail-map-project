@@ -263,7 +263,7 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 排他選択のボタン列 | `SegmentedControl`（molecule） |
 | 排他選択を1本の枠に収め、選んだ位置を背景のスライドで示す | `SlideSegmentedControl`（`SegmentedControl` の `variant="slide"` から使う実体） |
 | 選んだものを並べ、1つずつ外せるタグ（経由駅など） | `RemovableTag`（削除ボタン付き） |
-| 選んだものをタグで横一列に並べ、同じ行の末尾に「＋ 追加」の入力欄をいつでも出す（集合駅の出発駅など。人数に合わせて増減する入力） | `TagInputRow`（molecule。`RemovableTag` + `TextField`。番号と名前は1つのタグにまとめ、行ごとの見出しは立てない。入力欄の枠は普通の入力欄と同じで、**点線や色付きの枠にしない**。最小の幅は `TAG_INPUT_MIN_WIDTH_EM`、収まらなければ次の行で広がる。候補の一覧は children に渡す） |
+| 役割の色で塗った入力欄（出発=緑・到着=赤。値を消すボタン・先頭の＋などのアイコン付き）。出発駅・到着駅・「集合駅を探す」で増やす出発駅は**すべてこの部品**で出す（同じ入力欄を別々に手書きしない。追加の出発駅だけ灰色のタグ・点線の枠にしない） | `RoleField`（molecule。`TextField` + `IconButton`。役割の色は `ROLE_FIELD_COLOR`（= `SEMANTIC`）、枠は同じ色の実線。複数並べるときの1つぶんの最小の幅は `ROLE_FIELD_MIN_WIDTH_EM`、収まらなければ1列になって幅いっぱいに広がる。駅の知識は持たない） |
 | 開閉する見出しの右端の ▼ | `DisclosureIndicator`（開くと180度回る。回す時間・色は全パネル共通。塗ったボタンの中に置くときは `tone="inherit"`。▼▲▶ を文字で書くのはこの部品だけで、翻訳文言にも入れない） |
 | 押すと開閉する見出しの行 | `DisclosureHeader`（見出し＋▼。行のどこを押しても開閉、開くと区切り線。`size="floating"` で高さ・文字が `FLOATING_CONTROL`） |
 | 地図の上に浮かぶ操作の高さ・文字の大きさ | `FLOATING_CONTROL`（`controlSize.ts`。36px・`FS.body`。FloatingButton・凡例の見出し・丸いボタンで共通） |
