@@ -16,6 +16,7 @@ import { ARTICLE_SOURCES } from '../data/articles';
 import { lineByKey, stationName } from '../seo/pageModel';
 import { SEO_TEXT } from '../seo/pageText';
 import { findArticleStation, resolveArticleTokens } from './articleFacts';
+import { noticeHtml, requiredNoticeKinds } from './articleNotices';
 import type { ArticleBlock, ArticleLang, ArticleMapState, ArticleShotSpec, ArticleSource } from '../data/articles/types';
 
 /** 部品に出す決まり文句 */
@@ -142,6 +143,8 @@ function renderBlock(block: ArticleBlock, source: ArticleSource, lang: ArticleLa
         openHref: articleMapHref(state, lang), lang, demoId: `${source.slug}/${block.map}`,
       });
     }
+    case 'notice':
+      return noticeHtml(block.kind, lang, block.text);
     case 'cta':
       return `<div class="cta"><h3>${block.title}</h3><p>${block.text}</p><a class="btn" href="${esc(articleMapHref(mapOf(block.map), lang))}">${labels.openMap} <span class="ar">→</span></a></div>`;
     case 'html':
@@ -165,13 +168,20 @@ export function articleBlocksForRender(source: ArticleSource, lang: ArticleLang)
   ];
   // 冒頭のデモと同じ画面を、本文でもう一度埋め込まない（同じ地図が2つ続いて見えていた）
   const seen = new Set<string>();
-  return ordered.filter(b => {
+  const deduped = ordered.filter(b => {
     const src = blockEmbedSrc(b, source, lang);
     if (!src) return true;
     if (seen.has(src)) return false;
     seen.add(src);
     return true;
   });
+  // 試作・架空・推定を含む画面を載せる記事は、必要な注意書きを最初の地図デモの直後に自動で入れる
+  // （著者が書き忘れないように。同じ種類を本文に書いてあれば足さない。articleNotices.ts）
+  const written = new Set(deduped.flatMap(b => (b.type === 'notice' ? [b.kind] : [])));
+  const auto: ArticleBlock[] = requiredNoticeKinds(source).filter(k => !written.has(k)).map(kind => ({ type: 'notice', kind }));
+  if (auto.length === 0) return deduped;
+  const at = deduped[1]?.type === 'embed' ? 2 : 1;
+  return [...deduped.slice(0, at), ...auto, ...deduped.slice(at)];
 }
 
 /** 画面を埋め込むブロック（embed・shot）の URL。ほかのブロックは null */

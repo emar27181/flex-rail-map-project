@@ -33,6 +33,10 @@
   --accent:#2196F3;
   --accent-strong:#1565C0;
   --accent-tint:#E3F2FD;
+  /* 注意書き（試作・架空・推定）。意味は「注意」の橙（SEMANTIC.warning）。白地の文字は濃い橙 */
+  --warn:#FF9800;
+  --warn-tint:#FFF4E0;
+  --warn-text:#A85400;
   --maxw:760px;
   --sans:"Noto Sans JP", system-ui, sans-serif;
   --mono:ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
@@ -50,6 +54,9 @@ html[data-theme="dark"]{
   --accent:#4a9eff;
   --accent-strong:#6db3ff;
   --accent-tint:#1a2d40;
+  --warn:#FF9800;
+  --warn-tint:#33280f;
+  --warn-text:#f0ad4e;
 }
 
 *{ box-sizing:border-box; }
@@ -119,6 +126,12 @@ tr:nth-child(even) td{ background:color-mix(in srgb, var(--surface-2) 45%, trans
 .points ul{ margin:0; padding-left:0; list-style:none; }
 .points li{ position:relative; padding-left:26px; margin:.5em 0; }
 .points li::before{ content:"-"; position:absolute; left:0; color:var(--accent); font-weight:800; }
+/* 注意書き: 試作・架空のデータ・推定を含むことを、地図デモの直後に出す（articleNotices.ts）。複数あるときは続けて並べる */
+.notice{ display:flex; gap:12px; align-items:flex-start; margin:14px 0; padding:12px 16px; background:var(--warn-tint); border:1px solid var(--warn); border-left:4px solid var(--warn); border-radius:var(--r-card); font-size:14px; line-height:1.7; }
+.notice + .notice{ margin-top:-6px; }
+.notice .lbl{ flex:none; font-weight:800; font-size:12px; letter-spacing:.06em; color:var(--warn-text); padding-top:2px; white-space:nowrap; }
+.notice p{ margin:0; color:var(--ink); }
+@media (max-width: 767.98px){ .notice{ flex-direction:column; gap:2px; } }
 
 ol.steps{ list-style:none; counter-reset:st; padding-left:0; }
 ol.steps > li{ counter-increment:st; position:relative; padding:.55em 0 .55em 52px; border-bottom:1px solid var(--border); margin:0; }
