@@ -28,7 +28,8 @@ describe('終電モードは元のUIだけで操作する（回帰防止）', ()
     expect(map.match(/onLastTrainModeChange={handleLastTrainModeChange}/g)?.length).toBe(3);
     expect(selector).toContain('onLastTrainModeChange(!lastTrainModeEnabled)');
     expect(selector).toContain('onDepartureTimeChange(e.target.value)');
-    expect(selector).toContain("arrivalRef.current?.querySelector('input')?.focus()");
+    // 到着駅が未選択のときの案内は下の帯（知らせ）で出し、入力欄にはカーソルを移さない
+    expect(selector).not.toContain("arrivalRef.current?.querySelector('input')?.focus()");
     expect(selector).not.toContain('extraContent');
     expect(selector).not.toContain('lt-inspected-station');
     expect(selector).not.toContain('<Slider');
@@ -48,10 +49,11 @@ describe('終電モードは元のUIだけで操作する（回帰防止）', ()
     const map = read('src/components/RailwayMap.tsx');
     const selector = read('src/components/StationSelector.tsx');
     const i18n = read('src/utils/lastTrainDemoI18n.ts');
-    expect(map).toContain("import Snackbar from './ui/molecules/Snackbar'");
-    expect(map).toContain('lastTrainArrivalNoticeId > 0');
-    expect(map).toContain('message={lastTrainCopy(currentLanguage).chooseArrivalNotice}');
-    expect(selector).toContain('onLastTrainModeChange(true)');
+    // 知らせは useMapNotice の1か所で管理する（路線切替などと同じ帯。専用の状態・表示を作らない）
+    expect(map).toContain("import MapNoticeSnackbar from './map/MapNoticeSnackbar'");
+    expect(map).toContain('notifyMessage(lastTrainCopy(currentLanguage).chooseArrivalNotice)');
+    expect(map).not.toContain('lastTrainArrivalNoticeId');
+    expect(selector).toContain('onLastTrainModeChange(!lastTrainModeEnabled)');
     expect(i18n).toContain('終電モードを使用するには、到着駅を設定してください。');
     expect(map).not.toContain('LastTrainModeControls');
   });

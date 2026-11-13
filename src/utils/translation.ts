@@ -1403,8 +1403,12 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Timetable"
   },
   showStationTimeLabelsButton: {
-    japanese: "時刻を表示",
-    english: "Show Times"
+    japanese: "到着予定時刻を表示",
+    english: "Show Estimated Arrival Times"
+  },
+  showStationTimeLabelsHint: {
+    japanese: "経路上の各駅の到着予定時刻を駅名の下に表示します（路線データの駅間時間による目安）",
+    english: "Show the estimated arrival time at each station on the route under its name (an estimate from line data)"
   },
   departsAfterLabel: {
     japanese: "{station} {time}以降の発車（{route}）",
@@ -2345,7 +2349,8 @@ export const uiChinese: Record<string, string> = {
   approxMinutes: "约{time}分钟",
   close: "关闭",
   timetableButton: "时刻表",
-  showStationTimeLabelsButton: "显示时刻",
+  showStationTimeLabelsButton: "显示预计到达时间",
+  showStationTimeLabelsHint: "在车站名称下方显示路线上各站的预计到达时间（根据线路数据估算）",
   departsAfterLabel: "{station} {time}以后出发（{route}）",
   noTimetableDataFound: "未找到时刻数据",
   timetableUpdatedAt: "更新日: {date}",
@@ -2737,7 +2742,8 @@ export const uiKorean: Record<string, string> = {
   approxMinutes: "약 {time}분",
   close: "닫기",
   timetableButton: "시간표",
-  showStationTimeLabelsButton: "시간 표시",
+  showStationTimeLabelsButton: "도착 예정 시각 표시",
+  showStationTimeLabelsHint: "경로상 각 역의 도착 예정 시각을 역 이름 아래에 표시합니다(노선 데이터에 따른 추정)",
   departsAfterLabel: "{station} {time} 이후 출발（{route}）",
   noTimetableDataFound: "시간표 데이터를 찾을 수 없습니다",
   timetableUpdatedAt: "업데이트: {date}",

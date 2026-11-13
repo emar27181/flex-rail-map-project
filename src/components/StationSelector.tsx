@@ -843,16 +843,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   variant="primary"
                   size="sm"
                   pressed={lastTrainModeEnabled}
-                  onClick={() => {
-                    if (!arrival) {
-                      // 親側で共通Snackbarを表示。入力操作は既存の到着駅欄で続ける。
-                      onLastTrainModeChange(true);
-                      arrivalRef.current?.querySelector('input')?.focus();
-                      setShowArrivalResults(true);
-                      return;
-                    }
-                    onLastTrainModeChange(!lastTrainModeEnabled);
-                  }}
+                  // 到着駅が未選択のときの案内は親（RailwayMap）がほかの知らせと同じ下の帯で出す。
+                  // 入力欄へカーソルを移さない（2026-11 ユーザー指示）
+                  onClick={() => onLastTrainModeChange(!lastTrainModeEnabled)}
                   title={demoText.warnBody}
                   icon={<TrainFront />}
                 >
@@ -902,6 +895,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   size="sm"
                   pressed={!!showStationTimeLabels}
                   onClick={() => onShowStationTimeLabelsChange(!showStationTimeLabels)}
+                  title={translateUI('showStationTimeLabelsHint', language)}
                   icon={<Timer />}
                 >
                   {translateUI('showStationTimeLabelsButton', language)}
