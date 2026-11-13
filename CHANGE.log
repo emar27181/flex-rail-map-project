@@ -8,6 +8,19 @@
 - 架空ダイヤのままなので、ボタン名に「試作」・`title`・駅ラベルの `*` で明示（実際の終電検索には使えない）
 - `tests/render/lastTrainMap.render.ts`（通常画面のON/OFF・Snackbarを追加）, `tests/unit/components/lastTrainMapIntegration.test.ts`（deps の名前を更新）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
 
+## [2026-11-13] セッション（終電モードの絞り込みと時刻の注記）
+
+### fix: 終電モードでも駅の絞り込み（乗換駅のみ・急行駅のみ）が効くようにする
+- `src/components/RailwayMap.tsx`（`isDemoStationShown`）
+- 終電モードの駅マーカーは絞り込みを通っていなかった。通常の描画と同じ状態（`showTransferStationsOnly` / `showExpressStationsOnly`）で絞る。到着駅は常に残す
+- 意味のない操作（所要時間を表示・集合駅を探す）は終電モード中は押せず、`title` で理由を示す。終電モードに入ると集合駅モードはOFF
+
+### improve: 「時刻を表示」を終電モードで既定オンにし、時刻の意味を※の注記で説明する
+- `src/components/StationSelector.tsx`, `src/components/RailwayMap.tsx`, `src/utils/translation.ts`（4言語）
+- 駅名の下の時刻の意味はモードで変わる（到着予定時刻／終電モードでは最終時刻）。#128 で「到着予定時刻を表示」にしたボタン名を「時刻を表示」に戻し、意味は小さな「※」の注記とボタンの `title` で説明する。終電モードの注記は「架空の試験ダイヤによる試作の値」と明記
+- 終電モードでは「時刻を表示」を既定でオン（到着駅があれば出発駅が無くてもボタンが出る）。オフにすると最終時刻の表示が消える
+- `tests/render/timeLabels.render.ts`（`arrivalTimeLabels.render.ts` を改名・拡張）, `tests/unit/components/lastTrainMapIntegration.test.ts`, `docs/last-train-map-poc.md`, `docs/render-tests.md`
+
 ## [2026-11-13] セッション（知らせの一元管理・到着予定時刻のボタン）
 
 ### improve: 地図の下の知らせ（スナックバー）を1か所で管理し、終電モードの案内は入力欄へ移らず下の帯で出す

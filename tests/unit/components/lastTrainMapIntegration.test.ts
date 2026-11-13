@@ -57,6 +57,24 @@ describe('終電モードは元のUIだけで操作する（回帰防止）', ()
     expect(i18n).toContain('終電モードを使用するには、到着駅を設定してください。');
     expect(map).not.toContain('LastTrainModeControls');
   });
+  it('終電モードでも駅の絞り込みと「時刻を表示」が効く（通常の画面と同じ部品・同じ状態を使う）', () => {
+    const map = read('src/components/RailwayMap.tsx');
+    const selector = read('src/components/StationSelector.tsx');
+    // 乗換駅のみ・急行駅のみは通常の描画と同じ状態（showTransferStationsOnly / showExpressStationsOnly）で絞る。到着駅は残す
+    const fn = map.slice(map.indexOf('const isDemoStationShown'), map.indexOf('const demoAvailableStations'));
+    expect(fn).toContain('arrival?.name');
+    expect(fn).toContain('showTransferStationsOnly');
+    expect(fn).toContain('showExpressStationsOnly');
+    expect(map).toContain('isDemoStationShown(st, rk)');
+    // 時刻は「時刻を表示」（timetableModeEnabled）で出し入れし、終電モードに入ったら既定でオンにする
+    expect(map).toContain('!timetableModeEnabled || demoLatest === undefined');
+    expect(map).toContain('if (enabled) { setTimetableModeEnabled(true);');
+    // ボタンの名前はモードで変えない（意味は※の注記で説明する）。終電モードは到着駅だけでボタンを出す
+    expect(selector).toContain("translateUI('showStationTimeLabelsButton', language)");
+    expect(selector).toContain('(!!departure || lastTrainModeEnabled)');
+    expect(selector).toContain("'timeLabelNoteLastTrain'");
+    expect(selector).toContain('data-time-label-note');
+  });
   it('元のサイトは試作モードがデフォルトでOFF', () => {
     const map = read('src/components/RailwayMap.tsx');
     expect(map).toContain('setLastTrainModeEnabled');
