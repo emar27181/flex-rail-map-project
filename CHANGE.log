@@ -1,5 +1,12 @@
 # CHANGE LOG
 
+## [2026-11-12] セッション（現在地からの位置の更新）
+
+### fix: 「現在地から」を時間を空けて押したとき、その時点の位置で最寄り駅を決める
+- `src/utils/freshLocation.ts`（新規）, `src/components/RailwayMap.tsx`（`handleSetNearestDeparture`）
+- 位置の監視は画面を閉じている間などに止まり、古い位置のままだった。押したとき、最後の更新から10秒以上空いていれば `getCurrentPosition`（キャッシュなし・高精度・5秒で打ち切り）で取り直してから最寄り駅を出発駅にする。直前に更新された位置はそのまま使う（待たせない）。取り直せなければ直前の位置で続ける
+- `tests/unit/utils/freshLocation.test.ts`（新規, 9件）, `tests/render/currentLocation.render.ts`（新規, PC・スマホ）, `docs/render-tests.md`
+
 ## [2026-11-12] セッション（集合駅を探すモード）
 
 ### feat: 複数の出発駅から、お互いに行きやすい駅を探す「集合駅を探す」モード
