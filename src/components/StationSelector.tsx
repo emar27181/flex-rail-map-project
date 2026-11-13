@@ -178,6 +178,14 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
   const panelRef = useRef<HTMLDivElement>(null);
   const departureRef = useRef<HTMLDivElement>(null);
+  // 集合駅モードで増える出発駅の行は、出発駅欄と同じ横幅にそろえる（実測する）
+  useEffect(() => {
+    if (!meetingMode) return;
+    const measure = () => setWaypointFieldWidth(departureRef.current?.getBoundingClientRect().width ?? null);
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [meetingMode, isExpanded, language]);
   const arrivalRef = useRef<HTMLDivElement>(null);
   const departurePortalRef = useRef<HTMLDivElement>(null);
   const arrivalPortalRef = useRef<HTMLDivElement>(null);
@@ -918,7 +926,53 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 右側が空くため、チップは入力欄と同じ行に詰めて表示し
                 空きスペースを使う（無ければ何も出ない）。
               */}
-              {(waypoints ?? []).length > 0 && !showWaypointInput && (
+              {meetingMode && (waypoints ?? []).length > 0 && (
+                /*
+                  集合駅モード: 追加した出発駅は、出発駅欄と同じ見た目（緑の塗り・閉じるボタン）の行で縦に並べる。
+                  「出発駅を追加」を押すたびに行が増え、閉じるボタンで減らせる（人数に合わせて増減できる）。
+                */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs, marginBottom: showWaypointInput ? L.sp.xs : 0 }} data-meeting-origin-rows>
+                  {(waypoints ?? []).map((wp, index) => (
+                    <div key={`${wp.name}-${index}`} style={{ width: waypointFieldWidth ? `${waypointFieldWidth}px` : '100%', maxWidth: '100%' }}>
+                      <label style={{ display: 'block', marginBottom: L.sp.xs, fontWeight: 'bold', color: colors.textSecondary, fontSize: FS.caption }}>
+                        {`${translateUI('departureStation', language)} ${index + 2}`}
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <TextField
+                          theme={theme}
+                          size="sm"
+                          type="text"
+                          readOnly
+                          value={translateStation(wp.name, language)}
+                          aria-label={`${translateUI('departureStation', language)} ${index + 2}`}
+                          className="station-input-filled"
+                          styleOverride={{
+                            paddingRight: L.sp['3xl'],
+                            border: `2px solid ${SEMANTIC.departure}`,
+                            backgroundColor: SEMANTIC.departure,
+                            color: colors.onPrimary,
+                          }}
+                        />
+                        <IconButton
+                          theme={theme}
+                          size="sm"
+                          onClick={() => onRemoveWaypoint?.(index)}
+                          label={translateUI('clearSelection', language)}
+                          icon={<X size={14} />}
+                          styleOverride={{
+                            position: 'absolute',
+                            right: '2px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            color: alphaWhite(0.9),
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {!meetingMode && (waypoints ?? []).length > 0 && !showWaypointInput && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.xs }}>
                   {(waypoints ?? []).map((wp, index) => (
                     <RemovableTag
@@ -1003,7 +1057,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     icon={<X size={14} />}
                     styleOverride={{ flexShrink: 0 }}
                   />
-                  {(waypoints ?? []).map((wp, index) => (
+                  {!meetingMode && (waypoints ?? []).map((wp, index) => (
                     // input の blur（クリックで閉じる処理）より先に mousedown を
                     // 止めないと、削除ボタンを押した瞬間に入力欄ごと閉じてしまう
                     <span key={`${wp.name}-${index}`} onMouseDown={(e) => e.preventDefault()}>
