@@ -8,6 +8,15 @@
 - 架空ダイヤのままなので、ボタン名に「試作」・`title`・駅ラベルの `*` で明示（実際の終電検索には使えない）
 - `tests/render/lastTrainMap.render.ts`（通常画面のON/OFF・Snackbarを追加）, `tests/unit/components/lastTrainMapIntegration.test.ts`（deps の名前を更新）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
 
+## [2026-11-13] セッション（終電モードの動きを軽くする）
+
+### improve: 終電モードのスクロール・ズームの重さを減らす（駅アイコンの使い回し・画面の外は描かない）
+- `src/utils/divIconCache.ts`（新規）, `src/components/RailwayMap.tsx`（駅・時刻のアイコンを `cachedDivIcon` で作る。終電モードの駅・区間は `viewBounds` の外を描かない）
+- 駅のアイコンは描き直すたびに新しい DivIcon を作り、react-leaflet が全マーカーの DOM を作り直していた（終電モードは約370個）。見た目が同じなら同じアイコンを返す（上限 4000 を超えたら捨てる）。さらに、画面＋余白の外の駅・区間は描かない
+- 計測（CPU を4倍遅くして地図を動かす・終電モード・到着駅=新宿）: 長い処理（50ms 超）11回・約700ms → 2回・約180ms、フレーム間隔の95%点 73ms → 33ms
+- 通常の経路表示は線（薄く描く路線を含め約1000本）が多く、終電モードより重いことも分かった（今回は未対応）
+- `tests/unit/utils/divIconCache.test.ts`（新規）, `tests/render/lastTrainMap.render.ts`（画面の外は描かない。絞り込みを外すと落ちることを確認）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
+
 ## [2026-11-13] セッション（知らせを操作した場所の近くに出す）
 
 ### improve: 入力が足りない知らせを、駅選択パネルのすぐ下に注意の印つきで出す

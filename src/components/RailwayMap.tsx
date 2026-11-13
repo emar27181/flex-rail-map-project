@@ -111,6 +111,7 @@ import { estimateArrival, shouldNotifyArrival, buildArrivalMessage, isPlausibleS
 import { buildCorridorRoutes, vertexRanks, offsetPoints } from '../utils/routeOffset';
 import { TRACK_GEOMETRY } from '../data/trackGeometry';
 import { expandWithGeometry } from '../utils/trackGeometry';
+import { cachedDivIcon } from '../utils/divIconCache';
 import { isTrackGeometryExperiment, toTrackGeometries, TRACK_GEOMETRY_PROTOTYPE_URL, type TrackGeometryPrototypeFile } from '../utils/trackGeometryPrototype';
 import type { TrackGeometry } from '../data/trackGeometry/types';
 import Button from './ui/atoms/Button';
@@ -327,6 +328,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (showExpressStationsOnly && demoRouteHasExpressMark(rk) && !st.isExpress && !isTransfer) return false;
     return true;
   };
+  // 終電モードは駅・線の数が多い（数百）ので、通常の描画と同じ「画面＋余白」の範囲（viewBounds。動かしている間も
+  // 余白を使い切る前に更新される）の外の駅と区間は描かない。動かすたびの描き直しを軽くする。まだ範囲が無い（最初の1回）ときは全部描く
+  const isDemoStationInView = (st: { lat: number; lng: number }) =>
+    !viewBounds || (st.lat <= viewBounds.north && st.lat >= viewBounds.south && st.lng <= viewBounds.east && st.lng >= viewBounds.west);
   const demoAvailableStations = useMemo(() => new Set(
     demoReachability && arrival ? availableDemoStations(demoReachability.latestDeparture, arrival.name, demoMinute) : []
   ), [demoReachability, arrival?.name, demoMinute]);
@@ -2577,7 +2582,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         : `<div style="background:${labelBgColor};color:${labelTextColor};${haloCss}padding:${stationLabelBox.paddingCss};border-radius:${stationLabelBox.radiusCss};font-size:${lfs}px;font-weight:bold;white-space:nowrap;${borderCss}${shadowCss}opacity:${opacity}">${displayName}</div>`;
       const [oDx, oDy] = stationLabelOffsets.get(station.name) ?? [0, 0];
       const padded = withTouchPadding(htmlContent, stationNameWidth, iconHeight);
-      return new DivIcon({
+      return cachedDivIcon(DivIcon, {
         html: padded.html,
         className: 'station-name-marker',
         iconSize: padded.size,
@@ -2598,7 +2603,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         : 0;
       const iconTotal = stationSize + paddingForShadow;
       const touchTarget = isMobile ? Math.max(iconTotal, TARGET.touch) : iconTotal;
-      return new DivIcon({
+      return cachedDivIcon(DivIcon, {
         html: `<div style="width:${touchTarget}px;height:${touchTarget}px;display:flex;align-items:center;justify-content:center;"><div style="background:${dotFill};width:${stationSize}px;height:${stationSize}px;border:${dotBorder};box-shadow:${dotShadow};opacity:${opacity};border-radius:50%;flex-shrink:0;"></div></div>`,
         className: 'station-marker',
         iconSize: [touchTarget, touchTarget],
@@ -2788,7 +2793,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           opacity:${opacity}
         ">${innerHtml}</div>`;
       const padded = withTouchPadding(labelHtml, stationNameWidth, stationNameHeight);
-      return new DivIcon({
+      return cachedDivIcon(DivIcon, {
         html: padded.html,
         className: 'station-name-marker train-type-marker',
         iconSize: padded.size,
@@ -2805,7 +2810,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       const bgColor2 = stationIconStyle.bgColor ?? heatOverride ?? routeColors[routeKey];
       const borderColor2 = stationIconStyle.borderColor ?? borderStyle.borderColor;
       const touchTarget2 = isMobile ? Math.max(stationSize, TARGET.touch) : stationSize;
-      return new DivIcon({
+      return cachedDivIcon(DivIcon, {
         html: `<div style="width:${touchTarget2}px;height:${touchTarget2}px;display:flex;align-items:center;justify-content:center;"><div style="
           background:${bgColor2};
           width:${baseStationSize}px;
@@ -2876,7 +2881,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const htmlContent = hasFurigana || timeLines.length > 0
       ? `<div style="background:${bgColor};${borderCssSpecial}border-radius:${stationLabelBox.radiusCss};box-sizing:border-box;width:${markerWidth}px;height:${totalHeight}px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;color:${textColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px">${hasFurigana ? `<div style="font-size:${stationLabelBox.furiganaFontSize}px;line-height:1;margin-bottom:1px;font-weight:normal">${furigana}</div>` : ''}<div style="font-size:${fontSize}px;line-height:1">${displayStationName}</div>${timeHtml}</div>`
       : `<div style="background:${bgColor};${borderCssSpecial}border-radius:${stationLabelBox.radiusCss};box-sizing:border-box;width:${markerWidth}px;height:${totalHeight}px;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:bold;color:${textColor};position:relative;z-index:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 5px">${displayStationName}</div>`;
-    return new DivIcon({
+    return cachedDivIcon(DivIcon, {
       html: htmlContent,
       className: 'special-station-marker-inline',
       iconSize: [markerWidth, totalHeight],
@@ -2901,7 +2906,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
     // 所要時間のラベルは見せるだけ。地図には interactive={false} で置き、タップを受け取らせない。
     // 受け取らせると線の上に並ぶラベルが指のタップを吸い取り、線をタップしても路線の表示が切り替わらなかった（2026-11）
-    return new DivIcon({
+    return cachedDivIcon(DivIcon, {
       html: circularNumberBadgeHtml(label, { background: bgColor, text: textColor, border: borderColor }, theme),
       className: isSection ? 'time-text-section' : 'time-text',
       iconSize: [label.width, label.height],
@@ -5725,13 +5730,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       const to = base[i + 1];
                       const alive = demoActiveEdges.has(demoEdgeKey(line.id, from.name, to.name))
                         || demoActiveEdges.has(demoEdgeKey(line.id, to.name, from.name));
-                      return alive ? (
+                      return alive && (isDemoStationInView(from) || isDemoStationInView(to)) ? (
                         <Polyline key={line.id + '-' + i} positions={offsetPositions([from, to], rk, routeLineWidth)}
                           pathOptions={{ color, weight: routeLineWidth, opacity: 0.88, lineCap: 'round' }}
                           interactive={false} />
                       ) : null;
                     })}
-                    {line.stations.filter(st => demoStationOwner.get(st.name) === rk && isDemoStationShown(st, rk)).map(st =>
+                    {line.stations.filter(st => demoStationOwner.get(st.name) === rk && isDemoStationShown(st, rk) && isDemoStationInView(st)).map(st =>
                       renderStationMarker(st, rk, 'last-train-' + st.name, demoRouteHasExpressMark(rk)))}
                   </React.Fragment>
                 );
