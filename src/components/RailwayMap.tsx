@@ -111,6 +111,8 @@ import { estimateArrival, shouldNotifyArrival, buildArrivalMessage, isPlausibleS
 import { buildCorridorRoutes, vertexRanks, offsetPoints } from '../utils/routeOffset';
 import { TRACK_GEOMETRY } from '../data/trackGeometry';
 import { expandWithGeometry } from '../utils/trackGeometry';
+import { isTrackGeometryExperiment, toTrackGeometries, TRACK_GEOMETRY_PROTOTYPE_URL, type TrackGeometryPrototypeFile } from '../utils/trackGeometryPrototype';
+import type { TrackGeometry } from '../data/trackGeometry/types';
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import MapCompassButton from './map/MapCompassButton';
@@ -192,6 +194,22 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 試作URLのみ。既存の画面・操作部品をそのまま使う。通常のアクセスは完全に従来どおり。
   const [lastTrainDemo] = useState(() => typeof window !== 'undefined'
     && new URLSearchParams(window.location.search).get('experiment') === 'last-train');
+  // 線形（実際の線路の形）の試作。?experiment=track-geometry のときだけ試作データを読み、通常の画面は変えない
+  const [prototypeGeometry, setPrototypeGeometry] = useState<Record<string, TrackGeometry> | null>(null);
+  useEffect(() => {
+    if (typeof window === 'undefined' || !isTrackGeometryExperiment(window.location.search)) return;
+    let cancelled = false;
+    fetch(TRACK_GEOMETRY_PROTOTYPE_URL)
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((file: TrackGeometryPrototypeFile) => { if (!cancelled) setPrototypeGeometry(toTrackGeometries(file)); })
+      .catch(() => { /* 読めなければ今までどおり直線で描く */ });
+    return () => { cancelled = true; };
+  }, []);
+  /** 路線の線形。本番の線形（TRACK_GEOMETRY）が先、無ければ試作 */
+  const trackGeometryOf = useCallback(
+    (routeKey: string): TrackGeometry | undefined => TRACK_GEOMETRY[routeKey] ?? prototypeGeometry?.[routeKey],
+    [prototypeGeometry],
+  );
   // console.log('RailwayMap component initialized');
   const { theme, toggleTheme } = useTheme();
   const colors = getThemeColors(theme);
@@ -4194,7 +4212,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   ): [number, number][] => {
     // 線形（実際の線路に沿った座標列, src/data/trackGeometry/）がある路線は、駅の間を線路の形で描く。
     // 線形は実際の位置なので、重なり回避のずらしはしない
-    const geometry = TRACK_GEOMETRY[routeKey];
+    const geometry = trackGeometryOf(routeKey);
     if (geometry) return expandWithGeometry(stationList, geometry);
     const raw = stationList.map(s => [s.lat, s.lng] as [number, number]);
     const map = mapRef.current;
@@ -4216,7 +4234,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       // 地図がまだ初期化されていないなど、投影できないときは元の座標のまま描く
       return raw;
     }
-  }, [corridorRoutes, zoomLevel]);
+  }, [corridorRoutes, zoomLevel, trackGeometryOf]);
 
   if (!isClient || isLoading || !MapComponents) {
     return (
@@ -4705,7 +4723,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       .map(segStations => ({
       stations: segStations,
       positions: offsetPositions(segStations, routeKey, routeLineWidth),
-      stationIndices: stationVertexIndices(segStations, TRACK_GEOMETRY[routeKey]),
+      stationIndices: stationVertexIndices(segStations, trackGeometryOf(routeKey)),
     }));
     const getTimeLabelPosition = (from: Station, to: Station) => {
       const map = mapRef.current;
