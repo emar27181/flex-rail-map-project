@@ -897,6 +897,18 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "経由駅を追加",
     english: "Add via station"
   },
+  meetingRoutesTitle: {
+    japanese: "{station}までの各ルート（使う路線）",
+    english: "Routes to {station} (lines used)"
+  },
+  meetingNoRoute: {
+    japanese: "ルートなし",
+    english: "No route"
+  },
+  meetingAlreadyThere: {
+    japanese: "集合駅と同じ",
+    english: "Already there"
+  },
   meetingModeButton: {
     japanese: "集合駅を探す",
     english: "Find meeting station"
@@ -2215,6 +2227,9 @@ export const uiChinese: Record<string, string> = {
   viaStations: "经由",
   addWaypoint: "添加途经站",
   meetingModeButton: "寻找集合站",
+  meetingRoutesTitle: "前往{station}的各条路线（使用的线路）",
+  meetingNoRoute: "无路线",
+  meetingAlreadyThere: "就在集合站",
   addMeetingOrigin: "添加出发站",
   meetingNeedOrigins: "设置两个以上出发站，即可找出大家都容易到达的车站（出发站和“添加出发站”）。",
   meetingResultsTitle: "大家都容易到达的车站（按最晚到的人所需时间由短到长）",
@@ -2604,6 +2619,9 @@ export const uiKorean: Record<string, string> = {
   viaStations: "경유",
   addWaypoint: "경유역 추가",
   meetingModeButton: "만날 역 찾기",
+  meetingRoutesTitle: "{station}까지의 경로(이용 노선)",
+  meetingNoRoute: "경로 없음",
+  meetingAlreadyThere: "집합역과 같음",
   addMeetingOrigin: "출발역 추가",
   meetingNeedOrigins: "출발역을 2곳 이상 설정하면 모두가 가기 쉬운 역을 찾습니다(출발역과 \"출발역 추가\").",
   meetingResultsTitle: "모두가 가기 쉬운 역(가장 늦게 도착하는 사람의 소요 시간이 짧은 순)",

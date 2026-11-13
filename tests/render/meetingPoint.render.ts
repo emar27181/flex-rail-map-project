@@ -38,6 +38,11 @@ test('集合駅モード: 出発駅を追加すると候補が出て、選ぶと
   const name = (await first.innerText()).replace(/^1\.\s*/, '').split(' · ')[0];
   await first.click();
   await expect(stationInputs.nth(1)).toHaveValue(name);
+  // 集合駅が決まると、出発駅ごとに使う路線が出る（新宿・東京の2人分）
+  const routesBlock = page.locator('[data-meeting-routes]');
+  await expect(routesBlock).toBeVisible();
+  await expect(routesBlock.locator('[data-meeting-route]')).toHaveCount(2);
+  await expect(routesBlock.locator('[data-meeting-route="新宿"]')).toContainText('分');
   // 時刻欄は元からある1つだけ（集合駅用の時刻欄は作らない）
   await expect(page.locator('input[type="time"]')).toHaveCount(1);
 
@@ -70,6 +75,15 @@ test('集合駅モード: 出発駅の行は「追加」を押すたびに増え
   // 4人分の所要時間が候補に並ぶ
   await expect(page.locator('[data-meeting-results]')).toContainText('新宿');
   await expect(page.locator('[data-meeting-results]')).toContainText('渋谷');
+
+  // 横が空いていれば詰める: 2つ目までは同じ行に並ぶ
+  const tops = await rows.evaluateAll(els => els.map(e => Math.round(e.getBoundingClientRect().top)));
+  expect(tops[0]).toBe(tops[1]);
+
+  // 集合駅を決めると、4人それぞれのルートと使う路線が並ぶ
+  await page.locator('[data-meeting-results]').getByRole('button').first().click();
+  await expect(page.locator('[data-meeting-route]')).toHaveCount(4);
+  await expect(page.locator('[data-meeting-routes]')).toContainText('横浜');
 
   // ✕で行が減る
   await page.locator('[data-meeting-origin-rows] button[aria-label]').first().click();

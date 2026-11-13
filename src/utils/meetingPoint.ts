@@ -54,3 +54,42 @@ export function rankMeetingStations(
   }
   return result.sort((a, b) => a.max - b.max || a.sum - b.sum || a.name.localeCompare(b.name, 'ja'));
 }
+
+/** 集合駅までの、出発駅ごとのルート（使う路線の並び） */
+export interface MeetingRouteEntry {
+  /** 出発駅の名前 */
+  origin: string;
+  /** 乗る路線（同じ路線が続くときは1つにまとめる。徒歩の乗換は含めない） */
+  lines: string[];
+  /** 所要時間（分）。ルートが無いときは null */
+  totalTime: number | null;
+  transfers: number;
+}
+
+interface RouteLike {
+  totalTime: number;
+  transfers: number;
+  segments: Array<{ routeKey: string; isWalkingTransfer?: boolean }>;
+}
+
+/**
+ * 出発駅ごとに、集合駅までのいちばん良いルートで使う路線を並べる。
+ * ルートの探索そのものは findRoute（routeFinder.findRoutes の先頭）に任せ、ここは整理だけ。
+ */
+export function summarizeMeetingRoutes(
+  originNames: string[],
+  arrivalName: string,
+  findRoute: (origin: string) => RouteLike | null,
+): MeetingRouteEntry[] {
+  return originNames.map(origin => {
+    if (origin === arrivalName) return { origin, lines: [], totalTime: 0, transfers: 0 };
+    const route = findRoute(origin);
+    if (!route) return { origin, lines: [], totalTime: null, transfers: 0 };
+    const lines: string[] = [];
+    for (const seg of route.segments) {
+      if (!seg.routeKey || seg.routeKey === 'walking' || seg.isWalkingTransfer) continue;
+      if (lines[lines.length - 1] !== seg.routeKey) lines.push(seg.routeKey);
+    }
+    return { origin, lines, totalTime: Math.round(route.totalTime), transfers: route.transfers };
+  });
+}
