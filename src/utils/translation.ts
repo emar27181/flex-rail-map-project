@@ -1262,6 +1262,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "現在地を取得できません",
     english: "Location unavailable"
   },
+  locationDeniedHelp: {
+    japanese: "位置情報が許可されていません。ブラウザの設定でこのサイトの位置情報を許可してから、もう一度押してください。",
+    english: "Location access is not allowed. Allow location for this site in your browser settings, then press the button again."
+  },
   retryLocation: {
     japanese: "再取得",
     english: "Retry"
@@ -2331,6 +2335,7 @@ export const uiChinese: Record<string, string> = {
   showTrainStatusPanel: "显示乘车路线",
   locationDenied: "未允许获取位置信息",
   locationUnavailable: "无法获取当前位置",
+  locationDeniedHelp: "未允许获取位置信息。请在浏览器设置中允许此网站获取位置信息，然后再按一次。",
   retryLocation: "重试",
   useLocationFeatures: "根据当前位置自动设置出发站",
   moreItemsCount: "+{count}项",
@@ -2726,6 +2731,7 @@ export const uiKorean: Record<string, string> = {
   showTrainStatusPanel: "탑승 노선 표시",
   locationDenied: "위치 정보가 허용되지 않았습니다",
   locationUnavailable: "현재 위치를 가져올 수 없습니다",
+  locationDeniedHelp: "위치 정보가 허용되지 않았습니다. 브라우저 설정에서 이 사이트의 위치 정보를 허용한 뒤 다시 눌러 주세요.",
   retryLocation: "다시 시도",
   useLocationFeatures: "현재 위치로 출발역 자동 설정",
   moreItemsCount: "+{count}건",

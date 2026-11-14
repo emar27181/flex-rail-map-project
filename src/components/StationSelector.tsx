@@ -749,9 +749,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   /*
                     「現在地から」の塗り分けは何度か迷走した経緯があるので
                     最終的な条件をここに書いておく:
-                    - disabled: 位置情報（userLocation）が取れていない間。
-                      押しても意味が無いため非活性にする（消すと隣のボタンの
-                      位置が動くので、消さずに非活性で存在だけ示す）
+                    - 位置情報が取れていなくても**常に押せる**（2026-11-14）。許可しないで入った後でも、
+                      押すたびに位置の取得をやり直し、ブラウザが許可の確認を出せる状態ならもう一度聞く。
+                      それでも許可されないときは、ブラウザの設定で許可する案内が出る（RailwayMap の
+                      handleSetNearestDeparture）。以前は位置が無いと非活性で、許可し直す手段が無かった
                     - pressed(塗りつぶし): 出発駅が「今の現在地の最寄り駅」と
                       一致しているときだけ。「今だったら藤沢本町が最寄り駅で
                       それが出発駅にセットされていたら活性化」との指定どおり、
@@ -764,7 +765,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   size="sm"
                   onClick={onSetNearestDeparture}
                   icon={<LocateFixed />}
-                  disabled={!userLocation}
                   pressed={isNearestDeparture}
                 >
                   {translateUI('currentLocationFrom', language)}

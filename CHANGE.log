@@ -8,6 +8,14 @@
 - 架空ダイヤのままなので、ボタン名に「試作」・`title`・駅ラベルの `*` で明示（実際の終電検索には使えない）
 - `tests/render/lastTrainMap.render.ts`（通常画面のON/OFF・Snackbarを追加）, `tests/unit/components/lastTrainMapIntegration.test.ts`（deps の名前を更新）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
 
+## [2026-11-14] セッション（位置情報を許可せずに入ったあとの「現在地から」）
+
+### fix: 位置情報を許可せずに入っても「現在地から」を押せて、押すたびに許可を取り直す
+- `src/utils/freshLocation.ts`（`requestPosition` / `PositionResult` / 取れなかった理由）, `src/components/RailwayMap.tsx`（`handleSetNearestDeparture`）, `src/components/StationSelector.tsx`, `src/utils/translation.ts`（`locationDeniedHelp` を4言語）
+- 位置が取れていない間は「現在地から」が非活性で、許可し直す手段が無かった。**常に押せる**ようにし、押すたびに位置の取得をやり直す。ブラウザが「許可の確認」の状態なら、ここでもう一度許可を聞くポップアップが出る。取れたら最寄り駅を出発駅に入れ、位置の監視（現在地マーカーなど）も再開する
+- それでも許可されないとき（ブラウザが「拒否」を覚えているときは確認が出せない）は、「ブラウザの設定でこのサイトの位置情報を許可してから、もう一度押してください」を駅選択パネルのすぐ下に出す（取れない・時間切れのときは「現在地を取得できません」）
+- `tests/unit/utils/freshLocation.test.ts`（理由つき・押すたびに取り直す）, `tests/render/currentLocation.render.ts`（許可せずに入る → 押せる → 案内 → 許可して押すと使える）
+
 ## [2026-11-13] セッション（出発駅の欄を同じ緑の部品にそろえる）
 
 ### improve: 追加した出発駅も出発駅欄と同じ緑の欄にし、入れるたびに次の欄が隣に出る（部品 `RoleField`）

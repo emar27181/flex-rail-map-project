@@ -13,7 +13,7 @@ import type { Station } from '../data/yamanote';
 import StationSelector from './StationSelector';
 import { buildDestinationDemoNetwork, calculateDemoLastTrain, availableDemoStations, demoEdgeKey, formatDemoClock, parseDemoClock, getCurrentDemoClock } from '../utils/lastTrainDemo';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
-import { requestFreshPosition, resolveCurrentPosition } from '../utils/freshLocation';
+import { requestPosition, resolveCurrentPosition } from '../utils/freshLocation';
 import { rankMeetingStations, summarizeMeetingRoutes, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
@@ -1477,17 +1477,25 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   userLocationRef.current = userLocation;
   useEffect(() => { if (userLocation) userLocationAtRef.current = Date.now(); }, [userLocation]);
   const handleSetNearestDeparture = useCallback(async () => {
-    const { position, refreshed } = await resolveCurrentPosition({
+    const hadLocation = !!userLocationRef.current;
+    const { position, refreshed, failure } = await resolveCurrentPosition({
       known: userLocationRef.current,
       knownAt: userLocationAtRef.current,
       now: Date.now(),
-      fetchFresh: () => requestFreshPosition(),
+      // 位置がまだ無い（許可していない）ときも、押すたびに取り直す。ブラウザが「許可の確認」の状態なら、ここでもう一度許可を聞くポップアップが出る
+      fetchFresh: () => requestPosition(),
     });
     if (refreshed && position) setUserLocation(position);
-    if (!position) return;
+    // 許可が無かったところから取れた: 位置の監視（現在地マーカーなど）も再開する
+    if (!hadLocation && position) setLocationRetryCount(c => c + 1);
+    if (!position) {
+      // 許可されていない場合、ブラウザが「拒否」を覚えていると確認は出ない。ブラウザの設定で許可する案内を、操作した場所の近くに出す
+      notifyMessage(translateUI(failure === 'denied' ? 'locationDeniedHelp' : 'locationUnavailable', currentLanguage), 'warning');
+      return;
+    }
     const nearest = findNearestStation(position[0], position[1]);
     if (nearest) setDeparture(nearest);
-  }, [findNearestStation]);
+  }, [findNearestStation, notifyMessage, currentLanguage]);
 
   /**
    * 「現在地から」ボタンを塗りつぶしにするかどうかの条件。
