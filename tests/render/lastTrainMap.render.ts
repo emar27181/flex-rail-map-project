@@ -107,3 +107,14 @@ test('終電モード: 画面の外の駅は描かない（数百の駅を描き
   expect(near, `広い範囲 ${wide} / 近く ${near}`).toBeLessThan(wide * 0.5);
   expect(errors).toEqual([]);
 });
+
+test('終電モード: 到着駅は通常の画面と同じ到着駅の印（赤の駅名札）で描く', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('/?mode=last-train&to=shibuya&center=35.658,139.7016&zoom=14');
+  const arrival = page.locator('.special-station-marker-inline', { hasText: '渋谷' });
+  await expect(arrival).toHaveCount(1, { timeout: 20_000 });
+  // 塗りの色は到着の赤（通常の画面の到着駅と同じ部品）
+  const bg = await arrival.locator('div').first().evaluate(el => getComputedStyle(el).backgroundColor);
+  expect(bg).toBe('rgb(244, 67, 54)');
+  expect(errors).toEqual([]);
+});

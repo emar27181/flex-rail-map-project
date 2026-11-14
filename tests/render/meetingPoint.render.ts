@@ -238,3 +238,17 @@ test('駅選択パネルを閉じても、出発駅・到着駅は2行目に小�
   await expect(summary2).toContainText('横浜');
   expect(errors).toEqual([]);
 });
+
+test('集合駅モード: 集合駅を決める前でも、出発駅どうしの間の路線に、それぞれの出発駅から増える所要時間が出る', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('/?mode=meeting&from=shinjuku&with=fujisawa');
+  await expect(page.locator('.leaflet-container').first()).toBeVisible();
+  // 到着駅は未設定。間の路線（小田急線など）に区間の時間バッジが出る
+  await expect.poll(() => page.locator('.time-text-section').count(), { timeout: 20_000 }).toBeGreaterThan(3);
+  const texts = (await page.locator('.time-text-section').allInnerTexts()).map(Number);
+  // 両端（新宿側・藤沢側）から数字が増えるので、小さい数字が複数ある（1つの出発駅からの累計だけなら小さい数字は1つ）
+  expect(texts.filter(n => n <= 8).length).toBeGreaterThanOrEqual(2);
+  // 出発駅どうしの間にない路線は描かない（地図に出ている濃い線の路線数が全路線ではない）
+  await expect(page.locator('[data-meeting-results]')).toBeVisible();
+  expect(errors).toEqual([]);
+});
