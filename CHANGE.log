@@ -1,5 +1,12 @@
 # CHANGE LOG
 
+## [2026-11-14] セッション（駅ツールチップに「出発駅」「到着駅」の札）
+
+### improve: 駅のツールチップで、いま出発駅・到着駅の駅には駅名の横に「出発駅」「到着駅」の札を出す
+- `src/components/StationRoleBadge.tsx`（新規。`ColorChip` + 役割の色 `ROLE_FIELD_COLOR` + 既存の文言 `departureStation` / `arrivalStation`）, `src/components/RailwayMap.tsx`（`tooltipStationRoles`。時刻表のツールチップと統計のツールチップの両方）
+- 初見で、その駅がいま出発駅・到着駅だと分かるように。集合駅モードでは出発駅が複数でも、どれも「出発駅」の札
+- `tests/render/meetingPoint.render.ts`
+
 ## [2026-11-14] セッション（乗車ログ（試作））
 
 ### feat: 乗った路線・降りた駅を記録して、3段階で見せる「乗車ログ」モード（試作）

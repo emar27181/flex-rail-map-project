@@ -14,6 +14,7 @@ import StationSelector from './StationSelector';
 import { buildDestinationDemoNetwork, calculateDemoLastTrain, availableDemoStations, demoEdgeKey, formatDemoClock, parseDemoClock, getCurrentDemoClock } from '../utils/lastTrainDemo';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
 import { requestPosition, resolveCurrentPosition } from '../utils/freshLocation';
+import StationRoleBadge from './StationRoleBadge';
 import { useRideLog } from '../hooks/useRideLog';
 import { deriveRideLog, entriesFromRoute, countByLevel, rideLevelOf, RIDE_LEVELS, type RideLevel } from '../utils/rideLog';
 import { rankMeetingStations, summarizeMeetingRoutes, interleaveByRank, meetingEdgeMinutes, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
@@ -1752,8 +1753,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         {/* ヘッダー */}
         <div style={{ padding: `${L.sp.xs} ${L.sp.lg} ${L.sp.sm}`, borderBottom: `1px solid ${colors.borderLight}` }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: L.sp.sm }}>
-            <span style={{ fontWeight: 'bold', fontSize: FS.body, color: colors.text }}>
-              {translateStation(stationTooltip.stationName, currentLanguage)}
+            <span style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, minWidth: 0, flexWrap: 'wrap' }}>
+              <span style={{ fontWeight: 'bold', fontSize: FS.body, color: colors.text }}>
+                {translateStation(stationTooltip.stationName, currentLanguage)}
+              </span>
+              {tooltipStationRoles.departure && <StationRoleBadge role="departure" theme={theme} language={currentLanguage} />}
+              {tooltipStationRoles.arrival && <StationRoleBadge role="arrival" theme={theme} language={currentLanguage} />}
             </span>
             <span onClick={closeTooltip}
               style={{ fontSize: FS.caption, color: colors.textSecondary, cursor: 'pointer', padding: `${L.sp.sm} ${L.sp.md}`, margin: `-${L.sp.sm} -${L.sp.md}`, borderRadius: L.r.control }}>
@@ -2078,8 +2083,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         }}>
           {/* 駅名 + 閉じるボタン */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: L.sp.xs }}>
-            <span style={{ fontWeight: 'bold', fontSize: FS.body, color: colors.text }}>
-              {translateStation(stationTooltip.stationName, currentLanguage)}
+            <span style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, minWidth: 0, flexWrap: 'wrap' }}>
+              <span style={{ fontWeight: 'bold', fontSize: FS.body, color: colors.text }}>
+                {translateStation(stationTooltip.stationName, currentLanguage)}
+              </span>
+              {/* この駅がいま出発駅・到着駅なら、文言で示す（集合駅モードでは出発駅が複数） */}
+              {tooltipStationRoles.departure && <StationRoleBadge role="departure" theme={theme} language={currentLanguage} />}
+              {tooltipStationRoles.arrival && <StationRoleBadge role="arrival" theme={theme} language={currentLanguage} />}
             </span>
             <span
               onClick={closeTooltip}
@@ -3027,6 +3037,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       return true;
     });
   }, [departure, extraDepartures]);
+  /** ツールチップの駅が、いま出発駅・到着駅か（駅名札に「出発駅」「到着駅」の札を添える） */
+  const tooltipStationRoles = {
+    departure: !!stationTooltip && (meetingModeEnabled
+      ? meetingOrigins.some(o => o.name === stationTooltip.stationName)
+      : departure?.name === stationTooltip.stationName),
+    arrival: !!stationTooltip && arrival?.name === stationTooltip.stationName,
+  };
   // 出発駅ごとの全駅への最短所要時間（ダイクストラ）。出発駅どうしを区別しない（最初の入力も追加した入力も同じ計算）
   const meetingTimeMaps = useMemo(() => {
     if (!meetingModeEnabled || meetingOrigins.length < 2) return [];

@@ -252,3 +252,17 @@ test('集合駅モード: 集合駅を決める前でも、出発駅どうしの
   await expect(page.locator('[data-meeting-results]')).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test('駅のツールチップ: いま出発駅・到着駅の駅には、駅名の横に「出発駅」「到着駅」の札が出る', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('/?from=shinjuku&to=shibuya');
+  await expect(page.locator('.leaflet-container').first()).toBeVisible();
+  const open = async (name: string) => {
+    await page.locator('.special-station-marker-inline', { hasText: name }).first().click({ force: true });
+  };
+  await expect.poll(() => page.locator('.special-station-marker-inline').count(), { timeout: 20_000 }).toBeGreaterThan(1);
+  await open('渋谷');
+  await expect(page.locator('[data-station-role="arrival"]')).toHaveText('到着駅');
+  await expect(page.locator('[data-station-role="departure"]')).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
