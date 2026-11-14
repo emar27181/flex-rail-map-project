@@ -1,5 +1,12 @@
 # CHANGE LOG
 
+## [2026-11-14] セッション（駅ツールチップの路線一覧: 運行系統名を枠の中に）
+
+### fix: 駅ツールチップの路線一覧で、運行系統名（横須賀線の「横須賀・総武快速線」）を路線のチップの枠の中の2行目に入れる
+- `src/components/ui/atoms/Chip.tsx`（`subLabel`）, `src/components/legend/RouteToggleChip.tsx`, `src/components/ServiceTermini.tsx`（`serviceBrandLabel`）, `src/components/RailwayMap.tsx`
+- 灰色の系統名がチップの外にぶら下がり、次の路線の項目のように見えていた。チップの中の2行目に小さく入れる（路線名がすでに系統名を含む路線・系統が無い路線は従来どおり出さない）
+- `tests/unit/components/serviceBrandLabel.test.tsx`
+
 ## [2026-11-14] セッション（終電モードの到着駅の印／集合駅は出発駅どうしの間の路線だけを描く）
 
 ### fix: 終電モードの到着駅を、通常の画面と同じ到着駅の印（赤の駅名札）で描く

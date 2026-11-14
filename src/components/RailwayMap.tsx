@@ -103,7 +103,7 @@ import {
 } from '../utils/stationUrlParams';
 import ColorChip from './ui/ColorChip';
 import TimetableSourceNote from './ui/TimetableSourceNote';
-import ServiceTermini from './ServiceTermini';
+import { serviceBrandLabel } from './ServiceTermini';
 import { checkboxInput, L} from './legend/legendStyles';
 import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, tintColor, LIGHT_TEXT } from '../utils/contrast';
 import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE, haversineDistance, estimateHeadingFromHistory } from '../utils/trainDetector';
@@ -2248,6 +2248,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     <RouteToggleChip
                       routeKey={routeKey}
                       routeName={routeNames[routeKey] ?? rk}
+                      // 同じ線路を別系統が走る駅（藤沢の東海道線＝上野東京ラインなど）の系統名は、チップの枠の中の2行目に入れる
+                      subLabel={serviceBrandLabel(routeKey, currentLanguage)}
                       routeColor={routeColors[routeKey] ?? colors.textSecondary}
                       isVisible={isShowing}
                       theme={theme}
@@ -2265,16 +2267,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       }}
                       dataAttr={{ 'data-tooltip-route-chip': rk }}
                     />
-                  </div>
-                  {/* 同じ線路を別系統が走る駅（藤沢の東海道線＝上野東京ラインなど）で系統名を添える */}
-                  <div style={{
-                    fontSize: FS.caption,
-                    color: isActive || isJourney ? colors.text : colors.textSecondary,
-                    fontWeight: isJourney ? 'bold' : 'normal',
-                    lineHeight: 1.3,
-                    minWidth: 0,
-                  }}>
-                    <ServiceTermini route={routeKey} theme={theme} language={currentLanguage} variant="brand" />
                   </div>
                 </div>
               );

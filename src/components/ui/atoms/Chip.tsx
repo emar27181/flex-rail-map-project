@@ -15,9 +15,13 @@
 import React from 'react';
 import type { CSSProperties } from 'react';
 import { getThemeColors } from '../../../contexts/ThemeContext';
+import { FS } from '../../../constants/ui';
 import { filledLabelColors } from '../../../utils/contrast';
 import { CONTROL_SIZE, CONTROL_BORDER_WIDTH } from './controlSize';
 import type { ControlSize } from './controlSize';
+
+/** 2行目の文字の大きさ。12px が下限（FS.caption） */
+const CHIP_SUB_LABEL_FONT_SIZE = FS.caption;
 
 /** 色を示す丸の直径(px)。選択の有無で変えない */
 const DOT_SIZE = 10;
@@ -26,6 +30,8 @@ export interface ChipProps {
   /** このチップが表すものの色（路線色など） */
   color: string;
   label: string;
+  /** 2行目に小さく添える別名など（枠の中に入れる。枠の外にぶら下げない） */
+  subLabel?: string;
   selected: boolean;
   theme: 'light' | 'dark';
   size?: ControlSize;
@@ -38,6 +44,7 @@ export interface ChipProps {
 const Chip: React.FC<ChipProps> = ({
   color,
   label,
+  subLabel,
   selected,
   theme,
   size = 'md',
@@ -54,7 +61,7 @@ const Chip: React.FC<ChipProps> = ({
       {...dataAttr}
       onClick={onClick}
       aria-pressed={selected}
-      title={label}
+      title={subLabel ? `${label}（${subLabel}）` : label}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -94,7 +101,12 @@ const Chip: React.FC<ChipProps> = ({
         }}
       />
       {/* 幅が足りないときは語の切れ目で折り返す（省略すると路線を見分けられない） */}
-      <span style={{ minWidth: 0 }}>{label}</span>
+      <span style={{ minWidth: 0 }}>
+        {label}
+        {subLabel && (
+          <span style={{ display: 'block', fontSize: CHIP_SUB_LABEL_FONT_SIZE, lineHeight: 1.3, opacity: 0.85 }}>{subLabel}</span>
+        )}
+      </span>
     </button>
   );
 };

@@ -50,17 +50,28 @@ export function hasServiceSystem(route: RouteKey): boolean {
   return getServiceSystem(route) !== undefined;
 }
 
+/**
+ * 路線の運行系統名（路線一覧の2行目に添える名前）。無い、または路線名がすでに系統名を含むときは undefined。
+ * 路線名そのものが系統名を含む（湘南新宿ライン（…））なら重ねて出さない。
+ * 呼び出し側（駅ツールチップ）は、これを路線のチップの枠の中の2行目に入れる（枠の外にぶら下げない。2026-11-14）
+ */
+export function serviceBrandLabel(route: RouteKey, language: Language): string | undefined {
+  const system = getServiceSystem(route);
+  if (!system) return undefined;
+  const brand = translateUI(SERVICE_BRAND_LABEL_KEY[system.brand], language);
+  const routeName = translateRoute(routeNames[route] ?? route, language);
+  return routeName.includes(brand) ? undefined : brand;
+}
+
 export default function ServiceTermini({ route, theme, language, variant }: ServiceTerminiProps) {
   const system = getServiceSystem(route);
   if (!system) return null;
 
   const colors = getThemeColors(theme);
-  const brand = translateUI(SERVICE_BRAND_LABEL_KEY[system.brand], language);
 
   if (variant === 'brand') {
-    // 路線名そのものが系統名を含む（湘南新宿ライン（…））なら重ねて出さない
-    const routeName = translateRoute(routeNames[route] ?? route, language);
-    if (routeName.includes(brand)) return null;
+    const brand = serviceBrandLabel(route, language);
+    if (!brand) return null;
     return (
       <span style={{ display: 'block', fontSize: FS.caption, color: colors.textSecondary, lineHeight: 1.3 }}>
         {brand}
@@ -68,6 +79,7 @@ export default function ServiceTermini({ route, theme, language, variant }: Serv
     );
   }
 
+  const brand = translateUI(SERVICE_BRAND_LABEL_KEY[system.brand], language);
   const groupSep = language === 'japanese' ? '／' : ' / ';
   const dot = adjustRouteColorForTheme(routeColors[route] ?? colors.textMuted, theme);
   return (
