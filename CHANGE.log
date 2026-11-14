@@ -8,6 +8,14 @@
 - 架空ダイヤのままなので、ボタン名に「試作」・`title`・駅ラベルの `*` で明示（実際の終電検索には使えない）
 - `tests/render/lastTrainMap.render.ts`（通常画面のON/OFF・Snackbarを追加）, `tests/unit/components/lastTrainMapIntegration.test.ts`（deps の名前を更新）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
 
+## [2026-11-14] セッション（路線の切り替えの「元に戻す」）
+
+### improve: 地図の線をタップして路線を切り替えたときの知らせに「元に戻す」を付ける
+- `src/components/map/RouteToggleSnackbar.tsx`（`onUndo`）, `src/components/map/MapNoticeSnackbar.tsx`（`onUndoRouteToggle`）, `src/components/map/mapNotice.ts` / `src/hooks/useMapNotice.ts`（`removeFromAvailable`）, `src/components/RailwayMap.tsx`（`undoRouteToggle`）, `src/utils/translation.ts`（`undoAction` を4言語）
+- 2026-11 に「同じ線をもう一度押せば戻る」として外した「元に戻す」を、押し間違えたときに帯からすぐ戻せるよう戻した。押すと切り替える前の表示（表示した路線は非表示に、非表示にした路線は表示に）に戻り、知らせは閉じる。線をタップして足した路線（もともと表示できる路線の一覧に無かった）は、一覧からも外す
+- 帯は1行のまま。操作のボタンは押せる大きさ（44px）なので、帯の高さはそれに合わせて少し伸びる。長い路線名は路線名だけを省略し、「を非表示にしました」とボタンは残す
+- `tests/unit/components/ui/snackbar.test.tsx`（ボタンは onUndo のときだけ・押すと呼ばれて閉じる・4言語）, `tests/unit/components/map/routeToggleUndo.test.ts`（新規）, `tests/render/routeTap.render.ts`（線を押す → 非表示 → 元に戻す → 2路線に戻る）, `docs/design-system.md`
+
 ## [2026-11-14] セッション（位置情報を許可せずに入ったあとの「現在地から」）
 
 ### fix: 位置情報を許可せずに入っても「現在地から」を押せて、押すたびに許可を取り直す

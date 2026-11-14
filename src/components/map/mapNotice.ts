@@ -12,7 +12,7 @@
 /** 知らせの中身（どの種類か） */
 export type MapNoticeContent =
   /** 地図の線をタップして路線を切り替えた（どの路線を表示・非表示にしたか） */
-  | { kind: 'routeToggle'; routeKey: string; shown: boolean }
+  | { kind: 'routeToggle'; routeKey: string; shown: boolean; /** 「元に戻す」で、一覧（表示できる路線）からも外すか。もともと一覧に無かった路線を足したとき true */ removeFromAvailable?: boolean }
   /** 文だけの案内（例: 到着駅を決めてから使うモード）。文言は言語に合わせて呼び出し側が渡す */
   | { kind: 'message'; message: string; /** 注意（足りない入力など）は warning。既定は info */ tone?: 'info' | 'warning' };
 

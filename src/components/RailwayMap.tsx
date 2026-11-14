@@ -591,10 +591,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * 地図の下の知らせ（スナックバー）。路線の切り替え・モードの案内など、すべてここ1か所で管理する
    * （一度に1つ。種類は map/mapNotice.ts、表示は map/MapNoticeSnackbar）。
    * 指の端末では線に路線名の吹き出しを出さないので、線をタップして切り替えたときはどの路線かをここで1行だけ知らせる
-   * （戻すときは同じ線をもう一度押す。「元に戻す」は付けない）
+   * （押し間違えたときは、知らせの「元に戻す」で切り替える前に戻せる。同じ線をもう一度押しても戻る）
    */
   const { notice: mapNotice, notifyRouteToggle, notifyMessage, clearNotice } = useMapNotice();
   const noticeRouteToggle = notifyRouteToggle;
+  /**
+   * 路線の切り替えの知らせの「元に戻す」。切り替えたあとが「表示」なら非表示に、「非表示」なら表示に戻す。
+   * 線をタップして足した路線（もともと一覧に無かった）は、一覧からも外す。
+   */
+  const undoRouteToggle = useCallback((n: { routeKey: string; shown: boolean; removeFromAvailable?: boolean }) => {
+    const key = n.routeKey as RouteKey;
+    if (n.shown) {
+      setVisibleRoutes(prev => { const next = new Set(prev); next.delete(key); return next; });
+      if (n.removeFromAvailable) setAvailableRoutes(prev => { const next = new Set(prev); next.delete(key); return next; });
+    } else {
+      setVisibleRoutes(prev => new Set([...prev, key]));
+    }
+  }, []);
   const [clickedRoute, setClickedRoute] = useState<string | null>(null);
   const [routePopupPosition, setRoutePopupPosition] = useState<{ x: number, y: number } | null>(null);
   const [hoverTooltipPosition, setHoverTooltipPosition] = useState<{ x: number, y: number } | null>(null);
@@ -5701,9 +5714,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           justClickedLayerRef.current = true;
                           if (tapToggleMode && !embedded) {
                             // 切替モード：確認なしで即表示（埋め込みでは確認を出す。狭い枠で地図を動かす指で足されないように）
+                            // もともと一覧（表示できる路線）に無かったかを覚え、「元に戻す」で一覧からも外す
+                            const wasAvailable = availableRoutes.has(rKey);
                             setAvailableRoutes(prev => new Set([...prev, rKey]));
                             setVisibleRoutes(prev => new Set([...prev, rKey]));
-                            noticeRouteToggle(rKey, true);
+                            noticeRouteToggle(rKey, true, !wasAvailable);
                             return;
                           }
                           const oe = (e as any).originalEvent as MouseEvent;
@@ -6868,6 +6883,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             routeName={key => routeNames[key as RouteKey] ?? key}
             routeColor={key => adjustRouteColorForTheme(routeColors[key as RouteKey], theme)}
             onClose={clearNotice}
+            onUndoRouteToggle={undoRouteToggle}
           />
 
           <div style={{

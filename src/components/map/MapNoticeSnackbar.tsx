@@ -28,13 +28,15 @@ interface Props {
   routeName: (routeKey: string) => string;
   routeColor: (routeKey: string) => string;
   onClose: () => void;
+  /** 路線の切り替えを元に戻す（切り替えた路線と、切り替えたあとの状態を渡す） */
+  onUndoRouteToggle?: (notice: { routeKey: string; shown: boolean; removeFromAvailable?: boolean }) => void;
 }
 
 /** 駅選択パネルの下に出すときの、パネルとの隙間と、最小の幅（px。狭いパネルでも文が読める幅） */
 const NEAR_INPUT_GAP_PX = parseFloat(FLOATING_PANEL.gap);
 const NEAR_INPUT_MIN_WIDTH_PX = 240;
 
-const MapNoticeSnackbar: React.FC<Props> = ({ notice, theme, language: _language, bottom, routeName, routeColor, onClose }) => {
+const MapNoticeSnackbar: React.FC<Props> = ({ notice, theme, language: _language, bottom, routeName, routeColor, onClose, onUndoRouteToggle }) => {
   const sentinel = useRef<HTMLSpanElement>(null);
   const [position, setPosition] = useState<{ id: number; pos: NoticePosition | null } | null>(null);
   const colors = getThemeColors(theme);
@@ -71,6 +73,7 @@ const MapNoticeSnackbar: React.FC<Props> = ({ notice, theme, language: _language
           language={_language}
           bottom={bottom}
           onClose={onClose}
+          onUndo={onUndoRouteToggle ? () => onUndoRouteToggle({ routeKey: notice.routeKey, shown: notice.shown, removeFromAvailable: notice.removeFromAvailable }) : undefined}
         />
       );
     }
