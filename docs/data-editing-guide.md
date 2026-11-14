@@ -55,6 +55,7 @@ Flex Railway Map のデータ（路線・駅・直通運転・運行系統・駅
 | 駅統計（ヒートマップ）の値 | `src/data/station-stats-data.json` | `tests/unit/data/stationStats.test.ts` |
 | 駅統計の項目・出典・実データか推定か | `src/data/stationStats.ts` | 同上 |
 | 時刻表 | `src/data/timetableData.ts` | `tests/unit/data/timetableData.test.ts` |
+| 終電モードの実際の終電・最終列車の時刻 | `src/data/lastTrainTimetables.ts` | `tests/unit/data/lastTrainTimetables.test.ts` |
 | ガイド記事（/guides/*） | `src/data/guides.ts` | ビルド |
 
 ---
@@ -177,6 +178,31 @@ export const jrExampleLine: Station[] = [
 - 各路線の `directions` は `[下り（片方向）, 上り（逆方向）]` の2要素
 - 公式時刻表から写したものは `dataQuality: 'official'`、運行間隔からの概算は書かない
   （既定で「推定」扱いになり、画面に注意書きが出る）
+
+### 終電の時刻（`src/data/lastTrainTimetables.ts`）
+
+終電モードの駅名の下の時刻は、**実データが無い路線は架空のデモダイヤ**（`utils/lastTrainDemo.ts`、時刻に「*」）で、
+**実データを書いた路線だけ実データ**に切り替わる（アプリ側の変更は要らない。2026-11-14）。
+
+```ts
+export const LAST_TRAIN_TIMETABLES: LineLastTrainTimetable[] = [
+  {
+    routeKey: 'yamanote',
+    source: { name: '（公式の時刻表の名前）', url: 'https://…', retrievedAt: '2026-11-14' },
+    trips: [
+      { id: '外回り-最終', stops: [
+        { station: '渋谷', time: '24:00' },   // 日付をまたぐ時刻は 24:00 のように24以上で書く
+        { station: '原宿', time: '24:03' },
+      ] },
+    ],
+  },
+];
+```
+
+- 列車は**進行方向の順**に停車駅を並べる（2駅以上）。同じ列車が路線をまたぐ直通は、今は路線ごとの列車として書く
+- 全列車は要らない。終電に近い数本（乗換の判定に足りる範囲）でよい。書いていない時間帯は「列車なし」
+- 路線を1つ書くと、その路線の架空ダイヤは使われなくなる。駅の時刻の「*」は、最遅の列車が実データの駅から消える
+- 推測で書かない。出典（名前・URL・確認日）は必須。検証は `npm run test:data`
 
 ### ガイド（`src/data/guides.ts`）
 

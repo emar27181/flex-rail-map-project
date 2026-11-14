@@ -937,10 +937,6 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "全員が{minutes}分以内で行ける駅が見つかりません。",
     english: "No station is reachable by everyone within {minutes} minutes."
   },
-  meetingResultsNote: {
-    japanese: "駅をクリックすると到着駅に設定します。所要時間は路線データによる目安で、実際のダイヤではありません。",
-    english: "Click a station to set it as the arrival station. Times are estimates from line data, not actual timetables."
-  },
   otherStations: {
     japanese: "他{count}駅",
     english: "{count} more stations"
@@ -2256,7 +2252,6 @@ export const uiChinese: Record<string, string> = {
   meetingResultsTitle: "大家都容易到达的车站（按最晚到的人所需时间由短到长）",
   meetingMaxMinutes: "最长{minutes}分钟",
   meetingNoResults: "没有所有人都能在{minutes}分钟内到达的车站。",
-  meetingResultsNote: "点击车站即设为到达站。所需时间是根据线路数据的估算，并非实际时刻表。",
   otherStations: "其他{count}站",
   noRoutesFound: "未找到路线",
   routeCount: "{count}条路线",
@@ -2653,7 +2648,6 @@ export const uiKorean: Record<string, string> = {
   meetingResultsTitle: "모두가 가기 쉬운 역(가장 늦게 도착하는 사람의 소요 시간이 짧은 순)",
   meetingMaxMinutes: "최대 {minutes}분",
   meetingNoResults: "모두가 {minutes}분 이내에 갈 수 있는 역이 없습니다.",
-  meetingResultsNote: "역을 누르면 도착역으로 설정됩니다. 소요 시간은 노선 데이터에 따른 추정이며 실제 시각표가 아닙니다.",
   otherStations: "외 {count}역",
   noRoutesFound: "경로를 찾을 수 없습니다",
   routeCount: "{count}개 경로",

@@ -93,3 +93,18 @@ describe('summarizeMeetingRoutes', () => {
     expect(r[0]).toEqual({ origin: 'X', lines: [], totalTime: 0, transfers: 0 });
   });
 });
+
+describe('出発駅を対等に扱う補助', () => {
+  it('interleaveByRank: 出発駅ごとの経路を順位の順に交互に並べる（最初の出発駅だけが先頭に偏らない）', async () => {
+    const { interleaveByRank } = await import('../../../src/utils/meetingPoint');
+    expect(interleaveByRank([['a1', 'a2', 'a3'], ['b1'], ['c1', 'c2']])).toEqual(['a1', 'b1', 'c1', 'a2', 'c2', 'a3']);
+    expect(interleaveByRank([])).toEqual([]);
+  });
+
+  it('meetingClockTimes: 出発基準は全員同じ出発時刻、到着基準は全員同じ到着時刻', async () => {
+    const { meetingClockTimes } = await import('../../../src/utils/meetingPoint');
+    expect(meetingClockTimes('08:00', 'departure', 25)).toEqual({ depart: '08:00', arrive: '08:25' });
+    expect(meetingClockTimes('08:00', 'arrival', 25)).toEqual({ depart: '07:35', arrive: '08:00' });
+    expect(meetingClockTimes('23:50', 'departure', 20)).toEqual({ depart: '23:50', arrive: '00:10' });
+  });
+});

@@ -1,5 +1,29 @@
 # CHANGE LOG
 
+## [2026-11-14] セッション（集合駅・終電モードを出発駅どうし対等に／折りたたみ／実データの受け皿）
+
+### improve: 集合駅の候補・ルートは上位3件だけ見せ、残りは折りたたむ。説明文を削除
+- `src/components/ui/molecules/TopList.tsx`（新規）, `src/components/StationSelector.tsx`, `src/utils/translation.ts`（`meetingResultsNote` を削除）, `docs/design-system.md`
+- 候補（最大5）と「{駅}までの各ルート（使う路線）」を `TopList`（既定3件、「さらに表示（残りN）」「折りたたむ」）で出す。「駅をクリックすると到着駅に設定します…」の文言は不要のため削除
+
+### improve: 「出発時刻」の行を「時刻を表示」ボタンのすぐ下へ。ルートごとに出発・到着の時刻を出す
+- `src/components/StationSelector.tsx`, `src/utils/meetingPoint.ts`（`meetingClockTimes`）
+- 候補・ルートが長くなっても時刻の操作が押し出されない。ルートの行に「08:00 → 08:25」（出発基準なら全員同じ出発、到着基準なら全員同じ到着）
+
+### feat: 集合駅モードで、出発駅それぞれからの所要時間・経路を対等に表示
+- `src/components/RailwayMap.tsx`, `src/utils/meetingPoint.ts`（`interleaveByRank`, `MEETING_LABEL_NAME_CHARS`）
+- 駅ラベルは、候補（一覧に出る駅）と集合駅では出発駅ごとの所要時間を1行ずつ（入力順。最初の駅も追加した駅も同じ扱い）。ほかの駅は全駅に行を出すと読めないので最大の所要時間だけ
+- 地図に描く経路は、出発駅ごとに同じ数ずつ求めて順位の順に交互に並べる（最初の出発駅だけの経路にならない）。出発駅の印・地図の範囲も全員分
+
+### feat: 終電モードでも、表示していない路線は通常の画面と同じ半透明で描き、直接つながらない路線の駅にも終電時刻を付ける
+- `src/components/RailwayMap.tsx`（`demoFullNetwork`, `demoDrawnLines`）, `src/utils/lastTrainDemo.ts`（`maxLines` に `Infinity`）
+- 終電時刻は到着駅からたどれる全路線で計算。最初から出す路線（従来の上限）と、路線の表示切替・タップで出した路線は通常どおりの濃さで駅と時刻付き、それ以外は半透明の線（タップで出せる）
+
+### feat: 終電の実データを差し込める受け皿（時刻表のフォーマット）
+- `src/data/lastTrainTimetables.ts`（新規・空）, `src/utils/lastTrainDemo.ts`（`legsFromRealTimetable`, `parseTimetableClock`, `latestIsReal`）, `src/components/RailwayMap.tsx`（実データの駅は時刻の「*」を外す）, `docs/data-editing-guide.md`（節を追加）
+- 路線を1つ書くとその路線だけ架空ダイヤから実データに切り替わる。出典必須。`tests/unit/data/lastTrainTimetables.test.ts` が駅名・時刻・出典を検証
+- `tests/unit/utils/lastTrainRealData.test.ts`, `tests/unit/components/ui/topList.test.tsx`, `tests/unit/utils/meetingPoint.test.ts`
+
 ## [2026-11-13] セッション（終電モードを通常の画面へ）
 
 ### feat: 終電モード（試作）を、試作URLなしでも通常の駅選択パネルから使えるようにする

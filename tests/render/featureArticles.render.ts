@@ -62,5 +62,6 @@ test('集合駅モードのURL（埋め込みでない）: 追加分の出発駅
   await expect(page.locator('[data-meeting-extra]')).toHaveCount(2);
   // 追加の入力欄も、ボタンなしで最初から出ている
   await expect(page.locator('[data-meeting-add]')).toBeVisible();
-  await expect(page.locator('[data-meeting-results]').getByRole('button')).toHaveCount(5);
+  // 候補は上位3つだけ見せ、残りは折りたたみ（候補3つ + 「さらに表示」1つ）
+  await expect(page.locator('[data-meeting-results]').getByRole('button')).toHaveCount(4);
 });

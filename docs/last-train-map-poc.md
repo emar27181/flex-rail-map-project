@@ -34,6 +34,13 @@
 - 検査: `tests/unit/utils/divIconCache.test.ts`、`tests/render/lastTrainMap.render.ts`（広い範囲より近くのほうが描く駅が半分未満。絞り込みを外すと落ちる）
 - 通常の経路表示は、路線を薄く描くため線（約1000本）が多く、終電モードより重い。別の課題
 
+## 全路線の終電時刻と実データの受け皿（2026-11-14）
+
+- 終電時刻は到着駅からたどれる**全路線**で計算する（`buildDestinationDemoNetwork(到着駅, Infinity)`）。最初から濃く出す路線は従来どおり候補数の上限まで、
+  路線の表示切替・線のタップで出した路線もその場で駅ごとの終電時刻が付く。それ以外の路線は通常の画面と同じ半透明の線で描く
+- 時刻の元は `src/data/lastTrainTimetables.ts`（今は空）。路線を足すとその路線だけ架空ダイヤから実データに切り替わり、実データの駅は時刻の「*」が消える。
+  書き方は `docs/data-editing-guide.md` の「終電の時刻」
+
 ## 確認方法
 
 PR #106 の Deploy Preview ホームを **/?experiment=last-train** 付きで開く。

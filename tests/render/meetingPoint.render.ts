@@ -29,7 +29,13 @@ test('集合駅モード: 出発駅を追加すると候補が出て、選ぶと
   await page.locator('[data-station-option="東京"]').first().click();
 
   const results = page.locator('[data-meeting-results]');
-  await expect(results.getByRole('button')).toHaveCount(5);
+  // 候補は上位3つだけ見せ、残り2つは折りたたみ。説明文（「駅をクリックすると…」）は出さない
+  await expect(results.getByRole('button')).toHaveCount(4);
+  await expect(results).not.toContainText('駅をクリックすると到着駅に設定します');
+  await results.getByRole('button', { name: /さらに表示/ }).click();
+  await expect(results.getByRole('button')).toHaveCount(6);
+  await results.getByRole('button', { name: '折りたたむ' }).click();
+  await expect(results.getByRole('button')).toHaveCount(4);
   await expect(results).toContainText('最大');
   await expect(results).toContainText('新宿');
   await expect(results).toContainText('東京');
@@ -106,6 +112,9 @@ test('集合駅モード: 追加した出発駅も出発駅欄と同じ緑の欄
   // 4人分の所要時間が候補に並び、集合駅を決めると4人それぞれのルートと使う路線が並ぶ
   await expect(page.locator('[data-meeting-results]')).toContainText('渋谷');
   await page.locator('[data-meeting-results]').getByRole('button').first().click();
+  // ルートは上位3つだけ見せ、4つ目からは折りたたみ
+  await expect(page.locator('[data-meeting-route]')).toHaveCount(3);
+  await page.locator('[data-meeting-routes]').getByRole('button', { name: /さらに表示/ }).click();
   await expect(page.locator('[data-meeting-route]')).toHaveCount(4);
 
   // ×で欄が減る
@@ -176,3 +185,26 @@ for (const lang of ['ja', 'en', 'zh', 'ko'] as const) {
     expect(fit.text, JSON.stringify(fit)).toBeLessThanOrEqual(fit.inner);
   });
 }
+
+test('集合駅モード: 時刻の入力は「時刻を表示」ボタンの下（候補より上）にあり、駅ラベルは出発駅ごとの所要時間を出す', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('/?mode=meeting&from=shinjuku&with=tokyo');
+  await expect(page.locator('[data-meeting-results]')).toBeVisible();
+  // 到着駅を決める（候補の先頭）と時刻を表示・時刻欄が出る
+  await page.locator('[data-meeting-results]').getByRole('button').first().click();
+  const timeButton = page.getByRole('button', { name: '時刻を表示' });
+  await expect(timeButton).toBeVisible();
+  const timeInput = page.locator('input[type="time"]');
+  await expect(timeInput).toHaveCount(1);
+  const [b, t, r] = await Promise.all([
+    timeButton.boundingBox(), timeInput.boundingBox(), page.locator('[data-meeting-results]').boundingBox(),
+  ]);
+  expect(t!.y).toBeGreaterThan(b!.y);
+  expect(t!.y).toBeLessThan(r!.y);
+  // ルートの行に「出発 → 到着」の時刻
+  await expect(page.locator('[data-meeting-route-clock]').first()).toHaveText(/\d\d:\d\d → \d\d:\d\d/);
+  // 地図の駅ラベルは（候補の駅で）、出発駅それぞれ（新宿・東京。入力順に関係なく同じ扱い）からの所要時間
+  await expect.poll(() => page.locator('.leaflet-marker-icon', { hasText: /新宿 \d+分/ }).count(), { timeout: 20_000 }).toBeGreaterThan(0);
+  await expect.poll(() => page.locator('.leaflet-marker-icon', { hasText: /東京 \d+分/ }).count(), { timeout: 20_000 }).toBeGreaterThan(0);
+  expect(errors).toEqual([]);
+});

@@ -14,7 +14,7 @@ import StationSelector from './StationSelector';
 import { buildDestinationDemoNetwork, calculateDemoLastTrain, availableDemoStations, demoEdgeKey, formatDemoClock, parseDemoClock, getCurrentDemoClock } from '../utils/lastTrainDemo';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
 import { requestPosition, resolveCurrentPosition } from '../utils/freshLocation';
-import { rankMeetingStations, summarizeMeetingRoutes, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
+import { MEETING_LABEL_NAME_CHARS, rankMeetingStations, summarizeMeetingRoutes, interleaveByRank, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
@@ -311,14 +311,27 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const demoNetwork = useMemo(() => lastTrainUiActive && arrival
     ? buildDestinationDemoNetwork(arrival.name, maxRouteRecommendations) : null,
     [lastTrainUiActive, arrival?.name, maxRouteRecommendations]);
+  // 終電時刻を求めるネットワーク。到着駅からたどれる路線をすべて含める（上の demoNetwork は最初から出す路線だけ）。
+  // 直接つながらない路線も、表示すれば駅ごとに終電時刻が付く（通常の画面と同じ「路線の表示/非表示」で出し入れ）
+  const demoFullNetwork = useMemo(() => lastTrainUiActive && arrival
+    ? buildDestinationDemoNetwork(arrival.name, Infinity) : null,
+    [lastTrainUiActive, arrival?.name]);
   const lastTrainDestinationSupported = !!demoNetwork && demoNetwork.lines.length > 0;
   const lastTrainFilterActive = lastTrainUiActive && lastTrainModeEnabled && lastTrainDestinationSupported;
   const [demoMinute, setDemoMinute] = useState(getCurrentDemoClock);
-  const demoStationOwner = useMemo(() => new Map(demoNetwork?.lines.flatMap(line =>
-    line.stations.map(st => [st.name, line.routeKey] as const)) ?? []), [demoNetwork]);
-  const demoReachability = useMemo(() => lastTrainFilterActive && arrival && demoNetwork
-    ? calculateDemoLastTrain(demoNetwork.legs, arrival.name) : null,
-    [lastTrainFilterActive, demoNetwork, arrival?.name]);
+  // 終電モードで「オン」の路線: 最初から出す路線 + 路線の表示切替で出した路線（通常の画面と同じ規則）。
+  // それ以外は通常の画面と同じく、半透明の線だけで描く
+  const demoDrawnLines = useMemo(() => {
+    if (!demoFullNetwork || !demoNetwork) return [];
+    const initial = new Set(demoNetwork.lines.map(l => l.routeKey));
+    return demoFullNetwork.lines.filter(l => initial.has(l.routeKey) || visibleRoutes.has(l.routeKey));
+  }, [demoFullNetwork, demoNetwork, visibleRoutes]);
+  const demoDrawnKeys = useMemo(() => new Set(demoDrawnLines.map(l => l.routeKey)), [demoDrawnLines]);
+  const demoStationOwner = useMemo(() => new Map(demoDrawnLines.flatMap(line =>
+    line.stations.map(st => [st.name, line.routeKey] as const))), [demoDrawnLines]);
+  const demoReachability = useMemo(() => lastTrainFilterActive && arrival && demoFullNetwork
+    ? calculateDemoLastTrain(demoFullNetwork.legs, arrival.name) : null,
+    [lastTrainFilterActive, demoFullNetwork, arrival?.name]);
   // 終電モードでも、駅の絞り込み（乗換駅のみ・急行駅のみ）は通常の画面と同じに効かせる。到着駅は常に出す
   const demoRouteHasExpressMark = (rk: RouteKey) => (routes[rk] as Station[] | undefined)?.some(s => s.isExpress) ?? false;
   const isDemoStationShown = (st: Station, rk: RouteKey): boolean => {
@@ -2999,6 +3012,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return rankMeetingStations(meetingOrigins.map(o => o.name), timeMaps);
   }, [meetingModeEnabled, meetingOrigins, timeFilter]);
   const meetingCandidates = useMemo(() => meetingRanking.slice(0, MEETING_RESULT_LIMIT), [meetingRanking]);
+  const meetingCandidateNames = useMemo(() => new Set(meetingCandidates.map(c => c.name)), [meetingCandidates]);
   // 集合駅（到着駅）が決まっているとき、出発駅ごとのルートと使う路線
   const meetingRouteEntries = useMemo(() => {
     if (!meetingModeEnabled || !arrival || meetingOrigins.length < 2) return [];
@@ -3021,6 +3035,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   }, [meetingRouteEntries, drawnRecommendations]);
   /** 地図の駅ラベルに出す「全員が着くまでの最大時間」 */
   const meetingMaxTimeMap = useMemo(() => new Map(meetingRanking.map(c => [c.name, c.max])), [meetingRanking]);
+  /** 駅ごとの、出発駅それぞれからの所要時間（出発駅の並びは meetingOrigins。誰も優先しない） */
+  const meetingTimesMap = useMemo(() => new Map(meetingRanking.map(c => [c.name, c.times])), [meetingRanking]);
   // 駅選択パネルの「追加」欄は、集合駅モードでは経由駅ではなく追加出発駅として使う
   const selectorWaypoints = meetingModeEnabled ? extraDepartures : waypoints;
   const selectorOnAddWaypoint = meetingModeEnabled ? handleAddExtraDeparture : handleAddWaypoint;
@@ -3390,7 +3406,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       // 1本のルートだけを提示する（既存の複数候補探索アルゴリズムは経由駅に
       // 対応していないため、既存ロジックには手を入れず結果の作り方だけ分ける。
       // 以降の「使用路線の自動表示」等の処理は経由駅の有無に関わらず共通）
-      const finalUniqueRoutes = waypoints.length > 0
+      // 集合駅を探す: 出発駅（最初の入力もあとから足した入力も）それぞれから集合駅への経路を同じ数ずつ求め、
+      // 順位の順に交互に並べる。最初の出発駅だけを優先しない（utils/meetingPoint.ts の interleaveByRank）
+      const meetingSearchOrigins = meetingModeEnabled && meetingOrigins.length >= 2 ? meetingOrigins : [];
+      const perOriginShare = Math.max(1, Math.ceil(maxRouteRecommendations / Math.max(1, meetingSearchOrigins.length)));
+      const perOriginRoutes = meetingSearchOrigins.map(origin =>
+        removeFinalDuplicates(
+          routeFinder.findRoutes(origin, arrival, perOriginShare * 2).filter(r => !revisitsStation(r))
+        ).slice(0, perOriginShare)
+      );
+      const finalUniqueRoutes = meetingSearchOrigins.length >= 2
+        ? interleaveByRank(perOriginRoutes)
+        : waypoints.length > 0
         ? (() => {
             const viaRoute = findRoutesViaWaypoints(routeFinder, departure, waypoints, arrival);
             return viaRoute ? [viaRoute] : [];
@@ -3412,7 +3439,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       // 出ないため「時刻が出る路線と出ない路線がある」ように見えて混乱を
       // 招いていた。既定は先頭候補だけを選択状態にし、他候補は
       // 「推薦ルート選択」パネルから手動で追加できるようにする。
-      setSelectedRouteIndices(finalUniqueRoutes.length > 0 ? new Set([0]) : new Set());
+      // 集合駅を探すときは、出発駅ごとの先頭の経路をそろって選ぶ（交互に並べているので先頭から出発駅の数だけ）
+      const selectedFirstCount = meetingSearchOrigins.length >= 2 ? perOriginRoutes.filter(l => l.length > 0).length : 1;
+      setSelectedRouteIndices(finalUniqueRoutes.length > 0
+        ? new Set(Array.from({ length: Math.min(selectedFirstCount, finalUniqueRoutes.length) }, (_, i) => i))
+        : new Set());
 
       // 推薦ルートの最初のセグメントをTrainStatusPanelに反映
       const topRoute = finalUniqueRoutes[0];
@@ -3479,8 +3510,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
       // 出発・到着駅が両方揃ったら地図をその範囲に合わせる
       if (mapRef.current) {
-        const lats = [departure.lat, arrival.lat];
-        const lngs = [departure.lng, arrival.lng];
+        const boundsStations = meetingSearchOrigins.length >= 2 ? [...meetingSearchOrigins, arrival] : [departure, arrival];
+        const lats = boundsStations.map(st => st.lat);
+        const lngs = boundsStations.map(st => st.lng);
         const bounds: [[number, number], [number, number]] = [
           [Math.min(...lats), Math.min(...lngs)],
           [Math.max(...lats), Math.max(...lngs)],
@@ -3493,7 +3525,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       setRouteRecommendations([]);
       setSelectedRouteIndices(null);
     }
-  }, [departure, arrival, waypoints, routeFinder, maxRouteRecommendations, removeFinalDuplicates]);
+  }, [departure, arrival, waypoints, routeFinder, maxRouteRecommendations, removeFinalDuplicates, meetingModeEnabled, meetingOrigins]);
 
   // 時間フィルターが有効な時の駅フィルタリング（出発駅ベース）
   useEffect(() => {
@@ -4543,8 +4575,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const demoLatest = demoReachability?.latestDeparture.get(station.name);
     const meetingMax = meetingModeEnabled ? meetingMaxTimeMap.get(station.name) : undefined;
     // 終電モードでは、駅名の下の時刻は「その駅を出発できる最終時刻」。「時刻を表示」で出し入れできる（既定はオン）
-    const effectiveTimeLabel = lastTrainFilterActive
-      ? (!timetableModeEnabled || demoLatest === undefined ? undefined : formatDemoClock(demoLatest) + ' *')
+    // 集合駅を探すときは、出発駅それぞれからの所要時間を1行ずつ（出発駅の入力順。最初の駅も追加した駅も同じ扱い）
+    // 全駅に出発駅の数だけ行を出すと地図が読めなくなるので、行を出すのは候補（一覧に出ている駅）と集合駅。ほかの駅は最大の所要時間だけ
+    const meetingTimes = meetingModeEnabled && (meetingCandidateNames.has(station.name) || station.name === arrival?.name)
+      ? meetingTimesMap.get(station.name) : undefined;
+    const effectiveTimeLabel: string | StationTimeLine[] | undefined = lastTrainFilterActive
+      ? (!timetableModeEnabled || demoLatest === undefined ? undefined : formatDemoClock(demoLatest) + (demoReachability?.latestIsReal.has(station.name) ? '' : ' *'))
+      : meetingTimes !== undefined && meetingMax !== undefined
+        ? meetingOrigins.map((origin, k) => ({
+            time: `${translateStation(origin.name, currentLanguage).slice(0, MEETING_LABEL_NAME_CHARS)} ${meetingTimes[k]}${translateUI('minutesSuffix', currentLanguage)}`,
+          }))
       : meetingMax !== undefined
         ? `${meetingMax}${translateUI('minutesSuffix', currentLanguage)}`
       : travelTimeMins !== undefined
@@ -4834,7 +4874,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         })}
         {/* 駅マーカー（全セグメントの和集合） */}
         {displayStations.map((station, index) => {
-          const isDeparture = !!(departure && station.name === departure.name);
+          // 集合駅を探すときは、最初の出発駅も追加した出発駅も同じ出発駅の印にする（対等）
+          const isDeparture = meetingModeEnabled && meetingOrigins.length >= 2
+            ? meetingOrigins.some(o => o.name === station.name)
+            : !!(departure && station.name === departure.name);
           const isArrival = arrival && station.name === arrival.name;
           const isSpecialStation = isDeparture || isArrival;
 
@@ -5678,8 +5721,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               ))}
 
               {/* 非表示路線（半透明・クリック可能）─ バブルモードでは非表示 */}
-              {!lastTrainFilterActive && mapViewMode !== 'bubble' && showDimmedMapRoutes && Object.entries(routes)
-                .filter(([rk]) => !visibleRoutes.has(rk as RouteKey))
+              {(!lastTrainFilterActive || mapViewMode === 'realistic') && mapViewMode !== 'bubble' && showDimmedMapRoutes && Object.entries(routes)
+                .filter(([rk]) => (lastTrainFilterActive ? !demoDrawnKeys.has(rk as RouteKey) : !visibleRoutes.has(rk as RouteKey)))
                 .map(([rk, stationList]) => {
                   const rKey = rk as RouteKey;
                   // ヒートマップ表示中はその路線の駅の平均値に応じた色にする。
@@ -5741,7 +5784,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               }
 
               {/* 終電デモ専用の表示切替。基盤は既存Leaflet地図/共通ルート色/駅マーカーを再利用。 */}
-              {lastTrainFilterActive && mapViewMode === 'realistic' && demoNetwork?.lines.map(line => {
+              {lastTrainFilterActive && mapViewMode === 'realistic' && demoDrawnLines.map(line => {
                 const rk = line.routeKey;
                 const base = line.circular ? [...line.stations, line.stations[0]] : line.stations;
                 const color = adjustRouteColorForTheme(routeColors[rk], theme);

@@ -6,7 +6,7 @@ import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { translateStation, translateUI, translateRoute } from '../utils/translation'
 import type { Language } from '../utils/translation';
-import { MEETING_MAX_MINUTES, type MeetingCandidate, type MeetingRouteEntry } from '../utils/meetingPoint';
+import { MEETING_MAX_MINUTES, meetingClockTimes, type MeetingCandidate, type MeetingRouteEntry } from '../utils/meetingPoint';
 import ColorChip from './ui/ColorChip';
 import { stationReadings, normalizeToHiragana, hiraganaToRomaji, normalizeRomajiForMatch } from '../utils/stationReadings';
 import { findNearestStations } from '../utils/nearestStations';
@@ -25,6 +25,7 @@ import type { DetectedRoute } from '../utils/trainDetector';
 import TextField from './ui/atoms/TextField';
 import RoleField from './ui/molecules/RoleField';
 import FieldPairRow, { PAIR_DIVIDER_WIDTH } from './ui/molecules/FieldPairRow';
+import TopList from './ui/molecules/TopList';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import { useDeviceClass } from '../hooks/useDeviceClass';
 import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
@@ -879,6 +880,84 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           )}
 
           {/*
+            時刻の入力は「時刻を表示」ボタン（と※の説明）のすぐ下に置く（2026-11-14 ユーザー指示）。
+            集合駅の候補・ルートの一覧が長くなっても（折りたたんでも）、時刻の操作が下に押し出されない。
+          */}
+          {/*
+            出発時刻の行。駅ツールチップ側にも同じ設定（timetableBaseTime を
+            共有）があるが、経路を選ぶ前に時刻を決めたい操作にも対応できるよう
+            駅選択パネルからも直接変更できるようにしている。
+            timeMode（出発/到着）で、この時刻を「出発時刻」として使うか
+            「到着時刻」として使うかを切り替えられる（ラベルも連動して変わる）。
+            「時刻を表示」ボタンと同様、経路が無いと意味を持たないため
+            出発駅・到着駅の両方が決まってから表示する。
+          */}
+          {SHOW_DEPARTURE_TIME_ROW && onDepartureTimeChange && ((departure && arrival) || lastTrainDemoMode) && (
+            <div style={{ marginTop: L.sp.sm }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: L.sp.xs,
+                flexWrap: 'wrap',
+              }}>
+                <label style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
+                  {lastTrainDemoMode ? demoText.virtualTime : translateUI(timeMode === 'arrival' ? 'arrivalTimeLabel' : 'departureTime', language)}
+                </label>
+                <TextField
+                  theme={theme}
+                  size="sm"
+                  type="time"
+                  value={departureTime ?? ''}
+                  onChange={e => onDepartureTimeChange(e.target.value)}
+                  onFocus={(e) => { focusedInputRef.current = e.currentTarget; }}
+                  onBlur={() => { focusedInputRef.current = null; }}
+                  fullWidth={false}
+                />
+                {/*
+                  出発/到着どちらの基準かは、時刻そのものの隣に置いて初めて
+                  「この時刻が何を意味するか」が一目でわかる。以前は下の行に
+                  分けていたが、現在時刻ボタンのすぐ右に詰めて1つの操作列に見せる。
+                  行が折り返される狭い画面（スマホ・PWA）では、この2つが
+                  親のflexWrapでバラバラの行に千切れると「現在時刻の右」が
+                  保証できなくなるため、2つをまとめて1つのflexアイテムにし、
+                  折り返す時は必ずセットのまま次の行へ落ちるようにする。
+                  選択中はButton(variant="primary", pressed)で塗りつぶす
+                  （このアプリの他のトグルと共通の「押されている＝塗り」の規約）。
+                */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, flexShrink: 0 }}>
+                  <Button
+                    theme={theme}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const now = new Date();
+                      const hh = String(now.getHours()).padStart(2, '0');
+                      const mm = String(now.getMinutes()).padStart(2, '0');
+                      onDepartureTimeChange(`${hh}:${mm}`);
+                    }}
+                  >
+                    {translateUI('currentTime', language)}
+                  </Button>
+                  {!lastTrainDemoMode && onTimeModeChange && (
+                    <SegmentedControl
+                      theme={theme}
+                      size="sm"
+                      variant="slide"
+                      ariaLabel={translateUI('baseTime', language)}
+                      value={timeMode}
+                      onChange={onTimeModeChange}
+                      options={[
+                        { value: 'departure', label: translateUI('timeBasisDeparture', language) },
+                        { value: 'arrival', label: translateUI('timeBasisArrival', language) },
+                      ]}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/*
             経由駅の設定。「経由駅の設定と、時刻の設定も出発駅とかの入力の下で
             できるように」という要望を受けて追加した。出発駅・到着駅の入力欄
             と同じ検索候補ロジック（filterStations）・同じ候補ドロップダウン
@@ -1102,30 +1181,33 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   <div style={{ fontSize: FS.caption, color: colors.textSecondary }}>
                     {translateUI('meetingResultsTitle', language)}
                   </div>
-                  {meetingCandidates.map((c, i) => {
-                    const station = allStations.find(st => st.name === c.name);
-                    return (
-                      <div key={c.name} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.xs }}>
-                        <Button
-                          theme={theme}
-                          size="sm"
-                          variant="outline"
-                          pressed={arrival?.name === c.name}
-                          disabled={!station}
-                          onClick={() => station && onArrivalChange(station)}
-                        >
-                          {`${i + 1}. ${translateStation(c.name, language)} · ${translateUI('meetingMaxMinutes', language, { minutes: c.max })}`}
-                        </Button>
-                        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
-                          {meetingOriginNames.map((n, k) => `${translateStation(n, language)} ${c.times[k]}`).join(' / ')}
-                          {translateUI('minutesSuffix', language)}
-                        </span>
-                      </div>
-                    );
-                  })}
-                  <div style={{ fontSize: FS.caption, color: colors.textSecondary }}>
-                    {translateUI('meetingResultsNote', language)}
-                  </div>
+                  <TopList
+                    theme={theme}
+                    moreLabel={hidden => translateUI('showMoreRoutesStep', language, { count: String(hidden) })}
+                    lessLabel={translateUI('collapseList', language)}
+                  >
+                    {meetingCandidates.map((c, i) => {
+                      const station = allStations.find(st => st.name === c.name);
+                      return (
+                        <div key={c.name} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.xs }}>
+                          <Button
+                            theme={theme}
+                            size="sm"
+                            variant="outline"
+                            pressed={arrival?.name === c.name}
+                            disabled={!station}
+                            onClick={() => station && onArrivalChange(station)}
+                          >
+                            {`${i + 1}. ${translateStation(c.name, language)} · ${translateUI('meetingMaxMinutes', language, { minutes: c.max })}`}
+                          </Button>
+                          <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                            {meetingOriginNames.map((n, k) => `${translateStation(n, language)} ${c.times[k]}`).join(' / ')}
+                            {translateUI('minutesSuffix', language)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </TopList>
                 </>
               )}
               {/*
@@ -1137,108 +1219,49 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   <div style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary }}>
                     {translateUI('meetingRoutesTitle', language, { station: translateStation(arrival.name, language) })}
                   </div>
-                  {meetingRoutes.map(entry => (
-                    <div key={entry.origin} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.xs }} data-meeting-route={entry.origin}>
-                      <span style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.text }}>
-                        {translateStation(entry.origin, language)}
-                      </span>
-                      {entry.totalTime === null ? (
-                        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('meetingNoRoute', language)}</span>
-                      ) : entry.lines.length === 0 ? (
-                        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('meetingAlreadyThere', language)}</span>
-                      ) : (
-                        entry.lines.map((key, i) => (
-                          <React.Fragment key={`${key}-${i}`}>
-                            {i > 0 && <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{'→'}</span>}
-                            <ColorChip color={routeColors[key as keyof typeof routeColors] ?? colors.textSecondary} theme={theme}>
-                              {translateRoute(routeNames[key as keyof typeof routeNames] ?? key, language)}
-                            </ColorChip>
-                          </React.Fragment>
-                        ))
-                      )}
-                      {entry.totalTime !== null && (
-                        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
-                          {entry.totalTime}{translateUI('minutesSuffix', language)}
+                  <TopList
+                    theme={theme}
+                    moreLabel={hidden => translateUI('showMoreRoutesStep', language, { count: String(hidden) })}
+                    lessLabel={translateUI('collapseList', language)}
+                  >
+                    {meetingRoutes.map(entry => (
+                      <div key={entry.origin} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.xs }} data-meeting-route={entry.origin}>
+                        <span style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.text }}>
+                          {translateStation(entry.origin, language)}
                         </span>
-                      )}
-                    </div>
-                  ))}
+                        {entry.totalTime === null ? (
+                          <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('meetingNoRoute', language)}</span>
+                        ) : entry.lines.length === 0 ? (
+                          <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('meetingAlreadyThere', language)}</span>
+                        ) : (
+                          entry.lines.map((key, i) => (
+                            <React.Fragment key={`${key}-${i}`}>
+                              {i > 0 && <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{'→'}</span>}
+                              <ColorChip color={routeColors[key as keyof typeof routeColors] ?? colors.textSecondary} theme={theme}>
+                                {translateRoute(routeNames[key as keyof typeof routeNames] ?? key, language)}
+                              </ColorChip>
+                            </React.Fragment>
+                          ))
+                        )}
+                        {entry.totalTime !== null && (
+                          <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                            {entry.totalTime}{translateUI('minutesSuffix', language)}
+                          </span>
+                        )}
+                        {/* 時刻（基準の時刻と所要時間から。全員が同じ基準で、誰も優先しない） */}
+                        {entry.totalTime !== null && entry.lines.length > 0 && departureTime && (() => {
+                          const clock = meetingClockTimes(departureTime, timeMode, entry.totalTime);
+                          return (
+                            <span data-meeting-route-clock style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                              {`${clock.depart} → ${clock.arrive}`}
+                            </span>
+                          );
+                        })()}
+                      </div>
+                    ))}
+                  </TopList>
                 </div>
               )}
-            </div>
-          )}
-
-          {/*
-            出発時刻の行。駅ツールチップ側にも同じ設定（timetableBaseTime を
-            共有）があるが、経路を選ぶ前に時刻を決めたい操作にも対応できるよう
-            駅選択パネルからも直接変更できるようにしている。
-            timeMode（出発/到着）で、この時刻を「出発時刻」として使うか
-            「到着時刻」として使うかを切り替えられる（ラベルも連動して変わる）。
-            「時刻を表示」ボタンと同様、経路が無いと意味を持たないため
-            出発駅・到着駅の両方が決まってから表示する。
-          */}
-          {SHOW_DEPARTURE_TIME_ROW && onDepartureTimeChange && ((departure && arrival) || lastTrainDemoMode) && (
-            <div style={{ marginTop: L.sp.sm }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: L.sp.xs,
-                flexWrap: 'wrap',
-              }}>
-                <label style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
-                  {lastTrainDemoMode ? demoText.virtualTime : translateUI(timeMode === 'arrival' ? 'arrivalTimeLabel' : 'departureTime', language)}
-                </label>
-                <TextField
-                  theme={theme}
-                  size="sm"
-                  type="time"
-                  value={departureTime ?? ''}
-                  onChange={e => onDepartureTimeChange(e.target.value)}
-                  onFocus={(e) => { focusedInputRef.current = e.currentTarget; }}
-                  onBlur={() => { focusedInputRef.current = null; }}
-                  fullWidth={false}
-                />
-                {/*
-                  出発/到着どちらの基準かは、時刻そのものの隣に置いて初めて
-                  「この時刻が何を意味するか」が一目でわかる。以前は下の行に
-                  分けていたが、現在時刻ボタンのすぐ右に詰めて1つの操作列に見せる。
-                  行が折り返される狭い画面（スマホ・PWA）では、この2つが
-                  親のflexWrapでバラバラの行に千切れると「現在時刻の右」が
-                  保証できなくなるため、2つをまとめて1つのflexアイテムにし、
-                  折り返す時は必ずセットのまま次の行へ落ちるようにする。
-                  選択中はButton(variant="primary", pressed)で塗りつぶす
-                  （このアプリの他のトグルと共通の「押されている＝塗り」の規約）。
-                */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, flexShrink: 0 }}>
-                  <Button
-                    theme={theme}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const now = new Date();
-                      const hh = String(now.getHours()).padStart(2, '0');
-                      const mm = String(now.getMinutes()).padStart(2, '0');
-                      onDepartureTimeChange(`${hh}:${mm}`);
-                    }}
-                  >
-                    {translateUI('currentTime', language)}
-                  </Button>
-                  {!lastTrainDemoMode && onTimeModeChange && (
-                    <SegmentedControl
-                      theme={theme}
-                      size="sm"
-                      variant="slide"
-                      ariaLabel={translateUI('baseTime', language)}
-                      value={timeMode}
-                      onChange={onTimeModeChange}
-                      options={[
-                        { value: 'departure', label: translateUI('timeBasisDeparture', language) },
-                        { value: 'arrival', label: translateUI('timeBasisArrival', language) },
-                      ]}
-                    />
-                  )}
-                </div>
-              </div>
             </div>
           )}
 

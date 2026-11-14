@@ -23,7 +23,7 @@ describe('終電モードは元のUIだけで操作する（回帰防止）', ()
     expect(map).toContain('<MapContainer');
     expect(map).toContain('lastTrainFilterActive && mapViewMode');
     expect(map).toContain('renderStationMarker(st, rk');
-    expect(map).toContain('demoNetwork?.lines.map(line =>');
+    expect(map).toContain('demoDrawnLines.map(line =>');
     expect(map.match(/<StationSelector/g)?.length).toBe(3);
     expect(map.match(/onLastTrainModeChange={handleLastTrainModeChange}/g)?.length).toBe(3);
     expect(selector).toContain('onLastTrainModeChange(!lastTrainModeEnabled)');
