@@ -919,11 +919,11 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   },
   addMeetingOrigin: {
     japanese: "出発駅を追加",
-    english: "Add departure"
+    english: "Add departure station"
   },
   meetingNeedOrigins: {
-    japanese: "出発駅欄と、下の「＋ 出発駅を追加」欄に駅を入れて、2駅以上そろえると、全員が行きやすい駅を探します。",
-    english: "Enter two or more departure stations (the departure field plus the \"+ Add departure station\" field below) to find a station everyone can reach easily."
+    japanese: "出発駅欄と、その下の出発駅の欄に駅を入れて、2駅以上そろえると、全員が行きやすい駅を探します。",
+    english: "Enter two or more departure stations (the departure field plus the departure fields below it) to find a station everyone can reach easily."
   },
   meetingResultsTitle: {
     japanese: "お互いに行きやすい駅（いちばん遅い人の所要時間が短い順）",
@@ -2252,7 +2252,7 @@ export const uiChinese: Record<string, string> = {
   meetingNoRoute: "无路线",
   meetingAlreadyThere: "就在集合站",
   addMeetingOrigin: "添加出发站",
-  meetingNeedOrigins: "在出发站栏和下方“＋ 添加出发站”栏中输入两个以上的车站，即可找出大家都容易到达的车站。",
+  meetingNeedOrigins: "在出发站栏和其下方的出发站栏中输入两个以上的车站，即可找出大家都容易到达的车站。",
   meetingResultsTitle: "大家都容易到达的车站（按最晚到的人所需时间由短到长）",
   meetingMaxMinutes: "最长{minutes}分钟",
   meetingNoResults: "没有所有人都能在{minutes}分钟内到达的车站。",
@@ -2649,7 +2649,7 @@ export const uiKorean: Record<string, string> = {
   meetingNoRoute: "경로 없음",
   meetingAlreadyThere: "집합역과 같음",
   addMeetingOrigin: "출발역 추가",
-  meetingNeedOrigins: "출발역 칸과 아래의 \"＋ 출발역 추가\" 칸에 역을 2곳 이상 넣으면 모두가 가기 쉬운 역을 찾습니다.",
+  meetingNeedOrigins: "출발역 칸과 그 아래의 출발역 칸에 역을 2곳 이상 넣으면 모두가 가기 쉬운 역을 찾습니다.",
   meetingResultsTitle: "모두가 가기 쉬운 역(가장 늦게 도착하는 사람의 소요 시간이 짧은 순)",
   meetingMaxMinutes: "최대 {minutes}분",
   meetingNoResults: "모두가 {minutes}분 이내에 갈 수 있는 역이 없습니다.",

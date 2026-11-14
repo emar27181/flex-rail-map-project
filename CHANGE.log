@@ -8,6 +8,15 @@
 - 架空ダイヤのままなので、ボタン名に「試作」・`title`・駅ラベルの `*` で明示（実際の終電検索には使えない）
 - `tests/render/lastTrainMap.render.ts`（通常画面のON/OFF・Snackbarを追加）, `tests/unit/components/lastTrainMapIntegration.test.ts`（deps の名前を更新）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
 
+## [2026-11-14] セッション（集合駅の出発駅を出発駅欄と同じ幅・文言にそろえる）
+
+### improve: 追加した出発駅を、出発駅欄と同じ幅・位置・文言にする（部品 `FieldPairRow`）
+- `src/components/ui/molecules/FieldPairRow.tsx`（新規）, `src/components/ui/molecules/RoleField.tsx`, `src/components/StationSelector.tsx`, `src/components/ui/atoms/controlSize.ts`, `src/utils/translation.ts`（案内文）, `src/data/articles/meeting-station-finder.ts`（説明を合わせた）
+- 追加の出発駅は幅いっぱいで、出発駅欄（半分の幅）と幅がちがい、文言も「＋ 出発駅を追加」だった。出発駅欄・到着駅欄と同じ2列の行（`FieldPairRow`）に置き、左は出発駅欄と、右は到着駅欄と同じ幅・同じ位置にそろえた。区切りの列の幅は入れ替えボタンと同じ定義元（`PAIR_DIVIDER_WIDTH` = `CONTROL_SIZE.sm.minHeight`）の1か所
+- 案内は出発駅欄（未入力）と同じ「駅名入力」。＋のアイコンは外した（読み上げの名前だけ「出発駅を追加」）。入れるたびに次の欄が右隣に出る。狭いスマホでも半分の幅のまま（出発駅欄と同じ）
+- 使わなくなった `ROLE_FIELD_MIN_WIDTH_EM`（最小幅の定義）と `RoleField` のアイコン枠を削除
+- `tests/unit/components/ui/fieldPairRow.test.tsx`（新規）, `roleField.test.tsx`, `tests/render/meetingPoint.render.ts`（3つの画面幅で幅・位置が出発駅欄・到着駅欄と一致・右隣に出る・4言語で文言が同じで収まる）, `docs/design-system.md`, `docs/ui-mode-extension-guide.md`, `docs/render-tests.md`
+
 ## [2026-11-14] セッション（路線の切り替えの「元に戻す」）
 
 ### improve: 地図の線をタップして路線を切り替えたときの知らせに「元に戻す」を付ける

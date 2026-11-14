@@ -263,7 +263,8 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 排他選択のボタン列 | `SegmentedControl`（molecule） |
 | 排他選択を1本の枠に収め、選んだ位置を背景のスライドで示す | `SlideSegmentedControl`（`SegmentedControl` の `variant="slide"` から使う実体） |
 | 選んだものを並べ、1つずつ外せるタグ（経由駅など） | `RemovableTag`（削除ボタン付き） |
-| 役割の色で塗った入力欄（出発=緑・到着=赤。値を消すボタン・先頭の＋などのアイコン付き）。出発駅・到着駅・「集合駅を探す」で増やす出発駅は**すべてこの部品**で出す（同じ入力欄を別々に手書きしない。追加の出発駅だけ灰色のタグ・点線の枠にしない） | `RoleField`（molecule。`TextField` + `IconButton`。役割の色は `ROLE_FIELD_COLOR`（= `SEMANTIC`）、枠は同じ色の実線。複数並べるときの1つぶんの最小の幅は `ROLE_FIELD_MIN_WIDTH_EM`、収まらなければ1列になって幅いっぱいに広がる。駅の知識は持たない） |
+| 役割の色で塗った入力欄（出発=緑・到着=赤。値を消すボタン付き）。出発駅・到着駅・「集合駅を探す」で増やす出発駅は**すべてこの部品**で出す（同じ入力欄を別々に手書きしない。追加の出発駅だけ灰色のタグ・点線の枠・別の幅・別の文言にしない） | `RoleField`（molecule。`TextField` + `IconButton`。役割の色は `ROLE_FIELD_COLOR`（= `SEMANTIC`）、枠は同じ色の実線。駅の知識は持たない） |
+| 入力欄を2つ並べる行（左右は同じ幅、間に入れ替えボタンと同じ幅の区切り。「出発駅 ⇆ 到着駅」と、集合駅の追加の出発駅の行を**同じ幅・同じ位置**にそろえる） | `FieldPairRow`（molecule。区切りの幅は `PAIR_DIVIDER_WIDTH` = `CONTROL_SIZE.sm.minHeight`。欄が1つだけの行も半分の幅） |
 | 開閉する見出しの右端の ▼ | `DisclosureIndicator`（開くと180度回る。回す時間・色は全パネル共通。塗ったボタンの中に置くときは `tone="inherit"`。▼▲▶ を文字で書くのはこの部品だけで、翻訳文言にも入れない） |
 | 押すと開閉する見出しの行 | `DisclosureHeader`（見出し＋▼。行のどこを押しても開閉、開くと区切り線。`size="floating"` で高さ・文字が `FLOATING_CONTROL`） |
 | 地図の上に浮かぶ操作の高さ・文字の大きさ | `FLOATING_CONTROL`（`controlSize.ts`。36px・`FS.body`。FloatingButton・凡例の見出し・丸いボタンで共通） |

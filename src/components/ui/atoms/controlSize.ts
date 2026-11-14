@@ -135,10 +135,3 @@ export const aboveFloatingButtons = (rows = 1) =>
  * FLOATING_ICON_BUTTON_SIZE.md（36px）の箱に対して詰まりすぎない大きさ。
  */
 export const FLOATING_ICON_GLYPH_SIZE = 18;
-
-/**
- * 役割の色で塗った入力欄（RoleField）を、複数並べるときの1つぶんの最小の幅（em。入力欄の文字の大きさに対する倍数）。
- * 4言語の案内の文字が、アイコンと一緒に切れずに入る幅。パネルがこの幅の2つぶん以上あれば横に並び、
- * 足りなければ1列になって幅いっぱいに広がる。px を呼び出し側に書かない。
- */
-export const ROLE_FIELD_MIN_WIDTH_EM = 11;

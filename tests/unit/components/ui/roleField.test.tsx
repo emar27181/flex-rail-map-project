@@ -4,7 +4,8 @@ import { readFileSync } from 'node:fs';
 import { render, screen, fireEvent } from '@testing-library/react';
 import RoleField, { ROLE_FIELD_COLOR, ROLE_FIELD_CLASS } from '../../../../src/components/ui/molecules/RoleField';
 import { SEMANTIC } from '../../../../src/constants/ui';
-import { ROLE_FIELD_MIN_WIDTH_EM } from '../../../../src/components/ui/atoms/controlSize';
+import { PAIR_DIVIDER_WIDTH } from '../../../../src/components/ui/molecules/FieldPairRow';
+import { CONTROL_SIZE } from '../../../../src/components/ui/atoms/controlSize';
 
 const hexToRgb = (hex: string) => {
   const n = parseInt(hex.slice(1), 16);
@@ -39,12 +40,6 @@ describe('RoleField（役割の色で塗った入力欄）', () => {
     expect(onClear).toHaveBeenCalledTimes(1);
   });
 
-  it('先頭のアイコン（＋など）を置ける。文字と重ならないよう左の余白を取る', () => {
-    render(<RoleField theme="dark" role="departure" placeholder="x" adornment={<svg data-testid="plus" />} />);
-    expect(screen.getByTestId('plus')).toBeTruthy();
-    expect((screen.getByPlaceholderText('x') as HTMLInputElement).style.paddingLeft).toContain('calc(');
-  });
-
   it('入力欄の props（value・onChange など）をそのまま渡せ、data 属性を囲みに付けられる', () => {
     const onChange = vi.fn();
     const { container } = render(<RoleField theme="dark" role="departure" value="新宿" onChange={onChange} wrapperAttr={{ 'data-x': true }} />);
@@ -65,10 +60,14 @@ describe('出発・到着・追加の出発駅は同じ部品（再発防止）'
     expect(code.match(/role="arrival"/g)?.length).toBe(1);
   });
 
-  it('追加の出発駅の並びは最小の幅の定義元（em）から。px を直書きしない', () => {
-    expect(selector).toContain('ROLE_FIELD_MIN_WIDTH_EM');
-    expect(ROLE_FIELD_MIN_WIDTH_EM).toBeGreaterThan(0);
+  it('追加の出発駅は出発駅欄・到着駅欄と同じ2列の行（FieldPairRow）に置き、区切りの列の幅は1か所（入れ替えボタンと同じ）', () => {
+    expect(selector).toContain('<FieldPairRow');
+    expect(selector).toContain('PAIR_DIVIDER_WIDTH');
+    expect(PAIR_DIVIDER_WIDTH).toBe(CONTROL_SIZE.sm.minHeight);
+    // 追加の出発駅だけ別の幅・別の文言にしない（案内は出発駅欄と同じ「駅名入力」）
+    expect(selector).not.toContain('ROLE_FIELD_MIN_WIDTH_EM');
     expect(selector).not.toContain('MEETING_ADD_MIN_WIDTH_PX');
+    expect(selector).not.toContain("placeholder={translateUI('addMeetingOrigin', language)}");
   });
 
   it('RoleField は色・生の入力欄・ボタンを直書きしない（アトムとトークンだけ。駅の知識も持たない）', () => {

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
-import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Plus, Timer, TrainFront, Users, Waypoints, X } from 'lucide-react';
+import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Timer, TrainFront, Users, Waypoints, X } from 'lucide-react';
 import { routes, routeNames, routeColors } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
@@ -18,12 +18,13 @@ import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import RemovableTag from './ui/atoms/RemovableTag';
 import StationSearchDropdown from './ui/StationSearchDropdown';
-import { CONTROL_SIZE, FLOATING_ICON_BUTTON_SIZE, ROLE_FIELD_MIN_WIDTH_EM } from './ui/atoms/controlSize';
+import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
 import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 import TextField from './ui/atoms/TextField';
 import RoleField from './ui/molecules/RoleField';
+import FieldPairRow, { PAIR_DIVIDER_WIDTH } from './ui/molecules/FieldPairRow';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import { useDeviceClass } from '../hooks/useDeviceClass';
 import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
@@ -615,12 +616,14 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             </div>
 
 
-            {/* 入れ替えボタン */}
+            {/* 入れ替えボタン。幅は FieldPairRow の区切りの列と同じ（追加の出発駅の行と、欄の幅・位置をそろえる） */}
             <div style={{
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'flex-end',
               paddingBottom: L.sp.xxs,
+              flex: `0 0 ${PAIR_DIVIDER_WIDTH}px`,
+              width: PAIR_DIVIDER_WIDTH,
             }}>
               {/* ラベル (line-height≒18px) + margin-bottom 3px 分のオフセット */}
               <div style={{ height: '21px' }} />
@@ -999,81 +1002,83 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           )}
 
           {/*
-            集合駅モードの出発駅。追加した出発駅も、出発駅欄と**同じ部品・同じ緑**（RoleField role="departure"）で出す。
-            1つ入れるごとに次の入力欄（＋ 出発駅を追加）が隣に出る（2つ入れると3つ目は右、収まらなければ次の行）。
-            行ごとの見出しは立てず、番号は付けない。入力欄は**いつでも出ている**（ボタンを押して開く手間がない）。
-            並べ方は CSS グリッドで、1つぶんの最小の幅は ROLE_FIELD_MIN_WIDTH_EM（足りない狭い画面では1列で幅いっぱい）。
-            候補の出し方は経由駅の追加と同じ部品（StationSearchDropdown）。開いたときにキーボードが出ないよう、自動でフォーカスはしない。
+            集合駅モードの出発駅。追加した出発駅も、出発駅欄と**同じ部品・同じ緑・同じ幅・同じ文言**で出す
+            （RoleField role="departure" を、出発駅欄・到着駅欄と同じ2列の行 FieldPairRow に置く。案内は「駅名入力」）。
+            入れるごとに次の欄が隣（右）に出る（出発駅欄＋1つ入れたら、その右に次の欄）。欄はいつでも出ている（ボタンを押して開く手間がない）。
+            行ごとの見出し・番号・＋のアイコンは付けない。候補の出し方は経由駅の追加と同じ部品（StationSearchDropdown）。
+            開いたときにキーボードが出ないよう、自動でフォーカスはしない。
           */}
           {!lastTrainDemoMode && onAddWaypoint && meetingMode && (
-            <div
-              data-meeting-origin-rows
-              style={{
-                marginTop: L.sp.md,
-                display: 'grid',
-                gridTemplateColumns: `repeat(auto-fit, minmax(${ROLE_FIELD_MIN_WIDTH_EM}em, 1fr))`,
-                gap: L.sp.xs,
-              }}
-            >
-              {(waypoints ?? []).map((wp, index) => (
-                <RoleField
-                  key={`${wp.name}-${index}`}
-                  theme={theme}
-                  role="departure"
-                  size="sm"
-                  type="text"
-                  readOnly
-                  value={translateStation(wp.name, language)}
-                  aria-label={`${translateUI('departureStation', language)} ${index + 2}`}
-                  onClear={() => onRemoveWaypoint?.(index)}
-                  clearLabel={translateUI('clearSelection', language)}
-                  wrapperAttr={{ 'data-meeting-extra': true }}
-                />
-              ))}
-              <div style={{ position: 'relative' }}>
-                <RoleField
-                  theme={theme}
-                  role="departure"
-                  size="sm"
-                  type="text"
-                  value={waypointSearch}
-                  onChange={(e) => {
-                    setWaypointSearch(e.target.value);
-                    setWaypointDropdownPos(getInputDropdownPosition(e.currentTarget.getBoundingClientRect()));
-                    setShowWaypointResults(true);
-                  }}
-                  onFocus={(e) => {
-                    focusedInputRef.current = e.currentTarget;
-                    setWaypointDropdownPos(getInputDropdownPosition(e.currentTarget.getBoundingClientRect()));
-                    setShowWaypointResults(true);
-                  }}
-                  onBlur={() => {
-                    focusedInputRef.current = null;
-                    setShowWaypointResults(false);
-                    setWaypointSearch('');
-                  }}
-                  placeholder={translateUI('addMeetingOrigin', language)}
-                  aria-label={translateUI('addMeetingOrigin', language)}
-                  adornment={<Plus size={CONTROL_SIZE.sm.iconSize} />}
-                  wrapperAttr={{ 'data-meeting-add': true }}
-                />
-                {showWaypointResults && waypointDropdownPos && (
-                  <StationSearchDropdown
-                    position={waypointDropdownPos}
-                    stations={filteredWaypointStations}
-                    onSelect={(station) => {
-                      // 選んだら欄が増え、入力欄は空に戻って次の駅をすぐ入れられる（次の欄は隣に出る）
-                      onAddWaypoint(station);
-                      setWaypointSearch('');
-                      setShowWaypointResults(false);
-                    }}
+            <div data-meeting-origin-rows style={{ marginTop: L.sp.xs, display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
+              {(() => {
+                const extraFields: React.ReactNode[] = (waypoints ?? []).map((wp, index) => (
+                  <RoleField
+                    key={`${wp.name}-${index}`}
                     theme={theme}
-                    language={language}
-                    hasQuery={!!waypointSearch}
-                    onMouseDown={(e) => e.preventDefault()}
+                    role="departure"
+                    size="sm"
+                    type="text"
+                    readOnly
+                    value={translateStation(wp.name, language)}
+                    aria-label={`${translateUI('departureStation', language)} ${index + 2}`}
+                    onClear={() => onRemoveWaypoint?.(index)}
+                    clearLabel={translateUI('clearSelection', language)}
+                    wrapperAttr={{ 'data-meeting-extra': true }}
                   />
-                )}
-              </div>
+                ));
+                const addField = (
+                  <div key="add" style={{ position: 'relative' }}>
+                    <RoleField
+                      theme={theme}
+                      role="departure"
+                      size="sm"
+                      type="text"
+                      value={waypointSearch}
+                      onChange={(e) => {
+                        setWaypointSearch(e.target.value);
+                        setWaypointDropdownPos(getInputDropdownPosition(e.currentTarget.getBoundingClientRect()));
+                        setShowWaypointResults(true);
+                      }}
+                      onFocus={(e) => {
+                        focusedInputRef.current = e.currentTarget;
+                        setWaypointDropdownPos(getInputDropdownPosition(e.currentTarget.getBoundingClientRect()));
+                        setShowWaypointResults(true);
+                      }}
+                      onBlur={() => {
+                        focusedInputRef.current = null;
+                        setShowWaypointResults(false);
+                        setWaypointSearch('');
+                      }}
+                      // 出発駅欄（未入力）と同じ文言。読み上げの名前だけ「出発駅を追加」にする
+                      placeholder={translateUI('stationPlaceholder', language)}
+                      aria-label={translateUI('addMeetingOrigin', language)}
+                      wrapperAttr={{ 'data-meeting-add': true }}
+                    />
+                    {showWaypointResults && waypointDropdownPos && (
+                      <StationSearchDropdown
+                        position={waypointDropdownPos}
+                        stations={filteredWaypointStations}
+                        onSelect={(station) => {
+                          // 選んだら欄が増え、入力欄は空に戻って次の駅をすぐ入れられる（次の欄は隣に出る）
+                          onAddWaypoint(station);
+                          setWaypointSearch('');
+                          setShowWaypointResults(false);
+                        }}
+                        theme={theme}
+                        language={language}
+                        hasQuery={!!waypointSearch}
+                        onMouseDown={(e) => e.preventDefault()}
+                      />
+                    )}
+                  </div>
+                );
+                const fields = [...extraFields, addField];
+                const rows: React.ReactNode[] = [];
+                for (let k = 0; k < fields.length; k += 2) {
+                  rows.push(<FieldPairRow key={k} left={fields[k]} right={fields[k + 1]} />);
+                }
+                return rows;
+              })()}
             </div>
           )}
 

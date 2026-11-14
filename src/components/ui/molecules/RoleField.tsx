@@ -6,7 +6,7 @@
  * 役割の色・白い文字・クリアボタンの置き方はここ1か所。
  *
  * - 入力欄はアトム TextField、クリアはアトム IconButton。枠も塗りも役割の色（状態で太さを変えない）
- * - 先頭にアイコン（＋など）を置ける（adornment）。クリアは値があるときだけ（onClear を渡したとき）
+ * - クリアは値があるときだけ（onClear を渡したとき）
  * - 入力欄の props（value・onChange・placeholder など）はそのまま渡せる
  *
  * 駅のことは知らない（何を入れる欄かは呼び出し側が決める）。
@@ -15,7 +15,6 @@ import React from 'react';
 import { X } from 'lucide-react';
 import TextField from '../atoms/TextField';
 import IconButton from '../atoms/IconButton';
-import { CONTROL_SIZE } from '../atoms/controlSize';
 import type { ControlSize } from '../atoms/controlSize';
 import type { TextFieldProps } from '../atoms/TextField';
 import { getThemeColors } from '../../../contexts/ThemeContext';
@@ -37,8 +36,6 @@ export interface RoleFieldProps extends Omit<TextFieldProps, 'size' | 'className
   onClear?: () => void;
   /** 消すボタンの読み上げ用ラベル */
   clearLabel?: string;
-  /** 先頭に置くアイコン（「＋」など）。文字と重ならない余白を取る */
-  adornment?: React.ReactNode;
   /** 入力欄を囲む要素に付ける data 属性（テスト・計測用） */
   wrapperAttr?: Record<`data-${string}`, string | boolean | undefined>;
 }
@@ -47,21 +44,12 @@ export interface RoleFieldProps extends Omit<TextFieldProps, 'size' | 'className
 export const ROLE_FIELD_CLASS = 'station-input-filled';
 
 const RoleField = React.forwardRef<HTMLInputElement, RoleFieldProps>(({
-  role, size = 'sm', onClear, clearLabel, adornment, wrapperAttr, theme, ...rest
+  role, size = 'sm', onClear, clearLabel, wrapperAttr, theme, ...rest
 }, ref) => {
   const colors = getThemeColors(theme);
-  const dims = CONTROL_SIZE[size];
   const color = ROLE_FIELD_COLOR[role];
   return (
     <div style={{ position: 'relative' }} {...wrapperAttr}>
-      {adornment && (
-        <span
-          aria-hidden
-          style={{ position: 'absolute', left: L.sp.md, top: '50%', transform: 'translateY(-50%)', display: 'flex', color: colors.onPrimary, pointerEvents: 'none' }}
-        >
-          {adornment}
-        </span>
-      )}
       <TextField
         {...rest}
         ref={ref}
@@ -73,7 +61,6 @@ const RoleField = React.forwardRef<HTMLInputElement, RoleFieldProps>(({
           // ✕ を重ねるときだけ右側の余白を広げる（値が無いうちは案内の文字に幅を使う。
           // 英語の "Enter station name" が狭い画面で切れていた, 2026-10-15）
           ...(onClear ? { paddingRight: L.sp['3xl'] } : {}),
-          ...(adornment ? { paddingLeft: `calc(${L.sp.md} + ${dims.iconSize}px + ${L.sp.xs})` } : {}),
           // 役割の色で塗りつぶし、文字は白。地図の上でも役割が一目で分かるようにする
           border: `2px solid ${color}`,
           backgroundColor: color,

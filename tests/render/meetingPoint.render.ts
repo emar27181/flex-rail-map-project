@@ -1,6 +1,6 @@
 /**
  * 集合駅を探すモード: 既存の駅選択パネルの中だけで完結する（別パネル・別の入力欄を増やさない）。
- * 出発駅 + 常に出ている「＋ 出発駅を追加」の入力欄で2駅以上そろうと候補が出て、選ぶと既存の到着駅に入る。
+ * 出発駅 + 常に出ている出発駅の入力欄（出発駅欄と同じ緑・同じ幅・同じ文言）で2駅以上そろうと候補が出て、選ぶと既存の到着駅に入る。
  */
 import { test, expect, collectErrors } from './helpers';
 
@@ -18,11 +18,13 @@ test('集合駅モード: 出発駅を追加すると候補が出て、選ぶと
   // 出発駅が1つのうちは案内だけ
   await expect(page.locator('[data-meeting-results]')).toContainText('2駅以上そろえると');
 
-  // 「＋ 出発駅を追加」の入力欄は、ボタンを押さなくても最初から出ている
+  // 出発駅の入力欄は、ボタンを押さなくても最初から出ている（出発駅欄と同じ文言「駅名入力」）
   await expect(page.getByRole('button', { name: '出発駅を追加' })).toHaveCount(0);
   await expect(page.locator('[data-meeting-add]')).toHaveCount(1);
-  const add = page.getByPlaceholder('出発駅を追加');
+  const add = page.locator('[data-meeting-add] input');
   await expect(add).toBeVisible();
+  await expect(add).toHaveAttribute('placeholder', '駅名入力');
+  await expect(add).toHaveAccessibleName('出発駅を追加');
   await add.fill('東京');
   await page.locator('[data-station-option="東京"]').first().click();
 
@@ -31,7 +33,7 @@ test('集合駅モード: 出発駅を追加すると候補が出て、選ぶと
   await expect(results).toContainText('最大');
   await expect(results).toContainText('新宿');
   await expect(results).toContainText('東京');
-  // 追加した出発駅は出発駅欄と同じ部品の欄（1つ）。次の欄（＋ 出発駅を追加）が増えるだけで、別のパネル・入力欄は作らない
+  // 追加した出発駅は出発駅欄と同じ部品の欄（1つ）。次の欄が増えるだけで、別のパネル・入力欄は作らない
   await expect(page.locator('[data-meeting-extra]')).toHaveCount(1);
   expect(await stationInputs.count()).toBe(inputsBefore + 2);
 
@@ -67,7 +69,7 @@ test('集合駅モード: 追加した出発駅も出発駅欄と同じ緑の欄
   await expect(add).toHaveCount(1);
 
   const addOne = async (name: string) => {
-    await page.getByPlaceholder('出発駅を追加').fill(name);
+    await page.locator('[data-meeting-add] input').fill(name);
     await page.locator(`[data-station-option="${name}"]`).first().click();
   };
   // 1つ入れると、次の欄は隣（右）に出る（出発駅を2つ入れたら、3つ目の欄は右）
@@ -113,40 +115,64 @@ test('集合駅モード: 追加した出発駅も出発駅欄と同じ緑の欄
   expect(errors).toEqual([]);
 });
 
-for (const lang of ['ja', 'en', 'zh', 'ko'] as const) {
-  for (const width of [1280, 360]) {
-    test(`集合駅モード: 「＋ 出発駅を追加」の案内の文字が切れない（${lang}・${width}px）`, async ({ page }) => {
-      // 広い画面は2列（欄の幅が狭い）、狭いスマホは1列。どちらでも案内の文字が収まる
-      await page.setViewportSize({ width, height: 780 });
-      await page.goto(`/?mode=meeting&from=shinjuku&with=tokyo&lang=${lang}`);
-      const input = page.locator('[data-meeting-add] input');
-      await expect(input).toBeVisible();
-      // 案内（placeholder）の文字の幅が、入力欄の中の幅（左の＋アイコンの余白を除く）に収まる
-      const fit = await input.evaluate((el: HTMLInputElement) => {
-        const cs = getComputedStyle(el);
-        const ctx = document.createElement('canvas').getContext('2d')!;
-        ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-        const text = ctx.measureText(el.placeholder).width;
-        const inner = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-        return { text: Math.round(text), inner: Math.round(inner), placeholder: el.placeholder };
-      });
-      expect(fit.placeholder.length).toBeGreaterThan(0);
-      expect(fit.text, JSON.stringify(fit)).toBeLessThanOrEqual(fit.inner);
+for (const width of [1280, 390, 360]) {
+  test(`集合駅モード: 追加の出発駅は出発駅欄と同じ幅・同じ位置にそろう（${width}px）`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto('/?mode=meeting&from=shinjuku&with=tokyo,yokohama');
+    await expect(page.locator('[data-meeting-add]')).toBeVisible();
+    const m = await page.evaluate(() => {
+      const box = (el: Element) => { const r = el.getBoundingClientRect(); return { left: r.left, right: r.right, width: r.width, top: r.top }; };
+      const inputs = [...document.querySelectorAll('input.station-input-filled')];
+      const departure = box(inputs[0]);          // 出発駅欄
+      const arrival = box(inputs[1]);            // 到着駅欄
+      const extras = [...document.querySelectorAll('[data-meeting-extra] input')].map(box);
+      const add = box(document.querySelector('[data-meeting-add] input')!);
+      return { departure, arrival, extras, add };
     });
-  }
+    // 左の欄: 出発駅欄と同じ左端・同じ幅。右の欄: 到着駅欄と同じ左端・同じ幅（行をそろえる）
+    expect(Math.abs(m.extras[0].left - m.departure.left)).toBeLessThanOrEqual(1);
+    expect(Math.abs(m.extras[0].width - m.departure.width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(m.extras[1].left - m.arrival.left)).toBeLessThanOrEqual(1);
+    expect(Math.abs(m.extras[1].width - m.arrival.width)).toBeLessThanOrEqual(1);
+    // 3つ目の欄（追加の入力欄）は次の行の左（出発駅欄の真下）
+    expect(Math.abs(m.add.left - m.departure.left)).toBeLessThanOrEqual(1);
+    expect(Math.abs(m.add.width - m.departure.width)).toBeLessThanOrEqual(1);
+    expect(m.add.top).toBeGreaterThan(m.extras[0].top);
+  });
 }
 
-test('集合駅モード: 狭いスマホ（360px）では1列で幅いっぱいになり、はみ出さない', async ({ page }) => {
-  await page.setViewportSize({ width: 360, height: 780 });
-  await page.goto('/?mode=meeting&from=shinjuku&with=tokyo,yokohama,shibuya');
+test('集合駅モード: 出発駅（欄）を入れると次の欄が右隣に出る（出発駅欄と追加1つの次は右）', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.goto('/?mode=meeting&from=shinjuku&with=tokyo');
   await expect(page.locator('[data-meeting-add]')).toBeVisible();
-  const boxes = await page.evaluate(() => {
-    const row = document.querySelector('[data-meeting-origin-rows]')!.getBoundingClientRect();
-    const fields = [...document.querySelectorAll('[data-meeting-extra], [data-meeting-add]')].map(e => e.getBoundingClientRect());
-    return { rowLeft: row.left, rowRight: row.right, rights: fields.map(f => f.right), lefts: fields.map(f => f.left), widths: fields.map(f => Math.round(f.width)) };
+  const pos = await page.evaluate(() => {
+    const e = document.querySelector('[data-meeting-extra] input')!.getBoundingClientRect();
+    const a = document.querySelector('[data-meeting-add] input')!.getBoundingClientRect();
+    return { extraTop: Math.round(e.top), addTop: Math.round(a.top), extraRight: e.right, addLeft: a.left };
   });
-  for (const r of boxes.rights) expect(r).toBeLessThanOrEqual(boxes.rowRight + 1);
-  for (const l of boxes.lefts) expect(l).toBeGreaterThanOrEqual(boxes.rowLeft - 1);
-  // 狭いときは1列（どの欄も行の幅いっぱい）
-  for (const w of boxes.widths) expect(w).toBeGreaterThanOrEqual(Math.round(boxes.rowRight - boxes.rowLeft) - 2);
+  // 追加した1つ目の右隣に、次の欄が出る（同じ行）
+  expect(pos.addTop).toBe(pos.extraTop);
+  expect(pos.addLeft).toBeGreaterThanOrEqual(pos.extraRight);
 });
+
+for (const lang of ['ja', 'en', 'zh', 'ko'] as const) {
+  test(`集合駅モード: 追加の出発駅の欄の案内は、出発駅欄（未入力）と同じ文言（${lang}）`, async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto(`/?mode=meeting&from=shinjuku&lang=${lang}`);
+    const add = page.locator('[data-meeting-add] input');
+    await expect(add).toBeVisible();
+    // 到着駅欄（未入力）の案内と同じ文言
+    const arrivalPlaceholder = await page.locator('input.station-input-filled').nth(1).getAttribute('placeholder');
+    await expect(add).toHaveAttribute('placeholder', arrivalPlaceholder!);
+    // 文字が欄の幅に収まる（出発駅欄と同じ幅なので、出発駅欄が収まっていれば収まる）
+    const fit = await add.evaluate((el: HTMLInputElement) => {
+      const cs = getComputedStyle(el);
+      const ctx = document.createElement('canvas').getContext('2d')!;
+      ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+      const text = ctx.measureText(el.placeholder).width;
+      const inner = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return { text: Math.round(text), inner: Math.round(inner), placeholder: el.placeholder };
+    });
+    expect(fit.text, JSON.stringify(fit)).toBeLessThanOrEqual(fit.inner);
+  });
+}

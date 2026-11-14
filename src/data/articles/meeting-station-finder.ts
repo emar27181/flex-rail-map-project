@@ -133,7 +133,7 @@ export const meetingStationFinder: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "駅選択パネルの出発駅に1人目の駅を入れ、「集合駅を探す」を押します。すると出発駅の下に「＋ 出発駅を追加」の入力欄がいつでも出ているので、駅名を入れて選ぶたびに出発駅の行が増えます（削除ボタンで減らせます）。2駅以上そろうと、候補が5件出ます。候補を押すと、その駅が到着駅になり、出発駅ごとのルートと使う路線が下に並びます。"
+          "text": "駅選択パネルの出発駅に1人目の駅を入れ、「集合駅を探す」を押します。すると出発駅の下に、出発駅と同じ緑の入力欄がいつでも出ているので、駅名を入れて選ぶたびに欄が増えます（削除ボタンで減らせます）。2駅以上そろうと、候補が5件出ます。候補を押すと、その駅が到着駅になり、出発駅ごとのルートと使う路線が下に並びます。"
         },
         {
           "type": "shot",
@@ -151,7 +151,7 @@ export const meetingStationFinder: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "所要時間は、路線データの駅間時間と乗換のペナルティから出した目安です。実際の時刻表・遅延・混雑は反映していません。人数を増やしたいときは、「＋ 出発駅を追加」の欄に駅を入れて行を足します。"
+          "text": "所要時間は、路線データの駅間時間と乗換のペナルティから出した目安です。実際の時刻表・遅延・混雑は反映していません。人数を増やしたいときは、出発駅の下の空いている欄に駅を入れて足します。"
         },
         {
           "type": "shot",
@@ -167,7 +167,7 @@ export const meetingStationFinder: ArticleSource = {
           "type": "steps",
           "items": [
             "出発駅に1人目の駅を入れ、「集合駅を探す」を押す",
-            "「＋ 出発駅を追加」の欄に、集まる人の出発駅を入れて足す",
+            "出発駅の下の空いている欄に、集まる人の出発駅を入れて足す",
             "候補を押して集合駅を決め、出発駅ごとのルートと使う路線を確かめる",
             "出発前に、各社の公式の時刻表・運行情報で確認する"
           ]
@@ -229,7 +229,7 @@ export const meetingStationFinder: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "Enter the first person's station as the departure station and press \"Find meeting station\". A \"+ Add departure station\" field is always shown below, so each time you enter a station name and pick it, another departure row appears (use the remove button to delete one). Once there are two or more, five candidates appear. Press a candidate to make it the arrival station, and the route and lines for each departure station are listed below."
+          "text": "Enter the first person's station as the departure station and press \"Find meeting station\". An empty green field like the departure field is always shown below, so each time you enter a station name and pick it, another field appears (use the remove button to delete one). Once there are two or more, five candidates appear. Press a candidate to make it the arrival station, and the route and lines for each departure station are listed below."
         },
         {
           "type": "shot",
@@ -247,7 +247,7 @@ export const meetingStationFinder: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "Travel times are estimates from the time between stations in the line data plus a transfer penalty. They do not reflect actual timetables, delays or crowding. To add more people, enter their stations in the \"+ Add departure station\" field."
+          "text": "Travel times are estimates from the time between stations in the line data plus a transfer penalty. They do not reflect actual timetables, delays or crowding. To add more people, enter their stations in the empty field below the departure station."
         },
         {
           "type": "shot",
@@ -263,7 +263,7 @@ export const meetingStationFinder: ArticleSource = {
           "type": "steps",
           "items": [
             "Enter the first person's station as the departure station and press \"Find meeting station\"",
-            "Enter each person's departure station in the \"+ Add departure station\" field",
+            "Enter each person's departure station in the empty field below the departure station",
             "Press a candidate to pick the meeting station and check each person's route and lines",
             "Before you leave, check each operator's official timetable and service information"
           ]
@@ -325,7 +325,7 @@ export const meetingStationFinder: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "在车站选择面板的出发站中输入第一个人的车站，按“寻找集合站”。出发站下方始终有“＋ 添加出发站”输入栏，每输入站名并选择一次，就会增加一行出发站（可用删除按钮删除）。有两个以上时，会显示5个候选。按候选就会把该站设为到达站，下方会列出每个出发站的路线和使用的线路。"
+          "text": "在车站选择面板的出发站中输入第一个人的车站，按“寻找集合站”。出发站下方始终有一个与出发站相同的绿色空输入栏，每输入站名并选择一次，就会增加一栏（可用删除按钮删除）。有两个以上时，会显示5个候选。按候选就会把该站设为到达站，下方会列出每个出发站的路线和使用的线路。"
         },
         {
           "type": "shot",
@@ -343,7 +343,7 @@ export const meetingStationFinder: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "所需时间是根据线路数据的站间时间和换乘罚时估算的，并未反映实际时刻表、延误和拥挤情况。想增加人数时，在“＋ 添加出发站”栏中输入车站即可增加行。"
+          "text": "所需时间是根据线路数据的站间时间和换乘罚时估算的，并未反映实际时刻表、延误和拥挤情况。想增加人数时，在出发站下方的空栏中输入车站即可。"
         },
         {
           "type": "shot",
@@ -359,7 +359,7 @@ export const meetingStationFinder: ArticleSource = {
           "type": "steps",
           "items": [
             "在出发站输入第一个人的车站，按“寻找集合站”",
-            "在“＋ 添加出发站”栏中输入集合的人的出发站",
+            "在出发站下方的空栏中输入集合的人的出发站",
             "按候选决定集合站，确认每个出发站的路线和使用的线路",
             "出发前，请在各公司的官方时刻表和运行信息中确认"
           ]
@@ -421,7 +421,7 @@ export const meetingStationFinder: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "역 선택 패널의 출발역에 첫 번째 사람의 역을 넣고 ‘만날 역 찾기’를 누릅니다. 출발역 아래에는 ‘＋ 출발역 추가’ 입력란이 항상 있어, 역 이름을 넣어 고를 때마다 출발역 행이 늘어납니다(삭제 버튼으로 줄일 수 있습니다). 2개 이상이 되면 후보 5개가 나옵니다. 후보를 누르면 그 역이 도착역이 되고, 출발역별 경로와 이용 노선이 아래에 나열됩니다."
+          "text": "역 선택 패널의 출발역에 첫 번째 사람의 역을 넣고 ‘만날 역 찾기’를 누릅니다. 출발역 아래에는 출발역과 같은 초록색 빈 입력란이 항상 있어, 역 이름을 넣어 고를 때마다 입력란이 늘어납니다(삭제 버튼으로 줄일 수 있습니다). 2개 이상이 되면 후보 5개가 나옵니다. 후보를 누르면 그 역이 도착역이 되고, 출발역별 경로와 이용 노선이 아래에 나열됩니다."
         },
         {
           "type": "shot",
@@ -439,7 +439,7 @@ export const meetingStationFinder: ArticleSource = {
         },
         {
           "type": "p",
-          "text": "소요 시간은 노선 데이터의 역간 시간과 환승 시간으로 계산한 추정치이며, 실제 시각표·지연·혼잡은 반영하지 않습니다. 인원을 늘리려면 ‘＋ 출발역 추가’ 칸에 역을 넣어 행을 더합니다."
+          "text": "소요 시간은 노선 데이터의 역간 시간과 환승 시간으로 계산한 추정치이며, 실제 시각표·지연·혼잡은 반영하지 않습니다. 인원을 늘리려면 출발역 아래의 빈 칸에 역을 넣습니다."
         },
         {
           "type": "shot",
@@ -455,7 +455,7 @@ export const meetingStationFinder: ArticleSource = {
           "type": "steps",
           "items": [
             "출발역에 첫 번째 사람의 역을 넣고 ‘만날 역 찾기’를 누른다",
-            "‘＋ 출발역 추가’ 칸에 모이는 사람의 출발역을 넣어 더한다",
+            "출발역 아래의 빈 칸에 모이는 사람의 출발역을 넣어 더한다",
             "후보를 눌러 만날 역을 정하고 출발역별 경로와 이용 노선을 확인한다",
             "출발 전에 각 사의 공식 시각표·운행 정보를 확인한다"
           ]
