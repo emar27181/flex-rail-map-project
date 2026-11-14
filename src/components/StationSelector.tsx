@@ -168,6 +168,11 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const colors = getThemeColors(theme);
   const demoText = lastTrainCopy(language);
   /** 「時刻を表示」を出すか。出発駅・到着駅がそろったとき。終電モードは到着駅だけで出す */
+  // 畳んだときの2行目（出発駅・到着駅）。集合駅を探すときは出発駅が複数
+  const summaryOrigins = !isExpanded
+    ? (meetingMode && meetingOriginNames.length > 0 ? meetingOriginNames : (departure ? [departure.name] : []))
+    : [];
+  const collapsedSummaryShown = !isExpanded && (summaryOrigins.length > 0 || !!arrival);
   const timeLabelButtonShown = !!onShowStationTimeLabelsChange && !!arrival && (!!departure || lastTrainModeEnabled);
   /** 駅名の下の時刻の意味（到着予定時刻／終電モードでは最終時刻） */
   const timeLabelNote = translateUI(lastTrainModeEnabled ? 'timeLabelNoteLastTrain' : 'timeLabelNoteArrival', language);
@@ -496,13 +501,15 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         // 見出し行の高さぶんだけ下側の空きが上側より狭く見えていた。
         // 上下とも余白を0にし、代わりにflexの縦中央揃えで高さいっぱいに
         // センタリングすることで、中身の実際の高さに関係なく必ず揃うようにする
-        paddingTop: isExpanded ? L.sp.md : 0,
-        paddingBottom: isExpanded ? L.sp.md : 0,
+        paddingTop: isExpanded || collapsedSummaryShown ? L.sp.md : 0,
+        paddingBottom: isExpanded || collapsedSummaryShown ? L.sp.md : 0,
         paddingLeft: L.sp.md,
         paddingRight: L.sp.md,
         // 畳んだ高さは、地図隅に浮かぶ他のアイコンボタン（フルスクリーン/言語切替等）
         // と行が揃うよう、それらと同じ一元管理された寸法から取る
-        height: isExpanded ? 'auto' : FLOATING_ICON_BUTTON_SIZE.md,
+        // 畳んでいても出発駅・到着駅を2行目に小さく出すときは、その分だけ高さが伸びる（最低でも他のアイコンボタンの高さ）
+        height: isExpanded || collapsedSummaryShown ? 'auto' : FLOATING_ICON_BUTTON_SIZE.md,
+        minHeight: FLOATING_ICON_BUTTON_SIZE.md,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: isExpanded ? 'flex-start' : 'center',
@@ -527,6 +534,27 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           <DisclosureIndicator expanded={isExpanded} theme={theme} />
         )}
       </div>
+      {/*
+        畳んでいても、決めた出発駅・到着駅は2行目に小さく残す（開かないと何を選んだか分からない、を避ける）。
+        色は入力欄と同じ役割の色（出発=緑・到着=赤。ColorChip）。集合駅を探すときは出発駅が複数並ぶ。
+      */}
+      {collapsedSummaryShown && (
+        <div data-station-summary style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.xs, marginTop: L.sp.xs, minWidth: 0 }}>
+          {summaryOrigins.map(name => (
+            <ColorChip key={name} color={SEMANTIC.departure} theme={theme}>
+              {translateStation(name, language)}
+            </ColorChip>
+          ))}
+          {summaryOrigins.length > 0 && arrival && (
+            <span aria-hidden style={{ fontSize: FS.caption, color: colors.textSecondary }}>{'→'}</span>
+          )}
+          {arrival && (
+            <ColorChip color={SEMANTIC.arrival} theme={theme}>
+              {translateStation(arrival.name, language)}
+            </ColorChip>
+          )}
+        </div>
+      )}
       
       {isExpanded && (
         <>

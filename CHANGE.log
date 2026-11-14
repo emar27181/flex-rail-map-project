@@ -1,5 +1,17 @@
 # CHANGE LOG
 
+## [2026-11-14] セッション（路線の上の時間を出発駅から増える数字に／畳んでも出発駅・到着駅を残す）
+
+### improve: 集合駅モードの路線の上の時間を、出発駅それぞれから増えていく数字（ダイクストラ）にする
+- `src/utils/meetingPoint.ts`（`meetingEdgeMinutes`。区間バッジ用の `legs` は削除）, `src/components/RailwayMap.tsx`（`meetingTimeMaps`, `meetingEdgeBadges`）
+- 隣り合う駅の間ごとに、いちばん近い出発駅から見た「遠い側の駅までの最短時間」を出す。出発駅どうしの間では、それぞれの出発駅の側から数字が増えていく（新宿側 20→30→50、藤沢側 25→40→…）。出発駅の並びを入れ替えても同じ結果
+- `tests/unit/utils/meetingPoint.test.ts`
+
+### feat: 駅選択パネルを閉じても、出発駅・到着駅を2行目に小さく残す
+- `src/components/StationSelector.tsx`（`collapsedSummaryShown`, `data-station-summary`）。部品は既存の `ColorChip`（出発=緑・到着=赤）
+- 畳んでも何を選んだか分かるよう、見出しの下に「新宿 → 品川」を小さく出す。集合駅モードでは出発駅が複数並ぶ。畳んだ高さは他のアイコンボタンと同じ高さが最低で、2行目の分だけ伸びる
+- `tests/render/meetingPoint.render.ts`
+
 ## [2026-11-14] セッション（集合駅・終電モードを出発駅どうし対等に／折りたたみ／実データの受け皿）
 
 ### improve: 集合駅の候補・ルートは上位3件だけ見せ、残りは折りたたむ。説明文を削除

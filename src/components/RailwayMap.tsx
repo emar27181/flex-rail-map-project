@@ -14,7 +14,7 @@ import StationSelector from './StationSelector';
 import { buildDestinationDemoNetwork, calculateDemoLastTrain, availableDemoStations, demoEdgeKey, formatDemoClock, parseDemoClock, getCurrentDemoClock } from '../utils/lastTrainDemo';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
 import { requestPosition, resolveCurrentPosition } from '../utils/freshLocation';
-import { rankMeetingStations, summarizeMeetingRoutes, interleaveByRank, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
+import { rankMeetingStations, summarizeMeetingRoutes, interleaveByRank, meetingEdgeMinutes, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
@@ -3005,14 +3005,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       return true;
     });
   }, [departure, extraDepartures]);
-  const meetingRanking = useMemo(() => {
+  // 出発駅ごとの全駅への最短所要時間（ダイクストラ）。出発駅どうしを区別しない（最初の入力も追加した入力も同じ計算）
+  const meetingTimeMaps = useMemo(() => {
     if (!meetingModeEnabled || meetingOrigins.length < 2) return [];
     const allRouteKeys = new Set(Object.keys(routes) as RouteKey[]);
-    const timeMaps = meetingOrigins.map(origin => new Map(
+    return meetingOrigins.map(origin => new Map(
       timeFilter.findStationsWithinTime(origin, MEETING_MAX_MINUTES, allRouteKeys).map(r => [r.station.name, r.totalTime] as [string, number]),
     ));
-    return rankMeetingStations(meetingOrigins.map(o => o.name), timeMaps);
   }, [meetingModeEnabled, meetingOrigins, timeFilter]);
+  const meetingRanking = useMemo(
+    () => (meetingTimeMaps.length < 2 ? [] : rankMeetingStations(meetingOrigins.map(o => o.name), meetingTimeMaps)),
+    [meetingTimeMaps, meetingOrigins],
+  );
   const meetingCandidates = useMemo(() => meetingRanking.slice(0, MEETING_RESULT_LIMIT), [meetingRanking]);
   // 集合駅（到着駅）が決まっているとき、出発駅ごとのルートと使う路線
   const meetingRouteEntries = useMemo(() => {
@@ -3035,22 +3039,31 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // 経路候補が変わると路線の表示が作り直されるので、そのたびに足し直す
   }, [meetingRouteEntries, drawnRecommendations]);
   /**
-   * 集合駅までの、出発駅それぞれの経路の「区間の所要時間」。地図の路線の上に丸いバッジで出す
-   * （駅アイコンの下には書かない）。出発駅どうしで同じ区間を通るときは1つにまとめる（誰も優先しない）
+   * 路線の上（隣り合う駅の間）に出す所要時間のバッジ。出発駅それぞれから数字が増えていく
+   * （ダイクストラの最短時間。いちばん近い出発駅から見た時間。utils/meetingPoint.ts の meetingEdgeMinutes）。
+   * 駅アイコンの下には書かない。地図に描いている経路（全出発駅ぶん）の区間だけに出す
    */
-  const meetingLegBadges = useMemo(() => {
+  const meetingEdgeBadges = useMemo(() => {
     const seen = new Set<string>();
     const badges: Array<{ key: string; routeKey: RouteKey; minutes: number; a: { lat: number; lng: number }; b: { lat: number; lng: number } }> = [];
-    for (const entry of meetingRouteEntries) {
-      for (const leg of entry.legs) {
-        const key = `${leg.routeKey}:${leg.from}>${leg.to}`;
-        if (seen.has(key)) continue;
-        seen.add(key);
-        badges.push({ key, routeKey: leg.routeKey as RouteKey, minutes: leg.minutes, a: leg.middle[0], b: leg.middle[1] });
+    if (!meetingModeEnabled || meetingTimeMaps.length < 2) return badges;
+    for (const route of drawnRecommendations) {
+      for (const seg of route.segments) {
+        if (!seg.routeKey || seg.routeKey === 'walking' || seg.isWalkingTransfer) continue;
+        for (let i = 0; i < seg.stations.length - 1; i++) {
+          const from = seg.stations[i];
+          const to = seg.stations[i + 1];
+          const key = `${seg.routeKey}:${[from.name, to.name].sort().join('|')}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          const minutes = meetingEdgeMinutes(meetingTimeMaps, from.name, to.name);
+          if (minutes === undefined) continue;
+          badges.push({ key, routeKey: seg.routeKey as RouteKey, minutes, a: from, b: to });
+        }
       }
     }
     return badges;
-  }, [meetingRouteEntries]);
+  }, [meetingModeEnabled, meetingTimeMaps, drawnRecommendations]);
   // 駅選択パネルの「追加」欄は、集合駅モードでは経由駅ではなく追加出発駅として使う
   const selectorWaypoints = meetingModeEnabled ? extraDepartures : waypoints;
   const selectorOnAddWaypoint = meetingModeEnabled ? handleAddExtraDeparture : handleAddWaypoint;
@@ -5789,14 +5802,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 })
               }
 
-              {/* 集合駅を探す: 出発駅ごとの経路の区間の所要時間を、路線の上（区間の真ん中）に丸いバッジで出す。
+              {/* 集合駅を探す: 隣り合う駅の間（路線の上）に、出発駅それぞれから増えていく所要時間を丸いバッジで出す。
                   既存の区間の時間バッジ（createTimeIcon）と同じ見た目。タップは受け取らない */}
-              {meetingModeEnabled && meetingLegBadges.map(badge => {
+              {meetingModeEnabled && meetingEdgeBadges.map(badge => {
                 const icon = createTimeIcon(badge.minutes, adjustRouteColorForTheme(routeColors[badge.routeKey] ?? '#888', theme), zoomLevel, true, true);
                 if (!icon) return null;
                 return (
                   <Marker
-                    key={`meeting-leg-${badge.key}`}
+                    key={`meeting-edge-${badge.key}`}
                     position={[(badge.a.lat + badge.b.lat) / 2, (badge.a.lng + badge.b.lng) / 2]}
                     icon={icon}
                     zIndexOffset={TRAVEL_TIME_MARKER_Z}

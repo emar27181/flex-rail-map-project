@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { rankMeetingStations } from '../../../src/utils/meetingPoint';
+import { rankMeetingStations, meetingEdgeMinutes } from '../../../src/utils/meetingPoint';
 import { RouteFinder, TimeFilter } from '../../../src/utils/routeFinder';
 import { routes } from '../../../src/data/routes';
 import type { RouteKey } from '../../../src/data/routes';
@@ -90,7 +90,7 @@ describe('summarizeMeetingRoutes', () => {
 
   it('集合駅と同じ出発駅は 0 分・路線なし', () => {
     const r = summarizeMeetingRoutes(['X'], 'X', () => { throw new Error('探索しない'); });
-    expect(r[0]).toEqual({ origin: 'X', lines: [], totalTime: 0, transfers: 0, legs: [] });
+    expect(r[0]).toEqual({ origin: 'X', lines: [], totalTime: 0, transfers: 0 });
   });
 });
 
@@ -109,21 +109,28 @@ describe('出発駅を対等に扱う補助', () => {
   });
 });
 
-describe('集合駅までの区間の所要時間（路線の上のバッジ用）', () => {
-  it('乗る区間ごとに所要時間と、真ん中あたりの隣り合う2駅を返す（徒歩の乗換は含めない）', async () => {
-    const { summarizeMeetingRoutes } = await import('../../../src/utils/meetingPoint');
-    const st = (name: string, lat: number) => ({ name, lat, lng: 139 });
-    const entries = summarizeMeetingRoutes(['新宿'], '藤沢', () => ({
-      totalTime: 60, transfers: 1,
-      segments: [
-        { routeKey: 'odakyuLine', time: 20, stations: [st('新宿', 35.0), st('代々木上原', 35.1), st('登戸', 35.2), st('相模大野', 35.3)] },
-        { routeKey: 'walking', isWalkingTransfer: true, time: 5, stations: [st('相模大野', 35.3), st('相模大野', 35.3)] },
-        { routeKey: 'odakyuEnoshimaLine', time: 25, stations: [st('相模大野', 35.3), st('藤沢', 35.4)] },
-      ],
-    }));
-    expect(entries[0].legs).toHaveLength(2);
-    expect(entries[0].legs[0]).toMatchObject({ routeKey: 'odakyuLine', from: '新宿', to: '相模大野', minutes: 20 });
-    expect(entries[0].legs[0].middle.map(p => p.lat)).toEqual([35.1, 35.2]);
-    expect(entries[0].legs[1]).toMatchObject({ from: '相模大野', to: '藤沢', minutes: 25 });
+describe('路線の上の区間の時間（出発駅それぞれから数字が増える）', () => {
+  // 新宿 -(20)- 代々木上原 -(10)- 登戸 -(20)- 新百合ヶ丘 -(15)- 相模大野 -(25)- 藤沢 のような一本の路線
+  const fromShinjuku = new Map([['新宿', 0], ['代々木上原', 20], ['登戸', 30], ['新百合ヶ丘', 50], ['相模大野', 65], ['藤沢', 90]]);
+  const fromFujisawa = new Map([['藤沢', 0], ['相模大野', 25], ['新百合ヶ丘', 40], ['登戸', 60], ['代々木上原', 70], ['新宿', 90]]);
+
+  it('それぞれの出発駅の側から数字が増えていく（近い出発駅から見た、遠い側の駅までの時間）', () => {
+    const maps = [fromShinjuku, fromFujisawa];
+    expect(meetingEdgeMinutes(maps, '新宿', '代々木上原')).toBe(20);
+    expect(meetingEdgeMinutes(maps, '代々木上原', '登戸')).toBe(30);
+    expect(meetingEdgeMinutes(maps, '登戸', '新百合ヶ丘')).toBe(50);
+    expect(meetingEdgeMinutes(maps, '新百合ヶ丘', '相模大野')).toBe(40);
+    expect(meetingEdgeMinutes(maps, '相模大野', '藤沢')).toBe(25);
+  });
+
+  it('出発駅の並びを入れ替えても同じ（最初の出発駅を優先しない）', () => {
+    for (const [a, b] of [['新宿', '代々木上原'], ['登戸', '新百合ヶ丘'], ['相模大野', '藤沢']]) {
+      expect(meetingEdgeMinutes([fromShinjuku, fromFujisawa], a, b)).toBe(meetingEdgeMinutes([fromFujisawa, fromShinjuku], a, b));
+    }
+  });
+
+  it('どの出発駅からも行けない区間は undefined', () => {
+    expect(meetingEdgeMinutes([fromShinjuku], '新宿', '存在しない駅')).toBeUndefined();
+    expect(meetingEdgeMinutes([], '新宿', '藤沢')).toBeUndefined();
   });
 });

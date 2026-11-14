@@ -208,3 +208,33 @@ test('集合駅モード: 時刻の入力は「時刻を表示」ボタンの下
   expect(await page.locator('.leaflet-marker-icon', { hasText: /(新宿|東京) \d+分/ }).count()).toBe(0);
   expect(errors).toEqual([]);
 });
+
+test('駅選択パネルを閉じても、出発駅・到着駅は2行目に小さく残る（集合駅では出発駅が並ぶ）', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('/?from=shinjuku&to=tokyo');
+  const panel = page.locator('[data-station-selector]').first();
+  await expect(panel.locator('input.station-input-filled').first()).toBeVisible();
+  await expect(panel.locator('[data-station-summary]')).toHaveCount(0);
+  // 閉じる（見出しを押す）
+  await panel.getByRole('heading').first().click();
+  await expect(panel.locator('input.station-input-filled')).toHaveCount(0);
+  const summary = panel.locator('[data-station-summary]');
+  await expect(summary).toBeVisible();
+  await expect(summary).toContainText('新宿');
+  await expect(summary).toContainText('東京');
+  // 見出しの下（2行目）にある
+  const [h, s] = await Promise.all([panel.getByRole('heading').first().boundingBox(), summary.boundingBox()]);
+  expect(s!.y).toBeGreaterThan(h!.y + h!.height - 1);
+  // 開き直すと2行目は消える
+  await panel.getByRole('heading').first().click();
+  await expect(panel.locator('[data-station-summary]')).toHaveCount(0);
+
+  // 集合駅モード: 出発駅が複数並ぶ
+  await page.goto('/?mode=meeting&from=shinjuku&with=yokohama');
+  const panel2 = page.locator('[data-station-selector]').first();
+  await panel2.getByRole('heading').first().click();
+  const summary2 = panel2.locator('[data-station-summary]');
+  await expect(summary2).toContainText('新宿');
+  await expect(summary2).toContainText('横浜');
+  expect(errors).toEqual([]);
+});
