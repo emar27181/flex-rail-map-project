@@ -1,5 +1,14 @@
 # CHANGE LOG
 
+## [2026-11-14] セッション（乗車ログ（試作））
+
+### feat: 乗った路線・降りた駅を記録して、3段階で見せる「乗車ログ」モード（試作）
+- `src/utils/rideLog.ts`（段階の計算・保存形式。新規）, `src/hooks/useRideLog.ts`（localStorage。新規）, `src/components/RideLogControls.tsx`（絞り込み・記録。新規）, `src/components/StationSelector.tsx`（ボタン・操作の差し込み）, `src/components/RailwayMap.tsx`, `src/utils/translation.ts`（4言語）
+- 段階: 全く通っていない（無彩色の線）／通ったけど降りていない（乗った区間の路線色の線・薄い駅）／通って降りた（路線色の濃い駅）。チップで見せる段階を選べる（複数）
+- 記録は、選んでいる出発駅→到着駅の経路（候補の先頭）を1回ぶん。直前の取り消し・全消去つき。この端末のブラウザにだけ保存
+- 既存UIに統合（ボタン列に1つ足すだけ・入力欄は既存）。終電・集合駅とは同時に使わない
+- `tests/unit/utils/rideLog.test.ts`, `tests/render/rideLog.render.ts`, `docs/ui-mode-extension-guide.md`, `docs/render-tests.md`
+
 ## [2026-11-14] セッション（駅ツールチップの路線一覧: 運行系統名を枠の中に）
 
 ### fix: 駅ツールチップの路線一覧で、運行系統名（横須賀線の「横須賀・総武快速線」）を路線のチップの枠の中の2行目に入れる

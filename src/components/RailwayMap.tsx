@@ -14,6 +14,8 @@ import StationSelector from './StationSelector';
 import { buildDestinationDemoNetwork, calculateDemoLastTrain, availableDemoStations, demoEdgeKey, formatDemoClock, parseDemoClock, getCurrentDemoClock } from '../utils/lastTrainDemo';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
 import { requestPosition, resolveCurrentPosition } from '../utils/freshLocation';
+import { useRideLog } from '../hooks/useRideLog';
+import { deriveRideLog, entriesFromRoute, countByLevel, rideLevelOf, RIDE_LEVELS, type RideLevel } from '../utils/rideLog';
 import { rankMeetingStations, summarizeMeetingRoutes, interleaveByRank, meetingEdgeMinutes, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
@@ -318,6 +320,29 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     [lastTrainUiActive, arrival?.name]);
   const lastTrainDestinationSupported = !!demoNetwork && demoNetwork.lines.length > 0;
   const lastTrainFilterActive = lastTrainUiActive && lastTrainModeEnabled && lastTrainDestinationSupported;
+  // 乗車ログ（試作）: 乗った路線・降りた駅を記録して、3段階（全く通っていない／通ったけど降りていない／通って降りた）で見せるモード
+  const [rideLogModeEnabled, setRideLogModeEnabled] = useState(false);
+  const [rideLogFilter, setRideLogFilter] = useState<Set<RideLevel>>(() => new Set(RIDE_LEVELS));
+  const rideLog = useRideLog();
+  const rideState = useMemo(() => deriveRideLog(rideLog.entries), [rideLog.entries]);
+  /** 地図の下の層（ほかのモードの描画）を止めて、乗車ログの描画にする */
+  const rideLogActive = rideLogModeEnabled;
+  /** 記録の区間を、地図に描ける駅（座標つき）の並びにしたもの */
+  const ridePaths = useMemo(() => rideState.paths.flatMap(path => {
+    const list = routes[path.routeKey as RouteKey] as Station[] | undefined;
+    if (!list) return [];
+    const byName = new Map(list.map(st => [st.name, st] as const));
+    const stations = path.stations.map(name => byName.get(name));
+    return stations.every((st): st is Station => !!st) ? [{ id: path.id, routeKey: path.routeKey as RouteKey, stations }] : [];
+  }), [rideState]);
+  const totalStationCount = useMemo(() => new Set(Object.values(routes).flatMap(list => (list as Station[]).map(st => st.name))).size, []);
+  /** 地図に駅の印を出す駅（記録にある駅）。段階と、色を決める路線つき */
+  const rideStations = useMemo(() => [...rideState.stationLevel.entries()].flatMap(([name, level]) => {
+    const rk = rideState.stationRoute.get(name) as RouteKey | undefined;
+    const station = rk ? (routes[rk] as Station[] | undefined)?.find(st => st.name === name) : undefined;
+    return rk && station ? [{ station, routeKey: rk, level }] : [];
+  }), [rideState]);
+  const rideCounts = useMemo(() => countByLevel(rideState, totalStationCount), [rideState, totalStationCount]);
   const [demoMinute, setDemoMinute] = useState(getCurrentDemoClock);
   // 終電モードで「オン」の路線: 最初から出す路線 + 路線の表示切替で出した路線（通常の画面と同じ規則）。
   // それ以外は通常の画面と同じく、半透明の線だけで描く
@@ -4650,13 +4675,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     routeHasExpressMark: boolean,
   ) => {
     const routeColor = adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme);
-    const isDetailed = !!(lastTrainFilterActive || showStationNames || (showExpressStationsOnly && routeHasExpressMark && station.isExpress));
+    const isDetailed = !!(lastTrainFilterActive || rideLogActive || showStationNames || (showExpressStationsOnly && routeHasExpressMark && station.isExpress));
     // 非表示路線の駅は薄く描く。ただし次の2つは例外として通常の濃さで描く。
     //  - 乗換駅ヒント時: 表示ONの路線が1つも無いため、そのまま当てると全駅が薄くなる
     //  - 主要ターミナル(5路線以上): 位置の目印として常に読める必要がある
     const isLandmarkStation =
       (stationRouteCountMap.get(station.name) ?? 0) >= ALWAYS_VISIBLE_MIN_ROUTES;
-    const stationOpacity = lastTrainFilterActive
+    // 乗車ログ: 降りた駅は通常の濃さ、通っただけの駅は薄く
+    const stationOpacity = rideLogActive
+      ? (rideLevelOf(rideState, station.name) === 2 ? 1 : 0.4)
+      : lastTrainFilterActive
       ? (station.name === arrival?.name || demoAvailableStations.has(station.name) ? 1 : 0.16)
       : (isTransferHintMode || isLandmarkStation || visibleRoutes.has(routeKey)) ? 1 : 0.3;
     // 時刻表モード有効かつ経路上の駅なら出発時刻を2行目に表示
@@ -4666,7 +4694,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const demoLatest = demoReachability?.latestDeparture.get(station.name);
     // 終電モードでは、駅名の下の時刻は「その駅を出発できる最終時刻」。「時刻を表示」で出し入れできる（既定はオン）
     // 集合駅を探すときは、駅アイコンの下に時間は書かない（出発駅ごとの所要時間は、路線の上の区間バッジで出す）
-    const effectiveTimeLabel: string | StationTimeLine[] | undefined = lastTrainFilterActive
+    const effectiveTimeLabel: string | StationTimeLine[] | undefined = rideLogActive
+      ? undefined
+      : lastTrainFilterActive
       ? (!timetableModeEnabled || demoLatest === undefined ? undefined : formatDemoClock(demoLatest) + (demoReachability?.latestIsReal.has(station.name) ? '' : ' *'))
       : meetingModeEnabled
         ? undefined
@@ -5197,6 +5227,46 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   /** スマホ全画面の左下ボタン群に「候補ルート」を出すか（候補が無いとき・推薦ルート選択を出さない設定では出さない） */
   const showMobileRouteCandidatesButton = !lastTrainFilterActive && showRouteRecommendationsPanel && routeRecommendations.length > 0;
   // 追加パネルを作らない。既存の到着駅・時刻欄・トグルだけで描画を切り替える。
+  /** 集合駅モードの切り替え。乗車ログとは同時に使わない */
+  const handleMeetingModeChange = (enabled: boolean) => {
+    setMeetingModeEnabled(enabled);
+    if (enabled) setRideLogModeEnabled(false);
+  };
+  /** 乗車ログの切り替え。終電・集合駅とは同時に使わない（描画も別になるため） */
+  const handleRideLogModeChange = (enabled: boolean) => {
+    setRideLogModeEnabled(enabled);
+    if (enabled) { setLastTrainModeEnabled(false); setMeetingModeEnabled(false); }
+  };
+  const toggleRideLevel = (level: RideLevel) => setRideLogFilter(prev => {
+    const next = new Set(prev);
+    if (next.has(level)) next.delete(level); else next.add(level);
+    return next;
+  });
+  /** いま選んでいる経路（候補の先頭）を乗車ログに記録する */
+  const recordCurrentRoute = () => {
+    const route = routeRecommendations[0];
+    if (!departure || !arrival || !route) return;
+    const batch = `${Date.now().toString(36)}`;
+    let n = 0;
+    const entries = entriesFromRoute(route.segments as Array<{ routeKey?: string; isWalkingTransfer?: boolean; stations: Station[] }>, () => `${batch}:${n++}`);
+    if (entries.length === 0) return;
+    rideLog.add(entries);
+    notifyMessage(translateUI('rideLogRecorded', currentLanguage, { from: translateStation(departure.name, currentLanguage), to: translateStation(arrival.name, currentLanguage) }));
+  };
+  const rideLogProps = {
+    enabled: rideLogModeEnabled,
+    onEnabledChange: handleRideLogModeChange,
+    filter: rideLogFilter,
+    onToggleLevel: toggleRideLevel,
+    counts: rideCounts,
+    loggedLines: rideState.riddenRoutes.size,
+    loggedStations: rideState.stationLevel.size,
+    canRecord: !!departure && !!arrival && routeRecommendations.length > 0,
+    hasEntries: rideLog.entries.length > 0,
+    onRecord: recordCurrentRoute,
+    onUndo: rideLog.undoLast,
+    onClear: rideLog.clear,
+  };
   const handleLastTrainModeChange = (enabled: boolean) => {
     if (enabled && !arrival) {
       // 到着駅を決めてから使うモード。入力欄には移らず、ほかの知らせと同じ下の帯で案内する
@@ -5205,7 +5275,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     }
     setLastTrainModeEnabled(enabled);
     // 終電モードでは「時刻を表示」を既定でオンにする（駅名の下に最終時刻が出る）
-    if (enabled) { setTimetableModeEnabled(true); setMeetingModeEnabled(false); }
+    if (enabled) { setTimetableModeEnabled(true); setMeetingModeEnabled(false); setRideLogModeEnabled(false); }
     if (enabled && arrival) {
       // ONにした直後はまだ作られていないので、ここで同じ到着駅のネットワークを求める
       const network = demoNetwork ?? buildDestinationDemoNetwork(arrival.name, maxRouteRecommendations);
@@ -5261,6 +5331,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               <StationSelector
                 lastTrainDemoMode={lastTrainUiActive}
                 lastTrainButton
+                rideLog={rideLogProps}
                 lastTrainModeEnabled={lastTrainModeEnabled}
                 onLastTrainModeChange={handleLastTrainModeChange}
                 departure={departure}
@@ -5291,7 +5362,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onAddWaypoint={selectorOnAddWaypoint}
                 onRemoveWaypoint={selectorOnRemoveWaypoint}
                 meetingMode={meetingModeEnabled}
-                onMeetingModeChange={setMeetingModeEnabled}
+                onMeetingModeChange={handleMeetingModeChange}
                 meetingCandidates={meetingCandidates}
                 meetingOriginNames={meetingOrigins.map(o => o.name)}
                 meetingRoutes={meetingRouteEntries}
@@ -5307,6 +5378,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           <StationSelector
                 lastTrainDemoMode={lastTrainUiActive}
                 lastTrainButton
+                rideLog={rideLogProps}
                 lastTrainModeEnabled={lastTrainModeEnabled}
                 onLastTrainModeChange={handleLastTrainModeChange}
             departure={departure}
@@ -5344,7 +5416,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             onAddWaypoint={selectorOnAddWaypoint}
             onRemoveWaypoint={selectorOnRemoveWaypoint}
             meetingMode={meetingModeEnabled}
-            onMeetingModeChange={setMeetingModeEnabled}
+            onMeetingModeChange={handleMeetingModeChange}
             meetingCandidates={meetingCandidates}
             meetingOriginNames={meetingOrigins.map(o => o.name)}
             meetingRoutes={meetingRouteEntries}
@@ -5772,7 +5844,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               ))}
 
               {/* 非表示路線（半透明・クリック可能）─ バブルモードでは非表示 */}
-              {(!lastTrainFilterActive || mapViewMode === 'realistic') && mapViewMode !== 'bubble' && showDimmedMapRoutes && Object.entries(routes)
+              {!rideLogActive && (!lastTrainFilterActive || mapViewMode === 'realistic') && mapViewMode !== 'bubble' && showDimmedMapRoutes && Object.entries(routes)
                 .filter(([rk]) => (lastTrainFilterActive ? !demoDrawnKeys.has(rk as RouteKey) : !visibleRoutes.has(rk as RouteKey)))
                 .map(([rk, stationList]) => {
                   const rKey = rk as RouteKey;
@@ -5851,6 +5923,55 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 );
               })}
 
+              {/*
+                乗車ログ（試作）: 3段階で見せる。元のLeaflet・路線色・駅マーカーのまま。
+                  全く通っていない = 無彩色の線（駅は出さない）
+                  通ったけど降りていない = 乗った区間の路線色の線 + 薄い駅
+                  通って降りた = 路線色の駅（濃い）
+                絞り込み（rideLogFilter）で、見せる段階を選ぶ。
+              */}
+              {rideLogActive && mapViewMode === 'realistic' && (
+                <>
+                  {rideLogFilter.has(0) && Object.entries(routes).map(([rk, stationList]) => {
+                    const rKey = rk as RouteKey;
+                    const closedStations = closeFullRouteStations(stationList, stationList, isCircularRoute(rKey));
+                    const positions = offsetPositions(closedStations, rKey, DIMMED_ROUTE_WEIGHT,
+                      closedStations === stationList ? fullRouteRanks.get(rKey) : undefined);
+                    return (
+                      <Polyline
+                        key={`ride-none-${rKey}`}
+                        positions={positions}
+                        pathOptions={{ color: colors.textMuted, weight: DIMMED_ROUTE_WEIGHT, opacity: 0.35 }}
+                        interactive={false}
+                      />
+                    );
+                  })}
+                  {(rideLogFilter.has(1) || rideLogFilter.has(2)) && ridePaths.map(path => (
+                    <Polyline
+                      key={`ride-path-${path.id}`}
+                      positions={offsetPositions(path.stations, path.routeKey, routeLineWidth)}
+                      pathOptions={{ color: adjustRouteColorForTheme(routeColors[path.routeKey] ?? '#888', theme), weight: routeLineWidth, opacity: 0.9, lineCap: 'round' }}
+                      interactive={false}
+                    />
+                  ))}
+                  {/* 記録する経路（いま選んでいる出発駅→到着駅）の見本。破線で、記録すると色つきの実線になる */}
+                  {departure && arrival && routeRecommendations[0]?.segments.map((seg, i) => (
+                    seg.routeKey && seg.routeKey !== 'walking' && !seg.isWalkingTransfer && seg.stations.length >= 2 ? (
+                      <Polyline
+                        key={`ride-preview-${i}`}
+                        positions={offsetPositions(seg.stations as Station[], seg.routeKey as RouteKey, routeLineWidth)}
+                        pathOptions={{ color: adjustRouteColorForTheme(routeColors[seg.routeKey as RouteKey] ?? '#888', theme), weight: routeLineWidth, opacity: 0.55, dashArray: '6 8' }}
+                        interactive={false}
+                      />
+                    ) : null
+                  ))}
+                  {rideStations
+                    .filter(({ station, level }) => rideLogFilter.has(level) && isDemoStationInView(station))
+                    .map(({ station, routeKey }) =>
+                      renderStationMarker(station, routeKey, 'ride-log-' + station.name, demoRouteHasExpressMark(routeKey)))}
+                </>
+              )}
+
               {/* 終電デモ専用の表示切替。基盤は既存Leaflet地図/共通ルート色/駅マーカーを再利用。 */}
               {lastTrainFilterActive && mapViewMode === 'realistic' && demoDrawnLines.map(line => {
                 const rk = line.routeKey;
@@ -5880,7 +6001,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 );
               })}
               {/* 路線・駅マーカー ─ バブルモードでは非表示（CircleMarker で代替） */}
-              {!lastTrainFilterActive && mapViewMode !== 'bubble' && [...visibleRoutesData].sort(([a], [b]) => {
+              {!lastTrainFilterActive && !rideLogActive && mapViewMode !== 'bubble' && [...visibleRoutesData].sort(([a], [b]) => {
                 const ai = routeOrder.indexOf(a as RouteKey);
                 const bi = routeOrder.indexOf(b as RouteKey);
                 // 上（index小）が最前面になるよう降順（後から描画＝前面）
@@ -5894,7 +6015,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 マーカーの見た目は renderStationMarker に集約しており、
                 通常の路線描画と同じデザインで描かれる。
               */}
-              {!lastTrainFilterActive && mapViewMode !== 'bubble' && isTransferHintMode && transferHintStations.map(station => {
+              {!lastTrainFilterActive && !rideLogActive && mapViewMode !== 'bubble' && isTransferHintMode && transferHintStations.map(station => {
                 const stationRoutes = getRoutesForStation(station.name, station) as RouteKey[];
                 const primaryRouteKey = stationRoutes[0];
                 if (!primaryRouteKey) return null;
@@ -5912,7 +6033,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 主要ターミナル（5路線以上）は路線の表示状態に関わらず常に出す。
                 描画は renderStationMarker に集約しているので通常の駅と同じデザイン。
               */}
-              {!lastTrainFilterActive && mapViewMode !== 'bubble' && alwaysVisibleStations.map(station => {
+              {!lastTrainFilterActive && !rideLogActive && mapViewMode !== 'bubble' && alwaysVisibleStations.map(station => {
                 const stationRoutes = getRoutesForStation(station.name, station) as RouteKey[];
                 const primaryRouteKey = stationRoutes[0];
                 if (!primaryRouteKey) return null;
@@ -6748,6 +6869,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               <StationSelector
                 lastTrainDemoMode={lastTrainUiActive}
                 lastTrainButton
+                rideLog={rideLogProps}
                 lastTrainModeEnabled={lastTrainModeEnabled}
                 onLastTrainModeChange={handleLastTrainModeChange}
                 departure={departure}
@@ -6778,7 +6900,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onAddWaypoint={selectorOnAddWaypoint}
                 onRemoveWaypoint={selectorOnRemoveWaypoint}
                 meetingMode={meetingModeEnabled}
-                onMeetingModeChange={setMeetingModeEnabled}
+                onMeetingModeChange={handleMeetingModeChange}
                 meetingCandidates={meetingCandidates}
                 meetingOriginNames={meetingOrigins.map(o => o.name)}
                 meetingRoutes={meetingRouteEntries}
@@ -6945,7 +7067,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           {/* 表示中の路線の凡例（右下）。どの色がどの路線かを、表示切替を開かずに確かめる。
               全路線表示・0路線のときは意味が無いので出さない。スマホは下部のナビに重ならない高さに置き、
               スマホ全画面でヒートマップの凡例が右下に来るときは譲る */}
-          {!lastTrainFilterActive && mapViewMode === 'realistic' && !(isFullscreen && isMobile && heatmapEnabled) && (() => {
+          {!lastTrainFilterActive && !rideLogActive && mapViewMode === 'realistic' && !(isFullscreen && isMobile && heatmapEnabled) && (() => {
             const total = Object.keys(routes).length;
             if (visibleRoutes.size >= total) return null;
             // 表示中の路線（出発・到着駅を通る路線を先頭）＋凡例から非表示にした路線。

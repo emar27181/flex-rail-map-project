@@ -913,6 +913,54 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "集合駅と同じ",
     english: "Already there"
   },
+  rideLogModeButton: {
+    japanese: "乗車ログ（試作）",
+    english: "Ride log (prototype)"
+  },
+  rideLogLevelNone: {
+    japanese: "全く通っていない",
+    english: "Never passed"
+  },
+  rideLogLevelPassed: {
+    japanese: "通ったけど降りていない",
+    english: "Passed, not alighted"
+  },
+  rideLogLevelAlighted: {
+    japanese: "通って降りた",
+    english: "Passed and alighted"
+  },
+  rideLogRecord: {
+    japanese: "この経路を記録",
+    english: "Record this route"
+  },
+  rideLogUndo: {
+    japanese: "直前を取り消す",
+    english: "Undo last"
+  },
+  rideLogClear: {
+    japanese: "ログを消去",
+    english: "Clear log"
+  },
+  rideLogSummary: {
+    japanese: "{lines}路線・{stations}駅を記録",
+    english: "{lines} lines, {stations} stations logged"
+  },
+  rideLogHint: {
+    japanese: "出発駅と到着駅を選び「この経路を記録」。記録はこの端末のブラウザにだけ保存されます。",
+    english: "Pick a departure and an arrival, then record the route. The log is saved only in this browser."
+  },
+  rideLogRecorded: {
+    japanese: "{from} → {to} を記録しました",
+    english: "Recorded {from} → {to}"
+  },
+  rideLogNeedRoute: {
+    japanese: "出発駅と到着駅を選ぶと、その経路を記録できます。",
+    english: "Select a departure and an arrival to record that route."
+  },
+  rideLogFilterLabel: {
+    japanese: "表示する段階",
+    english: "Levels shown"
+  },
   meetingModeButton: {
     japanese: "集合駅を探す",
     english: "Find meeting station"
@@ -2243,6 +2291,18 @@ export const uiChinese: Record<string, string> = {
   directionArea: "前往{destination}方向",
   viaStations: "经由",
   addWaypoint: "添加途经站",
+  rideLogModeButton: "乘车记录（试作）",
+  rideLogLevelNone: "完全没经过",
+  rideLogLevelPassed: "经过但没下车",
+  rideLogLevelAlighted: "经过并下车",
+  rideLogRecord: "记录此路线",
+  rideLogUndo: "撤销上一条",
+  rideLogClear: "清除记录",
+  rideLogSummary: "已记录 {lines} 条线路、{stations} 个车站",
+  rideLogHint: "选择出发站和到达站后点击“记录此路线”。记录只保存在此浏览器中。",
+  rideLogRecorded: "已记录 {from} → {to}",
+  rideLogNeedRoute: "选择出发站和到达站后，即可记录该路线。",
+  rideLogFilterLabel: "显示的等级",
   meetingModeButton: "寻找集合站",
   meetingRoutesTitle: "前往{station}的各条路线（使用的线路）",
   meetingNoRoute: "无路线",
@@ -2639,6 +2699,18 @@ export const uiKorean: Record<string, string> = {
   directionArea: "{destination} 방면",
   viaStations: "경유",
   addWaypoint: "경유역 추가",
+  rideLogModeButton: "승차 기록(시험)",
+  rideLogLevelNone: "전혀 지나지 않음",
+  rideLogLevelPassed: "지났지만 내리지 않음",
+  rideLogLevelAlighted: "지나고 내림",
+  rideLogRecord: "이 경로 기록",
+  rideLogUndo: "직전 기록 취소",
+  rideLogClear: "기록 삭제",
+  rideLogSummary: "{lines}개 노선·{stations}개 역 기록됨",
+  rideLogHint: "출발역과 도착역을 고른 뒤 '이 경로 기록'을 누르세요. 기록은 이 브라우저에만 저장됩니다.",
+  rideLogRecorded: "{from} → {to} 기록함",
+  rideLogNeedRoute: "출발역과 도착역을 고르면 그 경로를 기록할 수 있습니다.",
+  rideLogFilterLabel: "표시할 단계",
   meetingModeButton: "만날 역 찾기",
   meetingRoutesTitle: "{station}까지의 경로(이용 노선)",
   meetingNoRoute: "경로 없음",

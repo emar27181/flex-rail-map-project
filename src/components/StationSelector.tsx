@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
-import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Timer, TrainFront, Users, Waypoints, X } from 'lucide-react';
+import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, NotebookPen, Timer, TrainFront, Users, Waypoints, X } from 'lucide-react';
 import { routes, routeNames, routeColors } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
@@ -26,6 +26,7 @@ import TextField from './ui/atoms/TextField';
 import RoleField from './ui/molecules/RoleField';
 import FieldPairRow, { PAIR_DIVIDER_WIDTH } from './ui/molecules/FieldPairRow';
 import TopList from './ui/molecules/TopList';
+import RideLogControls, { type RideLogControlsProps } from './RideLogControls';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import { useDeviceClass } from '../hooks/useDeviceClass';
 import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
@@ -68,6 +69,8 @@ interface StationSelectorProps {
   lastTrainDemoMode?: boolean;
   /** 通常の画面にも終電モード（試作）のボタンを出す。ボタンを押したときだけ終電の画面になる */
   lastTrainButton?: boolean;
+  /** 乗車ログ（試作）。渡したときだけモードのボタンを出す。モードがONの間は絞り込みと記録の操作を出す */
+  rideLog?: { enabled: boolean; onEnabledChange: (enabled: boolean) => void } & Omit<RideLogControlsProps, 'theme' | 'language'>;
   lastTrainModeEnabled?: boolean;
   onLastTrainModeChange?: (enabled: boolean) => void;
   onDepartureChange: (station: Station | null) => void;
@@ -130,6 +133,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   meetingRoutes = [],
   lastTrainDemoMode = false,
   lastTrainButton = false,
+  rideLog,
   lastTrainModeEnabled = false,
   onLastTrainModeChange,
   onDepartureChange,
@@ -173,7 +177,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     ? (meetingMode && meetingOriginNames.length > 0 ? meetingOriginNames : (departure ? [departure.name] : []))
     : [];
   const collapsedSummaryShown = !isExpanded && (summaryOrigins.length > 0 || !!arrival);
-  const timeLabelButtonShown = !!onShowStationTimeLabelsChange && !!arrival && (!!departure || lastTrainModeEnabled);
+  // 乗車ログ（試作）の間は、駅名の下の時刻も時刻の入力も意味が無いので出さない
+  const timeLabelButtonShown = !rideLog?.enabled && !!onShowStationTimeLabelsChange && !!arrival && (!!departure || lastTrainModeEnabled);
   /** 駅名の下の時刻の意味（到着予定時刻／終電モードでは最終時刻） */
   const timeLabelNote = translateUI(lastTrainModeEnabled ? 'timeLabelNoteLastTrain' : 'timeLabelNoteArrival', language);
   const [departureSearch, setDepartureSearch] = useState('');
@@ -763,7 +768,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
             寸法は Button の size="sm" に揃えてあるので2つの大きさは一致する。
           */}
-          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange || onAddWaypoint || onShowStationTimeLabelsChange || onMeetingModeChange || ((lastTrainDemoMode || lastTrainButton) && onLastTrainModeChange)) && (
+          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange || onAddWaypoint || onShowStationTimeLabelsChange || onMeetingModeChange || rideLog || ((lastTrainDemoMode || lastTrainButton) && onLastTrainModeChange)) && (
             <div style={{
               // 出発駅・到着駅欄とこの行の間隔も、ボタン同士の間隔（下記gap）と
               // 揃える。片方だけ広げるとリズムが不揃いに見えるため統一する。
@@ -846,6 +851,18 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   {demoText.toggleMode}
                 </Button>
               )}
+              {rideLog && (
+                <Button
+                  theme={theme}
+                  variant="primary"
+                  size="sm"
+                  pressed={rideLog.enabled}
+                  onClick={() => rideLog.onEnabledChange(!rideLog.enabled)}
+                  icon={<NotebookPen />}
+                >
+                  {translateUI('rideLogModeButton', language)}
+                </Button>
+              )}
               {onShowTransferStationsOnlyChange && (
                 <Button
                   theme={theme}
@@ -900,6 +917,23 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               )}
             </div>
           )}
+          {/* 乗車ログ（試作）: 段階の絞り込みと記録。別パネルにせず、モードのボタンのすぐ下に出す */}
+          {rideLog?.enabled && (
+            <RideLogControls
+              theme={theme}
+              language={language}
+              filter={rideLog.filter}
+              onToggleLevel={rideLog.onToggleLevel}
+              counts={rideLog.counts}
+              loggedLines={rideLog.loggedLines}
+              loggedStations={rideLog.loggedStations}
+              canRecord={rideLog.canRecord}
+              hasEntries={rideLog.hasEntries}
+              onRecord={rideLog.onRecord}
+              onUndo={rideLog.onUndo}
+              onClear={rideLog.onClear}
+            />
+          )}
           {/* ※ 駅名の下の時刻の意味（モードで変わる）。時刻を出しているときだけ、小さく添える */}
           {timeLabelButtonShown && showStationTimeLabels && (
             <div data-time-label-note style={{ marginTop: L.sp.xs, fontSize: FS.caption, color: colors.textSecondary }}>
@@ -920,7 +954,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             「時刻を表示」ボタンと同様、経路が無いと意味を持たないため
             出発駅・到着駅の両方が決まってから表示する。
           */}
-          {SHOW_DEPARTURE_TIME_ROW && onDepartureTimeChange && ((departure && arrival) || lastTrainDemoMode) && (
+          {SHOW_DEPARTURE_TIME_ROW && !rideLog?.enabled && onDepartureTimeChange && ((departure && arrival) || lastTrainDemoMode) && (
             <div style={{ marginTop: L.sp.sm }}>
               <div style={{
                 display: 'flex',
