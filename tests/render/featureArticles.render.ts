@@ -48,11 +48,13 @@ test('集合駅の記事: 推定を含む注意書きがデモの直後に出て
   expect(src).toContain('with=tokyo%2Cyokohama');
 });
 
-test('集合駅の記事のデモ: 開いたときから集合駅モードで、全員が着くまでの最大時間が駅に出る', async ({ page }) => {
+test('集合駅の記事のデモ: 開いたときから集合駅モードで、駅アイコンの下に時間は書かない', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('/?mode=meeting&from=shinjuku&with=tokyo,yokohama&embed=1&center=35.64,139.72&zoom=11');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
-  await expect.poll(() => page.locator('.leaflet-marker-icon', { hasText: /\d+分/ }).count(), { timeout: 20_000 }).toBeGreaterThan(0);
+  // 到着駅を決めるまで、地図には駅アイコンの下の時間も区間バッジも出ない（出発駅ごとの所要時間は、決めた後に路線の上へ）
+  await expect.poll(() => page.locator('.leaflet-marker-icon').count(), { timeout: 20_000 }).toBeGreaterThan(0);
+  expect(await page.locator('.leaflet-marker-icon', { hasText: /\d+分/ }).count()).toBe(0);
   expect(errors).toEqual([]);
 });
 

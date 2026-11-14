@@ -81,7 +81,7 @@ describe('summarizeMeetingRoutes', () => {
       B: route([{ routeKey: 'walking', isWalkingTransfer: true }, 'ginzaLine'], 12, 0),
       C: null,
     } as Record<string, ReturnType<typeof route> | null>)[origin]);
-    expect(r).toEqual([
+    expect(r).toMatchObject([
       { origin: 'A', lines: ['yamanote', 'chuo'], totalTime: 20, transfers: 1 },
       { origin: 'B', lines: ['ginzaLine'], totalTime: 12, transfers: 0 },
       { origin: 'C', lines: [], totalTime: null, transfers: 0 },
@@ -90,7 +90,7 @@ describe('summarizeMeetingRoutes', () => {
 
   it('集合駅と同じ出発駅は 0 分・路線なし', () => {
     const r = summarizeMeetingRoutes(['X'], 'X', () => { throw new Error('探索しない'); });
-    expect(r[0]).toEqual({ origin: 'X', lines: [], totalTime: 0, transfers: 0 });
+    expect(r[0]).toEqual({ origin: 'X', lines: [], totalTime: 0, transfers: 0, legs: [] });
   });
 });
 
@@ -106,5 +106,24 @@ describe('出発駅を対等に扱う補助', () => {
     expect(meetingClockTimes('08:00', 'departure', 25)).toEqual({ depart: '08:00', arrive: '08:25' });
     expect(meetingClockTimes('08:00', 'arrival', 25)).toEqual({ depart: '07:35', arrive: '08:00' });
     expect(meetingClockTimes('23:50', 'departure', 20)).toEqual({ depart: '23:50', arrive: '00:10' });
+  });
+});
+
+describe('集合駅までの区間の所要時間（路線の上のバッジ用）', () => {
+  it('乗る区間ごとに所要時間と、真ん中あたりの隣り合う2駅を返す（徒歩の乗換は含めない）', async () => {
+    const { summarizeMeetingRoutes } = await import('../../../src/utils/meetingPoint');
+    const st = (name: string, lat: number) => ({ name, lat, lng: 139 });
+    const entries = summarizeMeetingRoutes(['新宿'], '藤沢', () => ({
+      totalTime: 60, transfers: 1,
+      segments: [
+        { routeKey: 'odakyuLine', time: 20, stations: [st('新宿', 35.0), st('代々木上原', 35.1), st('登戸', 35.2), st('相模大野', 35.3)] },
+        { routeKey: 'walking', isWalkingTransfer: true, time: 5, stations: [st('相模大野', 35.3), st('相模大野', 35.3)] },
+        { routeKey: 'odakyuEnoshimaLine', time: 25, stations: [st('相模大野', 35.3), st('藤沢', 35.4)] },
+      ],
+    }));
+    expect(entries[0].legs).toHaveLength(2);
+    expect(entries[0].legs[0]).toMatchObject({ routeKey: 'odakyuLine', from: '新宿', to: '相模大野', minutes: 20 });
+    expect(entries[0].legs[0].middle.map(p => p.lat)).toEqual([35.1, 35.2]);
+    expect(entries[0].legs[1]).toMatchObject({ from: '相模大野', to: '藤沢', minutes: 25 });
   });
 });

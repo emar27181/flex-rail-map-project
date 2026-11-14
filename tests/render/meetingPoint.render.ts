@@ -186,7 +186,7 @@ for (const lang of ['ja', 'en', 'zh', 'ko'] as const) {
   });
 }
 
-test('集合駅モード: 時刻の入力は「時刻を表示」ボタンの下（候補より上）にあり、駅ラベルは出発駅ごとの所要時間を出す', async ({ page }) => {
+test('集合駅モード: 時刻の入力は「時刻を表示」ボタンの下（候補より上）にあり、地図は路線の上に区間の所要時間を出す（駅アイコンの下には書かない）', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('/?mode=meeting&from=shinjuku&with=tokyo');
   await expect(page.locator('[data-meeting-results]')).toBeVisible();
@@ -203,8 +203,8 @@ test('集合駅モード: 時刻の入力は「時刻を表示」ボタンの下
   expect(t!.y).toBeLessThan(r!.y);
   // ルートの行に「出発 → 到着」の時刻
   await expect(page.locator('[data-meeting-route-clock]').first()).toHaveText(/\d\d:\d\d → \d\d:\d\d/);
-  // 地図の駅ラベルは（候補の駅で）、出発駅それぞれ（新宿・東京。入力順に関係なく同じ扱い）からの所要時間
-  await expect.poll(() => page.locator('.leaflet-marker-icon', { hasText: /新宿 \d+分/ }).count(), { timeout: 20_000 }).toBeGreaterThan(0);
-  await expect.poll(() => page.locator('.leaflet-marker-icon', { hasText: /東京 \d+分/ }).count(), { timeout: 20_000 }).toBeGreaterThan(0);
+  // 駅アイコンの下には時間を書かない。出発駅ごとの所要時間は、路線の上の丸いバッジ（区間の時間）で出る
+  await expect.poll(() => page.locator('.time-text-section').count(), { timeout: 20_000 }).toBeGreaterThan(0);
+  expect(await page.locator('.leaflet-marker-icon', { hasText: /(新宿|東京) \d+分/ }).count()).toBe(0);
   expect(errors).toEqual([]);
 });

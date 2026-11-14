@@ -14,7 +14,7 @@ import StationSelector from './StationSelector';
 import { buildDestinationDemoNetwork, calculateDemoLastTrain, availableDemoStations, demoEdgeKey, formatDemoClock, parseDemoClock, getCurrentDemoClock } from '../utils/lastTrainDemo';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
 import { requestPosition, resolveCurrentPosition } from '../utils/freshLocation';
-import { MEETING_LABEL_NAME_CHARS, rankMeetingStations, summarizeMeetingRoutes, interleaveByRank, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
+import { rankMeetingStations, summarizeMeetingRoutes, interleaveByRank, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
@@ -2923,8 +2923,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     });
   }, [MapComponents, theme, colors, language, showFurigana, showStationNumbers, stationSizeScale, stationLabelBox]);
 
-  const createTimeIcon = useCallback((time: number, color: string, zoomLevel: number, isSection = false) => {
-    if (!MapComponents?.DivIcon || !showTravelTimes || showTrainDemo) return null;
+  const createTimeIcon = useCallback((time: number, color: string, zoomLevel: number, isSection = false, force = false) => {
+    // force: 集合駅モードの区間バッジ。「路線の時間を表示」の設定に関わらず出す
+    // 集合駅モードでは、出発駅1つ（メイン）を基準にした区間の時間は出さない（出発駅どうしを対等に扱うため。区間バッジだけ出す）
+    if (!MapComponents?.DivIcon || (!showTravelTimes && !force) || showTrainDemo || (meetingModeEnabled && !force)) return null;
 
     const { DivIcon } = MapComponents;
     const label = travelTimeLabelLayout(time);
@@ -2946,7 +2948,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       iconSize: [label.width, label.height],
       iconAnchor: label.anchor
     });
-  }, [MapComponents, currentLanguage, theme, showTravelTimes, showTrainDemo, travelTimeStyle]);
+  }, [MapComponents, currentLanguage, theme, showTravelTimes, showTrainDemo, travelTimeStyle, meetingModeEnabled]);
 
   // 出発/到着駅を通る路線キーのセット（凡例の区切り線用）
   const stationRouteKeys = useMemo<Set<RouteKey> | undefined>(() => {
@@ -3012,7 +3014,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     return rankMeetingStations(meetingOrigins.map(o => o.name), timeMaps);
   }, [meetingModeEnabled, meetingOrigins, timeFilter]);
   const meetingCandidates = useMemo(() => meetingRanking.slice(0, MEETING_RESULT_LIMIT), [meetingRanking]);
-  const meetingCandidateNames = useMemo(() => new Set(meetingCandidates.map(c => c.name)), [meetingCandidates]);
   // 集合駅（到着駅）が決まっているとき、出発駅ごとのルートと使う路線
   const meetingRouteEntries = useMemo(() => {
     if (!meetingModeEnabled || !arrival || meetingOrigins.length < 2) return [];
@@ -3033,10 +3034,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     setAvailableRoutes(prev => (keys.every(k => prev.has(k)) ? prev : new Set([...prev, ...keys])));
     // 経路候補が変わると路線の表示が作り直されるので、そのたびに足し直す
   }, [meetingRouteEntries, drawnRecommendations]);
-  /** 地図の駅ラベルに出す「全員が着くまでの最大時間」 */
-  const meetingMaxTimeMap = useMemo(() => new Map(meetingRanking.map(c => [c.name, c.max])), [meetingRanking]);
-  /** 駅ごとの、出発駅それぞれからの所要時間（出発駅の並びは meetingOrigins。誰も優先しない） */
-  const meetingTimesMap = useMemo(() => new Map(meetingRanking.map(c => [c.name, c.times])), [meetingRanking]);
+  /**
+   * 集合駅までの、出発駅それぞれの経路の「区間の所要時間」。地図の路線の上に丸いバッジで出す
+   * （駅アイコンの下には書かない）。出発駅どうしで同じ区間を通るときは1つにまとめる（誰も優先しない）
+   */
+  const meetingLegBadges = useMemo(() => {
+    const seen = new Set<string>();
+    const badges: Array<{ key: string; routeKey: RouteKey; minutes: number; a: { lat: number; lng: number }; b: { lat: number; lng: number } }> = [];
+    for (const entry of meetingRouteEntries) {
+      for (const leg of entry.legs) {
+        const key = `${leg.routeKey}:${leg.from}>${leg.to}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        badges.push({ key, routeKey: leg.routeKey as RouteKey, minutes: leg.minutes, a: leg.middle[0], b: leg.middle[1] });
+      }
+    }
+    return badges;
+  }, [meetingRouteEntries]);
   // 駅選択パネルの「追加」欄は、集合駅モードでは経由駅ではなく追加出発駅として使う
   const selectorWaypoints = meetingModeEnabled ? extraDepartures : waypoints;
   const selectorOnAddWaypoint = meetingModeEnabled ? handleAddExtraDeparture : handleAddWaypoint;
@@ -4573,20 +4587,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // 累積所要時間オーバーレイ: 所要時間を2行目ラベルとして表示（時刻表ラベルより優先）
     const travelTimeMins = showTravelTimeOverlay ? travelTimeMap.get(station.name) : undefined;
     const demoLatest = demoReachability?.latestDeparture.get(station.name);
-    const meetingMax = meetingModeEnabled ? meetingMaxTimeMap.get(station.name) : undefined;
     // 終電モードでは、駅名の下の時刻は「その駅を出発できる最終時刻」。「時刻を表示」で出し入れできる（既定はオン）
-    // 集合駅を探すときは、出発駅それぞれからの所要時間を1行ずつ（出発駅の入力順。最初の駅も追加した駅も同じ扱い）
-    // 全駅に出発駅の数だけ行を出すと地図が読めなくなるので、行を出すのは候補（一覧に出ている駅）と集合駅。ほかの駅は最大の所要時間だけ
-    const meetingTimes = meetingModeEnabled && (meetingCandidateNames.has(station.name) || station.name === arrival?.name)
-      ? meetingTimesMap.get(station.name) : undefined;
+    // 集合駅を探すときは、駅アイコンの下に時間は書かない（出発駅ごとの所要時間は、路線の上の区間バッジで出す）
     const effectiveTimeLabel: string | StationTimeLine[] | undefined = lastTrainFilterActive
       ? (!timetableModeEnabled || demoLatest === undefined ? undefined : formatDemoClock(demoLatest) + (demoReachability?.latestIsReal.has(station.name) ? '' : ' *'))
-      : meetingTimes !== undefined && meetingMax !== undefined
-        ? meetingOrigins.map((origin, k) => ({
-            time: `${translateStation(origin.name, currentLanguage).slice(0, MEETING_LABEL_NAME_CHARS)} ${meetingTimes[k]}${translateUI('minutesSuffix', currentLanguage)}`,
-          }))
-      : meetingMax !== undefined
-        ? `${meetingMax}${translateUI('minutesSuffix', currentLanguage)}`
+      : meetingModeEnabled
+        ? undefined
       : travelTimeMins !== undefined
         ? `${travelTimeMins}${translateUI('minutesSuffix', currentLanguage)}`
         : stationTimeLabel;
@@ -5782,6 +5788,23 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   );
                 })
               }
+
+              {/* 集合駅を探す: 出発駅ごとの経路の区間の所要時間を、路線の上（区間の真ん中）に丸いバッジで出す。
+                  既存の区間の時間バッジ（createTimeIcon）と同じ見た目。タップは受け取らない */}
+              {meetingModeEnabled && meetingLegBadges.map(badge => {
+                const icon = createTimeIcon(badge.minutes, adjustRouteColorForTheme(routeColors[badge.routeKey] ?? '#888', theme), zoomLevel, true, true);
+                if (!icon) return null;
+                return (
+                  <Marker
+                    key={`meeting-leg-${badge.key}`}
+                    position={[(badge.a.lat + badge.b.lat) / 2, (badge.a.lng + badge.b.lng) / 2]}
+                    icon={icon}
+                    zIndexOffset={TRAVEL_TIME_MARKER_Z}
+                    pane="travelTimePane"
+                    interactive={false}
+                  />
+                );
+              })}
 
               {/* 終電デモ専用の表示切替。基盤は既存Leaflet地図/共通ルート色/駅マーカーを再利用。 */}
               {lastTrainFilterActive && mapViewMode === 'realistic' && demoDrawnLines.map(line => {

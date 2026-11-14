@@ -23,8 +23,6 @@ export interface MeetingCandidate {
 
 /** 計算する所要時間の上限（分）。これを超える駅は集合駅の候補にしない */
 export const MEETING_MAX_MINUTES = 120;
-/** 駅ラベルで、どの出発駅からの時間かを示す駅名の文字数（先頭から） */
-export const MEETING_LABEL_NAME_CHARS = 3;
 /** 画面に出す候補の数 */
 export const MEETING_RESULT_LIMIT = 5;
 
@@ -68,12 +66,31 @@ export interface MeetingRouteEntry {
   /** 所要時間（分）。ルートが無いときは null */
   totalTime: number | null;
   transfers: number;
+  /** 乗る区間ごとの所要時間（地図の路線の上に出す）。乗換駅で区切る */
+  legs: MeetingRouteLeg[];
+}
+
+/** 出発駅から集合駅までの1区間（1路線に乗り続ける区間） */
+export interface MeetingRouteLeg {
+  routeKey: string;
+  /** 区間の最初と最後の駅 */
+  from: string;
+  to: string;
+  /** その区間の所要時間（分） */
+  minutes: number;
+  /** バッジを置く、区間の真ん中あたりの隣り合う2駅の座標（この2点の中点に置く） */
+  middle: [{ lat: number; lng: number }, { lat: number; lng: number }];
 }
 
 interface RouteLike {
   totalTime: number;
   transfers: number;
-  segments: Array<{ routeKey: string; isWalkingTransfer?: boolean }>;
+  segments: Array<{
+    routeKey: string;
+    isWalkingTransfer?: boolean;
+    time?: number;
+    stations?: Array<{ name: string; lat: number; lng: number }>;
+  }>;
 }
 
 /**
@@ -86,15 +103,27 @@ export function summarizeMeetingRoutes(
   findRoute: (origin: string) => RouteLike | null,
 ): MeetingRouteEntry[] {
   return originNames.map(origin => {
-    if (origin === arrivalName) return { origin, lines: [], totalTime: 0, transfers: 0 };
+    if (origin === arrivalName) return { origin, lines: [], totalTime: 0, transfers: 0, legs: [] };
     const route = findRoute(origin);
-    if (!route) return { origin, lines: [], totalTime: null, transfers: 0 };
+    if (!route) return { origin, lines: [], totalTime: null, transfers: 0, legs: [] };
     const lines: string[] = [];
+    const legs: MeetingRouteLeg[] = [];
     for (const seg of route.segments) {
       if (!seg.routeKey || seg.routeKey === 'walking' || seg.isWalkingTransfer) continue;
       if (lines[lines.length - 1] !== seg.routeKey) lines.push(seg.routeKey);
+      const stations = seg.stations ?? [];
+      if (stations.length >= 2 && seg.time !== undefined) {
+        const m = Math.floor((stations.length - 1) / 2);
+        legs.push({
+          routeKey: seg.routeKey,
+          from: stations[0].name,
+          to: stations[stations.length - 1].name,
+          minutes: Math.max(1, Math.round(seg.time)),
+          middle: [stations[m], stations[m + 1]],
+        });
+      }
     }
-    return { origin, lines, totalTime: Math.round(route.totalTime), transfers: route.transfers };
+    return { origin, lines, totalTime: Math.round(route.totalTime), transfers: route.transfers, legs };
   });
 }
 

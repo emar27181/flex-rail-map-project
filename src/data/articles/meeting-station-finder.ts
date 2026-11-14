@@ -113,7 +113,7 @@ export const meetingStationFinder: ArticleSource = {
             "zoom": 11
           },
           "title": "{siteName}の地図（{station:yamanote:新宿}・{station:yamanote:東京}・{station:keihinTohoku:横浜}から集合駅を探した状態）",
-          "caption": "実際の地図（新宿・東京・横浜の3駅から探した状態）。駅名の下の分数は、3人が着くまでのいちばん長い時間です。枠の中で拡大・移動できます。"
+          "caption": "実際の地図（新宿・東京・横浜の3駅から探した状態）。集合駅を決めると、3人それぞれの経路が路線の上に出て、区間ごとの所要時間（分）が丸いバッジで並びます。枠の中で拡大・移動できます。"
         },
         {
           "type": "h2",
@@ -156,7 +156,7 @@ export const meetingStationFinder: ArticleSource = {
         {
           "type": "shot",
           "shot": "four",
-          "alt": "新宿・東京・横浜・渋谷の4駅から集合駅を探した地図。駅名の下に全員が着くまでの最大時間が出ている",
+          "alt": "新宿・東京・横浜・渋谷の4駅から集合駅を探した地図。出発駅ごとの候補が出ている",
           "caption": "4駅から探した場合。人数が増えると、集合駅の候補も変わる"
         },
         {
@@ -252,7 +252,7 @@ export const meetingStationFinder: ArticleSource = {
         {
           "type": "shot",
           "shot": "four",
-          "alt": "Map searching for a meeting station from four stations: Shinjuku, Tokyo, Yokohama and Shibuya. The longest time for everyone is shown under each station name",
+          "alt": "Map searching for a meeting station from four stations: Shinjuku, Tokyo, Yokohama and Shibuya. Candidate stations for everyone are listed",
           "caption": "Searching from four stations. With more people, the candidate stations change"
         },
         {
@@ -348,7 +348,7 @@ export const meetingStationFinder: ArticleSource = {
         {
           "type": "shot",
           "shot": "four",
-          "alt": "从新宿、东京、横滨、涩谷四站寻找集合站的地图。车站名称下方显示大家全部到达所需的最长时间",
+          "alt": "从新宿、东京、横滨、涩谷四站寻找集合站的地图。列出了适合大家的候选车站",
           "caption": "从四个车站寻找时。人数增加，集合站的候选也会改变"
         },
         {
@@ -444,7 +444,7 @@ export const meetingStationFinder: ArticleSource = {
         {
           "type": "shot",
           "shot": "four",
-          "alt": "신주쿠·도쿄·요코하마·시부야 4개 역에서 만날 역을 찾은 지도. 역 이름 아래에 모두가 도착할 때까지의 최대 시간이 나온다",
+          "alt": "신주쿠·도쿄·요코하마·시부야 4개 역에서 만날 역을 찾은 지도. 모두에게 알맞은 후보 역이 나온다",
           "caption": "4개 역에서 찾은 경우. 인원이 늘면 만날 역의 후보도 달라진다"
         },
         {
