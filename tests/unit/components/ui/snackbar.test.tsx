@@ -3,7 +3,7 @@
  * 地図の線をタップして路線を切り替えたときの知らせ（map/RouteToggleSnackbar）のテスト。
  *
  * 2026-11: 指の端末では線に路線名の吹き出しを出さないため、タップでどの路線を切り替えたか分からなかった。
- * 帯は1行だけ（「元に戻す」は付けない。同じ線をもう一度押せば戻る）。
+ * 帯は1行で、「元に戻す」が付く（押し間違えたときにすぐ戻せる。2026-11-14）。
  */
 // @vitest-environment jsdom
 import { readFileSync } from 'node:fs';
@@ -79,9 +79,25 @@ describe('RouteToggleSnackbar', () => {
     expect(screen.getByRole('status').textContent).toBe('Showing Yamanote Line');
   });
 
-  it('「元に戻す」も×も出さない（同じ線をもう一度押せば戻るので、帯は文だけ）', () => {
-    render(<RouteToggleSnackbar {...base} notice={{ id: 1, routeKey: 'yamanote', shown: false }} language="japanese" />);
+  it('「元に戻す」は onUndo を渡したときだけ出る。×は出さない', () => {
+    const { rerender } = render(<RouteToggleSnackbar {...base} notice={{ id: 1, routeKey: 'yamanote', shown: false }} language="japanese" />);
     expect(screen.queryAllByRole('button')).toHaveLength(0);
+    rerender(<RouteToggleSnackbar {...base} onUndo={() => {}} notice={{ id: 1, routeKey: 'yamanote', shown: false }} language="japanese" />);
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+    expect(screen.getByRole('button', { name: '元に戻す' })).toBeTruthy();
+  });
+
+  it('「元に戻す」を押すと onUndo が呼ばれ、知らせは閉じる。ボタンの文言は表示する言語で出る', () => {
+    const onUndo = vi.fn();
+    const onClose = vi.fn();
+    const { rerender } = render(<RouteToggleSnackbar {...base} onClose={onClose} onUndo={onUndo} notice={{ id: 1, routeKey: 'yamanote', shown: true }} language="english" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+    expect(onUndo).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalled();
+    rerender(<RouteToggleSnackbar {...base} onUndo={onUndo} notice={{ id: 2, routeKey: 'yamanote', shown: true }} language="chinese" />);
+    expect(screen.getByRole('button', { name: '撤销' })).toBeTruthy();
+    rerender(<RouteToggleSnackbar {...base} onUndo={onUndo} notice={{ id: 3, routeKey: 'yamanote', shown: true }} language="korean" />);
+    expect(screen.getByRole('button', { name: '되돌리기' })).toBeTruthy();
   });
 
   it('2行に折り返さず、長い路線名は路線名だけを省略して「を非表示にしました」を残す', () => {
@@ -102,8 +118,29 @@ describe('地図の線をタップして切り替えたときに知らせる（R
 
   it('表示中の線・薄い線のどちらをタップして切り替えても知らせる', () => {
     expect(src).toMatch(/setVisibleRoutes\(newVisibleRoutes\);\s*noticeRouteToggle\(routeKey, newVisibleRoutes\.has\(routeKey\)\);/);
-    expect(src).toMatch(/setVisibleRoutes\(prev => new Set\(\[\.\.\.prev, rKey\]\)\);\s*noticeRouteToggle\(rKey, true\);/);
+    expect(src).toMatch(/setVisibleRoutes\(prev => new Set\(\[\.\.\.prev, rKey\]\)\);\s*noticeRouteToggle\(rKey, true, !wasAvailable\);/);
     // 知らせの表示は MapNoticeSnackbar の1か所（種類ごとの見た目はその中で分ける）
     expect(src).toContain('<MapNoticeSnackbar');
+  });
+});
+
+describe('Snackbar の multiline（文末を切らない）', () => {
+  it('multiline は折り返しを許し（2行まで）、文を overflow で隠さない。既定は1行', () => {
+    const { rerender } = render(<Snackbar theme="dark" bottom="10px" message="とても長い案内の文" onClose={() => {}} />);
+    const single = document.querySelector('[data-snackbar-message]') as HTMLElement;
+    expect(single.style.whiteSpace).toBe('nowrap');
+    expect(single.style.overflow).toBe('hidden');
+
+    rerender(<Snackbar theme="dark" bottom="10px" message="とても長い案内の文" onClose={() => {}} multiline />);
+    const multi = document.querySelector('[data-snackbar-message]') as HTMLElement;
+    expect(multi.style.whiteSpace).toBe('normal');
+    expect(multi.style.overflow).toBe('');
+    const bar = document.querySelector('[data-snackbar]') as HTMLElement;
+    expect(bar.style.whiteSpace).toBe('normal');
+  });
+
+  it('文だけの知らせ（MapNoticeSnackbar）は multiline で出す（案内の文末を切らない）', () => {
+    const src = readFileSync(join(__dirname, '../../../../src/components/map/MapNoticeSnackbar.tsx'), 'utf8');
+    expect(src).toMatch(/<Snackbar[\s\S]*?multiline/);
   });
 });

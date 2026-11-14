@@ -89,3 +89,21 @@ test('通常の画面で到着駅が未選択のまま押すと、共通のSnack
   await expect(page.locator('[data-snackbar]')).toContainText('終電モードを使用するには、到着駅を設定してください。');
   await expect(toggle).toHaveAttribute('aria-pressed', 'false');
 });
+
+test('終電モード: 画面の外の駅は描かない（数百の駅を描き直して、動かすと重くなるのを避ける）', async ({ page }) => {
+  const errors = collectErrors(page);
+  const count = () => page.locator('.leaflet-marker-icon').count();
+  // 路線網全体が入る広さ
+  await page.goto('/?mode=last-train&to=shibuya&center=35.66,139.72&zoom=10');
+  await expect(page.locator('.leaflet-container').first()).toBeVisible();
+  await expect.poll(count, { timeout: 20_000 }).toBeGreaterThan(40);
+  const wide = await count();
+  // 渋谷の周りだけが入る広さ
+  await page.goto('/?mode=last-train&to=shibuya&center=35.658,139.7016&zoom=15');
+  await expect(page.locator('.leaflet-container').first()).toBeVisible();
+  await expect.poll(count, { timeout: 20_000 }).toBeGreaterThan(0);
+  await page.waitForTimeout(800);
+  const near = await count();
+  expect(near, `広い範囲 ${wide} / 近く ${near}`).toBeLessThan(wide * 0.5);
+  expect(errors).toEqual([]);
+});

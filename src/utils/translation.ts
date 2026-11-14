@@ -677,6 +677,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Show more ({count} left)"
   },
   // 地図の線をタップして路線を切り替えたときの知らせ（map/RouteToggleSnackbar.tsx）
+  undoAction: {
+    japanese: "元に戻す",
+    english: "Undo"
+  },
   routeToggledShown: {
     japanese: "{route}を表示しました",
     english: "Showing {route}"
@@ -918,8 +922,8 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Add departure station"
   },
   meetingNeedOrigins: {
-    japanese: "出発駅を2つ以上設定すると、全員が行きやすい駅を探します（出発駅と「出発駅を追加」）。",
-    english: "Set two or more departure stations to find a station everyone can reach easily (the departure field plus \"Add departure station\")."
+    japanese: "出発駅欄と、その下の出発駅の欄に駅を入れて、2駅以上そろえると、全員が行きやすい駅を探します。",
+    english: "Enter two or more departure stations (the departure field plus the departure fields below it) to find a station everyone can reach easily."
   },
   meetingResultsTitle: {
     japanese: "お互いに行きやすい駅（いちばん遅い人の所要時間が短い順）",
@@ -932,10 +936,6 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   meetingNoResults: {
     japanese: "全員が{minutes}分以内で行ける駅が見つかりません。",
     english: "No station is reachable by everyone within {minutes} minutes."
-  },
-  meetingResultsNote: {
-    japanese: "駅をクリックすると到着駅に設定します。所要時間は路線データによる目安で、実際のダイヤではありません。",
-    english: "Click a station to set it as the arrival station. Times are estimates from line data, not actual timetables."
   },
   otherStations: {
     japanese: "他{count}駅",
@@ -1261,6 +1261,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   locationUnavailable: {
     japanese: "現在地を取得できません",
     english: "Location unavailable"
+  },
+  locationDeniedHelp: {
+    japanese: "位置情報が許可されていません。ブラウザの設定でこのサイトの位置情報を許可してから、もう一度押してください。",
+    english: "Location access is not allowed. Allow location for this site in your browser settings, then press the button again."
   },
   retryLocation: {
     japanese: "再取得",
@@ -2163,6 +2167,7 @@ export const uiChinese: Record<string, string> = {
   collapseList: "折叠",
   showMoreRoutes: "显示其他 {count} 条线路",
   showMoreRoutesStep: "显示更多（剩余 {count}）",
+  undoAction: "撤销",
   routeToggledShown: "已显示{route}",
   routeToggledHidden: "已隐藏{route}",
   routeViewBoard: "面板",
@@ -2243,11 +2248,10 @@ export const uiChinese: Record<string, string> = {
   meetingNoRoute: "无路线",
   meetingAlreadyThere: "就在集合站",
   addMeetingOrigin: "添加出发站",
-  meetingNeedOrigins: "设置两个以上出发站，即可找出大家都容易到达的车站（出发站和“添加出发站”）。",
+  meetingNeedOrigins: "在出发站栏和其下方的出发站栏中输入两个以上的车站，即可找出大家都容易到达的车站。",
   meetingResultsTitle: "大家都容易到达的车站（按最晚到的人所需时间由短到长）",
   meetingMaxMinutes: "最长{minutes}分钟",
   meetingNoResults: "没有所有人都能在{minutes}分钟内到达的车站。",
-  meetingResultsNote: "点击车站即设为到达站。所需时间是根据线路数据的估算，并非实际时刻表。",
   otherStations: "其他{count}站",
   noRoutesFound: "未找到路线",
   routeCount: "{count}条路线",
@@ -2331,6 +2335,7 @@ export const uiChinese: Record<string, string> = {
   showTrainStatusPanel: "显示乘车路线",
   locationDenied: "未允许获取位置信息",
   locationUnavailable: "无法获取当前位置",
+  locationDeniedHelp: "未允许获取位置信息。请在浏览器设置中允许此网站获取位置信息，然后再按一次。",
   retryLocation: "重试",
   useLocationFeatures: "根据当前位置自动设置出发站",
   moreItemsCount: "+{count}项",
@@ -2558,6 +2563,7 @@ export const uiKorean: Record<string, string> = {
   collapseList: "접기",
   showMoreRoutes: "다른 {count}개 노선 표시",
   showMoreRoutesStep: "더 보기 (남은 {count}개)",
+  undoAction: "되돌리기",
   routeToggledShown: "{route} 표시됨",
   routeToggledHidden: "{route} 숨겨짐",
   routeViewBoard: "보드",
@@ -2638,11 +2644,10 @@ export const uiKorean: Record<string, string> = {
   meetingNoRoute: "경로 없음",
   meetingAlreadyThere: "집합역과 같음",
   addMeetingOrigin: "출발역 추가",
-  meetingNeedOrigins: "출발역을 2곳 이상 설정하면 모두가 가기 쉬운 역을 찾습니다(출발역과 \"출발역 추가\").",
+  meetingNeedOrigins: "출발역 칸과 그 아래의 출발역 칸에 역을 2곳 이상 넣으면 모두가 가기 쉬운 역을 찾습니다.",
   meetingResultsTitle: "모두가 가기 쉬운 역(가장 늦게 도착하는 사람의 소요 시간이 짧은 순)",
   meetingMaxMinutes: "최대 {minutes}분",
   meetingNoResults: "모두가 {minutes}분 이내에 갈 수 있는 역이 없습니다.",
-  meetingResultsNote: "역을 누르면 도착역으로 설정됩니다. 소요 시간은 노선 데이터에 따른 추정이며 실제 시각표가 아닙니다.",
   otherStations: "외 {count}역",
   noRoutesFound: "경로를 찾을 수 없습니다",
   routeCount: "{count}개 경로",
@@ -2726,6 +2731,7 @@ export const uiKorean: Record<string, string> = {
   showTrainStatusPanel: "탑승 노선 표시",
   locationDenied: "위치 정보가 허용되지 않았습니다",
   locationUnavailable: "현재 위치를 가져올 수 없습니다",
+  locationDeniedHelp: "위치 정보가 허용되지 않았습니다. 브라우저 설정에서 이 사이트의 위치 정보를 허용한 뒤 다시 눌러 주세요.",
   retryLocation: "다시 시도",
   useLocationFeatures: "현재 위치로 출발역 자동 설정",
   moreItemsCount: "+{count}건",

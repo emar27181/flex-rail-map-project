@@ -23,7 +23,7 @@ describe('終電モードは元のUIだけで操作する（回帰防止）', ()
     expect(map).toContain('<MapContainer');
     expect(map).toContain('lastTrainFilterActive && mapViewMode');
     expect(map).toContain('renderStationMarker(st, rk');
-    expect(map).toContain('demoNetwork?.lines.map(line =>');
+    expect(map).toContain('demoDrawnLines.map(line =>');
     expect(map.match(/<StationSelector/g)?.length).toBe(3);
     expect(map.match(/onLastTrainModeChange={handleLastTrainModeChange}/g)?.length).toBe(3);
     expect(selector).toContain('onLastTrainModeChange(!lastTrainModeEnabled)');
@@ -51,7 +51,8 @@ describe('終電モードは元のUIだけで操作する（回帰防止）', ()
     const i18n = read('src/utils/lastTrainDemoI18n.ts');
     // 知らせは useMapNotice の1か所で管理する（路線切替などと同じ帯。専用の状態・表示を作らない）
     expect(map).toContain("import MapNoticeSnackbar from './map/MapNoticeSnackbar'");
-    expect(map).toContain('notifyMessage(lastTrainCopy(currentLanguage).chooseArrivalNotice)');
+    // 足りない入力の案内は注意（warning）の印つきで出す
+    expect(map).toContain("notifyMessage(lastTrainCopy(currentLanguage).chooseArrivalNotice, 'warning')");
     expect(map).not.toContain('lastTrainArrivalNoticeId');
     expect(selector).toContain('onLastTrainModeChange(!lastTrainModeEnabled)');
     expect(i18n).toContain('終電モードを使用するには、到着駅を設定してください。');

@@ -1,5 +1,29 @@
 # CHANGE LOG
 
+## [2026-11-14] セッション（集合駅・終電モードを出発駅どうし対等に／折りたたみ／実データの受け皿）
+
+### improve: 集合駅の候補・ルートは上位3件だけ見せ、残りは折りたたむ。説明文を削除
+- `src/components/ui/molecules/TopList.tsx`（新規）, `src/components/StationSelector.tsx`, `src/utils/translation.ts`（`meetingResultsNote` を削除）, `docs/design-system.md`
+- 候補（最大5）と「{駅}までの各ルート（使う路線）」を `TopList`（既定3件、「さらに表示（残りN）」「折りたたむ」）で出す。「駅をクリックすると到着駅に設定します…」の文言は不要のため削除
+
+### improve: 「出発時刻」の行を「時刻を表示」ボタンのすぐ下へ。ルートごとに出発・到着の時刻を出す
+- `src/components/StationSelector.tsx`, `src/utils/meetingPoint.ts`（`meetingClockTimes`）
+- 候補・ルートが長くなっても時刻の操作が押し出されない。ルートの行に「08:00 → 08:25」（出発基準なら全員同じ出発、到着基準なら全員同じ到着）
+
+### feat: 集合駅モードで、出発駅それぞれからの所要時間・経路を対等に表示
+- `src/components/RailwayMap.tsx`, `src/utils/meetingPoint.ts`（`interleaveByRank`, `MEETING_LABEL_NAME_CHARS`）
+- 駅ラベルは、候補（一覧に出る駅）と集合駅では出発駅ごとの所要時間を1行ずつ（入力順。最初の駅も追加した駅も同じ扱い）。ほかの駅は全駅に行を出すと読めないので最大の所要時間だけ
+- 地図に描く経路は、出発駅ごとに同じ数ずつ求めて順位の順に交互に並べる（最初の出発駅だけの経路にならない）。出発駅の印・地図の範囲も全員分
+
+### feat: 終電モードでも、表示していない路線は通常の画面と同じ半透明で描き、直接つながらない路線の駅にも終電時刻を付ける
+- `src/components/RailwayMap.tsx`（`demoFullNetwork`, `demoDrawnLines`）, `src/utils/lastTrainDemo.ts`（`maxLines` に `Infinity`）
+- 終電時刻は到着駅からたどれる全路線で計算。最初から出す路線（従来の上限）と、路線の表示切替・タップで出した路線は通常どおりの濃さで駅と時刻付き、それ以外は半透明の線（タップで出せる）
+
+### feat: 終電の実データを差し込める受け皿（時刻表のフォーマット）
+- `src/data/lastTrainTimetables.ts`（新規・空）, `src/utils/lastTrainDemo.ts`（`legsFromRealTimetable`, `parseTimetableClock`, `latestIsReal`）, `src/components/RailwayMap.tsx`（実データの駅は時刻の「*」を外す）, `docs/data-editing-guide.md`（節を追加）
+- 路線を1つ書くとその路線だけ架空ダイヤから実データに切り替わる。出典必須。`tests/unit/data/lastTrainTimetables.test.ts` が駅名・時刻・出典を検証
+- `tests/unit/utils/lastTrainRealData.test.ts`, `tests/unit/components/ui/topList.test.tsx`, `tests/unit/utils/meetingPoint.test.ts`
+
 ## [2026-11-13] セッション（終電モードを通常の画面へ）
 
 ### feat: 終電モード（試作）を、試作URLなしでも通常の駅選択パネルから使えるようにする
@@ -7,6 +31,91 @@
 - ボタンを押したときだけ終電の画面（基準時刻・到達圏の絞り込み）になる。OFFで通常に戻る。到着駅が未選択なら共通Snackbarで案内
 - 架空ダイヤのままなので、ボタン名に「試作」・`title`・駅ラベルの `*` で明示（実際の終電検索には使えない）
 - `tests/render/lastTrainMap.render.ts`（通常画面のON/OFF・Snackbarを追加）, `tests/unit/components/lastTrainMapIntegration.test.ts`（deps の名前を更新）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
+
+## [2026-11-14] セッション（集合駅の出発駅を出発駅欄と同じ幅・文言にそろえる）
+
+### improve: 追加した出発駅を、出発駅欄と同じ幅・位置・文言にする（部品 `FieldPairRow`）
+- `src/components/ui/molecules/FieldPairRow.tsx`（新規）, `src/components/ui/molecules/RoleField.tsx`, `src/components/StationSelector.tsx`, `src/components/ui/atoms/controlSize.ts`, `src/utils/translation.ts`（案内文）, `src/data/articles/meeting-station-finder.ts`（説明を合わせた）
+- 追加の出発駅は幅いっぱいで、出発駅欄（半分の幅）と幅がちがい、文言も「＋ 出発駅を追加」だった。出発駅欄・到着駅欄と同じ2列の行（`FieldPairRow`）に置き、左は出発駅欄と、右は到着駅欄と同じ幅・同じ位置にそろえた。区切りの列の幅は入れ替えボタンと同じ定義元（`PAIR_DIVIDER_WIDTH` = `CONTROL_SIZE.sm.minHeight`）の1か所
+- 案内は出発駅欄（未入力）と同じ「駅名入力」。＋のアイコンは外した（読み上げの名前だけ「出発駅を追加」）。入れるたびに次の欄が右隣に出る。狭いスマホでも半分の幅のまま（出発駅欄と同じ）
+- 使わなくなった `ROLE_FIELD_MIN_WIDTH_EM`（最小幅の定義）と `RoleField` のアイコン枠を削除
+- `tests/unit/components/ui/fieldPairRow.test.tsx`（新規）, `roleField.test.tsx`, `tests/render/meetingPoint.render.ts`（3つの画面幅で幅・位置が出発駅欄・到着駅欄と一致・右隣に出る・4言語で文言が同じで収まる）, `docs/design-system.md`, `docs/ui-mode-extension-guide.md`, `docs/render-tests.md`
+
+## [2026-11-14] セッション（路線の切り替えの「元に戻す」）
+
+### improve: 地図の線をタップして路線を切り替えたときの知らせに「元に戻す」を付ける
+- `src/components/map/RouteToggleSnackbar.tsx`（`onUndo`）, `src/components/map/MapNoticeSnackbar.tsx`（`onUndoRouteToggle`）, `src/components/map/mapNotice.ts` / `src/hooks/useMapNotice.ts`（`removeFromAvailable`）, `src/components/RailwayMap.tsx`（`undoRouteToggle`）, `src/utils/translation.ts`（`undoAction` を4言語）
+- 2026-11 に「同じ線をもう一度押せば戻る」として外した「元に戻す」を、押し間違えたときに帯からすぐ戻せるよう戻した。押すと切り替える前の表示（表示した路線は非表示に、非表示にした路線は表示に）に戻り、知らせは閉じる。線をタップして足した路線（もともと表示できる路線の一覧に無かった）は、一覧からも外す
+- 帯は1行のまま。操作のボタンは押せる大きさ（44px）なので、帯の高さはそれに合わせて少し伸びる。長い路線名は路線名だけを省略し、「を非表示にしました」とボタンは残す
+- `tests/unit/components/ui/snackbar.test.tsx`（ボタンは onUndo のときだけ・押すと呼ばれて閉じる・4言語）, `tests/unit/components/map/routeToggleUndo.test.ts`（新規）, `tests/render/routeTap.render.ts`（線を押す → 非表示 → 元に戻す → 2路線に戻る）, `docs/design-system.md`
+
+## [2026-11-14] セッション（位置情報を許可せずに入ったあとの「現在地から」）
+
+### fix: 位置情報を許可せずに入っても「現在地から」を押せて、押すたびに許可を取り直す
+- `src/utils/freshLocation.ts`（`requestPosition` / `PositionResult` / 取れなかった理由）, `src/components/RailwayMap.tsx`（`handleSetNearestDeparture`）, `src/components/StationSelector.tsx`, `src/utils/translation.ts`（`locationDeniedHelp` を4言語）
+- 位置が取れていない間は「現在地から」が非活性で、許可し直す手段が無かった。**常に押せる**ようにし、押すたびに位置の取得をやり直す。ブラウザが「許可の確認」の状態なら、ここでもう一度許可を聞くポップアップが出る。取れたら最寄り駅を出発駅に入れ、位置の監視（現在地マーカーなど）も再開する
+- それでも許可されないとき（ブラウザが「拒否」を覚えているときは確認が出せない）は、「ブラウザの設定でこのサイトの位置情報を許可してから、もう一度押してください」を駅選択パネルのすぐ下に出す（取れない・時間切れのときは「現在地を取得できません」）
+- `tests/unit/utils/freshLocation.test.ts`（理由つき・押すたびに取り直す）, `tests/render/currentLocation.render.ts`（許可せずに入る → 押せる → 案内 → 許可して押すと使える）
+
+## [2026-11-13] セッション（出発駅の欄を同じ緑の部品にそろえる）
+
+### improve: 追加した出発駅も出発駅欄と同じ緑の欄にし、入れるたびに次の欄が隣に出る（部品 `RoleField`）
+- `src/components/ui/molecules/RoleField.tsx`（新規）, `src/components/ui/atoms/controlSize.ts`（`ROLE_FIELD_MIN_WIDTH_EM`）, `src/components/StationSelector.tsx`, `src/utils/translation.ts`（英語の案内を "Add departure" に）
+- 追加した出発駅が灰色のタグで、出発駅欄と別の見た目だった（「別の出発駅でも色は同じで」）。出発駅・到着駅・追加の出発駅・追加の入力欄を、役割の色（出発=緑・到着=赤）で塗る同じ部品 `RoleField` にそろえた。出発欄と到着欄で同じ入力欄を2回手書きしていたのもここ1か所にまとめた
+- 入れるごとに次の欄が隣（右）に出る（2つ入れたら3つ目は右。収まらない狭いスマホは1列で幅いっぱい）。行ごとの見出し・番号・点線・タグは無し。先に作った `TagInputRow`（タグ＋入力欄）は使わなくなったので削除
+- 並びは CSS グリッド（1つぶんの最小の幅は `ROLE_FIELD_MIN_WIDTH_EM`＝em。px の直書きなし）
+- `tests/unit/components/ui/roleField.test.tsx`（新規。色・実線・クリア・アイコン・出発/到着/追加が同じ部品であること）, `tests/render/meetingPoint.render.ts`・`featureArticles.render.ts`（緑・右に出る・4言語×広い/狭いで案内が切れない・1列）, `docs/design-system.md`（部品の表）, `docs/ui-mode-extension-guide.md`, `docs/render-tests.md`
+
+## [2026-11-13] セッション（終電モードの動きを軽くする）
+
+### improve: 終電モードのスクロール・ズームの重さを減らす（駅アイコンの使い回し・画面の外は描かない）
+- `src/utils/divIconCache.ts`（新規）, `src/components/RailwayMap.tsx`（駅・時刻のアイコンを `cachedDivIcon` で作る。終電モードの駅・区間は `viewBounds` の外を描かない）
+- 駅のアイコンは描き直すたびに新しい DivIcon を作り、react-leaflet が全マーカーの DOM を作り直していた（終電モードは約370個）。見た目が同じなら同じアイコンを返す（上限 4000 を超えたら捨てる）。さらに、画面＋余白の外の駅・区間は描かない
+- 計測（CPU を4倍遅くして地図を動かす・終電モード・到着駅=新宿）: 長い処理（50ms 超）11回・約700ms → 2回・約180ms、フレーム間隔の95%点 73ms → 33ms
+- 通常の経路表示は線（薄く描く路線を含め約1000本）が多く、終電モードより重いことも分かった（今回は未対応）
+- `tests/unit/utils/divIconCache.test.ts`（新規）, `tests/render/lastTrainMap.render.ts`（画面の外は描かない。絞り込みを外すと落ちることを確認）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
+
+## [2026-11-13] セッション（知らせを操作した場所の近くに出す）
+
+### improve: 入力が足りない知らせを、駅選択パネルのすぐ下に注意の印つきで出す
+- `src/components/map/mapNotice.ts`（`noticePlacement` / `MESSAGE_NOTICE_DURATION_MS`）, `src/components/map/mapNoticePlacement.ts`（新規）, `src/components/map/MapNoticeSnackbar.tsx`, `src/hooks/useMapNotice.ts`, `src/components/StationSelector.tsx`（`data-station-selector`）, `src/components/RailwayMap.tsx`
+- 終電モードの案内が画面の下の端に出て、目に止まらなかった。フィードバックは操作・入力の近くに出すのがベストプラクティスなので、文の案内（駅選択パネルでの操作の結果）は**パネルのすぐ下**（左端をそろえ、パネルの幅まで）に、注意の印（橙のアイコン）つきで出す。6秒出す（行動が必要な文は4秒より長く）。パネルが見つからないときは従来どおり地図の下
+- 地図の線をタップした知らせは従来どおり地図の下（指の下にあるのは地図のため）。知らせの管理・表示は `useMapNotice` / `MapNoticeSnackbar` の1か所のまま、種類ごとに場所を決める
+- `tests/unit/components/map/mapNoticePlacement.test.ts`（新規）, `tests/render/mapNotice.render.ts`（パネルのすぐ下・左端そろえ・上半分・アイコン）, `docs/ui-mode-extension-guide.md`, `docs/design-system.md`, `docs/last-train-map-poc.md`, `docs/render-tests.md`
+
+## [2026-11-13] セッション（知らせの文末が切れる）
+
+### fix: 地図の下の知らせで、案内の文末が切れないようにする（`multiline`）
+- `src/components/ui/molecules/Snackbar.tsx`（`multiline`）, `src/components/map/MapNoticeSnackbar.tsx`, `docs/design-system.md`
+- スマホで「終電モードを使用するには、到着駅を設定してくださ」と文末が切れていた（幅 360px を超える文を、1行・overflow で隠していた）。文の案内は、収まらないときに**2行まで折り返す**ようにした（Material Design も2行まで）。1行のときの高さは変えない。路線名の知らせは従来どおり1行で、路線名だけを省略する
+- `tests/render/mapNotice.render.ts`（新規。4言語×360/390px で文が切れない・2行まで・画面の端に収まる・下の浮かぶボタンに重ならない。複数行を外すと落ちることを確認）, `tests/unit/components/ui/snackbar.test.tsx`, `docs/render-tests.md`
+
+## [2026-11-13] セッション（集合駅の出発駅を横一列のタグにまとめる）
+
+### improve: 追加した出発駅を横一列のタグにし、点線・色付きの枠をやめる（部品 `TagInputRow`）
+- `src/components/ui/molecules/TagInputRow.tsx`（新規）, `src/components/ui/atoms/controlSize.ts`（`TAG_INPUT_MIN_WIDTH_EM`）, `src/components/StationSelector.tsx`
+- 「分かりにくい」との指摘を受け、行ごとの見出し（出発駅 2 …）・緑の塗りと枠・点線の枠の入力欄をやめた。番号と名前は「2. 東京 ×」の1つのタグにまとめて横一列に並べ、同じ行の末尾に普通の枠の「＋ 出発駅を追加」入力欄をいつでも出す。収まらなければ次の行で広がる
+- 最小の幅は px の直書きをやめ、定義元の `TAG_INPUT_MIN_WIDTH_EM`（em）にした。出発駅欄の幅を実測する処理も不要になり削除
+- アトム（`RemovableTag` / `TextField`）の組み合わせだけで作った molecule。駅の知識は持たない（候補・追加の処理は `StationSelector` が渡す）
+- `tests/unit/components/ui/tagInputRow.test.tsx`（新規）, `tests/render/meetingPoint.render.ts`・`featureArticles.render.ts`（タグの増減・同じ行・通常の枠・4言語の案内が切れない・狭いスマホ）, `docs/design-system.md`（部品の表に追加）, `docs/ui-mode-extension-guide.md`, `docs/render-tests.md`
+
+## [2026-11-13] セッション（集合駅の「＋ 出発駅を追加」入力欄を常に出す）
+
+### improve: 「集合駅を探す」で、「＋ 出発駅を追加」の入力欄をいつでも出す
+- `src/components/StationSelector.tsx`, `src/utils/translation.ts`（案内文を4言語で更新）, `src/data/articles/meeting-station-finder.ts`（説明を合わせた）
+- これまでは「出発駅を追加」ボタンを押して入力欄を開いていた。追加した出発駅の行の最後に、点線の枠の「＋ 出発駅を追加」入力欄を常に出す。駅名を入れて選ぶと行が増え、入力欄は次の駅の分として空に戻る（ボタンは出さない）。横が空いていれば行と並べて詰める。開いたときにキーボードが出ないよう、自動のフォーカスはしない
+- 候補は、追加済みの駅と出発駅欄の駅を除く
+- `tests/render/meetingPoint.render.ts`, `tests/render/featureArticles.render.ts`, `docs/ui-mode-extension-guide.md`, `docs/render-tests.md`
+
+## [2026-11-13] セッション（新機能の記事と注意書き）
+
+### feat: 終電モード・集合駅を探すモードの記事を2本（4言語）、試作・推定の注意書きを自動で付ける仕組み
+- 記事: `src/data/articles/last-train-mode-guide.ts`（終電モードの使い方・試作）, `src/data/articles/meeting-station-finder.ts`（集合駅を探す）, `src/data/articles/index.ts`
+- 注意書き: `src/utils/articleNotices.ts`（新規）, `src/utils/articleRender.ts`, `src/data/articles/types.ts`（`notice` ブロック）, `src/styles/article-layout.css`（`.notice`・橙の注意色）
+  - 試作の機能・架空のデータ・推定を含む画面を載せる記事は、記事の地図の状態（`mode` / `travelTimes`）から必要な注意書きを決め、最初の地図デモの直後に自動で入れる。書き忘れを防ぐため（文言は4言語で1か所）
+  - 終電モード → 試作＋架空のデータ、集合駅 → 推定、所要時間を出す地図 → 推定。既存の「通勤時間から住む駅を探す」にも「推定を含みます」が付く
+- 機能を開いたときからそのモードにする URL: `src/utils/mapModeUrlParam.ts`（新規。`?mode=last-train&to=…` / `?mode=meeting&from=…&with=…`）, `src/utils/mapDeepLink.ts`, `src/components/RailwayMap.tsx`（初期状態）。埋め込みの画面ではボタンを押せないため
+- `tests/unit/utils/articleNotices.test.ts`（新規, 11件）, `tests/render/featureArticles.render.ts`（新規, PC・スマホ）, `docs/article-writing.md`, `docs/templates/article-prompt.md`, `docs/render-tests.md`
 
 ## [2026-11-13] セッション（終電モードの絞り込みと時刻の注記）
 
@@ -33,6 +142,14 @@
 - `src/utils/translation.ts`（4言語）, `src/components/StationSelector.tsx`（`title` に説明を追加）
 - 駅名の下の時刻は、経路上の各駅の到着予定時刻（路線データの駅間時間による目安）。ボタン1つで出し入れできる（既存の `Button` アトム）
 - `tests/render/arrivalTimeLabels.render.ts`（新規, PC・スマホ）, `docs/render-tests.md`
+
+## [2026-11-13] セッション（線形の試作）
+
+### feat: 2D の地図を実際の線路の形で描く試作（`?experiment=track-geometry`）
+- `scripts/track-geometry/build-from-terrain3d-v2.mts`（新規）, `public/data/track-geometry-prototype.json`（新規, 52路線）, `src/utils/trackGeometryPrototype.ts`（新規）, `src/components/RailwayMap.tsx`（`trackGeometryOf`）
+- 立体表示用に受け取っていた線形（OSM 由来・80路線）を、駅の位置で区切って `TrackSection` にした。検証（`splitAtStations`）に通った路線だけを使う。通常の画面は変わらない
+- 駅と線の距離の基準は試作では 300m（本番は 150m）。除外した28路線は直線のまま（理由は JSON の `meta.skipped`）
+- `tests/unit/utils/trackGeometryPrototype.test.ts`（新規, 8件）, `tests/render/trackGeometry.render.ts`（新規）, `docs/track-geometry.md`, `docs/render-tests.md`
 
 ## [2026-11-13] セッション（集合駅までの各ルート）
 

@@ -84,10 +84,17 @@ test('地図の線を押すと路線の表示が切り替わり、どの路線�
     await expect(page.locator('.leaflet-tooltip-pane .leaflet-tooltip')).toHaveCount(0);
   }
 
-  // 知らせは1行だけ（ボタンを持たず、地図に浮かぶほかの部品と同じ高さ）
-  await expect(notice.getByRole('button')).toHaveCount(0);
+  // 知らせは1行で、「元に戻す」ボタンが付く（押し間違えたときにすぐ戻せる）。高さは操作ボタン（44px）まで
+  const undo = notice.getByRole('button', { name: '元に戻す' });
+  await expect(undo).toBeVisible();
+  await expect(notice.getByRole('button')).toHaveCount(1);
   const box = (await notice.boundingBox())!;
-  expect(box.height).toBeLessThanOrEqual(40);
+  expect(box.height).toBeLessThanOrEqual(52);
+
+  // 「元に戻す」で、切り替える前の表示（2路線）に戻り、知らせは消える
+  if (isMobile) await undo.tap(); else await undo.click();
+  await expect.poll(async () => (await routesParam(page)).length).toBe(2);
+  await expect(page.locator('[data-snackbar]')).toHaveCount(0);
 });
 
 test('所要時間の数字（線の上に並ぶ）はタップを受け取らない（指のタップを吸って何もしなかった）', async ({ page }) => {

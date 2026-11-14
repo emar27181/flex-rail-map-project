@@ -9,6 +9,7 @@ import { THROUGH_SERVICES, type ThroughService } from '../data/throughServices';
 import { DEFAULT_ROUTE_RECOMMENDATION_LIMIT } from '../constants/routeRecommendationLimit';
 import { chuo } from '../data/chuo';
 import { keihinTohoku } from '../data/keihin-tohoku';
+import { LAST_TRAIN_TIMETABLES, type LineLastTrainTimetable } from '../data/lastTrainTimetables';
 
 export interface DemoLine {
   id: string;
@@ -29,6 +30,8 @@ export interface DemoLeg {
   tripId?: string;
   depart: number;
   arrive: number;
+  /** 'real' = 実際の時刻表（data/lastTrainTimetables.ts）。省略 = 架空のデモダイヤ（駅名の下の時刻に「*」が付く） */
+  quality?: 'real';
 }
 
 export const DEMO_START = 22 * 60;
@@ -61,6 +64,9 @@ export const DEMO_STATIONS: Station[] = Array.from(
  * 例えば到着駅に1路線だけなら、直接路線1本+接続路線4本で計5路線（既定値）。
  * 直接乗り入れる路線が指定上限を超える場合は、直接路線を優先して残す。
  * 入力ダイヤは全て架空で、時刻表の正確さを意味しない。
+ *
+ * maxLines に Infinity を渡すと、到着駅からたどれる路線をすべて含める（直接つながらない路線の駅にも終電時刻を付けるため。
+ * 2026-11-14 ユーザー指示）。画面に最初から出す路線の数は、従来どおり上限つきで作ったものを使う。
  */
 export interface DestinationDemoNetwork {
   lines: DemoLine[];
@@ -75,7 +81,7 @@ export function buildDestinationDemoNetwork(
 ): DestinationDemoNetwork {
   const allKeys = Object.keys(routes) as RouteKey[];
   const onStation = allKeys.filter(key => routes[key].some(st => st.name === destination));
-  if (onStation.length === 0 || !Number.isFinite(maxLines) || maxLines < 1) {
+  if (onStation.length === 0 || Number.isNaN(maxLines) || maxLines < 1) {
     return { lines: [], stations: [], legs: [], limited: false };
   }
 
@@ -190,9 +196,15 @@ export function demoEdgeKey(lineId: string, from: string, to: string): string {
  * 各方向の架空列車を駅間コネクションに展開する。
  * 同一列車の駅間は連続するが、実ダイヤではない。
  */
-export function buildDemoLegs(lines: readonly DemoLine[] = DEMO_LINES): DemoLeg[] {
+export function buildDemoLegs(
+  lines: readonly DemoLine[] = DEMO_LINES,
+  realTimetables: readonly LineLastTrainTimetable[] = LAST_TRAIN_TIMETABLES,
+): DemoLeg[] {
   const result: DemoLeg[] = [];
+  // 実データのある路線は、架空のダイヤを作らず実データを使う（路線の単位で切り替える）
+  const realKeys = new Set(realTimetables.map(t => t.routeKey));
   for (const line of lines) {
+    if (realKeys.has(line.routeKey)) continue;
     for (const reversed of [false, true]) {
       const sequence = reversed ? [...line.stations].reverse() : [...line.stations];
       if (line.circular && sequence.length > 1) sequence.push(sequence[0]);
@@ -215,7 +227,41 @@ export function buildDemoLegs(lines: readonly DemoLine[] = DEMO_LINES): DemoLeg[
       }
     }
   }
-  result.push(...buildDemoThroughLegs(lines));
+  result.push(...buildDemoThroughLegs(lines.filter(line => !realKeys.has(line.routeKey))));
+  for (const timetable of realTimetables) {
+    if (lines.some(line => line.routeKey === timetable.routeKey)) result.push(...legsFromRealTimetable(timetable));
+  }
+  return result;
+}
+
+/** "HH:MM"（24以上の時も可）を、0時からの分に直す。書き方が違うときは null */
+export function parseTimetableClock(value: string): number | null {
+  const match = /^(\d{1,2}):([0-5]\d)$/.exec(value);
+  if (!match) return null;
+  const hours = Number(match[1]);
+  return hours > 29 ? null : hours * 60 + Number(match[2]);
+}
+
+/**
+ * 実際の時刻表（data/lastTrainTimetables.ts）を、架空のデモダイヤと同じ形（駅間の列車）に展開する。
+ * 以降の計算（calculateDemoLastTrain）は、架空か実データかを区別せずに同じ処理で行う。
+ */
+export function legsFromRealTimetable(timetable: LineLastTrainTimetable): DemoLeg[] {
+  const result: DemoLeg[] = [];
+  for (const trip of timetable.trips) {
+    for (let i = 0; i < trip.stops.length - 1; i++) {
+      const from = trip.stops[i];
+      const to = trip.stops[i + 1];
+      const depart = parseTimetableClock(from.time);
+      const arrive = parseTimetableClock(to.time);
+      if (depart === null || arrive === null || arrive < depart) continue;
+      result.push({
+        from: from.station, to: to.station, lineId: timetable.routeKey,
+        tripId: `real:${timetable.routeKey}:${trip.id}`,
+        depart, arrive, quality: 'real',
+      });
+    }
+  }
   return result;
 }
 
@@ -280,6 +326,8 @@ export interface LastTrainDemoResult {
   latestDeparture: Map<string, number>;
   /** その接続から先に目的地へ到達可能な架空便を含む地図区間。 */
   feasibleLegs: DemoLeg[];
+  /** 最遅時刻が実際の時刻表（data/lastTrainTimetables.ts）によるもの。無い駅は架空のデモダイヤ（時刻に「*」を付ける） */
+  latestIsReal: Set<string>;
 }
 
 /**
@@ -297,6 +345,7 @@ export function calculateDemoLastTrain(
   const latestByTrip = new Map<string, Map<string, number>>();
   const latestAny = new Map<string, number>();
   const feasibleLegs: DemoLeg[] = [];
+  const latestIsReal = new Set<string>();
   const sorted = [...legs].sort((a, b) => b.depart - a.depart);
   for (const leg of sorted) {
     if (leg.from === destination) continue;
@@ -311,10 +360,14 @@ export function calculateDemoLastTrain(
     const state = latestByTrip.get(leg.from) ?? new Map<string, number>();
     state.set(tripKey, Math.max(state.get(tripKey) ?? -Infinity, leg.depart));
     latestByTrip.set(leg.from, state);
-    latestAny.set(leg.from, Math.max(latestAny.get(leg.from) ?? -Infinity, leg.depart));
+    // 最遅の出発をつくる便が実データなら、その駅の時刻は実データ（便は出発の遅い順に処理しているので、最初に入った便が最遅）
+    if (!latestAny.has(leg.from) || leg.depart > latestAny.get(leg.from)!) {
+      latestAny.set(leg.from, leg.depart);
+      if (leg.quality === 'real') latestIsReal.add(leg.from); else latestIsReal.delete(leg.from);
+    }
   }
   const latestDeparture = latestAny;
-  return { latestDeparture, feasibleLegs };
+  return { latestDeparture, feasibleLegs, latestIsReal };
 }
 
 export function availableDemoStations(
