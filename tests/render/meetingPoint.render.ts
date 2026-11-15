@@ -136,7 +136,8 @@ for (const width of [1280, 390, 360]) {
       const arrival = box(inputs[1]);            // 到着駅欄
       const extras = [...document.querySelectorAll('[data-meeting-extra] input')].map(box);
       const add = box(document.querySelector('[data-meeting-add] input')!);
-      return { departure, arrival, extras, add };
+      const actions = box(document.querySelector('[data-station-actions]')!);
+      return { departure, arrival, extras, add, actions };
     });
     // 左の欄: 出発駅欄と同じ左端・同じ幅。右の欄: 到着駅欄と同じ左端・同じ幅（行をそろえる）
     expect(Math.abs(m.extras[0].left - m.departure.left)).toBeLessThanOrEqual(1);
@@ -147,6 +148,8 @@ for (const width of [1280, 390, 360]) {
     expect(Math.abs(m.add.left - m.departure.left)).toBeLessThanOrEqual(1);
     expect(Math.abs(m.add.width - m.departure.width)).toBeLessThanOrEqual(1);
     expect(m.add.top).toBeGreaterThan(m.extras[0].top);
+    expect(m.extras[0].top).toBeGreaterThan(m.arrival.top);
+    expect(m.add.top).toBeLessThan(m.actions.top);
   });
 }
 
@@ -339,20 +342,25 @@ test('集合駅モード: 3人以上のときだけ「集合駅の決め方」�
   await expect(slider).toBeVisible();
   await expect(slider).toContainText('全員が同じくらい');
   await expect(slider).toContainText('多い人に寄せる');
-  const input = slider.locator('input[type="range"]');
+  await expect(slider.locator('[data-slider-stop]')).toHaveCount(5);
+  const input = slider.getByRole('slider');
   await expect(input).toHaveAttribute('max', '4');
   await expect(input).toHaveAttribute('step', '1');
   const names = () => page.locator('[data-meeting-candidate]').evaluateAll(
     cards => cards.map(card => card.getAttribute('data-meeting-candidate')),
   );
   const fair = await names();
-  await input.fill('4');
+  await input.focus();
+  await input.press('ArrowRight');
+  await expect(input).toHaveValue('1');
+  await input.press('End');
+  await expect(input).toHaveValue('4');
   await expect.poll(async () => (await names()).join(',')).not.toBe(fair.join(','));
   expect(await names()).toHaveLength(3);
   expect(errors).toEqual([]);
 });
 
-test('集合駅モード: 畳んだ駅選択パネルにも、到着駅候補の上位3つが控えめなボタンでコンパクトに出て、押すと到着駅になる', async ({ page }) => {
+test('集合駅モード: 畳んだ駅選択パネルにも、到着駅候補の上位3つが到着駅と同じ配色でコンパクトに出て、押すと到着駅になる', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('/?mode=meeting&from=shinjuku&with=yokohama');
   const panel = page.locator('[data-station-selector]').first();
@@ -365,9 +373,13 @@ test('集合駅モード: 畳んだ駅選択パネルにも、到着駅候補の
   await expect(group.getByRole('button')).toHaveCount(3);
   await expect(group).toContainText('他2');
   // 札を押すと、その駅が到着駅になり、候補の札は到着駅の札に変わる
-  const first = (await group.getByRole('button').first().innerText()).trim();
-  await group.getByRole('button').first().click();
-  await expect(panel.locator('[data-summary-group="arrival"]')).toContainText(first);
+  const firstCandidate = group.getByRole('button').first();
+  const first = (await firstCandidate.innerText()).trim();
+  const background = await firstCandidate.evaluate(el => getComputedStyle(el).backgroundColor);
+  await firstCandidate.click();
+  const arrivalGroup = panel.locator('[data-summary-group="arrival"]');
+  await expect(arrivalGroup).toContainText(first);
+  await expect(arrivalGroup.getByText(first, { exact: true })).toHaveCSS('background-color', background);
   await expect(panel.locator('[data-summary-group="candidates"]')).toHaveCount(0);
   expect(errors).toEqual([]);
 });
@@ -382,6 +394,7 @@ test('集合駅の候補は1駅につき1枚のカード。所要時間からも
   await expect(card).toHaveAccessibleName(/^1\. /);
   await expect(card).toHaveAccessibleDescription(/最大.*新宿.*横浜/);
   await expect(card).not.toHaveCSS('background-color', 'rgb(244, 67, 54)');
+  await expect(card).toHaveCSS('border-inline-start-color', 'rgba(244, 67, 54, 0.6)');
   const times = card.locator('[data-meeting-origin-time]');
   await expect(times).toHaveCount(2);
   await expect(times.first()).toContainText('新宿');

@@ -3,10 +3,14 @@ import React, { useId } from 'react';
 import { Check } from 'lucide-react';
 import { getThemeColors } from '../contexts/ThemeContext';
 import { FS, SEMANTIC } from '../constants/ui';
+import { tintColor } from '../utils/contrast';
 import { L, selectableCard } from './legend/legendStyles';
 import Button from './ui/atoms/Button';
 import { CONTROL_SIZE } from './ui/atoms/controlSize';
 import { translateStation, translateUI, type Language } from '../utils/translation';
+
+/** 候補の段階では、到着駅の色を左端だけに使う。 */
+const CANDIDATE_ACCENT = tintColor(SEMANTIC.arrival, 0.6);
 
 export interface MeetingCandidateRowProps {
   theme: 'light' | 'dark';
@@ -44,6 +48,7 @@ const MeetingCandidateRow: React.FC<MeetingCandidateRowProps> = ({ theme, langua
       styleOverride={{
         ...selectableCard(colors, { selected, accent: SEMANTIC.arrival }),
         borderColor: selected ? SEMANTIC.arrival : colors.border,
+        borderInlineStartColor: selected ? SEMANTIC.arrival : CANDIDATE_ACCENT,
         flexDirection: 'column',
         alignItems: 'stretch',
         gap: L.sp.xxs,
