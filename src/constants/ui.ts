@@ -86,6 +86,18 @@ export const SEMANTIC = {
   north: '#E53935',
 } as const;
 
+/** 路線チップと同じ規則で色を付ける、表示モードごとの識別色。 */
+export const DISPLAY_MODE_COLORS = {
+  meeting: '#538FD1',
+  lastTrain: '#8B73CF',
+  heatmap: '#BF633D',
+  rideLog: '#44967D',
+  trainDemo: '#348DA1',
+  bubble: '#AC6598',
+  schematic: '#728EA9',
+  terrain3d: '#748C49',
+} as const;
+
 /**
  * 白と黒の唯一の定義。
  *

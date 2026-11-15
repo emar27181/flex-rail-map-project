@@ -5,7 +5,7 @@ import { travelTimeLabelLayout } from './map/travelTimeLabel';
 import { circularNumberBadgeHtml } from './ui/atoms/circularNumberBadge';
 import { isCircularRoute } from '../utils/routeAdjacency';
 import { closeFullRouteStations, renderedRouteMidpoint, stationVertexIndices } from '../utils/renderedRouteMidpoint';
-import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X, Timer, TriangleAlert, ArrowUpDown, Users, NotebookPen } from 'lucide-react';
+import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X, Timer, TriangleAlert, ArrowUpDown, Users, NotebookPen, Palette } from 'lucide-react';
 import type { LeafletEvent, LeafletMouseEvent, Map as LeafletMap } from 'leaflet';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { JAPAN_OUTLINE } from '../data/japanOutline';
@@ -20,7 +20,7 @@ import type { TagToggleItem } from './ui/molecules/TagToggleGroup';
 import { useRideLog } from '../hooks/useRideLog';
 import { collectUserData, parseUserData, persistUserData } from '../utils/userDataBundle';
 import { deriveRideLog, entriesFromRoute, rideLevelOf, hasAlightEntry, type RideLogEntry } from '../utils/rideLog';
-import { MEETING_BALANCE_DEFAULT, MEETING_BALANCE_LEVELS, rankMeetingStations, summarizeMeetingRoutes, interleaveByRank, meetingEdgeMinutes, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
+import { MEETING_BALANCE_DEFAULT, MEETING_BALANCE_LEVELS, rankMeetingStations, summarizeMeetingRoutes, interleaveByRank, meetingEdgeMinutes, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT, MEETING_MAP_CANDIDATE_LIMIT } from '../utils/meetingPoint';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
@@ -70,7 +70,7 @@ import {
   computeEffectiveBaseTime,
   type Departure,
 } from '../data/timetableData';
-import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, alphaWhite, alphaBlack } from '../constants/ui';
+import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, alphaWhite, alphaBlack, DISPLAY_MODE_COLORS } from '../constants/ui';
 import { DEFAULT_ROUTE_RECOMMENDATION_LIMIT, ROUTE_RECOMMENDATION_LIMIT_OPTIONS } from '../constants/routeRecommendationLimit';
 import { trackStationSelect, trackRouteSearch, trackViewSwitch, trackRouteVisibility, trackRouteVisibilityBulk } from '../utils/appAnalytics';
 import { DEFAULT_MAP_CENTER } from '../constants/mapDefaults';
@@ -3120,6 +3120,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     [meetingTimeMaps, meetingOrigins, deferredMeetingBalance],
   );
   const meetingCandidates = useMemo(() => meetingRanking.slice(0, MEETING_RESULT_LIMIT), [meetingRanking]);
+  const meetingMapCandidates = useMemo(() => meetingCandidates.slice(0, MEETING_MAP_CANDIDATE_LIMIT), [meetingCandidates]);
   /** 候補の駅名から座標つきの駅を引く（地図に札を置くため） */
   const candidateStationOf = useMemo(() => {
     const byName = new Map<string, Station>();
@@ -3130,14 +3131,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const meetingCandidateMarkers = useMemo(() => {
     const markers = new Map<string, Station>();
     if (meetingModeEnabled) {
-      for (const { name } of meetingCandidates) {
+      for (const { name } of meetingMapCandidates) {
         if (name === arrival?.name) continue;
         const station = candidateStationOf(name);
         if (station) markers.set(name, station);
       }
     }
     return markers;
-  }, [meetingModeEnabled, meetingCandidates, arrival?.name, candidateStationOf]);
+  }, [meetingModeEnabled, meetingMapCandidates, arrival?.name, candidateStationOf]);
   // 集合駅（到着駅）が決まっているとき、出発駅ごとのルートと使う路線
   const meetingRouteEntries = useMemo(() => {
     if (!meetingModeEnabled || !arrival || meetingOrigins.length < 2) return [];
@@ -3549,11 +3550,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 出発駅と到着駅が設定された時にルート検索を実行
   useEffect(() => {
     // 集合駅を探す（集合駅はまだ無い）: 出発駅それぞれから、集合駅になりそうな候補の駅を「仮の到着駅」として、
-    // その経路（路線）を描く。どの出発駅も対等（最初の入力を優先しない）。候補は上位（MEETING_RESULT_LIMIT）まで
+    // その経路（路線）を描く。どの出発駅も対等（最初の入力を優先しない）。地図に描く候補は MEETING_MAP_CANDIDATE_LIMIT 件まで
     if (meetingProvisionalMode) {
       const origins = meetingOrigins;
       const provisional: RouteResult[] = [];
-      for (const candidate of meetingCandidates) {
+      for (const candidate of meetingMapCandidates) {
         const target = candidateStationOf(candidate.name);
         if (!target) continue;
         for (const origin of origins) {
@@ -3582,7 +3583,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       if (provisionalFitKeyRef.current !== fitKey) {
         provisionalFitKeyRef.current = fitKey;
         mapRef.current?.fitBounds(
-          [...origins, ...meetingCandidates.flatMap(c => { const st = candidateStationOf(c.name); return st ? [st] : []; })]
+          [...origins, ...meetingMapCandidates.flatMap(c => { const st = candidateStationOf(c.name); return st ? [st] : []; })]
             .map(st => [st.lat, st.lng] as [number, number]),
           { padding: [60, 60], maxZoom: 13 });
       }
@@ -3712,7 +3713,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       setRouteRecommendations([]);
       setSelectedRouteIndices(null);
     }
-  }, [departure, arrival, waypoints, routeFinder, maxRouteRecommendations, removeFinalDuplicates, meetingModeEnabled, meetingOrigins, meetingProvisionalMode, meetingCandidates, candidateStationOf]);
+  }, [departure, arrival, waypoints, routeFinder, maxRouteRecommendations, removeFinalDuplicates, meetingModeEnabled, meetingOrigins, meetingProvisionalMode, meetingMapCandidates, candidateStationOf]);
 
   // 時間フィルターが有効な時の駅フィルタリング（出発駅ベース）
   useEffect(() => {
@@ -5414,14 +5415,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     notifyMessage(translateUI('rideLogRecorded', currentLanguage, { from: translateStation(departure.name, currentLanguage), to: translateStation(arrival.name, currentLanguage) }));
   };
   /**
-   * 表示モード（集合駅・終電・乗車ログ）の切り替えタグ。「表示切替」パネルの表示設定の下に出す
-   * （2026-11-15 ユーザー指示: 駅選択パネルのボタン列から、切り替えを出す専用の場所へ移した）。
-   * 同時に使えるのは1つ。押すと、ほかのモードは切れる
+   * 「表示切替」に先に並べる4つのモード。
+   * 集合駅・終電・乗車ログは相互に切り替え、ヒートマップは独立して切り替える。
    */
   const modeTags: TagToggleItem[] = [
-    { key: 'meeting', label: translateUI('meetingModeButton', currentLanguage), icon: <Users />, pressed: meetingModeEnabled, onToggle: () => handleMeetingModeChange(!meetingModeEnabled) },
-    { key: 'lastTrain', label: lastTrainCopy(currentLanguage).toggleMode, icon: <TrainFront />, pressed: lastTrainModeEnabled, title: lastTrainCopy(currentLanguage).warnBody, onToggle: () => handleLastTrainModeChange(!lastTrainModeEnabled) },
-    { key: 'rideLog', label: translateUI('rideLogModeButton', currentLanguage), icon: <NotebookPen />, pressed: rideLogModeEnabled, onToggle: () => handleRideLogModeChange(!rideLogModeEnabled) },
+    { key: 'meeting', color: DISPLAY_MODE_COLORS.meeting, label: translateUI('meetingModeButton', currentLanguage), icon: <Users />, pressed: meetingModeEnabled, onToggle: () => handleMeetingModeChange(!meetingModeEnabled) },
+    { key: 'lastTrain', color: DISPLAY_MODE_COLORS.lastTrain, label: lastTrainCopy(currentLanguage).toggleMode, icon: <TrainFront />, pressed: lastTrainModeEnabled, title: lastTrainCopy(currentLanguage).warnBody, onToggle: () => handleLastTrainModeChange(!lastTrainModeEnabled) },
+    { key: 'heatmap', color: DISPLAY_MODE_COLORS.heatmap, label: translateUI('stationHeatmap', currentLanguage), icon: <Palette />, pressed: heatmapEnabled, onToggle: () => setHeatmapEnabled(v => !v) },
+    { key: 'rideLog', color: DISPLAY_MODE_COLORS.rideLog, label: translateUI('rideLogModeButton', currentLanguage), icon: <NotebookPen />, pressed: rideLogModeEnabled, onToggle: () => handleRideLogModeChange(!rideLogModeEnabled) },
   ];
   /** 乗車ログの間、「表示路線の切替」のチップは乗った路線を表す（同じチップ・同じ並びで、押すと乗った/乗っていないを切り替える） */
   const routeListRideOverrides = rideLogActive ? {
@@ -6885,9 +6886,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onShowStationNumbersChange={setShowStationNumbers}
                     onShowFuriganaChange={setShowFurigana}
                     onShowOsmTilesChange={setShowOsmTiles}
-                    heatmapEnabled={heatmapEnabled}
                     heatmapParam={heatmapParam}
-                    onHeatmapEnabledChange={setHeatmapEnabled}
                     onHeatmapParamChange={handleHeatmapParamChange}
                     showEstimatedData={showEstimatedData}
                     onShowEstimatedDataChange={handleShowEstimatedDataChange}
@@ -7190,9 +7189,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onShowStationNumbersChange={setShowStationNumbers}
                         onShowFuriganaChange={setShowFurigana}
                         onShowOsmTilesChange={setShowOsmTiles}
-                        heatmapEnabled={heatmapEnabled}
                         heatmapParam={heatmapParam}
-                        onHeatmapEnabledChange={setHeatmapEnabled}
                         onHeatmapParamChange={handleHeatmapParamChange}
                         showEstimatedData={showEstimatedData}
                         onShowEstimatedDataChange={handleShowEstimatedDataChange}

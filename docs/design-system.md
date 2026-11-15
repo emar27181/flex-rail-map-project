@@ -265,10 +265,10 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 選んだものを並べ、1つずつ外せるタグ（経由駅など） | `RemovableTag`（削除ボタン付き） |
 | 役割の色で塗った入力欄（出発=緑・到着=赤。値を消すボタン付き）。出発駅・到着駅・「集合駅を探す」で増やす出発駅は**すべてこの部品**で出す（同じ入力欄を別々に手書きしない。追加の出発駅だけ灰色のタグ・点線の枠・別の幅・別の文言にしない） | `RoleField`（molecule。`TextField` + `IconButton`。役割の色は `ROLE_FIELD_COLOR`（= `SEMANTIC`）、枠は同じ色の実線。駅の知識は持たない） |
 | 入力欄を2つ並べる行（左右は同じ幅、間に入れ替えボタンと同じ幅の区切り。「出発駅 ⇆ 到着駅」と、集合駅の追加の出発駅の行を**同じ幅・同じ位置**にそろえる） | `FieldPairRow`（molecule。区切りの幅は `PAIR_DIVIDER_WIDTH` = `CONTROL_SIZE.sm.minHeight`。欄が1つだけの行も半分の幅） |
-| アイコンつきの切り替えタグ（ボタン）の並び。「表示モード」の先頭にデータ可視化（ヒートマップ・列車デモ・バブル地図・路線図風・立体）、続けて集合駅・終電・乗車ログを並べ、**同じ見た目の「押すと塗りに変わるタグ」**で切り替える（チェックボックスの縦の列にしない。折り返して並ぶので長くならない） | `TagToggleGroup`（molecule。タグは `Button`（primary・pressed）、アイコンは lucide-react。何のタグかは知らない。2026-11-15） |
+| アイコンつきの切り替えタグ（ボタン）の並び。「表示モード」は集合駅・終電・ヒートマップ・乗車ログを先に並べ、残りの可視化とは共通の余白で区切る。路線切り替えと同じ面・角丸を使い、有効なチップは識別色で塗る | `TagToggleGroup`（molecule）。アトムは路線と同じ `Chip`。モード色は `DISPLAY_MODE_COLORS`、印は lucide-react |
 | 2つの考え方の間を段階で選ぶ設定（数字は出さず、つまみの位置と両端の言葉で示す。集合駅の「全員が同じくらい ←→ 多い人に寄せる」） | `EndLabeledSlider`（molecule。つまみと等間隔の目盛りは `Slider` アトム（ブラウザ別のつまみの描画は `slider.css`）。選択位置までを主操作色で示し、目盛りとつまみは駅マーカーと同じ `L.r.control`。何の設定かは知らない。2026-11-15） |
 | 見出しの語（小さな文字）と、続く札・チップの並び（畳んだ駅選択パネルの2行目「出発駅 [藤沢][船橋]　到着駅 [東京]」。折り返しても見出しと札は離れない） | `LabeledGroup`（molecule。駅は知らない。札は `ColorChip`、語は `departureStation` / `arrivalStation`。2026-11-14） |
-| 並んだ項目（縦の一覧）を上位3件だけ見せ、残りは「さらに表示」で開く（集合駅の候補・出発駅ごとのルート。手で `slice` して開閉の状態を持たない） | `TopList`（molecule。件数は `TOP_LIST_DEFAULT_COUNT` = 3、文言は `showMoreRoutesStep` / `collapseList`。折り返して並ぶ小さな部品を行数で切るのは `ClampedWrap`。2026-11-14） |
+| 並んだ項目（縦の一覧）を上位3件だけ見せ、残りは「さらに表示」で開く（集合駅の候補・出発駅ごとのルート。手で `slice` して開閉の状態を持たない） | `TopList`（molecule。初期件数は `TOP_LIST_DEFAULT_COUNT` = 3。集合駅候補の段階表示は `TOP_LIST_STEP_COUNT` = 5。文言は `showMoreRoutesStep` / `collapseList`。折り返して並ぶ小さな部品を行数で切るのは `ClampedWrap`。2026-11-14） |
 | 開閉する見出しの右端の ▼ | `DisclosureIndicator`（開くと180度回る。回す時間・色は全パネル共通。塗ったボタンの中に置くときは `tone="inherit"`。▼▲▶ を文字で書くのはこの部品だけで、翻訳文言にも入れない） |
 | 押すと開閉する見出しの行 | `DisclosureHeader`（見出し＋▼。行のどこを押しても開閉、開くと区切り線。`size="floating"` で高さ・文字が `FLOATING_CONTROL`） |
 | 地図の上に浮かぶ操作の高さ・文字の大きさ | `FLOATING_CONTROL`（`controlSize.ts`。36px・`FS.body`。FloatingButton・凡例の見出し・丸いボタンで共通） |
@@ -609,7 +609,7 @@ UIのテーマと無関係なため明示的に除外している。
    色覚特性によっては差が分かりにくい
 
 路線一覧では accent にその路線の色を渡し、選択された路線が自分の色で塗られるようにした。
-集合駅候補のように背景の差で区切るカードは、共通の `selectableCard()` に `borderless: true` を指定する。通常は `surfaceElevated`、選択時は薄いアクセント色の背景にチェックを添える。
+集合駅候補のように背景の差で区切るカードは、共通の `selectableCard()` に `borderless: true` を指定する。通常は `surfaceElevated`、選択時は薄いアクセント色の背景にチェックを添える。集合駅候補の駅名には到着駅色、各所要時間の出発駅名には出発駅色を、共通の `ColorChip` の `tone="subtle"` で薄く敷く。
 `tests/unit/components/legend/legendStyles.test.ts` でこの3点を固定している。
 
 ---

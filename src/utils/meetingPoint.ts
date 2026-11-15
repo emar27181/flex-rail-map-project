@@ -37,8 +37,10 @@ export function meetingBalanceWeight(level: number): number {
   return clamped / (MEETING_BALANCE_LEVELS - 1);
 }
 
-/** 画面に出す候補の数 */
-export const MEETING_RESULT_LIMIT = 5;
+/** 一覧に出す候補の最大件数 */
+export const MEETING_RESULT_LIMIT = 15;
+/** 到着駅を選ぶ前に、地図に駅名と経路を描く候補の最大件数 */
+export const MEETING_MAP_CANDIDATE_LIMIT = 5;
 
 /**
  * @param timeMaps 出発駅ごとの「駅名 → 所要時間(分)」。出発駅の並びは呼び出し側が決める

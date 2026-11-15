@@ -12,7 +12,7 @@ import { describe, it, expect, vi } from 'vitest';
 import LegendRouteList from '../../../src/components/legend/LegendRouteList';
 import type { RouteKey } from '../../../src/data/routes';
 import type { MapConfig } from '../../../src/components/legend/MapConfigPanel';
-import { NEUTRAL } from '../../../src/constants/ui';
+import { DISPLAY_MODE_COLORS, NEUTRAL } from '../../../src/constants/ui';
 
 // Leaflet 非依存コンポーネントなのでモック不要
 // ただし ThemeContext だけ必要
@@ -79,13 +79,12 @@ const minimalProps = {
   onShowOsmTilesChange: noopBool,
   adjustRouteColorForTheme: (color: string) => color,
   viewCenter: [35.6812, 139.7671] as [number, number],
+  modeTags: [],
   showTrainDemo: false,
   onTrainDemoToggle: noop,
   mapViewMode: 'realistic' as const,
   onMapViewModeChange: noop,
-  heatmapEnabled: false,
   heatmapParam: 'avgRent1K' as const,
-  onHeatmapEnabledChange: noopBool,
   onHeatmapParamChange: noop,
   bubbleShape: 'circle' as const,
   onBubbleShapeChange: noop,
@@ -276,34 +275,38 @@ describe('詳細設定（所要時間・駅アイコンの配色カスタム）'
 });
 
 describe('表示設定の並びと名前', () => {
-  it('表示モードは可視化から始まり、すべての切り替えが共通のボタンで1つずつ出る', () => {
-    const onHeatmapEnabledChange = vi.fn();
+  it('指定した4つのモードを先に表示し、間隔を空けてほかの可視化を並べる', () => {
+    const onHeatmapToggle = vi.fn();
     const onMapViewModeChange = vi.fn();
     const onMeetingToggle = vi.fn();
-    const props = {
-      ...minimalProps,
-      onHeatmapEnabledChange,
-      onMapViewModeChange,
-      modeTags: [{ key: 'meeting', label: 'meeting', icon: <svg />, pressed: false, onToggle: onMeetingToggle }],
-    };
+    const modeTags = [
+      { key: 'meeting', label: 'meeting', color: DISPLAY_MODE_COLORS.meeting, icon: <svg />, pressed: false, onToggle: onMeetingToggle },
+      { key: 'lastTrain', label: 'lastTrain', color: DISPLAY_MODE_COLORS.lastTrain, icon: <svg />, pressed: false, onToggle: noop },
+      { key: 'heatmap', label: 'stationHeatmap', color: DISPLAY_MODE_COLORS.heatmap, icon: <svg />, pressed: false, onToggle: onHeatmapToggle },
+      { key: 'rideLog', label: 'rideLog', color: DISPLAY_MODE_COLORS.rideLog, icon: <svg />, pressed: false, onToggle: noop },
+    ];
+    const props = { ...minimalProps, modeTags, onMapViewModeChange };
     const { rerender } = render(<LegendRouteList {...props} />);
-    const modes = within(screen.getByRole('group', { name: 'displayModes' }));
-    expect(modes.getAllByRole('button').map(button => button.getAttribute('data-tag'))).toEqual([
-      'heatmap', 'trainDemo', 'bubble', 'schematic', 'terrain3d', 'meeting',
-    ]);
+    const priorityGroup = screen.getByRole('group', { name: 'displayModes' });
+    const otherGroup = screen.getByRole('group', { name: 'settingsGroupViz' });
+    const keys = (group: HTMLElement) => within(group).getAllByRole('button').map(button => button.getAttribute('data-tag'));
+    expect(keys(priorityGroup)).toEqual(['meeting', 'lastTrain', 'heatmap', 'rideLog']);
+    expect(keys(otherGroup)).toEqual(['trainDemo', 'bubble', 'schematic', 'terrain3d']);
+    expect(priorityGroup.nextElementSibling).toBe(otherGroup);
+    expect(priorityGroup.parentElement).toHaveStyle({ gap: '12px' });
     const heatmap = screen.getByRole('button', { name: 'stationHeatmap' });
     expect(heatmap.firstElementChild).toHaveAttribute('aria-hidden', 'true');
     fireEvent.click(heatmap);
-    expect(onHeatmapEnabledChange).toHaveBeenCalledWith(true);
-    fireEvent.click(modes.getByRole('button', { name: 'bubbleMap' }));
+    expect(onHeatmapToggle).toHaveBeenCalledOnce();
+    fireEvent.click(within(otherGroup).getByRole('button', { name: 'bubbleMap' }));
     expect(onMapViewModeChange).toHaveBeenLastCalledWith('bubble');
-    fireEvent.click(modes.getByRole('button', { name: 'meeting' }));
+    fireEvent.click(within(priorityGroup).getByRole('button', { name: 'meeting' }));
     expect(onMeetingToggle).toHaveBeenCalledOnce();
 
-    rerender(<LegendRouteList {...props} heatmapEnabled mapViewMode="bubble" />);
+    rerender(<LegendRouteList {...props} modeTags={modeTags.map(tag => ({ ...tag, pressed: tag.key === 'heatmap' }))} mapViewMode="bubble" />);
     expect(heatmap).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByText('bubbleMaxRadius')).toBeVisible();
-    const bubble = modes.getByRole('button', { name: 'bubbleMap' });
+    const bubble = within(otherGroup).getByRole('button', { name: 'bubbleMap' });
     expect(bubble).toHaveAttribute('aria-pressed', 'true');
     fireEvent.click(bubble);
     expect(onMapViewModeChange).toHaveBeenLastCalledWith('realistic');
@@ -333,7 +336,7 @@ describe('表示設定のグループは既定で閉じている', () => {
       expect(header!.getAttribute('aria-expanded'), key).toBe('false');
     }
     expect(container.textContent).not.toContain('showOnlyTransferStations');
-    expect(screen.getByRole('button', { name: 'stationHeatmap' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'bubbleMap' })).toBeVisible();
   });
 
   it('見出しを押すとそのグループだけが開く', () => {
