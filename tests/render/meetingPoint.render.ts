@@ -288,3 +288,38 @@ test('集合駅モード: 集合駅を決める前に、ほかの路線を表示
   await expect(page.locator('[data-station-selector]').first()).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test('集合駅モード: 候補の駅は到着駅と同じ赤の駅名札で地図に出て、タップすると出発駅ごとの所要時間がツールチップに出る（駅アイコンの下には書かない）', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('/?mode=meeting&from=shinjuku&with=yokohama');
+  await expect(page.locator('[data-meeting-results]')).toBeVisible();
+  // 候補（上位5つ）が、到着駅と同じ赤の札で出る
+  const candidateNames: string[] = [];
+  const buttons = page.locator('[data-meeting-results]').getByRole('button');
+  await page.locator('[data-meeting-results]').getByRole('button', { name: /さらに表示/ }).click();
+  const n = await buttons.count();
+  for (let i = 0; i < n; i++) {
+    const t = await buttons.nth(i).innerText();
+    const m = t.match(/^\d+\.\s*(.+?)\s·/);
+    if (m) candidateNames.push(m[1]);
+  }
+  expect(candidateNames).toHaveLength(5);
+  const plates = page.locator('.special-station-marker-inline');
+  await expect.poll(async () => {
+    let found = 0;
+    for (const name of candidateNames) found += (await plates.filter({ hasText: name }).count()) > 0 ? 1 : 0;
+    return found;
+  }, { timeout: 20_000 }).toBeGreaterThanOrEqual(3);
+  const bg = await plates.filter({ hasText: candidateNames[0] }).first().locator('div').first().evaluate(el => getComputedStyle(el).backgroundColor);
+  expect(bg).toBe('rgb(244, 67, 54)');
+  // 駅アイコンの下には出発駅ごとの時間を出さない
+  expect(await page.locator('.leaflet-marker-icon', { hasText: /(新宿|横浜) \d+分/ }).count()).toBe(0);
+  // 候補の札をタップ → ツールチップに出発駅ごとの所要時間と最大
+  await plates.filter({ hasText: candidateNames[0] }).first().click({ force: true });
+  const detail = page.locator('[data-meeting-times]');
+  await expect(detail).toBeVisible();
+  await expect(detail.locator('[data-meeting-times-row="新宿"]')).toContainText('分');
+  await expect(detail.locator('[data-meeting-times-row="横浜"]')).toContainText('分');
+  await expect(detail).toContainText('最大');
+  expect(errors).toEqual([]);
+});

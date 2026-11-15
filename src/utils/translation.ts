@@ -977,6 +977,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "お互いに行きやすい駅（いちばん遅い人の所要時間が短い順）",
     english: "Stations easy for everyone (shortest for the slowest traveler first)"
   },
+  meetingDetailTitle: {
+    japanese: "各出発駅からの所要時間",
+    english: "Time from each departure"
+  },
   meetingMaxMinutes: {
     japanese: "最大{minutes}分",
     english: "up to {minutes} min"
@@ -2310,6 +2314,7 @@ export const uiChinese: Record<string, string> = {
   addMeetingOrigin: "添加出发站",
   meetingNeedOrigins: "在出发站栏和其下方的出发站栏中输入两个以上的车站，即可找出大家都容易到达的车站。",
   meetingResultsTitle: "大家都容易到达的车站（按最晚到的人所需时间由短到长）",
+  meetingDetailTitle: "从各出发站所需时间",
   meetingMaxMinutes: "最长{minutes}分钟",
   meetingNoResults: "没有所有人都能在{minutes}分钟内到达的车站。",
   otherStations: "其他{count}站",
@@ -2718,6 +2723,7 @@ export const uiKorean: Record<string, string> = {
   addMeetingOrigin: "출발역 추가",
   meetingNeedOrigins: "출발역 칸과 그 아래의 출발역 칸에 역을 2곳 이상 넣으면 모두가 가기 쉬운 역을 찾습니다.",
   meetingResultsTitle: "모두가 가기 쉬운 역(가장 늦게 도착하는 사람의 소요 시간이 짧은 순)",
+  meetingDetailTitle: "각 출발역에서의 소요 시간",
   meetingMaxMinutes: "최대 {minutes}분",
   meetingNoResults: "모두가 {minutes}분 이내에 갈 수 있는 역이 없습니다.",
   otherStations: "외 {count}역",

@@ -15,6 +15,7 @@ import { buildDestinationDemoNetwork, calculateDemoLastTrain, availableDemoStati
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
 import { requestPosition, resolveCurrentPosition } from '../utils/freshLocation';
 import StationRoleBadge from './StationRoleBadge';
+import MeetingTimesDetail from './MeetingTimesDetail';
 import { useRideLog } from '../hooks/useRideLog';
 import { deriveRideLog, entriesFromRoute, countByLevel, rideLevelOf, RIDE_LEVELS, type RideLevel } from '../utils/rideLog';
 import { rankMeetingStations, summarizeMeetingRoutes, interleaveByRank, meetingEdgeMinutes, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
@@ -1775,6 +1776,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               {translateUI('setArrivalStation', currentLanguage)}
             </Button>
           </div>
+          {tooltipMeetingDetail && <div style={{ marginTop: L.sp.sm }}>{tooltipMeetingDetail}</div>}
         </div>
 
         {/* 選択パラメータ（大きく表示） */}
@@ -2111,6 +2113,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onClick={() => { setArrival(stationTooltip.station); closeTooltip(); }}
               >{translateUI('setArrivalStation', currentLanguage)}</Button>
             </div>
+            {tooltipMeetingDetail}
             <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, flexWrap: 'wrap' }}>
               <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
                 {translateUI(timeMode === 'arrival' ? 'arrivalTimeLabel' : 'baseTime', currentLanguage)}
@@ -3052,11 +3055,28 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       timeFilter.findStationsWithinTime(origin, MEETING_MAX_MINUTES, allRouteKeys).map(r => [r.station.name, r.totalTime] as [string, number]),
     ));
   }, [meetingModeEnabled, meetingOrigins, timeFilter]);
+  /** 集合駅を探すとき、ツールチップの駅への出発駅ごとの所要時間（駅アイコンの下には出さず、ここに出す） */
+  const tooltipMeetingDetail = stationTooltip && meetingModeEnabled && meetingTimeMaps.length >= 2 ? (
+    <MeetingTimesDetail
+      theme={theme}
+      language={currentLanguage}
+      rows={meetingOrigins.map((origin, k) => {
+        const t = origin.name === stationTooltip.stationName ? 0 : meetingTimeMaps[k]?.get(stationTooltip.stationName);
+        return { origin: origin.name, minutes: t === undefined ? undefined : Math.round(t) };
+      })}
+    />
+  ) : null;
   const meetingRanking = useMemo(
     () => (meetingTimeMaps.length < 2 ? [] : rankMeetingStations(meetingOrigins.map(o => o.name), meetingTimeMaps)),
     [meetingTimeMaps, meetingOrigins],
   );
   const meetingCandidates = useMemo(() => meetingRanking.slice(0, MEETING_RESULT_LIMIT), [meetingRanking]);
+  /** 候補の駅名から座標つきの駅を引く（地図に札を置くため） */
+  const candidateStationOf = useMemo(() => {
+    const byName = new Map<string, Station>();
+    for (const list of Object.values(routes)) for (const st of list as Station[]) if (!byName.has(st.name)) byName.set(st.name, st);
+    return (name: string) => byName.get(name);
+  }, []);
   // 集合駅（到着駅）が決まっているとき、出発駅ごとのルートと使う路線
   const meetingRouteEntries = useMemo(() => {
     if (!meetingModeEnabled || !arrival || meetingOrigins.length < 2) return [];
@@ -5924,6 +5944,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   );
                 })
               }
+
+              {/*
+                集合駅の候補（上位5つ）は、到着駅と同じ駅名札（赤）で少し強調して出す（2026-11-14 ユーザー指示）。
+                決めた到着駅は路線の描画側で同じ札になるので、ここでは重ねない。
+              */}
+              {meetingModeEnabled && meetingCandidates
+                .filter(c => c.name !== arrival?.name)
+                .map(c => {
+                  const station = candidateStationOf(c.name);
+                  if (!station) return null;
+                  return renderEndpointMarker(station, `meeting-candidate-${c.name}`,
+                    createSpecialStationIcon(false, zoomLevel, translateStation(c.name, currentLanguage), c.name));
+                })}
 
               {/* 集合駅を探す: 隣り合う駅の間（路線の上）に、出発駅それぞれから増えていく所要時間を丸いバッジで出す。
                   既存の区間の時間バッジ（createTimeIcon）と同じ見た目。タップは受け取らない */}

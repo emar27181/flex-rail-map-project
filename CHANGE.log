@@ -1,5 +1,16 @@
 # CHANGE LOG
 
+## [2026-11-15] セッション（集合駅の候補を到着駅と同じ札で／出発駅ごとの時間はツールチップに）
+
+### feat: 集合駅の候補（上位5つ）を、到着駅と同じ赤の駅名札で地図に出す
+- `src/components/RailwayMap.tsx`（`renderEndpointMarker` を候補にも使う。決めた到着駅とは重ねない）
+- 候補が地図のどこにあるかがひと目で分かる。タップは通常の駅と同じ（ツールチップ・到着駅に設定）
+
+### improve: 出発駅ごとの所要時間は、駅アイコンの下ではなく駅のツールチップに出す
+- `src/components/MeetingTimesDetail.tsx`（新規）, `src/components/RailwayMap.tsx`（`tooltipMeetingDetail`）, `src/utils/translation.ts`（`meetingDetailTitle` を4言語）
+- 集合駅モードで駅をタップすると、出発駅それぞれ（入力順。誰も優先しない）の所要時間と「最大」を出す。出発駅の札は既存の `ColorChip`
+- `tests/render/meetingPoint.render.ts`
+
 ## [2026-11-15] セッション（集合駅モードで画面が真っ白になる不具合）
 
 ### fix: 集合駅モードで、集合駅を決める前に地図の薄い線をタップすると画面が真っ白になる
