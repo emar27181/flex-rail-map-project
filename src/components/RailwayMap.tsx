@@ -4880,7 +4880,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         // 藤沢→新宿で中央線の立川方面や小田急線の相模大野より先まで駅が並んでいた
         displaySegments = [stations];
         if (!showFullRouteStations) {
-          displayStations = stations.filter(s => s.name === departure.name || s.name === arrival.name);
+          // 集合駅を探すときは、集合駅（到着駅）がまだ無いことがある（出発駅どうしの間だけ描く）。出発駅は全員残す
+          displayStations = stations.filter(s => s.name === departure?.name || s.name === arrival?.name
+            || (meetingModeEnabled && meetingOrigins.some(o => o.name === s.name)));
         }
       } else {
         if (showFullRouteStations) {

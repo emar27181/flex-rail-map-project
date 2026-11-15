@@ -266,3 +266,25 @@ test('駅のツールチップ: いま出発駅・到着駅の駅には、駅名
   await expect(page.locator('[data-station-role="departure"]')).toHaveCount(0);
   expect(errors).toEqual([]);
 });
+
+test('集合駅モード: 集合駅を決める前に、ほかの路線を表示に足しても画面が落ちない（到着駅が無くても描ける）', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('/?mode=meeting&from=shinjuku&with=fujisawa');
+  await expect.poll(() => page.locator('.time-text-section').count(), { timeout: 20_000 }).toBeGreaterThan(3);
+  // 地図の薄い線（いま描いている小田急線ではない路線）をタップして、表示に足す（スマホでは確認なしで足される）
+  const point = await page.evaluate(() => {
+    const container = document.querySelector('.leaflet-container') as unknown as { _leaflet_map?: { latLngToContainerPoint: (p: [number, number]) => { x: number; y: number } } };
+    const map = container._leaflet_map;
+    if (!map) return null;
+    // 渋谷駅のあたり（山手線などの薄い線が通る）
+    const p = map.latLngToContainerPoint([35.6586, 139.7016]);
+    const rect = (document.querySelector('.leaflet-container') as HTMLElement).getBoundingClientRect();
+    return { x: rect.left + p.x, y: rect.top + p.y };
+  });
+  expect(point).not.toBeNull();
+  await page.mouse.click(point!.x, point!.y);
+  await page.waitForTimeout(1500);
+  // 画面が残っている（駅選択パネルが見える）。例外も出ていない
+  await expect(page.locator('[data-station-selector]').first()).toBeVisible();
+  expect(errors).toEqual([]);
+});
