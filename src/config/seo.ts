@@ -50,6 +50,9 @@ export const SITE_URL = 'https://flex-railway-map.netlify.app';
  */
 export const APP_ICON_PATH = '/icon_flex_rail_way_map.png';
 
+/** ブラウザが既定のURLを参照するときも、アプリアイコンと同じ絵柄を返すための ICO。 */
+export const FAVICON_ICO_PATH = '/favicon.ico';
+
 /** Google検索で大きな画像プレビューの使用を許可する。実際の表示はGoogle側が決める。 */
 export const GOOGLE_IMAGE_PREVIEW_DIRECTIVE = 'max-image-preview:large';
 

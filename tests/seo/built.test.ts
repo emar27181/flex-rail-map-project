@@ -11,7 +11,7 @@
 import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { SITE_URL } from '../../src/config/seo';
+import { APP_ICON_PATH, FAVICON_ICO_PATH, SITE_NAME, SITE_URL } from '../../src/config/seo';
 import { parseSitemapLocs, verifySeo, isNoindex, pageUrl } from '../../src/seo/sitemapCore';
 import { readBuiltPages } from '../../src/integrations/seoSitemap';
 
@@ -25,6 +25,30 @@ describe.skipIf(!built)('ビルド結果の SEO 検証（dist）', () => {
 
   it('sitemap・canonical・hreflang・title・H1 に問題が無い', () => {
     expect(verifySeo(pages, locs, SITE_URL)).toEqual([]);
+  });
+
+  it('ホームの WebSite 構造化データと OGP が正式なサイト名を示す', () => {
+    const head = readFileSync(join(DIST, 'index.html'), 'utf8').split('</head>')[0];
+    const webSite = [...head.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g)]
+      .map(match => JSON.parse(match[1]))
+      .filter(schema => schema['@type'] === 'WebSite');
+    expect(webSite).toEqual([expect.objectContaining({ name: SITE_NAME, url: `${SITE_URL}/` })]);
+    expect(head).toContain(`property="og:site_name" content="${SITE_NAME}"`);
+    expect(head).toContain(`rel="icon" type="image/png" href="${APP_ICON_PATH}"`);
+    expect(head).toContain(`rel="shortcut icon" type="image/x-icon" href="${FAVICON_ICO_PATH}"`);
+  });
+
+  it('ルートの ICO が実ファイルとして存在し、48px より大きい正方形を含む', () => {
+    const icon = readFileSync(join(DIST, FAVICON_ICO_PATH));
+    expect(icon.readUInt16LE(0)).toBe(0);
+    expect(icon.readUInt16LE(2)).toBe(1);
+    const count = icon.readUInt16LE(4);
+    const entries = Array.from({ length: count }, (_, index) => 6 + index * 16);
+    expect(entries.some(offset => {
+      const width = icon.readUInt8(offset) || 256;
+      const height = icon.readUInt8(offset + 1) || 256;
+      return width === height && width > 48;
+    })).toBe(true);
   });
 
   it('noindex のページは sitemap に1つも無い', () => {
