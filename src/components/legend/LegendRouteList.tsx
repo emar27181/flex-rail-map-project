@@ -39,6 +39,8 @@ const ROUTE_UI_MODE_KEY = 'routeSwitchUiMode';
 const ROUTE_CLASSIC_VIEW_ENABLED = false;
 
 interface LegendRouteListProps {
+  /** 路線チップの意味（既定は表示）。乗車ログのときは 'rideLog'（RouteSwitchBoard） */
+  routeToggleMode?: 'visibility' | 'rideLog';
   visibleRoutesData: Array<[string, any]>;
   visibleRoutes: Set<RouteKey>;
   routeOrder: RouteKey[];
@@ -135,6 +137,7 @@ interface LegendRouteListProps {
 const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowRoutesFromMemo,
   onUseStationAsDeparture,
+  routeToggleMode,
   visibleRoutesData,
   visibleRoutes,
   routeOrder,
@@ -490,6 +493,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           onSelectAllRoutes={onSelectAllRoutes}
           onDeselectAllRoutes={onDeselectAllRoutes}
           adjustRouteColorForTheme={adjustRouteColorForTheme}
+          mode={routeToggleMode}
         />
       )}
 

@@ -1,5 +1,13 @@
 # CHANGE LOG
 
+## [2026-11-15] セッション（乗車ログ: 「表示路線の切替」でも乗った路線を切り替える）
+
+### improve: 乗車ログの間、「表示路線の切替」のチップで乗った路線を切り替えられる
+- `src/components/legend/RouteSwitchBoard.tsx`（`mode`: visibility / rideLog）, `src/components/legend/LegendRouteList.tsx`（`routeToggleMode`）, `src/components/RailwayMap.tsx`（`routeListRideOverrides`, `toggleRideLine`）, `src/utils/translation.ts`（`rideLogRouteSummary`）
+- 同じチップ・同じ並び・同じ検索のまま、塗り＝乗った路線。押すと地図の灰色の線のタップと同じ結果（乗った路線になり、もう一度で外れる）。全部を一度に乗ったことにはしないので、全表示・全非表示のボタンは出さない
+- 乗った路線を外すときは、線のタップ・経路の記録のどちらで記録した路線も外す（降りた駅の記録は残す）
+- `tests/render/rideLog.render.ts`
+
 ## [2026-11-15] セッション（乗車ログ: 灰色の線のタップで記録・絞り込みを無くす）
 
 ### improve: 乗車ログを、灰色の線をタップして記録する形にし、絞り込みを無くす

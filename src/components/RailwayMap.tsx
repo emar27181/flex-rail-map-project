@@ -17,7 +17,7 @@ import { requestPosition, resolveCurrentPosition } from '../utils/freshLocation'
 import StationRoleBadge from './StationRoleBadge';
 import MeetingTimesDetail from './MeetingTimesDetail';
 import { useRideLog } from '../hooks/useRideLog';
-import { deriveRideLog, entriesFromRoute, rideLevelOf, hasLineEntry, hasAlightEntry, type RideLogEntry } from '../utils/rideLog';
+import { deriveRideLog, entriesFromRoute, rideLevelOf, hasAlightEntry, type RideLogEntry } from '../utils/rideLog';
 import { rankMeetingStations, summarizeMeetingRoutes, interleaveByRank, meetingEdgeMinutes, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
@@ -5290,8 +5290,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    */
   const toggleRideLine = (routeKey: RouteKey) => {
     const name = translateRoute(routeNames[routeKey] ?? routeKey, currentLanguage);
-    if (hasLineEntry(rideLog.entries, routeKey)) {
-      rideLog.removeWhere(e => e.kind === 'line' && e.routeKey === routeKey);
+    if (rideState.riddenRoutes.has(routeKey)) {
+      // 乗った路線（路線のタップ・経路の記録のどちらでも）を外す。降りた駅の記録は残す
+      rideLog.removeWhere(e => e.routeKey === routeKey && e.kind !== 'alight');
       notifyMessage(translateUI('rideLogLineRemoved', currentLanguage, { route: name }));
       return;
     }
@@ -5323,6 +5324,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     rideLog.add(entries);
     notifyMessage(translateUI('rideLogRecorded', currentLanguage, { from: translateStation(departure.name, currentLanguage), to: translateStation(arrival.name, currentLanguage) }));
   };
+  /** 乗車ログの間、「表示路線の切替」のチップは乗った路線を表す（同じチップ・同じ並びで、押すと乗った/乗っていないを切り替える） */
+  const routeListRideOverrides = rideLogActive ? {
+    routeToggleMode: 'rideLog' as const,
+    visibleRoutes: rideState.riddenRoutes as Set<RouteKey>,
+    availableRoutes: new Set(Object.keys(routes) as RouteKey[]),
+    visibleRoutesData: Object.entries(routes) as Array<[string, any]>,
+    onToggleRoute: toggleRideLine,
+  } : {};
   const rideLogProps = {
     enabled: rideLogModeEnabled,
     onEnabledChange: handleRideLogModeChange,
@@ -6766,6 +6775,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onToggleRoute={toggleRoute}
                     onSelectAllRoutes={selectAllRoutes}
                     onDeselectAllRoutes={deselectAllRoutes}
+                    {...routeListRideOverrides}
                     onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
                     onShowTrainStatusPanelChange={setShowTrainStatusPanel}
                     onAutoSetDepartureFromLocationChange={setAutoSetDepartureFromLocation}
@@ -7066,6 +7076,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onToggleRoute={toggleRoute}
                         onSelectAllRoutes={selectAllRoutes}
                         onDeselectAllRoutes={deselectAllRoutes}
+                    {...routeListRideOverrides}
                         onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
                         onShowTrainStatusPanelChange={setShowTrainStatusPanel}
                         onAutoSetDepartureFromLocationChange={setAutoSetDepartureFromLocation}

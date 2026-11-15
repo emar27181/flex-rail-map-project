@@ -102,3 +102,28 @@ test('乗車ログ: 終電・集合駅のモードとは同時に使わない', 
   await expect(meeting).toHaveAttribute('aria-pressed', 'false');
   expect(errors).toEqual([]);
 });
+
+test('乗車ログ: 「表示路線の切替」のチップでも、乗った路線を切り替えられる（同じチップ・地図の灰色タップと同じ結果）', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('/');
+  await expect(page.locator('.leaflet-container').first()).toBeVisible();
+  await page.getByRole('button', { name: LOG_BUTTON }).click();
+  // PCは「表示路線の切替」、スマホは「表示切替」から開く
+  await page.getByText(/^(表示路線の切替|表示切替)$/).first().click();
+  // 乗車ログの間は、チップは乗った路線を表す。全表示・全非表示のボタンは出ない
+  await expect(page.locator('[data-route-board-mode="rideLog"]')).toBeVisible();
+  await expect(page.getByRole('button', { name: '全表示' })).toHaveCount(0);
+  await page.getByPlaceholder('路線名を検索').fill('山手線');
+  const chip = page.locator('[data-route-chip="yamanote"]').first();
+  await expect(chip).toHaveAttribute('aria-pressed', 'false');
+  await chip.click();
+  await expect(chip).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('[data-ride-log]')).toContainText('1路線');
+  // 駅名が出る（乗った路線の駅）
+  await expect.poll(() => page.locator('.leaflet-marker-icon', { hasText: '渋谷' }).count(), { timeout: 20_000 }).toBeGreaterThan(0);
+  // もう一度押すと外れる
+  await chip.click();
+  await expect(chip).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('[data-ride-log]')).not.toContainText('1路線');
+  expect(errors).toEqual([]);
+});

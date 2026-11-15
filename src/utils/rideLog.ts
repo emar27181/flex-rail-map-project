@@ -94,11 +94,6 @@ export function rideLevelOf(state: RideLogState, stationName: string): RideLevel
   return state.stationLevel.get(stationName) ?? 0;
 }
 
-/** 路線に「乗った」とする記録（地図の灰色の線のタップ）が既にあるか */
-export function hasLineEntry(entries: readonly RideLogEntry[], routeKey: string): boolean {
-  return entries.some(e => e.kind === 'line' && e.routeKey === routeKey);
-}
-
 /** 駅を「降りた駅」とする記録（ツールチップのボタン）が既にあるか */
 export function hasAlightEntry(entries: readonly RideLogEntry[], stationName: string): boolean {
   return entries.some(e => e.kind === 'alight' && e.stations[0] === stationName);

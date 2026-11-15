@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  deriveRideLog, entriesFromRoute, rideLevelOf, hasLineEntry, hasAlightEntry, parseRideLog, serializeRideLog, isValidEntry, type RideLogEntry,
+  deriveRideLog, entriesFromRoute, rideLevelOf, hasAlightEntry, parseRideLog, serializeRideLog, isValidEntry, type RideLogEntry,
 } from '../../../src/utils/rideLog';
 
 const st = (name: string) => ({ name });
@@ -49,13 +49,11 @@ describe('乗車ログ（3段階）', () => {
     expect(only.paths).toHaveLength(0);
   });
 
-  it('路線のタップ・降りた駅の記録があるか調べられる（もう一度タップで外すため）', () => {
+  it('降りた駅の記録があるか調べられる（もう一度押して外すため）', () => {
     const entries: RideLogEntry[] = [
       { id: 'a:0', kind: 'line', routeKey: 'yamanote', stations: ['新宿', '渋谷'] },
       { id: 'b:0', kind: 'alight', routeKey: 'yamanote', stations: ['渋谷'] },
     ];
-    expect(hasLineEntry(entries, 'yamanote')).toBe(true);
-    expect(hasLineEntry(entries, 'chuo')).toBe(false);
     expect(hasAlightEntry(entries, '渋谷')).toBe(true);
     expect(hasAlightEntry(entries, '新宿')).toBe(false);
   });

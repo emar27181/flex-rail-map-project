@@ -933,6 +933,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "{route}の記録を外しました",
     english: "Removed {route} from the log"
   },
+  rideLogRouteSummary: {
+    japanese: "乗った路線 {shown} / {total}",
+    english: "Ridden lines {shown} / {total}"
+  },
   rideLogRecord: {
     japanese: "この経路を記録",
     english: "Record this route"
@@ -2300,6 +2304,7 @@ export const uiChinese: Record<string, string> = {
   rideLogAlightOff: "取消下车站记录",
   rideLogLineRecorded: "已将{route}记录为乘坐过的线路",
   rideLogLineRemoved: "已移除{route}的记录",
+  rideLogRouteSummary: "乘坐过的线路 {shown} / {total}",
   rideLogRecord: "记录此路线",
   rideLogUndo: "撤销上一条",
   rideLogClear: "清除记录",
@@ -2709,6 +2714,7 @@ export const uiKorean: Record<string, string> = {
   rideLogAlightOff: "내린 역 기록 해제",
   rideLogLineRecorded: "{route}을(를) 탄 노선으로 기록했습니다",
   rideLogLineRemoved: "{route} 기록을 해제했습니다",
+  rideLogRouteSummary: "탄 노선 {shown} / {total}",
   rideLogRecord: "이 경로 기록",
   rideLogUndo: "직전 기록 취소",
   rideLogClear: "기록 삭제",

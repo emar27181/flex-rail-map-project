@@ -67,6 +67,13 @@ interface RouteSwitchBoardProps {
   onSelectAllRoutes: () => void;
   onDeselectAllRoutes: () => void;
   adjustRouteColorForTheme: (color: string, theme: 'light' | 'dark') => string;
+  /**
+   * チップの塗りが何を表すか。
+   * - visibility（既定）: 地図に表示している路線。全表示・全非表示のボタンを出す
+   * - rideLog: 乗った路線（乗車ログ）。同じチップ・同じ並びで、押すと乗った・乗っていないを切り替える。
+   *   全部を一度に乗ったことにはしないので、全表示・全非表示のボタンは出さない
+   */
+  mode?: 'visibility' | 'rideLog';
 }
 
 type GroupKey = 'onRoute' | 'atStation' | 'visible' | 'hidden';
@@ -84,6 +91,7 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
   onSelectAllRoutes,
   onDeselectAllRoutes,
   adjustRouteColorForTheme,
+  mode = 'visibility',
 }) => {
   const colors = getThemeColors(theme);
   const [query, setQuery] = useState('');
@@ -180,17 +188,19 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
         styleOverride={{ marginBottom: L.sp.md }}
       />
 
-      <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.md }}>
-        <Button theme={theme} variant="positive" size={BOARD_CONTROL_SIZE} onClick={onSelectAllRoutes} styleOverride={{ flex: 1 }}>
-          {translateUI('allShow', language)}
-        </Button>
-        <Button theme={theme} variant="danger" size={BOARD_CONTROL_SIZE} onClick={onDeselectAllRoutes} styleOverride={{ flex: 1 }}>
-          {translateUI('allHide', language)}
-        </Button>
-      </div>
+      {mode === 'visibility' && (
+        <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.md }}>
+          <Button theme={theme} variant="positive" size={BOARD_CONTROL_SIZE} onClick={onSelectAllRoutes} styleOverride={{ flex: 1 }}>
+            {translateUI('allShow', language)}
+          </Button>
+          <Button theme={theme} variant="danger" size={BOARD_CONTROL_SIZE} onClick={onDeselectAllRoutes} styleOverride={{ flex: 1 }}>
+            {translateUI('allHide', language)}
+          </Button>
+        </div>
+      )}
 
-      <div style={{ fontSize: FS.caption, color: colors.textSecondary, marginBottom: L.sp.md }}>
-        {translateUI('routeVisibleSummary', language, {
+      <div data-route-board-mode={mode} style={{ fontSize: FS.caption, color: colors.textSecondary, marginBottom: L.sp.md }}>
+        {translateUI(mode === 'rideLog' ? 'rideLogRouteSummary' : 'routeVisibleSummary', language, {
           shown: String(routeKeys.filter(rk => visibleRoutes.has(rk)).length),
           total: String(routeKeys.length),
         })}
