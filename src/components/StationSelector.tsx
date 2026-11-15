@@ -1244,9 +1244,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 </div>
               ) : (
                 <>
-                  <div style={{ fontSize: FS.caption, color: colors.textSecondary }}>
-                    {translateUI('meetingResultsTitle', language)}
-                  </div>
                   <TopList
                     theme={theme}
                     moreLabel={hidden => translateUI('showMoreRoutesStep', language, { count: String(hidden) })}
