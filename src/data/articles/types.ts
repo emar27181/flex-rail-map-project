@@ -100,9 +100,7 @@ export type ArticleBlock =
    *  （articleNotices.ts）。本文の途中に足したいときだけ書く。text は決まり文句に足す説明（省略可） */
   | { type: 'notice'; kind: 'prototype' | 'fictional' | 'estimated'; text?: string }
   /** 地図を開くボタン（maps のキー） */
-  | { type: 'cta'; map: string; title: string; text: string }
-  /** 上の型で書けない図（初心者記事の操作できる図など）。新しく使う前に型を足せないか考える */
-  | { type: 'html'; html: string };
+  | { type: 'cta'; map: string; title: string; text: string };
 
 export interface ArticleMeta {
   title: string;

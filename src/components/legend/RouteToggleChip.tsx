@@ -8,6 +8,8 @@ import Chip from '../ui/atoms/Chip';
 interface RouteToggleChipProps {
   routeKey: RouteKey;
   routeName: string;
+  /** 2行目に添える運行系統名など（枠の中に入る） */
+  subLabel?: string;
   routeColor: string;
   isVisible: boolean;
   theme: 'light' | 'dark';
@@ -32,6 +34,7 @@ interface RouteToggleChipProps {
 const RouteToggleChip: React.FC<RouteToggleChipProps> = ({
   routeKey,
   routeName,
+  subLabel,
   routeColor,
   isVisible,
   theme,
@@ -45,6 +48,7 @@ const RouteToggleChip: React.FC<RouteToggleChipProps> = ({
   <Chip
     color={adjustRouteColorForTheme(routeColor, theme)}
     label={translateRoute(routeName, language)}
+    subLabel={subLabel}
     selected={isVisible}
     theme={theme}
     size={size}

@@ -663,6 +663,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "大きくする",
     english: "Increase"
   },
+  moreDisplayModes: {
+    japanese: "ほかの表示モード",
+    english: "More display modes"
+  },
   collapseList: {
     japanese: "折りたたむ",
     english: "Collapse"
@@ -677,6 +681,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Show more ({count} left)"
   },
   // 地図の線をタップして路線を切り替えたときの知らせ（map/RouteToggleSnackbar.tsx）
+  undoAction: {
+    japanese: "元に戻す",
+    english: "Undo"
+  },
   routeToggledShown: {
     japanese: "{route}を表示しました",
     english: "Showing {route}"
@@ -909,6 +917,62 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "集合駅と同じ",
     english: "Already there"
   },
+  displayModes: {
+    japanese: "表示モード",
+    english: "Modes"
+  },
+  rideLogModeButton: {
+    japanese: "乗車ログ（試作）",
+    english: "Ride log (prototype)"
+  },
+  rideLogAlight: {
+    japanese: "降りた駅に記録",
+    english: "Log as alighted"
+  },
+  rideLogAlightOff: {
+    japanese: "降りた駅の記録を外す",
+    english: "Remove alighted log"
+  },
+  rideLogLineRecorded: {
+    japanese: "{route}を乗った路線に記録しました",
+    english: "Logged {route} as ridden"
+  },
+  rideLogLineRemoved: {
+    japanese: "{route}の記録を外しました",
+    english: "Removed {route} from the log"
+  },
+  rideLogRouteSummary: {
+    japanese: "乗った路線 {shown} / {total}",
+    english: "Ridden lines {shown} / {total}"
+  },
+  rideLogRecord: {
+    japanese: "この経路を記録",
+    english: "Record this route"
+  },
+  rideLogUndo: {
+    japanese: "直前を取り消す",
+    english: "Undo last"
+  },
+  rideLogClear: {
+    japanese: "ログを消去",
+    english: "Clear log"
+  },
+  rideLogSummary: {
+    japanese: "{lines}路線・{stations}駅を記録",
+    english: "{lines} lines, {stations} stations logged"
+  },
+  rideLogHint: {
+    japanese: "灰色の線をタップすると、乗った路線として記録します。駅をタップして「降りた駅に記録」もできます。記録はこの端末のブラウザにだけ保存されます。",
+    english: "Tap a gray line to log it as ridden. Tap a station and choose \"Log as alighted\" for stops. The log is saved only in this browser."
+  },
+  rideLogRecorded: {
+    japanese: "{from} → {to} を記録しました",
+    english: "Recorded {from} → {to}"
+  },
+  rideLogNeedRoute: {
+    japanese: "出発駅と到着駅を選ぶと、その経路を記録できます。",
+    english: "Select a departure and an arrival to record that route."
+  },
   meetingModeButton: {
     japanese: "集合駅を探す",
     english: "Find meeting station"
@@ -918,12 +982,32 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     english: "Add departure station"
   },
   meetingNeedOrigins: {
-    japanese: "出発駅欄と、下の「＋ 出発駅を追加」欄に駅を入れて、2駅以上そろえると、全員が行きやすい駅を探します。",
-    english: "Enter two or more departure stations (the departure field plus the \"+ Add departure station\" field below) to find a station everyone can reach easily."
+    japanese: "出発駅欄と、その下の出発駅の欄に駅を入れて、2駅以上そろえると、全員が行きやすい駅を探します。",
+    english: "Enter two or more departure stations (the departure field plus the departure fields below it) to find a station everyone can reach easily."
   },
-  meetingResultsTitle: {
-    japanese: "お互いに行きやすい駅（いちばん遅い人の所要時間が短い順）",
-    english: "Stations easy for everyone (shortest for the slowest traveler first)"
+  meetingDetailTitle: {
+    japanese: "各出発駅からの所要時間",
+    english: "Time from each departure"
+  },
+  meetingBalanceLabel: {
+    japanese: "集合駅の決め方",
+    english: "How to choose"
+  },
+  meetingBalanceFair: {
+    japanese: "全員が同じくらい",
+    english: "Equal for everyone"
+  },
+  meetingBalanceCrowd: {
+    japanese: "多い人に寄せる",
+    english: "Favor the crowd"
+  },
+  meetingCandidateGroup: {
+    japanese: "到着駅候補",
+    english: "Arrival options"
+  },
+  meetingMoreCandidates: {
+    japanese: "他{count}",
+    english: "+{count}"
   },
   meetingMaxMinutes: {
     japanese: "最大{minutes}分",
@@ -932,10 +1016,6 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   meetingNoResults: {
     japanese: "全員が{minutes}分以内で行ける駅が見つかりません。",
     english: "No station is reachable by everyone within {minutes} minutes."
-  },
-  meetingResultsNote: {
-    japanese: "駅をクリックすると到着駅に設定します。所要時間は路線データによる目安で、実際のダイヤではありません。",
-    english: "Click a station to set it as the arrival station. Times are estimates from line data, not actual timetables."
   },
   otherStations: {
     japanese: "他{count}駅",
@@ -1261,6 +1341,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
   locationUnavailable: {
     japanese: "現在地を取得できません",
     english: "Location unavailable"
+  },
+  locationDeniedHelp: {
+    japanese: "位置情報が許可されていません。ブラウザの設定でこのサイトの位置情報を許可してから、もう一度押してください。",
+    english: "Location access is not allowed. Allow location for this site in your browser settings, then press the button again."
   },
   retryLocation: {
     japanese: "再取得",
@@ -2160,9 +2244,11 @@ export const uiChinese: Record<string, string> = {
   play: "播放",
   pause: "暂停",
   increase: "放大",
+  moreDisplayModes: "其他显示模式",
   collapseList: "折叠",
   showMoreRoutes: "显示其他 {count} 条线路",
   showMoreRoutesStep: "显示更多（剩余 {count}）",
+  undoAction: "撤销",
   routeToggledShown: "已显示{route}",
   routeToggledHidden: "已隐藏{route}",
   routeViewBoard: "面板",
@@ -2238,16 +2324,34 @@ export const uiChinese: Record<string, string> = {
   directionArea: "前往{destination}方向",
   viaStations: "经由",
   addWaypoint: "添加途经站",
+  displayModes: "显示模式",
+  rideLogModeButton: "乘车记录（试作）",
+  rideLogAlight: "记录为下车站",
+  rideLogAlightOff: "取消下车站记录",
+  rideLogLineRecorded: "已将{route}记录为乘坐过的线路",
+  rideLogLineRemoved: "已移除{route}的记录",
+  rideLogRouteSummary: "乘坐过的线路 {shown} / {total}",
+  rideLogRecord: "记录此路线",
+  rideLogUndo: "撤销上一条",
+  rideLogClear: "清除记录",
+  rideLogSummary: "已记录 {lines} 条线路、{stations} 个车站",
+  rideLogHint: "点击灰色线路即可记录为乘坐过的线路。点击车站并选择“记录为下车站”。记录只保存在此浏览器中。",
+  rideLogRecorded: "已记录 {from} → {to}",
+  rideLogNeedRoute: "选择出发站和到达站后，即可记录该路线。",
   meetingModeButton: "寻找集合站",
   meetingRoutesTitle: "前往{station}的各条路线（使用的线路）",
   meetingNoRoute: "无路线",
   meetingAlreadyThere: "就在集合站",
   addMeetingOrigin: "添加出发站",
-  meetingNeedOrigins: "在出发站栏和下方“＋ 添加出发站”栏中输入两个以上的车站，即可找出大家都容易到达的车站。",
-  meetingResultsTitle: "大家都容易到达的车站（按最晚到的人所需时间由短到长）",
+  meetingNeedOrigins: "在出发站栏和其下方的出发站栏中输入两个以上的车站，即可找出大家都容易到达的车站。",
+  meetingDetailTitle: "从各出发站所需时间",
+  meetingBalanceLabel: "集合站的选法",
+  meetingBalanceFair: "大家差不多",
+  meetingBalanceCrowd: "靠近人多的一侧",
+  meetingCandidateGroup: "到达站候选",
+  meetingMoreCandidates: "其他{count}",
   meetingMaxMinutes: "最长{minutes}分钟",
   meetingNoResults: "没有所有人都能在{minutes}分钟内到达的车站。",
-  meetingResultsNote: "点击车站即设为到达站。所需时间是根据线路数据的估算，并非实际时刻表。",
   otherStations: "其他{count}站",
   noRoutesFound: "未找到路线",
   routeCount: "{count}条路线",
@@ -2331,6 +2435,7 @@ export const uiChinese: Record<string, string> = {
   showTrainStatusPanel: "显示乘车路线",
   locationDenied: "未允许获取位置信息",
   locationUnavailable: "无法获取当前位置",
+  locationDeniedHelp: "未允许获取位置信息。请在浏览器设置中允许此网站获取位置信息，然后再按一次。",
   retryLocation: "重试",
   useLocationFeatures: "根据当前位置自动设置出发站",
   moreItemsCount: "+{count}项",
@@ -2555,9 +2660,11 @@ export const uiKorean: Record<string, string> = {
   play: "재생",
   pause: "일시정지",
   increase: "크게",
+  moreDisplayModes: "다른 표시 모드",
   collapseList: "접기",
   showMoreRoutes: "다른 {count}개 노선 표시",
   showMoreRoutesStep: "더 보기 (남은 {count}개)",
+  undoAction: "되돌리기",
   routeToggledShown: "{route} 표시됨",
   routeToggledHidden: "{route} 숨겨짐",
   routeViewBoard: "보드",
@@ -2633,16 +2740,34 @@ export const uiKorean: Record<string, string> = {
   directionArea: "{destination} 방면",
   viaStations: "경유",
   addWaypoint: "경유역 추가",
+  displayModes: "표시 모드",
+  rideLogModeButton: "승차 기록(시험)",
+  rideLogAlight: "내린 역으로 기록",
+  rideLogAlightOff: "내린 역 기록 해제",
+  rideLogLineRecorded: "{route}을(를) 탄 노선으로 기록했습니다",
+  rideLogLineRemoved: "{route} 기록을 해제했습니다",
+  rideLogRouteSummary: "탄 노선 {shown} / {total}",
+  rideLogRecord: "이 경로 기록",
+  rideLogUndo: "직전 기록 취소",
+  rideLogClear: "기록 삭제",
+  rideLogSummary: "{lines}개 노선·{stations}개 역 기록됨",
+  rideLogHint: "회색 노선을 누르면 탄 노선으로 기록됩니다. 역을 누르고 '내린 역으로 기록'을 고를 수도 있습니다. 기록은 이 브라우저에만 저장됩니다.",
+  rideLogRecorded: "{from} → {to} 기록함",
+  rideLogNeedRoute: "출발역과 도착역을 고르면 그 경로를 기록할 수 있습니다.",
   meetingModeButton: "만날 역 찾기",
   meetingRoutesTitle: "{station}까지의 경로(이용 노선)",
   meetingNoRoute: "경로 없음",
   meetingAlreadyThere: "집합역과 같음",
   addMeetingOrigin: "출발역 추가",
-  meetingNeedOrigins: "출발역 칸과 아래의 \"＋ 출발역 추가\" 칸에 역을 2곳 이상 넣으면 모두가 가기 쉬운 역을 찾습니다.",
-  meetingResultsTitle: "모두가 가기 쉬운 역(가장 늦게 도착하는 사람의 소요 시간이 짧은 순)",
+  meetingNeedOrigins: "출발역 칸과 그 아래의 출발역 칸에 역을 2곳 이상 넣으면 모두가 가기 쉬운 역을 찾습니다.",
+  meetingDetailTitle: "각 출발역에서의 소요 시간",
+  meetingBalanceLabel: "만날 역 정하는 방법",
+  meetingBalanceFair: "모두 비슷하게",
+  meetingBalanceCrowd: "사람 많은 쪽으로",
+  meetingCandidateGroup: "도착역 후보",
+  meetingMoreCandidates: "외 {count}",
   meetingMaxMinutes: "최대 {minutes}분",
   meetingNoResults: "모두가 {minutes}분 이내에 갈 수 있는 역이 없습니다.",
-  meetingResultsNote: "역을 누르면 도착역으로 설정됩니다. 소요 시간은 노선 데이터에 따른 추정이며 실제 시각표가 아닙니다.",
   otherStations: "외 {count}역",
   noRoutesFound: "경로를 찾을 수 없습니다",
   routeCount: "{count}개 경로",
@@ -2726,6 +2851,7 @@ export const uiKorean: Record<string, string> = {
   showTrainStatusPanel: "탑승 노선 표시",
   locationDenied: "위치 정보가 허용되지 않았습니다",
   locationUnavailable: "현재 위치를 가져올 수 없습니다",
+  locationDeniedHelp: "위치 정보가 허용되지 않았습니다. 브라우저 설정에서 이 사이트의 위치 정보를 허용한 뒤 다시 눌러 주세요.",
   retryLocation: "다시 시도",
   useLocationFeatures: "현재 위치로 출발역 자동 설정",
   moreItemsCount: "+{count}건",

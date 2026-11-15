@@ -8,7 +8,7 @@ import type { ArticleSource } from './types';
 export const flexRailMapIntroduction: ArticleSource = {
   "slug": "flex-rail-map-introduction",
   "publishedDate": "2025-06-06",
-  "modifiedDate": "2026-11-12",
+  "modifiedDate": "2026-11-15",
   "related": [
     "tokyo-train-map-beginner",
     "tokyo-sightseeing-routes",
@@ -120,7 +120,7 @@ export const flexRailMapIntroduction: ArticleSource = {
           "type": "embed",
           "map": "all",
           "title": "{siteName}の地図（都心の主要15路線をすべて表示した状態）",
-          "caption": "実際の地図に、都心の主要15路線をすべて表示した状態です。見にくいですよね。枠の中で拡大・移動して確かめてください。"
+          "caption": "都心の主要15路線を表示しています。地図の左上で出発駅に新宿、到着駅に東京を選び、経路に関係する路線が色付きで残る様子を確かめてください。"
         },
         {
           "type": "h2",
@@ -217,7 +217,7 @@ export const flexRailMapIntroduction: ArticleSource = {
           "type": "embed",
           "map": "all",
           "title": "{siteName} map (all 15 major central lines shown)",
-          "caption": "The live map with all 15 major central Tokyo lines shown. Hard to read, isn't it? You can zoom and pan inside the frame to see for yourself."
+          "caption": "The map starts with 15 major central Tokyo lines. Open the station selector at the top left, set Shinjuku as departure and Tokyo as arrival, and see which lines stay highlighted."
         },
         {
           "type": "h2",
@@ -314,7 +314,7 @@ export const flexRailMapIntroduction: ArticleSource = {
           "type": "embed",
           "map": "all",
           "title": "{siteName}地图（显示市中心全部15条主要线路）",
-          "caption": "实际的地图，显示了东京市中心的全部15条主要线路。是不是很难看清？可以在框内缩放和移动来亲自确认。"
+          "caption": "地图一开始显示东京市中心的15条主要线路。打开左上角的车站选择，选择新宿为出发站、东京为到达站，看看哪些线路会保持高亮。"
         },
         {
           "type": "h2",
@@ -411,7 +411,7 @@ export const flexRailMapIntroduction: ArticleSource = {
           "type": "embed",
           "map": "all",
           "title": "{siteName} 지도(도심 주요 15개 노선을 모두 표시한 상태)",
-          "caption": "실제 지도에 도쿄 도심의 주요 15개 노선을 모두 표시한 상태입니다. 보기 어렵죠? 틀 안에서 확대·이동하며 직접 확인해 보세요."
+          "caption": "지도에는 도쿄 도심의 주요 15개 노선이 표시됩니다. 왼쪽 위에서 출발역을 신주쿠, 도착역을 도쿄로 지정해 어떤 노선이 색으로 강조되는지 확인해 보세요."
         },
         {
           "type": "h2",

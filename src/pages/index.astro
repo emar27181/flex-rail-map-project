@@ -2,7 +2,7 @@
 import ThemeWrapper from "../components/ThemeWrapper.tsx";
 import SiteFooterNav from "../components/SiteFooterNav.astro";
 import leafletCss from "leaflet/dist/leaflet.css?url";
-import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION, GOOGLE_IMAGE_PREVIEW_DIRECTIVE } from "../config/seo";
+import { SITE_URL, SITE_NAME, PROJECT_NAME, DEFAULT_OG_IMAGE, GOOGLE_SITE_VERIFICATION, GOOGLE_IMAGE_PREVIEW_DIRECTIVE } from "../config/seo";
 import GA4Loader from "../components/GA4Loader.astro";
 import { ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC, ADSENSE_SLOTS, hasManualAdSlot } from "../config/ads";
 // 地図の画面に広告の枠（ADSENSE_SLOTS.mapBottom）があるときだけ広告スクリプトを読む（自動広告を出さない, config/ads.ts）
@@ -14,7 +14,6 @@ import { FS, SEMANTIC } from '../constants/ui';
 import { L } from '../components/legend/legendStyles';
 import { THEME_STORAGE_KEY, LEGACY_THEME_STORAGE_KEY, THEME_PARAM } from '../utils/themeStorage';
 import { EMBED_PARAM } from '../utils/embedMode';
-import { SITE_NAME, PROJECT_NAME } from '../config/seo';
 
 // JSON-LD はプレーンな<script>タグの中身をAstroが解釈しないため、
 // SITE_URL等の変数を埋め込むにはここでオブジェクトを組み立てて
@@ -23,7 +22,6 @@ const webApplicationSchema = {
 	"@context": "https://schema.org",
 	"@type": "WebApplication",
 	"name": SITE_NAME,
-	"alternateName": SITE_NAME,
 	"url": `${SITE_URL}/`,
 	"description": "路線図が見にくい・複雑すぎるを解決するシンプルなインタラクティブ路線図サービス。必要な路線だけ選んで表示でき、遅延・運休時も自分で乗り換えを判断できます。",
 	"applicationCategory": "TravelApplication",
@@ -88,8 +86,8 @@ const faqSchema = {
 const webSiteSchema = {
 	"@context": "https://schema.org",
 	"@type": "WebSite",
+	"@id": `${SITE_URL}/#website`,
 	"name": SITE_NAME,
-	"alternateName": SITE_NAME,
 	"url": `${SITE_URL}/`,
 	"inLanguage": ["ja", "en"]
 };
@@ -163,7 +161,7 @@ const appLoadingMessages = Object.fromEntries(APP_LOADING_LANGUAGES.map(lang => 
 				if (m) m.setAttribute('content', bg);
 			})();
 		</script>
-		<meta name="apple-mobile-web-app-title" content="路線図" />
+		<meta name="apple-mobile-web-app-title" content={SITE_NAME} />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{SITE_NAME} | 路線図が見にくい・複雑すぎる？を解決するシンプルな乗り換え路線図</title>

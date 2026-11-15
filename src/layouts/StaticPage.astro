@@ -15,7 +15,7 @@ import SimpleThemeWrapper from '../components/SimpleThemeWrapper.tsx';
 import { THEME_STORAGE_KEY, LEGACY_THEME_STORAGE_KEY } from '../utils/themeStorage';
 import SiteFooterNav from '../components/SiteFooterNav.astro';
 import { staticPageCss } from './staticPageStyles';
-import { SITE_URL, GOOGLE_SITE_VERIFICATION } from '../config/seo';
+import { SITE_URL, SITE_NAME, GOOGLE_SITE_VERIFICATION } from '../config/seo';
 import FaviconLinks from '../components/seo/FaviconLinks.astro';
 import GA4Loader from '../components/GA4Loader.astro';
 
@@ -68,6 +68,7 @@ const {
 		<meta name="generator" content={Astro.generator} />
 
 		<title>{title}</title>
+		<meta property="og:site_name" content={SITE_NAME} />
 		<meta name="description" content={description} />
 		{keywords && <meta name="keywords" content={keywords} />}
 		<meta name="robots" content="index, follow" />

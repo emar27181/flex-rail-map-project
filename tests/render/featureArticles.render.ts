@@ -2,7 +2,7 @@
  * 新しい機能（終電モード・集合駅を探す）を操作する記事。
  * 試作・架空のデータ・推定を含むことが、最初の地図デモの直後に見え、デモの地図がそのモードで開く。
  */
-import { test, expect, collectErrors } from './helpers';
+import { test, expect, collectErrors, modeIsOn } from './helpers';
 
 test('終電モードの記事: 試作・架空の注意書きがデモの直後に出て、デモの地図は終電モードで開く', async ({ page }) => {
   const errors = collectErrors(page);
@@ -48,19 +48,22 @@ test('集合駅の記事: 推定を含む注意書きがデモの直後に出て
   expect(src).toContain('with=tokyo%2Cyokohama');
 });
 
-test('集合駅の記事のデモ: 開いたときから集合駅モードで、全員が着くまでの最大時間が駅に出る', async ({ page }) => {
+test('集合駅の記事のデモ: 開いたときから集合駅モードで、駅アイコンの下に時間は書かない', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('/?mode=meeting&from=shinjuku&with=tokyo,yokohama&embed=1&center=35.64,139.72&zoom=11');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
-  await expect.poll(() => page.locator('.leaflet-marker-icon', { hasText: /\d+分/ }).count(), { timeout: 20_000 }).toBeGreaterThan(0);
+  // 到着駅を決めるまで、地図には駅アイコンの下の時間も区間バッジも出ない（出発駅ごとの所要時間は、決めた後に路線の上へ）
+  await expect.poll(() => page.locator('.leaflet-marker-icon').count(), { timeout: 20_000 }).toBeGreaterThan(0);
+  expect(await page.locator('.leaflet-marker-icon', { hasText: /\d+分/ }).count()).toBe(0);
   expect(errors).toEqual([]);
 });
 
-test('集合駅モードのURL（埋め込みでない）: 追加分の出発駅がタグで並び、候補が出る', async ({ page }) => {
+test('集合駅モードのURL（埋め込みでない）: 追加分の出発駅が緑の欄で並び、候補が出る', async ({ page }) => {
   await page.goto('/?mode=meeting&from=shinjuku&with=tokyo,yokohama');
-  await expect(page.getByRole('button', { name: '集合駅を探す' })).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.locator('[data-meeting-origin-rows] [data-tag-item]')).toHaveCount(2);
+  expect(await modeIsOn(page, '集合駅を探す')).toBe(true);
+  await expect(page.locator('[data-meeting-extra]')).toHaveCount(2);
   // 追加の入力欄も、ボタンなしで最初から出ている
   await expect(page.locator('[data-meeting-add]')).toBeVisible();
-  await expect(page.locator('[data-meeting-results]').getByRole('button')).toHaveCount(5);
+  // 候補は上位3つだけ見せ、残りは折りたたみ（候補3つ + 「さらに表示」1つ）
+  await expect(page.locator('[data-meeting-results]').getByRole('button')).toHaveCount(4);
 });

@@ -8,10 +8,14 @@
  * filledLabelColors（utils/contrast.ts）に一本化する。
  */
 import type { CSSProperties, ReactNode } from 'react';
-import { filledLabelColors } from '../../utils/contrast';
+import { filledLabelColors, tintColor } from '../../utils/contrast';
+import { getThemeColors } from '../../contexts/ThemeContext';
 import { FS } from '../../constants/ui';
 import { L } from '../legend/legendStyles';
 import { textHalo } from './atoms/shadow';
+
+/** 周囲の本文と並べるチップは、役割の色を薄く敷く。 */
+const SUBTLE_CHIP_TINT = 0.22;
 
 export type ColorChipProps = {
   /** 元になる色（路線色・ヒートマップ色など） */
@@ -22,6 +26,7 @@ export type ColorChipProps = {
   fontSize?: string;
   /** 太字にするか */
   bold?: boolean;
+  tone?: 'filled' | 'subtle';
   /**
    * 明るい色でコントラスト不足のとき縁取り(textShadow)を足す既定の
    * 読みやすさ対策を使うか。既定はtrue。false にすると縁取りを出さない
@@ -41,22 +46,24 @@ export default function ColorChip({
   children,
   fontSize = FS.caption,
   bold = false,
+  tone = 'filled',
   shadow = true,
   title,
   style,
   onClick,
 }: ColorChipProps) {
   const { background, text, needsHalo } = filledLabelColors(color, theme);
+  const subtle = tone === 'subtle';
   return (
     <span
       title={title}
       onClick={onClick}
       style={{
         display: 'inline-block',
-        backgroundColor: background,
-        color: text,
+        backgroundColor: subtle ? tintColor(color, SUBTLE_CHIP_TINT) : background,
+        color: subtle ? getThemeColors(theme).text : text,
         // 4.5:1 に届かない明るい色は縁取りで読めるようにする
-        textShadow: shadow && needsHalo ? textHalo('strong') : undefined,
+        textShadow: !subtle && shadow && needsHalo ? textHalo('strong') : undefined,
         fontSize,
         fontWeight: bold ? 'bold' : 'normal',
         borderRadius: L.r.control,

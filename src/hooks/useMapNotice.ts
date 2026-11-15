@@ -11,8 +11,8 @@ export function useMapNotice() {
   const notify = useCallback((content: MapNoticeContent) => {
     setNotice(prev => nextMapNotice(prev, content));
   }, []);
-  const notifyRouteToggle = useCallback((routeKey: string, shown: boolean) => notify({ kind: 'routeToggle', routeKey, shown }), [notify]);
-  const notifyMessage = useCallback((message: string) => notify({ kind: 'message', message }), [notify]);
+  const notifyRouteToggle = useCallback((routeKey: string, shown: boolean, removeFromAvailable = false) => notify({ kind: 'routeToggle', routeKey, shown, removeFromAvailable }), [notify]);
+  const notifyMessage = useCallback((message: string, tone: 'info' | 'warning' = 'info') => notify({ kind: 'message', message, tone }), [notify]);
   const clearNotice = useCallback(() => setNotice(null), []);
   return { notice, notifyRouteToggle, notifyMessage, clearNotice };
 }

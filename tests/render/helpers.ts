@@ -49,3 +49,42 @@ export async function screenshotCanvasOnly(page: Page, canvasSelector: string): 
     await style.evaluate(el => (el as Element).remove());
   }
 }
+
+/**
+ * 表示モード（集合駅・終電・乗車ログ）の切り替えタグ。「表示切替」パネルの表示設定の上にある（2026-11-15）。
+ * パネルが閉じていれば開いてから、タグを返す。PCの浮かぶパネルは開いたままにする（駅選択パネルをふさがない）
+ */
+export async function modeTag(page: Page, name: string, opener: RegExp = SETTINGS_OPENER) {
+  const tag = page.getByRole('button', { name });
+  if (!(await tag.first().isVisible().catch(() => false))) {
+    await page.getByText(opener).first().click();
+  }
+  return tag.first();
+}
+
+/** 「表示切替」パネルを開くボタンの文言（日本語。PCは「表示路線の切替」、スマホは「表示切替」） */
+export const SETTINGS_OPENER = /^(表示路線の切替|表示切替)$/;
+/** 言語ごとの、スマホの「表示切替」ボタンの文言 */
+export const SETTINGS_OPENER_MOBILE: Record<'ja' | 'en' | 'zh' | 'ko', RegExp> = {
+  ja: /^表示切替$/, en: /^Display Toggles$/, zh: /^显示切换$/, ko: /^표시 전환$/,
+};
+
+/** スマホの下から出る「表示切替」のシートを閉じる（駅選択パネルをふさぐので、操作のあとに閉じる）。PCでは何もしない */
+export async function closeSettingsSheet(page: Page) {
+  const dialog = page.getByRole('dialog');
+  if (await dialog.count()) await dialog.getByRole('button', { name: '閉じる' }).click();
+}
+
+/** モードのタグを押して、スマホならシートを閉じる */
+export async function clickMode(page: Page, name: string, opener: RegExp = SETTINGS_OPENER) {
+  await (await modeTag(page, name, opener)).click();
+  await closeSettingsSheet(page);
+}
+
+/** モードのタグが押されている（ON）かを確かめる。スマホならシートを閉じる */
+export async function modeIsOn(page: Page, name: string): Promise<boolean> {
+  const tag = await modeTag(page, name);
+  const on = (await tag.getAttribute('aria-pressed')) === 'true';
+  await closeSettingsSheet(page);
+  return on;
+}

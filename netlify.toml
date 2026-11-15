@@ -9,6 +9,10 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# Branch Deploy の最新ビルドには Netlify が noindex を付けないため、develop だけに追加する。
+[context.develop]
+  command = "npm run build && cp scripts/netlify-preview-headers.txt dist/_headers"
+
 # 記事は2026-09から言語ごとに別URL（/en/articles/... など）。以前の ?lang= 付きURL
 # （JSで本文を差し替えていた頃のURL。共有・ブックマーク・外部リンクに残っている）を
 # 新しいURLへ恒久的に転送する。元のURL（/articles/...）にもファイルがあるため force が必要

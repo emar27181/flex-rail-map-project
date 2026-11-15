@@ -1,5 +1,235 @@
 # CHANGE LOG
 
+## [2026-11-16] セッション（1.36.0 リリース）
+
+### feat: 集合駅・乗車ログ・表示切替を本番公開
+
+- `src/data/releases.ts` とパッケージのバージョンを 1.36.0 に更新。
+- PR #129 の線路形状の試作は別途公開を判断するため、1.36.0 の公開対象から外す。
+
+## [2026-11-15] セッション（検索結果のロゴとサイト名）
+
+### fix: 検索向けに公式ロゴとサイト名をそろえる
+
+- `netlify.toml` の develop ビルドに検索除外ヘッダーを追加し、固定プレビューのURLが本番の検索結果に混ざらないようにする。
+- `public/favicon.ico` に既存のアプリアイコンに由来する ICO を置き、共通の `FaviconLinks.astro` から参照する。ルートの既定アイコンにも公式ロゴを返す。
+- `index.astro` の `WebSite` 構造化データと `StaticPage.astro`・`ArticleLayout.astro` の OGP に共通の正式名称を使う。ビルド後に検索向けのサイト名とアイコンを検証する。
+
+## [2026-11-15] セッション（記事のデモを実際の路線図に統一）
+
+- 紹介記事と初心者ガイドの4言語で、概念図を外して実際の路線図と操作を案内する。旧 `/demo/` も同じ路線図の横浜→新宿を開く。
+
+## [2026-11-15] セッション（路線と表示モードの折りたたみ）
+
+- 路線の各グループは初期3行、以降は5行ずつ表示する。追加の表示モードは折りたたみ、実装中の項目は末尾に置く。
+
+## [2026-11-15] セッション（更新履歴のカード化）
+
+- 更新履歴は共通の `Card` でバージョンごとにまとめ、テーマの背景色を交互に使う。
+
+## [2026-11-15] セッション（表示路線切り替えの省スペース化）
+
+- 路線検索と並び順は幅に応じて同じ行に並べる。全表示・全非表示は横並びにし、操作列の余白を共通トークンで詰める。
+
+## [2026-11-15] セッション（表示モードのチップと集合駅の駅欄）
+
+- 表示モードの先頭に集合駅・終電・ヒートマップ・乗車ログを並べ、ほかの項目との間に余白を置く。路線と同じ `Chip` に Lucide アイコンを渡す。
+- 候補駅名と内訳の出発駅名には、到着色と出発色を薄く敷いた `ColorChip` を使う。追加出発駅は出発駅欄の幅のまま縦一列に並べる。PCでは駅選択パネルと左下の地図操作の間に間隔を確保する。
+- 集合駅候補は最大15件。共通の `TopList` で初期3件から5件ずつ展開し、地図上の仮経路は上位5件を描く。
+- 地図では出発・到着駅、集合駅候補、通常駅の順で重ねる。候補同士は接続路線数が多い方を前面にする。
+
+## [2026-11-15] セッション（表示モードの配置と集合駅候補の面）
+
+- 「表示モード」を「表示設定」の上に置き、データ可視化の切り替えを同じ `TagToggleGroup` の先頭に表示する。バブルの形と半径は有効時にボタン群の下に出す。
+- 集合駅候補はテーマ共通の背景色と余白で一件ずつ見せる。選択した候補は薄い到着駅色の背景とチェックで示す。
+
+## [2026-11-15] セッション（集合駅パネルの入力順と配色）
+
+### improve: 追加の出発駅・決め方・集合駅候補を整理
+- `StationSelector.tsx` は追加の出発駅を出発駅・到着駅の直下にまとめる。駅選択パネル内の操作ボタンと結果は駅入力の後に置く。
+- `Slider.tsx` と `EndLabeledSlider.tsx` は5段階を路線のような線と駅マーカーと同じ角丸で表示する。タッチとキーボード操作はネイティブのスライダーを使う。
+- `MeetingCandidateRow.tsx` は未選択時のカード左端だけに到着駅の赤を薄く使い、選択時は薄い面・境界線・チェックで示す。
+
+## [2026-11-15] セッション（折りたたんだ集合駅候補の配色）
+
+### fix: 到着駅候補を到着駅と同じ赤で表示
+- `src/components/StationSelector.tsx` と `tests/render/meetingPoint.render.ts`。折りたたんだパネルの候補ボタンと確定した到着駅の背景色を揃える。展開時は候補カードの控えめな配色を維持する。
+
+## [2026-11-15] セッション（モードの切り替えを「表示モード」へ／URL共有／設定ファイル／候補カード）
+
+### improve: 集合駅・終電・乗車ログの切り替えを、「表示切替」パネルの表示設定の下の「表示モード」（切り替えタグ）に移す
+- `src/components/ui/molecules/TagToggleGroup.tsx`（新規。`Button` primary・pressed + lucide アイコン）, `src/components/legend/LegendRouteList.tsx`（`modeTags`）, `src/components/RailwayMap.tsx`（`modeTags`）, `src/components/StationSelector.tsx`（ボタンを削除）, `CLAUDE.md`, `docs/ui-mode-extension-guide.md`, `docs/design-system.md`
+- 同時に使えるのは1つ（押すと、ほかのモードは切れる。集合駅 → 終電・乗車ログも切る）。データ可視化（ヒートマップ・列車デモ・バブル・路線図風・立体）も、同じタグで切り替える
+- テストは `tests/render/helpers.ts` の `clickMode` / `modeIsOn` / `modeTag` で、パネルを開いてタグを押す
+
+### feat: URLで時刻・基準・所要時間の表示・モード・集合駅の決め方を共有する
+- `src/utils/shareStateUrlParams.ts`（新規）, `src/components/RailwayMap.tsx`
+- `time=0830`（基準の時刻。触るまで書かない）・`basis=arr`・`times=0|1`（出発駅があるときのOFFだけ 0、無いときのONだけ 1）・`mode`/`with`/`bal`。既定の値は書かないので短い。開いたときに1回読み、変わるたびに履歴を増やさず書き戻す
+- `tests/unit/utils/shareStateUrlParams.test.ts`, `tests/render/shareUrl.render.ts`
+
+### feat: 設定の保存・読込（設定ファイル）に、乗車ログ・駅のメモ・駅の選択履歴と、足りなかった設定を入れる
+- `src/utils/userDataBundle.ts`（新規）, `src/components/legend/MapConfigPanel.tsx`（`userData`, 経路候補数・薄い路線・列車の状況パネル・現在地から自動・集合駅の決め方）, `src/utils/rideLog.ts`（`sanitizeRideLog`）, `src/hooks/useRideLog.ts`（`replace`）
+- 書き出すときに集め、読み込むと含まれている項目だけ置き換える（壊れた要素は捨てる）
+- `tests/unit/utils/userDataBundle.test.ts`, `tests/render/rideLog.render.ts`
+
+### improve: 乗車ログの降りていない駅を、非活性の灰色（ヒートマップの「データなし」と同じ色）にする
+- `src/components/RailwayMap.tsx`（半透明をやめた）
+
+### improve: 集合駅の候補を、1候補1枚の控えめなカードにする。候補の駅名札が二重に見えるのを直す
+- `src/components/MeetingCandidateRow.tsx`（枠だけのカード。赤は駅名の前の丸だけ。出発駅ごとの時間は灰色の1行）, `src/components/RailwayMap.tsx`（候補の駅は到着駅の札だけを描き、通常の駅名札は出さない）
+
+## [2026-11-15] セッション（集合駅の候補カードと地図の駅名札）
+
+### improve: 集合駅の候補を1駅1カードにまとめ、地図では到着駅の札を優先
+- `src/components/MeetingCandidateRow.tsx`、`src/components/StationSelector.tsx`、`src/components/RailwayMap.tsx`、`tests/render/meetingPoint.render.ts`
+- 候補カードは落ち着いた配色で、各出発駅からの所要時間を1段に並べる。カード全体から選択でき、確定済みの候補は枠とチェックで示す。折りたたみ時の候補ボタンも配色を抑える。
+- 地図は候補駅の札を1枚だけ描く。出発駅と到着駅が同じ駅になった場合は到着駅の色を使う。
+- PC・スマホの描画テストで、カードと駅アイコンの選択・重複を検査する。古いピンチ描画テストは駅選択パネルを閉じてから地図に指を置く。
+
+## [2026-11-15] セッション（集合駅の候補の行を、役割の色で統一）
+
+### improve: 集合駅の候補の行を、到着駅と同じ赤の札・出発駅と同じ緑の札でつくり直す
+- `src/components/MeetingCandidateRow.tsx`（新規 organism）, `src/components/StationSelector.tsx`
+- 候補の駅 = 到着駅の赤の `Button`（variant="arrival"。決めている候補にはチェック）＋「最大〇分」。出発駅ごとの所要時間 = 出発駅の緑の `ColorChip`（「藤沢 42分」）。以前は灰色の枠のボタンと灰色の文字で、色が地図・入力欄と揃っていなかった
+- `tests/render/meetingPoint.render.ts`（色の検査）
+
+## [2026-11-15] セッション（畳んだパネルに集合駅の候補）
+
+### feat: 畳んだ駅選択パネルの2行目に、集合駅の候補（上位3つ）を到着駅の札でコンパクトに出す
+- `src/components/StationSelector.tsx`（`summaryCandidates`）, `src/utils/translation.ts`（`meetingCandidateGroup`, `meetingMoreCandidates`）
+- 集合駅モードで到着駅がまだ無いとき、「出発駅 [藤沢][船橋][伊勢原]　到着駅候補 [東京][新橋][日比谷] 他2」の形。札（既存の `ColorChip`、到着の赤）を押すとその駅が到着駅になる。決まると候補の札は「到着駅 [駅名]」に変わる
+- `tests/render/meetingPoint.render.ts`
+
+## [2026-11-15] セッション（集合駅: 候補を仮の到着駅にした経路／3人以上の決め方5段階）
+
+### feat: 集合駅を決める前に、出発駅それぞれから候補の駅（仮の到着駅）への経路・路線を描く
+- `src/components/RailwayMap.tsx`（`meetingProvisionalMode`。出発駅どうしの間だけを描いていたのをやめた。組ごとの経路は覚えておく）
+- どの出発駅も対等。地図の範囲は出発駅が変わったときだけ合わせる。数字は各出発駅から増えていく（これまでどおり）
+
+### feat: 3人以上のとき、集合駅の決め方を5段階で選べる（全員が同じくらい ←→ 多い人に寄せる）
+- `src/utils/meetingPoint.ts`（`MEETING_BALANCE_LEVELS`, `meetingBalanceWeight`, `rankMeetingStations` の `balance`）, `src/components/ui/molecules/EndLabeledSlider.tsx`（新規。`Slider` アトムに両端の言葉）, `src/components/StationSelector.tsx`, `src/utils/translation.ts`（4言語）
+- 点数 = 最大 ×(1-w) + 平均 × w（w は段階で 0〜1）。0 は待たされる人を作らない、4 は合計が最小で、駅が近くに固まっている人の多い側に寄る。出発駅の並びを入れ替えても同じ結果
+- `tests/unit/utils/meetingPoint.test.ts`, `tests/render/meetingPoint.render.ts`
+
+## [2026-11-15] セッション（集合駅の候補の見出しを削除）
+
+### improve: 集合駅の候補の上の説明文「お互いに行きやすい駅（いちばん遅い人の所要時間が短い順）」を出さない
+- `src/components/StationSelector.tsx`, `src/utils/translation.ts`（`meetingResultsTitle` を4言語とも削除）
+- 候補の並びは、各行の「最大〇分」で分かるため
+
+## [2026-11-15] セッション（乗車ログ: 「表示路線の切替」でも乗った路線を切り替える）
+
+### improve: 乗車ログの間、「表示路線の切替」のチップで乗った路線を切り替えられる
+- `src/components/legend/RouteSwitchBoard.tsx`（`mode`: visibility / rideLog）, `src/components/legend/LegendRouteList.tsx`（`routeToggleMode`）, `src/components/RailwayMap.tsx`（`routeListRideOverrides`, `toggleRideLine`）, `src/utils/translation.ts`（`rideLogRouteSummary`）
+- 同じチップ・同じ並び・同じ検索のまま、塗り＝乗った路線。押すと地図の灰色の線のタップと同じ結果（乗った路線になり、もう一度で外れる）。全部を一度に乗ったことにはしないので、全表示・全非表示のボタンは出さない
+- 乗った路線を外すときは、線のタップ・経路の記録のどちらで記録した路線も外す（降りた駅の記録は残す）
+- `tests/render/rideLog.render.ts`
+
+## [2026-11-15] セッション（乗車ログ: 灰色の線のタップで記録・絞り込みを無くす）
+
+### improve: 乗車ログを、灰色の線をタップして記録する形にし、絞り込みを無くす
+- `src/utils/rideLog.ts`（記録の種類 `ride` / `line` / `alight`。段階の数・絞り込みは削除）, `src/hooks/useRideLog.ts`（`removeWhere`）, `src/components/RideLogControls.tsx`（チップを削除）, `src/components/RailwayMap.tsx`, `src/utils/translation.ts`
+- 地図: 乗っていない路線は灰色、乗った路線は色つきで常に出す。駅名は乗った路線の駅だけ。降りた駅は濃く、降りていない（通っただけの）駅は半透明
+- 灰色の線をタップ → 乗った路線として記録（もう一度タップで外す）。タップの判定は地図の薄い線を切り替えるときと同じ（36pxの透明な太い線 + 同じイベント）。駅のツールチップに「降りた駅に記録」ボタン
+- 記録する駅だけなので、ふだんは画面の外の札を省かない（400駅を超えたときだけ省く）。fitBounds の直後に遠い駅の札が出なかった
+- `tests/unit/utils/rideLog.test.ts`, `tests/render/rideLog.render.ts`, `docs/ui-mode-extension-guide.md`, `docs/render-tests.md`
+
+## [2026-11-15] セッション（畳んだ駅選択パネルに「出発駅」「到着駅」の語）
+
+### improve: 畳んだ駅選択パネルの2行目に、札の前に「出発駅」「到着駅」の語を添える
+- `src/components/ui/molecules/LabeledGroup.tsx`（新規）, `src/components/StationSelector.tsx`, `docs/design-system.md`
+- 札（色つきの駅名）だけでは、閉じたときに何の駅か分からなかった。「出発駅 [藤沢][船橋]　到着駅 [東京]」の形にした。集合駅がまだ無いときは到着駅の語は出さない
+- `tests/render/meetingPoint.render.ts`
+
+## [2026-11-15] セッション（集合駅の候補を到着駅と同じ札で／出発駅ごとの時間はツールチップに）
+
+### feat: 集合駅の候補（上位5つ）を、到着駅と同じ赤の駅名札で地図に出す
+- `src/components/RailwayMap.tsx`（`renderEndpointMarker` を候補にも使う。決めた到着駅とは重ねない）
+- 候補が地図のどこにあるかがひと目で分かる。タップは通常の駅と同じ（ツールチップ・到着駅に設定）
+
+### improve: 出発駅ごとの所要時間は、駅アイコンの下ではなく駅のツールチップに出す
+- `src/components/MeetingTimesDetail.tsx`（新規）, `src/components/RailwayMap.tsx`（`tooltipMeetingDetail`）, `src/utils/translation.ts`（`meetingDetailTitle` を4言語）
+- 集合駅モードで駅をタップすると、出発駅それぞれ（入力順。誰も優先しない）の所要時間と「最大」を出す。出発駅の札は既存の `ColorChip`
+- `tests/render/meetingPoint.render.ts`
+
+## [2026-11-15] セッション（集合駅モードで画面が真っ白になる不具合）
+
+### fix: 集合駅モードで、集合駅を決める前に地図の薄い線をタップすると画面が真っ白になる
+- `src/components/RailwayMap.tsx`（路線の描画で `arrival` が無いときの駅の絞り込み）
+- 出発駅どうしの間の経路を描く（到着駅が無い）状態で、薄い線をタップして路線を足すと、その路線の描画で `arrival.name` を読んで例外になり、画面が全部消えていた。到着駅が無くても描けるようにし、出発駅は全員残す
+- `tests/render/meetingPoint.render.ts`（直す前は落ち、直すと通ることを確認。スマホ・PCの両方）
+
+## [2026-11-14] セッション（駅ツールチップに「出発駅」「到着駅」の札）
+
+### improve: 駅のツールチップで、いま出発駅・到着駅の駅には駅名の横に「出発駅」「到着駅」の札を出す
+- `src/components/StationRoleBadge.tsx`（新規。`ColorChip` + 役割の色 `ROLE_FIELD_COLOR` + 既存の文言 `departureStation` / `arrivalStation`）, `src/components/RailwayMap.tsx`（`tooltipStationRoles`。時刻表のツールチップと統計のツールチップの両方）
+- 初見で、その駅がいま出発駅・到着駅だと分かるように。集合駅モードでは出発駅が複数でも、どれも「出発駅」の札
+- `tests/render/meetingPoint.render.ts`
+
+## [2026-11-14] セッション（乗車ログ（試作））
+
+### feat: 乗った路線・降りた駅を記録して、3段階で見せる「乗車ログ」モード（試作）
+- `src/utils/rideLog.ts`（段階の計算・保存形式。新規）, `src/hooks/useRideLog.ts`（localStorage。新規）, `src/components/RideLogControls.tsx`（絞り込み・記録。新規）, `src/components/StationSelector.tsx`（ボタン・操作の差し込み）, `src/components/RailwayMap.tsx`, `src/utils/translation.ts`（4言語）
+- 段階: 全く通っていない（無彩色の線）／通ったけど降りていない（乗った区間の路線色の線・薄い駅）／通って降りた（路線色の濃い駅）。チップで見せる段階を選べる（複数）
+- 記録は、選んでいる出発駅→到着駅の経路（候補の先頭）を1回ぶん。直前の取り消し・全消去つき。この端末のブラウザにだけ保存
+- 既存UIに統合（ボタン列に1つ足すだけ・入力欄は既存）。終電・集合駅とは同時に使わない
+- `tests/unit/utils/rideLog.test.ts`, `tests/render/rideLog.render.ts`, `docs/ui-mode-extension-guide.md`, `docs/render-tests.md`
+
+## [2026-11-14] セッション（駅ツールチップの路線一覧: 運行系統名を枠の中に）
+
+### fix: 駅ツールチップの路線一覧で、運行系統名（横須賀線の「横須賀・総武快速線」）を路線のチップの枠の中の2行目に入れる
+- `src/components/ui/atoms/Chip.tsx`（`subLabel`）, `src/components/legend/RouteToggleChip.tsx`, `src/components/ServiceTermini.tsx`（`serviceBrandLabel`）, `src/components/RailwayMap.tsx`
+- 灰色の系統名がチップの外にぶら下がり、次の路線の項目のように見えていた。チップの中の2行目に小さく入れる（路線名がすでに系統名を含む路線・系統が無い路線は従来どおり出さない）
+- `tests/unit/components/serviceBrandLabel.test.tsx`
+
+## [2026-11-14] セッション（終電モードの到着駅の印／集合駅は出発駅どうしの間の路線だけを描く）
+
+### fix: 終電モードの到着駅を、通常の画面と同じ到着駅の印（赤の駅名札）で描く
+- `src/components/RailwayMap.tsx`（`renderEndpointMarker` を切り出し、通常の路線描画と終電モードで共用）
+- 終電モードの到着駅が普通の駅の見た目だった。出発・到着の印を置く部品を1つにして、同じ見た目・同じタップ／ホバーの動きにした
+- `tests/render/lastTrainMap.render.ts`
+
+### fix: 集合駅モードで、集合駅を決める前でも出発駅どうしの間の路線と所要時間を出す
+- `src/components/RailwayMap.tsx`（`meetingPairMode`, `journeyActive`）
+- 出発駅が2つ以上あるのに、集合駅（到着駅）が無いと経路も時間も出ず、2つ目以降の出発駅の路線も出なかった。出発駅どうしの間の経路（どの組も対等）だけを描き、関係のない路線は出さない。数字は各出発駅から増えていく。出発駅の印に時刻（駅アイコンの下）は付けない
+- `tests/render/meetingPoint.render.ts`
+
+## [2026-11-14] セッション（路線の上の時間を出発駅から増える数字に／畳んでも出発駅・到着駅を残す）
+
+### improve: 集合駅モードの路線の上の時間を、出発駅それぞれから増えていく数字（ダイクストラ）にする
+- `src/utils/meetingPoint.ts`（`meetingEdgeMinutes`。区間バッジ用の `legs` は削除）, `src/components/RailwayMap.tsx`（`meetingTimeMaps`, `meetingEdgeBadges`）
+- 隣り合う駅の間ごとに、いちばん近い出発駅から見た「遠い側の駅までの最短時間」を出す。出発駅どうしの間では、それぞれの出発駅の側から数字が増えていく（新宿側 20→30→50、藤沢側 25→40→…）。出発駅の並びを入れ替えても同じ結果
+- `tests/unit/utils/meetingPoint.test.ts`
+
+### feat: 駅選択パネルを閉じても、出発駅・到着駅を2行目に小さく残す
+- `src/components/StationSelector.tsx`（`collapsedSummaryShown`, `data-station-summary`）。部品は既存の `ColorChip`（出発=緑・到着=赤）
+- 畳んでも何を選んだか分かるよう、見出しの下に「新宿 → 品川」を小さく出す。集合駅モードでは出発駅が複数並ぶ。畳んだ高さは他のアイコンボタンと同じ高さが最低で、2行目の分だけ伸びる
+- `tests/render/meetingPoint.render.ts`
+
+## [2026-11-14] セッション（集合駅・終電モードを出発駅どうし対等に／折りたたみ／実データの受け皿）
+
+### improve: 集合駅の候補・ルートは上位3件だけ見せ、残りは折りたたむ。説明文を削除
+- `src/components/ui/molecules/TopList.tsx`（新規）, `src/components/StationSelector.tsx`, `src/utils/translation.ts`（`meetingResultsNote` を削除）, `docs/design-system.md`
+- 候補（最大5）と「{駅}までの各ルート（使う路線）」を `TopList`（既定3件、「さらに表示（残りN）」「折りたたむ」）で出す。「駅をクリックすると到着駅に設定します…」の文言は不要のため削除
+
+### improve: 「出発時刻」の行を「時刻を表示」ボタンのすぐ下へ。ルートごとに出発・到着の時刻を出す
+- `src/components/StationSelector.tsx`, `src/utils/meetingPoint.ts`（`meetingClockTimes`）
+- 候補・ルートが長くなっても時刻の操作が押し出されない。ルートの行に「08:00 → 08:25」（出発基準なら全員同じ出発、到着基準なら全員同じ到着）
+
+### feat: 集合駅モードで、出発駅それぞれからの所要時間・経路を対等に表示
+- `src/components/RailwayMap.tsx`, `src/utils/meetingPoint.ts`（`interleaveByRank`, `MEETING_LABEL_NAME_CHARS`）
+- 駅アイコンの下には時間を書かない（2026-11-14 追記: ユーザー指示）。集合駅を決めると、出発駅ごとの経路が路線の上に出て、区間（乗換駅で区切る）の所要時間を丸いバッジで出す。出発駅どうしで同じ区間は1つ（`MeetingRouteLeg`, `meetingLegBadges`）。記事の説明も合わせた
+- 地図に描く経路は、出発駅ごとに同じ数ずつ求めて順位の順に交互に並べる（最初の出発駅だけの経路にならない）。出発駅の印・地図の範囲も全員分
+
+### feat: 終電モードでも、表示していない路線は通常の画面と同じ半透明で描き、直接つながらない路線の駅にも終電時刻を付ける
+- `src/components/RailwayMap.tsx`（`demoFullNetwork`, `demoDrawnLines`）, `src/utils/lastTrainDemo.ts`（`maxLines` に `Infinity`）
+- 終電時刻は到着駅からたどれる全路線で計算。最初から出す路線（従来の上限）と、路線の表示切替・タップで出した路線は通常どおりの濃さで駅と時刻付き、それ以外は半透明の線（タップで出せる）
+
+### feat: 終電の実データを差し込める受け皿（時刻表のフォーマット）
+- `src/data/lastTrainTimetables.ts`（新規・空）, `src/utils/lastTrainDemo.ts`（`legsFromRealTimetable`, `parseTimetableClock`, `latestIsReal`）, `src/components/RailwayMap.tsx`（実データの駅は時刻の「*」を外す）, `docs/data-editing-guide.md`（節を追加）
+- 路線を1つ書くとその路線だけ架空ダイヤから実データに切り替わる。出典必須。`tests/unit/data/lastTrainTimetables.test.ts` が駅名・時刻・出典を検証
+- `tests/unit/utils/lastTrainRealData.test.ts`, `tests/unit/components/ui/topList.test.tsx`, `tests/unit/utils/meetingPoint.test.ts`
+
 ## [2026-11-13] セッション（終電モードを通常の画面へ）
 
 ### feat: 終電モード（試作）を、試作URLなしでも通常の駅選択パネルから使えるようにする
@@ -7,6 +237,57 @@
 - ボタンを押したときだけ終電の画面（基準時刻・到達圏の絞り込み）になる。OFFで通常に戻る。到着駅が未選択なら共通Snackbarで案内
 - 架空ダイヤのままなので、ボタン名に「試作」・`title`・駅ラベルの `*` で明示（実際の終電検索には使えない）
 - `tests/render/lastTrainMap.render.ts`（通常画面のON/OFF・Snackbarを追加）, `tests/unit/components/lastTrainMapIntegration.test.ts`（deps の名前を更新）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
+
+## [2026-11-14] セッション（集合駅の出発駅を出発駅欄と同じ幅・文言にそろえる）
+
+### improve: 追加した出発駅を、出発駅欄と同じ幅・位置・文言にする（部品 `FieldPairRow`）
+- `src/components/ui/molecules/FieldPairRow.tsx`（新規）, `src/components/ui/molecules/RoleField.tsx`, `src/components/StationSelector.tsx`, `src/components/ui/atoms/controlSize.ts`, `src/utils/translation.ts`（案内文）, `src/data/articles/meeting-station-finder.ts`（説明を合わせた）
+- 追加の出発駅は幅いっぱいで、出発駅欄（半分の幅）と幅がちがい、文言も「＋ 出発駅を追加」だった。出発駅欄・到着駅欄と同じ2列の行（`FieldPairRow`）に置き、左は出発駅欄と、右は到着駅欄と同じ幅・同じ位置にそろえた。区切りの列の幅は入れ替えボタンと同じ定義元（`PAIR_DIVIDER_WIDTH` = `CONTROL_SIZE.sm.minHeight`）の1か所
+- 案内は出発駅欄（未入力）と同じ「駅名入力」。＋のアイコンは外した（読み上げの名前だけ「出発駅を追加」）。入れるたびに次の欄が右隣に出る。狭いスマホでも半分の幅のまま（出発駅欄と同じ）
+- 使わなくなった `ROLE_FIELD_MIN_WIDTH_EM`（最小幅の定義）と `RoleField` のアイコン枠を削除
+- `tests/unit/components/ui/fieldPairRow.test.tsx`（新規）, `roleField.test.tsx`, `tests/render/meetingPoint.render.ts`（3つの画面幅で幅・位置が出発駅欄・到着駅欄と一致・右隣に出る・4言語で文言が同じで収まる）, `docs/design-system.md`, `docs/ui-mode-extension-guide.md`, `docs/render-tests.md`
+
+## [2026-11-14] セッション（路線の切り替えの「元に戻す」）
+
+### improve: 地図の線をタップして路線を切り替えたときの知らせに「元に戻す」を付ける
+- `src/components/map/RouteToggleSnackbar.tsx`（`onUndo`）, `src/components/map/MapNoticeSnackbar.tsx`（`onUndoRouteToggle`）, `src/components/map/mapNotice.ts` / `src/hooks/useMapNotice.ts`（`removeFromAvailable`）, `src/components/RailwayMap.tsx`（`undoRouteToggle`）, `src/utils/translation.ts`（`undoAction` を4言語）
+- 2026-11 に「同じ線をもう一度押せば戻る」として外した「元に戻す」を、押し間違えたときに帯からすぐ戻せるよう戻した。押すと切り替える前の表示（表示した路線は非表示に、非表示にした路線は表示に）に戻り、知らせは閉じる。線をタップして足した路線（もともと表示できる路線の一覧に無かった）は、一覧からも外す
+- 帯は1行のまま。操作のボタンは押せる大きさ（44px）なので、帯の高さはそれに合わせて少し伸びる。長い路線名は路線名だけを省略し、「を非表示にしました」とボタンは残す
+- `tests/unit/components/ui/snackbar.test.tsx`（ボタンは onUndo のときだけ・押すと呼ばれて閉じる・4言語）, `tests/unit/components/map/routeToggleUndo.test.ts`（新規）, `tests/render/routeTap.render.ts`（線を押す → 非表示 → 元に戻す → 2路線に戻る）, `docs/design-system.md`
+
+## [2026-11-14] セッション（位置情報を許可せずに入ったあとの「現在地から」）
+
+### fix: 位置情報を許可せずに入っても「現在地から」を押せて、押すたびに許可を取り直す
+- `src/utils/freshLocation.ts`（`requestPosition` / `PositionResult` / 取れなかった理由）, `src/components/RailwayMap.tsx`（`handleSetNearestDeparture`）, `src/components/StationSelector.tsx`, `src/utils/translation.ts`（`locationDeniedHelp` を4言語）
+- 位置が取れていない間は「現在地から」が非活性で、許可し直す手段が無かった。**常に押せる**ようにし、押すたびに位置の取得をやり直す。ブラウザが「許可の確認」の状態なら、ここでもう一度許可を聞くポップアップが出る。取れたら最寄り駅を出発駅に入れ、位置の監視（現在地マーカーなど）も再開する
+- それでも許可されないとき（ブラウザが「拒否」を覚えているときは確認が出せない）は、「ブラウザの設定でこのサイトの位置情報を許可してから、もう一度押してください」を駅選択パネルのすぐ下に出す（取れない・時間切れのときは「現在地を取得できません」）
+- `tests/unit/utils/freshLocation.test.ts`（理由つき・押すたびに取り直す）, `tests/render/currentLocation.render.ts`（許可せずに入る → 押せる → 案内 → 許可して押すと使える）
+
+## [2026-11-13] セッション（出発駅の欄を同じ緑の部品にそろえる）
+
+### improve: 追加した出発駅も出発駅欄と同じ緑の欄にし、入れるたびに次の欄が隣に出る（部品 `RoleField`）
+- `src/components/ui/molecules/RoleField.tsx`（新規）, `src/components/ui/atoms/controlSize.ts`（`ROLE_FIELD_MIN_WIDTH_EM`）, `src/components/StationSelector.tsx`, `src/utils/translation.ts`（英語の案内を "Add departure" に）
+- 追加した出発駅が灰色のタグで、出発駅欄と別の見た目だった（「別の出発駅でも色は同じで」）。出発駅・到着駅・追加の出発駅・追加の入力欄を、役割の色（出発=緑・到着=赤）で塗る同じ部品 `RoleField` にそろえた。出発欄と到着欄で同じ入力欄を2回手書きしていたのもここ1か所にまとめた
+- 入れるごとに次の欄が隣（右）に出る（2つ入れたら3つ目は右。収まらない狭いスマホは1列で幅いっぱい）。行ごとの見出し・番号・点線・タグは無し。先に作った `TagInputRow`（タグ＋入力欄）は使わなくなったので削除
+- 並びは CSS グリッド（1つぶんの最小の幅は `ROLE_FIELD_MIN_WIDTH_EM`＝em。px の直書きなし）
+- `tests/unit/components/ui/roleField.test.tsx`（新規。色・実線・クリア・アイコン・出発/到着/追加が同じ部品であること）, `tests/render/meetingPoint.render.ts`・`featureArticles.render.ts`（緑・右に出る・4言語×広い/狭いで案内が切れない・1列）, `docs/design-system.md`（部品の表）, `docs/ui-mode-extension-guide.md`, `docs/render-tests.md`
+
+## [2026-11-13] セッション（終電モードの動きを軽くする）
+
+### improve: 終電モードのスクロール・ズームの重さを減らす（駅アイコンの使い回し・画面の外は描かない）
+- `src/utils/divIconCache.ts`（新規）, `src/components/RailwayMap.tsx`（駅・時刻のアイコンを `cachedDivIcon` で作る。終電モードの駅・区間は `viewBounds` の外を描かない）
+- 駅のアイコンは描き直すたびに新しい DivIcon を作り、react-leaflet が全マーカーの DOM を作り直していた（終電モードは約370個）。見た目が同じなら同じアイコンを返す（上限 4000 を超えたら捨てる）。さらに、画面＋余白の外の駅・区間は描かない
+- 計測（CPU を4倍遅くして地図を動かす・終電モード・到着駅=新宿）: 長い処理（50ms 超）11回・約700ms → 2回・約180ms、フレーム間隔の95%点 73ms → 33ms
+- 通常の経路表示は線（薄く描く路線を含め約1000本）が多く、終電モードより重いことも分かった（今回は未対応）
+- `tests/unit/utils/divIconCache.test.ts`（新規）, `tests/render/lastTrainMap.render.ts`（画面の外は描かない。絞り込みを外すと落ちることを確認）, `docs/last-train-map-poc.md`, `docs/render-tests.md`
+
+## [2026-11-13] セッション（知らせを操作した場所の近くに出す）
+
+### improve: 入力が足りない知らせを、駅選択パネルのすぐ下に注意の印つきで出す
+- `src/components/map/mapNotice.ts`（`noticePlacement` / `MESSAGE_NOTICE_DURATION_MS`）, `src/components/map/mapNoticePlacement.ts`（新規）, `src/components/map/MapNoticeSnackbar.tsx`, `src/hooks/useMapNotice.ts`, `src/components/StationSelector.tsx`（`data-station-selector`）, `src/components/RailwayMap.tsx`
+- 終電モードの案内が画面の下の端に出て、目に止まらなかった。フィードバックは操作・入力の近くに出すのがベストプラクティスなので、文の案内（駅選択パネルでの操作の結果）は**パネルのすぐ下**（左端をそろえ、パネルの幅まで）に、注意の印（橙のアイコン）つきで出す。6秒出す（行動が必要な文は4秒より長く）。パネルが見つからないときは従来どおり地図の下
+- 地図の線をタップした知らせは従来どおり地図の下（指の下にあるのは地図のため）。知らせの管理・表示は `useMapNotice` / `MapNoticeSnackbar` の1か所のまま、種類ごとに場所を決める
+- `tests/unit/components/map/mapNoticePlacement.test.ts`（新規）, `tests/render/mapNotice.render.ts`（パネルのすぐ下・左端そろえ・上半分・アイコン）, `docs/ui-mode-extension-guide.md`, `docs/design-system.md`, `docs/last-train-map-poc.md`, `docs/render-tests.md`
 
 ## [2026-11-13] セッション（知らせの文末が切れる）
 
@@ -67,6 +348,14 @@
 - `src/utils/translation.ts`（4言語）, `src/components/StationSelector.tsx`（`title` に説明を追加）
 - 駅名の下の時刻は、経路上の各駅の到着予定時刻（路線データの駅間時間による目安）。ボタン1つで出し入れできる（既存の `Button` アトム）
 - `tests/render/arrivalTimeLabels.render.ts`（新規, PC・スマホ）, `docs/render-tests.md`
+
+## [2026-11-13] セッション（線形の試作）
+
+### feat: 2D の地図を実際の線路の形で描く試作（`?experiment=track-geometry`）
+- `scripts/track-geometry/build-from-terrain3d-v2.mts`（新規）, `public/data/track-geometry-prototype.json`（新規, 52路線）, `src/utils/trackGeometryPrototype.ts`（新規）, `src/components/RailwayMap.tsx`（`trackGeometryOf`）
+- 立体表示用に受け取っていた線形（OSM 由来・80路線）を、駅の位置で区切って `TrackSection` にした。検証（`splitAtStations`）に通った路線だけを使う。通常の画面は変わらない
+- 駅と線の距離の基準は試作では 300m（本番は 150m）。除外した28路線は直線のまま（理由は JSON の `meta.skipped`）
+- `tests/unit/utils/trackGeometryPrototype.test.ts`（新規, 8件）, `tests/render/trackGeometry.render.ts`（新規）, `docs/track-geometry.md`, `docs/render-tests.md`
 
 ## [2026-11-13] セッション（集合駅までの各ルート）
 

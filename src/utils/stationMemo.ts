@@ -64,7 +64,7 @@ export function isKnownStation(stationName: string): boolean {
 
 // ── 保存 ──────────────────────────────────────────────────────────
 
-const isMemo = (value: unknown): value is StationMemo => {
+export const isMemo = (value: unknown): value is StationMemo => {
   if (typeof value !== 'object' || value === null) return false;
   const m = value as Record<string, unknown>;
   return typeof m.id === 'string'

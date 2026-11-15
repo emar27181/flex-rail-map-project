@@ -24,7 +24,7 @@ PR ごとに `npm run test:design` で実行する（手元でも同じコマン
 | 開閉の印（▼）は手で書かない。翻訳文言にも入れない | `DisclosureIndicator` / `DisclosureHeader` / `CollapsiblePanel` | `tests/unit/components/ui/disclosure.test.ts` |
 | 地図の上に浮かぶ開閉パネルは `CollapsiblePanel`。見出しは常に「表示切替」と同じ高さ・文字（`FLOATING_CONTROL`）。幅は `width="narrow"` か `"wide"`、高さの上限・地図の端との間・隅のボタンの上の位置も定義元から取り、使うファイルに px / vh を書かない | `CollapsiblePanel` / `FLOATING_PANEL` / `floatingPanelWidth` / `aboveFloatingButtons`（`ui/atoms/controlSize.ts`） | `tests/unit/components/ui/floatingPanel.test.tsx` |
 | 部品（atoms / molecules）と、それを使う地図の上の部品（立体表示・凡例）は型チェックの対象に入れる | `tsconfig.check.json` の `include` | `npm run test:types`（CI の checks） |
-| 地図の重なり順（駅は路線数が多いほど上・出発/到着は最上・層の前後）は1か所だけに書く | `MAP_PANE_Z` / `stationMarkerZ` / `ENDPOINT_MARKER_Z`（`constants/mapLayers.ts`） | `tests/unit/constants/mapLayers.test.ts` |
+| 地図の重なり順（出発/到着 → 集合駅候補 → 通常駅。候補同士・通常駅同士は接続路線数が多いほど前面）は1か所だけに書く | `MAP_PANE_Z` / `stationMarkerZ` / `meetingCandidateMarkerZ` / `ENDPOINT_MARKER_Z`（`constants/mapLayers.ts`） | `tests/unit/constants/mapLayers.test.ts` |
 | 端末の境目（768 / 1024px）は1か所だけに書く | `constants/breakpoints.ts`（`MEDIA` / `useDeviceClass`） | `tests/unit/constants/breakpoints.test.ts` |
 | 静的ページ（記事・駅/路線ページ）の CSS もトークンの CSS 変数を使う | `TOKEN_VARS_CSS` / `CONTROL_CSS`（`ui/atoms/controlCss.ts`） | `tests/unit/styles/articleCssTokens.test.ts`, `tests/unit/components/ui/controlCss.test.ts` |
 | 絵文字を使わない。アイコンは lucide-react | `lucide-react` | `tests/unit/noEmojiIcons.test.ts` |
@@ -263,7 +263,13 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 排他選択のボタン列 | `SegmentedControl`（molecule） |
 | 排他選択を1本の枠に収め、選んだ位置を背景のスライドで示す | `SlideSegmentedControl`（`SegmentedControl` の `variant="slide"` から使う実体） |
 | 選んだものを並べ、1つずつ外せるタグ（経由駅など） | `RemovableTag`（削除ボタン付き） |
-| 選んだものをタグで横一列に並べ、同じ行の末尾に「＋ 追加」の入力欄をいつでも出す（集合駅の出発駅など。人数に合わせて増減する入力） | `TagInputRow`（molecule。`RemovableTag` + `TextField`。番号と名前は1つのタグにまとめ、行ごとの見出しは立てない。入力欄の枠は普通の入力欄と同じで、**点線や色付きの枠にしない**。最小の幅は `TAG_INPUT_MIN_WIDTH_EM`、収まらなければ次の行で広がる。候補の一覧は children に渡す） |
+| 役割の色で塗った入力欄（出発=緑・到着=赤。値を消すボタン付き）。出発駅・到着駅・「集合駅を探す」で増やす出発駅は**すべてこの部品**で出す（同じ入力欄を別々に手書きしない。追加の出発駅だけ灰色のタグ・点線の枠・別の幅・別の文言にしない） | `RoleField`（molecule。`TextField` + `IconButton`。役割の色は `ROLE_FIELD_COLOR`（= `SEMANTIC`）、枠は同じ色の実線。駅の知識は持たない） |
+| 入力欄を2つ並べる行（左右は同じ幅、間に入れ替えボタンと同じ幅の区切り。「出発駅 ⇆ 到着駅」と、集合駅の追加の出発駅の行を**同じ幅・同じ位置**にそろえる） | `FieldPairRow`（molecule。区切りの幅は `PAIR_DIVIDER_WIDTH` = `CONTROL_SIZE.sm.minHeight`。欄が1つだけの行も半分の幅） |
+| 更新履歴のように、情報を1件ずつ背景色と余白でまとめるカード | `Card`（atom。角丸と内側の余白は共通トークンを使用。隣り合うカードはテーマの2色を交互に使う） |
+| アイコンつきの切り替えタグ（ボタン）の並び。「表示モード」は集合駅・終電・ヒートマップ・乗車ログを先に並べ、残りの可視化は「ほかの表示モード」で開き、実装中の項目は末尾に置く。選択中の項目は畳んでいても表示する。路線切り替えと同じ面・角丸を使い、有効なチップは識別色で塗る | `TagToggleGroup`（molecule）。アトムは路線と同じ `Chip`。モード色は `DISPLAY_MODE_COLORS`、印は lucide-react |
+| 2つの考え方の間を段階で選ぶ設定（数字は出さず、つまみの位置と両端の言葉で示す。集合駅の「全員が同じくらい ←→ 多い人に寄せる」） | `EndLabeledSlider`（molecule。つまみと等間隔の目盛りは `Slider` アトム（ブラウザ別のつまみの描画は `slider.css`）。選択位置までを主操作色で示し、目盛りとつまみは駅マーカーと同じ `L.r.control`。何の設定かは知らない。2026-11-15） |
+| 見出しの語（小さな文字）と、続く札・チップの並び（畳んだ駅選択パネルの2行目「出発駅 [藤沢][船橋]　到着駅 [東京]」。折り返しても見出しと札は離れない） | `LabeledGroup`（molecule。駅は知らない。札は `ColorChip`、語は `departureStation` / `arrivalStation`。2026-11-14） |
+| 並んだ項目（縦の一覧）を上位3件だけ見せ、残りは「さらに表示」で開く（集合駅の候補・出発駅ごとのルート。手で `slice` して開閉の状態を持たない） | `TopList`（molecule。初期件数は `TOP_LIST_DEFAULT_COUNT` = 3。集合駅候補の段階表示は `TOP_LIST_STEP_COUNT` = 5。文言は `showMoreRoutesStep` / `collapseList`。折り返して並ぶ小さな部品を行数で切るのは `ClampedWrap`。2026-11-14） |
 | 開閉する見出しの右端の ▼ | `DisclosureIndicator`（開くと180度回る。回す時間・色は全パネル共通。塗ったボタンの中に置くときは `tone="inherit"`。▼▲▶ を文字で書くのはこの部品だけで、翻訳文言にも入れない） |
 | 押すと開閉する見出しの行 | `DisclosureHeader`（見出し＋▼。行のどこを押しても開閉、開くと区切り線。`size="floating"` で高さ・文字が `FLOATING_CONTROL`） |
 | 地図の上に浮かぶ操作の高さ・文字の大きさ | `FLOATING_CONTROL`（`controlSize.ts`。36px・`FS.body`。FloatingButton・凡例の見出し・丸いボタンで共通） |
@@ -272,8 +278,8 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 地図の上に浮かぶアイコンだけの丸いボタン（隅の縮小・言語・テーマ、立体表示の設定） | `FloatingIconButton`（atom。大きさ `FLOATING_ICON_BUTTON_SIZE`・アイコン `FLOATING_ICON_GLYPH_SIZE`・地 `floatingSurfaceStyle`。`pressed` を渡すと開閉ボタンになり、開いている間は塗り。寸法や地を呼び出し側で組み立てない） |
 | 見出しと中身を1枚の箱にまとめた開閉パネル（地図の上に浮かぶもの） | `CollapsiblePanel`（molecule。凡例「N路線」・立体表示の説明が使う。見出しと中身を別の箱に分けない。見出しは常に `FLOATING_CONTROL`、幅は `width="narrow"`（一覧）/ `"wide"`（説明と操作）、開いた中身は `FLOATING_PANEL.maxHeight` でスクロール。左下の丸いボタンの上に置くときは `bottom: aboveFloatingButtons(1)`） |
 | 地図・グラフの出典を小さな情報アイコンで格納し、必要時だけ展開する | `SourceDisclosure`（molecule。出典や注記を折りたたみ、キーボードでも開閉可能。色・余白・フォントは既存トークン） |
-| 折り返して並ぶチップなどを、決まった行数（既定5行）まで見せ、「さらに表示」1回で10行ずつ広げる（全部を一度に出さない） | `ClampedWrap`（molecule。表示路線の切替の各グループが使う。件数ではなく行数で切るので、画面の幅によらず高さがそろう。1回の量の理由は部品の冒頭のコメント、2026-11） |
-| 操作の結果を画面の下に1行で短く知らせる（「● 山手線を非表示にしました」） | `Snackbar`（molecule。一度に1つ・4秒で自動で消える・指が乗っている間は消さない・**原則1行で、高さは `FLOATING_CONTROL.height`。文の案内は `multiline` で、収まらないとき文末を切らずに2行まで折り返す**（2026-11-13: 「…設定してくださ」と切れていた。路線名のように省略できる部分だけを省略する）・操作と×は任意・`role="status"`。位置 `bottom` は呼び出し側が浮かぶボタンとの関係で決める。地図の線をタップしたときは `map/RouteToggleSnackbar`（「元に戻す」は付けない。長い路線名は名前だけ省略）、2026-11） |
+| 折り返して並ぶチップなどを、決まった行数まで見せ、「さらに表示」で段階的に広げる。表示路線の切り替えでは初期3行・追加5行 | `ClampedWrap`（molecule。表示路線の切替の各グループが使う。件数ではなく行数で切るので、画面の幅によらず高さがそろう。1回の量の理由は部品の冒頭のコメント、2026-11） |
+| 操作の結果を画面の下に1行で短く知らせる（「● 山手線を非表示にしました」） | `Snackbar`（molecule。一度に1つ・4秒で自動で消える・指が乗っている間は消さない・**原則1行で、高さは `FLOATING_CONTROL.height`。文の案内は `multiline` で、収まらないとき文末を切らずに2行まで折り返す**（2026-11-13: 「…設定してくださ」と切れていた。路線名のように省略できる部分だけを省略する）・操作と×は任意・`role="status"`。位置 `bottom` は呼び出し側が浮かぶボタンとの関係で決める。**出す場所は知らせの種類で決め、入力・操作の結果は操作した場所の近く（駅選択パネルのすぐ下）に注意の印つきで出す**（画面の下の端は目に入らない。`map/mapNotice.ts` の `noticePlacement`・`map/mapNoticePlacement.ts`。2026-11-13）。地図の線をタップしたときは `map/RouteToggleSnackbar`（**「元に戻す」を付ける**＝切り替える前の表示に戻す。2026-11-14 ユーザー指示。長い路線名は名前だけ省略）、2026-11） |
 
 | 折り返して並ぶチップなどを、閉じているときは決まった行数（既定5行）まで見せ、開くと全部見せる | `ClampedWrap`（molecule。表示路線の切替の各グループが使う。件数ではなく行数で切るので、画面の幅によらず高さがそろう） |
 | ボタンを押すと選択肢の一覧が開き、1つ選ぶ（言語の切り替えなど。**押すたびに次へ進む巡回ボタンは使わない**。押す前に行き先が分からない） | `OptionMenu`（molecule。ボタンはアイコンだけで文字は添えず、今の選択は読み上げ名で伝える。一覧に今の選択を塗りと ✓ で示す。外を押す・Escape で閉じ、↑↓ で動ける。地図の言語は organism の `LanguagePicker`（`constants/languages.ts` の名前・並びを使う）） |
@@ -489,7 +495,7 @@ UIのテーマと無関係なため明示的に除外している。
 ダークモード用の値は `ThemeContext` が持ち、ライト側の値だけ `SEMANTIC` から取る。
 
 また、インラインstyleを持つのにテーマから色を取っていないコンポーネントが **42中9**
-（`DemoMap` `CoverageAnalysis` `SchematicMap` `SimpleMap` `ErrorBoundary` など）。
+（`CoverageAnalysis` `SchematicMap` `SimpleMap` `ErrorBoundary` など）。
 これらはダークモードで配色が崩れる可能性がある。
 なお `map/HeatmapDots.tsx` と `map/HeatmapLayer.tsx` はどこからも import されていない
 **未使用ファイル**なので、直すより消す方が筋が良い。
@@ -604,6 +610,7 @@ UIのテーマと無関係なため明示的に除外している。
    色覚特性によっては差が分かりにくい
 
 路線一覧では accent にその路線の色を渡し、選択された路線が自分の色で塗られるようにした。
+集合駅候補のように背景の差で区切るカードは、共通の `selectableCard()` に `borderless: true` を指定する。通常は `surfaceElevated`、選択時は薄いアクセント色の背景にチェックを添える。集合駅候補の駅名には到着駅色、各所要時間の出発駅名には出発駅色を、共通の `ColorChip` の `tone="subtle"` で薄く敷く。
 `tests/unit/components/legend/legendStyles.test.ts` でこの3点を固定している。
 
 ---

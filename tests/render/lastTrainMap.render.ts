@@ -1,5 +1,5 @@
 /** 終電モードは独立UIを使わず、既存駅・時刻欄 + モードボタンだけ。 */
-import { test, expect, collectErrors } from './helpers';
+import { test, expect, collectErrors, clickMode, modeIsOn, modeTag, closeSettingsSheet } from './helpers';
 
 test('終電モード切替時に余分なパネル・スライダー・駅選択欄を増やさない', async ({ page }) => {
   const errors = collectErrors(page);
@@ -10,9 +10,7 @@ test('終電モード切替時に余分なパネル・スライダー・駅選�
   await expect(stations).toHaveCount(2);
   const timeField = page.locator('input[type="time"]').first();
   await expect(timeField).toHaveValue(/^\d{2}:\d{2}$/);
-  const toggle = page.getByRole('button', { name: '終電モード' });
-  await expect(toggle).toBeEnabled();
-  await toggle.click();
+  await clickMode(page, '終電モード');
 
   await expect(stations).toHaveCount(2);
   await expect(page.locator('input[type="time"]')).toHaveCount(1);
@@ -26,7 +24,7 @@ test('終電モード切替時に余分なパネル・スライダー・駅選�
   await expect(timeField).toHaveValue('23:55');
   await timeField.fill('01:30');
   await expect(timeField).toHaveValue('01:30');
-  await toggle.click();
+  await clickMode(page, '終電モード');
   await expect(timeField).toHaveValue('01:30');
   await expect(page.getByRole('slider', { name: '仮想現在時刻を変更' })).toHaveCount(0);
   expect(errors).toEqual([]);
@@ -35,24 +33,20 @@ test('終電モード切替時に余分なパネル・スライダー・駅選�
 test('到着駅未選択で押すと路線切替と共通のSnackbarで案内し、入力欄にはカーソルを移さない', async ({ page }) => {
   await page.goto('/?experiment=last-train');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
-  const toggle = page.getByRole('button', { name: '終電モード' });
-  await expect(toggle).toBeEnabled();
-  await toggle.click();
+  await clickMode(page, '終電モード');
   await expect(page.locator('[data-snackbar]')).toHaveCount(1);
   await expect(page.locator('[data-snackbar]')).toContainText('終電モードを使用するには、到着駅を設定してください。');
   // 入力欄へカーソルは移らず、駅の候補も開かない（案内は下の帯だけ）
   await expect(page.locator('input.station-input-filled').nth(1)).not.toBeFocused();
   await expect(page.locator('[data-station-option]')).toHaveCount(0);
-  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+  expect(await modeIsOn(page, '終電モード')).toBe(false);
   await expect(page.getByRole('slider', { name: '仮想現在時刻を変更' })).toHaveCount(0);
 });
 
 test('固定3路線外の駅でも既存の終電モードボタンを押せる', async ({ page }) => {
   await page.goto('/?experiment=last-train&to=fujisawa');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
-  const toggle = page.getByRole('button', { name: '終電モード' });
-  await expect(toggle).toBeEnabled();
-  await toggle.click();
+  await clickMode(page, '終電モード');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
   await expect(page.getByRole('slider', { name: '仮想現在時刻を変更' })).toHaveCount(0);
 });
@@ -61,22 +55,19 @@ test('通常の画面にも終電モード（試作）のボタンがあり、�
   const errors = collectErrors(page);
   await page.goto('/?from=shinjuku&to=shibuya');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
-  const toggle = page.getByRole('button', { name: '終電モード（試作）' });
-  await expect(toggle).toBeEnabled();
-  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
-  // 押す前は通常の画面（出発時刻の欄、「集合駅を探す」も並んでいる）
+  expect(await modeIsOn(page, '終電モード')).toBe(false);
+  // 押す前は通常の画面（出発時刻の欄がある）
   await expect(page.getByText('出発時刻')).toBeVisible();
-  await expect(page.getByRole('button', { name: '集合駅を探す' })).toBeVisible();
 
-  await toggle.click();
-  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  await clickMode(page, '終電モード');
+  expect(await modeIsOn(page, '終電モード')).toBe(true);
   await expect(page.getByText('基準時刻')).toBeVisible();
   // 駅の入力欄・時刻欄は元の1組だけ
   await expect(page.locator('input.station-input-filled')).toHaveCount(2);
   await expect(page.locator('input[type="time"]')).toHaveCount(1);
 
-  await toggle.click();
-  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+  await clickMode(page, '終電モード');
+  expect(await modeIsOn(page, '終電モード')).toBe(false);
   await expect(page.getByText('出発時刻')).toBeVisible();
   expect(errors).toEqual([]);
 });
@@ -84,8 +75,36 @@ test('通常の画面にも終電モード（試作）のボタンがあり、�
 test('通常の画面で到着駅が未選択のまま押すと、共通のSnackbarで案内する（画面は変わらない）', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
-  const toggle = page.getByRole('button', { name: '終電モード（試作）' });
-  await toggle.click();
+  await clickMode(page, '終電モード');
   await expect(page.locator('[data-snackbar]')).toContainText('終電モードを使用するには、到着駅を設定してください。');
-  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+  expect(await modeIsOn(page, '終電モード')).toBe(false);
+});
+
+test('終電モード: 画面の外の駅は描かない（数百の駅を描き直して、動かすと重くなるのを避ける）', async ({ page }) => {
+  const errors = collectErrors(page);
+  const count = () => page.locator('.leaflet-marker-icon').count();
+  // 路線網全体が入る広さ
+  await page.goto('/?mode=last-train&to=shibuya&center=35.66,139.72&zoom=10');
+  await expect(page.locator('.leaflet-container').first()).toBeVisible();
+  await expect.poll(count, { timeout: 20_000 }).toBeGreaterThan(40);
+  const wide = await count();
+  // 渋谷の周りだけが入る広さ
+  await page.goto('/?mode=last-train&to=shibuya&center=35.658,139.7016&zoom=15');
+  await expect(page.locator('.leaflet-container').first()).toBeVisible();
+  await expect.poll(count, { timeout: 20_000 }).toBeGreaterThan(0);
+  await page.waitForTimeout(800);
+  const near = await count();
+  expect(near, `広い範囲 ${wide} / 近く ${near}`).toBeLessThan(wide * 0.5);
+  expect(errors).toEqual([]);
+});
+
+test('終電モード: 到着駅は通常の画面と同じ到着駅の印（赤の駅名札）で描く', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('/?mode=last-train&to=shibuya&center=35.658,139.7016&zoom=14');
+  const arrival = page.locator('.special-station-marker-inline', { hasText: '渋谷' });
+  await expect(arrival).toHaveCount(1, { timeout: 20_000 });
+  // 塗りの色は到着の赤（通常の画面の到着駅と同じ部品）
+  const bg = await arrival.locator('div').first().evaluate(el => getComputedStyle(el).backgroundColor);
+  expect(bg).toBe('rgb(244, 67, 54)');
+  expect(errors).toEqual([]);
 });

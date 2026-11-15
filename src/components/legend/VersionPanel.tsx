@@ -13,6 +13,7 @@ import { getThemeColors } from '../../contexts/ThemeContext';
 import { section, text, L } from './legendStyles';
 import { translateUI, type Language } from '../../utils/translation';
 import Button from '../ui/atoms/Button';
+import Card from '../ui/atoms/Card';
 import DisclosureIndicator from '../ui/atoms/DisclosureIndicator';
 import { RELEASES, type Release } from '../../data/releases';
 import {
@@ -120,19 +121,19 @@ export default function VersionPanel({
           {/* 更新履歴 */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.sm }}>
             <div style={section.title(colors)}>{translateUI('versionHistory', language)}</div>
-            <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: L.sp.md }}>
-              {visible.map(r => {
+            <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
+              {visible.map((r, index) => {
                 const at = r.releasedAt ?? BUILT_AT;
                 return (
-                  <li key={r.version} data-release={r.version}>
+                  <Card as="li" key={r.version} theme={theme} tone={index % 2 === 0 ? 'raised' : 'neutral'} data-release={r.version}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: L.sp.sm, flexWrap: 'wrap' }}>
                       <strong style={text.body(colors)}>{r.version}</strong>
-                      {at && <span style={{ ...text.body(colors), color: colors.textSecondary }}>{time(at)}</span>}
+                      {at && <time dateTime={at} style={{ ...text.body(colors), color: colors.textSecondary }}>{time(at)}</time>}
                     </div>
-                    <ul style={{ margin: `${L.sp.xxs} 0 0`, paddingLeft: L.sp.xl, ...text.body(colors) }}>
+                    <ul style={{ margin: `${L.sp.xxs} 0 0`, paddingInlineStart: L.sp['2xl'], ...text.body(colors), overflowWrap: 'anywhere' }}>
                       {releaseNotes(r, language).map(note => <li key={note}>{note}</li>)}
                     </ul>
-                  </li>
+                  </Card>
                 );
               })}
             </ol>

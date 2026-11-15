@@ -22,6 +22,17 @@ describe('VersionPanel', () => {
     expect(items[1].textContent).toContain(RELEASES[1].notes.ja[0]);
   });
 
+  it.each(['light', 'dark'] as const)('各版を背景色の異なるカードにまとめる（%s）', theme => {
+    const r = render(<VersionPanel theme={theme} language="japanese" />);
+    open(r);
+    const items = Array.from(r.container.querySelectorAll<HTMLLIElement>('[data-release]'));
+    expect(items[0].tagName).toBe('LI');
+    expect(items[1].querySelector('time')).toHaveAttribute('datetime', RELEASES[1].releasedAt);
+    expect(items[0].querySelectorAll('ul > li')).toHaveLength(RELEASES[0].notes.ja.length);
+    expect(items[0].style.backgroundColor).not.toBe(items[1].style.backgroundColor);
+    expect(items[2].style.backgroundColor).toBe(items[0].style.backgroundColor);
+  });
+
   it('「さらに表示」で少しずつ広げる', () => {
     const r = render(<VersionPanel theme="dark" language="japanese" />);
     open(r);
