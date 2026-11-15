@@ -418,6 +418,21 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
     </div>
   );
 
+  const sortControl = (
+    <Select
+      theme={theme}
+      size="sm"
+      value={sortMode}
+      onChange={e => setSortMode(e.target.value as SortMode)}
+      aria-label={translateUI('sortLabel', language)}
+    >
+      <option value="distance">{translateUI('sortNearby', language)}</option>
+      <option value="name">{translateUI('sortAlpha', language)}</option>
+      <option value="color">{translateUI('sortColor', language)}</option>
+      <option value="default">{translateUI('sortDefault', language)}</option>
+    </Select>
+  );
+
   return (
     <div style={{
       marginBottom: L.sp['2xl'],
@@ -454,32 +469,6 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         )}
       </div>
 
-      {/*
-        並び順。表示方式（ボード/一覧）に関わらず共通で効く。
-        「並びかえで今選択されてるのが表示されてプルダウンとかで
-        切り替えるように」という要望を受けて、折りたたみ式のボタン列
-        （SegmentedControl）ではなく、他の設定（対象: N路線以上など）と
-        同じSelect（プルダウン）にした。常に今の並び順がラベルとして
-        見え、かつボタン4つ分よりも省スペースになる。
-      */}
-      <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.sm, alignItems: 'center' }}>
-        <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>
-          {translateUI('sortLabel', language)}
-        </span>
-        <Select
-          theme={theme}
-          size="sm"
-          value={sortMode}
-          onChange={e => setSortMode(e.target.value as SortMode)}
-          aria-label={translateUI('sortLabel', language)}
-        >
-          <option value="distance">{translateUI('sortNearby', language)}</option>
-          <option value="name">{translateUI('sortAlpha', language)}</option>
-          <option value="color">{translateUI('sortColor', language)}</option>
-          <option value="default">{translateUI('sortDefault', language)}</option>
-        </Select>
-      </div>
-
       {(!ROUTE_CLASSIC_VIEW_ENABLED || routeUiMode === 'board') && (
         <RouteSwitchBoard
           routeKeys={boardRouteKeys}
@@ -495,10 +484,12 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           onDeselectAllRoutes={onDeselectAllRoutes}
           adjustRouteColorForTheme={adjustRouteColorForTheme}
           mode={routeToggleMode}
+          sortControl={sortControl}
         />
       )}
 
       {ROUTE_CLASSIC_VIEW_ENABLED && routeUiMode === 'classic' && (<>
+      <div style={{ marginBottom: L.sp.xs }}>{sortControl}</div>
 
       {/* 全表示/全非表示 */}
       <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.sm }}>

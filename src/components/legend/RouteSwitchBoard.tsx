@@ -38,6 +38,9 @@ import ClampedWrap from '../ui/molecules/ClampedWrap';
  */
 const BOARD_CONTROL_SIZE = 'sm' as const;
 
+/** 検索のプレースホルダーを省略せず読める幅。狭いパネルでは並び順を次の行に送る。 */
+const SEARCH_COMFORTABLE_WIDTH = '10em';
+
 /**
  * 各グループ（経路上・駅を通る・表示中・非表示）はチップを5行まで見せて始め、「さらに表示」で10行ずつ広げる
  * （ui/molecules/ClampedWrap）。以前は「さらに48件」と件数で区切っていて画面の幅で行数がばらばらだった。
@@ -54,6 +57,7 @@ const GROUP_GAP = L.sp['2xl'];
 interface RouteSwitchBoardProps {
   /** 表示候補の路線キー（呼び出し側で絞り込んだもの） */
   routeKeys: RouteKey[];
+  sortControl?: React.ReactNode;
   visibleRoutes: Set<RouteKey>;
   /** 選択中の経路が通る路線 */
   highlightedRouteKeys?: Set<RouteKey> | null;
@@ -80,6 +84,7 @@ type GroupKey = 'onRoute' | 'atStation' | 'visible' | 'hidden';
 
 const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
   routeKeys,
+  sortControl,
   visibleRoutes,
   highlightedRouteKeys,
   stationRouteKeys,
@@ -178,18 +183,23 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
 
   return (
     <div>
-      <TextField
-        theme={theme}
-        size={BOARD_CONTROL_SIZE}
-        type="search"
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-        placeholder={translateUI('routeSearchPlaceholder', language)}
-        styleOverride={{ marginBottom: L.sp.md }}
-      />
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.xs, marginBottom: L.sp.sm }}>
+        <TextField
+          theme={theme}
+          size={BOARD_CONTROL_SIZE}
+          type="search"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          aria-label={translateUI('routeSearchPlaceholder', language)}
+          placeholder={translateUI('routeSearchPlaceholder', language)}
+          fullWidth={false}
+          styleOverride={{ flex: `1 1 ${SEARCH_COMFORTABLE_WIDTH}`, minWidth: 0 }}
+        />
+        {sortControl}
+      </div>
 
       {mode === 'visibility' && (
-        <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.md }}>
+        <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.sm }}>
           <Button theme={theme} variant="positive" size={BOARD_CONTROL_SIZE} onClick={onSelectAllRoutes} styleOverride={{ flex: 1 }}>
             {translateUI('allShow', language)}
           </Button>
@@ -199,7 +209,7 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
         </div>
       )}
 
-      <div data-route-board-mode={mode} style={{ fontSize: FS.caption, color: colors.textSecondary, marginBottom: L.sp.md }}>
+      <div data-route-board-mode={mode} style={{ fontSize: FS.caption, color: colors.textSecondary, marginBottom: L.sp.sm }}>
         {translateUI(mode === 'rideLog' ? 'rideLogRouteSummary' : 'routeVisibleSummary', language, {
           shown: String(routeKeys.filter(rk => visibleRoutes.has(rk)).length),
           total: String(routeKeys.length),
