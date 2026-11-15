@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { rankMeetingStations, meetingEdgeMinutes } from '../../../src/utils/meetingPoint';
+import { rankMeetingStations, meetingEdgeMinutes, meetingBalanceWeight, MEETING_BALANCE_LEVELS } from '../../../src/utils/meetingPoint';
 import { RouteFinder, TimeFilter } from '../../../src/utils/routeFinder';
 import { routes } from '../../../src/data/routes';
 import type { RouteKey } from '../../../src/data/routes';
@@ -132,5 +132,47 @@ describe('路線の上の区間の時間（出発駅それぞれから数字が�
   it('どの出発駅からも行けない区間は undefined', () => {
     expect(meetingEdgeMinutes([fromShinjuku], '新宿', '存在しない駅')).toBeUndefined();
     expect(meetingEdgeMinutes([], '新宿', '藤沢')).toBeUndefined();
+  });
+});
+
+describe('偏りの設定（全員が同じくらい ←→ 人の多い側に寄せる）', () => {
+  // A, B は駅が近く（Cからは遠い）、C は離れた所にいる。X は A・B の近く、Y は3人の真ん中、
+  const maps = [
+    m({ X: 2, Y: 20, Z: 40 }),   // A
+    m({ X: 4, Y: 20, Z: 40 }),   // B
+    m({ X: 60, Y: 30, Z: 50 }),  // C
+  ];
+  const names = ['A', 'B', 'C'];
+
+  it('段階の重みは 0 〜 1 を等間隔に分ける（5段階）', () => {
+    expect(MEETING_BALANCE_LEVELS).toBe(5);
+    expect([0, 1, 2, 3, 4].map(meetingBalanceWeight)).toEqual([0, 0.25, 0.5, 0.75, 1]);
+    expect(meetingBalanceWeight(-3)).toBe(0);
+    expect(meetingBalanceWeight(99)).toBe(1);
+  });
+
+  it('0 = 全員が同じくらい: 最大が小さい駅（真ん中の Y）が先頭', () => {
+    expect(rankMeetingStations(names, maps, 0)[0].name).toBe('Y');
+  });
+
+  it('最大 = 人の多い側に寄せる: 合計が小さい駅（A・B の近くの X）が先頭', () => {
+    expect(rankMeetingStations(names, maps, 4)[0].name).toBe('X');
+  });
+
+  it('段階を上げていくと、先頭が Y → X に移る（途中で入れ替わる）', () => {
+    const heads = [0, 1, 2, 3, 4].map(level => rankMeetingStations(names, maps, level)[0].name);
+    expect(heads[0]).toBe('Y');
+    expect(heads[4]).toBe('X');
+    // 一度 X になったら、段階を上げても Y に戻らない
+    const firstX = heads.indexOf('X');
+    expect(heads.slice(firstX).every(h => h === 'X')).toBe(true);
+  });
+
+  it('出発駅の並びを入れ替えても同じ結果（誰も優先しない）', () => {
+    for (const level of [0, 2, 4]) {
+      const a = rankMeetingStations(names, maps, level).map(c => c.name);
+      const b = rankMeetingStations(['C', 'B', 'A'], [maps[2], maps[1], maps[0]], level).map(c => c.name);
+      expect(b).toEqual(a);
+    }
   });
 });

@@ -1,5 +1,16 @@
 # CHANGE LOG
 
+## [2026-11-15] セッション（集合駅: 候補を仮の到着駅にした経路／3人以上の決め方5段階）
+
+### feat: 集合駅を決める前に、出発駅それぞれから候補の駅（仮の到着駅）への経路・路線を描く
+- `src/components/RailwayMap.tsx`（`meetingProvisionalMode`。出発駅どうしの間だけを描いていたのをやめた。組ごとの経路は覚えておく）
+- どの出発駅も対等。地図の範囲は出発駅が変わったときだけ合わせる。数字は各出発駅から増えていく（これまでどおり）
+
+### feat: 3人以上のとき、集合駅の決め方を5段階で選べる（全員が同じくらい ←→ 多い人に寄せる）
+- `src/utils/meetingPoint.ts`（`MEETING_BALANCE_LEVELS`, `meetingBalanceWeight`, `rankMeetingStations` の `balance`）, `src/components/ui/molecules/EndLabeledSlider.tsx`（新規。`Slider` アトムに両端の言葉）, `src/components/StationSelector.tsx`, `src/utils/translation.ts`（4言語）
+- 点数 = 最大 ×(1-w) + 平均 × w（w は段階で 0〜1）。0 は待たされる人を作らない、4 は合計が最小で、駅が近くに固まっている人の多い側に寄る。出発駅の並びを入れ替えても同じ結果
+- `tests/unit/utils/meetingPoint.test.ts`, `tests/render/meetingPoint.render.ts`
+
 ## [2026-11-15] セッション（集合駅の候補の見出しを削除）
 
 ### improve: 集合駅の候補の上の説明文「お互いに行きやすい駅（いちばん遅い人の所要時間が短い順）」を出さない

@@ -981,6 +981,18 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "各出発駅からの所要時間",
     english: "Time from each departure"
   },
+  meetingBalanceLabel: {
+    japanese: "集合駅の決め方",
+    english: "How to choose"
+  },
+  meetingBalanceFair: {
+    japanese: "全員が同じくらい",
+    english: "Equal for everyone"
+  },
+  meetingBalanceCrowd: {
+    japanese: "多い人に寄せる",
+    english: "Favor the crowd"
+  },
   meetingMaxMinutes: {
     japanese: "最大{minutes}分",
     english: "up to {minutes} min"
@@ -2315,6 +2327,9 @@ export const uiChinese: Record<string, string> = {
   addMeetingOrigin: "添加出发站",
   meetingNeedOrigins: "在出发站栏和其下方的出发站栏中输入两个以上的车站，即可找出大家都容易到达的车站。",
   meetingDetailTitle: "从各出发站所需时间",
+  meetingBalanceLabel: "集合站的选法",
+  meetingBalanceFair: "大家差不多",
+  meetingBalanceCrowd: "靠近人多的一侧",
   meetingMaxMinutes: "最长{minutes}分钟",
   meetingNoResults: "没有所有人都能在{minutes}分钟内到达的车站。",
   otherStations: "其他{count}站",
@@ -2724,6 +2739,9 @@ export const uiKorean: Record<string, string> = {
   addMeetingOrigin: "출발역 추가",
   meetingNeedOrigins: "출발역 칸과 그 아래의 출발역 칸에 역을 2곳 이상 넣으면 모두가 가기 쉬운 역을 찾습니다.",
   meetingDetailTitle: "각 출발역에서의 소요 시간",
+  meetingBalanceLabel: "만날 역 정하는 방법",
+  meetingBalanceFair: "모두 비슷하게",
+  meetingBalanceCrowd: "사람 많은 쪽으로",
   meetingMaxMinutes: "최대 {minutes}분",
   meetingNoResults: "모두가 {minutes}분 이내에 갈 수 있는 역이 없습니다.",
   otherStations: "외 {count}역",

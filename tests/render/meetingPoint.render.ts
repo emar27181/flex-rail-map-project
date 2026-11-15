@@ -245,7 +245,7 @@ test('駅選択パネルを閉じても、出発駅・到着駅は2行目に小�
   expect(errors).toEqual([]);
 });
 
-test('集合駅モード: 集合駅を決める前でも、出発駅どうしの間の路線に、それぞれの出発駅から増える所要時間が出る', async ({ page }) => {
+test('集合駅モード: 集合駅を決める前でも、出発駅それぞれから候補の駅（仮の到着駅）への路線に、それぞれの出発駅から増える所要時間が出る', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('/?mode=meeting&from=shinjuku&with=fujisawa');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
@@ -254,7 +254,6 @@ test('集合駅モード: 集合駅を決める前でも、出発駅どうしの
   const texts = (await page.locator('.time-text-section').allInnerTexts()).map(Number);
   // 両端（新宿側・藤沢側）から数字が増えるので、小さい数字が複数ある（1つの出発駅からの累計だけなら小さい数字は1つ）
   expect(texts.filter(n => n <= 8).length).toBeGreaterThanOrEqual(2);
-  // 出発駅どうしの間にない路線は描かない（地図に出ている濃い線の路線数が全路線ではない）
   await expect(page.locator('[data-meeting-results]')).toBeVisible();
   expect(errors).toEqual([]);
 });
@@ -327,5 +326,28 @@ test('集合駅モード: 候補の駅は到着駅と同じ赤の駅名札で地
   await expect(detail.locator('[data-meeting-times-row="新宿"]')).toContainText('分');
   await expect(detail.locator('[data-meeting-times-row="横浜"]')).toContainText('分');
   await expect(detail).toContainText('最大');
+  expect(errors).toEqual([]);
+});
+
+test('集合駅モード: 3人以上のときだけ「集合駅の決め方」の5段階スライダーが出て、動かすと候補が入れ替わる', async ({ page }) => {
+  const errors = collectErrors(page);
+  // 2人: 出ない
+  await page.goto('/?mode=meeting&from=shinjuku&with=yokohama');
+  await expect(page.locator('[data-meeting-results]')).toBeVisible();
+  await expect(page.locator('[data-end-labeled-slider]')).toHaveCount(0);
+  // 3人: 出る（両端の言葉つき・5段階）
+  await page.goto('/?mode=meeting&from=shinjuku&with=yokohama,ikebukuro');
+  const slider = page.locator('[data-end-labeled-slider]');
+  await expect(slider).toBeVisible();
+  await expect(slider).toContainText('全員が同じくらい');
+  await expect(slider).toContainText('多い人に寄せる');
+  const input = slider.locator('input[type="range"]');
+  await expect(input).toHaveAttribute('max', '4');
+  await expect(input).toHaveAttribute('step', '1');
+  const names = async () => (await page.locator('[data-meeting-results]').getByRole('button').allInnerTexts()).filter(t => /^\d+\./.test(t)).map(t => t.replace(/^\d+\.\s*/, '').split(' · ')[0]);
+  const fair = await names();
+  await input.fill('4');
+  await expect.poll(async () => (await names()).join(',')).not.toBe(fair.join(','));
+  expect(await names()).toHaveLength(3);
   expect(errors).toEqual([]);
 });

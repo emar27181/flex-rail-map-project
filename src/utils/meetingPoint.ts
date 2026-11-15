@@ -4,7 +4,8 @@
  * 出発駅ごとに、全駅までの最短所要時間（ダイクストラ。routeFinder.findStationsWithinTime）を求め、
  * 駅ごとに「全員が着く時間」を比べる。UIには依存しない（画面は RailwayMap / StationSelector）。
  *
- * 並べ方: 「いちばん遅い人の所要時間」が短い順（待たされる人を作らない）。同じなら合計が短い順。
+ * 並べ方: 既定は「いちばん遅い人の所要時間」が短い順（待たされる人を作らない）。同じなら合計が短い順。
+ * 3人以上のときは、偏りの設定（5段階）で、全員が同じくらい ←→ 人の多い側に寄せる（合計が短い順）を切り替えられる。
  * 所要時間は路線データの駅間時間と乗換ペナルティによる目安で、実際のダイヤではない。
  */
 
@@ -19,10 +20,23 @@ export interface MeetingCandidate {
   max: number;
   /** 全員の所要時間の合計（分） */
   sum: number;
+  /** 並べ替えの点数（小さいほど上）。偏りの設定（balance）で、最大と平均を混ぜた値 */
+  score: number;
 }
 
 /** 計算する所要時間の上限（分）。これを超える駅は集合駅の候補にしない */
 export const MEETING_MAX_MINUTES = 120;
+/** 偏りの設定の段階数（0 〜 段階数-1）。0 = 全員が同じくらい、いちばん大きい値 = 人の多い側に寄せる */
+export const MEETING_BALANCE_LEVELS = 5;
+/** 偏りの設定の初期値（全員が同じくらい） */
+export const MEETING_BALANCE_DEFAULT = 0;
+
+/** 段階 → 平均の重み（0〜1）。段階が上がるほど平均（人の多い側に寄る）の割合が増える */
+export function meetingBalanceWeight(level: number): number {
+  const clamped = Math.min(Math.max(Math.round(level), 0), MEETING_BALANCE_LEVELS - 1);
+  return clamped / (MEETING_BALANCE_LEVELS - 1);
+}
+
 /** 画面に出す候補の数 */
 export const MEETING_RESULT_LIMIT = 5;
 
@@ -34,6 +48,7 @@ export const MEETING_RESULT_LIMIT = 5;
 export function rankMeetingStations(
   originNames: string[],
   timeMaps: Array<Map<string, number>>,
+  balance: number = MEETING_BALANCE_DEFAULT,
 ): MeetingCandidate[] {
   if (timeMaps.length < 2) return [];
   // 出発駅自身の所要時間は 0 分（探索結果に含まれない場合に備えて補う）
@@ -52,9 +67,14 @@ export function rankMeetingStations(
       times.push(Math.round(t));
     }
     if (times.length !== maps.length) continue;
-    result.push({ name, times, max: Math.max(...times), sum: times.reduce((a, b) => a + b, 0) });
+    const max = Math.max(...times);
+    const sum = times.reduce((a, b) => a + b, 0);
+    // 点数 = 最大 × (1-w) + 平均 × w。w=0 は「待たされる人を作らない」（全員が同じくらい）、
+    // w=1 は合計が最小（駅が近くに固まっている人の多い側に寄る = 重心に近い）
+    const w = meetingBalanceWeight(balance);
+    result.push({ name, times, max, sum, score: max * (1 - w) + (sum / times.length) * w });
   }
-  return result.sort((a, b) => a.max - b.max || a.sum - b.sum || a.name.localeCompare(b.name, 'ja'));
+  return result.sort((a, b) => a.score - b.score || a.max - b.max || a.sum - b.sum || a.name.localeCompare(b.name, 'ja'));
 }
 
 /** 集合駅までの、出発駅ごとのルート（使う路線の並び） */

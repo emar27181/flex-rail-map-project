@@ -6,7 +6,7 @@ import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { translateStation, translateUI, translateRoute } from '../utils/translation'
 import type { Language } from '../utils/translation';
-import { MEETING_MAX_MINUTES, meetingClockTimes, type MeetingCandidate, type MeetingRouteEntry } from '../utils/meetingPoint';
+import { MEETING_BALANCE_LEVELS, MEETING_MAX_MINUTES, meetingClockTimes, type MeetingCandidate, type MeetingRouteEntry } from '../utils/meetingPoint';
 import ColorChip from './ui/ColorChip';
 import { stationReadings, normalizeToHiragana, hiraganaToRomaji, normalizeRomajiForMatch } from '../utils/stationReadings';
 import { findNearestStations } from '../utils/nearestStations';
@@ -27,6 +27,7 @@ import RoleField from './ui/molecules/RoleField';
 import FieldPairRow, { PAIR_DIVIDER_WIDTH } from './ui/molecules/FieldPairRow';
 import TopList from './ui/molecules/TopList';
 import LabeledGroup from './ui/molecules/LabeledGroup';
+import EndLabeledSlider from './ui/molecules/EndLabeledSlider';
 import RideLogControls, { type RideLogControlsProps } from './RideLogControls';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import { useDeviceClass } from '../hooks/useDeviceClass';
@@ -66,6 +67,9 @@ interface StationSelectorProps {
   meetingOriginNames?: string[];
   /** 到着駅（集合駅）が決まっているときの、出発駅ごとのルートと使う路線 */
   meetingRoutes?: MeetingRouteEntry[];
+  /** 3人以上のときの偏りの設定（0 = 全員が同じくらい 〜 最大 = 多い人に寄せる） */
+  meetingBalance?: number;
+  onMeetingBalanceChange?: (level: number) => void;
   /** 既存ボタン群に試験用の切替を1個だけ追加する */
   lastTrainDemoMode?: boolean;
   /** 通常の画面にも終電モード（試作）のボタンを出す。ボタンを押したときだけ終電の画面になる */
@@ -132,6 +136,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   meetingCandidates = [],
   meetingOriginNames = [],
   meetingRoutes = [],
+  meetingBalance = 0,
+  onMeetingBalanceChange,
   lastTrainDemoMode = false,
   lastTrainButton = false,
   rideLog,
@@ -1234,6 +1240,18 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           */}
           {meetingMode && (
             <div style={{ marginTop: L.sp.md, display: 'flex', flexDirection: 'column', gap: L.sp.xs }} data-meeting-results>
+              {/* 3人以上のときだけ、集合駅の決め方（全員が同じくらい ←→ 多い人に寄せる）を5段階で選べる */}
+              {meetingOriginNames.length >= 3 && onMeetingBalanceChange && (
+                <EndLabeledSlider
+                  theme={theme}
+                  label={translateUI('meetingBalanceLabel', language)}
+                  value={meetingBalance}
+                  steps={MEETING_BALANCE_LEVELS}
+                  onChange={onMeetingBalanceChange}
+                  startLabel={translateUI('meetingBalanceFair', language)}
+                  endLabel={translateUI('meetingBalanceCrowd', language)}
+                />
+              )}
               {meetingOriginNames.length < 2 ? (
                 <div style={{ fontSize: FS.caption, color: colors.textSecondary }}>
                   {translateUI('meetingNeedOrigins', language)}

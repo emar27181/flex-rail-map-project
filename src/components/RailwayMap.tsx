@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, useDeferredValue } from 'react';
 import { useTravelTimeLabelMode } from '../hooks/useTravelTimeLabelMode';
 import { useCanHover } from '../hooks/useCanHover';
 import { travelTimeLabelLayout } from './map/travelTimeLabel';
@@ -18,7 +18,7 @@ import StationRoleBadge from './StationRoleBadge';
 import MeetingTimesDetail from './MeetingTimesDetail';
 import { useRideLog } from '../hooks/useRideLog';
 import { deriveRideLog, entriesFromRoute, rideLevelOf, hasAlightEntry, type RideLogEntry } from '../utils/rideLog';
-import { rankMeetingStations, summarizeMeetingRoutes, interleaveByRank, meetingEdgeMinutes, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
+import { MEETING_BALANCE_DEFAULT, rankMeetingStations, summarizeMeetingRoutes, interleaveByRank, meetingEdgeMinutes, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
@@ -305,6 +305,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 集合駅を探すモード（出発駅の一覧は追加出発駅 extraDepartures を共用する）
   // ?mode=meeting&from=…&with=…（記事の埋め込み・共有リンク）のときだけ、開いたときからONにする
   const [meetingModeEnabled, setMeetingModeEnabled] = useState(() => getInitialMapModeFromUrl() === 'meeting');
+  // 3人以上の集合駅の決め方（0 = 全員が同じくらい 〜 最大 = 多い人に寄せる）。utils/meetingPoint.ts
+  const [meetingBalance, setMeetingBalance] = useState(MEETING_BALANCE_DEFAULT);
+  // 候補の入れ替え（経路の探し直しと地図の描き直し）は重いので、つまみの動きを先に反映し、計算は少し遅らせる
+  const deferredMeetingBalance = useDeferredValue(meetingBalance);
+  const provisionalRouteCache = useRef(new Map<string, RouteResult | null>());
+  const provisionalFitKeyRef = useRef('');
   // 通常の経路推薦数と終電モードで選択肢・既定値を1箇所の設定から共用する。
   const [maxRouteRecommendations, setMaxRouteRecommendations] = useState(DEFAULT_ROUTE_RECOMMENDATION_LIMIT);
   // 選択した到着駅を通る路線を起点に、通常の候補数設定の範囲内で探索。
@@ -392,9 +398,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [extraDepartures, setExtraDepartures] = useState<Station[]>(() => (getInitialMapModeFromUrl() === 'meeting' ? getInitialExtraDeparturesFromUrl() : []));
   // 集合駅を探す: 到着駅（集合駅）がまだ無くても、出発駅が2つ以上あれば「出発駅どうしの間」の経路を描く
   // （その間の路線だけを出し、関係ない路線は出さない。数字は各出発駅から増えていく）
-  const meetingPairMode = meetingModeEnabled && !arrival && !!departure && extraDepartures.some(e => e.name !== departure.name);
+  const meetingProvisionalMode = meetingModeEnabled && !arrival && !!departure && extraDepartures.some(e => e.name !== departure.name);
   /** 地図に経路を描いている状態（出発駅と到着駅がそろっている、または集合駅の出発駅どうしの間） */
-  const journeyActive = !!departure && (!!arrival || meetingPairMode);
+  const journeyActive = !!departure && (!!arrival || meetingProvisionalMode);
 
   // Language state management
   const currentLanguage = language;
@@ -3075,8 +3081,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     </Button>
   ) : null;
   const meetingRanking = useMemo(
-    () => (meetingTimeMaps.length < 2 ? [] : rankMeetingStations(meetingOrigins.map(o => o.name), meetingTimeMaps)),
-    [meetingTimeMaps, meetingOrigins],
+    () => (meetingTimeMaps.length < 2 ? [] : rankMeetingStations(meetingOrigins.map(o => o.name), meetingTimeMaps, meetingOrigins.length >= 3 ? deferredMeetingBalance : MEETING_BALANCE_DEFAULT)),
+    [meetingTimeMaps, meetingOrigins, deferredMeetingBalance],
   );
   const meetingCandidates = useMemo(() => meetingRanking.slice(0, MEETING_RESULT_LIMIT), [meetingRanking]);
   /** 候補の駅名から座標つきの駅を引く（地図に札を置くため） */
@@ -3495,29 +3501,44 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // 出発駅と到着駅が設定された時にルート検索を実行
   useEffect(() => {
-    // 集合駅を探す（集合駅はまだ無い）: 出発駅どうしの間の経路だけを描く。どの組も対等（最初の入力を優先しない）
-    if (meetingPairMode) {
+    // 集合駅を探す（集合駅はまだ無い）: 出発駅それぞれから、集合駅になりそうな候補の駅を「仮の到着駅」として、
+    // その経路（路線）を描く。どの出発駅も対等（最初の入力を優先しない）。候補は上位（MEETING_RESULT_LIMIT）まで
+    if (meetingProvisionalMode) {
       const origins = meetingOrigins;
-      const between: RouteResult[] = [];
-      for (let i = 0; i < origins.length; i++) {
-        for (let j = i + 1; j < origins.length; j++) {
-          const best = removeFinalDuplicates(
-            routeFinder.findRoutes(origins[i], origins[j], 4).filter(r => !revisitsStation(r))
-          )[0];
-          if (best) between.push(best);
+      const provisional: RouteResult[] = [];
+      for (const candidate of meetingCandidates) {
+        const target = candidateStationOf(candidate.name);
+        if (!target) continue;
+        for (const origin of origins) {
+          if (origin.name === target.name) continue;
+          // 偏りの設定を動かすたびに同じ組の経路を探し直さない（候補が入れ替わるだけなので、組ごとに覚えておく）
+          const cacheKey = `${origin.name}>${target.name}`;
+          if (!provisionalRouteCache.current.has(cacheKey)) {
+            provisionalRouteCache.current.set(cacheKey, routeFinder.findRoutes(origin, target, 1).filter(r => !revisitsStation(r))[0] ?? null);
+          }
+          const best = provisionalRouteCache.current.get(cacheKey);
+          if (best) provisional.push(best);
         }
       }
-      setRouteRecommendations(between);
-      setSelectedRouteIndices(new Set(between.map((_, i) => i)));
+      setRouteRecommendations(provisional);
+      setSelectedRouteIndices(new Set(provisional.map((_, i) => i)));
       const used = new Set<RouteKey>();
-      between.forEach(r => r.segments.forEach(seg => {
+      provisional.forEach(r => r.segments.forEach(seg => {
         if (seg.routeKey && seg.routeKey !== 'walking') used.add(seg.routeKey as RouteKey);
       }));
       if (used.size > 0) {
         setVisibleRoutes(used);
         setAvailableRoutes(used);
       }
-      mapRef.current?.fitBounds(origins.map(o => [o.lat, o.lng] as [number, number]), { padding: [60, 60], maxZoom: 13 });
+      // 地図の範囲は出発駅が変わったときだけ合わせる（偏りの設定を動かすたびに動かさない）
+      const fitKey = origins.map(o => o.name).join('|');
+      if (provisionalFitKeyRef.current !== fitKey) {
+        provisionalFitKeyRef.current = fitKey;
+        mapRef.current?.fitBounds(
+          [...origins, ...meetingCandidates.flatMap(c => { const st = candidateStationOf(c.name); return st ? [st] : []; })]
+            .map(st => [st.lat, st.lng] as [number, number]),
+          { padding: [60, 60], maxZoom: 13 });
+      }
       return;
     }
     if (departure && arrival) {
@@ -3644,7 +3665,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       setRouteRecommendations([]);
       setSelectedRouteIndices(null);
     }
-  }, [departure, arrival, waypoints, routeFinder, maxRouteRecommendations, removeFinalDuplicates, meetingModeEnabled, meetingOrigins, meetingPairMode]);
+  }, [departure, arrival, waypoints, routeFinder, maxRouteRecommendations, removeFinalDuplicates, meetingModeEnabled, meetingOrigins, meetingProvisionalMode, meetingCandidates, candidateStationOf]);
 
   // 時間フィルターが有効な時の駅フィルタリング（出発駅ベース）
   useEffect(() => {
@@ -5442,6 +5463,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 meetingCandidates={meetingCandidates}
                 meetingOriginNames={meetingOrigins.map(o => o.name)}
                 meetingRoutes={meetingRouteEntries}
+            meetingBalance={meetingBalance}
+            onMeetingBalanceChange={setMeetingBalance}
+                meetingBalance={meetingBalance}
+                onMeetingBalanceChange={setMeetingBalance}
                 showStationTimeLabels={timetableModeEnabled}
                 onShowStationTimeLabelsChange={setTimetableModeEnabled}
                 timeMode={timeMode}
@@ -5496,6 +5521,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             meetingCandidates={meetingCandidates}
             meetingOriginNames={meetingOrigins.map(o => o.name)}
             meetingRoutes={meetingRouteEntries}
+            meetingBalance={meetingBalance}
+            onMeetingBalanceChange={setMeetingBalance}
             showStationTimeLabels={timetableModeEnabled}
             onShowStationTimeLabelsChange={setTimetableModeEnabled}
             timeMode={timeMode}
@@ -7014,6 +7041,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 meetingCandidates={meetingCandidates}
                 meetingOriginNames={meetingOrigins.map(o => o.name)}
                 meetingRoutes={meetingRouteEntries}
+            meetingBalance={meetingBalance}
+            onMeetingBalanceChange={setMeetingBalance}
+                meetingBalance={meetingBalance}
+                onMeetingBalanceChange={setMeetingBalance}
                 showStationTimeLabels={timetableModeEnabled}
                 onShowStationTimeLabelsChange={setTimetableModeEnabled}
                 timeMode={timeMode}
