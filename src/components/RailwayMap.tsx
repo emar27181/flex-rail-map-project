@@ -78,7 +78,7 @@ import type { MapViewMode } from '../constants/mapViewMode';
 import { initialDisplayUrlOptions } from '../utils/mapDisplayUrlParam';
 // 立体（標高）表示は three.js を使うので、開いたときだけ読み込む
 const Terrain3DView = React.lazy(() => import('./Terrain3DView'));
-import { MAP_PANE_Z, stationMarkerZ, ENDPOINT_MARKER_Z, TRAVEL_TIME_MARKER_Z, USER_LOCATION_MARKER_Z, TRAIN_DEMO_MARKER_Z } from '../constants/mapLayers';
+import { MAP_PANE_Z, stationMarkerZ, meetingCandidateMarkerZ, ENDPOINT_MARKER_Z, TRAVEL_TIME_MARKER_Z, USER_LOCATION_MARKER_Z, TRAIN_DEMO_MARKER_Z } from '../constants/mapLayers';
 import type { LabelColorOverride } from '../constants/ui';
 import {
   getInitialStationSizeScale,
@@ -4747,14 +4747,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * 通常の路線描画と終電モードの描画で同じ部品を使う（終電モードの到着駅が普通の駅の見た目になっていた。2026-11-14）。
    * 駅をタップ／ホバーしたときの動きも通常の駅と同じ。
    */
-  const renderEndpointMarker = (station: Station, markerKey: string, icon: ReturnType<typeof createSpecialStationIcon>) => {
+  const renderEndpointMarker = (
+    station: Station,
+    markerKey: string,
+    icon: ReturnType<typeof createSpecialStationIcon>,
+    zIndexOffset = ENDPOINT_MARKER_Z,
+  ) => {
     if (!icon) return null;
     return (
       <Marker
         key={markerKey}
         position={[station.lat, station.lng]}
         icon={icon}
-        zIndexOffset={ENDPOINT_MARKER_Z}
+        zIndexOffset={zIndexOffset}
         eventHandlers={{
           mouseover: (e: LeafletMouseEvent) => {
             if (!showStationTooltip || isMobile) return;
@@ -5499,7 +5504,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               // 右端を伸ばして出発駅・到着駅の入力欄を広く使えるようにする
               width: '400px',
               maxWidth: 'calc(100% - 20px)',
-              maxHeight: 'calc(100% - 20px)',
+              // 縦に長い集合駅の一覧も、左下の地図操作に重ならない範囲でスクロールさせる。
+              maxHeight: `calc(100% - ${FLOATING_CONTROL.height}px - 2 * ${FLOATING_PANEL.inset} - ${FLOATING_PANEL.gap})`,
               overflowY: 'auto',
               overflowX: 'hidden',
               borderRadius: L.r.card,
@@ -6088,8 +6094,12 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
               {/* 候補の札は路線色や出発駅の札と重ねず、到着駅の色で1枚だけ描く */}
               {Array.from(meetingCandidateMarkers.values(), station =>
-                renderEndpointMarker(station, `meeting-candidate-${station.name}`,
-                  createSpecialStationIcon(false, zoomLevel, translateStation(station.name, currentLanguage), station.name)))}
+                renderEndpointMarker(
+                  station,
+                  `meeting-candidate-${station.name}`,
+                  createSpecialStationIcon(false, zoomLevel, translateStation(station.name, currentLanguage), station.name),
+                  meetingCandidateMarkerZ(stationRouteCountMap.get(station.name) ?? 1),
+                ))}
 
               {/* 集合駅を探す: 隣り合う駅の間（路線の上）に、出発駅それぞれから増えていく所要時間を丸いバッジで出す。
                   既存の区間の時間バッジ（createTimeIcon）と同じ見た目。タップは受け取らない */}

@@ -10,7 +10,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { routes } from '../../../src/data/routes';
 import {
-  stationMarkerZ, ENDPOINT_MARKER_Z, MARKER_Z_STEP, MARKER_Z_MAX_ROUTES, MAP_PANE_Z,
+  stationMarkerZ, meetingCandidateMarkerZ, ENDPOINT_MARKER_Z, MARKER_Z_STEP, MARKER_Z_MAX_ROUTES, MAP_PANE_Z,
 } from '../../../src/constants/mapLayers';
 
 /** 画面の高さの上限の目安(px)。段の差はこれより大きくなければならない */
@@ -36,8 +36,15 @@ describe('駅の重なり順', () => {
     expect(max).toBeLessThanOrEqual(MARKER_Z_MAX_ROUTES);
   });
 
-  it('出発駅・到着駅はどの駅よりも上', () => {
-    expect(ENDPOINT_MARKER_Z - stationMarkerZ(MARKER_Z_MAX_ROUTES)).toBeGreaterThan(MAX_SCREEN_PX);
+  it('出発駅・到着駅、集合駅候補、通常駅の順を維持する', () => {
+    expect(meetingCandidateMarkerZ(1) - stationMarkerZ(MARKER_Z_MAX_ROUTES)).toBeGreaterThan(MAX_SCREEN_PX);
+    expect(ENDPOINT_MARKER_Z - meetingCandidateMarkerZ(MARKER_Z_MAX_ROUTES)).toBeGreaterThan(MAX_SCREEN_PX);
+  });
+
+  it('集合駅候補同士では、接続路線数が1つ多いだけでもY座標で逆転しない', () => {
+    for (let n = 1; n < MARKER_Z_MAX_ROUTES; n++) {
+      expect(meetingCandidateMarkerZ(n + 1) - meetingCandidateMarkerZ(n)).toBeGreaterThan(MAX_SCREEN_PX);
+    }
   });
 
   it('CSS の z-index の上限（32bit）を超えない', () => {

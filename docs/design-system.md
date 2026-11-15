@@ -24,7 +24,7 @@ PR ごとに `npm run test:design` で実行する（手元でも同じコマン
 | 開閉の印（▼）は手で書かない。翻訳文言にも入れない | `DisclosureIndicator` / `DisclosureHeader` / `CollapsiblePanel` | `tests/unit/components/ui/disclosure.test.ts` |
 | 地図の上に浮かぶ開閉パネルは `CollapsiblePanel`。見出しは常に「表示切替」と同じ高さ・文字（`FLOATING_CONTROL`）。幅は `width="narrow"` か `"wide"`、高さの上限・地図の端との間・隅のボタンの上の位置も定義元から取り、使うファイルに px / vh を書かない | `CollapsiblePanel` / `FLOATING_PANEL` / `floatingPanelWidth` / `aboveFloatingButtons`（`ui/atoms/controlSize.ts`） | `tests/unit/components/ui/floatingPanel.test.tsx` |
 | 部品（atoms / molecules）と、それを使う地図の上の部品（立体表示・凡例）は型チェックの対象に入れる | `tsconfig.check.json` の `include` | `npm run test:types`（CI の checks） |
-| 地図の重なり順（駅は路線数が多いほど上・出発/到着は最上・層の前後）は1か所だけに書く | `MAP_PANE_Z` / `stationMarkerZ` / `ENDPOINT_MARKER_Z`（`constants/mapLayers.ts`） | `tests/unit/constants/mapLayers.test.ts` |
+| 地図の重なり順（出発/到着 → 集合駅候補 → 通常駅。候補同士・通常駅同士は接続路線数が多いほど前面）は1か所だけに書く | `MAP_PANE_Z` / `stationMarkerZ` / `meetingCandidateMarkerZ` / `ENDPOINT_MARKER_Z`（`constants/mapLayers.ts`） | `tests/unit/constants/mapLayers.test.ts` |
 | 端末の境目（768 / 1024px）は1か所だけに書く | `constants/breakpoints.ts`（`MEDIA` / `useDeviceClass`） | `tests/unit/constants/breakpoints.test.ts` |
 | 静的ページ（記事・駅/路線ページ）の CSS もトークンの CSS 変数を使う | `TOKEN_VARS_CSS` / `CONTROL_CSS`（`ui/atoms/controlCss.ts`） | `tests/unit/styles/articleCssTokens.test.ts`, `tests/unit/components/ui/controlCss.test.ts` |
 | 絵文字を使わない。アイコンは lucide-react | `lucide-react` | `tests/unit/noEmojiIcons.test.ts` |
