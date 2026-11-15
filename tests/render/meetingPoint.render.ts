@@ -14,12 +14,14 @@ test('集合駅モード: 出発駅を追加すると候補が出て、選ぶと
   // 表示モードは「表示切替」パネルの表示設定の上にある
   await modeTag(page, '集合駅を探す');
   const groups = page.locator('[data-mode-section] [role="group"]');
+  await expect(groups).toHaveCount(1);
+  await page.getByRole('button', { name: 'ほかの表示モード' }).click();
   await expect(groups).toHaveCount(2);
   const tags = (index: number) => groups.nth(index).locator('[data-tag]').evaluateAll(
     elements => elements.map(element => element.getAttribute('data-tag')),
   );
   expect(await tags(0)).toEqual(['meeting', 'lastTrain', 'heatmap', 'rideLog']);
-  expect(await tags(1)).toEqual(['trainDemo', 'bubble', 'schematic', 'terrain3d']);
+  expect(await tags(1)).toEqual(['trainDemo', 'terrain3d', 'bubble', 'schematic']);
   await clickMode(page, '集合駅を探す');
   expect(await modeIsOn(page, '集合駅を探す')).toBe(true);
   // 出発駅が1つのうちは案内だけ

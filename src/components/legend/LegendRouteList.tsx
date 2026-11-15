@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useId, useState, useMemo } from 'react';
 import type { RouteKey } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation'
@@ -250,6 +250,8 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
     try { window.localStorage.setItem(ROUTE_UI_MODE_KEY, mode); } catch { /* 保存できなくても表示は変わる */ }
   };
   const [sortMode, setSortMode] = useState<SortMode>('distance');
+  const [additionalModesOpen, setAdditionalModesOpen] = useState(false);
+  const additionalModesId = useId();
   const [dragOverKey, setDragOverKey] = useState<string | null>(null);
   const [touchDragKey, setTouchDragKey] = useState<RouteKey | null>(null);
   const ROUTE_LIST_LIMIT = 10;
@@ -417,6 +419,14 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
       <DisclosureIndicator expanded={isOpen} theme={theme} />
     </div>
   );
+
+  const additionalModes: TagToggleItem[] = [
+    ...(mapViewMode === 'realistic' ? [{ key: 'trainDemo', color: DISPLAY_MODE_COLORS.trainDemo, label: translateUI('trainDemoLabel', language), icon: <TrainTrack />, pressed: showTrainDemo, onToggle: onTrainDemoToggle }] : []),
+    { key: 'terrain3d', color: DISPLAY_MODE_COLORS.terrain3d, label: translateUI('terrain3dLabel', language), icon: <Mountain />, pressed: mapViewMode === 'terrain3d', onToggle: () => onMapViewModeChange(mapViewMode === 'terrain3d' ? 'realistic' : 'terrain3d') },
+    { key: 'bubble', color: DISPLAY_MODE_COLORS.bubble, label: translateUI('bubbleMap', language), icon: <CircleDot />, pressed: mapViewMode === 'bubble', onToggle: () => onMapViewModeChange(mapViewMode === 'bubble' ? 'realistic' : 'bubble') },
+    { key: 'schematic', color: DISPLAY_MODE_COLORS.schematic, label: translateUI('schematicMapLabel', language), icon: <Network />, pressed: mapViewMode === 'schematic', onToggle: () => onMapViewModeChange(mapViewMode === 'schematic' ? 'realistic' : 'schematic') },
+  ];
+  const shownAdditionalModes = additionalModesOpen ? additionalModes : additionalModes.filter(item => item.pressed);
 
   const sortControl = (
     <Select
@@ -630,16 +640,25 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xl }}>
           <TagToggleGroup theme={theme} ariaLabel={translateUI('displayModes', language)} items={modeTags} />
-          <TagToggleGroup
-            theme={theme}
-            ariaLabel={translateUI('settingsGroupViz', language)}
-            items={[
-              ...(mapViewMode === 'realistic' ? [{ key: 'trainDemo', color: DISPLAY_MODE_COLORS.trainDemo, label: translateUI('trainDemoLabel', language), icon: <TrainTrack />, pressed: showTrainDemo, onToggle: onTrainDemoToggle }] : []),
-              { key: 'bubble', color: DISPLAY_MODE_COLORS.bubble, label: translateUI('bubbleMap', language), icon: <CircleDot />, pressed: mapViewMode === 'bubble', onToggle: () => onMapViewModeChange(mapViewMode === 'bubble' ? 'realistic' : 'bubble') },
-              { key: 'schematic', color: DISPLAY_MODE_COLORS.schematic, label: translateUI('schematicMapLabel', language), icon: <Network />, pressed: mapViewMode === 'schematic', onToggle: () => onMapViewModeChange(mapViewMode === 'schematic' ? 'realistic' : 'schematic') },
-              { key: 'terrain3d', color: DISPLAY_MODE_COLORS.terrain3d, label: translateUI('terrain3dLabel', language), icon: <Mountain />, pressed: mapViewMode === 'terrain3d', onToggle: () => onMapViewModeChange(mapViewMode === 'terrain3d' ? 'realistic' : 'terrain3d') },
-            ]}
-          />
+          <div>
+            <div id={additionalModesId}>
+              {shownAdditionalModes.length > 0 && (
+                <TagToggleGroup theme={theme} ariaLabel={translateUI('settingsGroupViz', language)} items={shownAdditionalModes} />
+              )}
+            </div>
+            <Button
+              theme={theme}
+              variant="outline"
+              size="sm"
+              aria-expanded={additionalModesOpen}
+              aria-controls={additionalModesId}
+              onClick={() => setAdditionalModesOpen(value => !value)}
+              styleOverride={shownAdditionalModes.length > 0 ? { marginTop: L.sp.xs } : undefined}
+            >
+              {translateUI(additionalModesOpen ? 'collapseList' : 'moreDisplayModes', language)}
+              <DisclosureIndicator expanded={additionalModesOpen} theme={theme} tone="inherit" />
+            </Button>
+          </div>
         </div>
         {mapViewMode === 'bubble' && (
           <div style={{ marginTop: L.sp.sm }}>

@@ -288,11 +288,15 @@ describe('表示設定の並びと名前', () => {
     const props = { ...minimalProps, modeTags, onMapViewModeChange };
     const { rerender } = render(<LegendRouteList {...props} />);
     const priorityGroup = screen.getByRole('group', { name: 'displayModes' });
+    expect(screen.queryByRole('group', { name: 'settingsGroupViz' })).toBeNull();
+    const more = screen.getByRole('button', { name: 'moreDisplayModes' });
+    expect(more).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(more);
     const otherGroup = screen.getByRole('group', { name: 'settingsGroupViz' });
     const keys = (group: HTMLElement) => within(group).getAllByRole('button').map(button => button.getAttribute('data-tag'));
     expect(keys(priorityGroup)).toEqual(['meeting', 'lastTrain', 'heatmap', 'rideLog']);
-    expect(keys(otherGroup)).toEqual(['trainDemo', 'bubble', 'schematic', 'terrain3d']);
-    expect(priorityGroup.nextElementSibling).toBe(otherGroup);
+    expect(keys(otherGroup)).toEqual(['trainDemo', 'terrain3d', 'bubble', 'schematic']);
+    expect(priorityGroup.nextElementSibling).toContainElement(otherGroup);
     expect(priorityGroup.parentElement).toHaveStyle({ gap: '12px' });
     const heatmap = screen.getByRole('button', { name: 'stationHeatmap' });
     expect(heatmap.firstElementChild).toHaveAttribute('aria-hidden', 'true');
@@ -310,6 +314,9 @@ describe('表示設定の並びと名前', () => {
     expect(bubble).toHaveAttribute('aria-pressed', 'true');
     fireEvent.click(bubble);
     expect(onMapViewModeChange).toHaveBeenLastCalledWith('realistic');
+    fireEvent.click(screen.getByRole('button', { name: 'collapseList' }));
+    expect(screen.getByRole('button', { name: 'bubbleMap' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByRole('button', { name: 'schematicMapLabel' })).toBeNull();
   });
 
   // このファイルでは translateUI をキーをそのまま返すモックにしているので、キーの並びで確かめる
@@ -336,7 +343,7 @@ describe('表示設定のグループは既定で閉じている', () => {
       expect(header!.getAttribute('aria-expanded'), key).toBe('false');
     }
     expect(container.textContent).not.toContain('showOnlyTransferStations');
-    expect(screen.getByRole('button', { name: 'bubbleMap' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'moreDisplayModes' })).toBeVisible();
   });
 
   it('見出しを押すとそのグループだけが開く', () => {

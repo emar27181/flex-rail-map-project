@@ -42,11 +42,12 @@ const BOARD_CONTROL_SIZE = 'sm' as const;
 const SEARCH_COMFORTABLE_WIDTH = '10em';
 
 /**
- * 各グループ（経路上・駅を通る・表示中・非表示）はチップを5行まで見せて始め、「さらに表示」で10行ずつ広げる
+ * 各グループ（経路上・駅を通る・表示中・非表示）はチップを3行まで見せて始め、「さらに表示」で5行ずつ広げる
  * （ui/molecules/ClampedWrap）。以前は「さらに48件」と件数で区切っていて画面の幅で行数がばらばらだった。
  * 2026-11 まで「他 479 路線を表示」で全部が一度に出て、スクロールがとても長くなっていた
  */
-const GROUP_MAX_ROWS = 5;
+const GROUP_MAX_ROWS = 3;
+const GROUP_STEP_ROWS = 5;
 
 /**
  * グループとグループの間の余白。見出しを出さないので、チップ同士の間（ClampedWrap の 6px）より
@@ -170,6 +171,7 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
           theme={theme}
           size={BOARD_CONTROL_SIZE}
           maxRows={GROUP_MAX_ROWS}
+          stepRows={GROUP_STEP_ROWS}
           steps={steps[key]}
           onStepsChange={n => setSteps(prev => ({ ...prev, [key]: n }))}
           moreLabel={hidden => translateUI('showMoreRoutesStep', language, { count: String(hidden) })}

@@ -95,5 +95,5 @@ Netlify は自動プレビューのビルド時間を節約するため明示的
 - 集合駅・終電・乗車ログの切り替えは、駅選択パネルのボタン列ではなく、**「表示切替」パネルの表示設定の上の「表示モード」**にある（`LegendRouteList` の `modeTags`。部品は `TagToggleGroup` = アイコンつきの切り替えタグ、アイコンは lucide-react）
 - モードは同時に1つ。タグを押すと、ほかのモードは切れる（`RailwayMap.tsx` の `handleMeetingModeChange` / `handleLastTrainModeChange` / `handleRideLogModeChange`）
 - 新しいモードは `modeTags` に1つ足す（ボタンを別の場所に作らない）。モードごとの入力・結果は、駅選択パネルの中の既存の欄・既存の部品を使う
-- 集合駅 → 終電 → ヒートマップ → 乗車ログの順に並べる。少し間を空けて列車デモ・バブル・路線図風・立体を並べる。どちらも `TagToggleGroup` で、バブルの形と半径はバブル表示中にチップ群の直下に出す
+- 集合駅 → 終電 → ヒートマップ → 乗車ログの順に並べる。少し間を空けて折りたたんだ「ほかの表示モード」に列車デモ・立体・バブル・路線図風を並べる。実装中の項目は末尾に置く。どちらも `TagToggleGroup` で、バブルの形と半径はバブル表示中にチップ群の直下に出す
 - URLで共有する見せ方（時刻 `time`・基準 `basis`・所要時間の表示 `times`・モード `mode`/`with`/`bal`）は `utils/shareStateUrlParams.ts`。既定の値は書かない。乗車ログは端末の中のデータなのでURLに載せず、設定ファイルの書き出し・読み込み（`utils/userDataBundle.ts`）で移す
