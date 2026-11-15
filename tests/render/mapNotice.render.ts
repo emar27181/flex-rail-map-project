@@ -3,7 +3,7 @@
  * 下に並ぶ浮かぶボタンに重ならない。
  * （2026-11-13: スマホで「終電モードを使用するには、到着駅を設定してくださ」と文末が切れていた）
  */
-import { test, expect } from './helpers';
+import { test, expect, clickMode, SETTINGS_OPENER_MOBILE } from './helpers';
 
 const TOGGLE: Record<'ja' | 'en' | 'zh' | 'ko', string> = {
   ja: '終電モード（試作）', en: 'Last train mode (beta)', zh: '末班车模式（测试）', ko: '막차 모드(시험)',
@@ -15,7 +15,7 @@ for (const lang of ['ja', 'en', 'zh', 'ko'] as const) {
       await page.setViewportSize({ width, height: 780 });
       await page.goto(`/?lang=${lang}`);
       await expect(page.locator('.leaflet-container').first()).toBeVisible();
-      await page.getByRole('button', { name: TOGGLE[lang] }).click();
+      await clickMode(page, TOGGLE[lang], SETTINGS_OPENER_MOBILE[lang]);
       const bar = page.locator('[data-snackbar]');
       await expect(bar).toBeVisible();
 
@@ -46,7 +46,7 @@ for (const lang of ['ja', 'en', 'zh', 'ko'] as const) {
 test('入力が足りない知らせは、操作した駅選択パネルのすぐ下に、注意の印つきで出る（画面の下の端ではない）', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
-  await page.getByRole('button', { name: '終電モード（試作）' }).click();
+  await clickMode(page, '終電モード');
   const bar = page.locator('[data-snackbar]');
   await expect(bar).toBeVisible();
   const r = await page.evaluate(() => {

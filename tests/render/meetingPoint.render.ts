@@ -2,7 +2,7 @@
  * 集合駅を探すモード: 既存の駅選択パネルの中だけで完結する（別パネル・別の入力欄を増やさない）。
  * 出発駅 + 常に出ている出発駅の入力欄（出発駅欄と同じ緑・同じ幅・同じ文言）で2駅以上そろうと候補が出て、選ぶと既存の到着駅に入る。
  */
-import { test, expect, collectErrors } from './helpers';
+import { test, expect, collectErrors, clickMode, modeIsOn } from './helpers';
 
 test('集合駅モード: 出発駅を追加すると候補が出て、選ぶと既存の到着駅に入る', async ({ page }) => {
   const errors = collectErrors(page);
@@ -11,10 +11,9 @@ test('集合駅モード: 出発駅を追加すると候補が出て、選ぶと
   const stationInputs = page.locator('input.station-input-filled');
   const inputsBefore = await stationInputs.count();
 
-  const toggle = page.getByRole('button', { name: '集合駅を探す' });
-  await expect(toggle).toBeEnabled();
-  await toggle.click();
-  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  // 表示モードのタグは「表示切替」パネルの表示設定の下にある
+  await clickMode(page, '集合駅を探す');
+  expect(await modeIsOn(page, '集合駅を探す')).toBe(true);
   // 出発駅が1つのうちは案内だけ
   await expect(page.locator('[data-meeting-results]')).toContainText('2駅以上そろえると');
 
@@ -58,7 +57,7 @@ test('集合駅モード: 出発駅を追加すると候補が出て、選ぶと
   await expect(page.locator('input[type="time"]')).toHaveCount(1);
 
   // OFFで通常表示に戻る（候補の欄が消える）
-  await toggle.click();
+  await clickMode(page, '集合駅を探す');
   await expect(page.locator('[data-meeting-results]')).toHaveCount(0);
   expect(errors).toEqual([]);
 });
@@ -68,7 +67,7 @@ test('集合駅モード: 追加した出発駅も出発駅欄と同じ緑の欄
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/?from=shinjuku');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
-  await page.getByRole('button', { name: '集合駅を探す' }).click();
+  await clickMode(page, '集合駅を探す');
 
   const extras = page.locator('[data-meeting-extra]');
   const add = page.locator('[data-meeting-add]');

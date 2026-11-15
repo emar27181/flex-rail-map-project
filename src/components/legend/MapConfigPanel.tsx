@@ -8,6 +8,7 @@ import Button from '../ui/atoms/Button';
 import TextArea from '../ui/atoms/TextArea';
 import DisclosureIndicator from '../ui/atoms/DisclosureIndicator';
 import type { LabelColorOverride } from '../../constants/ui';
+import type { UserDataBundle } from '../../utils/userDataBundle';
 
 export type MapConfig = {
   version: 1;
@@ -48,6 +49,21 @@ export type MapConfig = {
   travelTimeStyle?: LabelColorOverride;
   /** 駅アイコンの文字色・背景色・枠線色の個別カスタム（旧バージョンには無いため任意） */
   stationIconStyle?: LabelColorOverride;
+  /** 経路の候補の数（1/2/3/5/10。旧バージョンの設定ファイルには無いため任意） */
+  maxRouteRecommendations?: number;
+  /** 薄い路線を地図に出すか */
+  showDimmedMapRoutes?: boolean;
+  /** 走行中の列車の状況パネルを出すか */
+  showTrainStatusPanel?: boolean;
+  /** 現在地から出発駅を自動で決めるか */
+  autoSetDepartureFromLocation?: boolean;
+  /** 集合駅の決め方（0 = 全員が同じくらい 〜 4 = 多い人に寄せる） */
+  meetingBalance?: number;
+  /**
+   * 利用者のデータ（乗車ログ・駅のメモ・駅の選択履歴）。画面の設定とは別に、書き出すときに集めて入れる
+   * （utils/userDataBundle.ts。読み込むと、含まれている項目は置き換わる）
+   */
+  userData?: UserDataBundle;
 };
 
 type Props = {
@@ -55,9 +71,11 @@ type Props = {
   theme: 'light' | 'dark';
   language: Language;
   onImport: (config: MapConfig) => void;
+  /** 書き出すときに、利用者のデータ（乗車ログ・メモ・履歴）を集める。呼ばれるのは書き出すときだけ */
+  getUserData?: () => UserDataBundle;
 };
 
-export default function MapConfigPanel({ config, theme, language, onImport }: Props) {
+export default function MapConfigPanel({ config, theme, language, onImport, getUserData }: Props) {
   const colors = getThemeColors(theme);
   const [open, setOpen]           = useState(false);
   const [pasteText, setPasteText] = useState('');
@@ -66,10 +84,11 @@ export default function MapConfigPanel({ config, theme, language, onImport }: Pr
   const [importDone, setImportDone] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const jsonStr = JSON.stringify(config, null, 2);
+  /** 書き出す内容。画面の設定 + 利用者のデータ（書き出す瞬間の値） */
+  const buildJson = () => JSON.stringify(getUserData ? { ...config, userData: getUserData() } : config, null, 2);
 
   const handleExportDownload = () => {
-    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const blob = new Blob([buildJson()], { type: 'application/json' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
     a.href     = url;
@@ -79,7 +98,7 @@ export default function MapConfigPanel({ config, theme, language, onImport }: Pr
   };
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(jsonStr);
+    await navigator.clipboard.writeText(buildJson());
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

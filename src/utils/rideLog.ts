@@ -107,15 +107,21 @@ export function serializeRideLog(entries: readonly RideLogEntry[]): string {
   return JSON.stringify({ version: 1, entries: entries.filter(isValidEntry) });
 }
 
+/** 記録の配列を、使える形のものだけにする（壊れた要素・知らない種類は捨てる）。保存データと設定ファイルの取り込みで共通 */
+export function sanitizeRideLog(entries: unknown): RideLogEntry[] {
+  if (!Array.isArray(entries)) return [];
+  return (entries as RideLogEntry[]).filter(e =>
+    e && typeof e.id === 'string' && typeof e.routeKey === 'string' && Array.isArray(e.stations)
+    && (e.kind === undefined || e.kind === 'ride' || e.kind === 'line' || e.kind === 'alight') && isValidEntry(e));
+}
+
 /** 壊れた保存データ・古い形式は空として扱う（地図を壊さない） */
 export function parseRideLog(raw: string | null): RideLogEntry[] {
   if (!raw) return [];
   try {
     const data = JSON.parse(raw) as { version?: number; entries?: unknown };
-    if (data.version !== 1 || !Array.isArray(data.entries)) return [];
-    return (data.entries as RideLogEntry[]).filter(e =>
-      e && typeof e.id === 'string' && typeof e.routeKey === 'string' && Array.isArray(e.stations)
-      && (e.kind === undefined || e.kind === 'ride' || e.kind === 'line' || e.kind === 'alight') && isValidEntry(e));
+    if (data.version !== 1) return [];
+    return sanitizeRideLog(data.entries);
   } catch {
     return [];
   }

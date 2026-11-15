@@ -36,5 +36,7 @@ export function useRideLog() {
   const clear = useCallback(() => setEntries([]), []);
   /** 条件に合う記録を外す（路線のタップの取り消し・降りた駅の取り消し） */
   const removeWhere = useCallback((predicate: (e: RideLogEntry) => boolean) => setEntries(prev => prev.filter(e => !predicate(e))), []);
-  return { entries, add, undoLast, clear, removeWhere };
+  /** 記録を丸ごと置き換える（設定ファイルの取り込み） */
+  const replace = useCallback((next: RideLogEntry[]) => setEntries(next), []);
+  return { entries, add, undoLast, clear, removeWhere, replace };
 }
