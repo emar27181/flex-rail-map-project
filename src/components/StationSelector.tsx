@@ -566,23 +566,24 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               ))}
             </LabeledGroup>
           )}
-          {/* 集合駅を探すとき、集合駅（到着駅）がまだ無ければ、候補の上位を到着駅の札でコンパクトに出す。押すとその駅が到着駅になる */}
+          {/* 集合駅を探すとき、集合駅（到着駅）がまだ無ければ、候補の上位を控えめなボタンで出す。押すとその駅が到着駅になる */}
           {summaryCandidates.length > 0 && (
             <LabeledGroup theme={theme} label={translateUI('meetingCandidateGroup', language)} dataAttr={{ 'data-summary-group': 'candidates' }}>
               {summaryCandidates.map(c => (
-                <ColorChip
+                <Button
                   key={c.name}
-                  color={SEMANTIC.arrival}
                   theme={theme}
+                  size="sm"
+                  variant="outline"
                   onClick={e => {
                     e.stopPropagation();
                     const station = allStations.find(st => st.name === c.name);
                     if (station) onArrivalChange(station);
                   }}
-                  style={{ cursor: 'pointer' }}
+                  styleOverride={{ paddingInline: L.sp.xs }}
                 >
                   {translateStation(c.name, language)}
-                </ColorChip>
+                </Button>
               ))}
               {meetingCandidates.length > summaryCandidates.length && (
                 <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>

@@ -33,6 +33,8 @@ async function setup(page: Page) {
   await expect.poll(() => page.evaluate(() => !!(window as any).__map), { timeout: 30_000 }).toBe(true);
   await expect(page.locator('.leaflet-overlay-pane path').first()).toBeAttached({ timeout: 30_000 });
   await expect(page.locator('.leaflet-marker-icon').first()).toBeAttached({ timeout: 30_000 });
+  // スマホでは駅選択パネルが地図の中央を覆うことがある。閉じてから地図に指を置く。
+  await page.locator('[data-station-selector]').first().getByRole('heading').first().click();
   // 経路の計算が終わって描き直しが落ち着くまで待つ
   await page.waitForTimeout(3000);
   const box = (await page.locator('.leaflet-container').boundingBox())!;

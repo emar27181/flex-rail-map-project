@@ -1,18 +1,11 @@
-/**
- * 集合駅の候補1つ分のカード（organism）。「1　茅場町　最大44分」と、出発駅ごとの所要時間。
- *
- * 候補は推薦であって入力欄ではないので、色は控えめにする（2026-11-15 ユーザー指示: 主張が強すぎる）。
- * - 1候補 = 1枚のカード（枠だけの `Button`。全体が押せる）。塗りは使わない
- * - 色の手がかりは、駅名の前の小さな丸だけ（到着駅と同じ赤。いま集合駅に決めている候補はチェックと赤い枠）
- * - 出発駅ごとの所要時間は、灰色の小さな文字を1行にまとめる（出発駅の入力順。誰も優先しない）
- * 押すとその駅が到着駅になる（呼び出し側）。計算は utils/meetingPoint.ts。ここは見せるだけ。
- */
-import React from 'react';
+/** 集合駅の候補カード。カード全体を押すと、候補が到着駅になる。 */
+import React, { useId } from 'react';
 import { Check } from 'lucide-react';
 import { getThemeColors } from '../contexts/ThemeContext';
 import { FS, SEMANTIC } from '../constants/ui';
-import { L } from './legend/legendStyles';
+import { L, selectableCard } from './legend/legendStyles';
 import Button from './ui/atoms/Button';
+import { CONTROL_SIZE } from './ui/atoms/controlSize';
 import { translateStation, translateUI, type Language } from '../utils/translation';
 
 export interface MeetingCandidateRowProps {
@@ -31,43 +24,47 @@ export interface MeetingCandidateRowProps {
   onSelect: () => void;
 }
 
-/** 駅名の前の丸の直径（px） */
-const DOT_SIZE = 8;
-
 const MeetingCandidateRow: React.FC<MeetingCandidateRowProps> = ({ theme, language, rank, name, max, times, selected, disabled, onSelect }) => {
+  const descriptionId = useId();
   const colors = getThemeColors(theme);
   const suffix = translateUI('minutesSuffix', language);
+  const stationLabel = `${rank}. ${translateStation(name, language)}`;
   return (
     <Button
       theme={theme}
-      size="sm"
+      size="md"
       variant="outline"
       fullWidth
       disabled={disabled}
       onClick={onSelect}
+      aria-label={stationLabel}
+      aria-describedby={`${descriptionId}-max ${descriptionId}-times`}
       aria-current={selected ? 'true' : undefined}
       data-meeting-candidate={name}
       styleOverride={{
+        ...selectableCard(colors, { selected, accent: SEMANTIC.arrival }),
+        borderColor: selected ? SEMANTIC.arrival : colors.border,
         flexDirection: 'column',
         alignItems: 'stretch',
-        justifyContent: 'flex-start',
         gap: L.sp.xxs,
-        whiteSpace: 'normal',
+        padding: `${L.sp.xs} ${L.sp.md}`,
         textAlign: 'start',
-        // 決めている候補だけ、到着駅の赤の枠（太さは変えない）
-        borderColor: selected ? SEMANTIC.arrival : undefined,
+        whiteSpace: 'normal',
       }}
     >
-      <span style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm }}>
-        <span data-candidate-dot aria-hidden style={{ width: DOT_SIZE, height: DOT_SIZE, borderRadius: '50%', background: SEMANTIC.arrival, flexShrink: 0 }} />
-        <span style={{ fontWeight: 'bold', color: colors.text, minWidth: 0 }}>{`${rank}  ${translateStation(name, language)}`}</span>
-        {selected && <Check size={14} aria-hidden style={{ color: SEMANTIC.arrival, flexShrink: 0 }} />}
-        <span style={{ marginInlineStart: 'auto', fontSize: FS.caption, color: colors.textSecondary, flexShrink: 0 }}>
+      <span style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: L.sp.xs }}>
+        <span style={{ fontWeight: 'bold', overflowWrap: 'anywhere' }}>{stationLabel}</span>
+        <span id={`${descriptionId}-max`} style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>
           {translateUI('meetingMaxMinutes', language, { minutes: max })}
         </span>
+        {selected && <Check size={CONTROL_SIZE.sm.iconSize} aria-hidden="true" style={{ alignSelf: 'center', marginInlineStart: 'auto' }} />}
       </span>
-      <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
-        {times.map(t => `${translateStation(t.origin, language)} ${t.minutes}`).join(' · ')}{suffix}
+      <span id={`${descriptionId}-times`} style={{ display: 'flex', flexWrap: 'wrap', columnGap: L.sp.md, rowGap: L.sp.xxs, fontSize: FS.caption, color: colors.textSecondary }}>
+        {times.map(t => (
+          <span key={t.origin} data-meeting-origin-time={t.origin} style={{ overflowWrap: 'anywhere' }}>
+            {`${translateStation(t.origin, language)} ${t.minutes}${suffix}`}
+          </span>
+        ))}
       </span>
     </Button>
   );

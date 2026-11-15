@@ -3120,17 +3120,24 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     [meetingTimeMaps, meetingOrigins, deferredMeetingBalance],
   );
   const meetingCandidates = useMemo(() => meetingRanking.slice(0, MEETING_RESULT_LIMIT), [meetingRanking]);
-  /** 集合駅の候補（決めた到着駅を除く）の駅名。この駅は到着駅の札で別に描くので、通常の駅名札は出さない */
-  const meetingCandidateNames = useMemo(
-    () => new Set(meetingCandidates.map(c => c.name).filter(n => n !== arrival?.name)),
-    [meetingCandidates, arrival?.name],
-  );
   /** 候補の駅名から座標つきの駅を引く（地図に札を置くため） */
   const candidateStationOf = useMemo(() => {
     const byName = new Map<string, Station>();
     for (const list of Object.values(routes)) for (const st of list as Station[]) if (!byName.has(st.name)) byName.set(st.name, st);
     return (name: string) => byName.get(name);
   }, []);
+  // 確定した到着駅は通常の駅描画が担当し、残りの候補は専用の駅名札を1枚だけ置く。
+  const meetingCandidateMarkers = useMemo(() => {
+    const markers = new Map<string, Station>();
+    if (meetingModeEnabled) {
+      for (const { name } of meetingCandidates) {
+        if (name === arrival?.name) continue;
+        const station = candidateStationOf(name);
+        if (station) markers.set(name, station);
+      }
+    }
+    return markers;
+  }, [meetingModeEnabled, meetingCandidates, arrival?.name, candidateStationOf]);
   // 集合駅（到着駅）が決まっているとき、出発駅ごとのルートと使う路線
   const meetingRouteEntries = useMemo(() => {
     if (!meetingModeEnabled || !arrival || meetingOrigins.length < 2) return [];
@@ -4704,7 +4711,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           <g key={b.name} style={{ pointerEvents: 'all', cursor: 'pointer' }}
             onClick={(e) => onBubbleClick(b.name, e.clientX, e.clientY)}>
             <circle cx={b.x} cy={b.y} r={b.r} fill={b.color} fillOpacity={0.65} stroke={alphaWhite(0.5)} strokeWidth={1} />
-            {showNames && b.r >= 12 && (
+            {showNames && b.r >= 12 && !meetingCandidateMarkers.has(b.name) && (
               <text x={b.x} y={b.y} textAnchor="middle" dominantBaseline="middle"
                 fontSize={Math.max(7, Math.min(11, b.r * 0.55))}
                 fill={NEUTRAL.white} fontWeight="bold"
@@ -4793,9 +4800,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     keyPrefix: string,
     routeHasExpressMark: boolean,
   ) => {
-    // 集合駅の候補は、到着駅と同じ駅名札で別に描く（meeting-candidate-…）。通常の駅名札を重ねると色が二重に見えるので、
-    // 到着駅の札を優先して、通常の札は出さない（2026-11-15 ユーザー指示）
-    if (meetingModeEnabled && meetingCandidateNames.has(station.name)) return null;
+    if (meetingCandidateMarkers.has(station.name)) return null;
+
     const routeColor = adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme);
     const isDetailed = !!(lastTrainFilterActive || rideLogActive || showStationNames || (showExpressStationsOnly && routeHasExpressMark && station.isExpress));
     // 非表示路線の駅は薄く描く。ただし次の2つは例外として通常の濃さで描く。
@@ -5115,6 +5121,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         })}
         {/* 駅マーカー（全セグメントの和集合） */}
         {displayStations.map((station, index) => {
+          if (meetingCandidateMarkers.has(station.name)) return null;
+
           // 集合駅を探すときは、最初の出発駅も追加した出発駅も同じ出発駅の印にする（対等）
           const isDeparture = meetingModeEnabled && meetingOrigins.length >= 2
             ? meetingOrigins.some(o => o.name === station.name)
@@ -5155,7 +5163,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             }
 
             const specialHeatBg = heatmapEnabled ? getStationHeatColor(station.name, heatmapParam, heatmapCustomRange) : undefined;
-            const specialIcon = createSpecialStationIcon(isDeparture, zoomLevel, translateStation(station.name, currentLanguage), station.name, routeKey, specialHeatBg, meetingModeEnabled ? undefined : getStationTimeLines(station.name));
+            const specialIcon = createSpecialStationIcon(!isArrival && isDeparture, zoomLevel, translateStation(station.name, currentLanguage), station.name, routeKey, specialHeatBg, meetingModeEnabled ? undefined : getStationTimeLines(station.name));
             if (!specialIcon) return null;
 
             // special icon も heatmap 切替で確実に再マウントするため色を key に含める
@@ -5533,8 +5541,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 meetingCandidates={meetingCandidates}
                 meetingOriginNames={meetingOrigins.map(o => o.name)}
                 meetingRoutes={meetingRouteEntries}
-            meetingBalance={meetingBalance}
-            onMeetingBalanceChange={setMeetingBalance}
                 meetingBalance={meetingBalance}
                 onMeetingBalanceChange={setMeetingBalance}
                 showStationTimeLabels={timetableModeEnabled}
@@ -6079,18 +6085,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 })
               }
 
-              {/*
-                集合駅の候補（上位5つ）は、到着駅と同じ駅名札（赤）で少し強調して出す（2026-11-14 ユーザー指示）。
-                決めた到着駅は路線の描画側で同じ札になるので、ここでは重ねない。
-              */}
-              {meetingModeEnabled && meetingCandidates
-                .filter(c => c.name !== arrival?.name)
-                .map(c => {
-                  const station = candidateStationOf(c.name);
-                  if (!station) return null;
-                  return renderEndpointMarker(station, `meeting-candidate-${c.name}`,
-                    createSpecialStationIcon(false, zoomLevel, translateStation(c.name, currentLanguage), c.name));
-                })}
+              {/* 候補の札は路線色や出発駅の札と重ねず、到着駅の色で1枚だけ描く */}
+              {Array.from(meetingCandidateMarkers.values(), station =>
+                renderEndpointMarker(station, `meeting-candidate-${station.name}`,
+                  createSpecialStationIcon(false, zoomLevel, translateStation(station.name, currentLanguage), station.name)))}
 
               {/* 集合駅を探す: 隣り合う駅の間（路線の上）に、出発駅それぞれから増えていく所要時間を丸いバッジで出す。
                   既存の区間の時間バッジ（createTimeIcon）と同じ見た目。タップは受け取らない */}
@@ -7113,8 +7111,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 meetingCandidates={meetingCandidates}
                 meetingOriginNames={meetingOrigins.map(o => o.name)}
                 meetingRoutes={meetingRouteEntries}
-            meetingBalance={meetingBalance}
-            onMeetingBalanceChange={setMeetingBalance}
                 meetingBalance={meetingBalance}
                 onMeetingBalanceChange={setMeetingBalance}
                 showStationTimeLabels={timetableModeEnabled}
