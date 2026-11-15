@@ -45,9 +45,10 @@ test('集合駅モード: 出発駅を追加すると候補が出て、選ぶと
 
   // 候補を押すと到着駅に入る
   const first = results.getByRole('button').first();
-  const name = (await first.innerText()).replace(/^1\.\s*/, '').trim();
+  const name = await first.getAttribute('data-meeting-candidate');
+  expect(name).toBeTruthy();
   await first.click();
-  await expect(stationInputs.nth(1)).toHaveValue(name);
+  await expect(stationInputs.nth(1)).toHaveValue(name!);
   // 集合駅が決まると、出発駅ごとに使う路線が出る（新宿・東京の2人分）
   const routesBlock = page.locator('[data-meeting-routes]');
   await expect(routesBlock).toBeVisible();
@@ -299,15 +300,11 @@ test('集合駅モード: 候補の駅は到着駅と同じ赤の駅名札で地
   await page.goto('/?mode=meeting&from=shinjuku&with=yokohama');
   await expect(page.locator('[data-meeting-results]')).toBeVisible();
   // 候補（上位5つ）が、到着駅と同じ赤の札で出る
-  const candidateNames: string[] = [];
-  const buttons = page.locator('[data-meeting-results]').getByRole('button');
-  await page.locator('[data-meeting-results]').getByRole('button', { name: /さらに表示/ }).click();
-  const n = await buttons.count();
-  for (let i = 0; i < n; i++) {
-    const t = await buttons.nth(i).innerText();
-    const m = t.match(/^\d+\.\s*(.+?)\s*$/);
-    if (m) candidateNames.push(m[1]);
-  }
+  const results = page.locator('[data-meeting-results]');
+  await results.getByRole('button', { name: /さらに表示/ }).click();
+  const candidateNames = await results.locator('[data-meeting-candidate]').evaluateAll(
+    cards => cards.map(card => card.getAttribute('data-meeting-candidate')!),
+  );
   expect(candidateNames).toHaveLength(5);
   const plates = page.locator('.special-station-marker-inline');
   await expect.poll(async () => {
@@ -315,8 +312,10 @@ test('集合駅モード: 候補の駅は到着駅と同じ赤の駅名札で地
     for (const name of candidateNames) found += (await plates.filter({ hasText: name }).count()) > 0 ? 1 : 0;
     return found;
   }, { timeout: 20_000 }).toBeGreaterThanOrEqual(3);
-  const bg = await plates.filter({ hasText: candidateNames[0] }).first().locator('div').first().evaluate(el => getComputedStyle(el).backgroundColor);
-  expect(bg).toBe('rgb(244, 67, 54)');
+  const firstMarker = page.locator('.special-station-marker-inline, .station-marker')
+    .filter({ has: page.getByText(candidateNames[0], { exact: true }) });
+  await expect(firstMarker).toHaveCount(1);
+  await expect(firstMarker.locator('div').first()).toHaveCSS('background-color', 'rgb(244, 67, 54)');
   // 駅アイコンの下には出発駅ごとの時間を出さない
   expect(await page.locator('.leaflet-marker-icon', { hasText: /(新宿|横浜) \d+分/ }).count()).toBe(0);
   // 候補の札をタップ → ツールチップに出発駅ごとの所要時間と最大
@@ -344,7 +343,9 @@ test('集合駅モード: 3人以上のときだけ「集合駅の決め方」�
   const input = slider.locator('input[type="range"]');
   await expect(input).toHaveAttribute('max', '4');
   await expect(input).toHaveAttribute('step', '1');
-  const names = async () => (await page.locator('[data-meeting-results]').getByRole('button').allInnerTexts()).filter(t => /^\d+\./.test(t)).map(t => t.replace(/^\d+\.\s*/, '').trim());
+  const names = () => page.locator('[data-meeting-candidate]').evaluateAll(
+    cards => cards.map(card => card.getAttribute('data-meeting-candidate')),
+  );
   const fair = await names();
   await input.fill('4');
   await expect.poll(async () => (await names()).join(',')).not.toBe(fair.join(','));
@@ -352,7 +353,7 @@ test('集合駅モード: 3人以上のときだけ「集合駅の決め方」�
   expect(errors).toEqual([]);
 });
 
-test('集合駅モード: 畳んだ駅選択パネルにも、到着駅候補の上位3つが到着駅の札でコンパクトに出て、押すと到着駅になる', async ({ page }) => {
+test('集合駅モード: 畳んだ駅選択パネルにも、到着駅候補の上位3つが控えめなボタンでコンパクトに出て、押すと到着駅になる', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('/?mode=meeting&from=shinjuku&with=yokohama');
   const panel = page.locator('[data-station-selector]').first();
@@ -362,35 +363,45 @@ test('集合駅モード: 畳んだ駅選択パネルにも、到着駅候補の
   await expect(group).toBeVisible();
   await expect(group).toContainText('到着駅候補');
   // 上位3つの札 + 「他2」
-  await expect(group.locator('span[style*="cursor: pointer"]')).toHaveCount(3);
+  await expect(group.getByRole('button')).toHaveCount(3);
   await expect(group).toContainText('他2');
   // 札を押すと、その駅が到着駅になり、候補の札は到着駅の札に変わる
-  const first = (await group.locator('span[style*="cursor: pointer"]').first().innerText()).trim();
-  await group.locator('span[style*="cursor: pointer"]').first().click();
+  const first = (await group.getByRole('button').first().innerText()).trim();
+  await group.getByRole('button').first().click();
   await expect(panel.locator('[data-summary-group="arrival"]')).toContainText(first);
   await expect(panel.locator('[data-summary-group="candidates"]')).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 
-test('集合駅の候補の行: 候補は到着駅と同じ赤、出発駅ごとの所要時間は出発駅と同じ緑（色を役割で統一）', async ({ page }) => {
+test('集合駅の候補は1駅につき1枚のカード。所要時間からも選べる', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('/?mode=meeting&from=shinjuku&with=yokohama');
-  const row = page.locator('[data-meeting-candidate]').first();
-  await expect(row).toBeVisible();
-  const colorOf = (loc: ReturnType<typeof row.locator>) => loc.first().evaluate(el => getComputedStyle(el).backgroundColor);
-  // 候補の駅のボタンは到着駅の赤
-  expect(await colorOf(row.getByRole('button'))).toBe('rgb(244, 67, 54)');
-  // 出発駅ごとの所要時間の札は出発駅の緑（入力順に、新宿・横浜）
-  const chips = row.locator('span', { hasText: /(新宿|横浜) \d+分/ });
-  await expect(chips).toHaveCount(2);
-  await expect(chips.first()).toContainText('新宿');
-  // 札の塗りは、白字が読めるよう少し濃くした緑（ColorChip 共通の規則）。赤みや青みではなく緑
-  const [r, g, b] = (await colorOf(chips)).match(/\d+/g)!.map(Number);
-  expect(g).toBeGreaterThan(r);
-  expect(g).toBeGreaterThan(b);
-  await expect(row).toContainText('最大');
-  // 押すと到着駅になり、チェックが付く
-  await row.getByRole('button').click();
-  await expect(row.getByRole('button')).toHaveAttribute('aria-current', 'true');
+  const cards = page.locator('[data-meeting-candidate]');
+  await expect(cards).toHaveCount(3);
+  const card = cards.first();
+  await expect(card).toHaveRole('button');
+  await expect(card).toHaveAccessibleName(/^1\. /);
+  await expect(card).toHaveAccessibleDescription(/最大.*新宿.*横浜/);
+  await expect(card).not.toHaveCSS('background-color', 'rgb(244, 67, 54)');
+  const times = card.locator('[data-meeting-origin-time]');
+  await expect(times).toHaveCount(2);
+  await expect(times.first()).toContainText('新宿');
+  await expect(times.first()).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  await times.first().click();
+  await expect(card).toHaveAttribute('aria-current', 'true');
   expect(errors).toEqual([]);
+});
+
+test('集合駅モード: 出発駅を集合駅に選んだときも、到着駅の札が1枚だけ出る', async ({ page }) => {
+  await page.goto('/?mode=meeting&from=shibuya&with=ebisu');
+  const candidate = page.locator('[data-meeting-candidate="恵比寿"]');
+  await expect(candidate).toBeVisible();
+  const markers = page.locator('.special-station-marker-inline, .station-marker')
+    .filter({ has: page.getByText('恵比寿', { exact: true }) });
+  await expect(markers).toHaveCount(1);
+  await expect(markers.locator('div').first()).toHaveCSS('background-color', 'rgb(244, 67, 54)');
+  await candidate.click();
+  await expect(candidate).toHaveAttribute('aria-current', 'true');
+  await expect(markers).toHaveCount(1);
+  await expect(markers.locator('div').first()).toHaveCSS('background-color', 'rgb(244, 67, 54)');
 });
