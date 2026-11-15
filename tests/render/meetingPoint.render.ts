@@ -351,3 +351,23 @@ test('集合駅モード: 3人以上のときだけ「集合駅の決め方」�
   expect(await names()).toHaveLength(3);
   expect(errors).toEqual([]);
 });
+
+test('集合駅モード: 畳んだ駅選択パネルにも、到着駅候補の上位3つが到着駅の札でコンパクトに出て、押すと到着駅になる', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('/?mode=meeting&from=shinjuku&with=yokohama');
+  const panel = page.locator('[data-station-selector]').first();
+  await expect(page.locator('[data-meeting-results]')).toBeVisible();
+  await panel.getByRole('heading').first().click();
+  const group = panel.locator('[data-summary-group="candidates"]');
+  await expect(group).toBeVisible();
+  await expect(group).toContainText('到着駅候補');
+  // 上位3つの札 + 「他2」
+  await expect(group.locator('span[style*="cursor: pointer"]')).toHaveCount(3);
+  await expect(group).toContainText('他2');
+  // 札を押すと、その駅が到着駅になり、候補の札は到着駅の札に変わる
+  const first = (await group.locator('span[style*="cursor: pointer"]').first().innerText()).trim();
+  await group.locator('span[style*="cursor: pointer"]').first().click();
+  await expect(panel.locator('[data-summary-group="arrival"]')).toContainText(first);
+  await expect(panel.locator('[data-summary-group="candidates"]')).toHaveCount(0);
+  expect(errors).toEqual([]);
+});

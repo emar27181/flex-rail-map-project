@@ -1,5 +1,12 @@
 # CHANGE LOG
 
+## [2026-11-15] セッション（畳んだパネルに集合駅の候補）
+
+### feat: 畳んだ駅選択パネルの2行目に、集合駅の候補（上位3つ）を到着駅の札でコンパクトに出す
+- `src/components/StationSelector.tsx`（`summaryCandidates`）, `src/utils/translation.ts`（`meetingCandidateGroup`, `meetingMoreCandidates`）
+- 集合駅モードで到着駅がまだ無いとき、「出発駅 [藤沢][船橋][伊勢原]　到着駅候補 [東京][新橋][日比谷] 他2」の形。札（既存の `ColorChip`、到着の赤）を押すとその駅が到着駅になる。決まると候補の札は「到着駅 [駅名]」に変わる
+- `tests/render/meetingPoint.render.ts`
+
 ## [2026-11-15] セッション（集合駅: 候補を仮の到着駅にした経路／3人以上の決め方5段階）
 
 ### feat: 集合駅を決める前に、出発駅それぞれから候補の駅（仮の到着駅）への経路・路線を描く

@@ -993,6 +993,14 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "多い人に寄せる",
     english: "Favor the crowd"
   },
+  meetingCandidateGroup: {
+    japanese: "到着駅候補",
+    english: "Arrival options"
+  },
+  meetingMoreCandidates: {
+    japanese: "他{count}",
+    english: "+{count}"
+  },
   meetingMaxMinutes: {
     japanese: "最大{minutes}分",
     english: "up to {minutes} min"
@@ -2330,6 +2338,8 @@ export const uiChinese: Record<string, string> = {
   meetingBalanceLabel: "集合站的选法",
   meetingBalanceFair: "大家差不多",
   meetingBalanceCrowd: "靠近人多的一侧",
+  meetingCandidateGroup: "到达站候选",
+  meetingMoreCandidates: "其他{count}",
   meetingMaxMinutes: "最长{minutes}分钟",
   meetingNoResults: "没有所有人都能在{minutes}分钟内到达的车站。",
   otherStations: "其他{count}站",
@@ -2742,6 +2752,8 @@ export const uiKorean: Record<string, string> = {
   meetingBalanceLabel: "만날 역 정하는 방법",
   meetingBalanceFair: "모두 비슷하게",
   meetingBalanceCrowd: "사람 많은 쪽으로",
+  meetingCandidateGroup: "도착역 후보",
+  meetingMoreCandidates: "외 {count}",
   meetingMaxMinutes: "최대 {minutes}분",
   meetingNoResults: "모두가 {minutes}분 이내에 갈 수 있는 역이 없습니다.",
   otherStations: "외 {count}역",

@@ -50,6 +50,8 @@ const SUGGESTION_HEAD_COUNT = SUGGESTION_NEARBY_COUNT + SUGGESTION_FREQUENT_COUN
  * 要望を受け、駅選択パネルからも直接操作できるようにした
  */
 const SHOW_DEPARTURE_TIME_ROW: boolean = true;
+/** 畳んだパネルの2行目に出す、集合駅の候補の数（残りは「他N」） */
+const SUMMARY_CANDIDATE_LIMIT = 3;
 /** 近隣駅は候補の補充にも使うため、先頭3件より多めに求めておく */
 const NEARBY_STATION_COUNT = STATION_SUGGESTION_LIMIT;
 
@@ -183,6 +185,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const summaryOrigins = !isExpanded
     ? (meetingMode && meetingOriginNames.length > 0 ? meetingOriginNames : (departure ? [departure.name] : []))
     : [];
+  /** 畳んだ2行目に出す、集合駅の候補（集合駅がまだ無いときの上位3つ） */
+  const summaryCandidates = !isExpanded && meetingMode && !arrival ? meetingCandidates.slice(0, SUMMARY_CANDIDATE_LIMIT) : [];
   const collapsedSummaryShown = !isExpanded && (summaryOrigins.length > 0 || !!arrival);
   // 乗車ログ（試作）の間は、駅名の下の時刻も時刻の入力も意味が無いので出さない
   const timeLabelButtonShown = !rideLog?.enabled && !!onShowStationTimeLabelsChange && !!arrival && (!!departure || lastTrainModeEnabled);
@@ -559,6 +563,31 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   {translateStation(name, language)}
                 </ColorChip>
               ))}
+            </LabeledGroup>
+          )}
+          {/* 集合駅を探すとき、集合駅（到着駅）がまだ無ければ、候補の上位を到着駅の札でコンパクトに出す。押すとその駅が到着駅になる */}
+          {summaryCandidates.length > 0 && (
+            <LabeledGroup theme={theme} label={translateUI('meetingCandidateGroup', language)} dataAttr={{ 'data-summary-group': 'candidates' }}>
+              {summaryCandidates.map(c => (
+                <ColorChip
+                  key={c.name}
+                  color={SEMANTIC.arrival}
+                  theme={theme}
+                  onClick={e => {
+                    e.stopPropagation();
+                    const station = allStations.find(st => st.name === c.name);
+                    if (station) onArrivalChange(station);
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {translateStation(c.name, language)}
+                </ColorChip>
+              ))}
+              {meetingCandidates.length > summaryCandidates.length && (
+                <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                  {translateUI('meetingMoreCandidates', language, { count: meetingCandidates.length - summaryCandidates.length })}
+                </span>
+              )}
             </LabeledGroup>
           )}
           {arrival && (
