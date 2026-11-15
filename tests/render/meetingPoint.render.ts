@@ -222,6 +222,9 @@ test('駅選択パネルを閉じても、出発駅・到着駅は2行目に小�
   await expect(summary).toBeVisible();
   await expect(summary).toContainText('新宿');
   await expect(summary).toContainText('東京');
+  // 札の前に「出発駅」「到着駅」の語がある（札の色だけでは、何の駅か分からない）
+  await expect(summary.locator('[data-summary-group="departure"]')).toContainText('出発駅');
+  await expect(summary.locator('[data-summary-group="arrival"]')).toContainText('到着駅');
   // 見出しの下（2行目）にある
   const [h, s] = await Promise.all([panel.getByRole('heading').first().boundingBox(), summary.boundingBox()]);
   expect(s!.y).toBeGreaterThan(h!.y + h!.height - 1);
@@ -236,6 +239,9 @@ test('駅選択パネルを閉じても、出発駅・到着駅は2行目に小�
   const summary2 = panel2.locator('[data-station-summary]');
   await expect(summary2).toContainText('新宿');
   await expect(summary2).toContainText('横浜');
+  await expect(summary2.locator('[data-summary-group="departure"]')).toContainText('出発駅');
+  // 集合駅がまだ無いときは、到着駅の語は出さない
+  await expect(summary2.locator('[data-summary-group="arrival"]')).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 

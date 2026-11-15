@@ -26,6 +26,7 @@ import TextField from './ui/atoms/TextField';
 import RoleField from './ui/molecules/RoleField';
 import FieldPairRow, { PAIR_DIVIDER_WIDTH } from './ui/molecules/FieldPairRow';
 import TopList from './ui/molecules/TopList';
+import LabeledGroup from './ui/molecules/LabeledGroup';
 import RideLogControls, { type RideLogControlsProps } from './RideLogControls';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import { useDeviceClass } from '../hooks/useDeviceClass';
@@ -541,22 +542,25 @@ const StationSelector: React.FC<StationSelectorProps> = ({
       </div>
       {/*
         畳んでいても、決めた出発駅・到着駅は2行目に小さく残す（開かないと何を選んだか分からない、を避ける）。
-        色は入力欄と同じ役割の色（出発=緑・到着=赤。ColorChip）。集合駅を探すときは出発駅が複数並ぶ。
+        色は入力欄と同じ役割の色（出発=緑・到着=赤。ColorChip）。札の前に「出発駅」「到着駅」の語を添える（LabeledGroup）。集合駅を探すときは出発駅が複数並ぶ。
       */}
       {collapsedSummaryShown && (
-        <div data-station-summary style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.xs, marginTop: L.sp.xs, minWidth: 0 }}>
-          {summaryOrigins.map(name => (
-            <ColorChip key={name} color={SEMANTIC.departure} theme={theme}>
-              {translateStation(name, language)}
-            </ColorChip>
-          ))}
-          {summaryOrigins.length > 0 && arrival && (
-            <span aria-hidden style={{ fontSize: FS.caption, color: colors.textSecondary }}>{'→'}</span>
+        <div data-station-summary style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', columnGap: L.sp.md, rowGap: L.sp.xs, marginTop: L.sp.xs, minWidth: 0 }}>
+          {summaryOrigins.length > 0 && (
+            <LabeledGroup theme={theme} label={translateUI('departureStation', language)} dataAttr={{ 'data-summary-group': 'departure' }}>
+              {summaryOrigins.map(name => (
+                <ColorChip key={name} color={SEMANTIC.departure} theme={theme}>
+                  {translateStation(name, language)}
+                </ColorChip>
+              ))}
+            </LabeledGroup>
           )}
           {arrival && (
-            <ColorChip color={SEMANTIC.arrival} theme={theme}>
-              {translateStation(arrival.name, language)}
-            </ColorChip>
+            <LabeledGroup theme={theme} label={translateUI('arrivalStation', language)} dataAttr={{ 'data-summary-group': 'arrival' }}>
+              <ColorChip color={SEMANTIC.arrival} theme={theme}>
+                {translateStation(arrival.name, language)}
+              </ColorChip>
+            </LabeledGroup>
           )}
         </div>
       )}

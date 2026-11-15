@@ -1,5 +1,12 @@
 # CHANGE LOG
 
+## [2026-11-15] セッション（畳んだ駅選択パネルに「出発駅」「到着駅」の語）
+
+### improve: 畳んだ駅選択パネルの2行目に、札の前に「出発駅」「到着駅」の語を添える
+- `src/components/ui/molecules/LabeledGroup.tsx`（新規）, `src/components/StationSelector.tsx`, `docs/design-system.md`
+- 札（色つきの駅名）だけでは、閉じたときに何の駅か分からなかった。「出発駅 [藤沢][船橋]　到着駅 [東京]」の形にした。集合駅がまだ無いときは到着駅の語は出さない
+- `tests/render/meetingPoint.render.ts`
+
 ## [2026-11-15] セッション（集合駅の候補を到着駅と同じ札で／出発駅ごとの時間はツールチップに）
 
 ### feat: 集合駅の候補（上位5つ）を、到着駅と同じ赤の駅名札で地図に出す
