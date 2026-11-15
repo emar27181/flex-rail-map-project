@@ -495,7 +495,7 @@ UIのテーマと無関係なため明示的に除外している。
 ダークモード用の値は `ThemeContext` が持ち、ライト側の値だけ `SEMANTIC` から取る。
 
 また、インラインstyleを持つのにテーマから色を取っていないコンポーネントが **42中9**
-（`DemoMap` `CoverageAnalysis` `SchematicMap` `SimpleMap` `ErrorBoundary` など）。
+（`CoverageAnalysis` `SchematicMap` `SimpleMap` `ErrorBoundary` など）。
 これらはダークモードで配色が崩れる可能性がある。
 なお `map/HeatmapDots.tsx` と `map/HeatmapLayer.tsx` はどこからも import されていない
 **未使用ファイル**なので、直すより消す方が筋が良い。

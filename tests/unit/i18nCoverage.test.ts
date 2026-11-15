@@ -30,7 +30,6 @@ const I18N_MARKERS = ['translateUI', 'translateStation', 'translateRoute'];
  * - CoverageAnalysis.tsx / TrainTypeViewer.tsx: 内部データ定義(路線名マップ等)が
  *   大半で、UI文言そのものは少ない。要判断のため未着手
  * - DataTest.tsx / SimpleMap.tsx: 開発用の動作確認コンポーネント（本番未使用）
- * - DemoMap.tsx: デモ用の固定データ（駅名の座標定義）
  * - MobileBottomPanel.tsx / StickyBottomAd.tsx: aria-label 等の補助文言のみ
  * - map/HeatmapDots.tsx: ツールチップの単位表示のみ
  *
@@ -39,7 +38,6 @@ const I18N_MARKERS = ['translateUI', 'translateStation', 'translateRoute'];
 const KNOWN_UNTRANSLATED = new Set([
   'CoverageAnalysis.tsx',
   'DataTest.tsx',
-  'DemoMap.tsx',
   'MobileBottomPanel.tsx',
   'SimpleMap.tsx',
   'StickyBottomAd.tsx',

@@ -143,28 +143,6 @@ caption{ caption-side:top; text-align:left; font-size:12.5px; color:var(--ink-fa
 .mono{ font-feature-settings:normal; letter-spacing:.04em; color:var(--accent-strong); font-weight:800; }
 h3 .lab{ display:inline-block; min-width:1.5em; color:var(--accent-strong); }
 
-figure.map{ margin:34px 0; padding:0; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card); overflow:hidden; box-shadow:var(--shadow); }
-.map-head{ padding:18px 22px 4px; }
-.map-head .cap{ font-weight:800; font-size:13px; color:var(--ink); }
-.map-head .cap b{ color:var(--accent-strong); }
-.map-head .sub{ font-size:13px; color:var(--ink-soft); margin:6px 0 0; line-height:1.7; }
-.chips{ display:flex; flex-wrap:wrap; gap:8px; padding:14px 22px 4px; }
-.chip{ display:inline-flex; align-items:center; gap:var(--ctl-md-gap); font-family:var(--sans); box-sizing:border-box; min-height:var(--ctl-md-h); font-size:var(--ctl-md-fs); font-weight:700; padding:var(--ctl-md-pad); border:var(--ctl-border-w) solid var(--border-strong); background:var(--surface-2); color:var(--ink); border-radius:var(--r-control); cursor:pointer; transition:opacity .2s ease, background .2s ease, color .2s ease, border-color .2s ease; user-select:none; white-space:nowrap; }
-.chip .sw{ width:14px; height:14px; border-radius:50%; flex:none; }
-.chip[aria-pressed="false"]{ background:transparent; color:var(--ink-faint); border-color:var(--border); text-decoration:line-through; text-decoration-thickness:1px; }
-.chip[aria-pressed="false"] .sw{ filter:grayscale(1); opacity:.4; }
-.chip:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-.map-stage{ padding:6px 14px 14px; }
-.map-stage svg{ width:100%; height:auto; display:block; }
-.ln{ transition:opacity .25s ease; }
-.ln.off{ opacity:.08; }
-.st-label{ font-family:var(--sans); font-size:12px; font-weight:700; fill:var(--ink); paint-order:stroke; stroke:var(--surface); stroke-width:3px; stroke-linejoin:round; }
-.st-label.faint{ fill:var(--ink-soft); font-size:11px; }
-.map-note{ padding:0 22px 18px; font-size:11.5px; color:var(--ink-faint); }
-.readout{ padding:0 22px 16px; font-size:13px; color:var(--ink-soft); }
-.readout b{ color:var(--accent-strong); font-weight:800; }
-
-
 /* 目次（閉じて置く）・この記事の路線と駅・出典（ArticleLayout.astro）。見出しは関連記事と同じ h2 */
 .toc{ margin:24px 0 0; padding:0 16px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card); }
 .toc summary{ display:flex; align-items:center; min-height:var(--ctl-md-h); cursor:pointer; font-weight:700; color:var(--ink-soft); }
