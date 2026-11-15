@@ -126,6 +126,7 @@ const related = (isArticle ? ARTICLES.find(a => a.slug === pageKey)?.related ?? 
   {hreflang.map(h => <link rel="alternate" hreflang={h.hreflang} href={h.href} />)}
 
   <meta property="og:title" content={meta.title} />
+  <meta property="og:site_name" content={SITE_NAME} />
   <meta property="og:description" content={meta.description} />
   <meta property="og:type" content={isArticle ? "article" : "website"} />
   <meta property="og:url" content={canonicalUrl} />
