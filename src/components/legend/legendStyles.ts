@@ -241,19 +241,20 @@ export const SELECTION_BORDER_WIDTH = 2;
  * 選択は「枠線の色」だけでなく「背景を薄く塗る」ことでも示す。
  * 枠線だけだと細くて気づきにくく、色覚特性によっては差が分かりにくいため。
  *
- * @param accent 選択時の色。省略時は primary（青）
+ * 枠線を使わないカードは surface の差でまとめ、選択時は同じ薄いアクセント色を使う。
  */
 export function selectableCard(
   colors: Colors,
-  opts: { selected: boolean; accent?: string; radius?: string },
+  opts: { selected: boolean; accent?: string; radius?: string; borderless?: boolean },
 ): CSSProperties {
   const accent = opts.accent ?? colors.primary ?? SEMANTIC.primary;
+  const restingSurface = opts.borderless ? colors.surfaceElevated : colors.surface;
   return {
     boxSizing: 'border-box',
     borderRadius: opts.radius ?? L.r.card,
-    // 太さは常に同じ。非選択時は色を透明にして場所だけ確保する
-    border: `${SELECTION_BORDER_WIDTH}px solid ${opts.selected ? accent : 'transparent'}`,
-    backgroundColor: opts.selected ? tintColor(accent, 0.18) : colors.surface,
+    // 枠線を使う場合は透明でも同じ太さを確保する
+    border: opts.borderless ? 'none' : `${SELECTION_BORDER_WIDTH}px solid ${opts.selected ? accent : 'transparent'}`,
+    backgroundColor: opts.selected ? tintColor(accent, 0.18) : restingSurface,
     transition: 'background-color 0.15s ease, border-color 0.15s ease',
   };
 }

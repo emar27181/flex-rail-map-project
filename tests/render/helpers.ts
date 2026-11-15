@@ -51,7 +51,7 @@ export async function screenshotCanvasOnly(page: Page, canvasSelector: string): 
 }
 
 /**
- * 表示モード（集合駅・終電・乗車ログ）の切り替えタグ。「表示切替」パネルの表示設定の下にある（2026-11-15）。
+ * 表示モード（集合駅・終電・乗車ログ）の切り替えタグ。「表示切替」パネルの表示設定の上にある（2026-11-15）。
  * パネルが閉じていれば開いてから、タグを返す。PCの浮かぶパネルは開いたままにする（駅選択パネルをふさがない）
  */
 export async function modeTag(page: Page, name: string, opener: RegExp = SETTINGS_OPENER) {

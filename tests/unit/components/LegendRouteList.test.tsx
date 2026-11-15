@@ -276,15 +276,46 @@ describe('詳細設定（所要時間・駅アイコンの配色カスタム）'
 });
 
 describe('表示設定の並びと名前', () => {
+  it('表示モードは可視化から始まり、すべての切り替えが共通のボタンで1つずつ出る', () => {
+    const onHeatmapEnabledChange = vi.fn();
+    const onMapViewModeChange = vi.fn();
+    const onMeetingToggle = vi.fn();
+    const props = {
+      ...minimalProps,
+      onHeatmapEnabledChange,
+      onMapViewModeChange,
+      modeTags: [{ key: 'meeting', label: 'meeting', icon: <svg />, pressed: false, onToggle: onMeetingToggle }],
+    };
+    const { rerender } = render(<LegendRouteList {...props} />);
+    const modes = within(screen.getByRole('group', { name: 'displayModes' }));
+    expect(modes.getAllByRole('button').map(button => button.getAttribute('data-tag'))).toEqual([
+      'heatmap', 'trainDemo', 'bubble', 'schematic', 'terrain3d', 'meeting',
+    ]);
+    const heatmap = screen.getByRole('button', { name: 'stationHeatmap' });
+    expect(heatmap.firstElementChild).toHaveAttribute('aria-hidden', 'true');
+    fireEvent.click(heatmap);
+    expect(onHeatmapEnabledChange).toHaveBeenCalledWith(true);
+    fireEvent.click(modes.getByRole('button', { name: 'bubbleMap' }));
+    expect(onMapViewModeChange).toHaveBeenLastCalledWith('bubble');
+    fireEvent.click(modes.getByRole('button', { name: 'meeting' }));
+    expect(onMeetingToggle).toHaveBeenCalledOnce();
+
+    rerender(<LegendRouteList {...props} heatmapEnabled mapViewMode="bubble" />);
+    expect(heatmap).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('bubbleMaxRadius')).toBeVisible();
+    const bubble = modes.getByRole('button', { name: 'bubbleMap' });
+    expect(bubble).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(bubble);
+    expect(onMapViewModeChange).toHaveBeenLastCalledWith('realistic');
+  });
+
   // このファイルでは translateUI をキーをそのまま返すモックにしているので、キーの並びで確かめる
-  it('「複数駅の共通路線」はデータ可視化の中（駅フィルターより前）、UI設定の後の一番下が詳細設定', () => {
+  it('「複数駅の共通路線」は駅フィルターより前、UI設定の後の一番下が詳細設定', () => {
     const { container } = render(<LegendRouteList {...minimalProps} />);
-    // 「複数駅の共通路線」はデータ可視化の中なので、データ可視化を開いてから並びを見る
-    fireEvent.click(screen.getByText('settingsGroupViz'));
     const text = container.textContent ?? '';
     const pos = (key: string) => text.indexOf(key);
-    expect(pos('settingsGroupViz')).toBeGreaterThan(-1);
-    expect(pos('memoTitle')).toBeGreaterThan(pos('settingsGroupViz'));
+    expect(pos('displaySettings')).toBeGreaterThan(pos('displayModes'));
+    expect(pos('memoTitle')).toBeGreaterThan(pos('displaySettings'));
     expect(pos('memoTitle')).toBeLessThan(pos('settingsGroupFilter'));
     expect(pos('settingsGroupMap')).toBeGreaterThan(pos('settingsGroupFilter'));
     expect(pos('settingsGroupDetail')).toBeGreaterThan(pos('settingsGroupMap'));
@@ -292,9 +323,9 @@ describe('表示設定の並びと名前', () => {
 });
 
 describe('表示設定のグループは既定で閉じている', () => {
-  const GROUPS = ['settingsGroupLabel', 'settingsGroupViz', 'settingsGroupFilter', 'settingsGroupMap', 'settingsGroupDetail'];
+  const GROUPS = ['settingsGroupLabel', 'memoTitle', 'settingsGroupFilter', 'settingsGroupMap', 'settingsGroupDetail'];
 
-  it('開いた直後はどのグループも閉じていて、中身（駅ラベル・データ可視化の項目）を出さない', () => {
+  it('表示設定のグループは閉じていて、可視化ボタンは表示モードに出る', () => {
     const { container } = render(<LegendRouteList {...minimalProps} />);
     for (const key of GROUPS) {
       const header = container.querySelector(`[data-settings-group="${key}"]`);
@@ -302,14 +333,14 @@ describe('表示設定のグループは既定で閉じている', () => {
       expect(header!.getAttribute('aria-expanded'), key).toBe('false');
     }
     expect(container.textContent).not.toContain('showOnlyTransferStations');
-    expect(container.textContent).not.toContain('stationHeatmap');
+    expect(screen.getByRole('button', { name: 'stationHeatmap' })).toBeVisible();
   });
 
   it('見出しを押すとそのグループだけが開く', () => {
     const { container } = render(<LegendRouteList {...minimalProps} />);
     fireEvent.click(container.querySelector('[data-settings-group="settingsGroupLabel"]')!);
     expect(container.querySelector('[data-settings-group="settingsGroupLabel"]')!.getAttribute('aria-expanded')).toBe('true');
-    expect(container.querySelector('[data-settings-group="settingsGroupViz"]')!.getAttribute('aria-expanded')).toBe('false');
+    expect(container.querySelector('[data-settings-group="memoTitle"]')!.getAttribute('aria-expanded')).toBe('false');
     expect(container.textContent).toContain('showOnlyTransferStations');
   });
 });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { RouteKey } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation'
@@ -41,7 +41,7 @@ const ROUTE_UI_MODE_KEY = 'routeSwitchUiMode';
 const ROUTE_CLASSIC_VIEW_ENABLED = false;
 
 interface LegendRouteListProps {
-  /** 表示モード（集合駅・終電・乗車ログ）の切り替えタグ。「表示設定」の下に出す */
+  /** データ可視化の後に並べる表示モード（集合駅・終電・乗車ログ）の切り替えタグ */
   modeTags?: TagToggleItem[];
   /** 路線チップの意味（既定は表示）。乗車ログのときは 'rideLog'（RouteSwitchBoard） */
   routeToggleMode?: 'visibility' | 'rideLog';
@@ -259,13 +259,10 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   const ROUTE_LIST_LIMIT = 10;
   const [routeListExpanded, setRouteListExpanded] = useState(false);
   const [groupLabelOpen,  setGroupLabelOpen]  = useState(false);
-  const [groupVizOpen,    setGroupVizOpen]    = useState(false);
   const [groupFilterOpen, setGroupFilterOpen] = useState(false);
   const [groupMapOpen,    setGroupMapOpen]    = useState(false);
   const [groupDetailOpen, setGroupDetailOpen] = useState(false);
   const [groupMemoOpen,   setGroupMemoOpen]   = useState(false);
-
-  useEffect(() => { if (heatmapEnabled) setGroupVizOpen(true); }, [heatmapEnabled]);
 
   // HEX色をHue値(0-360)に変換
   const hexToHue = (hex: string): number => {
@@ -639,6 +636,54 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
       </>)}
 
+      {/* ═══ 表示モード ═══ */}
+      <div data-mode-section style={{ marginTop: L.sp.xl, marginBottom: L.sp.xs }}>
+        <div style={{ fontSize: FS.title, fontWeight: 'bold', marginBottom: L.sp.md, color: colors.text }}>
+          {translateUI('displayModes', language)}
+        </div>
+        <TagToggleGroup
+          theme={theme}
+          ariaLabel={translateUI('displayModes', language)}
+          items={[
+            { key: 'heatmap', label: translateUI('stationHeatmap', language), icon: <Palette />, pressed: heatmapEnabled, onToggle: () => onHeatmapEnabledChange(!heatmapEnabled) },
+            ...(mapViewMode === 'realistic' ? [{ key: 'trainDemo', label: translateUI('trainDemoLabel', language), icon: <TrainTrack />, pressed: showTrainDemo, onToggle: onTrainDemoToggle }] : []),
+            { key: 'bubble', label: translateUI('bubbleMap', language), icon: <CircleDot />, pressed: mapViewMode === 'bubble', onToggle: () => onMapViewModeChange(mapViewMode === 'bubble' ? 'realistic' : 'bubble') },
+            { key: 'schematic', label: translateUI('schematicMapLabel', language), icon: <Network />, pressed: mapViewMode === 'schematic', onToggle: () => onMapViewModeChange(mapViewMode === 'schematic' ? 'realistic' : 'schematic') },
+            { key: 'terrain3d', label: translateUI('terrain3dLabel', language), icon: <Mountain />, pressed: mapViewMode === 'terrain3d', onToggle: () => onMapViewModeChange(mapViewMode === 'terrain3d' ? 'realistic' : 'terrain3d') },
+            ...(modeTags ?? []),
+          ]}
+        />
+        {mapViewMode === 'bubble' && (
+          <div style={{ marginTop: L.sp.sm }}>
+            <div style={{ display: 'flex', gap: L.sp.sm, marginBottom: L.sp.sm }}>
+              {(['circle', 'square'] as const).map(shape => (
+                <Radio
+                  key={shape}
+                  theme={theme}
+                  size="sm"
+                  name="bubbleShape"
+                  checked={bubbleShape === shape}
+                  onChange={() => onBubbleShapeChange(shape)}
+                >
+                  {shape === 'circle' ? translateUI('bubbleCircle', language) : translateUI('bubbleSquare', language)}
+                </Radio>
+              ))}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm }}>
+              <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('bubbleMaxRadius', language)}</span>
+              <Slider
+                min={500} max={50000} step={500}
+                value={bubbleMaxRadiusM}
+                onChange={e => onBubbleMaxRadiusMChange(Number(e.target.value))}
+              />
+              <span style={{ fontSize: FS.caption, color: colors.text, minWidth: '40px', textAlign: 'right' }}>
+                {bubbleMaxRadiusM >= 1000 ? `${(bubbleMaxRadiusM / 1000).toFixed(1)}km` : `${bubbleMaxRadiusM}m`}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* ═══ セクション2: 表示設定 ═══ */}
       <div style={{ marginTop: L.sp.xl, marginBottom: L.sp.xs }}>
         <div style={{ fontSize: FS.title, fontWeight: 'bold', marginBottom: L.sp.md, color: colors.text }}>
@@ -745,68 +790,20 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
               </div>
             )}
 
-            {/* ── データ可視化 ── */}
-            {sectionHeader(translateUI('settingsGroupViz', language), groupVizOpen, () => setGroupVizOpen(v => !v))}
-            {groupVizOpen && (
+            {/* ── 複数駅の共通路線 ── */}
+            {sectionHeader(translateUI('memoTitle', language), groupMemoOpen, () => setGroupMemoOpen(v => !v))}
+            {groupMemoOpen && (
               <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
-                {/* データ可視化は、表示モードと同じ「押すと塗りに変わるタグ」で切り替える（アイコンは lucide）。
-                    地図の見せ方（現実の路線図・バブル・路線図風・立体）は同時に1つなので、押すとその見せ方になり、もう一度押すと現実の路線図に戻る */}
-                <TagToggleGroup
+                <StationMemoPanel
+                  bare
                   theme={theme}
-                  ariaLabel={translateUI('settingsGroupViz', language)}
-                  items={[
-                    { key: 'heatmap', label: translateUI('stationHeatmap', language), icon: <Palette />, pressed: heatmapEnabled, onToggle: () => onHeatmapEnabledChange(!heatmapEnabled) },
-                    ...(mapViewMode === 'realistic' ? [{ key: 'trainDemo', label: translateUI('trainDemoLabel', language), icon: <TrainTrack />, pressed: showTrainDemo, onToggle: onTrainDemoToggle }] : []),
-                    { key: 'bubble', label: translateUI('bubbleMap', language), icon: <CircleDot />, pressed: mapViewMode === 'bubble', onToggle: () => onMapViewModeChange(mapViewMode === 'bubble' ? 'realistic' : 'bubble') },
-                    { key: 'schematic', label: translateUI('schematicMapLabel', language), icon: <Network />, pressed: mapViewMode === 'schematic', onToggle: () => onMapViewModeChange(mapViewMode === 'schematic' ? 'realistic' : 'schematic') },
-                    { key: 'terrain3d', label: translateUI('terrain3dLabel', language), icon: <Mountain />, pressed: mapViewMode === 'terrain3d', onToggle: () => onMapViewModeChange(mapViewMode === 'terrain3d' ? 'realistic' : 'terrain3d') },
-                  ]}
+                  language={language}
+                  routeColors={routeColors as Record<string, string>}
+                  routeNames={routeNames as Record<string, string>}
+                  adjustRouteColorForTheme={adjustRouteColorForTheme}
+                  onShowRoutes={onShowRoutesFromMemo}
+                  onUseAsDeparture={onUseStationAsDeparture}
                 />
-                {mapViewMode === 'bubble' && (
-                  <div style={{ marginLeft: L.sp['4xl'], marginTop: L.sp.xs }}>
-                    <div style={{ display: 'flex', gap: L.sp.sm, marginBottom: L.sp.sm }}>
-                      {(['circle', 'square'] as const).map(shape => (
-                        <Radio
-                          theme={theme}
-                          size="sm"
-                          name="bubbleShape"
-                          checked={bubbleShape === shape}
-                          onChange={() => onBubbleShapeChange(shape)}
-                        >
-                          {shape === 'circle' ? translateUI('bubbleCircle', language) : translateUI('bubbleSquare', language)}
-                        </Radio>
-                      ))}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm }}>
-                      <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('bubbleMaxRadius', language)}</span>
-                      <Slider
-                        min={500} max={50000} step={500}
-                        value={bubbleMaxRadiusM}
-                        onChange={e => onBubbleMaxRadiusMChange(Number(e.target.value))}
-                      />
-                      <span style={{ fontSize: FS.caption, color: colors.text, minWidth: '40px', textAlign: 'right' }}>
-                        {bubbleMaxRadiusM >= 1000 ? `${(bubbleMaxRadiusM / 1000).toFixed(1)}km` : `${bubbleMaxRadiusM}m`}
-                      </span>
-                    </div>
-                  </div>
-                )}
-                {/* 複数駅の共通路線（以前の「最寄り駅メモ」）。複数の駅の路線を地図に出すのでデータ可視化に置く。
-                    見出しは他の節と同じ sectionHeader、中身は StationMemoPanel（bare） */}
-                {sectionHeader(translateUI('memoTitle', language), groupMemoOpen, () => setGroupMemoOpen(v => !v))}
-                {groupMemoOpen && (
-                  <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
-                    <StationMemoPanel
-                      bare
-                      theme={theme}
-                      language={language}
-                      routeColors={routeColors as Record<string, string>}
-                      routeNames={routeNames as Record<string, string>}
-                      adjustRouteColorForTheme={adjustRouteColorForTheme}
-                      onShowRoutes={onShowRoutesFromMemo}
-                      onUseAsDeparture={onUseStationAsDeparture}
-                    />
-                  </div>
-                )}
               </div>
             )}
 
@@ -884,16 +881,6 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
         </div>
       </div>
-
-      {/* ═══ 表示モード: 集合駅・終電・乗車ログ（表示設定の下。切り替えタグ） ═══ */}
-      {modeTags && modeTags.length > 0 && (
-        <div data-mode-section style={{ marginTop: L.sp.xl, marginBottom: L.sp.xs }}>
-          <div style={{ fontSize: FS.title, fontWeight: 'bold', marginBottom: L.sp.md, color: colors.text }}>
-            {translateUI('displayModes', language)}
-          </div>
-          <TagToggleGroup theme={theme} ariaLabel={translateUI('displayModes', language)} items={modeTags} />
-        </div>
-      )}
 
       {/* ═══ セクション3: 設定の保存/読み込み ═══ */}
       <MapConfigPanel config={mapConfig} theme={theme} language={language} onImport={onImportConfig} getUserData={getUserData} />
