@@ -11,7 +11,7 @@ test('集合駅モード: 出発駅を追加すると候補が出て、選ぶと
   const stationInputs = page.locator('input.station-input-filled');
   const inputsBefore = await stationInputs.count();
 
-  // 表示モードのタグは「表示切替」パネルの表示設定の下にある
+  // 表示モードは「表示切替」パネルの表示設定の上にある
   await clickMode(page, '集合駅を探す');
   expect(await modeIsOn(page, '集合駅を探す')).toBe(true);
   // 出発駅が1つのうちは案内だけ
@@ -394,13 +394,19 @@ test('集合駅の候補は1駅につき1枚のカード。所要時間からも
   await expect(card).toHaveAccessibleName(/^1\. /);
   await expect(card).toHaveAccessibleDescription(/最大.*新宿.*横浜/);
   await expect(card).not.toHaveCSS('background-color', 'rgb(244, 67, 54)');
-  await expect(card).toHaveCSS('border-inline-start-color', 'rgba(244, 67, 54, 0.6)');
+  await expect(card).toHaveCSS('border-top-style', 'none');
+  await expect(card).toHaveCSS('border-inline-start-style', 'none');
+  const restingSurface = await card.evaluate(el => getComputedStyle(el).backgroundColor);
+  expect(restingSurface).not.toBe('rgba(0, 0, 0, 0)');
   const times = card.locator('[data-meeting-origin-time]');
   await expect(times).toHaveCount(2);
   await expect(times.first()).toContainText('新宿');
   await expect(times.first()).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
   await times.first().click();
   await expect(card).toHaveAttribute('aria-current', 'true');
+  await expect(card).toHaveCSS('border-inline-start-style', 'none');
+  await expect(card).not.toHaveCSS('background-color', restingSurface);
+  await expect(card.locator('svg.lucide-check')).toBeVisible();
   expect(errors).toEqual([]);
 });
 
