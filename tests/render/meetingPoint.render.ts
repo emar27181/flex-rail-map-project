@@ -353,7 +353,7 @@ test('集合駅モード: 3人以上のときだけ「集合駅の決め方」�
   expect(errors).toEqual([]);
 });
 
-test('集合駅モード: 畳んだ駅選択パネルにも、到着駅候補の上位3つが控えめなボタンでコンパクトに出て、押すと到着駅になる', async ({ page }) => {
+test('集合駅モード: 畳んだ駅選択パネルにも、到着駅候補の上位3つが到着駅と同じ配色でコンパクトに出て、押すと到着駅になる', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('/?mode=meeting&from=shinjuku&with=yokohama');
   const panel = page.locator('[data-station-selector]').first();
@@ -366,9 +366,13 @@ test('集合駅モード: 畳んだ駅選択パネルにも、到着駅候補の
   await expect(group.getByRole('button')).toHaveCount(3);
   await expect(group).toContainText('他2');
   // 札を押すと、その駅が到着駅になり、候補の札は到着駅の札に変わる
-  const first = (await group.getByRole('button').first().innerText()).trim();
-  await group.getByRole('button').first().click();
-  await expect(panel.locator('[data-summary-group="arrival"]')).toContainText(first);
+  const firstCandidate = group.getByRole('button').first();
+  const first = (await firstCandidate.innerText()).trim();
+  const background = await firstCandidate.evaluate(el => getComputedStyle(el).backgroundColor);
+  await firstCandidate.click();
+  const arrivalGroup = panel.locator('[data-summary-group="arrival"]');
+  await expect(arrivalGroup).toContainText(first);
+  await expect(arrivalGroup.getByText(first, { exact: true })).toHaveCSS('background-color', background);
   await expect(panel.locator('[data-summary-group="candidates"]')).toHaveCount(0);
   expect(errors).toEqual([]);
 });

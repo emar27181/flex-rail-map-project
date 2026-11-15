@@ -8,6 +8,7 @@ import { translateStation, translateUI, translateRoute } from '../utils/translat
 import type { Language } from '../utils/translation';
 import { MEETING_BALANCE_LEVELS, MEETING_MAX_MINUTES, meetingClockTimes, type MeetingCandidate, type MeetingRouteEntry } from '../utils/meetingPoint';
 import ColorChip from './ui/ColorChip';
+import { filledLabelColors } from '../utils/contrast';
 import { stationReadings, normalizeToHiragana, hiraganaToRomaji, normalizeRomajiForMatch } from '../utils/stationReadings';
 import { findNearestStations } from '../utils/nearestStations';
 import { loadStationHistory, recordStationSelection, buildSuggestions } from '../utils/stationHistory';
@@ -188,6 +189,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     : [];
   /** 畳んだ2行目に出す、集合駅の候補（集合駅がまだ無いときの上位3つ） */
   const summaryCandidates = !isExpanded && meetingMode && !arrival ? meetingCandidates.slice(0, SUMMARY_CANDIDATE_LIMIT) : [];
+  const arrivalSummaryColors = filledLabelColors(SEMANTIC.arrival, theme);
   const collapsedSummaryShown = !isExpanded && (summaryOrigins.length > 0 || !!arrival);
   // 乗車ログ（試作）の間は、駅名の下の時刻も時刻の入力も意味が無いので出さない
   const timeLabelButtonShown = !rideLog?.enabled && !!onShowStationTimeLabelsChange && !!arrival && (!!departure || lastTrainModeEnabled);
@@ -566,7 +568,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               ))}
             </LabeledGroup>
           )}
-          {/* 集合駅を探すとき、集合駅（到着駅）がまだ無ければ、候補の上位を控えめなボタンで出す。押すとその駅が到着駅になる */}
+          {/* 集合駅を探すとき、集合駅（到着駅）がまだ無ければ、候補の上位は到着駅の札と同じ配色のボタンで出す。押すとその駅が到着駅になる */}
           {summaryCandidates.length > 0 && (
             <LabeledGroup theme={theme} label={translateUI('meetingCandidateGroup', language)} dataAttr={{ 'data-summary-group': 'candidates' }}>
               {summaryCandidates.map(c => (
@@ -574,13 +576,18 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   key={c.name}
                   theme={theme}
                   size="sm"
-                  variant="outline"
+                  variant="arrival"
                   onClick={e => {
                     e.stopPropagation();
                     const station = allStations.find(st => st.name === c.name);
                     if (station) onArrivalChange(station);
                   }}
-                  styleOverride={{ paddingInline: L.sp.xs }}
+                  styleOverride={{
+                    paddingInline: L.sp.xs,
+                    backgroundColor: arrivalSummaryColors.background,
+                    borderColor: arrivalSummaryColors.background,
+                    color: arrivalSummaryColors.text,
+                  }}
                 >
                   {translateStation(c.name, language)}
                 </Button>
