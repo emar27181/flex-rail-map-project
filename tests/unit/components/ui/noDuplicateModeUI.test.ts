@@ -12,7 +12,9 @@ describe('UIモード拡張時の二重操作禁止', () => {
   it('既存の駅検索パネルを1つだけ使い終電専用の別パネル/スライダーを禁止', () => {
     const selector = read('src/components/StationSelector.tsx');
     const map = read('src/components/RailwayMap.tsx');
-    expect(selector).toContain("onLastTrainModeChange(!lastTrainModeEnabled)");
+    // 切り替えは「表示切替」パネルの表示モード（タグ）にある（2026-11-15）。駅選択パネルのボタン列には置かない
+    expect(map).toContain('handleLastTrainModeChange(!lastTrainModeEnabled)');
+    expect(selector).not.toContain('onLastTrainModeChange(!lastTrainModeEnabled)');
     expect(selector).toContain("onDepartureTimeChange(e.target.value)");
     // 到着駅が未選択のときの案内は下の帯（知らせ）で出し、入力欄にはカーソルを移さない
     expect(selector).not.toContain("arrivalRef.current?.querySelector('input')?.focus()");

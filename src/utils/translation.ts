@@ -913,6 +913,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "集合駅と同じ",
     english: "Already there"
   },
+  displayModes: {
+    japanese: "表示モード",
+    english: "Modes"
+  },
   rideLogModeButton: {
     japanese: "乗車ログ（試作）",
     english: "Ride log (prototype)"
@@ -2315,6 +2319,7 @@ export const uiChinese: Record<string, string> = {
   directionArea: "前往{destination}方向",
   viaStations: "经由",
   addWaypoint: "添加途经站",
+  displayModes: "显示模式",
   rideLogModeButton: "乘车记录（试作）",
   rideLogAlight: "记录为下车站",
   rideLogAlightOff: "取消下车站记录",
@@ -2729,6 +2734,7 @@ export const uiKorean: Record<string, string> = {
   directionArea: "{destination} 방면",
   viaStations: "경유",
   addWaypoint: "경유역 추가",
+  displayModes: "표시 모드",
   rideLogModeButton: "승차 기록(시험)",
   rideLogAlight: "내린 역으로 기록",
   rideLogAlightOff: "내린 역 기록 해제",

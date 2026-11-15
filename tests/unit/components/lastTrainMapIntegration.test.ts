@@ -26,7 +26,8 @@ describe('終電モードは元のUIだけで操作する（回帰防止）', ()
     expect(map).toContain('demoDrawnLines.map(line =>');
     expect(map.match(/<StationSelector/g)?.length).toBe(3);
     expect(map.match(/onLastTrainModeChange={handleLastTrainModeChange}/g)?.length).toBe(3);
-    expect(selector).toContain('onLastTrainModeChange(!lastTrainModeEnabled)');
+    expect(map).toContain('handleLastTrainModeChange(!lastTrainModeEnabled)');
+    expect(selector).not.toContain('onLastTrainModeChange(!lastTrainModeEnabled)');
     expect(selector).toContain('onDepartureTimeChange(e.target.value)');
     // 到着駅が未選択のときの案内は下の帯（知らせ）で出し、入力欄にはカーソルを移さない
     expect(selector).not.toContain("arrivalRef.current?.querySelector('input')?.focus()");
@@ -54,7 +55,8 @@ describe('終電モードは元のUIだけで操作する（回帰防止）', ()
     // 足りない入力の案内は注意（warning）の印つきで出す
     expect(map).toContain("notifyMessage(lastTrainCopy(currentLanguage).chooseArrivalNotice, 'warning')");
     expect(map).not.toContain('lastTrainArrivalNoticeId');
-    expect(selector).toContain('onLastTrainModeChange(!lastTrainModeEnabled)');
+    expect(map).toContain('handleLastTrainModeChange(!lastTrainModeEnabled)');
+    expect(selector).not.toContain('onLastTrainModeChange(!lastTrainModeEnabled)');
     expect(i18n).toContain('終電モードを使用するには、到着駅を設定してください。');
     expect(map).not.toContain('LastTrainModeControls');
   });

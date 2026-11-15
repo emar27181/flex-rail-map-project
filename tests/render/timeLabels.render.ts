@@ -3,7 +3,7 @@
  * （通常は到着予定時刻、終電モードはその駅を出発できる最終時刻）ので、ボタン名は変えず、※の注記で説明する。
  * 終電モードでも駅の絞り込み（乗換駅のみ表示）が効き、既定で時刻が出る。
  */
-import { test, expect, collectErrors } from './helpers';
+import { test, expect, collectErrors, clickMode, modeIsOn } from './helpers';
 
 const timeLabels = (page: import('@playwright/test').Page) =>
   page.locator('.leaflet-marker-icon', { hasText: /\d{2}:\d{2}/ });
@@ -45,7 +45,7 @@ test('終電モード: 「時刻を表示」は既定でオン。時刻は最終
   // 到着駅だけでは、ボタンはまだ出ない（出発駅が無い通常の画面）
   await expect(page.getByRole('button', { name: '時刻を表示', exact: true })).toHaveCount(0);
 
-  await page.getByRole('button', { name: '終電モード（試作）' }).click();
+  await clickMode(page, '終電モード');
   const button = page.getByRole('button', { name: '時刻を表示', exact: true });
   await expect(button).toBeVisible();
   await expect(button).toHaveAttribute('aria-pressed', 'true');
@@ -67,7 +67,7 @@ test('終電モード: 乗換駅のみ表示が効き、戻すと元に戻る（
   const errors = collectErrors(page);
   await page.goto('/?to=shibuya');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
-  await page.getByRole('button', { name: '終電モード（試作）' }).click();
+  await clickMode(page, '終電モード');
   const markers = page.locator('.leaflet-marker-icon');
   await expect.poll(() => markers.count(), { timeout: 20_000 }).toBeGreaterThan(20);
   const all = await markers.count();
@@ -84,17 +84,20 @@ test('終電モード: 乗換駅のみ表示が効き、戻すと元に戻る（
   expect(errors).toEqual([]);
 });
 
-test('終電モード: 意味のない操作（所要時間・集合駅）は押せず、理由を title で示す', async ({ page }) => {
+test('終電モード: 意味のない操作（所要時間）は押せず、理由を title で示す。集合駅のタグを押すと終電モードは切れる', async ({ page }) => {
   await page.goto('/?to=shibuya');
   await expect(page.locator('.leaflet-container').first()).toBeVisible();
-  await page.getByRole('button', { name: '終電モード（試作）' }).click();
-  for (const name of ['所要時間を表示', '集合駅を探す']) {
-    const b = page.getByRole('button', { name });
-    await expect(b).toBeDisabled();
-    await expect(b).toHaveAttribute('title', '終電モードでは使えません');
-  }
+  await clickMode(page, '終電モード');
+  const b = page.getByRole('button', { name: '所要時間を表示' });
+  await expect(b).toBeDisabled();
+  await expect(b).toHaveAttribute('title', '終電モードでは使えません');
   // OFFで戻る
-  await page.getByRole('button', { name: '終電モード（試作）' }).click();
+  await clickMode(page, '終電モード');
   await expect(page.getByRole('button', { name: '所要時間を表示' })).toBeEnabled();
-  await expect(page.getByRole('button', { name: '集合駅を探す' })).toBeEnabled();
+  // 同時には使えない: 終電モードの間に集合駅のタグを押すと、終電モードは切れる
+  await clickMode(page, '終電モード');
+  expect(await modeIsOn(page, '終電モード')).toBe(true);
+  await clickMode(page, '集合駅を探す');
+  expect(await modeIsOn(page, '集合駅を探す')).toBe(true);
+  expect(await modeIsOn(page, '終電モード')).toBe(false);
 });

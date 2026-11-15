@@ -30,7 +30,7 @@ describe('知らせは1か所で管理する（再発防止）', () => {
   it('到着駅が無いときの終電モードの案内は、入力欄にカーソルを移さず知らせで出す', () => {
     const handler = map.slice(map.indexOf('const handleLastTrainModeChange'));
     expect(handler.slice(0, 600)).toContain('notifyMessage(');
-    const button = selector.slice(selector.indexOf('onLastTrainModeChange(!lastTrainModeEnabled)') - 600, selector.indexOf('onLastTrainModeChange(!lastTrainModeEnabled)') + 100);
+    const button = map.slice(map.indexOf('handleLastTrainModeChange(!lastTrainModeEnabled)') - 600, map.indexOf('handleLastTrainModeChange(!lastTrainModeEnabled)') + 100);
     expect(button).not.toContain('focus()');
     expect(button).not.toContain('setShowArrivalResults');
   });

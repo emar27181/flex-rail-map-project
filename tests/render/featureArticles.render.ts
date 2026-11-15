@@ -2,7 +2,7 @@
  * 新しい機能（終電モード・集合駅を探す）を操作する記事。
  * 試作・架空のデータ・推定を含むことが、最初の地図デモの直後に見え、デモの地図がそのモードで開く。
  */
-import { test, expect, collectErrors } from './helpers';
+import { test, expect, collectErrors, modeIsOn } from './helpers';
 
 test('終電モードの記事: 試作・架空の注意書きがデモの直後に出て、デモの地図は終電モードで開く', async ({ page }) => {
   const errors = collectErrors(page);
@@ -60,7 +60,7 @@ test('集合駅の記事のデモ: 開いたときから集合駅モードで、
 
 test('集合駅モードのURL（埋め込みでない）: 追加分の出発駅が緑の欄で並び、候補が出る', async ({ page }) => {
   await page.goto('/?mode=meeting&from=shinjuku&with=tokyo,yokohama');
-  await expect(page.getByRole('button', { name: '集合駅を探す' })).toHaveAttribute('aria-pressed', 'true');
+  expect(await modeIsOn(page, '集合駅を探す')).toBe(true);
   await expect(page.locator('[data-meeting-extra]')).toHaveCount(2);
   // 追加の入力欄も、ボタンなしで最初から出ている
   await expect(page.locator('[data-meeting-add]')).toBeVisible();

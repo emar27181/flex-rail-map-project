@@ -1,5 +1,28 @@
 # CHANGE LOG
 
+## [2026-11-15] セッション（モードの切り替えを「表示モード」へ／URL共有／設定ファイル／候補カード）
+
+### improve: 集合駅・終電・乗車ログの切り替えを、「表示切替」パネルの表示設定の下の「表示モード」（切り替えタグ）に移す
+- `src/components/ui/molecules/TagToggleGroup.tsx`（新規。`Button` primary・pressed + lucide アイコン）, `src/components/legend/LegendRouteList.tsx`（`modeTags`）, `src/components/RailwayMap.tsx`（`modeTags`）, `src/components/StationSelector.tsx`（ボタンを削除）, `CLAUDE.md`, `docs/ui-mode-extension-guide.md`, `docs/design-system.md`
+- 同時に使えるのは1つ（押すと、ほかのモードは切れる。集合駅 → 終電・乗車ログも切る）。データ可視化（ヒートマップ・列車デモ・バブル・路線図風・立体）も、同じタグで切り替える
+- テストは `tests/render/helpers.ts` の `clickMode` / `modeIsOn` / `modeTag` で、パネルを開いてタグを押す
+
+### feat: URLで時刻・基準・所要時間の表示・モード・集合駅の決め方を共有する
+- `src/utils/shareStateUrlParams.ts`（新規）, `src/components/RailwayMap.tsx`
+- `time=0830`（基準の時刻。触るまで書かない）・`basis=arr`・`times=0|1`（出発駅があるときのOFFだけ 0、無いときのONだけ 1）・`mode`/`with`/`bal`。既定の値は書かないので短い。開いたときに1回読み、変わるたびに履歴を増やさず書き戻す
+- `tests/unit/utils/shareStateUrlParams.test.ts`, `tests/render/shareUrl.render.ts`
+
+### feat: 設定の保存・読込（設定ファイル）に、乗車ログ・駅のメモ・駅の選択履歴と、足りなかった設定を入れる
+- `src/utils/userDataBundle.ts`（新規）, `src/components/legend/MapConfigPanel.tsx`（`userData`, 経路候補数・薄い路線・列車の状況パネル・現在地から自動・集合駅の決め方）, `src/utils/rideLog.ts`（`sanitizeRideLog`）, `src/hooks/useRideLog.ts`（`replace`）
+- 書き出すときに集め、読み込むと含まれている項目だけ置き換える（壊れた要素は捨てる）
+- `tests/unit/utils/userDataBundle.test.ts`, `tests/render/rideLog.render.ts`
+
+### improve: 乗車ログの降りていない駅を、非活性の灰色（ヒートマップの「データなし」と同じ色）にする
+- `src/components/RailwayMap.tsx`（半透明をやめた）
+
+### improve: 集合駅の候補を、1候補1枚の控えめなカードにする。候補の駅名札が二重に見えるのを直す
+- `src/components/MeetingCandidateRow.tsx`（枠だけのカード。赤は駅名の前の丸だけ。出発駅ごとの時間は灰色の1行）, `src/components/RailwayMap.tsx`（候補の駅は到着駅の札だけを描き、通常の駅名札は出さない）
+
 ## [2026-11-15] セッション（集合駅の候補の行を、役割の色で統一）
 
 ### improve: 集合駅の候補の行を、到着駅と同じ赤の札・出発駅と同じ緑の札でつくり直す

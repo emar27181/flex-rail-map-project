@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
-import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, NotebookPen, Timer, TrainFront, Users, Waypoints, X } from 'lucide-react';
+import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Timer, Waypoints, X } from 'lucide-react';
 import { routes, routeNames, routeColors } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
@@ -862,47 +862,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   {translateUI('showTravelTimes', language)}
                 </Button>
               )}
-              {onMeetingModeChange && (
-                <Button
-                  theme={theme}
-                  variant="primary"
-                  size="sm"
-                  pressed={meetingMode}
-                  onClick={() => onMeetingModeChange(!meetingMode)}
-                  disabled={lastTrainModeEnabled}
-                  title={lastTrainModeEnabled ? translateUI('unavailableInLastTrain', language) : undefined}
-                  icon={<Users />}
-                >
-                  {translateUI('meetingModeButton', language)}
-                </Button>
-              )}
-              {(lastTrainDemoMode || lastTrainButton) && onLastTrainModeChange && (
-                <Button
-                  theme={theme}
-                  variant="primary"
-                  size="sm"
-                  pressed={lastTrainModeEnabled}
-                  // 到着駅が未選択のときの案内は親（RailwayMap）がほかの知らせと同じ下の帯で出す。
-                  // 入力欄へカーソルを移さない（2026-11 ユーザー指示）
-                  onClick={() => onLastTrainModeChange(!lastTrainModeEnabled)}
-                  title={demoText.warnBody}
-                  icon={<TrainFront />}
-                >
-                  {demoText.toggleMode}
-                </Button>
-              )}
-              {rideLog && (
-                <Button
-                  theme={theme}
-                  variant="primary"
-                  size="sm"
-                  pressed={rideLog.enabled}
-                  onClick={() => rideLog.onEnabledChange(!rideLog.enabled)}
-                  icon={<NotebookPen />}
-                >
-                  {translateUI('rideLogModeButton', language)}
-                </Button>
-              )}
+              {/* 集合駅・終電・乗車ログの切り替えは「表示切替」パネルの表示モード（タグ）へ移した（2026-11-15） */}
               {onShowTransferStationsOnlyChange && (
                 <Button
                   theme={theme}

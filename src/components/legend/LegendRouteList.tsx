@@ -15,6 +15,8 @@ import RouteSwitchBoard from './RouteSwitchBoard';
 import Button from '../ui/atoms/Button';
 import SegmentedControl from '../ui/molecules/SegmentedControl';
 import Stepper from '../ui/molecules/Stepper';
+import TagToggleGroup, { type TagToggleItem } from '../ui/molecules/TagToggleGroup';
+import { Palette, TrainTrack, CircleDot, Network, Mountain } from 'lucide-react';
 import { ALERT_MINUTE_OPTIONS } from '../../utils/arrivalAlert';
 import Select from '../ui/atoms/Select';
 import Radio from '../ui/atoms/Radio';
@@ -39,6 +41,8 @@ const ROUTE_UI_MODE_KEY = 'routeSwitchUiMode';
 const ROUTE_CLASSIC_VIEW_ENABLED = false;
 
 interface LegendRouteListProps {
+  /** 表示モード（集合駅・終電・乗車ログ）の切り替えタグ。「表示設定」の下に出す */
+  modeTags?: TagToggleItem[];
   /** 路線チップの意味（既定は表示）。乗車ログのときは 'rideLog'（RouteSwitchBoard） */
   routeToggleMode?: 'visibility' | 'rideLog';
   visibleRoutesData: Array<[string, any]>;
@@ -114,6 +118,8 @@ interface LegendRouteListProps {
   onShowRouteLineChange: (v: boolean) => void;
   mapConfig: MapConfig;
   onImportConfig: (config: MapConfig) => void;
+  /** 設定ファイルに入れる利用者のデータ（乗車ログ・メモ・履歴）を書き出すときに集める */
+  getUserData?: () => import('../../utils/userDataBundle').UserDataBundle;
   /** 複数駅の共通路線: 指定した路線を地図に出す */
   onShowRoutesFromMemo: (routeKeys: RouteKey[]) => void;
   /** 複数駅の共通路線: 一覧の駅を出発駅にする */
@@ -138,6 +144,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowRoutesFromMemo,
   onUseStationAsDeparture,
   routeToggleMode,
+  modeTags,
   visibleRoutesData,
   visibleRoutes,
   routeOrder,
@@ -210,6 +217,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowRouteLineChange,
   mapConfig,
   onImportConfig,
+  getUserData,
   stationLabelFontSize,
   onStationLabelFontSizeChange,
   stationIconScale,
@@ -741,17 +749,19 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {sectionHeader(translateUI('settingsGroupViz', language), groupVizOpen, () => setGroupVizOpen(v => !v))}
             {groupVizOpen && (
               <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
-                <Checkbox theme={theme} checked={heatmapEnabled} onChange={onHeatmapEnabledChange}>
-                  {translateUI('stationHeatmap', language)}
-                </Checkbox>
-                {mapViewMode === 'realistic' && (
-                  <Checkbox theme={theme} checked={showTrainDemo} onChange={onTrainDemoToggle}>
-                  {translateUI('trainDemoLabel', language)}
-                </Checkbox>
-                )}
-                <Checkbox theme={theme} checked={mapViewMode === 'bubble'} onChange={(checked) => onMapViewModeChange(checked ? 'bubble' : 'realistic')}>
-                  {translateUI('bubbleMap', language)}
-                </Checkbox>
+                {/* データ可視化は、表示モードと同じ「押すと塗りに変わるタグ」で切り替える（アイコンは lucide）。
+                    地図の見せ方（現実の路線図・バブル・路線図風・立体）は同時に1つなので、押すとその見せ方になり、もう一度押すと現実の路線図に戻る */}
+                <TagToggleGroup
+                  theme={theme}
+                  ariaLabel={translateUI('settingsGroupViz', language)}
+                  items={[
+                    { key: 'heatmap', label: translateUI('stationHeatmap', language), icon: <Palette />, pressed: heatmapEnabled, onToggle: () => onHeatmapEnabledChange(!heatmapEnabled) },
+                    ...(mapViewMode === 'realistic' ? [{ key: 'trainDemo', label: translateUI('trainDemoLabel', language), icon: <TrainTrack />, pressed: showTrainDemo, onToggle: onTrainDemoToggle }] : []),
+                    { key: 'bubble', label: translateUI('bubbleMap', language), icon: <CircleDot />, pressed: mapViewMode === 'bubble', onToggle: () => onMapViewModeChange(mapViewMode === 'bubble' ? 'realistic' : 'bubble') },
+                    { key: 'schematic', label: translateUI('schematicMapLabel', language), icon: <Network />, pressed: mapViewMode === 'schematic', onToggle: () => onMapViewModeChange(mapViewMode === 'schematic' ? 'realistic' : 'schematic') },
+                    { key: 'terrain3d', label: translateUI('terrain3dLabel', language), icon: <Mountain />, pressed: mapViewMode === 'terrain3d', onToggle: () => onMapViewModeChange(mapViewMode === 'terrain3d' ? 'realistic' : 'terrain3d') },
+                  ]}
+                />
                 {mapViewMode === 'bubble' && (
                   <div style={{ marginLeft: L.sp['4xl'], marginTop: L.sp.xs }}>
                     <div style={{ display: 'flex', gap: L.sp.sm, marginBottom: L.sp.sm }}>
@@ -780,13 +790,6 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                     </div>
                   </div>
                 )}
-                <Checkbox theme={theme} checked={mapViewMode === 'schematic'} onChange={(checked) => onMapViewModeChange(checked ? 'schematic' : 'realistic')}>
-                  {translateUI('schematicMapLabel', language)}
-                </Checkbox>
-                {/* 立体（線路の下の地面の標高）。Terrain3DView */}
-                <Checkbox theme={theme} checked={mapViewMode === 'terrain3d'} onChange={(checked) => onMapViewModeChange(checked ? 'terrain3d' : 'realistic')}>
-                  {translateUI('terrain3dLabel', language)}
-                </Checkbox>
                 {/* 複数駅の共通路線（以前の「最寄り駅メモ」）。複数の駅の路線を地図に出すのでデータ可視化に置く。
                     見出しは他の節と同じ sectionHeader、中身は StationMemoPanel（bare） */}
                 {sectionHeader(translateUI('memoTitle', language), groupMemoOpen, () => setGroupMemoOpen(v => !v))}
@@ -882,8 +885,18 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         </div>
       </div>
 
+      {/* ═══ 表示モード: 集合駅・終電・乗車ログ（表示設定の下。切り替えタグ） ═══ */}
+      {modeTags && modeTags.length > 0 && (
+        <div data-mode-section style={{ marginTop: L.sp.xl, marginBottom: L.sp.xs }}>
+          <div style={{ fontSize: FS.title, fontWeight: 'bold', marginBottom: L.sp.md, color: colors.text }}>
+            {translateUI('displayModes', language)}
+          </div>
+          <TagToggleGroup theme={theme} ariaLabel={translateUI('displayModes', language)} items={modeTags} />
+        </div>
+      )}
+
       {/* ═══ セクション3: 設定の保存/読み込み ═══ */}
-      <MapConfigPanel config={mapConfig} theme={theme} language={language} onImport={onImportConfig} />
+      <MapConfigPanel config={mapConfig} theme={theme} language={language} onImport={onImportConfig} getUserData={getUserData} />
 
       {/* ═══ セクション4: バージョン・更新履歴（いちばん下） ═══ */}
       <VersionPanel theme={theme} language={language} />

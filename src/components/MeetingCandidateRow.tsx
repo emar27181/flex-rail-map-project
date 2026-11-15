@@ -1,9 +1,10 @@
 /**
- * 集合駅の候補1つ分の行（organism）。「1. 茅場町　最大44分」と、出発駅ごとの所要時間。
+ * 集合駅の候補1つ分のカード（organism）。「1　茅場町　最大44分」と、出発駅ごとの所要時間。
  *
- * 色は役割で統一する（2026-11-14 ユーザー指示: 到着駅候補なので到着駅と同じ赤、出発駅は緑）。
- * - 候補の駅 = 到着駅と同じ赤の `Button`（variant="arrival"）。いま集合駅（到着駅）に決めている候補にはチェックを付ける
- * - 出発駅ごとの所要時間 = 出発駅と同じ緑の `ColorChip`（「藤沢 42分」）。出発駅の入力順に並べ、誰も優先しない
+ * 候補は推薦であって入力欄ではないので、色は控えめにする（2026-11-15 ユーザー指示: 主張が強すぎる）。
+ * - 1候補 = 1枚のカード（枠だけの `Button`。全体が押せる）。塗りは使わない
+ * - 色の手がかりは、駅名の前の小さな丸だけ（到着駅と同じ赤。いま集合駅に決めている候補はチェックと赤い枠）
+ * - 出発駅ごとの所要時間は、灰色の小さな文字を1行にまとめる（出発駅の入力順。誰も優先しない）
  * 押すとその駅が到着駅になる（呼び出し側）。計算は utils/meetingPoint.ts。ここは見せるだけ。
  */
 import React from 'react';
@@ -12,7 +13,6 @@ import { getThemeColors } from '../contexts/ThemeContext';
 import { FS, SEMANTIC } from '../constants/ui';
 import { L } from './legend/legendStyles';
 import Button from './ui/atoms/Button';
-import ColorChip from './ui/ColorChip';
 import { translateStation, translateUI, type Language } from '../utils/translation';
 
 export interface MeetingCandidateRowProps {
@@ -31,35 +31,45 @@ export interface MeetingCandidateRowProps {
   onSelect: () => void;
 }
 
+/** 駅名の前の丸の直径（px） */
+const DOT_SIZE = 8;
+
 const MeetingCandidateRow: React.FC<MeetingCandidateRowProps> = ({ theme, language, rank, name, max, times, selected, disabled, onSelect }) => {
   const colors = getThemeColors(theme);
   const suffix = translateUI('minutesSuffix', language);
   return (
-    <div data-meeting-candidate={name} style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.sm }}>
-        <Button
-          theme={theme}
-          size="sm"
-          variant="arrival"
-          disabled={disabled}
-          onClick={onSelect}
-          icon={selected ? <Check /> : undefined}
-          aria-current={selected ? 'true' : undefined}
-        >
-          {`${rank}. ${translateStation(name, language)}`}
-        </Button>
-        <span style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.text }}>
+    <Button
+      theme={theme}
+      size="sm"
+      variant="outline"
+      fullWidth
+      disabled={disabled}
+      onClick={onSelect}
+      aria-current={selected ? 'true' : undefined}
+      data-meeting-candidate={name}
+      styleOverride={{
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        justifyContent: 'flex-start',
+        gap: L.sp.xxs,
+        whiteSpace: 'normal',
+        textAlign: 'start',
+        // 決めている候補だけ、到着駅の赤の枠（太さは変えない）
+        borderColor: selected ? SEMANTIC.arrival : undefined,
+      }}
+    >
+      <span style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm }}>
+        <span data-candidate-dot aria-hidden style={{ width: DOT_SIZE, height: DOT_SIZE, borderRadius: '50%', background: SEMANTIC.arrival, flexShrink: 0 }} />
+        <span style={{ fontWeight: 'bold', color: colors.text, minWidth: 0 }}>{`${rank}  ${translateStation(name, language)}`}</span>
+        {selected && <Check size={14} aria-hidden style={{ color: SEMANTIC.arrival, flexShrink: 0 }} />}
+        <span style={{ marginInlineStart: 'auto', fontSize: FS.caption, color: colors.textSecondary, flexShrink: 0 }}>
           {translateUI('meetingMaxMinutes', language, { minutes: max })}
         </span>
-      </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.xs }}>
-        {times.map(t => (
-          <ColorChip key={t.origin} color={SEMANTIC.departure} theme={theme}>
-            {`${translateStation(t.origin, language)} ${t.minutes}${suffix}`}
-          </ColorChip>
-        ))}
-      </div>
-    </div>
+      </span>
+      <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+        {times.map(t => `${translateStation(t.origin, language)} ${t.minutes}`).join(' · ')}{suffix}
+      </span>
+    </Button>
   );
 };
 

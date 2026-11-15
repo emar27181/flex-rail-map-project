@@ -5,7 +5,7 @@ import { travelTimeLabelLayout } from './map/travelTimeLabel';
 import { circularNumberBadgeHtml } from './ui/atoms/circularNumberBadge';
 import { isCircularRoute } from '../utils/routeAdjacency';
 import { closeFullRouteStations, renderedRouteMidpoint, stationVertexIndices } from '../utils/renderedRouteMidpoint';
-import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X, Timer, TriangleAlert, ArrowUpDown } from 'lucide-react';
+import { Maximize2, Minimize2, Sun, Moon, Info, Settings, ClipboardList, Wrench, Link as LinkIcon, Construction, TrainFront, Clock, Minus, Plus, Play, Pause, RotateCcw, X, Timer, TriangleAlert, ArrowUpDown, Users, NotebookPen } from 'lucide-react';
 import type { LeafletEvent, LeafletMouseEvent, Map as LeafletMap } from 'leaflet';
 import { routes, routeColors, routeNames, type RouteKey } from '../data/routes';
 import { JAPAN_OUTLINE } from '../data/japanOutline';
@@ -16,9 +16,11 @@ import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
 import { requestPosition, resolveCurrentPosition } from '../utils/freshLocation';
 import StationRoleBadge from './StationRoleBadge';
 import MeetingTimesDetail from './MeetingTimesDetail';
+import type { TagToggleItem } from './ui/molecules/TagToggleGroup';
 import { useRideLog } from '../hooks/useRideLog';
+import { collectUserData, parseUserData, persistUserData } from '../utils/userDataBundle';
 import { deriveRideLog, entriesFromRoute, rideLevelOf, hasAlightEntry, type RideLogEntry } from '../utils/rideLog';
-import { MEETING_BALANCE_DEFAULT, rankMeetingStations, summarizeMeetingRoutes, interleaveByRank, meetingEdgeMinutes, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
+import { MEETING_BALANCE_DEFAULT, MEETING_BALANCE_LEVELS, rankMeetingStations, summarizeMeetingRoutes, interleaveByRank, meetingEdgeMinutes, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
 import SchematicMap from './SchematicMap';
@@ -95,6 +97,7 @@ import { toArticleLanguage } from '../utils/languagePersistence';
 import { SITE_FOOTER_LINKS, type NavLang } from '../config/siteNav';
 import { defaultRoutesNear } from '../utils/defaultRoutesNear';
 import { getInitialMapViewFromUrl, getInitialTravelTimesFromUrl } from '../utils/mapViewUrlParam';
+import { getInitialShareStateFromUrl, syncShareStateToUrl } from '../utils/shareStateUrlParams';
 import { isEmbedMode } from '../utils/embedMode';
 import { getInitialMapModeFromUrl, getInitialExtraDeparturesFromUrl } from '../utils/mapModeUrlParam';
 import { loadLeafletModules } from '../utils/leafletLoader';
@@ -104,6 +107,7 @@ import {
   getInitialArrivalFromUrl,
   getInitialWaypointsFromUrl,
   syncStationsToUrl,
+  encodeStationParam,
 } from '../utils/stationUrlParams';
 import ColorChip from './ui/ColorChip';
 import TimetableSourceNote from './ui/TimetableSourceNote';
@@ -217,6 +221,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   );
   // console.log('RailwayMap component initialized');
   const { theme, toggleTheme } = useTheme();
+  // URLで共有する見せ方（時刻・所要時間の表示・集合駅の決め方）。開いたときに1回だけ読む（utils/shareStateUrlParams.ts）
+  const [initialShare] = useState(getInitialShareStateFromUrl);
   const colors = getThemeColors(theme);
 
   // Leafletツールチップのテーマ対応CSS注入
@@ -306,7 +312,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // ?mode=meeting&from=…&with=…（記事の埋め込み・共有リンク）のときだけ、開いたときからONにする
   const [meetingModeEnabled, setMeetingModeEnabled] = useState(() => getInitialMapModeFromUrl() === 'meeting');
   // 3人以上の集合駅の決め方（0 = 全員が同じくらい 〜 最大 = 多い人に寄せる）。utils/meetingPoint.ts
-  const [meetingBalance, setMeetingBalance] = useState(MEETING_BALANCE_DEFAULT);
+  const [meetingBalance, setMeetingBalance] = useState(() => initialShare.balance ?? MEETING_BALANCE_DEFAULT);
   // 候補の入れ替え（経路の探し直しと地図の描き直し）は重いので、つまみの動きを先に反映し、計算は少し遅らせる
   const deferredMeetingBalance = useDeferredValue(meetingBalance);
   const provisionalRouteCache = useRef(new Map<string, RouteResult | null>());
@@ -453,8 +459,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 出発駅の新規設定・変更時は所要時間を自動表示する。
   // 駅が変わらない限りは手動OFFを維持（同じ出発駅での再描画ではONに戻さない）。
   // 累積/区間の既定切替は useTravelTimeLabelMode が一元管理する。
+  // URL に times=0 があるときは、開いたときの1回だけ自動ONにしない（共有された「所要時間は出さない」を守る）
+  const urlTravelTimesOffRef = useRef(initialShare.times === false);
   useEffect(() => {
-    if (departure) setShowTravelTimes(true);
+    if (departure) {
+      if (urlTravelTimesOffRef.current) urlTravelTimesOffRef.current = false;
+      else setShowTravelTimes(true);
+    }
   }, [departure?.name, departure?.lat, departure?.lng]); // eslint-disable-line react-hooks/exhaustive-deps
   const [showStationNames, setShowStationNames] = useState(true);
   const [showFurigana, setShowFurigana] = useState(false);
@@ -580,6 +591,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     hadBothStationsRef.current = hasBoth;
   }, [departure, arrival]);
   const [timetableBaseTime, setTimetableBaseTime] = useState(() => {
+    if (initialShare.time) return initialShare.time;
     const now = new Date();
     return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   });
@@ -594,7 +606,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * 到着時刻モードでは、選択中経路の合計所要時間ぶん遡った時刻を
    * 実際の出発基準時刻（effectiveBaseTime）として使う。
    */
-  const [timeMode, setTimeMode] = useState<'departure' | 'arrival'>('departure');
+  const [timeMode, setTimeMode] = useState<'departure' | 'arrival'>(initialShare.basis ?? 'departure');
+  // 利用者が時刻を決めたか（既定は「いま」なので、触るまではURLに書かない）
+  const [timeTouched, setTimeTouched] = useState(initialShare.time !== null);
+  const changeBaseTime = useCallback((time: string) => { setTimeTouched(true); setTimetableBaseTime(time); }, []);
 
   // 列車位置デモ
   const [showTrainDemo, setShowTrainDemo] = useState(false);
@@ -1151,6 +1166,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     routeLineWidth,
     travelTimeStyle,
     stationIconStyle,
+    maxRouteRecommendations,
+    showDimmedMapRoutes,
+    showTrainStatusPanel,
+    autoSetDepartureFromLocation,
+    meetingBalance,
   }), [heatmapEnabled, heatmapParam, heatmapCustomRange, visibleRoutes,
       showTransferStationsOnly, showExpressStationsOnly, showTravelTimes,
       showStationNames, showFurigana, showStationNumbers, showOsmTiles,
@@ -1158,7 +1178,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       showStationTooltip, showFullRouteStations, showRouteRecommendationsPanel, showPerRouteStationTimes,
       alwaysVisibleStationsEnabled, alwaysVisibleMinRoutes,
       arrivalAlertEnabled, arrivalAlertMinutes,
-      stationSizeScale, routeLineWidth, travelTimeStyle, stationIconStyle]);
+      stationSizeScale, routeLineWidth, travelTimeStyle, stationIconStyle,
+      maxRouteRecommendations, showDimmedMapRoutes, showTrainStatusPanel, autoSetDepartureFromLocation, meetingBalance]);
+
+  /** 設定ファイルに入れる利用者のデータ。書き出すときに集める（メモ・履歴はその瞬間の localStorage の値） */
+  const getUserData = useCallback(() => collectUserData(rideLog.entries), [rideLog.entries]);
 
   // インポートされた設定を一括適用
   const handleImportConfig = useCallback((cfg: MapConfig) => {
@@ -1189,7 +1213,18 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     if (cfg.routeLineWidth !== undefined) setRouteLineWidth(cfg.routeLineWidth);
     if (cfg.travelTimeStyle !== undefined) setTravelTimeStyle(cfg.travelTimeStyle);
     if (cfg.stationIconStyle !== undefined) setStationIconStyle(cfg.stationIconStyle);
-  }, []);
+    if (cfg.maxRouteRecommendations !== undefined && ROUTE_RECOMMENDATION_LIMIT_OPTIONS.includes(cfg.maxRouteRecommendations)) setMaxRouteRecommendations(cfg.maxRouteRecommendations);
+    if (cfg.showDimmedMapRoutes !== undefined) setShowDimmedMapRoutes(cfg.showDimmedMapRoutes);
+    if (cfg.showTrainStatusPanel !== undefined) setShowTrainStatusPanel(cfg.showTrainStatusPanel);
+    if (cfg.autoSetDepartureFromLocation !== undefined) setAutoSetDepartureFromLocation(cfg.autoSetDepartureFromLocation);
+    if (cfg.meetingBalance !== undefined && Number.isFinite(cfg.meetingBalance)) setMeetingBalance(Math.min(Math.max(Math.round(cfg.meetingBalance), 0), MEETING_BALANCE_LEVELS - 1));
+    // 利用者のデータ（乗車ログ・駅のメモ・選択履歴）。含まれている項目だけ、設定ファイルの内容に置き換える
+    if (cfg.userData) {
+      const data = parseUserData(cfg.userData);
+      if (data.rideLog) rideLog.replace(data.rideLog);
+      persistUserData(data);
+    }
+  }, [rideLog.replace]);
 
   const routeFinder = useMemo(() => {
     const finder = new RouteFinder();
@@ -2130,7 +2165,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 size="sm"
                 type="time"
                 value={timetableBaseTime}
-                onChange={e => setTimetableBaseTime(e.target.value)}
+                onChange={e => changeBaseTime(e.target.value)}
                 fullWidth={false}
               />
               {/*
@@ -2148,7 +2183,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     const now = new Date();
                     const hh = String(now.getHours()).padStart(2, '0');
                     const mm = String(now.getMinutes()).padStart(2, '0');
-                    setTimetableBaseTime(`${hh}:${mm}`);
+                    changeBaseTime(`${hh}:${mm}`);
                   }}
                 >{translateUI('currentTime', currentLanguage)}</Button>
                 <SegmentedControl
@@ -3085,6 +3120,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     [meetingTimeMaps, meetingOrigins, deferredMeetingBalance],
   );
   const meetingCandidates = useMemo(() => meetingRanking.slice(0, MEETING_RESULT_LIMIT), [meetingRanking]);
+  /** 集合駅の候補（決めた到着駅を除く）の駅名。この駅は到着駅の札で別に描くので、通常の駅名札は出さない */
+  const meetingCandidateNames = useMemo(
+    () => new Set(meetingCandidates.map(c => c.name).filter(n => n !== arrival?.name)),
+    [meetingCandidates, arrival?.name],
+  );
   /** 候補の駅名から座標つきの駅を引く（地図に札を置くため） */
   const candidateStationOf = useMemo(() => {
     const byName = new Map<string, Station>();
@@ -3878,6 +3918,19 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   useEffect(() => {
     syncStationsToUrl(departure, arrival, waypoints);
   }, [departure, arrival, waypoints]);
+
+  // URL共有: 時刻・所要時間の表示・モード・集合駅の決め方も、既定と違うものだけをURLへ反映する（utils/shareStateUrlParams.ts）
+  useEffect(() => {
+    syncShareStateToUrl({
+      time: timeTouched ? timetableBaseTime : null,
+      basis: timeMode,
+      showTravelTimes,
+      hasDeparture: !!departure,
+      mode: meetingModeEnabled ? 'meeting' : lastTrainModeEnabled ? 'last-train' : null,
+      withCodes: meetingModeEnabled ? extraDepartures.map(st => encodeStationParam(st.name)).filter((c): c is string => !!c) : [],
+      balance: meetingBalance,
+    });
+  }, [timeTouched, timetableBaseTime, timeMode, showTravelTimes, departure, meetingModeEnabled, lastTrainModeEnabled, extraDepartures, meetingBalance]);
 
   // URL共有: 初回マウント時のみ、URLの metric パラメータがあればその指標のヒートマップを表示する
   // （駅周辺データのページ /data/* から開いたとき）
@@ -4740,6 +4793,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     keyPrefix: string,
     routeHasExpressMark: boolean,
   ) => {
+    // 集合駅の候補は、到着駅と同じ駅名札で別に描く（meeting-candidate-…）。通常の駅名札を重ねると色が二重に見えるので、
+    // 到着駅の札を優先して、通常の札は出さない（2026-11-15 ユーザー指示）
+    if (meetingModeEnabled && meetingCandidateNames.has(station.name)) return null;
     const routeColor = adjustRouteColorForTheme(routeColors[routeKey] ?? '#888', theme);
     const isDetailed = !!(lastTrainFilterActive || rideLogActive || showStationNames || (showExpressStationsOnly && routeHasExpressMark && station.isExpress));
     // 非表示路線の駅は薄く描く。ただし次の2つは例外として通常の濃さで描く。
@@ -4747,9 +4803,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     //  - 主要ターミナル(5路線以上): 位置の目印として常に読める必要がある
     const isLandmarkStation =
       (stationRouteCountMap.get(station.name) ?? 0) >= ALWAYS_VISIBLE_MIN_ROUTES;
-    // 乗車ログ: 降りた駅は通常の濃さ、通っただけの駅は薄く
+    // 乗車ログ: 降りた駅は路線色、降りていない駅は非活性の灰色（ヒートマップで「データなし」の駅に使う灰色と同じ色。
+    // 半透明ではなく、ほかのモードで使っている非活性の色設定をそのまま使う。2026-11-15 ユーザー指示）
+    const rideInactive = rideLogActive && rideLevelOf(rideState, station.name) !== 2;
     const stationOpacity = rideLogActive
-      ? (rideLevelOf(rideState, station.name) === 2 ? 1 : 0.4)
+      ? 1
       : lastTrainFilterActive
       ? (station.name === arrival?.name || demoAvailableStations.has(station.name) ? 1 : 0.16)
       : (isTransferHintMode || isLandmarkStation || visibleRoutes.has(routeKey)) ? 1 : 0.3;
@@ -4772,9 +4830,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     // getStationDisplayColor は heatmapEnabled/heatmapParam/heatmapMultiParams が deps に入った
     // useCallback なので、モード切替時に自動的に新しい関数参照になる
     // ヒートマップ時の上書き色（undefined = 通常色のまま）複合モード時は複合スコア色を使用
-    const heatOverride = heatmapEnabled
-      ? getStationDisplayColor(station.name, routeKey)
-      : undefined;
+    const heatOverride = rideInactive
+      ? HEATMAP_NO_DATA_COLOR
+      : heatmapEnabled
+        ? getStationDisplayColor(station.name, routeKey)
+        : undefined;
     const stationColor = heatOverride ?? routeColor;
     const tierStyle = getStationBorderStyle(routeKey, station.name);
     const stationIcon = trainTypeViewEnabled
@@ -5295,10 +5355,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   /** スマホ全画面の左下ボタン群に「候補ルート」を出すか（候補が無いとき・推薦ルート選択を出さない設定では出さない） */
   const showMobileRouteCandidatesButton = !lastTrainFilterActive && showRouteRecommendationsPanel && routeRecommendations.length > 0;
   // 追加パネルを作らない。既存の到着駅・時刻欄・トグルだけで描画を切り替える。
-  /** 集合駅モードの切り替え。乗車ログとは同時に使わない */
+  /** 集合駅モードの切り替え。終電・乗車ログとは同時に使わない（ONにすると、ほかのモードは切れる） */
   const handleMeetingModeChange = (enabled: boolean) => {
     setMeetingModeEnabled(enabled);
-    if (enabled) setRideLogModeEnabled(false);
+    if (enabled) { setRideLogModeEnabled(false); setLastTrainModeEnabled(false); }
   };
   /** 乗車ログの切り替え。終電・集合駅とは同時に使わない（描画も別になるため） */
   const handleRideLogModeChange = (enabled: boolean) => {
@@ -5345,6 +5405,16 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     rideLog.add(entries);
     notifyMessage(translateUI('rideLogRecorded', currentLanguage, { from: translateStation(departure.name, currentLanguage), to: translateStation(arrival.name, currentLanguage) }));
   };
+  /**
+   * 表示モード（集合駅・終電・乗車ログ）の切り替えタグ。「表示切替」パネルの表示設定の下に出す
+   * （2026-11-15 ユーザー指示: 駅選択パネルのボタン列から、切り替えを出す専用の場所へ移した）。
+   * 同時に使えるのは1つ。押すと、ほかのモードは切れる
+   */
+  const modeTags: TagToggleItem[] = [
+    { key: 'meeting', label: translateUI('meetingModeButton', currentLanguage), icon: <Users />, pressed: meetingModeEnabled, onToggle: () => handleMeetingModeChange(!meetingModeEnabled) },
+    { key: 'lastTrain', label: lastTrainCopy(currentLanguage).toggleMode, icon: <TrainFront />, pressed: lastTrainModeEnabled, title: lastTrainCopy(currentLanguage).warnBody, onToggle: () => handleLastTrainModeChange(!lastTrainModeEnabled) },
+    { key: 'rideLog', label: translateUI('rideLogModeButton', currentLanguage), icon: <NotebookPen />, pressed: rideLogModeEnabled, onToggle: () => handleRideLogModeChange(!rideLogModeEnabled) },
+  ];
   /** 乗車ログの間、「表示路線の切替」のチップは乗った路線を表す（同じチップ・同じ並びで、押すと乗った/乗っていないを切り替える） */
   const routeListRideOverrides = rideLogActive ? {
     routeToggleMode: 'rideLog' as const,
@@ -5439,7 +5509,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onToggleExpanded={() => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
                 language={currentLanguage}
                 departureTime={timetableBaseTime}
-                onDepartureTimeChange={setTimetableBaseTime}
+                onDepartureTimeChange={changeBaseTime}
                 onSetNearestDeparture={handleSetNearestDeparture}
                 isNearestDeparture={isDepartureNearestStation}
                 onSearchingChange={handleSearchingChange}
@@ -5496,7 +5566,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             isExpanded={isMobile ? true : isStationSelectorExpanded}
             onToggleExpanded={isMobile ? undefined : () => setIsStationSelectorExpanded(!isStationSelectorExpanded)}
             departureTime={timetableBaseTime}
-            onDepartureTimeChange={setTimetableBaseTime}
+            onDepartureTimeChange={changeBaseTime}
             language={currentLanguage}
             onSetNearestDeparture={handleSetNearestDeparture}
             isNearestDeparture={isDepartureNearestStation}
@@ -6043,7 +6113,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 乗車ログ（試作）: 元のLeaflet・路線色・駅マーカーのまま、次のように見せる（絞り込みは無い）。
                   乗っていない路線 = 灰色の線（駅名は出さない）。灰色の線をタップすると乗った路線として記録
                   乗った路線 = 路線色の線を常に出す。駅名は、乗った路線の駅だけ
-                  降りた駅 = 濃い駅名札 / 通っただけの駅 = 半透明
+                  降りた駅 = 路線色の駅名札 / 降りていない駅 = 非活性の灰色（ヒートマップの「データなし」と同じ色）
                 線のタップの判定は地図の薄い線を切り替えるときと同じ（36pxの太い透明の線）
               */}
               {rideLogActive && mapViewMode === 'realistic' && (
@@ -6802,6 +6872,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onToggleRoute={toggleRoute}
                     onSelectAllRoutes={selectAllRoutes}
                     onDeselectAllRoutes={deselectAllRoutes}
+                    modeTags={modeTags}
                     {...routeListRideOverrides}
                     onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
                     onShowTrainStatusPanelChange={setShowTrainStatusPanel}
@@ -6861,6 +6932,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     }}
                     mapConfig={mapConfig}
                     onImportConfig={handleImportConfig}
+                    getUserData={getUserData}
                     stationLabelFontSize={stationLabelFontSize}
                     onStationLabelFontSizeChange={() => {}}
                     stationIconScale={stationIconScale}
@@ -7017,7 +7089,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 onToggleExpanded={() => setMobileStationExpanded(v => !v)}
                 language={currentLanguage}
                 departureTime={timetableBaseTime}
-                onDepartureTimeChange={setTimetableBaseTime}
+                onDepartureTimeChange={changeBaseTime}
                 onSetNearestDeparture={handleSetNearestDeparture}
                 isNearestDeparture={isDepartureNearestStation}
                 onSearchingChange={handleSearchingChange}
@@ -7107,6 +7179,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onToggleRoute={toggleRoute}
                         onSelectAllRoutes={selectAllRoutes}
                         onDeselectAllRoutes={deselectAllRoutes}
+                    modeTags={modeTags}
                     {...routeListRideOverrides}
                         onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
                         onShowTrainStatusPanelChange={setShowTrainStatusPanel}
@@ -7166,6 +7239,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         }}
                         mapConfig={mapConfig}
                         onImportConfig={handleImportConfig}
+                    getUserData={getUserData}
                         stationLabelFontSize={stationLabelFontSize}
                         onStationLabelFontSizeChange={() => {}}
                         stationIconScale={stationIconScale}
