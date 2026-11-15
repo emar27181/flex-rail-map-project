@@ -1,5 +1,12 @@
 # CHANGE LOG
 
+## [2026-11-15] セッション（集合駅の候補の行を、役割の色で統一）
+
+### improve: 集合駅の候補の行を、到着駅と同じ赤の札・出発駅と同じ緑の札でつくり直す
+- `src/components/MeetingCandidateRow.tsx`（新規 organism）, `src/components/StationSelector.tsx`
+- 候補の駅 = 到着駅の赤の `Button`（variant="arrival"。決めている候補にはチェック）＋「最大〇分」。出発駅ごとの所要時間 = 出発駅の緑の `ColorChip`（「藤沢 42分」）。以前は灰色の枠のボタンと灰色の文字で、色が地図・入力欄と揃っていなかった
+- `tests/render/meetingPoint.render.ts`（色の検査）
+
 ## [2026-11-15] セッション（畳んだパネルに集合駅の候補）
 
 ### feat: 畳んだ駅選択パネルの2行目に、集合駅の候補（上位3つ）を到着駅の札でコンパクトに出す

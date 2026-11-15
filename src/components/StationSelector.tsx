@@ -28,6 +28,7 @@ import FieldPairRow, { PAIR_DIVIDER_WIDTH } from './ui/molecules/FieldPairRow';
 import TopList from './ui/molecules/TopList';
 import LabeledGroup from './ui/molecules/LabeledGroup';
 import EndLabeledSlider from './ui/molecules/EndLabeledSlider';
+import MeetingCandidateRow from './MeetingCandidateRow';
 import RideLogControls, { type RideLogControlsProps } from './RideLogControls';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import { useDeviceClass } from '../hooks/useDeviceClass';
@@ -1299,22 +1300,18 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     {meetingCandidates.map((c, i) => {
                       const station = allStations.find(st => st.name === c.name);
                       return (
-                        <div key={c.name} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.xs }}>
-                          <Button
-                            theme={theme}
-                            size="sm"
-                            variant="outline"
-                            pressed={arrival?.name === c.name}
-                            disabled={!station}
-                            onClick={() => station && onArrivalChange(station)}
-                          >
-                            {`${i + 1}. ${translateStation(c.name, language)} · ${translateUI('meetingMaxMinutes', language, { minutes: c.max })}`}
-                          </Button>
-                          <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
-                            {meetingOriginNames.map((n, k) => `${translateStation(n, language)} ${c.times[k]}`).join(' / ')}
-                            {translateUI('minutesSuffix', language)}
-                          </span>
-                        </div>
+                        <MeetingCandidateRow
+                          key={c.name}
+                          theme={theme}
+                          language={language}
+                          rank={i + 1}
+                          name={c.name}
+                          max={c.max}
+                          times={meetingOriginNames.map((origin, k) => ({ origin, minutes: c.times[k] }))}
+                          selected={arrival?.name === c.name}
+                          disabled={!station}
+                          onSelect={() => station && onArrivalChange(station)}
+                        />
                       );
                     })}
                   </TopList>
