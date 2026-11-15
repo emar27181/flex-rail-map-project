@@ -31,6 +31,8 @@ const EndLabeledSlider: React.FC<EndLabeledSliderProps> = ({ theme, label, value
     <div data-end-labeled-slider style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xxs }}>
       <div style={{ fontSize: FS.caption, color: colors.textSecondary }}>{label}</div>
       <Slider
+        size="md"
+        stops={{ count: steps, theme }}
         min={0}
         max={steps - 1}
         step={1}
