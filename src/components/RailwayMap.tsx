@@ -3094,7 +3094,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 確定した到着駅は通常の駅描画が担当し、残りの候補は専用の駅名札を1枚だけ置く。
   const meetingCandidateMarkers = useMemo(() => {
     const markers = new Map<string, Station>();
-    if (meetingModeEnabled && mapViewMode === 'realistic') {
+    if (meetingModeEnabled) {
       for (const { name } of meetingCandidates) {
         if (name === arrival?.name) continue;
         const station = candidateStationOf(name);
@@ -3102,7 +3102,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       }
     }
     return markers;
-  }, [meetingModeEnabled, mapViewMode, meetingCandidates, arrival?.name, candidateStationOf]);
+  }, [meetingModeEnabled, meetingCandidates, arrival?.name, candidateStationOf]);
   // 集合駅（到着駅）が決まっているとき、出発駅ごとのルートと使う路線
   const meetingRouteEntries = useMemo(() => {
     if (!meetingModeEnabled || !arrival || meetingOrigins.length < 2) return [];
@@ -4663,7 +4663,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           <g key={b.name} style={{ pointerEvents: 'all', cursor: 'pointer' }}
             onClick={(e) => onBubbleClick(b.name, e.clientX, e.clientY)}>
             <circle cx={b.x} cy={b.y} r={b.r} fill={b.color} fillOpacity={0.65} stroke={alphaWhite(0.5)} strokeWidth={1} />
-            {showNames && b.r >= 12 && (
+            {showNames && b.r >= 12 && !meetingCandidateMarkers.has(b.name) && (
               <text x={b.x} y={b.y} textAnchor="middle" dominantBaseline="middle"
                 fontSize={Math.max(7, Math.min(11, b.r * 0.55))}
                 fill={NEUTRAL.white} fontWeight="bold"
