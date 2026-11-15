@@ -54,3 +54,32 @@ test('記事の広告枠: 手元（本番以外）では広告を読み込まず
   // 本文の広告は4つ目の見出しのすぐ前
   expect(await slots.nth(0).evaluate(el => el.nextElementSibling?.id)).toBe('section-4');
 });
+
+test('紹介・初心者記事の4言語は、同じ操作が使える実際の地図を最初に埋め込む', async ({ page }) => {
+  for (const lang of ['ja', 'en', 'zh', 'ko']) {
+    for (const slug of ['flex-rail-map-introduction', 'tokyo-train-map-beginner']) {
+      const prefix = lang === 'ja' ? '' : `/${lang}`;
+      const response = await page.goto(`${prefix}/articles/${slug}/`, { waitUntil: 'domcontentloaded' });
+      expect(response?.ok()).toBe(true);
+      const demo = page.locator('.article-body figure[data-demo-id]').first();
+      await expect(demo).toBeAttached();
+      await expect(page.locator('figure.map')).toHaveCount(0);
+      const src = new URL((await demo.locator('iframe').getAttribute('src'))!, page.url());
+      expect(src.pathname).toBe('/');
+      expect(src.searchParams.get('embed')).toBe('1');
+      expect(src.searchParams.get('lang')).toBe(lang);
+    }
+  }
+
+  await page.goto('/articles/tokyo-train-map-beginner/');
+  await page.locator('figure[data-demo-id]').first().scrollIntoViewIfNeeded();
+  const map = page.frameLocator('figure[data-demo-id] iframe').first();
+  await expect(map.locator('.leaflet-container').first()).toBeVisible();
+  await map.getByText(/^(表示路線の切替|表示切替)$/).first().click();
+  const search = map.getByRole('searchbox', { name: '路線名を検索' });
+  await search.fill('山手線');
+  const route = map.locator('[data-route-group]').getByRole('button', { name: /山手線/ }).first();
+  await expect(route).toHaveAttribute('aria-pressed', 'true');
+  await route.click();
+  await expect(route).toHaveAttribute('aria-pressed', 'false');
+});

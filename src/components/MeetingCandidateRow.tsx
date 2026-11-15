@@ -5,6 +5,7 @@ import { getThemeColors } from '../contexts/ThemeContext';
 import { FS, SEMANTIC } from '../constants/ui';
 import { L, selectableCard } from './legend/legendStyles';
 import Button from './ui/atoms/Button';
+import ColorChip from './ui/ColorChip';
 import { CONTROL_SIZE } from './ui/atoms/controlSize';
 import { translateStation, translateUI, type Language } from '../utils/translation';
 
@@ -28,7 +29,8 @@ const MeetingCandidateRow: React.FC<MeetingCandidateRowProps> = ({ theme, langua
   const descriptionId = useId();
   const colors = getThemeColors(theme);
   const suffix = translateUI('minutesSuffix', language);
-  const stationLabel = `${rank}. ${translateStation(name, language)}`;
+  const station = translateStation(name, language);
+  const stationLabel = `${rank}. ${station}`;
   return (
     <Button
       theme={theme}
@@ -52,7 +54,10 @@ const MeetingCandidateRow: React.FC<MeetingCandidateRowProps> = ({ theme, langua
       }}
     >
       <span style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: L.sp.xs }}>
-        <span style={{ fontWeight: 'bold', overflowWrap: 'anywhere' }}>{stationLabel}</span>
+        <span style={{ fontWeight: 'bold' }}>{rank}.</span>
+        <ColorChip color={SEMANTIC.arrival} theme={theme} tone="subtle" fontSize={FS.body} bold style={{ whiteSpace: 'normal', overflowWrap: 'anywhere', maxWidth: '100%', boxSizing: 'border-box' }}>
+          {station}
+        </ColorChip>
         <span id={`${descriptionId}-max`} style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>
           {translateUI('meetingMaxMinutes', language, { minutes: max })}
         </span>
@@ -61,7 +66,10 @@ const MeetingCandidateRow: React.FC<MeetingCandidateRowProps> = ({ theme, langua
       <span id={`${descriptionId}-times`} style={{ display: 'flex', flexWrap: 'wrap', columnGap: L.sp.md, rowGap: L.sp.xxs, fontSize: FS.caption, color: colors.textSecondary }}>
         {times.map(t => (
           <span key={t.origin} data-meeting-origin-time={t.origin} style={{ overflowWrap: 'anywhere' }}>
-            {`${translateStation(t.origin, language)} ${t.minutes}${suffix}`}
+            <ColorChip color={SEMANTIC.departure} theme={theme} tone="subtle">
+              {translateStation(t.origin, language)}
+            </ColorChip>
+            {` ${t.minutes}${suffix}`}
           </span>
         ))}
       </span>

@@ -26,7 +26,7 @@ import type { DetectedRoute } from '../utils/trainDetector';
 import TextField from './ui/atoms/TextField';
 import RoleField from './ui/molecules/RoleField';
 import FieldPairRow, { PAIR_DIVIDER_WIDTH } from './ui/molecules/FieldPairRow';
-import TopList from './ui/molecules/TopList';
+import TopList, { TOP_LIST_STEP_COUNT } from './ui/molecules/TopList';
 import LabeledGroup from './ui/molecules/LabeledGroup';
 import EndLabeledSlider from './ui/molecules/EndLabeledSlider';
 import MeetingCandidateRow from './MeetingCandidateRow';
@@ -791,33 +791,27 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             </div>
           </div>
 
-          {/*
-            集合駅モードの出発駅。追加した出発駅も、出発駅欄と**同じ部品・同じ緑・同じ幅・同じ文言**で出す
-            （RoleField role="departure" を、出発駅欄・到着駅欄と同じ2列の行 FieldPairRow に置く。案内は「駅名入力」）。
-            入れるごとに次の欄が隣（右）に出る（出発駅欄＋1つ入れたら、その右に次の欄）。欄はいつでも出ている（ボタンを押して開く手間がない）。
-            行ごとの見出し・番号・＋のアイコンは付けない。候補の出し方は経由駅の追加と同じ部品（StationSearchDropdown）。
-            開いたときにキーボードが出ないよう、自動でフォーカスはしない。
-          */}
+          {/* 追加の出発駅は、共通の RoleField で出発駅欄の真下に並べる。 */}
           {!lastTrainDemoMode && onAddWaypoint && meetingMode && (
-            <div data-meeting-origin-rows style={{ marginTop: L.sp.xs, display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
-              {(() => {
-                const extraFields: React.ReactNode[] = (waypoints ?? []).map((wp, index) => (
-                  <RoleField
-                    key={`${wp.name}-${index}`}
-                    theme={theme}
-                    role="departure"
-                    size="sm"
-                    type="text"
-                    readOnly
-                    value={translateStation(wp.name, language)}
-                    aria-label={`${translateUI('departureStation', language)} ${index + 2}`}
-                    onClear={() => onRemoveWaypoint?.(index)}
-                    clearLabel={translateUI('clearSelection', language)}
-                    wrapperAttr={{ 'data-meeting-extra': true }}
-                  />
-                ));
-                const addField = (
-                  <div key="add" style={{ position: 'relative' }}>
+            <div style={{ marginTop: L.sp.xs }}>
+              <FieldPairRow left={
+                <div data-meeting-origin-rows style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
+                  {(waypoints ?? []).map((wp, index) => (
+                    <RoleField
+                      key={`${wp.name}-${index}`}
+                      theme={theme}
+                      role="departure"
+                      size="sm"
+                      type="text"
+                      readOnly
+                      value={translateStation(wp.name, language)}
+                      aria-label={`${translateUI('departureStation', language)} ${index + 2}`}
+                      onClear={() => onRemoveWaypoint?.(index)}
+                      clearLabel={translateUI('clearSelection', language)}
+                      wrapperAttr={{ 'data-meeting-extra': true }}
+                    />
+                  ))}
+                  <div style={{ position: 'relative' }}>
                     <RoleField
                       theme={theme}
                       role="departure"
@@ -849,7 +843,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                         position={waypointDropdownPos}
                         stations={filteredWaypointStations}
                         onSelect={(station) => {
-                          // 選んだら欄が増え、入力欄は空に戻って次の駅をすぐ入れられる（次の欄は隣に出る）
+                          // 選んだら欄が増え、入力欄は空に戻って次の駅をすぐ入れられる（次の欄は下に出る）
                           onAddWaypoint(station);
                           setWaypointSearch('');
                           setShowWaypointResults(false);
@@ -861,14 +855,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       />
                     )}
                   </div>
-                );
-                const fields = [...extraFields, addField];
-                const rows: React.ReactNode[] = [];
-                for (let k = 0; k < fields.length; k += 2) {
-                  rows.push(<FieldPairRow key={k} left={fields[k]} right={fields[k + 1]} />);
-                }
-                return rows;
-              })()}
+                </div>
+              } />
             </div>
           )}
 
@@ -1262,6 +1250,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 <>
                   <TopList
                     theme={theme}
+                    step={TOP_LIST_STEP_COUNT}
                     moreLabel={hidden => translateUI('showMoreRoutesStep', language, { count: String(hidden) })}
                     lessLabel={translateUI('collapseList', language)}
                   >

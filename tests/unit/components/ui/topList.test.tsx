@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render, fireEvent } from '@testing-library/react';
-import TopList, { TOP_LIST_DEFAULT_COUNT } from '../../../../src/components/ui/molecules/TopList';
+import TopList, { TOP_LIST_DEFAULT_COUNT, TOP_LIST_STEP_COUNT } from '../../../../src/components/ui/molecules/TopList';
 
 const items = (n: number) => Array.from({ length: n }, (_, i) => <div key={i} data-item>{`項目${i + 1}`}</div>);
 
@@ -26,6 +26,24 @@ describe('TopList（上位だけ見せて残りは折りたたむ一覧）', () 
     expect(getByRole('button').getAttribute('aria-expanded')).toBe('true');
     fireEvent.click(getByRole('button'));
     expect(container.querySelectorAll('[data-item]')).toHaveLength(3);
+  });
+
+  it('段階表示では5件ずつ増やし、15件に達する前でも最初の3件に戻せる', () => {
+    const { container, getByRole, queryByRole } = render(
+      <TopList theme="light" step={TOP_LIST_STEP_COUNT} moreLabel={n => `残り${n}`} lessLabel="折りたたむ">{items(15)}</TopList>,
+    );
+    const count = () => container.querySelectorAll('[data-item]').length;
+    expect(count()).toBe(3);
+    fireEvent.click(getByRole('button', { name: '残り12' }));
+    expect(count()).toBe(8);
+    fireEvent.click(getByRole('button', { name: '折りたたむ' }));
+    expect(count()).toBe(3);
+    fireEvent.click(getByRole('button', { name: '残り12' }));
+    fireEvent.click(getByRole('button', { name: '残り7' }));
+    expect(count()).toBe(13);
+    fireEvent.click(getByRole('button', { name: '残り2' }));
+    expect(count()).toBe(15);
+    expect(queryByRole('button', { name: /残り/ })).toBeNull();
   });
 
   it('3つ以下ならボタンを出さない', () => {

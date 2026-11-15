@@ -147,8 +147,6 @@ function renderBlock(block: ArticleBlock, source: ArticleSource, lang: ArticleLa
       return noticeHtml(block.kind, lang, block.text);
     case 'cta':
       return `<div class="cta"><h3>${block.title}</h3><p>${block.text}</p><a class="btn" href="${esc(articleMapHref(mapOf(block.map), lang))}">${labels.openMap} <span class="ar">→</span></a></div>`;
-    case 'html':
-      return block.html;
   }
 }
 
@@ -208,11 +206,11 @@ export const ARTICLE_AD_MAX_SLOTS = 1;
 export const ARTICLE_AD_EVERY_SECTIONS = 6;
 
 /**
- * 広告のすぐ上に来てよいか。地図を開くボタン・中身の分からない HTML・説明文の無い地図のデモの下には置かない
+ * 広告のすぐ上に来てよいか。地図を開くボタン・説明文の無い地図のデモの下には置かない
  * （地図のデモの下には「地図を大きく開く」などのボタンがある。説明文があれば、ボタンと広告の間に文が挟まる）
  */
 function adSafeAfter(block: ArticleBlock): boolean {
-  if (block.type === 'cta' || block.type === 'html') return false;
+  if (block.type === 'cta') return false;
   if (block.type === 'embed' || block.type === 'shot') return Boolean(block.caption);
   return true;
 }

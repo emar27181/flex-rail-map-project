@@ -663,6 +663,10 @@ export const uiTranslations: { [key: string]: { japanese: string; english: strin
     japanese: "大きくする",
     english: "Increase"
   },
+  moreDisplayModes: {
+    japanese: "ほかの表示モード",
+    english: "More display modes"
+  },
   collapseList: {
     japanese: "折りたたむ",
     english: "Collapse"
@@ -2240,6 +2244,7 @@ export const uiChinese: Record<string, string> = {
   play: "播放",
   pause: "暂停",
   increase: "放大",
+  moreDisplayModes: "其他显示模式",
   collapseList: "折叠",
   showMoreRoutes: "显示其他 {count} 条线路",
   showMoreRoutesStep: "显示更多（剩余 {count}）",
@@ -2655,6 +2660,7 @@ export const uiKorean: Record<string, string> = {
   play: "재생",
   pause: "일시정지",
   increase: "크게",
+  moreDisplayModes: "다른 표시 모드",
   collapseList: "접기",
   showMoreRoutes: "다른 {count}개 노선 표시",
   showMoreRoutesStep: "더 보기 (남은 {count}개)",

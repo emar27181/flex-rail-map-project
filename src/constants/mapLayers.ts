@@ -34,8 +34,13 @@ export function stationMarkerZ(routeCount: number): number {
   return n * MARKER_Z_STEP;
 }
 
-/** 出発駅・到着駅のラベル。どの駅よりも上 */
-export const ENDPOINT_MARKER_Z = (MARKER_Z_MAX_ROUTES + 1) * MARKER_Z_STEP;
+/** 集合駅候補は通常駅より手前に置き、候補同士では接続路線の多い駅を手前に出す。 */
+export function meetingCandidateMarkerZ(routeCount: number): number {
+  return MARKER_Z_MAX_ROUTES * MARKER_Z_STEP + stationMarkerZ(routeCount);
+}
+
+/** 出発駅・到着駅は集合駅候補より手前に置く。 */
+export const ENDPOINT_MARKER_Z = meetingCandidateMarkerZ(MARKER_Z_MAX_ROUTES) + MARKER_Z_STEP;
 
 /** 現在地マーカー（userLocation の層の中）と、列車デモ（同じ層の中）の zIndexOffset */
 export const USER_LOCATION_MARKER_Z = MARKER_Z_STEP;

@@ -8,7 +8,7 @@ import type { ArticleSource } from './types';
 export const tokyoTrainMapBeginner: ArticleSource = {
   "slug": "tokyo-train-map-beginner",
   "publishedDate": "2025-06-06",
-  "modifiedDate": "2026-09-29",
+  "modifiedDate": "2026-11-15",
   "related": [
     "flex-rail-map-introduction",
     "tokyo-sightseeing-routes",
@@ -131,14 +131,6 @@ export const tokyoTrainMapBeginner: ArticleSource = {
           ]
         },
         {
-          "type": "p",
-          "text": "下の図では、路線を消したり戻したりして、線が減ると読みやすくなる様子を試せます。"
-        },
-        {
-          "type": "html",
-          "html": "<figure class=\"map\"><div class=\"map-head\"><div class=\"cap\">図：<b>必要な路線だけ</b>表示してみる</div><p class=\"sub\">チップをタップして路線を消したり戻したりできます。</p></div><div class=\"chips\" id=\"chips\" role=\"group\" aria-label=\"表示する路線の切り替え\"></div><div class=\"map-stage\"><svg viewBox=\"0 0 640 440\" role=\"img\" aria-label=\"東京の主要路線を簡略化した概念図\"><g id=\"g-yamanote\" class=\"ln\" data-line=\"yamanote\"><polygon points=\"210,95 420,110 470,250 380,365 200,345 150,205\" fill=\"none\" stroke=\"#7FBF3F\" stroke-width=\"7\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-chuo\" class=\"ln\" data-line=\"chuo\"><polyline points=\"150,205 300,225 400,205 470,250\" fill=\"none\" stroke=\"#E8542A\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-marunouchi\" class=\"ln\" data-line=\"marunouchi\"><polyline points=\"210,95 330,160 420,215 470,250\" fill=\"none\" stroke=\"#D9362C\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-ginza\" class=\"ln\" data-line=\"ginza\"><polyline points=\"200,345 275,302 450,302 440,200 420,110\" fill=\"none\" stroke=\"#F5A623\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-odakyu\" class=\"ln\" data-line=\"odakyu\"><polyline points=\"150,205 78,262 40,332\" fill=\"none\" stroke=\"#1F7FC4\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-tozai\" class=\"ln\" data-line=\"tozai\"><polyline points=\"70,168 250,196 420,215 575,215\" fill=\"none\" stroke=\"#16A7CE\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"nodes\"><g><circle cx=\"210\" cy=\"95\" r=\"7.5\" fill=\"#fff\" stroke=\"#211E18\" stroke-width=\"2.6\"/><text class=\"st-label\" x=\"210\" y=\"78\" text-anchor=\"middle\">池袋</text></g><g><circle cx=\"470\" cy=\"250\" r=\"8.5\" fill=\"#fff\" stroke=\"#211E18\" stroke-width=\"3\"/><text class=\"st-label\" x=\"484\" y=\"254\">東京</text></g><g><circle cx=\"200\" cy=\"345\" r=\"8.5\" fill=\"#fff\" stroke=\"#211E18\" stroke-width=\"3\"/><text class=\"st-label\" x=\"186\" y=\"366\" text-anchor=\"end\">渋谷</text></g><g><circle cx=\"150\" cy=\"205\" r=\"8.5\" fill=\"#fff\" stroke=\"#211E18\" stroke-width=\"3\"/><text class=\"st-label\" x=\"136\" y=\"200\" text-anchor=\"end\">新宿</text></g></g></svg></div><div class=\"readout\" id=\"readout\">表示中の路線：<b>6</b> / 6</div><div class=\"map-note\">※ これは概念図です。</div></figure>"
-        },
-        {
           "type": "embed",
           "map": "main",
           "view": {
@@ -149,7 +141,7 @@ export const tokyoTrainMapBeginner: ArticleSource = {
             "zoom": 12
           },
           "title": "{siteName}の地図（山手線だけを表示した状態）",
-          "caption": "実際の地図（山手線だけを表示した状態）。枠の中で拡大・移動できます。"
+          "caption": "山手線から始めます。「表示切替」（PCでは「表示路線の切替」）を開き、路線名を検索してチップを押すと表示を切り替えられます。"
         },
         {
           "type": "cta",
@@ -237,14 +229,6 @@ export const tokyoTrainMapBeginner: ArticleSource = {
           ]
         },
         {
-          "type": "p",
-          "text": "In the figure below, you can hide and show lines to see how fewer lines make the map easier to read."
-        },
-        {
-          "type": "html",
-          "html": "<figure class=\"map\"><div class=\"map-head\"><div class=\"cap\">Figure: show <b>only the lines you need</b></div><p class=\"sub\">Tap a chip to hide or show a line.</p></div><div class=\"chips\" id=\"chips\" role=\"group\" aria-label=\"Choose which lines to show\"></div><div class=\"map-stage\"><svg viewBox=\"0 0 640 440\" role=\"img\" aria-label=\"Simplified concept map of major Tokyo lines\"><g id=\"g-yamanote\" class=\"ln\" data-line=\"yamanote\"><polygon points=\"210,95 420,110 470,250 380,365 200,345 150,205\" fill=\"none\" stroke=\"#7FBF3F\" stroke-width=\"7\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-chuo\" class=\"ln\" data-line=\"chuo\"><polyline points=\"150,205 300,225 400,205 470,250\" fill=\"none\" stroke=\"#E8542A\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-marunouchi\" class=\"ln\" data-line=\"marunouchi\"><polyline points=\"210,95 330,160 420,215 470,250\" fill=\"none\" stroke=\"#D9362C\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-ginza\" class=\"ln\" data-line=\"ginza\"><polyline points=\"200,345 275,302 450,302 440,200 420,110\" fill=\"none\" stroke=\"#F5A623\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-odakyu\" class=\"ln\" data-line=\"odakyu\"><polyline points=\"150,205 78,262 40,332\" fill=\"none\" stroke=\"#1F7FC4\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-tozai\" class=\"ln\" data-line=\"tozai\"><polyline points=\"70,168 250,196 420,215 575,215\" fill=\"none\" stroke=\"#16A7CE\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"nodes\"><g><circle cx=\"210\" cy=\"95\" r=\"7.5\" fill=\"#fff\" stroke=\"#211E18\" stroke-width=\"2.6\"/><text class=\"st-label\" x=\"210\" y=\"78\" text-anchor=\"middle\">Ikebukuro</text></g><g><circle cx=\"470\" cy=\"250\" r=\"8.5\" fill=\"#fff\" stroke=\"#211E18\" stroke-width=\"3\"/><text class=\"st-label\" x=\"484\" y=\"254\">Tokyo</text></g><g><circle cx=\"200\" cy=\"345\" r=\"8.5\" fill=\"#fff\" stroke=\"#211E18\" stroke-width=\"3\"/><text class=\"st-label\" x=\"186\" y=\"366\" text-anchor=\"end\">Shibuya</text></g><g><circle cx=\"150\" cy=\"205\" r=\"8.5\" fill=\"#fff\" stroke=\"#211E18\" stroke-width=\"3\"/><text class=\"st-label\" x=\"136\" y=\"200\" text-anchor=\"end\">Shinjuku</text></g></g></svg></div><div class=\"readout\" id=\"readout\">Lines shown: <b>6</b> / 6</div><div class=\"map-note\">This is a conceptual diagram.</div></figure>"
-        },
-        {
           "type": "embed",
           "map": "main",
           "view": {
@@ -255,7 +239,7 @@ export const tokyoTrainMapBeginner: ArticleSource = {
             "zoom": 12
           },
           "title": "{siteName} map (only the Yamanote Line shown)",
-          "caption": "The live map (only the Yamanote Line shown). You can zoom and pan inside the frame."
+          "caption": "Start with the Yamanote Line. Open Display Toggles (Route Display Toggle on desktop), search by name, and select a line chip to show or hide it."
         },
         {
           "type": "cta",
@@ -343,14 +327,6 @@ export const tokyoTrainMapBeginner: ArticleSource = {
           ]
         },
         {
-          "type": "p",
-          "text": "在下图中可以隐藏或显示线路，体会线路减少后地图变得好读。"
-        },
-        {
-          "type": "html",
-          "html": "<figure class=\"map\"><div class=\"map-head\"><div class=\"cap\">图：只显示<b>需要的线路</b></div><p class=\"sub\">点击标签可以隐藏或重新显示线路。</p></div><div class=\"chips\" id=\"chips\" role=\"group\" aria-label=\"切换显示的线路\"></div><div class=\"map-stage\"><svg viewBox=\"0 0 640 440\" role=\"img\" aria-label=\"东京主要线路的简化概念图\"><g id=\"g-yamanote\" class=\"ln\" data-line=\"yamanote\"><polygon points=\"210,95 420,110 470,250 380,365 200,345 150,205\" fill=\"none\" stroke=\"#7FBF3F\" stroke-width=\"7\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-chuo\" class=\"ln\" data-line=\"chuo\"><polyline points=\"150,205 300,225 400,205 470,250\" fill=\"none\" stroke=\"#E8542A\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-marunouchi\" class=\"ln\" data-line=\"marunouchi\"><polyline points=\"210,95 330,160 420,215 470,250\" fill=\"none\" stroke=\"#D9362C\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-ginza\" class=\"ln\" data-line=\"ginza\"><polyline points=\"200,345 275,302 450,302 440,200 420,110\" fill=\"none\" stroke=\"#F5A623\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-odakyu\" class=\"ln\" data-line=\"odakyu\"><polyline points=\"150,205 78,262 40,332\" fill=\"none\" stroke=\"#1F7FC4\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-tozai\" class=\"ln\" data-line=\"tozai\"><polyline points=\"70,168 250,196 420,215 575,215\" fill=\"none\" stroke=\"#16A7CE\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"nodes\"><g><circle cx=\"210\" cy=\"95\" r=\"7.5\" fill=\"#fff\" stroke=\"#211E18\" stroke-width=\"2.6\"/><text class=\"st-label\" x=\"210\" y=\"78\" text-anchor=\"middle\">池袋</text></g><g><circle cx=\"470\" cy=\"250\" r=\"8.5\" fill=\"#fff\" stroke=\"#211E18\" stroke-width=\"3\"/><text class=\"st-label\" x=\"484\" y=\"254\">东京</text></g><g><circle cx=\"200\" cy=\"345\" r=\"8.5\" fill=\"#fff\" stroke=\"#211E18\" stroke-width=\"3\"/><text class=\"st-label\" x=\"186\" y=\"366\" text-anchor=\"end\">涩谷</text></g><g><circle cx=\"150\" cy=\"205\" r=\"8.5\" fill=\"#fff\" stroke=\"#211E18\" stroke-width=\"3\"/><text class=\"st-label\" x=\"136\" y=\"200\" text-anchor=\"end\">新宿</text></g></g></svg></div><div class=\"readout\" id=\"readout\">显示中的线路：<b>6</b> / 6</div><div class=\"map-note\">※ 这是概念图。</div></figure>"
-        },
-        {
           "type": "embed",
           "map": "main",
           "view": {
@@ -361,7 +337,7 @@ export const tokyoTrainMapBeginner: ArticleSource = {
             "zoom": 12
           },
           "title": "{siteName}地图（只显示山手线）",
-          "caption": "实际的地图（只显示山手线）。可以在框内缩放和移动。"
+          "caption": "先从山手线开始。打开「显示切换」（电脑上为「显示路线切换」），搜索线路名称，再点击线路标签切换显示。"
         },
         {
           "type": "cta",
@@ -449,14 +425,6 @@ export const tokyoTrainMapBeginner: ArticleSource = {
           ]
         },
         {
-          "type": "p",
-          "text": "아래 그림에서 노선을 숨기거나 다시 표시하면서, 선이 줄면 읽기 쉬워지는 것을 직접 확인할 수 있습니다."
-        },
-        {
-          "type": "html",
-          "html": "<figure class=\"map\"><div class=\"map-head\"><div class=\"cap\">그림: <b>필요한 노선만</b> 표시해 보기</div><p class=\"sub\">칩을 누르면 노선을 숨기거나 다시 표시할 수 있습니다.</p></div><div class=\"chips\" id=\"chips\" role=\"group\" aria-label=\"표시할 노선 전환\"></div><div class=\"map-stage\"><svg viewBox=\"0 0 640 440\" role=\"img\" aria-label=\"도쿄 주요 노선을 단순화한 개념도\"><g id=\"g-yamanote\" class=\"ln\" data-line=\"yamanote\"><polygon points=\"210,95 420,110 470,250 380,365 200,345 150,205\" fill=\"none\" stroke=\"#7FBF3F\" stroke-width=\"7\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-chuo\" class=\"ln\" data-line=\"chuo\"><polyline points=\"150,205 300,225 400,205 470,250\" fill=\"none\" stroke=\"#E8542A\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-marunouchi\" class=\"ln\" data-line=\"marunouchi\"><polyline points=\"210,95 330,160 420,215 470,250\" fill=\"none\" stroke=\"#D9362C\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-ginza\" class=\"ln\" data-line=\"ginza\"><polyline points=\"200,345 275,302 450,302 440,200 420,110\" fill=\"none\" stroke=\"#F5A623\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-odakyu\" class=\"ln\" data-line=\"odakyu\"><polyline points=\"150,205 78,262 40,332\" fill=\"none\" stroke=\"#1F7FC4\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"g-tozai\" class=\"ln\" data-line=\"tozai\"><polyline points=\"70,168 250,196 420,215 575,215\" fill=\"none\" stroke=\"#16A7CE\" stroke-width=\"6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></g><g id=\"nodes\"><g><circle cx=\"210\" cy=\"95\" r=\"7.5\" fill=\"#fff\" stroke=\"#211E18\" stroke-width=\"2.6\"/><text class=\"st-label\" x=\"210\" y=\"78\" text-anchor=\"middle\">이케부쿠로</text></g><g><circle cx=\"470\" cy=\"250\" r=\"8.5\" fill=\"#fff\" stroke=\"#211E18\" stroke-width=\"3\"/><text class=\"st-label\" x=\"484\" y=\"254\">도쿄</text></g><g><circle cx=\"200\" cy=\"345\" r=\"8.5\" fill=\"#fff\" stroke=\"#211E18\" stroke-width=\"3\"/><text class=\"st-label\" x=\"186\" y=\"366\" text-anchor=\"end\">시부야</text></g><g><circle cx=\"150\" cy=\"205\" r=\"8.5\" fill=\"#fff\" stroke=\"#211E18\" stroke-width=\"3\"/><text class=\"st-label\" x=\"136\" y=\"200\" text-anchor=\"end\">신주쿠</text></g></g></svg></div><div class=\"readout\" id=\"readout\">표시 중인 노선: <b>6</b> / 6</div><div class=\"map-note\">※ 개념도입니다.</div></figure>"
-        },
-        {
           "type": "embed",
           "map": "main",
           "view": {
@@ -467,7 +435,7 @@ export const tokyoTrainMapBeginner: ArticleSource = {
             "zoom": 12
           },
           "title": "{siteName} 지도(야마노테선만 표시한 상태)",
-          "caption": "실제 지도(야마노테선만 표시한 상태). 틀 안에서 확대·이동할 수 있습니다."
+          "caption": "야마노테선부터 살펴보세요. ‘표시 전환’(PC에서는 ‘표시 노선 전환’)을 열고 노선 이름을 검색한 뒤 노선 칩을 눌러 표시를 전환할 수 있습니다."
         },
         {
           "type": "cta",
