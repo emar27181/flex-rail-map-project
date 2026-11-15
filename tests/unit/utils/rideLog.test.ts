@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  deriveRideLog, entriesFromRoute, rideLevelOf, countByLevel, isLevelShown, parseRideLog, serializeRideLog, isValidEntry, type RideLogEntry,
+  deriveRideLog, entriesFromRoute, rideLevelOf, hasLineEntry, hasAlightEntry, parseRideLog, serializeRideLog, isValidEntry, type RideLogEntry,
 } from '../../../src/utils/rideLog';
 
 const st = (name: string) => ({ name });
@@ -31,15 +31,33 @@ describe('乗車ログ（3段階）', () => {
     expect(rideLevelOf(a, '千駄ケ谷')).toBe(2);
   });
 
-  it('段階ごとの駅の数。全駅数から記録の駅を引いたものが「全く通っていない」', () => {
-    expect(countByLevel(state, 100)).toEqual({ 0: 96, 1: 2, 2: 2 });
-    expect(countByLevel(deriveRideLog([]), 50)).toEqual({ 0: 50, 1: 0, 2: 0 });
+  it('路線のタップ（line）は路線の全駅が「通っただけ」。駅のタップ（alight）は「降りた」。どちらも path は line だけ', () => {
+    const st2 = deriveRideLog([
+      E('l:0', 'chuo', ['東京', '神田', '御茶ノ水']),
+    ].map(e => ({ ...e, kind: 'line' as const })).concat([{ id: 'x:0', kind: 'alight' as const, routeKey: 'chuo', stations: ['神田'] }]));
+    expect(rideLevelOf(st2, '東京')).toBe(1);
+    expect(rideLevelOf(st2, '御茶ノ水')).toBe(1);
+    expect(rideLevelOf(st2, '神田')).toBe(2);
+    expect(st2.riddenRoutes.has('chuo')).toBe(true);
+    expect(st2.paths).toHaveLength(1);
   });
 
-  it('絞り込みは選んだ段階だけを見せる', () => {
-    const f = new Set<0 | 1 | 2>([1, 2]);
-    expect(isLevelShown(f, 0)).toBe(false);
-    expect(isLevelShown(f, 2)).toBe(true);
+  it('降りた駅だけの記録は、路線を乗った路線にしない', () => {
+    const only = deriveRideLog([{ id: 'x:0', kind: 'alight', routeKey: 'chuo', stations: ['神田'] }]);
+    expect(rideLevelOf(only, '神田')).toBe(2);
+    expect(only.riddenRoutes.size).toBe(0);
+    expect(only.paths).toHaveLength(0);
+  });
+
+  it('路線のタップ・降りた駅の記録があるか調べられる（もう一度タップで外すため）', () => {
+    const entries: RideLogEntry[] = [
+      { id: 'a:0', kind: 'line', routeKey: 'yamanote', stations: ['新宿', '渋谷'] },
+      { id: 'b:0', kind: 'alight', routeKey: 'yamanote', stations: ['渋谷'] },
+    ];
+    expect(hasLineEntry(entries, 'yamanote')).toBe(true);
+    expect(hasLineEntry(entries, 'chuo')).toBe(false);
+    expect(hasAlightEntry(entries, '渋谷')).toBe(true);
+    expect(hasAlightEntry(entries, '新宿')).toBe(false);
   });
 });
 
@@ -65,5 +83,8 @@ describe('保存と読み込み', () => {
     expect(parseRideLog('{broken')).toEqual([]);
     expect(parseRideLog(JSON.stringify({ version: 0, entries }))).toEqual([]);
     expect(parseRideLog(JSON.stringify({ version: 1, entries: [{ id: 'x', routeKey: 'y', stations: ['一駅'] }] }))).toEqual([]);
+    // 降りた駅（alight）は1駅でよい。知らない種類は捨てる
+    const alight = { id: 'x', kind: 'alight', routeKey: 'y', stations: ['一駅'] };
+    expect(parseRideLog(JSON.stringify({ version: 1, entries: [alight, { ...alight, id: 'z', kind: 'weird' }] }))).toEqual([alight]);
   });
 });

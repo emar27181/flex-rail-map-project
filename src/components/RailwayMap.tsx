@@ -17,7 +17,7 @@ import { requestPosition, resolveCurrentPosition } from '../utils/freshLocation'
 import StationRoleBadge from './StationRoleBadge';
 import MeetingTimesDetail from './MeetingTimesDetail';
 import { useRideLog } from '../hooks/useRideLog';
-import { deriveRideLog, entriesFromRoute, countByLevel, rideLevelOf, RIDE_LEVELS, type RideLevel } from '../utils/rideLog';
+import { deriveRideLog, entriesFromRoute, rideLevelOf, hasLineEntry, hasAlightEntry, type RideLogEntry } from '../utils/rideLog';
 import { rankMeetingStations, summarizeMeetingRoutes, interleaveByRank, meetingEdgeMinutes, MEETING_MAX_MINUTES, MEETING_RESULT_LIMIT } from '../utils/meetingPoint';
 import CoverageAnalysis from './CoverageAnalysis';
 import ErrorBoundary from './ErrorBoundary';
@@ -324,7 +324,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const lastTrainFilterActive = lastTrainUiActive && lastTrainModeEnabled && lastTrainDestinationSupported;
   // 乗車ログ（試作）: 乗った路線・降りた駅を記録して、3段階（全く通っていない／通ったけど降りていない／通って降りた）で見せるモード
   const [rideLogModeEnabled, setRideLogModeEnabled] = useState(false);
-  const [rideLogFilter, setRideLogFilter] = useState<Set<RideLevel>>(() => new Set(RIDE_LEVELS));
   const rideLog = useRideLog();
   const rideState = useMemo(() => deriveRideLog(rideLog.entries), [rideLog.entries]);
   /** 地図の下の層（ほかのモードの描画）を止めて、乗車ログの描画にする */
@@ -337,14 +336,14 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     const stations = path.stations.map(name => byName.get(name));
     return stations.every((st): st is Station => !!st) ? [{ id: path.id, routeKey: path.routeKey as RouteKey, stations }] : [];
   }), [rideState]);
-  const totalStationCount = useMemo(() => new Set(Object.values(routes).flatMap(list => (list as Station[]).map(st => st.name))).size, []);
+  /** これより多くの駅を記録したときだけ、画面の外の駅の札を描かない */
+  const RIDE_STATION_CULL_THRESHOLD = 400;
   /** 地図に駅の印を出す駅（記録にある駅）。段階と、色を決める路線つき */
   const rideStations = useMemo(() => [...rideState.stationLevel.entries()].flatMap(([name, level]) => {
     const rk = rideState.stationRoute.get(name) as RouteKey | undefined;
     const station = rk ? (routes[rk] as Station[] | undefined)?.find(st => st.name === name) : undefined;
     return rk && station ? [{ station, routeKey: rk, level }] : [];
   }), [rideState]);
-  const rideCounts = useMemo(() => countByLevel(rideState, totalStationCount), [rideState, totalStationCount]);
   const [demoMinute, setDemoMinute] = useState(getCurrentDemoClock);
   // 終電モードで「オン」の路線: 最初から出す路線 + 路線の表示切替で出した路線（通常の画面と同じ規則）。
   // それ以外は通常の画面と同じく、半透明の線だけで描く
@@ -1777,6 +1776,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             </Button>
           </div>
           {tooltipMeetingDetail && <div style={{ marginTop: L.sp.sm }}>{tooltipMeetingDetail}</div>}
+          {tooltipRideLogAction && <div style={{ marginTop: L.sp.sm }}>{tooltipRideLogAction}</div>}
         </div>
 
         {/* 選択パラメータ（大きく表示） */}
@@ -2114,6 +2114,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               >{translateUI('setArrivalStation', currentLanguage)}</Button>
             </div>
             {tooltipMeetingDetail}
+            {tooltipRideLogAction}
             <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, flexWrap: 'wrap' }}>
               <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
                 {translateUI(timeMode === 'arrival' ? 'arrivalTimeLabel' : 'baseTime', currentLanguage)}
@@ -3065,6 +3066,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
         return { origin: origin.name, minutes: t === undefined ? undefined : Math.round(t) };
       })}
     />
+  ) : null;
+  /** 乗車ログの間、駅のツールチップに出す「降りた駅に記録」ボタン */
+  const tooltipRideLogAction = stationTooltip && rideLogModeEnabled ? (
+    <Button theme={theme} variant="outline" size="sm" data-ride-log-alight
+      onClick={() => toggleRideAlight(stationTooltip.station)}>
+      {translateUI(hasAlightEntry(rideLog.entries, stationTooltip.stationName) ? 'rideLogAlightOff' : 'rideLogAlight', currentLanguage)}
+    </Button>
   ) : null;
   const meetingRanking = useMemo(
     () => (meetingTimeMaps.length < 2 ? [] : rankMeetingStations(meetingOrigins.map(o => o.name), meetingTimeMaps)),
@@ -5276,11 +5284,34 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     setRideLogModeEnabled(enabled);
     if (enabled) { setLastTrainModeEnabled(false); setMeetingModeEnabled(false); }
   };
-  const toggleRideLevel = (level: RideLevel) => setRideLogFilter(prev => {
-    const next = new Set(prev);
-    if (next.has(level)) next.delete(level); else next.add(level);
-    return next;
-  });
+  /**
+   * 灰色の線をタップ → 乗った路線として記録（色つきになる）。色つきの線をもう一度タップ → 外す。
+   * 線のタップの判定は、地図の薄い線を切り替えるときと同じ（太い透明の線 + 同じイベント）
+   */
+  const toggleRideLine = (routeKey: RouteKey) => {
+    const name = translateRoute(routeNames[routeKey] ?? routeKey, currentLanguage);
+    if (hasLineEntry(rideLog.entries, routeKey)) {
+      rideLog.removeWhere(e => e.kind === 'line' && e.routeKey === routeKey);
+      notifyMessage(translateUI('rideLogLineRemoved', currentLanguage, { route: name }));
+      return;
+    }
+    const list = routes[routeKey] as Station[] | undefined;
+    if (!list || list.length < 2) return;
+    rideLog.add([{ id: `${Date.now().toString(36)}:0`, kind: 'line', routeKey, stations: list.map(st => st.name) }]);
+    notifyMessage(translateUI('rideLogLineRecorded', currentLanguage, { route: name }));
+  };
+  /** 駅のツールチップのボタン: 降りた駅として記録 / 外す */
+  const toggleRideAlight = (station: Station) => {
+    if (hasAlightEntry(rideLog.entries, station.name)) {
+      rideLog.removeWhere(e => e.kind === 'alight' && e.stations[0] === station.name);
+      return;
+    }
+    const routeKey = rideState.stationRoute.get(station.name)
+      ?? (Object.keys(routes) as RouteKey[]).find(rk => (routes[rk] as Station[]).some(st => st.name === station.name));
+    if (!routeKey) return;
+    const entry: RideLogEntry = { id: `${Date.now().toString(36)}:0`, kind: 'alight', routeKey, stations: [station.name] };
+    rideLog.add([entry]);
+  };
   /** いま選んでいる経路（候補の先頭）を乗車ログに記録する */
   const recordCurrentRoute = () => {
     const route = routeRecommendations[0];
@@ -5295,9 +5326,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const rideLogProps = {
     enabled: rideLogModeEnabled,
     onEnabledChange: handleRideLogModeChange,
-    filter: rideLogFilter,
-    onToggleLevel: toggleRideLevel,
-    counts: rideCounts,
     loggedLines: rideState.riddenRoutes.size,
     loggedStations: rideState.stationLevel.size,
     canRecord: !!departure && !!arrival && routeRecommendations.length > 0,
@@ -5976,29 +6004,48 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               })}
 
               {/*
-                乗車ログ（試作）: 3段階で見せる。元のLeaflet・路線色・駅マーカーのまま。
-                  全く通っていない = 無彩色の線（駅は出さない）
-                  通ったけど降りていない = 乗った区間の路線色の線 + 薄い駅
-                  通って降りた = 路線色の駅（濃い）
-                絞り込み（rideLogFilter）で、見せる段階を選ぶ。
+                乗車ログ（試作）: 元のLeaflet・路線色・駅マーカーのまま、次のように見せる（絞り込みは無い）。
+                  乗っていない路線 = 灰色の線（駅名は出さない）。灰色の線をタップすると乗った路線として記録
+                  乗った路線 = 路線色の線を常に出す。駅名は、乗った路線の駅だけ
+                  降りた駅 = 濃い駅名札 / 通っただけの駅 = 半透明
+                線のタップの判定は地図の薄い線を切り替えるときと同じ（36pxの太い透明の線）
               */}
               {rideLogActive && mapViewMode === 'realistic' && (
                 <>
-                  {rideLogFilter.has(0) && Object.entries(routes).map(([rk, stationList]) => {
+                  {Object.entries(routes).map(([rk, stationList]) => {
                     const rKey = rk as RouteKey;
                     const closedStations = closeFullRouteStations(stationList, stationList, isCircularRoute(rKey));
                     const positions = offsetPositions(closedStations, rKey, DIMMED_ROUTE_WEIGHT,
                       closedStations === stationList ? fullRouteRanks.get(rKey) : undefined);
                     return (
-                      <Polyline
-                        key={`ride-none-${rKey}`}
-                        positions={positions}
-                        pathOptions={{ color: colors.textMuted, weight: DIMMED_ROUTE_WEIGHT, opacity: 0.35 }}
-                        interactive={false}
-                      />
+                      <React.Fragment key={`ride-gray-${rKey}`}>
+                        <Polyline
+                          positions={positions}
+                          pathOptions={{ color: colors.textMuted, weight: DIMMED_ROUTE_WEIGHT, opacity: hoveredRoute === rKey ? 0.7 : 0.35 }}
+                          interactive={false}
+                        />
+                        <Polyline
+                          positions={positions} color={colors.textMuted} weight={36} opacity={0.001}
+                          pathOptions={{ cursor: 'pointer' }}
+                          eventHandlers={{
+                            ...routeHoverHandlers(rKey),
+                            click: (e: LeafletMouseEvent) => {
+                              (e.target as any)?.closeTooltip?.();
+                              justClickedLayerRef.current = true;
+                              toggleRideLine(rKey);
+                            },
+                          }}
+                        >
+                          {canHover && <Tooltip sticky offset={[10, 0]} direction="right" opacity={0.97}>
+                            <span style={{ fontWeight: 'bold', fontSize: FS.caption }}>
+                              {translateRoute(routeNames[rKey] ?? rKey, currentLanguage)}
+                            </span>
+                          </Tooltip>}
+                        </Polyline>
+                      </React.Fragment>
                     );
                   })}
-                  {(rideLogFilter.has(1) || rideLogFilter.has(2)) && ridePaths.map(path => (
+                  {ridePaths.map(path => (
                     <Polyline
                       key={`ride-path-${path.id}`}
                       positions={offsetPositions(path.stations, path.routeKey, routeLineWidth)}
@@ -6017,8 +6064,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                       />
                     ) : null
                   ))}
+                  {/* 記録のある駅だけなので、ふつうは数十。多いとき（数百駅）だけ画面の外を描かない */}
                   {rideStations
-                    .filter(({ station, level }) => rideLogFilter.has(level) && isDemoStationInView(station))
+                    .filter(({ station }) => rideStations.length <= RIDE_STATION_CULL_THRESHOLD || isDemoStationInView(station))
                     .map(({ station, routeKey }) =>
                       renderStationMarker(station, routeKey, 'ride-log-' + station.name, demoRouteHasExpressMark(routeKey)))}
                 </>

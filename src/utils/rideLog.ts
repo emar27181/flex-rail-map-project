@@ -7,20 +7,25 @@
  *   2 = 通って降りた（乗った駅・乗り換えた駅・降りた駅。乗り降りした駅）
  * 路線は、乗った区間（駅の並び）だけが「乗った」。路線のほかの区間は、乗っていない。
  *
- * 記録は「路線ごとの、通った駅の並び」を1件とする（経路検索の結果の区間をそのまま入れる）。
- * 区間の最初の駅と最後の駅が、乗り降りした駅（段階2）。途中の駅は通っただけ（段階1）。
+ * 記録（RideLogEntry）の種類:
+ *   'ride'  = 経路検索の結果の区間（路線ごとの、通った駅の並び）。最初の駅と最後の駅が乗り降りした駅（段階2）、途中は通っただけ（段階1）
+ *   'line'  = 地図の灰色の線をタップして「この路線に乗った」とした記録。路線の全駅が通っただけ（段階1）
+ *   'alight'= 駅のツールチップで「降りた駅に記録」した駅（段階2）
  * 同じ駅が別の記録で乗り降りされていれば、そちらを優先して段階2になる。
+ * 地図の見せ方: 乗っていない路線は灰色、乗った路線は色つきで常に出し、駅名は乗った路線の駅だけ。降りていない駅は半透明。
  */
 
 export type RideLevel = 0 | 1 | 2;
 
-export const RIDE_LEVELS: readonly RideLevel[] = [0, 1, 2];
+export type RideLogEntryKind = 'ride' | 'line' | 'alight';
 
-/** 1回の乗車（1路線に乗り続けた区間） */
+/** 記録1件 */
 export interface RideLogEntry {
   id: string;
+  /** 省略 = 'ride' */
+  kind?: RideLogEntryKind;
   routeKey: string;
-  /** 通った駅の並び（乗った駅から降りた駅まで。2駅以上） */
+  /** 通った駅の並び（'ride' は乗った駅から降りた駅まで・'line' は路線の全駅で2駅以上、'alight' は降りた駅1つ） */
   stations: string[];
 }
 
@@ -37,7 +42,8 @@ export interface RideLogState {
 
 /** 記録として使える形か（路線と、2駅以上の並び。同じ駅が続かない） */
 export function isValidEntry(entry: RideLogEntry): boolean {
-  return !!entry.routeKey && entry.stations.length >= 2 && entry.stations.every(s => typeof s === 'string' && s.length > 0);
+  if (!entry.routeKey || !entry.stations.every(s => typeof s === 'string' && s.length > 0)) return false;
+  return entry.kind === 'alight' ? entry.stations.length === 1 : entry.stations.length >= 2;
 }
 
 /** 経路検索の結果（区間の並び）から、記録を作る。徒歩の乗り換えと、2駅に満たない区間は入れない */
@@ -71,10 +77,15 @@ export function deriveRideLog(entries: readonly RideLogEntry[]): RideLogState {
   };
   for (const entry of entries) {
     if (!isValidEntry(entry)) continue;
+    const kind = entry.kind ?? 'ride';
+    if (kind === 'alight') {
+      raise(entry.stations[0], 2, entry.routeKey);
+      continue;
+    }
     riddenRoutes.add(entry.routeKey);
     paths.push({ id: entry.id, routeKey: entry.routeKey, stations: entry.stations });
     const last = entry.stations.length - 1;
-    entry.stations.forEach((name, i) => raise(name, i === 0 || i === last ? 2 : 1, entry.routeKey));
+    entry.stations.forEach((name, i) => raise(name, kind === 'ride' && (i === 0 || i === last) ? 2 : 1, entry.routeKey));
   }
   return { stationLevel, stationRoute, riddenRoutes, paths };
 }
@@ -83,19 +94,14 @@ export function rideLevelOf(state: RideLogState, stationName: string): RideLevel
   return state.stationLevel.get(stationName) ?? 0;
 }
 
-/** 段階ごとの駅の数（0 は「記録のある駅」ではなく全駅数 - 記録の駅数なので、全駅数を渡す） */
-export function countByLevel(state: RideLogState, totalStations: number): Record<RideLevel, number> {
-  let passed = 0;
-  let alighted = 0;
-  for (const level of state.stationLevel.values()) {
-    if (level === 2) alighted++; else passed++;
-  }
-  return { 0: Math.max(0, totalStations - passed - alighted), 1: passed, 2: alighted };
+/** 路線に「乗った」とする記録（地図の灰色の線のタップ）が既にあるか */
+export function hasLineEntry(entries: readonly RideLogEntry[], routeKey: string): boolean {
+  return entries.some(e => e.kind === 'line' && e.routeKey === routeKey);
 }
 
-/** 段階の絞り込み。選んだ段階だけを見せる */
-export function isLevelShown(filter: ReadonlySet<RideLevel>, level: RideLevel): boolean {
-  return filter.has(level);
+/** 駅を「降りた駅」とする記録（ツールチップのボタン）が既にあるか */
+export function hasAlightEntry(entries: readonly RideLogEntry[], stationName: string): boolean {
+  return entries.some(e => e.kind === 'alight' && e.stations[0] === stationName);
 }
 
 // ── 保存（ブラウザの localStorage。端末の外へは出さない）──
@@ -113,7 +119,8 @@ export function parseRideLog(raw: string | null): RideLogEntry[] {
     const data = JSON.parse(raw) as { version?: number; entries?: unknown };
     if (data.version !== 1 || !Array.isArray(data.entries)) return [];
     return (data.entries as RideLogEntry[]).filter(e =>
-      e && typeof e.id === 'string' && typeof e.routeKey === 'string' && Array.isArray(e.stations) && isValidEntry(e));
+      e && typeof e.id === 'string' && typeof e.routeKey === 'string' && Array.isArray(e.stations)
+      && (e.kind === undefined || e.kind === 'ride' || e.kind === 'line' || e.kind === 'alight') && isValidEntry(e));
   } catch {
     return [];
   }

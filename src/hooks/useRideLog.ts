@@ -34,5 +34,7 @@ export function useRideLog() {
     return prev.filter(e => e.id.split(':')[0] !== batch);
   }), []);
   const clear = useCallback(() => setEntries([]), []);
-  return { entries, add, undoLast, clear };
+  /** 条件に合う記録を外す（路線のタップの取り消し・降りた駅の取り消し） */
+  const removeWhere = useCallback((predicate: (e: RideLogEntry) => boolean) => setEntries(prev => prev.filter(e => !predicate(e))), []);
+  return { entries, add, undoLast, clear, removeWhere };
 }

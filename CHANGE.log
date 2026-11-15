@@ -1,5 +1,14 @@
 # CHANGE LOG
 
+## [2026-11-15] セッション（乗車ログ: 灰色の線のタップで記録・絞り込みを無くす）
+
+### improve: 乗車ログを、灰色の線をタップして記録する形にし、絞り込みを無くす
+- `src/utils/rideLog.ts`（記録の種類 `ride` / `line` / `alight`。段階の数・絞り込みは削除）, `src/hooks/useRideLog.ts`（`removeWhere`）, `src/components/RideLogControls.tsx`（チップを削除）, `src/components/RailwayMap.tsx`, `src/utils/translation.ts`
+- 地図: 乗っていない路線は灰色、乗った路線は色つきで常に出す。駅名は乗った路線の駅だけ。降りた駅は濃く、降りていない（通っただけの）駅は半透明
+- 灰色の線をタップ → 乗った路線として記録（もう一度タップで外す）。タップの判定は地図の薄い線を切り替えるときと同じ（36pxの透明な太い線 + 同じイベント）。駅のツールチップに「降りた駅に記録」ボタン
+- 記録する駅だけなので、ふだんは画面の外の札を省かない（400駅を超えたときだけ省く）。fitBounds の直後に遠い駅の札が出なかった
+- `tests/unit/utils/rideLog.test.ts`, `tests/render/rideLog.render.ts`, `docs/ui-mode-extension-guide.md`, `docs/render-tests.md`
+
 ## [2026-11-15] セッション（畳んだ駅選択パネルに「出発駅」「到着駅」の語）
 
 ### improve: 畳んだ駅選択パネルの2行目に、札の前に「出発駅」「到着駅」の語を添える
