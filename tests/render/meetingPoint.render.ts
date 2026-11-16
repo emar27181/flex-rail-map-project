@@ -21,7 +21,7 @@ test('集合駅モード: 出発駅を追加すると候補が出て、選ぶと
     elements => elements.map(element => element.getAttribute('data-tag')),
   );
   expect(await tags(0)).toEqual(['meeting', 'lastTrain', 'heatmap', 'rideLog']);
-  expect(await tags(1)).toEqual(['trainDemo', 'terrain3d', 'bubble', 'schematic']);
+  expect(await tags(1)).toEqual(['trainDemo', 'track-geometry', 'terrain3d', 'bubble', 'schematic']);
   await clickMode(page, '集合駅を探す');
   expect(await modeIsOn(page, '集合駅を探す')).toBe(true);
   // 出発駅が1つのうちは案内だけ
