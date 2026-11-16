@@ -21,7 +21,7 @@ PR ごとに `npm run test:design` で実行する（手元でも同じコマン
 | 色は意味で選び、直書きしない（出発=緑・到着=赤・注意=橙…） | `SEMANTIC` / `NEUTRAL` / `getThemeColors` | `tests/unit/constants/semanticColors.test.ts` |
 | 地図の上に浮かぶ箱・ボタンの地（透け具合・ぼかし・枠線・角の丸み）はそろえる | `floatingSurfaceStyle` / `FLOATING_OPACITY` / `FLOATING_CONTROL` | `tests/unit/components/ui/floatingSurface.test.ts` |
 | 影は付けない（2026-10-06）。影も縁取りも1か所から取り、戻すときは `SHADOW` の `enabled` だけを変える | `shadow` / `joinShadows` / `textHalo`（`ui/atoms/shadow.ts`） | `tests/unit/components/ui/shadow.test.ts` |
-| 開閉の印（▼）は手で書かない。翻訳文言にも入れない | `DisclosureIndicator` / `DisclosureHeader` / `CollapsiblePanel` | `tests/unit/components/ui/disclosure.test.ts` |
+| 開閉の印（▼）は手で書かない。翻訳文言にも入れない。矢印は150msで状態を伝え、端末の動きを減らす設定では即時切替 | `DisclosureIndicator` / `DisclosureHeader` / `CollapsiblePanel` | `tests/unit/components/ui/disclosure.test.ts` |
 | 地図の上に浮かぶ開閉パネルは `CollapsiblePanel`。見出しは常に「表示切替」と同じ高さ・文字（`FLOATING_CONTROL`）。幅は `width="narrow"` か `"wide"`、高さの上限・地図の端との間・隅のボタンの上の位置も定義元から取り、使うファイルに px / vh を書かない | `CollapsiblePanel` / `FLOATING_PANEL` / `floatingPanelWidth` / `aboveFloatingButtons`（`ui/atoms/controlSize.ts`） | `tests/unit/components/ui/floatingPanel.test.tsx` |
 | 部品（atoms / molecules）と、それを使う地図の上の部品（立体表示・凡例）は型チェックの対象に入れる | `tsconfig.check.json` の `include` | `npm run test:types`（CI の checks） |
 | 地図の重なり順（出発/到着 → 集合駅候補 → 通常駅。候補同士・通常駅同士は接続路線数が多いほど前面）は1か所だけに書く | `MAP_PANE_Z` / `stationMarkerZ` / `meetingCandidateMarkerZ` / `ENDPOINT_MARKER_Z`（`constants/mapLayers.ts`） | `tests/unit/constants/mapLayers.test.ts` |
@@ -30,6 +30,7 @@ PR ごとに `npm run test:design` で実行する（手元でも同じコマン
 | 絵文字を使わない。アイコンは lucide-react | `lucide-react` | `tests/unit/noEmojiIcons.test.ts` |
 | サービス名・アプリのアイコンは1か所から取る | `SITE_NAME`（`config/seo.ts`）/ `APP_ICON_PATH` | `tests/unit/config/siteName.test.ts`, `tests/unit/config/appIcon.test.ts` |
 | 言語など少数の選択肢は、押すたびに次へ進む巡回ボタンにせず、一覧を開いて直接選ぶ。言語名は「その言語自身の文字」で1か所だけに書く（旗は使わない） | `OptionMenu` / `LanguagePicker` / `LANGUAGE_NATIVE_NAME`（`constants/languages.ts`）。ボタンは地球儀のアイコンだけ（「日」「EN」のような文字を添えない） | `tests/unit/constants/languages.test.ts`, `tests/unit/components/LanguagePicker.test.tsx` |
+| 推定の時刻・所要時間、参考統計、架空のダイヤは、その値が表示される間、通常・全画面共通の地図下部に明記する。閉じた駅選択パネルや一時的な通知だけに置かない | `MapFooter` / `RailwayMap` の `mapNotices` | `tests/unit/components/map/mapFooter.test.tsx` |
 | 部品（atoms / molecules）を足したら「どの部品を使うか」に1行足す。この表の検査はすべて CI で動く | この文書 | `tests/unit/designRules.test.ts` |
 | 既存画面にモード・フィルタを足すとき、同じ駅・時刻の入力欄、専用パネル、独立地図、スライダーを重複して作らず、既存UIのボタンON/OFFで表示だけ変える | `StationSelector` / `RailwayMap` / `timetableBaseTime` / `docs/ui-mode-extension-guide.md` | `tests/unit/components/ui/noDuplicateModeUI.test.ts` |
 
@@ -241,6 +242,9 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 書こうとしているもの | 使うアトム |
 |---|---|
 | 円形の数値バッジ（HTML描画先） | `circularNumberBadge`（寸法・文字・円のHTML。駅/路線の知識は持たない） |
+| 開閉の印と動き | `DisclosureIndicator` / `disclosureIndicator.css`（端末の動きを減らす設定に対応） |
+| 地図上の距離の目盛り | `ScaleBar`（アトム）と `MapDistanceScale`（地図の中央で実距離を計算）。地理座標の2D地図で使う |
+| 地図下部の参考・推定・試作注記と出典 | `MapFooter`。注記を自動で閉じず、縮尺と出典はセーフエリア内に収める |
 | 非操作の小さな位置の印 | `pointMarker` / `POINT_MARKER`（画面上の外径6px、色を変えても寸法は同じ） |
 | 色付きの小ラベルの文字・余白・配色 | `textBadge` / `textBadgeStyle`（`FS.caption`・`L.sp`・`L.r`・`filledLabelColors`） |
 | 塗りの無い小さな文字ラベル（数が多い駅名など。塗りの箱だと地図を埋めるもの） | `plainTextLabelStyle(theme, fontPx)`（`textBadge.ts`。文字の大きさは地図の駅名と同じ `MAP_LABEL` × 設定の倍率を渡す。ダークは縁取り `textHalo`） |
@@ -573,8 +577,7 @@ UIのテーマと無関係なため明示的に除外している。
 **チェックボックスを単独で（クリック可能な行の外に）置く場合のみ**、
 置く側で 24px 以上の当たり判定を用意すること。
 
-フッタの3リンクは Leaflet と地図タイル提供元の帰属表示で、外部ライブラリが
-生成しているもの。表示義務があるため消せないが、高さ14pxで基準を下回っている。
+現在の地図下部は共通の `MapFooter` を使う。OpenStreetMap の出典は地図下部から開ける。Leaflet のライセンスは About に載せ、ロゴは地図から外す。
 
 実描画のフォントサイズ分布は `9px`×49 / `12px`×146 / `16px`×49。
 9px は地図上の駅名ラベルで、CLAUDE.md の「小さすぎる文字サイズ」に既出。

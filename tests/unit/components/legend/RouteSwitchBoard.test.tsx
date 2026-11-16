@@ -118,8 +118,8 @@ describe('RouteSwitchBoard', () => {
     expect(on.style.backgroundColor).not.toBe(off.style.backgroundColor);
   });
 
-  it('経路上・駅を通る路線が先に来る', () => {
-    renderBoard({ stationRouteKeys: new Set(['chuo'] as RouteKey[]) });
+  it('同じ表示状態では経路上・駅を通る路線が先に来る', () => {
+    renderBoard({ stationRouteKeys: new Set(['chuo'] as RouteKey[]), visibleRoutes: new Set<RouteKey>() });
     expect(chipLabels()[0]).toBe('中央線');
   });
 });
@@ -157,7 +157,7 @@ describe('グループの区切りは余白で示し、見出しは出さない�
     renderBoard(props);
     const groups = screen.getAllByRole('group');
     expect(groups.map(g => g.getAttribute('aria-label'))).toEqual([
-      'routeGroupOnRoute 1', 'routeGroupAtStation 1', 'routeGroupVisible 1',
+      'routeGroupVisible 3',
     ]);
   });
 
