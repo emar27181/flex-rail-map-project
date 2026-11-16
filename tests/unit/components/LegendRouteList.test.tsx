@@ -12,7 +12,7 @@ import { describe, it, expect, vi } from 'vitest';
 import LegendRouteList from '../../../src/components/legend/LegendRouteList';
 import type { RouteKey } from '../../../src/data/routes';
 import type { MapConfig } from '../../../src/components/legend/MapConfigPanel';
-import { NEUTRAL } from '../../../src/constants/ui';
+import { DISPLAY_MODE_COLORS, NEUTRAL } from '../../../src/constants/ui';
 
 // Leaflet 非依存コンポーネントなのでモック不要
 // ただし ThemeContext だけ必要
@@ -79,13 +79,12 @@ const minimalProps = {
   onShowOsmTilesChange: noopBool,
   adjustRouteColorForTheme: (color: string) => color,
   viewCenter: [35.6812, 139.7671] as [number, number],
+  modeTags: [],
   showTrainDemo: false,
   onTrainDemoToggle: noop,
   mapViewMode: 'realistic' as const,
   onMapViewModeChange: noop,
-  heatmapEnabled: false,
   heatmapParam: 'avgRent1K' as const,
-  onHeatmapEnabledChange: noopBool,
   onHeatmapParamChange: noop,
   bubbleShape: 'circle' as const,
   onBubbleShapeChange: noop,
@@ -276,15 +275,57 @@ describe('詳細設定（所要時間・駅アイコンの配色カスタム）'
 });
 
 describe('表示設定の並びと名前', () => {
+  it('指定した4つのモードを先に表示し、間隔を空けてほかの可視化を並べる', () => {
+    const onHeatmapToggle = vi.fn();
+    const onMapViewModeChange = vi.fn();
+    const onMeetingToggle = vi.fn();
+    const modeTags = [
+      { key: 'meeting', label: 'meeting', color: DISPLAY_MODE_COLORS.meeting, icon: <svg />, pressed: false, onToggle: onMeetingToggle },
+      { key: 'lastTrain', label: 'lastTrain', color: DISPLAY_MODE_COLORS.lastTrain, icon: <svg />, pressed: false, onToggle: noop },
+      { key: 'heatmap', label: 'stationHeatmap', color: DISPLAY_MODE_COLORS.heatmap, icon: <svg />, pressed: false, onToggle: onHeatmapToggle },
+      { key: 'rideLog', label: 'rideLog', color: DISPLAY_MODE_COLORS.rideLog, icon: <svg />, pressed: false, onToggle: noop },
+    ];
+    const props = { ...minimalProps, modeTags, onMapViewModeChange };
+    const { rerender } = render(<LegendRouteList {...props} />);
+    const priorityGroup = screen.getByRole('group', { name: 'displayModes' });
+    expect(screen.queryByRole('group', { name: 'settingsGroupViz' })).toBeNull();
+    const more = screen.getByRole('button', { name: 'moreDisplayModes' });
+    expect(more).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(more);
+    const otherGroup = screen.getByRole('group', { name: 'settingsGroupViz' });
+    const keys = (group: HTMLElement) => within(group).getAllByRole('button').map(button => button.getAttribute('data-tag'));
+    expect(keys(priorityGroup)).toEqual(['meeting', 'lastTrain', 'heatmap', 'rideLog']);
+    expect(keys(otherGroup)).toEqual(['trainDemo', 'terrain3d', 'bubble', 'schematic']);
+    expect(priorityGroup.nextElementSibling).toContainElement(otherGroup);
+    expect(priorityGroup.parentElement).toHaveStyle({ gap: '12px' });
+    const heatmap = screen.getByRole('button', { name: 'stationHeatmap' });
+    expect(heatmap.firstElementChild).toHaveAttribute('aria-hidden', 'true');
+    fireEvent.click(heatmap);
+    expect(onHeatmapToggle).toHaveBeenCalledOnce();
+    fireEvent.click(within(otherGroup).getByRole('button', { name: 'bubbleMap' }));
+    expect(onMapViewModeChange).toHaveBeenLastCalledWith('bubble');
+    fireEvent.click(within(priorityGroup).getByRole('button', { name: 'meeting' }));
+    expect(onMeetingToggle).toHaveBeenCalledOnce();
+
+    rerender(<LegendRouteList {...props} modeTags={modeTags.map(tag => ({ ...tag, pressed: tag.key === 'heatmap' }))} mapViewMode="bubble" />);
+    expect(heatmap).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('bubbleMaxRadius')).toBeVisible();
+    const bubble = within(otherGroup).getByRole('button', { name: 'bubbleMap' });
+    expect(bubble).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(bubble);
+    expect(onMapViewModeChange).toHaveBeenLastCalledWith('realistic');
+    fireEvent.click(screen.getByRole('button', { name: 'collapseList' }));
+    expect(screen.getByRole('button', { name: 'bubbleMap' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByRole('button', { name: 'schematicMapLabel' })).toBeNull();
+  });
+
   // このファイルでは translateUI をキーをそのまま返すモックにしているので、キーの並びで確かめる
-  it('「複数駅の共通路線」はデータ可視化の中（駅フィルターより前）、UI設定の後の一番下が詳細設定', () => {
+  it('「複数駅の共通路線」は駅フィルターより前、UI設定の後の一番下が詳細設定', () => {
     const { container } = render(<LegendRouteList {...minimalProps} />);
-    // 「複数駅の共通路線」はデータ可視化の中なので、データ可視化を開いてから並びを見る
-    fireEvent.click(screen.getByText('settingsGroupViz'));
     const text = container.textContent ?? '';
     const pos = (key: string) => text.indexOf(key);
-    expect(pos('settingsGroupViz')).toBeGreaterThan(-1);
-    expect(pos('memoTitle')).toBeGreaterThan(pos('settingsGroupViz'));
+    expect(pos('displaySettings')).toBeGreaterThan(pos('displayModes'));
+    expect(pos('memoTitle')).toBeGreaterThan(pos('displaySettings'));
     expect(pos('memoTitle')).toBeLessThan(pos('settingsGroupFilter'));
     expect(pos('settingsGroupMap')).toBeGreaterThan(pos('settingsGroupFilter'));
     expect(pos('settingsGroupDetail')).toBeGreaterThan(pos('settingsGroupMap'));
@@ -292,9 +333,9 @@ describe('表示設定の並びと名前', () => {
 });
 
 describe('表示設定のグループは既定で閉じている', () => {
-  const GROUPS = ['settingsGroupLabel', 'settingsGroupViz', 'settingsGroupFilter', 'settingsGroupMap', 'settingsGroupDetail'];
+  const GROUPS = ['settingsGroupLabel', 'memoTitle', 'settingsGroupFilter', 'settingsGroupMap', 'settingsGroupDetail'];
 
-  it('開いた直後はどのグループも閉じていて、中身（駅ラベル・データ可視化の項目）を出さない', () => {
+  it('表示設定のグループは閉じていて、可視化ボタンは表示モードに出る', () => {
     const { container } = render(<LegendRouteList {...minimalProps} />);
     for (const key of GROUPS) {
       const header = container.querySelector(`[data-settings-group="${key}"]`);
@@ -302,14 +343,14 @@ describe('表示設定のグループは既定で閉じている', () => {
       expect(header!.getAttribute('aria-expanded'), key).toBe('false');
     }
     expect(container.textContent).not.toContain('showOnlyTransferStations');
-    expect(container.textContent).not.toContain('stationHeatmap');
+    expect(screen.getByRole('button', { name: 'moreDisplayModes' })).toBeVisible();
   });
 
   it('見出しを押すとそのグループだけが開く', () => {
     const { container } = render(<LegendRouteList {...minimalProps} />);
     fireEvent.click(container.querySelector('[data-settings-group="settingsGroupLabel"]')!);
     expect(container.querySelector('[data-settings-group="settingsGroupLabel"]')!.getAttribute('aria-expanded')).toBe('true');
-    expect(container.querySelector('[data-settings-group="settingsGroupViz"]')!.getAttribute('aria-expanded')).toBe('false');
+    expect(container.querySelector('[data-settings-group="memoTitle"]')!.getAttribute('aria-expanded')).toBe('false');
     expect(container.textContent).toContain('showOnlyTransferStations');
   });
 });

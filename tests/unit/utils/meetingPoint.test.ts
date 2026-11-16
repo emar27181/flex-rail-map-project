@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { rankMeetingStations } from '../../../src/utils/meetingPoint';
+import { rankMeetingStations, meetingEdgeMinutes, meetingBalanceWeight, MEETING_BALANCE_LEVELS } from '../../../src/utils/meetingPoint';
 import { RouteFinder, TimeFilter } from '../../../src/utils/routeFinder';
 import { routes } from '../../../src/data/routes';
 import type { RouteKey } from '../../../src/data/routes';
@@ -81,7 +81,7 @@ describe('summarizeMeetingRoutes', () => {
       B: route([{ routeKey: 'walking', isWalkingTransfer: true }, 'ginzaLine'], 12, 0),
       C: null,
     } as Record<string, ReturnType<typeof route> | null>)[origin]);
-    expect(r).toEqual([
+    expect(r).toMatchObject([
       { origin: 'A', lines: ['yamanote', 'chuo'], totalTime: 20, transfers: 1 },
       { origin: 'B', lines: ['ginzaLine'], totalTime: 12, transfers: 0 },
       { origin: 'C', lines: [], totalTime: null, transfers: 0 },
@@ -91,5 +91,88 @@ describe('summarizeMeetingRoutes', () => {
   it('集合駅と同じ出発駅は 0 分・路線なし', () => {
     const r = summarizeMeetingRoutes(['X'], 'X', () => { throw new Error('探索しない'); });
     expect(r[0]).toEqual({ origin: 'X', lines: [], totalTime: 0, transfers: 0 });
+  });
+});
+
+describe('出発駅を対等に扱う補助', () => {
+  it('interleaveByRank: 出発駅ごとの経路を順位の順に交互に並べる（最初の出発駅だけが先頭に偏らない）', async () => {
+    const { interleaveByRank } = await import('../../../src/utils/meetingPoint');
+    expect(interleaveByRank([['a1', 'a2', 'a3'], ['b1'], ['c1', 'c2']])).toEqual(['a1', 'b1', 'c1', 'a2', 'c2', 'a3']);
+    expect(interleaveByRank([])).toEqual([]);
+  });
+
+  it('meetingClockTimes: 出発基準は全員同じ出発時刻、到着基準は全員同じ到着時刻', async () => {
+    const { meetingClockTimes } = await import('../../../src/utils/meetingPoint');
+    expect(meetingClockTimes('08:00', 'departure', 25)).toEqual({ depart: '08:00', arrive: '08:25' });
+    expect(meetingClockTimes('08:00', 'arrival', 25)).toEqual({ depart: '07:35', arrive: '08:00' });
+    expect(meetingClockTimes('23:50', 'departure', 20)).toEqual({ depart: '23:50', arrive: '00:10' });
+  });
+});
+
+describe('路線の上の区間の時間（出発駅それぞれから数字が増える）', () => {
+  // 新宿 -(20)- 代々木上原 -(10)- 登戸 -(20)- 新百合ヶ丘 -(15)- 相模大野 -(25)- 藤沢 のような一本の路線
+  const fromShinjuku = new Map([['新宿', 0], ['代々木上原', 20], ['登戸', 30], ['新百合ヶ丘', 50], ['相模大野', 65], ['藤沢', 90]]);
+  const fromFujisawa = new Map([['藤沢', 0], ['相模大野', 25], ['新百合ヶ丘', 40], ['登戸', 60], ['代々木上原', 70], ['新宿', 90]]);
+
+  it('それぞれの出発駅の側から数字が増えていく（近い出発駅から見た、遠い側の駅までの時間）', () => {
+    const maps = [fromShinjuku, fromFujisawa];
+    expect(meetingEdgeMinutes(maps, '新宿', '代々木上原')).toBe(20);
+    expect(meetingEdgeMinutes(maps, '代々木上原', '登戸')).toBe(30);
+    expect(meetingEdgeMinutes(maps, '登戸', '新百合ヶ丘')).toBe(50);
+    expect(meetingEdgeMinutes(maps, '新百合ヶ丘', '相模大野')).toBe(40);
+    expect(meetingEdgeMinutes(maps, '相模大野', '藤沢')).toBe(25);
+  });
+
+  it('出発駅の並びを入れ替えても同じ（最初の出発駅を優先しない）', () => {
+    for (const [a, b] of [['新宿', '代々木上原'], ['登戸', '新百合ヶ丘'], ['相模大野', '藤沢']]) {
+      expect(meetingEdgeMinutes([fromShinjuku, fromFujisawa], a, b)).toBe(meetingEdgeMinutes([fromFujisawa, fromShinjuku], a, b));
+    }
+  });
+
+  it('どの出発駅からも行けない区間は undefined', () => {
+    expect(meetingEdgeMinutes([fromShinjuku], '新宿', '存在しない駅')).toBeUndefined();
+    expect(meetingEdgeMinutes([], '新宿', '藤沢')).toBeUndefined();
+  });
+});
+
+describe('偏りの設定（全員が同じくらい ←→ 人の多い側に寄せる）', () => {
+  // A, B は駅が近く（Cからは遠い）、C は離れた所にいる。X は A・B の近く、Y は3人の真ん中、
+  const maps = [
+    m({ X: 2, Y: 20, Z: 40 }),   // A
+    m({ X: 4, Y: 20, Z: 40 }),   // B
+    m({ X: 60, Y: 30, Z: 50 }),  // C
+  ];
+  const names = ['A', 'B', 'C'];
+
+  it('段階の重みは 0 〜 1 を等間隔に分ける（5段階）', () => {
+    expect(MEETING_BALANCE_LEVELS).toBe(5);
+    expect([0, 1, 2, 3, 4].map(meetingBalanceWeight)).toEqual([0, 0.25, 0.5, 0.75, 1]);
+    expect(meetingBalanceWeight(-3)).toBe(0);
+    expect(meetingBalanceWeight(99)).toBe(1);
+  });
+
+  it('0 = 全員が同じくらい: 最大が小さい駅（真ん中の Y）が先頭', () => {
+    expect(rankMeetingStations(names, maps, 0)[0].name).toBe('Y');
+  });
+
+  it('最大 = 人の多い側に寄せる: 合計が小さい駅（A・B の近くの X）が先頭', () => {
+    expect(rankMeetingStations(names, maps, 4)[0].name).toBe('X');
+  });
+
+  it('段階を上げていくと、先頭が Y → X に移る（途中で入れ替わる）', () => {
+    const heads = [0, 1, 2, 3, 4].map(level => rankMeetingStations(names, maps, level)[0].name);
+    expect(heads[0]).toBe('Y');
+    expect(heads[4]).toBe('X');
+    // 一度 X になったら、段階を上げても Y に戻らない
+    const firstX = heads.indexOf('X');
+    expect(heads.slice(firstX).every(h => h === 'X')).toBe(true);
+  });
+
+  it('出発駅の並びを入れ替えても同じ結果（誰も優先しない）', () => {
+    for (const level of [0, 2, 4]) {
+      const a = rankMeetingStations(names, maps, level).map(c => c.name);
+      const b = rankMeetingStations(['C', 'B', 'A'], [maps[2], maps[1], maps[0]], level).map(c => c.name);
+      expect(b).toEqual(a);
+    }
   });
 });

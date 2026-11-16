@@ -20,7 +20,7 @@ export interface StationHistoryEntry {
   lastUsedAt: number;
 }
 
-const isEntry = (v: unknown): v is StationHistoryEntry => {
+export const isEntry = (v: unknown): v is StationHistoryEntry => {
   if (typeof v !== 'object' || v === null) return false;
   const e = v as Partial<StationHistoryEntry>;
   return typeof e.name === 'string' && typeof e.count === 'number' && typeof e.lastUsedAt === 'number';
@@ -40,7 +40,7 @@ export const loadStationHistory = (): StationHistoryEntry[] => {
   }
 };
 
-const saveStationHistory = (entries: StationHistoryEntry[]): void => {
+export const saveStationHistory = (entries: StationHistoryEntry[]): void => {
   if (typeof window === 'undefined') return;
   try {
     window.localStorage.setItem(STATION_HISTORY_STORAGE_KEY, JSON.stringify(entries));

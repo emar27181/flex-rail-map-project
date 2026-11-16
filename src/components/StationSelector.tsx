@@ -1,13 +1,14 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
-import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Timer, TrainFront, Users, Waypoints, X } from 'lucide-react';
+import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Timer, Waypoints, X } from 'lucide-react';
 import { routes, routeNames, routeColors } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
 import { translateStation, translateUI, translateRoute } from '../utils/translation'
 import type { Language } from '../utils/translation';
-import { MEETING_MAX_MINUTES, type MeetingCandidate, type MeetingRouteEntry } from '../utils/meetingPoint';
+import { MEETING_BALANCE_LEVELS, MEETING_MAX_MINUTES, meetingClockTimes, type MeetingCandidate, type MeetingRouteEntry } from '../utils/meetingPoint';
 import ColorChip from './ui/ColorChip';
+import { filledLabelColors } from '../utils/contrast';
 import { stationReadings, normalizeToHiragana, hiraganaToRomaji, normalizeRomajiForMatch } from '../utils/stationReadings';
 import { findNearestStations } from '../utils/nearestStations';
 import { loadStationHistory, recordStationSelection, buildSuggestions } from '../utils/stationHistory';
@@ -23,6 +24,13 @@ import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
 import TextField from './ui/atoms/TextField';
+import RoleField from './ui/molecules/RoleField';
+import FieldPairRow, { PAIR_DIVIDER_WIDTH } from './ui/molecules/FieldPairRow';
+import TopList, { TOP_LIST_STEP_COUNT } from './ui/molecules/TopList';
+import LabeledGroup from './ui/molecules/LabeledGroup';
+import EndLabeledSlider from './ui/molecules/EndLabeledSlider';
+import MeetingCandidateRow from './MeetingCandidateRow';
+import RideLogControls, { type RideLogControlsProps } from './RideLogControls';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import { useDeviceClass } from '../hooks/useDeviceClass';
 import DisclosureIndicator from './ui/atoms/DisclosureIndicator';
@@ -44,6 +52,8 @@ const SUGGESTION_HEAD_COUNT = SUGGESTION_NEARBY_COUNT + SUGGESTION_FREQUENT_COUN
  * 要望を受け、駅選択パネルからも直接操作できるようにした
  */
 const SHOW_DEPARTURE_TIME_ROW: boolean = true;
+/** 畳んだパネルの2行目に出す、集合駅の候補の数（残りは「他N」） */
+const SUMMARY_CANDIDATE_LIMIT = 3;
 /** 近隣駅は候補の補充にも使うため、先頭3件より多めに求めておく */
 const NEARBY_STATION_COUNT = STATION_SUGGESTION_LIMIT;
 
@@ -61,10 +71,15 @@ interface StationSelectorProps {
   meetingOriginNames?: string[];
   /** 到着駅（集合駅）が決まっているときの、出発駅ごとのルートと使う路線 */
   meetingRoutes?: MeetingRouteEntry[];
+  /** 3人以上のときの偏りの設定（0 = 全員が同じくらい 〜 最大 = 多い人に寄せる） */
+  meetingBalance?: number;
+  onMeetingBalanceChange?: (level: number) => void;
   /** 既存ボタン群に試験用の切替を1個だけ追加する */
   lastTrainDemoMode?: boolean;
   /** 通常の画面にも終電モード（試作）のボタンを出す。ボタンを押したときだけ終電の画面になる */
   lastTrainButton?: boolean;
+  /** 乗車ログ（試作）。渡したときだけモードのボタンを出す。モードがONの間は絞り込みと記録の操作を出す */
+  rideLog?: { enabled: boolean; onEnabledChange: (enabled: boolean) => void } & Omit<RideLogControlsProps, 'theme' | 'language'>;
   lastTrainModeEnabled?: boolean;
   onLastTrainModeChange?: (enabled: boolean) => void;
   onDepartureChange: (station: Station | null) => void;
@@ -125,8 +140,11 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   meetingCandidates = [],
   meetingOriginNames = [],
   meetingRoutes = [],
+  meetingBalance = 0,
+  onMeetingBalanceChange,
   lastTrainDemoMode = false,
   lastTrainButton = false,
+  rideLog,
   lastTrainModeEnabled = false,
   onLastTrainModeChange,
   onDepartureChange,
@@ -165,7 +183,16 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   const colors = getThemeColors(theme);
   const demoText = lastTrainCopy(language);
   /** 「時刻を表示」を出すか。出発駅・到着駅がそろったとき。終電モードは到着駅だけで出す */
-  const timeLabelButtonShown = !!onShowStationTimeLabelsChange && !!arrival && (!!departure || lastTrainModeEnabled);
+  // 畳んだときの2行目（出発駅・到着駅）。集合駅を探すときは出発駅が複数
+  const summaryOrigins = !isExpanded
+    ? (meetingMode && meetingOriginNames.length > 0 ? meetingOriginNames : (departure ? [departure.name] : []))
+    : [];
+  /** 畳んだ2行目に出す、集合駅の候補（集合駅がまだ無いときの上位3つ） */
+  const summaryCandidates = !isExpanded && meetingMode && !arrival ? meetingCandidates.slice(0, SUMMARY_CANDIDATE_LIMIT) : [];
+  const arrivalSummaryColors = filledLabelColors(SEMANTIC.arrival, theme);
+  const collapsedSummaryShown = !isExpanded && (summaryOrigins.length > 0 || !!arrival);
+  // 乗車ログ（試作）の間は、駅名の下の時刻も時刻の入力も意味が無いので出さない
+  const timeLabelButtonShown = !rideLog?.enabled && !!onShowStationTimeLabelsChange && !!arrival && (!!departure || lastTrainModeEnabled);
   /** 駅名の下の時刻の意味（到着予定時刻／終電モードでは最終時刻） */
   const timeLabelNote = translateUI(lastTrainModeEnabled ? 'timeLabelNoteLastTrain' : 'timeLabelNoteArrival', language);
   const [departureSearch, setDepartureSearch] = useState('');
@@ -189,14 +216,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
   const panelRef = useRef<HTMLDivElement>(null);
   const departureRef = useRef<HTMLDivElement>(null);
-  // 集合駅モードで増える出発駅の行は、出発駅欄と同じ横幅にそろえる（実測する）
-  useEffect(() => {
-    if (!meetingMode) return;
-    const measure = () => setWaypointFieldWidth(departureRef.current?.getBoundingClientRect().width ?? null);
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, [meetingMode, isExpanded, language]);
   const arrivalRef = useRef<HTMLDivElement>(null);
   const departurePortalRef = useRef<HTMLDivElement>(null);
   const arrivalPortalRef = useRef<HTMLDivElement>(null);
@@ -380,8 +399,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   // 経由駅の候補は、まだ経由駅に入っていない駅だけに絞る（同じ駅を二重に選べないように）
   const filteredWaypointStations = useMemo(() => {
     const already = new Set((waypoints ?? []).map(s => s.name));
+    // 集合駅モードでは出発駅欄の駅も、追加の出発駅に入れない（同じ駅を二重に選ばない）
+    if (meetingMode && departure) already.add(departure.name);
     return filterStations(waypointSearch, majorStations).filter(s => !already.has(s.name));
-  }, [allStations, waypointSearch, majorStations, waypoints]);
+  }, [allStations, waypointSearch, majorStations, waypoints, meetingMode, departure]);
 
   const handleWaypointSelect = (station: Station) => {
     onAddWaypoint?.(station);
@@ -488,6 +509,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   return (
     <div
       ref={panelRef}
+      // 知らせ（入力が足りないときの案内など）を、このパネルのすぐ下に出すための目印（map/MapNoticeSnackbar）
+      data-station-selector
       onTouchStart={stopTouchPropagation}
       onTouchMove={stopTouchPropagation}
       onTouchEnd={stopTouchPropagation}
@@ -497,13 +520,15 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         // 見出し行の高さぶんだけ下側の空きが上側より狭く見えていた。
         // 上下とも余白を0にし、代わりにflexの縦中央揃えで高さいっぱいに
         // センタリングすることで、中身の実際の高さに関係なく必ず揃うようにする
-        paddingTop: isExpanded ? L.sp.md : 0,
-        paddingBottom: isExpanded ? L.sp.md : 0,
+        paddingTop: isExpanded || collapsedSummaryShown ? L.sp.md : 0,
+        paddingBottom: isExpanded || collapsedSummaryShown ? L.sp.md : 0,
         paddingLeft: L.sp.md,
         paddingRight: L.sp.md,
         // 畳んだ高さは、地図隅に浮かぶ他のアイコンボタン（フルスクリーン/言語切替等）
         // と行が揃うよう、それらと同じ一元管理された寸法から取る
-        height: isExpanded ? 'auto' : FLOATING_ICON_BUTTON_SIZE.md,
+        // 畳んでいても出発駅・到着駅を2行目に小さく出すときは、その分だけ高さが伸びる（最低でも他のアイコンボタンの高さ）
+        height: isExpanded || collapsedSummaryShown ? 'auto' : FLOATING_ICON_BUTTON_SIZE.md,
+        minHeight: FLOATING_ICON_BUTTON_SIZE.md,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: isExpanded ? 'flex-start' : 'center',
@@ -528,6 +553,61 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           <DisclosureIndicator expanded={isExpanded} theme={theme} />
         )}
       </div>
+      {/*
+        畳んでいても、決めた出発駅・到着駅は2行目に小さく残す（開かないと何を選んだか分からない、を避ける）。
+        色は入力欄と同じ役割の色（出発=緑・到着=赤。ColorChip）。札の前に「出発駅」「到着駅」の語を添える（LabeledGroup）。集合駅を探すときは出発駅が複数並ぶ。
+      */}
+      {collapsedSummaryShown && (
+        <div data-station-summary style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', columnGap: L.sp.md, rowGap: L.sp.xs, marginTop: L.sp.xs, minWidth: 0 }}>
+          {summaryOrigins.length > 0 && (
+            <LabeledGroup theme={theme} label={translateUI('departureStation', language)} dataAttr={{ 'data-summary-group': 'departure' }}>
+              {summaryOrigins.map(name => (
+                <ColorChip key={name} color={SEMANTIC.departure} theme={theme}>
+                  {translateStation(name, language)}
+                </ColorChip>
+              ))}
+            </LabeledGroup>
+          )}
+          {/* 集合駅を探すとき、集合駅（到着駅）がまだ無ければ、候補の上位は到着駅の札と同じ配色のボタンで出す。押すとその駅が到着駅になる */}
+          {summaryCandidates.length > 0 && (
+            <LabeledGroup theme={theme} label={translateUI('meetingCandidateGroup', language)} dataAttr={{ 'data-summary-group': 'candidates' }}>
+              {summaryCandidates.map(c => (
+                <Button
+                  key={c.name}
+                  theme={theme}
+                  size="sm"
+                  variant="arrival"
+                  onClick={e => {
+                    e.stopPropagation();
+                    const station = allStations.find(st => st.name === c.name);
+                    if (station) onArrivalChange(station);
+                  }}
+                  styleOverride={{
+                    paddingInline: L.sp.xs,
+                    backgroundColor: arrivalSummaryColors.background,
+                    borderColor: arrivalSummaryColors.background,
+                    color: arrivalSummaryColors.text,
+                  }}
+                >
+                  {translateStation(c.name, language)}
+                </Button>
+              ))}
+              {meetingCandidates.length > summaryCandidates.length && (
+                <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                  {translateUI('meetingMoreCandidates', language, { count: meetingCandidates.length - summaryCandidates.length })}
+                </span>
+              )}
+            </LabeledGroup>
+          )}
+          {arrival && (
+            <LabeledGroup theme={theme} label={translateUI('arrivalStation', language)} dataAttr={{ 'data-summary-group': 'arrival' }}>
+              <ColorChip color={SEMANTIC.arrival} theme={theme}>
+                {translateStation(arrival.name, language)}
+              </ColorChip>
+            </LabeledGroup>
+          )}
+        </div>
+      )}
       
       {isExpanded && (
         <>
@@ -548,8 +628,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 {translateUI('departureStation', language)}
               </label>
               <div style={{ position: 'relative' }}>
-                <TextField
+                <RoleField
                   theme={theme}
+                  role="departure"
                   size="sm"
                   type="text"
                   value={departureSearch}
@@ -580,34 +661,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     }
                   }}
                   placeholder={departure ? translateStation(departure.name, language) : translateUI('stationPlaceholder', language)}
-                  className="station-input-filled"
-                  styleOverride={{
-                    // ✕ を重ねるときだけ右側の余白を広げる（駅を選ぶ前は ✕ が無いので、案内の文字に幅を使う。
-                    // 英語の "Enter station name" が狭い画面で切れていた, 2026-10-15）
-                    ...(departure ? { paddingRight: L.sp['3xl'] } : {}),
-                    // 出発＝緑 で塗りつぶし、文字は白。地図の上でも役割が一目で分かるようにする
-                    border: `2px solid ${SEMANTIC.departure}`,
-                    backgroundColor: SEMANTIC.departure,
-                    color: colors.onPrimary,
-                  }}
+                  onClear={departure ? clearDeparture : undefined}
+                  clearLabel={translateUI('clearSelection', language)}
                 />
-                {departure && (
-                  <IconButton
-                    theme={theme}
-                    size="sm"
-                    onClick={clearDeparture}
-                    label={translateUI('clearSelection', language)}
-                    icon={<X size={14} />}
-                    styleOverride={{
-                      position: 'absolute',
-                      right: '2px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      // 塗りつぶした入力欄の上に置くため白系にする
-                      color: alphaWhite(0.9),
-                    }}
-                  />
-                )}
               </div>
               {/*
                 位置情報が取れないときは黙って何も出さないと、
@@ -642,12 +698,14 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             </div>
 
 
-            {/* 入れ替えボタン */}
+            {/* 入れ替えボタン。幅は FieldPairRow の区切りの列と同じ（追加の出発駅の行と、欄の幅・位置をそろえる） */}
             <div style={{
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'flex-end',
               paddingBottom: L.sp.xxs,
+              flex: `0 0 ${PAIR_DIVIDER_WIDTH}px`,
+              width: PAIR_DIVIDER_WIDTH,
             }}>
               {/* ラベル (line-height≒18px) + margin-bottom 3px 分のオフセット */}
               <div style={{ height: '21px' }} />
@@ -678,8 +736,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 {translateUI('arrivalStation', language)}
               </label>
               <div style={{ position: 'relative' }}>
-                <TextField
+                <RoleField
                   theme={theme}
+                  role="arrival"
                   size="sm"
                   type="text"
                   value={arrivalSearch}
@@ -710,33 +769,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     }
                   }}
                   placeholder={arrival ? translateStation(arrival.name, language) : translateUI('stationPlaceholder', language)}
-                  className="station-input-filled"
-                  styleOverride={{
-                    // ✕ を重ねるときだけ右側の余白を広げる（出発駅と同じ）
-                    ...(arrival ? { paddingRight: L.sp['3xl'] } : {}),
-                    // 到着＝赤 で塗りつぶし、文字は白（出発欄と対になる配色）
-                    border: `2px solid ${SEMANTIC.arrival}`,
-                    backgroundColor: SEMANTIC.arrival,
-                    color: colors.onPrimary,
-                  }}
+                  onClear={arrival ? clearArrival : undefined}
+                  clearLabel={translateUI('clearSelection', language)}
                 />
-                {arrival && (
-                  <IconButton
-                    theme={theme}
-                    size="sm"
-                    onClick={clearArrival}
-                    label={translateUI('clearSelection', language)}
-                    icon={<X size={14} />}
-                    styleOverride={{
-                      position: 'absolute',
-                      right: '2px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      // 塗りつぶした入力欄の上に置くため白系にする
-                      color: alphaWhite(0.9),
-                    }}
-                  />
-                )}
               </div>
               
               {showArrivalResults && arrivalDropdownPos && (
@@ -755,6 +790,75 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               )}
             </div>
           </div>
+
+          {/* 追加の出発駅は、共通の RoleField で出発駅欄の真下に並べる。 */}
+          {!lastTrainDemoMode && onAddWaypoint && meetingMode && (
+            <div style={{ marginTop: L.sp.xs }}>
+              <FieldPairRow left={
+                <div data-meeting-origin-rows style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
+                  {(waypoints ?? []).map((wp, index) => (
+                    <RoleField
+                      key={`${wp.name}-${index}`}
+                      theme={theme}
+                      role="departure"
+                      size="sm"
+                      type="text"
+                      readOnly
+                      value={translateStation(wp.name, language)}
+                      aria-label={`${translateUI('departureStation', language)} ${index + 2}`}
+                      onClear={() => onRemoveWaypoint?.(index)}
+                      clearLabel={translateUI('clearSelection', language)}
+                      wrapperAttr={{ 'data-meeting-extra': true }}
+                    />
+                  ))}
+                  <div style={{ position: 'relative' }}>
+                    <RoleField
+                      theme={theme}
+                      role="departure"
+                      size="sm"
+                      type="text"
+                      value={waypointSearch}
+                      onChange={(e) => {
+                        setWaypointSearch(e.target.value);
+                        setWaypointDropdownPos(getInputDropdownPosition(e.currentTarget.getBoundingClientRect()));
+                        setShowWaypointResults(true);
+                      }}
+                      onFocus={(e) => {
+                        focusedInputRef.current = e.currentTarget;
+                        setWaypointDropdownPos(getInputDropdownPosition(e.currentTarget.getBoundingClientRect()));
+                        setShowWaypointResults(true);
+                      }}
+                      onBlur={() => {
+                        focusedInputRef.current = null;
+                        setShowWaypointResults(false);
+                        setWaypointSearch('');
+                      }}
+                      // 出発駅欄（未入力）と同じ文言。読み上げの名前だけ「出発駅を追加」にする
+                      placeholder={translateUI('stationPlaceholder', language)}
+                      aria-label={translateUI('addMeetingOrigin', language)}
+                      wrapperAttr={{ 'data-meeting-add': true }}
+                    />
+                    {showWaypointResults && waypointDropdownPos && (
+                      <StationSearchDropdown
+                        position={waypointDropdownPos}
+                        stations={filteredWaypointStations}
+                        onSelect={(station) => {
+                          // 選んだら欄が増え、入力欄は空に戻って次の駅をすぐ入れられる（次の欄は下に出る）
+                          onAddWaypoint(station);
+                          setWaypointSearch('');
+                          setShowWaypointResults(false);
+                        }}
+                        theme={theme}
+                        language={language}
+                        hasQuery={!!waypointSearch}
+                        onMouseDown={(e) => e.preventDefault()}
+                      />
+                    )}
+                  </div>
+                </div>
+              } />
+            </div>
+          )}
 
           {/* 乗車路線検出パネル（表示設定でONにしたときだけ出す） */}
           {showTrainStatusPanel && hasGps && onManualTrainRouteChange && (
@@ -781,8 +885,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
             寸法は Button の size="sm" に揃えてあるので2つの大きさは一致する。
           */}
-          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange || onAddWaypoint || onShowStationTimeLabelsChange || onMeetingModeChange || ((lastTrainDemoMode || lastTrainButton) && onLastTrainModeChange)) && (
-            <div style={{
+          {(onSetNearestDeparture || onShowTravelTimeChange || onShowTransferStationsOnlyChange || onAddWaypoint || onShowStationTimeLabelsChange || onMeetingModeChange || rideLog || ((lastTrainDemoMode || lastTrainButton) && onLastTrainModeChange)) && (
+            <div data-station-actions style={{
               // 出発駅・到着駅欄とこの行の間隔も、ボタン同士の間隔（下記gap）と
               // 揃える。片方だけ広げるとリズムが不揃いに見えるため統一する。
               marginTop: L.sp.md,
@@ -799,9 +903,10 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   /*
                     「現在地から」の塗り分けは何度か迷走した経緯があるので
                     最終的な条件をここに書いておく:
-                    - disabled: 位置情報（userLocation）が取れていない間。
-                      押しても意味が無いため非活性にする（消すと隣のボタンの
-                      位置が動くので、消さずに非活性で存在だけ示す）
+                    - 位置情報が取れていなくても**常に押せる**（2026-11-14）。許可しないで入った後でも、
+                      押すたびに位置の取得をやり直し、ブラウザが許可の確認を出せる状態ならもう一度聞く。
+                      それでも許可されないときは、ブラウザの設定で許可する案内が出る（RailwayMap の
+                      handleSetNearestDeparture）。以前は位置が無いと非活性で、許可し直す手段が無かった
                     - pressed(塗りつぶし): 出発駅が「今の現在地の最寄り駅」と
                       一致しているときだけ。「今だったら藤沢本町が最寄り駅で
                       それが出発駅にセットされていたら活性化」との指定どおり、
@@ -814,7 +919,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   size="sm"
                   onClick={onSetNearestDeparture}
                   icon={<LocateFixed />}
-                  disabled={!userLocation}
                   pressed={isNearestDeparture}
                 >
                   {translateUI('currentLocationFrom', language)}
@@ -835,35 +939,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   {translateUI('showTravelTimes', language)}
                 </Button>
               )}
-              {onMeetingModeChange && (
-                <Button
-                  theme={theme}
-                  variant="primary"
-                  size="sm"
-                  pressed={meetingMode}
-                  onClick={() => onMeetingModeChange(!meetingMode)}
-                  disabled={lastTrainModeEnabled}
-                  title={lastTrainModeEnabled ? translateUI('unavailableInLastTrain', language) : undefined}
-                  icon={<Users />}
-                >
-                  {translateUI('meetingModeButton', language)}
-                </Button>
-              )}
-              {(lastTrainDemoMode || lastTrainButton) && onLastTrainModeChange && (
-                <Button
-                  theme={theme}
-                  variant="primary"
-                  size="sm"
-                  pressed={lastTrainModeEnabled}
-                  // 到着駅が未選択のときの案内は親（RailwayMap）がほかの知らせと同じ下の帯で出す。
-                  // 入力欄へカーソルを移さない（2026-11 ユーザー指示）
-                  onClick={() => onLastTrainModeChange(!lastTrainModeEnabled)}
-                  title={demoText.warnBody}
-                  icon={<TrainFront />}
-                >
-                  {demoText.toggleMode}
-                </Button>
-              )}
+              {/* 集合駅・終電・乗車ログの切り替えは「表示切替」パネルの表示モード（タグ）へ移した（2026-11-15） */}
               {onShowTransferStationsOnlyChange && (
                 <Button
                   theme={theme}
@@ -880,7 +956,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 「経由駅を追加」は乗換駅のみ表示の右に詰めて置く。入力欄を
                 開いている間は下に検索欄が出るのでボタン自体は隠す。
               */}
-              {onAddWaypoint && !showWaypointInput && (
+              {onAddWaypoint && !showWaypointInput && !meetingMode && (
                 <Button
                   theme={theme}
                   size="sm"
@@ -891,7 +967,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     setShowWaypointInput(true);
                   }}
                 >
-                  {translateUI(meetingMode ? 'addMeetingOrigin' : 'addWaypoint', language)}
+                  {translateUI('addWaypoint', language)}
                 </Button>
               )}
               {/*
@@ -918,10 +994,105 @@ const StationSelector: React.FC<StationSelectorProps> = ({
               )}
             </div>
           )}
+          {/* 乗車ログ（試作）: 段階の絞り込みと記録。別パネルにせず、モードのボタンのすぐ下に出す */}
+          {rideLog?.enabled && (
+            <RideLogControls
+              theme={theme}
+              language={language}
+              filter={rideLog.filter}
+              onToggleLevel={rideLog.onToggleLevel}
+              counts={rideLog.counts}
+              loggedLines={rideLog.loggedLines}
+              loggedStations={rideLog.loggedStations}
+              canRecord={rideLog.canRecord}
+              hasEntries={rideLog.hasEntries}
+              onRecord={rideLog.onRecord}
+              onUndo={rideLog.onUndo}
+              onClear={rideLog.onClear}
+            />
+          )}
           {/* ※ 駅名の下の時刻の意味（モードで変わる）。時刻を出しているときだけ、小さく添える */}
           {timeLabelButtonShown && showStationTimeLabels && (
             <div data-time-label-note style={{ marginTop: L.sp.xs, fontSize: FS.caption, color: colors.textSecondary }}>
               {'※ '}{timeLabelNote}
+            </div>
+          )}
+
+          {/*
+            時刻の入力は「時刻を表示」ボタン（と※の説明）のすぐ下に置く（2026-11-14 ユーザー指示）。
+            集合駅の候補・ルートの一覧が長くなっても（折りたたんでも）、時刻の操作が下に押し出されない。
+          */}
+          {/*
+            出発時刻の行。駅ツールチップ側にも同じ設定（timetableBaseTime を
+            共有）があるが、経路を選ぶ前に時刻を決めたい操作にも対応できるよう
+            駅選択パネルからも直接変更できるようにしている。
+            timeMode（出発/到着）で、この時刻を「出発時刻」として使うか
+            「到着時刻」として使うかを切り替えられる（ラベルも連動して変わる）。
+            「時刻を表示」ボタンと同様、経路が無いと意味を持たないため
+            出発駅・到着駅の両方が決まってから表示する。
+          */}
+          {SHOW_DEPARTURE_TIME_ROW && !rideLog?.enabled && onDepartureTimeChange && ((departure && arrival) || lastTrainDemoMode) && (
+            <div style={{ marginTop: L.sp.sm }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: L.sp.xs,
+                flexWrap: 'wrap',
+              }}>
+                <label style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
+                  {lastTrainDemoMode ? demoText.virtualTime : translateUI(timeMode === 'arrival' ? 'arrivalTimeLabel' : 'departureTime', language)}
+                </label>
+                <TextField
+                  theme={theme}
+                  size="sm"
+                  type="time"
+                  value={departureTime ?? ''}
+                  onChange={e => onDepartureTimeChange(e.target.value)}
+                  onFocus={(e) => { focusedInputRef.current = e.currentTarget; }}
+                  onBlur={() => { focusedInputRef.current = null; }}
+                  fullWidth={false}
+                />
+                {/*
+                  出発/到着どちらの基準かは、時刻そのものの隣に置いて初めて
+                  「この時刻が何を意味するか」が一目でわかる。以前は下の行に
+                  分けていたが、現在時刻ボタンのすぐ右に詰めて1つの操作列に見せる。
+                  行が折り返される狭い画面（スマホ・PWA）では、この2つが
+                  親のflexWrapでバラバラの行に千切れると「現在時刻の右」が
+                  保証できなくなるため、2つをまとめて1つのflexアイテムにし、
+                  折り返す時は必ずセットのまま次の行へ落ちるようにする。
+                  選択中はButton(variant="primary", pressed)で塗りつぶす
+                  （このアプリの他のトグルと共通の「押されている＝塗り」の規約）。
+                */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, flexShrink: 0 }}>
+                  <Button
+                    theme={theme}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const now = new Date();
+                      const hh = String(now.getHours()).padStart(2, '0');
+                      const mm = String(now.getMinutes()).padStart(2, '0');
+                      onDepartureTimeChange(`${hh}:${mm}`);
+                    }}
+                  >
+                    {translateUI('currentTime', language)}
+                  </Button>
+                  {!lastTrainDemoMode && onTimeModeChange && (
+                    <SegmentedControl
+                      theme={theme}
+                      size="sm"
+                      variant="slide"
+                      ariaLabel={translateUI('baseTime', language)}
+                      value={timeMode}
+                      onChange={onTimeModeChange}
+                      options={[
+                        { value: 'departure', label: translateUI('timeBasisDeparture', language) },
+                        { value: 'arrival', label: translateUI('timeBasisArrival', language) },
+                      ]}
+                    />
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
@@ -937,7 +1108,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
             詰めて配置してあるので、ここには選択済みチップと検索欄（開いて
             いるときだけ）を出す。どちらも無ければ何も描画せず余白を使わない。
           */}
-          {!lastTrainDemoMode && onAddWaypoint && ((waypoints ?? []).length > 0 || showWaypointInput) && (
+          {!lastTrainDemoMode && onAddWaypoint && !meetingMode && ((waypoints ?? []).length > 0 || showWaypointInput) && (
             <div style={{ marginTop: L.sp.md }}>
               {/*
                 入力欄を開いていないときは、選択済みチップだけを独立した行で表示。
@@ -945,52 +1116,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 右側が空くため、チップは入力欄と同じ行に詰めて表示し
                 空きスペースを使う（無ければ何も出ない）。
               */}
-              {meetingMode && (waypoints ?? []).length > 0 && (
-                /*
-                  集合駅モード: 追加した出発駅は、出発駅欄と同じ見た目（緑の塗り・閉じるボタン）の行で縦に並べる。
-                  「出発駅を追加」を押すたびに行が増え、閉じるボタンで減らせる（人数に合わせて増減できる）。
-                */
-                <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: L.sp.xs, marginBottom: showWaypointInput ? L.sp.xs : 0 }} data-meeting-origin-rows>
-                  {(waypoints ?? []).map((wp, index) => (
-                    <div key={`${wp.name}-${index}`} style={{ width: waypointFieldWidth ? `${waypointFieldWidth}px` : '100%', maxWidth: '100%' }}>
-                      <label style={{ display: 'block', marginBottom: L.sp.xs, fontWeight: 'bold', color: colors.textSecondary, fontSize: FS.caption }}>
-                        {`${translateUI('departureStation', language)} ${index + 2}`}
-                      </label>
-                      <div style={{ position: 'relative' }}>
-                        <TextField
-                          theme={theme}
-                          size="sm"
-                          type="text"
-                          readOnly
-                          value={translateStation(wp.name, language)}
-                          aria-label={`${translateUI('departureStation', language)} ${index + 2}`}
-                          className="station-input-filled"
-                          styleOverride={{
-                            paddingRight: L.sp['3xl'],
-                            border: `2px solid ${SEMANTIC.departure}`,
-                            backgroundColor: SEMANTIC.departure,
-                            color: colors.onPrimary,
-                          }}
-                        />
-                        <IconButton
-                          theme={theme}
-                          size="sm"
-                          onClick={() => onRemoveWaypoint?.(index)}
-                          label={translateUI('clearSelection', language)}
-                          icon={<X size={14} />}
-                          styleOverride={{
-                            position: 'absolute',
-                            right: '2px',
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            color: alphaWhite(0.9),
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
               {!meetingMode && (waypoints ?? []).length > 0 && !showWaypointInput && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.xs }}>
                   {(waypoints ?? []).map((wp, index) => (
@@ -1101,6 +1226,18 @@ const StationSelector: React.FC<StationSelectorProps> = ({
           */}
           {meetingMode && (
             <div style={{ marginTop: L.sp.md, display: 'flex', flexDirection: 'column', gap: L.sp.xs }} data-meeting-results>
+              {/* 3人以上のときだけ、集合駅の決め方（全員が同じくらい ←→ 多い人に寄せる）を5段階で選べる */}
+              {meetingOriginNames.length >= 3 && onMeetingBalanceChange && (
+                <EndLabeledSlider
+                  theme={theme}
+                  label={translateUI('meetingBalanceLabel', language)}
+                  value={meetingBalance}
+                  steps={MEETING_BALANCE_LEVELS}
+                  onChange={onMeetingBalanceChange}
+                  startLabel={translateUI('meetingBalanceFair', language)}
+                  endLabel={translateUI('meetingBalanceCrowd', language)}
+                />
+              )}
               {meetingOriginNames.length < 2 ? (
                 <div style={{ fontSize: FS.caption, color: colors.textSecondary }}>
                   {translateUI('meetingNeedOrigins', language)}
@@ -1111,33 +1248,30 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 </div>
               ) : (
                 <>
-                  <div style={{ fontSize: FS.caption, color: colors.textSecondary }}>
-                    {translateUI('meetingResultsTitle', language)}
-                  </div>
-                  {meetingCandidates.map((c, i) => {
-                    const station = allStations.find(st => st.name === c.name);
-                    return (
-                      <div key={c.name} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.xs }}>
-                        <Button
+                  <TopList
+                    theme={theme}
+                    step={TOP_LIST_STEP_COUNT}
+                    moreLabel={hidden => translateUI('showMoreRoutesStep', language, { count: String(hidden) })}
+                    lessLabel={translateUI('collapseList', language)}
+                  >
+                    {meetingCandidates.map((c, i) => {
+                      const station = allStations.find(st => st.name === c.name);
+                      return (
+                        <MeetingCandidateRow
+                          key={c.name}
                           theme={theme}
-                          size="sm"
-                          variant="outline"
-                          pressed={arrival?.name === c.name}
+                          language={language}
+                          rank={i + 1}
+                          name={c.name}
+                          max={c.max}
+                          times={meetingOriginNames.map((origin, k) => ({ origin, minutes: c.times[k] }))}
+                          selected={arrival?.name === c.name}
                           disabled={!station}
-                          onClick={() => station && onArrivalChange(station)}
-                        >
-                          {`${i + 1}. ${translateStation(c.name, language)} · ${translateUI('meetingMaxMinutes', language, { minutes: c.max })}`}
-                        </Button>
-                        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
-                          {meetingOriginNames.map((n, k) => `${translateStation(n, language)} ${c.times[k]}`).join(' / ')}
-                          {translateUI('minutesSuffix', language)}
-                        </span>
-                      </div>
-                    );
-                  })}
-                  <div style={{ fontSize: FS.caption, color: colors.textSecondary }}>
-                    {translateUI('meetingResultsNote', language)}
-                  </div>
+                          onSelect={() => station && onArrivalChange(station)}
+                        />
+                      );
+                    })}
+                  </TopList>
                 </>
               )}
               {/*
@@ -1149,108 +1283,49 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   <div style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary }}>
                     {translateUI('meetingRoutesTitle', language, { station: translateStation(arrival.name, language) })}
                   </div>
-                  {meetingRoutes.map(entry => (
-                    <div key={entry.origin} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.xs }} data-meeting-route={entry.origin}>
-                      <span style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.text }}>
-                        {translateStation(entry.origin, language)}
-                      </span>
-                      {entry.totalTime === null ? (
-                        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('meetingNoRoute', language)}</span>
-                      ) : entry.lines.length === 0 ? (
-                        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('meetingAlreadyThere', language)}</span>
-                      ) : (
-                        entry.lines.map((key, i) => (
-                          <React.Fragment key={`${key}-${i}`}>
-                            {i > 0 && <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{'→'}</span>}
-                            <ColorChip color={routeColors[key as keyof typeof routeColors] ?? colors.textSecondary} theme={theme}>
-                              {translateRoute(routeNames[key as keyof typeof routeNames] ?? key, language)}
-                            </ColorChip>
-                          </React.Fragment>
-                        ))
-                      )}
-                      {entry.totalTime !== null && (
-                        <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
-                          {entry.totalTime}{translateUI('minutesSuffix', language)}
+                  <TopList
+                    theme={theme}
+                    moreLabel={hidden => translateUI('showMoreRoutesStep', language, { count: String(hidden) })}
+                    lessLabel={translateUI('collapseList', language)}
+                  >
+                    {meetingRoutes.map(entry => (
+                      <div key={entry.origin} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.xs }} data-meeting-route={entry.origin}>
+                        <span style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.text }}>
+                          {translateStation(entry.origin, language)}
                         </span>
-                      )}
-                    </div>
-                  ))}
+                        {entry.totalTime === null ? (
+                          <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('meetingNoRoute', language)}</span>
+                        ) : entry.lines.length === 0 ? (
+                          <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('meetingAlreadyThere', language)}</span>
+                        ) : (
+                          entry.lines.map((key, i) => (
+                            <React.Fragment key={`${key}-${i}`}>
+                              {i > 0 && <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{'→'}</span>}
+                              <ColorChip color={routeColors[key as keyof typeof routeColors] ?? colors.textSecondary} theme={theme}>
+                                {translateRoute(routeNames[key as keyof typeof routeNames] ?? key, language)}
+                              </ColorChip>
+                            </React.Fragment>
+                          ))
+                        )}
+                        {entry.totalTime !== null && (
+                          <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                            {entry.totalTime}{translateUI('minutesSuffix', language)}
+                          </span>
+                        )}
+                        {/* 時刻（基準の時刻と所要時間から。全員が同じ基準で、誰も優先しない） */}
+                        {entry.totalTime !== null && entry.lines.length > 0 && departureTime && (() => {
+                          const clock = meetingClockTimes(departureTime, timeMode, entry.totalTime);
+                          return (
+                            <span data-meeting-route-clock style={{ fontSize: FS.caption, color: colors.textSecondary }}>
+                              {`${clock.depart} → ${clock.arrive}`}
+                            </span>
+                          );
+                        })()}
+                      </div>
+                    ))}
+                  </TopList>
                 </div>
               )}
-            </div>
-          )}
-
-          {/*
-            出発時刻の行。駅ツールチップ側にも同じ設定（timetableBaseTime を
-            共有）があるが、経路を選ぶ前に時刻を決めたい操作にも対応できるよう
-            駅選択パネルからも直接変更できるようにしている。
-            timeMode（出発/到着）で、この時刻を「出発時刻」として使うか
-            「到着時刻」として使うかを切り替えられる（ラベルも連動して変わる）。
-            「時刻を表示」ボタンと同様、経路が無いと意味を持たないため
-            出発駅・到着駅の両方が決まってから表示する。
-          */}
-          {SHOW_DEPARTURE_TIME_ROW && onDepartureTimeChange && ((departure && arrival) || lastTrainDemoMode) && (
-            <div style={{ marginTop: L.sp.sm }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: L.sp.xs,
-                flexWrap: 'wrap',
-              }}>
-                <label style={{ fontSize: FS.caption, fontWeight: 'bold', color: colors.textSecondary, whiteSpace: 'nowrap' }}>
-                  {lastTrainDemoMode ? demoText.virtualTime : translateUI(timeMode === 'arrival' ? 'arrivalTimeLabel' : 'departureTime', language)}
-                </label>
-                <TextField
-                  theme={theme}
-                  size="sm"
-                  type="time"
-                  value={departureTime ?? ''}
-                  onChange={e => onDepartureTimeChange(e.target.value)}
-                  onFocus={(e) => { focusedInputRef.current = e.currentTarget; }}
-                  onBlur={() => { focusedInputRef.current = null; }}
-                  fullWidth={false}
-                />
-                {/*
-                  出発/到着どちらの基準かは、時刻そのものの隣に置いて初めて
-                  「この時刻が何を意味するか」が一目でわかる。以前は下の行に
-                  分けていたが、現在時刻ボタンのすぐ右に詰めて1つの操作列に見せる。
-                  行が折り返される狭い画面（スマホ・PWA）では、この2つが
-                  親のflexWrapでバラバラの行に千切れると「現在時刻の右」が
-                  保証できなくなるため、2つをまとめて1つのflexアイテムにし、
-                  折り返す時は必ずセットのまま次の行へ落ちるようにする。
-                  選択中はButton(variant="primary", pressed)で塗りつぶす
-                  （このアプリの他のトグルと共通の「押されている＝塗り」の規約）。
-                */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.xs, flexShrink: 0 }}>
-                  <Button
-                    theme={theme}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const now = new Date();
-                      const hh = String(now.getHours()).padStart(2, '0');
-                      const mm = String(now.getMinutes()).padStart(2, '0');
-                      onDepartureTimeChange(`${hh}:${mm}`);
-                    }}
-                  >
-                    {translateUI('currentTime', language)}
-                  </Button>
-                  {!lastTrainDemoMode && onTimeModeChange && (
-                    <SegmentedControl
-                      theme={theme}
-                      size="sm"
-                      variant="slide"
-                      ariaLabel={translateUI('baseTime', language)}
-                      value={timeMode}
-                      onChange={onTimeModeChange}
-                      options={[
-                        { value: 'departure', label: translateUI('timeBasisDeparture', language) },
-                        { value: 'arrival', label: translateUI('timeBasisArrival', language) },
-                      ]}
-                    />
-                  )}
-                </div>
-              </div>
             </div>
           )}
 

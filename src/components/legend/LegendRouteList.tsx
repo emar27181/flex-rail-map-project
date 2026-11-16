@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useId, useState, useMemo } from 'react';
 import type { RouteKey } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation'
@@ -9,12 +9,14 @@ import MapConfigPanel from './MapConfigPanel';
 import VersionPanel from './VersionPanel';
 import type { MapConfig } from './MapConfigPanel';
 import Checkbox from '../ui/atoms/Checkbox';
-import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, ROUTE_LINE } from '../../constants/ui';
+import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, ROUTE_LINE, DISPLAY_MODE_COLORS } from '../../constants/ui';
 import type { LabelColorOverride } from '../../constants/ui';
 import RouteSwitchBoard from './RouteSwitchBoard';
 import Button from '../ui/atoms/Button';
 import SegmentedControl from '../ui/molecules/SegmentedControl';
 import Stepper from '../ui/molecules/Stepper';
+import TagToggleGroup, { type TagToggleItem } from '../ui/molecules/TagToggleGroup';
+import { TrainTrack, CircleDot, Network, Mountain } from 'lucide-react';
 import { ALERT_MINUTE_OPTIONS } from '../../utils/arrivalAlert';
 import Select from '../ui/atoms/Select';
 import Radio from '../ui/atoms/Radio';
@@ -39,6 +41,10 @@ const ROUTE_UI_MODE_KEY = 'routeSwitchUiMode';
 const ROUTE_CLASSIC_VIEW_ENABLED = false;
 
 interface LegendRouteListProps {
+  /** 表示モードの先頭に並べる切り替えタグ */
+  modeTags: TagToggleItem[];
+  /** 路線チップの意味（既定は表示）。乗車ログのときは 'rideLog'（RouteSwitchBoard） */
+  routeToggleMode?: 'visibility' | 'rideLog';
   visibleRoutesData: Array<[string, any]>;
   visibleRoutes: Set<RouteKey>;
   routeOrder: RouteKey[];
@@ -87,9 +93,7 @@ interface LegendRouteListProps {
   onTrainDemoToggle: () => void;
   mapViewMode: MapViewMode;
   onMapViewModeChange: (mode: MapViewMode) => void;
-  heatmapEnabled: boolean;
   heatmapParam: keyof StationStats;
-  onHeatmapEnabledChange: (v: boolean) => void;
   onHeatmapParamChange: (k: keyof StationStats) => void;
   showEstimatedData: boolean;
   onShowEstimatedDataChange: (v: boolean) => void;
@@ -112,6 +116,8 @@ interface LegendRouteListProps {
   onShowRouteLineChange: (v: boolean) => void;
   mapConfig: MapConfig;
   onImportConfig: (config: MapConfig) => void;
+  /** 設定ファイルに入れる利用者のデータ（乗車ログ・メモ・履歴）を書き出すときに集める */
+  getUserData?: () => import('../../utils/userDataBundle').UserDataBundle;
   /** 複数駅の共通路線: 指定した路線を地図に出す */
   onShowRoutesFromMemo: (routeKeys: RouteKey[]) => void;
   /** 複数駅の共通路線: 一覧の駅を出発駅にする */
@@ -135,6 +141,8 @@ interface LegendRouteListProps {
 const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowRoutesFromMemo,
   onUseStationAsDeparture,
+  routeToggleMode,
+  modeTags,
   visibleRoutesData,
   visibleRoutes,
   routeOrder,
@@ -183,9 +191,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onTrainDemoToggle,
   mapViewMode,
   onMapViewModeChange,
-  heatmapEnabled,
   heatmapParam,
-  onHeatmapEnabledChange,
   onHeatmapParamChange,
   showEstimatedData,
   onShowEstimatedDataChange,
@@ -207,6 +213,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowRouteLineChange,
   mapConfig,
   onImportConfig,
+  getUserData,
   stationLabelFontSize,
   onStationLabelFontSizeChange,
   stationIconScale,
@@ -243,18 +250,17 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
     try { window.localStorage.setItem(ROUTE_UI_MODE_KEY, mode); } catch { /* 保存できなくても表示は変わる */ }
   };
   const [sortMode, setSortMode] = useState<SortMode>('distance');
+  const [additionalModesOpen, setAdditionalModesOpen] = useState(false);
+  const additionalModesId = useId();
   const [dragOverKey, setDragOverKey] = useState<string | null>(null);
   const [touchDragKey, setTouchDragKey] = useState<RouteKey | null>(null);
   const ROUTE_LIST_LIMIT = 10;
   const [routeListExpanded, setRouteListExpanded] = useState(false);
   const [groupLabelOpen,  setGroupLabelOpen]  = useState(false);
-  const [groupVizOpen,    setGroupVizOpen]    = useState(false);
   const [groupFilterOpen, setGroupFilterOpen] = useState(false);
   const [groupMapOpen,    setGroupMapOpen]    = useState(false);
   const [groupDetailOpen, setGroupDetailOpen] = useState(false);
   const [groupMemoOpen,   setGroupMemoOpen]   = useState(false);
-
-  useEffect(() => { if (heatmapEnabled) setGroupVizOpen(true); }, [heatmapEnabled]);
 
   // HEX色をHue値(0-360)に変換
   const hexToHue = (hex: string): number => {
@@ -414,6 +420,29 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
     </div>
   );
 
+  const additionalModes: TagToggleItem[] = [
+    ...(mapViewMode === 'realistic' ? [{ key: 'trainDemo', color: DISPLAY_MODE_COLORS.trainDemo, label: translateUI('trainDemoLabel', language), icon: <TrainTrack />, pressed: showTrainDemo, onToggle: onTrainDemoToggle }] : []),
+    { key: 'terrain3d', color: DISPLAY_MODE_COLORS.terrain3d, label: translateUI('terrain3dLabel', language), icon: <Mountain />, pressed: mapViewMode === 'terrain3d', onToggle: () => onMapViewModeChange(mapViewMode === 'terrain3d' ? 'realistic' : 'terrain3d') },
+    { key: 'bubble', color: DISPLAY_MODE_COLORS.bubble, label: translateUI('bubbleMap', language), icon: <CircleDot />, pressed: mapViewMode === 'bubble', onToggle: () => onMapViewModeChange(mapViewMode === 'bubble' ? 'realistic' : 'bubble') },
+    { key: 'schematic', color: DISPLAY_MODE_COLORS.schematic, label: translateUI('schematicMapLabel', language), icon: <Network />, pressed: mapViewMode === 'schematic', onToggle: () => onMapViewModeChange(mapViewMode === 'schematic' ? 'realistic' : 'schematic') },
+  ];
+  const shownAdditionalModes = additionalModesOpen ? additionalModes : additionalModes.filter(item => item.pressed);
+
+  const sortControl = (
+    <Select
+      theme={theme}
+      size="sm"
+      value={sortMode}
+      onChange={e => setSortMode(e.target.value as SortMode)}
+      aria-label={translateUI('sortLabel', language)}
+    >
+      <option value="distance">{translateUI('sortNearby', language)}</option>
+      <option value="name">{translateUI('sortAlpha', language)}</option>
+      <option value="color">{translateUI('sortColor', language)}</option>
+      <option value="default">{translateUI('sortDefault', language)}</option>
+    </Select>
+  );
+
   return (
     <div style={{
       marginBottom: L.sp['2xl'],
@@ -450,32 +479,6 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         )}
       </div>
 
-      {/*
-        並び順。表示方式（ボード/一覧）に関わらず共通で効く。
-        「並びかえで今選択されてるのが表示されてプルダウンとかで
-        切り替えるように」という要望を受けて、折りたたみ式のボタン列
-        （SegmentedControl）ではなく、他の設定（対象: N路線以上など）と
-        同じSelect（プルダウン）にした。常に今の並び順がラベルとして
-        見え、かつボタン4つ分よりも省スペースになる。
-      */}
-      <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.sm, alignItems: 'center' }}>
-        <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>
-          {translateUI('sortLabel', language)}
-        </span>
-        <Select
-          theme={theme}
-          size="sm"
-          value={sortMode}
-          onChange={e => setSortMode(e.target.value as SortMode)}
-          aria-label={translateUI('sortLabel', language)}
-        >
-          <option value="distance">{translateUI('sortNearby', language)}</option>
-          <option value="name">{translateUI('sortAlpha', language)}</option>
-          <option value="color">{translateUI('sortColor', language)}</option>
-          <option value="default">{translateUI('sortDefault', language)}</option>
-        </Select>
-      </div>
-
       {(!ROUTE_CLASSIC_VIEW_ENABLED || routeUiMode === 'board') && (
         <RouteSwitchBoard
           routeKeys={boardRouteKeys}
@@ -490,10 +493,13 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
           onSelectAllRoutes={onSelectAllRoutes}
           onDeselectAllRoutes={onDeselectAllRoutes}
           adjustRouteColorForTheme={adjustRouteColorForTheme}
+          mode={routeToggleMode}
+          sortControl={sortControl}
         />
       )}
 
       {ROUTE_CLASSIC_VIEW_ENABLED && routeUiMode === 'classic' && (<>
+      <div style={{ marginBottom: L.sp.xs }}>{sortControl}</div>
 
       {/* 全表示/全非表示 */}
       <div style={{ display: 'flex', gap: L.sp.xs, marginBottom: L.sp.sm }}>
@@ -627,6 +633,64 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
       </>)}
 
+      {/* ═══ 表示モード ═══ */}
+      <div data-mode-section style={{ marginTop: L.sp.xl, marginBottom: L.sp.xs }}>
+        <div style={{ fontSize: FS.title, fontWeight: 'bold', marginBottom: L.sp.md, color: colors.text }}>
+          {translateUI('displayModes', language)}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xl }}>
+          <TagToggleGroup theme={theme} ariaLabel={translateUI('displayModes', language)} items={modeTags} />
+          <div>
+            <div id={additionalModesId}>
+              {shownAdditionalModes.length > 0 && (
+                <TagToggleGroup theme={theme} ariaLabel={translateUI('settingsGroupViz', language)} items={shownAdditionalModes} />
+              )}
+            </div>
+            <Button
+              theme={theme}
+              variant="outline"
+              size="sm"
+              aria-expanded={additionalModesOpen}
+              aria-controls={additionalModesId}
+              onClick={() => setAdditionalModesOpen(value => !value)}
+              styleOverride={shownAdditionalModes.length > 0 ? { marginTop: L.sp.xs } : undefined}
+            >
+              {translateUI(additionalModesOpen ? 'collapseList' : 'moreDisplayModes', language)}
+              <DisclosureIndicator expanded={additionalModesOpen} theme={theme} tone="inherit" />
+            </Button>
+          </div>
+        </div>
+        {mapViewMode === 'bubble' && (
+          <div style={{ marginTop: L.sp.sm }}>
+            <div style={{ display: 'flex', gap: L.sp.sm, marginBottom: L.sp.sm }}>
+              {(['circle', 'square'] as const).map(shape => (
+                <Radio
+                  key={shape}
+                  theme={theme}
+                  size="sm"
+                  name="bubbleShape"
+                  checked={bubbleShape === shape}
+                  onChange={() => onBubbleShapeChange(shape)}
+                >
+                  {shape === 'circle' ? translateUI('bubbleCircle', language) : translateUI('bubbleSquare', language)}
+                </Radio>
+              ))}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm }}>
+              <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('bubbleMaxRadius', language)}</span>
+              <Slider
+                min={500} max={50000} step={500}
+                value={bubbleMaxRadiusM}
+                onChange={e => onBubbleMaxRadiusMChange(Number(e.target.value))}
+              />
+              <span style={{ fontSize: FS.caption, color: colors.text, minWidth: '40px', textAlign: 'right' }}>
+                {bubbleMaxRadiusM >= 1000 ? `${(bubbleMaxRadiusM / 1000).toFixed(1)}km` : `${bubbleMaxRadiusM}m`}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* ═══ セクション2: 表示設定 ═══ */}
       <div style={{ marginTop: L.sp.xl, marginBottom: L.sp.xs }}>
         <div style={{ fontSize: FS.title, fontWeight: 'bold', marginBottom: L.sp.md, color: colors.text }}>
@@ -733,73 +797,20 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
               </div>
             )}
 
-            {/* ── データ可視化 ── */}
-            {sectionHeader(translateUI('settingsGroupViz', language), groupVizOpen, () => setGroupVizOpen(v => !v))}
-            {groupVizOpen && (
+            {/* ── 複数駅の共通路線 ── */}
+            {sectionHeader(translateUI('memoTitle', language), groupMemoOpen, () => setGroupMemoOpen(v => !v))}
+            {groupMemoOpen && (
               <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
-                <Checkbox theme={theme} checked={heatmapEnabled} onChange={onHeatmapEnabledChange}>
-                  {translateUI('stationHeatmap', language)}
-                </Checkbox>
-                {mapViewMode === 'realistic' && (
-                  <Checkbox theme={theme} checked={showTrainDemo} onChange={onTrainDemoToggle}>
-                  {translateUI('trainDemoLabel', language)}
-                </Checkbox>
-                )}
-                <Checkbox theme={theme} checked={mapViewMode === 'bubble'} onChange={(checked) => onMapViewModeChange(checked ? 'bubble' : 'realistic')}>
-                  {translateUI('bubbleMap', language)}
-                </Checkbox>
-                {mapViewMode === 'bubble' && (
-                  <div style={{ marginLeft: L.sp['4xl'], marginTop: L.sp.xs }}>
-                    <div style={{ display: 'flex', gap: L.sp.sm, marginBottom: L.sp.sm }}>
-                      {(['circle', 'square'] as const).map(shape => (
-                        <Radio
-                          theme={theme}
-                          size="sm"
-                          name="bubbleShape"
-                          checked={bubbleShape === shape}
-                          onChange={() => onBubbleShapeChange(shape)}
-                        >
-                          {shape === 'circle' ? translateUI('bubbleCircle', language) : translateUI('bubbleSquare', language)}
-                        </Radio>
-                      ))}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm }}>
-                      <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('bubbleMaxRadius', language)}</span>
-                      <Slider
-                        min={500} max={50000} step={500}
-                        value={bubbleMaxRadiusM}
-                        onChange={e => onBubbleMaxRadiusMChange(Number(e.target.value))}
-                      />
-                      <span style={{ fontSize: FS.caption, color: colors.text, minWidth: '40px', textAlign: 'right' }}>
-                        {bubbleMaxRadiusM >= 1000 ? `${(bubbleMaxRadiusM / 1000).toFixed(1)}km` : `${bubbleMaxRadiusM}m`}
-                      </span>
-                    </div>
-                  </div>
-                )}
-                <Checkbox theme={theme} checked={mapViewMode === 'schematic'} onChange={(checked) => onMapViewModeChange(checked ? 'schematic' : 'realistic')}>
-                  {translateUI('schematicMapLabel', language)}
-                </Checkbox>
-                {/* 立体（線路の下の地面の標高）。Terrain3DView */}
-                <Checkbox theme={theme} checked={mapViewMode === 'terrain3d'} onChange={(checked) => onMapViewModeChange(checked ? 'terrain3d' : 'realistic')}>
-                  {translateUI('terrain3dLabel', language)}
-                </Checkbox>
-                {/* 複数駅の共通路線（以前の「最寄り駅メモ」）。複数の駅の路線を地図に出すのでデータ可視化に置く。
-                    見出しは他の節と同じ sectionHeader、中身は StationMemoPanel（bare） */}
-                {sectionHeader(translateUI('memoTitle', language), groupMemoOpen, () => setGroupMemoOpen(v => !v))}
-                {groupMemoOpen && (
-                  <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
-                    <StationMemoPanel
-                      bare
-                      theme={theme}
-                      language={language}
-                      routeColors={routeColors as Record<string, string>}
-                      routeNames={routeNames as Record<string, string>}
-                      adjustRouteColorForTheme={adjustRouteColorForTheme}
-                      onShowRoutes={onShowRoutesFromMemo}
-                      onUseAsDeparture={onUseStationAsDeparture}
-                    />
-                  </div>
-                )}
+                <StationMemoPanel
+                  bare
+                  theme={theme}
+                  language={language}
+                  routeColors={routeColors as Record<string, string>}
+                  routeNames={routeNames as Record<string, string>}
+                  adjustRouteColorForTheme={adjustRouteColorForTheme}
+                  onShowRoutes={onShowRoutesFromMemo}
+                  onUseAsDeparture={onUseStationAsDeparture}
+                />
               </div>
             )}
 
@@ -879,7 +890,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
       </div>
 
       {/* ═══ セクション3: 設定の保存/読み込み ═══ */}
-      <MapConfigPanel config={mapConfig} theme={theme} language={language} onImport={onImportConfig} />
+      <MapConfigPanel config={mapConfig} theme={theme} language={language} onImport={onImportConfig} getUserData={getUserData} />
 
       {/* ═══ セクション4: バージョン・更新履歴（いちばん下） ═══ */}
       <VersionPanel theme={theme} language={language} />

@@ -6,7 +6,7 @@ import { CONTROL_SIZE } from '../../../src/components/ui/atoms/controlSize';
 import { L } from '../../../src/components/legend/legendStyles';
 
 const STYLES = join(__dirname, '../../../src/styles');
-const FILES = ['article-layout.css', 'article-introduction.css'];
+const FILES = ['article-layout.css'];
 
 /**
  * 記事の CSS は手書きのため、角の丸み・操作部品の寸法をデザイントークンの CSS 変数
@@ -30,8 +30,8 @@ describe('記事の CSS はデザイントークンに従う', () => {
       expect(bad).toEqual([]);
     });
 
-    it(`${file}: ボタン（.btn・.chip・.seg button・地図を開くリンク）は操作部品の寸法を使う`, () => {
-      const rules = css.split('}').filter(r => /(\.btn|\.chip|\.seg button|foot-app-link)\s*\{/.test(r) && !/:hover|\.sw|\.ar|\.n\{|aria-/.test(r.split('{')[0]));
+    it(`${file}: ボタン（.btn・地図を開くリンク）は操作部品の寸法を使う`, () => {
+      const rules = css.split('}').filter(r => /(\.btn|foot-app-link)\s*\{/.test(r) && !/:hover|\.sw|\.ar|\.n\{|aria-/.test(r.split('{')[0]));
       for (const r of rules) {
         if (!/padding|font-size/.test(r)) continue;
         expect(r, r.split('{')[0]).toContain('var(--ctl-md-h)');

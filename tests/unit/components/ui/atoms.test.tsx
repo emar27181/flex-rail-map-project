@@ -101,6 +101,21 @@ describe('アトムの寸法が規格と一致する', () => {
 });
 
 describe('状態が変わっても外形が変わらない', () => {
+  it('アイコン付きChipも路線チップと同じ背景で選択状態を示す', () => {
+    const props = { color: '#538FD1', label: '集合駅', theme: 'dark' as const, onClick: () => {} };
+    const { container, rerender } = render(<Chip {...props} selected={false} icon={<svg />} />);
+    const button = container.querySelector('button')!;
+    const restingSurface = button.style.backgroundColor;
+    expect(button.firstElementChild).toHaveAttribute('aria-hidden', 'true');
+    expect(button.querySelector('svg')).toBeInTheDocument();
+    rerender(<Chip {...props} selected icon={<svg />} />);
+    expect(button).toHaveAttribute('aria-pressed', 'true');
+    expect(button.style.backgroundColor).not.toBe(restingSurface);
+    rerender(<Chip {...props} selected />);
+    expect(button.style.backgroundColor).not.toBe(restingSurface);
+    expect(button.querySelector('svg')).not.toBeInTheDocument();
+  });
+
   it('Chip は選択・非選択で枠線の太さと文字の太さが同じ', () => {
     const off = render(
       <Chip color="#9ACD32" label="山手線" selected={false} theme="light" onClick={() => {}} />,
