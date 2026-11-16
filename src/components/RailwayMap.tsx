@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback, useDeferredValue } from 'react';
-import { useTravelTimeLabelMode } from '../hooks/useTravelTimeLabelMode';
+import { defaultTravelTimeLabelMode, useTravelTimeLabelMode } from '../hooks/useTravelTimeLabelMode';
 import { useCanHover } from '../hooks/useCanHover';
 import { travelTimeLabelLayout } from './map/travelTimeLabel';
 import { circularNumberBadgeHtml } from './ui/atoms/circularNumberBadge';
@@ -69,12 +69,14 @@ import {
   computeEffectiveBaseTime,
   type Departure,
 } from '../data/timetableData';
-import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, alphaWhite, alphaBlack, DISPLAY_MODE_COLORS } from '../constants/ui';
+import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, ROUTE_LINE, alphaWhite, alphaBlack, DISPLAY_MODE_COLORS } from '../constants/ui';
 import { DEFAULT_ROUTE_RECOMMENDATION_LIMIT, ROUTE_RECOMMENDATION_LIMIT_OPTIONS } from '../constants/routeRecommendationLimit';
 import { trackStationSelect, trackRouteSearch, trackViewSwitch, trackRouteVisibility, trackRouteVisibilityBulk } from '../utils/appAnalytics';
 import { DEFAULT_MAP_CENTER } from '../constants/mapDefaults';
+import { saveTerrain3dGroundStyle, TERRAIN3D_DEFAULT_GROUND_STYLE } from '../utils/terrain3dAppearance';
+import { DISPLAY_DEFAULTS, defaultShowTravelTimes, defaultStationNumbers } from '../constants/displayDefaults';
 import type { MapViewMode } from '../constants/mapViewMode';
-import { initialDisplayUrlOptions } from '../utils/mapDisplayUrlParam';
+import { initialDisplayUrlOptions, clearDisplayUrlOptions } from '../utils/mapDisplayUrlParam';
 // 立体（標高）表示は three.js を使うので、開いたときだけ読み込む
 const Terrain3DView = React.lazy(() => import('./Terrain3DView'));
 import { LAST_TRAIN_LINE_STYLE, MAP_PANE_Z, stationMarkerZ, meetingCandidateMarkerZ, ENDPOINT_MARKER_Z, TRAVEL_TIME_MARKER_Z, USER_LOCATION_MARKER_Z, TRAIN_DEMO_MARKER_Z } from '../constants/mapLayers';
@@ -95,7 +97,7 @@ import { getInitialHeatmapMetricFromUrl, syncHeatmapMetricToUrl } from '../utils
 import { toArticleLanguage } from '../utils/languagePersistence';
 import { SITE_FOOTER_LINKS, type NavLang } from '../config/siteNav';
 import { defaultRoutesNear } from '../utils/defaultRoutesNear';
-import { getInitialMapViewFromUrl, getInitialTravelTimesFromUrl } from '../utils/mapViewUrlParam';
+import { getInitialMapViewFromUrl } from '../utils/mapViewUrlParam';
 import { getInitialShareStateFromUrl, syncShareStateToUrl } from '../utils/shareStateUrlParams';
 import { isEmbedMode } from '../utils/embedMode';
 import { getInitialMapModeFromUrl, getInitialExtraDeparturesFromUrl } from '../utils/mapModeUrlParam';
@@ -111,7 +113,7 @@ import {
 import ColorChip from './ui/ColorChip';
 import TimetableSourceNote from './ui/TimetableSourceNote';
 import { serviceBrandLabel } from './ServiceTermini';
-import { checkboxInput, L} from './legend/legendStyles';
+import { L } from './legend/legendStyles';
 import { readableTextColor, darkenForWhiteText, meetsContrast, filledLabelColors, tintColor, LIGHT_TEXT } from '../utils/contrast';
 import { detectCurrentRoute, detectRouteWithHistory, checkNearStation, makeManualRoute, MIN_SPEED_MS, DEFAULT_SPEED_MS, DETECTION_WARMUP_MS, GPS_HISTORY_SIZE, haversineDistance, estimateHeadingFromHistory } from '../utils/trainDetector';
 import { estimateArrival, shouldNotifyArrival, buildArrivalMessage, isPlausibleSpeed, DEFAULT_ALERT_MINUTES } from '../utils/arrivalAlert';
@@ -139,7 +141,7 @@ import Select from './ui/atoms/Select';
 import SegmentedControl from './ui/molecules/SegmentedControl';
 import RouteToggleChip from './legend/RouteToggleChip';
 import TextField from './ui/atoms/TextField';
-import Checkbox from './ui/atoms/Checkbox';
+import SettingToggle from './ui/atoms/SettingToggle';
 import LinkButton from './ui/atoms/LinkButton';
 import { FLOATING_CONTROL, FLOATING_ICON_BUTTON_SIZE, FLOATING_ICON_GLYPH_SIZE, FLOATING_PANEL } from './ui/atoms/controlSize';
 import FloatingIconButton from './ui/atoms/FloatingIconButton';
@@ -309,10 +311,10 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [arrival, setArrival] = useState<Station | null>(null);
   // 試作も通常の駅/時刻入力を利用。試作モードはボタンを押すまで有効にしない。
   // ?mode=last-train（記事の埋め込み・共有リンク。到着駅 to が要る）のときだけ、開いたときからONにする
-  const [lastTrainModeEnabled, setLastTrainModeEnabled] = useState(() => getInitialMapModeFromUrl() === 'last-train' && !!getInitialArrivalFromUrl());
+  const [lastTrainModeEnabled, setLastTrainModeEnabled] = useState(() => getInitialMapModeFromUrl() === 'last-train' ? !!getInitialArrivalFromUrl() : DISPLAY_DEFAULTS.lastTrainModeEnabled);
   // 集合駅を探すモード（出発駅の一覧は追加出発駅 extraDepartures を共用する）
   // ?mode=meeting&from=…&with=…（記事の埋め込み・共有リンク）のときだけ、開いたときからONにする
-  const [meetingModeEnabled, setMeetingModeEnabled] = useState(() => getInitialMapModeFromUrl() === 'meeting');
+  const [meetingModeEnabled, setMeetingModeEnabled] = useState(() => getInitialMapModeFromUrl() === 'meeting' || DISPLAY_DEFAULTS.meetingModeEnabled);
   // 3人以上の集合駅の決め方（0 = 全員が同じくらい 〜 最大 = 多い人に寄せる）。utils/meetingPoint.ts
   const [meetingBalance, setMeetingBalance] = useState(() => initialShare.balance ?? MEETING_BALANCE_DEFAULT);
   // 候補の入れ替え（経路の探し直しと地図の描き直し）は重いので、つまみの動きを先に反映し、計算は少し遅らせる
@@ -337,7 +339,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const lastTrainDestinationSupported = !!demoNetwork && demoNetwork.lines.length > 0;
   const lastTrainFilterActive = lastTrainUiActive && lastTrainModeEnabled && lastTrainDestinationSupported;
   // 乗車ログ（試作）: 乗った路線・降りた駅を記録して、3段階（全く通っていない／通ったけど降りていない／通って降りた）で見せるモード
-  const [rideLogModeEnabled, setRideLogModeEnabled] = useState(false);
+  const [rideLogModeEnabled, setRideLogModeEnabled] = useState(DISPLAY_DEFAULTS.rideLogModeEnabled);
   const rideLog = useRideLog();
   const rideState = useMemo(() => deriveRideLog(rideLog.entries), [rideLog.entries]);
   /** 地図の下の層（ほかのモードの描画）を止めて、乗車ログの描画にする */
@@ -427,9 +429,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [isLegendExpanded, setIsLegendExpanded] = useState(false);
 
   // 表示モードの管理
-  const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(false);
+  const [showTransferStationsOnly, setShowTransferStationsOnly] = useState(DISPLAY_DEFAULTS.showTransferStationsOnly);
   // 乗車中の路線・到着予定のパネル。情報量が多く常時は邪魔になるため既定は非表示
-  const [showTrainStatusPanel, setShowTrainStatusPanel] = useState(false);
+  const [showTrainStatusPanel, setShowTrainStatusPanel] = useState(DISPLAY_DEFAULTS.showTrainStatusPanel);
   /**
    * 現在地から最寄駅を出発駅に自動設定するか。既定はOFF。
    * ONだと起動しただけで出発駅が埋まり、「駅未選択なら乗換駅だけ出す」
@@ -438,7 +440,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * 位置情報の取得自体はこの設定に関係なく行う。現在地マーカーの表示と、
    * 出発駅候補の「近くの駅」の算出に必要で、これらは駅を自動で選ぶわけではない。
    */
-  const [autoSetDepartureFromLocation, setAutoSetDepartureFromLocation] = useState(false);
+  const [autoSetDepartureFromLocation, setAutoSetDepartureFromLocation] = useState(DISPLAY_DEFAULTS.autoSetDepartureFromLocation);
   /**
    * 主要駅の常時表示。
    *
@@ -447,17 +449,17 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * （乗換駅を広く出したい / 本当に大きい駅だけでいい）ため、
    * しきい値と on/off をどちらも設定から変えられるようにする。
    */
-  const [alwaysVisibleStationsEnabled, setAlwaysVisibleStationsEnabled] = useState(true);
+  const [alwaysVisibleStationsEnabled, setAlwaysVisibleStationsEnabled] = useState(DISPLAY_DEFAULTS.alwaysVisibleStationsEnabled);
   /**
    * 常時表示の対象とする最小路線数。この本数以上が乗り入れる駅を残す。
    * 「路線表示オフでも表示する駅の閾値を今の+2にしてデフォルトの値を」
    * との指摘を受け、既定値を5→7に変更（選択肢自体は変更前から2〜10で
    * 変わらず、そのうち7は既存の選択肢に含まれている）
    */
-  const [alwaysVisibleMinRoutes, setAlwaysVisibleMinRoutes] = useState(7);
-  const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(false);
-  const [showStationTierBadges, setShowStationTierBadges] = useState(false); // 乗り入れ路線数リング表示
-  const [showTravelTimes, setShowTravelTimes] = useState(getInitialTravelTimesFromUrl);
+  const [alwaysVisibleMinRoutes, setAlwaysVisibleMinRoutes] = useState(DISPLAY_DEFAULTS.alwaysVisibleMinRoutes);
+  const [showExpressStationsOnly, setShowExpressStationsOnly] = useState(DISPLAY_DEFAULTS.showExpressStationsOnly);
+  const [showStationTierBadges, setShowStationTierBadges] = useState(DISPLAY_DEFAULTS.showStationTierBadges); // 乗り入れ路線数リング表示
+  const [showTravelTimes, setShowTravelTimes] = useState(initialShare.times ?? DISPLAY_DEFAULTS.showTravelTimes);
   // 出発駅の新規設定・変更時は所要時間を自動表示する。
   // 駅が変わらない限りは手動OFFを維持（同じ出発駅での再描画ではONに戻さない）。
   // 累積/区間の既定切替は useTravelTimeLabelMode が一元管理する。
@@ -466,13 +468,13 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   useEffect(() => {
     if (departure) {
       if (urlTravelTimesOffRef.current) urlTravelTimesOffRef.current = false;
-      else setShowTravelTimes(true);
+      else setShowTravelTimes(defaultShowTravelTimes(true));
     }
   }, [departure?.name, departure?.lat, departure?.lng]); // eslint-disable-line react-hooks/exhaustive-deps
-  const [showStationNames, setShowStationNames] = useState(true);
-  const [showFurigana, setShowFurigana] = useState(false);
+  const [showStationNames, setShowStationNames] = useState(DISPLAY_DEFAULTS.showStationNames);
+  const [showFurigana, setShowFurigana] = useState(DISPLAY_DEFAULTS.showFurigana);
   // 既定は日本語以外で出す。記事の地図デモ・共有リンクは URL（?numbers=1, mapDisplayUrlParam.ts）で指定できる
-  const [showStationNumbers, setShowStationNumbers] = useState(() => initialDisplayUrlOptions().stationNumbers ?? language !== 'japanese');
+  const [showStationNumbers, setShowStationNumbers] = useState(() => initialDisplayUrlOptions().stationNumbers ?? defaultStationNumbers(language));
   /**
    * 駅ラベルの倍率と路線の線の太さ。
    *
@@ -534,7 +536,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * 差し替えるまでは、既定では路線図だけ（背景タイルなし）を表示し、
    * 欲しい人は設定パネルから手動でONにする運用にする。
    */
-  const [showOsmTiles, setShowOsmTiles] = useState(false);
+  const [showOsmTiles, setShowOsmTiles] = useState(DISPLAY_DEFAULTS.showOsmTiles);
   /**
    * 地図の下地の色。背景タイルを出さないときは海の色（日本の輪郭＝陸と色分けする）、
    * タイルを出すときはタイルに任せる。下地を塗る所は必ずこれを使う（以前は2か所でページの背景色を塗っていて、
@@ -544,7 +546,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [showRouteToggleSection, setShowRouteToggleSection] = useState(false);
   const [tapToggleMode, setTapToggleMode] = useState(true);
   // 地図表示モード
-  const [mapViewMode, setMapViewMode] = useState<MapViewMode>(() => lastTrainDemo ? 'realistic' : initialDisplayUrlOptions().view ?? 'realistic');
+  const [mapViewMode, setMapViewMode] = useState<MapViewMode>(() => lastTrainDemo ? DISPLAY_DEFAULTS.mapViewMode : initialDisplayUrlOptions().view ?? DISPLAY_DEFAULTS.mapViewMode);
   /** 利用者が表示方式を切り替えたとき（設定パネル）。GA4 に送るのはここだけ（URL・保存した設定での復元は数えない） */
   const changeMapViewMode = (next: MapViewMode) => {
     trackViewSwitch(next, mapViewMode);
@@ -566,20 +568,20 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 経路推薦設定
 
   // 時間フィルター機能
-  const [timeFilterEnabled, setTimeFilterEnabled] = useState(false);
-  const [timeFilterMaxMinutes, setTimeFilterMaxMinutes] = useState(15);
+  const [timeFilterEnabled, setTimeFilterEnabled] = useState(DISPLAY_DEFAULTS.timeFilterEnabled);
+  const [timeFilterMaxMinutes, setTimeFilterMaxMinutes] = useState(DISPLAY_DEFAULTS.timeFilterMaxMinutes);
   const [stationsWithinTime, setStationsWithinTime] = useState<StationWithTime[]>([]);
   const [actuallyDisplayedStations, setActuallyDisplayedStations] = useState<Set<string>>(new Set());
 
   // 累積所要時間オーバーレイ
-  const [showTravelTimeOverlay, setShowTravelTimeOverlay] = useState(false);
+  const [showTravelTimeOverlay, setShowTravelTimeOverlay] = useState(DISPLAY_DEFAULTS.showTravelTimeOverlay);
   const [travelTimeMap, setTravelTimeMap] = useState<Map<string, number>>(new Map());
 
   // フルスクリーン状態（モバイルはデフォルトでフルスクリーン）
   const [isFullscreen, setIsFullscreen] = useState(true);
 
   // 時刻表モード
-  const [timetableModeEnabled, setTimetableModeEnabled] = useState(true);
+  const [timetableModeEnabled, setTimetableModeEnabled] = useState(DISPLAY_DEFAULTS.timetableModeEnabled);
   // 「時刻を表示」ボタンは出発駅・到着駅が両方揃ったときだけ表示する
   // （StationSelector.tsx側）。揃った瞬間は必ずONから始まるようにする
   // （揃った状態のまま何度も再評価してユーザーが手動でOFFにした分を
@@ -614,7 +616,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const changeBaseTime = useCallback((time: string) => { setTimeTouched(true); setTimetableBaseTime(time); }, []);
 
   // 列車位置デモ
-  const [showTrainDemo, setShowTrainDemo] = useState(false);
+  const [showTrainDemo, setShowTrainDemo] = useState(DISPLAY_DEFAULTS.showTrainDemo);
   const [trainDemoMinutes, setTrainDemoMinutes] = useState(12 * 60); // 12:00（全日: 5:00〜25:00）
   const [trainDemoPlaying, setTrainDemoPlaying] = useState(false);
   const [trainDemoSpeed, setTrainDemoSpeed] = useState(1); // 1倍速をデフォルト
@@ -682,7 +684,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 記事の地図が実際の画面と違って見えた）。以前は埋め込みで出していなかった。線の周り36pxを押すと
   // 切替モードでは確認なしで路線が足され、狭い枠で地図を動かす指で鶴見線などが足されていたため。
   // 埋め込みでは押しても確認の吹き出しを出すだけにする（下の click）
-  const [showDimmedMapRoutes, setShowDimmedMapRoutes] = useState(true);
+  const [showDimmedMapRoutes, setShowDimmedMapRoutes] = useState(DISPLAY_DEFAULTS.showDimmedMapRoutes);
   const [dimmedMapTooltip, setDimmedMapTooltip] = useState<{ routeKey: RouteKey; x: number; y: number; isVisible: boolean } | null>(null);
 
   // 現在地表示
@@ -701,7 +703,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
    * GPSの現在地と実測速度だけで残り時間を出して、しきい値を切ったら知らせる。
    * 通知の許可が要るため既定はオフ。
    */
-  const [arrivalAlertEnabled, setArrivalAlertEnabled] = useState(false);
+  const [arrivalAlertEnabled, setArrivalAlertEnabled] = useState(DISPLAY_DEFAULTS.arrivalAlertEnabled);
   const [arrivalAlertMinutes, setArrivalAlertMinutes] = useState<number>(DEFAULT_ALERT_MINUTES);
   /** 通知が使えない環境向けの画面内バナー */
   const [arrivalBanner, setArrivalBanner] = useState<{ title: string; body: string } | null>(null);
@@ -743,28 +745,28 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const gpsSessionStartRef = useRef<number>(0);
 
   // ヒートマップ
-  const [heatmapEnabled, setHeatmapEnabled] = useState(() => initialDisplayUrlOptions().heatmap ?? false);
-  const [showEstimatedData, setShowEstimatedData] = useState(false);
-  const [heatmapParam, setHeatmapParam] = useState<keyof StationStats>(() => initialDisplayUrlOptions().heatmapParam ?? 'restaurantCount');
+  const [heatmapEnabled, setHeatmapEnabled] = useState(() => initialDisplayUrlOptions().heatmap ?? DISPLAY_DEFAULTS.heatmapEnabled);
+  const [showEstimatedData, setShowEstimatedData] = useState(DISPLAY_DEFAULTS.showEstimatedData);
+  const [heatmapParam, setHeatmapParam] = useState<keyof StationStats>(() => initialDisplayUrlOptions().heatmapParam ?? DISPLAY_DEFAULTS.heatmapParam);
   // 複数パラメータ選択（1個=単一表示、2個以上=複合シグマモード、0個=全駅データなし色）
-  const [heatmapMultiParams, setHeatmapMultiParams] = useState<Set<keyof StationStats>>(new Set<keyof StationStats>([initialDisplayUrlOptions().heatmapParam ?? 'restaurantCount']));
+  const [heatmapMultiParams, setHeatmapMultiParams] = useState<Set<keyof StationStats>>(new Set<keyof StationStats>([initialDisplayUrlOptions().heatmapParam ?? DISPLAY_DEFAULTS.heatmapParam]));
   // バブルマップの形状（円 or 四角）
-  const [bubbleShape, setBubbleShape] = useState<'circle' | 'square'>('circle');
+  const [bubbleShape, setBubbleShape] = useState<'circle' | 'square'>(DISPLAY_DEFAULTS.bubbleShape);
   // バブルマップの地理的最大半径（メートル）。値が最大の駅がこの半径になる
-  const [bubbleMaxRadiusM, setBubbleMaxRadiusM] = useState(1250);
+  const [bubbleMaxRadiusM, setBubbleMaxRadiusM] = useState(DISPLAY_DEFAULTS.bubbleMaxRadiusM);
   const [heatmapCustomRange, setHeatmapCustomRange] = useState<{ min: number; max: number } | undefined>(undefined);
   const [heatmapParamSelectorOpen, setHeatmapParamSelectorOpen] = useState(false);
-  const [heatmapRangeFilterEnabled, setHeatmapRangeFilterEnabled] = useState(false);
+  const [heatmapRangeFilterEnabled, setHeatmapRangeFilterEnabled] = useState(DISPLAY_DEFAULTS.heatmapRangeFilterEnabled);
   const [heatmapParamListOpen, setHeatmapParamListOpen] = useState(false);
-  const [showStationTooltip, setShowStationTooltip] = useState(false);
-  const [showFullRouteStations, setShowFullRouteStations] = useState(false);
+  const [showStationTooltip, setShowStationTooltip] = useState(DISPLAY_DEFAULTS.showStationTooltip);
+  const [showFullRouteStations, setShowFullRouteStations] = useState(DISPLAY_DEFAULTS.showFullRouteStations);
   // 推薦ルート選択パネル。既定は出さない。出発・到着の間は全候補と並行ルートの路線を描き、
   // どの路線を見るかは「表示路線の切替」でユーザーが調整する（パネルを出したときだけ、
   // 選んだ候補に描画を絞る）
-  const [showRouteRecommendationsPanel, setShowRouteRecommendationsPanel] = useState(false);
+  const [showRouteRecommendationsPanel, setShowRouteRecommendationsPanel] = useState(DISPLAY_DEFAULTS.showRouteRecommendationsPanel);
   // 駅ラベルの時刻。既定は通る路線の時刻の平均で1つにまとめる（路線ごとに並べると行数が多すぎる）。
   // 設定で路線ごとの表示に切り替えられる
-  const [showPerRouteStationTimes, setShowPerRouteStationTimes] = useState(false);
+  const [showPerRouteStationTimes, setShowPerRouteStationTimes] = useState(DISPLAY_DEFAULTS.showPerRouteStationTimes);
   // 地図右下の「表示中の路線」の凡例を折りたたんでいるか（保存して持ち越す）
   const [visibleRoutesLegendCollapsed, setVisibleRoutesLegendCollapsed] = useState(true);
   // 埋め込み表示（記事などの小さな枠）では凡例が地図を大きく隠すので畳んで始め、閲覧者の設定も上書きしない
@@ -774,7 +776,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [legendHiddenRoutes, setLegendHiddenRoutes] = useState<Set<RouteKey>>(() => new Set());
   // 凡例の並び。押して非表示→表示に戻しても位置が動かないよう、前回の並びを引き継ぐ
   const legendOrderRef = useRef<RouteKey[]>([]);
-  const [showRouteLine, setShowRouteLine] = useState(true);
+  const [showRouteLine, setShowRouteLine] = useState(DISPLAY_DEFAULTS.showRouteLine);
   const watchIdRef = useRef<number | null>(null);
   const justClickedLayerRef = useRef(false);
   const autoSetDepartureRef = useRef(false);
@@ -994,7 +996,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
   // 日本語以外はデフォルトで駅コードを表示。URL で指定されていればそれに従う（記事の地図デモで駅番号を見せる）
   useEffect(() => {
-    setShowStationNumbers(initialDisplayUrlOptions().stationNumbers ?? language !== 'japanese');
+    setShowStationNumbers(initialDisplayUrlOptions().stationNumbers ?? defaultStationNumbers(language));
   }, [language]);
 
   // モバイル幅の監視（端末の区分は src/constants/breakpoints.ts だけで決める）
@@ -1177,7 +1179,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       showTransferStationsOnly, showExpressStationsOnly, showTravelTimes,
       showStationNames, showFurigana, showStationNumbers, showOsmTiles,
       mapViewMode, timeFilterEnabled, timeFilterMaxMinutes,
-      showStationTooltip, showFullRouteStations, showRouteRecommendationsPanel, showPerRouteStationTimes,
+      showStationTooltip, showFullRouteStations, showRouteLine, showRouteRecommendationsPanel, showPerRouteStationTimes,
       alwaysVisibleStationsEnabled, alwaysVisibleMinRoutes,
       arrivalAlertEnabled, arrivalAlertMinutes,
       stationSizeScale, routeLineWidth, travelTimeStyle, stationIconStyle,
@@ -1227,6 +1229,42 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       persistUserData(data);
     }
   }, [rideLog.replace]);
+
+  const resetDisplaySettings = () => {
+    clearDisplayUrlOptions();
+    handleImportConfig({
+      ...DISPLAY_DEFAULTS,
+      version: 1,
+      visibleRoutes: [...visibleRoutes],
+      showTravelTimes: defaultShowTravelTimes(!!departure),
+      showStationNumbers: defaultStationNumbers(currentLanguage),
+      arrivalAlertMinutes: DEFAULT_ALERT_MINUTES,
+      stationSizeScale: MAP_LABEL.defaultScale,
+      routeLineWidth: ROUTE_LINE.defaultWidth,
+      travelTimeStyle: {},
+      stationIconStyle: {},
+      maxRouteRecommendations: DEFAULT_ROUTE_RECOMMENDATION_LIMIT,
+      meetingBalance: MEETING_BALANCE_DEFAULT,
+    });
+    setLastTrainModeEnabled(DISPLAY_DEFAULTS.lastTrainModeEnabled);
+    setMeetingModeEnabled(DISPLAY_DEFAULTS.meetingModeEnabled);
+    setRideLogModeEnabled(DISPLAY_DEFAULTS.rideLogModeEnabled);
+    setShowStationTierBadges(DISPLAY_DEFAULTS.showStationTierBadges);
+    setShowTravelTimeOverlay(DISPLAY_DEFAULTS.showTravelTimeOverlay);
+    setTimetableModeEnabled(DISPLAY_DEFAULTS.timetableModeEnabled);
+    setShowTrainDemo(DISPLAY_DEFAULTS.showTrainDemo);
+    setShowEstimatedData(DISPLAY_DEFAULTS.showEstimatedData);
+    setBubbleShape(DISPLAY_DEFAULTS.bubbleShape);
+    setBubbleMaxRadiusM(DISPLAY_DEFAULTS.bubbleMaxRadiusM);
+    setHeatmapRangeFilterEnabled(DISPLAY_DEFAULTS.heatmapRangeFilterEnabled);
+    setTravelTimeLabelMode(defaultTravelTimeLabelMode(!!departure));
+    setHeatmapMultiParams(new Set([DISPLAY_DEFAULTS.heatmapParam]));
+    setTrainDemoPlaying(false);
+    setTrainDemoRealTime(false);
+    setArrivalBanner(null);
+    saveTerrain3dGroundStyle(TERRAIN3D_DEFAULT_GROUND_STYLE);
+    notifyMessage(translateUI('displayResetDone', currentLanguage));
+  };
 
   const routeFinder = useMemo(() => {
     const finder = new RouteFinder();
@@ -5660,9 +5698,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
             <div style={{ padding: L.sp['2xl'], maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
               {/* 区間外路線を半透明で表示 */}
               <div style={{ marginBottom: L.sp.lg }}>
-                <Checkbox theme={theme} size="sm" checked={showDimmedMapRoutes} onChange={setShowDimmedMapRoutes}>
-                    {translateUI('showOutsideSegmentRoutes', currentLanguage)}
-                  </Checkbox>
+                <SettingToggle theme={theme} checked={showDimmedMapRoutes} onChange={setShowDimmedMapRoutes} label={translateUI('showOutsideSegmentRoutes', currentLanguage)} />
               </div>
               <div style={{ marginBottom: L.sp.lg }}>
                 <div style={{
@@ -5711,9 +5747,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   borderRadius: L.r.control,
                   backgroundColor: showTravelTimeOverlay ? tintColor(SEMANTIC.departure, 0.08) : colors.surfaceElevated
                 }}>
-                  <Checkbox theme={theme} size="sm" checked={showTravelTimeOverlay} onChange={setShowTravelTimeOverlay}>
-                    <Timer size={14} aria-hidden style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />{translateUI('travelTimeOverlay', currentLanguage)}
-                  </Checkbox>
+                  <SettingToggle theme={theme} checked={showTravelTimeOverlay} onChange={setShowTravelTimeOverlay} icon={<Timer />} label={translateUI('travelTimeOverlay', currentLanguage)} />
                   {showTravelTimeOverlay && travelTimeMap.size === 0 && (
                     <div style={{ marginTop: L.sp.sm, paddingLeft: L.sp['3xl'], fontSize: FS.caption, color: colors.textSecondary }}>
                       {translateUI('calculating', currentLanguage)}
@@ -5736,9 +5770,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                 backgroundColor: colors.surfaceElevated
               }}>
                 <div style={{ marginBottom: L.sp.md }}>
-                  <Checkbox theme={theme} size="sm" checked={timeFilterEnabled} onChange={setTimeFilterEnabled}>
-                    {translateUI('timeFilter', currentLanguage)}
-                  </Checkbox>
+                  <SettingToggle theme={theme} checked={timeFilterEnabled} onChange={setTimeFilterEnabled} label={translateUI('timeFilter', currentLanguage)} />
                 </div>
 
                 {timeFilterEnabled && (
@@ -6543,9 +6575,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                           onClick={() => setHeatmapCustomRange({ min: effectiveMin, max: rnd1(effectiveMax + step) })} />
                       </div>
                       {heatmapEnabled && (
-                        <Checkbox theme={theme} size="sm" checked={heatmapRangeFilterEnabled} onChange={setHeatmapRangeFilterEnabled}>
-                            {translateUI('heatmapRangeFilter', currentLanguage)}
-                          </Checkbox>
+                        <SettingToggle theme={theme} checked={heatmapRangeFilterEnabled} onChange={setHeatmapRangeFilterEnabled} label={translateUI('heatmapRangeFilter', currentLanguage)} />
                       )}
                     </div>
                   )}
@@ -6959,6 +6989,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     }}
                     mapConfig={mapConfig}
                     onImportConfig={handleImportConfig}
+                    onResetDisplaySettings={resetDisplaySettings}
                     getUserData={getUserData}
                     stationLabelFontSize={stationLabelFontSize}
                     onStationLabelFontSizeChange={() => {}}
@@ -7252,6 +7283,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         }}
                         mapConfig={mapConfig}
                         onImportConfig={handleImportConfig}
+                        onResetDisplaySettings={resetDisplaySettings}
                     getUserData={getUserData}
                         stationLabelFontSize={stationLabelFontSize}
                         onStationLabelFontSizeChange={() => {}}

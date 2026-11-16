@@ -27,7 +27,7 @@ import { translateStation, translateUI, type Language } from '../utils/translati
 import { FLOATING_PANEL, CONTROL_SIZE, aboveFloatingButtons } from './ui/atoms/controlSize';
 import Button from './ui/atoms/Button';
 import Stepper from './ui/molecules/Stepper';
-import Checkbox from './ui/atoms/Checkbox';
+import SettingToggle from './ui/atoms/SettingToggle';
 import FloatingIconButton from './ui/atoms/FloatingIconButton';
 import CollapsiblePanel from './ui/molecules/CollapsiblePanel';
 import SourceDisclosure from './ui/molecules/SourceDisclosure';
@@ -705,15 +705,10 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
                 decreaseLabel="-"
                 increaseLabel="+"
               />
-              <Checkbox
-                theme={theme}
-                size="sm"
+              <SettingToggle theme={theme}
                 checked={showGround && !groundError}
                 disabled={groundError}
-                onChange={setShowGround}
-              >
-                {translateUI('terrain3dGroundLabel', language)}
-              </Checkbox>
+                onChange={setShowGround} label={translateUI('terrain3dGroundLabel', language)} />
               {showGround && !groundError && <SegmentedControl
                 theme={theme} size="sm" ariaLabel={translateUI('terrain3dGroundStyle', language)}
                 value={groundStyle} onChange={setGroundStyle}
@@ -721,9 +716,7 @@ const Terrain3DView: React.FC<Terrain3DViewProps> = ({
                   value, label: translateUI(value === 'simple' ? 'terrain3dGroundSimple' : 'terrain3dGroundElevation', language),
                 }))}
               />}
-              <Checkbox theme={theme} size="sm" checked={showStations} onChange={setShowStations}>
-                {translateUI('terrain3dStationsLabel', language)}
-              </Checkbox>
+              <SettingToggle theme={theme} checked={showStations} onChange={setShowStations} label={translateUI('terrain3dStationsLabel', language)} />
               {showStations && <SegmentedControl
                 theme={theme} size="sm" ariaLabel={translateUI('terrain3dStationStyleLabel', language)}
                 value={stationDisplayStyle} onChange={setStationDisplayStyle}

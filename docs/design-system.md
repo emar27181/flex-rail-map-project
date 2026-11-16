@@ -230,6 +230,8 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 
 ### どの部品を使うか
 
+「表示を初期設定に戻す」は表示設定の末尾に置く。通常の初期表示と同じ `DISPLAY_DEFAULTS` や共有の寸法トークンを使い、駅選択・乗車ログ・駅のメモの保存領域は操作しない。
+
 地図の所要時間ラベルは `components/map/travelTimeLabel.ts` の `TRAVEL_TIME_LABEL` と
 `travelTimeLabelLayout()` を使う（2026-10-09）。文字は `FS.caption`、角丸は `L.r.pill`。
 元の固定径の円形を維持する。
@@ -258,13 +260,15 @@ padding は 2/3/5/6/8/10px、角丸は 3/4/6/8/10px とばらついていたも�
 | 1行入力・時刻・数値 | `TextField` |
 | 複数行入力 | `TextArea` |
 | 選択欄 | `Select` |
-| チェックの行 | `Checkbox` |
+| 確認フォームのチェック行 | `Checkbox` |
+| 表示設定のオン・オフ | `SettingToggle`（`Chip` と主操作色を共用。色と印、`aria-pressed` で状態を伝える） |
+| 設定の初期化など、反映前に確認が必要な操作 | `ConfirmationDialog`（見出し・説明・キャンセル・確定。最初はキャンセルにフォーカスし、Escape で取り消す） |
 | 排他選択の行 | `Radio` |
 | 行の見た目は自前で、印だけ欲しい | `ToggleMark` |
 | 横長のオン・オフ | `Switch` |
 | つまみで数値を選ぶ | `Slider` |
 | −／＋の増減行 | `Stepper`（molecule） |
-| 排他選択のボタン列 | `SegmentedControl`（molecule） |
+| 排他選択のボタン列 | `SegmentedControl`（molecule）。表示設定の短い選択肢は `variant="chips"` で折り返す |
 | 排他選択を1本の枠に収め、選んだ位置を背景のスライドで示す | `SlideSegmentedControl`（`SegmentedControl` の `variant="slide"` から使う実体） |
 | 選んだものを並べ、1つずつ外せるタグ（経由駅など） | `RemovableTag`（削除ボタン付き） |
 | 役割の色で塗った入力欄（出発=緑・到着=赤。値を消すボタン付き）。出発駅・到着駅・「集合駅を探す」で増やす出発駅は**すべてこの部品**で出す（同じ入力欄を別々に手書きしない。追加の出発駅だけ灰色のタグ・点線の枠・別の幅・別の文言にしない） | `RoleField`（molecule。`TextField` + `IconButton`。役割の色は `ROLE_FIELD_COLOR`（= `SEMANTIC`）、枠は同じ色の実線。駅の知識は持たない） |

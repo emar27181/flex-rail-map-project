@@ -8,7 +8,7 @@ import type { StationStats } from '../../data/stationStats';
 import MapConfigPanel from './MapConfigPanel';
 import VersionPanel from './VersionPanel';
 import type { MapConfig } from './MapConfigPanel';
-import Checkbox from '../ui/atoms/Checkbox';
+import SettingToggle from '../ui/atoms/SettingToggle';
 import { FS, TARGET, SEMANTIC, NEUTRAL, MAP_LABEL, ROUTE_LINE, DISPLAY_MODE_COLORS } from '../../constants/ui';
 import type { LabelColorOverride } from '../../constants/ui';
 import RouteSwitchBoard from './RouteSwitchBoard';
@@ -16,12 +16,12 @@ import Button from '../ui/atoms/Button';
 import SegmentedControl from '../ui/molecules/SegmentedControl';
 import Stepper from '../ui/molecules/Stepper';
 import TagToggleGroup, { type TagToggleItem } from '../ui/molecules/TagToggleGroup';
-import { TrainTrack, CircleDot, Network, Mountain } from 'lucide-react';
+import { TrainTrack, CircleDot, Network, Mountain, RotateCcw } from 'lucide-react';
 import { ALERT_MINUTE_OPTIONS } from '../../utils/arrivalAlert';
 import Select from '../ui/atoms/Select';
-import Radio from '../ui/atoms/Radio';
 import Slider from '../ui/atoms/Slider';
 import { L } from './legendStyles';
+import ConfirmationDialog from '../ui/molecules/ConfirmationDialog';
 import DisclosureIndicator from '../ui/atoms/DisclosureIndicator';
 import StationMemoPanel from '../StationMemoPanel';
 import type { MapViewMode } from '../../constants/mapViewMode';
@@ -116,6 +116,7 @@ interface LegendRouteListProps {
   onShowRouteLineChange: (v: boolean) => void;
   mapConfig: MapConfig;
   onImportConfig: (config: MapConfig) => void;
+  onResetDisplaySettings: () => void;
   /** 設定ファイルに入れる利用者のデータ（乗車ログ・メモ・履歴）を書き出すときに集める */
   getUserData?: () => import('../../utils/userDataBundle').UserDataBundle;
   /** 複数駅の共通路線: 指定した路線を地図に出す */
@@ -213,6 +214,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onShowRouteLineChange,
   mapConfig,
   onImportConfig,
+  onResetDisplaySettings,
   getUserData,
   stationLabelFontSize,
   onStationLabelFontSizeChange,
@@ -256,6 +258,7 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   const [touchDragKey, setTouchDragKey] = useState<RouteKey | null>(null);
   const ROUTE_LIST_LIMIT = 10;
   const [routeListExpanded, setRouteListExpanded] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
   const [groupLabelOpen,  setGroupLabelOpen]  = useState(false);
   const [groupFilterOpen, setGroupFilterOpen] = useState(false);
   const [groupMapOpen,    setGroupMapOpen]    = useState(false);
@@ -662,19 +665,13 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
         </div>
         {mapViewMode === 'bubble' && (
           <div style={{ marginTop: L.sp.sm }}>
-            <div style={{ display: 'flex', gap: L.sp.sm, marginBottom: L.sp.sm }}>
-              {(['circle', 'square'] as const).map(shape => (
-                <Radio
-                  key={shape}
-                  theme={theme}
-                  size="sm"
-                  name="bubbleShape"
-                  checked={bubbleShape === shape}
-                  onChange={() => onBubbleShapeChange(shape)}
-                >
-                  {shape === 'circle' ? translateUI('bubbleCircle', language) : translateUI('bubbleSquare', language)}
-                </Radio>
-              ))}
+            <div style={{ marginBottom: L.sp.sm }}>
+              <SegmentedControl variant="chips" theme={theme}
+                ariaLabel={translateUI('bubbleShapeLabel', language)}
+                value={bubbleShape} onChange={onBubbleShapeChange} options={[
+                  { value: 'circle', label: translateUI('bubbleCircle', language) },
+                  { value: 'square', label: translateUI('bubbleSquare', language) },
+                ]} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm }}>
               <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('bubbleMaxRadius', language)}</span>
@@ -701,41 +698,25 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {/* ── 駅ラベル ── */}
             {sectionHeader(translateUI('settingsGroupLabel', language), groupLabelOpen, () => setGroupLabelOpen(v => !v))}
             {groupLabelOpen && (
-              <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
-                <Checkbox theme={theme} checked={showTransferStationsOnly} onChange={onShowTransferStationsOnlyChange}>
-                  {translateUI('showOnlyTransferStations', language)}
-                </Checkbox>
-                <Checkbox theme={theme} checked={showTravelTimes} onChange={onShowTravelTimesChange}>
-                  {translateUI('showTravelTimes', language)}
-                </Checkbox>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs, padding: `${L.sp.xs} 0 ${L.sp.sm} ${L.sp.xs}` }}>
+                <SettingToggle theme={theme} checked={showTransferStationsOnly} onChange={onShowTransferStationsOnlyChange} label={translateUI('showOnlyTransferStations', language)} />
+                <SettingToggle theme={theme} checked={showTravelTimes} onChange={onShowTravelTimesChange} label={translateUI('showTravelTimes', language)} />
                 {showTravelTimes && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, paddingLeft: L.sp['4xl'], marginBottom: L.sp.xxs }}>
-                    <span style={{ fontSize: FS.caption, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{translateUI('travelTimeLabelMode', language)}:</span>
-                    {(['interval', 'cumulative'] as const).map(mode => (
-                      <Radio
-                          theme={theme}
-                          size="sm"
-                          name="travelTimeLabelMode"
-                          checked={travelTimeLabelMode === mode}
-                          onChange={() => onTravelTimeLabelModeChange(mode)}
-                        >
-                          {mode === 'interval' ? translateUI('travelTimeLabelInterval', language) : `${translateUI('travelTimeLabelCumulative', language)}（実装中）`}
-                        </Radio>
-                    ))}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: L.sp.xs, paddingLeft: L.sp['2xl'] }}>
+                    <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>{translateUI('travelTimeLabelMode', language)}</span>
+                    <SegmentedControl variant="chips" theme={theme}
+                      ariaLabel={translateUI('travelTimeLabelMode', language)}
+                      value={travelTimeLabelMode} onChange={onTravelTimeLabelModeChange} options={[
+                        { value: 'interval', label: translateUI('travelTimeLabelInterval', language) },
+                        { value: 'cumulative', label: translateUI('travelTimeCumulativeDraft', language) },
+                      ]} />
                   </div>
                 )}
-                <Checkbox theme={theme} checked={showStationNumbers} onChange={onShowStationNumbersChange}>
-                  {translateUI('showStationCodes', language)}
-                </Checkbox>
-                <Checkbox theme={theme} checked={autoSetDepartureFromLocation} onChange={onAutoSetDepartureFromLocationChange}>
-                  {translateUI('useLocationFeatures', language)}
-                </Checkbox>                <Checkbox theme={theme} checked={showTrainStatusPanel} onChange={onShowTrainStatusPanelChange}>
-                  {translateUI('showTrainStatusPanel', language)}
-                </Checkbox>
+                <SettingToggle theme={theme} checked={showStationNumbers} onChange={onShowStationNumbersChange} label={translateUI('showStationCodes', language)} />
+                <SettingToggle theme={theme} checked={autoSetDepartureFromLocation} onChange={onAutoSetDepartureFromLocationChange} label={translateUI('useLocationFeatures', language)} />
+                <SettingToggle theme={theme} checked={showTrainStatusPanel} onChange={onShowTrainStatusPanelChange} label={translateUI('showTrainStatusPanel', language)} />
                 {/* 降車駅アラーム。時刻表ではなく現在地から残り時間を出して知らせる */}
-                <Checkbox theme={theme} checked={arrivalAlertEnabled} onChange={onArrivalAlertEnabledChange}>
-                  {translateUI('arrivalAlert', language)}
-                </Checkbox>
+                <SettingToggle theme={theme} checked={arrivalAlertEnabled} onChange={onArrivalAlertEnabledChange} label={translateUI('arrivalAlert', language)} />
                 {arrivalAlertEnabled && (
                   <div style={{ paddingLeft: L.sp['4xl'], paddingBottom: L.sp.xs }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm }}>
@@ -760,13 +741,9 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                     </div>
                   </div>
                 )}
-                <Checkbox theme={theme} checked={showStationNames} onChange={onShowStationNamesChange}>
-                  {translateUI('showStationNames', language)}
-                </Checkbox>
+                <SettingToggle theme={theme} checked={showStationNames} onChange={onShowStationNamesChange} label={translateUI('showStationNames', language)} />
                 {/* 主要駅の常時表示。しきい値（何路線以上か）も変えられるようにする */}
-                <Checkbox theme={theme} checked={alwaysVisibleStationsEnabled} onChange={onAlwaysVisibleStationsEnabledChange}>
-                  {translateUI('alwaysShowMajorStations', language)}
-                </Checkbox>
+                <SettingToggle theme={theme} checked={alwaysVisibleStationsEnabled} onChange={onAlwaysVisibleStationsEnabledChange} label={translateUI('alwaysShowMajorStations', language)} />
                 {alwaysVisibleStationsEnabled && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: L.sp.sm, padding: `${L.sp.xxs} 0 ${L.sp.xs} ${L.sp['4xl']}` }}>
                     <span style={{ fontSize: FS.caption, color: colors.textSecondary }}>
@@ -787,13 +764,9 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
                   </div>
                 )}
                 {language === 'japanese' && (
-                  <Checkbox theme={theme} checked={showFurigana} onChange={onShowFuriganaChange}>
-                  {translateUI('showFurigana', language)}
-                </Checkbox>
+                  <SettingToggle theme={theme} checked={showFurigana} onChange={onShowFuriganaChange} label={translateUI('showFurigana', language)} />
                 )}
-                <Checkbox theme={theme} checked={showPerRouteStationTimes} onChange={onShowPerRouteStationTimesChange}>
-                  {translateUI('showPerRouteStationTimes', language)}
-                </Checkbox>
+                <SettingToggle theme={theme} checked={showPerRouteStationTimes} onChange={onShowPerRouteStationTimesChange} label={translateUI('showPerRouteStationTimes', language)} />
               </div>
             )}
 
@@ -817,38 +790,22 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             {/* ── 駅フィルター ── */}
             {sectionHeader(translateUI('settingsGroupFilter', language), groupFilterOpen, () => setGroupFilterOpen(v => !v))}
             {groupFilterOpen && (
-              <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
-                <Checkbox theme={theme} checked={showExpressStationsOnly} onChange={onShowExpressStationsOnlyChange}>
-                  {translateUI('showOnlyExpressStations', language)}
-                </Checkbox>
-                <Checkbox theme={theme} checked={showFullRouteStations} onChange={onShowFullRouteStationsChange}>
-                  {translateUI('showFullRouteStations', language)}
-                </Checkbox>
-                <Checkbox theme={theme} checked={showRouteRecommendationsPanel} onChange={onShowRouteRecommendationsPanelChange}>
-                  {translateUI('showRouteRecommendationsPanel', language)}
-                </Checkbox>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs, padding: `${L.sp.xs} 0 ${L.sp.sm} ${L.sp.xs}` }}>
+                <SettingToggle theme={theme} checked={showExpressStationsOnly} onChange={onShowExpressStationsOnlyChange} label={translateUI('showOnlyExpressStations', language)} />
+                <SettingToggle theme={theme} checked={showFullRouteStations} onChange={onShowFullRouteStationsChange} label={translateUI('showFullRouteStations', language)} />
+                <SettingToggle theme={theme} checked={showRouteRecommendationsPanel} onChange={onShowRouteRecommendationsPanelChange} label={translateUI('showRouteRecommendationsPanel', language)} />
               </div>
             )}
 
             {/* ── 地図表示 ── */}
             {sectionHeader(translateUI('settingsGroupMap', language), groupMapOpen, () => setGroupMapOpen(v => !v))}
             {groupMapOpen && (
-              <div style={{ paddingLeft: L.sp.xs, marginBottom: L.sp.xs }}>
-                <Checkbox theme={theme} checked={showDimmedRoutes} onChange={onShowDimmedRoutesChange}>
-                  {translateUI('showOutsideSegmentRoutes', language)}
-                </Checkbox>
-                <Checkbox theme={theme} checked={showRouteLine} onChange={onShowRouteLineChange}>
-                  {translateUI('showRouteLines', language)}
-                </Checkbox>
-                <Checkbox theme={theme} checked={showStationTierBadges} onChange={onShowStationTierBadgesChange}>
-                  {translateUI('transferHighlight', language)}
-                </Checkbox>
-                <Checkbox theme={theme} checked={showStationTooltip} onChange={onShowStationTooltipChange}>
-                  {translateUI('stationTooltipLabel', language)}
-                </Checkbox>
-                <Checkbox theme={theme} checked={showOsmTiles} onChange={onShowOsmTilesChange}>
-                  {translateUI('showMapTiles', language)}
-                </Checkbox>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.xs, padding: `${L.sp.xs} 0 ${L.sp.sm} ${L.sp.xs}` }}>
+                <SettingToggle theme={theme} checked={showDimmedRoutes} onChange={onShowDimmedRoutesChange} label={translateUI('showOutsideSegmentRoutes', language)} />
+                <SettingToggle theme={theme} checked={showRouteLine} onChange={onShowRouteLineChange} label={translateUI('showRouteLines', language)} />
+                <SettingToggle theme={theme} checked={showStationTierBadges} onChange={onShowStationTierBadgesChange} label={translateUI('transferHighlight', language)} />
+                <SettingToggle theme={theme} checked={showStationTooltip} onChange={onShowStationTooltipChange} label={translateUI('stationTooltipLabel', language)} />
+                <SettingToggle theme={theme} checked={showOsmTiles} onChange={onShowOsmTilesChange} label={translateUI('showMapTiles', language)} />
                 <Stepper
                   theme={theme}
                   label={translateUI('settingsIconSize', language)}
@@ -888,6 +845,20 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
 
         </div>
       </div>
+
+      <div style={{ marginTop: L.sp.sm, marginBottom: L.sp['2xl'] }}>
+        <Button theme={theme} variant="outline" size="sm" icon={<RotateCcw />} onClick={() => setConfirmReset(true)}>
+          {translateUI('displayReset', language)}
+        </Button>
+      </div>
+      {confirmReset && <ConfirmationDialog theme={theme}
+        title={translateUI('displayResetTitle', language)}
+        description={translateUI('displayResetDescription', language)}
+        cancelLabel={translateUI('displayResetCancel', language)}
+        confirmLabel={translateUI('displayResetConfirm', language)}
+        onCancel={() => setConfirmReset(false)}
+        onConfirm={() => { setConfirmReset(false); onResetDisplaySettings(); }}
+      />}
 
       {/* ═══ セクション3: 設定の保存/読み込み ═══ */}
       <MapConfigPanel config={mapConfig} theme={theme} language={language} onImport={onImportConfig} getUserData={getUserData} />

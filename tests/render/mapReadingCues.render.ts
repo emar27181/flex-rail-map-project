@@ -54,3 +54,38 @@ test('終電がある区間だけを実線にし、試作表記は駅選択を�
   await page.locator('[data-station-selector]').first().getByRole('heading').first().click();
   await expect(notice).toBeVisible();
 });
+
+test('表示設定は押下式で切り替わり、初期化は確認したときだけ反映される', async ({ page }) => {
+  await page.goto('/?from=fujisawa&to=tokyo&numbers=1');
+  await expect(page.locator('.leaflet-container').first()).toBeVisible();
+  await page.getByText(/^(表示路線の切替|表示切替)$/).first().click();
+  await page.getByRole('button', { name: '駅ラベル', exact: true }).click();
+
+  const names = page.getByRole('button', { name: '駅名を表示', exact: true });
+  const numbers = page.getByRole('button', { name: '駅コードを表示', exact: true });
+  const interval = page.getByRole('button', { name: '間隔', exact: true });
+  const reset = page.getByRole('button', { name: '表示を初期設定に戻す', exact: true });
+  const dialog = page.getByRole('dialog', { name: '表示を初期設定に戻しますか？' });
+
+  await expect(names).toHaveAttribute('aria-pressed', 'true');
+  await names.click();
+  await expect(names).toHaveAttribute('aria-pressed', 'false');
+  await interval.click();
+  await expect(interval).toHaveAttribute('aria-pressed', 'true');
+  await reset.click();
+  await expect(dialog.getByRole('button', { name: 'キャンセル' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(names).toHaveAttribute('aria-pressed', 'false');
+
+  await reset.click();
+  await dialog.getByRole('button', { name: '初期設定に戻す', exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(names).toHaveAttribute('aria-pressed', 'true');
+  await expect(numbers).toHaveAttribute('aria-pressed', 'false');
+  await expect(interval).toHaveAttribute('aria-pressed', 'false');
+  const params = new URL(page.url()).searchParams;
+  expect(params.get('from')).toBe('fujisawa');
+  expect(params.get('to')).toBe('tokyo');
+  expect(params.has('numbers')).toBe(false);
+});

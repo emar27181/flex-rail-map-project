@@ -74,6 +74,7 @@ const Chip: React.FC<ChipProps> = ({
 
   return (
     <button
+      type="button"
       {...dataAttr}
       onClick={onClick}
       disabled={disabled}
