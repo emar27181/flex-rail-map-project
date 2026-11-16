@@ -84,7 +84,7 @@ const geometry: TrackGeometry = {
     name: 'OpenStreetMap',
     url: 'https://www.openstreetmap.org/copyright',
     license: 'ODbL 1.0 (c) OpenStreetMap contributors',
-    retrievedAt: new Date().toISOString().slice(0, 10),
+    retrievedAt: raw.retrievedAt ?? new Date().toISOString().slice(0, 10),
     crs: 'EPSG:4326',
     sourceIds: [`relation/${rel.id}`],
     note: `route=train リレーションの way をつなぎ、駅の位置で区切った。${SIMPLIFY_M}m の許容誤差で間引き。bridge/tunnel/layer は構造・上下関係として残し、高さには変換していない。標高は持たない。`,

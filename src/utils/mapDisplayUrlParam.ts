@@ -1,5 +1,5 @@
 /** Optional initial display settings; invalid values are ignored. */
-import type { MapViewMode } from '../constants/mapViewMode';
+import { MAP_VIEW_MODES, TRACK_GEOMETRY_VIEW, type MapViewMode } from '../constants/mapViewMode';
 import { STAT_PARAMS, type StationStats } from '../data/stationStats';
 import type { Terrain3DVersion } from './terrain3d';
 import type { Terrain3DGroundStyle } from './terrain3dAppearance';
@@ -9,7 +9,7 @@ export const HEATMAP_URL_KEYS = STAT_PARAMS.map(param => param.key);
 
 /** 駅名の前に駅番号を出すか（記事の地図デモ・共有リンク）。1 / 0 */
 export const STATION_NUMBERS_PARAM = 'numbers';
-/** 表示方式（realistic / schematic / bubble / terrain3d） */
+/** 表示方式 */
 export const VIEW_PARAM = 'view';
 
 export interface DisplayUrlOptions {
@@ -24,8 +24,9 @@ export interface DisplayUrlOptions {
 export function parseDisplayUrlParams(search: string): DisplayUrlOptions {
   const params = new URLSearchParams(search);
   const result: DisplayUrlOptions = {};
-  const view = params.get(VIEW_PARAM);
-  if (view === 'realistic' || view === 'schematic' || view === 'bubble' || view === 'terrain3d') result.view = view;
+  const view = MAP_VIEW_MODES.find(mode => mode === params.get(VIEW_PARAM));
+  if (view) result.view = view;
+  else if (params.get('experiment') === TRACK_GEOMETRY_VIEW) result.view = TRACK_GEOMETRY_VIEW;
   const numbers = params.get(STATION_NUMBERS_PARAM);
   if (numbers === '1' || numbers === 'true') result.stationNumbers = true;
   if (numbers === '0' || numbers === 'false') result.stationNumbers = false;
@@ -45,4 +46,16 @@ export function parseDisplayUrlParams(search: string): DisplayUrlOptions {
 }
 export function initialDisplayUrlOptions(): DisplayUrlOptions {
   return typeof window === 'undefined' ? {} : parseDisplayUrlParams(window.location.search);
+}
+
+/** 旧プレビューリンクも正規の表示方式に変換し、共有URLに反映する。 */
+export function syncTrackGeometryViewToUrl(view: MapViewMode): void {
+  const url = new URL(window.location.href);
+  const params = url.searchParams;
+  const oldExperiment = params.get('experiment') === TRACK_GEOMETRY_VIEW;
+  if (view !== TRACK_GEOMETRY_VIEW && params.get(VIEW_PARAM) !== TRACK_GEOMETRY_VIEW && !oldExperiment) return;
+  if (oldExperiment) params.delete('experiment');
+  if (view === 'realistic') params.delete(VIEW_PARAM);
+  else params.set(VIEW_PARAM, view);
+  if (url.href !== window.location.href) window.history.replaceState(window.history.state, '', url);
 }

@@ -5,6 +5,8 @@
     "src/data/stationStats.ts",
     "src/data/routes.ts",
     "src/utils/trackGeometry.ts",
+    "src/utils/trackGeometryPrototype.ts",
+    "src/utils/mapDisplayUrlParam.ts",
     "src/utils/renderedRouteMidpoint.ts",
     "src/utils/routeAdjacency.ts",
     "src/components/ui/atoms/circularNumberBadge.ts",

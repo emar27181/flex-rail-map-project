@@ -21,7 +21,7 @@ describe('終電モードは元のUIだけで操作する（回帰防止）', ()
     const selector = read('src/components/StationSelector.tsx');
     expect(map).toContain("get('experiment') === 'last-train'");
     expect(map).toContain('<MapContainer');
-    expect(map).toContain('lastTrainFilterActive && mapViewMode');
+    expect(map).toContain('lastTrainFilterActive && isRailwayMapView && demoDrawnLines.map');
     expect(map).toContain('renderStationMarker(st, rk');
     expect(map).toContain('demoDrawnLines.map(line =>');
     expect(map.match(/<StationSelector/g)?.length).toBe(3);

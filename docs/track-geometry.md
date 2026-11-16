@@ -20,7 +20,7 @@
 
 ### データの形
 
-- 隣り合う2駅ごとに1区間（`from` → `to` は路線データの並び順）。`points` は駅と駅の**途中の点だけ**（両端の駅は含めない）
+- 隣り合う2駅ごとに1区間（`from` → `to` は路線データの並び順）。`points` は駅と駅の**途中の点だけ**（線路上の両端は `trackEnds` に保持する）
 - 座標は WGS84（EPSG:4326）、`[緯度, 経度]`、小数6桁（約0.1m）。3m の許容誤差で間引く
 - `structures`: 区間の中の構造。OSM の `bridge` → `bridge`、`tunnel` → `tunnel`、どちらも無い → `untagged`（**地上とは限らない**）。`layer` は OSM の値そのまま
 
@@ -82,27 +82,16 @@ npm run test:data && npm run test:types && npm run test:unit && npm run build
 - **線形のデータはまだ無い。** サンドボックスから Overpass・OSM・Geofabrik・国土数値情報に接続できない（プロキシが 403）ため
 - 再開に必要なこと: 環境の設定で `overpass-api.de`（または `overpass.private.coffee`）への接続を許可する。上の手順1〜3で小田急小田原線を取り込める
 
-## 試作: 2D の地図を実際の線路の形で描く（2026-11-13）
+## 2D の「実際の線路の形」（2026-11-16）
 
-**`/?experiment=track-geometry` を付けると、駅の間を実際の線路の形（カーブ・分岐の手前の曲がり）で描く。** 通常の画面は変わらない。
-サンドボックスから OSM に接続できなくても、立体表示用に受け取った線形（`public/data/terrain3d-lines-v2.json`, OSM 由来・80路線）を駅で区切り直して使える。
+「表示切替」→「表示モード」→「ほかの表示モード」から切り替える。共有URLは `?view=track-geometry`。以前の `?experiment=track-geometry` も開ける。線路データがない区間は駅間を直線で描く。
 
-| 置き場所 | 中身 |
-|---|---|
-| `scripts/track-geometry/build-from-terrain3d-v2.mts` | 立体表示用の線形を、駅の位置で区切って `TrackSection` にする（`splitAtStations` で検証し、通った路線だけ書き出す） |
-| `public/data/track-geometry-prototype.json` | 上のスクリプトの出力（52路線）。除外した路線は `meta.skipped` に理由つきで残す |
-| `src/utils/trackGeometryPrototype.ts` | 試作のURLパラメータの判定と、JSON を `TrackGeometry` にする変換 |
-| `src/components/RailwayMap.tsx` の `trackGeometryOf` | 本番の線形（`TRACK_GEOMETRY`）が先、無ければ試作。主線・薄い線のどちらも `offsetPositions` を通るので同じに描かれる |
-| `tests/unit/utils/trackGeometryPrototype.test.ts` | 出典・検証・「駅の間を飛ばない・遠回りしない」・標高を持たないことを確かめる |
-| `tests/render/trackGeometry.render.ts` | パラメータがあるときだけ線の頂点が増える／データが読めなくても直線で描ける |
-
-- 作り直し: `npx tsx scripts/track-geometry/build-from-terrain3d-v2.mts`（ネットワーク不要）
-- **駅と線の距離の基準は試作では 300m**（本番の基準は上の表のとおり 150m）。ターミナル駅は駅舎の中心と線路が離れるため、150m だと52路線ではなく35路線になる。
-  本番に取り込むときは基準を 150m に戻し、外れる駅は駅の座標側を確かめる
-- 構造の対応は 地上 → `untagged`（地上とは限らない）／高架 → `bridge`／地下 → `tunnel`。高さ（m）には変換しない
-- 除外した28路線は直線のまま: 山手線など環状線・折り返しのある路線（線上の順番が逆）、駅が線から数km離れている路線（東海道線の熱海、総武線快速の東京 など）、
-  駅の間の点が飛んでいる路線。線形の元データを直すか、路線ごとに収集（OSM）して取り込む
-- **出典: © OpenStreetMap contributors（ODbL-1.0）。** 試作を本番にするときは、地図の出典表示に OpenStreetMap を明記する
+- 線路上に投影した点で区間をつなぐ。駅マーカーの座標は従来の駅データを使う
+- カバー率の分母は登録済み路線の隣り合う駅間（環状路線の最後の駅から最初の駅への区間を含む）。全国と選択中の路線を別々に算出する
+- `public/data/track-geometry-prototype.json` は OSM の Geofabrik 関東抽出（2026-10-14、ODbL 1.0）由来。`npx tsx scripts/track-geometry/build-from-terrain3d-v2.mts` で再生成できる。元の線形は8mで間引き済み。駅と線路の距離の基準は300mで、52路線を収録
+- 東海道線は別途、OpenStreetMap の [relation 12014184](https://www.openstreetmap.org/relation/12014184)（熱海→東京、2026-11-16取得、[ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/)）から取得。横浜付近のリレーションメンバー2件の順序を共有ノードに沿って入れ替え、270本のwayの連続性と東京〜熱海の20駅間を検証した。駅の代表点と線路の距離は最大95m。WGS84、間引き許容誤差3m
+- 東海道線の再生成: `npx tsx scripts/track-geometry/collect-osm.mts --route jrTokaidoMainLine --input data/track-geometry/jrTokaidoMainLine.osm.json`。出典と照合結果は同ディレクトリの `.osm.json` と `.report.json`
+- 2D表示中は地図に「© OpenStreetMap contributors」を表示する
 
 ## 立体（標高）表示（2026-10-13）
 

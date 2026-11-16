@@ -1,0 +1,38 @@
+{
+ "routeKey": "jrTokaidoMainLine",
+ "relation": 12014184,
+ "relationName": "JR東海道本線",
+ "ways": 270,
+ "points": 632,
+ "sections": 20,
+ "expectedSections": 20,
+ "stationDistanceM": {
+  "東京": 37,
+  "新橋": 33,
+  "品川": 32,
+  "川崎": 12,
+  "横浜": 28,
+  "戸塚": 0,
+  "大船": 95,
+  "藤沢": 28,
+  "辻堂": 2,
+  "茅ケ崎": 5,
+  "平塚": 17,
+  "大磯": 14,
+  "二宮": 21,
+  "国府津": 19,
+  "鴨宮": 5,
+  "小田原": 72,
+  "早川": 5,
+  "根府川": 3,
+  "真鶴": 11,
+  "湯河原": 18,
+  "熱海": 26
+ },
+ "structures": {
+  "untagged": 114,
+  "bridge": 80,
+  "tunnel": 21
+ },
+ "problems": []
+}
