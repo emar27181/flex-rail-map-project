@@ -75,8 +75,8 @@ import { trackStationSelect, trackRouteSearch, trackViewSwitch, trackRouteVisibi
 import { DEFAULT_MAP_CENTER } from '../constants/mapDefaults';
 import { saveTerrain3dGroundStyle, TERRAIN3D_DEFAULT_GROUND_STYLE } from '../utils/terrain3dAppearance';
 import { DISPLAY_DEFAULTS, defaultShowTravelTimes, defaultStationNumbers } from '../constants/displayDefaults';
-import type { MapViewMode } from '../constants/mapViewMode';
-import { initialDisplayUrlOptions, clearDisplayUrlOptions } from '../utils/mapDisplayUrlParam';
+import { TRACK_GEOMETRY_VIEW, type MapViewMode } from '../constants/mapViewMode';
+import { clearDisplayUrlOptions, initialDisplayUrlOptions, syncTrackGeometryViewToUrl } from '../utils/mapDisplayUrlParam';
 // 立体（標高）表示は three.js を使うので、開いたときだけ読み込む
 const Terrain3DView = React.lazy(() => import('./Terrain3DView'));
 import { LAST_TRAIN_LINE_STYLE, MAP_PANE_Z, stationMarkerZ, meetingCandidateMarkerZ, ENDPOINT_MARKER_Z, TRAVEL_TIME_MARKER_Z, USER_LOCATION_MARKER_Z, TRAIN_DEMO_MARKER_Z } from '../constants/mapLayers';
@@ -121,7 +121,7 @@ import { buildCorridorRoutes, vertexRanks, offsetPoints } from '../utils/routeOf
 import { TRACK_GEOMETRY } from '../data/trackGeometry';
 import { expandWithGeometry } from '../utils/trackGeometry';
 import { cachedDivIcon } from '../utils/divIconCache';
-import { isTrackGeometryExperiment, toTrackGeometries, TRACK_GEOMETRY_PROTOTYPE_URL, type TrackGeometryPrototypeFile } from '../utils/trackGeometryPrototype';
+import { toTrackGeometries, trackCoverage, TRACK_GEOMETRY_PROTOTYPE_URL, type TrackGeometryPrototypeFile } from '../utils/trackGeometryPrototype';
 import type { TrackGeometry } from '../data/trackGeometry/types';
 import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
@@ -205,22 +205,6 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   // 試作URLのみ。既存の画面・操作部品をそのまま使う。通常のアクセスは完全に従来どおり。
   const [lastTrainDemo] = useState(() => typeof window !== 'undefined'
     && new URLSearchParams(window.location.search).get('experiment') === 'last-train');
-  // 線形（実際の線路の形）の試作。?experiment=track-geometry のときだけ試作データを読み、通常の画面は変えない
-  const [prototypeGeometry, setPrototypeGeometry] = useState<Record<string, TrackGeometry> | null>(null);
-  useEffect(() => {
-    if (typeof window === 'undefined' || !isTrackGeometryExperiment(window.location.search)) return;
-    let cancelled = false;
-    fetch(TRACK_GEOMETRY_PROTOTYPE_URL)
-      .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((file: TrackGeometryPrototypeFile) => { if (!cancelled) setPrototypeGeometry(toTrackGeometries(file)); })
-      .catch(() => { /* 読めなければ今までどおり直線で描く */ });
-    return () => { cancelled = true; };
-  }, []);
-  /** 路線の線形。本番の線形（TRACK_GEOMETRY）が先、無ければ試作 */
-  const trackGeometryOf = useCallback(
-    (routeKey: string): TrackGeometry | undefined => TRACK_GEOMETRY[routeKey] ?? prototypeGeometry?.[routeKey],
-    [prototypeGeometry],
-  );
   // console.log('RailwayMap component initialized');
   const { theme, toggleTheme } = useTheme();
   // URLで共有する見せ方（時刻・所要時間の表示・集合駅の決め方）。開いたときに1回だけ読む（utils/shareStateUrlParams.ts）
@@ -547,6 +531,37 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
   const [tapToggleMode, setTapToggleMode] = useState(true);
   // 地図表示モード
   const [mapViewMode, setMapViewMode] = useState<MapViewMode>(() => lastTrainDemo ? DISPLAY_DEFAULTS.mapViewMode : initialDisplayUrlOptions().view ?? DISPLAY_DEFAULTS.mapViewMode);
+  const trackGeometryEnabled = mapViewMode === TRACK_GEOMETRY_VIEW;
+  const isRailwayMapView = mapViewMode === 'realistic' || trackGeometryEnabled;
+  const [prototypeGeometry, setPrototypeGeometry] = useState<Record<string, TrackGeometry> | 'error' | null>(null);
+  const trackGeometryLoaded = prototypeGeometry !== null && prototypeGeometry !== 'error';
+  useEffect(() => {
+    if (!trackGeometryEnabled || trackGeometryLoaded) return;
+    const controller = new AbortController();
+    fetch(TRACK_GEOMETRY_PROTOTYPE_URL, { signal: controller.signal })
+      .then(response => {
+        if (!response.ok) throw new Error(String(response.status));
+        return response.json() as Promise<TrackGeometryPrototypeFile>;
+      })
+      .then(file => { if (!controller.signal.aborted) setPrototypeGeometry(toTrackGeometries(file)); })
+      .catch(() => { if (!controller.signal.aborted) setPrototypeGeometry('error'); });
+    return () => controller.abort();
+  }, [trackGeometryEnabled, trackGeometryLoaded]);
+  useEffect(() => syncTrackGeometryViewToUrl(mapViewMode), [mapViewMode]);
+
+  const trackGeometries = useMemo(() => ({
+    ...(prototypeGeometry === 'error' ? null : prototypeGeometry),
+    ...TRACK_GEOMETRY,
+  }), [prototypeGeometry]);
+  const trackGeometryOf = useCallback((routeKey: string): TrackGeometry | undefined =>
+    trackGeometryEnabled ? trackGeometries[routeKey] : undefined, [trackGeometries, trackGeometryEnabled]);
+  const nationwideTrackCoverage = useMemo(() =>
+    trackGeometryEnabled ? trackCoverage(Object.entries(routes), trackGeometries) : null,
+  [trackGeometries, trackGeometryEnabled]);
+  const selectedTrackCoverage = useMemo(() =>
+    trackGeometryEnabled ? trackCoverage(Object.entries(routes), trackGeometries, visibleRoutes) : null,
+  [trackGeometries, trackGeometryEnabled, visibleRoutes]);
+
   /** 利用者が表示方式を切り替えたとき（設定パネル）。GA4 に送るのはここだけ（URL・保存した設定での復元は数えない） */
   const changeMapViewMode = (next: MapViewMode) => {
     trackViewSwitch(next, mapViewMode);
@@ -5488,7 +5503,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       // ONにした直後はまだ作られていないので、ここで同じ到着駅のネットワークを求める
       const network = demoNetwork ?? buildDestinationDemoNetwork(arrival.name, maxRouteRecommendations);
       if (network.lines.length > 0) {
-        setMapViewMode('realistic');
+        if (!isRailwayMapView) setMapViewMode(DISPLAY_DEFAULTS.mapViewMode);
         mapRef.current?.fitBounds(
           network.stations.map(st => [st.lat, st.lng] as [number, number]),
           { padding: [24, 24] },
@@ -5496,8 +5511,8 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
       }
     }
   };
-  const geographicMap = mapViewMode === 'realistic' || mapViewMode === 'bubble';
-  const lastTrainLegend = lastTrainFilterActive && mapViewMode === 'realistic';
+  const geographicMap = isRailwayMapView || mapViewMode === 'bubble';
+  const lastTrainLegend = lastTrainFilterActive && isRailwayMapView;
   const mapNotices: MapDataNotice[] = [];
   if (lastTrainLegend) {
     if (demoReachability?.feasibleLegs.some(leg => leg.quality !== 'real')) mapNotices.push('mapLastTrainDemo');
@@ -5511,7 +5526,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
     mapNotices.push('mapEstimatedTimes');
   }
   if (geographicMap && (heatmapEnabled || mapViewMode === 'bubble')) mapNotices.push('mapReferenceStatistics');
-  if (showTrainDemo && mapViewMode === 'realistic' && !lastTrainLegend) mapNotices.push('mapTrainSimulation');
+  if (showTrainDemo && isRailwayMapView && !lastTrainLegend) mapNotices.push('mapTrainSimulation');
 
   const mapFooterBottom = isFullscreen
     ? `max(${L.sp.xs}, env(safe-area-inset-bottom, 0px))`
@@ -5959,7 +5974,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           ? { position: 'absolute', inset: 0, border: 'none' }
           : { height: '600px', width: '100%', border: `1px solid ${colors.border}`, position: 'relative' }
         }>
-          {(mapViewMode === 'realistic' || mapViewMode === 'bubble') ? (
+          {(isRailwayMapView || mapViewMode === 'bubble') ? (
             <MapContainer
               center={mapCenter}
               zoom={mapZoom}
@@ -6071,7 +6086,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               ))}
 
               {/* 非表示路線（半透明・クリック可能）─ バブルモードでは非表示 */}
-              {!rideLogActive && (!lastTrainFilterActive || mapViewMode === 'realistic') && mapViewMode !== 'bubble' && showDimmedMapRoutes && Object.entries(routes)
+              {!rideLogActive && (!lastTrainFilterActive || isRailwayMapView) && mapViewMode !== 'bubble' && showDimmedMapRoutes && Object.entries(routes)
                 .filter(([rk]) => (lastTrainFilterActive ? !demoDrawnKeys.has(rk as RouteKey) : !visibleRoutes.has(rk as RouteKey)))
                 .map(([rk, stationList]) => {
                   const rKey = rk as RouteKey;
@@ -6167,7 +6182,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                   降りた駅 = 路線色の駅名札 / 降りていない駅 = 非活性の灰色（ヒートマップの「データなし」と同じ色）
                 線のタップの判定は地図の薄い線を切り替えるときと同じ（36pxの太い透明の線）
               */}
-              {rideLogActive && mapViewMode === 'realistic' && (
+              {rideLogActive && isRailwayMapView && (
                 <>
                   {Object.entries(routes).map(([rk, stationList]) => {
                     const rKey = rk as RouteKey;
@@ -6230,7 +6245,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               )}
 
               {/* 終電デモ専用の表示切替。基盤は既存Leaflet地図/共通ルート色/駅マーカーを再利用。 */}
-              {lastTrainFilterActive && mapViewMode === 'realistic' && demoDrawnLines.map(line => {
+              {lastTrainFilterActive && isRailwayMapView && demoDrawnLines.map(line => {
                 const rk = line.routeKey;
                 const base = line.circular ? [...line.stations, line.stations[0]] : line.stations;
                 const color = adjustRouteColorForTheme(routeColors[rk], theme);
@@ -6437,7 +6452,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           )}
 
           {/* ヒートマップ凡例 */}
-          {(heatmapEnabled || mapViewMode === 'bubble') && (mapViewMode === 'realistic' || mapViewMode === 'bubble') && (() => {
+          {(heatmapEnabled || mapViewMode === 'bubble') && (isRailwayMapView || mapViewMode === 'bubble') && (() => {
             const isCompositeMode = heatmapMultiParams.size >= 2;
             const meta = STAT_PARAMS.find(p => p.key === heatmapParam);
             const gradientCss = buildGradientCss('to right');
@@ -6647,7 +6662,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
 
           {/* 列車位置デモ コントロールパネル */}
-          {showTrainDemo && mapViewMode === 'realistic' && (
+          {showTrainDemo && isRailwayMapView && (
             <div style={{
               position: 'absolute', bottom: mapNoticeBottom, left: '50%', transform: 'translateX(-50%)',
               zIndex: 1001,
@@ -6932,6 +6947,9 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                     onSelectAllRoutes={selectAllRoutes}
                     onDeselectAllRoutes={deselectAllRoutes}
                     modeTags={modeTags}
+                    trackGeometryCoverage={nationwideTrackCoverage}
+                    selectedTrackGeometryCoverage={selectedTrackCoverage}
+                    trackGeometryStatus={prototypeGeometry === 'error' ? 'error' : prototypeGeometry ? 'ready' : 'loading'}
                     {...routeListRideOverrides}
                     onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
                     onShowTrainStatusPanelChange={setShowTrainStatusPanel}
@@ -7010,7 +7028,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
 
                   {/* 3. 表示オプション (Display Options) */}
                   <LegendDisplayOptions
-                    mapViewMode={mapViewMode === 'bubble' ? 'realistic' : mapViewMode}
+                    mapViewMode={mapViewMode === 'bubble' || trackGeometryEnabled ? 'realistic' : mapViewMode}
                     theme={theme}
                     language={currentLanguage}
                     trainTypeViewEnabled={trainTypeViewEnabled}
@@ -7225,8 +7243,11 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
                         onToggleRoute={toggleRoute}
                         onSelectAllRoutes={selectAllRoutes}
                         onDeselectAllRoutes={deselectAllRoutes}
-                    modeTags={modeTags}
-                    {...routeListRideOverrides}
+                        modeTags={modeTags}
+                        trackGeometryCoverage={nationwideTrackCoverage}
+                        selectedTrackGeometryCoverage={selectedTrackCoverage}
+                        trackGeometryStatus={prototypeGeometry === 'error' ? 'error' : prototypeGeometry ? 'ready' : 'loading'}
+                        {...routeListRideOverrides}
                         onShowTransferStationsOnlyChange={setShowTransferStationsOnly}
                         onShowTrainStatusPanelChange={setShowTrainStatusPanel}
                         onAutoSetDepartureFromLocationChange={setAutoSetDepartureFromLocation}
@@ -7319,7 +7340,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
           {/* 表示中の路線の凡例（右下）。どの色がどの路線かを、表示切替を開かずに確かめる。
               全路線表示・0路線のときは意味が無いので出さない。スマホは下部のナビに重ならない高さに置き、
               スマホ全画面でヒートマップの凡例が右下に来るときは譲る */}
-          {!lastTrainFilterActive && !rideLogActive && mapViewMode === 'realistic' && !(isFullscreen && isMobile && heatmapEnabled) && (() => {
+          {!lastTrainFilterActive && !rideLogActive && isRailwayMapView && !(isFullscreen && isMobile && heatmapEnabled) && (() => {
             const total = Object.keys(routes).length;
             if (visibleRoutes.size >= total) return null;
             // 表示中の路線（出発・到着駅を通る路線を先頭）＋凡例から非表示にした路線。

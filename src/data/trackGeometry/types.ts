@@ -33,6 +33,8 @@ export interface TrackSection {
   to: string;
   /** 駅と駅の間の途中の点（両端の駅の座標は含めない） */
   points: LatLng[];
+  /** 駅に対応する線路上の両端。駅マーカーの座標は別に保持する。 */
+  trackEnds?: [LatLng, LatLng];
   structures?: TrackStructureSpan[];
   /** 線路自体の標高（m）。出典があるときだけ。points と同じ長さ、不明は null */
   trackElevationM?: (number | null)[];

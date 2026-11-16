@@ -3,6 +3,7 @@ import type { RouteKey } from '../../data/routes';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
+import { toArticleLanguage } from '../../utils/languagePersistence';
 import RouteToggleItem from '../ui/RouteToggleItem';
 import type { StationStats } from '../../data/stationStats';
 import MapConfigPanel from './MapConfigPanel';
@@ -16,7 +17,7 @@ import Button from '../ui/atoms/Button';
 import SegmentedControl from '../ui/molecules/SegmentedControl';
 import Stepper from '../ui/molecules/Stepper';
 import TagToggleGroup, { type TagToggleItem } from '../ui/molecules/TagToggleGroup';
-import { TrainTrack, CircleDot, Network, Mountain, RotateCcw } from 'lucide-react';
+import { TrainTrack, CircleDot, Network, Mountain, Spline, RotateCcw } from 'lucide-react';
 import { ALERT_MINUTE_OPTIONS } from '../../utils/arrivalAlert';
 import Select from '../ui/atoms/Select';
 import Slider from '../ui/atoms/Slider';
@@ -24,7 +25,8 @@ import { L } from './legendStyles';
 import ConfirmationDialog from '../ui/molecules/ConfirmationDialog';
 import DisclosureIndicator from '../ui/atoms/DisclosureIndicator';
 import StationMemoPanel from '../StationMemoPanel';
-import type { MapViewMode } from '../../constants/mapViewMode';
+import { TRACK_GEOMETRY_VIEW, type MapViewMode } from '../../constants/mapViewMode';
+import type { TrackCoverage } from '../../utils/trackGeometryPrototype';
 
 type SortMode = 'name' | 'color' | 'default' | 'distance';
 
@@ -43,6 +45,9 @@ const ROUTE_CLASSIC_VIEW_ENABLED = false;
 interface LegendRouteListProps {
   /** 表示モードの先頭に並べる切り替えタグ */
   modeTags: TagToggleItem[];
+  trackGeometryCoverage?: TrackCoverage | null;
+  selectedTrackGeometryCoverage?: TrackCoverage | null;
+  trackGeometryStatus?: 'loading' | 'ready' | 'error';
   /** 路線チップの意味（既定は表示）。乗車ログのときは 'rideLog'（RouteSwitchBoard） */
   routeToggleMode?: 'visibility' | 'rideLog';
   visibleRoutesData: Array<[string, any]>;
@@ -144,6 +149,9 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   onUseStationAsDeparture,
   routeToggleMode,
   modeTags,
+  trackGeometryCoverage,
+  selectedTrackGeometryCoverage,
+  trackGeometryStatus,
   visibleRoutesData,
   visibleRoutes,
   routeOrder,
@@ -424,12 +432,26 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
   );
 
   const additionalModes: TagToggleItem[] = [
-    ...(mapViewMode === 'realistic' ? [{ key: 'trainDemo', color: DISPLAY_MODE_COLORS.trainDemo, label: translateUI('trainDemoLabel', language), icon: <TrainTrack />, pressed: showTrainDemo, onToggle: onTrainDemoToggle }] : []),
+    ...(mapViewMode === 'realistic' || mapViewMode === TRACK_GEOMETRY_VIEW ? [{ key: 'trainDemo', color: DISPLAY_MODE_COLORS.trainDemo, label: translateUI('trainDemoLabel', language), icon: <TrainTrack />, pressed: showTrainDemo, onToggle: onTrainDemoToggle }] : []),
+    { key: TRACK_GEOMETRY_VIEW, color: DISPLAY_MODE_COLORS.trackGeometry, label: translateUI('trackGeometryMode', language), icon: <Spline />, pressed: mapViewMode === TRACK_GEOMETRY_VIEW, onToggle: () => onMapViewModeChange(mapViewMode === TRACK_GEOMETRY_VIEW ? 'realistic' : TRACK_GEOMETRY_VIEW) },
     { key: 'terrain3d', color: DISPLAY_MODE_COLORS.terrain3d, label: translateUI('terrain3dLabel', language), icon: <Mountain />, pressed: mapViewMode === 'terrain3d', onToggle: () => onMapViewModeChange(mapViewMode === 'terrain3d' ? 'realistic' : 'terrain3d') },
     { key: 'bubble', color: DISPLAY_MODE_COLORS.bubble, label: translateUI('bubbleMap', language), icon: <CircleDot />, pressed: mapViewMode === 'bubble', onToggle: () => onMapViewModeChange(mapViewMode === 'bubble' ? 'realistic' : 'bubble') },
     { key: 'schematic', color: DISPLAY_MODE_COLORS.schematic, label: translateUI('schematicMapLabel', language), icon: <Network />, pressed: mapViewMode === 'schematic', onToggle: () => onMapViewModeChange(mapViewMode === 'schematic' ? 'realistic' : 'schematic') },
   ];
   const shownAdditionalModes = additionalModesOpen ? additionalModes : additionalModes.filter(item => item.pressed);
+
+  const coverageText = (coverage: TrackCoverage) => {
+    const locale = toArticleLanguage(language);
+    const percent = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 });
+    return translateUI('trackGeometryCoverage', language, {
+      coveredRoutes: coverage.coveredRoutes.toLocaleString(locale),
+      routes: coverage.routeCount.toLocaleString(locale),
+      routePercent: percent.format(coverage.routeCount ? coverage.coveredRoutes / coverage.routeCount : 0),
+      coveredSections: coverage.coveredSections.toLocaleString(locale),
+      sections: coverage.sectionCount.toLocaleString(locale),
+      sectionPercent: percent.format(coverage.sectionCount ? coverage.coveredSections / coverage.sectionCount : 0),
+    });
+  };
 
   const sortControl = (
     <Select
@@ -663,6 +685,22 @@ const LegendRouteList: React.FC<LegendRouteListProps> = ({
             </Button>
           </div>
         </div>
+        {mapViewMode === TRACK_GEOMETRY_VIEW && trackGeometryCoverage && (
+          <div role="status" style={{ display: 'grid', gap: L.sp.xxs, marginTop: L.sp.sm, color: colors.textSecondary, fontSize: FS.caption }}>
+            {trackGeometryStatus === 'loading' || trackGeometryStatus === 'error' ? (
+              <span>{translateUI(trackGeometryStatus === 'error' ? 'trackGeometryLoadError' : 'trackGeometryLoading', language)}</span>
+            ) : null}
+            {trackGeometryStatus !== 'loading' && (
+              <>
+                <span>{translateUI('trackGeometryNationwide', language)}　{coverageText(trackGeometryCoverage)}</span>
+                {!!selectedTrackGeometryCoverage?.routeCount && (
+                  <span>{translateUI('trackGeometrySelected', language)}　{coverageText(selectedTrackGeometryCoverage)}</span>
+                )}
+                <span>{translateUI('trackGeometryFallback', language)}</span>
+              </>
+            )}
+          </div>
+        )}
         {mapViewMode === 'bubble' && (
           <div style={{ marginTop: L.sp.sm }}>
             <div style={{ marginBottom: L.sp.sm }}>

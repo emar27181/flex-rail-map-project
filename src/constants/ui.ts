@@ -106,6 +106,7 @@ export const DISPLAY_MODE_COLORS = {
   bubble: '#AC6598',
   schematic: '#728EA9',
   terrain3d: '#748C49',
+  trackGeometry: '#487D96',
 } as const;
 
 /**

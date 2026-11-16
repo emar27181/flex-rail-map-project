@@ -5,5 +5,6 @@
  * JSON は値だけ（手で座標を書かない）。手順・検証の基準は docs/track-geometry.md。
  */
 import type { TrackGeometry } from './types';
+import jrTokaidoMainLine from './jrTokaidoMainLine.json';
 
-export const TRACK_GEOMETRY: Record<string, TrackGeometry> = {};
+export const TRACK_GEOMETRY: Record<string, TrackGeometry> = { jrTokaidoMainLine: jrTokaidoMainLine as TrackGeometry };

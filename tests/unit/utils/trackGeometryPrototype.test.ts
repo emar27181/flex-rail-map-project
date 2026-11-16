@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { routes, type RouteKey } from '../../../src/data/routes';
-import { distanceM, validateGeometry } from '../../../src/utils/trackGeometry';
+import { TRACK_GEOMETRY } from '../../../src/data/trackGeometry';
+import { distanceM, expandWithGeometry, validateGeometry } from '../../../src/utils/trackGeometry';
 import {
-  isTrackGeometryExperiment, toTrackGeometries, type TrackGeometryPrototypeFile,
+  toTrackGeometries, trackCoverage, type TrackGeometryPrototypeFile,
 } from '../../../src/utils/trackGeometryPrototype';
 import { build, lineFromRuns, MAX_STATION_DIST_M } from '../../../scripts/track-geometry/build-from-terrain3d-v2.mts';
 
@@ -46,7 +47,7 @@ describe('線形の試作データ（public/data/track-geometry-prototype.json�
       const at = new Map(routes[key as RouteKey].map(s => [s.name, [s.lat, s.lng] as [number, number]]));
       for (const sec of geometry.sections) {
         const a = at.get(sec.from)!, b = at.get(sec.to)!;
-        const chain = [a, ...sec.points, b];
+        const chain = [sec.trackEnds?.[0] ?? a, ...sec.points, sec.trackEnds?.[1] ?? b];
         const direct = distanceM(a, b);
         let length = 0;
         for (let i = 1; i < chain.length; i++) {
@@ -92,10 +93,36 @@ describe('変換の元になる線', () => {
   });
 });
 
-describe('試作のURLパラメータ', () => {
-  it('?experiment=track-geometry のときだけ試作を読む', () => {
-    expect(isTrackGeometryExperiment('?experiment=track-geometry')).toBe(true);
-    expect(isTrackGeometryExperiment('?experiment=last-train')).toBe(false);
-    expect(isTrackGeometryExperiment('')).toBe(false);
+describe('実際の線路の形', () => {
+  const geometry = TRACK_GEOMETRY.jrTokaidoMainLine;
+  const stations = routes.jrTokaidoMainLine;
+
+  it('東海道線は東京〜熱海の全駅間を含み、藤沢の前後で同じ線路上の点につながる', () => {
+    expect(geometry.sections.length).toBe(stations.length - 1);
+    expect(geometry.sections[0].from).toBe('東京');
+    expect(geometry.sections.at(-1)?.to).toBe('熱海');
+    const fujisawa = stations.findIndex(station => station.name === '藤沢');
+    const preceding = geometry.sections[fujisawa - 1];
+    const following = geometry.sections[fujisawa];
+    expect(preceding.trackEnds?.[1]).toEqual(following.trackEnds?.[0]);
+    expect(preceding.points.length).toBeGreaterThan(2);
+    expect(following.points.length).toBeGreaterThan(2);
+    const station = stations[fujisawa];
+    const drawn = expandWithGeometry(stations.slice(fujisawa - 1, fujisawa + 2), geometry);
+    expect(drawn).not.toContainEqual([station.lat, station.lng]);
+    expect(drawn).toContainEqual(preceding.trackEnds?.[1]);
+    expect(expandWithGeometry(stations.slice(fujisawa - 1, fujisawa + 2).reverse(), geometry)).toEqual([...drawn].reverse());
+  });
+
+  it('全国と選択路線のカバー率を登録済みの駅間から数える', () => {
+    const entries = Object.entries(routes);
+    const geometries = { ...toTrackGeometries(file), ...TRACK_GEOMETRY };
+    expect(trackCoverage(entries, geometries, new Set(['jrTokaidoMainLine', 'yamanote']))).toEqual({
+      routeCount: 2, coveredRoutes: 1,
+      sectionCount: stations.length - 1 + routes.yamanote.length, coveredSections: stations.length - 1,
+    });
+    const nationwide = trackCoverage(entries, geometries);
+    expect(nationwide.coveredRoutes).toBe(Object.keys(geometries).length);
+    expect(nationwide.coveredSections).toBeGreaterThan(0);
   });
 });
