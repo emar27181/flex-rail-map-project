@@ -274,6 +274,28 @@ describe('詳細設定（所要時間・駅アイコンの配色カスタム）'
   });
 });
 
+describe('実際の線路の形', () => {
+  it('表示切替で選択でき、オンにすると全国と選択中の路線のカバー率を表示する', () => {
+    const onMapViewModeChange = vi.fn();
+    const { rerender } = render(<LegendRouteList {...minimalProps} onMapViewModeChange={onMapViewModeChange} />);
+    fireEvent.click(screen.getByRole('button', { name: 'moreDisplayModes' }));
+    fireEvent.click(screen.getByRole('button', { name: 'trackGeometryMode' }));
+    expect(onMapViewModeChange).toHaveBeenLastCalledWith('track-geometry');
+
+    rerender(<LegendRouteList {...minimalProps} onMapViewModeChange={onMapViewModeChange}
+      mapViewMode="track-geometry" trackGeometryStatus="ready"
+      trackGeometryCoverage={{ routeCount: 491, coveredRoutes: 53, sectionCount: 7495, coveredSections: 835 }}
+      selectedTrackGeometryCoverage={{ routeCount: 1, coveredRoutes: 1, sectionCount: 20, coveredSections: 20 }} />);
+    const status = screen.getByRole('status');
+    expect(status).toHaveTextContent('trackGeometryNationwide');
+    expect(status).toHaveTextContent('trackGeometrySelected');
+    expect(status).toHaveTextContent('trackGeometryFallback');
+    expect(screen.getByRole('button', { name: 'trackGeometryMode' })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(screen.getByRole('button', { name: 'trackGeometryMode' }));
+    expect(onMapViewModeChange).toHaveBeenLastCalledWith('realistic');
+  });
+});
+
 describe('表示設定の並びと名前', () => {
   it('指定した4つのモードを先に表示し、間隔を空けてほかの可視化を並べる', () => {
     const onHeatmapToggle = vi.fn();
@@ -295,7 +317,7 @@ describe('表示設定の並びと名前', () => {
     const otherGroup = screen.getByRole('group', { name: 'settingsGroupViz' });
     const keys = (group: HTMLElement) => within(group).getAllByRole('button').map(button => button.getAttribute('data-tag'));
     expect(keys(priorityGroup)).toEqual(['meeting', 'lastTrain', 'heatmap', 'rideLog']);
-    expect(keys(otherGroup)).toEqual(['trainDemo', 'terrain3d', 'bubble', 'schematic']);
+    expect(keys(otherGroup)).toEqual(['trainDemo', 'track-geometry', 'terrain3d', 'bubble', 'schematic']);
     expect(priorityGroup.nextElementSibling).toContainElement(otherGroup);
     expect(priorityGroup.parentElement).toHaveStyle({ gap: '12px' });
     const heatmap = screen.getByRole('button', { name: 'stationHeatmap' });

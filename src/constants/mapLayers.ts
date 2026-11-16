@@ -47,3 +47,9 @@ export const USER_LOCATION_MARKER_Z = MARKER_Z_STEP;
 export const TRAIN_DEMO_MARKER_Z = 2 * MARKER_Z_STEP;
 /** 所要時間の丸（travelTime の層の中） */
 export const TRAVEL_TIME_MARKER_Z = MARKER_Z_STEP;
+
+/** 終電の到達可否は路線色に加えて線種でも判別できるようにする。 */
+export const LAST_TRAIN_LINE_STYLE = {
+  available: { className: 'last-train-available', opacity: 1, lineCap: 'round' },
+  inactive: { className: 'last-train-inactive', opacity: 0.25, dashArray: '4 5', lineCap: 'butt' },
+} as const;

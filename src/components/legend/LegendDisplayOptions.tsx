@@ -3,9 +3,9 @@ import { TrainFront } from 'lucide-react';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { translateUI } from '../../utils/translation'
 import type { Language } from '../../utils/translation';
-import { checkboxInput, L} from './legendStyles';
-import Radio from '../ui/atoms/Radio';
-import Checkbox from '../ui/atoms/Checkbox';
+import { L } from './legendStyles';
+import SegmentedControl from '../ui/molecules/SegmentedControl';
+import SettingToggle from '../ui/atoms/SettingToggle';
 import { FS } from '../../constants/ui';
 import type { MapViewMode } from '../../constants/mapViewMode';
 
@@ -47,47 +47,22 @@ const LegendDisplayOptions: React.FC<LegendDisplayOptionsProps> = ({
           {translateUI('mapDisplayMode', language)}:
         </label>
         <div style={{ marginBottom: L.sp.xl }}>
-          <Radio
-            theme={theme}
-            size="sm"
-            name="mapViewMode"
-            checked={mapViewMode === 'realistic'}
-            onChange={() => onMapViewModeChange('realistic')}
-          >
-            {translateUI('realisticView', language)}
-          </Radio>
-          <Radio
-            theme={theme}
-            size="sm"
-            name="mapViewMode"
-            checked={mapViewMode === 'schematic'}
-            onChange={() => onMapViewModeChange('schematic')}
-          >
-            {translateUI('schematicView', language)}
-          </Radio>
-          <Radio
-            theme={theme}
-            size="sm"
-            name="mapViewMode"
-            checked={mapViewMode === 'terrain3d'}
-            onChange={() => onMapViewModeChange('terrain3d')}
-          >
-            {translateUI('terrain3dLabel', language)}
-          </Radio>
+          <SegmentedControl<MapViewMode> variant="chips" theme={theme}
+            ariaLabel={translateUI('mapDisplayMode', language)}
+            value={mapViewMode} onChange={onMapViewModeChange} options={[
+              { value: 'realistic', label: translateUI('realisticView', language) },
+              { value: 'schematic', label: translateUI('schematicView', language) },
+              { value: 'terrain3d', label: translateUI('terrain3dLabel', language) },
+            ]} />
         </div>
       </div>
 
       {/* 列車種別表示モード */}
       {onTrainTypeViewChange && (
         <div style={{ marginTop: L.sp.xl, paddingTop: L.sp.xl, borderTop: `1px solid ${colors.borderLight}` }}>
-          <Checkbox
-            theme={theme}
-            size="sm"
+          <SettingToggle theme={theme}
             checked={trainTypeViewEnabled}
-            onChange={onTrainTypeViewChange}
-          >
-            <TrainFront size={13} style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />列車種別表示モード
-          </Checkbox>
+            onChange={onTrainTypeViewChange} icon={<TrainFront />} label={translateUI('trainTypeView', language)} />
         </div>
       )}
     </div>

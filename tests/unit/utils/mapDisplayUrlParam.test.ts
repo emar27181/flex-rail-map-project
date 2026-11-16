@@ -15,6 +15,11 @@ describe('shareable map display URL', () => {
   it('ignores invalid and unknown values instead of guessing', () => {
     expect(parseDisplayUrlParams('?view=madeup&heatmap=yes&heatmapParam=unknown&ground=no&terrainVersion=v3')).toEqual({});
   });
+  it('accepts track alignment and preserves the legacy preview link', () => {
+    expect(parseDisplayUrlParams('?view=track-geometry')).toEqual({ view: 'track-geometry' });
+    expect(parseDisplayUrlParams('?experiment=track-geometry')).toEqual({ view: 'track-geometry' });
+    expect(parseDisplayUrlParams('?view=realistic&experiment=track-geometry')).toEqual({ view: 'realistic' });
+  });
   it('keeps existing defaults when not supplied', () => {
     expect(parseDisplayUrlParams('')).toEqual({});
   });

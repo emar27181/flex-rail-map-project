@@ -54,17 +54,22 @@ export function expandWithGeometry(
   geometry: TrackGeometry | undefined,
 ): LatLng[] {
   if (!geometry || stations.length === 0) return stations.map(s => [s.lat, s.lng]);
-  const forward = new Map<string, LatLng[]>();
+  const forward = new Map<string, Pick<TrackSection, 'points' | 'trackEnds'>>();
   for (const sec of geometry.sections) {
-    forward.set(`${sec.from}\u0000${sec.to}`, sec.points);
-    forward.set(`${sec.to}\u0000${sec.from}`, [...sec.points].reverse());
+    forward.set(`${sec.from}\u0000${sec.to}`, sec);
+    forward.set(`${sec.to}\u0000${sec.from}`, {
+      points: [...sec.points].reverse(),
+      trackEnds: sec.trackEnds && [sec.trackEnds[1], sec.trackEnds[0]],
+    });
   }
-  const out: LatLng[] = [[stations[0].lat, stations[0].lng]];
-  for (let i = 1; i < stations.length; i++) {
-    const pts = forward.get(`${stations[i - 1].name}\u0000${stations[i].name}`);
-    if (pts) out.push(...pts);
-    out.push([stations[i].lat, stations[i].lng]);
-  }
+  const sections = stations.slice(1).map((s, i) => forward.get(`${stations[i].name}\u0000${s.name}`));
+  const out: LatLng[] = [];
+  stations.forEach((station, i) => {
+    const trackPosition = sections[i - 1]?.trackEnds?.[1] ?? sections[i]?.trackEnds?.[0];
+    out.push(trackPosition ?? [station.lat, station.lng]);
+    const section = sections[i];
+    if (section) out.push(...section.points);
+  });
   return out;
 }
 
@@ -175,15 +180,21 @@ export function splitAtStations(
   for (const g of line.gaps) issues.push({ kind: 'gap', detail: `way ${g.afterWay} の後で ${g.distM}m 途切れている` });
 
   const sections: TrackSection[] = [];
+  const toCoord = ([la, ln]: LatLng): LatLng => [Math.round(la * 1e6) / 1e6, Math.round(ln * 1e6) / 1e6];
+  if (line.points.length < 2) return { sections, issues, stationDistM };
+  const trackPosition = ({ segment, t }: ReturnType<typeof locateOnLine>): LatLng => {
+    const [a, b] = [line.points[segment], line.points[segment + 1]];
+    return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+  };
   for (let i = 1; i < stations.length; i++) {
     const a = locs[i - 1], b = locs[i];
     if (b.alongM <= a.alongM) continue;
     // a の次の頂点から b の頂点までが途中の点
-    // 駅の座標と重なる点（1m 以内）は、描くときに駅の座標が入るので除く
-    const ends: LatLng[] = [[stations[i - 1].lat, stations[i - 1].lng], [stations[i].lat, stations[i].lng]];
+    // 駅の代表点を線路に投影して区切る。駅そのものへ寄り道すると大きな駅で折れが出る。
+    const ends: [LatLng, LatLng] = [trackPosition(a), trackPosition(b)];
     const idx: number[] = [];
     for (let k = a.segment + 1; k <= b.segment; k++) {
-      if (ends.every(e => distanceM(e, line.points[k]) > 1)) idx.push(k);
+      if (ends.every(e => distanceM(e, line.points[k]) > 0.08)) idx.push(k);
     }
     const pts = idx.map(k => line.points[k]);
     const kinds = idx.map(k => line.kinds[k]);
@@ -206,7 +217,8 @@ export function splitAtStations(
     sections.push({
       from: stations[i - 1].name,
       to: stations[i].name,
-      points: kept.map(([la, ln]) => [Math.round(la * 1e6) / 1e6, Math.round(ln * 1e6) / 1e6] as LatLng),
+      points: kept.map(toCoord),
+      trackEnds: [toCoord(ends[0]), toCoord(ends[1])],
       ...(structures.length > 0 && !(structures.length === 1 && structures[0].kind === 'untagged' && structures[0].layer === null)
         ? { structures } : {}),
     });
@@ -230,7 +242,12 @@ export function validateGeometry(
     const ia = names.indexOf(sec.from), ib = names.indexOf(sec.to);
     if (ia < 0 || ib < 0) { problems.push(`${sec.from}→${sec.to}: 路線データに無い駅`); continue; }
     if (Math.abs(ia - ib) !== 1) problems.push(`${sec.from}→${sec.to}: 隣り合う駅ではない`);
-    const chain: LatLng[] = [at.get(sec.from)!, ...sec.points, at.get(sec.to)!];
+    const stationEnds: [LatLng, LatLng] = [at.get(sec.from)!, at.get(sec.to)!];
+    const ends = sec.trackEnds ?? stationEnds;
+    if (sec.trackEnds && ends.some((p, i) => distanceM(p, stationEnds[i]) > opts.maxStationDistM + 0.1)) {
+      problems.push(`${sec.from}→${sec.to}: 線形の端点が駅から離れている`);
+    }
+    const chain: LatLng[] = [ends[0], ...sec.points, ends[1]];
     for (let j = 1; j < chain.length; j++) {
       const d = distanceM(chain[j - 1], chain[j]);
       if (d > opts.maxJumpM) problems.push(`${sec.from}→${sec.to}: 点の間が ${Math.round(d)}m 飛んでいる`);
@@ -241,7 +258,7 @@ export function validateGeometry(
       const seg = distanceM(at.get(sec.from)!, at.get(sec.to)!);
       if (dFirst > seg + opts.maxStationDistM || dLast > seg + opts.maxStationDistM) problems.push(`${sec.from}→${sec.to}: 線形が駅から離れた所から始まる/終わる`);
     }
-    for (const [la, ln] of sec.points) if (!(Math.abs(la) <= 90 && Math.abs(ln) <= 180)) problems.push(`${sec.from}→${sec.to}: 座標が範囲外`);
+    for (const [la, ln] of chain) if (!(Math.abs(la) <= 90 && Math.abs(ln) <= 180)) problems.push(`${sec.from}→${sec.to}: 座標が範囲外`);
     for (const key of ['trackElevationM', 'terrainElevationM'] as const) {
       const v = sec[key];
       if (v && v.length !== sec.points.length) problems.push(`${sec.from}→${sec.to}: ${key} の長さが points と違う`);

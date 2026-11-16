@@ -20,7 +20,7 @@
 
 ### データの形
 
-- 隣り合う2駅ごとに1区間（`from` → `to` は路線データの並び順）。`points` は駅と駅の**途中の点だけ**（両端の駅は含めない）
+- 隣り合う2駅ごとに1区間（`from` → `to` は路線データの並び順）。`points` は駅と駅の**途中の点だけ**（線路上の両端は `trackEnds` に保持する）
 - 座標は WGS84（EPSG:4326）、`[緯度, 経度]`、小数6桁（約0.1m）。3m の許容誤差で間引く
 - `structures`: 区間の中の構造。OSM の `bridge` → `bridge`、`tunnel` → `tunnel`、どちらも無い → `untagged`（**地上とは限らない**）。`layer` は OSM の値そのまま
 
@@ -81,6 +81,17 @@ npm run test:data && npm run test:types && npm run test:unit && npm run build
 - 仕組み（型・計算・収集スクリプト・地図への反映・テスト）はできている。合成データで、つなぐ〜区切る〜検証〜書き出しまで通ることを確認した
 - **線形のデータはまだ無い。** サンドボックスから Overpass・OSM・Geofabrik・国土数値情報に接続できない（プロキシが 403）ため
 - 再開に必要なこと: 環境の設定で `overpass-api.de`（または `overpass.private.coffee`）への接続を許可する。上の手順1〜3で小田急小田原線を取り込める
+
+## 2D の「実際の線路の形」（2026-11-16）
+
+「表示切替」→「表示モード」→「ほかの表示モード」から切り替える。共有URLは `?view=track-geometry`。以前の `?experiment=track-geometry` も開ける。線路データがない区間は駅間を直線で描く。
+
+- 線路上に投影した点で区間をつなぐ。駅マーカーの座標は従来の駅データを使う
+- カバー率の分母は登録済み路線の隣り合う駅間（環状路線の最後の駅から最初の駅への区間を含む）。全国と選択中の路線を別々に算出する
+- `public/data/track-geometry-prototype.json` は OSM の Geofabrik 関東抽出（2026-10-14、ODbL 1.0）由来。`npx tsx scripts/track-geometry/build-from-terrain3d-v2.mts` で再生成できる。元の線形は8mで間引き済み。駅と線路の距離の基準は300mで、52路線を収録
+- 東海道線は別途、OpenStreetMap の [relation 12014184](https://www.openstreetmap.org/relation/12014184)（熱海→東京、2026-11-16取得、[ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/)）から取得。横浜付近のリレーションメンバー2件の順序を共有ノードに沿って入れ替え、270本のwayの連続性と東京〜熱海の20駅間を検証した。駅の代表点と線路の距離は最大95m。WGS84、間引き許容誤差3m
+- 東海道線の再生成: `npx tsx scripts/track-geometry/collect-osm.mts --route jrTokaidoMainLine --input data/track-geometry/jrTokaidoMainLine.osm.json`。出典と照合結果は同ディレクトリの `.osm.json` と `.report.json`
+- 2D表示中は地図に「© OpenStreetMap contributors」を表示する
 
 ## 立体（標高）表示（2026-10-13）
 

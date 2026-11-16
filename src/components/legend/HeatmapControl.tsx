@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
+import { Palette } from 'lucide-react';
 import { getThemeColors } from '../../contexts/ThemeContext';
 import { STAT_PARAMS, PARAM_DATA_SOURCES, DATA_DISCLAIMER, buildGradientCss } from '../../data/stationStats';
 import type { StationStats, StatCategory } from '../../data/stationStats';
-import { section, text, L, checkboxInput } from './legendStyles';
+import { section, text, L } from './legendStyles';
 import { translateUI, translateStatParamLabel } from '../../utils/translation';
 import type { Language } from '../../utils/translation';
 import Select from '../ui/atoms/Select';
-import Checkbox from '../ui/atoms/Checkbox';
+import SettingToggle from '../ui/atoms/SettingToggle';
 import DisclosureIndicator from '../ui/atoms/DisclosureIndicator';
 
 type Props = {
@@ -50,9 +51,7 @@ export default function HeatmapControl({
     <div style={section.wrap(colors)}>
       {/* ヘッダー */}
       <div style={section.header} onClick={() => setOpen(v => !v)}>
-        <Checkbox theme={theme} size="sm" checked={enabled} onChange={onEnabledChange}>
-            <span style={section.title(colors)}>{translateUI('stationHeatmap', language)}</span>
-          </Checkbox>
+        <SettingToggle icon={<Palette />} theme={theme} checked={enabled} onChange={onEnabledChange} label={translateUI('stationHeatmap', language)} />
         {enabled && (
           <span style={{
             fontSize: L.fs.xs,

@@ -33,6 +33,15 @@ describe('VersionPanel', () => {
     expect(items[2].style.backgroundColor).toBe(items[0].style.backgroundColor);
   });
 
+  it('ジャンルで絞ると該当する変更のみを出し、すべてで戻る', () => {
+    const r = render(<VersionPanel theme="dark" language="japanese" />);
+    open(r);
+    fireEvent.click(r.getByRole('button', { name: '新機能', exact: true }));
+    expect(r.container.querySelectorAll('[data-release]')[0].querySelectorAll('ul > li')).toHaveLength(3);
+    fireEvent.click(r.getByRole('button', { name: 'すべて', exact: true }));
+    expect(r.container.querySelectorAll('[data-release]')[0].querySelectorAll('ul > li')).toHaveLength(RELEASES[0].notes.ja.length);
+  });
+
   it('「さらに表示」で少しずつ広げる', () => {
     const r = render(<VersionPanel theme="dark" language="japanese" />);
     open(r);

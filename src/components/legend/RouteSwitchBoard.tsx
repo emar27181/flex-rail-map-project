@@ -9,15 +9,9 @@
  *   「どの路線か」も「今どちらの状態か」も一目で分からない
  *
  * ここでは1行に複数のチップを並べ、路線色そのものを背景に使って
- * オン・オフを塗りの有無で示す。並びは意味のある順（経路上→駅を通る→
- * 表示中→非表示）に固定し、絞り込みの入力欄を置く。
- *
- * グループの区切りは余白だけで示し、見出しは画面に出さない（2026-11）。
- * 「経路上の路線」「選択した駅を通る路線」の見出しは違いが分かりにくいと指摘された。
- * 表示中か非表示かはチップの塗りで分かり、経路に近い路線ほど上に来る並び順で足りる。
- * 見出しは読み上げ用（role="group" の aria-label）にだけ残す。
- *
- * 従来の一覧も残してあり、呼び出し側で切り替えられる。
+ * オン・オフを塗りと目のアイコンで示す。表示中と非表示は別のグループに並べ、
+ * 各グループの中では経路上・選択駅を通る路線を優先する。
+ * 見出しは読み上げ用の aria-label に置く。
  */
 import React, { useMemo, useState } from 'react';
 import type { RouteKey } from '../../data/routes';
@@ -27,6 +21,7 @@ import type { Language } from '../../utils/translation';
 import { FS } from '../../constants/ui';
 import { L } from './legendStyles';
 import Button from '../ui/atoms/Button';
+import { CONTROL_BORDER_WIDTH } from '../ui/atoms/controlSize';
 import RouteToggleChip from './RouteToggleChip';
 import TextField from '../ui/atoms/TextField';
 import ClampedWrap from '../ui/molecules/ClampedWrap';
@@ -81,7 +76,7 @@ interface RouteSwitchBoardProps {
   mode?: 'visibility' | 'rideLog';
 }
 
-type GroupKey = 'onRoute' | 'atStation' | 'visible' | 'hidden';
+type GroupKey = 'visible' | 'hidden';
 
 const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
   routeKeys,
@@ -101,10 +96,8 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
 }) => {
   const colors = getThemeColors(theme);
   const [query, setQuery] = useState('');
-  /** グループごとの「さらに表示」を押した回数。既定はすべて 0（5行まで） */
+  /** グループごとの「さらに表示」を押した回数。 */
   const [steps, setSteps] = useState<Record<GroupKey, number>>({
-    onRoute: 0,
-    atStation: 0,
     visible: 0,
     hidden: 0,
   });
@@ -126,25 +119,15 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
 
   const groups = useMemo(() => {
     const filtered = matches ? routeKeys.filter(matches) : routeKeys;
-    const onRoute: RouteKey[] = [];
-    const atStation: RouteKey[] = [];
-    const visible: RouteKey[] = [];
-    const hidden: RouteKey[] = [];
-
-    filtered.forEach(rk => {
-      if (highlightedRouteKeys?.has(rk)) onRoute.push(rk);
-      else if (stationRouteKeys?.has(rk)) atStation.push(rk);
-      else if (visibleRoutes.has(rk)) visible.push(rk);
-      else hidden.push(rk);
-    });
-
-    // 並び順は呼び出し側から渡された routeKeys の順をそのまま使う。
-    // 既定は画面中心から近い順で、全国490路線を名前順にすると
-    // 「IGRいわて銀河鉄道」から始まって手元の路線に永遠に届かない
-    return { onRoute, atStation, visible, hidden };
+    const priority = (key: RouteKey) => highlightedRouteKeys?.has(key) ? 0 : stationRouteKeys?.has(key) ? 1 : 2;
+    const ordered = [...filtered].sort((a, b) => priority(a) - priority(b));
+    return {
+      visible: ordered.filter(key => visibleRoutes.has(key)),
+      hidden: ordered.filter(key => !visibleRoutes.has(key)),
+    };
   }, [routeKeys, matches, highlightedRouteKeys, stationRouteKeys, visibleRoutes]);
 
-  const totalShown = groups.onRoute.length + groups.atStation.length + groups.visible.length + groups.hidden.length;
+  const totalShown = groups.visible.length + groups.hidden.length;
 
   const chip = (routeKey: RouteKey) => (
     <RouteToggleChip
@@ -153,6 +136,7 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
       routeName={routeNames[routeKey] ?? routeKey}
       routeColor={routeColors[routeKey] ?? colors.textSecondary}
       isVisible={visibleRoutes.has(routeKey)}
+      showVisibilityIcon={mode === 'visibility'}
       theme={theme}
       language={language}
       size={BOARD_CONTROL_SIZE}
@@ -166,7 +150,11 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
   const group = (key: GroupKey, title: string, items: RouteKey[]) => {
     if (items.length === 0) return null;
     return (
-      <div key={key} role="group" aria-label={`${title} ${items.length}`} data-route-group={key}>
+      <div key={key} role="group" aria-label={`${title} ${items.length}`} data-route-group={key}
+        style={key === 'hidden' && groups.visible.length > 0 ? {
+          borderTop: `${CONTROL_BORDER_WIDTH}px solid ${colors.borderLight}`,
+          paddingTop: L.sp.md,
+        } : undefined}>
         <ClampedWrap
           theme={theme}
           size={BOARD_CONTROL_SIZE}
@@ -176,6 +164,7 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
           onStepsChange={n => setSteps(prev => ({ ...prev, [key]: n }))}
           moreLabel={hidden => translateUI('showMoreRoutesStep', language, { count: String(hidden) })}
           lessLabel={translateUI('collapseList', language)}
+          chipColor={colors.textSecondary}
         >
           {items.map(chip)}
         </ClampedWrap>
@@ -224,8 +213,6 @@ const RouteSwitchBoard: React.FC<RouteSwitchBoardProps> = ({
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: GROUP_GAP, marginBottom: L.sp.xl }}>
-          {group('onRoute', translateUI('routeGroupOnRoute', language), groups.onRoute)}
-          {group('atStation', translateUI('routeGroupAtStation', language), groups.atStation)}
           {group('visible', translateUI('routeGroupVisible', language), groups.visible)}
           {group('hidden', translateUI('routeGroupHidden', language), groups.hidden)}
         </div>

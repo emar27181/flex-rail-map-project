@@ -10,9 +10,7 @@
 import React from 'react';
 import { getThemeColors } from '../../../contexts/ThemeContext';
 import { FS } from '../../../constants/ui';
-
-/** 開閉の印を回す時間。どの見出しでも同じにする */
-export const DISCLOSURE_TRANSITION = 'transform 0.3s ease';
+import './disclosureIndicator.css';
 
 export interface DisclosureIndicatorProps {
   expanded: boolean;
@@ -27,13 +25,13 @@ export interface DisclosureIndicatorProps {
 const DisclosureIndicator: React.FC<DisclosureIndicatorProps> = ({ expanded, theme, tone = 'secondary' }) => (
   <span
     aria-hidden
+    className="disclosure-indicator"
     style={{
       flexShrink: 0,
       fontSize: FS.caption,
       lineHeight: 1,
       color: tone === 'inherit' ? 'currentColor' : getThemeColors(theme).textSecondary,
       transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-      transition: DISCLOSURE_TRANSITION,
     }}
   >
     ▼

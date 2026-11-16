@@ -26,6 +26,8 @@ export interface Release {
   prs: number[];
   /** 画面に出す変更点 */
   notes: { ja: string[]; en: string[] };
+  /** 複数の種類を含む場合、各言語の変更点と同じ順に記録する */
+  noteKinds?: readonly ReleaseKind[];
 }
 
 export const RELEASES: Release[] = [
@@ -34,6 +36,7 @@ export const RELEASES: Release[] = [
     releasedAt: '2026-11-16T00:11:35Z',
     kind: 'feat',
     prs: [131, 133, 134, 135, 136, 137],
+    noteKinds: ['feat', 'feat', 'feat', 'improve', 'docs', 'improve'],
     notes: {
       ja: [
         '集合駅を探すモードで出発駅を複数設定し、候補と各出発駅からの所要時間を地図で比較できる',
@@ -58,6 +61,7 @@ export const RELEASES: Release[] = [
     releasedAt: '2026-11-12T11:54:39Z',
     kind: 'feat',
     prs: [106, 116, 117],
+    noteKinds: ['feat', 'docs', 'improve'],
     notes: {
       ja: [
         '終電モードの試作（URL に ?experiment=last-train を付けたときだけ使える。時刻は架空のデモデータ）',
@@ -76,6 +80,7 @@ export const RELEASES: Release[] = [
     releasedAt: '2026-11-11T22:35:40Z',
     kind: 'feat',
     prs: [104, 105, 107, 108, 112, 113, 114, 115],
+    noteKinds: ['feat', 'feat', 'improve', 'improve', 'fix', 'improve', 'improve', 'docs'],
     notes: {
       ja: [
         '設定のいちばん下にバージョンと更新履歴、更新の確認',
