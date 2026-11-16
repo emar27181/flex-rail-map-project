@@ -14,8 +14,11 @@ import { section, text, L } from './legendStyles';
 import { translateUI, type Language } from '../../utils/translation';
 import Button from '../ui/atoms/Button';
 import Card from '../ui/atoms/Card';
+import Chip from '../ui/atoms/Chip';
+import ColorChip from '../ui/ColorChip';
+import { RELEASE_CATEGORY_COLORS } from '../../constants/ui';
 import DisclosureIndicator from '../ui/atoms/DisclosureIndicator';
-import { RELEASES, type Release } from '../../data/releases';
+import { RELEASES, type Release, type ReleaseKind } from '../../data/releases';
 import {
   BUILT_AT, BUILD_COMMIT, CURRENT_VERSION, checkForUpdate, formatDateTime, releaseNotes, type UpdateCheckResult,
 } from '../../utils/appVersion';
@@ -23,6 +26,15 @@ import {
 /** 更新履歴を最初に出す件数と、「さらに表示」で増やす件数 */
 export const VERSION_HISTORY_INITIAL = 5;
 export const VERSION_HISTORY_STEP = 10;
+
+const CATEGORY_LABEL = {
+  feat: 'releaseCategoryFeature',
+  improve: 'releaseCategoryImprovement',
+  fix: 'releaseCategoryFix',
+  data: 'releaseCategoryData',
+  docs: 'releaseCategoryGuide',
+  ci: 'releaseCategoryDevelopment',
+} as const satisfies Record<ReleaseKind, Parameters<typeof translateUI>[0]>;
 
 const LAST_CHECK_KEY = 'flexRailMap.lastUpdateCheck';
 
@@ -58,6 +70,7 @@ export default function VersionPanel({
   const [checking, setChecking] = useState(false);
   const [result, setResult] = useState<UpdateCheckResult | null>(readLastCheck);
   const [shown, setShown] = useState(VERSION_HISTORY_INITIAL);
+  const [filter, setFilter] = useState<ReleaseKind | null>(null);
 
   const runCheck = useCallback(async () => {
     setChecking(true);
@@ -68,8 +81,24 @@ export default function VersionPanel({
   }, [check]);
 
   const time = (iso: string) => formatDateTime(iso, language);
-  const visible = releases.slice(0, shown);
-  const rest = releases.length - visible.length;
+  const categories = Object.keys(CATEGORY_LABEL) as ReleaseKind[];
+  const grouped = releases.map(release => ({
+    release,
+    notes: releaseNotes(release, language).map((note, index) => ({
+      note, kind: release.noteKinds?.[index] ?? release.kind,
+    })),
+  }));
+  const usedCategories = new Set(grouped.flatMap(item => item.notes.map(note => note.kind)));
+  const filtered = grouped
+    .map(item => ({ ...item, notes: item.notes.filter(note => !filter || note.kind === filter) }))
+    .filter(item => item.notes.length > 0);
+  const visible = filtered.slice(0, shown);
+  const rest = filtered.length - visible.length;
+  const labelFor = (kind: ReleaseKind) => translateUI(CATEGORY_LABEL[kind], language);
+  const chooseFilter = (kind: ReleaseKind | null) => {
+    setFilter(kind === filter ? null : kind);
+    setShown(VERSION_HISTORY_INITIAL);
+  };
 
   return (
     <div style={section.wrap(colors)} data-version-panel>
@@ -121,8 +150,18 @@ export default function VersionPanel({
           {/* 更新履歴 */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: L.sp.sm }}>
             <div style={section.title(colors)}>{translateUI('versionHistory', language)}</div>
+            {usedCategories.size > 1 && (
+              <div role="group" aria-label={translateUI('releaseCategoryFilter', language)} style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.xs }}>
+                <Chip size="sm" theme={theme} color={colors.textSecondary} label={translateUI('releaseCategoryAll', language)}
+                  selected={!filter} onClick={() => chooseFilter(null)} />
+                {categories.filter(kind => usedCategories.has(kind)).map(kind => (
+                  <Chip key={kind} size="sm" theme={theme} color={RELEASE_CATEGORY_COLORS[kind]} label={labelFor(kind)}
+                    selected={filter === kind} onClick={() => chooseFilter(kind)} />
+                ))}
+              </div>
+            )}
             <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: L.sp.xs }}>
-              {visible.map((r, index) => {
+              {visible.map(({ release: r, notes }, index) => {
                 const at = r.releasedAt ?? BUILT_AT;
                 return (
                   <Card as="li" key={r.version} theme={theme} tone={index % 2 === 0 ? 'raised' : 'neutral'} data-release={r.version}>
@@ -130,8 +169,18 @@ export default function VersionPanel({
                       <strong style={text.body(colors)}>{r.version}</strong>
                       {at && <time dateTime={at} style={{ ...text.body(colors), color: colors.textSecondary }}>{time(at)}</time>}
                     </div>
-                    <ul style={{ margin: `${L.sp.xxs} 0 0`, paddingInlineStart: L.sp['2xl'], ...text.body(colors), overflowWrap: 'anywhere' }}>
-                      {releaseNotes(r, language).map(note => <li key={note}>{note}</li>)}
+                    <ul style={{
+                      margin: `${L.sp.xs} 0 0`, padding: 0, listStyle: 'none',
+                      display: 'grid', gap: L.sp.xs, ...text.body(colors), overflowWrap: 'anywhere',
+                    }}>
+                      {notes.map(({ note, kind }) => (
+                        <li key={note} style={{ display: 'flex', alignItems: 'baseline', gap: L.sp.xs }}>
+                          <ColorChip theme={theme} color={RELEASE_CATEGORY_COLORS[kind]} tone="subtle">
+                            {labelFor(kind)}
+                          </ColorChip>
+                          <span>{note}</span>
+                        </li>
+                      ))}
                     </ul>
                   </Card>
                 );

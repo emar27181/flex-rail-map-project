@@ -34,6 +34,7 @@ describe('更新履歴', () => {
     for (const r of RELEASES) {
       expect(r.notes.ja.length, r.version).toBeGreaterThan(0);
       expect(r.notes.en.length, r.version).toBe(r.notes.ja.length);
+      if (r.noteKinds) expect(r.noteKinds).toHaveLength(r.notes.ja.length);
       for (const n of [...r.notes.ja, ...r.notes.en]) expect(n.trim(), r.version).not.toBe('');
     }
   });

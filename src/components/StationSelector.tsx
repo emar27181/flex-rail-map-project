@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { lastTrainCopy } from '../utils/lastTrainDemoI18n';
-import { ArrowLeftRight, Clock, LocateFixed, MapPinPlus, Timer, Waypoints, X } from 'lucide-react';
+import { ArrowLeftRight, Clock, LocateFixed, MapPin, MapPinPlus, Timer, Waypoints, X } from 'lucide-react';
 import { routes, routeNames, routeColors } from '../data/routes';
 import type { Station } from '../data/yamanote';
 import { useTheme, getThemeColors } from '../contexts/ThemeContext';
@@ -19,7 +19,7 @@ import Button from './ui/atoms/Button';
 import IconButton from './ui/atoms/IconButton';
 import RemovableTag from './ui/atoms/RemovableTag';
 import StationSearchDropdown from './ui/StationSearchDropdown';
-import { FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
+import { CONTROL_SIZE, FLOATING_ICON_BUTTON_SIZE } from './ui/atoms/controlSize';
 import { floatingSurfaceStyle } from './ui/atoms/floatingSurface';
 import TrainStatusPanel from './TrainStatusPanel';
 import type { DetectedRoute } from '../utils/trainDetector';
@@ -190,7 +190,15 @@ const StationSelector: React.FC<StationSelectorProps> = ({
   /** 畳んだ2行目に出す、集合駅の候補（集合駅がまだ無いときの上位3つ） */
   const summaryCandidates = !isExpanded && meetingMode && !arrival ? meetingCandidates.slice(0, SUMMARY_CANDIDATE_LIMIT) : [];
   const arrivalSummaryColors = filledLabelColors(SEMANTIC.arrival, theme);
-  const collapsedSummaryShown = !isExpanded && (summaryOrigins.length > 0 || !!arrival);
+  const collapsedSummaryShown = !isExpanded;
+  const emptySummaryChip = (
+    <ColorChip color={colors.textSecondary} theme={theme} tone="subtle">
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: L.sp.xs }}>
+        <MapPin size={CONTROL_SIZE.sm.iconSize} aria-hidden />
+        {translateUI('stationUnset', language)}
+      </span>
+    </ColorChip>
+  );
   // 乗車ログ（試作）の間は、駅名の下の時刻も時刻の入力も意味が無いので出さない
   const timeLabelButtonShown = !rideLog?.enabled && !!onShowStationTimeLabelsChange && !!arrival && (!!departure || lastTrainModeEnabled);
   /** 駅名の下の時刻の意味（到着予定時刻／終電モードでは最終時刻） */
@@ -518,16 +526,15 @@ const StationSelector: React.FC<StationSelectorProps> = ({
         marginBottom: L.sp.md,
         // 畳んだ状態は上余白だけ8px・下余白0pxという非対称な指定になっており、
         // 見出し行の高さぶんだけ下側の空きが上側より狭く見えていた。
-        // 上下とも余白を0にし、代わりにflexの縦中央揃えで高さいっぱいに
-        // センタリングすることで、中身の実際の高さに関係なく必ず揃うようにする
-        paddingTop: isExpanded || collapsedSummaryShown ? L.sp.md : 0,
-        paddingBottom: isExpanded || collapsedSummaryShown ? L.sp.md : 0,
+        // 見出しと概要の上下に同じ余白を置く
+        paddingTop: L.sp.md,
+        paddingBottom: L.sp.md,
         paddingLeft: L.sp.md,
         paddingRight: L.sp.md,
         // 畳んだ高さは、地図隅に浮かぶ他のアイコンボタン（フルスクリーン/言語切替等）
         // と行が揃うよう、それらと同じ一元管理された寸法から取る
         // 畳んでいても出発駅・到着駅を2行目に小さく出すときは、その分だけ高さが伸びる（最低でも他のアイコンボタンの高さ）
-        height: isExpanded || collapsedSummaryShown ? 'auto' : FLOATING_ICON_BUTTON_SIZE.md,
+        height: 'auto',
         minHeight: FLOATING_ICON_BUTTON_SIZE.md,
         display: 'flex',
         flexDirection: 'column',
@@ -540,12 +547,21 @@ const StationSelector: React.FC<StationSelectorProps> = ({
     >
       <div 
         onClick={onToggleExpanded}
+        role={onToggleExpanded ? 'button' : undefined}
+        aria-expanded={onToggleExpanded ? isExpanded : undefined}
+        tabIndex={onToggleExpanded ? 0 : undefined}
+        onKeyDown={onToggleExpanded ? e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggleExpanded();
+          }
+        } : undefined}
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           cursor: onToggleExpanded ? 'pointer' : 'default',
-          marginBottom: isExpanded ? '6px' : '0'
+          marginBottom: isExpanded ? L.sp.sm : 0
         }}
       >
         <h3 style={{ margin: `0`, color: colors.text, fontSize: FS.title, fontWeight: 'bold' }}>{translateUI('stationSelection', language)}</h3>
@@ -559,15 +575,20 @@ const StationSelector: React.FC<StationSelectorProps> = ({
       */}
       {collapsedSummaryShown && (
         <div data-station-summary style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', columnGap: L.sp.md, rowGap: L.sp.xs, marginTop: L.sp.xs, minWidth: 0 }}>
-          {summaryOrigins.length > 0 && (
-            <LabeledGroup theme={theme} label={translateUI('departureStation', language)} dataAttr={{ 'data-summary-group': 'departure' }}>
-              {summaryOrigins.map(name => (
-                <ColorChip key={name} color={SEMANTIC.departure} theme={theme}>
-                  {translateStation(name, language)}
-                </ColorChip>
-              ))}
-            </LabeledGroup>
-          )}
+          <LabeledGroup theme={theme} label={translateUI('departureStation', language)} dataAttr={{ 'data-summary-group': 'departure' }}>
+            {summaryOrigins.length > 0 ? summaryOrigins.map(name => (
+              <ColorChip key={name} color={SEMANTIC.departure} theme={theme}>
+                {translateStation(name, language)}
+              </ColorChip>
+            )) : emptySummaryChip}
+          </LabeledGroup>
+          <LabeledGroup theme={theme} label={translateUI('arrivalStation', language)} dataAttr={{ 'data-summary-group': 'arrival' }}>
+            {arrival ? (
+              <ColorChip color={SEMANTIC.arrival} theme={theme}>
+                {translateStation(arrival.name, language)}
+              </ColorChip>
+            ) : emptySummaryChip}
+          </LabeledGroup>
           {/* 集合駅を探すとき、集合駅（到着駅）がまだ無ければ、候補の上位は到着駅の札と同じ配色のボタンで出す。押すとその駅が到着駅になる */}
           {summaryCandidates.length > 0 && (
             <LabeledGroup theme={theme} label={translateUI('meetingCandidateGroup', language)} dataAttr={{ 'data-summary-group': 'candidates' }}>
@@ -597,13 +618,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                   {translateUI('meetingMoreCandidates', language, { count: meetingCandidates.length - summaryCandidates.length })}
                 </span>
               )}
-            </LabeledGroup>
-          )}
-          {arrival && (
-            <LabeledGroup theme={theme} label={translateUI('arrivalStation', language)} dataAttr={{ 'data-summary-group': 'arrival' }}>
-              <ColorChip color={SEMANTIC.arrival} theme={theme}>
-                {translateStation(arrival.name, language)}
-              </ColorChip>
             </LabeledGroup>
           )}
         </div>

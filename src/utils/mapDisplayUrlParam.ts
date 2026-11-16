@@ -12,6 +12,16 @@ export const STATION_NUMBERS_PARAM = 'numbers';
 /** 表示方式（realistic / schematic / bubble / terrain3d） */
 export const VIEW_PARAM = 'view';
 
+const HEATMAP_PARAM = 'heatmap';
+
+const HEATMAP_FIELD_PARAM = 'heatmapParam';
+
+const TERRAIN_VERSION_PARAM = 'terrainVersion';
+
+const GROUND_PARAM = 'ground';
+
+const GROUND_STYLE_PARAM = 'groundStyle';
+
 export interface DisplayUrlOptions {
   view?: MapViewMode;
   stationNumbers?: boolean;
@@ -29,20 +39,30 @@ export function parseDisplayUrlParams(search: string): DisplayUrlOptions {
   const numbers = params.get(STATION_NUMBERS_PARAM);
   if (numbers === '1' || numbers === 'true') result.stationNumbers = true;
   if (numbers === '0' || numbers === 'false') result.stationNumbers = false;
-  const heatmap = params.get('heatmap');
+  const heatmap = params.get(HEATMAP_PARAM);
   if (heatmap === '1' || heatmap === 'true') result.heatmap = true;
   if (heatmap === '0' || heatmap === 'false') result.heatmap = false;
-  const field = params.get('heatmapParam');
+  const field = params.get(HEATMAP_FIELD_PARAM);
   if (field && (HEATMAP_URL_KEYS as readonly string[]).includes(field)) result.heatmapParam = field as keyof StationStats;
-  const version = params.get('terrainVersion');
+  const version = params.get(TERRAIN_VERSION_PARAM);
   if (version === 'v1' || version === 'v2') result.terrainVersion = version;
-  const ground = params.get('ground');
+  const ground = params.get(GROUND_PARAM);
   if (ground === '1' || ground === 'true') result.ground = true;
   if (ground === '0' || ground === 'false') result.ground = false;
-  const style = params.get('groundStyle');
+  const style = params.get(GROUND_STYLE_PARAM);
   if (style === 'simple' || style === 'elevation') result.groundStyle = style;
   return result;
 }
 export function initialDisplayUrlOptions(): DisplayUrlOptions {
   return typeof window === 'undefined' ? {} : parseDisplayUrlParams(window.location.search);
+}
+
+/** 共有URLの表示用上書きだけを外し、次回もリセット後の既定で開く。 */
+export function clearDisplayUrlOptions() {
+  const url = new URL(window.location.href);
+  const before = url.search;
+  for (const key of [VIEW_PARAM, STATION_NUMBERS_PARAM, HEATMAP_PARAM, HEATMAP_FIELD_PARAM, TERRAIN_VERSION_PARAM, GROUND_PARAM, GROUND_STYLE_PARAM]) {
+    url.searchParams.delete(key);
+  }
+  if (url.search !== before) window.history.replaceState(window.history.state, '', url);
 }
