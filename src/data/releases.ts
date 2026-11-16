@@ -30,6 +30,30 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    version: '1.36.0',
+    releasedAt: '2026-11-16T00:11:35Z',
+    kind: 'feat',
+    prs: [131, 133, 134, 135, 136, 137],
+    notes: {
+      ja: [
+        '集合駅を探すモードで出発駅を複数設定し、候補と各出発駅からの所要時間を地図で比較できる',
+        '乗車ログ（試作）で乗った路線と降りた駅を記録できる',
+        '表示モード・路線の切り替えを整理。URL共有と設定ファイルの書き出し・読み込みに対応',
+        '終電モードの操作・描画を改善。時刻は引き続き架空のデモデータ',
+        '終電・集合駅の解説を追加し、紹介と初心者ガイドのデモを実際の路線図に変更',
+        '更新履歴をバージョンごとのカードにし、検索向けに正式名称と公式ロゴを設定',
+      ],
+      en: [
+        'Compare meeting station candidates and travel times from multiple origins on the map',
+        'Record lines you rode and stations where you got off with the ride log prototype',
+        'The mode and line controls are easier to browse, with URL sharing and settings import and export',
+        'Improved last-train mode controls and rendering; the times are still fictional demo data',
+        'Added last-train and meeting-station guides and switched the introduction and beginner demos to the interactive map',
+        'Grouped update history by version and set the official site name and logo for search',
+      ],
+    },
+  },
+  {
     version: '1.35.0',
     releasedAt: '2026-11-12T11:54:39Z',
     kind: 'feat',

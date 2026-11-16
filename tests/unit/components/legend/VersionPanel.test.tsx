@@ -27,7 +27,7 @@ describe('VersionPanel', () => {
     open(r);
     const items = Array.from(r.container.querySelectorAll<HTMLLIElement>('[data-release]'));
     expect(items[0].tagName).toBe('LI');
-    expect(items[0].querySelector('time')).toHaveAttribute('datetime', RELEASES[0].releasedAt);
+    expect(items[1].querySelector('time')).toHaveAttribute('datetime', RELEASES[1].releasedAt);
     expect(items[0].querySelectorAll('ul > li')).toHaveLength(RELEASES[0].notes.ja.length);
     expect(items[0].style.backgroundColor).not.toBe(items[1].style.backgroundColor);
     expect(items[2].style.backgroundColor).toBe(items[0].style.backgroundColor);
