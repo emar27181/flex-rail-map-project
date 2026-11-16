@@ -16,6 +16,7 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import Button from '../atoms/Button';
+import Chip from '../atoms/Chip';
 import DisclosureIndicator from '../atoms/DisclosureIndicator';
 import { CONTROL_SIZE, type ControlSize } from '../atoms/controlSize';
 import { L } from '../../legend/legendStyles';
@@ -52,13 +53,15 @@ export interface ClampedWrapProps {
   moreLabel: (hiddenCount: number) => string;
   /** 「折りたたむ」の文言 */
   lessLabel: string;
+  /** チップの一覧では開閉操作も同じ面・輪郭を使う */
+  chipColor?: string;
 }
 
 const GAP = L.sp.sm;
 
 const ClampedWrap: React.FC<ClampedWrapProps> = ({
   theme, steps, onStepsChange, children, size = 'sm',
-  maxRows = CLAMPED_WRAP_DEFAULT_ROWS, stepRows = CLAMPED_WRAP_STEP_ROWS, moreLabel, lessLabel,
+  maxRows = CLAMPED_WRAP_DEFAULT_ROWS, stepRows = CLAMPED_WRAP_STEP_ROWS, moreLabel, lessLabel, chipColor,
 }) => {
   const rowHeight = CONTROL_SIZE[size].minHeight;
   const gapPx = parseFloat(GAP);
@@ -77,14 +80,28 @@ const ClampedWrap: React.FC<ClampedWrapProps> = ({
     const measure = () => {
       const items = Array.from(box.children) as HTMLElement[];
       // 箱は position: relative なので、中の部品の offsetTop は箱の上端からの距離
-      setVisibleCount(items.filter(el => el.offsetTop < maxHeight).length);
+      const rowTops = new Set<number>();
+      let visible = 0;
+      let height = 0;
+      for (const el of items) {
+        const top = el.offsetTop;
+        rowTops.add(top);
+        const shown = rowTops.size <= rows;
+        el.toggleAttribute('inert', !shown);
+        if (!shown) continue;
+        visible++;
+        height = Math.max(height, top + el.offsetHeight);
+      }
+      setVisibleCount(visible);
+      box.style.maxHeight = height ? `${height}px` : `${maxHeight}px`;
     };
     measure();
     if (typeof ResizeObserver === 'undefined') return;
     const ro = new ResizeObserver(measure);
     ro.observe(box);
+    for (const item of box.children) ro.observe(item);
     return () => ro.disconnect();
-  }, [maxHeight, rendered.length]);
+  }, [maxHeight, rows, rendered]);
 
   const hidden = Math.max(0, total - visibleCount);
 
@@ -92,6 +109,16 @@ const ClampedWrap: React.FC<ClampedWrapProps> = ({
     onStepsChange(0);
     // 下の方まで広げてから折りたたむと、一覧が画面の上に消えて今どこにいるか分からなくなる。箱の先頭を画面に戻す
     requestAnimationFrame(() => boxRef.current?.scrollIntoView?.({ block: 'nearest' }));
+  };
+
+  const renderToggle = (label: string, expanded: boolean, onClick: () => void, flex?: number) => {
+    const icon = <DisclosureIndicator expanded={expanded} theme={theme} tone="inherit" />;
+    if (chipColor) {
+      return <Chip theme={theme} size={size} color={chipColor} label={label} expanded={expanded}
+        selected={false} icon={icon} onClick={onClick} />;
+    }
+    return <Button theme={theme} variant="outline" size={size} aria-expanded={expanded} onClick={onClick}
+      styleOverride={{ flex }}>{label}{icon}</Button>;
   };
 
   return (
@@ -104,6 +131,8 @@ const ClampedWrap: React.FC<ClampedWrapProps> = ({
           position: 'relative',
           display: 'flex',
           flexWrap: 'wrap',
+          alignItems: 'flex-start',
+          alignContent: 'flex-start',
           gap: GAP,
           maxHeight,
           overflow: 'hidden',
@@ -112,33 +141,9 @@ const ClampedWrap: React.FC<ClampedWrapProps> = ({
         {rendered}
       </div>
       {(hidden > 0 || steps > 0) && (
-        <div style={{ display: 'flex', gap: GAP, marginTop: GAP }}>
-          {hidden > 0 && (
-            <Button
-              theme={theme}
-              variant="outline"
-              size={size}
-              aria-expanded={false}
-              onClick={() => onStepsChange(steps + 1)}
-              styleOverride={{ flex: 1 }}
-            >
-              {moreLabel(hidden)}
-              <DisclosureIndicator expanded={false} theme={theme} tone="inherit" />
-            </Button>
-          )}
-          {steps > 0 && (
-            <Button
-              theme={theme}
-              variant="outline"
-              size={size}
-              aria-expanded
-              onClick={collapse}
-              styleOverride={hidden > 0 ? undefined : { flex: 1 }}
-            >
-              {lessLabel}
-              <DisclosureIndicator expanded theme={theme} tone="inherit" />
-            </Button>
-          )}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: GAP, marginTop: GAP }}>
+          {hidden > 0 && renderToggle(moreLabel(hidden), false, () => onStepsChange(steps + 1), 1)}
+          {steps > 0 && renderToggle(lessLabel, true, collapse, hidden > 0 ? undefined : 1)}
         </div>
       )}
     </div>

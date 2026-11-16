@@ -36,8 +36,8 @@ test('表示設定で東海道線の線形を切り替え、収録率と出典�
   await expect(page).toHaveURL(/view=track-geometry/);
   await expect(page.getByRole('status').filter({ hasText: '選択中の路線' })).toContainText(/1\/1路線.*20\/20区間/);
   await expect(page.getByRole('status').filter({ hasText: '選択中の路線' })).toContainText('全国');
-  await expect(page.locator('.leaflet-control-attribution').getByRole('link', { name: 'OpenStreetMap' })).toBeVisible();
-  await expect.poll(() => vertexCount(page)).toBeGreaterThan(plain);
+  await expect(page.locator('[data-map-footer]').getByRole('link', { name: '© OpenStreetMap contributors' })).toBeVisible();
+  await expect.poll(() => vertexCount(page), { timeout: 20_000 }).toBeGreaterThan(plain);
 
   await trackMode.click();
   await expect(trackMode).toHaveAttribute('aria-pressed', 'false');

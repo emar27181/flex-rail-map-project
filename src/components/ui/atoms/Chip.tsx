@@ -37,6 +37,9 @@ export interface ChipProps {
   title?: string;
   disabled?: boolean;
   selected: boolean;
+  /** 開閉操作では押下状態に代えて開閉状態を読み上げる */
+  expanded?: boolean;
+  outline?: boolean;
   theme: 'light' | 'dark';
   size?: ControlSize;
   onClick: () => void;
@@ -53,6 +56,8 @@ const Chip: React.FC<ChipProps> = ({
   title,
   disabled,
   selected,
+  expanded,
+  outline = false,
   theme,
   size = 'md',
   onClick,
@@ -69,22 +74,24 @@ const Chip: React.FC<ChipProps> = ({
 
   return (
     <button
+      type="button"
       {...dataAttr}
       onClick={onClick}
       disabled={disabled}
-      aria-pressed={selected}
+      aria-pressed={expanded === undefined ? selected : undefined}
+      aria-expanded={expanded}
       title={title ?? (subLabel ? `${label}（${subLabel}）` : label)}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
         gap: dims.gap,
         // 太さは状態で変えない。変えるとチップの外形がずれて並びが動く
-        border: `${CONTROL_BORDER_WIDTH}px solid ${selected ? background : colors.border}`,
+        border: `${CONTROL_BORDER_WIDTH}px solid ${selected ? background : outline ? colors.borderLight : colors.border}`,
         boxSizing: 'border-box',
         borderRadius: dims.radius,
         padding: dims.padding,
         minHeight: `${dims.minHeight}px`,
-        backgroundColor: selected ? background : colors.surfaceElevated,
+        backgroundColor: selected ? background : outline ? colors.surface : colors.surfaceElevated,
         color: selected ? text : colors.text,
         fontSize: dims.fontSize,
         // 太さを変えると幅が変わって並びが動くので、状態で変えない

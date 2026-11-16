@@ -17,6 +17,8 @@
 import React from 'react';
 import Button from '../atoms/Button';
 import type { ButtonSize } from '../atoms/Button';
+import Chip from '../atoms/Chip';
+import { SEMANTIC } from '../../../constants/ui';
 import SlideSegmentedControl from '../atoms/SlideSegmentedControl';
 import { L } from '../../legend/legendStyles';
 
@@ -26,8 +28,7 @@ export interface SegmentedOption<T extends string> {
   label: React.ReactNode;
 }
 
-interface SegmentedControlProps<T extends string> {
-  options: SegmentedOption<T>[];
+type SegmentedControlProps<T extends string> = {
   value: T;
   onChange: (value: T) => void;
   theme: 'light' | 'dark';
@@ -41,23 +42,25 @@ interface SegmentedControlProps<T extends string> {
    * - buttons（既定）: ボタンを個別に並べる。項目数が多い一覧の並び替えなど向け
    * - slide: 1本の枠の中で選択位置をスライドで示す。2択をコンパクトに置きたい場合向け
    */
-  variant?: 'buttons' | 'slide';
-}
+} & (
+  | { variant?: 'buttons' | 'slide'; options: SegmentedOption<T>[] }
+  | { variant: 'chips'; options: Array<{ value: T; label: string }> }
+);
 
 function SegmentedControl<T extends string>({
-  options,
   value,
   onChange,
   theme,
   size = 'sm',
   stretch = false,
   ariaLabel,
-  variant = 'buttons',
+  ...presentation
 }: SegmentedControlProps<T>) {
+  const { variant } = presentation;
   if (variant === 'slide') {
     return (
       <SlideSegmentedControl
-        options={options}
+        options={presentation.options}
         value={value}
         onChange={onChange}
         theme={theme}
@@ -67,9 +70,20 @@ function SegmentedControl<T extends string>({
     );
   }
 
+  if (variant === 'chips') {
+    return (
+      <div role="group" aria-label={ariaLabel} style={{ display: 'flex', flexWrap: 'wrap', gap: L.sp.xs }}>
+        {presentation.options.map(option => (
+          <Chip key={option.value} theme={theme} size={size} color={SEMANTIC.primary}
+            label={option.label} selected={value === option.value} onClick={() => onChange(option.value)} />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div role="group" aria-label={ariaLabel} style={{ display: 'flex', gap: L.sp.xs }}>
-      {options.map(opt => (
+      {presentation.options.map(opt => (
         <Button
           key={opt.value}
           theme={theme}

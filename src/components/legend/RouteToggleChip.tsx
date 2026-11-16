@@ -1,4 +1,5 @@
 import React from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import type { RouteKey } from '../../data/routes';
 import { translateRoute } from '../../utils/translation';
@@ -16,7 +17,8 @@ interface RouteToggleChipProps {
   language: Language;
   onToggle: (routeKey: RouteKey) => void;
   adjustRouteColorForTheme: (color: string, theme: 'light' | 'dark') => string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md';
+  showVisibilityIcon?: boolean;
   styleOverride?: CSSProperties;
   dataAttr?: Record<string, string>;
 }
@@ -42,6 +44,7 @@ const RouteToggleChip: React.FC<RouteToggleChipProps> = ({
   onToggle,
   adjustRouteColorForTheme,
   size = 'sm',
+  showVisibilityIcon = false,
   styleOverride,
   dataAttr,
 }) => (
@@ -50,6 +53,8 @@ const RouteToggleChip: React.FC<RouteToggleChipProps> = ({
     label={translateRoute(routeName, language)}
     subLabel={subLabel}
     selected={isVisible}
+    outline={showVisibilityIcon && !isVisible}
+    icon={showVisibilityIcon ? (isVisible ? <Eye /> : <EyeOff />) : undefined}
     theme={theme}
     size={size}
     onClick={() => onToggle(routeKey)}

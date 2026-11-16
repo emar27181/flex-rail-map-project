@@ -86,6 +86,16 @@ export const SEMANTIC = {
   north: '#E53935',
 } as const;
 
+/** 更新項目の意味を示すタグ。表示・絞り込みで同じ色を使う。 */
+export const RELEASE_CATEGORY_COLORS = {
+  feat: SEMANTIC.primary,
+  improve: SEMANTIC.success,
+  fix: SEMANTIC.warning,
+  data: '#8B73CF',
+  docs: '#63748A',
+  ci: '#86694D',
+} as const;
+
 /** 路線チップと同じ規則で色を付ける、表示モードごとの識別色。 */
 export const DISPLAY_MODE_COLORS = {
   meeting: '#538FD1',

@@ -253,8 +253,7 @@ test('駅選択パネルを閉じても、出発駅・到着駅は2行目に小�
   await expect(summary2).toContainText('新宿');
   await expect(summary2).toContainText('横浜');
   await expect(summary2.locator('[data-summary-group="departure"]')).toContainText('出発駅');
-  // 集合駅がまだ無いときは、到着駅の語は出さない
-  await expect(summary2.locator('[data-summary-group="arrival"]')).toHaveCount(0);
+  await expect(summary2.locator('[data-summary-group="arrival"]')).toContainText('未設定');
   expect(errors).toEqual([]);
 });
 

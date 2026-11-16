@@ -23,6 +23,7 @@
    - `version`: 上の決まりで1つ上げる（`kind` が `feat` なら真ん中）
    - `releasedAt: null`（まだ `main` に入っていないため。画面にはそのビルドの時刻が出る）
    - `prs`: 入っている PR の番号
+   - `noteKinds`: 種類が混在する版では、変更点の順に種類を記録する。省略した項目はリリースの `kind` を使う
    - `notes`: 画面に出す短い説明を日本語（`ja`）と英語（`en`）で。同じ数だけ書く。中国語・韓国語の画面では英語を出す
 3. ひとつ前の版の `releasedAt` が `null` のままなら、`main` に入った時刻（GitHub の `merged_at`、UTC）で埋める（ふつうは手順 7 で埋めてある）
 4. `package.json` と `package-lock.json` の `version` を新しい版にそろえる

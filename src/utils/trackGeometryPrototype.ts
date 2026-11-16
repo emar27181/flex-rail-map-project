@@ -7,7 +7,6 @@ import type { TrackGeometry, TrackGeometrySource, TrackSection } from '../data/t
 import { isCircularRoute } from './routeAdjacency';
 
 export const TRACK_GEOMETRY_PROTOTYPE_URL = '/data/track-geometry-prototype.json';
-export const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 export interface TrackGeometryPrototypeFile {
   meta: { source: TrackGeometrySource; routeCount: number; maxStationDistM: number };

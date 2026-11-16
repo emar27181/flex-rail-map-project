@@ -86,7 +86,7 @@ export interface MobileBottomPanelProps {
   buttons: FloatingButtonDef[];
   theme: 'light' | 'dark';
   /** セーフエリア下部の余白（px）。デフォルト 0。 */
-  safeAreaBottom?: number;
+  safeAreaBottom?: number | string;
   /** いちばん下のボタンの右に並べるもの（立体表示の設定を開くボタンなど）。段数は増えない */
   trailing?: React.ReactNode;
 }
@@ -172,7 +172,8 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
   }, []);
   // ─────────────────────────────────────────────────────────────────
 
-  const safeBottom = safeAreaBottom + MOBILE_BOTTOM_PANEL_FLOAT; // ボタンを少し上に浮かせる
+  const bottomInset = typeof safeAreaBottom === 'number' ? `${safeAreaBottom}px` : safeAreaBottom;
+  const safeBottom = `calc(${bottomInset} + ${MOBILE_BOTTOM_PANEL_FLOAT}px)`; // ボタンを少し上に浮かせる
 
   const activeButton = buttons.find(b => b.key === openKey);
 
@@ -199,7 +200,7 @@ const MobileBottomPanel: React.FC<MobileBottomPanelProps> = ({
           aria-label={activeButton.label}
           style={{
             position: 'fixed',
-            bottom: mobileBottomPanelStackTop(buttons.length, safeAreaBottom) + 8,
+            bottom: `calc(${bottomInset} + ${mobileBottomPanelStackTop(buttons.length, 0)}px + ${L.sp.md})`,
             left: GROUP_LEFT,
             width: `min(${POPOVER_MAX_W}px, calc(100vw - ${GROUP_LEFT * 2}px))`,
             ...(panelHeight !== null
