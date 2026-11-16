@@ -5514,7 +5514,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               width: '400px',
               maxWidth: 'calc(100% - 20px)',
               // 縦に長い集合駅の一覧も、左下の地図操作に重ならない範囲でスクロールさせる。
-              maxHeight: `calc(100% - ${FLOATING_CONTROL.height}px - 2 * ${FLOATING_PANEL.inset} - ${FLOATING_PANEL.gap})`,
+              maxHeight: `calc(100% - ${cornerBottom} - ${FLOATING_CONTROL.height}px - ${FLOATING_PANEL.inset} - ${FLOATING_PANEL.gap})`,
               overflowY: 'auto',
               overflowX: 'hidden',
               borderRadius: L.r.card,
@@ -7089,7 +7089,7 @@ const RailwayMap: React.FC<RailwayMapProps> = ({ className, language, onLanguage
               left: '10px',
               zIndex: 1002,
               width: 'min(calc(100vw - 120px), 280px)',
-              maxHeight: 'calc(100vh - 80px)',
+              maxHeight: `calc(100dvh - env(safe-area-inset-top, 0px) - ${L.sp['2xl']} - ${mapNoticeBottom})`,
               overflowY: 'auto',
             }}>
               <StationSelector
